@@ -496,6 +496,7 @@ void WaterMesh::zero()
    depth=0;
   _lake =false;
   _box.zero();
+  _dirFlow = _offsetFlow =Vec2(0);
 }
 WaterMesh::WaterMesh() {zero();}
 void WaterMesh::del()
@@ -505,14 +506,34 @@ void WaterMesh::del()
   _material.clear();
    zero();
 }
-void WaterMesh::create(C MeshBase &src, Bool lake, Flt depth, C WaterMtrlPtr &material)
+void WaterMesh::create(C MeshBase &src, Bool lake, Flt depth, C WaterMtrlPtr &material, Vec2 dirFlow)
 {
    T._lake    =lake;
    T. depth   =depth;
    T._material=material;
+   T._dirFlow = dirFlow;
   _mshb.create(src, VTX_POS|VTX_TEX0|TRI_IND|QUAD_IND).getBox(_box);
   _mshr.create(_mshb); // 'mshb' is kept for testing 'under'
    WS.load();
+}
+
+void WaterMesh::dirFlow(Vec2 &tdirFlow)
+{
+    T._dirFlow = tdirFlow;
+}
+Vec2 WaterMesh::dirFlow()
+{
+    return T._dirFlow;
+}
+
+void WaterMesh::resetOffsetFlow()
+{
+    T._offsetFlow = Vec2(0);
+}
+
+void WaterMesh::updateCustomDirFlow(Vec2 CustomDir)
+{
+    T._offsetFlow += (T._dirFlow+CustomDir) * Time.d();
 }
 /******************************************************************************/
 Bool WaterMesh::under(C Vec &pos, Flt *depth)C
@@ -598,6 +619,7 @@ void WaterMesh::draw()C
             if(Shader *shader=T.shader())
          {
             Water  .begin();
+            if(_offsetFlow !=Vec2(0))WS.WaterOfsCol->set(_offsetFlow); // set the dir flow to be as per watermesh 
             mtrl  ->set  ();
             shader->begin(); _mshr.set().draw();
          }
@@ -629,8 +651,8 @@ void WaterMesh::draw()C
 /******************************************************************************/
 Bool WaterMesh::save(File &f, CChar *path)C
 {
-   f.cmpUIntV(0); // version
-   f<<_lake<<depth<<_box;
+   f.cmpUIntV(1); // version
+   f<<_lake<<depth<<_box<<_dirFlow;
    if(_mshb.save(f))
    if(_mshr.save(f))
    {
@@ -645,7 +667,7 @@ Bool WaterMesh::load(File &f, CChar *path)
    {
       case 0:
       {
-         f>>_lake>>depth>>_box;
+         f>>_lake>>depth>>_box>>_dirFlow;
          if(_mshb.load(f))
          if(_mshr.load(f))
          {

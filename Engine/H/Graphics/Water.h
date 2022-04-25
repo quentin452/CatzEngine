@@ -138,7 +138,13 @@ struct WaterMesh // manually specified water mesh, water meshes don't support wa
 
    // manage
    void del();
-   void create(C MeshBase &src, Bool lake, Flt depth=3, C WaterMtrlPtr &material=null); // create from 'src' mesh
+   void create(C MeshBase &src, Bool lake, Flt depth=3, C WaterMtrlPtr &material=null, Vec2 dirFlow=Vec2(0)); // create from 'src' mesh
+
+   void WaterMesh::dirFlow(Vec2& tdirFlow); // set WaterMesh dirFlow
+   Vec2 WaterMesh::dirFlow(); // get WaterMesh dirFlow
+
+   void resetOffsetFlow(); //set offsetFlow to be 0,0, when at 0,0 it will not override the global water update
+   void updateCustomDirFlow(Vec2 CustomDir=Vec2(0));// update offsetFlow by dirFlow+CustomDir
 
    // draw
    void draw()C; // draw water area, this should be called only in RM_WATER mode, automatically uses frustum culling
@@ -154,6 +160,7 @@ private:
 #endif
    Bool         _lake    ;
    Box          _box     ;
+   Vec2         _dirFlow, _offsetFlow ;
    MeshBase     _mshb    ;
    MeshRender   _mshr    ;
    WaterMtrlPtr _material;

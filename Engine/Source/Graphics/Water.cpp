@@ -308,7 +308,7 @@ void WaterClass::setEyeViewportCam()
    }
 }
 /******************************************************************************/
-void WaterClass::begin()
+void WaterClass::begin(Vec2 specifcWaterOfsCol)
 {
    if(!_began)
    {
@@ -366,7 +366,8 @@ void WaterClass::begin()
       D.cull      (true);
       D.stencil   (STENCIL_WATER_SET, STENCIL_REF_WATER);
       WS.WaterFlow   ->set(Time.time()*3);
-      WS.WaterOfsCol ->set(_offset_col  );
+      if (specifcWaterOfsCol != Vec2(0))WS.WaterOfsCol->set(specifcWaterOfsCol); // set the dir flow to be as per watermesh
+      else WS.WaterOfsCol->set(_offset_col);
       WS.WaterOfsNrm ->set(_offset_nrm  );
       WS.WaterOfsBump->set(_offset_bump );
       Rect uv=D.screenToUV(D.viewRect()); // UV
@@ -618,8 +619,7 @@ void WaterMesh::draw()C
          if(Frustum(_box) && _mshr.is())
             if(Shader *shader=T.shader())
          {
-            Water  .begin();
-            if(_offsetFlow !=Vec2(0))WS.WaterOfsCol->set(_offsetFlow); // set the dir flow to be as per watermesh 
+            Water  .begin(_offsetFlow);
             mtrl  ->set  ();
             shader->begin(); _mshr.set().draw();
          }

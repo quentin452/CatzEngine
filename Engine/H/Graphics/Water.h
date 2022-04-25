@@ -93,7 +93,7 @@ struct WaterClass : WaterMtrl // Main water control
    void del              ();
    void create           ();
    void prepare          ();
-   void begin            (); // this is called just before       WaterPlane and WaterMesh drawing
+   void begin            (Vec2 specifcWaterOfsCol=Vec2(0)); // this is called just before WaterPlane and WaterMesh drawing, SpecificWaterOfsCol can be specified to override water.update
    void end              (); // this is called at the end of all WaterPlane and WaterMesh drawing
    void under            (C PlaneM &plane, WaterMtrl &mtrl); // set if camera is under custom water plane
    void setImages        (Image *src, Image *depth);

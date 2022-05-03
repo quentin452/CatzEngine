@@ -667,6 +667,20 @@ Bool WaterMesh::load(File &f, CChar *path)
    {
       case 0:
       {
+          f >> _lake >> depth >> _box;
+          if (_mshb.load(f))
+              if (_mshr.load(f))
+              {
+                  _material.require(f._getStr(), path);
+                  if (f.ok())
+                  {
+                      WS.load();
+                      return true;
+                  }
+              }
+      }break;
+      case 1:
+      {
          f>>_lake>>depth>>_box>>_dirFlow;
          if(_mshb.load(f))
          if(_mshr.load(f))

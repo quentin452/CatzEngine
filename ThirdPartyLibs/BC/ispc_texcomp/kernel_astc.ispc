@@ -1,35 +1,17 @@
-/*
-  Copyright (c) 2015, Intel Corporation
-  All rights reserved.
-
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions are
-  met:
-
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-
-    * Neither the name of Intel Corporation nor the names of its
-      contributors may be used to endorse or promote products derived from
-      this software without specific prior written permission.
-
-
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
-   IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
-   TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-   PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
-   OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
-*/
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2016, Intel Corporation
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
+// documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
+// the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to the following conditions:
+// The above copyright notice and this permission notice shall be included in all copies or substantial portions of 
+// the Software.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
+// SOFTWARE.
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 typedef int8 int8_t;
 typedef int32 int32_t;
@@ -41,6 +23,20 @@ typedef unsigned int64 uint64_t;
 
 ///////////////////////////
 //   generic helpers
+
+inline float RCP(float x)
+{
+    return 1.0f/x; // uses rcp when compiled with --opt=fast-math
+    //return rcp(x);
+    //return rcp_fast(x);
+}
+
+inline float RSQRT(float x)
+{
+    return 1.0f/sqrt(x); // uses rsqrt when compiled with --opt=fast-math
+    //return rsqrt(x);
+    //return rsqrt_fast(x);
+}
 
 void swap(float& a, float& b)
 {
@@ -154,7 +150,7 @@ struct astc_enc_settings
     int refineIterations;
 };
 
-static export uniform int get_programCount()
+export uniform int get_programCount()
 {
     return programCount;
 } 
@@ -313,7 +309,7 @@ inline void compute_axis(float axis[4], float covar[10], uniform const int power
             for (uniform int p = 0; p < channels; p++)
                 norm_sq += axis[p] * axis[p];
 
-            float rnorm = rsqrt(norm_sq);
+            float rnorm = RSQRT(norm_sq);
             for (uniform int p = 0; p < channels; p++) vec[p] *= rnorm;
         }
     }
@@ -1236,7 +1232,7 @@ void load_mode_parameters(uniform astc_mode* uniform mode, uniform uint32_t pack
     mode->endpoint_range = get_bits(packed_mode, 8, 12); // 0..20 <= 2^5
 }
 
-static export void astc_rank_ispc(uniform rgba_surface src[], uniform int xx, uniform int yy, uniform uint32_t mode_buffer[], uniform astc_enc_settings settings[])
+export void astc_rank_ispc(uniform rgba_surface src[], uniform int xx, uniform int yy, uniform uint32_t mode_buffer[], uniform astc_enc_settings settings[])
 {
     int tex_width = src->width / settings->block_width;
     if (xx + programIndex >= tex_width) return;
@@ -1302,7 +1298,7 @@ struct astc_block
 {
     uniform int width;
     uniform int height;
-    uniform bool dual_plane;
+    uniform uint8_t dual_plane;
     int weight_range;
     uint8_t weights[64];
     int color_component_selector;
@@ -1696,11 +1692,16 @@ void opt_weights(float scaled_pixels[], astc_block block[])
     }
 }
 
-void sgesv2(float A[4], float x[2], float b[2])
+bool sgesv2(float A[4], float x[2], float b[2])
 {
-    float inv_det = 1.0f / (A[0] * A[3] - A[1] * A[2]);
+    float det = (A[0] * A[3] - A[1] * A[2]);
+    if(det == 0)
+        return false;
+    float inv_det = 1.0f / det;
     x[0] = (b[0] * +A[3] + b[1] * -A[2])*inv_det;
     x[1] = (b[0] * -A[1] + b[1] * +A[0])*inv_det;
+
+    return true;
 }
 
 void ls_refine_scale(float endpoints[4], float scaled_pixels[], astc_block block[])
@@ -1734,13 +1735,13 @@ void ls_refine_scale(float endpoints[4], float scaled_pixels[], astc_block block
     float b[2] = { sum_d, sum_wd };
     float xx[2];
 
-    sgesv2(C, xx, b);
-
-    float scale = xx[0] / (xx[1] + xx[0]);
-
-    if (xx[1] + xx[0] < 1) scale = 1;
-    if (scale > 0.9999) scale = 0.9999;
-    if (scale < 0) scale = 0;
+    float scale = 0;
+    if(sgesv2(C, xx, b))
+    {
+        scale = xx[0] / (xx[1] + xx[0]);
+        if (xx[1] + xx[0] < 1) scale = 1;
+        scale = clamp(scale, 0.0f, 0.9999f); // note: clamp also takes care of possible NaNs        
+    }    
         
     float sum_zz = 0;
     float sum_zp[3] = { 0, 0, 0 };
@@ -2167,7 +2168,7 @@ void load_block_parameters(astc_block block[], uint32_t mode, uniform astc_enc_c
     block->endpoint_range = get_bits(mode, 8, 12); // 0..20 <= 2^5
 }
 
-static export void astc_encode_ispc(uniform rgba_surface src[], uniform float block_scores[], uniform uint8_t dst[], uniform uint64_t list[], uniform astc_enc_context list_context[], uniform astc_enc_settings settings[])
+export void astc_encode_ispc(uniform rgba_surface src[], uniform float block_scores[], uniform uint8_t dst[], uniform uint64_t list[], uniform astc_enc_context list_context[], uniform astc_enc_settings settings[])
 {
     uint64_t entry = list[programIndex];
     uint32_t offset = entry >> 32;

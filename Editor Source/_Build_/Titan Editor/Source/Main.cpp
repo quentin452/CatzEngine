@@ -107,14 +107,15 @@ Environment& CurrentEnvironment() {if(Environment *env=EnvEdit.cur())return *env
 void InitPre()
 {
    if(App.cmd_line.elms()) // if given command line param
-   {
+      if(GetExt(App.cmd_line[0])==ProjectPackageExt) // param is Project Package
+   { // check if there's already another instance of the Editor running
       Memc<uint> proc; ProcList(proc);
       REPA(proc)if(proc[i]!=App.processID())
       {
          Str proc_name=GetBase(ProcName(proc[i]));
          if( proc_name==S+APP_NAME+".exe")
             if(SysWindow window=ProcWindow(proc[i]))
-         {
+         { // send command to that instance, and exit this one
             File f; f.writeMem().putStr(App.cmd_line[0]).pos(0);
             Memt<byte> temp; temp.setNum(f.left()); f.get(temp.data(), temp.elms());
             window.sendData(temp.data(), temp.elms());
@@ -126,7 +127,7 @@ void InitPre()
    
    ASSERT(ELM_NUM==(int)Edit::ELM_NUM); // they must match exactly
    Str path=GetPath(App.exe()).tailSlash(true);
-   InstallerMode=(STEAM ? false : !(FExistSystem(path+"Bin/Code Editor.dat") && FExistSystem(path+"Bin/Engine.pak") && FExistSystem(path+"Bin/Editor.pak") && FExistSystem(path+"Bin/Mobile/Engine.pak") && FExistSystem(path+"Bin/Engine/Engine.h") && FExistSystem(path+"Bin/Android/Ant")));
+   InstallerMode=(STEAM ? false : !(FExistSystem(path+"Bin/Code Editor.dat") && FExistSystem(path+"Bin/Engine.pak") && FExistSystem(path+"Bin/Editor.pak") && FExistSystem(path+"Bin/Mobile/Engine.pak") && FExistSystem(path+"Bin/Engine/Engine.h")));
    App.x=App.y=0;
    App.receive_data=ReceiveData;
    D.screen_changed=ScreenChanged;
@@ -196,20 +197,8 @@ bool Init()
       if(!Physics.created())Physics.create().timestep(PHYS_TIMESTEP_VARIABLE);
 
       const flt delay_remove=10;
-      Meshes      .delayRemove(delay_remove);
-      PhysBodies  .delayRemove(delay_remove);
-      WaterMtrls  .delayRemove(delay_remove);
-      Materials   .delayRemove(delay_remove);
-      Fonts       .delayRemove(delay_remove);
-      ImageAtlases.delayRemove(delay_remove);
-      Images      .delayRemove(delay_remove);
-      PanelImages .delayRemove(delay_remove);
-      Panels      .delayRemove(delay_remove);
-      TextStyles  .delayRemove(delay_remove);
-      GuiSkins    .delayRemove(delay_remove);
-          Objects .delayRemove(delay_remove);
-      EditObjects .delayRemove(delay_remove);
-      Environments.delayRemove(delay_remove);
+            CachesDelayRemove(delay_remove);
+      EditObjects.delayRemove(delay_remove);
 
       Images        .mode(CACHE_DUMMY);
       ImageAtlases  .mode(CACHE_DUMMY);

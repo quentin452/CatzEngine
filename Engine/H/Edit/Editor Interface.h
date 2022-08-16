@@ -50,19 +50,35 @@ enum RELOAD_RESULT : Byte // Element Reload Result
 /******************************************************************************/
 struct Elm // Project Element
 {
-   ELM_TYPE   type   ; // type of the element
-   Bool       removed, // if this element is marked   as removed    (this does not include parents state which may affect the final result, see 'final_removed' for final value)
-              publish, // if this element is included in publishing (this does not include parents state which may affect the final result, see 'final_publish' for final value)
-        final_removed, // if this element or  its parents are marked   as removed
-        final_publish; // if this element and its parents are included in publishing
-   UID             id, //      ID   of the element
-            parent_id; //      ID   of the element's parent ('UIDZero' means no parent)
-   Str           name, //      name of the element
-            full_name, // full name of the element (including its parents)
-             src_file; // source file from which this element was created
+   enum
+   {
+      REMOVED               =1<<0,
+      NO_PUBLISH            =1<<1,
+      NO_PUBLISH_MOBILE     =1<<2,
 
-   Bool save(File &f)C {f<<type<<removed<<publish<<id<<parent_id<<name<<src_file; return f.ok();}
-   Bool load(File &f)  {f>>type>>removed>>publish>>id>>parent_id>>name>>src_file; return f.ok();}
+      // these don't need to be saved because they're recalculated on the client
+      REMOVED_FULL          =1<<3,
+      NO_PUBLISH_FULL       =1<<4,
+      NO_PUBLISH_MOBILE_FULL=1<<5,
+   };
+
+   ELM_TYPE type; //      type of the element
+   Byte    flags; //     flags of the element
+   UID        id, //      ID   of the element
+       parent_id; //      ID   of the element's parent ('UIDZero' means no parent)
+   Str      name, //      name of the element
+       full_name, // full name of the element including its parents, not saved because it's recalculated on the client
+        src_file; // source file from which this element was created
+
+   Bool removed          ()C {return FlagOn (flags, REMOVED               );} // if this element                  is marked   as removed               (this does not include parents state                       which may affect the final result, see 'removedFull'       for final value)
+   Bool removedFull      ()C {return FlagOn (flags, REMOVED_FULL          );} // if this element or  its parents are marked   as removed
+   Bool publish          ()C {return FlagOff(flags, NO_PUBLISH            );} // if this element                  is included in publishing            (this does not include parents state and 'removed'         which may affect the final result, see 'publishFull'       for final value)
+   Bool publishFull      ()C {return FlagOff(flags, NO_PUBLISH_FULL       );} // if this element and its parents are included in publishing
+   Bool publishMobile    ()C {return FlagOff(flags, NO_PUBLISH_MOBILE     );} // if this element                  is included in publishing for Mobile (this does not include parents state and 'removed/publish' which may affect the final result, see 'publishMobileFull' for final value)
+   Bool publishMobileFull()C {return FlagOff(flags, NO_PUBLISH_MOBILE_FULL);} // if this element and its parents are included in publishing for Mobile
+
+   Bool save(File &f)C {f<<type<<flags<<id<<parent_id<<name<<src_file; return f.ok();}
+   Bool load(File &f)  {f>>type>>flags>>id>>parent_id>>name>>src_file; return f.ok();}
 };
 /******************************************************************************/
 struct Project // Project
@@ -96,8 +112,8 @@ struct ObjData
       bool removed  , // if this parameter is currently removed
            inherited; // if this parameter is inherited from a base object or object class (if this is true then the parameter does not directly exist in the object itself, but it exists in the base/class of the object)
 
-      Bool save(File &f)C {if(EE::Param::save(f)){f<<id<<removed<<inherited; return f.ok();} return false;}
-      Bool load(File &f)  {if(EE::Param::load(f)){f>>id>>removed>>inherited; return f.ok();} return false;}
+      Bool save(File &f)C {if(super::save(f)){f<<id<<removed<<inherited; return f.ok();} return false;}
+      Bool load(File &f)  {if(super::load(f)){f>>id>>removed>>inherited; return f.ok();} return false;}
 
       Param() {id.zero(); removed=inherited=false;}
    };
@@ -210,7 +226,8 @@ struct Material
    MATERIAL_TECHNIQUE technique;
    TEX_QUALITY        tex_quality;
    Bool               cull, detail_all_lod, flip_normal_y, smooth_is_rough;
-   Byte               downsize_tex_mobile; // how much to downsize textures for Mobile platforms, 0=full size, 1=half size, 2=quarter size, ..
+   Byte               tex_downsize_mobile, // how much to downsize textures for Mobile platforms, 0=full size, 1=half size, 2=quarter size, ..
+                      tex_downsize_switch; // how much to downsize textures for Nintendo Switch , 0=full size, 1=half size, 2=quarter size, ..
    Vec4                  color_s; // sRGB Gamma
    Vec                emissive_s; // sRGB Gamma
    Flt                emissive_glow, smooth, reflect_min, reflect_max, glow, normal, bump, uv_scale;
@@ -283,11 +300,15 @@ struct EditorInterface
       UID       newElm  (ELM_TYPE type, C Str &name,                                       C UID &parent_id=UIDZero); // create a new element in the project of 'type', 'name' and assigned to 'parent_id' parent (use 'UIDZero' for no parent), this method does not support following types: ELM_MESH, ELM_SKEL, ELM_PHYS, ELM_WORLD (for creating worlds please use 'newWorld' method)      , ID of the newly created element will be returned or 'UIDZero' if failed
       UID       newWorld(               C Str &name, Int area_size=64, Int terrain_res=64, C UID &parent_id=UIDZero); // create a new world   in the project            'name' and assigned to 'parent_id' parent (use 'UIDZero' for no parent), 'area_size'=size of a single area (in meters, valid values are: 32, 64, 128), 'terrain_res'=terrain resolution (valid values are: 32, 64, 128), ID of the newly created element will be returned or 'UIDZero' if failed
 
-      Bool setElmName   (C CMemPtr< IDParam<Str > > &elms); // set 'name'          for elements, where 'IDParam.id'=element ID, 'IDParam.value'=element name
-      Bool setElmRemoved(C CMemPtr< IDParam<Bool> > &elms); // set 'removed' state for elements, where 'IDParam.id'=element ID, 'IDParam.value'=element removed state
-      Bool setElmPublish(C CMemPtr< IDParam<Bool> > &elms); // set 'publish' state for elements, where 'IDParam.id'=element ID, 'IDParam.value'=element publish state
-      Bool setElmParent (C CMemPtr< IDParam<UID > > &elms); // set 'parent'        for elements, where 'IDParam.id'=element ID, 'IDParam.value'=parent ID (use 'UIDZero' for no parent)
-      Bool setElmSrcFile(C CMemPtr< IDParam<Str > > &elms); // set 'src_file'      for elements, where 'IDParam.id'=element ID, 'IDParam.value'=element source file (this does not reload the element, it only adjusts the source file for it)
+#if EE_PRIVATE
+      Bool setElmCmd          (Byte cmd, C CMemPtr< IDParam<Bool> > &elms);
+#endif
+      Bool setElmName         (C CMemPtr< IDParam<Str > > &elms); // set 'name'          for elements, where 'IDParam.id'=element ID, 'IDParam.value'=element name
+      Bool setElmRemoved      (C CMemPtr< IDParam<Bool> > &elms); // set 'removed' state for elements, where 'IDParam.id'=element ID, 'IDParam.value'=element removed state
+      Bool setElmPublish      (C CMemPtr< IDParam<Bool> > &elms); // set 'publish' state for elements, where 'IDParam.id'=element ID, 'IDParam.value'=element publish state
+      Bool setElmPublishMobile(C CMemPtr< IDParam<Bool> > &elms); // set 'publish' state for elements, where 'IDParam.id'=element ID, 'IDParam.value'=element publish state for Mobile
+      Bool setElmParent       (C CMemPtr< IDParam<UID > > &elms); // set 'parent'        for elements, where 'IDParam.id'=element ID, 'IDParam.value'=parent ID (use 'UIDZero' for no parent)
+      Bool setElmSrcFile      (C CMemPtr< IDParam<Str > > &elms); // set 'src_file'      for elements, where 'IDParam.id'=element ID, 'IDParam.value'=element source file (this does not reload the element, it only adjusts the source file for it)
 
       Bool       reloadElms  (C CMemPtr<UID> &elms, Bool remember_result                    ); // reload elements specified by their ID, elements will be reloaded from their current 'Elm.src_file', which can be changed using the 'setElmSrcFile' method. This method does not wait until elements finish reloading, it only requests the reload, and returns true if the request was accepted, and false if request failed. Which means that even if this method returns true, reload may still fail, for example if the element 'src_file' was not found. 'remember_result'=if this is set to true, then upon completion of reload process, the Editor will remember reload result for each element, which can be obtained later using 'reloadResult' method, while 'forgetReloadResult' can be called to forget those results.
       Bool cancelReloadElms  (C CMemPtr<UID> &elms                                          ); // cancel reloading elements specified by their ID
@@ -346,6 +367,8 @@ struct EditorInterface
       // image
       Bool getImage(C UID &elm_id,   Image &image); // get image of 'elm_id' ELM_IMAGE element in the project, false on fail
       Bool setImage(C UID &elm_id, C Image &image); // set image of 'elm_id' ELM_IMAGE element in the project, false on fail
+
+      Bool setImageMipMaps(C UID &elm_id, Bool mip_maps); // set if 'elm_id' ELM_IMAGE element in the project should have mip-maps, false on fail
 
       // code
       Bool getCode(C UID &elm_id,   Str &code); // get source code of 'elm_id' ELM_CODE element in the project, false on fail
@@ -457,6 +480,7 @@ enum EDITOR_INTERFACE_COMMANDS
    EI_SET_ELM_NAME,
    EI_SET_ELM_REMOVED,
    EI_SET_ELM_PUBLISH,
+   EI_SET_ELM_PUBLISH_MOBILE,
    EI_SET_ELM_PARENT,
    EI_SET_ELM_SRC_FILE,
 
@@ -489,6 +513,7 @@ enum EDITOR_INTERFACE_COMMANDS
 
    EI_GET_IMAGE,
    EI_SET_IMAGE,
+   EI_SET_IMAGE_MIP_MAPS,
    EI_GET_CODE,
    EI_SET_CODE,
    EI_GET_FILE,
@@ -533,7 +558,7 @@ enum EDITOR_INTERFACE_COMMANDS
 
    EI_NUM,
 #if EE_PRIVATE
-   // !! when changing this, don't forget to increment EI_VER !!
+   // !! WHEN CHANGING THIS, DON'T FORGET TO INCREMENT 'EI_VER' !!
 #endif
 };
 enum EDITOR_INTERFACE_OBJ_COMMANDS : Byte

@@ -1,4 +1,4 @@
-﻿/******************************************************************************/
+/******************************************************************************/
 #include "stdafx.h"
 namespace EE{
 /******************************************************************************/
@@ -11,14 +11,17 @@ ASensorEventQueue *SensorEventQueue;
 #elif IOS
 CLLocationManager *LocationManager[2];
 CMMotionManager   *CoreMotionMgr;
+CHHapticEngine    *Vibrator;
+
+static void DelVibrator() {[Vibrator release]; Vibrator=nil;}
 #endif
 Vec				   AccelerometerValue, GyroscopeValue, MagnetometerValue;
 Bool              LocationBackground[2];
 Dbl               LocationLat[2], LocationLon[2];
 Flt               LocationAlt[2], LocationAcc[2], LocationSpd[2], LocationInterval[2]={-1, -1}, MagnetometerInterval=-1;
 DateTime          LocationTim[2];
-InputComboClass   InputCombo;
 InputDevicesClass InputDevices;
+Memc<Input>       Inputs;
 /******************************************************************************/
 // ACCELEROMETER, GYROSCOPE, MAGNETOMETER, LOCATION
 /******************************************************************************/
@@ -161,178 +164,59 @@ void UpdateLocation(JNI &jni)
 }
 #endif
 /******************************************************************************/
-// INPUT BUTTON
-/******************************************************************************/
-Bool InputButton::on()C
+void DeviceVibrate(Flt intensity, Flt duration)
 {
-   switch(type)
+#if ANDROID
+   if(Jni && ActivityClass && vibrate)if(Byte int_byte=FltToByte(intensity)) // 0 will crash
    {
-      case INPUT_KEYBOARD: return                            Kb             .b(KB_KEY(button));
-      case INPUT_MOUSE   : return                            Ms             .b(       button );
-      case INPUT_JOYPAD  : return InRange(device, Joypads) ? Joypads[device].b(       button ) : false;
+      Int milliseconds=RoundPos(duration*1000); if(milliseconds>0)Jni->CallStaticVoidMethod(ActivityClass, vibrate, jint(int_byte), jint(milliseconds)); // <0 will crash, =0 is useless
    }
-   return false;
-}
-Bool InputButton::pd()C
-{
-   switch(type)
+#elif IOS
+   if(Vibrator && intensity>0)
    {
-      case INPUT_KEYBOARD: return                            Kb             .bp(KB_KEY(button));
-      case INPUT_MOUSE   : return                            Ms             .bp(       button );
-      case INPUT_JOYPAD  : return InRange(device, Joypads) ? Joypads[device].bp(       button ) : false;
+      intensity=SqrtFast(intensity); // sqrt because on iOS small vibrations are barely noticable
+   #if 0
+      CHHapticEventParameter *param=[[CHHapticEventParameter alloc] initWithParameterID:CHHapticEventParameterIDHapticIntensity value:intensity];
+      CHHapticEvent *event=[[CHHapticEvent alloc] initWithEventType:CHHapticEventTypeHapticContinuous parameters:[NSArray arrayWithObjects:param, nil] relativeTime:0 duration:duration];
+      NSError *error=nil; CHHapticPattern *pattern=[[CHHapticPattern alloc] initWithEvents:[NSArray arrayWithObject:event] parameters:[[NSArray alloc] init] error:&error]; if(!error)
+         if(auto player=[Vibrator createPlayerWithPattern:pattern error:&error])
+      {
+         if(!error)[player startAtTime:0 error:&error]; // don't set "error:nil" because if error happens then exception occurs with nil
+       //[player release]; don't release, it will crash
+      }
+   #else
+      NSDictionary *dict=
+     @{
+         CHHapticPatternKeyPattern:
+        @[ 
+           @{
+               CHHapticPatternKeyEvent:
+              @{
+                  CHHapticPatternKeyEventType      : CHHapticEventTypeHapticContinuous,
+                  CHHapticPatternKeyTime           : @(CHHapticTimeImmediate),
+                  CHHapticPatternKeyEventDuration  : @(duration),
+                  CHHapticPatternKeyEventParameters:
+                 @[
+                    @{
+                        CHHapticPatternKeyParameterID   : CHHapticEventParameterIDHapticIntensity,
+                        CHHapticPatternKeyParameterValue: @(intensity),
+                     },
+                  ],
+               },
+            },
+         ],
+      };
+      NSError *error=nil;
+      CHHapticPattern *pattern=[[CHHapticPattern alloc] initWithDictionary:dict error:&error]; if(!error)
+         if(auto player=[Vibrator createPlayerWithPattern:pattern error:&error])
+      {
+         if(!error)[player startAtTime:0 error:&error]; // don't set "error:nil" because if error happens then exception occurs with nil
+       //[player release]; don't release, it will crash
+      }
+   #endif
    }
-   return false;
+#endif
 }
-Bool InputButton::rs()C
-{
-   switch(type)
-   {
-      case INPUT_KEYBOARD: return                            Kb             .br(KB_KEY(button));
-      case INPUT_MOUSE   : return                            Ms             .br(       button );
-      case INPUT_JOYPAD  : return InRange(device, Joypads) ? Joypads[device].br(       button ) : false;
-   }
-   return false;
-}
-Bool InputButton::db()C
-{
-   switch(type)
-   {
-      case INPUT_KEYBOARD: return                            Kb             .bd(KB_KEY(button));
-      case INPUT_MOUSE   : return                            Ms             .bd(       button );
-      case INPUT_JOYPAD  : return InRange(device, Joypads) ? Joypads[device].bd(       button ) : false;
-   }
-   return false;
-}
-Str InputButton::name()C
-{
-   switch(type)
-   {
-      case INPUT_KEYBOARD: return                            Kb             .   keyName(KB_KEY(button));
-      case INPUT_MOUSE   : return                            Ms             .buttonName(       button );
-      case INPUT_JOYPAD  : return InRange(device, Joypads) ? Joypads[device].buttonName(       button ) : S;
-      default            : return S;
-   }
-}
-Bool InputButton::operator==(C InputButton &b)C
-{
-   return T.button==b.button
-       && T.type  ==b.type
-       && T.device==b.device;
-}
-Bool InputButton::operator!=(C InputButton &b)C
-{
-   return T.button!=b.button
-       || T.type  !=b.type
-       || T.device!=b.device;
-}
-/******************************************************************************/
-// INPUT
-/******************************************************************************/
-Bool Input::on()C {return b[0].on() || b[1].on() || b[2].on();}
-Bool Input::pd()C {return b[0].pd() || b[1].pd() || b[2].pd();}
-Bool Input::rs()C {return b[0].rs() || b[1].rs() || b[2].rs();}
-Bool Input::db()C {return b[0].db() || b[1].db() || b[2].db();}
-
-void Input::set(C Str &name, UInt group)
-{
-   T.name =name ;
-   T.group=group;
-}
-void Input::set(C Str &name, UInt group, C InputButton &b0, C InputButton *b1, C InputButton *b2)
-{
-   T.name =name ;
-   T.group=group;
-         b[0]= b0;
-   if(b1)b[1]=*b1;else Zero(b[1]);
-   if(b2)b[2]=*b2;else Zero(b[2]);
-}
-Bool Input::operator()(C InputButton &b)C
-{
-   return T.b[0]==b
-       || T.b[1]==b
-       || T.b[2]==b;
-}
-/******************************************************************************/
-// INPUT COMBO
-/******************************************************************************/
-#define INPUT_COMBO_AND (INPUT_COMBO_NUM-1)
-
-InputComboClass::InputComboClass()
-{
-   dt=0.22f;
-}
-void InputComboClass::clear()
-{
-   pos=length=0;
-}
-void InputComboClass::add(C InputButton &inp_btn)
-{
-   t[pos]=Time.appTime();
-   b[pos]=inp_btn;
-   pos   =((pos+1)&INPUT_COMBO_AND);
-   length=Min(length+1, Elms(b));
-}
-Bool InputComboClass::operator()(C Input &i0, C Input &i1)C
-{
-   if(length>=2)
-   {
-      Byte p1=((pos-1)&INPUT_COMBO_AND),
-           p0=((pos-2)&INPUT_COMBO_AND);
-
-      return i1(b[p1]) && (Time.appTime()-t[p1]<dt)
-          && i0(b[p0]) && (t[p1]         -t[p0]<dt);
-   }
-   return false;
-}
-Bool InputComboClass::operator()(C Input &i0, C Input &i1, C Input &i2)C
-{
-   if(length>=3)
-   {
-      Byte p2=((pos-1)&INPUT_COMBO_AND),
-           p1=((pos-2)&INPUT_COMBO_AND),
-           p0=((pos-3)&INPUT_COMBO_AND);
-
-      return i2(b[p2]) && (Time.appTime()-t[p2]<dt)
-          && i1(b[p1]) && (t[p2]         -t[p1]<dt)
-          && i0(b[p0]) && (t[p1]         -t[p0]<dt);
-   }
-   return false;
-}
-Bool InputComboClass::operator()(C Input &i0, C Input &i1, C Input &i2, C Input &i3)C
-{
-   if(length>=4)
-   {
-      Byte p3=((pos-1)&INPUT_COMBO_AND),
-           p2=((pos-2)&INPUT_COMBO_AND),
-           p1=((pos-3)&INPUT_COMBO_AND),
-           p0=((pos-4)&INPUT_COMBO_AND);
-
-      return i3(b[p3]) && (Time.appTime()-t[p3]<dt)
-          && i2(b[p2]) && (t[p3]         -t[p2]<dt)
-          && i1(b[p1]) && (t[p2]         -t[p1]<dt)
-          && i0(b[p0]) && (t[p1]         -t[p0]<dt);
-   }
-   return false;
-}
-Bool InputComboClass::operator()(C Input &i0, C Input &i1, C Input &i2, C Input &i3, C Input &i4)C
-{
-   if(length>=5)
-   {
-      Byte p4=((pos-1)&INPUT_COMBO_AND),
-           p3=((pos-2)&INPUT_COMBO_AND),
-           p2=((pos-3)&INPUT_COMBO_AND),
-           p1=((pos-4)&INPUT_COMBO_AND),
-           p0=((pos-5)&INPUT_COMBO_AND);
-
-      return i4(b[p4]) && (Time.appTime()-t[p4]<dt)
-          && i3(b[p3]) && (t[p4]         -t[p3]<dt)
-          && i2(b[p2]) && (t[p3]         -t[p2]<dt)
-          && i1(b[p1]) && (t[p2]         -t[p1]<dt)
-          && i0(b[p0]) && (t[p1]         -t[p0]<dt);
-   }
-   return false;
-}
-#undef INPUT_COMBO_AND
 /******************************************************************************/
 // INPUT
 /******************************************************************************/
@@ -344,36 +228,97 @@ void InputDevicesClass::del()
 #if WINDOWS_OLD && DIRECT_INPUT
    RELEASE(DI);
 #elif IOS
-   [CoreMotionMgr release]; CoreMotionMgr=null;
+   [CoreMotionMgr release]; CoreMotionMgr=nil;
+   DelVibrator();
 #endif
    VR.shut(); // !! delete as last, after the mouse, because it may try to reset the mouse cursor, so we need to make sure that mouse cursor was already deleted !!
 }
 /******************************************************************************/
-Bool InputDevicesClass::create()
+void InputDevicesClass::checkMouseKeyboard()
+{
+#if WINDOWS_OLD && (KB_RAW_INPUT || MS_RAW_INPUT)
+   if(KB_RAW_INPUT)Kb._hardware=false;
+   if(MS_RAW_INPUT)Ms._hardware=false;
+   Memt<RAWINPUTDEVICELIST> devices;
+	UINT num_devices=0; GetRawInputDeviceList(null, &num_devices, SIZE(RAWINPUTDEVICELIST));
+again:
+   devices.setNum(num_devices);
+	Int out=GetRawInputDeviceList(devices.data(), &num_devices, SIZE(RAWINPUTDEVICELIST));
+   if(out<0) // error
+   {
+      if(Int(num_devices)>devices.elms())goto again; // need more memory
+      devices.clear();
+   }else
+   {
+      if(out<devices.elms())devices.setNum(out);
+      FREPA(devices)
+      {
+       C RAWINPUTDEVICELIST &device=devices[i]; switch(device.dwType)
+         {
+         #if KB_RAW_INPUT
+            case RIM_TYPEKEYBOARD: Kb._hardware=             true; break;
+         #endif
+         #if MS_RAW_INPUT
+            case RIM_TYPEMOUSE   : Ms._hardware=Ms._detected=true; break; // don't set false in case user called 'Ms.simulate'
+         #endif
+         }
+       /*UInt size=0; if(Int(GetRawInputDeviceInfoW(device.hDevice, RIDI_DEVICENAME, null, &size))>=0)
+         {
+            Memt<Char> name; name.setNum(size+1); Int r=GetRawInputDeviceInfoW(device.hDevice, RIDI_DEVICENAME, name.data(), &size);
+            if(r>=0 && size==r && r+1==name.elms())
+            {
+               name.last()='\0'; // in case it's needed
+               Str n=name.data();
+            }
+         }*/
+      }
+   }
+#elif WINDOWS_NEW
+   // use try/catch because exceptions can occur, something about "data is too small"
+   try{Kb._hardware=(Windows::Devices::Input::KeyboardCapabilities().KeyboardPresent>0);                                   }catch(...){}
+   try{Ms._hardware=(Windows::Devices::Input::   MouseCapabilities().   MousePresent>0); if(Ms._hardware)Ms._detected=true;}catch(...){} // don't set false in case user called 'Ms.simulate'
+#elif ANDROID
+   Kb._hardware=((AndroidApp && AndroidApp->config) ? FlagOn(AConfiguration_getKeyboard(AndroidApp->config), (UInt)ACONFIGURATION_KEYBOARD_QWERTY) : false);
+#endif
+}
+/******************************************************************************/
+void InputDevicesClass::create()
 {
    if(LogInit)LogN("InputDevicesClass.create");
 #if WINDOWS_OLD
    if(LogInit)LogN("DirectInput8Create");
    #if DIRECT_INPUT
-      if(OK(DirectInput8Create(App._hinstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (Ptr*)&DI, null)))
+      DYNAMIC_ASSERT(OK(DirectInput8Create(App._hinstance, DIRECTINPUT_VERSION, IID_IDirectInput8, (Ptr*)&DI, null)), "Can't create DirectInput");
    #endif
 #endif
+   checkMouseKeyboard();
+   Kb  .create();
+   Ms  .create();
+   InitJoypads();
+ //VR  .init  (); this is now to be called manually in 'InitPre'
+#if IOS
+   Int hz=(D.freq()>0 ? D.freq() : 60); // default to 60 events per second
+   Flt interval=1.0f/hz;
+   CoreMotionMgr=[[CMMotionManager alloc] init];
+   CoreMotionMgr.accelerometerUpdateInterval=interval;
+   CoreMotionMgr.         gyroUpdateInterval=interval;
+
+   // Vibrator
+   if([CHHapticEngine class]) // if class was found, this is needed because CoreHaptics is linked optionally as "weak_framework CoreHaptics"
+      if(CHHapticEngine.capabilitiesForHardware.supportsHaptics)
    {
-      Kb  .create();
-      Ms  .create();
-      InitJoypads();
-    //VR  .init  (); this is now to be called manually in 'InitPre'
-   #if IOS
-      CoreMotionMgr=[[CMMotionManager alloc] init];
-      CoreMotionMgr.accelerometerUpdateInterval=1.0f/60; // 60 Hz
-      CoreMotionMgr.         gyroUpdateInterval=1.0f/60; // 60 Hz
-   #elif SWITCH
-      NS::CreateInput();
-   #endif
-      if(App.active())acquire(true);
-      return true;
+      NSError *error=nil; Vibrator=[[CHHapticEngine alloc] initAndReturnError:&error]; if(error)DelVibrator();else
+      {
+         [Vibrator setResetHandler:^
+         {
+            NSError *error=nil; [Vibrator startAndReturnError:&error]; // don't set "error:nil" because if error happens then exception occurs with nil
+         }];
+      }
    }
-   return false;
+#elif SWITCH
+   NS::CreateInput();
+#endif
+   if(App.active())acquire(true);
 }
 /******************************************************************************/
 void InputDevicesClass::update()
@@ -381,11 +326,11 @@ void InputDevicesClass::update()
 #if SWITCH
    NS::UpdateInput();
 #endif
-                         Kb      .update();
-                         Ms      .update();
-   if(App.active())REPAO(Joypads).update();
-                           TouchesUpdate();
-                               VR.update();
+                        Kb.update();
+                        Ms.update();
+   if(App.active())Joypads.update();
+                    TouchesUpdate();
+                        VR.update();
 #if ANDROID
    if(!(Time.frame()%60))UpdateLocation(Jni); // update once per 60-frames, because it was reported that this can generate plenty of messages in the log
 #elif IOS
@@ -404,22 +349,25 @@ void InputDevicesClass::clear()
                          Ms      .clear();
    if(App.active())REPAO(Joypads).clear();
                            TouchesClear();
+                           Inputs.clear();
 }
 /******************************************************************************/
 void InputDevicesClass::acquire(Bool on)
 {
-         Kb      .acquire(on);
-         Ms      .acquire(on);
-   REPAO(Joypads).acquire(on);
+        Kb.acquire(on);
+        Ms.acquire(on);
+   Joypads.acquire(on);
 #if ANDROID
    if(SensorEventQueue)
       if(ASensorManager *sensor_manager=ASensorManager_getInstance())
    {
+      Int hz=(D.freq()>0 ? D.freq() : 60); // default to 60 events per second
+      Int microseconds=1000*1000/hz;
       if(C ASensor *accelerometer=ASensorManager_getDefaultSensor(sensor_manager, ASENSOR_TYPE_ACCELEROMETER))
       {
          if(on) // start monitoring the accelerometer
          {
-               ASensorEventQueue_setEventRate (SensorEventQueue, accelerometer, 1000*1000/60); // 60 events per second
+               ASensorEventQueue_setEventRate (SensorEventQueue, accelerometer, microseconds);
                ASensorEventQueue_enableSensor (SensorEventQueue, accelerometer);
          }else ASensorEventQueue_disableSensor(SensorEventQueue, accelerometer); // stop monitoring accelerometer
       }
@@ -427,13 +375,18 @@ void InputDevicesClass::acquire(Bool on)
       {
          if(on) // start monitoring the gyroscope
          {
-               ASensorEventQueue_setEventRate (SensorEventQueue, gyroscope, 1000*1000/60); // 60 events per second
+               ASensorEventQueue_setEventRate (SensorEventQueue, gyroscope, microseconds);
                ASensorEventQueue_enableSensor (SensorEventQueue, gyroscope);
          }else ASensorEventQueue_disableSensor(SensorEventQueue, gyroscope); // stop monitoring gyroscope
       }
    }
    if(on)UpdateLocation(Jni);
 #elif IOS
+   if(Vibrator) // have to stop and restart on app pause/resume, without this vibrations will stop playing
+   {
+      if(on){NSError *error=nil; [Vibrator startAndReturnError      :&error];} // don't set "error:nil" because if error happens then exception occurs with nil
+      else                       [Vibrator stopWithCompletionHandler:nil   ];
+   }
    if(CoreMotionMgr)
    {
       if(on)
@@ -562,7 +515,7 @@ static Bool Processed         (  Str &str, TextEdit &edit, Bool multi_line, C Ke
             return true;
          }break;
 
-         case KB_TAB: if(multi_line)
+         case KB_TAB: if(multi_line && !key.alt())
          {
             if(edit.sel>=0)changed|=TextSelRem(str, edit);
           /*if(edit.overwrite && edit.cur<str.length())str.    _d[edit.cur]='\t';
@@ -572,7 +525,7 @@ static Bool Processed         (  Str &str, TextEdit &edit, Bool multi_line, C Ke
             return true;
          }break;
 
-         case KB_ENTER: if(multi_line || Kb.shift() && !Kb.ctrl() && !Kb.alt()) // allow adding new line only in multi_line 'TextBox', or 'TextLine' too but only if Shift is pressed without Ctrl/Alt
+         case KB_ENTER: if(multi_line || key.shift() && !key.ctrl() && !key.alt()) // allow adding new line only in multi_line 'TextBox', or 'TextLine' too but only if Shift is pressed without Ctrl/Alt
          {
             if(edit.sel>=0)changed|=TextSelRem(str, edit);
           /*if(edit.overwrite && edit.cur<str.length())str.    _d[edit.cur]='\n';

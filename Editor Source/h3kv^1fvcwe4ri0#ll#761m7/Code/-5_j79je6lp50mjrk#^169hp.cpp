@@ -50,7 +50,7 @@ class ListElm
    static Str Size(C ListElm &data)
    {
       long size=data.fileSize(); if(!size)return S;
-      Str    s=FileSize(size); if(!data.size_known)s+='+';
+      Str    s=SizeBytes(size); if(!data.size_known)s+='+';
       return s;
    }
 
@@ -76,8 +76,8 @@ class ListElm
       {
          int child_i=node.children[i];
        C Elm &elm=Proj.elms[child_i];
-         if( !elm.removed() || Proj.show_removed())
-         if(  elm.publish() || Proj.list.include_unpublished_elm_size) // can use 'publish' instead of 'finalPublish' because if this function is called, then the parent was already checked
+         if( elm.      exists() || Proj.show_removed())
+         if( elm.finalPublish() || Proj.list.include_unpublished_elm_size) // could use 'publish' instead of 'finalPublish' because if this function is called, then the parent was already checked, however we need platform
          {
             IncludeTex(texs, elm);
             IncludeTex(texs, Proj.hierarchy[child_i]); // we shouldn't check for ICS_ALWAYS or ICS_FOLDED here
@@ -90,7 +90,7 @@ class ListElm
       {
          tex_size_calculated=true;
          if(Proj.list.its && elm)
-         if(elm.finalPublish() || Proj.list.include_unpublished_elm_size) // have to use 'finalPublish' because it's not called recursively, but can be called for any element at any time
+         if(elm.finalPublish() || Proj.list.include_unpublished_elm_size) // have to use 'finalPublish' because it's not called recursively, but can be called for any element at any time, also we need platform
          {
             Memt<UID> texs;
             IncludeTex(texs, *elm);
@@ -164,16 +164,16 @@ class ListElm
       color_temp=color; // remember color in temp for fast restoring in 'elmHighlight'
       return T;
    }
-   ListElm& set(Elm &elm, ElmNode &node, int depth, int vis_parent, bool parent_removed)
+   ListElm& set(Elm &elm, ElmNode &node, int depth, int vis_parent) // !! assumes that 'finalRemoved'/FINAL is available !!
    {
       T.elm=&elm;
-      return set(elm.type, elm.name, FlagTest(node.flag, ELM_EDITED), elm.importing(), elm.removed() || parent_removed, depth, vis_parent);
+      return set(elm.type, elm.name, FlagOn(node.flag, ELM_EDITED), elm.importing(), elm.finalRemoved(), depth, vis_parent);
    }
-   ListElm& set(EEItem &item, bool opened, int depth, bool parent_removed)
+   ListElm& set(EEItem &item, bool opened, int depth)
    {
       T.item=&item;
       hasVisibleChildren(item.children.elms()>0, opened);
-      return set(item.type, item.base_name, FlagTest(item.flag, ELM_EDITED), false, parent_removed, depth, -1);
+      return set(item.type, item.base_name, FlagOn(item.flag, ELM_EDITED), false, false, depth, -1);
    }
 }
 /******************************************************************************/
@@ -239,7 +239,7 @@ class TexInfoGetter
 
    static int ImageLoad(ImageHeader &header, C Str &name)
    {
-      if(GetThreadId()==TIG.thread_id) // process only inside 'TIG'
+      if(GetThreadID()==TIG.thread_id) // process only inside 'TIG'
       {
          header.mode=IMAGE_SOFT;
        //if(ImageTI[header.type].compressed)header.type=ImageTypeUncompressed(header.type); no need to do that, because there are only one decompressions per mip-map (1. extracting 2nd mip map to RGBA, 2. comparing 1st mip map with upscaled), doing this would only increase memory usage
@@ -263,7 +263,7 @@ class TexInfoGetter
 
       // no need for 'ThreadMayUseGPUData' because we use only IMAGE_SOFT
       Images.lock(); // lock because other threads may modify 'image_load_shrink' too
-      TIG.thread_id=GetThreadId();
+      TIG.thread_id=GetThreadID();
       int (*image_load_shrink)(ImageHeader &image_header, C Str &name)=D.image_load_shrink; // remember current
       D.image_load_shrink=ImageLoad        ; bool ok=img.load(TIG.tex_path+EncodeFileName(tex_id));
       D.image_load_shrink=image_load_shrink; // restore

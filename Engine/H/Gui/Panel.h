@@ -44,10 +44,10 @@ struct Panel
    PanelImagePtr panel_image    ; // panel         image  , default=null
 
    // get
-   void extendedRect           (C Rect &rect, Rect &extended )C; // get rectangle containing panel drawn at 'rect' rectangle
-   void innerPadding           (C Rect &rect, Rect &padding  )C;
-   void defaultInnerPadding    (              Rect &padding  )C;
-   void defaultInnerPaddingSize(              Vec2 &padd_size)C;
+   void extendedRect           (C Rect &rect, Rect &extended)C; // get rectangle containing panel drawn at 'rect' rectangle
+   void innerPadding           (C Rect &rect, Rect &padding )C;
+   void defaultInnerPadding    (              Rect &padding )C;
+   Vec2 defaultInnerPaddingSize(                            )C;
 #if EE_PRIVATE
    Bool pixelBorder()C; // if this panel draws a 1 pixel border
    Bool getSideScale(C Rect &rect, Flt &scale)C;

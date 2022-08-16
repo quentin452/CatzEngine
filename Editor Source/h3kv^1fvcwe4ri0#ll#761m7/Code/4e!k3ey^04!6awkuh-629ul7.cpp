@@ -122,19 +122,39 @@ void ObjView.meshWeldPos(flt pos_eps)
    }
    if(changed)setChangedMesh(true, false);
 }
-void ObjView.meshSetPos()
+void ObjView.meshSetPos(bool keep_uv)
 {
    if(!sel_vtx.elms() || !mesh_parts.edit_selected())Gui.msgBox(S, "No vertexes selected");else
    if(lit_vtx<0)Gui.msgBox(S, "No highlighted vertex");else
    {
       MeshLod &lod=getLod();
+      TransformRegion.KeepUV kuv; if(keep_uv)kuv.create(lod);
       if(C MeshPart *part=lod.parts.addr(lit_vf_part))if(InRange(lit_vtx, part.base.vtx))
       {
          Vec center=part.base.vtx.pos(lit_vtx);
          mesh_undos.set("setPos");
          REPA(sel_vtx)
          {
-          C VecI2 &v=sel_vtx[i]; if(MeshPart *part=lod.parts.addr(v.x))if(InRange(v.y, part.base.vtx))part.base.vtx.pos(v.y)=center;
+          C VecI2 &v=sel_vtx[i]; if(MeshPart *part=lod.parts.addr(v.x))if(InRange(v.y, part.base.vtx))
+            {
+               part.base.vtx.pos(v.y)=center;
+               if(keep_uv)kuv.parts[v.x].vtxs[v.y].adjust=true;
+            }
+         }
+         if(keep_uv)
+         {
+            kuv.keepUV(lod);
+            REPA(sel_vtx)
+            {
+             C VecI2 &v=sel_vtx[i]; if(MeshPart *part=lod.parts.addr(v.x))
+               {
+                  MeshBase &base=part.base; if(InRange(v.y, base.vtx))if(Vec2 *uv=base.vtx.tex0())
+                  {
+                     TransformRegion.KeepUV.Vtx &vtx=kuv.parts[v.x].vtxs[v.y];
+                     if(vtx.weight)uv[v.y]=vtx.uv/vtx.weight;
+                  }
+               }
+            }
          }
          lod.setRender();
          mesh.setBox();

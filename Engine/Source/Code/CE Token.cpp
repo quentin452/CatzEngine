@@ -71,7 +71,7 @@ Bool Token::save(File &f, StrLibrary &sl, C Str &text)C
 Bool Token::load(File &f, StrLibrary &sl, C Str &text, Line &line, Str &temp) // load this after loading source symbols because of 'parent', and line text (Str) because of 'BStr'
 {
    BStrLoad(T, f, text, temp);
-   Byte flag; f.getMulti(flag, type); def_decl=FlagTest(flag, DEF_DECL); ctor_initializer=FlagTest(flag, CTOR); macro=FlagTest(flag, MACRO);
+   Byte flag; f.getMulti(flag, type); def_decl=FlagOn(flag, DEF_DECL); ctor_initializer=FlagOn(flag, CTOR); macro=FlagOn(flag, MACRO);
    col=f.decUIntV(); sl.getStr(f, temp); symbol=temp; sl.getStr(f, temp); parent=SymbolPtr().get(temp)(); T.line=&line; macro_col=-1; macro_line=null; macro_depth=0;
    if(f.ok())return true;
    del(); return false;

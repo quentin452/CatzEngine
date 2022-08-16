@@ -510,7 +510,7 @@ Bool SQL::appendTable(C Str &table_name, C CMemPtr<SQLColumn> &columns, Str *mes
          {
           C SQLColumn &col=columns[i];
             cmd=S+"ALTER TABLE "+name(table_name)+" ADD ";
-            if(colDesc(col, desc, messages ? &temp : null))
+            if(colDesc(col, desc, messages ? &temp : null, true))
             {
                cmd+=desc;
                if(command(cmd, messages ? &temp : null))
@@ -535,7 +535,7 @@ Bool SQL::appendTable(C Str &table_name, C CMemPtr<SQLColumn> &columns, Str *mes
       {
          Bool separate=(_type!=MSSQL);
          Str  cmd=S+"ALTER TABLE "+name(table_name), desc; if(!separate)cmd+=" ADD ";
-         FREPA(columns){if(i)cmd+=", "; if(separate)cmd+=" ADD "; if(!colDesc(columns[i], desc, messages))return false; cmd+=desc;}
+         FREPA(columns){if(i)cmd+=", "; if(separate)cmd+=" ADD "; if(!colDesc(columns[i], desc, messages, true))return false; cmd+=desc;}
          return command(cmd, messages, error) && createTableIndexes(table_name, columns, messages, cmd);
       }break;
    }
@@ -1507,7 +1507,7 @@ Str SQL::value(C SQLValues::Value &value)C
    }
    return S;
 }
-Bool SQL::colDesc(C SQLColumn &col, Str &desc, Str *messages)
+Bool SQL::colDesc(C SQLColumn &col, Str &desc, Str *messages, Bool append)
 {
    desc=name(col.name)+' ';
    switch(_type)
@@ -1627,7 +1627,8 @@ Bool SQL::colDesc(C SQLColumn &col, Str &desc, Str *messages)
       }break;
    }
    desc+=(col.allow_nulls ? "NULL " : "NOT NULL ");
-   if(col.default_val.is())
+   if(col.default_val.is()
+   || append && (col.type==SDT_STR || col.type==SDT_STR8))
    {
       desc+="DEFAULT "; desc+=value(col.default_val);
    }

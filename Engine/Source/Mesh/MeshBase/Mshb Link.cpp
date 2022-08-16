@@ -236,7 +236,7 @@ MeshBase& MeshBase::setVtxDupEx(MESH_FLAG flag, Flt pos_eps, Flt nrm_cos, Flt ta
    include(VTX_DUP); // vtx dup doesn't need to be initialized here, because the algorithm works in a way that only processed vertexes are tested
    MESH_FLAG t_flag=T.flag();
    flag                         &=(t_flag&(VTX_NRM_TAN_BIN|VTX_HLP|VTX_TEX_ALL|VTX_SIZE|VTX_SKIN|VTX_MATERIAL|VTX_COLOR|VTX_FLAG)); // only these are tested
-   smooth_groups_in_vtx_material&=FlagTest(t_flag, VTX_MATERIAL);
+   smooth_groups_in_vtx_material&=FlagOn(t_flag, VTX_MATERIAL);
    if(nrm_cos<=-1)FlagDisable(flag, VTX_NRM); // disable vtx normal   tests if we have tolerant 'nrm_cos'
    if(tan_cos<=-1)FlagDisable(flag, VTX_TAN); // disable vtx tangent  tests if we have tolerant 'tan_cos'
    if(bin_cos<=-1)FlagDisable(flag, VTX_BIN); // disable vtx binormal tests if we have tolerant 'bin_cos'

@@ -464,8 +464,8 @@ class BuilderClass
          }
 
          // load embedded
-         bool load_obj_mesh=FlagTest(area_build, AREA_REBUILD_EMBED_OBJ),
-              load_obj_phys=FlagTest(area_build, AREA_REBUILD_EMBED_OBJ|AREA_REBUILD_PATH);
+         bool load_obj_mesh=FlagOn(area_build, AREA_REBUILD_EMBED_OBJ),
+              load_obj_phys=FlagOn(area_build, AREA_REBUILD_EMBED_OBJ|AREA_REBUILD_PATH);
          if(embed_objs_rect.valid() && world_ver && (load_obj_mesh || load_obj_phys))
          {
             ThreadMayUseGPUData(); // objects load meshes

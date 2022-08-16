@@ -616,7 +616,28 @@ Flt Dist2(C Edge2 &a, C Edge2 &b)
               Dist2(b.p[0], a),
               Dist2(b.p[1], a));
 }
-Flt Dist(C Edge2 &a, C Edge2 &b) {return SqrtFast(Dist2(a, b));} // safe in case 'a' or 'b' are zero length
+Dbl Dist2(C EdgeD2 &a, C EdgeD2 &b)
+{
+   // check if they're cutting each other
+   VecD2 a_dir =a.delta(); Dbl a_length=a_dir.normalize();
+   VecD2 a_perp=Perp(a_dir);
+   Dbl d0=DistPointPlane(b.p[0], a.p[0], a_perp); Int s0=Sign(d0);
+   Dbl d1=DistPointPlane(b.p[1], a.p[0], a_perp); Int s1=Sign(d1);
+   if( s0==-s1 && s0)
+   {
+      VecD2 p=PointOnPlane  (b.p[0], b.p[1], d0, d1);
+      Dbl   d=DistPointPlane(  p   , a.p[0], a_dir );
+      if(d>=0 && d<=a_length)return 0;
+   }
+
+   // they don't cut
+   return Min(Dist2(a.p[0], b),
+              Dist2(a.p[1], b),
+              Dist2(b.p[0], a),
+              Dist2(b.p[1], a));
+}
+Flt Dist(C Edge2  &a, C Edge2  &b) {return SqrtFast(Dist2(a, b));} // safe in case 'a' or 'b' are zero length
+Dbl Dist(C EdgeD2 &a, C EdgeD2 &b) {return SqrtFast(Dist2(a, b));} // safe in case 'a' or 'b' are zero length
 /******************************************************************************/
 Flt Dist2(C Edge &a, C Edge &b) // safe in case 'a' or 'b' are zero length
 {
@@ -636,7 +657,26 @@ Flt Dist2(C Edge &a, C Edge &b) // safe in case 'a' or 'b' are zero length
               Dist2(b.p[0], a),
               Dist2(b.p[1], a));
 }
-Flt Dist(C Edge &a, C Edge &b) {return SqrtFast(Dist2(a, b));} // safe in case 'a' or 'b' are zero length
+Dbl Dist2(C EdgeD &a, C EdgeD &b) // safe in case 'a' or 'b' are zero length
+{
+   // check if they're cutting each other
+   EdgeD c;
+   VecD  a_dir=a.dir(),
+         b_dir=b.dir();
+   if(NearestPointOnLine(a.p[0], a_dir, b.p[0], b_dir, c)) // safe in case 'a' or 'b' are zero length
+   {
+      if(DistPointPlane(c.p[0], a.p[0], a_dir)>=0 && DistPointPlane(c.p[0], a.p[1], a_dir)<=0
+      && DistPointPlane(c.p[1], b.p[0], b_dir)>=0 && DistPointPlane(c.p[1], b.p[1], b_dir)<=0)return c.length2();
+   }
+
+   // they don't cut
+   return Min(Dist2(a.p[0], b),
+              Dist2(a.p[1], b),
+              Dist2(b.p[0], a),
+              Dist2(b.p[1], a));
+}
+Flt Dist(C Edge  &a, C Edge  &b) {return SqrtFast(Dist2(a, b));} // safe in case 'a' or 'b' are zero length
+Dbl Dist(C EdgeD &a, C EdgeD &b) {return SqrtFast(Dist2(a, b));} // safe in case 'a' or 'b' are zero length
 /******************************************************************************/
 Flt Dist(C Edge &edge, C Plane &plane) // safe in case 'a' or 'b' are zero length
 {
@@ -672,6 +712,17 @@ Bool NearestPointOnLine(C Vec &pos_a, C Vec &dir_a, C Vec &pos_b, C Vec &dir_b, 
 {
    Vec normal=Cross(dir_a, dir_b);
    if( normal.normalize())
+   {
+      out.p[0]=PointOnPlaneRay(pos_a, pos_b, CrossN(normal, dir_b), dir_a);
+      out.p[1]=PointOnPlaneRay(pos_b, pos_a, CrossN(normal, dir_a), dir_b);
+      return true;
+   }
+   return false;
+}
+Bool NearestPointOnLine(C VecD &pos_a, C VecD &dir_a, C VecD &pos_b, C VecD &dir_b, EdgeD &out)
+{
+   VecD normal=Cross(dir_a, dir_b);
+   if(  normal.normalize())
    {
       out.p[0]=PointOnPlaneRay(pos_a, pos_b, CrossN(normal, dir_b), dir_a);
       out.p[1]=PointOnPlaneRay(pos_b, pos_a, CrossN(normal, dir_a), dir_b);

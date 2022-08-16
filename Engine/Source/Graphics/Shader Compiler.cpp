@@ -411,13 +411,13 @@ void ShaderCompiler::Param::setDataFrom(C Param &src)
 }
 Bool ShaderCompiler::Param::operator==(C Param &p)C
 {
-   if(translation.elms()!=p.translation.elms())return false; REPA(translation)if(translation[i]!=p.translation[i])return false;
+   if(translation!=p.translation)return false;
    if(data.elms()!=p.data.elms() || !EqualMem(data.data(), p.data.data(), data.elms()))return false;
    return Equal(name, p.name, true) && array_elms==p.array_elms && cpu_data_size==p.cpu_data_size && gpu_data_size==p.gpu_data_size;
 }
 Bool ShaderCompiler::Buffer::operator==(C Buffer &b)C
 {
-   if(params.elms()!=b.params.elms())return false; REPA(params)if(params[i]!=b.params[i])return false;
+   if(params!=b.params)return false;
    if(bind_explicit && bind_slot!=b.bind_slot)return false; // check 'bind_slot' only if they are explicit
    return Equal(name, b.name, true) && size==b.size && bind_explicit==b.bind_explicit;
 }
@@ -571,7 +571,7 @@ REPD(get_default_val, (compiler->api!=API_DX) ? 2 : 1) // non-DX shaders have to
    {
    #if DX_SHADER_COMPILER
       Int params=shader->params.elms()+shader->extra_params.elms();
-      Bool force_func_name_main=((compiler->api==API_GL) && FlagTest(compiler->flag, SC_SPIRV)); // on GL SPIR-V loading shaders requires specifying entry point func name, so for simplicity force all names to be "main"
+      Bool force_func_name_main=((compiler->api==API_GL) && FlagOn(compiler->flag, SC_SPIRV)); // on GL SPIR-V loading shaders requires specifying entry point func name, so for simplicity force all names to be "main"
       MemtN<DxcDefine, 64  > defines; defines.setNum(params  +API_NUM+get_default_val+1+(compiler->api==API_GL)+force_func_name_main); Int defs =0;
       MemtN<Str      , 64*2> temp   ; temp   .setNum(params*2+API_NUM                                          +force_func_name_main); Int temps=0;
       FREPA(shader->params)
@@ -717,7 +717,7 @@ REPD(get_default_val, (compiler->api!=API_DX) ? 2 : 1) // non-DX shaders have to
                                  Buffer &buffer=buffers[buffers_elms++];
                                  buffer.name=desc.Name;
                                  buffer.bind_slot=desc.BindPoint;
-                                 buffer.bind_explicit=FlagTest(desc.uFlags, D3D_SIF_USERPACKED); // FIXME this is not set https://github.com/microsoft/DirectXShaderCompiler/issues/2356
+                                 buffer.bind_explicit=FlagOn(desc.uFlags, D3D_SIF_USERPACKED); // FIXME this is not set https://github.com/microsoft/DirectXShaderCompiler/issues/2356
                                  ID3D12ShaderReflectionConstantBuffer *cb=reflection->GetConstantBufferByName(desc.Name); if(!cb){error.line()+="'GetConstantBufferByIndex' failed."; goto error_new;}
                                  {
                                     D3D12_SHADER_BUFFER_DESC desc; if(!OK(cb->GetDesc(&desc))){error.line()+="'ID3D12ShaderReflectionConstantBuffer.GetDesc' failed."; goto error_new;}
@@ -747,7 +747,7 @@ REPD(get_default_val, (compiler->api!=API_DX) ? 2 : 1) // non-DX shaders have to
                                      //type->Release(); this doesn't have 'Release'
                                      //var ->Release(); this doesn't have 'Release'
                                     }
-                                    DEBUG_ASSERT(buffer.bind_explicit==FlagTest(desc.uFlags, D3D_CBF_USERPACKED), "bind_explicit mismatch"); 
+                                    DEBUG_ASSERT(buffer.bind_explicit==FlagOn(desc.uFlags, D3D_CBF_USERPACKED), "bind_explicit mismatch"); 
                                  }
                               //cb->Release(); this doesn't have 'Release'
                               }break;
@@ -894,7 +894,7 @@ REPD(get_default_val, (compiler->api!=API_DX) ? 2 : 1) // non-DX shaders have to
                         Buffer &buffer=buffers[buffers_elms++];
                         buffer.name=desc.Name;
                         buffer.bind_slot=desc.BindPoint;
-                        buffer.bind_explicit=FlagTest(desc.uFlags, D3D_SIF_USERPACKED);
+                        buffer.bind_explicit=FlagOn(desc.uFlags, D3D_SIF_USERPACKED);
                         ID3D11ShaderReflectionConstantBuffer *cb=reflection->GetConstantBufferByName(desc.Name); if(!cb){error.line()+="'GetConstantBufferByIndex' failed."; goto error;}
                         {
                            D3D11_SHADER_BUFFER_DESC desc; if(!OK(cb->GetDesc(&desc))){error.line()+="'ID3D11ShaderReflectionConstantBuffer.GetDesc' failed."; goto error;}
@@ -923,7 +923,7 @@ REPD(get_default_val, (compiler->api!=API_DX) ? 2 : 1) // non-DX shaders have to
                             //type->Release(); this doesn't have 'Release'
                             //var ->Release(); this doesn't have 'Release'
                            }
-                         //DEBUG_ASSERT(buffer.bind_explicit==FlagTest(desc.uFlags, D3D_CBF_USERPACKED), "bind_explicit mismatch"); ignore because looks like 'desc.uFlags' is not set
+                         //DEBUG_ASSERT(buffer.bind_explicit==FlagOn(desc.uFlags, D3D_CBF_USERPACKED), "bind_explicit mismatch"); ignore because looks like 'desc.uFlags' is not set
                         }
                      //cb->Release(); this doesn't have 'Release'
                      }break;
@@ -1142,53 +1142,6 @@ ShaderCompiler::ShaderCompiler() : buffers(CompareCS) {}
     virtual void OnTessellationInfo(uint32_t tessPartitionMode, uint32_t tessOutputWindingOrder, uint32_t tessMaxFactor, uint32_t tessNumPatchesInThreadGroup)override {}
     virtual void OnTessellationKernelInfo(uint32_t patchKernelBufferCount)override {}
 };*/
-struct ConvertContext
-{
-   ShaderCompiler &compiler;
-   SyncLock        lock;
-#if DEBUG
-   Memc<                ShaderData> (&shader_datas)[ST_NUM];
-   Mems<ShaderCompiler::Shader*   >  &shaders, &compute_shaders;
-#endif
-   ShaderCompiler::Shader* findShader(C ShaderData &shader_data)C // find first 'Shader' using 'shader_data'
-   {
-   #if DEBUG
-      FREPAD(type, shader_datas)
-      {
-         Int shader_data_index=shader_datas[type].index(&shader_data); if(shader_data_index>=0)
-         {
-            FREPAD(si,         shaders){ShaderCompiler::Shader &shader=*        shaders[si]; if(shader.sub[type].shader_data_index==shader_data_index)return &shader;}
-            FREPAD(si, compute_shaders){ShaderCompiler::Shader &shader=*compute_shaders[si]; if(shader.sub[type].shader_data_index==shader_data_index)return &shader;}
-            break;
-         }
-      }
-   #endif
-      return null;
-   }
-   ShaderCompiler::Shader& shader(C ShaderData &shader_data)C // get first 'Shader' using 'shader_data'
-   {
-      ShaderCompiler::Shader *shader=findShader(shader_data); if(!shader)Exit("Can't find shader using 'shader_data'");
-      return *shader;
-   }
-   Str shaderName(C ShaderData &shader_data)C
-   {
-      if(ShaderCompiler::Shader *shader=findShader(shader_data))return shader->name;
-      return S;
-   }
-
-   ConvertContext(ShaderCompiler &compiler
-   #if DEBUG
-    , Memc<                ShaderData> (&        shader_datas)[ST_NUM]
-    , Mems<ShaderCompiler::Shader*   >  &        shaders
-    , Mems<ShaderCompiler::Shader*   >  &compute_shaders
-   #endif
-   ) : compiler(compiler)
-   #if DEBUG
-     , shader_datas(shader_datas), shaders(shaders), compute_shaders(compute_shaders)
-   #endif
-   {
-   }
-};
 static void ErrorCallback(void *userdata, const char *error)
 {
    Exit(error);
@@ -1242,9 +1195,11 @@ static Str8 SamplerName(Int sampler_index, C Str8 &image_name)
 {
    return S8+'S'+sampler_index+'_'+image_name; // use S sampler_index _ image_name format, so we can use SkipStart when loading shaders without having to allocate memory for Str, so the name must be at the end, and sampler index before that, since name can't start with a number then S is also added at the start #SamplerName
 }
-static void Convert(ShaderData &shader_data, ConvertContext &cc, Int thread_index)
+static void Convert(ShaderData &shader_data, ShaderCompiler::SubShader &sub, Int thread_index)
 {
-   ShaderCompiler &compiler=cc.compiler;
+ C ShaderCompiler::Shader &shader  =*   sub.shader;
+ C ShaderCompiler::Source &source  =*shader.source;
+   ShaderCompiler         &compiler=*source.compiler;
    CPtr data; Int size;
 
 #if SPIRV_CROSS
@@ -1285,7 +1240,10 @@ static void Convert(ShaderData &shader_data, ConvertContext &cc, Int thread_inde
       spvc_compiler_set_name(spirv_compiler, res.id, instance_name);
       spvc_compiler_set_name(spirv_compiler, res.base_type_id, (compiler.api==API_GL) ? S8+'_'+buffer.name : buffer.name); // prefix all cbuffers on GL with '_' to avoid buffer/param name conflicts #UBOName
 
-      //spvc_compiler_get_decoration(spirv_compiler, res.id, SpvDecorationBinding) not needed for GL, because we obtain it in 'ShaderGL.validate'
+      spvc_compiler_set_decoration  (spirv_compiler, res.id, SpvDecorationRowMajor, true); // workaround for Arm Mali bug which will force "row_major" for all uniforms - https://community.arm.com/developer/tools-software/graphics/f/discussions/43743/serious-problems-with-handling-of-mat4x3
+    //spvc_compiler_get_decoration  (spirv_compiler, res.id, SpvDecorationBinding) not needed for GL, because we obtain it in 'ShaderGL.validate'
+      spvc_compiler_unset_decoration(spirv_compiler, res.id, SpvDecorationBinding); // remove 'binding' because it might be invalid
+
       buffer.bind_slot    =ExpectedBufferSlot(buffer.name);
       buffer.bind_explicit=(buffer.bind_slot>=0);
       size_t size=0; spvc_compiler_get_declared_struct_size(spirv_compiler, buffer_handle, &size); buffer.size=(Int)size;
@@ -1293,8 +1251,6 @@ static void Convert(ShaderData &shader_data, ConvertContext &cc, Int thread_inde
       buffer.params.setNum(spvc_type_get_num_member_types(buffer_handle));
       FREPA(buffer.params)
       {
-         spvc_compiler_set_decoration(spirv_compiler, res.id, SpvDecorationRowMajor, true); // workaround for Arm Mali bug which will force "row_major" for all uniforms - https://community.arm.com/developer/tools-software/graphics/f/discussions/43743/serious-problems-with-handling-of-mat4x3
-
          ShaderCompiler::Param &param=buffer.params[i];
          param.name=spvc_compiler_get_member_name(spirv_compiler, res.base_type_id, i);
          auto member=spvc_type_get_member_type(buffer_handle, i);
@@ -1350,7 +1306,7 @@ static void Convert(ShaderData &shader_data, ConvertContext &cc, Int thread_inde
 
    if(buffers.elms())
    {
-      SyncLocker lock(cc.lock); FREPA(buffers)
+      SyncLocker lock(compiler.lock); FREPA(buffers)
       {
        C ShaderCompiler::Buffer &src = buffers[i];
          ShaderCompiler::Buffer &dest=*compiler.buffers(src.name);
@@ -1363,20 +1319,24 @@ static void Convert(ShaderData &shader_data, ConvertContext &cc, Int thread_inde
    {
     C spvc_reflected_resource &res=list[i];
     //CChar8 *name=spvc_compiler_get_name(spirv_compiler, res.id); name=_SkipStart(name, "out_var_");
-      Int loc=spvc_compiler_get_decoration(spirv_compiler, res.id, SpvDecorationLocation); //DYNAMIC_ASSERT(loc==i, S+"location!=i "+cc.shaderName(shader_data));
+      Int loc=spvc_compiler_get_decoration(spirv_compiler, res.id, SpvDecorationLocation); //DYNAMIC_ASSERT(loc==i, S+"location!=i "+shader.name);
     //Bool no_persp=spvc_compiler_get_decoration(spirv_compiler, res.id, SpvDecorationNoPerspective);
-      Set(start, (type==ST_PS) ? "RT" : "IO"); Append(start, TextInt(loc, temp)); // OUTPUT name must match INPUT name, this solves problem when using "UV" and "UV0"
+      Set(start, (type==ST_PS || type==ST_CS) ? "RT" : "IO"); Append(start, TextInt(loc, temp)); // OUTPUT name must match INPUT name, this solves problem when using "UV" and "UV0"
       spvc_compiler_set_name(spirv_compiler, res.id, start);
+
+      if(type!=ST_PS && type!=ST_CS)spvc_compiler_unset_decoration(spirv_compiler, res.id, SpvDecorationLocation); // #RemoveLayoutLocation because when mixing 300 VS with 310 PS then issues arise because 310 generates layout(location=X) for varyings, and 300 does NOT, it causes bugs on Android ARM Mali. Alternative option would be to use "Int glsl_ver" for 'Shader' (rember to adjust it if there's any ComputeShader), then merge shader_data only if glsl_ver matches #RemoveLayoutLocation and use that 'glsl_ver' when converting shaders.
    }
    list=null; count=0; spvc_resources_get_resource_list_for_type(resources, SPVC_RESOURCE_TYPE_STAGE_INPUT, &list, &count); FREP(count)
    {
     C spvc_reflected_resource &res=list[i];
       CChar8 *name=spvc_compiler_get_name(spirv_compiler, res.id); name=_SkipStart(name, "in_var_");
-      Int loc=spvc_compiler_get_decoration(spirv_compiler, res.id, SpvDecorationLocation); //DYNAMIC_ASSERT(loc==i, S+"location!=i "+cc.shaderName(shader_data));
+      Int loc=spvc_compiler_get_decoration(spirv_compiler, res.id, SpvDecorationLocation); //DYNAMIC_ASSERT(loc==i, S+"location!=i "+shader.name);
     //Bool no_persp=spvc_compiler_get_decoration(spirv_compiler, res.id, SpvDecorationNoPerspective);
       if(Starts(name, "ATTR"))DYNAMIC_ASSERT(TextInt(name+4)==loc, "ATTR index!=loc"); // verify vtx input ATTR index
       Set(start, (type==ST_VS) ? "ATTR" : "IO"); Append(start, TextInt(loc, temp)); // OUTPUT name must match INPUT name, this solves problem when using "UV" and "UV0"
       spvc_compiler_set_name(spirv_compiler, res.id, start);
+
+      if(type!=ST_VS)spvc_compiler_unset_decoration(spirv_compiler, res.id, SpvDecorationLocation); // #RemoveLayoutLocation
    }
 
    spvc_compiler_options options=null;
@@ -1387,14 +1347,14 @@ static void Convert(ShaderData &shader_data, ConvertContext &cc, Int thread_inde
       {
       #if 1 // use GL_ES to output precisions
          spvc_compiler_options_set_bool(options, SPVC_COMPILER_OPTION_GLSL_ES, SPVC_TRUE);
-         spvc_compiler_options_set_uint(options, SPVC_COMPILER_OPTION_GLSL_VERSION, (type==ST_CS) ? 310 : 300);
+         spvc_compiler_options_set_uint(options, SPVC_COMPILER_OPTION_GLSL_VERSION, (type==ST_CS || shader.model>=SM_4_1) ? 310 : 300); // 4.1 is for textureGather which needs 3.1 GLSL
       #else
          spvc_compiler_options_set_bool(options, SPVC_COMPILER_OPTION_GLSL_ES, SPVC_FALSE);
          spvc_compiler_options_set_uint(options, SPVC_COMPILER_OPTION_GLSL_VERSION, 330);
       #endif
 
-         spvc_compiler_options_set_bool(options, SPVC_COMPILER_OPTION_GLSL_ES_DEFAULT_FLOAT_PRECISION_HIGHP, type!=ST_PS);
-         spvc_compiler_options_set_bool(options, SPVC_COMPILER_OPTION_GLSL_ES_DEFAULT_INT_PRECISION_HIGHP  , SPVC_TRUE  );
+         spvc_compiler_options_set_bool(options, SPVC_COMPILER_OPTION_GLSL_ES_DEFAULT_FLOAT_PRECISION_HIGHP, type!=ST_PS && type!=ST_CS);
+         spvc_compiler_options_set_bool(options, SPVC_COMPILER_OPTION_GLSL_ES_DEFAULT_INT_PRECISION_HIGHP  , SPVC_TRUE);
 
          spvc_compiler_options_set_bool(options, SPVC_COMPILER_OPTION_GLSL_SUPPORT_NONZERO_BASE_INSTANCE, SPVC_FALSE);
 
@@ -1443,7 +1403,7 @@ static void Convert(ShaderData &shader_data, ConvertContext &cc, Int thread_inde
             sampler_index=SSI_POINT; // if didn't found another image, then use PointSampler as dummy because it's not needed anyway, any could be used
       }else{sampler_index=GetSamplerIndex(sampler_name); if(sampler_index<0)Exit(S+"Unknown sampler for '"+image_name+"'");}
       spvc_compiler_set_name(spirv_compiler, cis.combined_id, SamplerName(sampler_index, image_name));
-      {SyncLocker lock(cc.lock); compiler.images.binaryInclude(image_name, CompareCS);}
+      {SyncLocker lock(compiler.lock); compiler.images.binaryInclude(image_name, CompareCS);}
    next:;
    }
    auto unique_samplers=num_samplers-replace_samplers.elms();
@@ -1456,7 +1416,7 @@ static void Convert(ShaderData &shader_data, ConvertContext &cc, Int thread_inde
          sampler_info+=spvc_compiler_get_name(spirv_compiler, cis. sampler_id); sampler_info+=", ";
          sampler_info+=spvc_compiler_get_name(spirv_compiler, cis.combined_id); sampler_info+='\n';
       }
-      Exit(S+"Samplers number: "+unique_samplers+", is too big!\nShader: "+cc.shaderName(shader_data)+'\n'+sampler_info);
+      Exit(S+"Samplers number: "+unique_samplers+", is too big!\nShader: "+shader.name+'\n'+sampler_info);
    }
 
    list=null; count=0; spvc_resources_get_resource_list_for_type(resources, SPVC_RESOURCE_TYPE_STORAGE_IMAGE, &list, &count); FREP(count)
@@ -1466,7 +1426,7 @@ static void Convert(ShaderData &shader_data, ConvertContext &cc, Int thread_inde
     //CChar8 *base_type_name=spvc_compiler_get_name(spirv_compiler, res.base_type_id);
     //CChar8 *     type_name=spvc_compiler_get_name(spirv_compiler, res.type_id);
       Str8        image_name=spvc_compiler_get_name(spirv_compiler, res.id);
-      {SyncLocker lock(cc.lock); compiler.rw_images.binaryInclude(image_name, CompareCS);}
+      {SyncLocker lock(compiler.lock); compiler.rw_images.binaryInclude(image_name, CompareCS);}
    }
 
    Str8 code;
@@ -1511,16 +1471,10 @@ static void Convert(ShaderData &shader_data, ConvertContext &cc, Int thread_inde
 
    #if FORCE_LOG_SHADER_CODE
       #pragma message("!! Warning: Use this only for debugging !!")
-      LogN(S+"/******************************************************************************/\nShader:"+cc.shaderName(shader_data)+' '+ShaderTypeName[type]+'\n'+code);
+      LogN(S+"/******************************************************************************/\nShader:"+shader.name+' '+ShaderTypeName[type]+'\n'+code);
    #endif
 
-      if(!code.length()) // this is also needed for null char below
-      {
-      #if DEBUG
-         ShaderCompiler::Shader &shader=cc.shader(shader_data);
-      #endif
-         Exit("Can't convert HLSL to GLSL");
-      }
+      if(!code.length())Exit("Can't convert HLSL to GLSL"); // this is also needed for null char below
       data=code();
       size=code.length()+1; // include null char
    }
@@ -1542,8 +1496,8 @@ static void Convert(ShaderData &shader_data, ConvertContext &cc, Int thread_inde
 /******************************************************************************/
 struct ImageBindMap : Mems<ShaderCompiler::Image>
 {
-   void operator =(C Mems<ShaderCompiler::Image> &images)  {setNum(images.elms()); FREPAO(T)=images[i];}
-   Bool operator==(C Mems<ShaderCompiler::Image> &images)C {if(elms()!=images.elms())return false; REPA(T)if(T[i]!=images[i])return false; return true;}
+   void operator=(C Mems<ShaderCompiler::Image> &images) {setNum(images.elms()); FREPAO(T)=images[i];}
+
    Bool save(File &f, C Memc<Str8> &images)C
    {
       f.cmpUIntV(elms());
@@ -1565,7 +1519,7 @@ struct BufferBindMap : Mems<ShaderCompiler::Bind>
       setNum(elms); elms=0; FREPA(buffers)   if(!buffers[i].bind_explicit)T[elms++]=buffers[i];
    }
 
- //Bool operator==(C Mems<ShaderCompiler::Buffer> &buffers)C {if(elms()!=buffers.elms())return false; REPA(T)if(T[i]!=buffers[i])return false; return true;}
+   Bool operator!=(C Mems<ShaderCompiler::Buffer> &buffers)C {return !(T==buffers);}
    Bool operator==(C Mems<ShaderCompiler::Buffer> &buffers)C // !! we shouldn't store buffers with explicit bind slots, because they're always bound at their creation, this will avoid overhead when drawing shaders !!
    {
       Int elms=0;
@@ -1590,6 +1544,10 @@ struct BufferBindMap : Mems<ShaderCompiler::Bind>
       }
       return save.saveRaw(f);
    }
+};
+struct ShaderDataEx : ShaderData
+{
+   ShaderCompiler::SubShader *sub=null; // this shader data can be reused by multiple shaders, and 'sub' points to the first one that uses it
 };
 /******************************************************************************/
 Bool ShaderCompiler::compileTry(Threads &threads)
@@ -1620,7 +1578,7 @@ Bool ShaderCompiler::compileTry(Threads &threads)
    threads.wait1();
    Memc< ImageBindMap>  image_maps, rw_image_maps;
    Memc<BufferBindMap> buffer_maps;
-   Memc<ShaderData   > shader_datas[ST_NUM];
+   Memc<ShaderDataEx > shader_datas[ST_NUM];
    Mems<Shader*      > shaders(shaders_num), compute_shaders(compute_shaders_num); shaders_num=compute_shaders_num=0;
    FREPA(sources)
    {
@@ -1658,9 +1616,13 @@ Bool ShaderCompiler::compileTry(Threads &threads)
                // shader data
                if(sub.shader_data.elms())
                {
-                  Memc<ShaderData> &sds=shader_datas[i];
-                  FREPA(sds)if(sds[i]==sub.shader_data){sub.shader_data_index=i; goto got_shader_data;} // find same
-                  sub.shader_data_index=sds.elms(); Swap(sds.New(), sub.shader_data); // add new, just swap
+                  Memc<ShaderDataEx> &sds=shader_datas[i];
+                  FREPA(sds)if(sds[i]==sub.shader_data){sub.shader_data_index=i; goto got_shader_data;} // find same. #RemoveLayoutLocation
+                  {
+                     sub.shader_data_index=sds.elms(); ShaderDataEx &sd=sds.New(); // add new
+                     Swap(SCAST(ShaderData, sd), sub.shader_data); // just swap
+                     sd.sub=&sub; // link only during compilation because data use 'Memc' container which could change addresses while new data were being added, however at this stage all have already been created
+                  }
                got_shader_data:
                   sub.shader_data.del(); // no longer needed
                }
@@ -1677,15 +1639,10 @@ Bool ShaderCompiler::compileTry(Threads &threads)
    {
       Map<Str8, Buffer> def_val_buffers(CompareCS); Swap(buffers, def_val_buffers);
 
-      ConvertContext cc(T
-      #if DEBUG
-       , shader_datas, shaders, compute_shaders
-      #endif
-      );
       FREPA(shader_datas)
       {
-         Memc<ShaderData> &sds=shader_datas[i];
-         FREPA(sds)threads.queue(sds[i], Convert, cc);
+         Memc<ShaderDataEx> &sds=shader_datas[i];
+         FREPA(sds){ShaderDataEx &sd=sds[i]; threads.queue(SCAST(ShaderData, sd), Convert, *sd.sub);}
       }
       // process dummies to get buffers and images
       FREPA(sources)
@@ -1694,7 +1651,8 @@ Bool ShaderCompiler::compileTry(Threads &threads)
          {
             Shader &shader=source.shaders[i]; if(shader.dummy)FREPA(shader.sub)
             {
-               ShaderData &sd=shader.sub[i].shader_data; if(sd.elms())threads.queue(sd, Convert, cc);
+               SubShader  &sub=shader.sub[i];
+               ShaderData &sd =sub.shader_data; if(sd.elms())threads.queue(sd, Convert, sub);
             }
          }
       }

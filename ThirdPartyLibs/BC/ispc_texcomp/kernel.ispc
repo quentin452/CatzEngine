@@ -1,42 +1,41 @@
-/*
-  Copyright (c) 2013, Intel Corporation
-  All rights reserved.
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2016, Intel Corporation
+// Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated 
+// documentation files (the "Software"), to deal in the Software without restriction, including without limitation 
+// the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+// permit persons to whom the Software is furnished to do so, subject to the following conditions:
+// The above copyright notice and this permission notice shall be included in all copies or substantial portions of 
+// the Software.
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO
+// THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+// TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE 
+// SOFTWARE.
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions are
-  met:
-
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-
-    * Neither the name of Intel Corporation nor the names of its
-      contributors may be used to endorse or promote products derived from
-      this software without specific prior written permission.
-
-
-   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
-   IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
-   TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-   PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER
-   OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
-   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
-   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
-   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
-   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
-*/
-
+#ifndef ISPC_UINT_IS_DEFINED
+//these are defined in ISPC version 1.13.0 and later
 typedef unsigned int8 uint8;
 typedef unsigned int32 uint32;
 typedef unsigned int64 uint64;
+#endif
 
 ///////////////////////////
 //   generic helpers
+
+inline float RCP(float x)
+{
+    return 1.0f/x; // uses rcp when compiled with --opt=fast-math
+    //return rcp(x);
+    //return rcp_fast(x);
+}
+
+inline float RSQRT(float x)
+{
+    return 1.0f/sqrt(x); // uses rsqrt when compiled with --opt=fast-math
+    //return rsqrt(x);
+    //return rsqrt_fast(x);
+}    
 
 inline void swap_ints(int u[], int v[], uniform int n)
 {
@@ -167,6 +166,41 @@ inline void load_block_interleaved_16bit(float block[48], uniform rgba_surface* 
     }
 }
 
+inline void load_block_r_8bit(float block[16], uniform rgba_surface* uniform src, int xx, uniform int yy)
+{
+	for (uniform int y=0; y<4; y++)
+	{
+		uniform unsigned int32* uniform src_ptr = (unsigned int32*)&src->ptr[(yy*4+y)*src->stride];
+		unsigned int32 rrrr = gather_uint(src_ptr, xx);
+
+		block[y*4+0] = (int)((rrrr>> 0)&255);
+		block[y*4+1] = (int)((rrrr>> 8)&255);
+		block[y*4+2] = (int)((rrrr>>16)&255);
+		block[y*4+3] = (int)((rrrr>>24)&255);
+	}
+}
+
+inline void load_block_interleaved_rg_8bit(float block[32], uniform rgba_surface* uniform src, int xx, uniform int yy)
+{
+	for (uniform int y=0; y<4; y++)
+	{
+		uniform unsigned int32* uniform src_ptr = (unsigned int32*)&src->ptr[(yy*4+y)*src->stride];
+		unsigned int32 rgrg0 = gather_uint(src_ptr, xx * 2 + 0);
+        unsigned int32 rgrg1 = gather_uint(src_ptr, xx * 2 + 1);
+
+        // r
+		block[16*0+y*4+0] = (int)((rgrg0>> 0)&255);
+		block[16*0+y*4+1] = (int)((rgrg0>>16)&255);
+		block[16*0+y*4+2] = (int)((rgrg1>> 0)&255);
+		block[16*0+y*4+3] = (int)((rgrg1>>16)&255);
+        // g
+		block[16*1+y*4+0] = (int)((rgrg0>> 8)&255);
+		block[16*1+y*4+1] = (int)((rgrg0>>24)&255);
+		block[16*1+y*4+2] = (int)((rgrg1>> 8)&255);
+		block[16*1+y*4+3] = (int)((rgrg1>>24)&255);
+	}
+}
+
 inline void store_data(uniform uint8 dst[], int width, int xx, uniform int yy, uint32 data[], int data_size)
 {
 	for (uniform int k=0; k<data_size; k++)
@@ -213,7 +247,7 @@ inline void compute_axis3(float axis[3], float covar[6], uniform const int power
 			for (uniform int p=0; p<3; p++)
 				norm_sq += axis[p]*axis[p];
 
-			float rnorm = rsqrt(norm_sq);
+			float rnorm = RSQRT(norm_sq);
 			for (uniform int p=0; p<3; p++) vec[p] *= rnorm;
 		}		
 	}
@@ -237,7 +271,7 @@ inline void compute_axis(float axis[4], float covar[10], uniform const int power
 			for (uniform int p=0; p<channels; p++)
 				norm_sq += axis[p]*axis[p];
 
-			float rnorm = rsqrt(norm_sq);
+			float rnorm = RSQRT(norm_sq);
 			for (uniform int p=0; p<channels; p++) vec[p] *= rnorm;
 		}		
 	}
@@ -314,7 +348,7 @@ inline void pick_endpoints(float c0[3], float c1[3], float block[48], float axis
 	for (uniform int p=0; p<3; p++)
 		norm_sq += axis[p]*axis[p];
 
-	float rnorm_sq = rcp(norm_sq);
+	float rnorm_sq = RCP(norm_sq);
 	for (uniform int p=0; p<3; p++)
 	{
 		c0[p] = clamp(dc[p]+min_dot*rnorm_sq*axis[p], 0, 255);
@@ -335,7 +369,7 @@ inline uint32 fast_quant(float block[48], int p0, int p1)
 	float sq_norm = 0;
 	for (uniform int p=0; p<3; p++) sq_norm += sq(dir[p]);
 
-	float rsq_norm = rcp(sq_norm);
+	float rsq_norm = RCP(sq_norm);
 
 	for (uniform int p=0; p<3; p++) dir[p] *= rsq_norm*3;
 
@@ -480,7 +514,7 @@ inline void bc1_refine(int pe[2], float block[48], unsigned int32 bits, float dc
 	    float Cxx = 16*sq(3)-2*3*sum_q+sum_qq;
 	    float Cyy = sum_qq;
 		float Cxy = 3*sum_q-sum_qq;
-		float scale = 3f * rcp(Cxx*Cyy - Cxy*Cxy);
+		float scale = 3f * RCP(Cxx*Cyy - Cxy*Cxy);
 
         for (uniform int p=0; p<3; p++)
         {
@@ -612,7 +646,32 @@ inline void CompressBlockBC3(uniform rgba_surface src[], int xx, uniform int yy,
 	store_data(dst, src->width, xx, yy, data, 4);
 }
 
-static export void CompressBlocksBC1_ispc(uniform rgba_surface src[], uniform uint8 dst[])
+inline void CompressBlockBC4(uniform rgba_surface src[], int xx, uniform int yy, uniform uint8 dst[])
+{
+	float block[16];
+    uint32 data[2];
+
+	load_block_r_8bit(block, src, xx, yy);
+	
+    CompressBlockBC3_alpha(block, data);
+
+	store_data(dst, src->width, xx, yy, data, 2);
+}
+
+inline void CompressBlockBC5(uniform rgba_surface src[], int xx, uniform int yy, uniform uint8 dst[])
+{
+	float block[32];
+    uint32 data[4];
+
+	load_block_interleaved_rg_8bit(block, src, xx, yy);
+	
+    CompressBlockBC3_alpha(block, data);
+    CompressBlockBC3_alpha(&block[16], &data[2]);
+
+	store_data(dst, src->width, xx, yy, data, 4);
+}
+
+export void CompressBlocksBC1_ispc(uniform rgba_surface src[], uniform uint8 dst[])
 {	
 	for (uniform int yy = 0; yy<src->height/4; yy++)
 	foreach (xx = 0 ... src->width/4)
@@ -621,12 +680,30 @@ static export void CompressBlocksBC1_ispc(uniform rgba_surface src[], uniform ui
 	}
 }
 
-static export void CompressBlocksBC3_ispc(uniform rgba_surface src[], uniform uint8 dst[])
+export void CompressBlocksBC3_ispc(uniform rgba_surface src[], uniform uint8 dst[])
 {	
 	for (uniform int yy = 0; yy<src->height/4; yy++)
 	foreach (xx = 0 ... src->width/4)
 	{
 		CompressBlockBC3(src, xx, yy, dst);
+	}
+}
+
+export void CompressBlocksBC4_ispc(uniform rgba_surface src[], uniform uint8 dst[])
+{
+	for (uniform int yy = 0; yy<src->height/4; yy++)
+	foreach (xx = 0 ... src->width/4)
+	{
+		CompressBlockBC4(src, xx, yy, dst);
+	}
+}
+
+export void CompressBlocksBC5_ispc(uniform rgba_surface src[], uniform uint8 dst[])
+{
+	for (uniform int yy = 0; yy<src->height/4; yy++)
+	foreach (xx = 0 ... src->width/4)
+	{
+		CompressBlockBC5(src, xx, yy, dst);
 	}
 }
 
@@ -1033,7 +1110,7 @@ void ep_quant0367(int qep[], float ep[], uniform int mode, uniform int channels)
             err1 += sq(ep[i*4+p]-ep_b[4+p]);
         }
 
-        if(channels==4 && ep[i*4+3]<=0.5f)err0=-1; // ESENTHEL CHANGED, BC7 allows to encode end points in 2 quantized modes, #1 standard, #2 add "0.5*levels" to all channels (1 extra bit precision, however it affects all channels at the same time, so if we have alpha=0, but RGB channels have smaller error with the extra 0.5 value, then alpha would get the +0.5 too, and it could destroy complete transparency, so this code always forces #1 version if we have alpha=0)
+		if(channels==4 && ep[i*4+3]<=0.5f)err0=-1; // ESENTHEL CHANGED, BC7 allows to encode end points in 2 quantized modes, #1 standard, #2 add "0.5*levels" to all channels (1 extra bit precision, however it affects all channels at the same time, so if we have alpha=0, but RGB channels have smaller error with the extra 0.5 value, then alpha would get the +0.5 too, and it could destroy complete transparency, so this code always forces #1 version if we have alpha=0)
 
 		for (uniform int p=0; p<4; p++)
 			qep[i*4+p] = (err0<err1) ? qep_b[0+p] : qep_b[4+p];
@@ -2046,7 +2123,7 @@ inline void CompressBlockBC7(uniform rgba_surface src[], int xx, uniform int yy,
 	store_data(dst, src->width, xx, yy, state->best_data, 4);
 }
 
-static export void CompressBlocksBC7_ispc(uniform rgba_surface src[], uniform uint8 dst[], uniform bc7_enc_settings settings[])
+export void CompressBlocksBC7_ispc(uniform rgba_surface src[], uniform uint8 dst[], uniform bc7_enc_settings settings[])
 {
 	for (uniform int yy = 0; yy<src->height/4; yy++)
 	foreach (xx = 0 ... src->width/4)
@@ -3148,7 +3225,7 @@ inline void CompressBlockBC6H(uniform rgba_surface src[], int xx, uniform int yy
     store_data(dst, src->width, xx, yy, state->best_data, 4);
 }
 
-static export void CompressBlocksBC6H_ispc(uniform rgba_surface src[], uniform uint8 dst[], uniform bc6h_enc_settings settings[])
+export void CompressBlocksBC6H_ispc(uniform rgba_surface src[], uniform uint8 dst[], uniform bc6h_enc_settings settings[])
 {
     for (uniform int yy = 0; yy<src->height / 4; yy++)
     foreach(xx = 0 ... src->width / 4)
@@ -3700,7 +3777,7 @@ inline void CompressBlockETC1(uniform rgba_surface src[], int xx, uniform int yy
     store_data(dst, src->width, xx, yy, state->best_data, 2);
 }
 
-static export void CompressBlocksETC1_ispc(uniform rgba_surface src[], uniform uint8 dst[], uniform etc_enc_settings settings[])
+export void CompressBlocksETC1_ispc(uniform rgba_surface src[], uniform uint8 dst[], uniform etc_enc_settings settings[])
 {
     for (uniform int yy = 0; yy<src->height / 4; yy++)
     foreach(xx = 0 ... src->width / 4)

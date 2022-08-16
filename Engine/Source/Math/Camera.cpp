@@ -227,97 +227,45 @@ Camera& Camera::transformByMouse(Flt dist_min, Flt dist_max, UInt flag)
    return T;
 }
 /******************************************************************************/
-Bool PosToScreen(C Vec &pos, Vec2 &screen)
+static Bool _PosToScreen(C Vec &pos, Vec2 &screen) // no need for 'VecD'
 {
-   Vec v=pos*CamMatrixInv; // no need for 'VecD'
    if(FovPerspective(D.viewFovMode()))
    {
-      screen.x=v.x/(v.z*D.viewFovTanGui().x);
-      screen.y=v.y/(v.z*D.viewFovTanGui().y);
+      screen.x=pos.x/(pos.z*D.viewFovTanGui().x);
+      screen.y=pos.y/(pos.z*D.viewFovTanGui().y);
    }else
    {
-      screen.x=v.x/D.viewFovTanGui().x;
-      screen.y=v.y/D.viewFovTanGui().y;
+      screen.x=pos.x/D.viewFovTanGui().x;
+      screen.y=pos.y/D.viewFovTanGui().y;
    }
-      screen+=D.viewCenter();
-   return v.z>D.viewFromActual();
+        screen+=D.viewCenter();
+   return pos.z>D.viewFromActual();
 }
-Bool PosToScreen(C VecD &pos, Vec2 &screen)
+static Bool _PosToFullScreen(C Vec &pos, Vec2 &screen) // no need for 'VecD'
 {
-   Vec v=pos*CamMatrixInv; // no need for 'VecD'
    if(FovPerspective(D.viewFovMode()))
    {
-      screen.x=v.x/(v.z*D.viewFovTanGui().x);
-      screen.y=v.y/(v.z*D.viewFovTanGui().y);
+      screen.x=pos.x/(pos.z*D.viewFovTanFull().x);
+      screen.y=pos.y/(pos.z*D.viewFovTanFull().y);
    }else
    {
-      screen.x=v.x/D.viewFovTanGui().x;
-      screen.y=v.y/D.viewFovTanGui().y;
+      screen.x=pos.x/D.viewFovTanFull().x;
+      screen.y=pos.y/D.viewFovTanFull().y;
    }
-      screen+=D.viewCenter();
-   return v.z>D.viewFromActual();
+        screen+=D.viewCenter();
+   return pos.z>D.viewFromActual();
 }
-Bool PosToFullScreen(C Vec &pos, Vec2 &screen)
-{
-   Vec v=pos*CamMatrixInv; // no need for 'VecD'
-   if(FovPerspective(D.viewFovMode()))
-   {
-      screen.x=v.x/(v.z*D.viewFovTanFull().x);
-      screen.y=v.y/(v.z*D.viewFovTanFull().y);
-   }else
-   {
-      screen.x=v.x/D.viewFovTanFull().x;
-      screen.y=v.y/D.viewFovTanFull().y;
-   }
-      screen+=D.viewCenter();
-   return v.z>D.viewFromActual();
-}
-Bool PosToFullScreen(C VecD &pos, Vec2 &screen)
-{
-   Vec v=pos*CamMatrixInv; // no need for 'VecD'
-   if(FovPerspective(D.viewFovMode()))
-   {
-      screen.x=v.x/(v.z*D.viewFovTanFull().x);
-      screen.y=v.y/(v.z*D.viewFovTanFull().y);
-   }else
-   {
-      screen.x=v.x/D.viewFovTanFull().x;
-      screen.y=v.y/D.viewFovTanFull().y;
-   }
-      screen+=D.viewCenter();
-   return v.z>D.viewFromActual();
-}
+Bool PosToScreen(C Vec  &pos, Vec2 &screen) {return _PosToScreen(pos*CamMatrixInv, screen);} // no need for 'VecD'
+Bool PosToScreen(C VecD &pos, Vec2 &screen) {return _PosToScreen(pos*CamMatrixInv, screen);} // no need for 'VecD'
 
-Bool PosToScreenM(C Vec &pos, Vec2 &screen)
-{
-   Vec v=(pos*ObjMatrix)*CamMatrixInv; // no need for 'VecD'
-   if(FovPerspective(D.viewFovMode()))
-   {
-      screen.x=v.x/(v.z*D.viewFovTanGui().x);
-      screen.y=v.y/(v.z*D.viewFovTanGui().y);
-   }else
-   {
-      screen.x=v.x/D.viewFovTanGui().x;
-      screen.y=v.y/D.viewFovTanGui().y;
-   }
-      screen+=D.viewCenter();
-   return v.z>D.viewFromActual();
-}
-Bool PosToScreenM(C VecD &pos, Vec2 &screen)
-{
-   Vec v=(pos*ObjMatrix)*CamMatrixInv; // no need for 'VecD'
-   if(FovPerspective(D.viewFovMode()))
-   {
-      screen.x=v.x/(v.z*D.viewFovTanGui().x);
-      screen.y=v.y/(v.z*D.viewFovTanGui().y);
-   }else
-   {
-      screen.x=v.x/D.viewFovTanGui().x;
-      screen.y=v.y/D.viewFovTanGui().y;
-   }
-      screen+=D.viewCenter();
-   return v.z>D.viewFromActual();
-}
+Bool PosToFullScreen(C Vec  &pos, Vec2 &screen) {return _PosToFullScreen(pos*CamMatrixInv, screen);} // no need for 'VecD'
+Bool PosToFullScreen(C VecD &pos, Vec2 &screen) {return _PosToFullScreen(pos*CamMatrixInv, screen);} // no need for 'VecD'
+
+Bool PosToScreenM(C Vec  &pos, Vec2 &screen) {return _PosToScreen((pos*ObjMatrix)*CamMatrixInv, screen);} // no need for 'VecD'
+Bool PosToScreenM(C VecD &pos, Vec2 &screen) {return _PosToScreen((pos*ObjMatrix)*CamMatrixInv, screen);} // no need for 'VecD'
+
+Bool PosToScreen(C Vec  &pos, C MatrixM &camera_matrix, Vec2 &screen) {return _PosToScreen(Vec().fromDivNormalized(pos, camera_matrix), screen);} // no need for 'VecD'
+Bool PosToScreen(C VecD &pos, C MatrixM &camera_matrix, Vec2 &screen) {return _PosToScreen(Vec().fromDivNormalized(pos, camera_matrix), screen);} // no need for 'VecD'
 
 Vec ScreenToPosDM(C Vec2 &screen_d, Flt z) {return ScreenToPosD(screen_d, z)/ObjMatrix.orn();}
 Vec ScreenToPosD (C Vec2 &screen_d, Flt z)
@@ -370,12 +318,14 @@ static INLINE Vec _FullScreenToViewPos(C Vec2 &screen, Flt z)
 Vec  FullScreenToViewPos(C Vec2 &screen, Flt z) {return _FullScreenToViewPos(screen, z);}
 VecD FullScreenToPos    (C Vec2 &screen, Flt z) {return _FullScreenToViewPos(screen, z)*CamMatrix;}
 
-Vec2 PosToScreen    (C Vec  &pos) {Vec2 screen; PosToScreen    (pos, screen); return screen;}
-Vec2 PosToScreen    (C VecD &pos) {Vec2 screen; PosToScreen    (pos, screen); return screen;}
-Vec2 PosToScreenM   (C Vec  &pos) {Vec2 screen; PosToScreenM   (pos, screen); return screen;}
-Vec2 PosToScreenM   (C VecD &pos) {Vec2 screen; PosToScreenM   (pos, screen); return screen;}
-Vec2 PosToFullScreen(C Vec  &pos) {Vec2 screen; PosToFullScreen(pos, screen); return screen;}
-Vec2 PosToFullScreen(C VecD &pos) {Vec2 screen; PosToFullScreen(pos, screen); return screen;}
+Vec2 PosToScreen    (C Vec  &pos                          ) {Vec2 screen; PosToScreen    (pos,                screen); return screen;}
+Vec2 PosToScreen    (C VecD &pos                          ) {Vec2 screen; PosToScreen    (pos,                screen); return screen;}
+Vec2 PosToScreen    (C Vec  &pos, C MatrixM &camera_matrix) {Vec2 screen; PosToScreen    (pos, camera_matrix, screen); return screen;}
+Vec2 PosToScreen    (C VecD &pos, C MatrixM &camera_matrix) {Vec2 screen; PosToScreen    (pos, camera_matrix, screen); return screen;}
+Vec2 PosToScreenM   (C Vec  &pos                          ) {Vec2 screen; PosToScreenM   (pos,                screen); return screen;}
+Vec2 PosToScreenM   (C VecD &pos                          ) {Vec2 screen; PosToScreenM   (pos,                screen); return screen;}
+Vec2 PosToFullScreen(C Vec  &pos                          ) {Vec2 screen; PosToFullScreen(pos,                screen); return screen;}
+Vec2 PosToFullScreen(C VecD &pos                          ) {Vec2 screen; PosToFullScreen(pos,                screen); return screen;}
 /******************************************************************************/
 Vec ScreenToDir(C Vec2 &screen)
 {

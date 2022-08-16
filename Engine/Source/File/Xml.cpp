@@ -1330,8 +1330,8 @@ Bool XmlData::loadAndroidBinary(File &f)
             {
                auto string_count =f.getUInt();
                auto style_count  =f.getUInt();
-               auto flags        =f.getUInt(); //Bool sorted_flag=FlagTest(flags, 1<<0);
-               Bool utf8_flag    =FlagTest(flags, 1<<8);
+               auto flags        =f.getUInt(); //Bool sorted_flag=FlagOn(flags, 1<<0);
+               Bool utf8_flag    =FlagOn(flags, 1<<8);
                auto strings_start=f.getUInt()+8;
                auto styles_start =f.getUInt();
 

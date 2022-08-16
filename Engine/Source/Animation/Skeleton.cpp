@@ -1209,6 +1209,14 @@ Bool Skeleton::setBoneParent(Int child, Int parent, MemPtr<Byte, 256> old_to_new
    return false;
 }
 /******************************************************************************/
+void Skeleton::recreateSkelAnims()
+{
+   CacheLock lock(_skel_anims); REPA(_skel_anims)
+   {
+      SkelAnim &skel_anim=_skel_anims.lockedData(i); skel_anim.create(T, *skel_anim.animation());
+   }
+}
+/******************************************************************************/
 void Skeleton::draw(C Color &bone_color, C Color &slot_color, Flt slot_size)C
 {
    if(bone_color.a)REPAO(bones).draw(bone_color);
@@ -1333,6 +1341,14 @@ Bool Skeleton::load(C Str &name)
 {
    File f; if(f.readTry(name))return load(f);
    del(); return false;
+}
+Bool Skeleton::reload(C Str &name)
+{
+   Cache<SkelAnim> temp; Swap(temp, _skel_anims);
+   Bool ok=load(name);
+   Swap(temp, _skel_anims);
+   recreateSkelAnims();
+   return ok;
 }
 void Skeleton::operator=(C UID &id  ) {T=_EncodeFileName(id);}
 void Skeleton::operator=(C Str &name)

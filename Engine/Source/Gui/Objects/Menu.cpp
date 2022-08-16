@@ -332,7 +332,7 @@ Menu& Menu::setData(C Node<MenuElm> &node)
            MenuElm  &elm  =_elms         [i];
       elm.create(child, this);
       elm.disabled|=!elm.name.is();
-      visible[i]   =!FlagTest(elm.flag(), MENU_HIDDEN);
+      visible[i]   =FlagOff(elm.flag(), MENU_HIDDEN);
       if(child.children.elms() && !elm._menu) // if menu was already created, then ignore the following code
       {
          Menu &menu=New(elm._menu)->create(); menu._parent=this;
@@ -343,7 +343,7 @@ Menu& Menu::setData(C Node<MenuElm> &node)
       children|=(elm._menu!=null);
       if(visible[i])
       {
-         togglable|=FlagTest(elm.flag(), MENU_TOGGLABLE);
+         togglable|=FlagOn(elm.flag(), MENU_TOGGLABLE);
                              MAX(width_name , ts.textWidth(elm.display_name    ));
          if(elm.kbsc ().is())MAX(width_kbsc , ts.textWidth(elm.kbsc ().asText()));
          if(elm.kbsc2().is())MAX(width_kbsc2, ts.textWidth(elm.kbsc2().asText()));

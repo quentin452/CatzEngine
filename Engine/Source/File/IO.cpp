@@ -337,7 +337,7 @@ void BackgroundFileFind::find(C Str &path, Bool (*filter)(C Str &name))
 {
    SyncLocker locker(_lock);
   _files.clear();
-  _paths.setNum(1)[0]=path;
+  _paths.setNum(1).first()=path;
   _filter=filter;
   _find_id++;
    if(!_thread.active())_thread.create(BackgroundFileFindThreadFunc, this);
@@ -612,12 +612,12 @@ Bool FAttrib(C Str &name, UInt attrib)
       struct stat stats; if(!lstat(utf, &stats))
       {
          UInt mode =(stats.st_mode&(S_IRWXU|S_IRWXG|S_IRWXO|S_ISUID|S_ISGID|S_ISVTX));
-         Bool write=!FlagTest(attrib, FATTRIB_READ_ONLY);
+         Bool write=FlagOff(attrib, FATTRIB_READ_ONLY);
          FlagSet(mode, S_IWUSR, write);
          FlagSet(mode, S_IWGRP, write);
          FlagSet(mode, S_IWOTH, write);
       #ifdef UF_HIDDEN
-         UInt flags=stats.st_flags; FlagSet(flags, UF_HIDDEN, FlagTest(attrib, FATTRIB_HIDDEN));
+         UInt flags=stats.st_flags; FlagSet(flags, UF_HIDDEN, FlagOn(attrib, FATTRIB_HIDDEN));
          if(!lchflags(utf, flags) && !lchmod(utf, mode))
       #else
          if(!chmod(utf, mode))

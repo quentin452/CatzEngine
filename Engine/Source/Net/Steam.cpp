@@ -1,7 +1,7 @@
 /******************************************************************************/
 #include "stdafx.h"
 
-#define SUPPORT_STEAM (DESKTOP && !ARM)
+#define SUPPORT_STEAM (DESKTOP && !WINDOWS_NEW && !ARM)
 #define CLOUD_WORKAROUND 1 // perhaps this is needed only when running apps manually and not through Steam
 
 #if SUPPORT_STEAM
@@ -117,7 +117,7 @@ static Bool SetDateFromYYYYMMDD(DateTime &dt, C Str &text)
    dt.zero();
    if(text.length()==8)
    {
-      REPA(text)if(!FlagTest(CharFlagFast(text[i]), CHARF_DIG))goto invalid;
+      REPA(text)if(FlagOff(CharFlagFast(text[i]), CHARF_DIG))goto invalid;
       dt.year =CharInt(text[0])*1000
               +CharInt(text[1])* 100
               +CharInt(text[2])*  10
@@ -192,7 +192,7 @@ static void  _SteamSetTime() // this is called at least once
    {
       Steam._start_time_s=i->GetSecondsSinceAppActive(); // 'GetSecondsSinceAppActive' is since Steam Client was started and not this application
    }
-   if(App._callbacks.initialized())App._callbacks.include(SteamUpdate); // include only if initialized, as this may be called before 'App' constructor and it would crash
+   if(App._callbacks.initialized())App.includeFuncCall(SteamUpdate); // include only if initialized, as this may be called before 'App' constructor and it would crash
 }
 #endif
 
@@ -272,19 +272,12 @@ SteamWorks::USER_STATUS SteamWorks::userStatus()C
    return STATUS_UNKNOWN;
 }
 Bool SteamWorks::userAvatar(Image &image)C {return userAvatar(userID(), image);}
-CChar8* SteamWorks::appLanguageText()C
-{
 #if SUPPORT_STEAM
-   if(ISteamApps *i=SteamApps())return i->GetCurrentGameLanguage();
-#endif
-   return null;
-}
-#if SUPPORT_STEAM
-static struct Locale
+struct SteamLanguage
 {
    LANG_TYPE lang;
    CChar8   *code;
-}locale[]=
+}static const SteamLanguages[]=
 { // https://partner.steamgames.com/doc/store/localization#supported_languages
    {(LANG_TYPE)LANG_ARABIC    , "arabic"    },
    {(LANG_TYPE)LANG_BULGARIAN , "bulgarian" },
@@ -321,16 +314,16 @@ static struct Locale
 LANG_TYPE SteamWorks::appLanguage()C
 {
 #if SUPPORT_STEAM
-   if(ISteamApps *i=SteamApps())if(auto text=i->GetCurrentGameLanguage())REPA(locale)if(Equal(locale[i].code, text))return locale[i].lang;
+   if(ISteamApps *i=SteamApps())if(auto text=i->GetCurrentGameLanguage())REPA(SteamLanguages)if(Equal(text, SteamLanguages[i].code))return SteamLanguages[i].lang;
 #endif
-   return LANG_UNKNOWN;
+   return LANG_NONE;
 }
-CChar8* SteamWorks::country()C
+COUNTRY SteamWorks::country()C
 {
 #if SUPPORT_STEAM
-   if(ISteamUtils *i=SteamUtils())return i->GetIPCountry();
+   if(ISteamUtils *i=SteamUtils())return CountryCode2(i->GetIPCountry());
 #endif
-   return null;
+   return COUNTRY_NONE;
 }
 DateTime SteamWorks::date()C
 {
@@ -689,6 +682,12 @@ Bool SteamWorks::cloudSave(C Str &file_name, File &f, Cipher *cipher)
 #if SUPPORT_STEAM
    if(file_name.is())if(ISteamRemoteStorage *i=SteamRemoteStorage())
    {
+      if(f._type==FILE_MEM && !f._cipher && !cipher)
+      {
+         Bool   ok=i->FileWrite(UTF8(file_name), f.memFast(), f.left()); f.pos(f.size());
+         return ok;
+      }
+
       Memt<Byte> data; data.setNum(f.left()); if(f.getFast(data.data(), data.elms()))
       {
          if(cipher)cipher->encrypt(data.data(), data.data(), data.elms(), 0);
@@ -705,21 +704,31 @@ Bool SteamWorks::cloudLoad(C Str &file_name, File &f, Bool memory, Cipher *ciphe
    {
       Str8 name=UTF8(file_name);
       Long size=i->GetFileSize(name);
-      if(size>0 || size==0 && i->FileExists(name))
+      if(  size>0 || size==0 && i->FileExists(name))
       {
+         if(memory)f.writeMemFixed(size);
          if(size>0)
          {
-            Memt<Byte> data; data.setNum(size);
+            Memt<Byte> temp;
+            Ptr        data;
+            Bool       direct=(f._type==FILE_MEM && f._writable && f.left()>=size);
+            data=(direct ? f.memFast() : temp.setNum(size).data());
          #if CLOUD_WORKAROUND
             REPD(attempt, 1000)
          #endif
             {
-               Int read=i->FileRead(name, data.data(), data.elms());
-               if( read==data.elms())
+               auto read=i->FileRead(name, data, size);
+               if(  read==size)
                {
-                  if(cipher)cipher->decrypt(data.data(), data.data(), data.elms(), 0);
-                  if(memory)f.writeMemFixed(size);
-                  if(f.put(data.data(), data.elms()))return true;
+                  if(cipher)cipher->decrypt(data, data, size, 0);
+                  if(direct)
+                  {
+                     if(f._cipher)f._cipher->encrypt(data, data, size, f.posCipher());
+                     return f.skip(size);
+                  }else
+                  {
+                     return f.put(data, size);
+                  }
                #if CLOUD_WORKAROUND
                   break;
                #endif
@@ -729,15 +738,11 @@ Bool SteamWorks::cloudLoad(C Str &file_name, File &f, Bool memory, Cipher *ciphe
                Time.wait(1);
             #endif
             }
-         }else // "size==0"
-         {
-            f.writeMemFixed(0);
-            return true;
-         }
+         }else return true; // "size==0"
       }
    }
 #endif
-   if(memory)f.close(); return false;
+   return false;
 }
 
 Bool SteamWorks::cloudSave(C Str &file_name, CPtr data, Int size)

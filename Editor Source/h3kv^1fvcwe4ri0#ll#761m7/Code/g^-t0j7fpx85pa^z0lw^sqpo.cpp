@@ -6,16 +6,53 @@ enum MATERIAL_SIMPLIFY : byte // !! this enum is saved !!
    MS_ALWAYS, // always simplify
    MS_NUM   ,
 }
+enum PROJ_CMPR_PLATFORM : byte
+{
+   PCP_DEFAULT,
+   PCP_MOBILE ,
+   PCP_NUM    ,
+}
+
 uint CC4_PRDT=CC4('P', 'R', 'D', 'T'); // Project Data
+/******************************************************************************/
+TEX_SIZE_PLATFORM ProjTexSize(Edit.EXE_TYPE type)
+{
+   switch(type)
+   {
+      case Edit.EXE_NS: return TSP_SWITCH;
+
+      case Edit.EXE_APK:
+      case Edit.EXE_AAB:
+      case Edit.EXE_IOS:
+      case Edit.EXE_WEB:
+         return TSP_MOBILE;
+
+      default: return TSP_NUM;
+   }
+}
+PROJ_CMPR_PLATFORM ProjCompres(Edit.EXE_TYPE type)
+{
+   switch(type)
+   {
+      case Edit.EXE_APK:
+      case Edit.EXE_AAB:
+      case Edit.EXE_IOS:
+      case Edit.EXE_WEB:
+         return PCP_MOBILE;
+
+      default: return PCP_DEFAULT;
+   }
+}
 /******************************************************************************/
 class Project
 {
    bool              text_data=false, synchronize=true;
-   byte              cipher_key[256], compress_level=9;
+   byte              cipher_key[256], compress_level[PCP_NUM];
+   byte              tex_downsize[TSP_NUM];
    CIPHER_TYPE       cipher=CIPHER_NONE;
-   COMPRESS_TYPE     compress_type=COMPRESS_NONE;
+   COMPRESS_TYPE     compress_type[PCP_NUM];
    MATERIAL_SIMPLIFY material_simplify=MS_NEVER;
-   TimeStamp         cipher_time, cipher_key_time, compress_type_time, compress_level_time, material_simplify_time;
+   TimeStamp         cipher_time, cipher_key_time, compress_time[PCP_NUM], material_simplify_time, tex_downsize_time;
    UID               id=UIDZero, app_id=UIDZero, hm_mtrl_id=UIDZero, water_mtrl_id=UIDZero, mtrl_brush_id[MtrlBrushSlots];
    Str               name, path, code_path, code_base_path, edit_path, game_path, temp_path, tex_path, temp_tex_path, temp_tex_dynamic_path;
    Memx<Elm>         elms;
@@ -27,6 +64,9 @@ class Project
    Project()
    {
       REPAO(cipher_key)=0;
+      REPAO(compress_level)=16;
+      REPAO(compress_type )=COMPRESS_NONE;
+      REPAO(tex_downsize)=0;
       REPAO(mtrl_brush_id).zero();
          world_vers.mode(CACHE_DUMMY); // to allow creating new elements
       mini_map_vers.mode(CACHE_DUMMY); // to allow creating new elements
@@ -42,10 +82,12 @@ class Project
       texs.del(); texs_update_base1.del(); texs_remove_srgb.del();
 
       cipher=CIPHER_NONE; REPAO(cipher_key)=0;
-      compress_type =COMPRESS_NONE;
-      compress_level=9;
+      REPAO(compress_level)=16;
+      REPAO(compress_type )=COMPRESS_NONE;
+      REPAO(tex_downsize)=0;
       material_simplify=MS_NEVER;
-      cipher_time=cipher_key_time=compress_type_time=compress_level_time=material_simplify_time=0;
+      REPAO(compress_time)=0;
+      cipher_time=cipher_key_time=material_simplify_time=tex_downsize_time=0;
       text_data=false; synchronize=true; app_id.zero(); hm_mtrl_id.zero(); water_mtrl_id.zero(); REPAO(mtrl_brush_id).zero();
 
       path.del(); code_path.del(); code_base_path.del(); edit_path.del(); game_path.del(); temp_path.del(); tex_path.del(); temp_tex_path.del(); temp_tex_dynamic_path.del();
@@ -90,7 +132,7 @@ class Project
                Elm &elm=elms[i]; if(elm.parent_id==parent && elm.name==name && ElmVisible(elm.type)) // don't list hidden types
                {
                   found_elm=&elm;
-                  if(!elm.removed())break; // stop looking if this element exists
+                  if(elm.exists())break; // stop looking if this element exists
                }
             }
             if(!p.is()   )return found_elm;
@@ -345,16 +387,6 @@ class Project
       return n;
    }
 
-   bool materialSimplify(Edit.EXE_TYPE type)C
-   {
-      switch(material_simplify)
-      {
-         default       : return false; // MS_NEVER
-         case MS_MOBILE: return type==Edit.EXE_APK || type==Edit.EXE_IOS || type==Edit.EXE_NS;
-         case MS_ALWAYS: return true;
-      }
-   }
-
    bool isBasedOnObjs(C Elm &elm, C Memt<UID> &objs)C // check if 'elm' is based on 'objs' (assumes that 'objs' is sorted)
    {
       Memt<UID> processed;
@@ -587,6 +619,16 @@ class Project
       return false;
    }
 
+   bool materialSimplify(Edit.EXE_TYPE type)C
+   {
+      switch(material_simplify)
+      {
+         default       : return false; // MS_NEVER
+         case MS_MOBILE: return type==Edit.EXE_APK || type==Edit.EXE_AAB || type==Edit.EXE_IOS || type==Edit.EXE_NS;
+         case MS_ALWAYS: return true;
+      }
+   }
+
    // operations
    Elm& getFolder(C Str &name, C UID &parent_id, bool &added, bool ignore_removed=true)
    {
@@ -770,7 +812,7 @@ class Project
       // remove unused meshes
       REPA(elms)
       {
-         Elm &elm=elms[i]; if(elm.type==ELM_MESH && !elm.removed() && !used.binaryHas(elm.id))elm.setRemoved(true, time);
+         Elm &elm=elms[i]; if(elm.type==ELM_MESH && elm.exists() && !used.binaryHas(elm.id))elm.setRemoved(true, time);
       }
 
       used.clear();
@@ -783,7 +825,7 @@ class Project
       // remove unused skel
       REPA(elms)
       {
-         Elm &elm=elms[i]; if(elm.type==ELM_SKEL && !elm.removed() && !used.binaryHas(elm.id))elm.setRemoved(true, time);
+         Elm &elm=elms[i]; if(elm.type==ELM_SKEL && elm.exists() && !used.binaryHas(elm.id))elm.setRemoved(true, time);
       }
 
       used.clear();
@@ -796,7 +838,7 @@ class Project
       // remove unused phys
       REPA(elms)
       {
-         Elm &elm=elms[i]; if(elm.type==ELM_PHYS && !elm.removed() && !used.binaryHas(elm.id))elm.setRemoved(true, time);
+         Elm &elm=elms[i]; if(elm.type==ELM_PHYS && elm.exists() && !used.binaryHas(elm.id))elm.setRemoved(true, time);
       }
    }
    virtual void eraseElm(C UID &elm_id)
@@ -2199,21 +2241,28 @@ class Project
 
    bool newerSettings(C Project &src)C
    {
-      return cipher_time>src.cipher_time || cipher_key_time>src.cipher_key_time || compress_type_time>src.compress_type_time
-          || compress_level_time>src.compress_level_time || material_simplify_time>src.material_simplify_time;
+      REPA(compress_time)if(compress_time[i]>src.compress_time[i])return true;
+      return cipher_time>src.cipher_time || cipher_key_time>src.cipher_key_time || material_simplify_time>src.material_simplify_time || tex_downsize_time>src.tex_downsize_time;
    }
    bool oldSettings(C TimeStamp &now=TimeStamp().getUTC())C
    {
-      return cipher_time<now && cipher_key_time<now && compress_type_time<now && compress_level_time<now && material_simplify_time<now;
+      REPA(compress_time)if(!(compress_time[i]<now))return false;
+      return cipher_time<now && cipher_key_time<now && material_simplify_time<now && tex_downsize_time<now;
    }
    bool syncSettings(C Project &src)
    {
       bool changed=false;
-      changed|=Sync(cipher_time           , src.cipher_time           , cipher           , src.cipher           );
-      changed|=Sync(compress_type_time    , src.compress_type_time    , compress_type    , src.compress_type    );
-      changed|=Sync(compress_level_time   , src.compress_level_time   , compress_level   , src.compress_level   );
-      changed|=Sync(material_simplify_time, src.material_simplify_time, material_simplify, src.material_simplify);
-      if(Sync(cipher_key_time, src.cipher_key_time)){changed=true; Copy(cipher_key, src.cipher_key);}
+      changed|=Sync   (cipher_time           , src.cipher_time           , cipher           , src.cipher           );
+      changed|=SyncMem(cipher_key_time       , src.cipher_key_time       , cipher_key       , src.cipher_key       );
+      changed|=Sync   (material_simplify_time, src.material_simplify_time, material_simplify, src.material_simplify);
+      changed|=SyncMem(tex_downsize_time     , src.tex_downsize_time     , tex_downsize     , src.tex_downsize     );
+
+      REPA(compress_time)if(Sync(compress_time[i], src.compress_time[i]))
+      {
+         changed=true;
+         compress_level[i]=src.compress_level[i];
+         compress_type [i]=src.compress_type [i];
+      }
       return changed;
    }
    void initSettings(C Project &src) // this is called when finished copying elements to an empty project (for example after importing *.ProjectPackage file)
@@ -2231,51 +2280,6 @@ class Project
       {CacheLock cl(   world_vers); REPA(   world_vers)   world_vers.lockedData(i).flush();}
       {CacheLock cl(mini_map_vers); REPA(mini_map_vers)mini_map_vers.lockedData(i).flush();}
    }
-   bool loadOldSettings(File &f)
-   {
-      if(f.getUInt()==CC4('P', 'R', 'S', 'T'))
-      {
-         UID proj_id; byte encrypt_key[32];
-         switch(f.decUIntV())
-         {
-            default: goto error;
-
-            case 3:
-            {
-               f>>proj_id; GetStr2(f, name); f>>cipher>>encrypt_key>>compress_type>>compress_level>>material_simplify
-                >>cipher_time>>cipher_key_time>>compress_type_time>>compress_level_time>>material_simplify_time;
-               f>>app_id>>hm_mtrl_id>>water_mtrl_id; FREPA(mtrl_brush_id)f>>mtrl_brush_id[i];
-            }break;
-
-            case 2:
-            {
-               byte max_tex_size; TimeStamp max_tex_size_time;
-               f>>proj_id; GetStr2(f, name); f>>cipher>>encrypt_key>>compress_type>>compress_level>>material_simplify>>max_tex_size
-                >>cipher_time>>cipher_key_time>>compress_type_time>>compress_level_time>>material_simplify_time>>max_tex_size_time;
-               f>>app_id>>hm_mtrl_id>>water_mtrl_id; FREPA(mtrl_brush_id)f>>mtrl_brush_id[i];
-            }break;
-
-            case 1:
-            {
-               f>>proj_id; GetStr(f, name);
-               f>>cipher>>encrypt_key>>compress_type>>compress_level>>material_simplify>>cipher_time>>cipher_key_time>>compress_type_time>>compress_level_time>>material_simplify_time;
-               f>>app_id>>hm_mtrl_id>>water_mtrl_id; FREPA(mtrl_brush_id)f>>mtrl_brush_id[i];
-            }break;
-
-            case 0:
-            {
-               f>>proj_id; GetStr(f, name);
-               f>>cipher>>encrypt_key>>compress_type>>compress_level>>cipher_time>>cipher_key_time>>compress_type_time>>compress_level_time;
-               f>>app_id>>hm_mtrl_id>>water_mtrl_id; FREPA(mtrl_brush_id)f>>mtrl_brush_id[i];
-            }break;
-         }
-         if(f.ok())return true;
-      }
-   error:
-      return false;
-   }
-   bool loadOldSettings (C Str &name)  {File f; return f.readTry(name) && loadOldSettings(f);}
-   bool loadOldSettings2(C Str &name)  {return loadOldSettings(name) || loadOldSettings(name+".old");}
 
    enum SAVE_DATA
    {
@@ -2299,9 +2303,9 @@ class Project
          f.cmpUIntV(ProjectVersion);
 
          // settings
-         f.cmpUIntV(0); // version
-         f<<cipher<<cipher_key<<compress_type<<compress_level<<material_simplify
-          <<cipher_time<<cipher_key_time<<compress_type_time<<compress_level_time<<material_simplify_time;
+         f.cmpUIntV(2); // version
+         f<<cipher<<cipher_key<<compress_type<<compress_level<<material_simplify<<tex_downsize;
+         f<<cipher_time<<cipher_key_time<<compress_time<<material_simplify_time<<tex_downsize_time;
          if(!network){f<<text_data<<app_id<<hm_mtrl_id<<water_mtrl_id; FREPA(mtrl_brush_id)f<<mtrl_brush_id[i];}
 
          if(mode>=SAVE_ALL)
@@ -2346,11 +2350,27 @@ class Project
                {
                   default: goto newer;
 
+                  case 2:
+                  {
+                     f>>cipher>>cipher_key>>compress_type>>compress_level>>material_simplify>>tex_downsize; ASSERT(ELMS(tex_downsize)==2 && ELMS(compress_type)==2 && ELMS(compress_level)==2 && ELMS(compress_time)==2);
+                     f>>cipher_time>>cipher_key_time>>compress_time>>material_simplify_time>>tex_downsize_time;
+                     if(!network){f>>text_data>>app_id>>hm_mtrl_id>>water_mtrl_id; FREPA(mtrl_brush_id)f>>mtrl_brush_id[i];}
+                  }break;
+
+                  case 1:
+                  {
+                     f>>cipher>>cipher_key>>compress_type[PCP_DEFAULT]>>compress_level[PCP_DEFAULT]>>material_simplify>>tex_downsize; ASSERT(ELMS(tex_downsize)==2);
+                     f>>cipher_time>>cipher_key_time>>compress_time[PCP_DEFAULT]>>compress_time[PCP_DEFAULT]>>material_simplify_time>>tex_downsize_time;
+                     if(!network){f>>text_data>>app_id>>hm_mtrl_id>>water_mtrl_id; FREPA(mtrl_brush_id)f>>mtrl_brush_id[i];}
+                     REP(PCP_NUM){compress_type[i]=compress_type[PCP_DEFAULT]; compress_level[i]=compress_level[PCP_DEFAULT]; compress_time[i]=compress_time[PCP_DEFAULT];}
+                  }break;
+
                   case 0:
                   {
-                     f>>cipher>>cipher_key>>compress_type>>compress_level>>material_simplify
-                      >>cipher_time>>cipher_key_time>>compress_type_time>>compress_level_time>>material_simplify_time;
+                     f>>cipher>>cipher_key>>compress_type[PCP_DEFAULT]>>compress_level[PCP_DEFAULT]>>material_simplify
+                      >>cipher_time>>cipher_key_time>>compress_time[PCP_DEFAULT]>>compress_time[PCP_DEFAULT]>>material_simplify_time;
                      if(!network){f>>text_data>>app_id>>hm_mtrl_id>>water_mtrl_id; FREPA(mtrl_brush_id)f>>mtrl_brush_id[i];}
+                     REP(PCP_NUM){compress_type[i]=compress_type[PCP_DEFAULT]; compress_level[i]=compress_level[PCP_DEFAULT]; compress_time[i]=compress_time[PCP_DEFAULT];}
                   }break;
                }
 
@@ -2405,9 +2425,10 @@ class Project
 
                   case 0:
                   {
-                     f>>cipher>>cipher_key>>compress_type>>compress_level>>material_simplify
-                      >>cipher_time>>cipher_key_time>>compress_type_time>>compress_level_time>>material_simplify_time;
+                     f>>cipher>>cipher_key>>compress_type[PCP_DEFAULT]>>compress_level[PCP_DEFAULT]>>material_simplify
+                      >>cipher_time>>cipher_key_time>>compress_time[PCP_DEFAULT]>>compress_time[PCP_DEFAULT]>>material_simplify_time;
                      if(!network){f>>text_data>>app_id>>hm_mtrl_id>>water_mtrl_id; FREPA(mtrl_brush_id)f>>mtrl_brush_id[i];}
+                     REP(PCP_NUM){compress_type[i]=compress_type[PCP_DEFAULT]; compress_level[i]=compress_level[PCP_DEFAULT]; compress_time[i]=compress_time[PCP_DEFAULT];}
                   }break;
                }
 
@@ -2445,17 +2466,19 @@ class Project
 
                   case 1:
                   {
-                     f>>cipher>>cipher_key>>compress_type>>compress_level>>material_simplify
-                      >>cipher_time>>cipher_key_time>>compress_type_time>>compress_level_time>>material_simplify_time;
+                     f>>cipher>>cipher_key>>compress_type[PCP_DEFAULT]>>compress_level[PCP_DEFAULT]>>material_simplify
+                      >>cipher_time>>cipher_key_time>>compress_time[PCP_DEFAULT]>>compress_time[PCP_DEFAULT]>>material_simplify_time;
                      if(!network){f>>text_data>>app_id>>hm_mtrl_id>>water_mtrl_id; FREPA(mtrl_brush_id)f>>mtrl_brush_id[i];}
+                     REP(PCP_NUM){compress_type[i]=compress_type[PCP_DEFAULT]; compress_level[i]=compress_level[PCP_DEFAULT]; compress_time[i]=compress_time[PCP_DEFAULT];}
                   }break;
 
                   case 0:
                   {
                      byte encrypt_key[32];
-                     f>>cipher>>encrypt_key>>compress_type>>compress_level>>material_simplify
-                      >>cipher_time>>cipher_key_time>>compress_type_time>>compress_level_time>>material_simplify_time;
+                     f>>cipher>>encrypt_key>>compress_type[PCP_DEFAULT]>>compress_level[PCP_DEFAULT]>>material_simplify
+                      >>cipher_time>>cipher_key_time>>compress_time[PCP_DEFAULT]>>compress_time[PCP_DEFAULT]>>material_simplify_time;
                      if(!network){f>>text_data>>app_id>>hm_mtrl_id>>water_mtrl_id; FREPA(mtrl_brush_id)f>>mtrl_brush_id[i];}
+                     REP(PCP_NUM){compress_type[i]=compress_type[PCP_DEFAULT]; compress_level[i]=compress_level[PCP_DEFAULT]; compress_time[i]=compress_time[PCP_DEFAULT];}
                   }break;
                }
 
@@ -2513,22 +2536,77 @@ class Project
       del(); return LOAD_NEWER;
    }
 
+   bool loadOldSettings(File &f)
+   {
+      if(f.getUInt()==CC4('P', 'R', 'S', 'T'))
+      {
+         UID proj_id; byte encrypt_key[32];
+         switch(f.decUIntV())
+         {
+            default: goto error;
+
+            case 3:
+            {
+               f>>proj_id; GetStr2(f, name); f>>cipher>>encrypt_key>>compress_type[PCP_DEFAULT]>>compress_level[PCP_DEFAULT]>>material_simplify
+                >>cipher_time>>cipher_key_time>>compress_time[PCP_DEFAULT]>>compress_time[PCP_DEFAULT]>>material_simplify_time;
+               f>>app_id>>hm_mtrl_id>>water_mtrl_id; FREPA(mtrl_brush_id)f>>mtrl_brush_id[i];
+               REP(PCP_NUM){compress_type[i]=compress_type[PCP_DEFAULT]; compress_level[i]=compress_level[PCP_DEFAULT]; compress_time[i]=compress_time[PCP_DEFAULT];}
+            }break;
+
+            case 2:
+            {
+               byte max_tex_size; TimeStamp max_tex_size_time;
+               f>>proj_id; GetStr2(f, name); f>>cipher>>encrypt_key>>compress_type[PCP_DEFAULT]>>compress_level[PCP_DEFAULT]>>material_simplify>>max_tex_size
+                >>cipher_time>>cipher_key_time>>compress_time[PCP_DEFAULT]>>compress_time[PCP_DEFAULT]>>material_simplify_time>>max_tex_size_time;
+               f>>app_id>>hm_mtrl_id>>water_mtrl_id; FREPA(mtrl_brush_id)f>>mtrl_brush_id[i];
+               REP(PCP_NUM){compress_type[i]=compress_type[PCP_DEFAULT]; compress_level[i]=compress_level[PCP_DEFAULT]; compress_time[i]=compress_time[PCP_DEFAULT];}
+            }break;
+
+            case 1:
+            {
+               f>>proj_id; GetStr(f, name);
+               f>>cipher>>encrypt_key>>compress_type[PCP_DEFAULT]>>compress_level[PCP_DEFAULT]>>material_simplify>>cipher_time>>cipher_key_time>>compress_time[PCP_DEFAULT]>>compress_time[PCP_DEFAULT]>>material_simplify_time;
+               f>>app_id>>hm_mtrl_id>>water_mtrl_id; FREPA(mtrl_brush_id)f>>mtrl_brush_id[i];
+               REP(PCP_NUM){compress_type[i]=compress_type[PCP_DEFAULT]; compress_level[i]=compress_level[PCP_DEFAULT]; compress_time[i]=compress_time[PCP_DEFAULT];}
+            }break;
+
+            case 0:
+            {
+               f>>proj_id; GetStr(f, name);
+               f>>cipher>>encrypt_key>>compress_type[PCP_DEFAULT]>>compress_level[PCP_DEFAULT]>>cipher_time>>cipher_key_time>>compress_time[PCP_DEFAULT]>>compress_time[PCP_DEFAULT];
+               f>>app_id>>hm_mtrl_id>>water_mtrl_id; FREPA(mtrl_brush_id)f>>mtrl_brush_id[i];
+               REP(PCP_NUM){compress_type[i]=compress_type[PCP_DEFAULT]; compress_level[i]=compress_level[PCP_DEFAULT]; compress_time[i]=compress_time[PCP_DEFAULT];}
+            }break;
+         }
+         if(f.ok())return true;
+      }
+   error:
+      return false;
+   }
+   bool loadOldSettings (C Str &name)  {File f; return f.readTry(name) && loadOldSettings(f);}
+   bool loadOldSettings2(C Str &name)  {return loadOldSettings(name) || loadOldSettings(name+".old");}
+
    void save(MemPtr<TextNode> nodes)C
    {
       const bool save_all=true; // this is needed when not calling 'del' in 'load'
-                                                    nodes.New().set   ("Version"              , ProjectVersion);
-                                                    nodes.New().set   ("Name"                 , name);
-                      if(save_all || synchronize  ) nodes.New().set   ("Synchronize"          , synchronize);
-                      if(save_all || cipher       ) nodes.New().set   ("Encrypt"              , cipher);
-      REPA(cipher_key)if(save_all || cipher_key[i]){nodes.New().setRaw("EncryptionKey"        , cipher_key); break;}
-                      if(save_all || compress_type) nodes.New().set   ("Compress"             , CompressionName(compress_type));
-                                                    nodes.New().set   ("CompressLevel"        , compress_level);
-                                                    nodes.New().set   ("SimplifyMaterials"    , material_simplify);
-                                                    nodes.New().set   ("EncryptTime"          , cipher_time.text());
-                                                    nodes.New().set   ("EncryptionKeyTime"    , cipher_key_time.text());
-                                                    nodes.New().set   ("CompressTime"         , compress_type_time.text());
-                                                    nodes.New().set   ("CompressLevelTime"    , compress_level_time.text());
-                                                    nodes.New().set   ("SimplifyMaterialsTime", material_simplify_time.text());
+                                                                 nodes.New().set   ("Version"              , ProjectVersion);
+                                                                 nodes.New().set   ("Name"                 , name);
+                      if(save_all || synchronize               ) nodes.New().set   ("Synchronize"          , synchronize);
+                      if(save_all || cipher                    ) nodes.New().set   ("Encrypt"              , cipher);
+      REPA(cipher_key)if(save_all || cipher_key[i]             ){nodes.New().setRaw("EncryptionKey"        , cipher_key); break;}
+                      if(save_all || compress_type[PCP_DEFAULT]) nodes.New().set   ("Compress"             , CompressionName(compress_type[PCP_DEFAULT]));
+                      if(save_all || compress_type[PCP_MOBILE ]) nodes.New().set   ("CompressMobile"       , CompressionName(compress_type[PCP_MOBILE ]));
+                                                                 nodes.New().set   ("CompressLevel"        , compress_level[PCP_DEFAULT]);
+                                                                 nodes.New().set   ("CompressLevelMobile"  , compress_level[PCP_MOBILE ]);
+                                                                 nodes.New().set   ("SimplifyMaterials"    , material_simplify);
+                      if(save_all || tex_downsize[TSP_MOBILE]   )nodes.New().set   ("TexDownsizeMobile"    , tex_downsize[TSP_MOBILE]);
+                      if(save_all || tex_downsize[TSP_SWITCH]   )nodes.New().set   ("TexDownsizeSwitch"    , tex_downsize[TSP_SWITCH]);
+                                                                 nodes.New().set   ("EncryptTime"          , cipher_time.text());
+                                                                 nodes.New().set   ("EncryptionKeyTime"    , cipher_key_time.text());
+                                                                 nodes.New().set   ("CompressTime"         , compress_time[PCP_DEFAULT].text());
+                                                                 nodes.New().set   ("CompressTimeMobile"   , compress_time[PCP_MOBILE ].text());
+                                                                 nodes.New().set   ("SimplifyMaterialsTime", material_simplify_time.text());
+                                                                 nodes.New().set   ("TexDownsizeTime"      , tex_downsize_time.text());
       if(save_all || elms.elms())
       {
          TextNode &node=nodes.New().setName("Elements");
@@ -2552,14 +2630,19 @@ class Project
          if(node.name=="Synchronize"          )synchronize=node.asBool1();else
          if(node.name=="Encrypt"              )cipher=(CIPHER_TYPE)node.asInt();else
          if(node.name=="EncryptionKey"        )node.getValueRaw(cipher_key);else
-         if(node.name=="Compress"             ){REP(COMPRESS_NUM)if(node.value==CompressionName(COMPRESS_TYPE(i))){compress_type=COMPRESS_TYPE(i); break;}}else
-         if(node.name=="CompressLevel"        )compress_level        =node.asInt ();else
-         if(node.name=="SimplifyMaterials"    )material_simplify     =(MATERIAL_SIMPLIFY)node.asInt();else
-         if(node.name=="EncryptTime"          )cipher_time           =node.asText();else
-         if(node.name=="EncryptionKeyTime"    )cipher_key_time       =node.asText();else
-         if(node.name=="CompressTime"         )compress_type_time    =node.asText();else
-         if(node.name=="CompressLevelTime"    )compress_level_time   =node.asText();else
-         if(node.name=="SimplifyMaterialsTime")material_simplify_time=node.asText();else
+         if(node.name=="Compress"             ){REP(COMPRESS_NUM)if(node.value==CompressionName(COMPRESS_TYPE(i))){compress_type[PCP_DEFAULT]=COMPRESS_TYPE(i); break;}}else
+         if(node.name=="CompressMobile"       ){REP(COMPRESS_NUM)if(node.value==CompressionName(COMPRESS_TYPE(i))){compress_type[PCP_MOBILE ]=COMPRESS_TYPE(i); break;}}else
+         if(node.name=="CompressLevel"        )compress_level[PCP_DEFAULT]=node.asInt ();else
+         if(node.name=="CompressLevelMobile"  )compress_level[PCP_MOBILE ]=node.asInt ();else
+         if(node.name=="SimplifyMaterials"    )material_simplify          =(MATERIAL_SIMPLIFY)node.asInt();else
+         if(node.name=="TexDownsizeMobile"    )tex_downsize[TSP_MOBILE]   =node.asInt ();else
+         if(node.name=="TexDownsizeSwitch"    )tex_downsize[TSP_SWITCH]   =node.asInt ();else
+         if(node.name=="EncryptTime"          )cipher_time                =node.asText();else
+         if(node.name=="EncryptionKeyTime"    )cipher_key_time            =node.asText();else
+         if(node.name=="CompressTime"         )compress_time[PCP_DEFAULT] =node.asText();else
+         if(node.name=="CompressTimeMobile"   )compress_time[PCP_MOBILE ] =node.asText();else
+         if(node.name=="SimplifyMaterialsTime")material_simplify_time     =node.asText();else
+         if(node.name=="TexDownsizeTime"      )tex_downsize_time          =node.asText();else
          if(node.name=="Elements"             )
          {
             // remember 'IMPORTING' and 'OPENED' which are not saved in text
@@ -2782,12 +2865,11 @@ class ProjectHierarchy : Project
    {
       FREPA(node.children) // list in order
       {
-         int      child_i    =node.children[i];
-         ElmNode &child      =hierarchy[child_i];
-         Elm     &elm        =elms     [child_i];
-         bool     elm_removed=(elm.removed() || parent_removed);
+         int  child_i    =node.children[i];
+         Elm &elm        =elms[child_i];
+         bool elm_removed=(elm.removed() || parent_removed);
          if(elm_removed)removed.add(elm.id);
-         floodRemoved(removed, child, elm_removed);
+         floodRemoved(removed, hierarchy[child_i], elm_removed);
       }
    }
 
@@ -2908,7 +2990,7 @@ class ProjectHierarchy : Project
                {
                   found_elm =&elm;
                   found_node=&hierarchy[child_i];
-                  if(!elm.removed())break; // stop looking if this element exists
+                  if(elm.exists())break; // stop looking if this element exists
                }
             }
             if(!p.is()    )return found_elm;

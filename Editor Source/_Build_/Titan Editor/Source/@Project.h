@@ -1,14 +1,14 @@
 ﻿/******************************************************************************/
-// Project Data
 /******************************************************************************/
 class Project
 {
    bool              text_data, synchronize;
-   byte              cipher_key[256], compress_level;
+   byte              cipher_key[256], compress_level[PCP_NUM];
+   byte              tex_downsize[TSP_NUM];
    CIPHER_TYPE       cipher;
-   COMPRESS_TYPE     compress_type;
+   COMPRESS_TYPE     compress_type[PCP_NUM];
    MATERIAL_SIMPLIFY material_simplify;
-   TimeStamp         cipher_time, cipher_key_time, compress_type_time, compress_level_time, material_simplify_time;
+   TimeStamp         cipher_time, cipher_key_time, compress_time[PCP_NUM], material_simplify_time, tex_downsize_time;
    UID               id, app_id, hm_mtrl_id, water_mtrl_id, mtrl_brush_id[MtrlBrushSlots];
    Str               name, path, code_path, code_base_path, edit_path, game_path, temp_path, tex_path, temp_tex_path, temp_tex_dynamic_path;
    Memx<Elm>         elms;
@@ -149,8 +149,6 @@ class Project
    RectI getWorldAreas(C UID &world_id, bool water=true);
    int worldAreasToRebuild(C UID *world_id=null);
 
-   bool materialSimplify(Edit::EXE_TYPE type)C;
-
    bool isBasedOnObjs(C Elm &elm, C Memt<UID> &objs)C; // check if 'elm' is based on 'objs' (assumes that 'objs' is sorted)
    void getExtendedObjs(C Memt<UID> &objs, Memt<UID> &exts)C; // get list of all objects that are based on 'objs' (assumes that 'objs' is sorted)
 
@@ -172,6 +170,8 @@ class Project
    bool invalidTex(C UID &tex_id                     )C; // is specified and is not present
    bool invalidRef(C UID &elm_id, bool optional=false)C; // is specified and is not present
    bool invalidRefs(Elm &elm); // check if this element has invalid references
+
+   bool materialSimplify(Edit::EXE_TYPE type)C;
 
    // operations
    Elm& getFolder(C Str &name, C UID &parent_id, bool &added, bool ignore_removed=true);
@@ -275,9 +275,6 @@ public:
 
    // io
    virtual void flush(SAVE_MODE save_mode=SAVE_DEFAULT);
-   bool loadOldSettings(File &f);
-   bool loadOldSettings (C Str &name); 
-   bool loadOldSettings2(C Str &name); 
 
    enum SAVE_DATA
    {
@@ -287,6 +284,10 @@ public:
    };
    bool save(File &f, bool network=false, SAVE_DATA mode=SAVE_ALL)C;
    LOAD_RESULT load(File &f, int &ver, bool network=false, SAVE_DATA mode=SAVE_ALL);
+
+   bool loadOldSettings(File &f);
+   bool loadOldSettings (C Str &name); 
+   bool loadOldSettings2(C Str &name); 
 
    void save(MemPtr<TextNode> nodes)C;
    LOAD_RESULT load(C MemPtr<TextNode> &nodes, int &ver, Str &error); // !! this assumes that binary was already loaded and 'ver' already set !!

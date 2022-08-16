@@ -385,7 +385,7 @@ PanelImageEditor PanelImageEdit;
       autoData(&params);
 
       props_w=super::create("Panel Image Editor", Vec2(prop_x, 0), 0.036f, prop_h, 0.3f).max.x+0.02f; button[1].show(); button[2].func(HideProjAct, SCAST(GuiObj, T)).show(); flag|=WIN_RESIZABLE;
-      T+=undo  .create(Rect_LU(0.02f, -0.01f     , 0.05f, 0.05f)).func(Undo, T).focusable(false).desc("Undo"); undo.image="Gui/Misc/undo.img";
+      T+=undo  .create(Rect_LU(0.02f, -0.01f       , 0.05f, 0.05f)).func(Undo, T).focusable(false).desc("Undo"); undo.image="Gui/Misc/undo.img";
       T+=redo  .create(Rect_LU(undo  .rect().ru(), 0.05f, 0.05f)).func(Redo, T).focusable(false).desc("Redo"); redo.image="Gui/Misc/redo.img";
       T+=locate.create(Rect_LU(redo  .rect().ru()+Vec2(0.01f, 0), 0.14f, 0.05f), "Locate").func(Locate, T).focusable(false).desc("Locate this element in the Project");
       T+=copy  .create(Rect_LU(locate.rect().ru()+Vec2(0.01f, 0), 0.11f, 0.05f), "Copy"  ).func(Copy  , T).focusable(false).desc("Copy values to system clipboard");

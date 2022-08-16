@@ -1,8 +1,10 @@
 /******************************************************************************/
 struct _MemcThreadSafe // Thread-Safe Continuous Memory Based Container Base - Do not use this class, use 'MemcThreadSafe' instead
 {
-   void clear();
-   void del  ();
+   void lockedClear() {_memc.clear();}
+   void lockedDel  () {_memc.del  ();}
+   void       clear();
+   void       del  ();
 
    // get / set
    Int     elms    ()C {return _memc.elms    ();}

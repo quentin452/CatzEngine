@@ -414,11 +414,11 @@ Bool Controller::load(File &f)
       {
          ControllerDesc desc; if(f.getFast(desc))
          {
-           _crouched    =FlagTest(Unaligned(desc.flags), ControllerDesc::CROUCHED    );
-           _on_ground   =FlagTest(Unaligned(desc.flags), ControllerDesc::ON_GROUND   );
-           _jumping     =FlagTest(Unaligned(desc.flags), ControllerDesc::JUMPING     );
-           _flying      =FlagTest(Unaligned(desc.flags), ControllerDesc::FLYING      );
-            fall_control=FlagTest(Unaligned(desc.flags), ControllerDesc::FALL_CONTROL);
+           _crouched    =FlagOn(Unaligned(desc.flags), ControllerDesc::CROUCHED    );
+           _on_ground   =FlagOn(Unaligned(desc.flags), ControllerDesc::ON_GROUND   );
+           _jumping     =FlagOn(Unaligned(desc.flags), ControllerDesc::JUMPING     );
+           _flying      =FlagOn(Unaligned(desc.flags), ControllerDesc::FLYING      );
+            fall_control=FlagOn(Unaligned(desc.flags), ControllerDesc::FALL_CONTROL);
 
             Unaligned(_radius         , desc.radius);
             Unaligned(_height         , desc.height);

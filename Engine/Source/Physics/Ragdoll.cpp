@@ -307,8 +307,10 @@ Ragdoll& Ragdoll::toSkelBlend(AnimatedSkeleton &anim_skel, Flt blend)
          Byte          sparent  = skel_bone.parent;
 
                           asbon.orn*=blend1;
-                          asbon.rot*=blend1;
                           asbon.pos*=blend1;
+                       #if HAS_ANIM_SKEL_ROT
+                          asbon.rot*=blend1;
+                        #endif
          if(sparent==0xFF)asbon.orn+=blend*GetAnimOrient(skel_bone);
          else             asbon.orn+=blend*GetAnimOrient(skel_bone, &skel.bones[sparent]);
       }
@@ -325,8 +327,10 @@ Ragdoll& Ragdoll::toSkelBlend(AnimatedSkeleton &anim_skel, Flt blend)
            C SkelBone &skel_bone=     skel.bones[sbone];
 
                                 asbon.orn*=blend1;
-                                asbon.rot*=blend1;
                                 asbon.pos*=blend1;
+                             #if HAS_ANIM_SKEL_ROT
+                                asbon.rot*=blend1;
+                             #endif
          if(InRange(rparent, T))asbon.orn+=blend*GetAnimOrient(skel_bone, rbon.actor.orn(), &skel.bones[skel_bone.parent], &NoTemp(bone(rparent).actor.orn()));
          else                   asbon.orn+=blend*GetAnimOrient(skel_bone, rbon.actor.orn()*ibody);
       }
@@ -482,12 +486,12 @@ Bool Ragdoll::loadState(File &f) // don't delete on fail, as here we're loading 
             user       (Ptr(Unaligned(desc.user        )));
             sleepEnergy(    Unaligned(desc.sleep_energy));
 
-            kinematic(FlagTest(Unaligned(desc.flag), ACTOR_KINEMATIC));
-            gravity  (FlagTest(Unaligned(desc.flag), ACTOR_GRAVITY  ));
-            ray      (FlagTest(Unaligned(desc.flag), ACTOR_RAY      ));
-            collision(FlagTest(Unaligned(desc.flag), ACTOR_COLLISION));
-            sleep    (FlagTest(Unaligned(desc.flag), ACTOR_SLEEP    ));
-            ccd      (FlagTest(Unaligned(desc.flag), ACTOR_CCD      ));
+            kinematic(FlagOn(Unaligned(desc.flag), ACTOR_KINEMATIC));
+            gravity  (FlagOn(Unaligned(desc.flag), ACTOR_GRAVITY  ));
+            ray      (FlagOn(Unaligned(desc.flag), ACTOR_RAY      ));
+            collision(FlagOn(Unaligned(desc.flag), ACTOR_COLLISION));
+            sleep    (FlagOn(Unaligned(desc.flag), ACTOR_SLEEP    ));
+            ccd      (FlagOn(Unaligned(desc.flag), ACTOR_CCD      ));
 
             if(f.getBool())
             {

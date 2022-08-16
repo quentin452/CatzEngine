@@ -1,4 +1,12 @@
 /******************************************************************************/
+#define SUPPORT_WINDOWS_XP (!X64 && GL) // 0=minor performance improvements in some parts of the engine, but no WindowsXP support, 1=some extra checks in the codes but with WindowsXP support
+#define SUPPORT_WINDOWS_7  (        GL) // 0=uses XAudio 2.9 (which requires Windows 10), 1=uses DirectSound
+
+#define JP_X_INPUT       (WINDOWS_OLD && (SUPPORT_WINDOWS_XP || SUPPORT_WINDOWS_7))
+#define JP_GAMEPAD_INPUT (WINDOWS     && !JP_X_INPUT) // always use on WINDOWS_NEW to allow 'App.joypad_user_changed'
+#define JP_DIRECT_INPUT  (WINDOWS_OLD && 0) // disable DirectInput-only Joypads because it introduces 0.25s delay to engine startup. Modern Joypads use XInput, so this is only for old Joypads.
+#define JP_RAW_INPUT     (WINDOWS_OLD && 0)
+
 #if EE_PRIVATE
    // Threads
    #if WEB
@@ -9,8 +17,6 @@
    /******************************************************************************/
    // SELECT WHICH LIBRARIES TO USE
    /******************************************************************************/
-   #define SUPPORT_WINDOWS_XP (!X64 && GL) // 0=minor performance improvements in some parts of the engine, but no WindowsXP support, 1=some extra checks in the codes but with WindowsXP support
-   #define SUPPORT_WINDOWS_7  (        GL) // 0=uses XAudio 2.9 (which requires Windows 10), 1=uses DirectSound
    // Renderer - Define "DX11" for DirectX 10/11, "DX12" for DirectX 12, "METAL" for Metal, "VULKAN" for Vulkan, "GL" or nothing for OpenGL
    // defines are specified through Project Settings
    #ifdef DX11
@@ -92,10 +98,7 @@
    #define KB_DIRECT_INPUT  0
    #define MS_RAW_INPUT     1
    #define MS_DIRECT_INPUT  0
-   #define JP_X_INPUT       WINDOWS_OLD
-   #define JP_GAMEPAD_INPUT WINDOWS_NEW // use on WINDOWS_NEW to allow 'App.joypad_user_changed'
-   #define JP_DIRECT_INPUT  (WINDOWS_OLD && 0) // disable DirectInput-only Joypads because it introduces 0.25s delay to engine startup. Modern Joypads use XInput, so this is only for old Joypads.
-   #if (KB_RAW_INPUT+KB_DIRECT_INPUT)!=1 || (MS_RAW_INPUT+MS_DIRECT_INPUT)!=1 || (JP_X_INPUT && JP_GAMEPAD_INPUT)
+   #if (KB_RAW_INPUT+KB_DIRECT_INPUT)!=1 || (MS_RAW_INPUT+MS_DIRECT_INPUT)!=1 || (JP_X_INPUT && JP_GAMEPAD_INPUT) // XInput can't be used together with GamepadInput
       #error Invalid Input API configuration
    #endif
    #define DIRECT_INPUT (KB_DIRECT_INPUT || MS_DIRECT_INPUT || JP_DIRECT_INPUT)
@@ -205,9 +208,17 @@
       #if JP_X_INPUT
          #include <xinput.h>
       #endif
+      #if WINDOWS_OLD && JP_GAMEPAD_INPUT
+         #include <wrl.h>
+         #include <windows.gaming.input.h>
+      #endif
       #if WINDOWS_OLD && DIRECT_INPUT
          #define DIRECTINPUT_VERSION 0x0800
          #include <dinput.h>
+      #endif
+      #if JP_RAW_INPUT
+         #include <hidsdi.h>
+         #include <hidpi.h>
       #endif
 
       #if DIRECT_SOUND || DIRECT_SOUND_RECORD
@@ -241,6 +252,7 @@
       #undef THIS
       #undef IGNORE
       #undef TRANSPARENT
+      #undef OPAQUE
       #undef ERROR
       #undef UNIQUE_NAME
       #undef INPUT_MOUSE
@@ -315,11 +327,12 @@
          #include <QuartzCore/QuartzCore.h>
          #include <CoreMotion/CoreMotion.h>
          #include <CoreLocation/CoreLocation.h>
+         #include <CoreHaptics/CoreHaptics.h>
+         #include <CoreHaptics/CHHapticPatternPlayer.h>
          #include <AVFoundation/AVFoundation.h>
          #include <AdSupport/ASIdentifierManager.h>
-         #include <FBSDKCoreKit/FBSDKCoreKit.h>
-         #include <FBSDKLoginKit/FBSDKLoginKit.h>
-         #include <FBSDKShareKit/FBSDKShareKit.h>
+         #include <GameController/GCController.h>
+         #include <GameController/GCExtendedGamepad.h>
          #include "../../../ThirdPartyLibs/Chartboost/Headers/Chartboost.h"
          #if GL
             #include <OpenGLES/EAGL.h>
@@ -433,7 +446,7 @@
       #include <android/log.h>
       #include <android/sensor.h>
       #include <android/asset_manager.h>
-      #include <android_native_app_glue.h>
+      #include <native_app_glue/android_native_app_glue.h>
       #if GL
          #include <EGL/egl.h>
          #include <EGL/eglext.h>
@@ -547,6 +560,32 @@
    /******************************************************************************/
    // INCLUDE THIRD PARTY LIBRARIES
    /******************************************************************************/
+   // Compression
+   #define SUPPORT_LZ4 1
+   #if     SUPPORT_LZ4
+      #if __clang__
+         #define LZ4_DISABLE_DEPRECATE_WARNINGS // fails to compile without it
+      #endif
+      #include "../../../ThirdPartyLibs/LZ4/lz4.h"
+      #include "../../../ThirdPartyLibs/LZ4/lz4hc.h"
+
+      #define LZ4_BUF_SIZE      65536 // headers say that up to 64Kb need to be kept in memory !! don't change in the future because it would break any past compressed data !!
+      #define LZ4_RING_BUF_SIZE (LZ4_BUF_SIZE*2) // if changing, then have to use LZ4_DECODER_RING_BUFFER_SIZE for decompression to keep compatibility with any past compressed data
+   #endif
+
+   #define SUPPORT_ZSTD 1
+   #if     SUPPORT_ZSTD
+      #define ZSTD_STATIC_LINKING_ONLY
+      #include "../../../ThirdPartyLibs/Zstd/lib/zstd.h"
+      #include "../../../ThirdPartyLibs/Zstd/lib/decompress/zstd_decompress_internal.h"
+      #undef MIN
+      #undef MAX
+      #undef ERROR
+      #undef KB
+      #undef MB
+      #undef GB
+   #endif
+
    // Physics
    #if PHYSX // use PhysX
       #ifndef NDEBUG
@@ -602,8 +641,8 @@
    // SPIR-V Cross
    #define SPIRV_CROSS (WINDOWS_OLD && X64)
    #if     SPIRV_CROSS
-      #include "../../../ThirdPartyLibs/SPIRV-Cross/include/spirv_cross/spirv_cross_c.h"
-      #include "../../../ThirdPartyLibs/SPIRV-Cross/include/spirv_cross/spirv_glsl.hpp"
+      #include "../../../ThirdPartyLibs/SPIRV-Cross/include/spirv_cross_c.h"
+      #include "../../../ThirdPartyLibs/SPIRV-Cross/include/spirv_glsl.hpp"
    #endif
 
    #if GL // define required constants which may be missing on some platforms
@@ -625,6 +664,34 @@
       #define GL_COMPRESSED_RGBA_PVRTC_2BPPV1_IMG          0x8C03
       #define GL_COMPRESSED_SRGB_ALPHA_PVRTC_2BPPV1_EXT    0x8A56
       #define GL_COMPRESSED_SRGB_ALPHA_PVRTC_4BPPV1_EXT    0x8A57
+      #define GL_COMPRESSED_RGBA_ASTC_4x4_KHR              0x93B0
+      #define GL_COMPRESSED_RGBA_ASTC_5x4_KHR              0x93B1
+      #define GL_COMPRESSED_RGBA_ASTC_5x5_KHR              0x93B2
+      #define GL_COMPRESSED_RGBA_ASTC_6x5_KHR              0x93B3
+      #define GL_COMPRESSED_RGBA_ASTC_6x6_KHR              0x93B4
+      #define GL_COMPRESSED_RGBA_ASTC_8x5_KHR              0x93B5
+      #define GL_COMPRESSED_RGBA_ASTC_8x6_KHR              0x93B6
+      #define GL_COMPRESSED_RGBA_ASTC_8x8_KHR              0x93B7
+      #define GL_COMPRESSED_RGBA_ASTC_10x5_KHR             0x93B8
+      #define GL_COMPRESSED_RGBA_ASTC_10x6_KHR             0x93B9
+      #define GL_COMPRESSED_RGBA_ASTC_10x8_KHR             0x93BA
+      #define GL_COMPRESSED_RGBA_ASTC_10x10_KHR            0x93BB
+      #define GL_COMPRESSED_RGBA_ASTC_12x10_KHR            0x93BC
+      #define GL_COMPRESSED_RGBA_ASTC_12x12_KHR            0x93BD
+      #define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_4x4_KHR      0x93D0
+      #define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x4_KHR      0x93D1
+      #define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_5x5_KHR      0x93D2
+      #define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x5_KHR      0x93D3
+      #define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_6x6_KHR      0x93D4
+      #define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x5_KHR      0x93D5
+      #define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x6_KHR      0x93D6
+      #define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_8x8_KHR      0x93D7
+      #define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x5_KHR     0x93D8
+      #define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x6_KHR     0x93D9
+      #define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x8_KHR     0x93DA
+      #define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_10x10_KHR    0x93DB
+      #define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x10_KHR    0x93DC
+      #define GL_COMPRESSED_SRGB8_ALPHA8_ASTC_12x12_KHR    0x93DD
       #define GL_ALPHA8                                    0x803C
       #define GL_LUMINANCE8                                0x8040
       #define GL_LUMINANCE8_ALPHA8                         0x8045
@@ -645,6 +712,14 @@
       #define GL_COMPRESSED_SIGNED_RED_RGTC1               0x8DBC
       #define GL_COMPRESSED_SIGNED_RG_RGTC2                0x8DBE
       #define GL_LUMINANCE                                 0x1909
+   #endif
+
+   // Other
+   #define SUPPORT_FACEBOOK (ANDROID)// || (IOS && !IOS_SIMULATOR))
+   #if     SUPPORT_FACEBOOK && IOS
+      #include <FBSDKCoreKit/FBSDKCoreKit.h>
+      #include <FBSDKLoginKit/FBSDKLoginKit.h>
+      #include <FBSDKShareKit/FBSDKShareKit.h>
    #endif
 
    #include <algorithm> // must be after PhysX or compile errors will show on Android

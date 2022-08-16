@@ -26,8 +26,8 @@ Bool Macro::load(File &f, StrLibrary &sl, Str &temp)
 {
    Byte flag;
    f.getMulti(flag, params, line).getStr(name).getStr(def);
-   all_up_case        =FlagTest(flag, ALL_UP_CASE);
-   use_for_suggestions=FlagTest(flag, USE_FOR_SUGGESTIONS);
+   all_up_case        =FlagOn(flag, ALL_UP_CASE);
+   use_for_suggestions=FlagOn(flag, USE_FOR_SUGGESTIONS);
    if(parts.load(f))
    {
       sl.getStr(f, temp); source=CE.findSource(temp);

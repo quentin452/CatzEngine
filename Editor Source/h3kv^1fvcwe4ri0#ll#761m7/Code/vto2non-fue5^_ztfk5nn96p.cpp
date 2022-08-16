@@ -1,6 +1,6 @@
 /******************************************************************************/
-const uint ProjectVersion     =89, // !! increase this by one if any of engine/editor asset formats have changed !!
-           ClientServerVersion=89; // !! client/server version (client will fail if tries to connect to server compiled with different version), increase this by one if any of engine resource formats have changed or if the network protocol has changed or if editor classes formats have changed !!
+const uint ProjectVersion     =98, // !! increase this by one if any of engine/editor asset formats have changed !!
+           ClientServerVersion=98; // !! client/server version (client will fail if tries to connect to server compiled with different version), increase this by one if any of engine resource formats have changed or if the network protocol has changed or if editor classes formats have changed !!
 const Str  ClientServerString =ENGINE_NAME " Editor";
 /******************************************************************************/
 const cchar8       *WorldVerSuffix     ="\\Data",
@@ -41,7 +41,7 @@ const int           ForceInstaller=-2, // -2=disable and don't update, -1=disabl
                     HeightBrushNoiseRes=256,
                     MtrlBrushSlots=14,
                     MaxVisibleRadius=(X64 ? 20 : 15),
-                    MaxMaterialDownsize=3, // 0=full, 1=half, 2=quarter
+                    MaxMaterialDownsize=4, // 0=full, 1=half, 2=quarter, 3=eighth
                     ClientSendBufSize=3*1024*1024, // 3 MB
                     ServerSendBufSize=2*1024*1024, // 2 MB
                     InvalidCoordinate=SIGN_BIT,

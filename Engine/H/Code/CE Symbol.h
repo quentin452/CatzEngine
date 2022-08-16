@@ -276,10 +276,10 @@ struct Symbol : Str // C++ Symbol
    Str fullCppName();
    Str   shortName(); // 'cppName' without the "operator" part for the operators
 
-   Str funcDefinition  (Int highlight);
-   Str     definition  ();
-   Str     comments    ();
-   Str     commentsCode();
+   void funcDefinition(StrEx &sx, Int highlight, C Color *col=null);
+   Str      definition();
+   Str      comments  ();
+   void     comments  (StrEx &sx);
 
    Symbol*    Parent          (); // return symbol's parent ignoring any transparent symbols (such as FUNC_LIST or TRANSPARENT class), which allows to return CLASS as parent for FUNC
    Symbol* rootClass          ();

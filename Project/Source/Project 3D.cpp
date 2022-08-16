@@ -8,8 +8,12 @@ void InitPre()
 #ifdef DEBUG
    App.flag|=APP_MEM_LEAKS|APP_BREAKPOINT_ON_ERROR;
 #endif
+#if DESKTOP
    DataPath("../Data");
-   //Paks.add("engine.pak");
+#endif
+#if WINDOWS_NEW || SWITCH || ANDROID
+   Paks.add("Engine.pak");
+#endif
 
    Cam.dist=1;
 }

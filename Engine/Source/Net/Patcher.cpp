@@ -372,7 +372,7 @@ static Bool Equal(C PakFile *pf, C Patcher::LocalFile *lf)
    {
       // verify File/Dir for local files of SYSTEM_* type
       if(lf->type!=Patcher::LocalFile::PAK_FILE) // not PAK_FILE -> it's a SYSTEM_* type
-         if(FlagTest(pf->flag, PF_STD_DIR) != (lf->type==Patcher::LocalFile::SYSTEM_DIR))
+         if(FlagOn(pf->flag, PF_STD_DIR) != (lf->type==Patcher::LocalFile::SYSTEM_DIR))
             return false;
 
       return  pf->data_size==lf->file_size // files have same sizes

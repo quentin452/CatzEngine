@@ -150,7 +150,7 @@ Property& Property::setColor()
      _value_type=GO_CUSTOM;
 
      _color    .create(this).desc(desc()); // try re-using existing description before deleting objects
-      New(_cp)->create(text()).func(Changed, T, true).hide();
+      New(_cp)->create(display()).func(Changed, T, true).hide();
 
       Delete(_win_io);
       checkbox .del();
@@ -821,19 +821,22 @@ Rect Property::addTo(GuiObj &parent, C Vec2 &pos, Flt text_width, Flt height, Fl
 /******************************************************************************/
 // MAIN
 /******************************************************************************/
-Rect AddProperties(Memx<Property> &properties, GuiObj &parent, C Vec2 &left_up, Flt property_height, Flt value_width, C TextStylePtr &text_style, Flt *parent_width)
+Rect AddProperties(Memx<Property> &properties, GuiObj &parent, C Vec2 &left_up, Flt property_height, Flt value_width, C TextStylePtr &text_style, C Flt *parent_width)
 {
    TextStylePtr ts=text_style; if(!ts && Gui.skin)ts=Gui.skin->text.text_style;
    Flt text_width=0,
        right     =left_up.x;
-   if(ts)FREPA(properties)MAX(text_width, ts->textWidth(properties[i].text()));
+   FREPA(properties)
+   {
+      Property &prop=properties[i];
+      prop.text.text_style=ts;
+      MAX(text_width, prop.text.textWidthLine());
+   }
    if(parent_width)MIN(value_width, *parent_width-left_up.x-text_width-NameValueSpace);
    FREPA(properties)
    {
-      Vec2      pos =left_up;
-      pos.y-=i*property_height;
       Property &prop=properties[i];
-      prop.text.text_style=ts;
+      Vec2 pos=left_up; pos.y-=i*property_height;
       MAX(right, prop.addTo(parent, pos, text_width, property_height, value_width).max.x);
    }
    return Rect(left_up.x, left_up.y-properties.elms()*property_height, right, left_up.y);

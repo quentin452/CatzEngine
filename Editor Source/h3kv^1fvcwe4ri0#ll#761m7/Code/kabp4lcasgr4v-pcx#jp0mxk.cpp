@@ -475,7 +475,7 @@ bool ImportFunc(Thread &thread) // 'ObjType' must be initialized because loading
             Material game; if(game.load(file))
             {
                Elm &elm=Proj.Project.newElm(name, Proj.getPathID(path), ELM_MTRL);
-               XMaterialEx mtrl_ex; mtrl_ex.create(game);
+               XMaterialEx mtrl_ex(&Proj); mtrl_ex.create(game);
                EditMaterial edit; edit.create(mtrl_ex); // create from material
 
                // set textures
@@ -503,7 +503,7 @@ bool ImportFunc(Thread &thread) // 'ObjType' must be initialized because loading
                ImportMtrlImages.binaryInclude(SkipStartPath(   base2_path, ImportSrc), ImportComparePath);
                ImportMtrlImages.binaryInclude(SkipStartPath(  detail_path, ImportSrc), ImportComparePath);
                ImportMtrlImages.binaryInclude(SkipStartPath(   macro_path, ImportSrc), ImportComparePath);
-               ImportMtrlImages.binaryInclude(SkipStartPath(emissive_path , ImportSrc), ImportComparePath);
+               ImportMtrlImages.binaryInclude(SkipStartPath(emissive_path, ImportSrc), ImportComparePath);
 
                // #MaterialTextureLayout
                edit.   color_map_time.getUTC(); edit. color_map=base0_path; //AddTransform(edit.color_map, "channel", "xyz"); don't set because we might need alpha

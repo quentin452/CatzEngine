@@ -377,8 +377,8 @@ Bool SoundRecord::create(Device *device, Int bits, Int channels, Int frequency) 
                      //UInt32 samples=0; size=SIZE(samples); status=AudioUnitGetProperty(_handle, kAudioDevicePropertyBufferFrameSize, kAudioUnitScope_Global, 0, &samples, &size);
 
                     _flags=(
-                        ((                   FlagTest(format.mFormatFlags, kAudioFormatFlagIsSignedInteger ))<<0)
-                     |  ((got_channels==2 && FlagTest(format.mFormatFlags, kAudioFormatFlagIsNonInterleaved))<<1)
+                        ((                   FlagOn(format.mFormatFlags, kAudioFormatFlagIsSignedInteger ))<<0)
+                     |  ((got_channels==2 && FlagOn(format.mFormatFlags, kAudioFormatFlagIsNonInterleaved))<<1)
                      |  ((    channels==2)<<2)
                      |  ((got_channels==2)<<3)
                      |  ((    bits    / 8)<<4)

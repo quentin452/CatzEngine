@@ -49,7 +49,7 @@ class CreateMaterials : PropWin
    {
       ThreadMayUseGPUData();
 
-      EditMaterial edit; edit.newData();
+      EditMaterial edit; edit.newData(Proj);
       edit.color_map=(src.id.valid() ? S+EncodeFileName(src.id) : CodeEdit.importPaths(src.file));
       edit.color_map_time.getUTC();
 

@@ -135,7 +135,7 @@ public:
    void hideDo();
    void create();
    void moveAbove(GuiObj &go);
-   void listElms(ElmNode &node, bool parent_contains_name=false);
+   void listElms(ElmNode &node, bool parent_contains_name=false); // add project elements to the Theater list
    VecD2 offset()C;
    void offset(C VecD2&offset);
    void refreshSize();       

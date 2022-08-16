@@ -203,9 +203,9 @@ struct PhysicsClass
 
 #if EE_PRIVATE
    static Bool ignored        (PHYS_API(PxRigidActor, RigidBody) &a, PHYS_API(PxRigidActor, RigidBody) &b); // if 'a' and 'b' actors are ignoring each other (based on Actor::ignore)
-          Bool collides       (Byte a, Byte b)C {return FlagTest(_collision_array[a], 1<<b);} // if 'a' can     collide  with 'b' ACTOR_GROUP
-          Bool collidesMask   (Byte a, UInt m)C {return FlagTest(                 m , 1<<a);} // if 'a' can     collide  with 'm' ACTOR_GROUP mask
-          Bool reports        (Byte a, Byte b)C {return          _contact_report [a][b]    ;} // if 'a' reports contacts with 'b' ACTOR_GROUP
+          Bool collides       (Byte a, Byte b)C {return FlagOn(_collision_array[a], 1<<b);} // if 'a' can     collide  with 'b' ACTOR_GROUP
+          Bool collidesMask   (Byte a, UInt m)C {return FlagOn(                 m , 1<<a);} // if 'a' can     collide  with 'm' ACTOR_GROUP mask
+          Bool reports        (Byte a, Byte b)C {return        _contact_report [a][b]    ;} // if 'a' reports contacts with 'b' ACTOR_GROUP
           Bool createMaterials();
           void step           ();
           void stepCompleted  ();

@@ -9,8 +9,10 @@ class ElmMaterial : ElmData
       USES_TEX_GLOW =1<<2,
    };
    UID                       base_0_tex, base_1_tex, base_2_tex, detail_tex, macro_tex, emissive_tex;
-   byte                      downsize_tex_mobile, flag;
+   byte                      tex_downsize[TSP_NUM], flag;
    Edit::Material::TEX_QUALITY tex_quality;
+
+   ElmMaterial();
 
    // get
    bool equal(C ElmMaterial &src)C;
@@ -26,17 +28,14 @@ class ElmMaterial : ElmData
 
    // operations
    void from(C EditMaterial &src);
-   uint undo(C ElmMaterial &src); // don't undo 'downsize_tex_mobile', 'flag' because they should be set only in 'from'
-   uint sync(C ElmMaterial &src); // don't sync 'downsize_tex_mobile', 'flag' because they should be set only in 'from'
+   uint undo(C ElmMaterial &src); // don't undo 'tex_downsize', 'flag' because they should be set only in 'from'
+   uint sync(C ElmMaterial &src); // don't sync 'tex_downsize', 'flag' because they should be set only in 'from'
 
    // io
    virtual bool save(File &f)C override;
    virtual bool load(File &f)override;
    virtual void save(MemPtr<TextNode> nodes)C override;
    virtual void load(C MemPtr<TextNode> &nodes)override;
-
-public:
-   ElmMaterial();
 };
 /******************************************************************************/
 /******************************************************************************/

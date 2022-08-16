@@ -37,9 +37,9 @@ UInt PathFind::pixelFlag(Int x, Int y)C
 {
    return validPos(x, y) ? pixel(x, y).flag : 0;
 }
-Bool PathFind::pixelWalkable(Int x, Int y)C {return FlagTest(pixelFlag(x, y), PFP_WALKABLE);}
-Bool PathFind::pixelTarget  (Int x, Int y)C {return FlagTest(pixelFlag(x, y), PFP_TARGET  );}
-Bool PathFind::pixelStart   (Int x, Int y)C {return FlagTest(pixelFlag(x, y), PFP_START   );}
+Bool PathFind::pixelWalkable(Int x, Int y)C {return FlagOn(pixelFlag(x, y), PFP_WALKABLE);}
+Bool PathFind::pixelTarget  (Int x, Int y)C {return FlagOn(pixelFlag(x, y), PFP_TARGET  );}
+Bool PathFind::pixelStart   (Int x, Int y)C {return FlagOn(pixelFlag(x, y), PFP_START   );}
 
 PathFind& PathFind::pixelFlag(Int x, Int y, Byte flag)
 {
@@ -234,7 +234,7 @@ void PathFind::getWalkableNeighbors(C VecI2 &pos, MemPtr<VecI2> pixels, Bool dia
          {
             VecI2 next=pos+Move[i].dir; if(validPos(next))
             {
-               Pixel &pix=pixel(next); if(FlagTest(pix.flag, PFP_WALKABLE) && pix.iteration!=_iteration)
+               Pixel &pix=pixel(next); if(FlagOn(pix.flag, PFP_WALKABLE) && pix.iteration!=_iteration)
                {
                   pixels.add(next); pix.iteration=_iteration;
                }

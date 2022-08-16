@@ -216,10 +216,10 @@ struct PakFile0
 #pragma pack(pop)
 Byte GetOldFlag(Byte flag)
 {
-   return (FlagTest(flag, 1<<1) ? PF_REMOVED     : 0)
-        | (FlagTest(flag, 1<<2) ? PF_STD_DIR     : 0)
-      //| (FlagTest(flag, 1<<3) ? PF_NO_COMPRESS : 0)
-        | (FlagTest(flag, 1<<4) ? PF_STD_LINK    : 0);
+   return (FlagOn(flag, 1<<1) ? PF_REMOVED     : 0)
+        | (FlagOn(flag, 1<<2) ? PF_STD_DIR     : 0)
+      //| (FlagOn(flag, 1<<3) ? PF_NO_COMPRESS : 0)
+        | (FlagOn(flag, 1<<4) ? PF_STD_LINK    : 0);
 }
 /******************************************************************************/
 static Bool CipherPerFile() {return true;} // '_cipher_per_file' value in latest Pak file format version
@@ -1380,9 +1380,9 @@ struct PakCreator
       {
          PakFileEx &src=files[i];
          Long       mem_reserved=0; // memory currently reserved for this file
-         Bool         decompress=                                     src.needDecompress() , // if decompress
-                    try_compress=(compress                         && src.needCompress  ()), // if   compress
-                    set_hash    =(FlagTest(pak_flag, PAK_SET_HASH) && src.needHash      ()); // if set hash
+         Bool         decompress=                                   src.needDecompress() , // if decompress
+                    try_compress=(compress                       && src.needCompress  ()), // if   compress
+                    set_hash    =(FlagOn(pak_flag, PAK_SET_HASH) && src.needHash      ()); // if set hash
 
          if(error_occurred
          || progress && progress->wantStop())goto finished;
@@ -1561,9 +1561,9 @@ struct PakCreator
             total_data_size_compressed  +=src.data_size_compressed;
             total_data_size_decompressed+=src.data_size;
 
-            Bool file_decompress=(                                    src.needDecompress()),
-                 file_compress  =(compress                         && src.needCompress  ()),
-                 file_hash      =(FlagTest(pak_flag, PAK_SET_HASH) && src.needHash      ());
+            Bool file_decompress=(                                  src.needDecompress()),
+                 file_compress  =(compress                       && src.needCompress  ()),
+                 file_hash      =(FlagOn(pak_flag, PAK_SET_HASH) && src.needHash      ());
             Long mem_usage= // estimate memory needed for this file
             (
            Long( file_decompress                                                      ? dest.data_size+DecompressionMemUsage(dest.compression, 255, dest.data_size) : 0)
@@ -1580,7 +1580,7 @@ struct PakCreator
          if(progress && progress->wantStop(error_message))goto error;
 
          // save header
-         if(!FlagTest(pak_flag, PAK_NO_FILE)) // create file
+         if(FlagOff(pak_flag, PAK_NO_FILE)) // create file
          {
             if(!pak.pakFileName().is()){if(error_message)*error_message="Pak name was not specified"; goto error;}
             if(!(in_place ? f_dest.editTry(pak.pakFileName(), cipher) : f_dest.writeTry(pak.pakFileName(), cipher))){if(error_message)*error_message=CantWrite(pak.pakFileName()); goto error;}
@@ -1591,7 +1591,7 @@ struct PakCreator
          auto f_dest_cipher_offset=f_dest._cipher_offset;
 
          // process files
-         if(!FlagTest(pak_flag, PAK_NO_DATA) || FlagTest(pak_flag, PAK_SET_HASH)) // write data or set hash
+         if(FlagOff(pak_flag, PAK_NO_DATA) || FlagOn(pak_flag, PAK_SET_HASH)) // write data or set hash
          {
          #if HAS_THREADS
             if(files_to_process)
@@ -1644,7 +1644,7 @@ struct PakCreator
                   }
 
                   // write data
-                  if(!FlagTest(pak_flag, PAK_NO_DATA))
+                  if(FlagOff(pak_flag, PAK_NO_DATA))
                   {
                      if(progress && progress->wantStop(error_message))goto error;
 
@@ -1746,7 +1746,7 @@ Bool Pak::create(C CMemPtr<Str> &files, C Str &pak_name, UInt flag, Cipher *dest
    PakCreator::FileTempContainer ftc; FREPA(files)ftc.add(files[i], Filter, pc); ftc.sort();
 
    // add files
-   if(FlagTest(flag, PAK_SHORTEN) && ftc.files.elms()==1 && ftc.files[0].isDir())pc.enter(ftc.files[0], -1, Filter);else
+   if(FlagOn(flag, PAK_SHORTEN) && ftc.files.elms()==1 && ftc.files[0].isDir())pc.enter(ftc.files[0], -1, Filter);else
    {
       FREPA(ftc.files)pc.add  (ftc.files[i], -1        );
       FREPA(ftc.files)pc.enter(ftc.files[i],  i, Filter);
@@ -1788,7 +1788,7 @@ Bool Pak::create(C CMemPtr<PakNode> &files, C Str &pak_name, UInt flag, Cipher *
    PakCreator::FileTempContainer ftc; FREPA(files)ftc.add(files[i]); ftc.sort();
 
    // add files
-   if(FlagTest(flag, PAK_SHORTEN) && ftc.files.elms()==1 && ftc.files[0].isDir())pc.enter(ftc.files[0], -1, null);else
+   if(FlagOn(flag, PAK_SHORTEN) && ftc.files.elms()==1 && ftc.files[0].isDir())pc.enter(ftc.files[0], -1, null);else
    {
       FREPA(ftc.files)pc.add  (ftc.files[i], -1      );
       FREPA(ftc.files)pc.enter(ftc.files[i],  i, null);
@@ -1918,7 +1918,7 @@ static Bool _PakUpdate(Pak &src_pak, C CMemPtr<PakFileData> &changes, C Str &pak
       {
        C PakFile     &pf =src_pak.file(i);
          PakFileData &pfd=src_files[j++];
-         pfd.mode             =(FlagTest(pf.flag, PF_REMOVED) ? PakFileData::MARK_REMOVED : PakFileData::REPLACE);
+         pfd.mode             =(FlagOn(pf.flag, PF_REMOVED) ? PakFileData::MARK_REMOVED : PakFileData::REPLACE);
          pfd.type             =pf.type();
          pfd.compress_mode    =COMPRESS_KEEP_ORIGINAL; // keep source files in original compression (for example if a Sound file was requested to have no compression before, to speed up streaming playback, then let's keep it)
          pfd.compressed       =pf.compression;
@@ -2198,7 +2198,7 @@ Bool PakEqual(MemPtr<PakFileData> files, C Pak &pak)
    REPA(pak)
    {
     C PakFile &pf=pak.file(i);
-      if(!FlagTest(pf.flag, PF_STD_DIR)) // skip folders because they're not required to be in the 'PakFileData' list
+      if(FlagOff(pf.flag, PF_STD_DIR)) // skip folders because they're not required to be in the 'PakFileData' list
       {
          PakFileData **files_pfd=files_sorted.binaryFind(pak.fullName(pf), ComparePF);
          if(!Equal(files_pfd ? *files_pfd : null, &pf))return false;
@@ -2218,7 +2218,7 @@ Bool CPakEqual(C CMemPtr<PakFileData> &files, C Pak &pak)
    REPA(pak)
    {
     C PakFile &pf=pak.file(i);
-      if(!FlagTest(pf.flag, PF_STD_DIR)) // skip folders because they're not required to be in the 'PakFileData' list
+      if(FlagOff(pf.flag, PF_STD_DIR)) // skip folders because they're not required to be in the 'PakFileData' list
       {
        C PakFileData **files_pfd=files_sorted.binaryFind(pak.fullName(pf), ComparePF);
          if(!Equal(files_pfd ? *files_pfd : null, &pf))return false;

@@ -8,11 +8,13 @@ enum EXE_TYPE : Byte // Executable Type
    EXE_LIB  , // Windows Statically  Linked Library (currently not supported, reserved for future use)
    EXE_UWP  , // Windows Universal App
    EXE_APK  , // Android Application Package
+   EXE_AAB  , // Android Application Bundle
    EXE_MAC  , // Mac     Application
    EXE_IOS  , // iOS     Application
    EXE_LINUX, // Linux
-   EXE_WEB  , // Web     Html/JavaScript
    EXE_NS   , // Nintendo Switch
+   EXE_WEB  , // Web     Html/JavaScript
+   EXE_NUM  ,
 };
 enum EXPORT_MODE : Byte // Export Mode
 {
@@ -52,6 +54,8 @@ enum XBOX_LIVE : Byte // https://docs.microsoft.com/en-us/gaming/xbox-live/get-s
 };
 struct CodeEditorInterface
 {
+   Int android_asset_packs=-1; // -1=not using asset packs
+
    void del        ();
    void clear      ();
    void create     (GuiObj &parent, Bool menu_on_top);
@@ -62,6 +66,7 @@ struct CodeEditorInterface
    Bool initialized();
    Str  title      ();
    Str  appPath    (C Str &app_name);
+   Str   androidPath();
    Str   androidProjectPakPath();
    Str       iOSProjectPakPath();
    Str       UWPProjectPakPath();
@@ -182,9 +187,12 @@ struct CodeEditorInterface
    virtual UID           appXboxLiveSCID                    () {return            UIDZero;} // get Xbox Live SCID                      of current app
    virtual Bool          appWindowsCodeSign                 () {return              false;} // get if code sign exe                    of current app
    virtual Str           appGooglePlayLicenseKey            () {return                  S;} // get Google Play license key             of current app
+   virtual Bool          appGooglePlayAssetDelivery         () {return              false;} // get Google Play Asset Delivery          of current app
    virtual Str           appLocationUsageReason             () {return                  S;} // get location usage reason               of current app
+   virtual Str           appNintendoInitialCode             () {return                  S;} // get Nintendo Initial Code               of current app
    virtual ULong         appNintendoAppID                   () {return                  0;} // get Nintendo App ID                     of current app
-   virtual Str           appNintendoPublisherName           () {return                  S;} // get Nintendo Publishder Name            of current app
+   virtual Str           appNintendoPublisherName           () {return                  S;} // get Nintendo Publisher Name             of current app
+   virtual Str           appNintendoLegalInformation        () {return                  S;} // get Nintendo Legal Information          of current app
    virtual Int           appBuild                           () {return                  1;} // get build number                        of current app
    virtual ULong         appFacebookAppID                   () {return                  0;} // get Facebook   App ID                   of current app
    virtual Str           appAdMobAppIDiOS                   () {return                  S;} // get AdMob      App ID                   of current app for iOS         platform
@@ -202,19 +210,18 @@ struct CodeEditorInterface
    virtual ImagePtr      appNotificationIcon                () {return               null;} // get notification icon                   of current app
    virtual Int           appEmbedEngineData                 () {return                  0;} // get if embed   engine  data             of current app
    virtual Cipher*       appEmbedCipher                     () {return               null;} // get cipher      used for embedding data of current app
-   virtual COMPRESS_TYPE appEmbedCompress                   () {return      COMPRESS_NONE;} // get compression used for embedding data of current app
-   virtual Int           appEmbedCompressLevel              () {return                  0;} // get compression used for embedding data of current app
-   virtual DateTime      appEmbedSettingsTime               () {return  DateTime().zero();} // get settings time    for embedding data of current app
    virtual Bool          appPublishProjData                 () {return               true;} // get if publish project data             of current app
    virtual Bool          appPublishPhysxDll                 () {return               true;} // get if copy PhysX  dll's                of current app
    virtual Bool          appPublishSteamDll                 () {return              false;} // get if copy Steam  dll                  of current app
    virtual Bool          appPublishOpenVRDll                () {return              false;} // get if copy OpenVR dll                  of current app
    virtual Bool          appPublishDataAsPak                () {return               true;} // get if publish data as paks             of current app
-   virtual Bool          appAndroidExpansion                () {return              false;} // get if download android expansion files of current app
-   virtual void          appSpecificFiles                   (MemPtr<PakFileData> files) { } // get specific files                      of current app
-   virtual void          appInvalidProperty                 (C Str &msg               ) { } // called when application property was detected as invalid
-   virtual void          appLanguages                       (MemPtr<LANG_TYPE> langs  ) {langs.clear();} // get supported languages    of current app
    virtual Long          appSaveSize                        () {return                 -1;} // get max save disk usage                 of current app
+   virtual void          appInvalidProperty                 (C Str &msg                                  ) {                         } // called when application property was detected as invalid
+   virtual COMPRESS_TYPE appEmbedCompress                   (                           EXE_TYPE exe_type) {return     COMPRESS_NONE;} // get compression used for embedding data of current app
+   virtual Int           appEmbedCompressLevel              (                           EXE_TYPE exe_type) {return                 0;} // get compression used for embedding data of current app
+   virtual DateTime      appEmbedSettingsTime               (                           EXE_TYPE exe_type) {return DateTime().zero();} // get settings time    for embedding data of current app
+   virtual void          appSpecificFiles                   (MemPtr<PakFileData> files, EXE_TYPE exe_type) {                         } // get specific files      of current app
+   virtual void          appLanguages                       (MemPtr<LANG_TYPE  > langs                   ) {langs.clear();           } // get supported languages of current app
 
    virtual Rect         menuRect    (                      ) {return D.rect();}
    virtual Rect       sourceRect    (                      ) {return D.rect();}
@@ -226,6 +233,9 @@ struct CodeEditorInterface
    virtual void publishSuccess(C Str &exe_name, EXE_TYPE exe_type, BUILD_MODE build_mode, C UID &project_id) {}
 
    virtual void validateActiveSources() {} // called when sources need to have their activation reset
+
+   virtual Int  editorAddrPort(              ) {return     0;} // get Editor Network Interface Address Port
+   virtual void editorAddr    (SockAddr &addr) {addr.clear();} // get Editor Network Interface Address
 
    virtual Bool elmValid    (C UID &id              ) {return false;} // if element of this ID exists in the project
    virtual Str  elmBaseName (C UID &id              ) {return     S;} // get base name of element
@@ -279,12 +289,25 @@ struct ColorTheme
 /******************************************************************************/
 const_mem_addr struct CodeEditor
 {
+   struct CodeTab : Tab
+   {
+      Source *source=null;
+   };
+   struct CodeTabs : Tabs
+   {
+      CodeTab& tab(  Int  i   ) {return (CodeTab&)super::tab(i   );}
+      CodeTab& New(C Str &text) {return (CodeTab&)super::New(text);}
+
+      CodeTabs() {replaceClass<CodeTab>();}
+   };
+
    GuiObj     * parent;
    Source     *_cur;
    Memx<Item>   items;
    Memx<Source> sources;
    Button       b_close;
    WindowIO     load_source;
+   CodeTabs     code_tabs;
    Bool         config_debug, config_32_bit, symbols_loaded, menu_on_top;
    Byte         config_api;
    EXE_TYPE     config_exe;
@@ -417,7 +440,7 @@ const_mem_addr struct CodeEditor
    Memc<DeviceLog>   devlog_data;
    List<DeviceLog>   devlog_list;
    Region            devlog_region;
-   ConsoleProcess    devlog_process, adb_server;
+   ConsoleProcess    devlog_process;
    Button            devlog_close, devlog_export, devlog_filter, devlog_clear;
    WindowIO          devlog_io;
    MemberDesc        devlog_time_sort;
@@ -545,7 +568,7 @@ const_mem_addr struct CodeEditor
       TextLine         vs_path,   netbeans_path,   android_sdk,   android_ndk,   jdk_path,   android_cert_file,   android_cert_pass  ,   apple_team_id;
       Button         b_vs_path, b_netbeans_path, b_android_sdk, b_android_ndk, b_jdk_path, b_android_cert_file,   android_cert_create, b_apple_team_id, facebook_android_key_hash, authenticode, vs_path_auto, netbeans_path_auto, android_sdk_auto, android_ndk_auto, jdk_path_auto, d_vs, d_netbeans, d_android_sdk, d_android_ndk, d_jdk, color_theme_edit, font_edit;
       ComboBox         font_size, color_theme, export_path_mode, import_path_mode;
-      Button           ac_on_enter, simple, imm_scroll, eol_clip, line_numbers, hide_horizontal_slidebar, auto_hide_menu, import_image_mip_maps;
+      Button           ac_on_enter, simple, imm_scroll, eol_clip, line_numbers, hide_horizontal_slidebar, auto_hide_menu, show_file_tabs, import_image_mip_maps;
       WindowIO       w_vs_path, w_netbeans_path, w_android_sdk, w_android_ndk, w_jdk_path, w_android_cert_file;
       VSVersions       vs_versions;
       ColorThemeEditor color_theme_editor;
@@ -674,15 +697,15 @@ const_mem_addr struct CodeEditor
    static void HideAndFocusCE(GuiObj &go);
 
    // edit
-   void undo      (                  ) {if(cur())cur()->undo     ();}
-   void redo      (                  ) {if(cur())cur()->redo     ();}
-   void cut       (                  ) {if(cur())cur()->cut      ();}
-   void copy      (                  ) {if(cur())cur()->copy     ();}
-   void paste     (Bool move_cur=true) {if(cur())cur()->paste    (null, move_cur);}
-   void separator (                  ) {if(cur())cur()->separator();}
-   void selectAll (                  ) {if(cur())cur()->selAll   ();}
-   void selectWord(                  ) {if(cur())cur()->selWord  ();}
-   void makeCase  (Bool upper        ) {if(cur())cur()->makeCase (upper);}
+   void undo      (                                    ) {if(cur())cur()->undo     ();}
+   void redo      (                                    ) {if(cur())cur()->redo     ();}
+   void cut       (                                    ) {if(cur())cur()->cut      ();}
+   void copy      (                                    ) {if(cur())cur()->copy     ();}
+   void paste     (C Str *text=null, Bool move_cur=true) {if(cur())cur()->paste    (text, move_cur);}
+   void separator (                                    ) {if(cur())cur()->separator();}
+   void selectAll (                                    ) {if(cur())cur()->selAll   ();}
+   void selectWord(                                    ) {if(cur())cur()->selWord  ();}
+   void makeCase  (Bool upper                          ) {if(cur())cur()->makeCase (upper);}
 
    // C++
    void VS     (C Str &command,   Bool console,   Bool hidden              );
@@ -694,9 +717,9 @@ const_mem_addr struct CodeEditor
 
    void validateDevEnv     ();
    void setVSPath          (C Str &path);
-   void setNBPath          (C Str &path);
-   void setASPath          (C Str &path);
-   void setANPath          (C Str &path);
+   void setNetBeansPath    (C Str &path);
+   void setAndroidSDKPath  (C Str &path);
+   void setAndroidNDKPath  (C Str &path);
    void setJDKPath         (C Str &path);
    void setAndroidCertPath (C Str &path);
    void setAndroidCertPass (C Str &pass);
@@ -743,9 +766,10 @@ const_mem_addr struct CodeEditor
    void    cur                 (Source *cur);
    Source& New                 ();
    void    sourceRemoved       (Source &src);
-   void    closeDo             ();
+   void    closeDo             (Source &src);
    void    closeAll            (); // close all sources ignoring any unsaved changes
-   void    close               ();
+   void    close               (Source *src);
+   void    close               () {close(cur());}
    void    saveChanges         ();
    void    saveChanges         (Memc<Edit::SaveChanges::Elm> &elms);
    void    removeUselessSources();
@@ -795,5 +819,6 @@ extern Memc<Str      > Suggestions;
 void SuggestionsUsed    (C Str &text);
 Int  SuggestionsPriority(C Str &suggestion, C Str &text, Bool all_up_case);
 #endif
+CChar8* ShortName(EXE_TYPE type);
 } // namespace
 /******************************************************************************/

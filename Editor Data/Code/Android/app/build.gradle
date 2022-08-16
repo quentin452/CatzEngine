@@ -1,0 +1,49 @@
+apply plugin: "com.android.application"
+
+android {
+	compileSdkVersion 32
+	ndkVersion MSBUILD_NDK_VERSION
+	defaultConfig {
+		applicationId "com.esenthel.project"
+		minSdkVersion MSBUILD_MIN_SDK_VERSION
+		targetSdkVersion 30
+	}
+	signingConfigs {
+		release {
+			storeFile file("CERTIFICATE_PATH")
+			storePassword "CERTIFICATE_PASS"
+			keyAlias "key"
+			keyPassword "CERTIFICATE_PASS"
+		}
+	}
+	buildTypes {
+		release {
+			minifyEnabled false
+			proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+			signingConfig signingConfigs.release
+		}
+		debug {
+			signingConfig signingConfigs.release // set also for debug to avoid certificate mismatch error when installing APK
+		}
+	}
+	sourceSets {
+		main {
+			jniLibs.srcDirs = [MSBUILD_JNI_LIBS_SRC_DIR]
+		}
+	}
+	aaptOptions {
+	   noCompress "pak"
+	}
+	applicationVariants.all { variant ->
+		variant.outputs.all {
+			outputFileName = MSBUILD_ANDROID_OUTPUT_APK_NAME
+		}
+	}
+	assetPacks = [ASSET_PACKS]
+}
+
+dependencies {
+	implementation fileTree(dir: "libs", include: ["*.jar"])
+}
+
+buildDir = MSBUILD_ANDROID_GRADLE_BUILD_OUTPUT_DIR

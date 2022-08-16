@@ -53,6 +53,7 @@ class MiscRegion : Region
    static void ConfigLIB    (MiscRegion &mr) {CodeEdit.configEXE  (Edit.EXE_LIB  );}
    static void ConfigUWP    (MiscRegion &mr) {CodeEdit.configEXE  (Edit.EXE_UWP  );}
    static void ConfigAPK    (MiscRegion &mr) {CodeEdit.configEXE  (Edit.EXE_APK  );}
+   static void ConfigAAB    (MiscRegion &mr) {CodeEdit.configEXE  (Edit.EXE_AAB  );}
    static void ConfigMAC    (MiscRegion &mr) {CodeEdit.configEXE  (Edit.EXE_MAC  );}
    static void ConfigIOS    (MiscRegion &mr) {CodeEdit.configEXE  (Edit.EXE_IOS  );}
    static void ConfigLinux  (MiscRegion &mr) {CodeEdit.configEXE  (Edit.EXE_LINUX);}
@@ -111,8 +112,8 @@ class MiscRegion : Region
       }
       about+="\n\n";
       Str s=Cpu.name(); if(s.is())s+=", "; s+=S+Cpu.threads()+" HW Threads"; if(s.is())about.line()+=S+"CPU: "+s;
-          s=D.deviceName(); if(s.is()){if(D.deviceMemory()>0)s+=S+", "+FileSize(D.deviceMemory(), '.')+" RAM"; about.line()+=S+"GPU: "+s;}
-      MemStats m; m.get(); if(m.total_phys>0)about.line()+=S+"RAM: "+FileSize(m.total_phys, '.');
+          s=D.deviceName(); if(s.is()){if(D.deviceMemory()>0)s+=S+", "+SizeBytes(D.deviceMemory(), '.')+" RAM"; about.line()+=S+"GPU: "+s;}
+      MemStats m; m.get(); if(m.total_phys>0)about.line()+=S+"RAM: "+SizeBytes(m.total_phys, '.');
           s=OSName(); if(s.is())about.line()+=S+"Operating System: "+s;
           s=OSUserName(); if(s.is())about.line()+=S+"System User Name: "+s;
       #if DESKTOP
@@ -252,10 +253,11 @@ class MiscRegion : Region
          build_menu.New().create("Windows DLL"      , ConfigDLL  , T).flag(MENU_TOGGLABLE);
        //build_menu.New().create("Windows LIB"      , ConfigLIB  , T).flag(MENU_TOGGLABLE);
          build_menu.New().create("Windows Universal", ConfigUWP  , T).flag(MENU_TOGGLABLE);
-         build_menu.New().create("Android APK"      , ConfigAPK  , T).flag(MENU_TOGGLABLE);
       #if WINDOWS
-         build_menu.New().create("Web"              , ConfigWeb  , T).flag(MENU_TOGGLABLE);
+         build_menu.New().create("Android APK"      , ConfigAPK  , T).flag(MENU_TOGGLABLE);
+         build_menu.New().create("Android AAB"      , ConfigAAB  , T).flag(MENU_TOGGLABLE);
          build_menu.New().create("Nintendo Switch"  , ConfigNS   , T).flag(MENU_TOGGLABLE);
+         build_menu.New().create("Web"              , ConfigWeb  , T).flag(MENU_TOGGLABLE);
       #elif MAC
          build_menu.New().create("Mac APP"    , ConfigMAC  , T).flag(MENU_TOGGLABLE);
          build_menu.New().create("iOS APP"    , ConfigIOS  , T).flag(MENU_TOGGLABLE);

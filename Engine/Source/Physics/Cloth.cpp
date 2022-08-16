@@ -119,7 +119,7 @@ ClothMesh& ClothMesh::create(C MeshBase &mesh, C MaterialPtr &material, Skeleton
       REPA(temp.tri)
       {
          Int *p=temp.tri.ind(i).c, p0=p[0], p1=p[1], p2=p[2];
-         if(tri_as_cloth[i]=FlagTest(temp.vtx.flag(p0)|temp.vtx.flag(p1)|temp.vtx.flag(p2), VTX_FLAG_CLOTH)) // if at least one vtx is meant for phys cloth
+         if(tri_as_cloth[i]=FlagOn(temp.vtx.flag(p0)|temp.vtx.flag(p1)|temp.vtx.flag(p2), VTX_FLAG_CLOTH)) // if at least one vtx is meant for phys cloth
          {
             // set all to cloth and neighbor
             cloth_neighbor[p0]=true;
@@ -428,10 +428,10 @@ Cloth& Cloth::sleep(Bool   sleep)  {if     (_cloth)if(sleep)_cloth->putToSleep()
 Vec    Cloth::wind (            )C {return  _cloth ? Physx.vec(_cloth->getExternalAcceleration()) : 0;}
 Cloth& Cloth::wind (C Vec &accel)  {if     (_cloth)            _cloth->setExternalAcceleration(Physx.vec(accel)); return T;}
 Box    Cloth::box  (            )C {return  _cloth ? Physx.box(_cloth->getWorldBounds()) : Box(0);}
-Bool   Cloth::ccd  (            )C {return  _cloth ? FlagTest((UInt)_cloth->getClothFlags(), PxClothFlag::eSWEPT_CONTACT) : false;}
-Cloth& Cloth::ccd  (Bool      on)  {if     (_cloth)                 _cloth->setClothFlag (   PxClothFlag::eSWEPT_CONTACT, on); return T;}
-Bool   Cloth::gpu  (            )C {return  _cloth ? FlagTest((UInt)_cloth->getClothFlags(), PxClothFlag::eGPU          ) : false;}
-Cloth& Cloth::gpu  (Bool      on)  {if     (_cloth)                 _cloth->setClothFlag (   PxClothFlag::eGPU          , on); return T;}
+Bool   Cloth::ccd  (            )C {return  _cloth ? FlagOn((UInt)_cloth->getClothFlags(), PxClothFlag::eSWEPT_CONTACT) : false;}
+Cloth& Cloth::ccd  (Bool      on)  {if     (_cloth)               _cloth->setClothFlag (   PxClothFlag::eSWEPT_CONTACT, on); return T;}
+Bool   Cloth::gpu  (            )C {return  _cloth ? FlagOn((UInt)_cloth->getClothFlags(), PxClothFlag::eGPU          ) : false;}
+Cloth& Cloth::gpu  (Bool      on)  {if     (_cloth)               _cloth->setClothFlag (   PxClothFlag::eGPU          , on); return T;}
 #else
 Int    Cloth::vtxs (            )C {return  0    ;}
 Ptr    Cloth::obj  (            )C {return  null ;}

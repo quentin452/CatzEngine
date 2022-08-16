@@ -767,7 +767,7 @@ struct CSG // Constructive Solid Geometry
       setCutFacesSolid  (a, b);
 
       // build data
-      Bool               id=FlagTest(a.flag()|b.flag(), FACE_ID);
+      Bool               id=FlagOn(a.flag()|b.flag(), FACE_ID);
       MeshBase           temp;
       build             (temp, ((a.flag()|b.flag())&VTX_ALL) | TRI_FLAG | (id ? FACE_ID : MESH_NONE));
       setOpaque         (temp, a, b);
@@ -935,7 +935,7 @@ void ClipMesh(C MeshBase &src, C Matrix *matrix, MeshBase &dest, C Plane *clip_p
       {
          Matrix3 matrix3; if(matrix){matrix3=*matrix; matrix3.normalize();}
 
-               Bool             set_flags=FlagTest(flag_and, FACE_FLAG);
+               Bool             set_flags=FlagOn(flag_and, FACE_FLAG);
          Memc< Byte          > poly_flags;
          Memc< Memc<VtxFull> > polys;
                Memc<VtxFull>   poly[2];
@@ -1026,7 +1026,7 @@ void ClipMesh(C MeshLod &src, C Matrix *matrix, MeshLod &dest, C Plane *clip_pla
       {
        C MeshPart &src_part = src     .parts[i]; MeshBase temp_src; if(!src_part.base.is() && src_part.render.is())temp_src.create(src_part.render);
        C MeshBase &src      =(src_part.base.is() ? src_part.base : temp_src);
-         Bool      set_flags=FlagTest(src.flag()&flag_and, FACE_FLAG);
+         Bool      set_flags=FlagOn(src.flag()&flag_and, FACE_FLAG);
 
          // triangles
          REPA(src.tri)
@@ -1128,7 +1128,7 @@ void ClipMesh(C Mesh &src, C Matrix *matrix, Mesh &dest, C Plane *clip_plane, In
          {
           C MeshPart &src_part = src_lod .parts[i]; MeshBase temp_src; if(!src_part.base.is() && src_part.render.is())temp_src.create(src_part.render);
           C MeshBase &src      =(src_part.base.is() ? src_part.base : temp_src);
-            Bool      set_flags=FlagTest(src.flag()&flag_and, FACE_FLAG);
+            Bool      set_flags=FlagOn(src.flag()&flag_and, FACE_FLAG);
 
             // triangles
             REPA(src.tri)

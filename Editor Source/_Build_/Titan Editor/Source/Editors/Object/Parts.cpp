@@ -50,7 +50,7 @@
             }
          }
       }
-   Str MeshParts::Removed(C Part &p) {if(MeshPart *part=ObjEdit.getPart(p.index))return FlagTest(part->part_flag, MSHP_HIDDEN); return S;}
+   Str MeshParts::Removed(C Part &p) {if(MeshPart *part=ObjEdit.getPart(p.index))return FlagOn(part->part_flag, MSHP_HIDDEN); return S;}
    Str MeshParts::Name(C Part &p) {if(MeshPart *part=ObjEdit.getPart(p.index))return part->name       ; return S;}
    Str MeshParts::Vtxs(C Part &p) {if(MeshPart *part=ObjEdit.getPart(p.index))return part->vtxs     (); return S;}
    Str MeshParts::Tris(C Part &p) {if(MeshPart *part=ObjEdit.getPart(p.index))return part->trisTotal(); return S;}
@@ -412,8 +412,8 @@
             Part     &p   =data[i];
             p.index=i;
             p.remove.create(Rect_LU(0, list.elmHeight())).func(HiddenToggle, p).focusable(false);
-            if(p.removed=FlagTest(part.part_flag, MSHP_HIDDEN))p.remove.setText ("R"            ).desc("Restore this part");
-            else                                               p.remove.setImage("Gui/close.img").desc( "Remove this part");
+            if(p.removed=FlagOn(part.part_flag, MSHP_HIDDEN))p.remove.setText ("R"            ).desc("Restore this part");
+            else                                             p.remove.setImage("Gui/close.img").desc( "Remove this part");
             p.setColor();
             visible.add(!p.removed || show_removed());
             list.addChild(p.remove, i, 0);

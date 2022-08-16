@@ -241,7 +241,7 @@ private:
    Str  valueBin (C Str &value)C;
    Str  valueID  (C Str &value)C;
    Str  value    (C SQLValues::Value &value)C;
-   Bool colDesc  (C SQLColumn &col, Str &desc, Str *messages);
+   Bool colDesc  (C SQLColumn &col, Str &desc, Str *messages, Bool append=false);
    void getStatus(Str *messages, Int *error, Bool statement=true);
 #endif
    NO_COPY_CONSTRUCTOR(SQL);

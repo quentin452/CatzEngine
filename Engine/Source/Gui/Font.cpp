@@ -135,117 +135,151 @@ Int Font::charWidth(Char c0, Char c1, SPACING_MODE spacing)C
    }
 }
 /******************************************************************************/
-Int Font::textWidth(Int &base_chars, SPACING_MODE spacing, CChar8 *text, Int max_length)C
+Int Font::textWidth(Int &spacings, SPACING_MODE spacing, CChar8 *text, Int max_length)C
 {
-   Int width=0, bcs=0;
+   Int width=0, spcs;
    if(spacing!=SPACING_CONST)
    {
+      spcs=-1; // for !SPACING_CONST we calculate spacings between characters, so start -1 and Max(0 later
       if(max_length<0) // unlimited
       {
-         for(;;)
+         Char8 c=*text;
+      next:
+         if(c)
          {
-            Char8 c=*text; if(!c)break;
-         skip:
+            spcs++;
+         combining:
             Char8 next=*++text;
-            if(CharFlagFast(next)&CHARF_COMBINING)goto skip;
-            width+=charWidth(c, next, spacing); bcs++;
+            if(CharFlagFast(next)&CHARF_COMBINING)goto combining;
+            width+=charWidth(c, next, spacing);
+            c=next; goto next;
          }
       }else
       if(max_length)
       {
-         for(;;)
+         Char8 c=*text;
+      next1:
+         if(c)
          {
-            Char8 c=*text; if(!c)break;
-         skip1:
-            if(!--max_length){/*if(spacing!=SPACING_CONST)*/width+=charWidth(c); bcs++; break;} // for the last character we need to process only its width and ignore the spacing between the next one
-            Char8 next=*++text;
-            if(CharFlagFast(next)&CHARF_COMBINING)goto skip1;
-            width+=charWidth(c, next, spacing); bcs++;
+            spcs++;
+         combining1:
+            if(!--max_length){/*if(spacing!=SPACING_CONST)*/width+=charWidth(c);}else // for the last character we need to process only its width and ignore the spacing between the next one
+            {
+               Char8 next=*++text;
+               if(CharFlagFast(next)&CHARF_COMBINING)goto combining1;
+               width+=charWidth(c, next, spacing);
+               c=next; goto next1;
+            }
          }
       }
-   }else // for SPACING_CONST we don't calculate 'width' but just 'bcs'
+      MAX(spcs, 0);
+   }else // for SPACING_CONST we don't calculate 'width' but just 'spacings'
    {
+      spcs=0;
       if(max_length<0) // unlimited
       {
-         for(;;)
+         Char8 c=*text;
+      next2:
+         if(c)
          {
-            Char8 c=*text; if(!c)break;
-         skip2:
+            spcs++;
+         combining2:
             Char8 next=*++text;
-            if(CharFlagFast(next)&CHARF_COMBINING)goto skip2;
-            bcs++;
+            if(CharFlagFast(next)&CHARF_COMBINING)goto combining2;
+            c=next; goto next2;
          }
       }else
       if(max_length)
       {
-         for(;;)
+         Char8 c=*text;
+      next3:
+         if(c)
          {
-            Char8 c=*text; if(!c)break;
-         skip3:
-            if(!--max_length){bcs++; break;} // for the last character we need to process only its width and ignore the spacing between the next one
-            Char8 next=*++text;
-            if(CharFlagFast(next)&CHARF_COMBINING)goto skip3;
-            bcs++;
+            spcs++;
+         combining3:
+            if(--max_length)
+            {
+               Char8 next=*++text;
+               if(CharFlagFast(next)&CHARF_COMBINING)goto combining3;
+               c=next; goto next3;
+            }
          }
       }
    }
-   base_chars=bcs; return width;
+   spacings=spcs; return width;
 }
-Int Font::textWidth(Int &base_chars, SPACING_MODE spacing, CChar *text, Int max_length)C
+Int Font::textWidth(Int &spacings, SPACING_MODE spacing, CChar *text, Int max_length)C
 {
-   Int width=0, bcs=0;
+   Int width=0, spcs;
    if(spacing!=SPACING_CONST)
    {
+      spcs=-1; // for !SPACING_CONST we calculate spacings between characters, so start -1 and Max(0 later
       if(max_length<0) // unlimited
       {
-         for(;;)
+         Char c=*text;
+      next:
+         if(c)
          {
-            Char c=*text; if(!c)break;
-         skip:
+            spcs++;
+         combining:
             Char next=*++text;
-            if(CharFlagFast(next)&CHARF_COMBINING)goto skip;
-            width+=charWidth(c, next, spacing); bcs++;
+            if(CharFlagFast(next)&CHARF_COMBINING)goto combining;
+            width+=charWidth(c, next, spacing);
+            c=next; goto next;
          }
       }else
       if(max_length)
       {
-         for(;;)
+         Char c=*text;
+      next1:
+         if(c)
          {
-            Char c=*text; if(!c)break;
-         skip1:
-            if(!--max_length){/*if(spacing!=SPACING_CONST)*/width+=charWidth(c); bcs++; break;} // for the last character we need to process only its width and ignore the spacing between the next one
-            Char next=*++text;
-            if(CharFlagFast(next)&CHARF_COMBINING)goto skip1;
-            width+=charWidth(c, next, spacing); bcs++;
+            spcs++;
+         combining1:
+            if(!--max_length){/*if(spacing!=SPACING_CONST)*/width+=charWidth(c);}else // for the last character we need to process only its width and ignore the spacing between the next one
+            {
+               Char next=*++text;
+               if(CharFlagFast(next)&CHARF_COMBINING)goto combining1;
+               width+=charWidth(c, next, spacing);
+               c=next; goto next1;
+            }
          }
       }
-   }else // for SPACING_CONST we don't calculate 'width' but just 'bcs'
+      MAX(spcs, 0);
+   }else // for SPACING_CONST we don't calculate 'width' but just 'spacings'
    {
+      spcs=0;
       if(max_length<0) // unlimited
       {
-         for(;;)
+         Char c=*text;
+      next2:
+         if(c)
          {
-            Char c=*text; if(!c)break;
-         skip2:
+            spcs++;
+         combining2:
             Char next=*++text;
-            if(CharFlagFast(next)&CHARF_COMBINING)goto skip2;
-            bcs++;
+            if(CharFlagFast(next)&CHARF_COMBINING)goto combining2;
+            c=next; goto next2;
          }
       }else
       if(max_length)
       {
-         for(;;)
+         Char c=*text;
+      next3:
+         if(c)
          {
-            Char c=*text; if(!c)break;
-         skip3:
-            if(!--max_length){bcs++; break;} // for the last character we need to process only its width and ignore the spacing between the next one
-            Char next=*++text;
-            if(CharFlagFast(next)&CHARF_COMBINING)goto skip3;
-            bcs++;
+            spcs++;
+         combining3:
+            if(--max_length)
+            {
+               Char next=*++text;
+               if(CharFlagFast(next)&CHARF_COMBINING)goto combining3;
+               c=next; goto next3;
+            }
          }
       }
    }
-   base_chars=bcs; return width;
+   spacings=spcs; return width;
 }
 /******************************************************************************/
 // OPERATIONS
@@ -261,9 +295,9 @@ Bool Font::imageType(IMAGE_TYPE type)
    if(!_sub_pixel)type=(FONT_SRGB           ? ImageTypeIncludeSRGB : ImageTypeExcludeSRGB)(type);else
    {              type=(FONT_SRGB_SUB_PIXEL ? ImageTypeIncludeSRGB : ImageTypeExcludeSRGB)(type);
    #if FONT_SRGB_SUB_PIXEL
-      if(type!=IMAGE_R8G8B8A8_SRGB && type!=IMAGE_B8G8R8A8_SRGB && type!=IMAGE_BC2_SRGB && type!=IMAGE_BC3_SRGB && type!=IMAGE_BC7_SRGB && type!=IMAGE_ETC2_RGBA_SRGB)return false; // sub pixel supports only these formats
+      if(type!=IMAGE_R8G8B8A8_SRGB && type!=IMAGE_B8G8R8A8_SRGB && type!=IMAGE_BC2_SRGB && type!=IMAGE_BC3_SRGB && type!=IMAGE_BC7_SRGB && type!=IMAGE_ETC2_RGBA_SRGB && type!=IMAGE_ASTC_4x4_SRGB)return false; // sub pixel supports only these formats
    #else
-      if(type!=IMAGE_R8G8B8A8      && type!=IMAGE_B8G8R8A8      && type!=IMAGE_BC2      && type!=IMAGE_BC3      && type!=IMAGE_BC7      && type!=IMAGE_ETC2_RGBA     )return false; // sub pixel supports only these formats
+      if(type!=IMAGE_R8G8B8A8      && type!=IMAGE_B8G8R8A8      && type!=IMAGE_BC2      && type!=IMAGE_BC3      && type!=IMAGE_BC7      && type!=IMAGE_ETC2_RGBA      && type!=IMAGE_ASTC_4x4     )return false; // sub pixel supports only these formats
    #endif
    }
    Bool changed=false;
@@ -756,7 +790,13 @@ struct FontChar
       image.del();
    }
 
-   static Int Compare(C FontChar &a, C FontChar &b) {return ::Compare(a.image.h(), b.image.h());}
+   static Int Compare(C FontChar &a, C FontChar &b)
+   {
+      Bool unicode=HasUnicode(a.chr);
+      if(Int c=::Compare(unicode             , HasUnicode(b.chr     )))return           c     ; // keep ASCII (non-unicode) first, because they're most commonly used, to minimize image changes when drawing
+      if(Int c=::Compare(         a.image.h(),            b.image.h()))return unicode ? c : -c; // sort by height to pack as many characters as possible, reverse order for non-unicode, so when transitioning from non-unicode to unicode, heights will be similar (this makes order: big ASCII, small ASCII, small Unicode, big Unicode). Order was designed to keep small Unicode close to 1st image, as those are usually frequantly used symbols.
+      return   ::Compare(Unsigned(a.chr     ), Unsigned  (b.chr     )); // keep characters close together to minimize image changes when drawing
+   }
 
    FontChar() {Zero(widths);} // Zero (for example required for spaces)
 };

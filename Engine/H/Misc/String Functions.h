@@ -268,6 +268,8 @@ Bool TextHexMem(C Str &t, Ptr data, Int size); // convert text hex representatio
 Str  FromUTF8(CChar8 *text); // convert 'text' from UTF-8 format into Str
 Str8 UTF8    (C Str  &text); // convert 'text' from   Str        into UTF-8 format
 
+Str Censor(C Str &text); // censor 'text' by removing profanities [Supported Platforms: NintendoSwitch]
+
 // compare strings
    // Str == (Str, Str8, CChar*, CChar8*, Char, Char8)
    inline Bool operator==(C Str  &a, C Str  &b) {return Equal(a, b);}

@@ -67,7 +67,10 @@ Int AtomicDisable(Int &x, Int y) {return _InterlockedAnd((LONG*)&x, ~y);} // 'In
 Int AtomicOr     (Int &x, Int y) {return _InterlockedOr ((LONG*)&x,  y);} // 'InterlockedOr'  returns the old value
 Int AtomicXor    (Int &x, Int y) {return _InterlockedXor((LONG*)&x,  y);} // 'InterlockedXor' returns the old value
 
-Int AtomicGetSet(Int &x, Int y) {return _InterlockedExchange((LONG*)&x, y);} // 'InterlockedExchange' returns the old value
+Int   AtomicGetSet(Int   &x, Int   y) {return _InterlockedExchange  ((LONG  *)&x, y);} // 'InterlockedExchange' returns the old value
+UInt  AtomicGetSet(UInt  &x, UInt  y) {return _InterlockedExchange  ((LONG  *)&x, y);} // 'InterlockedExchange' returns the old value
+Long  AtomicGetSet(Long  &x, Long  y) {return _InterlockedExchange64((LONG64*)&x, y);} // 'InterlockedExchange' returns the old value
+ULong AtomicGetSet(ULong &x, ULong y) {return _InterlockedExchange64((LONG64*)&x, y);} // 'InterlockedExchange' returns the old value
 
 Bool AtomicCAS(Int   &x, Int   compare, Int   new_value) {return _InterlockedCompareExchange  ((LONG  *)&x,       new_value,       compare)==      compare;} // 'InterlockedCompareExchange' returns the old value
 Bool AtomicCAS(UInt  &x, UInt  compare, UInt  new_value) {return _InterlockedCompareExchange  ((LONG  *)&x,       new_value,       compare)==      compare;} // 'InterlockedCompareExchange' returns the old value
@@ -108,7 +111,10 @@ Int AtomicDisable(Int &x, Int y) {return __sync_fetch_and_and(&x, ~y);} // '__sy
 Int AtomicOr     (Int &x, Int y) {return __sync_fetch_and_or (&x,  y);} // '__sync_fetch_and_or'  returns the old value
 Int AtomicXor    (Int &x, Int y) {return __sync_fetch_and_xor(&x,  y);} // '__sync_fetch_and_xor' returns the old value
 
-Int AtomicGetSet(Int &x, Int y) {return __sync_lock_test_and_set(&x, y);} // '__sync_lock_test_and_set' returns the old value
+ Int  AtomicGetSet( Int  &x,  Int  y) {return __sync_lock_test_and_set(&x, y);} // '__sync_lock_test_and_set' returns the old value
+UInt  AtomicGetSet(UInt  &x, UInt  y) {return __sync_lock_test_and_set(&x, y);} // '__sync_lock_test_and_set' returns the old value
+ Long AtomicGetSet( Long &x,  Long y) {return __sync_lock_test_and_set(&x, y);} // '__sync_lock_test_and_set' returns the old value
+ULong AtomicGetSet(ULong &x, ULong y) {return __sync_lock_test_and_set(&x, y);} // '__sync_lock_test_and_set' returns the old value
 
 Bool AtomicCAS(Int   &x, Int   compare, Int   new_value) {return __sync_bool_compare_and_swap(      &x,       compare,       new_value);}
 Bool AtomicCAS(UInt  &x, UInt  compare, UInt  new_value) {return __sync_bool_compare_and_swap(      &x,       compare,       new_value);}
@@ -117,10 +123,10 @@ Bool AtomicCAS(ULong &x, ULong compare, ULong new_value) {return __sync_bool_com
 Bool AtomicCAS(Flt   &x, Flt   compare, Flt   new_value) {return __sync_bool_compare_and_swap((Int*)&x, (Int&)compare, (Int&)new_value);}
 #endif
 /******************************************************************************/
-#undef  GetThreadId
-UIntPtr Thread::id()C {return PLATFORM(::GetThreadId(_handle), (UIntPtr)_handle);}
-UIntPtr GetThreadId() {return _GetThreadId();}
-#define GetThreadId _GetThreadId
+UIntPtr Thread::id()C {return PLATFORM(GetThreadId(_handle), (UIntPtr)_handle);}
+#undef  GetThreadID
+UIntPtr GetThreadID() {return _GetThreadID();}
+#define GetThreadID           _GetThreadID
 /******************************************************************************/
 void SetThreadName(C Str8 &name, UIntPtr thread_id)
 {
@@ -145,7 +151,7 @@ void SetThreadName(C Str8 &name, UIntPtr thread_id)
    __except(EXCEPTION_EXECUTE_HANDLER) {}
    // TODO: check 'SetThreadDescription'
 #elif APPLE
-   if(thread_id==GetThreadId()) // on Apple can set the name of current thread only
+   if(thread_id==GetThreadID()) // on Apple can set the name of current thread only
    {
    #if 1 // works the same but less overhead
       pthread_setname_np(name); // doesn't crash if 'name' is null
@@ -164,12 +170,14 @@ void SetThreadName(C Str8 &name, UIntPtr thread_id)
         SyncLock::~SyncLock()  {_is=false;}
         SyncLock:: SyncLock()  {_lock_count=0; _owner=0; _is=true;}
    Bool SyncLock:: tryOn   ()C {on(); return true;}
-   void SyncLock:: on      ()C {if(  _lock_count++==0)_owner=GetThreadId();}
+   void SyncLock:: on      ()C {if(  _lock_count++==0)_owner=GetThreadID();}
    void SyncLock:: off     ()C {if(--_lock_count  ==0)_owner=0;}
+   Bool SyncLock:: locked  ()C {return _lock_count>0;}
    Bool SyncLock:: owned   ()C {return _lock_count>0;}
    Bool SyncLock:: created ()C {return _is!=0;}
 #elif WINDOWS
-      Bool SyncLock::owned  ()C {return _lock.OwningThread==(HANDLE)GetThreadId();}
+      Bool SyncLock::locked ()C {return _lock.OwningThread!=null;}
+      Bool SyncLock::owned  ()C {return _lock.OwningThread==(HANDLE)GetThreadID();}
       Bool SyncLock::created()C {return _lock.DebugInfo!=null;}
 
    #if SUPPORT_WINDOWS_XP
@@ -234,9 +242,13 @@ SyncLock::~SyncLock()
   _lock_count=0;
   _owner=0;
 }
+Bool SyncLock::locked()C
+{
+   return _lock_count>0;
+}
 Bool SyncLock::owned()C
 {
-   return _lock_count>0 && _owner==GetThreadId();
+   return _lock_count>0 && _owner==GetThreadID();
 }
 Bool SyncLock::tryOn()C
 {
@@ -252,14 +264,14 @@ Bool SyncLock::tryOn()C
       }
       if(pthread_mutex_trylock(&_lock)==0)
       {
-        _owner=GetThreadId();
+        _owner=GetThreadID();
         _lock_count++;
          return true;
       }
    #else
       if(pthread_mutex_trylock(&_lock)==0)
       {
-         if(!_lock_count)_owner=GetThreadId();
+         if(!_lock_count)_owner=GetThreadID();
              _lock_count++;
          return true;
       }
@@ -277,12 +289,12 @@ void SyncLock::on()C
       if(!owned())
       {
          auto result=pthread_mutex_lock(&_lock); DEBUG_ASSERT(!result, "pthread_mutex_lock");
-        _owner=GetThreadId();
+        _owner=GetThreadID();
       }
      _lock_count++;
    #else
       auto result=pthread_mutex_lock(&_lock); DEBUG_ASSERT(!result, "pthread_mutex_lock");
-      if(!_lock_count)_owner=GetThreadId();
+      if(!_lock_count)_owner=GetThreadID();
           _lock_count++;
    #endif
    }
@@ -499,7 +511,7 @@ Bool SyncCounter::wait(Int milliseconds)C
 /******************************************************************************/
 void ReadWriteSync::enterRead()
 {
-   UIntPtr thread_id=GetThreadId();
+   UIntPtr thread_id=GetThreadID();
 
    // check if this thread already has a lock present, it's important to test without '_write_lock' yet, in case some thread called 'enterWrite'
    if(_locks.elms()) // this is safe because we're interested only in locks from this thread, so if this thread has made a lock before, then it will be available here without the need of enabling '_locks_lock'
@@ -523,7 +535,7 @@ void ReadWriteSync::leaveRead()
 {
  //if(_locks.elms()) don't check this, because if we're calling 'leaveRead', then most likely we are locked
    {
-      UIntPtr thread_id=GetThreadId();
+      UIntPtr thread_id=GetThreadID();
      _locks_lock.on();
       REPA(_locks)
       {
@@ -546,7 +558,7 @@ void ReadWriteSync::leaveRead()
 
 void ReadWriteSync::enterWrite()
 {
-   UIntPtr thread_id=GetThreadId();
+   UIntPtr thread_id=GetThreadID();
   _write_lock.on(); // block adding new 'readers' and 'writers'
 
    // wait until all 'readers' from other threads will exit
@@ -572,7 +584,7 @@ Bool ReadWriteSync::ownedRead()
 {
    if(_locks.elms())
    {
-      UIntPtr thread_id=GetThreadId();
+      UIntPtr thread_id=GetThreadID();
       SyncLocker lock(_locks_lock); REPA(_locks)if(_locks[i].thread_id==thread_id)return true;
    }
    return false;

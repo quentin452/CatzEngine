@@ -63,7 +63,7 @@ Application::Application()
   _waiting=false;
 #endif
   _stay_awake=AWAKE_OFF;
-  _lang=LANG_UNKNOWN;
+  _lang=LANG_NONE;
 //_mem_leaks=0; don't set this as it could have been already modified
   _process_id=_parent_process_id=0;
   _hwnd=null;
@@ -80,7 +80,7 @@ Application::Application()
   _style_window=0;
 #endif
 #endif
-  _thread_id=GetThreadId();
+  _thread_id=GetThreadID();
   _back_text="Running in background";
 }
 Application& Application::name(C Str &name)
@@ -248,8 +248,6 @@ Bool Application::maximized()C {return true ;}
 Bool Application::minimized()C {return false;}
 Bool Application::maximized()C {return _maximized;}
 #endif
-
-Bool Application::mainThread()C {return GetThreadId()==_thread_id;}
 
 UInt Application::parentProcessID()C
 {
@@ -503,46 +501,70 @@ Application& Application::lang(LANG_TYPE lang)
    return T;
 }
 /******************************************************************************/
-#if MAC
-static Bool            AssertionIDValid=false;
+#if WINDOWS_NEW
+static Bool                                      StayAwake;
+static Windows::System::Display::DisplayRequest ^DisplayRequest; // need to be as pointer, because crash happens if constructor is called on app startup. can't be created inside 'stayAwake' because crash will happen if that was called on secondary thread, must be created on main thread
+#elif MAC
+static Bool            AssertionIDValid;
 static IOPMAssertionID AssertionID;
 #endif
 #if !SWITCH
+static void SetStayAwake() {App.setStayAwake();}
+void Application::setStayAwake()
+{
+#if IOS // can be called only on the main thread
+   if(!App.mainThread()){App.includeFuncCall(SetStayAwake); return;}
+#endif
+
+   auto mode=_stay_awake;
+
+#if DESKTOP
+   if(mode==AWAKE_SCREEN) // if we want to keep the screen on
+      if(!(active() || FlagOn(App.flag, APP_WORK_IN_BACKGROUND))) // however the app is not focused
+         mode=AWAKE_OFF; // then disable staying awake
+#endif
+
+#if WINDOWS_OLD
+   SetThreadExecutionState(ES_CONTINUOUS|((mode==AWAKE_OFF) ? 0 : (mode==AWAKE_SCREEN) ? ES_DISPLAY_REQUIRED : ES_SYSTEM_REQUIRED));
+#elif WINDOWS_NEW
+   if(StayAwake!=(mode!=AWAKE_OFF)) // !! CALLS TO 'DisplayRequest' ARE CUMULATIVE, SO CALL ONLY ON CHANGE !! - https://docs.microsoft.com/en-us/uwp/api/windows.system.display.displayrequest
+      if(DisplayRequest)
+   {
+      try // need try/catch because can throw
+      {   // can be called on secondary threads
+         if(StayAwake)DisplayRequest->RequestRelease(); // here 'StayAwake' means current state (before change)
+         else         DisplayRequest->RequestActive ();
+         StayAwake^=1; // !! CHANGE AFTER CALL !! because if failed then exception is thrown and this is not called
+      }
+      catch(...){}
+   }
+#elif MAC
+   if(AssertionIDValid){IOPMAssertionRelease(AssertionID); AssertionIDValid=false;} // release current
+   if(mode && IOPMAssertionCreateWithName((mode==AWAKE_SCREEN) ? kIOPMAssertionTypeNoDisplaySleep : kIOPMAssertionTypeNoIdleSleep, kIOPMAssertionLevelOn, CFSTR("Busy"), &AssertionID)==kIOReturnSuccess)AssertionIDValid=true;
+#elif ANDROID
+   if(mode==AWAKE_SYSTEM) // if we want to keep the system on
+      if(!(active() || FlagOn(App.flag, APP_WORK_IN_BACKGROUND))) // however the app is not focused
+         mode=AWAKE_OFF; // then disable staying awake
+   JNI jni;
+   if(jni && ActivityClass)
+   if(JMethodID stayAwake=jni.staticFunc(ActivityClass, "stayAwake", "(I)V"))
+      jni->CallStaticVoidMethod(ActivityClass, stayAwake, jint(mode));
+#elif IOS
+   [UIApplication sharedApplication].idleTimerDisabled=(mode!=AWAKE_OFF);
+#elif LINUX
+   // TODO: add 'stayAwake' support for Linux
+#endif
+}
+#endif
 Application& Application::stayAwake(AWAKE_MODE mode)
 {
    if(_stay_awake!=mode)
    {
      _stay_awake=mode;
-   #if DESKTOP
-      if(mode==AWAKE_SCREEN) // if we want to keep the screen on
-         if(!(active() || FlagTest(App.flag, APP_WORK_IN_BACKGROUND))) // however the app is not focused
-            mode=AWAKE_OFF; // then disable staying awake
-   #endif
-   #if WINDOWS_OLD
-      SetThreadExecutionState(ES_CONTINUOUS|((mode==AWAKE_OFF) ? 0 : (mode==AWAKE_SCREEN) ? ES_DISPLAY_REQUIRED : ES_SYSTEM_REQUIRED));
-   #elif WINDOWS_NEW
-      static Windows::System::Display::DisplayRequest DR; // can't be set as a global var, because crash will happen at its constructor due to system not initialized yet
-      if(mode==AWAKE_OFF)DR.RequestRelease();else DR.RequestActive();
-   #elif MAC
-      if(AssertionIDValid){IOPMAssertionRelease(AssertionID); AssertionIDValid=false;} // release current
-      if(mode && IOPMAssertionCreateWithName((mode==AWAKE_SCREEN) ? kIOPMAssertionTypeNoDisplaySleep : kIOPMAssertionTypeNoIdleSleep, kIOPMAssertionLevelOn, CFSTR("Busy"), &AssertionID)==kIOReturnSuccess)AssertionIDValid=true;
-   #elif ANDROID
-      if(mode==AWAKE_SYSTEM) // if we want to keep the system on
-         if(!(active() || FlagTest(App.flag, APP_WORK_IN_BACKGROUND))) // however the app is not focused
-            mode=AWAKE_OFF; // then disable staying awake
-      JNI jni;
-      if(jni && ActivityClass)
-      if(JMethodID stayAwake=jni.staticFunc(ActivityClass, "stayAwake", "(I)V"))
-         jni->CallStaticVoidMethod(ActivityClass, stayAwake, jint(mode));
-   #elif IOS
-      [UIApplication sharedApplication].idleTimerDisabled=(mode!=AWAKE_OFF);
-   #elif LINUX
-      // TODO: add 'stayAwake' support for Linux
-   #endif
+      setStayAwake();
    }
    return T;
 }
-#endif
 /******************************************************************************/
 void Application::activeOrBackFullChanged()
 {
@@ -597,7 +619,7 @@ void Application::setActive(Bool active)
          else      {if(T. paused)T. paused();}
       }
    #if DESKTOP || ANDROID // also on Android in case a new Activity/Window was created, call this after potential 'paused/resumed' in case user modifies APP_WORK_IN_BACKGROUND which affect 'stayAwake'
-      if(_stay_awake){AWAKE_MODE temp=_stay_awake; _stay_awake=AWAKE_OFF; stayAwake(temp);} // reset sleeping when app gets de/activated
+      if(_stay_awake)setStayAwake(); // reset sleeping when app gets de/activated
    #endif
      _initialized=true;
    #if IOS
@@ -740,7 +762,7 @@ void Application::showError(CChar *error)
    {
       if(D.full() && App.window())
       {
-         hide();
+         if(!ANDROID)hide();
       #if DX11 // hiding window on DX10+ is not enough, try disabling Fullscreen
        //ChangeDisplaySettings(null, 0); this didn't help
          if(SwapChain
@@ -749,7 +771,7 @@ void Application::showError(CChar *error)
       #endif
          )
          {
-            if(App.threadID()==GetThreadId()) // we can make call to 'SetFullscreenState' only on the main thread, calling it on others made no difference
+            if(App.mainThread()) // we can make call to 'SetFullscreenState' only on the main thread, calling it on others made no difference
             {
                SyncLocker locker(D._lock); // we should always be able to lock on the main thread
                if(SwapChain)SwapChain->SetFullscreenState(false, null);
@@ -792,18 +814,24 @@ void Application::showError(CChar *error)
                if(JString te=JString(jni, error))
                   jni->CallStaticVoidMethod(ActivityClass, messageBox, ti(), te(), jboolean(true));
 
-            for(; !AndroidApp->destroyRequested && ALooper_pollAll(-1, null, null, null)>=0; )Time.wait(1); // since the message box is only queued, we need to wait until it's actually displayed, need to check for 'destroyRequested' as well, in case the system decided to close the app before 'closedError' got called
+            if(App.mainThread())
+            {
+               // remove callbacks
+               AndroidApp->onAppCmd    =null;
+               AndroidApp->onInputEvent=null;
+
+               android_poll_source *source;
+               for(; !AndroidApp->destroyRequested && ALooper_pollAll(-1, null, null, (void**)&source)>=0; ) // since the message box is only queued, we need to wait until it's actually displayed, need to check for 'destroyRequested' as well, in case the system decided to close the app before 'closedError' got called
+               {
+                  if(source)source->process(AndroidApp, source); // process this event
+                  Time.wait(1);
+               }
+            }else for(; !AndroidApp->destroyRequested; )Time.wait(1);
          }else // can't display a message box if app is minimized, so display a toast instead
          {
             Str message=S+App.name()+" exited"; if(Is(error))message.line()+=error;
-            JNI jni;
-            if(jni && ActivityClass)
-            if(JMethodID toast=jni.staticFunc(ActivityClass, "toast", "(Ljava/lang/String;)V"))
-               if(JString text=JString(jni, message))
-            {
-               jni->CallStaticVoidMethod(ActivityClass, toast, text());
-               Time.wait(4000); // wait 4 seconds because toast will disappear as soon as we crash
-            }
+            OSToast(message);
+            Time.wait(4000); // wait 4 seconds because toast will disappear as soon as we crash
          }
       }
    #elif IOS
@@ -1105,6 +1133,9 @@ void LoadEmbeddedPaks(Cipher *cipher)
 #endif
    Paks.rebuild();
 }
+#if !ANDROID
+void LoadAndroidAssetPacks(Int asset_packs, Cipher *cipher) {}
+#endif
 /******************************************************************************/
 Bool Application::create0()
 {
@@ -1115,6 +1146,7 @@ Bool Application::create0()
    TouchesSupported=(GetSystemMetrics(SM_MAXIMUMTOUCHES)>0);
 #elif WINDOWS_NEW
    TouchesSupported=(Windows::Devices::Input::TouchCapabilities().TouchPresent>0);
+   try{DisplayRequest=ref new Windows::System::Display::DisplayRequest;}catch(...){} // need try/catch because can throw
 #elif MAC
    [MyApplication sharedApplication]; // this allocates 'NSApp' application as our custom class
    [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
@@ -1135,7 +1167,7 @@ Bool Application::create0()
    }
 #endif
 
-   T._thread_id   =GetThreadId(); // !! adjust the thread ID here, because on WINDOWS_NEW it will be a different value !!
+   T._thread_id   =GetThreadID(); // !! adjust the thread ID here, because on WINDOWS_NEW it will be a different value !!
    T._elevated    =GetProcessElevation();
    T._process_id  =PLATFORM(GetCurrentProcessId(), getpid());
    T._desktop_size=D.screen();
@@ -1170,14 +1202,14 @@ Bool Application::create1()
    if(!testInstance())return false;
        windowCreate();
        InitSound   ();
-   if(!InputDevices.create())Exit(MLTC(u"Can't create DirectInput", PL,u"Nie można utworzyć DirectInput"));
    if(!D           .create())return false;
+       InputDevices.create(); // create input devices after display, because mouse might use 'D.res' for initial position, and some sensors are set based on screen refresh rate
 #if WINDOWS_OLD
    if(!(flag&APP_HIDDEN) && hidden())show(true); // if we don't want window hidden, but it is (for example due to WS_EX_NOREDIRECTIONBITMAP) then show it
    window().activate(); // manually activate because on Windows if application is loading for a long time, then it might lose focus
 #endif
 #if ANDROID
-   if(_stay_awake){AWAKE_MODE temp=_stay_awake; _stay_awake=AWAKE_OFF; stayAwake(temp);} // on Android we need to apply this after window was created
+   if(_stay_awake)setStayAwake(); // on Android we need to apply this after window was created
 #endif
    if(LogInit)LogN("Init");
    if(!Init())return false;
@@ -1232,6 +1264,7 @@ void Application::del()
 
      _initialized=false; setActive(false); // set '_initialized' to false to prevent from calling custom 'paused' callback in 'setActive', call 'setActive' because app will no longer be active, this is needed in case 'InputDevices.acquire' is called at a later stage, this is also needed because currently we need to disable disable magnetometer callback for WINDOWS_NEW (otherwise it will crash on Windows Phone when closing app)
       FlushIO          ();
+      ShutStreamLoads  (); // stop stream loads ASAP because we won't need them anymore
       ShutObj          ();
       Physics.del      ();
       D      .del      ();
@@ -1248,6 +1281,8 @@ void Application::del()
    #if WINDOWS_OLD
       RELEASE(TaskbarList);
       if(ShutCOM){ShutCOM=false; CoUninitialize();} // required by 'CoInitialize'
+   #elif WINDOWS_NEW
+      DisplayRequest=null; // release
    #elif LINUX
       if(XDisplay){XCloseDisplay(XDisplay); XDisplay=null;}
    #elif MAC
@@ -1295,6 +1330,8 @@ Str MLT(C Str &english, LANG_TYPE l0, C Str &t0, LANG_TYPE l1, C Str &t1, LANG_T
    {if(App.lang()==l0)return t0; if(App.lang()==l1)return t1; if(App.lang()==l2)return t2; if(App.lang()==l3)return t3; if(App.lang()==l4)return t4; if(App.lang()==l5)return t5; if(App.lang()==l6)return t6; if(App.lang()==l7)return t7; if(App.lang()==l8)return t8; if(App.lang()==l9)return t9; return english;}
 Str MLT(C Str &english, LANG_TYPE l0, C Str &t0, LANG_TYPE l1, C Str &t1, LANG_TYPE l2, C Str &t2, LANG_TYPE l3, C Str &t3, LANG_TYPE l4, C Str &t4, LANG_TYPE l5, C Str &t5, LANG_TYPE l6, C Str &t6, LANG_TYPE l7, C Str &t7, LANG_TYPE l8, C Str &t8, LANG_TYPE l9, C Str &t9, LANG_TYPE l10, C Str &t10)
    {if(App.lang()==l0)return t0; if(App.lang()==l1)return t1; if(App.lang()==l2)return t2; if(App.lang()==l3)return t3; if(App.lang()==l4)return t4; if(App.lang()==l5)return t5; if(App.lang()==l6)return t6; if(App.lang()==l7)return t7; if(App.lang()==l8)return t8; if(App.lang()==l9)return t9; if(App.lang()==l10)return t10; return english;}
+Str MLT(C Str &english, LANG_TYPE l0, C Str &t0, LANG_TYPE l1, C Str &t1, LANG_TYPE l2, C Str &t2, LANG_TYPE l3, C Str &t3, LANG_TYPE l4, C Str &t4, LANG_TYPE l5, C Str &t5, LANG_TYPE l6, C Str &t6, LANG_TYPE l7, C Str &t7, LANG_TYPE l8, C Str &t8, LANG_TYPE l9, C Str &t9, LANG_TYPE l10, C Str &t10, LANG_TYPE l11, C Str &t11)
+   {if(App.lang()==l0)return t0; if(App.lang()==l1)return t1; if(App.lang()==l2)return t2; if(App.lang()==l3)return t3; if(App.lang()==l4)return t4; if(App.lang()==l5)return t5; if(App.lang()==l6)return t6; if(App.lang()==l7)return t7; if(App.lang()==l8)return t8; if(App.lang()==l9)return t9; if(App.lang()==l10)return t10; if(App.lang()==l11)return t11; return english;}
 
 CChar* MLTC(CChar* english, LANG_TYPE l0, CChar* t0)
    {if(App.lang()==l0)return t0; return english;}
@@ -1318,6 +1355,8 @@ CChar* MLTC(CChar* english, LANG_TYPE l0, CChar* t0, LANG_TYPE l1, CChar* t1, LA
    {if(App.lang()==l0)return t0; if(App.lang()==l1)return t1; if(App.lang()==l2)return t2; if(App.lang()==l3)return t3; if(App.lang()==l4)return t4; if(App.lang()==l5)return t5; if(App.lang()==l6)return t6; if(App.lang()==l7)return t7; if(App.lang()==l8)return t8; if(App.lang()==l9)return t9; return english;}
 CChar* MLTC(CChar* english, LANG_TYPE l0, CChar* t0, LANG_TYPE l1, CChar* t1, LANG_TYPE l2, CChar* t2, LANG_TYPE l3, CChar* t3, LANG_TYPE l4, CChar* t4, LANG_TYPE l5, CChar* t5, LANG_TYPE l6, CChar* t6, LANG_TYPE l7, CChar* t7, LANG_TYPE l8, CChar* t8, LANG_TYPE l9, CChar* t9, LANG_TYPE l10, CChar* t10)
    {if(App.lang()==l0)return t0; if(App.lang()==l1)return t1; if(App.lang()==l2)return t2; if(App.lang()==l3)return t3; if(App.lang()==l4)return t4; if(App.lang()==l5)return t5; if(App.lang()==l6)return t6; if(App.lang()==l7)return t7; if(App.lang()==l8)return t8; if(App.lang()==l9)return t9; if(App.lang()==l10)return t10; return english;}
+CChar* MLTC(CChar* english, LANG_TYPE l0, CChar* t0, LANG_TYPE l1, CChar* t1, LANG_TYPE l2, CChar* t2, LANG_TYPE l3, CChar* t3, LANG_TYPE l4, CChar* t4, LANG_TYPE l5, CChar* t5, LANG_TYPE l6, CChar* t6, LANG_TYPE l7, CChar* t7, LANG_TYPE l8, CChar* t8, LANG_TYPE l9, CChar* t9, LANG_TYPE l10, CChar* t10, LANG_TYPE l11, CChar* t11)
+   {if(App.lang()==l0)return t0; if(App.lang()==l1)return t1; if(App.lang()==l2)return t2; if(App.lang()==l3)return t3; if(App.lang()==l4)return t4; if(App.lang()==l5)return t5; if(App.lang()==l6)return t6; if(App.lang()==l7)return t7; if(App.lang()==l8)return t8; if(App.lang()==l9)return t9; if(App.lang()==l10)return t10; if(App.lang()==l11)return t11; return english;}
 /******************************************************************************/
 void Break()
 {

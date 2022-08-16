@@ -697,6 +697,40 @@ void IDGenerator::Return(UInt id) // return ID so it can be re-used later
    }
 }
 /******************************************************************************/
+static CChar8 *SizeSuffix[]={"", " KB", " MB", " GB", " TB", " PB", " EB", " ZB"};
+Str SizeBytes(Long size, Char dot)
+{
+   const Int f=10;
+   size*=f;
+   Int i=0; for(; i<Elms(SizeSuffix)-1 && size>=1000*f; i++, size>>=10); // check for "1000*f" instead of "1024*f", because we want to avoid displaying things like "1 001 MB"
+   Str s=TextInt(size/f, -1, 3); if(size<100*f && i && dot){s+=dot; s+=size%10;} s+=SizeSuffix[i];
+   return s;
+}
+Str SizeKB(Long size, Char dot)
+{
+   const Int f=10;
+   size*=f;
+   Int i=1; size>>=10*i;
+   Str s=TextInt(size/f, -1, 3); if(size<100*f && i && dot){s+=','; s+=size%10;} s+=SizeSuffix[i];
+   return s;
+}
+Str SizeMB(Long size, Char dot)
+{
+   const Int f=10;
+   size*=f;
+   Int i=2; size>>=10*i;
+   Str s=TextInt(size/f, -1, 3); if(size<100*f && i && dot){s+=','; s+=size%10;} s+=SizeSuffix[i];
+   return s;
+}
+Str SizeGB(Long size, Char dot)
+{
+   const Int f=10;
+   size*=f;
+   Int i=3; size>>=10*i;
+   Str s=TextInt(size/f, -1, 3); if(size<100*f && i && dot){s+=','; s+=size%10;} s+=SizeSuffix[i];
+   return s;
+}
+/******************************************************************************/
 #if DESKTOP
 static Char LogFile[MAX_LONG_PATH]={'l', 'o', 'g', '.', 't', 'x', 't', '\0'}; // use Char array to allow working even after app is being destroyed (destructors called)
 #else
@@ -737,7 +771,7 @@ void Log    (C Str &text)
       if(LogThreadID)
       {
          t="ThreadID: ";
-         UIntPtr thread_id=GetThreadId();
+         UIntPtr thread_id=GetThreadID();
          t+=((thread_id==App.threadID()) ? "Main      (0x"
                                          : "Secondary (0x");
          t+=TextHex(thread_id, SIZE(thread_id)*2);
@@ -980,17 +1014,17 @@ Bool ClipSet(C Str &text)
    if(OpenClipboard(null))
    {
       EmptyClipboard();
-	   Int max_length=text.length()+1;
-	   if( max_length>1)if(HGLOBAL buf=GlobalAlloc(GMEM_MOVEABLE, max_length*SIZE(Char)))
+      Int max_length=text.length()+1;
+      if( max_length>1)if(HGLOBAL buf=GlobalAlloc(GMEM_MOVEABLE, max_length*SIZE(Char)))
       {
          Set((Char*)GlobalLock(buf), text(), max_length); GlobalUnlock(buf);
          SetClipboardData(CF_UNICODETEXT, buf);
        //GlobalFree(buf); this shouldn't be called after SetClipboardData
       }
-	   CloseClipboard();
-	   return true;
-	}
-	return false;
+      CloseClipboard();
+      return true;
+   }
+   return false;
 #elif WINDOWS_NEW
    Bool ok;
    auto content=ref new Windows::ApplicationModel::DataTransfer::DataPackage;
@@ -1478,6 +1512,7 @@ static struct UserNameGetter
    }
 }UserName;
 #endif
+Bool OSUserNameNeedsPermission() {return WINDOWS_NEW || ANDROID;}
 #if !SWITCH
 Str OSUserName(Bool short_name)
 {
@@ -1582,73 +1617,94 @@ void OSMsgBox(C Str &title, C Str &text, Bool error)
    JavaScriptRun(S+"alert(\""+CString(text)+"\")"); 
 #endif
 }
+void OSToast(C Str &text)
+{
+#if ANDROID
+   JNI jni;
+   if(jni && ActivityClass)
+   if(JMethodID toast=jni.staticFunc(ActivityClass, "toast", "(Ljava/lang/String;)V"))
+      if(JString jtext=JString(jni, text))
+         jni->CallStaticVoidMethod(ActivityClass, toast, jtext());
+#endif
+}
 /******************************************************************************/
-static struct Locale
+struct Language
 {
    LANG_TYPE lang;
-   CChar8   *code;
-}locale[]=
+   CChar8   *code, *name;
+}static const Languages[]=
 {
-   {(LANG_TYPE)LANG_AFRIKAANS , "af"},
-   {(LANG_TYPE)LANG_ARABIC    , "ar"},
-   {(LANG_TYPE)LANG_ARMENIAN  , "hy"},
-   {(LANG_TYPE)LANG_BELARUSIAN, "be"},
-   {(LANG_TYPE)LANG_BULGARIAN , "bg"},
-   {(LANG_TYPE)LANG_CHINESE   , "zh"},
-   {(LANG_TYPE)LANG_CROATIAN  , "hr"},
-   {(LANG_TYPE)LANG_CZECH     , "cs"},
-   {(LANG_TYPE)LANG_DANISH    , "da"},
-   {(LANG_TYPE)LANG_DUTCH     , "nl"},
-   {(LANG_TYPE)LANG_ENGLISH   , "en"},
-   {(LANG_TYPE)LANG_ESTONIAN  , "et"},
-   {(LANG_TYPE)LANG_FILIPINO  , "tl"},
-   {(LANG_TYPE)LANG_FINNISH   , "fi"},
-   {(LANG_TYPE)LANG_FRENCH    , "fr"},
-   {(LANG_TYPE)LANG_GALICIAN  , "gl"},
-   {(LANG_TYPE)LANG_GERMAN    , "de"},
-   {(LANG_TYPE)LANG_GREEK     , "el"},
-   {(LANG_TYPE)LANG_HEBREW    , "he"},
-   {(LANG_TYPE)LANG_HUNGARIAN , "hu"},
-   {(LANG_TYPE)LANG_HINDI     , "hi"},
-   {(LANG_TYPE)LANG_ICELANDIC , "is"},
-   {(LANG_TYPE)LANG_INDONESIAN, "id"},
-   {(LANG_TYPE)LANG_IRISH     , "ga"},
-   {(LANG_TYPE)LANG_ITALIAN   , "it"},
-   {(LANG_TYPE)LANG_JAPANESE  , "ja"},
-   {(LANG_TYPE)LANG_KOREAN    , "ko"},
-   {(LANG_TYPE)LANG_LATVIAN   , "lv"},
-   {(LANG_TYPE)LANG_LITHUANIAN, "lt"},
-   {(LANG_TYPE)LANG_MALAY     , "ms"},
-   {(LANG_TYPE)LANG_MONGOLIAN , "mn"},
-   {(LANG_TYPE)LANG_NORWEGIAN , "nb"},
-   {(LANG_TYPE)LANG_NORWEGIAN , "nn"},
-   {(LANG_TYPE)LANG_PERSIAN   , "fa"},
-   {(LANG_TYPE)LANG_POLISH    , "pl"},
-   {(LANG_TYPE)LANG_PORTUGUESE, "pt"},
-   {(LANG_TYPE)LANG_RUSSIAN   , "ru"},
-   {(LANG_TYPE)LANG_ROMANIAN  , "ro"},
-   {(LANG_TYPE)LANG_SERBIAN   , "sr"},
-   {(LANG_TYPE)LANG_SPANISH   , "es"},
-   {(LANG_TYPE)LANG_SLOVAK    , "sk"},
-   {(LANG_TYPE)LANG_SLOVENIAN , "sl"},
-   {(LANG_TYPE)LANG_SWAHILI   , "sw"},
-   {(LANG_TYPE)LANG_SWEDISH   , "sv"},
-   {(LANG_TYPE)LANG_TAMIL     , "ta"},
-   {(LANG_TYPE)LANG_THAI      , "th"},
-   {(LANG_TYPE)LANG_TURKISH   , "tr"},
-   {(LANG_TYPE)LANG_UKRAINIAN , "uk"},
-   {(LANG_TYPE)LANG_VIETNAMESE, "vi"},
-   {(LANG_TYPE)LANG_XHOSA     , "xh"},
-   {(LANG_TYPE)LANG_ZULU      , "zu"},
+   {(LANG_TYPE)LANG_AFRIKAANS , "af", "Afrikaans"},
+   {(LANG_TYPE)LANG_ARABIC    , "ar", "Arabic"},
+   {(LANG_TYPE)LANG_ARMENIAN  , "hy", "Armenian"},
+   {(LANG_TYPE)LANG_BELARUSIAN, "be", "Belarusian"},
+   {(LANG_TYPE)LANG_BULGARIAN , "bg", "Bulgarian"},
+   {(LANG_TYPE)LANG_CHINESE   , "zh", "Chinese"},
+   {(LANG_TYPE)LANG_CROATIAN  , "hr", "Croatian"},
+   {(LANG_TYPE)LANG_CZECH     , "cs", "Czech"},
+   {(LANG_TYPE)LANG_DANISH    , "da", "Danish"},
+   {(LANG_TYPE)LANG_DUTCH     , "nl", "Dutch"},
+   {(LANG_TYPE)LANG_ENGLISH   , "en", "English"},
+   {(LANG_TYPE)LANG_ENGLISH_K , "ek", "English K"},
+   {(LANG_TYPE)LANG_ESTONIAN  , "et", "Estonian"},
+   {(LANG_TYPE)LANG_FILIPINO  , "tl", "Filipino"},
+   {(LANG_TYPE)LANG_FINNISH   , "fi", "Finnish"},
+   {(LANG_TYPE)LANG_FRENCH    , "fr", "French"},
+   {(LANG_TYPE)LANG_GALICIAN  , "gl", "Galician"},
+   {(LANG_TYPE)LANG_GERMAN    , "de", "German"},
+   {(LANG_TYPE)LANG_GREEK     , "el", "Greek"},
+   {(LANG_TYPE)LANG_HEBREW    , "he", "Hebrew"},
+   {(LANG_TYPE)LANG_HUNGARIAN , "hu", "Hungarian"},
+   {(LANG_TYPE)LANG_HINDI     , "hi", "Hindi"},
+   {(LANG_TYPE)LANG_ICELANDIC , "is", "Icelandic"},
+   {(LANG_TYPE)LANG_INDONESIAN, "id", "Indonesian"},
+   {(LANG_TYPE)LANG_IRISH     , "ga", "Irish"},
+   {(LANG_TYPE)LANG_ITALIAN   , "it", "Italian"},
+   {(LANG_TYPE)LANG_JAPANESE  , "ja", "Japanese"},
+   {(LANG_TYPE)LANG_KOREAN    , "ko", "Korean"},
+   {(LANG_TYPE)LANG_LATVIAN   , "lv", "Latvian"},
+   {(LANG_TYPE)LANG_LITHUANIAN, "lt", "Lithuanian"},
+   {(LANG_TYPE)LANG_MALAY     , "ms", "Malay"},
+   {(LANG_TYPE)LANG_MONGOLIAN , "mn", "Mongolian"},
+   {(LANG_TYPE)LANG_NORWEGIAN , "nb", "Norwegian"},
+   {(LANG_TYPE)LANG_NORWEGIAN , "nn", "Norwegian"},
+   {(LANG_TYPE)LANG_PERSIAN   , "fa", "Persian"},
+   {(LANG_TYPE)LANG_POLISH    , "pl", "Polish"},
+   {(LANG_TYPE)LANG_PORTUGUESE, "pt", "Portuguese"},
+   {(LANG_TYPE)LANG_RUSSIAN   , "ru", "Russian"},
+   {(LANG_TYPE)LANG_ROMANIAN  , "ro", "Romanian"},
+   {(LANG_TYPE)LANG_SERBIAN   , "sr", "Serbian"},
+   {(LANG_TYPE)LANG_SPANISH   , "es", "Spanish"},
+   {(LANG_TYPE)LANG_SLOVAK    , "sk", "Slovak"},
+   {(LANG_TYPE)LANG_SLOVENIAN , "sl", "Slovenian"},
+   {(LANG_TYPE)LANG_SWAHILI   , "sw", "Swahili"},
+   {(LANG_TYPE)LANG_SWEDISH   , "sv", "Swedish"},
+   {(LANG_TYPE)LANG_TAMIL     , "ta", "Tamil"},
+   {(LANG_TYPE)LANG_THAI      , "th", "Thai"},
+   {(LANG_TYPE)LANG_TURKISH   , "tr", "Turkish"},
+   {(LANG_TYPE)LANG_UKRAINIAN , "uk", "Ukrainian"},
+   {(LANG_TYPE)LANG_VIETNAMESE, "vi", "Vietnamese"},
+   {(LANG_TYPE)LANG_XHOSA     , "xh", "Xhosa"},
+   {(LANG_TYPE)LANG_ZULU      , "zu", "Zulu"},
 };
-LANG_TYPE LanguageCode(C Str &lang)
+LANG_TYPE LanguageCode(CChar8 *code)
 {
-   if(lang.is())FREPA(locale)if(Starts(lang, locale[i].code))return locale[i].lang;
-   return LANG_UNKNOWN;
+   if(Is(code))FREPA(Languages)if(Starts(code, Languages[i].code))return Languages[i].lang;
+   return LANG_NONE;
+}
+LANG_TYPE LanguageCode(C Str &code)
+{
+   if(code.is())FREPA(Languages)if(Starts(code, Languages[i].code))return Languages[i].lang;
+   return LANG_NONE;
 }
 CChar8* LanguageCode(LANG_TYPE lang)
 {
-   if(lang)FREPA(locale)if(locale[i].lang==lang)return locale[i].code;
+   if(lang)FREPA(Languages)if(Languages[i].lang==lang)return Languages[i].code;
+   return null;
+}
+CChar8* LanguageName(LANG_TYPE lang)
+{
+   if(lang)FREPA(Languages)if(Languages[i].lang==lang)return Languages[i].name;
    return null;
 }
 LANG_TYPE OSLanguage()
@@ -1659,7 +1715,7 @@ LANG_TYPE OSLanguage()
    if(auto langs=Windows::System::UserProfile::GlobalizationPreferences::Languages)
       if(langs->Size>0)return LanguageCode(langs->GetAt(0)->Data());
 #elif APPLE
-   LANG_TYPE lang=LANG_UNKNOWN;
+   LANG_TYPE lang=LANG_NONE;
    if(CFArrayRef langs=CFLocaleCopyPreferredLanguages())
    {
       FREP(CFArrayGetCount(langs))
@@ -1682,7 +1738,7 @@ LANG_TYPE OSLanguage()
 #elif SWITCH
    return LanguageCode(NS::OSLang());
 #endif
-   return LANG_UNKNOWN;
+   return LANG_NONE;
 }
 /******************************************************************************/
 Str LanguageSpecific(LANG_TYPE lang)
@@ -1693,7 +1749,8 @@ Str LanguageSpecific(LANG_TYPE lang)
       case DE        : return u"äÄëËöÖüÜßẞ";
       case FR        : return u"àÀáÁâÂãÃäÄåÅæÆçÇèÈéÉêÊëËìÌíÍîÎïÏðÐñÑòÒóÓôÔõÕöÖøØùÙúÚûÛüÜýÝ";
       case RU        : return u"аАбБвВгГдДеЕёЁжЖзЗиИйЙкКлЛмМнНоОпПрРсСтТуУфФхХцЦчЧшШщЩъЪыЫьЬэЭюЮяЯ";
-      case PO        : return u"áÁàÀâÂãÃăĂçÇęĘéÉêÊíÍóÓőŐõÕôÔŕŔúÚ";
+      case PO        : return u"áÁàÀâÂãÃçÇéÉêÊíÍóÓõÕôÔúÚ";
+      case SP        : return u"áÁéÉíÍóÓúÚüÜñÑ¿¡";
       case LANG_GREEK: return u"αΑβΒγΓδΔεΕζΖηΗθΘιΙκΚλΛμΜνΝξΞοΟπΠρΡσΣτΤυΥφΦχΧψΨωΩ";
       case LANG_THAI : return u"กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรฤลฦวศษสหฬอฮฯะัาำิีึืฺุู฿เแโใไๅๆ็่้๊๋์ํ๎๏๐๑๒๓๔๕๖๗๘๙๚๛"; // https://en.wikipedia.org/wiki/Thai_alphabet#Unicode
 
@@ -1976,9 +2033,11 @@ static CChar8* AndroidPermissions[]=
    "android.permission.ACCESS_FINE_LOCATION"  , // 1
    "android.permission.RECORD_AUDIO"          , // 2
    "android.permission.READ_CONTACTS"         , // 3
+ //null                                       , // 4 PERMISSION_USER_COMMUNICATION NintendoSwitch
 };
-ASSERT(PERMISSION_EXTERNAL_STORAGE==0 && PERMISSION_LOCATION==1 && PERMISSION_SOUND_RECORD==2 && PERMISSION_USER_NAME==3 && PERMISSION_NUM==4);
+ASSERT(PERMISSION_EXTERNAL_STORAGE==0 && PERMISSION_LOCATION==1 && PERMISSION_SOUND_RECORD==2 && PERMISSION_USER_NAME==3 && PERMISSION_USER_COMMUNICATION==4 && PERMISSION_NUM==5);
 #endif
+#if !SWITCH
 Bool HasPermission(PERMISSION permission)
 {
 #if ANDROID
@@ -2012,6 +2071,7 @@ void GetPermission(PERMISSION permission)
    }
 #endif
 }
+#endif
 static Int PermissionAsked; ASSERT(PERMISSION_NUM<=32); // each permission is stored in separate bit
 void RequirePermission(PERMISSION permission)
 {
@@ -2156,6 +2216,7 @@ EXTENSION_TYPE ExtType(C Str &ext)
    // Engine formats
    if(ext=="img" )return EXT_IMAGE;
    if(ext=="mesh")return EXT_MESH;
+ //if(ext=="skel")return EXT_SKEL;
  //if(ext=="mtrl")return EXT_MATERIAL;
  //if(ext=="phys")return EXT_PHYS;
 
@@ -2163,8 +2224,8 @@ EXTENSION_TYPE ExtType(C Str &ext)
 }
 /******************************************************************************/
 #if 0
-inline Bool DriveChar(Char8 c) {return FlagTest(CharFlag(c), CHARF_ALPHA);}
-inline Bool DriveChar(Char  c) {return FlagTest(CharFlag(c), CHARF_ALPHA);}
+inline Bool DriveChar(Char8 c) {return FlagOn(CharFlag(c), CHARF_ALPHA);}
+inline Bool DriveChar(Char  c) {return FlagOn(CharFlag(c), CHARF_ALPHA);}
 #else
 inline Bool DriveChar(Char8 c) {return (c>='a' && c<='z') || (c>='A' && c<='Z');}
 inline Bool DriveChar(Char  c) {return (c>='a' && c<='z') || (c>='A' && c<='Z');}
@@ -2584,15 +2645,6 @@ Str SystemPath(SYSTEM_PATH type)
       case SP_APP_DATA_PUBLIC: return "save:"; // initialized by 'MountSaveData'
       case SP_APP_CACHE      : extern Bool MountCache(); if(MountCache())return "cache:"; break; // initialized by 'MountCacheStorage'
    }
-#endif
-   return S;
-}
-/******************************************************************************/
-Str AndroidExpansionFileName(Int version, Bool main)
-{
-#if ANDROID
-   if(AndroidPublicPath.is() && AndroidPackageName.is())
-      return AndroidPublicPath+"/Android/obb/"+AndroidPackageName+'/'+(main ? "main" : "patch")+'.'+version+'.'+AndroidPackageName+".obb";
 #endif
    return S;
 }
@@ -4270,6 +4322,284 @@ C ExeSection* FindSectionOffset (C CMemPtr<ExeSection> &sections, CPtr    offset
 Int Compare    (C DataRangeRel &a, C DataRangeRel &b) {if(a.start<b.start)return -1; if(a.start>b.start)return +1; return Compare(a.size , b.size );}
 Int Compare    (C DataRangeAbs &a, C DataRangeAbs &b) {if(a.start<b.start)return -1; if(a.start>b.start)return +1; return Compare(a.end  , b.end  );}
 Int CompareSize(C DataRangeRel &a, C DataRangeRel &b) {if(a.size <b.size )return -1; if(a.size >b.size )return +1; return Compare(a.start, b.start);}
+/******************************************************************************
+   // source: https://countrycode.org/
+   // select all, copy to clipboard, paste in notepad, save as text file
+   FileText f; f.read("C:/countries.txt");
+   Str enums="   COUNTRY_NONE,\n",
+       data ="   {null, null, null},\n";
+   for(;!f.end();)
+   {
+      Str s=f.getLine();
+      Memc<Str> sep, sepcodes;
+      Split(sep, s, '\t');
+      Str name=sep[0];
+      Str codes=Replace(sep[2], ' ', '\0');
+      Split(sepcodes, codes, '/');
+
+      Str enm=S+"   COUNTRY_"+CaseUp(Replace(Replace(Replace(name, ' ', '_'), '.', '\0'), '-', '\0'));
+      enums+=enm+",\n";
+      data+=S+"   {\""+sepcodes[0]+"\", \""+sepcodes[1]+"\", \""+CString(name)+"\"},\n";
+   }
+   enums+="   COUNTRY_NUM,\n",
+   Exit(enums+'\n'+data);
+/******************************************************************************/
+struct Country
+{
+   CChar8 *code2, *code3, *name;
+}static const Countries[]=
+{
+   {null, null, null},
+   {"AF", "AFG", "Afghanistan"},
+   {"AL", "ALB", "Albania"},
+   {"DZ", "DZA", "Algeria"},
+   {"AS", "ASM", "American Samoa"},
+   {"AD", "AND", "Andorra"},
+   {"AO", "AGO", "Angola"},
+   {"AI", "AIA", "Anguilla"},
+   {"AQ", "ATA", "Antarctica"},
+   {"AG", "ATG", "Antigua and Barbuda"},
+   {"AR", "ARG", "Argentina"},
+   {"AM", "ARM", "Armenia"},
+   {"AW", "ABW", "Aruba"},
+   {"AU", "AUS", "Australia"},
+   {"AT", "AUT", "Austria"},
+   {"AZ", "AZE", "Azerbaijan"},
+   {"BS", "BHS", "Bahamas"},
+   {"BH", "BHR", "Bahrain"},
+   {"BD", "BGD", "Bangladesh"},
+   {"BB", "BRB", "Barbados"},
+   {"BY", "BLR", "Belarus"},
+   {"BE", "BEL", "Belgium"},
+   {"BZ", "BLZ", "Belize"},
+   {"BJ", "BEN", "Benin"},
+   {"BM", "BMU", "Bermuda"},
+   {"BT", "BTN", "Bhutan"},
+   {"BO", "BOL", "Bolivia"},
+   {"BA", "BIH", "Bosnia and Herzegovina"},
+   {"BW", "BWA", "Botswana"},
+   {"BR", "BRA", "Brazil"},
+   {"IO", "IOT", "British Indian Ocean Territory"},
+   {"VG", "VGB", "British Virgin Islands"},
+   {"BN", "BRN", "Brunei"},
+   {"BG", "BGR", "Bulgaria"},
+   {"BF", "BFA", "Burkina Faso"},
+   {"BI", "BDI", "Burundi"},
+   {"KH", "KHM", "Cambodia"},
+   {"CM", "CMR", "Cameroon"},
+   {"CA", "CAN", "Canada"},
+   {"CV", "CPV", "Cape Verde"},
+   {"KY", "CYM", "Cayman Islands"},
+   {"CF", "CAF", "Central African Republic"},
+   {"TD", "TCD", "Chad"},
+   {"CL", "CHL", "Chile"},
+   {"CN", "CHN", "China"},
+   {"CX", "CXR", "Christmas Island"},
+   {"CC", "CCK", "Cocos Islands"},
+   {"CO", "COL", "Colombia"},
+   {"KM", "COM", "Comoros"},
+   {"CK", "COK", "Cook Islands"},
+   {"CR", "CRI", "Costa Rica"},
+   {"HR", "HRV", "Croatia"},
+   {"CU", "CUB", "Cuba"},
+   {"CW", "CUW", "Curacao"},
+   {"CY", "CYP", "Cyprus"},
+   {"CZ", "CZE", "Czech Republic"},
+   {"CD", "COD", "Democratic Republic of the Congo"},
+   {"DK", "DNK", "Denmark"},
+   {"DJ", "DJI", "Djibouti"},
+   {"DM", "DMA", "Dominica"},
+   {"DO", "DOM", "Dominican Republic"},
+   {"TL", "TLS", "East Timor"},
+   {"EC", "ECU", "Ecuador"},
+   {"EG", "EGY", "Egypt"},
+   {"SV", "SLV", "El Salvador"},
+   {"GQ", "GNQ", "Equatorial Guinea"},
+   {"ER", "ERI", "Eritrea"},
+   {"EE", "EST", "Estonia"},
+   {"ET", "ETH", "Ethiopia"},
+   {"FK", "FLK", "Falkland Islands"},
+   {"FO", "FRO", "Faroe Islands"},
+   {"FJ", "FJI", "Fiji"},
+   {"FI", "FIN", "Finland"},
+   {"FR", "FRA", "France"},
+   {"PF", "PYF", "French Polynesia"},
+   {"GA", "GAB", "Gabon"},
+   {"GM", "GMB", "Gambia"},
+   {"GE", "GEO", "Georgia"},
+   {"DE", "DEU", "Germany"},
+   {"GH", "GHA", "Ghana"},
+   {"GI", "GIB", "Gibraltar"},
+   {"GR", "GRC", "Greece"},
+   {"GL", "GRL", "Greenland"},
+   {"GD", "GRD", "Grenada"},
+   {"GU", "GUM", "Guam"},
+   {"GT", "GTM", "Guatemala"},
+   {"GG", "GGY", "Guernsey"},
+   {"GN", "GIN", "Guinea"},
+   {"GW", "GNB", "Guinea-Bissau"},
+   {"GY", "GUY", "Guyana"},
+   {"HT", "HTI", "Haiti"},
+   {"HN", "HND", "Honduras"},
+   {"HK", "HKG", "Hong Kong"},
+   {"HU", "HUN", "Hungary"},
+   {"IS", "ISL", "Iceland"},
+   {"IN", "IND", "India"},
+   {"ID", "IDN", "Indonesia"},
+   {"IR", "IRN", "Iran"},
+   {"IQ", "IRQ", "Iraq"},
+   {"IE", "IRL", "Ireland"},
+   {"IM", "IMN", "Isle of Man"},
+   {"IL", "ISR", "Israel"},
+   {"IT", "ITA", "Italy"},
+   {"CI", "CIV", "Ivory Coast"},
+   {"JM", "JAM", "Jamaica"},
+   {"JP", "JPN", "Japan"},
+   {"JE", "JEY", "Jersey"},
+   {"JO", "JOR", "Jordan"},
+   {"KZ", "KAZ", "Kazakhstan"},
+   {"KE", "KEN", "Kenya"},
+   {"KI", "KIR", "Kiribati"},
+   {"XK", "XKX", "Kosovo"},
+   {"KW", "KWT", "Kuwait"},
+   {"KG", "KGZ", "Kyrgyzstan"},
+   {"LA", "LAO", "Laos"},
+   {"LV", "LVA", "Latvia"},
+   {"LB", "LBN", "Lebanon"},
+   {"LS", "LSO", "Lesotho"},
+   {"LR", "LBR", "Liberia"},
+   {"LY", "LBY", "Libya"},
+   {"LI", "LIE", "Liechtenstein"},
+   {"LT", "LTU", "Lithuania"},
+   {"LU", "LUX", "Luxembourg"},
+   {"MO", "MAC", "Macau"},
+   {"MK", "MKD", "Macedonia"},
+   {"MG", "MDG", "Madagascar"},
+   {"MW", "MWI", "Malawi"},
+   {"MY", "MYS", "Malaysia"},
+   {"MV", "MDV", "Maldives"},
+   {"ML", "MLI", "Mali"},
+   {"MT", "MLT", "Malta"},
+   {"MH", "MHL", "Marshall Islands"},
+   {"MR", "MRT", "Mauritania"},
+   {"MU", "MUS", "Mauritius"},
+   {"YT", "MYT", "Mayotte"},
+   {"MX", "MEX", "Mexico"},
+   {"FM", "FSM", "Micronesia"},
+   {"MD", "MDA", "Moldova"},
+   {"MC", "MCO", "Monaco"},
+   {"MN", "MNG", "Mongolia"},
+   {"ME", "MNE", "Montenegro"},
+   {"MS", "MSR", "Montserrat"},
+   {"MA", "MAR", "Morocco"},
+   {"MZ", "MOZ", "Mozambique"},
+   {"MM", "MMR", "Myanmar"},
+   {"NA", "NAM", "Namibia"},
+   {"NR", "NRU", "Nauru"},
+   {"NP", "NPL", "Nepal"},
+   {"NL", "NLD", "Netherlands"},
+   {"AN", "ANT", "Netherlands Antilles"},
+   {"NC", "NCL", "New Caledonia"},
+   {"NZ", "NZL", "New Zealand"},
+   {"NI", "NIC", "Nicaragua"},
+   {"NE", "NER", "Niger"},
+   {"NG", "NGA", "Nigeria"},
+   {"NU", "NIU", "Niue"},
+   {"KP", "PRK", "North Korea"},
+   {"MP", "MNP", "Northern Mariana Islands"},
+   {"NO", "NOR", "Norway"},
+   {"OM", "OMN", "Oman"},
+   {"PK", "PAK", "Pakistan"},
+   {"PW", "PLW", "Palau"},
+   {"PS", "PSE", "Palestine"},
+   {"PA", "PAN", "Panama"},
+   {"PG", "PNG", "Papua New Guinea"},
+   {"PY", "PRY", "Paraguay"},
+   {"PE", "PER", "Peru"},
+   {"PH", "PHL", "Philippines"},
+   {"PN", "PCN", "Pitcairn"},
+   {"PL", "POL", "Poland"},
+   {"PT", "PRT", "Portugal"},
+   {"PR", "PRI", "Puerto Rico"},
+   {"QA", "QAT", "Qatar"},
+   {"CG", "COG", "Republic of the Congo"},
+   {"RE", "REU", "Reunion"},
+   {"RO", "ROU", "Romania"},
+   {"RU", "RUS", "Russia"},
+   {"RW", "RWA", "Rwanda"},
+   {"BL", "BLM", "Saint Barthelemy"},
+   {"SH", "SHN", "Saint Helena"},
+   {"KN", "KNA", "Saint Kitts and Nevis"},
+   {"LC", "LCA", "Saint Lucia"},
+   {"MF", "MAF", "Saint Martin"},
+   {"PM", "SPM", "Saint Pierre and Miquelon"},
+   {"VC", "VCT", "Saint Vincent and the Grenadines"},
+   {"WS", "WSM", "Samoa"},
+   {"SM", "SMR", "San Marino"},
+   {"ST", "STP", "Sao Tome and Principe"},
+   {"SA", "SAU", "Saudi Arabia"},
+   {"SN", "SEN", "Senegal"},
+   {"RS", "SRB", "Serbia"},
+   {"SC", "SYC", "Seychelles"},
+   {"SL", "SLE", "Sierra Leone"},
+   {"SG", "SGP", "Singapore"},
+   {"SX", "SXM", "Sint Maarten"},
+   {"SK", "SVK", "Slovakia"},
+   {"SI", "SVN", "Slovenia"},
+   {"SB", "SLB", "Solomon Islands"},
+   {"SO", "SOM", "Somalia"},
+   {"ZA", "ZAF", "South Africa"},
+   {"KR", "KOR", "South Korea"},
+   {"SS", "SSD", "South Sudan"},
+   {"ES", "ESP", "Spain"},
+   {"LK", "LKA", "Sri Lanka"},
+   {"SD", "SDN", "Sudan"},
+   {"SR", "SUR", "Suriname"},
+   {"SJ", "SJM", "Svalbard and Jan Mayen"},
+   {"SZ", "SWZ", "Swaziland"},
+   {"SE", "SWE", "Sweden"},
+   {"CH", "CHE", "Switzerland"},
+   {"SY", "SYR", "Syria"},
+   {"TW", "TWN", "Taiwan"},
+   {"TJ", "TJK", "Tajikistan"},
+   {"TZ", "TZA", "Tanzania"},
+   {"TH", "THA", "Thailand"},
+   {"TG", "TGO", "Togo"},
+   {"TK", "TKL", "Tokelau"},
+   {"TO", "TON", "Tonga"},
+   {"TT", "TTO", "Trinidad and Tobago"},
+   {"TN", "TUN", "Tunisia"},
+   {"TR", "TUR", "Turkey"},
+   {"TM", "TKM", "Turkmenistan"},
+   {"TC", "TCA", "Turks and Caicos Islands"},
+   {"TV", "TUV", "Tuvalu"},
+   {"VI", "VIR", "U.S. Virgin Islands"},
+   {"UG", "UGA", "Uganda"},
+   {"UA", "UKR", "Ukraine"},
+   {"AE", "ARE", "United Arab Emirates"},
+   {"GB", "GBR", "United Kingdom"},
+   {"US", "USA", "United States"},
+   {"UY", "URY", "Uruguay"},
+   {"UZ", "UZB", "Uzbekistan"},
+   {"VU", "VUT", "Vanuatu"},
+   {"VA", "VAT", "Vatican"},
+   {"VE", "VEN", "Venezuela"},
+   {"VN", "VNM", "Vietnam"},
+   {"WF", "WLF", "Wallis and Futuna"},
+   {"EH", "ESH", "Western Sahara"},
+   {"YE", "YEM", "Yemen"},
+   {"ZM", "ZMB", "Zambia"},
+   {"ZW", "ZWE", "Zimbabwe"},
+}; ASSERT(ELMS(Countries)==COUNTRY_NUM);
+
+// extra check for "UK" needed for Steam because of https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
+COUNTRY CountryCode2(CChar8 *code) {REPA(Countries){C Country &country=Countries[i]; if(Equal(code, country.code2)                              )return (COUNTRY)i;} if(Equal(code, "UK"))return COUNTRY_UNITED_KINGDOM; return COUNTRY_NONE;}
+COUNTRY CountryCode2(C Str  &code) {REPA(Countries){C Country &country=Countries[i]; if(Equal(code, country.code2)                              )return (COUNTRY)i;} if(Equal(code, "UK"))return COUNTRY_UNITED_KINGDOM; return COUNTRY_NONE;}
+COUNTRY CountryCode3(C Str  &code) {REPA(Countries){C Country &country=Countries[i]; if(                              Equal(code, country.code3))return (COUNTRY)i;} if(Equal(code, "UK"))return COUNTRY_UNITED_KINGDOM; return COUNTRY_NONE;}
+COUNTRY CountryCode (C Str  &code) {REPA(Countries){C Country &country=Countries[i]; if(Equal(code, country.code2) || Equal(code, country.code3))return (COUNTRY)i;} if(Equal(code, "UK"))return COUNTRY_UNITED_KINGDOM; return COUNTRY_NONE;}
+CChar8* CountryCode2(COUNTRY country) {return InRange(country, Countries) ? Countries[country].code2 : null;}
+CChar8* CountryCode3(COUNTRY country) {return InRange(country, Countries) ? Countries[country].code3 : null;}
+CChar8* CountryName (COUNTRY country) {return InRange(country, Countries) ? Countries[country].name  : null;}
 /******************************************************************************/
 void InitMisc()
 {

@@ -195,8 +195,8 @@ INLINE Bool EqualCIFast(Char8 a, Char  b) {return CharOrderFast(a)==CharOrderFas
 INLINE Bool EqualCIFast(Char  a, Char8 b) {return CharOrderFast(a)==CharOrderFast(b);}
 INLINE Bool EqualCIFast(Char  a, Char  b) {return CharOrderFast(a)==CharOrderFast(b);}
 
-INLINE Bool CharWholeWord(Char  c, WHOLE_WORD mask) {return FlagTest(CharFlagFast(c), mask);}
-INLINE Bool CharWholeWord(Char8 c, WHOLE_WORD mask) {return FlagTest(CharFlagFast(c), mask);}
+INLINE Bool CharWholeWord(Char  c, WHOLE_WORD mask) {return FlagOn(CharFlagFast(c), mask);}
+INLINE Bool CharWholeWord(Char8 c, WHOLE_WORD mask) {return FlagOn(CharFlagFast(c), mask);}
 /******************************************************************************/
 Int CharOrder(Char8 c) {I(); return CharOrderFast(c);}
 Int CharOrder(Char  c) {I(); return CharOrderFast(c);}
@@ -2088,6 +2088,10 @@ Str  WindowsPath    (C Str &path) {return Replace(path, '/', '\\');}
 Str     UnixPath    (C Str &path) {return Replace(path, '\\', '/');}
 Str8    UnixPathUTF8(C Str &path) {return UTF8(UnixPath(path));}
 /******************************************************************************/
+#if !SWITCH
+Str Censor(C Str &text) {return text;}
+#endif
+/******************************************************************************/
 CChar8* TextBool(Bool b) {return b ? "true" : "false";}
 CChar8* TextInt(Int i, Char8 (&temp)[256], Int digits, Int separate)
 {
@@ -2997,11 +3001,11 @@ Str & Str ::del() {_d.del(); _length=0; return T;}
 Str8& Str8::clear() {if(_d.elms())_d[0]='\0'; _length=0; return T;}
 Str & Str ::clear() {if(_d.elms())_d[0]='\0'; _length=0; return T;}
 
-Str8& Str8::space(Int num) {if(is() && !WhiteChar(last()))REP(num)T+=' '; return T;}
-Str & Str ::space(Int num) {if(is() && !WhiteChar(last()))REP(num)T+=' '; return T;}
+Str8& Str8::space() {if(is() && !WhiteChar(last()))T+=' '; return T;}
+Str & Str ::space() {if(is() && !WhiteChar(last()))T+=' '; return T;}
 
-Str8& Str8::line(Int num) {if(is() && last()!='\n')REP(num)T+='\n'; return T;}
-Str & Str ::line(Int num) {if(is() && last()!='\n')REP(num)T+='\n'; return T;}
+Str8& Str8::line() {if(is() && last()!='\n')T+='\n'; return T;}
+Str & Str ::line() {if(is() && last()!='\n')T+='\n'; return T;}
 
 Str8& Str8::insert(Int i, Char8 c)
 {
@@ -4007,7 +4011,7 @@ Bool StrLibrary::load(File &f)
    {
       case 0:
       {
-         Byte flag; f.getMulti(flag, _elms, _size); _case_sensitive=FlagTest(flag, 1); _paths=FlagTest(flag, 2);
+         Byte flag; f.getMulti(flag, _elms, _size); _case_sensitive=FlagOn(flag, 1); _paths=FlagOn(flag, 2);
          alloc();
          f.getFast(_index, SIZE(*_index)*_elms + SIZE(*_data)*_size);
          if(f.ok())return true;

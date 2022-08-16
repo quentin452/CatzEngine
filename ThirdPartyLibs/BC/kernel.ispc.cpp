@@ -31,6 +31,7 @@
    SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.  
 */
 
+// ESENTHEL CHANGED START
 typedef U8   uint8;
 typedef U16 uint16;
 typedef I32  int32;
@@ -56,6 +57,7 @@ inline float clamp(float v, float a, float b)
 {
    return (v<=a) ? a : (v>=b) ? b : v;
 }
+// ESENTHEL CHANGED END
 
 ///////////////////////////
 //   generic helpers
@@ -187,6 +189,41 @@ inline void load_block_interleaved_16bit(float block[48], uniform rgba_surface* 
         block[16 * 2 + y * 4 + x] = (int)(xb & 0xFFFF);
         block[16 * 3 + y * 4 + x] = 0;
     }
+}
+
+inline void load_block_r_8bit(float block[16], uniform rgba_surface* uniform src, int xx, uniform int yy)
+{
+	for (uniform int y=0; y<4; y++)
+	{
+		uniform uint32* uniform src_ptr = (uint32*)&src->ptr[(yy*4+y)*src->stride];
+		uint32 rrrr = gather_uint(src_ptr, xx);
+
+		block[y*4+0] = (int)((rrrr>> 0)&255);
+		block[y*4+1] = (int)((rrrr>> 8)&255);
+		block[y*4+2] = (int)((rrrr>>16)&255);
+		block[y*4+3] = (int)((rrrr>>24)&255);
+	}
+}
+
+inline void load_block_interleaved_rg_8bit(float block[32], uniform rgba_surface* uniform src, int xx, uniform int yy)
+{
+	for (uniform int y=0; y<4; y++)
+	{
+		uniform uint32* uniform src_ptr = (uint32*)&src->ptr[(yy*4+y)*src->stride];
+		uint32 rgrg0 = gather_uint(src_ptr, xx * 2 + 0);
+      uint32 rgrg1 = gather_uint(src_ptr, xx * 2 + 1);
+
+        // r
+		block[16*0+y*4+0] = (int)((rgrg0>> 0)&255);
+		block[16*0+y*4+1] = (int)((rgrg0>>16)&255);
+		block[16*0+y*4+2] = (int)((rgrg1>> 0)&255);
+		block[16*0+y*4+3] = (int)((rgrg1>>16)&255);
+        // g
+		block[16*1+y*4+0] = (int)((rgrg0>> 8)&255);
+		block[16*1+y*4+1] = (int)((rgrg0>>24)&255);
+		block[16*1+y*4+2] = (int)((rgrg1>> 8)&255);
+		block[16*1+y*4+3] = (int)((rgrg1>>24)&255);
+	}
 }
 
 inline void store_data(uniform uint8 dst[], int width, int xx, uniform int yy, uint32 data[], int data_size)
@@ -634,6 +671,31 @@ inline void CompressBlockBC3(uniform rgba_surface src[], int xx, uniform int yy,
 	store_data(dst, src->width, xx, yy, data, 4);
 }
 
+inline void CompressBlockBC4(uniform rgba_surface src[], int xx, uniform int yy, uniform uint8 dst[])
+{
+	float block[16];
+    uint32 data[2];
+
+	load_block_r_8bit(block, src, xx, yy);
+	
+    CompressBlockBC3_alpha(block, data);
+
+	store_data(dst, src->width, xx, yy, data, 2);
+}
+
+inline void CompressBlockBC5(uniform rgba_surface src[], int xx, uniform int yy, uniform uint8 dst[])
+{
+	float block[32];
+    uint32 data[4];
+
+	load_block_interleaved_rg_8bit(block, src, xx, yy);
+	
+    CompressBlockBC3_alpha(block, data);
+    CompressBlockBC3_alpha(&block[16], &data[2]);
+
+	store_data(dst, src->width, xx, yy, data, 4);
+}
+
 export void CompressBlocksBC1_ispc(uniform rgba_surface src[], uniform uint8 dst[])
 {	
    const int h_4=src->height/4, w_4=src->width/4;
@@ -651,6 +713,26 @@ export void CompressBlocksBC3_ispc(uniform rgba_surface src[], uniform uint8 dst
 	for (uniform int xx = 0; xx<w_4; xx++) // foreach (xx = 0 ... src->width/4)
 	{
 		CompressBlockBC3(src, xx, yy, dst);
+	}
+}
+
+export void CompressBlocksBC4_ispc(uniform rgba_surface src[], uniform uint8 dst[])
+{
+   const int h_4=src->height/4, w_4=src->width/4;
+	for (uniform int yy = 0; yy<h_4; yy++)
+	for (uniform int xx = 0; xx<w_4; xx++) // foreach (xx = 0 ... src->width/4)
+	{
+		CompressBlockBC4(src, xx, yy, dst);
+	}
+}
+
+export void CompressBlocksBC5_ispc(uniform rgba_surface src[], uniform uint8 dst[])
+{
+   const int h_4=src->height/4, w_4=src->width/4;
+	for (uniform int yy = 0; yy<h_4; yy++)
+	for (uniform int xx = 0; xx<w_4; xx++) // foreach (xx = 0 ... src->width/4)
+	{
+		CompressBlockBC5(src, xx, yy, dst);
 	}
 }
 

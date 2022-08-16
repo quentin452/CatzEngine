@@ -39,7 +39,7 @@ Window::Window() {zero();}
 Window& Window::del()
 {
   _children.del  ();
-   title   .clear();
+   title   .del  ();
   _skin    .clear();
    REPA(button)button[i].del();
    super::del(); zero(); return T;
@@ -140,25 +140,24 @@ Panel* Window::getNormalPanel()C
    if(GuiSkin *skin=getSkin())return barVisible() ? skin->window.normal() : skin->window.normal_no_bar();
    return null;
 }
-void Window::extendedRect           (Rect &rect     )C {if(Panel *panel=getNormalPanel())panel->extendedRect           (T.rect(), rect);else    rect=T.rect();}
-void Window::defaultInnerPadding    (Rect &padding  )C {if(Panel *panel=getNormalPanel())panel->defaultInnerPadding    (padding       );else padding  .zero();}
-void Window::defaultInnerPaddingSize(Vec2 &padd_size)C {if(Panel *panel=getNormalPanel())panel->defaultInnerPaddingSize(padd_size     );else padd_size.zero();}
-Vec2 Window::defaultInnerPaddingSize(               )C {Vec2 size; defaultInnerPaddingSize(size); return size;}
+void Window::extendedRect           (Rect &rect   )C {if(Panel *panel=getNormalPanel())       panel->extendedRect           (T.rect(), rect);else    rect=T.rect();}
+void Window::defaultInnerPadding    (Rect &padding)C {if(Panel *panel=getNormalPanel())       panel->defaultInnerPadding    (padding       );else padding  .zero();}
+Vec2 Window::defaultInnerPaddingSize(             )C {if(Panel *panel=getNormalPanel())return panel->defaultInnerPaddingSize(              );    return Vec2Zero  ;}
 /******************************************************************************/
 static Rect ResizedRect(C Rect &src, C Rect &dest, UInt mask)
 {
  C Rect *r[2]={&src, &dest};
    Rect  resized;
-   resized.min.x=r[FlagTest(mask, DIRF_LEFT )]->min.x;
-   resized.min.y=r[FlagTest(mask, DIRF_DOWN )]->min.y;
-   resized.max.x=r[FlagTest(mask, DIRF_RIGHT)]->max.x;
-   resized.max.y=r[FlagTest(mask, DIRF_UP   )]->max.y;
+   resized.min.x=r[FlagOn(mask, DIRF_LEFT )]->min.x;
+   resized.min.y=r[FlagOn(mask, DIRF_DOWN )]->min.y;
+   resized.max.x=r[FlagOn(mask, DIRF_RIGHT)]->max.x;
+   resized.max.y=r[FlagOn(mask, DIRF_UP   )]->max.y;
    return resized;
 }
 static Rect MaximizedRect(C Window &window)
 {
    if(GuiObj *parent=window.parent())return parent->localClientRect();
-   return D.rect();
+   return D.rectUI();
 }
 Bool    Window::maximized()C {return InsideEps(ResizedRect(rect(), MaximizedRect(T), resize_mask), rect());}
 Window& Window::maximize ()  {return rect(ResizedRect(rect(), maximized() ? MaximizedRect(T)*0.5f : MaximizedRect(T), resize_mask));}
@@ -316,7 +315,7 @@ Window& Window::hide()
       // activate next window from mutual parent
       if(activate_next && parent())if(GuiObjChildren *children=parent()->children())
          REPA(*children)
-            if(GuiObj *go=(*children)[i])if(go->isWindow() && go!=this && go->asWindow().showing()/* && !FlagTest(go->asWindow().flag, WIN_IMMEDIATE_DEACT)*/)
+            if(GuiObj *go=(*children)[i])if(go->isWindow() && go!=this && go->asWindow().showing()/* && FlagOff(go->asWindow().flag, WIN_IMMEDIATE_DEACT)*/)
                {go->activate(); break;}
    }
   _fade_type =FADE_NONE;
@@ -504,8 +503,8 @@ void Window::update(C GuiPC &gpc)
             {
                Vec2 pos=Ms.pos()-gpc.offset;
                Rect r  =rect(), size=sizeLimit();
-               MIN(size.max.x, Max(size.min.x, D.w2(), rect().w()));
-               MIN(size.max.y, Max(size.min.y, D.h2(), rect().h()));
+               MIN(size.max.x, Max(size.min.x, D.rectUI().w(), rect().w()));
+               MIN(size.max.y, Max(size.min.y, D.rectUI().h(), rect().h()));
                if(_resize&DIRF_LEFT )r.min.x=Mid(have_client_rect ? Min(pos.x, client_rect.max.x-WINDOW_PADD) : pos.x, r.max.x-size.max.x, r.max.x-size.min.x);
                if(_resize&DIRF_UP   )r.max.y=Mid(have_client_rect ? Max(pos.y, client_rect.min.y+WINDOW_PADD) : pos.y, r.min.y+size.min.y, r.min.y+size.max.y);
                if(_resize&DIRF_RIGHT)r.max.x=Mid(have_client_rect ? Max(pos.x, client_rect.min.x+WINDOW_PADD) : pos.x, r.min.x+size.min.x, r.min.x+size.max.x);
@@ -521,8 +520,8 @@ void Window::update(C GuiPC &gpc)
                   if(Ms.d().any() && resize_mask)
                   {
                      Rect r=rect(), size=sizeLimit();
-                     MIN(size.max.x, Max(size.min.x, D.w2(), rect().w()));
-                     MIN(size.max.y, Max(size.min.y, D.h2(), rect().h()));
+                     MIN(size.max.x, Max(size.min.x, D.rectUI().w(), rect().w()));
+                     MIN(size.max.y, Max(size.min.y, D.rectUI().h(), rect().h()));
                      if(resize_mask&DIRF_RIGHT)Clamp(r.max.x+=Ms.d().x, r.min.x+size.min.x, r.min.x+size.max.x);else if(resize_mask&DIRF_LEFT)Clamp(r.min.x+=Ms.d().x, r.max.x-size.max.x, r.max.x-size.min.x);
                      if(resize_mask&DIRF_DOWN )Clamp(r.min.y+=Ms.d().y, r.max.y-size.max.y, r.max.y-size.min.y);else if(resize_mask&DIRF_UP  )Clamp(r.max.y+=Ms.d().y, r.min.y+size.min.y, r.min.y+size.max.y);
                      rect(r);
@@ -545,8 +544,8 @@ void Window::update(C GuiPC &gpc)
                                                      if(  Gui.ms()==this && Ms.b(0) && !_resize){delta=(Ms.pos()-Ms.dc())-pos; UpdateStretch(delta.x, l, r, li, ri, Ms.dc().x); UpdateStretch(delta.y, d, u, di, ui, Ms.dc().y);}
                   REPA(Touches){Touch &t=Touches[i]; if(t.guiObj()==this && t.on( )            ){delta=( t.pos()- t.d ())-pos; UpdateStretch(delta.x, l, r, li, ri,  t.d ().x); UpdateStretch(delta.y, d, u, di, ui,  t.d ().y);}}
                   Rect rect=T.rect(), size=sizeLimit();
-                  MIN(size.max.x, Max(size.min.x, D.w2(), rect.w()));
-                  MIN(size.max.y, Max(size.min.y, D.h2(), rect.h()));
+                  MIN(size.max.x, Max(size.min.x, D.rectUI().w(), rect.w()));
+                  MIN(size.max.y, Max(size.min.y, D.rectUI().h(), rect.h()));
                   UpdateResize(rect.min.x, rect.max.x, li ? l/li : 0, ri ? r/ri : 0, size.min.x, size.max.x, flag&WIN_MOVABLE, resize_mask&DIRF_LEFT, resize_mask&DIRF_RIGHT);
                   UpdateResize(rect.min.y, rect.max.y, di ? d/di : 0, ui ? u/ui : 0, size.min.y, size.max.y, flag&WIN_MOVABLE, resize_mask&DIRF_DOWN, resize_mask&DIRF_UP   );
                   T.rect(rect);
@@ -854,9 +853,9 @@ void ModalWindow::draw(C GuiPC &gpc)
 {
    if(/*gpc.visible &&*/ visible())
    {
-      Flt alpha=finalAlpha()*0.5f;
+      Flt alpha=finalAlpha()*0.75f;
       D.clip();
-      D.rect().draw(Vec4(0, 0, 0, 1-SRGBToDisplay(1-alpha)));
+      D.rect().draw(Vec4(0, 0, 0, AlphaToDisplay(alpha)));
       super::draw(gpc);
    }
 }
@@ -869,22 +868,21 @@ Dialog& Dialog::autoSize()
    FREPA(buttons)button_w+=buttons[i].textWidth(&Gui.dialog_button_height);
 
    Flt text_w=0, text_h=0;
-   if(text().is())
+   if(text.hasData())
    if(C TextStyle *ts=text.getTextStyle())
    if(Flt line_h=ts->lineHeight())
    {
-      const Flt desired_aspect=2.5f, min_w=line_h*17, max_w=(D.w()-Gui.dialog_padd)*2; // min_w gives some tolerable minimum width based on a single line height
-            Int lines=ts->textLines(text(), max_w, text.auto_line, &text_w);
+      const Flt desired_aspect=2.5f, min_w=line_h*17, max_w=D.rectUI().w()-Gui.dialog_padd*2; // min_w gives some tolerable minimum width based on a single line height
+            Int lines=ts->textLines(text.text, text.extra.data(), text.extra.elms(), max_w, text.auto_line, &text_w);
       text_h=line_h*lines;
       if(text_w>min_w)
       {
-         AUTO_LINE_MODE auto_line=text.auto_line; if(auto_line==AUTO_LINE_SPACE_SPLIT || auto_line==AUTO_LINE_SPLIT)auto_line=AUTO_LINE_SPACE; // don't split words in next attempts, attempt above can split because we've set max_w as entire screen, however next attempts will use less
          Flt aspect=text_w/text_h;
          REP(3) // 3 attempts
          {
             Flt multiplier=Sqrt(desired_aspect/aspect), // need to apply 'Sqrt' because this affects both width and height
                 test_w=Mid(text_w*multiplier, min_w, max_w);
-            Int test_lines=ts->textLines(text(), test_w, auto_line, &test_w);
+            Int test_lines=ts->textLines(text.text, text.extra.data(), text.extra.elms(), test_w, text.auto_line, &test_w);
             Flt test_h=line_h*test_lines,
                 test_aspect=test_w/test_h;
             if(AbsScale(test_aspect, desired_aspect)<AbsScale(aspect, desired_aspect)) // if 'test_aspect' is closer to 'desired_aspect'
@@ -915,7 +913,7 @@ Dialog& Dialog::autoSize()
 Dialog& Dialog::set(C Str &title, C Str &text, C CMemPtr<Str> &buttons, C TextStylePtr &text_style)
 {
    super::setTitle(title).barVisible(title.is());
-   T+=T.text.create(text, text_style); T.text.auto_line=AUTO_LINE_SPACE_SPLIT;
+   T+=T.text.create(text, text_style); T.text.auto_line=true;
 
    T.buttons.setNum(buttons.elms());
    FREPA(T.buttons)T+=T.buttons[i].create(buttons[i]);

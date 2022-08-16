@@ -1,8 +1,0 @@
-﻿#include "../../Source/Gui/Font.cpp"
-#include "../../Source/Gui/Gui.cpp"
-#include "../../Source/Gui/Gui Object.cpp"
-#include "../../Source/Gui/Gui Objects.cpp"
-#include "../../Source/Gui/Gui Skin.cpp"
-#include "../../Source/Gui/Panel.cpp"
-#include "../../Source/Gui/Panel Image.cpp"
-#include "../../Source/Gui/Text Style.cpp"

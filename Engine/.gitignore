@@ -4,6 +4,7 @@
 
 /Debug*
 /Release*
+/Android-arm64-v8a
 /ARM
 /x64
 /Emscripten

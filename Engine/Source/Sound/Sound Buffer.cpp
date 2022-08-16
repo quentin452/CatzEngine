@@ -13,11 +13,11 @@ namespace EE{
    #pragma message("!! Warning: Use this only for debugging !!")
 #endif
 
-#define SOUND_API_LOCK_FORCE     SyncLocker locker(SoundAPILock);
-#define SOUND_API_LOCK_WEAK      //SOUND_API_LOCK_FORCE not needed
-#define OPERATION_SET            (!XAUDIO2_COMMIT_NOW) // make sure that this is not XAUDIO2_COMMIT_NOW
-#define DIRECT_SOUND_RANGE_SCALE 1.75f // this was tested by playing sound at different positions (1,0,0), (2,0,0), (4,0,0) with range 1 and comparing recorded volume to XAudio version
-#define      OPEN_AL_RANGE_SCALE 0.75f // this was tested by playing sound at different positions (1,0,0), (2,0,0), (4,0,0) with range 1 and comparing recorded volume to XAudio version
+#define SOUND_API_LOCK_FORCE SyncLocker locker(SoundAPILock);
+#define SOUND_API_LOCK_WEAK  //SOUND_API_LOCK_FORCE not needed
+#define OPERATION_SET        (!XAUDIO2_COMMIT_NOW) // make sure that this is not XAUDIO2_COMMIT_NOW
+
+#define FULL_VOL_AT_CENTER 1 // play 3D sounds at full volume when they're at Listener position
 
 #if DIRECT_SOUND
 static IDirectSound           *DS;
@@ -68,6 +68,12 @@ static void Get3DParams(C Vec &pos, Flt range, Flt volume, Flt &out_volume, Flt 
    if( dist>range)volume*=range/dist;
    out_volume=volume;
    out_pan   =Dot(delta, Listener.right())/((dist>EarRadius) ? dist : EarRadius); // normalize only if length is greater than 'EarRadius' so that we can still have pan when distance is less than 'EarRadius'
+}
+static Flt Get3DPan(C Vec &pos, Flt range) // pan will always be -1..1
+{
+   Vec delta=pos-Listener.pos();
+   Flt dist =delta.length();
+   return Dot(delta, Listener.right())/((dist>EarRadius) ? dist : EarRadius); // normalize only if length is greater than 'EarRadius' so that we can still have pan when distance is less than 'EarRadius'
 }
 /******************************************************************************/
 #if CUSTOM_AUDIO
@@ -459,14 +465,18 @@ void SoundBuffer::volume(Flt volume) // 'volume' should be in range 0..1
 #if DIRECT_SOUND
    if(_s)
    {
-      if(_s3d && _par.channels==2)volume*=0.5f; // 3D stereo sounds will play at different volumes than 3D mono, so adjust, do this here and not in 'range' because there we can affect volumes only outside of 'range' and not inside
+      if(_s3d && _par.channels==2)volume*=0.5f; // 3D stereo sounds will play at different volumes than 3D mono, so adjust to match
       Int linear=Round(Lerp(DSBVOLUME_MIN, DSBVOLUME_MAX, Pow(volume, 0.1f)));
       SOUND_API_LOCK_WEAK; _s->SetVolume(linear);
    }
 #elif XAUDIO
    if(_sv){SOUND_API_LOCK_WEAK; _sv->SetVolume(volume, OPERATION_SET);}
 #elif OPEN_AL
-   if(_source){SOUND_API_LOCK_WEAK; alSourcef(_source, AL_GAIN, volume);}
+   if(_source)
+   {
+      if(_par.channels==2)volume*=SQRT2_2; // on OpenAL mono sounds are more quiet, we can't make them louder because AL_GAIN is limited to 0..1, so instead make stereo sounds quiet too, to match mono
+      SOUND_API_LOCK_WEAK; alSourcef(_source, AL_GAIN, volume);
+   }
 #elif OPEN_SL
    if(player_volume)
    {
@@ -500,7 +510,6 @@ void SoundBuffer::set3DParams(C _Sound &sound, Bool pos_range, Bool speed)
       X3DAUDIO_EMITTER      emitter;
       X3DAUDIO_DSP_SETTINGS dsp;
       UInt                  flag=0;
-      Flt                   pan;
       if(pos_range) // !! process this first because of "Zero(emitter)" !!
       {
          flag|=X3DAUDIO_CALCULATE_MATRIX;
@@ -511,11 +520,9 @@ void SoundBuffer::set3DParams(C _Sound &sound, Bool pos_range, Bool speed)
          emitter.InnerRadius=EarRadius;
          emitter.CurveDistanceScaler=Max(FLT_MIN, sound._range);
 
-         dsp.SrcChannelCount=_par.channels;
+         dsp.SrcChannelCount= _par.channels;
          dsp.DstChannelCount=XAudioChannels;
          dsp.pMatrixCoefficients=matrix.setNum(dsp.SrcChannelCount*dsp.DstChannelCount).data();
-
-         Flt volume; if(_par.channels==2)Get3DParams(sound.pos(), sound.range(), 1, volume, pan); // get pan for 3D stereo
       }
       if(speed)
       {
@@ -530,7 +537,31 @@ void SoundBuffer::set3DParams(C _Sound &sound, Bool pos_range, Bool speed)
       SOUND_API_LOCK_WEAK;
       if(pos_range)
       {
-         if(_par.channels==2){pan=pan*0.5f+0.5f; Flt vol[]={1-pan, pan}; _sv->SetChannelVolumes(2, vol, OPERATION_SET);} // apply pan for 3D stereo, this formula matches 3D mono volumes
+         Flt pan=Get3DPan(sound.pos(), sound.range());
+         switch(_par.channels) // volumes have to be set to have same loudness for both mono/stereo sounds
+         {
+         #if FULL_VOL_AT_CENTER
+            case 1:
+            {
+               Flt scale=2-Abs(pan); REPA(matrix)dsp.pMatrixCoefficients[i]*=scale;
+            }break;
+         #endif
+
+            case 2:
+            {
+            #if FULL_VOL_AT_CENTER
+               Flt vol[]={Min(1-pan, 1), Min(pan+1, 1)};
+            #else
+               pan=pan*0.5f+0.5f; Flt vol[]={1-pan, pan}; // this matches mono
+            #endif
+               if(dsp.DstChannelCount==2)
+               {
+                  dsp.pMatrixCoefficients[0]*=vol[0]; dsp.pMatrixCoefficients[2]*=vol[0]; // left
+                  dsp.pMatrixCoefficients[1]*=vol[1]; dsp.pMatrixCoefficients[3]*=vol[1]; // right
+               }else _sv->SetChannelVolumes(2, vol, OPERATION_SET);
+            }break;
+         }
+         
         _sv->SetOutputMatrix(XAudioMasteringVoice, _par.channels, XAudioChannels, dsp.pMatrixCoefficients, OPERATION_SET); // 'SetOutputMatrix' and 'SetVolume' can be set independently
       }
       if(speed)_sv->SetFrequencyRatio(SoundSpeed(sound._actual_speed*dsp.DopplerFactor), OPERATION_SET);
@@ -542,9 +573,14 @@ void SoundBuffer::set3DParams(C _Sound &sound, Bool pos_range, Bool speed)
       {
          // first calculate on temporaries
          Flt volume, pan; Get3DParams(sound.pos(), sound.range(), _volume, volume, pan);
+      #if FULL_VOL_AT_CENTER
+         Flt volume_left =volume*Min(1-pan, 1),
+             volume_right=volume*Min(pan+1, 1);
+      #else
          pan=pan*0.5f+0.5f; // -1..1 -> 0..1, this formula matches 3D mono XAudio volumes
          Flt volume_left =volume*(1-pan),
              volume_right=volume*(  pan);
+      #endif
          // now set to final values, because '_voice->volume' might be used on secondary thread
         _voice->volume[0]=volume_left;
         _voice->volume[1]=volume_right;
@@ -661,11 +697,11 @@ void SoundBuffer::range(Flt range)
 {
    MAX(range, 0.0f);
 #if DIRECT_SOUND
-   if(_s3d){SOUND_API_LOCK_WEAK; _s3d->SetMinDistance(range*DIRECT_SOUND_RANGE_SCALE, DS3D_DEFERRED);}
+   if(_s3d){SOUND_API_LOCK_WEAK; _s3d->SetMinDistance(range, DS3D_DEFERRED);}
 #elif XAUDIO || CUSTOM_AUDIO
    // handled in 'set3DParams'
 #elif OPEN_AL
-   if(_source){SOUND_API_LOCK_WEAK; alSourcef(_source, AL_REFERENCE_DISTANCE, range*OPEN_AL_RANGE_SCALE);}
+   if(_source){SOUND_API_LOCK_WEAK; alSourcef(_source, AL_REFERENCE_DISTANCE, range);}
 #elif OPEN_SL
    T._range=range;
    if(!emulate3D() && player_source){SOUND_API_LOCK_WEAK; (*player_source)->SetRolloffDistances(player_source, RoundPos(range/SL_POS_UNIT), SL_MILLIMETER_MAX);}
@@ -674,11 +710,11 @@ void SoundBuffer::range(Flt range)
 Flt SoundBuffer::range()C
 {
 #if DIRECT_SOUND
-   if(_s3d){Flt range=0; SOUND_API_LOCK_WEAK; if(OK(_s3d->GetMinDistance(&range)))return range/DIRECT_SOUND_RANGE_SCALE;}
+   if(_s3d){Flt range=0; SOUND_API_LOCK_WEAK; if(OK(_s3d->GetMinDistance(&range)))return range;}
 #elif XAUDIO || CUSTOM_AUDIO
    // unavailable
 #elif OPEN_AL
-   Flt range=0; if(_source){SOUND_API_LOCK_WEAK; alGetSourcef(_source, AL_REFERENCE_DISTANCE, &range);} return range/OPEN_AL_RANGE_SCALE;
+   Flt range=0; if(_source){SOUND_API_LOCK_WEAK; alGetSourcef(_source, AL_REFERENCE_DISTANCE, &range);} return range;
 #elif OPEN_SL
    #if 1 // faster
       return _range;
@@ -742,7 +778,7 @@ void SoundBuffer::toggle(Bool loop)
 Bool SoundBuffer::playing()C
 {
 #if DIRECT_SOUND
-   DWORD status=0; if(_s){SOUND_API_LOCK_WEAK; _s->GetStatus(&status);} return FlagTest(status, DSBSTATUS_PLAYING);
+   DWORD status=0; if(_s){SOUND_API_LOCK_WEAK; _s->GetStatus(&status);} return FlagOn(status, DSBSTATUS_PLAYING);
 #elif XAUDIO
    // unavailable
    return false;

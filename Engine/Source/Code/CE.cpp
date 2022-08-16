@@ -585,7 +585,7 @@ static void EditRedo        (   ) {                   CE.redo      ();}
 static void EditCut         (   ) {if(!CE.view_mode())CE.cut       ();}
 static void EditCopy        (   ) {if(!CE.view_mode())CE.copy      ();}
 static void EditPaste       (   ) {if(!CE.view_mode())CE.paste     ();}
-static void EditPaste2      (   ) {if(!CE.view_mode())CE.paste     (false);}
+static void EditPaste2      (   ) {if(!CE.view_mode())CE.paste     (null, false);}
 static void EditSeparator   (   ) {if(!CE.view_mode())CE.separator ();}
 static void EditSelectAll   (   ) {if(!CE.view_mode())CE.selectAll ();}
 static void EditSelectWord  (   ) {if(!CE.view_mode())CE.selectWord();}
@@ -602,6 +602,41 @@ static void EditPrevCurPos  (   ) {CE.prevCurPos();}
 static void EditNextCurPos  (   ) {CE.nextCurPos();}
 static void EditAutoComplete(   ) {if(CE.cur())CE.cur()->listSuggestions( 1);}
 static void EditAutoCompleteElm() {if(CE.cur())CE.cur()->listSuggestions(-2);}
+
+static void TemplateEmptyApplication()
+{
+   if(CE.view_mode())return;
+   Str t=
+"/******************************************************************************/\n\
+void InitPre()\n\
+{\n\
+   INIT();\n\
+   App.flag=APP_MINIMIZABLE|APP_MAXIMIZABLE|APP_RESIZABLE;\n\
+}\n\
+bool Init()\n\
+{\n\
+   return true;\n\
+}\n\
+void Shut()\n\
+{\n\
+}\n\
+/******************************************************************************/\n\
+Bool Update()\n\
+{\n\
+   if(Kb.bp(KB_ESC))return false;\n\
+   Gui.update();\n\
+   return true;\n\
+}\n\
+/******************************************************************************/\n\
+void Draw()\n\
+{\n\
+   D.clearCol();\n\
+   Gui.draw();\n\
+}\n\
+/******************************************************************************/\n\
+";
+   CE.paste(&t);
+}
 
 static void EditNextFile() {CE.nextFile();}
 static void EditPrevFile() {CE.prevFile();}
@@ -679,7 +714,7 @@ void CodeEditor::setMenu(Node<MenuElm> &menu)
 {
    {
       {
-         Node<MenuElm> &f=menu+="File";
+         Node<MenuElm> &f=(menu+="File");
        /*f.New().create("New"      , MenuNew      ).kbsc(KbSc(KB_N, KBSC_CTRL_CMD));
          f++;*/
          f.New().create("Save"     , MenuOverwrite).kbsc(KbSc(KB_F2               )).kbsc2(KbSc(KB_S, KBSC_CTRL_CMD           ));
@@ -690,7 +725,7 @@ void CodeEditor::setMenu(Node<MenuElm> &menu)
          f.New().create("Locate"   , MenuLocate   ).kbsc(KbSc(KB_L , KBSC_CTRL_CMD       )).desc("Locate this file in the Project");
       }
       {
-         Node<MenuElm> &e=menu+="Edit";
+         Node<MenuElm> &e=(menu+="Edit");
          e.New().create("Undo" , EditUndo).kbsc(KbSc(KB_Z, KBSC_CTRL_CMD|KBSC_REPEAT));
          e.New().create("Redo" , EditRedo).kbsc(KbSc(KB_Y, KBSC_CTRL_CMD|KBSC_REPEAT)).kbsc2(KbSc(KB_Z, KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_REPEAT));
          e.New().create("Undo2", EditUndo).kbsc(KbSc(KB_BACK, KBSC_ALT           |KBSC_REPEAT)).flag(MENU_HIDDEN); // keep those hidden because they occupy too much of visible space (besides on Windows Notepad they also work and are not listed)
@@ -702,6 +737,10 @@ void CodeEditor::setMenu(Node<MenuElm> &menu)
          e.New().create("Paste Don't Move Cursor", EditPaste2).kbsc(KbSc('V', KBSC_CTRL_CMD|KBSC_REPEAT)).desc("This option performs Paste without moving the cursor");
          e++;
          e.New().create("Insert Separator", EditSeparator).kbsc(KbSc(KB_ENTER, KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_REPEAT));
+         {
+            Node<MenuElm> &t=(e+="Insert Template");
+            t.New().create("Empty Application", TemplateEmptyApplication);
+         }
          e++;
          e.New().create("Select All" , EditSelectAll ).kbsc(KbSc('a', KBSC_CTRL_CMD));
          e.New().create("Select Word", EditSelectWord).kbsc(KbSc('w', KBSC_CTRL_CMD));
@@ -836,6 +875,10 @@ void CodeEditor::replacePath(C Str &src, C Str &dest)
    REPAO(sources).replacePath(src, dest);
 }
 /******************************************************************************/
+static void CodeTabChanged(Ptr user)
+{
+   if(InRange(CE.code_tabs(), CE.code_tabs))CE.cur(CE.code_tabs.tab(CE.code_tabs()).source); // set source
+}
 void CodeEditor::create(GuiObj *parent, Bool menu_on_top)
 {
    T.parent     =parent;
@@ -969,6 +1012,7 @@ void CodeEditor::create(GuiObj *parent, Bool menu_on_top)
          Gui          +=devlog_clear .create("Clear"   ).func(DevlogClear  , T);
          Gui          +=devlog_io    .create("txt", S, SystemPath(SP_DESKTOP), DevlogExport, DevlogExport, T); devlog_io.textline.set("Android Device Log.txt");
       }
+     *parent+=code_tabs.create((CChar**)null, 0, true).func(CodeTabChanged).valid(true);
       find   .create();
       replace.create();
       save_changes.create();
@@ -1080,7 +1124,8 @@ Flt  CodeEditor::fontSpaceOffset()C {return (1-CE.ts.space.y)*CE.ts.size.y*0.5f;
 Rect CodeEditor::sourceRect     ()
 {
    Rect   r(-D.w(), build_region.visible() ? build_region.rect().max.y : -D.h(), D.w(), D.h());
-   if(menu.visibleFull())if(menu_on_top)MIN(r.max.y, menu.rect().min.y);else MAX(r.min.y, menu.rect().max.y); // check 'visibleFull' in case 'menu' is attached to a Tabs.Tab
+   if(menu     .visible())if(menu_on_top)MIN(r.max.y, menu     .rect().min.y);else MAX(r.min.y, menu.rect().max.y);
+   if(code_tabs.visible())               MIN(r.max.y, code_tabs.rect().min.y);
    return r&cei().sourceRect();
 }
 Source* CodeEditor::findSource(C SourceLoc &loc) {if(loc.is())REPA(sources)if(sources[i].loc==loc)return &sources[i]; return null;}
@@ -1099,8 +1144,10 @@ Source* CodeEditor:: getSource(C SourceLoc &loc, ERROR_TYPE *error)
 Int     CodeEditor::curI() {return sources.validIndex(_cur);}
 Source* CodeEditor::cur () {return                    _cur ;}
 
-void CodeEditor::nextFile() {Source *src=null; Int offset=curI()+1; FREPA(sources){Source &s=sources[Mod(offset+i, sources.elms())]; if(s.opened){src=&s; break;}} cur(src);} // activate next opened source
-void CodeEditor::prevFile() {Source *src=null; Int offset=curI()-1; FREPA(sources){Source &s=sources[Mod(offset-i, sources.elms())]; if(s.opened){src=&s; break;}} cur(src);} // activate prev opened source
+static Int TabI() {REPA(CE.code_tabs)if(CE.code_tabs.tab(i).source==CE.cur())return i; return -1;}
+
+void CodeEditor::nextFile() {if(code_tabs.tabs())cur(code_tabs.tab(Mod(TabI()+1, code_tabs.tabs())).source);} // activate next opened source
+void CodeEditor::prevFile() {if(code_tabs.tabs())cur(code_tabs.tab(Mod(TabI()-1, code_tabs.tabs())).source);} // activate prev opened source
 
 Str CodeEditor::title()
 {
@@ -1207,8 +1254,12 @@ void CodeEditor::update(Bool active)
    {
       if(Gui.kb()==&build_list)if(cur())cur()->activate();
 
-      if(Ms.bp(2) && build_region .contains(Gui.ms()))visibleOutput       (false);
-      if(Ms.bp(2) && devlog_region.contains(Gui.ms()))visibleAndroidDevLog(false);
+      if(Ms.bp(2))
+      {
+         if(build_region .contains(Gui.ms()))visibleOutput       (false);else
+         if(devlog_region.contains(Gui.ms()))visibleAndroidDevLog(false);else
+         if(code_tabs    .contains(Gui.ms())){REPA(code_tabs)if(code_tabs.tab(i).contains(Gui.ms())){close(code_tabs.tab(i).source); break;}}
+      }
 
       if(cur())cur()->suggestionsSetRect();
 
@@ -1289,16 +1340,11 @@ void CodeEditor::update(Bool active)
             lines=Split(build_output, '\n');
          }
          buildClear();
-         if(build_exe_type==EXE_EXE || build_exe_type==EXE_DLL || build_exe_type==EXE_LIB || build_exe_type==EXE_UWP || build_exe_type==EXE_MAC || build_exe_type==EXE_IOS || build_exe_type==EXE_LINUX || build_exe_type==EXE_WEB)build_step=0; // we're going to count compilation progress for these platforms
+         if(build_exe_type==EXE_EXE || build_exe_type==EXE_DLL || build_exe_type==EXE_LIB || build_exe_type==EXE_UWP || build_exe_type==EXE_MAC || build_exe_type==EXE_IOS || build_exe_type==EXE_LINUX || build_exe_type==EXE_APK || build_exe_type==EXE_AAB || build_exe_type==EXE_NS || build_exe_type==EXE_WEB)build_step=0; // we're going to count compilation progress for these platforms
          FREPA(lines)
          {
           C Str &line=lines[i];
             if(SkipWhiteChars(line).is())
-               if(build_exe_type!=EXE_APK || // hide some Android compiler/linker warnings
-                  !Contains(line, "uses 2-byte wchar_t yet the output is to use 4-byte wchar_t; use of wchar_t values across objects may fail")
-               && !Contains(line, "uses 4-byte wchar_t yet the output is to use 2-byte wchar_t; use of wchar_t values across objects may fail")
-               )
-               if(!Contains(line, "manifest authoring warning 81010002:"))
             {
                BuildResult &br=buildNew().set(line);
                if(Contains(line,   "warning:", false, WHOLE_WORD_STRICT)
@@ -1307,7 +1353,7 @@ void CodeEditor::update(Bool active)
                || Contains(line, ": error "  , false, WHOLE_WORD_STRICT))br.setError  ();
 
                // count sources compiled
-               if(build_exe_type==EXE_EXE || build_exe_type==EXE_DLL || build_exe_type==EXE_LIB || build_exe_type==EXE_UWP || build_exe_type==EXE_WEB)
+               if(build_exe_type==EXE_EXE || build_exe_type==EXE_DLL || build_exe_type==EXE_LIB || build_exe_type==EXE_UWP || build_exe_type==EXE_NS || build_exe_type==EXE_WEB)
                {
                   if(build_msbuild)
                   {
@@ -1330,6 +1376,12 @@ void CodeEditor::update(Bool active)
                         if(Ends(l, ".cpp") && CleanFileName(l)==l || Equal(l, "linking..."))build_step++;
                      }else break;
                   }
+               }else
+               if(build_exe_type==EXE_APK || build_exe_type==EXE_AAB)
+               {
+                  if(Ends    (line, ".o")
+                  && Contains(line, ".cpp -> ", true, WHOLE_WORD_STRICT))build_step++;
+                  if(Contains(line, ": Failure [", true, WHOLE_WORD_STRICT))br.setError(); // happens with certificate mismatch - when wanting to install Debug/Release when other option already installed, full error: ": Failure [INSTALL_FAILED_UPDATE_INCOMPATIBLE: Package *.*.* signatures do not match previously installed version; ignoring!]"
                }else
                if(build_exe_type==EXE_MAC || build_exe_type==EXE_IOS)
                {
@@ -1355,7 +1407,7 @@ void CodeEditor::update(Bool active)
          build_process.del();
          Bool was_log;
          if(was_log=build_log.is()){FDelFile(build_log); build_log.clear();}
-         if(build_exe_type==EXE_EXE || build_exe_type==EXE_DLL || build_exe_type==EXE_LIB || build_exe_type==EXE_UWP || build_exe_type==EXE_WEB)
+         if(build_exe_type==EXE_EXE || build_exe_type==EXE_DLL || build_exe_type==EXE_LIB || build_exe_type==EXE_UWP || build_exe_type==EXE_WEB || build_exe_type==EXE_APK || build_exe_type==EXE_AAB)
          {
             Bool ok=false;
             if(build_phase==0)
@@ -1437,26 +1489,75 @@ void CodeEditor::update(Bool active)
                         if(was_log)FREPA(build_data)build_output.line()+=build_data[i].text;
                         build_output.line();
                      }
+                  }else
+                  if(build_exe_type==EXE_AAB) // gradlew bundle*
+                  {
+                     build_process.create(build_path+PLATFORM("Android/gradlew.bat", "Android/gradlew"), build_debug ? "bundleDebug" : "bundleRelease");
+                  }else
+                  if(build_exe_type==EXE_APK && build_mode==BUILD_PLAY) // install APK
+                  {
+                     build_process.create(adbPath(), S+"install -r -d -t --fastdeploy \""+build_exe+"\""); // -r reinstall if already exists, -d Allow version code downgrade, -t allow test packages, --fastdeploy Quickly update an installed package by only updating the parts of the APK that changed https://developer.android.com/studio/command-line/adb#dpm Warning: --fastdeploy currently does not report certificate mismatch errors https://issuetracker.google.com/issues/231040652
                   }
                }
             }else
-            if(build_phase==(build_windows_code_sign ? 1 : -2))
+            if(build_phase==(build_windows_code_sign ? 1 : -2)) // verify code sign
             {
                ok=(exit_code==0);
                if(ok)build_phase++;
+            }else
+            if(build_phase==1 && build_exe_type==EXE_AAB) // verify gradlew bundle*
+            {
+               ok=(exit_code==0);
+               if(ok)build_phase++;
+            }else
+            if(build_phase==1 && build_exe_type==EXE_APK && build_mode==BUILD_PLAY) // verify install APK
+            {
+               // can't use 'exit_code' because it's always zero
+               if(build_data.elms()) // detect success
+               {
+                C BuildResult *prev=build_data.addr(build_data.elms()-2);
+                C Str &msg=build_data.last().text;
+                  ok=(msg=="Performing Streamed Install" // happens when updating
+                   || msg=="Success") // happens when installing 1st time
+                  && (!prev || prev->mode!=2); // happens with install failure (certificate mismatch)
+                  if(ok)build_phase++;
+               }
             }
-            if(ok && build_phase==(build_windows_code_sign ? 2 : 1))switch(build_mode)
+            if(ok && build_phase==(
+                     build_windows_code_sign                            ? 2
+                  : (build_exe_type==EXE_AAB                          ) ? 2
+                  : (build_exe_type==EXE_APK && build_mode==BUILD_PLAY) ? 2
+                  :                                                       1
+            ))switch(build_mode)
             {
                case BUILD_PLAY:
                {
                   switch(build_exe_type)
                   {
-                     case EXE_EXE: Run(build_exe); break;
+                     case EXE_EXE:
+                     {
+                        Str params;
+                        Int editor_port=CE.cei().editorAddrPort(); if(editor_port>0)params.space()+=S+"EditorPort "+editor_port;
+                        Run(build_exe, params);
+                     }break;
+
                      case EXE_WEB: goto publish; // when playing for WEB we will create PAKs after compilation, so call publish success to do so
+
+                     case EXE_APK:
+                     case EXE_AAB:
+                     {
+                        build_phase++;
+                        build_process.create(adbPath(), S+"shell am start \""+build_package+"/.EsenthelActivity\""); // https://developer.android.com/studio/command-line/adb#am
+                      //build_process.create(adbPath(), S+"shell monkey -p \""+build_package+"\" 1"); alternative without specifying activity name, however maybe it will break in the future
+                     }break;
                   }
                }break;
              //case BUILD_DEBUG  : if(build_exe_type==EXE_EXE)VSRun(build_project_file); break; // no need to call this because building was done by launching VS and it will automatically run the app
                case BUILD_PUBLISH: publish: cei().publishSuccess(build_exe, build_exe_type, build_mode, build_project_id); break;
+            }else
+            if(build_phase==((build_exe_type==EXE_APK && build_mode==BUILD_PLAY) ? 3 : -2))
+            {
+               visibleAndroidDevLog(true); // show dev log
             }
          }else
          if(build_exe_type==EXE_LINUX)
@@ -1498,8 +1599,8 @@ void CodeEditor::update(Bool active)
                case BUILD_DEBUG  : Run(build_exe); break;
                case BUILD_PUBLISH: cei().publishSuccess(build_exe, build_exe_type, build_mode, build_project_id); break;
             }
-         }else
-         if(build_exe_type==EXE_APK)
+         }/*else
+         if(build_exe_type==EXE_APK || build_exe_type==EXE_AAB)
          {
             if(build_phase==0) // link with ant
             {
@@ -1595,13 +1696,13 @@ void CodeEditor::update(Bool active)
                {
                   if(Contains(build_data.last().text, "Activity not started, unable to resolve Intent"))
                   {
-                     // start on the device thout -n parameter
+                     // start on the device with -n parameter
                      build_phase++;
                      build_process.create(adbPath(), S+"shell am start -n \""+build_package+"/.LoaderActivity\""); // start with -n this time
                   }
                }
             }
-         }
+         }*/
       }
    }
    if(devlog_process.created())
@@ -1681,16 +1782,6 @@ void CodeEditor::update(Bool active)
          }
       }
    }
-   if(adb_server.created() && !adb_server.active()) // ADB server finished starting
-   {
-      adb_server.del();
-      if(!devlog_process.active() && adb_path.is())
-      {
-         devlog_data.New().message="Android Debug Bridge Started, Starting LogCat..";
-         devlog_list.setData(devlog_data);
-         devlog_process.create(adb_path, "logcat -v time");
-      }
-   }
 }
 /******************************************************************************/
 void CodeEditor::draw()
@@ -1746,8 +1837,8 @@ void CodeEditor::rebuildSymbols(Bool rebuild_3rd_party_headers)
    if(rebuild_3rd_party_headers)rebuild3rdPartyHeaders();
    // setup custom macros
    Macro *macro; Int index;
-   CChar8 *name="STEAM"  ; if(ProjectMacros.binarySearch(name, index, CompareCS))macro=&ProjectMacros[index];else macro=&ProjectMacros.NewAt(index).set(name); macro->def=cei().appPublishSteamDll (); macro->parts.setNum(1)[0].set(TOKEN_NUMBER, -1, &BStr().setBorrowed(macro->def));
-           name="OPEN_VR"; if(ProjectMacros.binarySearch(name, index, CompareCS))macro=&ProjectMacros[index];else macro=&ProjectMacros.NewAt(index).set(name); macro->def=cei().appPublishOpenVRDll(); macro->parts.setNum(1)[0].set(TOKEN_NUMBER, -1, &BStr().setBorrowed(macro->def));
+   CChar8 *name="STEAM"  ; if(ProjectMacros.binarySearch(name, index, CompareCS))macro=&ProjectMacros[index];else macro=&ProjectMacros.NewAt(index).set(name); macro->def=cei().appPublishSteamDll (); macro->parts.setNum(1).first().set(TOKEN_NUMBER, -1, &BStr().setBorrowed(macro->def));
+           name="OPEN_VR"; if(ProjectMacros.binarySearch(name, index, CompareCS))macro=&ProjectMacros[index];else macro=&ProjectMacros.NewAt(index).set(name); macro->def=cei().appPublishOpenVRDll(); macro->parts.setNum(1).first().set(TOKEN_NUMBER, -1, &BStr().setBorrowed(macro->def));
 
    REPAO(sources).detectDefines  ();
    REPAO(sources).preprocess     ();
@@ -1770,14 +1861,14 @@ void CodeEditorInterface::skinChanged(                                ) {       
 Bool CodeEditorInterface::initialized(                                ) {return CE.symbols_loaded;}
 Str  CodeEditorInterface::title      (                                ) {return CE.title (      );}
 Str  CodeEditorInterface::appPath    (C Str &app_name                 ) {Str build_path, build_project_name; return CE.getBuildPath(build_path, build_project_name, &app_name) ? build_path                                           : S;}
-Str  CodeEditorInterface:: androidProjectPakPath(                     ) {Str build_path, build_project_name; return CE.getBuildPath(build_path, build_project_name           ) ? build_path+"Android/assets/Project.pak"              : S;}
+Str  CodeEditorInterface:: androidPath          (                     ) {Str build_path, build_project_name; return CE.getBuildPath(build_path, build_project_name           ) ? build_path+"Android"                                 : S;}
+Str  CodeEditorInterface:: androidProjectPakPath(                     ) {Str build_path, build_project_name; return CE.getBuildPath(build_path, build_project_name           ) ? build_path+"Android/app/src/main/assets/Project.pak" : S;}
 Str  CodeEditorInterface::     iOSProjectPakPath(                     ) {Str build_path, build_project_name; return CE.getBuildPath(build_path, build_project_name           ) ? build_path+"Assets/Project.pak"                      : S;}
 Str  CodeEditorInterface::     UWPProjectPakPath(                     ) {Str build_path, build_project_name; return CE.getBuildPath(build_path, build_project_name           ) ? build_path+"Project.pak"                             : S;} // if we would set "Assets/Project.pak" then the file would be included inside the UWP EXE including the "Assets/" too
 Str  CodeEditorInterface::nintendoProjectPakPath(                     ) {Str build_path, build_project_name; return CE.getBuildPath(build_path, build_project_name           ) ? build_path+"Assets/Nintendo Switch/Data/Project.pak" : S;}
 void CodeEditorInterface::saveChanges(                                                                                                ) {CE.saveChanges();}
 void CodeEditorInterface::saveChanges(Memc<Edit::SaveChanges::Elm> &elms                                                              ) {CE.saveChanges(elms);}
 void CodeEditorInterface::saveChanges(Memc<Edit::SaveChanges::Elm> &elms, void (*after_save_close)(Bool all_saved, Ptr user), Ptr user) {CE.save_changes.set(elms, after_save_close, user);}
-void CodeEditorInterface::sourceRename     (C UID &id  ) {SourceLoc loc=id; if(Source *source=CE.findSource(loc))source->loc=loc;}
 Bool CodeEditorInterface::sourceCur        (C Str &name) {CE.init(); return CE.load(name);} // 'init' in case we're loading source from data
 Bool CodeEditorInterface::sourceCur        (C UID &id  ) {           return CE.load(id  );}
 Bool CodeEditorInterface::sourceCurIs      (           ) {return CE.cur()!=null;}
@@ -1797,6 +1888,17 @@ void CodeEditorInterface::visibleOutput       (Bool on) {       CE.visibleOutput
 Bool CodeEditorInterface::visibleAndroidDevLog(       ) {return CE.visibleAndroidDevLog(  );}
 void CodeEditorInterface::visibleAndroidDevLog(Bool on) {       CE.visibleAndroidDevLog(on);}
 
+void CodeEditorInterface::sourceRename(C UID &id)
+{
+   SourceLoc loc=id; if(Source *source=CE.findSource(loc))
+   {
+      source->loc=loc;
+      REPA(CE.code_tabs)if(CE.code_tabs.tab(i).source==source)
+      {
+         CE.code_tabs.tab(i).text(loc.base_name); break;
+      }
+   }
+}
 void CodeEditorInterface::paste(C CMemPtr<UID> &elms, GuiObj *obj, C Vec2 &screen_pos)
 {
    if(Source *src=CE.cur())
@@ -2097,6 +2199,25 @@ Str XcodeBuildCleanParams(C Str &project, C Str &config, C Str &platform, C Str 
 Str LinuxBuildParams(C Str &project, C Str &config, Int build_threads)
 {
    return S+(config.is() ? S+"CONF=\""+config+"\" " : S)+"-j"+build_threads+" -C \""+UnixPath(project)+'"';
+}
+/******************************************************************************/
+CChar8* ShortName(EXE_TYPE type)
+{
+   switch(type)
+   {
+      case EXE_EXE  : return "EXE";
+      case EXE_DLL  : return "DLL";
+      case EXE_LIB  : return "LIB";
+      case EXE_UWP  : return "UWP";
+      case EXE_APK  : return "APK";
+      case EXE_AAB  : return "AAB";
+      case EXE_MAC  : return "Mac";
+      case EXE_IOS  : return "iOS";
+      case EXE_LINUX: return "Linux";
+      case EXE_NS   : return "NS";
+      case EXE_WEB  : return "Web";
+      default       : return null;
+   }
 }
 /******************************************************************************/
 }}

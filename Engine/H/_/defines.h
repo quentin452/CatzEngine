@@ -27,12 +27,12 @@
 /******************************************************************************/
 // HELPER MACROS
 /******************************************************************************/
-#define SIZE                                    sizeof               // get raw size of C++ element in bytes
-#define SIZEL(x)                           Long(SIZE(x))             // get raw size of C++ element in bytes as 'Long' type
+#define SIZE( x)                    UIntPtr(sizeof(x))               // get raw size of C++ element in bytes
+#define SIZEL(x)                       Long(sizeof(x))               // get raw size of C++ element in bytes as 'Long' type
 #define MEMBER(     Class, member)        (((Class*)null)-> member)  // null based Class::member, this macro is used to obtain member information by many other macros/functions
 #define OFFSET(     Class, member)  UIntPtr(&MEMBER(Class,  member)) // get offset   of member in class
 #define MEMBER_SIZE(Class, member)     SIZE( MEMBER(Class,  member)) // get size     of member in class
-#define MEMBER_ELMS(Class, member)     Elms( MEMBER(Class,  member)) // get elements of member in class
+#define MEMBER_ELMS(Class, member)     ELMS( MEMBER(Class,  member)) // get elements of member in class
 #define  CAST(      Class, object)     dynamic_cast<Class*>(object)  // perform a dynamic cast of 'object' to 'Class' class
 #define SCAST(      Class, object)      static_cast<Class&>(object)  // perform a  static cast of 'object' to 'Class' class
 #define ELMS(       Array        )      (SIZE(Array)/SIZE(Array[0])) // get number of elements in array (this is the compile-time version, use 'Elms' instead of 'ELMS' whenever possible)
@@ -98,6 +98,7 @@ T1(TYPE) constexpr ENABLE_IF_ENUM(TYPE, Dbl  ) operator- (Dbl   a, TYPE  b) {ret
 T1(TYPE) constexpr ENABLE_IF_ENUM(TYPE, Dbl  ) operator* (Dbl   a, TYPE  b) {return                 a * ENUM_TYPE(TYPE)(b);}
 T1(TYPE) constexpr ENABLE_IF_ENUM(TYPE, Dbl  ) operator/ (Dbl   a, TYPE  b) {return                 a / ENUM_TYPE(TYPE)(b);}
 T1(TYPE) constexpr ENABLE_IF_ENUM(TYPE, Int  ) operator+ (TYPE  a, Bool  b) {return Int            (a)+                 b ;}
+T1(TYPE) constexpr ENABLE_IF_ENUM(TYPE, Int  ) operator- (TYPE  a, Bool  b) {return Int            (a)-                 b ;}
 T1(TYPE) constexpr ENABLE_IF_ENUM(TYPE, Int  ) operator* (TYPE  a, Bool  b) {return Int            (a)*                 b ;}
 T1(TYPE) constexpr ENABLE_IF_ENUM(TYPE, Int  ) operator+ (TYPE  a, Int   b) {return Int            (a)+                 b ;}
 T1(TYPE) constexpr ENABLE_IF_ENUM(TYPE, Int  ) operator- (TYPE  a, Int   b) {return Int            (a)-                 b ;}
@@ -141,7 +142,8 @@ T2(ENUM0, ENUM1) constexpr typename std::enable_if< std::is_enum<ENUM0>::value &
 #define DEBUG_RANGE_ASSERT(index, elms       )     DEBUG_ASSERT(InRange(index, elms), "Element out of range")               // out of range assertion, asserts that 'index' is in range "0..elms-1"
 #define       RANGE_ASSERT(index, elms       )   DYNAMIC_ASSERT(InRange(index, elms), "Element out of range")               // out of range assertion, asserts that 'index' is in range "0..elms-1"
 #define RANGE_ASSERT_ERROR(index, elms, error)   DYNAMIC_ASSERT(InRange(index, elms), error                 )               // out of range assertion, asserts that 'index' is in range "0..elms-1"
-#define       ALIGN_ASSERT(Class, member     )   ASSERT(!(OFFSET(Class, member)&(SIZE(Ptr)-1)))                             // assert that class member has alignment native to the target platform
+#define     ALIGN_ASSERT(  Class, member     )   ASSERT(!(OFFSET(Class, member)&(SIZE(Ptr)-1)))                             // assert that class member has alignment native to the target platform
+#define     ALIGN_ASSERT_X(Class, member, x  )   ASSERT(!(OFFSET(Class, member)&(x        -1)))                             // assert that class member has alignment native to the target platform
 
 ASSERT(SIZE(Bool )==1); // size of Bool  must be 1 byte
 ASSERT(SIZE(Char8)==1); // size of Char8 must be 1 byte
@@ -188,9 +190,7 @@ ASSERT(SIZE(Char8)==1); // size of Char8 must be 1 byte
 // Compression
 #define SUPPORT_RLE    (!SWITCH && !WEB)
 #define SUPPORT_SNAPPY (!SWITCH && !WEB)
-#define SUPPORT_LZ4    1
 #define SUPPORT_ZLIB   (!WEB)
-#define SUPPORT_ZSTD   1
 #define SUPPORT_LZHAM  (!SWITCH)
 #define SUPPORT_LZMA   1
 

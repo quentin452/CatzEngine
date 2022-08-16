@@ -430,6 +430,23 @@ Flt LinearLumOfLinearColor(C Vec &l) {return              Dot(      l        , C
 Flt LinearLumOfSRGBColor  (C Vec &s) {return              Dot(SRGBToLinear(s), ColorLumWeight2) ;}
 Flt   SRGBLumOfLinearColor(C Vec &l) {return LinearToSRGB(Dot(      l        , ColorLumWeight2));}
 Flt   SRGBLumOfSRGBColor  (C Vec &s) {return LinearToSRGB(Dot(SRGBToLinear(s), ColorLumWeight2));}
+
+Flt AlphaToDisplay(Flt alpha)
+{
+#if !LINEAR_GAMMA
+   return alpha;
+#elif 0 // targets full luminance
+   return 1-SRGBToDisplay(1-alpha);
+#else // targets custom luminance
+/* col_lin*opacity_lin=SRGBToLinear(LinearToSRGB(col_lin)*opacity_srgb)
+           opacity_lin=SRGBToLinear(LinearToSRGB(col_lin)*opacity_srgb)/col_lin
+
+   opacity = 1-alpha */
+ //const Flt col_srgb=0.5f, col_lin=SRGBToLinear(col_srgb); // target mid tones
+   const Flt col_srgb=0.5f, col_lin=0.214041144f          ; // target mid tones, precalculated SRGBToLinear(0.5)
+   return 1-SRGBToLinear(col_srgb*(1-alpha))/col_lin;
+#endif
+}
 /******************************************************************************/
 Vec NightLightFactor(Flt intensity)
 {

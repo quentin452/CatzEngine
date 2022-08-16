@@ -400,14 +400,17 @@ class MaterialRegion : Region
    static Str  Tech(C MaterialRegion &mr          ) {REPA(mtrl_techs)if(mtrl_techs[i].tech==mr.edit.tech)return i; return S;}
    static void Tech(  MaterialRegion &mr, C Str &t) {int i=TextInt(t); if(InRange(i, mtrl_techs)){mr.edit.tech=mtrl_techs[i].tech; mr.edit.tech_time.now(); mr.setChanged(); D.setShader(mr.game());}}
 
-   static cchar8 *DownsizeTexMobileText[]=
+   static cchar8 *TexDownsizeText[]=
    {
       "Full",
       "Half",
       "Quarter",
-   }; ASSERT(MaxMaterialDownsize==3);
-   static Str  DownsizeTexMobile(C MaterialRegion &mr          ) {return mr.edit.downsize_tex_mobile;}
-   static void DownsizeTexMobile(  MaterialRegion &mr, C Str &t) {mr.edit.downsize_tex_mobile=TextInt(t); mr.edit.downsize_tex_mobile_time.getUTC();}
+      "Eighth",
+   }; ASSERT(MaxMaterialDownsize==4);
+   static Str  TexDownsizeMobile(C MaterialRegion &mr          ) {return mr.edit.tex_downsize[TSP_MOBILE];}
+   static void TexDownsizeMobile(  MaterialRegion &mr, C Str &t) {       mr.edit.tex_downsize[TSP_MOBILE]=TextInt(t); mr.edit.tex_downsize_time.getUTC();}
+   static Str  TexDownsizeSwitch(C MaterialRegion &mr          ) {return mr.edit.tex_downsize[TSP_SWITCH];}
+   static void TexDownsizeSwitch(  MaterialRegion &mr, C Str &t) {       mr.edit.tex_downsize[TSP_SWITCH]=TextInt(t); mr.edit.tex_downsize_time.getUTC();}
 
    class TexQualityND : NameDesc
    {
@@ -650,17 +653,17 @@ class MaterialRegion : Region
 
    bool bigVisible()C {return visible() && big();}
 
-   void   setRGB         (C Vec                   &srgb              ) {if(edit.color_s.xyz        !=srgb                                ){        undos.set("rgb"       ); edit.color_s.xyz        =srgb                             ; edit.              color_time.getUTC(); setChanged(); toGui();}}
-   void   setNormal      (flt                    normal              ) {if(edit.normal             !=normal                              ){        undos.set("normal"    ); edit.normal             =normal                           ; edit.             normal_time.getUTC(); setChanged(); toGui();}}
-   void   setSmooth      (flt                    smooth              ) {if(edit.smooth             !=smooth                              ){        undos.set("smooth"    ); edit.smooth             =smooth                           ; edit.             smooth_time.getUTC(); setChanged(); toGui();}}
-   void   setReflect     (flt reflect_min, flt reflect_max           ) {if(edit.reflect_min!=reflect_min || edit.reflect_max!=reflect_max){        undos.set("reflect"   ); edit.reflect_min=reflect_min; edit.reflect_max=reflect_max; edit.            reflect_time.getUTC(); setChanged(); toGui();}}
-   void resetAlpha       (                                           ) {                                                                           undos.set("alpha"     ); edit.resetAlpha()                                         ;                                         setChanged(); toGui(); }
-   void cull             (bool                      on               ) {if(edit.cull               !=on                                  ){        undos.set("cull"      ); edit.cull               =on                               ; edit.               cull_time.getUTC(); setChanged(); toGui();}}
-   void flipNrmY         (bool                      on               ) {if(edit.flip_normal_y      !=on                                  ){        undos.set("fny"       ); edit.flip_normal_y      =on                               ; edit.      flip_normal_y_time.getUTC(); rebuildBase(edit.textures(), EditMaterial.CHANGED_FLIP_NRM_Y     , false);}} // 'rebuildBase' already calls 'setChanged' and 'toGui'
-   void smoothIsRough    (bool                      on               ) {if(edit.smooth_is_rough    !=on                                  ){        undos.set("sir"       ); edit.smooth_is_rough    =on                               ; edit.    smooth_is_rough_time.getUTC(); rebuildBase(edit.textures(), EditMaterial.CHANGED_SMOOTH_IS_ROUGH, false);}} // 'rebuildBase' already calls 'setChanged' and 'toGui'
- //void maxTexSize       (Edit.MAX_TEX_SIZE         mts              ) {if(edit.max_tex_size       !=mts                                 ){        undos.set("mts"       ); edit.max_tex_size       =mts                              ; edit.       max_tex_size_time.getUTC(); setChanged(); toGui();}}
-   void downsizeTexMobile(byte                      ds               ) {if(edit.downsize_tex_mobile!=ds                                  ){        undos.set("dtm"       ); edit.downsize_tex_mobile=ds                               ; edit.downsize_tex_mobile_time.getUTC(); setChanged(); toGui();}}
-   void texQuality       (Edit.Material.TEX_QUALITY q, bool undo=true) {if(edit.tex_quality        !=q                                   ){if(undo)undos.set("texQuality"); edit.tex_quality        =q                                ; edit.        tex_quality_time.getUTC(); rebuildBase(edit.textures(), 0, false);}} // 'rebuildBase' already calls 'setChanged' and 'toGui'
+   void   setRGB     (C Vec                   &srgb              ) {if(edit.color_s.xyz        !=srgb                                ){        undos.set("rgb"       ); edit.color_s.xyz        =srgb                             ; edit.          color_time.getUTC(); setChanged(); toGui();}}
+   void   setNormal  (flt                    normal              ) {if(edit.normal             !=normal                              ){        undos.set("normal"    ); edit.normal             =normal                           ; edit.         normal_time.getUTC(); setChanged(); toGui();}}
+   void   setSmooth  (flt                    smooth              ) {if(edit.smooth             !=smooth                              ){        undos.set("smooth"    ); edit.smooth             =smooth                           ; edit.         smooth_time.getUTC(); setChanged(); toGui();}}
+   void   setReflect (flt reflect_min, flt reflect_max           ) {if(edit.reflect_min!=reflect_min || edit.reflect_max!=reflect_max){        undos.set("reflect"   ); edit.reflect_min=reflect_min; edit.reflect_max=reflect_max; edit.        reflect_time.getUTC(); setChanged(); toGui();}}
+   void resetAlpha   (                                           ) {                                                                           undos.set("alpha"     ); edit.resetAlpha()                                         ;                                     setChanged(); toGui(); }
+   void cull         (bool                      on               ) {if(edit.cull               !=on                                  ){        undos.set("cull"      ); edit.cull               =on                               ; edit.           cull_time.getUTC(); setChanged(); toGui();}}
+   void flipNrmY     (bool                      on               ) {if(edit.flip_normal_y      !=on                                  ){        undos.set("fny"       ); edit.flip_normal_y      =on                               ; edit.  flip_normal_y_time.getUTC(); rebuildBase(edit.textures(), EditMaterial.CHANGED_FLIP_NRM_Y     , false);}} // 'rebuildBase' already calls 'setChanged' and 'toGui'
+   void smoothIsRough(bool                      on               ) {if(edit.smooth_is_rough    !=on                                  ){        undos.set("sir"       ); edit.smooth_is_rough    =on                               ; edit.smooth_is_rough_time.getUTC(); rebuildBase(edit.textures(), EditMaterial.CHANGED_SMOOTH_IS_ROUGH, false);}} // 'rebuildBase' already calls 'setChanged' and 'toGui'
+ //void maxTexSize   (Edit.MAX_TEX_SIZE         mts              ) {if(edit.max_tex_size       !=mts                                 ){        undos.set("mts"       ); edit.max_tex_size       =mts                              ; edit.   max_tex_size_time.getUTC(); setChanged(); toGui();}}
+   void texDownsize  (TEX_SIZE_PLATFORM tsp, byte downsize       ) {if(edit.tex_downsize[tsp]  !=downsize                            ){        undos.set("texSize"   ); edit.tex_downsize[tsp]  =downsize                         ; edit.   tex_downsize_time.getUTC(); setChanged(); toGui();}}
+   void texQuality   (Edit.Material.TEX_QUALITY q, bool undo=true) {if(edit.tex_quality        !=q                                   ){if(undo)undos.set("texQuality"); edit.tex_quality        =q                                ; edit.    tex_quality_time.getUTC(); rebuildBase(edit.textures(), 0, false);}} // 'rebuildBase' already calls 'setChanged' and 'toGui'
 
    virtual void resizeBase(C VecI2 &size, bool relative=false)
    {
@@ -876,8 +879,9 @@ emit_blue =&props.New().create("Emit Blue" , MemberDesc(DATA_REAL).setFunc(Emiss
       props.New().create("Cull"         , MemberDesc(DATA_BOOL).setFunc(Cull   , Cull   ));
       props.New().create("UV Scale"     , MemberDesc(DATA_REAL).setFunc(UVScale, UVScale)).range(0.01, 1024).mouseEditMode(PROP_MOUSE_EDIT_SCALAR);
 
-Property &tqi=props.New().create("Tex Quality"    , MemberDesc(DATA_INT).setFunc(TexQuality       , TexQuality       )).setEnum().desc("Select Texture Quality"); tqi.combobox.setColumns(NameDescListColumn, Elms(NameDescListColumn)).setData(TexQualities, Elms(TexQualities)); tqi.combobox.menu.list.setElmDesc(MEMBER(NameDesc, desc));
-Property &mts=props.New().create("Tex Size Mobile", MemberDesc(DATA_INT).setFunc(DownsizeTexMobile, DownsizeTexMobile)).setEnum(DownsizeTexMobileText, Elms(DownsizeTexMobileText)).desc("If Downsize Textures when making Applications for Mobile platforms");
+Property &tq =props.New().create("Tex Quality"    , MemberDesc(DATA_INT).setFunc(TexQuality       , TexQuality       )).setEnum().desc("Select Texture Quality"); tq.combobox.setColumns(NameDescListColumn, Elms(NameDescListColumn)).setData(TexQualities, Elms(TexQualities)); tq.combobox.menu.list.setElmDesc(MEMBER(NameDesc, desc));
+Property &tsm=props.New().create("Tex Size Mobile", MemberDesc(DATA_INT).setFunc(TexDownsizeMobile, TexDownsizeMobile)).setEnum(TexDownsizeText, Elms(TexDownsizeText)).desc("If Downsize Textures when making Applications for Android, iOS, Web");
+Property &tss=props.New().create("Tex Size Switch", MemberDesc(DATA_INT).setFunc(TexDownsizeSwitch, TexDownsizeSwitch)).setEnum(TexDownsizeText, Elms(TexDownsizeText)).desc("If Downsize Textures when making Applications for Nintendo Switch");
 
       ts.reset().size=0.038; ts.align.set(1, 0);
       Rect prop_rect=AddProperties(props, sub, 0, prop_height, 0.16, &ts); REPAO(props).autoData(this).changed(Changed, PreChanged);
@@ -885,30 +889,31 @@ Property &mts=props.New().create("Tex Size Mobile", MemberDesc(DATA_INT).setFunc
       sub+=brightness.create(Rect_RU(     red.textline.rect().left(),      red.button.rect().w(), prop_height*2)).func(RGB     , T).focusable(false).subType(BUTTON_TYPE_PROPERTY_VALUE); brightness.mode=BUTTON_CONTINUOUS;
       sub+=rgb_1.create(Rect_R(brightness.rect().left()-Vec2(0.01, 0), prop_height, prop_height*2), "1").func(RGB1, T).focusable(false).desc("Set RGB to 1"); rgb_1.text_size/=2;
       tech.combobox.resize(Vec2(0.27, 0)); // increase size
-      tqi .combobox.resize(Vec2(0.12, 0)); // increase size
-      mts .combobox.resize(Vec2(0.12, 0)); // increase size
+      tq  .combobox.resize(Vec2(0.12, 0)); // increase size
+      tsm .combobox.resize(Vec2(0.12, 0)); // increase size
+      tss .combobox.resize(Vec2(0.12, 0)); // increase size
 
-      flt tex_size=prop_height*3; int i=-1;
-      sub+=texs.New().create(TEX_COLOR     , MEMBER(EditMaterial,      color_map), MEMBER(EditMaterial,      color_map_time), Rect_LU(prop_rect.ru()+Vec2(e           , i*prop_height), tex_size, tex_size), "Color"         , T);
-      sub+=texs.New().create(TEX_ALPHA     , MEMBER(EditMaterial,      alpha_map), MEMBER(EditMaterial,      alpha_map_time), Rect_LU(prop_rect.ru()+Vec2(e+tex_size*1, i*prop_height), tex_size, tex_size), "Alpha"         , T); i-=3;
-      sub+=texs.New().create(TEX_BUMP      , MEMBER(EditMaterial,       bump_map), MEMBER(EditMaterial,       bump_map_time), Rect_LU(prop_rect.ru()+Vec2(e           , i*prop_height), tex_size, tex_size), "Bump"          , T);
-      sub+=texs.New().create(TEX_NORMAL    , MEMBER(EditMaterial,     normal_map), MEMBER(EditMaterial,     normal_map_time), Rect_LU(prop_rect.ru()+Vec2(e+tex_size*1, i*prop_height), tex_size, tex_size), "Normal"        , T); i-=3;
-      sub+=texs.New().create(TEX_SMOOTH    , MEMBER(EditMaterial,     smooth_map), MEMBER(EditMaterial,     smooth_map_time), Rect_LU(prop_rect.ru()+Vec2(e           , i*prop_height), tex_size, tex_size), "Smooth"        , T);
-      sub+=texs.New().create(TEX_METAL     , MEMBER(EditMaterial,      metal_map), MEMBER(EditMaterial,      metal_map_time), Rect_LU(prop_rect.ru()+Vec2(e+tex_size*1, i*prop_height), tex_size, tex_size), "Metal"         , T); i-=3;
-      sub+=texs.New().create(TEX_GLOW      , MEMBER(EditMaterial,       glow_map), MEMBER(EditMaterial,       glow_map_time), Rect_LU(prop_rect.ru()+Vec2(e           , i*prop_height), tex_size, tex_size), "Glow"          , T);
-      sub+=texs.New().create(TEX_EMISSIVE  , MEMBER(EditMaterial,   emissive_map), MEMBER(EditMaterial,   emissive_map_time), Rect_LU(prop_rect.ru()+Vec2(e+tex_size*1, i*prop_height), tex_size, tex_size), "Emit\nLight"   , T); i-=3;
-      sub+=texs.New().create(TEX_DET_COLOR , MEMBER(EditMaterial,   detail_color), MEMBER(EditMaterial,     detail_map_time), Rect_LU(prop_rect.ru()+Vec2(e           , i*prop_height), tex_size, tex_size), "Detail\nColor" , T);
-      sub+=texs.New().create(TEX_DET_SMOOTH, MEMBER(EditMaterial,  detail_smooth), MEMBER(EditMaterial,     detail_map_time), Rect_LU(prop_rect.ru()+Vec2(e+tex_size*1, i*prop_height), tex_size, tex_size), "Detail\nSmooth", T); i-=3;
-      sub+=texs.New().create(TEX_DET_BUMP  , MEMBER(EditMaterial,    detail_bump), MEMBER(EditMaterial,     detail_map_time), Rect_LU(prop_rect.ru()+Vec2(e           , i*prop_height), tex_size, tex_size), "Detail\nBump"  , T);
-      sub+=texs.New().create(TEX_DET_NORMAL, MEMBER(EditMaterial,  detail_normal), MEMBER(EditMaterial,     detail_map_time), Rect_LU(prop_rect.ru()+Vec2(e+tex_size*1, i*prop_height), tex_size, tex_size), "Detail\nNormal", T); i-=3;
-      sub+=texs.New().create(TEX_MACRO     , MEMBER(EditMaterial,      macro_map), MEMBER(EditMaterial,      macro_map_time), Rect_LU(prop_rect.ru()+Vec2(e+tex_size*1, i*prop_height), tex_size, tex_size), "Macro"         , T);
-    /*sub+=texs.New().create(TEX_RFL_ALL   , MEMBER(EditMaterial, reflection_map), MEMBER(EditMaterial, reflection_map_time), Rect_LU(prop_rect.ru()+Vec2(e-tex_size*3, i*prop_height), tex_size, tex_size), "Reflect\nAll"  , T);
-      sub+=texs.New().create(TEX_RFL_L     , MEMBER(EditMaterial, reflection_map), MEMBER(EditMaterial, reflection_map_time), Rect_LU(prop_rect.ru()+Vec2(e-tex_size*2, i*prop_height), tex_size, tex_size), "Reflect\nLeft" , T);
-      sub+=texs.New().create(TEX_RFL_F     , MEMBER(EditMaterial, reflection_map), MEMBER(EditMaterial, reflection_map_time), Rect_LU(prop_rect.ru()+Vec2(e-tex_size*1, i*prop_height), tex_size, tex_size), "Reflect\nFront", T);
-      sub+=texs.New().create(TEX_RFL_R     , MEMBER(EditMaterial, reflection_map), MEMBER(EditMaterial, reflection_map_time), Rect_LU(prop_rect.ru()+Vec2(e+tex_size*0, i*prop_height), tex_size, tex_size), "Reflect\nRight", T);
-      sub+=texs.New().create(TEX_RFL_B     , MEMBER(EditMaterial, reflection_map), MEMBER(EditMaterial, reflection_map_time), Rect_LU(prop_rect.ru()+Vec2(e+tex_size*1, i*prop_height), tex_size, tex_size), "Reflect\nBack" , T); i-=3;
-      sub+=texs.New().create(TEX_RFL_D     , MEMBER(EditMaterial, reflection_map), MEMBER(EditMaterial, reflection_map_time), Rect_LU(prop_rect.ru()+Vec2(e+tex_size*0, i*prop_height), tex_size, tex_size), "Reflect\nDown" , T);
-      sub+=texs.New().create(TEX_RFL_U     , MEMBER(EditMaterial, reflection_map), MEMBER(EditMaterial, reflection_map_time), Rect_LU(prop_rect.ru()+Vec2(e+tex_size*1, i*prop_height), tex_size, tex_size), "Reflect\nUp"   , T); i-=3; */
+      flt tex_size=prop_height*3; int i=-1; flt s=e-0.003;
+      sub+=texs.New().create(TEX_COLOR     , MEMBER(EditMaterial,      color_map), MEMBER(EditMaterial,      color_map_time), Rect_LU(prop_rect.ru()+Vec2(s           , i*prop_height), tex_size, tex_size), "Color"         , T);
+      sub+=texs.New().create(TEX_ALPHA     , MEMBER(EditMaterial,      alpha_map), MEMBER(EditMaterial,      alpha_map_time), Rect_LU(prop_rect.ru()+Vec2(s+tex_size*1, i*prop_height), tex_size, tex_size), "Alpha"         , T); i-=3;
+      sub+=texs.New().create(TEX_BUMP      , MEMBER(EditMaterial,       bump_map), MEMBER(EditMaterial,       bump_map_time), Rect_LU(prop_rect.ru()+Vec2(s           , i*prop_height), tex_size, tex_size), "Bump"          , T);
+      sub+=texs.New().create(TEX_NORMAL    , MEMBER(EditMaterial,     normal_map), MEMBER(EditMaterial,     normal_map_time), Rect_LU(prop_rect.ru()+Vec2(s+tex_size*1, i*prop_height), tex_size, tex_size), "Normal"        , T); i-=3;
+      sub+=texs.New().create(TEX_SMOOTH    , MEMBER(EditMaterial,     smooth_map), MEMBER(EditMaterial,     smooth_map_time), Rect_LU(prop_rect.ru()+Vec2(s           , i*prop_height), tex_size, tex_size), "Smooth"        , T);
+      sub+=texs.New().create(TEX_METAL     , MEMBER(EditMaterial,      metal_map), MEMBER(EditMaterial,      metal_map_time), Rect_LU(prop_rect.ru()+Vec2(s+tex_size*1, i*prop_height), tex_size, tex_size), "Metal"         , T); i-=3;
+      sub+=texs.New().create(TEX_GLOW      , MEMBER(EditMaterial,       glow_map), MEMBER(EditMaterial,       glow_map_time), Rect_LU(prop_rect.ru()+Vec2(s           , i*prop_height), tex_size, tex_size), "Glow"          , T);
+      sub+=texs.New().create(TEX_EMISSIVE  , MEMBER(EditMaterial,   emissive_map), MEMBER(EditMaterial,   emissive_map_time), Rect_LU(prop_rect.ru()+Vec2(s+tex_size*1, i*prop_height), tex_size, tex_size), "Emit\nLight"   , T); i-=3;
+      sub+=texs.New().create(TEX_DET_COLOR , MEMBER(EditMaterial,   detail_color), MEMBER(EditMaterial,     detail_map_time), Rect_LU(prop_rect.ru()+Vec2(s           , i*prop_height), tex_size, tex_size), "Detail\nColor" , T);
+      sub+=texs.New().create(TEX_DET_SMOOTH, MEMBER(EditMaterial,  detail_smooth), MEMBER(EditMaterial,     detail_map_time), Rect_LU(prop_rect.ru()+Vec2(s+tex_size*1, i*prop_height), tex_size, tex_size), "Detail\nSmooth", T); i-=3;
+      sub+=texs.New().create(TEX_DET_BUMP  , MEMBER(EditMaterial,    detail_bump), MEMBER(EditMaterial,     detail_map_time), Rect_LU(prop_rect.ru()+Vec2(s           , i*prop_height), tex_size, tex_size), "Detail\nBump"  , T);
+      sub+=texs.New().create(TEX_DET_NORMAL, MEMBER(EditMaterial,  detail_normal), MEMBER(EditMaterial,     detail_map_time), Rect_LU(prop_rect.ru()+Vec2(s+tex_size*1, i*prop_height), tex_size, tex_size), "Detail\nNormal", T); i-=3;
+      sub+=texs.New().create(TEX_MACRO     , MEMBER(EditMaterial,      macro_map), MEMBER(EditMaterial,      macro_map_time), Rect_LU(prop_rect.ru()+Vec2(s+tex_size*1, i*prop_height), tex_size, tex_size), "Macro"         , T);
+    /*sub+=texs.New().create(TEX_RFL_ALL   , MEMBER(EditMaterial, reflection_map), MEMBER(EditMaterial, reflection_map_time), Rect_LU(prop_rect.ru()+Vec2(s-tex_size*3, i*prop_height), tex_size, tex_size), "Reflect\nAll"  , T);
+      sub+=texs.New().create(TEX_RFL_L     , MEMBER(EditMaterial, reflection_map), MEMBER(EditMaterial, reflection_map_time), Rect_LU(prop_rect.ru()+Vec2(s-tex_size*2, i*prop_height), tex_size, tex_size), "Reflect\nLeft" , T);
+      sub+=texs.New().create(TEX_RFL_F     , MEMBER(EditMaterial, reflection_map), MEMBER(EditMaterial, reflection_map_time), Rect_LU(prop_rect.ru()+Vec2(s-tex_size*1, i*prop_height), tex_size, tex_size), "Reflect\nFront", T);
+      sub+=texs.New().create(TEX_RFL_R     , MEMBER(EditMaterial, reflection_map), MEMBER(EditMaterial, reflection_map_time), Rect_LU(prop_rect.ru()+Vec2(s+tex_size*0, i*prop_height), tex_size, tex_size), "Reflect\nRight", T);
+      sub+=texs.New().create(TEX_RFL_B     , MEMBER(EditMaterial, reflection_map), MEMBER(EditMaterial, reflection_map_time), Rect_LU(prop_rect.ru()+Vec2(s+tex_size*1, i*prop_height), tex_size, tex_size), "Reflect\nBack" , T); i-=3;
+      sub+=texs.New().create(TEX_RFL_D     , MEMBER(EditMaterial, reflection_map), MEMBER(EditMaterial, reflection_map_time), Rect_LU(prop_rect.ru()+Vec2(s+tex_size*0, i*prop_height), tex_size, tex_size), "Reflect\nDown" , T);
+      sub+=texs.New().create(TEX_RFL_U     , MEMBER(EditMaterial, reflection_map), MEMBER(EditMaterial, reflection_map_time), Rect_LU(prop_rect.ru()+Vec2(s+tex_size*1, i*prop_height), tex_size, tex_size), "Reflect\nUp"   , T); i-=3; */
       REPA(texs)sub+=texs[i].remove;
 
       sub+=reload_base_textures.create("Reload Base Textures").func(ReloadBaseTextures, T).desc("Reload base textures, such as Color, Alpha, Bump, Normal, Smooth, Metal and Glow, from their original source files."); // #MaterialTextureLayout
@@ -1095,8 +1100,8 @@ Property &mts=props.New().create("Tex Size Mobile", MemberDesc(DATA_INT).setFunc
          Save(*game, Proj.gamePath(elm_id)); Proj.savedGame(*elm);
          Proj.mtrlSetAutoTanBin(elm.id);
          Server.setElmLong(elm.id);
-         if(saved.downsize_tex_mobile!=edit.downsize_tex_mobile)Proj.mtrlDownsizeTexMobile(elm_id, edit.downsize_tex_mobile, saved.base_0_tex, saved.base_1_tex, saved.base_2_tex); // upon flushing set all materials with same textures to the same 'downsize_tex_mobile'
-         if(saved.tex_quality        !=edit.tex_quality        )Proj.mtrlTexQuality       (elm_id, edit.tex_quality        , saved.base_0_tex, saved.base_1_tex, saved.base_2_tex); // upon flushing set all materials with same textures to the same 'tex_quality'
+         REPA(edit.tex_downsize)if(saved.tex_downsize[i]!=edit.tex_downsize[i])Proj.mtrlTexDownsize(elm_id, (TEX_SIZE_PLATFORM)i, edit.tex_downsize[i], saved.base_0_tex, saved.base_1_tex, saved.base_2_tex, true); // upon flushing set all materials with same textures to the same 'tex_downsize'
+                                if(saved.tex_quality    !=edit.tex_quality    )Proj.mtrlTexQuality (elm_id,                       edit.tex_quality    , saved.base_0_tex, saved.base_1_tex, saved.base_2_tex, true); // upon flushing set all materials with same textures to the same 'tex_quality'
          saved=edit;
       }
       changed=false;

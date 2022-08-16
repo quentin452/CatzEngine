@@ -58,7 +58,8 @@ Int Compare(C IndexWeight &a, C IndexWeight &b);
 T1(TYPE) void Sort(TYPE *data, Int elms, Int compare(C TYPE &a, C TYPE &b)=Compare); // sort custom array using custom comparing function
 
 // Binary Search, search sorted 'data' array for presence of 'value' and return if it was found in the array, 'index'=if the function returned true then this index points to the location where the 'value' is located in the array, if the function returned false then it means that 'value' was not found in the array however the 'index' points to the place where it should be added in the array while preserving sorted data, 'index' will always be in range (0..elms) inclusive
-T2(DATA, VALUE)  Bool   BinarySearch(C DATA *data, Int elms, C VALUE &value, Int &index, Int compare(C DATA &a, C VALUE &b)=Compare);
-T2(DATA, VALUE)  Bool   BinaryHas   (C DATA *data, Int elms, C VALUE &value,             Int compare(C DATA &a, C VALUE &b)=Compare) {Int i; return BinarySearch(data, elms, value, i, compare);                  } // check if 'value' is present in array
-T2(DATA, VALUE)  DATA*  BinaryFind  (  DATA *data, Int elms, C VALUE &value,             Int compare(C DATA &a, C VALUE &b)=Compare) {Int i; return BinarySearch(data, elms, value, i, compare) ? &data[i] : null;} // check if 'value' is present in array and return it, null on fail
+T2(DATA, VALUE)  Bool   BinarySearch     (C DATA *data, Int elms, C VALUE &value, Int &index, Int compare(C DATA &a, C VALUE &b)=Compare);
+T2(DATA, VALUE)  Bool   BinarySearchFirst(C DATA *data, Int elms, C VALUE &value, Int &index, Int compare(C DATA &a, C VALUE &b)=Compare); // if there are multiple elements with same value, then the first one will be returned
+T2(DATA, VALUE)  Bool   BinaryHas        (C DATA *data, Int elms, C VALUE &value,             Int compare(C DATA &a, C VALUE &b)=Compare) {Int i; return BinarySearch(data, elms, value, i, compare);                  } // check if 'value' is present in array
+T2(DATA, VALUE)  DATA*  BinaryFind       (  DATA *data, Int elms, C VALUE &value,             Int compare(C DATA &a, C VALUE &b)=Compare) {Int i; return BinarySearch(data, elms, value, i, compare) ? &data[i] : null;} // check if 'value' is present in array and return it, null on fail
 /******************************************************************************/

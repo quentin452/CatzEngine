@@ -23,6 +23,7 @@ Bool DataIsText(DATA_TYPE type)
       case DATA_CHAR_PTR :
       case DATA_STR8     :
       case DATA_STR      :
+      case DATA_STR_EX   :
          return true;
    }
    return false;
@@ -2190,6 +2191,7 @@ Str MemberDesc::asText(CPtr data, Int precision)C
             case DATA_CHAR_PTR : return *(Char **)data;
             case DATA_STR8     : return *(Str8 * )data;
             case DATA_STR      : return *(Str  * )data;
+            case DATA_STR_EX   : return ((StrEx* )data)->str();
             case DATA_PTR      : return (SIZE(Ptr)==4) ? TextHex(*(U32*)data, temp,  8, 0, true)
                                                        : TextHex(*(U64*)data, temp, 16, 0, true);
 
@@ -2322,10 +2324,11 @@ void MemberDesc::fromText(Ptr data, C Str &text)
          data=(Byte*)data+offset;
          switch(type)
          {
-            case DATA_CHAR8: Set((Char8*)data, text, size  ); break;
-            case DATA_CHAR : Set((Char *)data, text, size/2); break;
-            case DATA_STR8 :    *(Str8 *)data= text         ; break;
-            case DATA_STR  :    *(Str  *)data= text         ; break;
+            case DATA_CHAR8 : Set((Char8*)data, text, size  ); break;
+            case DATA_CHAR  : Set((Char *)data, text, size/2); break;
+            case DATA_STR8  :    *(Str8 *)data= text         ; break;
+            case DATA_STR   :    *(Str  *)data= text         ; break;
+            case DATA_STR_EX:    *(StrEx*)data= text         ; break;
 
             case DATA_BOOL: *(Bool*)data=TextBool(text); break;
 
@@ -2686,6 +2689,14 @@ Image* MemberDesc::asImage(CPtr data)C
          case DATA_IMAGE_PTR: return  *(Image*  *)data   ;
          case DATA_IMAGEPTR : return (*(ImagePtr*)data)();
       }
+   }
+   return null;
+}
+StrEx* MemberDesc::asStrEx(CPtr data)C
+{
+   switch(type)
+   {
+      case DATA_STR_EX: if(data)return (StrEx*)((Byte*)data+offset); break;
    }
    return null;
 }

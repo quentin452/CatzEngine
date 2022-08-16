@@ -445,12 +445,16 @@ inline Dbl Dist2         (C VecD  &point, C Edge   &edge  ,                  DIS
 inline Dbl Dist2         (C VecD  &point, C EdgeD  &edge  ,                  DIST_TYPE *type=null) {return Dist2PointEdge(point, edge.p[0], edge.p[1], type);}
 
 // distance between 2 edges
-Flt Dist(C Edge2 &a, C Edge2 &b);
-Flt Dist(C Edge  &a, C Edge  &b);
+Flt Dist(C Edge2  &a, C Edge2  &b);
+Dbl Dist(C EdgeD2 &a, C EdgeD2 &b);
+Flt Dist(C Edge   &a, C Edge   &b);
+Dbl Dist(C EdgeD  &a, C EdgeD  &b);
 
 // squared distance between 2 edges
-Flt Dist2(C Edge2 &a, C Edge2 &b);
-Flt Dist2(C Edge  &a, C Edge  &b);
+Flt Dist2(C Edge2  &a, C Edge2  &b);
+Dbl Dist2(C EdgeD2 &a, C EdgeD2 &b);
+Flt Dist2(C Edge   &a, C Edge   &b);
+Dbl Dist2(C EdgeD  &a, C EdgeD  &b);
 
 // distance between edge and a plane
 Flt Dist(C Edge &edge, C Plane &plane);
@@ -460,7 +464,8 @@ Flt Dist(C Edge &edge, C Plane &plane);
 inline Vec2 NearestPointOnEdge(C Vec2 &point, C Edge2 &edge                  ) {return NearestPointOnEdge(point, edge.p[0], edge.p[1]);} // nearest point  on edge
 inline Vec  NearestPointOnEdge(C Vec  &point, C Edge  &edge                  ) {return NearestPointOnEdge(point, edge.p[0], edge.p[1]);} // nearest point  on edge
        Vec  NearestPointOnLine(C Vec  &point, C Vec   &line_pos, C Vec &line_dir);                                                       // nearest point  on straight line , 'line_dir'=line direction (must be normalized)
-       Bool NearestPointOnLine(C Vec  &pos_a, C Vec   &dir_a, C Vec &pos_b, C Vec &dir_b, Edge &out);                                    // nearest points on straight lines, return true is succesfull, put points to out.p[], 'dir_a', 'dir_b'=line directions (must be normalized)
+       Bool NearestPointOnLine(C Vec  &pos_a, C Vec   &dir_a, C Vec  &pos_b, C Vec  &dir_b, Edge  &out);                                 // nearest points on straight lines, return true is succesfull, put points to out.p[], 'dir_a', 'dir_b'=line directions (must be normalized)
+       Bool NearestPointOnLine(C VecD &pos_a, C VecD  &dir_a, C VecD &pos_b, C VecD &dir_b, EdgeD &out);                                 // nearest points on straight lines, return true is succesfull, put points to out.p[], 'dir_a', 'dir_b'=line directions (must be normalized)
 
 // if points cuts edge (with epsilon)
        Bool CutsPointEdge(C Vec2  &point, C Edge2_I  &ei  , Vec2  *cuts=null);

@@ -44,6 +44,7 @@ const_mem_addr struct Button : GuiObj // Gui Button !! must be stored in constan
    Flt         text_align , // text aligning   , default=0.0
                text_size  ; // text size       , default=1.0 (this is multiplied by button height and 'GuiSkin.button.text_size')
    Str         text       ; // text            , default=""
+   StrEx       extra      ;
    ImagePtr    image      ; // image           , default=null
    GuiSkinPtr  skin       ; // skin override   , default=null (if set to null then current value of 'Gui.skin' is used)
 
@@ -54,12 +55,14 @@ const_mem_addr struct Button : GuiObj // Gui Button !! must be stored in constan
            Button& create(C Button &src                );                                     // create from 'src'
 
    // get / set
-           Bool    operator()(                                  )C {return _on ;} // get button state (if it's visually pushed)
-           Flt     lit       (                                  )C {return _lit;} // get highlight factor (0..1)
-           Button& set       (Bool on, SET_MODE mode=SET_DEFAULT);                // set button state, this method is valid only for BUTTON_TOGGLE mode
-           Button& push      (                                  );                // push manually
-           Button& setText   (C Str      &text                  );                // set text
-           Button& setImage  (C ImagePtr &image                 );                // set image
+           Bool    operator()(                                  )C {return _on                    ;} // get button state (if it's visually pushed)
+           Bool    hasData   (                                  )C {return text.is() || extra.is();} // if  has any text data
+           Flt     lit       (                                  )C {return _lit                   ;} // get highlight factor (0..1)
+           Button& set       (Bool on, SET_MODE mode=SET_DEFAULT);                                   // set button state, this method is valid only for BUTTON_TOGGLE mode
+           Button& push      (                                  );                                   // push manually
+           Button& fitText   (                                  );                                   // minimize text size if text is too big
+           Button& setText   (C Str      &text                  );                                   // set text
+           Button& setImage  (C ImagePtr &image                 );                                   // set image
            Button& subType   (BUTTON_TYPE type                  );           BUTTON_TYPE subType()C {return                  _sub_type;} // set/get button type, default=BUTTON_TYPE_DEFAULT
    virtual Button&  enabled  (Bool  enabled                     )override;   Bool        enabled()C {return          super:: enabled();} // set/get if  enabled
    virtual Button& disabled  (Bool disabled                     )override;   Bool       disabled()C {return          super::disabled();} // set/get if disabled

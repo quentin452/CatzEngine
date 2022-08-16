@@ -39,8 +39,8 @@ class ListElm
    void includeSize(C ListElm &src);
 
    ListElm& set(ELM_TYPE type, C Str &name, bool edited, bool importing, bool removed, int depth, int vis_parent);
-   ListElm& set(Elm &elm, ElmNode &node, int depth, int vis_parent, bool parent_removed);
-   ListElm& set(EEItem &item, bool opened, int depth, bool parent_removed);
+   ListElm& set(Elm &elm, ElmNode &node, int depth, int vis_parent); // !! assumes that 'finalRemoved'/FINAL is available !!
+   ListElm& set(EEItem &item, bool opened, int depth);
 
 public:
    ListElm();

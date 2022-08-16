@@ -7,6 +7,46 @@ namespace EE{
       -support large distances (because matrix calculations can be done in Dbl precision on the CPU side, and stored as Flt precision in view space)
       -reduce number of matrix operations in shaders
 
+/******************************************************************************
+
+   Matrix calculation rules:
+
+   ~A in Esenthel means inverse (1/A)
+
+      (A*B)*C = A*(B*C)
+
+      A*B=C
+      A*B/B=C/B
+      A=C/B
+
+      A=B, can multiply both sides on the right by same value
+      A*C=B*C
+
+      A=B, can multiply both sides on the left by same value
+      C*A=C*B
+
+      A=B, can divide both sides on the right by same value (which is multiply by inverse: *(1/C))
+      A/C=B/C
+
+      A=B, can inverse both sides
+      1/A = 1/B
+
+      1/(A*B) = (1/B)*(1/A)
+       ~(A*B) =   ~B *  ~A
+
+      A*B=C, multiply both sides on the left by ~A:
+      ~A * (A*B) = ~A * (C)
+      (~A * A) * B = ~A * C
+      B = ~A * C
+
+      A=C/B, inverse both sides:
+      ~A=~(C /  B)
+      ~A=~(C * ~B)
+      ~A=~~B * ~C
+      ~A=B * ~C
+      ~A*C=B
+      B=~A*C
+
 /******************************************************************************/
       MatrixM ObjMatrix(1),
               CamMatrix,
@@ -2863,7 +2903,7 @@ Vec Matrix3::axis(Bool normalized)C
             m->z.x - m->x.z,
             m->x.y - m->y.x);
 
-   if(axis.normalize()<=EPS)
+   Flt len2=axis.length2(); if(len2>Sqr(EPS))axis/=SqrtFast(len2);else // normalize
    {
       // singularity
       if(m->x.x>=EPS_COS)axis.set(1, 0, 0);else
@@ -2905,7 +2945,7 @@ VecD MatrixD3::axis(Bool normalized)C
              m->z.x - m->x.z,
              m->x.y - m->y.x);
 
-   if(axis.normalize()<=EPSD)
+   Dbl len2=axis.length2(); if(len2>Sqr(EPSD))axis/=SqrtFast(len2);else // normalize
    {
       // singularity
       if(m->x.x>=EPSD_COS)axis.set(1, 0, 0);else
@@ -2948,9 +2988,14 @@ Flt Matrix3::angle(Bool normalized)C
             m->z.x - m->x.z,
             m->x.y - m->y.x);
 
-   if(axis.length2()> Sqr(EPS)                )return Acos((m->x.x + m->y.y + m->z.z - 1)*0.5f);
-   if(m->x.x        >=    EPS_COS && m->y.y>=0)return 0;
-                                               return PI;
+   Flt len2=axis.length2(); if(len2>Sqr(EPS))
+   {
+      Flt sin=                SqrtFast(len2)/2,
+          cos=(m->x.x + m->y.y + m->z.z - 1)/2;
+      return ACosSin(cos, sin); // using 'ACosSin' is much more precise than just "Acos(cos)"
+   }
+   if(m->x.x>=EPS_COS && m->y.y>=0)return 0;
+                                   return PI;
 }
 Dbl MatrixD3::angle(Bool normalized)C
 {
@@ -2961,9 +3006,14 @@ Dbl MatrixD3::angle(Bool normalized)C
              m->z.x - m->x.z,
              m->x.y - m->y.x);
 
-   if(axis.length2()> Sqr(EPSD    )            )return Acos((m->x.x + m->y.y + m->z.z - 1)*0.5);
-   if(m->x.x        >=    EPSD_COS && m->y.y>=0)return 0;
-                                                return PID;
+   Dbl len2=axis.length2(); if(len2>Sqr(EPSD))
+   {
+      Dbl sin=                SqrtFast(len2)/2,
+          cos=(m->x.x + m->y.y + m->z.z - 1)/2;
+      return ACosSin(cos, sin); // using 'ACosSin' is much more precise than just "Acos(cos)"
+   }
+   if(m->x.x>=EPSD_COS && m->y.y>=0)return 0;
+                                    return PID;
 }
 /******************************************************************************/
 Flt Matrix3::angleY(Bool normalized)C
@@ -2975,8 +3025,14 @@ Flt Matrix3::angleY(Bool normalized)C
             m->z.x - m->x.z,
             m->x.y - m->y.x);
 
-   if(axis.normalize()> EPS    )return axis.y*Acos((m->x.x + m->y.y + m->z.z - 1)*0.5f);
-   if(m->x.x          >=EPS_COS)return 0; // axis=(1,0,0) so axis.y==0
+   Flt len2=axis.length2(); if(len2>Sqr(EPS))
+   {
+      Flt len=                  SqrtFast(len2),
+          sin=                           len/2,
+          cos=(m->x.x + m->y.y + m->z.z - 1)/2;
+      return axis.y/len*ACosSin(cos, sin); // axis.y/len = normalize, using 'ACosSin' is much more precise than just "Acos(cos)"
+   }
+   if(m->x.x>=EPS_COS)return 0; // axis=(1,0,0) so axis.y==0
 
    Flt xx=m->x.x+1,
        yy=m->y.y+1,
@@ -2985,6 +3041,32 @@ Flt Matrix3::angleY(Bool normalized)C
    if(xx>=yy && xx>=zz)return (m->x.y+m->y.x)/SqrtFast(xx)*(PI_4*SQRT2);
    if(yy>=zz          )return                 SqrtFast(yy)*(PI  /SQRT2);
                        return (m->y.z+m->z.y)/SqrtFast(zz)*(PI_4*SQRT2);
+}
+Dbl MatrixD3::angleY(Bool normalized)C
+{
+   MatrixD3 temp;
+ C MatrixD3 *m=this; if(!normalized){temp=T; temp.normalize(); m=&temp;}
+
+   VecD axis(m->y.z - m->z.y,
+             m->z.x - m->x.z,
+             m->x.y - m->y.x);
+
+   Dbl len2=axis.length2(); if(len2>Sqr(EPSD))
+   {
+      Dbl len=                  SqrtFast(len2),
+          sin=                           len/2,
+          cos=(m->x.x + m->y.y + m->z.z - 1)/2;
+      return axis.y/len*ACosSin(cos, sin); // axis.y/len = normalize, using 'ACosSin' is much more precise than just "Acos(cos)"
+   }
+   if(m->x.x>=EPSD_COS)return 0; // axis=(1,0,0) so axis.y==0
+
+   Dbl xx=m->x.x+1,
+       yy=m->y.y+1,
+       zz=m->z.z+1;
+
+   if(xx>=yy && xx>=zz)return (m->x.y+m->y.x)/SqrtFast(xx)*(PID_4*SQRT2);
+   if(yy>=zz          )return                 SqrtFast(yy)*(PID  /SQRT2);
+                       return (m->y.z+m->z.y)/SqrtFast(zz)*(PID_4*SQRT2);
 }
 /******************************************************************************/
 Flt Matrix3::axisAngle(Vec &axis, Bool normalized)C
@@ -2996,45 +3078,47 @@ Flt Matrix3::axisAngle(Vec &axis, Bool normalized)C
             m->z.x - m->x.z,
             m->x.y - m->y.x);
 
-   Flt angle;
-   if(axis.normalize()>EPS)angle=Acos((m->x.x + m->y.y + m->z.z - 1)*0.5f);else
+   Flt len2=axis.length2(); if(len2>Sqr(EPS))
    {
-      // singularity
-      if(m->x.x>=EPS_COS)
-      {
-         axis.set(1, 0, 0);
-         angle=((m->y.y>=0) ? 0 : PI);
-      }else
-      {
-         Flt xx=(m->x.x+1)*0.5f,
-             yy=(m->y.y+1)*0.5f,
-             zz=(m->z.z+1)*0.5f,
-             xy=(m->x.y+m->y.x)*0.25f,
-             xz=(m->x.z+m->z.x)*0.25f,
-             yz=(m->y.z+m->z.y)*0.25f;
-
-         if(xx>=yy && xx>=zz)
-         {
-            axis.x=SqrtFast(xx);
-            axis.y=xy/axis.x;
-            axis.z=xz/axis.x;
-         }else
-         if(yy>=zz)
-         {
-            axis.y=SqrtFast(yy);
-            axis.x=xy/axis.y;
-            axis.z=yz/axis.y;
-         }else
-         {
-            axis.z=SqrtFast(zz);
-            axis.x=xz/axis.z;
-            axis.y=yz/axis.z;
-         }
-         angle=PI;
-      }
+      Flt len=                  SqrtFast(len2),
+          sin=                           len/2,
+          cos=(m->x.x + m->y.y + m->z.z - 1)/2;
+      axis/=len; // normalize
+      return ACosSin(cos, sin); // using 'ACosSin' is much more precise than just "Acos(cos)"
    }
 
-   return angle;
+   // singularity
+   if(m->x.x>=EPS_COS)
+   {
+      axis.set(1, 0, 0);
+      return (m->y.y>=0) ? 0 : PI;
+   }
+
+   Flt xx=(m->x.x+1)*0.5f,
+       yy=(m->y.y+1)*0.5f,
+       zz=(m->z.z+1)*0.5f,
+       xy=(m->x.y+m->y.x)*0.25f,
+       xz=(m->x.z+m->z.x)*0.25f,
+       yz=(m->y.z+m->z.y)*0.25f;
+
+   if(xx>=yy && xx>=zz)
+   {
+      axis.x=SqrtFast(xx);
+      axis.y=xy/axis.x;
+      axis.z=xz/axis.x;
+   }else
+   if(yy>=zz)
+   {
+      axis.y=SqrtFast(yy);
+      axis.x=xy/axis.y;
+      axis.z=yz/axis.y;
+   }else
+   {
+      axis.z=SqrtFast(zz);
+      axis.x=xz/axis.z;
+      axis.y=yz/axis.z;
+   }
+   return PI;
 }
 Dbl MatrixD3::axisAngle(VecD &axis, Bool normalized)C
 {
@@ -3045,45 +3129,47 @@ Dbl MatrixD3::axisAngle(VecD &axis, Bool normalized)C
             m->z.x - m->x.z,
             m->x.y - m->y.x);
 
-   Dbl angle;
-   if(axis.normalize()>EPSD)angle=Acos((m->x.x + m->y.y + m->z.z - 1)*0.5);else
+   Dbl len2=axis.length2(); if(len2>Sqr(EPSD))
    {
-      // singularity
-      if(m->x.x>=EPSD_COS)
-      {
-         axis.set(1, 0, 0);
-         angle=((m->y.y>=0) ? 0 : PID);
-      }else
-      {
-         Dbl xx=(m->x.x+1)*0.5,
-             yy=(m->y.y+1)*0.5,
-             zz=(m->z.z+1)*0.5,
-             xy=(m->x.y+m->y.x)*0.25,
-             xz=(m->x.z+m->z.x)*0.25,
-             yz=(m->y.z+m->z.y)*0.25;
-
-         if(xx>=yy && xx>=zz)
-         {
-            axis.x=SqrtFast(xx);
-            axis.y=xy/axis.x;
-            axis.z=xz/axis.x;
-         }else
-         if(yy>=zz)
-         {
-            axis.y=SqrtFast(yy);
-            axis.x=xy/axis.y;
-            axis.z=yz/axis.y;
-         }else
-         {
-            axis.z=SqrtFast(zz);
-            axis.x=xz/axis.z;
-            axis.y=yz/axis.z;
-         }
-         angle=PID;
-      }
+      Dbl len=                  SqrtFast(len2),
+          sin=                           len/2,
+          cos=(m->x.x + m->y.y + m->z.z - 1)/2;
+      axis/=len; // normalize
+      return ACosSin(cos, sin); // using 'ACosSin' is much more precise than just "Acos(cos)"
    }
 
-   return angle;
+   // singularity
+   if(m->x.x>=EPSD_COS)
+   {
+      axis.set(1, 0, 0);
+      return (m->y.y>=0) ? 0 : PID;
+   }
+
+   Dbl xx=(m->x.x+1)*0.5,
+       yy=(m->y.y+1)*0.5,
+       zz=(m->z.z+1)*0.5,
+       xy=(m->x.y+m->y.x)*0.25,
+       xz=(m->x.z+m->z.x)*0.25,
+       yz=(m->y.z+m->z.y)*0.25;
+
+   if(xx>=yy && xx>=zz)
+   {
+      axis.x=SqrtFast(xx);
+      axis.y=xy/axis.x;
+      axis.z=xz/axis.x;
+   }else
+   if(yy>=zz)
+   {
+      axis.y=SqrtFast(yy);
+      axis.x=xy/axis.y;
+      axis.z=yz/axis.y;
+   }else
+   {
+      axis.z=SqrtFast(zz);
+      axis.x=xz/axis.z;
+      axis.y=yz/axis.z;
+   }
+   return PID;
 }
 Vec  Matrix3 ::axisAngle(Bool normalized)C {Vec  axis; Flt angle=axisAngle(axis, normalized); return axis*=angle;}
 VecD MatrixD3::axisAngle(Bool normalized)C {VecD axis; Dbl angle=axisAngle(axis, normalized); return axis*=angle;}

@@ -41,17 +41,18 @@ class ElmImage : ElmData
    bool         envActual()C;
    bool     mipMapsActual()C; // if Cube Env then always create mip maps
    bool       ignoreAlpha()C;
-   bool       mipMaps    ()C;   void mipMaps (bool on);
-   bool       pow2       ()C;   void pow2    (bool on);
-   bool       sRGB       ()C;   void sRGB    (bool on);
-   bool       env        ()C;   void env     (bool on);
-   bool       alphaLum   ()C;   void alphaLum(bool on);
-   bool       hasColor   ()C;   void hasColor(bool on);
-   bool       hasAlpha   ()C;   void hasAlpha(bool on);
+   bool       mipMaps    ()C;  void mipMaps (bool on);
+   bool       pow2       ()C;  void pow2    (bool on);
+   bool       sRGB       ()C;  void sRGB    (bool on);
+   bool       env        ()C;  void env     (bool on);
+   bool       alphaLum   ()C;  void alphaLum(bool on);
+   bool       hasColor   ()C;  void hasColor(bool on);
+   bool       hasAlpha   ()C;  void hasAlpha(bool on);
    bool       hasAlpha2  ()C;
    bool       hasAlpha3  ()C;
    IMAGE_TYPE androidType()C; // if want to be compressed then use ETC2_RGBA or ETC2_RGB
-   IMAGE_TYPE     iOSType()C; // if want to be compressed then use PVRTC1_4
+   IMAGE_TYPE     iOSType()C;
+ //IMAGE_TYPE     iOSType()C {return             (type==COMPRESSED                || type==COMPRESSED2)  ?               (sRGB() ? IMAGE_PVRTC1_4_SRGB  : IMAGE_PVRTC1_4 )                                                   : IMAGE_NONE;} // if want to be compressed then use PVRTC1_4
    IMAGE_TYPE     uwpType()C; // in this case we only want to replace BC7 format, which will happen only if image is COMPRESSED with alpha, or COMPRESSED2
    IMAGE_TYPE     webType()C; // in this case we only want to replace BC7 format, which will happen only if image is COMPRESSED with alpha, or COMPRESSED2
 

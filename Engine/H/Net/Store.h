@@ -60,7 +60,7 @@ struct PlatformStore // class allowing to communicate with Platform Store
       LTR_OK     , // user          has  a license
       LTR_FAIL   , // user does NOT have a license
       LTR_RETRY  , // probably a loss of connection with the service occurred, it's recommended to retry the license test
-      LTR_ERROR  , // an error occured, for example: "application requested a license check for a package that is not installed on the device", "application requested a license check for a package whose UID (package, user ID pair) does not match that of the requesting application", "application (package name) was not recognized by Google Play"
+      LTR_ERROR  , // an error occured, for example: "Application (Package Name) was not recognized by Google Play" or "Application License Key is invalid"
    };
 
    struct Item
@@ -110,8 +110,8 @@ struct PlatformStore // class allowing to communicate with Platform Store
    PlatformStore& restorePurchases(); // this function is usable only for Apple, it will call "[[SKPaymentQueue defaultQueue] restoreCompletedTransactions]"
 
    // license test
-   void                licenseTest  ();               // test if user has a license for this Application [Supported Platforms: Android]
- C LICENSE_TEST_RESULT licenseResult() {return _ltr;} // get license test result                         [Supported Platforms: Android]
+   void                licenseTest  ();                // test if user has a license for this Application [Supported Platforms: Android]
+   LICENSE_TEST_RESULT licenseResult()C {return _ltr;} // get license test result                         [Supported Platforms: Android]
 
 #if !EE_PRIVATE
 private:

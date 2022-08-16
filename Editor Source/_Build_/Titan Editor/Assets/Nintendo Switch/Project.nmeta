@@ -17,13 +17,13 @@
 			<Language>AmericanEnglish</Language>
 			<IconPath>Icon.bmp</IconPath>
 		</Icon>
-		<ReleaseVersion>71</ReleaseVersion>
-		<DisplayVersion>71</DisplayVersion>
+		<ReleaseVersion>72</ReleaseVersion>
+		<DisplayVersion>72</DisplayVersion>
 		<StartupUserAccount>Required</StartupUserAccount>
 		<UserAccountSwitchLock>Disable</UserAccountSwitchLock>
+		<ParentalControl>FreeCommunication</ParentalControl>
 		<Screenshot>Allow</Screenshot>
 		<DataLossConfirmation>None</DataLossConfirmation>
-		<ApplicationErrorCodeCategory>00000</ApplicationErrorCodeCategory>
 		<LogoType>LicensedByNintendo</LogoType>
 		<LogoHandling>Auto</LogoHandling>
 		<VideoCapture>Enable</VideoCapture>
@@ -34,5 +34,8 @@
 		<PlayLogQueryCapability>None</PlayLogQueryCapability>
 		<PlayLogPolicy>Open</PlayLogPolicy>
 		<RuntimeParameterDelivery>Always</RuntimeParameterDelivery>
+		<SupportedLanguage>AmericanEnglish</SupportedLanguage>
+		<UserAccountSaveDataSize>0x2000000</UserAccountSaveDataSize>
+		<UserAccountSaveDataJournalSize>0x2000000</UserAccountSaveDataJournalSize>
 	</Application>
 </NintendoSdkMeta>

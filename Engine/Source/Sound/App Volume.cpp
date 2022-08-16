@@ -137,7 +137,7 @@ void AppVolumeClass::mute(Bool mute)
       mixerSetControlDetails((HMIXEROBJ)handle, &mcd, MIXER_SETCONTROLDETAILSF_VALUE);
    }
 #else
-   if(FlagTest(Mute, MUTE_USER)!=mute){Mute^=MUTE_USER; SetMute();}
+   if(FlagOn(Mute, MUTE_USER)!=mute){Mute^=MUTE_USER; SetMute();}
 #endif
 }
 Bool AppVolumeClass::mute()
@@ -157,12 +157,12 @@ Bool AppVolumeClass::mute()
    }
    return false;
 #else
-   return FlagTest(Mute, MUTE_USER);
+   return FlagOn(Mute, MUTE_USER);
 #endif
 }
 #if !WINDOWS_OLD
-void AppVolumeClass::muteEx   (Bool mute)  {if(FlagTest(Mute, MUTE_EX)!=mute){Mute^=MUTE_EX; SetMute();}}
-Bool AppVolumeClass::muteEx   (         )C {return FlagTest(Mute, MUTE_EX);}
+void AppVolumeClass::muteEx   (Bool mute)  {if(FlagOn(Mute, MUTE_EX)!=mute){Mute^=MUTE_EX; SetMute();}}
+Bool AppVolumeClass::muteEx   (         )C {return FlagOn(Mute, MUTE_EX);}
 Bool AppVolumeClass::muteFinal(         )C {return Mute!=0;}
 #endif
 /******************************************************************************/

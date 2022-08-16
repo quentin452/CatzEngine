@@ -9,8 +9,8 @@ static Bool Overwrite;
 /******************************************************************************/
 void Line::setRect(Int i)
 {
-   Flt lh=CE.ts.lineHeight();
-   super::rect(Rect_LU(0, -lh*i + CE.fontSpaceOffset(), CE.ts.textWidth(T), lh));
+   Flt h=CE.ts.lineHeight(), o=CE.fontSpaceOffset();
+   super::rect(Rect(0, h*(-i-1) + o, CE.ts.textWidth(T), h*(-i))); // operate on absolute values, instead of relative, to get the same exact values for previous/next lines
 }
 void Line::setGui(Int i, GuiObj &parent)
 {
@@ -320,7 +320,7 @@ void Source::update(C GuiPC &gpc)
          }else
 
          // tab
-         if(Kb.k(KB_TAB) && !Kb.k.ctrlCmd())
+         if(Kb.k(KB_TAB) && !Kb.k.ctrlCmd() && !Kb.k.alt())
          {
             if(!Const)
             if(!CE.options.ac_on_enter() && suggestions_list())autoComplete();else
@@ -763,12 +763,12 @@ void Source::update(C GuiPC &gpc)
          {
             forceCreateNextUndo(); clearSuggestions();
             if(Kb.shift() && (sel.x<0 || sel.y<0))sel=cur;
-            cur.set(Round(c.x), Trunc(c.y));
+            cur.set(Overwrite ? Trunc(c.x) : Round(c.x), Trunc(c.y));
             curClip();
             if(!Kb.shift()){sel=-1; sel_temp=cur;}
             makeCurVisible();
          }else
-         if(MT.b(i, 0) && sel_temp.x>=0)
+         if(MT.b(i, 0) && sel_temp.x>=0 && (!Overwrite || Ms.selecting())) // for Overwrite, require some mouse movement, because there initial position is calculated based on 'Trunc', but target using 'Round'
          {
             if(MT.pos(i).y>=_crect.max.y)slidebar[1].button[1].push();else
             if(MT.pos(i).y<=_crect.min.y)slidebar[1].button[2].push();
@@ -838,7 +838,8 @@ static void ShowElmName(C UID &id, C Rect &rect, C GuiPC &gpc, C VecI2 &range, B
    if(  name.is())
    {
       TextStyleParams ts=CE.ts_small; ts.align=0; ts.color=Theme.colors[TOKEN_ELM_NAME];
-      Rect_LU r(rect.lu()+gpc.offset, Max((name.length()+0.5f)*ts.colWidth(), (range.y-range.x+1)*CE.ts.colWidth()), CE.ts.lineHeight()); r+=Vec2(range.x*CE.ts.colWidth(), 0);
+      Rect r=rect+gpc.offset; Flt x=range.x*CE.ts.colWidth(), w=Max((name.length()+0.5f)*ts.colWidth(), (range.y-range.x+1)*CE.ts.colWidth());
+      r.min.x+=x; r.max.x=r.min.x+w; // operate on absolute values, instead of relative, to get the same exact values for previous/next lines
       Color c=(valid ? Theme.colors[TOKEN_ELM_BACKGROUND] : Color(148, 0, 0));
       if(comment)c=Lerp(c, Theme.colors[TOKEN_NONE], 0.7f);
       c.a=Theme.colors[TOKEN_ELM_BACKGROUND].a;
@@ -861,10 +862,10 @@ void Line::draw(C GuiPC &gpc)
       if(rect().max.y+gpc.offset.y>=gpc.clip.min.y
       && rect().min.y+gpc.offset.y<=gpc.clip.max.y)
    {
-      if(!text_valid){text_valid=true; code(textCode());}
+      if(!text_valid){text_valid=true; setTextData();}
       GuiPC gpc2=gpc ; gpc2.offset.x+=CE. lineNumberSize();
          // if spacing between elements is a fixed number of pixels then flickering can occur if positions will be at 0.5 pixels (0.5, 1.5, 2.5, ..), to prevent that from happening align the vertical position
-         gpc2.offset+=D.alignScreenToPixelOffset(Vec2(gpc2.offset.x, CE.fontSpaceOffset()+CE.ts.posY(gpc2.offset.y)));
+         //gpc2.offset+=D.alignScreenToPixelOffset(Vec2(gpc2.offset.x, CE.fontSpaceOffset()+CE.ts.posY(gpc2.offset.y)));
       GuiPC gpc3=gpc2; gpc3.offset.y-=CE.fontSpaceOffset();
 
       // highlight symbol
@@ -900,10 +901,10 @@ void Source::ViewLine::draw(C GuiPC &gpc)
       if(rect().max.y+gpc.offset.y>=gpc.clip.min.y
       && rect().min.y+gpc.offset.y<=gpc.clip.max.y)
    {
-      if(!text_valid){text_valid=true; code(textCode());}
+      if(!text_valid){text_valid=true; setTextData();}
       GuiPC gpc2=gpc;    gpc2.offset.x+=CE. lineNumberSize();
          // if spacing between elements is a fixed number of pixels then flickering can occur if positions will be at 0.5 pixels (0.5, 1.5, 2.5, ..), to prevent that from happening align the vertical position
-         gpc2.offset+=D.alignScreenToPixelOffset(Vec2(gpc2.offset.x, CE.fontSpaceOffset()+CE.ts.posY(gpc2.offset.y)));
+         //gpc2.offset+=D.alignScreenToPixelOffset(Vec2(gpc2.offset.x, CE.fontSpaceOffset()+CE.ts.posY(gpc2.offset.y)));
       super::draw(gpc2); gpc2.offset.y-=CE.fontSpaceOffset();
       if(CE.find.visible() && CE.find.text().is())HighlightFind(asStr(), rect(), gpc2);
       if(CE.view_elm_names                       )ShowElmNames (asStr(), rect(), gpc2, null, this);
@@ -911,11 +912,13 @@ void Source::ViewLine::draw(C GuiPC &gpc)
 }
 /******************************************************************************/
 void Source::drawSelection(C Color &color, Int y, Int min_x, Int max_x)
-{
-   Vec2 pos=rect().lu()+offset(); D.alignScreenToPixel(pos);
-   pos+=D.alignScreenToPixelOffset(Vec2(pos.x, CE.fontSpaceOffset()+CE.ts.posY(pos.y)));
-   pos+=posVisual(VecI2(min_x, y));
-   Rect_LU(pos, (max_x>=min_x) ? CE.ts.colWidth()*(max_x-min_x) : D.w()-pos.x, CE.ts.lineHeight()).draw(color);
+{  // #SourceOffset
+   Vec2 offset=rect().lu()+T.offset(); D.alignScreenToPixel(offset);
+   offset+=D.alignScreenToPixelOffset(Vec2(offset.x, CE.fontSpaceOffset()+CE.ts.posY(offset.y)));
+
+   Rect rect(offset+posVisual(VecI2(min_x, y+1)), offset+posVisual(VecI2(max_x, y))); // operate on absolute values, instead of relative, to get the same exact values for previous/next lines
+   if(max_x<min_x)rect.max.x=D.w();
+   rect.draw(color);
 }
 /******************************************************************************/
 void Source::drawSelection(C Color &color, C VecI2 &a, C VecI2 &b, Bool including)
@@ -936,7 +939,7 @@ void Source::draw(C GuiPC &gpc)
    if(/*gpc.visible &&*/ visible())
    {
       D.clip(_crect);
-
+      // #SourceOffset
       Vec2 offset=rect().lu()+T.offset(); D.alignScreenToPixel(offset);
       offset+=D.alignScreenToPixelOffset(Vec2(offset.x, CE.fontSpaceOffset()+CE.ts.posY(offset.y)));
 
@@ -1034,10 +1037,10 @@ void Source::draw(C GuiPC &gpc)
       D.clip(_crect);
 
       // draw cursor
-      if(hasKbFocus() && App.active() && !Kb._cur_hidden)
+      if(hasKbFocus() && !Kb._cur_hidden && App.active())
       {
          Vec2 pos=offset+posVisual(cur); pos+=D.pixelToScreenSize(VecI2(1, 0));
-         if(Overwrite && sel.x<0)DrawKeyboardCursorOverwrite(pos, CE.ts.lineHeight(), CE.ts, '\0'); // don't draw overwrite if we have selection
+         if(Overwrite && sel.x<0)DrawKeyboardCursorOverwrite(pos, CE.ts.lineHeight(), CE.ts.colWidth()); // don't draw overwrite if we have selection
          else                    DrawKeyboardCursor         (pos, CE.ts.lineHeight());
       }
 
@@ -1154,14 +1157,20 @@ void Source::draw(C GuiPC &gpc)
 
                               if(matches.elms())
                               {
-                                 Memc<Str> t;
-                               //Int       match=matches[0].average_match;
-                                 Int       match=matches.last().lowest_match; REPA(matches)MAX(match, matches[i].lowest_match);
-                                 FREPA(matches){FuncMatch &fm=matches[i]; t.New()=S+((fm.lowest_match==match) ? "[col=000F]" : "[col=888F]")+fm.func->funcDefinition(cur_param)+fm.func->commentsCode()+"[/col]";}
+                                 StrEx sx;
+                               //Int   match=matches[0].average_match;
+                                 Int   match=matches.last().lowest_match; REPA(matches)MAX(match, matches[i].lowest_match);
+                                 FREPA(matches)
+                                 {
+                                    FuncMatch &fm=matches[i];
+                                    if(i)sx+='\n';
+                                    Color col=((fm.lowest_match==match) ? BLACK : GREY);
+                                    sx.color(col);
+                                    fm.func->funcDefinition(sx, cur_param, &col);
+                                    fm.func->comments      (sx);
+                                 }
 
-                                 Str code; FREPA(t){if(i)code+='\n'; code+=t[i];}
-                                 Str text; Memt<TextCodeData> codes; SetTextCode(code, text, codes);
-                                 Flt w=0; t=Split(text, '\n'); REPA(t)MAX(w, CE.ts_small.textWidth(t[i]));
+                                 Flt w; CE.ts_small.textLines((CChar*)null, sx.data(), sx.elms(), 0, false, &w);
                                  MIN(w, clientWidth()*0.9f);
 
                                  Vec2 fp  =offset+Vec2(0, CE.fontSpaceOffset())+posVisual(VecI2(func.col, cur.y)), // use cursor.y so information is displayed below cursor (needed for multi-line functions)
@@ -1170,10 +1179,10 @@ void Source::draw(C GuiPC &gpc)
 
                                  Flt     ext=0.01f;
                                  Rect_LU r(fp.x, suggestions_region.visible() ? pos.y-size.y-ext : fp.y-CE.ts.lineHeight()-ext, w, 0); if(r.max.x>=_crect.max.x)r-=Vec2(r.max.x-_crect.max.x, 0);
-                                 Int     lines=CE.ts_small.textLines(text, r.w(), AUTO_LINE_SPACE_SPLIT); r.min.y=r.max.y-lines*CE.ts_small.lineHeight();
+                                 Int     lines=CE.ts_small.textLines((CChar*)null, sx.data(), sx.elms(), r.w(), true); r.min.y=r.max.y-lines*CE.ts_small.lineHeight();
                                  Rect(r).extend(ext).draw(WHITE);
                                  Rect(r).extend(ext).draw(Color(0, 0, 0, 112), false);
-                                 CE.ts_small.drawCode(r, text, AUTO_LINE_SPACE_SPLIT, codes.data(), codes.elms());
+                                 D.text(CE.ts_small, r, (CChar*)null, sx.data(), sx.elms(), true);
                               }
                               break;
                            }
@@ -1192,7 +1201,7 @@ void Source::draw(C GuiPC &gpc)
          Symbol *symbol=sugg->symbol();
          if(symbol || sugg->is_macro)
          {
-            Memc<Str> t;
+            Memc<StrEx> t;
             if(symbol)
             {
                // get list of functions
@@ -1221,16 +1230,22 @@ void Source::draw(C GuiPC &gpc)
                Str comments=symbol->comments();
                if( comments.is())
                {
-                  Memc<Str> c=Split(S+"   "+comments, '\n');
                   if(t.elms())t.New();
                   t.New()="Comments:";
-                  FREPA(c)Swap(t.New(), c[i]);
+                  t.New()=S+"   "+comments;
                }
                if(symbol->type==Symbol::FUNC_LIST)
                {
                   if(t.elms())t.New();
                   t.New()="Functions:";
-                  FREPA(funcs)t.New()=S+"   "+funcs[i]->funcDefinition(-1)+funcs[i]->commentsCode();
+                  FREPA(funcs)
+                  {
+                     StrEx &sx=t.New();
+                     sx="   ";
+                     funcs[i]->funcDefinition(sx, -1);
+                     funcs[i]->comments      (sx);
+                     sx.color(null);
+                  }
                }
             }else
             {
@@ -1241,9 +1256,8 @@ void Source::draw(C GuiPC &gpc)
                t.New()=S+"   "+sugg->macro_def;
             }
 
-            Str code; FREPA(t){if(i)code+='\n'; code+=t[i];}
-            Str text; Memt<TextCodeData> codes; SetTextCode(code, text, codes);
-            Flt w=0; t=Split(text, '\n'); REPA(t)MAX(w, CE.ts_small.textWidth(t[i]));
+            StrEx sx; FREPA(t){if(i)sx+='\n'; sx+=t[i];}
+            Flt w; CE.ts_small.textLines((CChar*)null, sx.data(), sx.elms(), 0, false, &w);
             MIN(w, D.pixelToScreenSize().x*520);
 
             Vec2 size=suggestions_region.size(),
@@ -1251,7 +1265,7 @@ void Source::draw(C GuiPC &gpc)
 
             Flt     space=D.pixelToScreenSize().x*24;
             Rect_LU r(pos+Vec2(size.x+space, 0), w, 0); if(r.max.x>=D.w())r-=Vec2(r.max.x-pos.x+space, 0); if(r.min.x<rect().min.x)r+=Vec2(pos.x+size.x+space-r.min.x, 0);
-            Int     lines=CE.ts_small.textLines(text, r.w(), AUTO_LINE_SPACE_SPLIT); r.min.y=r.max.y-lines*CE.ts_small.lineHeight();
+            Int     lines=CE.ts_small.textLines((CChar*)null, sx.data(), sx.elms(), r.w(), true); r.min.y=r.max.y-lines*CE.ts_small.lineHeight();
 
             if(Gui.skin)
             {
@@ -1259,7 +1273,7 @@ void Source::draw(C GuiPC &gpc)
                if(Gui.skin->region.normal)Gui.skin->region.normal->draw(Gui.skin->region.normal_color, rect);else
                if(Gui.skin->region.normal_color.a)            rect.draw(Gui.skin->region.normal_color);
             }
-            CE.ts_small.drawCode(r, text, AUTO_LINE_SPACE_SPLIT, codes.data(), codes.elms());
+            D.text(CE.ts_small, r, (CChar*)null, sx.data(), sx.elms(), true);
          }
          if(sugg->elm_id.valid()) // project element
          {
@@ -1327,20 +1341,20 @@ void Source::draw(C GuiPC &gpc)
                      break;
                   }
                }
-               Str  code =cl.textCode(), text; Memt<TextCodeData> codes; SetTextCode(code, text, codes);
+               cl.setTextData();
                Vec2 pos  =screenPos();
                Flt  min_x=pos.x+              0.1f,
                     max_x=pos.x+clientWidth()-0.1f,
                     max_y=Ms.pos().y-0.15f;
 
-               Int  lines=CE.ts.textLines(text, max_x-min_x, AUTO_LINE_SPACE_SPLIT);
+               Int  lines=CE.ts.textLines(cl.text, cl.extra.data(), cl.extra.elms(), max_x-min_x, true);
                Flt  min_y=max_y-lines*CE.ts.lineHeight();
                Rect rect (min_x, min_y, max_x, max_y);
                if(rect.min.y-0.05f<=pos.y-clientHeight())rect+=Vec2(0, rect.h() + 0.15f*2);
                Rect rect_e=rect; rect_e.extend(0.02f);
                D.drawShadow(190, rect_e, 0.0875f);
-               rect_e.draw (Theme.colors[TOKEN_NONE]);
-               CE.ts.drawCode(rect, text, AUTO_LINE_SPACE_SPLIT, codes.data(), codes.elms());
+               rect_e.draw(Theme.colors[TOKEN_NONE]);
+               D.text(CE.ts, rect, cl.text, cl.extra.data(), cl.extra.elms(), true);
             }
          }
       }

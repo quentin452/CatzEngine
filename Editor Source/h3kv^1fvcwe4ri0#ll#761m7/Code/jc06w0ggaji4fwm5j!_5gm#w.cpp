@@ -159,13 +159,16 @@ class EditorServer : Edit.EditorServer
                         {
                            Edit.Elm &elm=     mems[i];
                            Elm      &src=Proj.elms[i];
-                           elm.type     =Edit.ELM_TYPE(src.type);
-                           elm.removed  = src.  removed();
-                           elm.publish  =!src.noPublish();
-                           elm.       id= src.       id;
-                           elm.parent_id= src.parent_id;
-                           elm.name     = src.name;
-                           elm.src_file = src.srcFile();
+                           elm.type=Edit.ELM_TYPE(src.type);
+                                                    elm.flags =0;
+                           if(src.removed        ())elm.flags|=Edit.Elm.REMOVED;
+                           if(src.noPublish      ())elm.flags|=Edit.Elm.NO_PUBLISH;
+                           if(src.noPublishMobile())elm.flags|=Edit.Elm.NO_PUBLISH_MOBILE;
+                           elm.       id=src.       id;
+                           elm.parent_id=src.parent_id;
+                           elm.name     =src.name;
+                           elm.src_file =src.srcFile();
+                           // "full" will be set on the client
                         }
                         elms.point(mems);
                      }else
@@ -293,6 +296,7 @@ class EditorServer : Edit.EditorServer
                }break;
 
                case Edit.EI_SET_ELM_PUBLISH:
+               case Edit.EI_SET_ELM_PUBLISH_MOBILE:
                {
                   bool ok=false;
                   if(Proj.valid())
@@ -301,11 +305,11 @@ class EditorServer : Edit.EditorServer
                      {
                         ok=true;
                         Memc<UID> publish, no_publish; FREPA(elms)if(elms[i].value)publish.add(elms[i].id);else no_publish.add(elms[i].id);
-                        Proj.disablePublish(no_publish, false);
-                        Proj. enablePublish(   publish);
+                        Proj.setElmPublish(no_publish, (cmd==Edit.EI_SET_ELM_PUBLISH) ? false : -1, (cmd==Edit.EI_SET_ELM_PUBLISH_MOBILE) ? false : -1, false); // disable
+                        Proj.setElmPublish(   publish, (cmd==Edit.EI_SET_ELM_PUBLISH) ? true  : -1, (cmd==Edit.EI_SET_ELM_PUBLISH_MOBILE) ? true  : -1, false); //  enable
                      }
                   }
-                  File &f=connection.data.reset().putByte(Edit.EI_SET_ELM_PUBLISH).putBool(ok); f.pos(0); connection.send(f);
+                  File &f=connection.data.reset().putByte(cmd).putBool(ok); f.pos(0); connection.send(f);
                }break;
 
                case Edit.EI_SET_ELM_PARENT:
@@ -856,6 +860,13 @@ class EditorServer : Edit.EditorServer
                   f.reset().putByte(Edit.EI_SET_IMAGE).putBool(ok).pos(0); connection.send(f);
                }break;
 
+               case Edit.EI_SET_IMAGE_MIP_MAPS:
+               {
+                  File &f=connection.data; UID elm_id=f.getUID(); bool mips=f.getBool();
+                  bool ok=Proj.imageMipMap(elm_id, mips);
+                  f.reset().putByte(Edit.EI_SET_IMAGE_MIP_MAPS).putBool(ok).pos(0); connection.send(f);
+               }break;
+
                // CODE
                case Edit.EI_GET_CODE:
                {
@@ -923,7 +934,7 @@ class EditorServer : Edit.EditorServer
                   File &f=connection.data; UID elm_id=f.getUID(); byte set=f.getByte(); Edit.Material mtrl; bool ok=mtrl.load(f);
                   if(ok)
                   {
-                     bool reload_textures=FlagTest(set, 1), adjust_params=FlagTest(set, 2);
+                     bool reload_textures=FlagOn(set, 1), adjust_params=FlagOn(set, 2);
                      ok=Proj.mtrlSync(elm_id, mtrl, reload_textures, adjust_params);
                   }
                   f.reset().putByte(Edit.EI_SET_MTRL).putBool(ok); f.pos(0); connection.send(f);
@@ -932,7 +943,7 @@ class EditorServer : Edit.EditorServer
                case Edit.EI_RLD_MTRL_TEX:
                {
                   File &f=connection.data; UID elm_id=f.getUID(); byte texs=f.getByte();
-                  bool base=FlagTest(texs, 1), detail=FlagTest(texs, 2), macro=FlagTest(texs, 4), emissive=FlagTest(texs, 8);
+                  bool base=FlagOn(texs, 1), detail=FlagOn(texs, 2), macro=FlagOn(texs, 4), emissive=FlagOn(texs, 8);
                   bool ok=Proj.mtrlReloadTextures(elm_id, base, detail, macro, emissive);
                   f.reset().putByte(Edit.EI_RLD_MTRL_TEX).putBool(ok); f.pos(0); connection.send(f);
                }break;

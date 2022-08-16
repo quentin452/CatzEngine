@@ -22,9 +22,9 @@ class IOFileData : IOFile
       id.zero();
       f>>name;
       byte b=f.getByte();
-      finished  =FlagTest(b, 1<<0);
-      error     =FlagTest(b, 1<<1);
-      compressed=FlagTest(b, 1<<2);
+      finished  =FlagOn(b, 1<<0);
+      error     =FlagOn(b, 1<<1);
+      compressed=FlagOn(b, 1<<2);
       f>>id.i[0];
       if(finished)f>>modify_time_utc;
       offset=f.decULongV();

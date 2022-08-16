@@ -4,7 +4,7 @@ namespace EE{
 static Int Compare(C Edit::Elm &elm, C UID &id) {return Compare(elm.id, id);}
 namespace Edit{
 /******************************************************************************/
-#define EI_VER 53 // this needs to be increased every time a new command is added, existing one is changed, or some of engine class file formats get updated
+#define EI_VER 56 // this needs to be increased every time a new command is added, existing one is changed, or some of engine class file formats get updated
 #define EI_STR (ENGINE_NAME " Editor Network Interface")
 
 #define CLIENT_WAIT_TIME         (   60*1000) //    60 seconds
@@ -14,27 +14,24 @@ namespace Edit{
 ASSERT( EI_NUM<=256); // because they're stored as bytes
 ASSERT(ELM_NUM<=256); // because they're stored as bytes
 /******************************************************************************/
-static Str ElmFullData(C CMemPtr<Elm> &elms, C UID &elm_id, Str &name, Bool &removed, Bool &publish) // 'elms' must be sorted by their ID
+static void Finalize(Elm &elm, C CMemPtr<Elm> &elms) // 'elms' must be sorted by their ID
 {
-   name   .clear();
-   removed=false;
-   publish=true ;
+    elm.full_name=elm.name;
+   auto flags    =elm.flags;
 
-   Memt<UID> processed;
-   for( UID cur_id=elm_id; cur_id.valid(); )
+   Memt<UID> processed; processed.add(elm.id);
+ C Elm *cur=&elm;
+parent:
+ C UID &parent_id=cur->parent_id; if(parent_id.valid() && processed.binaryInclude(parent_id))if(cur=elms.binaryFind(parent_id, Compare))
    {
-      if(      processed.binaryInclude(cur_id         )) // not yet processed
-      if(C Elm *elm=elms.binaryFind   (cur_id, Compare)) // was found in elements
-      {
-         name    =(name.is() ? elm->name+'\\'+name : elm->name);
-         removed|=elm->removed;
-         publish&=elm->publish;
-         cur_id  =elm->parent_id;
-         continue;
-      }
-      break;
+      elm.full_name=cur->name+'\\'+elm.full_name;
+          flags   |=cur->flags; // !! can use OR because we have NO_PUBLISH, if it was PUBLISH then we need a SEPARATE AND !!
+      goto parent;
    }
-   return name;
+
+   FlagSet(elm.flags, Elm::REMOVED_FULL          , FlagOn(flags, Elm::REMOVED                                           )); // Removed
+   FlagSet(elm.flags, Elm::NO_PUBLISH_FULL       , FlagOn(flags, Elm::REMOVED | Elm::NO_PUBLISH                         )); // Removed || NoPublish
+   FlagSet(elm.flags, Elm::NO_PUBLISH_MOBILE_FULL, FlagOn(flags, Elm::REMOVED | Elm::NO_PUBLISH | Elm::NO_PUBLISH_MOBILE)); // Removed || NoPublish || NoPublishMobile
 }
 /******************************************************************************/
 // MATERIAL MAP
@@ -132,7 +129,7 @@ Material& Material::reset()
    detail_all_lod=false;
    flip_normal_y=false;
    smooth_is_rough=false;
-   downsize_tex_mobile=0;
+   tex_downsize_mobile=tex_downsize_switch=0;
       color_s=1;
    emissive_s=0;
    emissive_glow=0;
@@ -158,7 +155,7 @@ Material& Material::reset()
 Bool Material::save(File &f)C
 {
    f.cmpUIntV(0);
-   f<<technique<<tex_quality<<cull<<detail_all_lod<<flip_normal_y<<smooth_is_rough<<downsize_tex_mobile<<color_s<<emissive_s<<emissive_glow<<smooth<<reflect_min<<reflect_max<<glow<<normal<<bump<<uv_scale
+   f<<technique<<tex_quality<<cull<<detail_all_lod<<flip_normal_y<<smooth_is_rough<<tex_downsize_mobile<<tex_downsize_switch<<color_s<<emissive_s<<emissive_glow<<smooth<<reflect_min<<reflect_max<<glow<<normal<<bump<<uv_scale
     <<Encode(   color_map   )<<Encode( alpha_map)
     <<Encode(    bump_map   )<<Encode(normal_map)
     <<Encode(  smooth_map   )<<Encode( metal_map)
@@ -177,7 +174,7 @@ Bool Material::load(File &f)
    {
       case 0:
       {
-         f>>technique>>tex_quality>>cull>>detail_all_lod>>flip_normal_y>>smooth_is_rough>>downsize_tex_mobile>>color_s>>emissive_s>>emissive_glow>>smooth>>reflect_min>>reflect_max>>glow>>normal>>bump>>uv_scale;
+         f>>technique>>tex_quality>>cull>>detail_all_lod>>flip_normal_y>>smooth_is_rough>>tex_downsize_mobile>>tex_downsize_switch>>color_s>>emissive_s>>emissive_glow>>smooth>>reflect_min>>reflect_max>>glow>>normal>>bump>>uv_scale;
          Decode(f,    color_map   ); Decode(f,  alpha_map);
          Decode(f,     bump_map   ); Decode(f, normal_map);
          Decode(f,   smooth_map   ); Decode(f,  metal_map);
@@ -336,7 +333,27 @@ Bool EditorInterface::connect(Str &message, Int timeout)
 {
    disconnect();
    if(timeout<0)timeout=1000; UInt start_time=Time.curTimeMs();
-   ConnectAttempt c[128]; FREPAO(c).create(65535-i);
+   ConnectAttempt c[128];
+   
+   // if applications are run through the Editor then it passes its Editor Network Interface port as "EditorPort" param
+   FREPA(App.cmd_line)
+   {
+    C Str &param=App.cmd_line[i]; if(param=="EditorPort")
+      {
+         if(InRange(i+1, App.cmd_line))
+         {
+            Int port=TextInt(App.cmd_line[i+1]); if(port>0)
+            {
+               c[0].create(port);
+               goto created;
+            }
+         }
+         break;
+      }
+   }
+   FREPAO(c).create(65535-i);
+created:
+
    for(;;)
    {
       Bool connecting=false;
@@ -459,13 +476,9 @@ Bool EditorInterface::getElms(MemPtr<Elm> elms, Bool include_removed)
          if(f.getBool()) // if success
          if(elms.load(f))
          {
-            REPA(elms)
-            {
-               Elm &elm=elms[i];
-               ElmFullData(elms, elm.id, elm.full_name, elm.final_removed, elm.final_publish); // setup full values for convenience
-            }
+            REPA(elms)Finalize(elms[i], elms); // setup full values for convenience
             if(!include_removed) // call this at the end, once all elements have been setup, so we won't remove an element that still has unprocessed children, do this on the client, to avoid overloading the server
-               REPA(elms)if(elms[i].final_removed)elms.remove(i, true); // need to keep order because elements are sorted by ID
+               REPA(elms)if(elms[i].removedFull())elms.remove(i, true); // need to keep order because elements are sorted by ID
             return true;
          }
          goto fail;
@@ -599,6 +612,19 @@ UID EditorInterface::newWorld(C Str &name, Int area_size, Int terrain_res, C UID
    return UIDZero;
 }
 /******************************************************************************/
+Bool EditorInterface::setElmCmd(Byte cmd, C CMemPtr< IDParam<Bool> > &elms)
+{
+   if(!elms.elms())return true;
+   if(connected())
+   {
+      File &f=_conn.data.reset(); f.putByte(cmd); elms.save(f); f.pos(0);
+      if(_conn.send(f))
+      if(_conn.receive(CLIENT_WAIT_TIME))
+      if(f.getByte()==cmd)return f.getBool();
+      disconnect();
+   }
+   return false;
+}
 Bool EditorInterface::setElmName(C CMemPtr< IDParam<Str> > &elms)
 {
    if(!elms.elms())return true;
@@ -612,32 +638,10 @@ Bool EditorInterface::setElmName(C CMemPtr< IDParam<Str> > &elms)
    }
    return false;
 }
-Bool EditorInterface::setElmRemoved(C CMemPtr< IDParam<Bool> > &elms)
-{
-   if(!elms.elms())return true;
-   if(connected())
-   {
-      File &f=_conn.data.reset(); f.putByte(EI_SET_ELM_REMOVED); elms.save(f); f.pos(0);
-      if(_conn.send(f))
-      if(_conn.receive(CLIENT_WAIT_TIME))
-      if(f.getByte()==EI_SET_ELM_REMOVED)return f.getBool();
-      disconnect();
-   }
-   return false;
-}
-Bool EditorInterface::setElmPublish(C CMemPtr< IDParam<Bool> > &elms)
-{
-   if(!elms.elms())return true;
-   if(connected())
-   {
-      File &f=_conn.data.reset(); f.putByte(EI_SET_ELM_PUBLISH); elms.save(f); f.pos(0);
-      if(_conn.send(f))
-      if(_conn.receive(CLIENT_WAIT_TIME))
-      if(f.getByte()==EI_SET_ELM_PUBLISH)return f.getBool();
-      disconnect();
-   }
-   return false;
-}
+Bool EditorInterface::setElmRemoved      (C CMemPtr< IDParam<Bool> > &elms) {return setElmCmd(EI_SET_ELM_REMOVED       , elms);}
+Bool EditorInterface::setElmPublish      (C CMemPtr< IDParam<Bool> > &elms) {return setElmCmd(EI_SET_ELM_PUBLISH       , elms);}
+Bool EditorInterface::setElmPublishMobile(C CMemPtr< IDParam<Bool> > &elms) {return setElmCmd(EI_SET_ELM_PUBLISH_MOBILE, elms);}
+
 Bool EditorInterface::setElmParent(C CMemPtr< IDParam<UID> > &elms)
 {
    if(!elms.elms())return true;
@@ -1021,6 +1025,18 @@ Bool EditorInterface::setImage(C UID &elm_id, C Image &image)
       if(_conn.send(f))
       if(_conn.receive(CLIENT_WAIT_TIME))
       if(f.getByte()==EI_SET_IMAGE)return f.getBool();
+      disconnect();
+   }
+   return false;
+}
+Bool EditorInterface::setImageMipMaps(C UID &elm_id, Bool mip_maps)
+{
+   if(elm_id.valid() && connected())
+   {
+      File &f=_conn.data.reset(); f.putByte(EI_SET_IMAGE_MIP_MAPS).putUID(elm_id).putBool(mip_maps); f.pos(0);
+      if(_conn.send(f))
+      if(_conn.receive(CLIENT_WAIT_TIME))
+      if(f.getByte()==EI_SET_IMAGE_MIP_MAPS)return f.getBool();
       disconnect();
    }
    return false;

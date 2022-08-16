@@ -4,7 +4,7 @@
 namespace EE{
 /******************************************************************************/
 Facebook FB;
-#if IOS
+#if SUPPORT_FACEBOOK && IOS
 enum GET_FLAG
 {
    GET_ME     =1<<0,
@@ -74,6 +74,7 @@ static void FBUpdate()
 /******************************************************************************/
 Bool Facebook::loggedIn()C
 {
+#if SUPPORT_FACEBOOK
 #if ANDROID
    JNI jni;
    if(jni && ActivityClass)
@@ -82,10 +83,12 @@ Bool Facebook::loggedIn()C
 #elif IOS
    return [FBSDKAccessToken currentAccessToken]!=null;
 #endif
+#endif
    return false;
 }
 Facebook& Facebook::logIn()
 {
+#if SUPPORT_FACEBOOK
 #if ANDROID
    JNI jni;
    if(jni && ActivityClass && Activity)
@@ -102,7 +105,7 @@ Facebook& Facebook::logIn()
          }else
          if(result && result.isCancelled)
          {
-            // cancelled
+            // canceled
          }else
          {
             // logged in
@@ -112,10 +115,12 @@ Facebook& Facebook::logIn()
      [login release];
    }
 #endif
+#endif
    return T;
 }
 Facebook& Facebook::logOut()
 {
+#if SUPPORT_FACEBOOK
 #if ANDROID
    JNI jni;
    if(jni && ActivityClass)
@@ -133,12 +138,14 @@ Facebook& Facebook::logOut()
       [FBSDKProfile     setCurrentProfile    :nil];
    #endif
 #endif
+#endif
   _me     .clear();
   _friends.clear();
    return T;
 }
 Facebook& Facebook::getMe()
 {
+#if SUPPORT_FACEBOOK
 #if ANDROID
    JNI jni;
    if(jni && ActivityClass && Activity)
@@ -147,10 +154,12 @@ Facebook& Facebook::getMe()
 #elif IOS
    if(loggedIn())GetMe();else{FlagEnable(Get, GET_ME); logIn();}
 #endif
+#endif
    return T;
 }
 Facebook& Facebook::getFriends()
 {
+#if SUPPORT_FACEBOOK
 #if ANDROID
    JNI jni;
    if(jni && ActivityClass && Activity)
@@ -158,6 +167,7 @@ Facebook& Facebook::getFriends()
       jni->CallVoidMethod(Activity, facebookGetFriends);
 #elif IOS
    if(loggedIn())GetFriends();else{FlagEnable(Get, GET_FRIENDS); logIn();}
+#endif
 #endif
    return T;
 }
@@ -181,6 +191,7 @@ void Facebook::openPage(C Str &page_name, C Str &page_id)
 }
 void Facebook::post(C Str &url, C Str &quote)
 {
+#if SUPPORT_FACEBOOK
 #if ANDROID
    JNI jni;
    if(jni && ActivityClass && Activity)
@@ -204,11 +215,12 @@ void Facebook::post(C Str &url, C Str &quote)
       [content release]; // release 'content' after 'dialog' finished, in case it has a weak reference
    }
 #endif
+#endif
 }
 /******************************************************************************/
 } // namespace EE
 /******************************************************************************/
-#if ANDROID
+#if SUPPORT_FACEBOOK && ANDROID
 static      Facebook::UserEmail Me;
 static Mems<Facebook::User >    Friends;
 static Byte                     Result;
@@ -223,7 +235,7 @@ extern "C" JNIEXPORT void JNICALL Java_com_esenthel_Native_facebookMe(JNIEnv *en
    Me.id   =TextULong(jni(id   ));
    Me.name =          jni(name ) ;
    Me.email=          jni(email) ;
-   App._callbacks.include(UpdateMe);
+   App.includeFuncCall(UpdateMe);
 }
 extern "C" JNIEXPORT void JNICALL Java_com_esenthel_Native_facebookFriends(JNIEnv *env, jclass clazz, jobject ids, jobject names)
 {
@@ -251,7 +263,7 @@ extern "C" JNIEXPORT void JNICALL Java_com_esenthel_Native_facebookFriends(JNIEn
    {
       SyncLocker locker(Lock);
       Swap(Friends, friends);
-      App._callbacks.include(UpdateFriends);
+      App.includeFuncCall(UpdateFriends);
    }
 }
 extern "C" JNIEXPORT void JNICALL Java_com_esenthel_Native_facebookPost(JNIEnv *env, jclass clazz, jint result)
@@ -259,7 +271,7 @@ extern "C" JNIEXPORT void JNICALL Java_com_esenthel_Native_facebookPost(JNIEnv *
    if(FB.callback)
    {
       Result=result;
-      App._callbacks.include(CallCallback);
+      App.includeFuncCall(CallCallback);
    }
 }
 #endif

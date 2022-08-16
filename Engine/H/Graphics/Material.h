@@ -94,8 +94,9 @@ struct Material : MaterialParams // Mesh Rendering Material - contains render pa
    Bool needTanBin()C; // if this Material needs tangent/binormals
 
    // operations
-   Material& validate(); // this needs to be called after manually changing the parameters/textures
-   Material& reset   (); // reset to default values (automatically calls 'validate')
+   Material& validate() ; // this needs to be called after manually changing the parameters/textures
+   Material& reset   () ; // reset to default values (automatically calls 'validate')
+   Bool waitForStream()C; // wait until streaming has finished, false on fail
 
    // io
    Bool save(C Str &name)C; // save, false on fail

@@ -22,8 +22,8 @@ SizeStatistics SizeStats;
          T.type=ELM_IMAGE;
       }
       Str SizeStatistics::ElmListElm::FinalName(C ElmListElm &elm) {return elm.finalName();}
-      Str SizeStatistics::ElmListElm::Size(C ElmListElm &elm) {return FileSize(elm.size);}
-      Str SizeStatistics::ElmListElm::SizeCmpr(C ElmListElm &elm) {return FileSize(elm.size_compressed);}
+      Str SizeStatistics::ElmListElm::Size(C ElmListElm &elm) {return SizeBytes(elm.size);}
+      Str SizeStatistics::ElmListElm::SizeCmpr(C ElmListElm &elm) {return SizeBytes(elm.size_compressed);}
    void SizeStatistics::SelectSel(SizeStatistics &ss) {Proj.elmSelect(ss.menu_elm);}
    void SizeStatistics::DrawPreview(Viewport &viewport) {SizeStats.drawPreview();}
           void SizeStatistics::drawPreview()

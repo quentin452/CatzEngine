@@ -123,8 +123,8 @@ private:
       AUTH_IGNORE     =1<<2, // ignore authorization results and continue with download
       AUTH_FAILED     =1<<3, // authorization failed
    };
-   Bool chunked       ()C {return FlagTest(_flags, CHUNKED);}
-   Bool hasAddrsHeader()C {return FlagTest(_flags, HAS_ADDRS_HEADER);}
+   Bool chunked       ()C {return FlagOn(_flags, CHUNKED);}
+   Bool hasAddrsHeader()C {return FlagOn(_flags, HAS_ADDRS_HEADER);}
 #endif
    Byte           _flags, _parse;
    DWNL_STATE     _state;

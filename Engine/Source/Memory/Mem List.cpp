@@ -48,7 +48,7 @@ MemlNode* _Meml::add()
    node->_next= null;
   _last=node;
   _elms++;
-   if(_new)_new(node->data());
+   if(_new)_new(node->data()); // create as the last step
    return node;
 }
 MemlNode* _Meml::addZero()
@@ -60,7 +60,7 @@ MemlNode* _Meml::addZero()
    node->_next= null;
   _last=node;
   _elms++;
-   if(_new)_new(node->data());
+   if(_new)_new(node->data()); // create as the last step
    return node;
 }
 MemlNode* _Meml::addBefore(MemlNode *x)
@@ -73,7 +73,7 @@ MemlNode* _Meml::addBefore(MemlNode *x)
    node->_prev=x->_prev;
    x   ->_prev=node;
   _elms++;
-   if(_new)_new(node->data());
+   if(_new)_new(node->data()); // create as the last step
    return node;
 }
 MemlNode* _Meml::addAfter(MemlNode *x)
@@ -86,14 +86,14 @@ MemlNode* _Meml::addAfter(MemlNode *x)
    node->_next=x->_next;
    x   ->_next=node;
   _elms++;
-   if(_new)_new(node->data());
+   if(_new)_new(node->data()); // create as the last step
    return node;
 }
 void _Meml::remove(MemlNode *node, Bool keep_order)
 {
    if(node)
    {
-      if(_del)_del(node->data());
+      if(_del)_del(node->data()); // destroy as the first step
      _elms--;
       if(_first==node)_first= node->_next;
       if(_last ==node)_last = node->_prev;

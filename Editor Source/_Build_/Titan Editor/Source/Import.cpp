@@ -5,6 +5,7 @@ ImporterClass Importer;
 /******************************************************************************/
 
 /******************************************************************************/
+         ImporterClass::Import::MaterialEx::MaterialEx() : XMaterialEx(&Proj) {}
          void ImporterClass::Import::MaterialEx::check(C Str &path, Str &tex)
          {
             Mems<FileParams> texs=FileParams::Decode(tex);
@@ -357,31 +358,21 @@ ImporterClass Importer;
                   anim.anim.linear(anim.fps>=LinearAnimFpsLimit);
                   if(files.elms())
                   {
+                     FileParams &fps=files[0];
                      if(anim.fps>0) // clip !! do this before looping and speed !!
                      {
-                      C TextParam *start_frame=files[0].findParam("start_frame"),
-                                  *  end_frame=files[0].findParam(  "end_frame");
+                      C TextParam *start_frame=fps.findParam("startFrame"),
+                                  *  end_frame=fps.findParam(  "endFrame");
                         if(start_frame || end_frame) // clip animation, currently importer will already offset keyframes by 'anim.start', so if we want custom ranges, we need to revert it back
                            anim.anim.clip(start_frame ? start_frame->asFlt()/anim.fps-anim.start : 0,
                                             end_frame ?   end_frame->asFlt()/anim.fps-anim.start : anim.anim.length());
                      }
-                     FREPA(files[0].params) // process in order
-                     {
-                      C TextParam &p=files[0].params[i]; if(p.name=="speedTime") // adjust speed for specified time range !! do this after clipping so the clip isn't affected by speed !!
-                        {
-                           Vec v=p.asVec(); flt speed=v.x, start=v.y, end=v.z;
-                           if(speed)anim.anim.scaleTime(start, end, 1/speed);
-                        }
-                     }
-                     if(C TextParam *p=files[0].findParam("loop")) // set looping !! do this after clipping so the clip isn't affected by looping !!
+                     if(C TextParam *p=fps.findParam("loop")) // set looping !! do this after clipping so the clip isn't affected by looping !!
                      {
                         has_loop=true;
                         anim.anim.loop(p->asBool());
-                        files[0].params.removeData(p); // remove this parameter because we've already applied this change to the animation, so when user modifies manually the looping, and then selectes reload, then looping won't be changed
+                        fps.params.removeData(p); // remove this parameter because we've already applied this change to the animation, so when user modifies manually the looping, and then selectes reload, then looping won't be changed
                      }
-                     if(C TextParam *p=files[0].findParam("speed")) // adjust speed !! do this after clipping so the clip isn't affected by speed !!
-                        if(flt speed=p->asFlt())
-                           anim.anim.length(anim.anim.length()/speed, true);
                   }
                   anim.anim.clip(0, anim.anim.length()); // remove any keyframes outside of anim range
                   T.file=FileParams::Encode(files); // 'files' could have changed, so adjust the name so the 'elm.srcFile' is set properly
@@ -739,13 +730,12 @@ ImporterClass Importer;
          SyncLocker locker(lock);
          REPA(node.children) // go from back
          {
-            int      child_i=node.children [i];
-            ElmNode &child  =Proj.hierarchy[child_i];
-            Elm     &elm    =Proj.elms     [child_i];
-            if(ImportRemovedElms || !elm.removed())
+            int  child_i=node.children[i];
+            Elm &elm    =Proj.elms[child_i];
+            if(ImportRemovedElms || elm.exists())
             {
-               investigate(child);
-               investigate(elm  );
+               investigate(Proj.hierarchy[child_i]);
+               investigate(elm);
             }
          }
       }
@@ -772,6 +762,7 @@ ImporterClass Importer;
          Proj.setListCurSel();
          Proj.closeElm(import.elm_id);
          elm->importing(false);
+         TimeStamp time; time.getUTC();
          switch(elm->type)
          {
             case ELM_MTRL: if(import.mtrls.elms())
@@ -783,7 +774,7 @@ ImporterClass Importer;
 
             case ELM_IMAGE:
             {
-               elm->setSrcFile(import.file);
+               elm->setSrcFile(import.file, time);
                import.raw.pos(0); Proj.imageSet(elm->id, import.raw, import.has_color, import.has_alpha);
             }break;
 
@@ -791,13 +782,13 @@ ImporterClass Importer;
             case ELM_VIDEO:
             case ELM_FILE :
             {
-               elm->setSrcFile(import.file);
+               elm->setSrcFile(import.file, time);
                import.raw.pos(0); Proj.fileSet(elm->id, import.raw);
             }break;
 
             case ELM_CODE:
             {
-               elm->setSrcFile(import.file);
+               elm->setSrcFile(import.file, time);
                Proj.codeSet(elm->id, import.code);
             }break;
 
@@ -815,18 +806,93 @@ ImporterClass Importer;
                if(import.anims.elms())
                if(ElmAnim *anim_data=elm->animData())
                {
-                  Mems<FileParams> file_params=FileParams::Decode(import.file);
+                  Mems<FileParams>     file_params=FileParams::Decode(import.file);
+                  Mems<FileParams> old_file_params=FileParams::Decode(anim_data->imported_file_params);
+                  FileParams *fps=file_params.data(), *old_fps=old_file_params.data();
                   XAnimation &xanim=import.anims[0];
                    Animation & anim=xanim.anim;
                   anim_data->newVer();
                   anim_data->fps=xanim.fps;
-                  anim_data->file_time.getUTC(); // file was changed
-                  anim_data->setSrcFile(import.file);
+                  anim_data->file_time=time; // file was changed
+                  anim_data->setSrcFile(import.file, time);
+                  anim_data->setImportedFileParams();
                   if(import.has_loop) // if import has information about looping then use it
                   {
-                     anim_data->loop(anim.loop()); anim_data->loop_time.getUTC(); // set from imported animation
+                     anim_data->loop(anim.loop()); anim_data->loop_time=time; // set from imported animation
                   }else anim.loop(anim_data->loop()); // otherwise keep the old setting
                   anim.linear(anim_data->linear()); // keep old linear
+
+                  // set events !! AFTER CLIP BUT BEFORE 'speedTime', 'offsetTime', 'speed'
+                  if(!anim.events.elms()) // if new animation doesn't have events, then check old anim for them
+                  {
+                     Animation old;
+                     {
+                        Animation temp; if(Animation *anim=Proj.getAnim(elm->id, temp))old.loop(anim->loop()).linear(anim->linear()).length(anim->length(), false).events=anim->events; // we just need events
+                     }
+                     if(old.events.elms()) // if old had events
+                     {
+                        // convert from old to absolute, have to process in reversed order
+                        if(old_fps)
+                        {
+                           if(C TextParam *p=old_fps->findParam("speed"))
+                              if(flt speed=p->asFlt())
+                                 old.length(old.length()*speed, true);
+
+                                              if(C TextParam *p=old_fps->findParam("offsetTime" ))old.offsetTime(p->asFlt());
+                           if(anim_data->fps>0)if(C TextParam *p=old_fps->findParam("offsetFrame"))old.offsetTime(p->asFlt()/anim_data->fps);
+
+                           REPA(old_fps->params) // process in reversed order
+                           {
+                            C TextParam &p=old_fps->params[i];
+                              if(p.name=="speedTime")
+                              {
+                                 Vec v=p.asVec(); flt speed=v.x, start=v.y, end=v.z;
+                                 if(speed)old.scaleTime(start, end ? start+(end-start)/speed : old.length(), speed);
+                              }else
+                              if(p.name=="speedFrame")
+                              {
+                                 if(anim_data->fps>0)
+                                 {
+                                    Vec v=p.asVec(); flt speed=v.x, start=v.y/anim_data->fps, end=v.z/anim_data->fps;
+                                    if(speed)old.scaleTime(start, end ? start+(end-start)/speed : old.length(), speed);
+                                 }
+                              }
+                           }
+                        }
+
+                        if(anim_data->fps>0)
+                        {
+                           flt offset=0;
+                           if(old_fps)if(C TextParam *start_frame=old_fps->findParam("startFrame"))offset+=start_frame->asFlt()/anim_data->fps-xanim.start; // currently importer will already offset keyframes by 'anim.start', so if we want custom ranges, we need to revert it back
+                           if(    fps)if(C TextParam *start_frame=    fps->findParam("startFrame"))offset-=start_frame->asFlt()/anim_data->fps-xanim.start; // currently importer will already offset keyframes by 'anim.start', so if we want custom ranges, we need to revert it back
+                           if(offset )REPAO(old.events).time+=offset;
+                        }
+
+                        Swap(anim.events, old.events);
+                        REPA(anim.events)Clamp(anim.events[i].time, 0, anim.length());
+                     }
+                  }
+
+                  if(fps) // 'speedTime' !! BEFORE ROOT !!
+                  {
+                     FREPA(fps->params) // process in order
+                     {
+                      C TextParam &p=fps->params[i];
+                        if(p.name=="speedTime") // adjust speed for specified time range !! do this after clipping so the clip isn't affected by speed !!
+                        {
+                           Vec v=p.asVec(); flt speed=v.x, start=v.y, end=v.z;
+                           if(speed)anim.scaleTime(start, end ? end : anim.length(), 1/speed); // if no end specified then use until end of anim
+                        }else
+                        if(p.name=="speedFrame")
+                        {
+                           if(anim_data->fps>0)
+                           {
+                              Vec v=p.asVec(); flt speed=v.x, start=v.y/anim_data->fps, end=v.z/anim_data->fps;
+                              if(speed)anim.scaleTime(start, end ? end : anim.length(), 1/speed); // if no end specified then use until end of anim
+                           }
+                        }
+                     }
+                  }
 
                   if(Elm *skel_elm=Proj.findElm(anim_data->skel_id))if(ElmSkel *skel_data=skel_elm->skelData()) // load target skeleton
                   {
@@ -873,14 +939,13 @@ ImporterClass Importer;
                            anim.adjustForSameSkeletonWithDifferentPose(import.skel, temp);
                            Swap(temp.bones, import.skel.bones);
                         }
-                        if(file_params.elms())
+                        if(fps)
                         {
-                           // transform / rotate !! before root !!
-                         C Skeleton   &sk =import.skel;
-                           FileParams &fps=file_params[0];
-                           FREPA(fps.params)
+                           // transform / rotate !! BEFORE ROOT !!
+                         C Skeleton &sk=import.skel;
+                           FREPA(fps->params)
                            {
-                            C TextParam &p=fps.params[i];
+                            C TextParam &p=fps->params[i];
                               if(p.name=="rotX")anim.transform(Matrix().setRotateX(DegToRad(p.asFlt())), sk, true);else
                               if(p.name=="rotY")anim.transform(Matrix().setRotateY(DegToRad(p.asFlt())), sk, true);else
                               if(p.name=="rotZ")anim.transform(Matrix().setRotateZ(DegToRad(p.asFlt())), sk, true);
@@ -903,32 +968,34 @@ ImporterClass Importer;
                         anim.transform(m, *skel, false);
                      }
 
-                     // optimize (after transform because scale affects position key removal, after 'adjustForSameTransformWithDifferentSkeleton' so it can operate on highest precision and to cleanup keyframes generated by it)
+                     if(fps)
+                     {  // 'offsetTime' !! AFTER ROOT !!
+                                           if(C TextParam *p=fps->findParam("offsetTime" ))anim.offsetTime(-p->asFlt());
+                        if(anim_data->fps>0)if(C TextParam *p=fps->findParam("offsetFrame"))anim.offsetTime(-p->asFlt()/anim_data->fps);
+                     }
+                     // optimize (after transform because scale affects position key removal, after 'adjustForSameTransformWithDifferentSkeleton' so it can operate on highest precision and to cleanup keyframes generated by it, after 'offsetTime' to cleanup keyframes generated by it)
                      {
                         flt angle_eps=EPS_ANIM_ANGLE, pos_eps=EPS_ANIM_POS, scale_eps=EPS_ANIM_SCALE;
-                        if(file_params.elms())if(C TextParam *optimize=file_params[0].findParam("optimize")){flt o=optimize->asFlt(); angle_eps*=o; pos_eps*=o; scale_eps*=o;}
+                        if(fps)if(C TextParam *optimize=fps->findParam("optimize")){flt o=optimize->asFlt(); angle_eps*=o; pos_eps*=o; scale_eps*=o;}
                         anim.optimize(angle_eps, pos_eps, scale_eps);
                      }
-                     if(file_params.elms())
+                     if(fps)
                      {
+                        // 'speed' !! AFTER clipping, 'speedTime', 'offsetTime' so they're not affected by speed !!
+                        if(C TextParam *p=fps->findParam("speed"))
+                           if(flt speed=p->asFlt())
+                              anim.length(anim.length()/speed, true);
+
                         // mirror
-                        if(C TextParam *mirror=file_params[0].findParam("mirror"))if(mirror->asBool1())anim.mirror(*skel);
+                        if(C TextParam *mirror=fps->findParam("mirror"))if(mirror->asBool1())anim.mirror(*skel);
 
                         // delete keys at the end !! after clipping and root !!
-                        if(C TextParam *p=file_params[0].findParam("delEndKeys"))DelEndKeys(anim);
+                        if(C TextParam *p=fps->findParam("delEndKeys"))DelEndKeys(anim);
                      }
                   }
 
-                  // set events, save and send
+                  // save and send
                   Str path=Proj.gamePath(elm->id);
-                  if(!anim.events.elms()) // if new animation doesn't have events, then check old anim for them
-                  {
-                     Animation old; if(old.load(path))if(old.events.elms()) // if old had events
-                     {
-                        anim.events=old.events; // copy them
-                        if(old.length()>EPS && anim.length()>EPS)if(flt mul=anim.length()/old.length())REPAO(anim.events).time*=mul; // adjust time
-                     }
-                  }
                   Proj.elmChanging(*elm);
                   Save(anim, path); Proj.savedGame(*elm, path);
                   Proj.elmChanged(*elm);
@@ -939,7 +1006,7 @@ ImporterClass Importer;
             case ELM_OBJ: if(ElmObj *obj_data=elm->objData())
             {
                obj_data->newVer();
-               obj_data->setSrcFile(import.file);
+               obj_data->setSrcFile(import.file, time);
                Skeleton &new_skel=import.skel;
 
                if(import.mesh.is())Proj.getObjMeshElm(elm->id, false, false); // need to have mesh     element to insert mesh
@@ -963,8 +1030,8 @@ ImporterClass Importer;
                      if(skel_elm)Proj.elmChanging(*skel_elm);
 
                      skel_data->newVer();
-                     skel_data->setSrcFile(import.file);
-                     skel_data->file_time.getUTC();
+                     skel_data->setSrcFile(import.file, time);
+                     skel_data->file_time=time;
 
                      Matrix m=skel_data->transform();
 
@@ -1061,7 +1128,7 @@ ImporterClass Importer;
                            anim_data->skel_id  =skel_elm ->id;
                            anim_data->transform=skel_data->transform;
                            anim_data->loop     (xanim.anim.loop()).linear(xanim.anim.linear());
-                           anim_data->src_file =fp.encode();
+                           anim_data->src_file =fp.encode(); anim_data->setImportedFileParams();
                            anim_data->fps      =xanim.fps;
                         }
                         xanim.anim.transform(m, new_skel, false);
@@ -1105,8 +1172,8 @@ ImporterClass Importer;
 
                   // update mesh
                   mesh_data->newVer();
-                  mesh_data->setSrcFile(import.file);
-                  mesh_data->file_time.getUTC();
+                  mesh_data->setSrcFile(import.file, time);
+                  mesh_data->file_time=time;
                   int pmi=0; FREPD(l, import.mesh.lods()) // set materials
                   {
                      MeshLod &lod=import.mesh.lod(l); FREPA(lod)
@@ -1150,7 +1217,7 @@ ImporterClass Importer;
                {
                   Proj.elmChanging(*elm);
                   mini_map_data->newVer();
-                  mini_map_data->setSrcFile(import.file);
+                  mini_map_data->setSrcFile(import.file, time);
                   RectI images=ver->images.last(); REPA(ver->images)images|=ver->images[i];
                   VecI2 images_size=image_size*(images.size()+1);
                   Image &all=import.images[0], single, temp;
@@ -1158,7 +1225,7 @@ ImporterClass Importer;
                   && single.createSoftTry(image_size, image_size, 1, IMAGE_R8G8B8A8_SRGB))
                   {
                      ver->changed=true;
-                     ver->time.getUTC(); // update time of mini map
+                     ver->time=time; // update time of mini map
                      Server.setMiniMapSettings(elm->id, ver->settings, ver->time); // send updated mini map settings first, as images will be received only if their timestamp matches the settings
                      REPA(ver->images)
                      {
@@ -1295,7 +1362,7 @@ ImporterClass Importer;
                anim_data->skel_id  =skel_elm->id;
                anim_data->transform=skel_data->transform;
                anim_data->loop     (xanim.anim.loop()).linear(xanim.anim.linear());
-               anim_data->src_file =fp.encode();
+               anim_data->src_file =fp.encode(); anim_data->setImportedFileParams();
                anim_data->fps      =xanim.fps;
             }
 
@@ -1309,6 +1376,7 @@ ImporterClass Importer;
    void ImporterClass::processAdd(Import &import)
    {
       Proj.closeElm(import.elm_id);
+      TimeStamp time; time.getUTC();
       if(Elm *elm=Proj.findElm(import.elm_id))switch(elm->type)
       {
          case ELM_OBJ:
@@ -1317,7 +1385,7 @@ ImporterClass Importer;
             {
                Proj.setListCurSel();
                obj_data->newVer();
-               obj_data->setSrcFile(FileParams::Merge(obj_data->src_file, import.file)); // add to file list
+               obj_data->setSrcFile(FileParams::Merge(obj_data->src_file, import.file), time); // add to file list
 
                if(import.mesh.is())Proj.getObjMeshElm(elm->id, false, false); // need to have mesh     element to insert mesh
              //if(import.skel.is())Proj.getObjSkelElm(elm.id, false, false); // need to have skeleton element to insert skeleton
@@ -1368,8 +1436,8 @@ ImporterClass Importer;
 
                   // update mesh
                   mesh_data->newVer();
-                  mesh_data->setSrcFile(FileParams::Merge(mesh_data->src_file, import.file)); // add to file list
-                  mesh_data->file_time.getUTC();
+                  mesh_data->setSrcFile(FileParams::Merge(mesh_data->src_file, import.file), time); // add to file list
+                  mesh_data->file_time=time;
                   int pmi=0; FREPD(l, import.mesh.lods()) // set materials
                   {
                      MeshLod &lod=import.mesh.lod(l); FREPA(lod)

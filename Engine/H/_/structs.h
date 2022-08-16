@@ -158,7 +158,6 @@ struct  ComboBox;
 struct  Dialog;
 struct  Desktop;
 struct  GuiCustom;
-struct  TextCodeData;
 struct  Text;
 struct  Viewport;
 struct  GuiImage;
@@ -200,6 +199,7 @@ struct VirtualRealityApi;
 /******************************************************************************/
 // MISC
 /******************************************************************************/
+struct FileStream;
 struct Str8;
 struct Str;
 struct BStr;

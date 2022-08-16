@@ -442,6 +442,8 @@ void Mesh::    setUsedBones(Bool (&bones)[256])C {Zero(bones); includeUsedBones(
 Mesh& Mesh::setVtxAO(Flt strength, Flt bias, Flt max, Flt ray_length, Flt pos_eps, Int rays, MESH_AO_FUNC func, Threads *threads) {REP(lods())lod(i).setVtxAO(strength, bias, max, ray_length, pos_eps, rays, func, threads); return T;}
 
 Mesh& Mesh::freeOpenGLESData() {REP(lods())lod(i).freeOpenGLESData(); return T;}
+
+Bool Mesh::waitForStream()C {Bool ok=true; REP(lods())ok&=lod(i).waitForStream(); return ok;}
 /******************************************************************************/
 // FIX
 /******************************************************************************/

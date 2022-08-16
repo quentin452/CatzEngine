@@ -94,8 +94,20 @@ AnimEditor AnimEdit;
                flt dist=0;
                if((always_draw_events || AnimEdit.preview.event_op()>=0) && AnimEdit.preview.event_op()!=EVENT_NEW)REPA(anim->events)
                {
-                  flt d=Abs(Ms.pos().x - ElmPosX(r, anim->events[i].time));
-                  if(event_lit<0 || d<dist){event_lit=i; dist=d;}
+                  flt event_time=anim->events[i].time;
+                  flt d=Abs(Ms.pos().x - ElmPosX(r, event_time));
+                  if(event_lit<0 || d<dist)
+                  {
+                     event_lit=i; dist=d;
+                     
+                     // check how many events share the same time
+                     int j=i; for(; j>0 && Equal(anim->events[j-1].time, event_time); )j--; // same is j..i inclusive
+                     int same=i-j+1; if(same>1) // if more than 1
+                     { // calculate based on Mouse Y
+                        flt frac=LerpR(r.min.y, r.max.y, Ms.pos().y); // 0..1
+                        event_lit=Mid(Trunc(frac*same)+j, j, i);
+                     }
+                  }
                }
                if(dist>0.05f)event_lit=-1;
 
@@ -128,7 +140,7 @@ AnimEditor AnimEdit;
                         if(Kb.alt())dt=-AnimEdit.animTime();
                         if(AnimEdit.sel_bone<0) // entire animation
                         {
-                           AnimEdit.anim->slideTime(dt);
+                           AnimEdit.anim->offsetTime(dt);
                         }else
                         {
                            REPA(keys->orns  )Slide(keys->orns  [i].time, dt, anim->length());
@@ -427,6 +439,8 @@ AnimEditor AnimEdit;
                   if(Kb.bp(KB_INS  )                ){Kb.eat(KB_INS  ); AnimEdit.newEvent(AnimEdit.animTime());}
                   if(Kb.bp(KB_DEL  ) && Kb.ctrlCmd()){Kb.eat(KB_DEL  ); AnimEdit.delEvent(track.event_lit);}
                   if(Kb.bp(KB_SPACE)                ){Kb.eat(KB_SPACE); AnimEdit.playToggle();}
+                  if(Kb.bp(KB_HOME ) && Kb.ctrlCmd()){Kb.eat(KB_HOME ); Start(AnimEdit);}
+                  if(Kb.bp(KB_END  ) && Kb.ctrlCmd()){Kb.eat(KB_END  ); End  (AnimEdit);}
                }
             }
             if(Gui.ms   ()==&viewport)if(Ms.b(0) || Ms.b(MS_BACK)){cam_yaw-=Ms.d().x; cam_pitch+=Ms.d().y; Ms.freeze();}
@@ -478,9 +492,9 @@ AnimEditor AnimEdit;
             refresh_needed=false;
             if(src)anim=*src;else anim.del();
             File f;
-            if(     file_size){anim.save(f.writeMem());      file_size->display(S+     "File Size: "+FileSizeKB(f.size()));}
+            if(     file_size){anim.save(f.writeMem());      file_size->display(S+     "File Size: "+SizeKB(f.size()));}
             optimizeDo(anim);
-            if(optimized_size){anim.save(f.reset   ()); optimized_size->display(S+"Optimized Size: "+FileSizeKB(f.size()));}
+            if(optimized_size){anim.save(f.reset   ()); optimized_size->display(S+"Optimized Size: "+SizeKB(f.size()));}
          }
          return preview ? &anim : src;
       }
@@ -678,6 +692,8 @@ AnimEditor AnimEdit;
    void  AnimEditor::DelFrame(AnimEditor &editor) {editor.delFrame ();}
    void  AnimEditor::DelFrames(AnimEditor &editor) {editor.delFrames(editor.sel_bone);}
    void  AnimEditor::DelFramesAtEnd(AnimEditor &editor) {editor.delFramesAtEnd();}
+   void AnimEditor::FreezeDelFrame(AnimEditor &editor) {editor.freezeDelFrame();}
+   void AnimEditor::FreezeDelFrames(AnimEditor &editor) {editor.freezeDelFrames();}
    void AnimEditor::Optimize(AnimEditor &editor) {editor.optimize_anim.activate();}
    void AnimEditor::ScalePosKey(AnimEditor &editor) {editor.scale_pos_keys.activate();}
    void AnimEditor::TimeRangeSp(AnimEditor &editor) {editor.time_range_speed.display();}
@@ -737,7 +753,7 @@ AnimEditor AnimEdit;
       if(ElmAnim *d=editor.data())
       {
          editor.undos.set("rootDelPos");
-         bool on=!FlagTest(d->flag, ElmAnim::ROOT_DEL_POS);
+         bool on=FlagOff(d->flag, ElmAnim::ROOT_DEL_POS);
          editor.root_del_pos_x.set(on, QUIET);
          editor.root_del_pos_y.set(on, QUIET);
          editor.root_del_pos_z.set(on, QUIET);
@@ -749,7 +765,7 @@ AnimEditor AnimEdit;
       if(ElmAnim *d=editor.data())
       {
          editor.undos.set("rootDelRot");
-         bool on=!FlagTest(d->flag, ElmAnim::ROOT_DEL_ROT);
+         bool on=FlagOff(d->flag, ElmAnim::ROOT_DEL_ROT);
          editor.root_del_rot_x.set(on, QUIET);
          editor.root_del_rot_y.set(on, QUIET);
          editor.root_del_rot_z.set(on, QUIET);
@@ -774,7 +790,7 @@ AnimEditor AnimEdit;
       if(ElmAnim *d=editor.data())
       {
          editor.undos.set("rootSmooth");
-         bool on=!FlagTest(d->flag, ElmAnim::ROOT_SMOOTH_ROT_POS);
+         bool on=FlagOff(d->flag, ElmAnim::ROOT_SMOOTH_ROT_POS);
          editor.root_smooth_rot.set(on, QUIET);
          editor.root_smooth_pos.set(on, QUIET);
          FlagSet(d->flag, ElmAnim::ROOT_SMOOTH_ROT_POS, on); /*d.file_time.getUTC(); already changed in 'setChanged' */ if(on){Skeleton temp, &skel=editor.skel ? *editor.skel : temp; editor.anim->adjustForSameTransformWithDifferentSkeleton(skel, skel, -1, null, ROOT_SMOOTH_ROT_POS); editor.setAnimSkel(); editor.setOrnTarget(); editor.toGui();} editor.setChanged();
@@ -971,7 +987,7 @@ AnimEditor AnimEdit;
       if(ElmAnim *d=data())if(d->fps>0)
       {
          frame=time*d->fps;
-         FileParams fps=d->src_file; if(C TextParam *p=fps.findParam("speed"))frame*=Abs(p->asFlt());
+         FileParams fps=d->imported_file_params; if(C TextParam *p=fps.findParam("speed"))frame*=Abs(p->asFlt());
          return true;
       }
       frame=0; return false;
@@ -1059,8 +1075,8 @@ AnimEditor AnimEdit;
       T+=show_grid .create(Rect_LU(axis      .rect().ld(), h)).focusable(false).desc("Draw grid\nKeyboard Shortcut: Alt+G"); show_grid.mode=BUTTON_TOGGLE; show_grid.set(false); show_grid.image="Gui/Misc/grid.img";
       cam_spherical.hide(); cam_lock.pos(cam_spherical.pos());
 
-      T+=undo  .create(Rect_LU(ctrls.rect().ru()+Vec2(h, 0), 0.05f, 0.05f)     ).func(Undo  , T).focusable(false).desc("Undo"); undo.image="Gui/Misc/undo.img";
-      T+=redo  .create(Rect_LU( undo.rect().ru()           , 0.05f, 0.05f)     ).func(Redo  , T).focusable(false).desc("Redo"); redo.image="Gui/Misc/redo.img";
+      T+=undo  .create(Rect_LU(ctrls.rect().ru()+Vec2(h, 0), 0.05f, 0.05f)     ).func(Undo  , T).focusable(false).desc("Undo\nKeyboard Shortcut: Ctrl+Z"      ); undo.image="Gui/Misc/undo.img";
+      T+=redo  .create(Rect_LU( undo.rect().ru()           , 0.05f, 0.05f)     ).func(Redo  , T).focusable(false).desc("Redo\nKeyboard Shortcut: Ctrl+Shift+Z"); redo.image="Gui/Misc/redo.img";
       T+=locate.create(Rect_LU( redo.rect().ru()           , 0.05f, 0.05f), "L").func(Locate, T).focusable(false).desc("Locate this element in the Project");
 
       T+=play.create(Rect_LU(locate.rect().ru()+Vec2(h, 0), h), true).desc(S+"Play Animation\nKeyboard Shortcut: "+Kb.ctrlCmdName()+"+P, "+Kb.ctrlCmdName()+"+D");
@@ -1073,9 +1089,16 @@ AnimEditor AnimEdit;
       op.tab(OP_POS  ).setImage("Gui/Misc/move.img"   ).desc(S+"Set Position Offset KeyFrames\n\nSelect with LeftClick\nTransform with RightClick\nHold Shift for more precision\nHold "+Kb.ctrlCmdName()+" to transform all KeyFrames\nHold Alt to use World Matrix alignment\n\nKeyboard Shortcut: F3");
       op.tab(OP_SCALE).setImage("Gui/Misc/scale.img"  ).desc(S+"Set Scale KeyFrames\n\nSelect with LeftClick\nTransform with RightClick\nHold Shift for more precision\nHold "+Kb.ctrlCmdName()+" to transform all KeyFrames\n\nKeyboard Shortcut: F4");
       Node<MenuElm> n;
+      n.New().create("Undo" , Undo, T).kbsc(KbSc(KB_Z, KBSC_CTRL_CMD|KBSC_REPEAT)).flag(MENU_HIDDEN); // keep those hidden because they occupy too much of visible space
+      n.New().create("Redo" , Redo, T).kbsc(KbSc(KB_Y, KBSC_CTRL_CMD|KBSC_REPEAT)).kbsc2(KbSc(KB_Z, KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_REPEAT)).flag(MENU_HIDDEN); // keep those hidden because they occupy too much of visible space
+      n.New().create("Undo2", Undo, T).kbsc(KbSc(KB_BACK, KBSC_ALT           |KBSC_REPEAT)).flag(MENU_HIDDEN); // keep those hidden because they occupy too much of visible space
+      n.New().create("Redo2", Redo, T).kbsc(KbSc(KB_BACK, KBSC_ALT|KBSC_SHIFT|KBSC_REPEAT)).flag(MENU_HIDDEN); // keep those hidden because they occupy too much of visible space
       n.New().create("Delete KeyFrame"                 , DelFrame      , T).kbsc(KbSc(KB_DEL, KBSC_CTRL_CMD)).desc("This will delete a single keyframe for selected bone");
       n.New().create("Delete KeyFrames"                , DelFrames     , T).kbsc(KbSc(KB_DEL, KBSC_CTRL_CMD|KBSC_SHIFT)).desc("This will delete all keyframes for selected bone");
       n.New().create("Delete All Bone KeyFrames at End", DelFramesAtEnd, T).kbsc(KbSc(KB_DEL, KBSC_CTRL_CMD|KBSC_WIN_CTRL)).desc("This will delete keyframes located at the end of the animation, for all bones (except root motion).");
+      n++;
+      n.New().create("Freeze Delete KeyFrame"          , FreezeDelFrame , T).kbsc(KbSc(KB_DEL, KBSC_ALT           )).desc("This will delete a single keyframe for selected bone, without affecting transforms of other bones");
+      n.New().create("Freeze Delete KeyFrames"         , FreezeDelFrames, T).kbsc(KbSc(KB_DEL, KBSC_ALT|KBSC_SHIFT)).desc("This will delete all keyframes for selected bone, without affecting transforms of other bones");
       n++;
       n.New().create("Reverse KeyFrames", ReverseFrames, T).kbsc(KbSc(KB_R, KBSC_CTRL_CMD|KBSC_SHIFT)); // avoid Ctrl+R collision with reload project element
       n.New().create("Apply Speed"      , ApplySpeed   , T).kbsc(KbSc(KB_S, KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_ALT)); // avoid Ctrl+R collision with reload project element
@@ -1283,16 +1306,9 @@ AnimEditor AnimEdit;
                         undos.set("orn");
                      op_orn:
 
-                        if(!rotate)
-                        {
-                           mul*=CamMoveScale(v4.perspective())*MoveScale(*view);
-                           Vec d=ActiveCam.matrix.x*Ms.d().x*mul.x
-                                +ActiveCam.matrix.y*Ms.d().y*mul.y;
-                           orn_target+=d;
-                           bone.setFromTo(bone.pos, orn_target);
-                        }
-                        Orient pose=GetAnimOrient(bone, &bone_parent); pose.fix();
-                        AnimKeys::Orn *orn=((all && keys->orns.elms()) ? null : &GetOrn(*keys, animTime(), pose)); // if there are no keys then create
+                      //Orient bone_orn=GetAnimOrient(bone, &bone_parent); bone_orn.fix();
+                        Orient bone_orn=asbon.orn; if(!bone_orn.fix()){if(sbon /*&& skel - no need to check because 'sbon' already guarantees 'skel'*/)bone_orn=GetAnimOrient(*sbon, skel->bones.addr(sbon->parent));else bone_orn.identity();} // 'asbon.orn' can be zero
+                        AnimKeys::Orn *orn=((all && keys->orns.elms()) ? null : &GetOrn(*keys, animTime(), bone_orn)); // if there are no keys then create
                         if(rotate)
                         {
                            flt d=(Ms.d()*mul).sum();
@@ -1306,26 +1322,44 @@ AnimEditor AnimEdit;
                            }
                         }else
                         {
-                           if(all)
+                           mul*=CamMoveScale(v4.perspective())*MoveScale(*view);
+                           Vec d=ActiveCam.matrix.x*Ms.d().x*mul.x
+                                +ActiveCam.matrix.y*Ms.d().y*mul.y;
+                           orn_target+=d;
+
+                           bool freeze    =Kb.b(KB_H); // hold
+                           bool freeze_pos=Kb.b(KB_F);
+                           if(freeze || freeze_pos || all)
                            {
-                              // always calculate current orientation, because 'asbon.orn' can be zero
                               Vec     p=orn_target-bone.pos; p/=Matrix3(bone_parent); p.normalize();
-                              Orient  orn=asbon.orn; if(!orn.fix()){if(sbon /*&& skel - no need to check because 'sbon' already guarantees 'skel'*/)orn=GetAnimOrient(*sbon, skel->bones.addr(sbon->parent));else orn.identity();}
                               Matrix3 transform;
-                              if(use_blend)REPA(keys->orns)
+                              if(freeze || freeze_pos)
                               {
-                                 Orient next=orn; next.rotateToDir(p, getBlend(keys->orns[i])); next.fixPerp();
-                                 GetTransform(transform, orn, next);
-                                 keys->orns[i].orn.mul(transform, true).fix();
+                                 if(skel)
+                                 {
+                                    Orient next=bone_orn; next.rotateToDir(p); next.fixPerp();
+                                    GetTransform(transform, bone_orn, next);
+                                    anim->freezeRotate(*skel, sel_bone, all ? -1 : keys->orns.index(orn), transform, freeze_pos);
+                                 }
                               }else
+                              if(all)
                               {
-                                 Orient next=orn; next.rotateToDir(p); next.fixPerp();
-                                 GetTransform(transform, orn, next);
-                                 REPAO(keys->orns).orn.mul(transform, true).fix();
+                                 if(use_blend)REPA(keys->orns)
+                                 {
+                                    Orient next=bone_orn; next.rotateToDir(p, getBlend(keys->orns[i])); next.fixPerp();
+                                    GetTransform(transform, bone_orn, next);
+                                    keys->orns[i].orn.mul(transform, true).fix();
+                                 }else
+                                 {
+                                    Orient next=bone_orn; next.rotateToDir(p); next.fixPerp();
+                                    GetTransform(transform, bone_orn, next);
+                                    REPAO(keys->orns).orn.mul(transform, true).fix();
+                                 }
                               }
                            }else // single
                            {
-                              orn->orn=pose;
+                              bone.setFromTo(bone.pos, orn_target);
+                              orn->orn=GetAnimOrient(bone, &bone_parent); orn->orn.fix();
                            }
                         }
                         keys->setTangents(anim->loop(), anim->length());
@@ -1445,6 +1479,10 @@ AnimEditor AnimEdit;
                         }
                         orn_target+=d;
                         d/=Matrix3(bone_parent);
+                        if(Kb.b(KB_F))
+                        {
+                           if(skel)anim->freezeMove(*skel, sel_bone, all ? -1 : keys->poss.index(pos), d);
+                        }else
                         if(all)
                         {
                            if(use_blend)REPA (keys->poss)keys->poss[i].pos+=d*getBlend(keys->poss[i]);
@@ -1632,6 +1670,26 @@ AnimEditor AnimEdit;
       if(AnimKeys *keys=findKeys(bone))if(keys->scales.elms()){undos.set("delAll"); keys->scales.del(); if(!keys->is())anim->bones.removeData(static_cast<AnimBone*>(keys), true); return true;}
       return false;
    }
+   bool AnimEditor::freezeDelFramePos(int bone)
+   {
+      if(skel)if(AnimKeys *keys=findKeys(bone))if(AnimKeys::Pos *key=FindPos(*keys, animTime())){undos.set("del"); anim->freezeDelPos(*skel, bone, keys->poss.index(key)); return true;}
+      return false;
+   }
+   bool AnimEditor::freezeDelFramesPos(int bone)
+   {
+      if(skel)if(AnimKeys *keys=findKeys(bone))if(keys->poss.elms()){undos.set("delAll"); anim->freezeDelPos(*skel, bone, -1); return true;}
+      return false;
+   }
+   bool AnimEditor::freezeDelFrameOrn(int bone, bool pos)
+   {
+      if(skel)if(AnimKeys *keys=findKeys(bone))if(AnimKeys::Orn *key=FindOrn(*keys, animTime())){undos.set("del"); anim->freezeDelRot(*skel, bone, keys->orns.index(key), pos); return true;}
+      return false;
+   }
+   bool AnimEditor::freezeDelFramesOrn(int bone, bool pos)
+   {
+      if(skel)if(AnimKeys *keys=findKeys(bone))if(keys->orns.elms()){undos.set("delAll"); anim->freezeDelRot(*skel, bone, -1, pos); return true;}
+      return false;
+   }
    void AnimEditor::delFrame()
    {
       bool changed=false;
@@ -1648,6 +1706,24 @@ AnimEditor AnimEdit;
       if(op()==OP_ORN2           )changed|=delFramesOrn  (bone)|delFramesOrn(boneParent(bone));
       if(op()==OP_POS   || op()<0)changed|=delFramesPos  (bone);
       if(op()==OP_SCALE || op()<0)changed|=delFramesScale(bone);
+      if(changed){setAnimSkel(); setOrnTarget(); anim->setRootMatrix(); setChanged();}
+   }
+   void AnimEditor::freezeDelFrame(bool pos)
+   {
+      bool changed=false;
+      if(op()==OP_ORN   || op()<0)changed|=freezeDelFrameOrn  (sel_bone, pos);
+      if(op()==OP_ORN2           )changed|=freezeDelFrameOrn  (sel_bone, pos)|freezeDelFrameOrn(boneParent(sel_bone), pos);
+      if(op()==OP_POS   || op()<0)changed|=freezeDelFramePos  (sel_bone);
+    //if(op()==OP_SCALE || op()<0)changed|=freezeDelFrameScale(sel_bone);
+      if(changed){setAnimSkel(); setOrnTarget(); anim->setRootMatrix(); setChanged();}
+   }
+   void AnimEditor::freezeDelFrames(bool pos)
+   {
+      bool changed=false;
+      if(op()==OP_ORN   || op()<0)changed|=freezeDelFramesOrn  (sel_bone, pos);
+      if(op()==OP_ORN2           )changed|=freezeDelFramesOrn  (sel_bone, pos)|freezeDelFrameOrn(boneParent(sel_bone), pos);
+      if(op()==OP_POS   || op()<0)changed|=freezeDelFramesPos  (sel_bone);
+    //if(op()==OP_SCALE || op()<0)changed|=freezeDelFramesScale(sel_bone);
       if(changed){setAnimSkel(); setOrnTarget(); anim->setRootMatrix(); setChanged();}
    }
    void AnimEditor::delFramesAtEnd()
@@ -1685,7 +1761,7 @@ AnimEditor AnimEdit;
    }
    void AnimEditor::playUpdate(flt multiplier)
    {
-      bool play=(Kb.b(KB_W) && Kb.ctrlCmd() && !Kb.alt()); if(play)T.force_play.push();
+      bool play=(Kb.b(KB_W) && Kb.ctrlCmd() && !Kb.alt() && (fullscreen ? contains(Gui.kb()) : preview.contains(Gui.kb()))); if(play)T.force_play.push();
       play|=T.force_play(); if(play && Kb.shift())CHS(multiplier);
       play|=T.play();
       if(anim)
@@ -1750,15 +1826,15 @@ AnimEditor AnimEdit;
       ElmAnim *data=T.data();
       loop           .set(data && data->loop  (), QUIET);
       linear         .set(data && data->linear(), QUIET);
-      root_from_body .set(data && FlagTest(data->flag, ElmAnim::ROOT_FROM_BODY ), QUIET);
-      root_del_pos_x .set(data && FlagTest(data->flag, ElmAnim::ROOT_DEL_POS_X ), QUIET);
-      root_del_pos_y .set(data && FlagTest(data->flag, ElmAnim::ROOT_DEL_POS_Y ), QUIET);
-      root_del_pos_z .set(data && FlagTest(data->flag, ElmAnim::ROOT_DEL_POS_Z ), QUIET);
-      root_del_rot_x .set(data && FlagTest(data->flag, ElmAnim::ROOT_DEL_ROT_X ), QUIET);
-      root_del_rot_y .set(data && FlagTest(data->flag, ElmAnim::ROOT_DEL_ROT_Y ), QUIET);
-      root_del_rot_z .set(data && FlagTest(data->flag, ElmAnim::ROOT_DEL_ROT_Z ), QUIET);
-      root_smooth_rot.set(data && FlagTest(data->flag, ElmAnim::ROOT_SMOOTH_ROT), QUIET);
-      root_smooth_pos.set(data && FlagTest(data->flag, ElmAnim::ROOT_SMOOTH_POS), QUIET);
+      root_from_body .set(data && FlagOn(data->flag, ElmAnim::ROOT_FROM_BODY ), QUIET);
+      root_del_pos_x .set(data && FlagOn(data->flag, ElmAnim::ROOT_DEL_POS_X ), QUIET);
+      root_del_pos_y .set(data && FlagOn(data->flag, ElmAnim::ROOT_DEL_POS_Y ), QUIET);
+      root_del_pos_z .set(data && FlagOn(data->flag, ElmAnim::ROOT_DEL_POS_Z ), QUIET);
+      root_del_rot_x .set(data && FlagOn(data->flag, ElmAnim::ROOT_DEL_ROT_X ), QUIET);
+      root_del_rot_y .set(data && FlagOn(data->flag, ElmAnim::ROOT_DEL_ROT_Y ), QUIET);
+      root_del_rot_z .set(data && FlagOn(data->flag, ElmAnim::ROOT_DEL_ROT_Z ), QUIET);
+      root_smooth_rot.set(data && FlagOn(data->flag, ElmAnim::ROOT_SMOOTH_ROT), QUIET);
+      root_smooth_pos.set(data && FlagOn(data->flag, ElmAnim::ROOT_SMOOTH_POS), QUIET);
       root_set_move  .set(data && data->rootMove(), QUIET);
       root_set_rot   .set(data && data->rootRot (), QUIET);
    }
@@ -1770,12 +1846,19 @@ AnimEditor AnimEdit;
 
          // adjust speed file param
          Mems<FileParams> file_params=FileParams::Decode(data->src_file);
-         if(file_params.elms()==1)
+         if(FileParams *fps=file_params.data())
          {
-            TextParam &speed=file_params[0].getParam("speed");
+            TextParam &speed=fps->getParam("speed");
             flt set_speed=anim_speed; if(flt cur_speed=speed.asFlt())set_speed*=cur_speed;
-            speed.setValue(set_speed);
+            if(Equal(set_speed, 1))fps->params.removeData(&speed, true);else speed.setValue(set_speed);
             data->setSrcFile(FileParams::Encode(file_params));
+         }
+         {
+            FileParams fps=data->imported_file_params;
+            TextParam &speed=fps.getParam("speed");
+            flt set_speed=anim_speed; if(flt cur_speed=speed.asFlt())set_speed*=cur_speed;
+            if(Equal(set_speed, 1))fps.params.removeData(&speed, true);else speed.setValue(set_speed);
+            data->imported_file_params=fps.encode();
          }
 
          anim->length(anim->length()/anim_speed, true);

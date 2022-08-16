@@ -1,7 +1,6 @@
 ﻿/******************************************************************************/
 extern const bool PUBLISH          ;
 extern const bool EMBED_ENGINE_DATA;
-extern const bool ANDROID_EXPANSION;
 extern cchar *C    ENGINE_DATA_PATH;
 extern cchar *C   PROJECT_DATA_PATH;
 extern cchar *C   PROJECT_NAME     ;

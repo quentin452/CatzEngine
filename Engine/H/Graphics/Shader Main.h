@@ -204,7 +204,6 @@ struct MainShaderClass
       *DrawC  ,
       *DrawG  ,
       *DrawCG ,
-      *DrawA  ,
       *DrawMs1,
       *DrawMsN,
       *DrawMsM,

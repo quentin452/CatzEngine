@@ -54,6 +54,7 @@ class MiscRegion : Region
    static void ConfigLIB    (MiscRegion &mr);
    static void ConfigUWP    (MiscRegion &mr);
    static void ConfigAPK    (MiscRegion &mr);
+   static void ConfigAAB    (MiscRegion &mr);
    static void ConfigMAC    (MiscRegion &mr);
    static void ConfigIOS    (MiscRegion &mr);
    static void ConfigLinux  (MiscRegion &mr);

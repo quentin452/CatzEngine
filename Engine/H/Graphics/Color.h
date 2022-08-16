@@ -140,6 +140,8 @@ Flt   SRGBLumOfSRGBColor  (C Vec &s); // get srgb   photometric luminance (as pe
 
 Vec NightLightFactor(Flt intensity); // get color multiplier for "Night Light / Blue Filter" effect, to be used for colors in sRGB space, example "Flt intensity=0.5f; Vec night_light_color=srgb_color*NightLightFactor(intensity);"
 #if EE_PRIVATE
+Flt AlphaToDisplay(Flt alpha);
+
 Flt SignSRGBToLinear(Flt s); // convert -1..1 srgb   to -1..1 linear
 Flt SignLinearToSRGB(Flt l); // convert -1..1 linear to -1..1 srgb
 

@@ -3,11 +3,11 @@ Replace all C++17
 	CE Editor C++.cpp
 
 	WEB
-	Engine\EsenthelEngine.vcxproj
+	Engine\Engine.vcxproj
 	Editor Data\Code\Windows\Project.vcxproj
 
 	MAC
-	Engine\EsenthelEngine.xcodeproj\project.pbxproj
+	Engine\Engine.xcodeproj\project.pbxproj
 	Project\Project.xcodeproj\project.pbxproj
 	Editor Data\Code\Apple\project.pbxproj
 
@@ -27,7 +27,7 @@ Replace all C++17
 	Editor Data\Code\Android\Android.mk
 
 Replace all stdcpp17
-	Engine\EsenthelEngine.vcxproj
+	Engine\Engine.vcxproj
 	Project\Project.vcxproj
 	Editor Data\Code\Windows\Project.vcxproj
 
@@ -36,4 +36,4 @@ Replace all <standard>17</standard>
 	Project\Linux\nbproject\configurations.xml
 	Editor Data\Code\Linux\nbproject\configurations.xml
 /******************************************************************************/
-Re-export Esenthel Editor to Windows, Mac, Linux projects
+Re-export Editor to Windows, Mac, Linux projects

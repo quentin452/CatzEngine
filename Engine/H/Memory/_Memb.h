@@ -58,7 +58,8 @@ private:
    Ptr   *_ptr;
    void (*_new)(Ptr elm),
         (*_del)(Ptr elm);
-   Ptr  _element(Int i)C;
+
+   Ptr _element(Int i)C;
 
    explicit _Memb(Int elm_size, Int block_elms, void (*_new)(Ptr elm), void (*_del)(Ptr elm));
       void _reset(Int elm_size, Int block_elms, void (*_new)(Ptr elm), void (*_del)(Ptr elm));

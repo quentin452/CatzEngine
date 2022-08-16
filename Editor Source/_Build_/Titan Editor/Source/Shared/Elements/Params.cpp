@@ -224,7 +224,7 @@ Cache<EditObject> EditObjects;
          }
          return false;
       }
-   bool EditObject::constant()C {return FlagTest(flag, CONSTANT);}
+   bool EditObject::constant()C {return FlagOn(flag, CONSTANT);}
    uint EditObject::memUsage()C {return super::memUsage()+sub_objs.memUsage();}
    ::EditObject::SubObj* EditObject::findSubObj(C UID &id)  {REPA(sub_objs)if(sub_objs[i].id==id)return &sub_objs[i]; return null;}
  C ::EditObject::SubObj* EditObject::findSubObj(C UID &id)C {return ConstCast(T).findSubObj(id);}
@@ -393,11 +393,11 @@ Cache<EditObject> EditObjects;
    void EditObject::copyTo(Object &obj, C Project &proj, bool zero_align, C UID *mesh_id, C UID *phys_id)C // 'zero_align' should be set only to ELM_OBJ
    {
       super::copyTo(obj);
-      obj.access         (FlagTest(flag, OVR_ACCESS        ), access           );
-      obj.type           (FlagTest(flag, OVR_TYPE          ), type             );
-      obj.constant       (FlagTest(flag, OVR_CONST         ), constant()       );
-      obj.path           (FlagTest(flag, OVR_PATH          ), path             );
-      obj.meshVariationID(FlagTest(flag, OVR_MESH_VARIATION), mesh_variation_id);
+      obj.access         (FlagOn(flag, OVR_ACCESS        ), access           );
+      obj.type           (FlagOn(flag, OVR_TYPE          ), type             );
+      obj.constant       (FlagOn(flag, OVR_CONST         ), constant()       );
+      obj.path           (FlagOn(flag, OVR_PATH          ), path             );
+      obj.meshVariationID(FlagOn(flag, OVR_MESH_VARIATION), mesh_variation_id);
       obj.align          (zero_align);
       UID base_id=base.id();           obj.base(      proj.gamePath( base_id));
       if(!mesh_id)obj.mesh(false);else obj.mesh(true, proj.gamePath(*mesh_id));
@@ -432,7 +432,7 @@ Cache<EditObject> EditObjects;
       {
          if(base) // if we have a base
          {
-            if(FlagTest(flag, OVR_TYPE)) // we must get 'editor_type' from custom 'type' (check this only inside 'base' condition, because this will mean that it's a world object, and only then we're interested in 'OVR_TYPE', because otherwise 'OVR_TYPE' is set only for 'OBJ_CLASS' for which we can't adjust 'editor_type')
+            if(FlagOn(flag, OVR_TYPE)) // we must get 'editor_type' from custom 'type' (check this only inside 'base' condition, because this will mean that it's a world object, and only then we're interested in 'OVR_TYPE', because otherwise 'OVR_TYPE' is set only for 'OBJ_CLASS' for which we can't adjust 'editor_type')
             {
                EditObjectPtr type_base; if(type.valid())type_base=Str(edit_path).tailSlash(true)+EncodeFileName(type);
                if(type_base)editor_type=type_base->editor_type;else editor_type.zero();
@@ -443,11 +443,11 @@ Cache<EditObject> EditObjects;
    }
    void EditObject::updateBase(cchar *edit_path)
    {
-      if(!FlagTest(flag, OVR_ACCESS        ))access=(base ? base->access : OBJ_ACCESS_TERRAIN);
-      if(!FlagTest(flag, OVR_TYPE          ))if(base)type=base->type;else type.zero();
-      if(!FlagTest(flag, OVR_CONST         ))FlagSet(flag, CONSTANT, base ? base->constant() : false);
-      if(!FlagTest(flag, OVR_PATH          ))path=(base ? base->path : OBJ_PATH_CREATE);
-      if(!FlagTest(flag, OVR_MESH_VARIATION))mesh_variation_id=(base ? base->mesh_variation_id : 0);
+      if(FlagOff(flag, OVR_ACCESS        ))access=(base ? base->access : OBJ_ACCESS_TERRAIN);
+      if(FlagOff(flag, OVR_TYPE          ))if(base)type=base->type;else type.zero();
+      if(FlagOff(flag, OVR_CONST         ))FlagSet(flag, CONSTANT, base ? base->constant() : false);
+      if(FlagOff(flag, OVR_PATH          ))path=(base ? base->path : OBJ_PATH_CREATE);
+      if(FlagOff(flag, OVR_MESH_VARIATION))mesh_variation_id=(base ? base->mesh_variation_id : 0);
       updateEditorType(edit_path);
    }
    bool EditObject::newParam(C Str &name, PARAM_TYPE type, C Project &proj)
@@ -476,31 +476,31 @@ Cache<EditObject> EditObjects;
       {
          changed=true;
          access=src.access;
-         FlagSet(flag, OVR_ACCESS, FlagTest(src.flag, OVR_ACCESS));
+         FlagSet(flag, OVR_ACCESS, FlagOn(src.flag, OVR_ACCESS));
       }
       if(Sync(type_time, src.type_time))
       {
          changed=true;
          type=src.type;
-         FlagSet(flag, OVR_TYPE, FlagTest(src.flag, OVR_TYPE));
+         FlagSet(flag, OVR_TYPE, FlagOn(src.flag, OVR_TYPE));
       }
       if(Sync(const_time, src.const_time))
       {
          changed=true;
          FlagSet(flag, CONSTANT , src.constant());
-         FlagSet(flag, OVR_CONST, FlagTest(src.flag, OVR_CONST));
+         FlagSet(flag, OVR_CONST, FlagOn(src.flag, OVR_CONST));
       }
       if(Sync(path_time, src.path_time))
       {
          changed=true;
          path=src.path;
-         FlagSet(flag, OVR_PATH, FlagTest(src.flag, OVR_PATH));
+         FlagSet(flag, OVR_PATH, FlagOn(src.flag, OVR_PATH));
       }
       if(Sync(mesh_variation_time, src.mesh_variation_time))
       {
          changed=true;
          mesh_variation_id=src.mesh_variation_id;
-         FlagSet(flag, OVR_MESH_VARIATION, FlagTest(src.flag, OVR_MESH_VARIATION));
+         FlagSet(flag, OVR_MESH_VARIATION, FlagOn(src.flag, OVR_MESH_VARIATION));
       }
       REPA(src.sub_objs)
       {
@@ -519,31 +519,31 @@ Cache<EditObject> EditObjects;
       {
          changed=true;
          access=src.access;
-         FlagSet(flag, OVR_ACCESS, FlagTest(src.flag, OVR_ACCESS));
+         FlagSet(flag, OVR_ACCESS, FlagOn(src.flag, OVR_ACCESS));
       }
       if(Undo(type_time, src.type_time))
       {
          changed=true;
          type=src.type;
-         FlagSet(flag, OVR_TYPE, FlagTest(src.flag, OVR_TYPE));
+         FlagSet(flag, OVR_TYPE, FlagOn(src.flag, OVR_TYPE));
       }
       if(Undo(const_time, src.const_time))
       {
          changed=true;
          FlagSet(flag, CONSTANT , src.constant());
-         FlagSet(flag, OVR_CONST, FlagTest(src.flag, OVR_CONST));
+         FlagSet(flag, OVR_CONST, FlagOn(src.flag, OVR_CONST));
       }
       if(Undo(path_time, src.path_time))
       {
          changed=true;
          path=src.path;
-         FlagSet(flag, OVR_PATH, FlagTest(src.flag, OVR_PATH));
+         FlagSet(flag, OVR_PATH, FlagOn(src.flag, OVR_PATH));
       }
       if(Undo(mesh_variation_time, src.mesh_variation_time))
       {
          changed=true;
          mesh_variation_id=src.mesh_variation_id;
-         FlagSet(flag, OVR_MESH_VARIATION, FlagTest(src.flag, OVR_MESH_VARIATION));
+         FlagSet(flag, OVR_MESH_VARIATION, FlagOn(src.flag, OVR_MESH_VARIATION));
       }
       // sub objects
          // mark as removed those that aren't present in 'src'

@@ -9,8 +9,9 @@ enum FILE_TYPE : Byte // File Type
    FILE_NONE     , // none
    FILE_STD_READ , // stdio in read  mode, '_handle' is a system handle, can be switched to FILE_STD_WRITE if '_writable'
    FILE_STD_WRITE, // stdio in write mode, '_handle' is a system handle, can be switched to FILE_STD_READ
-   FILE_MEM      , // memory, always readable, writable if '_writable'
+   FILE_MEM      , // memory, always readable, writable if '_writable', allocated if '_allocated'
    FILE_MEMB     , // Memb  , always readable+writable
+   FILE_STREAM   , // Stream, readable, only forward, no seeking
 };
 #endif
 struct File
@@ -40,17 +41,18 @@ struct File
 #if ANDROID
    Bool   readStdTryEx(C Str     &name,                 const_mem_addr Cipher *cipher, UInt max_buf_size=UINT_MAX, Bool *processed=null); // try to read stdio file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed)
 #else
-   Bool   readStdTryEx(C Str     &name,                 const_mem_addr Cipher *cipher, UInt max_buf_size=UINT_MAX); // try to read        stdio file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed)
+   Bool   readStdTryEx(C Str     &name,                 const_mem_addr Cipher *cipher, UInt max_buf_size=UINT_MAX        ); // try to read        stdio file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed)
 #endif
-   Bool   readTryEx   (C Str     &name,                 const_mem_addr Cipher *cipher, Bool *processed           ); // try to read Pak or stdio file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), 'processed'=if original file had to be processed
-   Bool   readTryEx   (C UID     &id  ,                 const_mem_addr Cipher *cipher, Bool *processed           ); // try to read Pak or stdio file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), 'processed'=if original file had to be processed
-   Bool   readTryEx   (C Str     &name, C PakSet &paks, const_mem_addr Cipher *cipher, Bool *processed           ); // try to read Pak          file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), 'processed'=if original file had to be processed
-   Bool   readTryEx   (C UID     &id  , C PakSet &paks, const_mem_addr Cipher *cipher, Bool *processed           ); // try to read Pak          file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), 'processed'=if original file had to be processed
-   Bool   readTryEx   (C PakFile &file, C Pak    &pak , const_mem_addr Cipher *cipher, Bool *processed           ); // try to read Pak          file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), 'processed'=if original file had to be processed
-   Bool   readTryRaw  (C PakFile &file, C Pak    &pak                                                            ); // try to read Pak          file, writing is not allowed in this mode, false on fail, this reads file in raw mode (does not decompress files)
+   Bool   readTryEx   (C Str     &name,                 const_mem_addr Cipher *cipher, Bool *processed, Bool stream=false); // try to read Pak or stdio file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), 'processed'=if original file had to be processed
+   Bool   readTryEx   (C UID     &id  ,                 const_mem_addr Cipher *cipher, Bool *processed, Bool stream=false); // try to read Pak or stdio file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), 'processed'=if original file had to be processed
+   Bool   readTryEx   (C Str     &name, C PakSet &paks, const_mem_addr Cipher *cipher, Bool *processed, Bool stream=false); // try to read Pak          file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), 'processed'=if original file had to be processed
+   Bool   readTryEx   (C UID     &id  , C PakSet &paks, const_mem_addr Cipher *cipher, Bool *processed, Bool stream=false); // try to read Pak          file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), 'processed'=if original file had to be processed
+   Bool   readTryEx   (C PakFile &file, C Pak    &pak , const_mem_addr Cipher *cipher, Bool *processed, Bool stream=false); // try to read Pak          file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), 'processed'=if original file had to be processed
+   Bool   readTryRaw  (C PakFile &file, C Pak    &pak                                                                    ); // try to read Pak          file, writing is not allowed in this mode, false on fail, this reads file in raw mode (does not decompress files)
 #endif
 
-   File& writeMemFixed( Int size              , const_mem_addr Cipher *cipher=null); // start writing to   fixed     memory file   , reading is     allowed in this mode, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed)
+   File& writeMemFixed(           Int size    , const_mem_addr Cipher *cipher=null); // start writing to   fixed     memory file   , reading is     allowed in this mode, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed)
+   File& writeMemDest ( Ptr data, Int size    , const_mem_addr Cipher *cipher=null); // start writing to   fixed     memory address, reading is     allowed in this mode, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed)
    File& writeMem     (UInt block_elms=64*1024, const_mem_addr Cipher *cipher=null); // start writing to   resizable memory file   , reading is     allowed in this mode, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed)
    File&  readMem     (CPtr data, Int size    , const_mem_addr Cipher *cipher=null); // start reading from fixed     memory address, writing is not allowed in this mode, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed)
 
@@ -80,6 +82,7 @@ struct File
    void      cipherOffset     (Int     offset);                             // adjust file cipher offset
    void      cipherOffset     (Long    offset) {cipherOffset((Int)offset);} // adjust file cipher offset, can be Int (instead Long) because Cipher operates on Int offset only
    void      cipherOffsetClear(              ) {cipherOffset(-pos()     );} // adjust file cipher offset so that "posCipher()==0 -> pos+cipher_offset==0 -> cipher_offset=-pos", this will result in encryption being always the same, regardless of current location
+   Long      fullLeft         (              )C{return _full_size-_pos   ;} // get size left (number of bytes from current position to the end of the file)
 #endif
    Bool  is     (        )C {return _type!=0    ;} // if  file is opened
    Bool  pos    (Long pos);                        // set position, false on fail
@@ -102,16 +105,18 @@ struct File
    Bool get( Ptr data, Int size); // read  from file to 'data' memory, false on fail, if error occurs then 'ok' will be set to false
    Bool put(CPtr data, Int size); // write from 'data' memory to file, false on fail, if error occurs then 'ok' will be set to false
 
-   T1(TYPE) Bool  put       (C TYPE &t       ) {return put(&t, SIZE(TYPE)  );} // write raw memory              of 't' object
-   T1(TYPE) Bool  get       (  TYPE &t       ) {return get(&t, SIZE(TYPE)  );} // read  raw memory              to 't' object
-   T1(TYPE) Bool  putN      (C TYPE *t, Int n) {return put( t, SIZE(TYPE)*n);} // write raw array of 'n' number of 't' objects
-   T1(TYPE) Bool  getN      (  TYPE *t, Int n) {return get( t, SIZE(TYPE)*n);} // read  raw array to 'n' number of 't' objects
-   T1(TYPE) File& operator<<(C TYPE &t       ) {       put( t);     return T;} // write raw memory              of 't' object
-   T1(TYPE) File& operator>>(  TYPE &t       ) {       get( t);     return T;} // read  raw memory              to 't' object
-            File& operator<<(C Str8 &s       ) {return putStr(s);            } // write string
-            File& operator<<(C Str  &s       ) {return putStr(s);            } // write string
-            File& operator>>(  Str8 &s       ) {return getStr(s);            } // read  string
-            File& operator>>(  Str  &s       ) {return getStr(s);            } // read  string
+   T1(TYPE) Bool  put       (C TYPE     &t       ) {return put(&t, SIZE(TYPE)  );} // write raw memory              of 't' object
+   T1(TYPE) Bool  get       (  TYPE     &t       ) {return get(&t, SIZE(TYPE)  );} // read  raw memory              to 't' object
+   T1(TYPE) Bool  putN      (C TYPE     *t, Int n) {return put( t, SIZE(TYPE)*n);} // write raw array of 'n' number of 't' objects
+   T1(TYPE) Bool  getN      (  TYPE     *t, Int n) {return get( t, SIZE(TYPE)*n);} // read  raw array to 'n' number of 't' objects
+   T1(TYPE) File& operator<<(C TYPE     &t       ) {       put( t);     return T;} // write raw memory              of 't' object
+   T1(TYPE) File& operator>>(  TYPE     &t       ) {       get( t);     return T;} // read  raw memory              to 't' object
+            File& operator<<(C Str8     &s       ) {return putStr(s);            } // write string
+            File& operator<<(C Str      &s       ) {return putStr(s);            } // write string
+            File& operator<<(C MultiStr &s       ) {       s.save(T);   return T;} // write string
+            File& operator>>(  Str8     &s       ) {return getStr(s);            } // read  string
+            File& operator>>(  Str      &s       ) {return getStr(s);            } // read  string
+            File& operator>>(  MultiStr &s       ) {       s.load(T);   return T;} // read  string
 
    File& putBool  (  Bool  b) {T<<b; return T;}    Bool  getBool  () {Bool   b; T>>b; return b;} // write/read  Bool
    File& putSByte ( SByte  b) {T<<b; return T;}   SByte  getSByte () {SByte  b; T>>b; return b;} // write/read SByte
@@ -231,6 +236,8 @@ struct File
    void   limit(ULong &total_size, ULong &applied_offset, Long new_size); // temporarily limit current file to '0..new_size' size, current position will be mapped to 0
    void unlimit(ULong &total_size, ULong &applied_offset               ); // unlimit previously limited file
 
+   Bool decompress(COMPRESS_TYPE compression, ULong decompressed_size, Bool stream);
+
    T1 (TA                                        )  File& putMulti(C TA &a) {return T<<a;}
    T1 (TA                                        )  File& getMulti(  TA &a) {return T>>a;}
    T2 (TA, TB                                    )  File& putMulti(C TA &a, C TB &b);
@@ -274,15 +281,24 @@ private:
    Bool       _writable, _ok;
    FILE_PATH  _path;
    Int        _buf_pos, _buf_len, _buf_size, _cipher_offset;
-   ULong      _offset, _pos, _size;
+   ULong      _offset, _pos, _size, _full_size;
  C Pak       *_pak;
    Cipher    *_cipher;
    Ptr        _buf;
 union
 {
-   Int        _handle;
-   Ptr        _mem;
-   Memb<Byte> _memb;
+      Int         _handle;
+   struct
+   {
+      Ptr         _mem;
+      Bool        _allocated;
+   };
+      Memb<Byte>  _memb;
+   struct
+   {
+      FileStream *_stream;
+      CPtr        _stream_buf;
+   };
 };
 #if ANDROID
    Ptr        _aasset;
@@ -314,4 +330,45 @@ union
    template<Int elms>  File& _getStr(Char (&t)[elms]     ) {return _getStr(t, elms);} // read string into 't' array,                                         , deprecated - do not use
 #endif
 };
+/******************************************************************************/
+#if EE_PRIVATE
+struct FileStream
+{
+   File src;
+
+   virtual CPtr init()=NULL;
+   virtual void get(File &main)=NULL;
+   virtual UInt memUsage()C {return src.memUsage();}
+
+   virtual ~FileStream() {}
+};
+
+struct FileStreamLZ4 : FileStream
+{
+   LZ4_streamDecode_t ctx;
+   Byte buf[LZ4_RING_BUF_SIZE];
+   Bool ok;
+
+   virtual CPtr init()override;
+   virtual void get(File &main)override;
+   virtual UInt memUsage()C override;
+};
+
+struct FileStreamZSTD : FileStream
+{
+   ZSTD_DCtx_s ctx;
+   Bool ok;
+   UInt buf_size;
+
+   // !! DECLARE AS LAST SO THIS CAN BE CUSTOM SIZED BASED ON MEMORY ALLOCATION FOR CLASS OBJECT !!
+#pragma warning(push)
+#pragma warning(disable:4200) // zero-sized array in struct/union
+   Byte buf[];
+#pragma warning(pop)
+
+   virtual CPtr init()override;
+   virtual void get(File &main)override;
+   virtual UInt memUsage()C override;
+};
+#endif
 /******************************************************************************/

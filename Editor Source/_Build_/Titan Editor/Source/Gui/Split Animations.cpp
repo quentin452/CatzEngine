@@ -54,8 +54,8 @@ SplitAnimation SplitAnim;
                {
                   TimeStamp time; time.getUTC();
                                     files[0].params.clear().setNum(3+anim_name.is());
-                                    files[0].params[0].name="start_frame";
-                                    files[0].params[1].name=  "end_frame";
+                                    files[0].params[0].name="startFrame";
+                                    files[0].params[1].name=  "endFrame";
                                     files[0].params[2].name="loop";
                   if(anim_name.is())files[0].params[3].set( "name", anim_name);
                   FREPA(anims)
@@ -102,7 +102,7 @@ SplitAnimation SplitAnim;
    void SplitAnimation::create()
    {
       Gui+=super  ::create(Rect_C (0, 0, 1.3f, 1.15f)); button[2].show().func(Hide, T);
-      T+=text     .create(Rect_C (clientWidth()/2   , -0.07f, clientWidth()-0.04f, 0), "Drag and drop a file with animations list on this window,\nor use the button to detect them from clipboard."); text.auto_line=AUTO_LINE_SPACE_SPLIT;
+      T+=text     .create(Rect_C (clientWidth()/2   , -0.07f, clientWidth()-0.04f, 0), "Drag and drop a file with animations list on this window,\nor use the button to detect them from clipboard."); text.auto_line=true;
       T+=clear    .create(Rect_LU(              0.04f, -0.15f, 0.2f, 0.06f), "Clear"                ).func(Clear    , T);
       T+=clipboard.create(Rect_U (clientWidth()/2   , -0.15f, 0.5f, 0.06f), "Detect from Clipboard").func(Clipboard, T);
       T+=add_new  .create(Rect_RU(clientWidth()-0.04f, -0.15f, 0.2f, 0.06f), "New"                  ).func(New      , T);
@@ -125,7 +125,7 @@ SplitAnimation SplitAnim;
       }
    }
    bool SplitAnimation::Create(int &data, C Str &key, ptr user) {data=0; return true;}
-   bool SplitAnimation::IsNumber(C Str &str) {return FlagTest(CharFlag(str[0]), CHARF_DIG);}
+   bool SplitAnimation::IsNumber(C Str &str) {return FlagOn(CharFlag(str[0]), CHARF_DIG);}
    void SplitAnimation::add(C Str &text)
    {
       // auto-detect from following samples: (watch out as names may include numbers)

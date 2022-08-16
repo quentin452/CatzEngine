@@ -1,7 +1,4 @@
 /******************************************************************************/
-#ifndef ETC_H
-#define ETC_H
-/******************************************************************************/
 void DecompressBlockETC1     (C Byte *b, Color  (&block)[4][4]);
 void DecompressBlockETC2R    (C Byte *b, Color  (&block)[4][4]);
 void DecompressBlockETC2RS   (C Byte *b, Color  (&block)[4][4]);
@@ -30,6 +27,4 @@ VecSB2 DecompressPixelETC2RGS  (C Byte *b, Int x, Int y);
 Color  DecompressPixelETC2RGB  (C Byte *b, Int x, Int y);
 Color  DecompressPixelETC2RGBA1(C Byte *b, Int x, Int y);
 Color  DecompressPixelETC2RGBA (C Byte *b, Int x, Int y);
-/******************************************************************************/
-#endif
 /******************************************************************************/

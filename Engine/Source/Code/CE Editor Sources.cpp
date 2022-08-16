@@ -3,6 +3,19 @@
 namespace EE{
 namespace Edit{
 /******************************************************************************/
+void Source::setOpened(Bool opened)
+{
+   if(T.opened!=opened)
+   {
+      T.opened=opened;
+      if(opened)CE.code_tabs.New(loc.base_name).source=this;      // create new tab
+      else REPA(CE.code_tabs)if(CE.code_tabs.tab(i).source==this) // remove     tab
+      {
+         CE.code_tabs.remove(i);
+         break;
+      }
+   }
+}
 void CodeEditor::cur(Source *cur)
 {
    if(T._cur!=cur && parent)
@@ -14,12 +27,18 @@ void CodeEditor::cur(Source *cur)
          cur->moveToBottom().moveAbove(menu); // move to bottom below 'browse_mode' buttons, but above 'menu' so alt is processed properly (Menu Alt detection relies on 'Kb.k' detection, which can be eaten by this gui object, so make sure 'menu' is processed first)
          cur->prepareForDraw();
          cur->activate();
-         if(!cur->opened)
+         cur->setOpened(true);
+         /*if(!cur->opened)
          {
             cur->opened=true;
           //sources.moveToEnd(curI()); this won't work with 'find previous/next' and can make engine headers be between custom sources
-         }
+         }*/
          if(cur->used())init(); // if activated a used source then make sure that Code Editor is initialized (do this after operating on 'cur' in case 'init' will somehow change/delete it)
+         REPA(CE.code_tabs)if(CE.code_tabs.tab(i).source==cur) // set active tab
+         {
+            CE.code_tabs.set(i, QUIET);
+            break;
+         }
       }
       b_close.visible(T._cur!=null && menu.visible()); // close button is visible on top of menu (so display only if that's visible too)
       cei().sourceChanged(true);
@@ -47,41 +66,51 @@ void CodeEditor::sourceRemoved(Source &src)
       if(symbol.source==&src)symbol.source=null;
    }
 
-   // exclude from opened
-   src.opened=false;
+   // adjust 'cur'
+   if(cur()==&src)
+   {
+      prevFile(); // activate previous opened source
+      if(cur()==&src)cur(null); // if still the same, then set null
+   }
 
-   // make sure it's not current
-   if(cur()==&src)nextFile();
+   // exclude from opened
+   src.setOpened(false);
 }
 /******************************************************************************/
-void CodeEditor::closeDo()
+void CodeEditor::closeDo(Source &src)
 {
-   if(Source *s=cur())
+   // adjust 'cur'
+   if(cur()==&src)
    {
-      s->opened=false; // close
       prevFile(); // activate previous opened source
-      if(s->used())s->reload();else sources.removeData(s, true); // if 's' is used in the project then reload to maintain last saved position (in case there were some changes applied, but the user decided not to save them), if not then remove from 'sources'
-      cei().sourceChanged();
+      if(cur()==&src)cur(null); // if still the same, then set null
    }
+
+   // exclude from opened
+   src.setOpened(false); // close after 'prevFile' because this destroys the tab, but we need it in 'prevFile' for index
+
+   if(src.used())src.reload();else sources.removeData(&src, true); // if 's' is used in the project then reload to maintain last saved position (in case there were some changes applied, but the user decided not to save them), if not then remove from 'sources'
+   cei().sourceChanged();
 }
 void CodeEditor::closeAll()
 {
-   for(; cur(); )closeDo();
+   for(; Source *src=cur(); )closeDo(*src);
    removeUselessSources();
 }
 /******************************************************************************/
-static Bool  SaveSource(Edit::SaveChanges::Elm &elm) {REPA(CE.sources)if(elm.user==&CE.sources[i])return CE.sources[i].overwrite(); return true;}
-static void CloseSource(Edit::SaveChanges::Elm &elm) {if(CE.cur() && elm.user==CE.cur())CE.closeDo();}
-void CodeEditor::close()
+static Source* PtrToSource(Ptr ptr) {return CE.sources.addr(CE.sources.validIndex((Source*)ptr));}
+static Bool  SaveSource(Edit::SaveChanges::Elm &elm) {if(Source *src=PtrToSource(elm.user))return src->overwrite(); return true;}
+static void CloseSource(Edit::SaveChanges::Elm &elm) {if(Source *src=PtrToSource(elm.user))CE.closeDo(*src);}
+void CodeEditor::close(Source *src)
 {
-   if(cur())
+   if(src)
    {
-      if(cur()->modified())
+      if(src->modified())
       {
-         save_changes.set(Edit::SaveChanges::Elm().set(cur()->loc.file_name, S+"Source - \""+cur()->loc.asText()+'"', cur()->loc.id, cur()).save(SaveSource).close(CloseSource));
+         save_changes.set(Edit::SaveChanges::Elm().set(src->loc.file_name, S+"Source - \""+src->loc.asText()+'"', src->loc.id, src).save(SaveSource).close(CloseSource));
       }else
       {
-         closeDo();
+         closeDo(*src);
       }
    }
 }

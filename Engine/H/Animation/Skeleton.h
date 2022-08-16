@@ -4,6 +4,8 @@
    Use 'AnimatedSkeleton' to animate a base static 'Skeleton', by applying 'Animation's on the 'AnimatedSkeleton'.
 
 /******************************************************************************/
+#define HAS_ANIM_SKEL_ROT 0
+/******************************************************************************/
 // STATIC SKELETON
 /******************************************************************************/
 enum BONE_TYPE : Byte
@@ -239,6 +241,7 @@ struct Skeleton // Animation Skeleton - base skeleton used by 'AnimatedSkeleton'
    Skeleton& setBoneLengths(                                                       ); // automatically set bone lengths
    void      boneRemap     (                   C CMemPtr<Byte, 256> &old_to_new    );
 #endif
+   void      recreateSkelAnims(); // this can be called if animations got reloaded
 
    // draw
    void draw(C Color &bone_color, C Color &slot_color=TRANSPARENT, Flt slot_size=0.2f)C; // draw bones and slots, this can be optionally called outside of Render function
@@ -248,6 +251,7 @@ struct Skeleton // Animation Skeleton - base skeleton used by 'AnimatedSkeleton'
    void operator=(C UID &id  ) ; // load, Exit  on fail
    Bool save     (C Str &name)C; // save, false on fail
    Bool load     (C Str &name) ; // load, false on fail
+   Bool reload   (C Str &name) ; // reload, false on fail, this method preserves internal '_skel_anims' cache
 
    Bool save(File &f)C; // save, false on fail
    Bool load(File &f) ; // load, false on fail
@@ -270,9 +274,11 @@ struct  AnimatedSkeletonBone // Bone of an Animated Skeleton
 {
    // these parameters may be manually changed during animation process, they are in parent space:
    Orient   orn  ; // target   orientation
-   AxisRoll rot  ; // relative rotation
    Vec      pos  , // offset   position
             scale; // scale    factor
+#if HAS_ANIM_SKEL_ROT
+   AxisRoll rot  ; // relative rotation
+#endif
 
    // the following parameters are valid only after calling 'updateMatrix'
  C MatrixM& matrix    ()C {return _matrix     ;} // this is the transformation matrix, which transforms source bone 'SkelBone' and source 'Mesh' into their final positions (source_data * matrix = final_world_space_position), it's valid after animation and matrix updates (using 'updateMatrix' method)

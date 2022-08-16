@@ -25,7 +25,7 @@ void _Memc::del()
 }
 void _Memc::clear()
 {
-   if(_del)REPA(T)_del(T[i]);
+   if(_del)REPA(T)_del(T[i]); // destroy as the first step
   _elms=0;
 }
 /******************************************************************************/
@@ -57,11 +57,11 @@ void _Memc::setNum(Int num)
    {
       reserve(num);
       Int old_elms=elms(); _elms=num; // set '_elms' before accessing new elements to avoid range assert
-      if(_new)for(Int i=old_elms; i<elms(); i++)_new(T[i]);
+      if(_new)for(Int i=old_elms; i<elms(); i++)_new(T[i]); // create as the last step
    }else
    if(num<elms()) // remove elements
    {
-      if(_del)for(Int i=elms(); --i>=num; )_del(T[i]);
+      if(_del)for(Int i=elms(); --i>=num; )_del(T[i]); // destroy as the first step
      _elms=num; // set '_elms' after accessing new elements to avoid range assert
    }
 }
@@ -73,11 +73,11 @@ void _Memc::setNumZero(Int num)
       reserve(num);
       Int old_elms=elms(); _elms=num; // set '_elms' before accessing new elements to avoid range assert
       ZeroFast(T[old_elms], elmSize()*UIntPtr(elms()-old_elms));
-      if(_new)for(Int i=old_elms; i<elms(); i++)_new(T[i]);
+      if(_new)for(Int i=old_elms; i<elms(); i++)_new(T[i]); // create as the last step
    }else
    if(num<elms()) // remove elements
    {
-      if(_del)for(Int i=elms(); --i>=num; )_del(T[i]);
+      if(_del)for(Int i=elms(); --i>=num; )_del(T[i]); // destroy as the first step
      _elms=num; // set '_elms' after accessing new elements to avoid range assert
    }
 }
@@ -85,20 +85,20 @@ void _Memc::setNum(Int num, Int keep)
 {
    MAX(num, 0);
    Clamp(keep, 0, Min(elms(), num));
-   if(_del)for(Int i=elms(); --i>=keep; )_del(T[i]); // delete unkept elements
+   if(_del)for(Int i=elms(); --i>=keep; )_del(T[i]); // delete unkept elements, destroy as the first step
    if(Greater(num, maxElms())) // resize memory, num>maxElms()
    {
      _elms=keep; // set '_elms' before 'reserve' to copy only 'keep' elements
       reserve(num);
    }
   _elms=num; // set '_elms' before accessing new elements to avoid range assert
-   if(_new)for(Int i=keep; i<elms(); i++)_new(T[i]); // create new elements
+   if(_new)for(Int i=keep; i<elms(); i++)_new(T[i]); // create new elements, create as the last step
 }
 void _Memc::setNumZero(Int num, Int keep)
 {
    MAX(num, 0);
    Clamp(keep, 0, Min(elms(), num));
-   if(_del)for(Int i=elms(); --i>=keep; )_del(T[i]); // delete unkept elements
+   if(_del)for(Int i=elms(); --i>=keep; )_del(T[i]); // delete unkept elements, destroy as the first step
    if(Greater(num, maxElms())) // resize memory, num>maxElms()
    {
      _elms=keep; // set '_elms' before 'reserve' to copy only 'keep' elements
@@ -106,7 +106,7 @@ void _Memc::setNumZero(Int num, Int keep)
    }
   _elms=num; // set '_elms' before accessing new elements to avoid range assert
    ZeroFast(_element(keep), elmSize()*UIntPtr(elms()-keep)); // zero new elements, have to use '_element' to avoid out of range errors
-   if(_new)for(Int i=keep; i<elms(); i++)_new(T[i]);  // create new elements
+   if(_new)for(Int i=keep; i<elms(); i++)_new(T[i]); // create new elements, create as the last step
 }
 void _Memc::setNumDiscard(Int num)
 {
@@ -118,16 +118,16 @@ void _Memc::setNumDiscard(Int num)
          clear(); // clear before 'reserve' to skip copying old elements
          reserve(num);
         _elms=num; // set '_elms' before accessing new elements to avoid range assert
-         if(_new)FREPA(T)_new(T[i]); // create new elements
+         if(_new)FREPA(T)_new(T[i]); // create new elements, create as the last step
       }else
       if(num>elms()) // add elements in existing memory
       {
          Int old_elms=elms(); _elms=num; // set '_elms' before accessing new elements to avoid range assert
-         if(_new)for(Int i=old_elms; i<elms(); i++)_new(T[i]);
+         if(_new)for(Int i=old_elms; i<elms(); i++)_new(T[i]); // create as the last step
       }else
     //if(num<elms()) // remove elements, "if" not needed because we already know that "num!=elms && !(num>elms())"
       {
-         if(_del)for(Int i=elms(); --i>=num; )_del(T[i]);
+         if(_del)for(Int i=elms(); --i>=num; )_del(T[i]); // destroy as the first step
         _elms=num; // set '_elms' after accessing new elements to avoid range assert
       }
    }
@@ -152,13 +152,13 @@ Ptr _Memc::NewAt(Int i)
    {
       MoveFast(T[i+1], T[i], UIntPtr(old_elms-i)*elmSize());
    }
-   Ptr elm=T[i]; if(_new)_new(elm); return elm;
+   Ptr elm=T[i]; if(_new)_new(elm); return elm; // create as the last step
 }
 void _Memc::removeLast()
 {
    if(elms())
    {
-      if(_del)_del(T[elms()-1]);
+      if(_del)_del(T[elms()-1]); // destroy as the first step
      _elms--;
    }
 }
@@ -166,7 +166,7 @@ void _Memc::remove(Int i, Bool keep_order)
 {
    if(InRange(i, T))
    {
-      if(_del)_del(T[i]);
+      if(_del)_del(T[i]); // destroy as the first step
       if(i<elms()-1)
       {
          if(keep_order)MoveFast(T[i], T[     i+1], elmSize()*UIntPtr(elms()-1-i));
@@ -181,7 +181,7 @@ void _Memc::removeNum(Int i, Int n, Bool keep_order)
    if(n>0 && InRange(i, T)) // if we want to remove elements and the index fits
    {
       MIN(n, elms()-i); // minimize what we can actually remove
-      if(_del)REPD(j, n)_del(T[i+j]); // delete those elements
+      if(_del)REPD(j, n)_del(T[i+j]); // delete those elements, destroy as the first step
       if(i<elms()-n) // if there are any elements after those being removed
       {
                       if(keep_order)MoveFast(T[i], T[     i+n], elmSize()*UIntPtr(elms()-n-i));else // move all    elements after i(+n) to left

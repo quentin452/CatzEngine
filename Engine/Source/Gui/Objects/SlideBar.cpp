@@ -143,20 +143,20 @@ SlideBar& SlideBar::setLengths(Flt length, Flt length_total)
       T._length      =length;
       T._length_total=length_total;
       T._usable      =(length+EPS<length_total);
-      if(_scroll)_scroll_to=Max(0, Min(_scroll_to, lengthTotal()-T.length())); // adjust current scrolling if any
+      if(_scroll)_scroll_to=Max(0, Min(_scroll_to, maxOffset())); // adjust current scrolling if any
       return setOffset(_offset, false);
    }
    return T;
 }
 SlideBar& SlideBar::set(Flt frac, SET_MODE mode)
 {
-   return setOffset(Sat(frac)*(lengthTotal()-length()), true, mode);
+   return setOffset(Sat(frac)*maxOffset(), true, mode);
 }
 SlideBar& SlideBar::offset(Flt offset, SET_MODE mode)
 {
    return setOffset(offset, true, mode);
 }
-Flt SlideBar::operator()  ()C {Flt d=lengthTotal()-length(); return d ? _offset/d : 0;}
+Flt SlideBar::operator()  ()C {Flt d=maxOffset(); return d ? _offset/d : 0;}
 Flt SlideBar::wantedOffset()C {return _scroll ? _scroll_to : _offset;}
 /******************************************************************************/
 SlideBar& SlideBar::func(void (*func)(Ptr), Ptr user, Bool immediate)
@@ -221,7 +221,7 @@ Flt SlideBar::scrollDelta()C
 SlideBar& SlideBar::setOffset(Flt offset, Bool stop, SET_MODE mode)
 {
    if(stop)_scroll=false;
-   offset=Max(0, Min(offset, lengthTotal()-length()));
+   offset=Max(0, Min(offset, maxOffset()));
    if(T._offset!=offset)
    {
       T._offset=offset;
@@ -234,32 +234,28 @@ SlideBar& SlideBar::scroll(Flt delta, Bool immediate)
 {
    if(immediate)
    {
-      if(_scroll)_scroll_to=Max(0, Min(_scroll_to+delta, lengthTotal()-length())); // adjust current scrolling if any
+      if(_scroll)_scroll_to=Max(0, Min(_scroll_to+delta, maxOffset())); // adjust current scrolling if any
       setOffset(_offset+delta, false); // adjust current offset but without stopping
    }else
    {
       if(_scroll)_scroll_to+=delta        ; // if currently scrolling
       else      {_scroll_to =delta+_offset; _scroll=true;}
-     _scroll_to=Max(0, Min(_scroll_to, lengthTotal()-length()));
+     _scroll_to=Max(0, Min(_scroll_to, maxOffset()));
    }
    return T;
 }
 SlideBar& SlideBar::scrollTo(Flt pos, Bool immediate)
 {
-   Flt min=Max(0, Min(pos, lengthTotal()-length())),
-       max=Max(0, Min(pos, lengthTotal()         ));
-   if(min<_offset         ){_scroll=true ; _scroll_to=min         ;}else
-   if(max>_offset+length()){_scroll=true ; _scroll_to=max-length();}else
-                           {_scroll=false; _scroll_to=_offset     ;}
+   Flt min=Max(0, Min(pos,   maxOffset())         ); if(min<_offset){_scroll=true ; _scroll_to=min    ;}else
+  {Flt max=Max(0, Min(pos, lengthTotal())-length()); if(max>_offset){_scroll=true ; _scroll_to=max    ;}else
+                                                                    {_scroll=false; _scroll_to=_offset;}}
    return immediate ? setOffset(_scroll_to) : T;
 }
 SlideBar& SlideBar::scrollFit(Flt min, Flt max, Bool immediate)
 {
-   min=Max(0, Min(min, lengthTotal()-length()));
-   max=Max(0, Min(max, lengthTotal()         ));
-   if(min<_offset         ){_scroll=true ; _scroll_to=min         ;}else
-   if(max>_offset+length()){_scroll=true ; _scroll_to=max-length();}else
-                           {_scroll=false; _scroll_to=   _offset  ;}
+   min=Max(0, Min(min         , maxOffset())); if(min<_offset){_scroll=true ; _scroll_to=min    ;}else
+  {max=Max(0, Min(max-length(), min        )); if(max>_offset){_scroll=true ; _scroll_to=max    ;}else
+                                                              {_scroll=false; _scroll_to=_offset;}}
    return immediate ? setOffset(_scroll_to) : T;
 }
 SlideBar& SlideBar::scrollEnd(Bool immediate) {return scrollTo(lengthTotal(), immediate);}
@@ -426,7 +422,7 @@ void SlideBar::draw(C GuiPC &gpc)
          // scroll target
          if(_scroll && _usable)
             if(GuiSkin *button_skin=button[SB_MIDDLE].getSkin())
-              if(Flt d=lengthTotal()-length())
+              if(Flt d=maxOffset())
          {
             d=(_scroll_to-_offset)/d;
             Button button_temp; button_temp.create(button[SB_MIDDLE]);

@@ -4,7 +4,7 @@
    CubicFast can be done in linear
 
 /******************************************************************************/
-#define GAMMA_FAST (IN_GAMMA && OUT_GAMMA) // can use fast gamma only if we do both conversions in the shader
+#define FAST_GAMMA (IN_GAMMA && OUT_GAMMA) // can use fast gamma only if we do both conversions in the shader
 #define MAX_0      (!DITHER) // can do Max(0, in !DITHER because dither is always used only for low precision 0..1 RTs so Max is not needed
 /******************************************************************************/
 #include "!Header.h"
@@ -77,7 +77,7 @@ VecH TexLerpRGB(Vec2 t0, Vec2 t1, Flt lu, Flt ru, Flt lb, Flt rb) // ignores alp
 VecH GetColor(VecH col)
 {
 #if IN_GAMMA
-   #if GAMMA_FAST
+   #if FAST_GAMMA
       col.rgb=LinearToSRGBFast(col.rgb);
    #else
       col.rgb=LinearToSRGB(col.rgb);
@@ -88,7 +88,7 @@ VecH GetColor(VecH col)
 VecH4 GetColor(VecH4 col)
 {
 #if IN_GAMMA
-   #if GAMMA_FAST
+   #if FAST_GAMMA
       col.rgb=LinearToSRGBFast(col.rgb);
    #else
       col.rgb=LinearToSRGB(col.rgb);
@@ -242,7 +242,7 @@ VecH4 DrawTexCubicPlus_PS
 #endif
 
 #if OUT_GAMMA
-   #if GAMMA_FAST
+   #if FAST_GAMMA
       col.rgb=SRGBToLinearFast(col.rgb);
    #else
       col.rgb=SRGBToLinear(col.rgb);

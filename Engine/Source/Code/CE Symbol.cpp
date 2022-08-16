@@ -353,26 +353,24 @@ Str Symbol::definition()
    }
    return cppName();
 }
-Str Symbol::funcDefinition(Int highlight)
+void Symbol::funcDefinition(StrEx &sx, Int highlight, C Color *col)
 {
    if(source && InRange(token_index, source->tokens) && type==FUNC)
    {
       Str s=source->getText(def_range.x, def_range.y);
       Int level=0; REPA(s)if(s[i]==')')level--;else if(s[i]=='(')if(!++level){s.clip(i); break;} // remove param list
-      s=source->getText(type_range.x, type_range.y)+' '+s;
-      s+='(';
+      sx+=source->getText(type_range.x, type_range.y)+' '+s;
+      sx+='(';
       FREPA(params)
       {
          Symbol &param=*params[i];
-         if(i)s+=", ";
-         if(i==highlight)s+="[color=F00]";
-         s+=source->getText(param.type_range.x, param.def_range.y);
-         if(i==highlight)s+="[/color]";
+         if(i)sx+=", ";
+         if(i==highlight)sx.color(RED);
+         sx+=source->getText(param.type_range.x, param.def_range.y);
+         if(i==highlight)sx.color(col);
       }
-      s+=')';
-      return s;
-   }
-   return cppName();
+      sx+=')';
+   }else sx+=cppName();
 }
 Str Symbol::comments()
 {
@@ -427,10 +425,9 @@ Str Symbol::comments()
    }
    return S;
 }
-Str Symbol::commentsCode()
+void Symbol::comments(StrEx &sx)
 {
-   Str    comm=comments(); if(comm.is())comm=S+" [color=080]// "+comm+"[/color]";
-   return comm;
+   Str comm=comments(); if(comm.is()){sx.color(Color(0, 128, 0)); sx+=" // "; sx+=comm;}
 }
 /******************************************************************************/
 Symbol* Symbol::Parent()
@@ -519,7 +516,7 @@ Bool Symbol::fullyStatic()
       REPA(funcs)if(!(funcs[i]->modifiers&MODIF_STATIC))return false; // if at least one is not static
       return true;
    }
-   return FlagTest(modifiers, MODIF_STATIC);
+   return FlagOn(modifiers, MODIF_STATIC);
 }
 Bool Symbol::partiallyStatic()
 {
@@ -528,7 +525,7 @@ Bool Symbol::partiallyStatic()
       REPA(funcs)if(funcs[i]->modifiers&MODIF_STATIC)return true; // if at least one is static
       return false;
    }
-   return FlagTest(modifiers, MODIF_STATIC);
+   return FlagOn(modifiers, MODIF_STATIC);
 }
 /******************************************************************************/
 Bool Symbol::isNativeFunc          () {return type==KEYWORD && (T=="sizeof" || T=="typeid" || T=="dynamic_cast" || T=="static_cast" || T=="const_cast" || T=="reinterpret_cast");}
@@ -862,7 +859,7 @@ Bool Symbol::hasNonPrivateBase(Symbol *Class, Memc<Modif> *templates, Bool allow
    REPA(base)
    {
       Modif &b=base[i];
-      if(test_private ? !FlagTest(b.modifiers, MODIF_PRIVATE) : true)
+      if(test_private ? FlagOff(b.modifiers, MODIF_PRIVATE) : true)
       {
          Modif base=b; base.proceedToFinal(templates); if(base->hasNonPrivateBase(Class, &base.templates, true, true, rt))return true;
       }
@@ -875,7 +872,7 @@ Bool Symbol::hasPrivateBase(Symbol *Class, Memc<Modif> *templates, Bool test_pri
    REPA(base)
    {
       Modif base=T.base[i]; base.proceedToFinal(templates);
-      if(test_private ? FlagTest(base.modifiers, MODIF_PRIVATE) : false)
+      if(test_private ? FlagOn(base.modifiers, MODIF_PRIVATE) : false)
       {
          if(base->hasBase(Class, &base.templates, rt))return true;
       }else
@@ -891,7 +888,7 @@ Bool Symbol::hasNonPublicBase(Symbol *Class , Memc<Modif> *templates, Bool test_
    REPA(base)
    {
       Modif base=T.base[i]; base.proceedToFinal(templates);
-      if(test_access ? FlagTest(base.modifiers, MODIF_PRIVATE|MODIF_PROTECTED) : false)
+      if(test_access ? FlagOn(base.modifiers, MODIF_PRIVATE|MODIF_PROTECTED) : false)
       {
          if(base->hasBase(Class, &base.templates, rt))return true;
       }else

@@ -2,8 +2,10 @@
 T1(const_mem_addr TYPE) struct MemcThreadSafe : _MemcThreadSafe // Thread-Safe Continuous Memory Based Container
 {
    // manage
-   MemcThreadSafe& clear(); // remove all elements
-   MemcThreadSafe& del  (); // remove all elements and free helper memory
+   MemcThreadSafe& lockedClear(); // remove all elements                       , container must be locked first using the 'lock' method before using this method
+   MemcThreadSafe& lockedDel  (); // remove all elements and free helper memory, container must be locked first using the 'lock' method before using this method
+   MemcThreadSafe&       clear(); // remove all elements
+   MemcThreadSafe&       del  (); // remove all elements and free helper memory
 
    // get / set
    Int     elms    ()C; // number of elements
@@ -41,6 +43,7 @@ T1(const_mem_addr TYPE) struct MemcThreadSafe : _MemcThreadSafe // Thread-Safe C
    void lockedSwapPopFirst(TYPE &dest,        Bool keep_order=true); // get first element, store it in 'dest' using 'Swap' and remove it from the container, if 'keep_order'=true then moves all elements after i-th to the left (keeping order), container must be locked first using the 'lock' method before using this method
    void lockedSwapPop     (TYPE &dest, Int i, Bool keep_order=true); // get i-th  element, store it in 'dest' using 'Swap' and remove it from the container, if 'keep_order'=true then moves all elements after i-th to the left (keeping order), container must be locked first using the 'lock' method before using this method
    void lockedSwapPop     (TYPE &dest                             ); // get last  element, store it in 'dest' using 'Swap' and remove it from the container                                                                                     , container must be locked first using the 'lock' method before using this method
+   void       swapPop     (TYPE &dest                             ); // get last  element, store it in 'dest' using 'Swap' and remove it from the container
 
    MemcThreadSafe& setNum    (Int num); // set number of elements to 'num'                                                                              , this method may change the memory address of all elements
    MemcThreadSafe& setNumZero(Int num); // set number of elements to 'num', memory of new elements will be first zeroed before calling their constructor, this method may change the memory address of all elements

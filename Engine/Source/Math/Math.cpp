@@ -41,55 +41,6 @@ VecD  ScaleFactorR(C VecD  &vec) {return VecD (ScaleFactorR(vec.x), ScaleFactorR
 Vec4  ScaleFactorR(C Vec4  &vec) {return Vec4 (ScaleFactorR(vec.x), ScaleFactorR(vec.y), ScaleFactorR(vec.z), ScaleFactorR(vec.w));}
 VecD4 ScaleFactorR(C VecD4 &vec) {return VecD4(ScaleFactorR(vec.x), ScaleFactorR(vec.y), ScaleFactorR(vec.z), ScaleFactorR(vec.w));}
 /******************************************************************************/
-void MinMax(C Flt *f, Int elms, Flt &min, Flt &max)
-{
-   if(elms)for(min=max=*f++; --elms; )
-   {
-      Flt r=*f++;
-      if(r<min)min=r;else
-      if(r>max)max=r;
-   }
-}
-void MinMax(C Dbl *f, Int elms, Dbl &min, Dbl &max)
-{
-   if(elms)for(min=max=*f++; --elms; )
-   {
-      Dbl r=*f++;
-      if(r<min)min=r;else
-      if(r>max)max=r;
-   }
-}
-void MinMaxI(C Flt *f, Int elms, Int &min, Int &max)
-{
-   if(elms)
-   {
-      Flt _min, _max;
-     _min=_max=f[0];
-      min= max=  0 ;
-      for(Int i=1; i<elms; i++)
-      {
-         Flt r=f[i];
-         if(r<_min){_min=r; min=i;}else
-         if(r>_max){_max=r; max=i;}
-      }
-   }
-}
-void MinMaxI(C Dbl *f, Int elms, Int &min, Int &max)
-{
-   if(elms)
-   {
-      Dbl _min, _max;
-     _min=_max=f[0];
-      min= max=  0 ;
-      for(Int i=1; i<elms; i++)
-      {
-         Dbl r=f[i];
-         if(r<_min){_min=r; min=i;}else
-         if(r>_max){_max=r; max=i;}
-      }
-   }
-}
-/******************************************************************************/
 Flt Sqrt(Int x) {return (x<=0) ? 0 : SqrtFast(x);}
 Flt Sqrt(Flt x) {return (x<=0) ? 0 : SqrtFast(x);}
 Dbl Sqrt(Dbl x) {return (x<=0) ? 0 : SqrtFast(x);}
@@ -541,15 +492,13 @@ void AdjustValDir(Flt &value, Int dir, Flt change, Flt reset)
 /******************************************************************************/
 void AdjustValBool(Flt &value, Bool on, Flt dv)
 {
-   if(on)value+=dv; // increase
-   else  value-=dv; // decrease
-   SAT(value);      // saturate
+   if(on)MIN(value+=dv, 1); // increase
+   else  MAX(value-=dv, 0); // decrease
 }
 void AdjustValBool(Flt &value, Bool on, Flt inc, Flt dec)
 {
-   if(on)value+=inc; // increase
-   else  value-=dec; // decrease
-   SAT(value);       // saturate
+   if(on)MIN(value+=inc, 1); // increase
+   else  MAX(value-=dec, 0); // decrease
 }
 /******************************************************************************/
 void AdjustValBoolSet(Flt &value, Bool on, Bool set, Flt dv          ) {if(set)value=on;else AdjustValBool(value, on, dv      );} // immediately set or smoothly adjust

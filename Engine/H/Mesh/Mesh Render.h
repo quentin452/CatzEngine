@@ -68,7 +68,7 @@ struct MeshRender // Mesh Renderable (Hardware: contains Vertexes + Triangles)
 
 #if EE_PRIVATE
    Int  triIndSize     ()C {return indBit16() ? SIZE(U16)*3 : SIZE(U32)*3;} // get triangle indexes size
-   Bool storageCompress()C {return FlagTest(_storage, MSHR_COMPRESS);}
+   Bool storageCompress()C {return FlagOn(_storage, MSHR_COMPRESS);}
 
    void        boneRemap(C CMemPtr<Byte, 256> &old_to_new); // remap vertex bone/matrix indexes according to bone 'old_to_new' remap
    void     setUsedBones(Bool (&bones)[256])C;

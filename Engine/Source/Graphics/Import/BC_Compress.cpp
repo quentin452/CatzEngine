@@ -1,6 +1,6 @@
 /******************************************************************************
 
-   Have to keep this as a separate file, so it won't be linked if unused.
+   !! KEEP THIS AS SEPARATE CPP, SO WHEN UNUSED IT WON'T INCREASE BINARY SIZE !!
 
    BC7 - If entire block has the same alpha value, then it's best when that alpha is equal to 255,
       because in that mode, RGB will have more precision.
@@ -45,7 +45,7 @@ static struct BC7ENC16Init
 }BI;
 #endif
 /******************************************************************************/
-struct Data
+struct BCContext
 {
 #if BC_ENC==BC_LIB_ISPC
    union
@@ -60,8 +60,9 @@ struct Data
    Image *dest;
    Bool   bc6;
    Int    thread_blocks, threads;
+   VecI2  size;
 
-   Data(Image &dest)
+   BCContext(Image &dest)
    {
       T.dest=&dest;
       bc6=(dest.hwType()==IMAGE_BC6);
@@ -84,26 +85,26 @@ struct Data
    void init(C Image &src)
    {
       T.src=&src;
-      Int total_blocks=src.lh()/4;
-      threads=Min(total_blocks, ImageThreads.threads1()); // +1 because we will do processing on the caller thread too
+      Int total_blocks=size.y/4;
+      threads  =Min(total_blocks, ImageThreads.threads1()); // +1 because we will do processing on the caller thread too
       thread_blocks=total_blocks/threads;
    }
 };
 /******************************************************************************/
-static void CompressBC67Block(IntPtr elm_index, Data &data, Int thread_index)
+static void CompressBC67Block(IntPtr elm_index, BCContext &data, Int thread_index)
 {
    Int block_start=elm_index*data.thread_blocks, y_start=block_start*4;
 #if BC_ENC==BC_LIB_ISPC
    rgba_surface surf;
    surf.ptr   =ConstCast(data.src->data()+y_start*data.src->pitch());
    surf.stride=data.src->pitch();
-   surf.width =data.src->lw   ();
-   surf.height=((elm_index==data.threads-1) ? data.src->lh()-y_start : data.thread_blocks*4); // last thread must process all remaining blocks
+   surf.width =data.size.x;
+   surf.height=((elm_index==data.threads-1) ? data.size.y-y_start : data.thread_blocks*4); // last thread must process all remaining blocks
    if(data.bc6)CompressBlocksBC6H(&surf, data.dest->data() + block_start*data.dest->pitch(), &data.bc6_settings);
    else        CompressBlocksBC7 (&surf, data.dest->data() + block_start*data.dest->pitch(), &data.bc7_settings);
 #elif BC_ENC==BC_LIB_DIRECTX
-   Int blocks_x=data.src->lw()/4,
-       blocks_y=((elm_index==data.threads-1) ? (data.src->lh()-y_start)/4 : data.thread_blocks); // last thread must process all remaining blocks
+   Int blocks_x=data.size.x/4,
+       blocks_y=((elm_index==data.threads-1) ? (data.size.y-y_start)/4 : data.thread_blocks); // last thread must process all remaining blocks
    REPD(by, blocks_y)
    REPD(bx, blocks_x)
    {
@@ -120,8 +121,8 @@ static void CompressBC67Block(IntPtr elm_index, Data &data, Int thread_index)
       else        DirectX::D3DXEncodeBC7  (data.dest->data() + bx*16 + (by+block_start)*data.dest->pitch(), &dx_rgba[0][0], 0);
    }
 #elif BC_ENC==BC_LIB_BC7ENC16
-   Int blocks_x=data.src->lw()/4,
-       blocks_y=((elm_index==data.threads-1) ? (data.src->lh()-y_start)/4 : data.thread_blocks); // last thread must process all remaining blocks
+   Int blocks_x=data.size.x/4,
+       blocks_y=((elm_index==data.threads-1) ? (data.size.y-y_start)/4 : data.thread_blocks); // last thread must process all remaining blocks
    REPD(by, blocks_y)
    REPD(bx, blocks_x)
    {
@@ -144,23 +145,23 @@ Bool _CompressBC67(C Image &src, Image &dest)
 {
    if(dest.hwType()==IMAGE_BC6 || dest.hwType()==IMAGE_BC7 || dest.hwType()==IMAGE_BC7_SRGB)
    {
-      ImageThreads.init(); Data data(dest);
+      ImageThreads.init(); BCContext data(dest);
       Int src_faces1=src.faces()-1;
       Image temp; // define outside loop to avoid overhead
       REPD(mip, Min(src.mipMaps(), dest.mipMaps()))
       {
-         Int dest_mip_hwW=PaddedWidth (dest.hwW(), dest.hwH(), mip, dest.hwType()),
-             dest_mip_hwH=PaddedHeight(dest.hwW(), dest.hwH(), mip, dest.hwType());
+         data.size.set(PaddedWidth (dest.hwW(), dest.hwH(), mip, dest.hwType()), // operate on mip HW size to process partial and Pow2Padded blocks too
+                       PaddedHeight(dest.hwW(), dest.hwH(), mip, dest.hwType()));
          // to directly read from 'src', we need to match requirements for compressor, which needs:
          Bool read_from_src=((data.bc6 ? src.hwType()==IMAGE_F16_4 : (src.hwType()==IMAGE_R8G8B8A8 || src.hwType()==IMAGE_R8G8B8A8_SRGB)) // IMAGE_F16_4 for BC6 / IMAGE_R8G8B8A8 for BC7
-                         && PaddedWidth (src.hwW(), src.hwH(), mip, src.hwType())==dest_mip_hwW   // src mip width  must be exactly the same as dest mip width
-                         && PaddedHeight(src.hwW(), src.hwH(), mip, src.hwType())==dest_mip_hwH); // src mip height must be exactly the same as dest mip height
+                         && Max(1, src.w()>>mip)>=data.size.x   // src mip valid width  must be at least as dest mip width
+                         && Max(1, src.h()>>mip)>=data.size.y); // src mip valid height must be at least as dest mip height
        C Image &s=(read_from_src ? src : temp);
          REPD(face, dest.faces())
          {
             if(!read_from_src)
             {
-               if(!src.extractNonCompressedMipMapNoStretch(temp, dest_mip_hwW, dest_mip_hwH, 1, mip, (DIR_ENUM)Min(face, src_faces1), true))return false;
+               if(!src.extractNonCompressedMipMapNoStretch(temp, data.size.x, data.size.y, 1, mip, (DIR_ENUM)Min(face, src_faces1), true))return false;
                if(data.bc6){if(temp.hwType()!=IMAGE_F16_4                                         )if(!temp.copyTry(temp, -1, -1, -1,                                     IMAGE_F16_4   ))return false;}
                else        {if(temp.hwType()!=IMAGE_R8G8B8A8 && temp.hwType()!=IMAGE_R8G8B8A8_SRGB)if(!temp.copyTry(temp, -1, -1, -1, dest.sRGB() ? IMAGE_R8G8B8A8_SRGB : IMAGE_R8G8B8A8))return false;}
             }else

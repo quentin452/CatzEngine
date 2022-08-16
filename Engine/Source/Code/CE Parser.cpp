@@ -1421,7 +1421,7 @@ void ReadVarFunc(Symbol *type, Memc<SymbolDef> &symbols, Memc<Token*> &tokens, I
 
    // process var/func
    Int  var_func_def_start=i; // var func definition start, this includes pointers "int |**x"
-   Bool is_friend=FlagTest(group_modifiers, Symbol::MODIF_FRIEND);
+   Bool is_friend=FlagOn(group_modifiers, Symbol::MODIF_FRIEND);
 
    if(space_mode==SPACE_NORMAL    ){if(inside_class && !is_friend)group_modifiers|=Symbol::AccessLevelToModif(start_parent->access_level);}else
    if(space_mode==SPACE_FUNC_PARAM){                              group_modifiers|=Symbol::MODIF_FUNC_PARAM;}

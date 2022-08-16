@@ -1,5 +1,5 @@
 ﻿<Package xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10" xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest" xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10" IgnorableNamespaces="uap mp">
-	<Identity Name="com.esenthel.editor" Publisher="CN=00000000-0000-0000-0000-000000000000" Version="71.0.0.0"/>
+	<Identity Name="com.esenthel.editor" Publisher="CN=00000000-0000-0000-0000-000000000000" Version="72.0.0.0"/>
 	<mp:PhoneIdentity PhoneProductId="00000000-0000-0000-0000-000000000000" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 	<Properties>
 		<DisplayName>Titan Editor</DisplayName>

@@ -115,10 +115,10 @@ void DefaultShaders::init(C Material *material[4], MESH_FLAG mesh_flag, Int lod_
    valid    =true;
  T.heightmap=heightmap;
    materials=1;
-   tex      =FlagTest(mesh_flag, VTX_TEX0 );
-   normal   =FlagTest(mesh_flag, VTX_NRM  );
-   color    =FlagTest(mesh_flag, VTX_COLOR);
-   size     =FlagTest(mesh_flag, VTX_SIZE );
+   tex      =FlagOn(mesh_flag, VTX_TEX0 );
+   normal   =FlagOn(mesh_flag, VTX_NRM  );
+   color    =FlagOn(mesh_flag, VTX_COLOR);
+   size     =FlagOn(mesh_flag, VTX_SIZE );
 
    layout=Layout(*m); bump=BumpMode(*m, mesh_flag); detail=Detail(*m); macro=Macro(*m); reflect=Reflect(*m); emissive=EmissiveMode(*m);
    if(material && material[1]) // && (mesh_flag&VTX_MATERIAL)) we must always return a different shader even when there's no VTX_MATERIAL component, because we need a different shader for multi-material parts that have 'umm', as they operate on 'MultiMaterialShaderDraws' and not 'ShaderDraws', otherwise crash or memory corruption may occur, because 'ShaderBase.shader_index' would point to wrong container
@@ -272,7 +272,7 @@ BLST* DefaultShaders::Blst()C
    )
    {
       BLSTKey key;
-      key.per_pixel =(((Renderer.type()==RT_FORWARD) ? Renderer.forwardPrecision() : true) && bump>SBUMP_ZERO);
+      key.per_pixel   =(((Renderer.type()==RT_FORWARD) ? Renderer.forwardPrecision() : true) && bump>SBUMP_ZERO);
 
       key.bump_mode   =Min(bump, key.per_pixel ? SBUMP_NORMAL : SBUMP_FLAT); // blend light currently supports only up to normal mapping
       key.color       =color;

@@ -88,7 +88,7 @@ struct MeshPart // Mesh Base + Mesh Render
  C MaterialPtr& multiMaterial(Int i)C; // get i-th multi material
 
    MeshPart& heightmap(Bool heightmap, Int lod_index=0); // set as heightmap (use false to disable heightmap mode), 'lod_index'=index of the LOD in the mesh (used to determine quality of the shader)
-   Bool      heightmap()C {return FlagTest(part_flag, MSHP_HEIGHTMAP);} // if this is a heightmap
+   Bool      heightmap()C {return FlagOn(part_flag, MSHP_HEIGHTMAP);} // if this is a heightmap
 
    // transform
    MeshPart& move         (              C Vec &move                               ); //           move
@@ -121,6 +121,8 @@ struct MeshPart // Mesh Base + Mesh Render
    MeshPart& setRandomLeafBending(                  ); // this method will set    unique bending for different leafs (this will only affect mesh parts which have leaf-based material)
    MeshPart& setRandomLeafBending(Flt random_value  ); // this method will set    unique bending for different leafs (this will only affect mesh parts which have leaf-based material), 'random_value'=any random value
    MeshPart& delRandomLeafBending(                  ); // this method will remove unique bending for different leafs
+
+   Bool waitForStream()C; // wait until streaming has finished, false on fail
 
    // draw
       // default drawing, doesn't use automatic Frustum Culling, this doesn't draw the mesh immediately, instead it adds the mesh to a draw list

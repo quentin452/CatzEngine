@@ -97,13 +97,14 @@ void CodeEditor::saveSettings(TextNode &code)
       edit.nodes.New().set("ShowLineNumbers"        , options.line_numbers            ());
       edit.nodes.New().set("HideHorizontalSlidebar" , options.hide_horizontal_slidebar());
       edit.nodes.New().set("AutoHideMenuBar"        , options.auto_hide_menu          ());
+      edit.nodes.New().set("ShowFileTabs"           , options.show_file_tabs          ());
       edit.nodes.New().set("ExportPathMode"         , options.export_path_mode        ());
 
    TextNode &conf=code.nodes.New().setName("Configuration");
       conf.nodes.New().set("Debug", config_debug );
     //conf.nodes.New().set("32Bit", config_32_bit);
     //conf.nodes.New().set("API"  , config_api   );
-      conf.nodes.New().set("EXE"  , (config_exe==EXE_EXE) ? "exe" : (config_exe==EXE_DLL) ? "dll" : (config_exe==EXE_LIB) ? "lib" : (config_exe==EXE_UWP) ? "uwp" : (config_exe==EXE_APK) ? "apk" : (config_exe==EXE_MAC) ? "mac" : (config_exe==EXE_IOS) ? "ios" : (config_exe==EXE_LINUX) ? "linux" : (config_exe==EXE_NS) ? "ns" : (config_exe==EXE_WEB) ? "web" : "");
+      if(auto name=ShortName(config_exe))conf.nodes.New().set("EXE"  , name);
 
    TextNode &sugg=code.nodes.New().setName("SuggestionHistory");
       FREPA(Suggestions)sugg.nodes.New().value=Suggestions[i];
@@ -136,22 +137,23 @@ void CodeEditor::loadSettings(C TextNode &code)
    }
    if(C TextNode *edit=code.findNode("Edit")) // editing settings
    {
-      if(C TextNode *p=edit->findNode("AutocompleteOnEnterOnly"))options.ac_on_enter             .set(p->asBool());
-      if(C TextNode *p=edit->findNode("SimpleMode"             ))options.simple                  .set(p->asBool());
-      if(C TextNode *p=edit->findNode("ImmediateScroll"        ))options.imm_scroll              .set(p->asBool());
-      if(C TextNode *p=edit->findNode("EndOfLineClip"          ))options.eol_clip                .set(p->asBool());
-      if(C TextNode *p=edit->findNode("ShowLineNumbers"        ))options.line_numbers            .set(p->asBool());
-      if(C TextNode *p=edit->findNode("HideHorizontalSlidebar" ))options.hide_horizontal_slidebar.set(p->asBool());
-      if(C TextNode *p=edit->findNode("AutoHideMenuBar"        ))options.auto_hide_menu          .set(p->asBool());
-      if(C TextNode *p=edit->findNode("ExportPathMode"         ))options.export_path_mode        .set(p->asBool());
+      if(C TextNode *p=edit->findNode("AutocompleteOnEnterOnly"))options.ac_on_enter             .set(p->asBool1());
+      if(C TextNode *p=edit->findNode("SimpleMode"             ))options.simple                  .set(p->asBool1());
+      if(C TextNode *p=edit->findNode("ImmediateScroll"        ))options.imm_scroll              .set(p->asBool1());
+      if(C TextNode *p=edit->findNode("EndOfLineClip"          ))options.eol_clip                .set(p->asBool1());
+      if(C TextNode *p=edit->findNode("ShowLineNumbers"        ))options.line_numbers            .set(p->asBool1());
+      if(C TextNode *p=edit->findNode("HideHorizontalSlidebar" ))options.hide_horizontal_slidebar.set(p->asBool1());
+      if(C TextNode *p=edit->findNode("AutoHideMenuBar"        ))options.auto_hide_menu          .set(p->asBool1());
+      if(C TextNode *p=edit->findNode("ShowFileTabs"           ))options.show_file_tabs          .set(p->asBool1());
+      if(C TextNode *p=edit->findNode("ExportPathMode"         ))options.export_path_mode        .set(p->asBool ());
    }
    if(C TextNode *paths=code.findNode("Paths"))
    {
-      if(C TextNode *p=paths->findNode("VisualStudio"      ))setVSPath (p->value); // load VS path before loading project (and parsing 3rd party headers)
-      if(C TextNode *p=paths->findNode("NetBeans"          ))setNBPath (p->value);
-      if(C TextNode *p=paths->findNode("AndroidSDK"        ))setASPath (p->value);
-      if(C TextNode *p=paths->findNode("AndroidNDK"        ))setANPath (p->value);
-      if(C TextNode *p=paths->findNode("JavaDevelopmentKit"))setJDKPath(p->value);
+      if(C TextNode *p=paths->findNode("VisualStudio"      ))setVSPath        (p->value); // load VS path before loading project (and parsing 3rd party headers)
+      if(C TextNode *p=paths->findNode("NetBeans"          ))setNetBeansPath  (p->value);
+      if(C TextNode *p=paths->findNode("AndroidSDK"        ))setAndroidSDKPath(p->value);
+      if(C TextNode *p=paths->findNode("AndroidNDK"        ))setAndroidNDKPath(p->value);
+      if(C TextNode *p=paths->findNode("JavaDevelopmentKit"))setJDKPath       (p->value);
    }
    if(C TextNode *certificates=code.findNode("Certificates"))
    {
@@ -178,19 +180,7 @@ void CodeEditor::loadSettings(C TextNode &code)
       if(C TextNode *p=conf->findNode("Debug"))configDebug(p->asBool());
     //if(C TextNode *p=conf->findNode("32Bit"))config32Bit(p->asBool());
     //if(C TextNode *p=conf->findNode("API"  ))configAPI  (p->asInt ());
-      if(C TextNode *p=conf->findNode("EXE"  ))
-      {
-         if(p->value=="exe"  )configEXE(EXE_EXE  );else
-         if(p->value=="dll"  )configEXE(EXE_DLL  );else
-         if(p->value=="lib"  )configEXE(EXE_LIB  );else
-         if(p->value=="uwp"  )configEXE(EXE_UWP  );else
-         if(p->value=="apk"  )configEXE(EXE_APK  );else
-         if(p->value=="mac"  )configEXE(EXE_MAC  );else
-         if(p->value=="ios"  )configEXE(EXE_IOS  );else
-         if(p->value=="linux")configEXE(EXE_LINUX);else
-         if(p->value=="ns"   )configEXE(EXE_NS   );else
-         if(p->value=="web" || p->value=="html" || p->value=="js")configEXE(EXE_WEB);
-      }
+      if(C TextNode *p=conf->findNode("EXE"  )){REP(EXE_NUM)if(p->value==ShortName(EXE_TYPE(i))){configEXE(EXE_TYPE(i)); break;}}
    }
    if(C TextNode *sugg=code.findNode("SuggestionHistory"))
    {

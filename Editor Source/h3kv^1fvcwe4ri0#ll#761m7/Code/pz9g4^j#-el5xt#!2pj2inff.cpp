@@ -86,7 +86,7 @@ class DetectSimilarTextures : PropWin
    }
    static int ImageLoad(ImageHeader &header, C Str &name)
    {
-      if(GetThreadId()==DST.io_thread_id) // process only on the 'IOThread'
+      if(GetThreadID()==DST.io_thread_id) // process only on the 'IOThread'
       {
          header.mode=IMAGE_SOFT;
          int    shrink=0; for(uint max_size=header.size.max(); max_size>DST.MaxTexSize; max_size/=2)shrink++;
@@ -97,7 +97,7 @@ class DetectSimilarTextures : PropWin
    static bool IOThread(Thread &t) {return DST.ioThread();}
           bool ioThread()
    {
-      io_thread_id=GetThreadId();
+      io_thread_id=GetThreadID();
       Image              img;
       Memt<Threads.Call> calls;
       REPA(proj_texs)

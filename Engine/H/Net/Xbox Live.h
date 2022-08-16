@@ -5,26 +5,23 @@
    In order to use Xbox Live functionality, you need to:
       1. Be a Microsoft Partner - https://partner.microsoft.com/en-us/dashboard
 
-      2. Create an Application - https://partner.microsoft.com/en-US/dashboard/apps/new
+      2. Create an Application - https://partner.microsoft.com/en-us/dashboard/apps-and-games/overview
       3. Enable Xbox Live for it
-         1. Open Application Page on https://partner.microsoft.com/en-us/dashboard
+         1. Open Application Page on https://partner.microsoft.com/en-us/dashboard/apps-and-games/overview
          2. Select "Services \ Xbox Live" in the menu
          3. Enable Xbox Live for Application
       4. Authorize Xbox Live accounts for testing
       5. Publish configuration using the "Test" button
 
-      Full Microsoft documentation here:
-         Creators         - https://docs.microsoft.com/en-us/gaming/xbox-live/get-started/setup-partner-center/live-setup-partner-center-creators
-         Managed Partners - https://docs.microsoft.com/en-us/gaming/xbox-live/get-started/setup-partner-center/live-setup-partner-center-partners
+      Full Microsoft documentation here - https://docs.microsoft.com/en-us/gaming/gdk/_content/gc/live/get-started/live-getstarted-nav
 
-      6. Set Xbox Live Sandbox ID in the Windows Device Portal - https://docs.microsoft.com/en-us/gaming/xbox-live/test-release/sandboxes/live-sandboxes-creators#windows-device-portal
+      6. Set Xbox Live Sandbox ID in the Windows Device Portal - https://docs.microsoft.com/en-us/windows/uwp/debug-test-perf/device-portal-desktop#set-up-windows-device-portal-on-a-desktop-device
 
       7. Configure your Application in Engine Editor
          1. Double-click your Application Element in the Project to open its properties
          2. Fill out the "Microsoft" and "XboxLive" fields (you can use "Get" buttons to navigate to Microsoft website where you can obtain these values)
 
    Please note that some Xbox Live functionality is limited depending on the type of your Microsoft Partner account:
-      https://docs.microsoft.com/en-us/gaming/xbox-live/get-started/join-dev-program/live-feature-comparison-table
       Creators                   - everything except Friends and Achievements
       Managed Partners (ID@Xbox) - full support
 

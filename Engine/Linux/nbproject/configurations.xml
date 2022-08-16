@@ -362,6 +362,8 @@
       </logicalFolder>
       <logicalFolder name="Graphics" displayName="Graphics" projectFiles="true">
         <logicalFolder name="Import" displayName="Import" projectFiles="true">
+          <itemPath>../Source/Graphics/Import/ASTC.cpp</itemPath>
+          <itemPath>../Source/Graphics/Import/ASTC_Compress.cpp</itemPath>
           <itemPath>../Source/Graphics/Import/BC.cpp</itemPath>
           <itemPath>../Source/Graphics/Import/BC.h</itemPath>
           <itemPath>../Source/Graphics/Import/BC_Compress.cpp</itemPath>
@@ -377,7 +379,6 @@
           <itemPath>../Source/Graphics/Import/PNG.cpp</itemPath>
           <itemPath>../Source/Graphics/Import/PSD.cpp</itemPath>
           <itemPath>../Source/Graphics/Import/PVRTC.cpp</itemPath>
-          <itemPath>../Source/Graphics/Import/PVRTC.h</itemPath>
           <itemPath>../Source/Graphics/Import/PVRTC_Compress.cpp</itemPath>
           <itemPath>../Source/Graphics/Import/TGA.cpp</itemPath>
           <itemPath>../Source/Graphics/Import/TIF.cpp</itemPath>
@@ -579,6 +580,7 @@
         <itemPath>../Source/Misc/String.cpp</itemPath>
         <itemPath>../Source/Misc/Thread.cpp</itemPath>
         <itemPath>../Source/Misc/Timer.cpp</itemPath>
+        <itemPath>../Source/Misc/Translation.cpp</itemPath>
         <itemPath>../Source/Misc/Video.cpp</itemPath>
         <itemPath>../Source/Misc/Windows.cpp</itemPath>
       </logicalFolder>
@@ -1453,6 +1455,13 @@
             tool="1"
             flavor2="0">
       </item>
+      <item path="../Source/Graphics/Import/ASTC.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../Source/Graphics/Import/ASTC_Compress.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="../Source/Graphics/Import/BC.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Graphics/Import/BC.h" ex="false" tool="3" flavor2="0">
@@ -1491,8 +1500,6 @@
             ex="false"
             tool="1"
             flavor2="0">
-      </item>
-      <item path="../Source/Graphics/Import/PVRTC.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../Source/Graphics/Import/PVRTC_Compress.cpp"
             ex="false"
@@ -1937,6 +1944,8 @@
       <item path="../Source/Misc/Thread.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Misc/Timer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../Source/Misc/Translation.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Misc/Video.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -2863,6 +2872,13 @@
             tool="1"
             flavor2="0">
       </item>
+      <item path="../Source/Graphics/Import/ASTC.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../Source/Graphics/Import/ASTC_Compress.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="../Source/Graphics/Import/BC.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Graphics/Import/BC.h" ex="false" tool="3" flavor2="0">
@@ -2901,8 +2917,6 @@
             ex="false"
             tool="1"
             flavor2="0">
-      </item>
-      <item path="../Source/Graphics/Import/PVRTC.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../Source/Graphics/Import/PVRTC_Compress.cpp"
             ex="false"
@@ -3347,6 +3361,8 @@
       <item path="../Source/Misc/Thread.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Misc/Timer.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../Source/Misc/Translation.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Misc/Video.cpp" ex="false" tool="1" flavor2="0">
       </item>

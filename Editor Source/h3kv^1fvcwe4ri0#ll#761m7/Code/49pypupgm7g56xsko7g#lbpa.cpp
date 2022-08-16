@@ -84,22 +84,18 @@ class ImageConvert : SrcDest // src and dest files
    static bool SkipOptimize(int &type, DateTime &time) // skip formats which are slow to convert
    {
       if(PublishSkipOptimize())
-         if(type==IMAGE_BC6 || type==IMAGE_BC7      || type==IMAGE_PVRTC1_2      || type==IMAGE_PVRTC1_4      || type==IMAGE_ETC2_R      || type==IMAGE_ETC2_RG      || type==IMAGE_ETC2_RGB      || type==IMAGE_ETC2_RGBA1      || type==IMAGE_ETC2_RGBA
-                            || type==IMAGE_BC7_SRGB || type==IMAGE_PVRTC1_2_SRGB || type==IMAGE_PVRTC1_4_SRGB || type==IMAGE_ETC2_R_SIGN || type==IMAGE_ETC2_RG_SIGN || type==IMAGE_ETC2_RGB_SRGB || type==IMAGE_ETC2_RGBA1_SRGB || type==IMAGE_ETC2_RGBA_SRGB)
+         if(InRange(type, IMAGE_TYPES) && ImageTI[type].compressed) // if compressed
+            if(type<IMAGE_BC1 || type>IMAGE_BC5_SIGN) // BC1..BC5 compression is fast, so no need to skip
       {
-         type=-1; time.decDay(); return true; // use default type and set previous date, so the file will be regenerated next time
+         type=-1; time.decDay(); return true; // use original type and set previous date, so the file will be regenerated next time
       }
       return false;
    }
 
-   void process(C bool *stop=null)C
+   void process()C
    {
       DateTime time=T.time; if(!time.valid())time=FileInfo(src).modify_time_utc; // 'time' could've been empty if the file didn't exist yet at the moment of setting up this object (this can happen for dynamically generated textures)
       int type=T.type; bool skip=SkipOptimize(type, time), pvrtc=(type==IMAGE_PVRTC1_2 || type==IMAGE_PVRTC1_4 || type==IMAGE_PVRTC1_2_SRGB || type==IMAGE_PVRTC1_4_SRGB);
-      SyncLockerEx locker(Lock, pvrtc); // PVRTC texture compression is already multi-threaded and uses a lot of memory, so allow only one at a time
-      if(stop && *stop)return;
-      skip|=SkipOptimize(type, time); // call this again after the 'locker' got unlocked
-      PublishPVRTC pub_pvrtc(pvrtc);
       switch(family)
       {
          case ELM_IMAGE:
@@ -163,7 +159,6 @@ class ImageConvert : SrcDest // src and dest files
          {
             if(skip) // just copy
             {
-               locker.on(); // when just copying then limit to only one thread
                File f; if(f.readTry(src))SafeOverwrite(f, dest, &time);
             }else
             if(C ImagePtr &image=src)
@@ -219,13 +214,6 @@ class PublishResult : ClosableWindow
       activate();
    }
 }
-class PublishPVRTC
-{
-   bool on;
-
-   PublishPVRTC(bool on) : on(on) {if(on)AtomicInc(PublishPVRTCUse);}
-  ~PublishPVRTC(       )          {if(on)AtomicDec(PublishPVRTCUse);}
-}
 enum PUBLISH_STAGE
 {
    PUBLISH_MTRL_SIMPLIFY,
@@ -258,7 +246,7 @@ Memc<ImageConvert>  PublishConvert;
 Memc<Mems<byte>>    PublishFileData; // for file data allocated dynamically
 SyncLock            PublishLock;
 bool                PublishOk, PublishNoCompile, PublishOpenIDE, PublishDataAsPak, PublishDataOnly, PublishProjectPackage;
-int                 PublishAreasLeft, PublishPVRTCUse;
+int                 PublishAreasLeft;
 PUBLISH_STAGE       PublishStage;
 Str                 PublishPath,
                     PublishBinPath, // "Bin/" path (must include tail slash)
@@ -278,19 +266,22 @@ enum DATA_STATE
    DATA_CREATE, // need to be fully recreated
    DATA_UPDATE, // just update
 }
-bool PublishDataNeedOptimized() {return false /*PublishBuildMode==Edit.BUILD_PUBLISH*/;} // never optimize automatically, because for large games with many GB that would require potentially rewriting all data, if user wants to manually optimize, he would have to delete the publish project before publishing
-bool PublishDataNeeded(Edit.EXE_TYPE exe) {return exe==Edit.EXE_UWP || exe==Edit.EXE_APK || exe==Edit.EXE_IOS || exe==Edit.EXE_NS;}
-DATA_STATE PublishDataState() // state of project data
+bool PublishDataNeeded(Edit.EXE_TYPE exe) {return exe==Edit.EXE_UWP || exe==Edit.EXE_APK || exe==Edit.EXE_AAB || exe==Edit.EXE_IOS || exe==Edit.EXE_NS;}
+bool PublishDataNeedOptimized()
 {
-   if(!PublishProjectDataPath.is())return DATA_READY; // if we don't want to create project data pak (no file)
-   if(CompareFile(FileInfoSystem(PublishProjectDataPath).modify_time_utc, CodeEdit.appEmbedSettingsTime())>0) // if existing Pak time is newer than settings (compression/encryption)
+   return (PublishExeType==Edit.EXE_APK || PublishExeType==Edit.EXE_AAB || PublishExeType==Edit.EXE_IOS) && PublishBuildMode==Edit.BUILD_PUBLISH; // optimize only for Android/iOS Publishing, because for large games with many GB that would require potentially rewriting all data, if user wants to manually optimize, he would have to delete the publish project before publishing
+}
+DATA_STATE PublishDataState(MemPtr<PakFileData> files, C Str &pak_name) // state of project data
+{
+   if(!pak_name.is())return DATA_READY; // if we don't want to create project data pak (no file)
+   if(CompareFile(FileInfoSystem(pak_name).modify_time_utc, CodeEdit.appEmbedSettingsTime(PublishExeType))>0) // if existing Pak time is newer than settings (compression/encryption)
    {
       bool need_optimized=PublishDataNeedOptimized(); // test if optimized 
       Memt<DataRangeAbs> used_file_ranges;
-      Pak pak; if(pak.loadEx(PublishProjectDataPath, Publish.cipher(), 0, null, null, need_optimized ? &used_file_ranges : null)==PAK_LOAD_OK)
+      Pak pak; if(pak.loadEx(pak_name, Publish.cipher(), 0, null, null, need_optimized ? &used_file_ranges : null)==PAK_LOAD_OK)
       {
          if(need_optimized && used_file_ranges.elms()!=1)return DATA_CREATE; // needs to be optimized, so fully recreate
-         return PakEqual(PublishFiles, pak) ? DATA_READY : DATA_UPDATE;
+         return PakEqual(files, pak) ? DATA_READY : DATA_UPDATE;
       }
    }
    return DATA_CREATE;
@@ -336,6 +327,9 @@ bool StartPublish(C Str &exe_name, Edit.EXE_TYPE exe_type, Edit.BUILD_MODE build
 {
    PublishRes.del();
 
+   if(exe_type==Edit.EXE_AAB && (build_mode==Edit.BUILD_PLAY || build_mode==Edit.BUILD_DEBUG))exe_type=Edit.EXE_APK; // cannot play AAB, only APK
+
+   CodeEdit.clearAuto();
    PublishExePath       =exe_name;
    PublishExeType       =exe_type;
    PublishBuildMode     =build_mode;
@@ -481,7 +475,7 @@ bool StartPublish(C Str &exe_name, Edit.EXE_TYPE exe_type, Edit.BUILD_MODE build
             FCreateDirs(GetPath(PublishProjectDataPath));
          }
       }else
-      if(exe_type==Edit.EXE_APK)
+      if(exe_type==Edit.EXE_APK || exe_type==Edit.EXE_AAB)
       {
          PublishDataAsPak=true; // always set to true because files inside APK (assets) can't be modified by the app, so there's no point in storing them separately
          //if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
@@ -517,13 +511,14 @@ bool StartPublish(C Str &exe_name, Edit.EXE_TYPE exe_type, Edit.BUILD_MODE build
    }
 
    if(build_mode!=Edit.BUILD_PUBLISH) // if there's no need to wait for fully complete data (for example we want to Play/Debug game on mobile which requires PAK creation)
+      if(PublishDataAsPak) // if we're creating a pak
+         if(!(PublishExeType==Edit.EXE_AAB && CodeEdit.appGooglePlayAssetDelivery())) // no asset packs
    {
       Proj.flush(); // flush what we've changed
       SetPublishFiles(PublishFiles, PublishGenerate, PublishConvert, PublishFileData); // detect files for packing
       if(!PublishGenerate.elms() && !PublishConvert.elms()) // if there are no elements to generate and convert
-         if(PublishDataAsPak) // if we're creating a pak
-            if(PublishDataState()==DATA_READY) // if data already available
-               {PublishSuccess(); return true;} // exit already
+         if(PublishDataState(PublishFiles, PublishProjectDataPath)==DATA_READY) // if data already available
+            {PublishSuccess(); return true;} // exit already
    }
 
    StatePublish.set(StateFadeTime);
@@ -539,34 +534,67 @@ void ImageGenerateProcess(ImageGenerate &generate, ptr user, int thread_index)
       {SyncLocker locker(PublishLock); Publish.progress.progress+=1.0/PublishGenerate.elms();}
    }
 }
-void ImageConvertProcess(ImageConvert &convert, ptr user, int thread_index)
+bool SetPak(MemPtr<PakFileData> files, C Str &pak_name)
 {
-   if(!Publish.progress.stop)
-   {
-      ThreadMayUseGPUData();
-      convert.process(&Publish.progress.stop);
-      {SyncLocker locker(PublishLock); Publish.progress.progress+=1.0/PublishConvert.elms();}
-   }
+   DATA_STATE             state=PublishDataState(files, pak_name); if(state==DATA_READY)return true;
+   PROJ_CMPR_PLATFORM       pcp=ProjCompres(PublishExeType);
+   COMPRESS_TYPE compress      =PublishProjectPackage ? ProjectPackageCompression      : Proj.compress_type [pcp];
+   int           compress_level=PublishProjectPackage ? ProjectPackageCompressionLevel : Proj.compress_level[pcp];
+   if(state==DATA_UPDATE && PakReplaceInPlace(files, pak_name, PAK_SET_HASH, Publish.cipher(), compress, compress_level, &PublishErrorMessage, &Publish.progress))return true;
+                     return PakCreate        (files, pak_name, PAK_SET_HASH, Publish.cipher(), compress, compress_level, &PublishErrorMessage, &Publish.progress);
 }
+/******************************************************************************/
 bool PublishFunc(Thread &thread)
 {
    // generate
    PublishStage=PUBLISH_MTRL_SIMPLIFY; Publish.progress.progress=0; WorkerThreads.process1(PublishGenerate, ImageGenerateProcess);
 
    // convert
-   PublishStage=PUBLISH_TEX_OPTIMIZE; Publish.progress.progress=0; WorkerThreads.process1(PublishConvert, ImageConvertProcess);
+   if(PublishConvert.elms()) // image compression is already multi-threaded, so allow only one at a time, this is so we can check for 'stop' after other image finished, and stop immediately, without waiting for this one to be processed
+   {
+      PublishStage=PUBLISH_TEX_OPTIMIZE; Publish.progress.progress=0;
+      ThreadMayUseGPUData();
+      FREPA(PublishConvert) // process in order because of progress
+      {
+         if(Publish.progress.stop)break;
+         PublishConvert[i].process();
+         Publish.progress.progress=flt(i)/PublishConvert.elms();
+      }
+      ThreadFinishedUsingGPUData();
+   }
 
    // pak
    PublishStage=PUBLISH_PUBLISH; Publish.progress.progress=0;
    if(PublishDataAsPak)
    {
-      switch(PublishDataState())
+      if(PublishExeType==Edit.EXE_AAB && CodeEdit.appGooglePlayAssetDelivery()) // asset packs are only for AAB (not APK)
       {
-         case DATA_READY : PublishOk=true; break;
-         case DATA_UPDATE: PublishOk=PakReplaceInPlace(PublishFiles, PublishProjectDataPath, PAK_SET_HASH, Publish.cipher(), PublishProjectPackage ? ProjectPackageCompression : Proj.compress_type, PublishProjectPackage ? ProjectPackageCompressionLevel : Proj.compress_level, &PublishErrorMessage, &Publish.progress); if(PublishOk)break;
-         // !! here no break !! fully recreate if 'PakReplaceInPlace' failed
-         default         : PublishOk=PakCreate        (PublishFiles, PublishProjectDataPath, PAK_SET_HASH, Publish.cipher(), PublishProjectPackage ? ProjectPackageCompression : Proj.compress_type, PublishProjectPackage ? ProjectPackageCompressionLevel : Proj.compress_level, &PublishErrorMessage, &Publish.progress); break;
-      }
+         FDelFile(PublishProjectDataPath); // delete main project data so it won't be included in the APK
+         Str android_path=CodeEdit.androidPath(); if(!android_path.is()){PublishErrorMessage="Invalid 'androidPath'"; return false;} android_path.tailSlash(true);
+         const int           max_size=500<<20; // 500 MB (there's 512 MB limit for each PAK, so keep a little smaller because of PAK header) - https://developer.android.com/guide/playcore/asset-delivery
+               long        split_size=0;
+         Memt<PakFileData> split;
+         CodeEdit.android_asset_packs=0;
+         for(int i=0; ; i++)
+         {
+          C PakFileData *pfd=PublishFiles.addr(i);
+            long pfd_size=(pfd ? pfd.data.size() : 0);
+            if(  pfd_size>=max_size){PublishErrorMessage=S+"File too big:\n"+pfd.name; return false;} // a single file cannot be bigger than asset pack
+            if(!pfd || split_size+pfd_size>max_size) // if reached the end, or adding this file would break the limit
+            {
+               if(split.elms()) // have any data
+               {
+                  Str pack_name=S+"Data"+CodeEdit.android_asset_packs,
+                      pack_path=android_path+pack_name+"/src/main/assets/";
+                  FCreateDirs(pack_path);
+                  if(!SetPak(split, pack_path+pack_name+".pak"))return false; // !! FILE NAMES MUST BE UNIQUE BECAUSE ANDROID GRADLE WILL COMPLAIN IF THERE ARE MULTIPLE FILES WITH SAME NAMES ACROSS DIFFERENT ASSET PACKS !!
+                  split.clear(); split_size=0; CodeEdit.android_asset_packs++;
+               }
+               if(!pfd){PublishOk=true; break;} // finished
+            }
+            split.add(*pfd); split_size+=pfd_size;
+         }
+      }else PublishOk=SetPak(PublishFiles, PublishProjectDataPath);
    }else
    {
       Memc<Str> dest_paths;
@@ -605,19 +633,19 @@ class Texture
    }
    UID                            id; // texture id
    Edit.Material.TEX_QUALITY quality=Edit.Material.LOW;
-   byte                     downsize=0, // downsize
+   byte                     downsize=MaxMaterialDownsize-1, // downsize
                             channels=3, // assume RGB by default (no alpha used)
                                flags=0;
 
-   Texture& downSize(int size) {MAX(downsize, size); return T;}
+   Texture& downSize(int size) {MIN(downsize, size); return T;}
    
    Texture& usesAlpha() {channels=4; return T;}
    Texture& normal   () {channels=2; flags|=SIGN; return T;}
 
-   bool sRGB      ()C {return FlagTest(flags, SRGB      );}   Texture& sRGB      (bool on) {FlagSet(flags, SRGB      , on); return T;}
-   bool sign      ()C {return FlagTest(flags, SIGN      );}   Texture& sign      (bool on) {FlagSet(flags, SIGN      , on); return T;}
-   bool dynamic   ()C {return FlagTest(flags, DYNAMIC   );}   Texture& dynamic   (bool on) {FlagSet(flags, DYNAMIC   , on); return T;}
-   bool regenerate()C {return FlagTest(flags, REGENERATE);}   Texture& regenerate(bool on) {FlagSet(flags, REGENERATE, on); return T;}
+   bool sRGB      ()C {return FlagOn(flags, SRGB      );}   Texture& sRGB      (bool on) {FlagSet(flags, SRGB      , on); return T;}
+   bool sign      ()C {return FlagOn(flags, SIGN      );}   Texture& sign      (bool on) {FlagSet(flags, SIGN      , on); return T;}
+   bool dynamic   ()C {return FlagOn(flags, DYNAMIC   );}   Texture& dynamic   (bool on) {FlagSet(flags, DYNAMIC   , on); return T;}
+   bool regenerate()C {return FlagOn(flags, REGENERATE);}   Texture& regenerate(bool on) {FlagSet(flags, REGENERATE, on); return T;}
 
    static int CompareTex(C Texture &tex, C UID &tex_id) {return Compare(tex.id, tex_id);}
 }
@@ -631,17 +659,19 @@ Texture* GetTexture(MemPtr<Texture> textures, C UID &tex_id)
    }
    return null;
 }
-void AddPublishFiles(Memt<Elm*> &elms, MemPtr<PakFileData> files, Memc<ImageGenerate> &generate, Memc<ImageConvert> &convert)
+void AddPublishFiles(Memt<Elm*> &elms, MemPtr<PakFileData> files, Memc<ImageGenerate> &generate, Memc<ImageConvert> &convert, Edit.EXE_TYPE exe_type)
 {
+   if(!elms.elms())return;
+
    Memx<Texture> publish_texs; // textures to be published, need to use Memx because below pointers are stored
 
- C bool android=(PublishExeType==Edit.EXE_APK),
-            iOS=(PublishExeType==Edit.EXE_IOS),
-            uwp=(PublishExeType==Edit.EXE_UWP),
-            web=(PublishExeType==Edit.EXE_WEB),
-             ns=(PublishExeType==Edit.EXE_NS ),
-         mobile=(android || iOS || ns),
-  mtrl_simplify=Proj.materialSimplify(PublishExeType);
+ C bool android=(exe_type==Edit.EXE_APK || exe_type==Edit.EXE_AAB),
+            iOS=(exe_type==Edit.EXE_IOS),
+            uwp=(exe_type==Edit.EXE_UWP),
+            web=(exe_type==Edit.EXE_WEB),
+             ns=(exe_type==Edit.EXE_NS ),
+           mtrl_simplify=Proj.materialSimplify(exe_type);
+   TEX_SIZE_PLATFORM tsp=ProjTexSize          (exe_type);
 
    // elements
    FREPA(elms)if(Elm *elm=elms[i])if(ElmPublish(elm.type))
@@ -703,7 +733,7 @@ void AddPublishFiles(Memt<Elm*> &elms, MemPtr<PakFileData> files, Memc<ImageGene
             IMAGE_TYPE dest_type=IMAGE_NONE;
             if(android || iOS) // convert for android/ios, desktop/uwp/web/switch already have IMAGE_BC1 chosen
             {
-               dest_type=(android ? IMAGE_ETC2_RGB_SRGB : IMAGE_PVRTC1_4_SRGB);
+               dest_type=IMAGE_ETC2_RGB_SRGB; //(android ? IMAGE_ETC2_RGB_SRGB : IMAGE_PVRTC1_4_SRGB);
                mini_map_formats_path=Proj.formatPath(elm.id, FormatSuffix(dest_type));
                mini_map_formats_path.tailSlash(true);
                FCreateDirs(mini_map_formats_path);
@@ -736,7 +766,7 @@ void AddPublishFiles(Memt<Elm*> &elms, MemPtr<PakFileData> files, Memc<ImageGene
          {
             bool uses_tex_bump=data.usesTexBump(), 
                  uses_tex_glow=data.usesTexGlow();
-            byte downsize  =(mobile ? data.downsize_tex_mobile : 0);
+            byte downsize  =(InRange(tsp, data.tex_downsize) ? data.tex_downsize[tsp] : 0);
             uint flags     =0; // used to set 'dynamic, regenerate'
             UID  base_0_tex=data.base_0_tex,
                  base_1_tex=data.base_1_tex,
@@ -814,9 +844,9 @@ void AddPublishFiles(Memt<Elm*> &elms, MemPtr<PakFileData> files, Memc<ImageGene
          {
             // !! 'GetTexture' needs to be called always because it adds texture to publish list !!
             // #MaterialTextureLayoutWater
-            Texture *t0; if(t0=GetTexture(publish_texs, data.base_0_tex)){t0.sRGB(true); MAX(t0.quality, MinMtrlTexQualityBase0); MAX(t0.quality, data.tex_quality);}
-            Texture *t1; if(t1=GetTexture(publish_texs, data.base_1_tex)){               MAX(t1.quality, MinMtrlTexQualityBase1); t1.normal();}
-            Texture *t2; if(t2=GetTexture(publish_texs, data.base_2_tex)){               MAX(t2.quality, MinMtrlTexQualityBase2); t2.channels=1; t2.sign(true);}
+            Texture *t0; if(t0=GetTexture(publish_texs, data.base_0_tex)){t0.sRGB(true); t0.downSize(0); MAX(t0.quality, MinMtrlTexQualityBase0); MAX(t0.quality, data.tex_quality);}
+            Texture *t1; if(t1=GetTexture(publish_texs, data.base_1_tex)){               t1.downSize(0); MAX(t1.quality, MinMtrlTexQualityBase1); t1.normal();}
+            Texture *t2; if(t2=GetTexture(publish_texs, data.base_2_tex)){               t2.downSize(0); MAX(t2.quality, MinMtrlTexQualityBase2); t2.channels=1; t2.sign(true);}
 
             // check which base textures use Alpha Channel, #MaterialTextureLayoutWater
          }
@@ -854,7 +884,7 @@ void AddPublishFiles(Memt<Elm*> &elms, MemPtr<PakFileData> files, Memc<ImageGene
             if(android || iOS || (uwp && !UWPBC7) || (web && !WebBC7)) // desktop/switch platforms already have the best format chosen during image atlas creation
                if(ElmImageAtlas *data=elm.imageAtlasData())
                   if(data.compress())
-                     if(IMAGE_TYPE dest_type=(android ? IMAGE_ETC2_RGBA_SRGB : iOS ? IMAGE_PVRTC1_4_SRGB : uwp ? IMAGE_BC3_SRGB : IMAGE_BC3_SRGB)) // we assume that atlas images contain transparency
+                     if(IMAGE_TYPE dest_type=((android || iOS) ? IMAGE_ETC2_RGBA_SRGB : iOS ? IMAGE_PVRTC1_4_SRGB : uwp ? IMAGE_BC3_SRGB : IMAGE_BC3_SRGB)) // we assume that atlas images contain transparency
          {
             Str src_name=pfd.data.name,
                dest_name=Proj.formatPath(elm.id, FormatSuffix(dest_type));
@@ -882,7 +912,7 @@ void AddPublishFiles(Memt<Elm*> &elms, MemPtr<PakFileData> files, Memc<ImageGene
          if(elm.type==ELM_PANEL_IMAGE) // panel image
             if(android || iOS || (uwp && !UWPBC7) || (web && !WebBC7)) // desktop/switch platforms already have the best format chosen during image atlas creation
                if(ElmPanelImage *data=elm.panelImageData())
-                  if(IMAGE_TYPE dest_type=(android ? IMAGE_ETC2_RGBA_SRGB : iOS ? IMAGE_PVRTC1_4_SRGB : uwp ? IMAGE_BC3_SRGB : IMAGE_BC3_SRGB)) // we assume that panel images contain transparency
+                  if(IMAGE_TYPE dest_type=((android || iOS) ? IMAGE_ETC2_RGBA_SRGB : iOS ? IMAGE_PVRTC1_4_SRGB : uwp ? IMAGE_BC3_SRGB : IMAGE_BC3_SRGB)) // we assume that panel images contain transparency
          {
             Str src_name=pfd.data.name,
                dest_name=Proj.formatPath(elm.id, FormatSuffix(dest_type));
@@ -909,11 +939,11 @@ void AddPublishFiles(Memt<Elm*> &elms, MemPtr<PakFileData> files, Memc<ImageGene
          int change_type=-1; // sRGB is set below
          if(tex.quality<Edit.Material.FULL) // compress
          {
-            if(android)change_type=((tex.channels==1) ? (tex.sign() ? IMAGE_ETC2_R_SIGN : IMAGE_ETC2_R) : (tex.channels==2) ? (tex.sign() ? IMAGE_ETC2_RG_SIGN : IMAGE_ETC2_RG) : (tex.channels==3                   ) ? IMAGE_ETC2_RGB : IMAGE_ETC2_RGBA);else
-            if(iOS    )change_type=((tex.channels==1) ? (tex.sign() ? IMAGE_ETC2_R_SIGN : IMAGE_ETC2_R) : (tex.channels==2) ? (tex.sign() ? IMAGE_ETC2_RG_SIGN : IMAGE_ETC2_RG) : (tex.quality >=Edit.Material.MEDIUM) ? IMAGE_PVRTC1_4 : IMAGE_PVRTC1_2 );else
-            if(uwp    )change_type=((!UWPBC7 && tex.channels>=3) ? ((tex.channels==4) ? IMAGE_BC3 : IMAGE_BC1) : -1);else // here we only want to disable BC7
-            if(web    )change_type=((tex.channels<=2) ? -1 : WebBC7 ? ((tex.channels==4 || tex.quality>Edit.Material.MEDIUM) ?        -1 : IMAGE_BC1)  // texture could have alpha, however if we're not using it, then reduce to BC1 because it's only 4-bit per pixel
-                                                                    :   tex.channels==4                                      ? IMAGE_BC3 : IMAGE_BC1); // if BC7 not supported for Web, then use BC3
+            if(android || iOS)change_type=((tex.channels==1) ? (tex.sign() ? IMAGE_ETC2_R_SIGN : IMAGE_ETC2_R) : (tex.channels==2) ? (tex.sign() ? IMAGE_ETC2_RG_SIGN : IMAGE_ETC2_RG) : (tex.channels==3                   ) ? IMAGE_ETC2_RGB : IMAGE_ETC2_RGBA);else
+            if(iOS           )change_type=((tex.channels==1) ? (tex.sign() ? IMAGE_ETC2_R_SIGN : IMAGE_ETC2_R) : (tex.channels==2) ? (tex.sign() ? IMAGE_ETC2_RG_SIGN : IMAGE_ETC2_RG) : (tex.quality >=Edit.Material.MEDIUM) ? IMAGE_PVRTC1_4 : IMAGE_PVRTC1_2 );else
+            if(uwp           )change_type=((!UWPBC7 && tex.channels>=3) ? ((tex.channels==4) ? IMAGE_BC3 : IMAGE_BC1) : -1);else // here we only want to disable BC7
+            if(web           )change_type=((tex.channels<=2) ? -1 : WebBC7 ? ((tex.channels==4 || tex.quality>Edit.Material.MEDIUM) ?        -1 : IMAGE_BC1)  // texture could have alpha, however if we're not using it, then reduce to BC1 because it's only 4-bit per pixel
+                                                                           :   tex.channels==4                                      ? IMAGE_BC3 : IMAGE_BC1); // if BC7 not supported for Web, then use BC3
             if(change_type>=0 && tex.sRGB())change_type=ImageTypeIncludeSRGB((IMAGE_TYPE)change_type); // set sRGB
          }
 
@@ -962,7 +992,7 @@ void SetPublishFiles(Memb<PakFileData> &files, Memc<ImageGenerate> &generate, Me
    if(PublishProjectPackage) // publish as *.ProjectPackage
    {
       Project temp; temp=Proj;
-      Memc<UID> remove; Proj.floodRemoved(remove, Proj.root); remove.sort(Compare);
+      Memc<UID> remove; Proj.floodRemoved(remove, Proj.root); remove.sort();
       REPA(temp.elms)if(remove.binaryHas(temp.elms[i].id))temp.elms.removeValid(i, true);
       temp.getTextures(temp.texs); // keep only used textures
 
@@ -1150,19 +1180,16 @@ void SetPublishFiles(Memb<PakFileData> &files, Memc<ImageGenerate> &generate, Me
       }
 
       // Project files
+      Memt<Elm*> elms;
       if(CodeEdit.appPublishProjData() || PublishDataOnly)
       {
-         Memt<Elm*> elms; FREPA(Proj.elms) // process in order
-         {
-            Elm &elm=Proj.elms[i]; if(elm.finalPublish() && ElmPublish(elm.type))elms.add(&elm);
-         }
-         AddPublishFiles(elms, files, generate, convert);
+         Proj.getPublishElms(elms, PublishExeType);
       }else
-      if(PublishExeType==Edit.EXE_UWP || PublishExeType==Edit.EXE_APK || PublishExeType==Edit.EXE_IOS || PublishExeType==Edit.EXE_NS) // for Windows New, Android, iOS and Switch, if Project data is not included, then include only App data
+      if(PublishExeType==Edit.EXE_UWP || PublishExeType==Edit.EXE_APK || PublishExeType==Edit.EXE_AAB || PublishExeType==Edit.EXE_IOS || PublishExeType==Edit.EXE_NS) // for Windows New, Android, iOS and Switch, if Project data is not included, then include only App data
       {
-         Memt<Elm*> elms; Proj.getActiveAppElms(elms);
-         AddPublishFiles(elms, files, generate, convert);
+         Proj.getActiveAppElms(elms, PublishExeType);
       }
+      AddPublishFiles(elms, files, generate, convert, PublishExeType);
    }
 }
 void GetPublishFiles(Memb<PakFileData> &files) // this is to be called outside of publishing just to get a list of files
@@ -1179,6 +1206,7 @@ void GetPublishFiles(Memb<PakFileData> &files) // this is to be called outside o
 /******************************************************************************/
 bool InitPublish()
 {
+   App.stayAwake(AWAKE_SYSTEM);
    PublishOk=false;
    PublishErrorMessage.clear();
    Publish.progress.reset();
@@ -1199,9 +1227,11 @@ void ShutPublish()
    PublishConvert     .del();
    PublishFileData    .del();
    PublishSkipOptimize.del();
+   CodeEdit.clearAuto(); // clear needed for next 'makeAuto'
    Proj.resume();
    App.stateNormal().flash();
    if(!PublishOk)Gui.msgBox("Publishing Failed", PublishErrorMessage);
+   App.stayAwake(AWAKE_OFF);
 }
 /******************************************************************************/
 void PublishSuccess(C Str &open_path, C Str &text)
@@ -1225,7 +1255,7 @@ void PublishSuccess()
    }else
    {
       Str text;
-      if(PublishProjectDataPath.is())text=S+(PublishProjectPackage ? "Project size: " : "Project data size: ")+FileSize(FSize(PublishProjectDataPath));
+      if(PublishProjectDataPath.is())text=S+(PublishProjectPackage ? "Project size: " : "Project data size: ")+SizeBytes(FSize(PublishProjectDataPath));
       else                           text="Publishing succeeded";
       PublishSuccess(PublishPath, text);
    }
@@ -1252,7 +1282,7 @@ bool UpdatePublish()
          {
             WorldEdit.flush(); // flush any world areas that were built
             SetPublishFiles(PublishFiles, PublishGenerate, PublishConvert, PublishFileData);
-            UpdateThread.create(PublishFunc);
+            UpdateThread.create(PublishFunc, null, 0, false, "Editor.Publish");
          }
       }else
       if(!UpdateThread.active()) // finished
@@ -1281,7 +1311,7 @@ void DrawPublish()
    D.clear(BackgroundColor());
    if(Publish.progress.stop)
    {
-      D.text(0, 0.05, (PublishPVRTCUse ? "Waiting for PVRTC to finish" : "Stopping"));
+      D.text(0, 0.05, "Stopping");
    }else
    {
       if(!UpdateThread.created())
@@ -1292,8 +1322,8 @@ void DrawPublish()
          Str text; switch(PublishStage)
          {
             case PUBLISH_MTRL_SIMPLIFY: text="Simplifying Materials"; break;
-            case PUBLISH_TEX_OPTIMIZE : text=(PublishSkipOptimize() ? PublishPVRTCUse ? "Waiting for PVRTC to finish" : "Copying Textures" : "Optimizing Textures"); break;
-            default                   : text=(PublishProjectPackage ? "Compressing Project" : "Publishing Project"); break;
+            case PUBLISH_TEX_OPTIMIZE : text=(PublishSkipOptimize() ? "Copying Textures"    : "Optimizing Textures"); break;
+            default                   : text=(PublishProjectPackage ? "Compressing Project" : "Publishing Project" ); break;
          }
          D.text(0, 0.05, text);
       }
@@ -1303,10 +1333,6 @@ void DrawPublish()
       gpc.offset.zero();
       UpdateProgress.draw(gpc);
       D.clip();
-   }
-   if(PublishPVRTCUse)
-   {
-      TextStyleParams ts; ts.align.set(0, -1); ts.size=0.05; D.text(ts, Gui.desktop().rect(), "Compressing PVRTC (iOS Texture Format) - this may take a while.\nMaking sure textures look beautiful and use little space.");
    }
    Gui.draw();
    Draw();

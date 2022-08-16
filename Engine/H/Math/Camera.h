@@ -75,6 +75,14 @@ extern   Camera       Cam; // default camera, you can use it to manipulate the c
 extern C Camera ActiveCam; // active  camera in read-only mode, this object is always changed when you activate any 'Camera' using its 'set' method, when rendering mirror/reflections, its 'matrix' temporarily gets adjusted
 /******************************************************************************/
 //
+// Following functions work on active viewport
+//
+Vec2 PosToScreen(C Vec  &pos, C MatrixM &camera_matrix              ); // convert 3D position to 2D screen position
+Vec2 PosToScreen(C VecD &pos, C MatrixM &camera_matrix              ); // convert 3D position to 2D screen position
+Bool PosToScreen(C Vec  &pos, C MatrixM &camera_matrix, Vec2 &screen); // convert 3D position to 2D screen position, false on fail (point is behind the camera)
+Bool PosToScreen(C VecD &pos, C MatrixM &camera_matrix, Vec2 &screen); // convert 3D position to 2D screen position, false on fail (point is behind the camera)
+
+//
 // Following functions work on active viewport and 'ActiveCam' camera:
 //
 Vec2 PosToScreen (C Vec  &pos              ); // convert 3D position to 2D screen position

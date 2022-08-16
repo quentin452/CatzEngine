@@ -77,6 +77,8 @@ Bool DecompressHeader(File &src, COMPRESS_TYPE &type, ULong &compressed_size, UL
 Bool _OldDecompressHeader(File &src, COMPRESS_TYPE &type, ULong &compressed_size, ULong &decompressed_size);
 Bool _OldDecompress      (File &src, File &dest, Bool memory=false, DataCallback *callback=null);
 
+UInt ZSTDDecompressBufSize(Long decompressed_size);
+
 const Int MaxCmpUIntVSize =5,
           MaxCmpULongVSize=9;
 #endif
@@ -85,9 +87,9 @@ struct ZipFile
 {
    Str      name             ; // full name (including paths)
    Bool     compressed       ; // if file is compressed
-   UInt     uncompressed_size, // size of  uncompressed data
-              compressed_size, // size of    compressed data (if file is not compressed, it's equal to 'uncompressed_size')
-            crc32            ; // CRC32 hash
+   ULong    uncompressed_size, // size of  uncompressed data
+              compressed_size; // size of    compressed data (if file is not compressed, it's equal to 'uncompressed_size')
+   UInt     crc32            ; // CRC32 hash
    Long     offset           ; // data offset in ZIP file
    DateTime modify_time_local; // modification time (in local time zone of the ZIP creator)
 

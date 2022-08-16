@@ -78,6 +78,7 @@ struct MouseClass // Mouse Input
  C VecI2& desktopPos()C {return _desktop_pixeli    ;} // cursor position in System      Desktop in Pixel Coordinates
  C VecI2& pixelDelta()C {return   _delta_pixeli_clp;} // cursor position delta                  in Pixel Coordinates
 
+   Bool hardware()C {return _hardware ;} // if hardware mouse is available
    Bool detected()C {return _detected ;} // if mouse was detected in the system
    Bool onClient()C {return _on_client;} // if mouse is currently on top of the application window client area (and not occluded by other windows)
 
@@ -143,7 +144,7 @@ struct MouseClass // Mouse Input
 private:
 #endif
    BS_FLAG          _button[8];
-   Bool             _selecting, _dragging, _first, _detected, _on_client, _visible, _clip_rect_on, _clip_window, _freeze, _frozen, _action, _want_cur_hw, _locked, _swapped;
+   Bool             _selecting, _dragging, _first, _hardware, _detected, _on_client, _visible, _clip_rect_on, _clip_window, _freeze, _frozen, _action, _want_cur_hw, _locked, _swapped;
    Int              _cur;
    Flt              _speed;
    Dbl              _start_time, _wheel_time;

@@ -2,7 +2,7 @@
 #include "stdafx.h"
 namespace EE{
 /******************************************************************************/
-#define SELECT_DIST_2 Sqr(0.013f)
+#define SELECT_DIST_2 Sqr(0.01f)
 #define SPEED         0.005f
 #define BUF_BUTTONS   256
 
@@ -158,7 +158,7 @@ MouseClass::MouseClass()
 {
 #if 0 // there's only one 'MouseClass' global 'Ms' and it doesn't need clearing members to zero
    REPAO(_button)=0;
-  _selecting=_dragging=_first=_detected=_on_client=_clip_rect_on=_clip_window=_freeze=_frozen=_action=_locked=_swapped=false;
+  _selecting=_dragging=_first=_hardware=_detected=_on_client=_clip_rect_on=_clip_window=_freeze=_frozen=_action=_locked=_swapped=false;
   _start_time=_wheel_time=0;
   _pos=_delta_rel_sm=_delta_clp=_delta_rel=_start_pos=_move_offset=_wheel=_wheel_f=0;
   _window_pixeli=_desktop_pixeli=_delta_pixeli_clp=_wheel_i=0;
@@ -179,6 +179,9 @@ MouseClass::MouseClass()
   _button_name[5]="Mouse6";
   _button_name[6]="Mouse7";
   _button_name[7]="Mouse8";
+#if SWITCH
+  _on_client=true; // #NintendoSwitchRes
+#endif
 }
 void MouseClass::del()
 {
@@ -214,34 +217,7 @@ void MouseClass::create()
    rid[0].hwndTarget =App.window();
 
    RegisterRawInputDevices(rid, Elms(rid), SIZE(RAWINPUTDEVICE));
-
-   Memt<RAWINPUTDEVICELIST> devices;
-	UINT num_devices=0; GetRawInputDeviceList(null, &num_devices, SIZE(RAWINPUTDEVICELIST));
-again:
-   devices.setNum(num_devices);
-	Int out=GetRawInputDeviceList(devices.data(), &num_devices, SIZE(RAWINPUTDEVICELIST));
-   if(out<0) // error
-   {
-      if(Int(num_devices)>devices.elms())goto again; // need more memory
-      devices.clear();
-   }else
-   {
-      if(out<devices.elms())devices.setNum(out);
-      FREPA(devices)
-      {
-       C RAWINPUTDEVICELIST &device=devices[i];
-         if(device.dwType==RIM_TYPEMOUSE){_detected=true; break;}
-       /*UInt size=0; if(Int(GetRawInputDeviceInfoW(device.hDevice, RIDI_DEVICENAME, null, &size))>=0)
-         {
-            Memt<Char> name; name.setNum(size+1); Int r=GetRawInputDeviceInfoW(device.hDevice, RIDI_DEVICENAME, name.data(), &size);
-            if(r>=0 && size==r && r+1==name.elms())
-            {
-               name.last()='\0'; // in case it's needed
-               Str n=name.data();
-            }
-         }*/
-      }
-   }
+   // detection is done in 'checkMouseKeyboard'
 #elif MS_DIRECT_INPUT
    if(InputDevices.DI) // need to use DirectInput to be able to obtain '_delta_rel'
    if(OK(InputDevices.DI->CreateDevice(GUID_SysMouse, &_device, null)))
@@ -258,7 +234,7 @@ again:
         _device->SetProperty(DIPROP_BUFFERSIZE, &dipdw.diph);
 
          if(MOUSE_MODE==BACKGROUND)_device->Acquire(); // in background mode we always want the mouse to be acquired
-        _detected=true;
+        _hardware=_detected=true; // don't set false in case user called 'Ms.simulate'
          goto ok;
       }
       RELEASE(_device);
@@ -266,9 +242,9 @@ again:
 ok:;
 #endif
 #elif WINDOWS_NEW
-  _detected|=(Windows::Devices::Input::MouseCapabilities().MousePresent>0); // OR in case user called 'Ms.simulate'
-#elif DESKTOP // assume that desktops always have a mouse
-  _detected=true;
+   // detection is done in 'checkMouseKeyboard'
+#elif MAC || LINUX || WEB // FIXME: TODO:
+  _hardware=_detected=true; // don't set false in case user called 'Ms.simulate'
 #endif
 #if LINUX
    // create empty cursor
@@ -294,7 +270,11 @@ ok:;
    }
 #endif
 
+#if SWITCH
+  _desktop_pixeli=_window_pixeli.set(1280/2, 720/2); // NintendoSwitch APIs are always for 1280,720 res #NintendoSwitchRes
+#else
   _desktop_pixeli=_window_pixeli=D.res()/2; // initially set at screen center, in case mouse is unavailable
+#endif
    updatePos(); _delta_pixeli_clp.zero(); // always get position at the start, and clear any pixel delta. This is needed so that further readings of mouse position will properly detect if there was any change, so we can trigger '_detected'. Also initial position is needed in codes below
 
 #if WINDOWS_NEW
@@ -470,7 +450,7 @@ static Bool CanUseHWCursor() {return Ms._cursor && Ms._cursor->_hw.is() && !VR.a
 void MouseClass::resetCursor()
 {
 #if WINDOWS_NEW
-   if(!App.mainThread()){App._callbacks.include(MouseResetCursor); return;} // for Windows New this can be called only on the main thread
+   if(!App.mainThread()){App.includeFuncCall(MouseResetCursor); return;} // for Windows New this can be called only on the main thread
 #endif
 
    Int cur; // -1=system default, 0=hidden, 1=custom hardware
@@ -574,7 +554,6 @@ void MouseClass::_push(Byte b) // !! assumes 'b' is in range !!
    DEBUG_RANGE_ASSERT(b, _button);
    if(!(_button[b]&BS_ON))
    {
-      InputCombo.add(InputButton(INPUT_MOUSE, b));
      _button[b]|=BS_PUSHED|BS_ON;
       if(_cur==b && _first && Time.appTime()<=_start_time+DoubleClickTime+Time.ad())
       {
@@ -588,6 +567,7 @@ void MouseClass::_push(Byte b) // !! assumes 'b' is in range !!
      _cur       =b;
      _start_pos =pos();
      _start_time=Time.appTime();
+      Inputs.New().set(true, INPUT_MOUSE, b);
    }
 }
 void MouseClass::_release(Byte b) // !! assumes 'b' is in range !!
@@ -598,6 +578,7 @@ void MouseClass::_release(Byte b) // !! assumes 'b' is in range !!
       FlagDisable(_button[b], BS_ON      );
       FlagEnable (_button[b], BS_RELEASED);
       if(!selecting() && life()<=0.25f+Time.ad())_button[b]|=BS_TAPPED;
+      Inputs.New().set(false, INPUT_MOUSE, b);
    }
 }
 void MouseClass::push(Byte b)
@@ -619,17 +600,20 @@ void MouseClass::release(Byte b)
 void MouseClass::moveAbs(C Vec2 &screen_d) {move(screen_d/D.scale());}
 void MouseClass::move   (C Vec2 &screen_d)
 {
-   Vec2 pixel_d=D.screenToWindowPixelSize(screen_d); // convert to pixel delta
-  _delta_rel_sm+=pixel_d*_speed; // adjust by speed
-   if(!frozen())
+   if(screen_d.any())
    {
-   #if 1 // pixel align (needed because all Operating Systems internally store mouse position as 'int')
-      pixel_d+=_move_offset; // add what we've accumulated before
-      VecI2 pixel_di=Round(pixel_d); // round to nearest pixel
-     _move_offset=pixel_d-pixel_di; // calculate what we want - what we've got
-      Vec2 screen_d=D.windowPixelToScreenSize(pixel_di); // move by aligned pixel delta
-   #endif
-      pos(pos()+screen_d);
+      Vec2 pixel_d=D.screenToWindowPixelSize(screen_d); // convert to pixel delta
+     _delta_rel_sm+=pixel_d*_speed; // adjust by speed
+      if(!frozen())
+      {
+      #if 1 // pixel align (needed because all Operating Systems internally store mouse position as 'int')
+         pixel_d+=_move_offset; // add what we've accumulated before
+         VecI2 pixel_di=Round(pixel_d); // round to nearest pixel
+        _move_offset=pixel_d-pixel_di; // calculate what we want - what we've got
+         Vec2 screen_d=D.windowPixelToScreenSize(pixel_di); // move by aligned pixel delta
+      #endif
+         pos(pos()+screen_d);
+      }
    }
 }
 void MouseClass::scroll(C Vec2 &d) {_wheel+=d;}
@@ -701,6 +685,7 @@ void MouseClass::updatePos()
      _desktop_pixeli     =desktop_pixeli;
       // '_on_client' is managed through 'EnterNotify' and 'LeaveNotify' events
    }
+#elif SWITCH  // NintendoSwitch APIs are always for 1280,720 res #NintendoSwitchRes, so can't compare with 'D.res', instead always set to true in constructor
 #else
    // desktop and window pos obtained externally in main loop
   _on_client=(InRange(_window_pixeli.x, D.resW()) && InRange(_window_pixeli.y, D.resH()));
@@ -742,8 +727,6 @@ void MouseClass::update()
    }
 #endif
 
-  _delta_rel*=_speed;
-
    updatePos();
 #if WINDOWS_NEW
    if(App.active() && (_frozen || _clip_rect_on || _clip_window))clipUpdate();
@@ -755,7 +738,7 @@ void MouseClass::update()
 #if WINDOWS_NEW || WEB
    if(_locked) // for WINDOWS_NEW and WEB when '_locked', the '_window_pixeli' never changes so we need to manually adjust the '_pos' based on '_delta_rel'
    {
-      if(!_frozen)_pos+=_delta_rel*(D.size().max()*0.7f); // make movement speed dependent on the screen size
+      if(!_frozen)_pos+=D.windowPixelToScreenSize(_delta_rel);
 
       // clip
       if(_clip_rect_on)_pos&=_clip_rect;else
@@ -770,14 +753,22 @@ void MouseClass::update()
    }
 
                 _delta_clp   =_pos-old; // get delta = new-old
+                _delta_rel  *=_speed;
                 _delta_rel_sm=_sv_delta.update(_delta_rel); // yes, mouse delta smoothing is needed, especially for low fps (for example ~40), without this, player camera rotation was not smooth
    if(Time.ad())_vel         =_sv_vel  .update(_delta_clp/Time.ad(), Time.ad()); // use '_delta_clp' to match exact cursor position
 
    // dragging
    if(b(_cur))
    {
-      if(!selecting() && Dist2(pos(), startPos())*Sqr(D.scale())>=SELECT_DIST_2     )_selecting=true; // skip 'D.smallSize' because mouse input is independent on screen size
-      if(!dragging () && selecting() &&                   life()>=DragTime+Time.ad())_dragging =true;
+      if(!dragging()) // since dragging can be enabled only if selecting, then check this first to allow skipping check for selecting
+      {
+      #if 1 // screen units
+         if(  !selecting() && Dist2(pos(), startPos())*Sqr(D.scale()*(D.smallSize() ? 0.5f : 1.0f))>=SELECT_DIST_2     )_selecting=true;
+      #else // pixel  units
+         if(  !selecting() &&                 D.screenToWindowPixelSize(pos()-startPos()).length2()>=Sqr(3.5)          )_selecting=true;
+      #endif
+         if(/*!dragging () && already checked above*/ selecting() &&                         life()>=DragTime+Time.ad())_dragging =true;
+      }
    }else
    if(!br(_cur))_dragging=_selecting=false; // disable dragging only if button not on and not released, to allow detection inside the game for "release after dragging"
 

@@ -1,5 +1,6 @@
 /******************************************************************************/
 #include "stdafx.h"
+#include "../Platforms/iOS/iOS.h"
 namespace EE{
 /******************************************************************************/
 #define D3D_DEBUG     0
@@ -94,7 +95,7 @@ static CGDisplayModeRef GetDisplayMode(Int width, Int height)
    {
       CGDisplayModeRef mode=(CGDisplayModeRef)CFArrayGetValueAtIndex(modes, i);
       UInt flags=CGDisplayModeGetIOFlags(mode);
-      Bool ok   =FlagTest(flags, kDisplayModeSafetyFlags);
+      Bool ok   =FlagOn(flags, kDisplayModeSafetyFlags);
       if(  ok)
       {
          Int w=CGDisplayModeGetWidth      (mode),
@@ -751,7 +752,7 @@ Bool DisplayClass::Monitor::set(HMONITOR monitor)
    {
       full.set(monitor_info.rcMonitor.left, monitor_info.rcMonitor.top, monitor_info.rcMonitor.right, monitor_info.rcMonitor.bottom);
       work.set(monitor_info.rcWork   .left, monitor_info.rcWork   .top, monitor_info.rcWork   .right, monitor_info.rcWork   .bottom);
-      primary=FlagTest(monitor_info.dwFlags, MONITORINFOF_PRIMARY);
+      primary=FlagOn(monitor_info.dwFlags, MONITORINFOF_PRIMARY);
       Set(device_name, WChar(monitor_info.szDevice)); ASSERT(ELMS(device_name)==ELMS(monitor_info.szDevice));
 
       DISPLAY_DEVICEW display_device; Zero(display_device); display_device.cb=SIZE(display_device);
@@ -910,11 +911,12 @@ DisplayClass::DisplayClass() : _monitors(Compare, null, null, 4)
   _image_mip_bias  =-0.50f;
    _font_mip_bias  =-0.75f;
   _bend_leafs      =true;
-  _particles_soft  =!MOBILE;
+  _particles_soft  =true;
   _particles_smooth=!MOBILE;
 //_temp_anti_alias =_temp_super_res=_temp_dual=false;
 //_shader_model    =SM_UNKNOWN;
 //_gl_ver          .zero();
+//_freq_want       =_freq_got=0;
 
 //_initialized=false;
 //_resetting  =false;
@@ -923,7 +925,7 @@ DisplayClass::DisplayClass() : _monitors(Compare, null, null, 4)
   _density=127;
   _samples=1;
   _scale=1;
-  _unscaled_size=1; _size2=2; _rect.set(-1, -1, 1, 1); // init to 1 to avoid div by 0 at app startup which could cause crash on Web
+  _unscaled_size=1; _size2=2; _rect_ui=_rect.set(-1, -1, 1, 1); // init to 1 to avoid div by 0 at app startup which could cause crash on Web
   _disp_aspect_ratio=_disp_aspect_ratio_want=0;
   _app_aspect_ratio=1;
   _pixel_aspect=1;
@@ -1049,7 +1051,13 @@ DisplayClass::DisplayClass() : _monitors(Compare, null, null, 4)
 void DisplayClass::init() // make this as a method because if we put this to Display constructor, then 'SecondaryContexts' may not have been initialized yet
 {
 #if DEBUG
-   REP(IMAGE_ALL_TYPES)DYNAMIC_ASSERT(ImageTI[i].high_precision==(ImageTI[i].precision>IMAGE_PRECISION_8 || IsSByte(IMAGE_TYPE(i))), "Invalid 'ImageTI.high_precision'");
+   REP(IMAGE_ALL_TYPES)
+   {
+    C auto &ti=ImageTI[i];
+      DYNAMIC_ASSERT(ti.high_precision==(ti.precision>IMAGE_PRECISION_8 || IsSByte(IMAGE_TYPE(i))), "Invalid 'ImageTI.high_precision'");
+      if(!ti.compressed                                                 )DYNAMIC_ASSERT(ti.block_bytes==ti.byte_pp                       , "Invalid 'ImageTI.block_bytes'");
+      if( ti.compressed && (i<=IMAGE_ASTC_4x4_SRGB || i>=IMAGE_ASTC_8x8))DYNAMIC_ASSERT(ti.block_bytes==ti.block_w*ti.block_h*ti.bit_pp/8, "Invalid 'ImageTI.block_bytes'");
+   }
 #endif
 
    secondaryOpenGLContexts(1); // default 1 secondary context
@@ -1097,7 +1105,7 @@ void DisplayClass::init() // make this as a method because if we put this to Dis
          {
             CGDisplayModeRef mode=(CGDisplayModeRef)CFArrayGetValueAtIndex(display_modes, i);
             UInt flags=CGDisplayModeGetIOFlags(mode);
-            Bool ok   =FlagTest(flags, kDisplayModeSafetyFlags);
+            Bool ok   =FlagOn(flags, kDisplayModeSafetyFlags);
             if(  ok)modes.binaryInclude(VecI2(CGDisplayModeGetWidth(mode), CGDisplayModeGetHeight(mode)));
          }
          CFRelease(display_modes);
@@ -1678,6 +1686,7 @@ void DisplayClass::androidOpen()
 {
 #if ANDROID
    SyncLocker locker(_lock);
+   App._thread_id=GetThreadID(); // !! adjust the thread ID here, because it will be a different value !!
    androidClose();
    if(GLDisplay && MainContext.context)
    {
@@ -1692,7 +1701,8 @@ void DisplayClass::androidOpen()
       ANativeWindow_setBuffersGeometry(AndroidApp->window, 0, 0, format);
       MainContext.surface=eglCreateWindowSurface(GLDisplay, GLConfig, AndroidApp->window, win_attribs); if(!MainContext.surface)Exit("Can't create EGLSurface.");
       MainContext.lock();
-   }else Exit("OpenGL Display and MainContext not available.");
+      setDeviceSettings(); // reset device state, also needed because of thread ID change
+   }//else Exit("OpenGL Display and MainContext not available."); don't exit because this might be called in 'LoadAndroidAssetPacks' while display is still not created
 #endif
 }
 Bool DisplayClass::create()
@@ -1726,9 +1736,9 @@ _linear_gamma^=1; linearGamma(!_linear_gamma); // set after loading shaders
    {auto v=grassRange       (); _grass_range      =-1              ; grassRange       (v);}
    {auto v=sharpenIntensity (); _sharpen_intensity=-1;             ; sharpenIntensity (v);}
   _tone_map_max_lum=0; toneMapMonitorMaxLumAuto(); //SPSet("ToneMapMonitorMaxLum", D.toneMapMonitorMaxLum());
-   SPSet("ToneMapTopRange"     , D.toneMapTopRange     ());
-   SPSet("ToneMapDarkenRange"  , D.toneMapDarkenRange  ());
-   SPSet("ToneMapDarkenExp"    , D.toneMapDarkenExp    ());
+   SPSet("ToneMapTopRange"     , D.toneMapTopRange   ());
+   SPSet("ToneMapDarkenRange"  , D.toneMapDarkenRange());
+   SPSet("ToneMapDarkenExp"    , D.toneMapDarkenExp  ());
    lod            (_lod_factor, _lod_factor_mirror);
    shadowJitterSet();
    shadowRangeSet ();
@@ -1876,7 +1886,7 @@ Bool DisplayClass::findMode(Bool auto_full)
       SwapChainDesc.SampleDesc.Quality=0;
       SwapChainDesc.BufferUsage       =DXGI_USAGE_RENDER_TARGET_OUTPUT|DXGI_USAGE_SHADER_INPUT|DXGI_USAGE_BACK_BUFFER;
       SwapChainDesc.Flags             =DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH|(GDI_COMPATIBLE ? DXGI_SWAP_CHAIN_FLAG_GDI_COMPATIBLE : 0);
-      if(_freq_want && !SwapChainDesc.Windowed) // set custom frequency only if desired and in true full-screen
+      if(_freq_want>0 && !SwapChainDesc.Windowed) // set custom frequency only if desired and in true full-screen
       {
          SwapChainDesc.BufferDesc.RefreshRate.Numerator  =_freq_want;
          SwapChainDesc.BufferDesc.RefreshRate.Denominator=1;
@@ -2173,7 +2183,7 @@ void DisplayClass::getCaps()
 
    D3D11_FEATURE_DATA_SHADER_MIN_PRECISION_SUPPORT min_prec;
    if(OK(D3D->CheckFeatureSupport(D3D11_FEATURE_SHADER_MIN_PRECISION_SUPPORT, &min_prec, SIZE(min_prec)))) // check for hlsl half support
-        _half_supported=FlagTest(min_prec.PixelShaderMinPrecision, D3D11_SHADER_MIN_PRECISION_16_BIT);
+        _half_supported=FlagOn(min_prec.PixelShaderMinPrecision, D3D11_SHADER_MIN_PRECISION_16_BIT);
    else _half_supported=-1; // unknown
 
    /*IDXGISwapChain4 *swap_chain4=null; SwapChain->QueryInterface(__uuidof(IDXGISwapChain4), (Ptr*)&swap_chain4); if(swap_chain4)
@@ -2678,8 +2688,13 @@ void DisplayClass::sizeChanged()
    Renderer.setPixelSize();
 
    // this is used by mouse/touch pointers
+#if SWITCH // NintendoSwitch APIs are always for 1280,720 res #NintendoSwitchRes
+   D._window_pixel_to_screen_mul.set( D.w2()/(1280-1),
+                                     -D.h2()/( 720-1));
+#else
    D._window_pixel_to_screen_mul.set( D.w2()/(D.resW()-1),  // div by "resW-1" so we can have full -D.w .. D.w range !! if this is changed for some reason, then adjust 'rect.max' in 'Ms.clipUpdate' !!
                                      -D.h2()/(D.resH()-1)); // div by "resH-1" so we can have full -D.h .. D.h range !! if this is changed for some reason, then adjust 'rect.max' in 'Ms.clipUpdate' !!
+#endif
    D._window_pixel_to_screen_add.set(-D.w(), D.h());
    if(VR.active()) // because VR Gui Rect may be different than Window Rect, we need to adjust scaling
    {
@@ -2687,6 +2702,17 @@ void DisplayClass::sizeChanged()
       D._window_pixel_to_screen_mul*=D._window_pixel_to_screen_scale;
       D._window_pixel_to_screen_add*=D._window_pixel_to_screen_scale;
    }
+
+   // rect UI
+   D._rect_ui=D._rect;
+#if IOS
+   if(auto view=GetUIView())
+   {
+      Vec2 scale=ScreenScale*D._pixel_size; // convert from iOS points to pixels, then to screen
+      D._rect_ui.min.x+=view.safeAreaInsets.left  *scale.x; D._rect_ui.max.x-=view.safeAreaInsets.right*scale.x;
+      D._rect_ui.min.y+=view.safeAreaInsets.bottom*scale.y; D._rect_ui.max.y-=view.safeAreaInsets.top  *scale.y;
+   }
+#endif
 
    viewReset();
 }
@@ -3770,7 +3796,25 @@ Bool DisplayClass::drawFade()C
       }else
       {
          Sh.Step->set(_fade_alpha);
-         Sh.DrawA->draw(Renderer._fade);
+         Bool perceptual=true;
+         if(perceptual)
+            if(C ImageRTPtr &in1=Renderer.getBackBuffer())
+         {
+          C auto &in0=Renderer._fade;
+          C auto &out=Renderer._cur[0];
+            ALPHA_MODE alpha=D.alpha(ALPHA_NONE);
+            Bool in0_gamma=LINEAR_GAMMA, in0_swap_srgb=(in0_gamma && in0->canSwapSRV()); if(in0_swap_srgb){in0_gamma=false; in0->swapSRV();}
+            Bool in1_gamma=LINEAR_GAMMA, in1_swap_srgb=(in1_gamma && in1->canSwapSRV()); if(in1_swap_srgb){in1_gamma=false; in1->swapSRV();}
+            Bool out_gamma=LINEAR_GAMMA, out_swap_srgb=(out_gamma && out->canSwapRTV()); if(out_swap_srgb){out_gamma=false; out->swapRTV(); Renderer.set(Renderer._cur[0], Renderer._cur_ds, true);}
+            Sh.Img[1]->set(in1);
+            Sh.get(S8+"Fade"+in0_gamma+in1_gamma+out_gamma)->draw(Renderer._fade);
+            if(in0_swap_srgb) in0->swapSRV();
+            if(in1_swap_srgb) in1->swapSRV();
+            if(out_swap_srgb){out->swapRTV(); Renderer.set(Renderer._cur[0], Renderer._cur_ds, true);}
+            D.alpha(alpha);
+            return true;
+         }
+         Sh.get("DrawA")->draw(Renderer._fade);
       }
       return true;
    }

@@ -73,10 +73,10 @@ struct OptionsClass : ClosableWindow
 
    void create()
    {
-      Gui+=super::create(Rect_C(0, 0, 1.4, 0.35), "Options").hide(); button[2].show();
-      Flt y=-0.05, h=0.06;
+      Flt y=-0.05f, h=0.06f;
+      Gui+=super::create(Rect_C(0, 0, 1.4f, 3*h+0.11f), "Options").hide(); button[2].show();
       T+=t_vs_path .create(Vec2(0.19, y), "Visual Studio Path"); T+= vs_path.create(Rect_L(0.38, y, 1.0, 0.05)); y-=h;
-      T+=t_ndk_path.create(Vec2(0.19, y),   "Android NDK Path"); T+=ndk_path.create(Rect_L(0.38, y, 1.0, 0.05)); y-=h;
+    //T+=t_ndk_path.create(Vec2(0.19, y),   "Android NDK Path"); T+=ndk_path.create(Rect_L(0.38, y, 1.0, 0.05)); y-=h;
       T+=t_aac     .create(Vec2(0.19, y),   "Use Patented AAC"); T+=aac.create(Rect_L(0.38, y, 0.05, 0.05)).func(OptionChanged, T).desc("If support AAC decoding which is currently covered by patents.\nIf disabled then playback of AAC sounds will not be available."); y-=h;
       T+=t_physics .create(Vec2(0.19, y),     "Physics Engine"); T+=physics .create(Rect_L(0.38, y, 1.0, 0.05), Physics_t, Elms(Physics_t)).func(OptionChanged, T).set(PHYS_ENGINE_PHYSX, QUIET); y-=h;
       load();
@@ -174,7 +174,7 @@ Str NDKBuildPath()
 Str ARPath()
 {
 #if WINDOWS
-   return EnginePath+AndroidProject+"cygwin/ar.exe";
+   return ThirdPartyLibsPath+"AR/ar.exe";
 #else
    return "ar";
 #endif
@@ -538,7 +538,7 @@ void MakeLinuxLibs()
    Build().set(ARPath(), S+"-q \""+UnixPath(engine_lib)+"\" "+obj_files).run();
    if(!FExistSystem(engine_lib))Gui.msgBox("Error", "Can't create Engine Linux Lib");
 }
-Str EngineAndroidLibName(C Str &abi) {return EditorPath+"Bin/Android/Engine-"+abi+".a";}
+/*Str EngineAndroidLibName(C Str &abi) {return EditorPath+"Bin/Android/Engine-"+abi+".a";}
 void MakeAndroidLibs(C Str &abi)
 {
    Str engine_lib=EngineAndroidLibName(abi);
@@ -586,6 +586,20 @@ void MakeAndroidLibs()
    FDelFile(EngineAndroidLibName("x86"));
 #endif
 }
+void CleanEngineAndroid()
+{
+   FDelDirs(EnginePath+AndroidProject+"obj");
+}
+void CompileEngineAndroid()
+{
+   Str ndk_build=NDKBuildPath();
+   if(!ndk_build.is()){Options.show(); Gui.msgBox("Error", "Android NDK Path unknown");}else
+   {
+      Int build_threads_num=Cpu.threads();
+      build_threads.queue(build_requests.New().set(ndk_build, S+"-j"+build_threads_num+" -C \""+EnginePath+AndroidProject+"\""), BuildRun);
+   }
+}
+void AndroidLibs() {build_threads.queue(build_requests.New().set(MakeAndroidLibs), BuildRun);}
 /******************************************************************************/
 void UpdateHeaders()
 {
@@ -751,6 +765,7 @@ void CopyEngineWindowsUniversal64DX11   () {Copy(EnginePath+"EngineUniversal64DX
 void CopyEngineWindowsUniversal32DX11   () {Copy(EnginePath+"EngineUniversal32DX11.lib"   , EditorPath+"Bin/EngineUniversal32DX11.lib");}
 void CopyEngineWindowsUniversalArm32DX11() {Copy(EnginePath+"EngineUniversalArm32DX11.lib", EditorPath+"Bin/EngineUniversalArm32DX11.lib");}
 void CopyEngineWindowsUniversalArm64DX11() {Copy(EnginePath+"EngineUniversalArm64DX11.lib", EditorPath+"Bin/EngineUniversalArm64DX11.lib");}
+void CopyEngineAndroid                  () {Copy(EnginePath+"EngineAndroid.a"             , EditorPath+"Bin/EngineAndroid.a");}
 void CopyEngineNintendoSwitch           () {Copy(EnginePath+"EngineNintendoSwitch.a"      , EditorPath+"Bin/EngineNintendoSwitch.a");}
 
 void CopyEngineDebugWindows64DX9             () {Copy(EnginePath+"EngineDebug64DX9.lib" , EditorPath+"Bin/Engine64DX9.lib");}
@@ -763,14 +778,15 @@ void CopyEngineDebugWindowsUniversalArm32DX11() {Copy(EnginePath+"EngineDebugUni
 void CopyEngineDebugWindowsUniversalArm64DX11() {Copy(EnginePath+"EngineDebugUniversalArm64DX11.lib", EditorPath+"Bin/EngineUniversalArm64DX11.lib");}
 void CopyEngineDebugNintendoSwitch           () {Copy(EnginePath+"EngineDebugNintendoSwitch.a"      , EditorPath+"Bin/EngineNintendoSwitch.a");}
 
-void CompileEngineWindows64GL              () {CompileVS(EnginePath+VSEngineProject, "Release GL"            , "1) 64 bit", CopyEngineWindows64GL);}
-void CompileEngineWindows64DX9             () {CompileVS(EnginePath+VSEngineProject, "Release DX9"           , "1) 64 bit", CopyEngineWindows64DX9);}
-void CompileEngineWindows32DX9             () {CompileVS(EnginePath+VSEngineProject, "Release DX9"           , "2) 32 bit", CopyEngineWindows32DX9);}
-void CompileEngineWindows64DX11            () {CompileVS(EnginePath+VSEngineProject, "Release DX11"          , "1) 64 bit", CopyEngineWindows64DX11);}
-void CompileEngineWindows32DX11            () {CompileVS(EnginePath+VSEngineProject, "Release DX11"          , "2) 32 bit", CopyEngineWindows32DX11);}
-void CompileEngineWindowsUniversal64DX11   () {CompileVS(EnginePath+VSEngineProject, "Release Universal DX11", "1) 64 bit", CopyEngineWindowsUniversal64DX11);}
-void CompileEngineWindowsUniversal32DX11   () {CompileVS(EnginePath+VSEngineProject, "Release Universal DX11", "2) 32 bit", CopyEngineWindowsUniversal32DX11);}
-void CompileEngineWindowsUniversalArm32DX11() {CompileVS(EnginePath+VSEngineProject, "Release Universal DX11", "3) ARM"   , CopyEngineWindowsUniversalArm32DX11);}
+void CompileEngineWindows64GL              () {CompileVS(EnginePath+VSEngineProject, "Release GL"            , "1) 64 bit" , CopyEngineWindows64GL);}
+void CompileEngineWindows64DX9             () {CompileVS(EnginePath+VSEngineProject, "Release DX9"           , "1) 64 bit" , CopyEngineWindows64DX9);}
+void CompileEngineWindows32DX9             () {CompileVS(EnginePath+VSEngineProject, "Release DX9"           , "2) 32 bit" , CopyEngineWindows32DX9);}
+void CompileEngineWindows64DX11            () {CompileVS(EnginePath+VSEngineProject, "Release DX11"          , "1) 64 bit" , CopyEngineWindows64DX11);}
+void CompileEngineWindows32DX11            () {CompileVS(EnginePath+VSEngineProject, "Release DX11"          , "2) 32 bit" , CopyEngineWindows32DX11);}
+void CompileEngineWindowsUniversal64DX11   () {CompileVS(EnginePath+VSEngineProject, "Release Universal DX11", "1) 64 bit" , CopyEngineWindowsUniversal64DX11);}
+void CompileEngineWindowsUniversal32DX11   () {CompileVS(EnginePath+VSEngineProject, "Release Universal DX11", "2) 32 bit" , CopyEngineWindowsUniversal32DX11);}
+void CompileEngineWindowsUniversalArm32DX11() {CompileVS(EnginePath+VSEngineProject, "Release Universal DX11", "3) ARM"    , CopyEngineWindowsUniversalArm32DX11);}
+void CompileEngineAndroid                  () {CompileVS(EnginePath+VSEngineProject, "Release DX11"          , "6) Android", CopyEngineAndroid);}
 void CompileEngineNintendoSwitch           () {if(CheckNintendoSwitch())CompileVS(EnginePath+VSEngineProject, "Release DX11"          , "5) Nintendo Switch", CopyEngineNintendoSwitch);}
 void CompileEngineWeb                      () {CompileVS(EnginePath+VSEngineProject, "Release GL"            , "4) Web");}
 
@@ -781,7 +797,7 @@ void CompileEngineDebugWindows32DX11            () {CompileVS(EnginePath+VSEngin
 void CompileEngineDebugWindowsUniversal64DX11   () {CompileVS(EnginePath+VSEngineProject, "Debug Universal DX11", "1) 64 bit", CopyEngineDebugWindowsUniversal64DX11);}
 void CompileEngineDebugWindowsUniversal32DX11   () {CompileVS(EnginePath+VSEngineProject, "Debug Universal DX11", "2) 32 bit", CopyEngineDebugWindowsUniversal32DX11);}
 void CompileEngineDebugWindowsUniversalArm32DX11() {CompileVS(EnginePath+VSEngineProject, "Debug Universal DX11", "3) ARM"   , CopyEngineDebugWindowsUniversalArm32DX11);}
-void CompileEngineDebugNintendoSwitch           () {if(CheckNintendoSwitch())CompileVS(EnginePath+VSEngineProject, "Debug DX11"          , "5) Nintendo Switch", CopyEngineNintendoSwitch);}
+void CompileEngineDebugNintendoSwitch           () {if(CheckNintendoSwitch())CompileVS(EnginePath+VSEngineProject, "Debug DX11"          , "5) Nintendo Switch", CopyEngineDebugNintendoSwitch);}
 
 void  DelEditorExe          () {FDelFile(EditorSourcePath+ENGINE_NAME " Editor.exe");} // VS has a bug that it won't rebuild the EXE if no changes were made in source (so if EXE was built with DX9 lib, and then we're compiling for DX11, then it may not be relinked)
 void CopyEditorWindows64DX11() {    Copy(EditorSourcePath+ENGINE_NAME " Editor.exe", EditorPath+ENGINE_NAME " Editor.exe");}
@@ -824,21 +840,6 @@ void         CleanLinux    () {build_threads.queue(build_requests.New().set(Clea
 void CompileEngineLinux    () {CompileLinux(EnginePath      +LinuxEngineProject, "Release");}
 void CompileEditorLinux    () {CompileLinux(EditorSourcePath+LinuxEditorProject, "Release", CopyEditorLinux);}
 void              LinuxLibs() {build_threads.queue(build_requests.New().set(MakeLinuxLibs), BuildRun);}
-
-void CleanEngineAndroid()
-{
-   FDelDirs(EnginePath+AndroidProject+"obj");
-}
-void CompileEngineAndroid()
-{
-   Str ndk_build=NDKBuildPath();
-   if(!ndk_build.is()){Options.show(); Gui.msgBox("Error", "Android NDK Path unknown");}else
-   {
-      Int build_threads_num=Cpu.threads();
-      build_threads.queue(build_requests.New().set(ndk_build, S+"-j"+build_threads_num+" -C \""+EnginePath+AndroidProject+"\""), BuildRun);
-   }
-}
-void AndroidLibs() {build_threads.queue(build_requests.New().set(MakeAndroidLibs), BuildRun);}
 
 void  EnginePak() {build_threads.queue(build_requests.New().set(CreateEnginePak), BuildRun);}
 void  EditorPak() {build_threads.queue(build_requests.New().set(CreateEditorPak), BuildRun);}
@@ -894,7 +895,7 @@ TaskBase CompileEditorWindowsTB[]=
 };
 void CompileEditorWindows() {FREPAO(CompileEditorWindowsTB).queue();}
 /******************************************************************************/
-#define ANDROID_DEFAULT WINDOWS
+#define ANDROID_DEFAULT false//WINDOWS
 #define     WEB_DEFAULT false
 
 TaskBase TaskBases[]=
@@ -910,6 +911,7 @@ TaskBase TaskBases[]=
    {"Clean Apple"               , "Clean temporary files generated during Engine compilation for Apple platforms"       ,   CleanEngineApple        , false},
    {"Compile Mac"               , "Compile the Engine in Release mode for Mac only"                                     , CompileEngineMac          , false},
    {"Compile iOS"               , "Compile the Engine in Release mode for iOS only"                                     , CompileEngineiOS          , false},
+   {"Compile iOS Simulator"     , "Compile the Engine in Release mode for iOS Simulator only"                           , CompileEngineiOSSimulator , false},
    {"Compile Apple"             , "Compile the Engine in Release mode for all Apple platforms (Mac, iOS, iOS Simulator)", CompileEngineApple        , true , true},
    {"Compile Mac (Debug)"       , "Compile the Engine in Debug mode for Mac only"                                       , CompileEngineDebugMac     , false},
    {"Compile iOS (Debug)"       , "Compile the Engine in Debug mode for iOS only"                                       , CompileEngineDebugiOS     , false},
@@ -919,14 +921,16 @@ TaskBase TaskBases[]=
    {"Compile Linux"             , "Compile the Engine in Release mode for Linux"                                       , CompileEngineLinux         , true },
    {"Make Linux Libs"           , "Make the Engine Linux Lib from the compilation result to the Editor Bin folder"     , LinuxLibs                  , true },
 #endif
-   {"Clean Android"             , "Clean temporary files generated during Engine compilation for Android"              ,   CleanEngineAndroid       , false},
+ /*{"Clean Android"             , "Clean temporary files generated during Engine compilation for Android"              ,   CleanEngineAndroid       , false},
    {"Compile Android"           , "Compile the Engine in Release mode for Android"                                     , CompileEngineAndroid       , ANDROID_DEFAULT},
-   {"Make Android Libs"         , "Make the Engine Android Libs from the compilation result to the Editor Bin folder"  , AndroidLibs                , ANDROID_DEFAULT},
+   {"Make Android Libs"         , "Make the Engine Android Libs from the compilation result to the Editor Bin folder"  , AndroidLibs                , ANDROID_DEFAULT},*/
 #if WINDOWS
-   {"Compile Nintendo Switch"   , "Compile the Engine in Release mode for Nintendo Switch"                             , CompileEngineNintendoSwitch, false},
-   {"Clean Web"                 , "Clean temporary files generated during Engine compilation for the Web"              ,   CleanEngineWeb           , false},
-   {"Compile Web"               , "Compile the Engine for Web"                                                         , CompileEngineWeb           , WEB_DEFAULT},
-   {"Make Web Libs"             , "Make the Engine Web Lib from the compilation result to the Editor Bin folder"       , WebLibs                    , WEB_DEFAULT},
+   {"Compile Android"              , "Compile the Engine in Release mode for Android"                                  , CompileEngineAndroid            , false},
+   {"Compile Nintendo Switch"      , "Compile the Engine in Release mode for Nintendo Switch"                          , CompileEngineNintendoSwitch     , false},
+   {"Compile Nintendo Switch Debug", "Compile the Engine in Debug mode for Nintendo Switch"                            , CompileEngineDebugNintendoSwitch, false},
+   {"Clean Web"                 , "Clean temporary files generated during Engine compilation for the Web"              ,   CleanEngineWeb                , false},
+   {"Compile Web"               , "Compile the Engine for Web"                                                         , CompileEngineWeb                , WEB_DEFAULT},
+   {"Make Web Libs"             , "Make the Engine Web Lib from the compilation result to the Editor Bin folder"       , WebLibs                         , WEB_DEFAULT},
 #endif
    {"Copy Headers"              , "Copy cleaned Engine Headers from the Engine folder to the Editor folder.\nCleaning removes all 'EE_PRIVATE' sections from the headers."                                                                    , Headers       , true },
    {"Create \"Code Editor.dat\"", "Create \"Code Editor.dat\" file needed for Code Editor in the Engine's Editor.\nThis data is generated from the Engine headers in the Editor Bin folder, which are generated in the \"Copy Headers\" step.", CodeEditorData, true },
@@ -1064,7 +1068,7 @@ void SetPaths()
    }
 
    // setup Android NDK path if not specified
-   if(!AndroidNDKPath.is())
+   /*if(!AndroidNDKPath.is())
    {
       Str AndroidSDKPath=GetPath(GetRegStr(RKG_LOCAL_MACHINE, "Software/Android SDK Tools/Path"));
       if( AndroidSDKPath.is())for(FileFind ff(AndroidSDKPath); ff(); )
@@ -1074,7 +1078,7 @@ void SetPaths()
             AndroidNDKPath=ndk_path; break;
          }
       }
-   }
+   }*/
 }
 Bool Init()
 {

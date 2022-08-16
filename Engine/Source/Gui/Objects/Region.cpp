@@ -120,7 +120,7 @@ Region& Region::removeSlideBars()
    view       .del();
    setButtons(); return T;
 }
-Bool    Region::alwaysHideHorizontalSlideBar(         )C {return FlagTest(_flag, ALWAYS_HIDE_HORIZONTAL_SLIDEBAR);}
+Bool    Region::alwaysHideHorizontalSlideBar(         )C {return FlagOn(_flag, ALWAYS_HIDE_HORIZONTAL_SLIDEBAR);}
 Region& Region::alwaysHideHorizontalSlideBar(Bool hide)
 {
    if(hide!=alwaysHideHorizontalSlideBar())
@@ -148,14 +148,22 @@ void Region::setButtons()
    view                                          .rect(Rect(rect().max.x-slidebarSize(),  rect().min.y,  rect().max.x, rect().min.y+slidebarSize())).visible(slidebar[0]._usable && slidebar[1]._usable);
    setParent();
 }
-Vec2 Region::childrenSize()C
+static void ChildrenSize(Vec2 &size, C GuiObjChildren &children)
 {
-   Vec2 size=0;
-   REPA(_children)if(C GuiObj *c=_children[i])if(c->visible())
+   REPA(children)if(C GuiObj *c=children[i])if(c->visible())
    {
       MAX(size.x, GuiMaxX(c->rect()));
       MAX(size.y, GuiMaxY(c->rect()));
+      if(c->type()==GO_TABS)
+      {
+       C Tabs &tabs=c->asTabs(); if(InRange(tabs(), tabs))ChildrenSize(size, tabs.tab(tabs())._children);
+      }
    }
+}
+Vec2 Region::childrenSize()C
+{
+   Vec2 size=0;
+   ChildrenSize(size, _children);
    return size;
 }
 Region& Region::slidebarSize(Flt size)

@@ -9,9 +9,11 @@ namespace EE{
 void AnimatedSkeletonBone::clear()
 {
    orn  .zero();
-   rot  .zero();
    pos  .zero();
    scale.zero();
+#if HAS_ANIM_SKEL_ROT
+   rot  .zero();
+#endif
 #if HAS_ANIM_COLOR
    color.set(1);
 #endif
@@ -20,9 +22,11 @@ void AnimatedSkeletonBone::clear()
 void AnimatedSkeletonBone::keep01(Flt blend)
 {
    orn  *=blend;
-   rot  *=blend;
    pos  *=blend;
    scale*=blend;
+#if HAS_ANIM_SKEL_ROT
+   rot  *=blend;
+#endif
 #if HAS_ANIM_COLOR
    color*=blend; color+=1-blend; // color=Lerp(Vec4(1), color, blend)
 #endif
@@ -457,6 +461,7 @@ static void UpdateRootBoneMatrix(AnimatedSkeleton &anim_skel, C MatrixM &body_ma
       Orient &bone_orn=bone.orn; // we can modify it directly, because we're just calling 'fix' on it
 
       // rotation
+   #if HAS_ANIM_SKEL_ROT
       if(bone.rot.any())
       {
          Vec axis =bone.rot.axis;
@@ -476,6 +481,7 @@ static void UpdateRootBoneMatrix(AnimatedSkeleton &anim_skel, C MatrixM &body_ma
             bone._matrix.orn()*=Matrix3(bone_orn);
          }
       }else
+   #endif
       if(bone_orn.fix()) // orientation
       {
          bone._matrix.orn()=bone_orn;
@@ -550,6 +556,7 @@ static void UpdateBoneMatrix(AnimatedSkeleton &anim_skel, Int i)
    */
 
       // rotation
+   #if HAS_ANIM_SKEL_ROT
       if(bone.rot.any())
       {
          Vec axis =bone.rot.axis;       // rotation in parent space
@@ -571,6 +578,7 @@ static void UpdateBoneMatrix(AnimatedSkeleton &anim_skel, Int i)
             Matrix3 transform; GetTransform(transform, sbon, bone_orn); bone._matrix.orn()*=transform;
          }
       }else
+   #endif
       if(bone_orn.fix()) // orientation
       {
          if(parent)bone_orn.mul(parent_matrix, true); // transform target orientation from parent space to world space

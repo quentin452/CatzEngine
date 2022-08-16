@@ -39,14 +39,13 @@ const_mem_addr struct Window : GuiObj // Gui Window !! must be stored in constan
                                                                 Vec2        clientSize    ()C {return _crect.size()               ;} //     get client size
            Window& clientRect(C Rect       &rect   );         C Rect&       clientRect    ()C {return _crect                      ;} // set/get client rect
 
-   virtual Rect sizeLimit              (               )C {return Rect(0.045f, 0.045f, Max(4, D.w2()), Max(4, D.h2()));} // allowed size limits for the Window rectangle, you can override this method and return custom values, they will be used by 'rect' method
-   virtual void extendedRect           (Rect &rect     )C; // get extended rectangle (including self and all child elements extending it visually)
-           void defaultInnerPadding    (Rect &padding  )C; // get default inner padding
-           void defaultInnerPaddingSize(Vec2 &padd_size)C; // get default inner padding size
-           Vec2 defaultInnerPaddingSize(               )C; // get default inner padding size
-           Flt  defaultBarHeight       (               )C; // get default bar height
-           Flt  defaultBarTextWidth    (               )C; // get default bar text width
-           Flt  defaultBarFullWidth    (               )C; // get default bar full width including text and visible buttons
+   virtual Rect sizeLimit              (             )C {return Rect(0.045f, 0.045f, Max(4, D.w2()), Max(4, D.h2()));} // allowed size limits for the Window rectangle, you can override this method and return custom values, they will be used by 'rect' method
+   virtual void extendedRect           (Rect &rect   )C; // get extended rectangle (including self and all child elements extending it visually)
+           void defaultInnerPadding    (Rect &padding)C; // get default inner padding
+           Vec2 defaultInnerPaddingSize(             )C; // get default inner padding size
+           Flt  defaultBarHeight       (             )C; // get default bar height
+           Flt  defaultBarTextWidth    (             )C; // get default bar text width
+           Flt  defaultBarFullWidth    (             )C; // get default bar full width including text and visible buttons
 
    // operations
            Bool    showing   (       )C;        // if visible and not fading out

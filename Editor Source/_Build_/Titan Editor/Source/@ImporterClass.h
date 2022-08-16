@@ -13,6 +13,8 @@ class ImporterClass
    {
       class MaterialEx : XMaterialEx
       {
+         MaterialEx();
+
          void check(C Str &path, Str &tex);
          void process(C Str &path);
       };

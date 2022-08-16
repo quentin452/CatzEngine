@@ -3,8 +3,6 @@
    Use 'TextStyle'       to specify custom text style which can be used when drawing texts, use it      as a global/class variable for storage.
    Use 'TextStyleParams' to specify custom text style which can be used when drawing texts, use it only as a local        variable inside functions for drawing/calculation.
 
-   Use 'TextCode' to manually draw text with different settings for different parts of the text.
-
 /******************************************************************************
 
    'TextStyle' and 'TextStyleParams' are mostly the same, as 'TextStyle' is based on 'TextStyleParams'.
@@ -46,53 +44,98 @@
          }
 
 /******************************************************************************/
-enum AUTO_LINE_MODE : Byte // Automatic Lines Mode
+enum TEXT_INDEX_MODE : Byte // Text Index Mode
 {
-   AUTO_LINE_NONE       , // doesn't       set  new lines in text (only manual new-lines '\n' are used)
-   AUTO_LINE_SPACE      , // automatically sets new lines in text (new lines can be  calculated on spaces, words are not split)
-   AUTO_LINE_SPACE_SPLIT, // automatically sets new lines in text (new lines can be  calculated on spaces, words can be  split if their length exceeds available width)
-   AUTO_LINE_SPLIT      , // automatically sets new lines in text (new lines are not calculated on spaces, words can be  split if their length exceeds available width)
-   AUTO_LINE_NUM        , // number of auto line modes
+   TEXT_INDEX_DEFAULT  , // use when finding cursor position, with rounding
+   TEXT_INDEX_OVERWRITE, // use when finding cursor position in overwrite mode
+   TEXT_INDEX_FIT      , // use when finding how many elements can fit in given space
 };
 /******************************************************************************/
-#if EE_PRIVATE
-struct TextCodeData
+struct StrData
 {
-   enum MODE : Byte
+   enum TYPE : Byte
    {
-      PREV   ,
-      NEW    ,
-      OLD    ,
-      DEFAULT,
+      NONE,
+      TEXT,
+      IMAGE,
+      COLOR,
+      COLOR_OFF,
+      SHADOW,
+      SHADOW_OFF,
+      FONT,
+      PANEL,
+      NUM,
    };
-   MODE  shadow_mode, color_mode, nocode_mode;
-   Byte  shadow;
-   Color color ;
-   CPtr  pos   ;
-};
-void SetTextCode(C Str &code, Str &text, MemPtr<TextCodeData> codes);
-Str  GetTextCode(           C Str &text,      C TextCodeData *code, Int codes);
+   TYPE type;
+   union
+   {
+      Str           text;
+      ImagePtr      image;
+      Color         color;
+      Byte          shadow;
+      FontPtr       font;
+      PanelImagePtr panel;
+   };
 
-struct TextLineSplit8
+   Bool visible()C;
+   Bool operator==(C StrData &x)C;
+   Bool operator!=(C StrData &x)C {return !(T==x);}
+
+   void     del   ();
+   StrData& create(TYPE type);
+
+  ~StrData() {del();}
+   StrData() {type=NONE;}
+   StrData(C StrData &src)=delete;
+   void operator=(C StrData &src);
+};
+struct StrEx : Mems<StrData> // Extended String, which can hold: Text, Images, Color/Shadow/Font information, Panel background
 {
-   CChar8 *text;
-   Int     length, offset;
+   // get
+   Bool       is()C {return elms();} // if has any data
+   Int    length()C; // get              length (where each image element has length=1)
+   Int strLength()C; // get       string length (ignoring   image elements)
+   Str str      ()C; // return as string        (ignoring   image, color, shadow, panel, font elements)
 
-          void set(CChar8 *text, Int length, Int offset) {T.text=text; T.length=length; T.offset=offset;}
-   friend void Set(MemPtr<TextLineSplit8> tls, CChar8 *text, C TextStyleParams &text_style, Flt width, AUTO_LINE_MODE auto_line);
+   StrEx& clear() {super::clear(); return T;}
+   StrEx& del  () {super::del  (); return T;}
+
+   void operator=(C Str &text);
+
+   // add element
+   StrEx& text  (   Char          chr   );
+   StrEx& text  (   Char8         chr   );
+   StrEx& text  (C CChar         *text  );
+   StrEx& text  (C CChar8        *text  );
+   StrEx& text  (C Str           &text  );
+   StrEx& text  (C Str8          &text  );
+   StrEx& image (C ImagePtr      &image );
+   StrEx& color (C Color         &color );
+   StrEx& color (C Color         *color ); // null disables custom color  and reverts to default
+   StrEx& shadow(  Byte           shadow);
+   StrEx& shadow(C Byte          *shadow); // null disables custom shadow and reverts to default
+   StrEx& font  (C FontPtr       &font  ); // null disables custom font   and reverts to default
+   StrEx& panel (C PanelImagePtr &panel );
+
+   void   operator+=(C StrEx         &str   );
+   void   operator+=(   Char          chr   ) {T.text  (chr  );}
+   void   operator+=(   Char8         chr   ) {T.text  (chr  );}
+   void   operator+=(C CChar         *text  ) {T.text  (text );}
+   void   operator+=(C CChar8        *text  ) {T.text  (text );}
+   void   operator+=(C Str           &text  ) {T.text  (text );}
+   void   operator+=(C Str8          &text  ) {T.text  (text );}
+   void   operator+=(C ImagePtr      &image ) {T.image (image);}
+   StrEx& shadow    (  Int            shadow) {T.shadow(Byte(shadow)); return T;}
+   StrEx& panelText (C PanelImagePtr &panel, C Str      &text ); // add text  inside a panel, same as "T.panel(panel); T+=text ; T.panel(null);"
+   StrEx& panelImage(C PanelImagePtr &panel, C ImagePtr &image); // add image inside a panel, same as "T.panel(panel); T+=image; T.panel(null);"
+
+   StrEx& space(); // add a space if string isn't empty and does not end with a new line or space
+   StrEx& line (); // add a line  if string isn't empty and does not end with a new line
+
+   // io
+   Bool save(File &f, CChar *path=null)C; // save, 'path'=path at which resource is located (this is needed so that the sub-resources can be accessed with relative path), false on fail
+   Bool load(File &f, CChar *path=null) ; // load, 'path'=path at which resource is located (this is needed so that the sub-resources can be accessed with relative path), false on fail
 };
-struct TextLineSplit16
-{
-   CChar *text;
-   Int    length, offset;
-
-          void set(CChar *text, Int length, Int offset) {T.text=text; T.length=length; T.offset=offset;}
-   friend void Set(MemPtr<TextLineSplit16> tls, CChar *text, C TextStyleParams &text_style, Flt width, AUTO_LINE_MODE auto_line);
-};
-
-extern Memc<TextLineSplit8 > Tls8 ;
-extern Memc<TextLineSplit16> Tls16;
-#endif
 /******************************************************************************/
 struct TextStyleParams // Text Style Params
 {
@@ -117,43 +160,40 @@ struct TextStyleParams // Text Style Params
    void posY (Flt y, Vec2 &range)C; // get actual position which will be used for drawing (including padding)
    void posYI(Flt y, Vec2 &range)C; // get actual position which will be used for drawing (including padding)
 #endif
-   Flt   colWidth (                               )C {return size.x*space.x;}                                             // get column width  (this is valid if "spacing==SPACING_CONST")
-   Flt  lineHeight(                               )C {return size.y*space.y;}                                             // get line   height
-   Flt  textWidth (C Str  &str , Int max_length=-1)C;                                                                     // get width    of 'str'  one line text
-   Flt  textWidth (C Str8 &str , Int max_length=-1)C;                                                                     // get width    of 'str'  one line text
-   Flt  textWidth (CChar  *text, Int max_length=-1)C;                                                                     // get width    of 'text' one line text
-   Flt  textWidth (CChar8 *text, Int max_length=-1)C;                                                                     // get width    of 'text' one line text
-   Int  textPos   (CChar  *text, Flt x       , Bool round)C;                                                              // get index    of character at given 'x'     position, returns "0 .. Length(text)"
-   Int  textPos   (CChar8 *text, Flt x       , Bool round)C;                                                              // get index    of character at given 'x'     position, returns "0 .. Length(text)"
-   Int  textPos   (CChar  *text, Flt x, Flt y, Bool round, Flt width, AUTO_LINE_MODE auto_line, Bool &eol             )C; // get index    of character at given 'x,y'   position, returns "0 .. Length(text)"
-   Vec2 textIndex (CChar  *text, Int index               , Flt width, AUTO_LINE_MODE auto_line                        )C; // get position of character at given 'index' position
-   Int  textLines (CChar  *text,                           Flt width, AUTO_LINE_MODE auto_line, Flt *actual_width=null)C; // get number   of lines needed to draw 'text' in space as wide as 'width', 'actual_width'=actual width of the text (this is the Max of all line widths)
-   Int  textLines (CChar8 *text,                           Flt width, AUTO_LINE_MODE auto_line, Flt *actual_width=null)C; // get number   of lines needed to draw 'text' in space as wide as 'width', 'actual_width'=actual width of the text (this is the Max of all line widths)
+   Bool spacingConst()C {return spacing==SPACING_CONST;}
+
+   Flt  colWidth ()C {return size.x*space.x;} // get column width  (this is valid if "spacing==SPACING_CONST")
+   Flt lineHeight()C {return size.y*space.y;} // get line   height
+
+   Flt textWidth(C Str  &str , Int max_length=-1         )C; // get width of one line 'str'  text
+   Flt textWidth(C Str8 &str , Int max_length=-1         )C; // get width of one line 'str'  text
+   Flt textWidth(CChar  *text, Int max_length=-1         )C; // get width of one line 'text' text
+   Flt textWidth(CChar8 *text, Int max_length=-1         )C; // get width of one line 'text' text
+   Flt textWidth(CChar  *text, C StrData *data, Int datas)C; // get width of one line 'text' text
+
+   Int textIndex(CChar  *text,                             Flt x,        TEXT_INDEX_MODE index_mode                                      )C; // get index of character at 'x'   position, returns "0 .. Length(text)"
+   Int textIndex(CChar8 *text,                             Flt x,        TEXT_INDEX_MODE index_mode                                      )C; // get index of character at 'x'   position, returns "0 .. Length(text)"
+   Int textIndex(CChar  *text,                             Flt x, Flt y, TEXT_INDEX_MODE index_mode, Flt width, Bool auto_line, Bool &eol)C; // get index of character at 'x,y' position, returns "0 .. Length(text)"
+   Int textIndex(CChar  *text, C StrData *data, Int datas, Flt x, Flt y, TEXT_INDEX_MODE index_mode, Flt width, Bool auto_line, Bool &eol)C; // get index of character at 'x,y' position, returns "0 .. Length(text)"
+
+   Vec2 textPos(CChar *text,                             Int index, Flt width, Bool auto_line)C; // get position of character at 'index' location
+   Vec2 textPos(CChar *text, C StrData *data, Int datas, Int index, Flt width, Bool auto_line)C; // get position of character at 'index' location
+
+   Int textLines(CChar  *text,                             Flt width, Bool auto_line, Flt *actual_width=null)C; // get number of lines needed to draw 'text' in space as wide as 'width', 'actual_width'=actual width of the text (this is the Max of all line widths)
+   Int textLines(CChar  *text, C StrData *data, Int datas, Flt width, Bool auto_line, Flt *actual_width=null)C; // get number of lines needed to draw 'text' in space as wide as 'width', 'actual_width'=actual width of the text (this is the Max of all line widths)
+   Int textLines(CChar8 *text, C StrData *data, Int datas, Flt width, Bool auto_line, Flt *actual_width=null)C; // get number of lines needed to draw 'text' in space as wide as 'width', 'actual_width'=actual width of the text (this is the Max of all line widths)
 
    // operations
    TextStyleParams& reset          (Bool gui=false); // reset all   parameters to default settings, this copies settings from 'Gui.skin.text_style' when 'gui' is false, and 'Gui.skin.text.text_style' when 'gui' is true
    TextStyleParams& resetColors    (Bool gui=false); // reset color parameters to default settings, this copies settings from 'Gui.skin.text_style' when 'gui' is false, and 'Gui.skin.text.text_style' when 'gui' is true, parameters which are copied include: 'shadow', 'shade', 'color', 'selection'
-   void             setPerPixelSize(              ); // set 1:1 pixel size "size = D.pixelToScreenSize(VecI2(font.height()))"
+   void             setPerPixelSize(              ); // set 1:1 pixel size "size = D.pixelToScreenSize(font.height())"
 
    // draw
-#if EE_PRIVATE
-   void drawMain    (              Flt x, Flt y, TextInput ti, Int max_length=-1, C TextCodeData *code=null, Int codes=0, Int offset=0)C;
-   void drawMainSoft(Image &image, Flt x, Flt y, TextInput ti, Int max_length=-1, C TextCodeData *code=null, Int codes=0, Int offset=0)C; // 'image' should be already locked for writing
+   void drawSoft(Image &image, Flt x, Flt y, CChar  *text, C StrData *data, Int datas)C; // draw text in software mode to 'image', 'image' should be already locked for writing
+   void drawSoft(Image &image, Flt x, Flt y, CChar8 *text, C StrData *data, Int datas)C; // draw text in software mode to 'image', 'image' should be already locked for writing
 
-   void drawSplit(C Rect &rect, Memc<TextLineSplit8 > &tls, C TextCodeData *code=null, Int codes=0)C;
-   void drawSplit(C Rect &rect, Memc<TextLineSplit16> &tls, C TextCodeData *code=null, Int codes=0)C;
-
-   void drawCode(C Rect &rect, CChar  *t, AUTO_LINE_MODE auto_line, C TextCodeData *code=null, Int codes=0)C;
-   void drawCode(C Rect &rect, CChar8 *t, AUTO_LINE_MODE auto_line, C TextCodeData *code=null, Int codes=0)C;
-
-   void drawSplitSoft(Image &image, C Rect &rect, Memt<TextLineSplit8 > &tls, C TextCodeData *code=null, Int codes=0)C;
-   void drawSplitSoft(Image &image, C Rect &rect, Memt<TextLineSplit16> &tls, C TextCodeData *code=null, Int codes=0)C;
-#endif
-   void drawSoft(Image &image, Flt x, Flt y, CChar  *t)C; // draw text in software mode to 'image', 'image' should be already locked for writing
-   void drawSoft(Image &image, Flt x, Flt y, CChar8 *t)C; // draw text in software mode to 'image', 'image' should be already locked for writing
-
-   void drawSoft(Image &image, C Rect &rect, CChar  *t, AUTO_LINE_MODE auto_line)C; // draw text in software mode to 'image', 'image' should be already locked for writing
-   void drawSoft(Image &image, C Rect &rect, CChar8 *t, AUTO_LINE_MODE auto_line)C; // draw text in software mode to 'image', 'image' should be already locked for writing
+   void drawSoft(Image &image, C Rect &rect, CChar  *text, C StrData *data, Int datas, Bool auto_line)C; // draw text in software mode to 'image', 'image' should be already locked for writing
+   void drawSoft(Image &image, C Rect &rect, CChar8 *text, C StrData *data, Int datas, Bool auto_line)C; // draw text in software mode to 'image', 'image' should be already locked for writing
 
    explicit TextStyleParams(                     Bool gui=false) {reset(gui);}
             TextStyleParams(TextStyleParams *ts, Bool gui      ) {if(ts)T=*ts;else reset(gui);}
@@ -181,40 +221,6 @@ struct TextStyle : TextStyleParams // Text Style
 
 private:
    FontPtr _font;
-};
-/******************************************************************************/
-struct TextCode // Text with modifiers, allowing to draw text on the screen with different settings for different parts of the text
-{
-   // get / set
-   TextCode& clear(           );                                      // clear   text value
-   TextCode& set  (C Str &text); C Str& operator()()C {return _text;} // set/get text value
-   TextCode& code (C Str &code);   Str  code      ()C;                // set/get text value in code format
-      // 1. code format accepts following keywords:   in following formats:
-      //    col, color                                RGB, RGBA, RRGGBB, RRGGBBAA (hexadecimal format)
-      //    shadow                                    X, XX                       (hexadecimal format)
-      // 2. codes should be surrounded by '[' ']' signs
-      // 3. removing the effect of a code should be handled by '/' sign followed by code name
-      // 4. sample codes:
-      //       "Text without code. [color=F00]Text with code[/color]"        - will force red color  on "Text with code"
-      //       "[shadow=0]No Shadow[/shadow] [shadow=F]Full Shadow[/shadow]" - will force no  shadow on "No Shadow" and full shadow on "Full Shadow"
-
-   // draw
-   void draw(C TextStyleParams &text_style, C Rect &rect, AUTO_LINE_MODE auto_line=AUTO_LINE_NONE)C;
-   void draw(                               C Rect &rect, AUTO_LINE_MODE auto_line=AUTO_LINE_NONE)C;
-
-  ~TextCode();
-   TextCode();
-
-#if !EE_PRIVATE
-private:
-#endif
-   Str  _text;
-#if EE_PRIVATE
-   Memc<TextCodeData> _codes;
-#else
-  _Memc _codes;
-#endif
-   NO_COPY_CONSTRUCTOR(TextCode);
 };
 /******************************************************************************/
 DECLARE_CACHE(TextStyle, TextStyles, TextStylePtr); // 'TextStyles' cache storing 'TextStyle' objects which can be accessed by 'TextStylePtr' pointer

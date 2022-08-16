@@ -19,9 +19,10 @@ class ElmIcon : ElmData
    bool          hasColor(             )C; ElmIcon&hasColor(bool on);
    bool          hasAlpha(             )C; ElmIcon&hasAlpha(bool on);
    IMAGE_TYPE androidType(Project *proj)C;                          // if want to be compressed then use ETC2_RGBA or ETC2_RGB
-   IMAGE_TYPE     iOSType(Project *proj)C;                          // if want to be compressed then use PVRTC1_4
-   IMAGE_TYPE     uwpType(Project *proj)C;                          // in this case we only want to replace BC7 format, which will happen only if image is COMPRESSED with alpha, or COMPRESSED2
-   IMAGE_TYPE     webType(Project *proj)C;                          // in this case we only want to replace BC7 format, which will happen only if image is COMPRESSED with alpha, or COMPRESSED2
+   IMAGE_TYPE     iOSType(Project *proj)C; 
+ //IMAGE_TYPE     iOSType(Project *proj)C {ElmImage.TYPE type=T.type(proj); return             (type==ElmImage.COMPRESSED               || type==ElmImage.COMPRESSED2)  ?              IMAGE_PVRTC1_4_SRGB                        : IMAGE_NONE;} // if want to be compressed then use PVRTC1_4
+   IMAGE_TYPE     uwpType(Project *proj)C; // in this case we only want to replace BC7 format, which will happen only if image is COMPRESSED with alpha, or COMPRESSED2
+   IMAGE_TYPE     webType(Project *proj)C; // in this case we only want to replace BC7 format, which will happen only if image is COMPRESSED with alpha, or COMPRESSED2
 
    bool equal(C ElmIcon &src)C;
    bool newer(C ElmIcon &src)C;

@@ -1,7 +1,4 @@
 /******************************************************************************/
-#ifndef BC_H
-#define BC_H
-/******************************************************************************/
 void DecompressBlockBC1 (C Byte *b, Color  (&block)[4][4]);
 void DecompressBlockBC2 (C Byte *b, Color  (&block)[4][4]);
 void DecompressBlockBC3 (C Byte *b, Color  (&block)[4][4]);
@@ -33,6 +30,4 @@ VecH   DecompressPixelBC6 (C Byte *b, Int x, Int y);
 Color  DecompressPixelBC7 (C Byte *b, Int x, Int y);
 
 Bool CompressBC(C Image &src, Image &dest);
-/******************************************************************************/
-#endif
 /******************************************************************************/

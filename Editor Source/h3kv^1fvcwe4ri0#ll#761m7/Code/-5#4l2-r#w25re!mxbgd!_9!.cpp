@@ -240,11 +240,11 @@ class ImageEditor : PropWin
    void setInfo()
    {
       if(  mip_maps)  mip_maps.visible(!data() || !data().envActual());
-      if(  width   )  width   .display(S+"Width: "   +        (game_image ? game_image->w           ()      : 0));
-      if(  height  )  height  .display(S+"Height: "  +        (game_image ? game_image->h           ()      : 0));
-      if(  type    )  type    .display(S+"Type: "    +        (game_image ? game_image->typeInfo    ().name : null));
-      if(i_mip_maps)i_mip_maps.display(S+"Mip Maps: "+        (game_image ? game_image->mipMaps     ()      : 0));
-      if(  mem_size)  mem_size.display(S+"Size: "    +FileSize(game_image ? game_image->typeMemUsage()      : 0)); // use 'typeMemUsage' because we need this only for stats
+      if(  width   )  width   .display(S+"Width: "   +         (game_image ? game_image->w           ()      : 0));
+      if(  height  )  height  .display(S+"Height: "  +         (game_image ? game_image->h           ()      : 0));
+      if(  type    )  type    .display(S+"Type: "    +         (game_image ? game_image->typeInfo    ().name : null));
+      if(i_mip_maps)i_mip_maps.display(S+"Mip Maps: "+         (game_image ? game_image->mipMaps     ()      : 0));
+      if(  mem_size)  mem_size.display(S+"Size: "    +SizeBytes(game_image ? game_image->typeMemUsage()      : 0)); // use 'typeMemUsage' because we need this only for stats
       if(  chn     )  chn.visible(data() && !IsCube(data().mode));
       if(  nos     )  nos.visible(data() && !IsCube(data().mode));
       if(  src     )  src.visible(data() &&  IsCube(data().mode));

@@ -56,8 +56,8 @@ struct Str // Text String (16-bit per character)
 
    Str& removeOuterWhiteChars(); // remove white characters at the start and end of the string
 
-   Str& space(Int num=1); // add a space if string isn't empty and does not end with a new line or space, 'num'=number of spaces to insert
-   Str& line (Int num=1); // add a line  if string isn't empty and does not end with a new line         , 'num'=number of lines  to insert
+   Str& space(); // add a space if string isn't empty and does not end with a new line or space
+   Str& line (); // add a line  if string isn't empty and does not end with a new line
 
 #if EE_PRIVATE
 #if WINDOWS

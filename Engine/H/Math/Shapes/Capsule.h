@@ -24,8 +24,8 @@ struct Capsule // Capsule Shape
 
    Flt innerHeightHalf()C {return h*0.5f-r;}
 
-   Vec  bottom  ()C {return pos-up*(h*0.5f  );           } // get bottom
-   Vec  top     ()C {return pos+up*(h*0.5f  );           } // get top
+   Vec  bottom  ()C {return pos-up*(h*0.5f);             } // get bottom
+   Vec  top     ()C {return pos+up*(h*0.5f);             } // get top
    Vec  ballDPos()C {return pos-up*innerHeightHalf();    } // get lower ball center
    Vec  ballUPos()C {return pos+up*innerHeightHalf();    } // get upper ball center
    Ball ballD   ()C {return Ball(r, ballDPos());         } // get lower ball
@@ -33,7 +33,8 @@ struct Capsule // Capsule Shape
    Edge fullEdge()C {return Edge(bottom  (), top     ());} // get edge between bottom and top
    Edge ballEdge()C {return Edge(ballDPos(), ballUPos());} // get edge between lower  and upper ball centers
 
-   Vec nearest(C Vec &normal)C; // get nearest point on capsule towards normal
+   Vec nearestNrm(C Vec &normal          )C; // get nearest point on capsule towards normal
+   Vec nearestPos(C Vec &pos, Bool inside)C; // get nearest point on capsule towards position, 'inside'=if allow retuning position inside capsule (false on surface only)
 
    Bool isBall   ()C {return h<=r*2        ;} // if this capsule is actually a ball (total height is equal or smaller than 2*radius)
    Flt  ballR    ()C {return     r         ;} // radius used for ball, can be used if you already know that 'isBall'
@@ -96,8 +97,8 @@ struct CapsuleM // Capsule Shape (mixed precision)
 
    Flt innerHeightHalf()C {return h*0.5f-r;}
 
-   VecD  bottom  ()C {return pos-up*(h*0.5f  );            } // get bottom
-   VecD  top     ()C {return pos+up*(h*0.5f  );            } // get top
+   VecD  bottom  ()C {return pos-up*(h*0.5f);              } // get bottom
+   VecD  top     ()C {return pos+up*(h*0.5f);              } // get top
    VecD  ballDPos()C {return pos-up*innerHeightHalf();     } // get lower ball center
    VecD  ballUPos()C {return pos+up*innerHeightHalf();     } // get upper ball center
    BallM ballD   ()C {return BallM(r, ballDPos());         } // get lower ball
@@ -105,7 +106,8 @@ struct CapsuleM // Capsule Shape (mixed precision)
    EdgeD fullEdge()C {return EdgeD(bottom  (), top     ());} // get edge between bottom and top
    EdgeD ballEdge()C {return EdgeD(ballDPos(), ballUPos());} // get edge between lower  and upper ball centers
 
-   VecD nearest(C Vec &normal)C; // get nearest point on capsule towards normal
+   VecD nearestNrm(C Vec  &normal          )C; // get nearest point on capsule towards normal
+   VecD nearestPos(C VecD &pos, Bool inside)C; // get nearest point on capsule towards position, 'inside'=if allow retuning position inside capsule (false on surface only)
 
    Bool isBall   ()C {return h<=r*2        ;} // if this capsule is actually a ball (total height is equal or smaller than 2*radius)
    Flt  ballR    ()C {return     r         ;} // radius used for ball, can be used if you already know that 'isBall'
@@ -120,6 +122,12 @@ struct CapsuleM // Capsule Shape (mixed precision)
    CapsuleM& operator/=(  Flt      f);
    CapsuleM& operator*=(C Vec     &v);
    CapsuleM& operator/=(C Vec     &v);
+   CapsuleM& operator*=(C Matrix3 &m);
+   CapsuleM& operator/=(C Matrix3 &m);
+   CapsuleM& operator*=(C Matrix  &m);
+   CapsuleM& operator/=(C Matrix  &m);
+   CapsuleM& operator*=(C MatrixM &m);
+   CapsuleM& operator/=(C MatrixM &m);
 
    friend CapsuleM operator+ (C CapsuleM &capsule, C VecD    &v) {return CapsuleM(capsule)+=v;}
    friend CapsuleM operator- (C CapsuleM &capsule, C VecD    &v) {return CapsuleM(capsule)-=v;}
@@ -127,25 +135,38 @@ struct CapsuleM // Capsule Shape (mixed precision)
    friend CapsuleM operator/ (C CapsuleM &capsule,   Flt      f) {return CapsuleM(capsule)/=f;}
    friend CapsuleM operator* (C CapsuleM &capsule, C Vec     &v) {return CapsuleM(capsule)*=v;}
    friend CapsuleM operator/ (C CapsuleM &capsule, C Vec     &v) {return CapsuleM(capsule)/=v;}
+   friend CapsuleM operator* (C CapsuleM &capsule, C Matrix3 &m) {return CapsuleM(capsule)*=m;}
+   friend CapsuleM operator/ (C CapsuleM &capsule, C Matrix3 &m) {return CapsuleM(capsule)/=m;}
+   friend CapsuleM operator* (C CapsuleM &capsule, C Matrix  &m) {return CapsuleM(capsule)*=m;}
+   friend CapsuleM operator/ (C CapsuleM &capsule, C Matrix  &m) {return CapsuleM(capsule)/=m;}
+   friend CapsuleM operator* (C CapsuleM &capsule, C MatrixM &m) {return CapsuleM(capsule)*=m;}
+   friend CapsuleM operator/ (C CapsuleM &capsule, C MatrixM &m) {return CapsuleM(capsule)/=m;}
 
-   CapsuleM() {}
-   CapsuleM(Flt r, Flt h, C VecD &pos=VecDZero, C Vec &up=Vec(0,1,0)) {set(r, h, pos , up);}
+              CapsuleM() {}
+              CapsuleM(Flt r, Flt h, C VecD &pos=VecDZero, C Vec &up=Vec(0,1,0)) {set(  r,   h,   pos,   up);}
+   CONVERSION CapsuleM(C Capsule &c                                            ) {set(c.r, c.h, c.pos, c.up);}
 };
 /******************************************************************************/
+inline CapsuleM operator* (C Capsule &capsule, C MatrixM &m) {return CapsuleM(capsule)*=m;}
+inline CapsuleM operator/ (C Capsule &capsule, C MatrixM &m) {return CapsuleM(capsule)/=m;}
+
 // distance
-       Flt Dist            (C Vec      &point  , C Capsule &capsule             ); // distance between point    and a capsule
-       Flt Dist            (C Edge     &edge   , C Capsule &capsule             ); // distance between edge     and a capsule
-       Flt Dist            (C TriN     &tri    , C Capsule &capsule             ); // distance between triangle and a capsule
-       Flt Dist            (C Box      &box    , C Capsule &capsule             ); // distance between box      and a capsule
-       Flt Dist            (C OBox     &obox   , C Capsule &capsule             ); // distance between box      and a capsule
-       Flt Dist            (C Ball     &ball   , C Capsule &capsule             ); // distance between ball     and a capsule
-       Flt Dist            (C Capsule  &a      , C Capsule &b                   ); // distance between capsule  and a capsule
-       Flt DistCapsulePlane(C Capsule  &capsule, C Vec     &plane, C Vec &normal); // distance between capsule  and a plane
-       Dbl DistCapsulePlane(C Capsule  &capsule, C VecD    &plane, C Vec &normal); // distance between capsule  and a plane
-       Dbl DistCapsulePlane(C CapsuleM &capsule, C VecD    &plane, C Vec &normal); // distance between capsule  and a plane
-inline Flt Dist            (C Capsule  &capsule, C Plane   &plane               ) {return DistCapsulePlane(capsule, plane.pos, plane.normal);} // distance between capsule and a plane
-inline Dbl Dist            (C Capsule  &capsule, C PlaneM  &plane               ) {return DistCapsulePlane(capsule, plane.pos, plane.normal);} // distance between capsule and a plane
-inline Dbl Dist            (C CapsuleM &capsule, C PlaneM  &plane               ) {return DistCapsulePlane(capsule, plane.pos, plane.normal);} // distance between capsule and a plane
+       Flt Dist            (C Vec      &point  , C Capsule  &capsule             ); // distance between point    and a capsule
+       Dbl Dist            (C VecD     &point  , C CapsuleM &capsule             ); // distance between point    and a capsule
+       Flt Dist            (C Edge     &edge   , C Capsule  &capsule             ); // distance between edge     and a capsule
+       Dbl Dist            (C EdgeD    &edge   , C CapsuleM &capsule             ); // distance between edge     and a capsule
+       Flt Dist            (C TriN     &tri    , C Capsule  &capsule             ); // distance between triangle and a capsule
+       Flt Dist            (C Box      &box    , C Capsule  &capsule             ); // distance between box      and a capsule
+       Flt Dist            (C OBox     &obox   , C Capsule  &capsule             ); // distance between box      and a capsule
+       Flt Dist            (C Ball     &ball   , C Capsule  &capsule             ); // distance between ball     and a capsule
+       Flt Dist            (C Capsule  &a      , C Capsule  &b                   ); // distance between capsule  and a capsule
+       Flt DistFull        (C Capsule  &a      , C Capsule  &b                   ); // distance between capsule  and a capsule, can return negative values if shapes intersect
+       Flt DistCapsulePlane(C Capsule  &capsule, C Vec      &plane, C Vec &normal); // distance between capsule  and a plane
+       Dbl DistCapsulePlane(C Capsule  &capsule, C VecD     &plane, C Vec &normal); // distance between capsule  and a plane
+       Dbl DistCapsulePlane(C CapsuleM &capsule, C VecD     &plane, C Vec &normal); // distance between capsule  and a plane
+inline Flt Dist            (C Capsule  &capsule, C Plane    &plane               ) {return DistCapsulePlane(capsule, plane.pos, plane.normal);} // distance between capsule and a plane
+inline Dbl Dist            (C Capsule  &capsule, C PlaneM   &plane               ) {return DistCapsulePlane(capsule, plane.pos, plane.normal);} // distance between capsule and a plane
+inline Dbl Dist            (C CapsuleM &capsule, C PlaneM   &plane               ) {return DistCapsulePlane(capsule, plane.pos, plane.normal);} // distance between capsule and a plane
 
 // cuts
 Bool Cuts(C Vec     &point, C Capsule  &capsule); // if point    cuts a capsule

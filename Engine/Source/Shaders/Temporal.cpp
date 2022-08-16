@@ -625,15 +625,15 @@ void Temporal_PS
 #if SUPER_RES
    NOPERSP PIXEL,
 #endif
+   out VecH4 outCol  :TARGET0
 #if MERGED_ALPHA
-   out VecH2 outData :TARGET0,
+ , out VecH2 outData :TARGET1
 #else
-   out Half  outData :TARGET0,
+ , out Half  outData :TARGET1
 #endif
 #if SEPARATE_ALPHA
-   out Half  outAlpha:TARGET1,
+ , out Half  outAlpha:TARGET2
 #endif
-   out VecH4 outCol  :TARGET2
 )
 #endif
 {

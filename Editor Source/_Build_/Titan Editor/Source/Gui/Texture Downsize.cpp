@@ -483,8 +483,8 @@ TextureDownsize TexDownsize;
       if(image && image->is())
       {
          int mem_size=image->typeMemUsage(); size+=mem_size; // use 'typeMemUsage' because we need this only for stats
-         return side ? S+FileSize(mem_size)+"  "+image->w()+'x'+image->h()+"  "+image->typeInfo().name
-                     : S+image->typeInfo().name+"  "+image->w()+'x'+image->h()+"  "+FileSize(mem_size);
+         return side ? S+SizeBytes(mem_size)+"  "+image->w()+'x'+image->h()+"  "+image->typeInfo().name
+                     : S+image->typeInfo().name+"  "+image->w()+'x'+image->h()+"  "+SizeBytes(mem_size);
       }
       return S;
    }
@@ -537,8 +537,8 @@ TextureDownsize TexDownsize;
       info[3][1].set(ImageInfo(downsized_base[2].is() ? &downsized_base[2] : normal_image[2], size_downsized, true ));
       info[4][0].set(ImageInfo(                                              normal_image[3], size_original , false));
       info[4][1].set(ImageInfo(downsized_emis   .is() ? &downsized_emis    : normal_image[3], size_downsized, true ));
-      info[0][0].set(normal_mtrl ? S+"(Original)  "+FileSize(size_original)   : S);
-      info[0][1].set(normal_mtrl ? S+FileSize(size_downsized)+"  (Downsized)" : S);
+      info[0][0].set(normal_mtrl ? S+"(Original)  "+SizeBytes(size_original)   : S);
+      info[0][1].set(normal_mtrl ? S+SizeBytes(size_downsized)+"  (Downsized)" : S);
 
       REPAO(downsized_mtrls).setTextures();
    }

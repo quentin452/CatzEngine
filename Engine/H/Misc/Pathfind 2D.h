@@ -38,7 +38,7 @@ struct PathFind // 2D Map Path Finder
    Pixel& pixel   (C VecI2 &v  )  {return  pixel   (v.x, v.y);}
  C Pixel& pixel   (C VecI2 &v  )C {return  pixel   (v.x, v.y);}
    Bool   validPos(C VecI2 &v  )  {return  validPos(v.x, v.y);}
-   Bool   onTarget(C VecI2 &v, C VecI2 *target)C {return target ? v==*target : FlagTest(pixel(v).flag, PFP_TARGET);} // !! 'v' is assumed to be 'validPos' !!
+   Bool   onTarget(C VecI2 &v, C VecI2 *target)C {return target ? v==*target : FlagOn(pixel(v).flag, PFP_TARGET);} // !! 'v' is assumed to be 'validPos' !!
    void   step    ();
    void   zero    ();
 #endif

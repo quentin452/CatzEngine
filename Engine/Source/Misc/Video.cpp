@@ -369,13 +369,13 @@ Bool Video::frameToImage(Int w, Int h, Int w_uv, Int h_uv, CPtr lum_data, CPtr u
 {
    if(_mode==ALPHA)
    {
-      if(!_lum.create2DTry(w, h, IMAGE_R8, 1, false))return false; _lum.setFrom(lum_data, lum_pitch);
+      if(!_lum.create2DTry(w, h, IMAGE_R8, 1, false))return false; _lum.setFaceData(lum_data, lum_pitch);
       return true;
    }else
    {
-      if(!_lum.create2DTry(w   , h   , IMAGE_R8, 1, false))return false; _lum.setFrom(lum_data, lum_pitch);
-      if(!_u  .create2DTry(w_uv, h_uv, IMAGE_R8, 1, false))return false; _u  .setFrom(  u_data,   u_pitch);
-      if(!_v  .create2DTry(w_uv, h_uv, IMAGE_R8, 1, false))return false; _v  .setFrom(  v_data,   v_pitch);
+      if(!_lum.create2DTry(w   , h   , IMAGE_R8, 1, false))return false; _lum.setFaceData(lum_data, lum_pitch);
+      if(!_u  .create2DTry(w_uv, h_uv, IMAGE_R8, 1, false))return false; _u  .setFaceData(  u_data,   u_pitch);
+      if(!_v  .create2DTry(w_uv, h_uv, IMAGE_R8, 1, false))return false; _v  .setFaceData(  v_data,   v_pitch);
       return   createTex();
    }
 }
@@ -383,12 +383,12 @@ Bool Video::frameToImage(Int w, Int h, Int w_uv, Int h_uv, CPtr lum_data, CPtr u
 {
    if(_mode==ALPHA)
    {
-      if(!_lum.create2DTry(w, h, IMAGE_R8, 1, false))return false; _lum.setFrom(lum_data, lum_pitch);
+      if(!_lum.create2DTry(w, h, IMAGE_R8, 1, false))return false; _lum.setFaceData(lum_data, lum_pitch);
       return true;
    }else
    {
-      if(!_lum.create2DTry(w   , h   , IMAGE_R8  , 1, false))return false; _lum.setFrom(lum_data, lum_pitch);
-      if(!_u  .create2DTry(w_uv, h_uv, IMAGE_R8G8, 1, false))return false; _u  .setFrom( uv_data,  uv_pitch);
+      if(!_lum.create2DTry(w   , h   , IMAGE_R8  , 1, false))return false; _lum.setFaceData(lum_data, lum_pitch);
+      if(!_u  .create2DTry(w_uv, h_uv, IMAGE_R8G8, 1, false))return false; _u  .setFaceData( uv_data,  uv_pitch);
           _v  .del();
       return   createTex();
    }

@@ -9,6 +9,7 @@ void TextBox::zero()
 {
    kb_lit=true;
   _slidebar_size=0.05f;
+  _text_space=0; // this parameter is used to make sure that all text functions use exactly the same text width. Important to keep in sync - multi-line drawing, clicking, editing, so that cursor position matches graphics.
 
   _can_select=false;
   _word_wrap =true;
@@ -69,6 +70,7 @@ TextBox& TextBox::create(C TextBox &src)
          kb_lit        =src. kb_lit;
          hint          =src. hint;
         _slidebar_size =src._slidebar_size;
+        _text_space    =src._text_space;
         _can_select    =src._can_select;
         _word_wrap     =src._word_wrap;
         _max_length    =src._max_length;
@@ -106,6 +108,7 @@ TextBox& TextBox::slidebarSize(Flt size)
 void TextBox::setVirtualSize()
 {
    Vec2 size=0;
+  _text_space=rect().w();
    if(GuiSkin *skin=getSkin())
       if(TextStyle *text_style=skin->textline.text_style())
    {
@@ -115,15 +118,15 @@ void TextBox::setVirtualSize()
     C TextStyle &ts=*text_style;
    #endif
 
-      Flt offset2=ts.size.x*(TEXTBOX_OFFSET*2), w=rect().w()-offset2; // decrease available width for text by offset for both sides
-      Int lines  =ts.textLines(T(), w, wordWrap() ? AUTO_LINE_SPACE_SPLIT : AUTO_LINE_NONE, &size.x);
+      Flt offset2 =ts.size.x*(TEXTBOX_OFFSET*2);
+      Int lines   =ts.textLines(T(), _text_space-=offset2, wordWrap(), &size.x); // decrease available space for text by offset for both sides
       size.y=lines*ts.lineHeight();
       if(wordWrap()) // check if in word wrap we're exceeding lines beyond client rectangle, in that case slidebar has to be made visible, which reduces client width
       {
          Flt client_height=rect().h(); // here can't use 'clientHeight' because it may not be available yet
          if(size.y>client_height+EPS) // exceeds client height
          { // recalculate using smaller width
-            Int lines=ts.textLines(T(), w-slidebarSize(), /*wordWrap() ? */AUTO_LINE_SPACE_SPLIT/* : AUTO_LINE_NONE*/, &size.x);
+            Int lines=ts.textLines(T(), _text_space-=slidebarSize(), wordWrap(), &size.x);
             size.y=lines*ts.lineHeight();
          }
       }
@@ -168,7 +171,7 @@ TextBox& TextBox::cursor(Int position)
    {
       setTextInput();
 
-      // make cursor visible
+      // scroll to make cursor visible
       if(GuiSkin *skin=getSkin())
          if(TextStyle *text_style=skin->textline.text_style())
       {
@@ -180,7 +183,7 @@ TextBox& TextBox::cursor(Int position)
 
          Flt offset=ts.size.x*TEXTBOX_OFFSET,
              margin=ts.size.x*TEXTBOX_MARGIN;
-         Vec2 pos=ts.textIndex(T(), cursor(), virtualWidth() - offset*2, wordWrap() ? AUTO_LINE_SPACE_SPLIT : AUTO_LINE_NONE); // here Y is 0..Inf
+         Vec2 pos=ts.textPos(T(), cursor(), _text_space, wordWrap()); // here Y is 0..Inf
          pos.x+=offset;
          Flt pos_left  =pos.x-margin,
              pos_right =pos.x+margin,
@@ -344,17 +347,16 @@ void TextBox::moveCursor(Int lines, Int pages)
     C TextStyle &ts=*text_style;
    #endif
 
-      Flt offset2=ts.size.x*(TEXTBOX_OFFSET*2), width=virtualWidth() - offset2;
-      AUTO_LINE_MODE auto_line=(wordWrap() ? AUTO_LINE_SPACE_SPLIT : AUTO_LINE_NONE);
+      Bool auto_line=wordWrap();
       if(!Kb.k.shift())_edit.sel=-1;else if(_edit.sel<0)_edit.sel=_edit.cur;
       if(pages)
       {
          Int page_lines=Trunc(clientHeight()/ts.lineHeight());
          lines+=pages*Max(1, page_lines); // always move at least one line
       }
-      Vec2 pos=ts.textIndex(T(), cursor(), width, auto_line);
-      pos.y+=ts.lineHeight()*(lines+0.5f); // add 0.5 to get rounding
-      Bool eol; _edit.cur=ts.textPos(T(), pos.x, pos.y, true, width, auto_line, eol);
+      Vec2 pos   =ts.textPos   (T(), cursor(), _text_space, auto_line);
+           pos.y+=ts.lineHeight()*(lines+0.5f); // add 0.5 to get rounding
+      Bool eol; _edit.cur=ts.textIndex(T(), pos.x, pos.y, TEXT_INDEX_DEFAULT, _text_space, auto_line, eol); // TODO: this could be "_edit.overwrite ? TEXT_INDEX_OVERWRITE : TEXT_INDEX_DEFAULT" but for that case we would have to adjust 'pos.x' based on char width
    }
 }
 /******************************************************************************/
@@ -430,8 +432,8 @@ void TextBox::update(C GuiPC &gpc)
 
             Flt  offset      =ts.size.x*TEXTBOX_OFFSET;
             Vec2 relative_pos=*touch_pos-gpc.offset,
-                  clipped_pos=relative_pos&_crect; // have to clip so after we start selecting and move mouse outside the client rectangle, we don't set cursor from outside, instead start smooth scrolling when mouse is outside
-            Bool eol; Int pos=ts.textPos(T(), clipped_pos.x - _crect.min.x + slidebar[0].offset() - offset, _crect.max.y - clipped_pos.y + slidebar[1].offset(), !ButtonDb(touch_state) && !_edit.overwrite, virtualWidth() - offset*2, wordWrap() ? AUTO_LINE_SPACE_SPLIT : AUTO_LINE_NONE, eol);
+                  clipped_pos=relative_pos&_crect; // have to clip so after we start selecting and move mouse outside the client rectangle, we don't set cursor to be outside, instead start smooth scrolling when mouse is outside towards cursor, but limit the cursor position within visible area
+            Bool eol; Int pos=ts.textIndex(T(), clipped_pos.x - _crect.min.x + slidebar[0].offset() - offset, _crect.max.y - clipped_pos.y + slidebar[1].offset(), (ButtonDb(touch_state) || _edit.overwrite) ? TEXT_INDEX_OVERWRITE : TEXT_INDEX_DEFAULT, _text_space, wordWrap(), eol);
 
             if(ButtonDb(touch_state))
             {
@@ -513,18 +515,18 @@ void TextBox::draw(C GuiPC &gpc)
                   if(T().is() || active)
                   {
                      text_rect.min.x+=offset - slidebar[0].offset(); text_rect.max.x=text_rect.min.x+virtualWidth () - offset*2;
-                     text_rect.max.y+=         slidebar[1].offset(); text_rect.min.y=text_rect.max.y-virtualHeight()           ;
+                     text_rect.max.y+=         slidebar[1].offset(); text_rect.min.y=text_rect.max.y-virtualHeight();
                      if(active)ts.edit=&_edit;
-                     D.text(ts, text_rect, T(), wordWrap() ? AUTO_LINE_SPACE_SPLIT : AUTO_LINE_NONE);
+                     D.text(ts, text_rect, T(), null, 0, wordWrap(), &_text_space);
                   #if DEBUG && 0 // draw cursor position
-                     Vec2 pos=ts.textIndex(T(), cursor(), text_rect.w(), wordWrap() ? AUTO_LINE_SPACE_SPLIT : AUTO_LINE_NONE);
+                     Vec2 pos=ts.textPos(T(), cursor(), _text_space, wordWrap());
                      (pos*Vec2(1, -1) + text_rect.lu()).draw(RED);
                   #endif
                   }else
                   if(hint.is())
                   {
                      text_rect.extendX(-offset); // we could've set virtualSize to full client size as a special case in 'setVirtualSize', however to just do this here, is faster (also because most of the time, hint is not displayed)
-                     ts.color.a=((ts.color.a*96)>>8); ts.size*=0.85f; D.text(ts, text_rect, hint, AUTO_LINE_SPACE_SPLIT);
+                     ts.color.a=((ts.color.a*96)>>8); ts.size*=0.85f; D.text(ts, text_rect, hint, null, 0, true);
                   }
                }
             }
@@ -542,7 +544,7 @@ Bool TextBox::save(File &f, CChar *path)C
 {
    if(super::save(f, path))
    {
-      // no need to save '_crect' because we always reset it after loading
+      // no need to save '_crect', '_text_space' because we always reset it after loading
       f.putMulti(Byte(1), kb_lit, _word_wrap, _max_length, _slidebar_size); // version
       f<<hint<<_text;
       f.putAsset(_skin.id());

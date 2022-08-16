@@ -69,7 +69,7 @@ class CopyElements : ClosableWindow
       void create()
       {
          Gui+=super .create(Rect_C(0, 0, 1.65, 1.1), "Replace elements").hide(); button[2].show();
-         T  +=text  .create(Rect_LU(0, 0, clientWidth(), 0.19).extend(-0.02), "Following elements already exist in target project.\nPlease select which elements should be copied and replace those in target project.\nThe elements that are not selected will not be copied."); text.auto_line=AUTO_LINE_SPACE_SPLIT;
+         T  +=text  .create(Rect_LU(0, 0, clientWidth(), 0.19).extend(-0.02), "Following elements already exist in target project.\nPlease select which elements should be copied and replace those in target project.\nThe elements that are not selected will not be copied."); text.auto_line=true;
          T  +=copy  .create(Rect_RD(clientWidth()-0.04, -clientHeight()+0.04, 0.25, 0.06), "Copy").func(Copy, T);
          T  +=region.create(Rect(0, copy.rect().max.y, clientWidth(), text.rect().min.y).extend(-0.04));
          ListColumn lc[]=
@@ -457,7 +457,7 @@ class CopyElements : ClosableWindow
             {
                case PAK_LOAD_OK                 : break;
                case PAK_LOAD_UNSUPPORTED_VERSION: Gui.msgBox(S, "Selected project was created with a newer version of the engine."); return;
-               case PAK_LOAD_INCOMPLETE_DATA    : Gui.msgBox(S, S+"Selected project file is incomplete:\nFile size is: "+FileSize(actual_size)+"\nIt should be: "+FileSize(expected_size)+"\nIf downloaded from Esenthel Store, please make sure that the download was not interrupted.\nConsider downloading using " ENGINE_NAME " Editor which supports resuming interrupted downloads."); return;
+               case PAK_LOAD_INCOMPLETE_DATA    : Gui.msgBox(S, S+"Selected project file is incomplete:\nFile size is: "+SizeBytes(actual_size)+"\nIt should be: "+SizeBytes(expected_size)+"\nIf downloaded from Esenthel Store, please make sure that the download was not interrupted.\nConsider downloading using " ENGINE_NAME " Editor which supports resuming interrupted downloads."); return;
                default                          : Gui.msgBox(S, "Can't load selected project"); return;
             }
 

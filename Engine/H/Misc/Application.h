@@ -29,6 +29,8 @@ enum APP_FLAG // Application Flags
    APP_FADE_OUT                       =1<<21, // if enabled then application window and all sounds will smoothly fade out at application close, available only on Desktop platforms
    APP_IGNORE_PRECOMPILED_SHADER_CACHE=1<<22, // if ignore loading shaders from Precompiled Shader Cache
    APP_SHADER_CACHE_MAX_COMPRESS      =1<<23, // if enable maximum compression for the Shader Cache, this slows down generation of the Shader Cache, but reduces its size
+   APP_JOYPAD_THREAD                  =1<<24, // if create a dedicated thread for polling joypads state, enables higher precision joypad events at the cost of extra processing
+   APP_JOYPAD_DISABLE_MINI            =1<<25, // if disable support for a single Nintendo Switch Joy-Con Left or Right held horizontally [Supported Platforms: NintendoSwitch]
 
    APP_AUTO_FREE_OPEN_GL_ES_DATA=APP_AUTO_FREE_IMAGE_OPEN_GL_ES_DATA|APP_AUTO_FREE_MESH_OPEN_GL_ES_DATA,
 };
@@ -128,6 +130,11 @@ struct Application // Application Settings
    T1(TYPE) void addFuncCall(void func(TYPE *user), TYPE *user) {addFuncCall((void(*)(Ptr))func,  user);} // add custom function to the Application callback list to be automatically called during Application Update on the main thread
    T1(TYPE) void addFuncCall(void func(TYPE &user), TYPE &user) {addFuncCall((void(*)(Ptr))func, &user);} // add custom function to the Application callback list to be automatically called during Application Update on the main thread
 
+            void includeFuncCall(void func(          )            ) {_callbacks.include(func      );}             // include custom function to the gui function callback list to be automatically called at the end of the 'Gui.update'
+            void includeFuncCall(void func(Ptr   user), Ptr   user) {_callbacks.include(func, user);}             // include custom function to the gui function callback list to be automatically called at the end of the 'Gui.update'
+   T1(TYPE) void includeFuncCall(void func(TYPE *user), TYPE *user) {includeFuncCall((void(*)(Ptr))func,  user);} // include custom function to the gui function callback list to be automatically called at the end of the 'Gui.update'
+   T1(TYPE) void includeFuncCall(void func(TYPE &user), TYPE &user) {includeFuncCall((void(*)(Ptr))func, &user);} // include custom function to the gui function callback list to be automatically called at the end of the 'Gui.update'
+
 #if EE_PRIVATE
    static Bool Fullscreen();
 
@@ -149,6 +156,7 @@ struct Application // Application Settings
    Bool activeOrBackFull       ()C {return _active || _back_full;}
    void activeOrBackFullChanged();
    void setActive(Bool active);
+   void setStayAwake();
 
    Bool testInstance  ();
    void windowCreate  ();
@@ -208,6 +216,7 @@ private:
 void StartEEManually(Ptr dll_module_instance); // this function imitates "WinMain" function, and should be called only in a DLL based application to start the engine manually
 
 void LoadEmbeddedPaks(Cipher *cipher); // load PAK files embedded in Application executable file, you can call this inside 'InitPre' function, 'cipher'=Cipher used for encrypting PAK files
+void LoadAndroidAssetPacks(Int asset_packs, Cipher *cipher); // load Project Data from Android Asset Packs
 
 void SupportCompressBC   (); // call this inside 'InitPre' function to add support for compressing IMAGE_BC6/7 formats                     , using this will however make your executable file bigger
 void SupportCompressETC  (); // call this inside 'InitPre' function to add support for compressing IMAGE_ETC   formats                     , using this will however make your executable file bigger
@@ -227,6 +236,7 @@ inline Str MLT(C Str &english) {return english;}
        Str MLT(C Str &english, LANG_TYPE l0, C Str &t0, LANG_TYPE l1, C Str &t1, LANG_TYPE l2, C Str &t2, LANG_TYPE l3, C Str &t3, LANG_TYPE l4, C Str &t4, LANG_TYPE l5, C Str &t5, LANG_TYPE l6, C Str &t6, LANG_TYPE l7, C Str &t7, LANG_TYPE l8, C Str &t8);
        Str MLT(C Str &english, LANG_TYPE l0, C Str &t0, LANG_TYPE l1, C Str &t1, LANG_TYPE l2, C Str &t2, LANG_TYPE l3, C Str &t3, LANG_TYPE l4, C Str &t4, LANG_TYPE l5, C Str &t5, LANG_TYPE l6, C Str &t6, LANG_TYPE l7, C Str &t7, LANG_TYPE l8, C Str &t8, LANG_TYPE l9, C Str &t9);
        Str MLT(C Str &english, LANG_TYPE l0, C Str &t0, LANG_TYPE l1, C Str &t1, LANG_TYPE l2, C Str &t2, LANG_TYPE l3, C Str &t3, LANG_TYPE l4, C Str &t4, LANG_TYPE l5, C Str &t5, LANG_TYPE l6, C Str &t6, LANG_TYPE l7, C Str &t7, LANG_TYPE l8, C Str &t8, LANG_TYPE l9, C Str &t9, LANG_TYPE l10, C Str &t10);
+       Str MLT(C Str &english, LANG_TYPE l0, C Str &t0, LANG_TYPE l1, C Str &t1, LANG_TYPE l2, C Str &t2, LANG_TYPE l3, C Str &t3, LANG_TYPE l4, C Str &t4, LANG_TYPE l5, C Str &t5, LANG_TYPE l6, C Str &t6, LANG_TYPE l7, C Str &t7, LANG_TYPE l8, C Str &t8, LANG_TYPE l9, C Str &t9, LANG_TYPE l10, C Str &t10, LANG_TYPE l11, C Str &t11);
 
 // Multi Language Text Constant, returns one of the few translations provided depending on current application language
 inline CChar* MLTC(CChar* english) {return english;}
@@ -241,6 +251,7 @@ inline CChar* MLTC(CChar* english) {return english;}
        CChar* MLTC(CChar* english, LANG_TYPE l0, CChar* t0, LANG_TYPE l1, CChar* t1, LANG_TYPE l2, CChar* t2, LANG_TYPE l3, CChar* t3, LANG_TYPE l4, CChar* t4, LANG_TYPE l5, CChar* t5, LANG_TYPE l6, CChar* t6, LANG_TYPE l7, CChar* t7, LANG_TYPE l8, CChar* t8);
        CChar* MLTC(CChar* english, LANG_TYPE l0, CChar* t0, LANG_TYPE l1, CChar* t1, LANG_TYPE l2, CChar* t2, LANG_TYPE l3, CChar* t3, LANG_TYPE l4, CChar* t4, LANG_TYPE l5, CChar* t5, LANG_TYPE l6, CChar* t6, LANG_TYPE l7, CChar* t7, LANG_TYPE l8, CChar* t8, LANG_TYPE l9, CChar* t9);
        CChar* MLTC(CChar* english, LANG_TYPE l0, CChar* t0, LANG_TYPE l1, CChar* t1, LANG_TYPE l2, CChar* t2, LANG_TYPE l3, CChar* t3, LANG_TYPE l4, CChar* t4, LANG_TYPE l5, CChar* t5, LANG_TYPE l6, CChar* t6, LANG_TYPE l7, CChar* t7, LANG_TYPE l8, CChar* t8, LANG_TYPE l9, CChar* t9, LANG_TYPE l10, CChar* t10);
+       CChar* MLTC(CChar* english, LANG_TYPE l0, CChar* t0, LANG_TYPE l1, CChar* t1, LANG_TYPE l2, CChar* t2, LANG_TYPE l3, CChar* t3, LANG_TYPE l4, CChar* t4, LANG_TYPE l5, CChar* t5, LANG_TYPE l6, CChar* t6, LANG_TYPE l7, CChar* t7, LANG_TYPE l8, CChar* t8, LANG_TYPE l9, CChar* t9, LANG_TYPE l10, CChar* t10, LANG_TYPE l11, CChar* t11);
 /******************************************************************************/
 #if EE_PRIVATE
 extern Bool LogInit;

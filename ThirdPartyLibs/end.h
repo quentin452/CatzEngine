@@ -1,7 +1,7 @@
-#define C    const
-#define T    (*this)
-#define null nullptr
-#define SIZE sizeof
+#define C       const
+#define T       (*this)
+#define null    nullptr
+#define SIZE(x) UIntPtr(sizeof(x))
 
 #undef  DEBUG
 #define DEBUG   SET_DEBUG

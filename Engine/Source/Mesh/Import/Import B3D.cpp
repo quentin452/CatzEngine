@@ -162,8 +162,8 @@ static void ImportB3DNode(File &f, Chunk &c, Memx<NODE> &nodes, NODE *parent, Te
             {
                c.size+=f.pos();
                Int flags, tex_coord_sets, tex_coord_set_size; f>>flags>>tex_coord_sets>>tex_coord_set_size;
-               mesh.has_nrm   =FlagTest(flags, 1);
-               mesh.has_color =FlagTest(flags, 2);
+               mesh.has_nrm   =FlagOn(flags, 1);
+               mesh.has_color =FlagOn(flags, 2);
                mesh.tex_coords=tex_coord_sets;
                for(; !f.end() && c.size>f.pos(); )
                {
@@ -201,9 +201,9 @@ static void ImportB3DNode(File &f, Chunk &c, Memx<NODE> &nodes, NODE *parent, Te
          c.size+=f.pos();
          KEYS &key=node.keys.New();
          Int flags; f>>flags;
-         key.has_pos  =FlagTest(flags, 1);
-         key.has_scale=FlagTest(flags, 2);
-         key.has_rot  =FlagTest(flags, 4);
+         key.has_pos  =FlagOn(flags, 1);
+         key.has_scale=FlagOn(flags, 2);
+         key.has_rot  =FlagOn(flags, 4);
          for(; !f.end() && c.size>f.pos(); )
          {
             FRAME &frame=key.frames.New();
@@ -471,8 +471,8 @@ Bool ImportB3D(C Str &name, Mesh *mesh, Skeleton *skeleton, XAnimation *animatio
                {
                   F_TEXS f_t;
                   TEXS  &t=texs.New(); t.file=GetStr(f); f>>f_t; t.pos=f_t.pos; t.scale=f_t.scale; t.rotate=f_t.rotate;
-                  t.has_alpha =FlagTest(f_t.flags,     2);
-                  t.second_tex=FlagTest(f_t.flags, 65536);
+                  t.has_alpha =FlagOn(f_t.flags,     2);
+                  t.second_tex=FlagOn(f_t.flags, 65536);
                 //LogN(S+"T "+f_t.flags+' '+f_t.blend+' '+t.file);
                }
             }else
@@ -483,8 +483,8 @@ Bool ImportB3D(C Str &name, Mesh *mesh, Skeleton *skeleton, XAnimation *animatio
                for(; !f.end() && c.size>f.pos(); )
                {
                   BRUS &b=brus.New(); b.name=GetStr(f); Int blend, fx; f>>b.color>>b.specular>>blend>>fx; REP(n_texs){Int tex_id; f>>tex_id; if(InRange(tex_id, texs))b.tex_id.add(tex_id);}
-                  b.cull       =!FlagTest(fx, 16);
-                  b.full_bright= FlagTest(fx,  1);
+                  b.cull       =FlagOff(fx, 16);
+                  b.full_bright=FlagOn (fx,  1);
                 //Log(S+"B "+blend+' '+fx+' '+b.name); FREPA(b.tex_id)Log(S+' '+texs[b.tex_id[i]].file); LogN();
                }
             }else

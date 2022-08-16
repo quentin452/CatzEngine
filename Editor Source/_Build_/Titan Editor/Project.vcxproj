@@ -1,5 +1,9 @@
 ﻿<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<ItemGroup Label="ProjectConfigurations">
+		<ProjectConfiguration Include="Debug DX11|Android-arm64-v8a">
+			<Configuration>Debug DX11</Configuration>
+			<Platform>Android-arm64-v8a</Platform>
+		</ProjectConfiguration>
 		<ProjectConfiguration Include="Debug DX11|ARM">
 			<Configuration>Debug DX11</Configuration>
 			<Platform>ARM</Platform>
@@ -15,6 +19,10 @@
 		<ProjectConfiguration Include="Debug DX11|x64">
 			<Configuration>Debug DX11</Configuration>
 			<Platform>x64</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="Debug Universal DX11|Android-arm64-v8a">
+			<Configuration>Debug Universal DX11</Configuration>
+			<Platform>Android-arm64-v8a</Platform>
 		</ProjectConfiguration>
 		<ProjectConfiguration Include="Debug Universal DX11|ARM">
 			<Configuration>Debug Universal DX11</Configuration>
@@ -32,6 +40,10 @@
 			<Configuration>Debug Universal DX11</Configuration>
 			<Platform>x64</Platform>
 		</ProjectConfiguration>
+		<ProjectConfiguration Include="Release DX11|Android-arm64-v8a">
+			<Configuration>Release DX11</Configuration>
+			<Platform>Android-arm64-v8a</Platform>
+		</ProjectConfiguration>
 		<ProjectConfiguration Include="Release DX11|ARM">
 			<Configuration>Release DX11</Configuration>
 			<Platform>ARM</Platform>
@@ -47,6 +59,10 @@
 		<ProjectConfiguration Include="Release DX11|x64">
 			<Configuration>Release DX11</Configuration>
 			<Platform>x64</Platform>
+		</ProjectConfiguration>
+		<ProjectConfiguration Include="Release Universal DX11|Android-arm64-v8a">
+			<Configuration>Release Universal DX11</Configuration>
+			<Platform>Android-arm64-v8a</Platform>
 		</ProjectConfiguration>
 		<ProjectConfiguration Include="Release Universal DX11|ARM">
 			<Configuration>Release Universal DX11</Configuration>
@@ -106,6 +122,16 @@
 		<WholeProgramOptimization>true</WholeProgramOptimization>
 		<PlatformToolset>v143</PlatformToolset>
 	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DX11|Android-arm64-v8a'" Label="Configuration">
+		<ConfigurationType>Application</ConfigurationType>
+		<CharacterSet>Unicode</CharacterSet>
+		<WholeProgramOptimization>true</WholeProgramOptimization>
+		<CLanguageStandard>c17</CLanguageStandard>
+		<CppLanguageStandard>cpp17</CppLanguageStandard>
+		<UseOfStl>cpp_static</UseOfStl>
+		<AndroidMinSdkVersion>21</AndroidMinSdkVersion>
+		<PlatformToolset>v143</PlatformToolset>
+	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DX11|NX64'" Label="Configuration">
 		<ConfigurationType>Application</ConfigurationType>
 		<CharacterSet>Unicode</CharacterSet>
@@ -121,6 +147,18 @@
 		<CharacterSet>Unicode</CharacterSet>
 		<WindowsAppContainer>true</WindowsAppContainer>
 		<AppContainerApplication>true</AppContainerApplication>
+		<PlatformToolset>v143</PlatformToolset>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|Android-arm64-v8a'" Label="Configuration">
+		<ConfigurationType>Application</ConfigurationType>
+		<WholeProgramOptimization>true</WholeProgramOptimization>
+		<CharacterSet>Unicode</CharacterSet>
+		<WindowsAppContainer>true</WindowsAppContainer>
+		<AppContainerApplication>true</AppContainerApplication>
+		<CLanguageStandard>c17</CLanguageStandard>
+		<CppLanguageStandard>cpp17</CppLanguageStandard>
+		<UseOfStl>cpp_static</UseOfStl>
+		<AndroidMinSdkVersion>21</AndroidMinSdkVersion>
 		<PlatformToolset>v143</PlatformToolset>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|NX64'" Label="Configuration">
@@ -148,6 +186,15 @@
 		<CharacterSet>Unicode</CharacterSet>
 		<PlatformToolset>v143</PlatformToolset>
 	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DX11|Android-arm64-v8a'" Label="Configuration">
+		<ConfigurationType>Application</ConfigurationType>
+		<CharacterSet>Unicode</CharacterSet>
+		<CLanguageStandard>c17</CLanguageStandard>
+		<CppLanguageStandard>cpp17</CppLanguageStandard>
+		<UseOfStl>cpp_static</UseOfStl>
+		<AndroidMinSdkVersion>21</AndroidMinSdkVersion>
+		<PlatformToolset>v143</PlatformToolset>
+	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DX11|NX64'" Label="Configuration">
 		<ConfigurationType>Application</ConfigurationType>
 		<CharacterSet>Unicode</CharacterSet>
@@ -161,6 +208,17 @@
 		<CharacterSet>Unicode</CharacterSet>
 		<WindowsAppContainer>true</WindowsAppContainer>
 		<AppContainerApplication>true</AppContainerApplication>
+		<PlatformToolset>v143</PlatformToolset>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Universal DX11|Android-arm64-v8a'" Label="Configuration">
+		<ConfigurationType>Application</ConfigurationType>
+		<CharacterSet>Unicode</CharacterSet>
+		<WindowsAppContainer>true</WindowsAppContainer>
+		<AppContainerApplication>true</AppContainerApplication>
+		<CLanguageStandard>c17</CLanguageStandard>
+		<CppLanguageStandard>cpp17</CppLanguageStandard>
+		<UseOfStl>cpp_static</UseOfStl>
+		<AndroidMinSdkVersion>21</AndroidMinSdkVersion>
 		<PlatformToolset>v143</PlatformToolset>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Universal DX11|NX64'" Label="Configuration">
@@ -197,11 +255,17 @@
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release DX11|x64'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
 	</ImportGroup>
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release DX11|Android-arm64-v8a'" Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
+	</ImportGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release DX11|NX64'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
 		<Import Project="ImportNintendoSdk.props"/>
 	</ImportGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|x64'" Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
+	</ImportGroup>
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|Android-arm64-v8a'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
 	</ImportGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|NX64'" Label="PropertySheets">
@@ -217,11 +281,17 @@
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug DX11|x64'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
 	</ImportGroup>
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug DX11|Android-arm64-v8a'" Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
+	</ImportGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug DX11|NX64'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
 		<Import Project="ImportNintendoSdk.props"/>
 	</ImportGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug Universal DX11|x64'" Label="PropertySheets">
+		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
+	</ImportGroup>
+	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug Universal DX11|Android-arm64-v8a'" Label="PropertySheets">
 		<Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform"/>
 	</ImportGroup>
 	<ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug Universal DX11|NX64'" Label="PropertySheets">
@@ -241,8 +311,10 @@
 		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug Universal DX11|ARM'">true</LinkIncremental>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='Debug DX11|x64'">$(ProjectDir)</OutDir>
 		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug DX11|x64'">true</LinkIncremental>
+		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug DX11|Android-arm64-v8a'">true</LinkIncremental>
 		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug DX11|NX64'">true</LinkIncremental>
 		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug Universal DX11|x64'">true</LinkIncremental>
+		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug Universal DX11|Android-arm64-v8a'">true</LinkIncremental>
 		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug Universal DX11|NX64'">true</LinkIncremental>
 		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug DX11|Emscripten'">true</LinkIncremental>
 		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug Universal DX11|Emscripten'">true</LinkIncremental>
@@ -250,8 +322,10 @@
 		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|ARM'">false</LinkIncremental>
 		<OutDir Condition="'$(Configuration)|$(Platform)'=='Release DX11|x64'">$(ProjectDir)</OutDir>
 		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release DX11|x64'">false</LinkIncremental>
+		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release DX11|Android-arm64-v8a'">false</LinkIncremental>
 		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release DX11|NX64'">false</LinkIncremental>
 		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|x64'">false</LinkIncremental>
+		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|Android-arm64-v8a'">false</LinkIncremental>
 		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|NX64'">false</LinkIncremental>
 		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release DX11|Emscripten'">false</LinkIncremental>
 		<LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|Emscripten'">false</LinkIncremental>
@@ -272,6 +346,46 @@
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|NX64'">
 		<CppLanguageStandard>Gnu++17</CppLanguageStandard>
 		<OutDir>$(Platform)\$(Configuration)\</OutDir>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DX11|Android-arm64-v8a'">
+		<OutDir>$(ProjectDir)Android\Debug\$(PlatformTarget)\</OutDir>
+		<IntDir>Android\Debug\</IntDir>
+		<AndroidEnablePackaging>true</AndroidEnablePackaging>
+		<AndroidGradleBuildDir>$(MSBuildProjectDirectory)\Android\</AndroidGradleBuildDir>
+		<AndroidApplicationModule>app</AndroidApplicationModule>
+		<AndroidApkName>$(ProjectName).apk</AndroidApkName>
+		<AndroidApplicationVariant>Debug</AndroidApplicationVariant>
+		<TargetName>libProject</TargetName>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Universal DX11|Android-arm64-v8a'">
+		<OutDir>$(ProjectDir)Android\Debug\$(PlatformTarget)\</OutDir>
+		<IntDir>Android\Debug\</IntDir>
+		<AndroidEnablePackaging>true</AndroidEnablePackaging>
+		<AndroidGradleBuildDir>$(MSBuildProjectDirectory)\Android\</AndroidGradleBuildDir>
+		<AndroidApplicationModule>app</AndroidApplicationModule>
+		<AndroidApkName>$(ProjectName).apk</AndroidApkName>
+		<AndroidApplicationVariant>Debug</AndroidApplicationVariant>
+		<TargetName>libProject</TargetName>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DX11|Android-arm64-v8a'">
+		<OutDir>$(ProjectDir)Android\Release\$(PlatformTarget)\</OutDir>
+		<IntDir>Android\Release\</IntDir>
+		<AndroidEnablePackaging>true</AndroidEnablePackaging>
+		<AndroidGradleBuildDir>$(MSBuildProjectDirectory)\Android\</AndroidGradleBuildDir>
+		<AndroidApplicationModule>app</AndroidApplicationModule>
+		<AndroidApkName>$(ProjectName).apk</AndroidApkName>
+		<AndroidApplicationVariant>Release</AndroidApplicationVariant>
+		<TargetName>libProject</TargetName>
+	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|Android-arm64-v8a'">
+		<OutDir>$(ProjectDir)Android\Release\$(PlatformTarget)\</OutDir>
+		<IntDir>Android\Release\</IntDir>
+		<AndroidEnablePackaging>true</AndroidEnablePackaging>
+		<AndroidGradleBuildDir>$(MSBuildProjectDirectory)\Android\</AndroidGradleBuildDir>
+		<AndroidApplicationModule>app</AndroidApplicationModule>
+		<AndroidApkName>$(ProjectName).apk</AndroidApkName>
+		<AndroidApplicationVariant>Release</AndroidApplicationVariant>
+		<TargetName>libProject</TargetName>
 	</PropertyGroup>
 	<PropertyGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug DX11|NX64'">
 		<ApplicationDataDir>Assets\Nintendo Switch\Data</ApplicationDataDir>
@@ -314,7 +428,7 @@
 		</ClCompile>
 		<Link>
 			<AdditionalOptions>/IGNORE:4078 %(AdditionalOptions)</AdditionalOptions>
-			<AdditionalDependencies>"..\..\..\Editor/Bin/EngineArm32DX11.lib";d3d11.lib;d3d12.lib;d3dcompiler.lib;dinput8.lib;dsound.lib;dxgi.lib;dxguid.lib;Xinput9_1_0.lib;xaudio2.lib;winmm.lib;wininet.lib;ws2_32.lib;imm32.lib;psapi.lib;rpcrt4.lib;version.lib;libcmt.lib;libcpmt.lib;libucrt.lib;libvcruntime.lib;oldnames.lib;iphlpapi.lib;secur32.lib;Setupapi.lib;Dbghelp.lib;comsupp.lib;concrt.lib;Mscms.lib;Advapi32.lib;User32.lib;Shell32.lib;Ole32.lib;OleAut32.lib;Gdi32.lib;uuid.lib;odbc32.lib;Winspool.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalDependencies>"..\..\..\Editor/Bin/EngineArm32DX11.lib";d3d11.lib;d3d12.lib;d3dcompiler.lib;dinput8.lib;dsound.lib;dxgi.lib;dxguid.lib;Xinput9_1_0.lib;xaudio2.lib;winmm.lib;wininet.lib;ws2_32.lib;imm32.lib;psapi.lib;rpcrt4.lib;version.lib;libcmt.lib;libcpmt.lib;libucrt.lib;libvcruntime.lib;oldnames.lib;iphlpapi.lib;secur32.lib;Setupapi.lib;Dbghelp.lib;comsupp.lib;concrt.lib;Mscms.lib;Advapi32.lib;User32.lib;Shell32.lib;Ole32.lib;OleAut32.lib;Gdi32.lib;uuid.lib;odbc32.lib;Winspool.lib;runtimeobject.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<SubSystem>Windows</SubSystem>
@@ -404,7 +518,7 @@
 		</ClCompile>
 		<Link>
 			<AdditionalOptions>/IGNORE:4078 %(AdditionalOptions)</AdditionalOptions>
-			<AdditionalDependencies>"..\..\..\Editor/Bin/Engine64DX11.lib";d3d11.lib;d3d12.lib;d3dcompiler.lib;dinput8.lib;dsound.lib;dxgi.lib;dxguid.lib;Xinput9_1_0.lib;xaudio2.lib;winmm.lib;wininet.lib;ws2_32.lib;imm32.lib;psapi.lib;rpcrt4.lib;version.lib;libcmt.lib;libcpmt.lib;libucrt.lib;libvcruntime.lib;oldnames.lib;iphlpapi.lib;secur32.lib;Setupapi.lib;Dbghelp.lib;comsupp.lib;concrt.lib;Mscms.lib;Advapi32.lib;User32.lib;Shell32.lib;Ole32.lib;OleAut32.lib;Gdi32.lib;uuid.lib;odbc32.lib;Winspool.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalDependencies>"..\..\..\Editor/Bin/Engine64DX11.lib";d3d11.lib;d3d12.lib;d3dcompiler.lib;dinput8.lib;dsound.lib;dxgi.lib;dxguid.lib;Xinput9_1_0.lib;xaudio2.lib;winmm.lib;wininet.lib;ws2_32.lib;imm32.lib;psapi.lib;rpcrt4.lib;version.lib;libcmt.lib;libcpmt.lib;libucrt.lib;libvcruntime.lib;oldnames.lib;iphlpapi.lib;secur32.lib;Setupapi.lib;Dbghelp.lib;comsupp.lib;concrt.lib;Mscms.lib;Advapi32.lib;User32.lib;Shell32.lib;Ole32.lib;OleAut32.lib;Gdi32.lib;uuid.lib;odbc32.lib;Winspool.lib;runtimeobject.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
 			<GenerateDebugInformation>true</GenerateDebugInformation>
 			<SubSystem>Windows</SubSystem>
@@ -414,6 +528,52 @@
 			<TargetMachine>MachineX64</TargetMachine>
 			<ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
 			<EntryPointSymbol>wWinMainCRTStartup</EntryPointSymbol>
+		</Link>
+		<Manifest>
+			<AdditionalManifestFiles>Assets\Windows Manifest.xml</AdditionalManifestFiles>
+		</Manifest>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug DX11|Android-arm64-v8a'">
+		<Midl/>
+		<ClCompile>
+			<Optimization>Disabled</Optimization>
+			<InlineFunctionExpansion>Default</InlineFunctionExpansion>
+			<IntrinsicFunctions>true</IntrinsicFunctions>
+			<FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+			<OmitFramePointers>false</OmitFramePointers>
+			<EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+			<WholeProgramOptimization>false</WholeProgramOptimization>
+			<AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>DEBUG=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<StringPooling>true</StringPooling>
+			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+			<EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+			<FloatingPointModel>Fast</FloatingPointModel>
+			<AdditionalOptions>-Wno-comment -Wno-parentheses -Wno-misleading-indentation -Wno-int-to-void-pointer-cast -Wno-unused-local-typedef -Wno-overloaded-virtual -Wno-switch -Wno-undefined-bool-conversion -Wno-null-dereference -Wno-missing-braces -Wno-invalid-noreturn -Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable -Wno-address-of-temporary</AdditionalOptions>
+			<RuntimeTypeInfo>true</RuntimeTypeInfo>
+			<PrecompiledHeader>Use</PrecompiledHeader>
+			<PrecompiledHeaderFile>StdAfx.h</PrecompiledHeaderFile>
+			<WarningLevel>Level3</WarningLevel>
+			<DisableSpecificWarnings>4018;4244;4312;4521</DisableSpecificWarnings>
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+			<SmallerTypeCheck>true</SmallerTypeCheck>
+			<BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+			<MultiProcessorCompilation>true</MultiProcessorCompilation>
+			<LanguageStandard>stdcpplatest</LanguageStandard>
+			<SDLCheck>false</SDLCheck>
+			<ClangMSExtensions>true</ClangMSExtensions>
+		</ClCompile>
+		<Link>
+			<AdditionalDependencies>..\..\..\Editor/Bin/EngineAndroid.a;</AdditionalDependencies>
+			<IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<SubSystem>Windows</SubSystem>
+			<LargeAddressAware>true</LargeAddressAware>
+			<OptimizeReferences>false</OptimizeReferences>
+			<EnableCOMDATFolding>false</EnableCOMDATFolding>
+			<ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+			<EntryPointSymbol>wWinMainCRTStartup</EntryPointSymbol>
+			<LibraryDependencies>log;android;EGL;GLESv3;z;OpenSLES;atomic</LibraryDependencies>
 		</Link>
 		<Manifest>
 			<AdditionalManifestFiles>Assets\Windows Manifest.xml</AdditionalManifestFiles>
@@ -510,6 +670,52 @@
 			<TargetMachine>MachineX64</TargetMachine>
 			<ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
 			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories); $(VCInstallDir)\lib\store\amd64; $(VCInstallDir)\lib\amd64</AdditionalLibraryDirectories>
+		</Link>
+		<Manifest>
+			<AdditionalManifestFiles>Assets\Windows Manifest.xml</AdditionalManifestFiles>
+		</Manifest>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug Universal DX11|Android-arm64-v8a'">
+		<Midl/>
+		<ClCompile>
+			<Optimization>Disabled</Optimization>
+			<InlineFunctionExpansion>Default</InlineFunctionExpansion>
+			<IntrinsicFunctions>true</IntrinsicFunctions>
+			<FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+			<OmitFramePointers>false</OmitFramePointers>
+			<EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+			<WholeProgramOptimization>false</WholeProgramOptimization>
+			<AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>DEBUG=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<StringPooling>true</StringPooling>
+			<BasicRuntimeChecks>Default</BasicRuntimeChecks>
+			<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+			<EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+			<FloatingPointModel>Fast</FloatingPointModel>
+			<AdditionalOptions>-Wno-comment -Wno-parentheses -Wno-misleading-indentation -Wno-int-to-void-pointer-cast -Wno-unused-local-typedef -Wno-overloaded-virtual -Wno-switch -Wno-undefined-bool-conversion -Wno-null-dereference -Wno-missing-braces -Wno-invalid-noreturn -Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable -Wno-address-of-temporary</AdditionalOptions>
+			<RuntimeTypeInfo>true</RuntimeTypeInfo>
+			<PrecompiledHeader>Use</PrecompiledHeader>
+			<PrecompiledHeaderFile>StdAfx.h</PrecompiledHeaderFile>
+			<WarningLevel>Level3</WarningLevel>
+			<DisableSpecificWarnings>4018;4244;4312;4521</DisableSpecificWarnings>
+			<DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+			<CompileAsWinRT>true</CompileAsWinRT>
+			<MultiProcessorCompilation>true</MultiProcessorCompilation>
+			<LanguageStandard>stdcpp17</LanguageStandard>
+			<SDLCheck>false</SDLCheck>
+			<ClangMSExtensions>true</ClangMSExtensions>
+		</ClCompile>
+		<Link>
+			<AdditionalDependencies>..\..\..\Editor/Bin/EngineAndroid.a;</AdditionalDependencies>
+			<IgnoreSpecificDefaultLibraries/>
+			<GenerateDebugInformation>true</GenerateDebugInformation>
+			<SubSystem>Windows</SubSystem>
+			<LargeAddressAware>true</LargeAddressAware>
+			<OptimizeReferences>false</OptimizeReferences>
+			<EnableCOMDATFolding>false</EnableCOMDATFolding>
+			<ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
+			<AdditionalLibraryDirectories/>
+			<LibraryDependencies>log;android;EGL;GLESv3;z;OpenSLES;atomic</LibraryDependencies>
 		</Link>
 		<Manifest>
 			<AdditionalManifestFiles>Assets\Windows Manifest.xml</AdditionalManifestFiles>
@@ -685,7 +891,7 @@
 		</ClCompile>
 		<Link>
 			<AdditionalOptions>/IGNORE:4078 %(AdditionalOptions)</AdditionalOptions>
-			<AdditionalDependencies>"..\..\..\Editor/Bin/EngineArm32DX11.lib";d3d11.lib;d3d12.lib;d3dcompiler.lib;dinput8.lib;dsound.lib;dxgi.lib;dxguid.lib;Xinput9_1_0.lib;xaudio2.lib;winmm.lib;wininet.lib;ws2_32.lib;imm32.lib;psapi.lib;rpcrt4.lib;version.lib;libcmt.lib;libcpmt.lib;libucrt.lib;libvcruntime.lib;oldnames.lib;iphlpapi.lib;secur32.lib;Setupapi.lib;Dbghelp.lib;comsupp.lib;concrt.lib;Mscms.lib;Advapi32.lib;User32.lib;Shell32.lib;Ole32.lib;OleAut32.lib;Gdi32.lib;uuid.lib;odbc32.lib;Winspool.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalDependencies>"..\..\..\Editor/Bin/EngineArm32DX11.lib";d3d11.lib;d3d12.lib;d3dcompiler.lib;dinput8.lib;dsound.lib;dxgi.lib;dxguid.lib;Xinput9_1_0.lib;xaudio2.lib;winmm.lib;wininet.lib;ws2_32.lib;imm32.lib;psapi.lib;rpcrt4.lib;version.lib;libcmt.lib;libcpmt.lib;libucrt.lib;libvcruntime.lib;oldnames.lib;iphlpapi.lib;secur32.lib;Setupapi.lib;Dbghelp.lib;comsupp.lib;concrt.lib;Mscms.lib;Advapi32.lib;User32.lib;Shell32.lib;Ole32.lib;OleAut32.lib;Gdi32.lib;uuid.lib;odbc32.lib;Winspool.lib;runtimeobject.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
 			<GenerateDebugInformation>false</GenerateDebugInformation>
 			<SubSystem>Windows</SubSystem>
@@ -778,7 +984,7 @@
 		</ClCompile>
 		<Link>
 			<AdditionalOptions>/IGNORE:4078 %(AdditionalOptions)</AdditionalOptions>
-			<AdditionalDependencies>"..\..\..\Editor/Bin/Engine64DX11.lib";d3d11.lib;d3d12.lib;d3dcompiler.lib;dinput8.lib;dsound.lib;dxgi.lib;dxguid.lib;Xinput9_1_0.lib;xaudio2.lib;winmm.lib;wininet.lib;ws2_32.lib;imm32.lib;psapi.lib;rpcrt4.lib;version.lib;libcmt.lib;libcpmt.lib;libucrt.lib;libvcruntime.lib;oldnames.lib;iphlpapi.lib;secur32.lib;Setupapi.lib;Dbghelp.lib;comsupp.lib;concrt.lib;Mscms.lib;Advapi32.lib;User32.lib;Shell32.lib;Ole32.lib;OleAut32.lib;Gdi32.lib;uuid.lib;odbc32.lib;Winspool.lib;%(AdditionalDependencies)</AdditionalDependencies>
+			<AdditionalDependencies>"..\..\..\Editor/Bin/Engine64DX11.lib";d3d11.lib;d3d12.lib;d3dcompiler.lib;dinput8.lib;dsound.lib;dxgi.lib;dxguid.lib;Xinput9_1_0.lib;xaudio2.lib;winmm.lib;wininet.lib;ws2_32.lib;imm32.lib;psapi.lib;rpcrt4.lib;version.lib;libcmt.lib;libcpmt.lib;libucrt.lib;libvcruntime.lib;oldnames.lib;iphlpapi.lib;secur32.lib;Setupapi.lib;Dbghelp.lib;comsupp.lib;concrt.lib;Mscms.lib;Advapi32.lib;User32.lib;Shell32.lib;Ole32.lib;OleAut32.lib;Gdi32.lib;uuid.lib;odbc32.lib;Winspool.lib;runtimeobject.lib;%(AdditionalDependencies)</AdditionalDependencies>
 			<IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
 			<GenerateDebugInformation>false</GenerateDebugInformation>
 			<SubSystem>Windows</SubSystem>
@@ -788,6 +994,54 @@
 			<LinkTimeCodeGeneration/>
 			<TargetMachine>MachineX64</TargetMachine>
 			<EntryPointSymbol>wWinMainCRTStartup</EntryPointSymbol>
+		</Link>
+		<Manifest>
+			<AdditionalManifestFiles>Assets\Windows Manifest.xml</AdditionalManifestFiles>
+		</Manifest>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release DX11|Android-arm64-v8a'">
+		<Midl/>
+		<ClCompile>
+			<Optimization>Full</Optimization>
+			<InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+			<IntrinsicFunctions>true</IntrinsicFunctions>
+			<FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+			<OmitFramePointers>true</OmitFramePointers>
+			<EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+			<WholeProgramOptimization>false</WholeProgramOptimization>
+			<AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>DEBUG=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<StringPooling>true</StringPooling>
+			<BasicRuntimeChecks>Default</BasicRuntimeChecks>
+			<RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+			<EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+			<FloatingPointModel>Fast</FloatingPointModel>
+			<MultiProcessorCompilation>true</MultiProcessorCompilation>
+			<AdditionalOptions>-Wno-comment -Wno-parentheses -Wno-misleading-indentation -Wno-int-to-void-pointer-cast -Wno-unused-local-typedef -Wno-overloaded-virtual -Wno-switch -Wno-undefined-bool-conversion -Wno-null-dereference -Wno-missing-braces -Wno-invalid-noreturn -Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable -Wno-address-of-temporary</AdditionalOptions>
+			<RuntimeTypeInfo>true</RuntimeTypeInfo>
+			<PrecompiledHeader>Use</PrecompiledHeader>
+			<PrecompiledHeaderFile>StdAfx.h</PrecompiledHeaderFile>
+			<WarningLevel>Level3</WarningLevel>
+			<DisableSpecificWarnings>4018;4244;4312;4521</DisableSpecificWarnings>
+			<DebugInformationFormat/>
+			<LanguageStandard>stdcpplatest</LanguageStandard>
+			<BufferSecurityCheck>false</BufferSecurityCheck>
+			<SDLCheck/>
+			<ClangDebugInformationFormat>None</ClangDebugInformationFormat>
+			<ClangMSExtensions>true</ClangMSExtensions>
+			<StackProtectionLevel>None</StackProtectionLevel>
+		</ClCompile>
+		<Link>
+			<AdditionalDependencies>..\..\..\Editor/Bin/EngineAndroid.a;</AdditionalDependencies>
+			<IgnoreAllDefaultLibraries>true</IgnoreAllDefaultLibraries>
+			<GenerateDebugInformation>false</GenerateDebugInformation>
+			<SubSystem>Windows</SubSystem>
+			<LargeAddressAware>true</LargeAddressAware>
+			<OptimizeReferences>true</OptimizeReferences>
+			<EnableCOMDATFolding>true</EnableCOMDATFolding>
+			<LinkTimeCodeGeneration/>
+			<EntryPointSymbol>wWinMainCRTStartup</EntryPointSymbol>
+			<LibraryDependencies>log;android;EGL;GLESv3;z;OpenSLES;atomic</LibraryDependencies>
 		</Link>
 		<Manifest>
 			<AdditionalManifestFiles>Assets\Windows Manifest.xml</AdditionalManifestFiles>
@@ -892,6 +1146,55 @@
 			<TargetMachine>MachineX64</TargetMachine>
 			<AdditionalLibraryDirectories>%(AdditionalLibraryDirectories); $(VCInstallDir)\lib\store\amd64; $(VCInstallDir)\lib\amd64</AdditionalLibraryDirectories>
 			<IgnoreSpecificDefaultLibraries>libcmt;libcpmt</IgnoreSpecificDefaultLibraries>
+		</Link>
+		<Manifest>
+			<AdditionalManifestFiles>Assets\Windows Manifest.xml</AdditionalManifestFiles>
+		</Manifest>
+	</ItemDefinitionGroup>
+	<ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|Android-arm64-v8a'">
+		<Midl/>
+		<ClCompile>
+			<Optimization>Full</Optimization>
+			<InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+			<IntrinsicFunctions>true</IntrinsicFunctions>
+			<FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+			<OmitFramePointers>true</OmitFramePointers>
+			<EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
+			<WholeProgramOptimization>false</WholeProgramOptimization>
+			<AdditionalIncludeDirectories>$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+			<PreprocessorDefinitions>DEBUG=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+			<StringPooling>true</StringPooling>
+			<BasicRuntimeChecks>Default</BasicRuntimeChecks>
+			<RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+			<EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
+			<FloatingPointModel>Fast</FloatingPointModel>
+			<MultiProcessorCompilation>true</MultiProcessorCompilation>
+			<AdditionalOptions>-Wno-comment -Wno-parentheses -Wno-misleading-indentation -Wno-int-to-void-pointer-cast -Wno-unused-local-typedef -Wno-overloaded-virtual -Wno-switch -Wno-undefined-bool-conversion -Wno-null-dereference -Wno-missing-braces -Wno-invalid-noreturn -Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable -Wno-address-of-temporary</AdditionalOptions>
+			<RuntimeTypeInfo>true</RuntimeTypeInfo>
+			<PrecompiledHeader>Use</PrecompiledHeader>
+			<PrecompiledHeaderFile>StdAfx.h</PrecompiledHeaderFile>
+			<WarningLevel>Level3</WarningLevel>
+			<DisableSpecificWarnings>4018;4244;4312;4521</DisableSpecificWarnings>
+			<DebugInformationFormat/>
+			<CompileAsWinRT>true</CompileAsWinRT>
+			<LanguageStandard>stdcpp17</LanguageStandard>
+			<BufferSecurityCheck>false</BufferSecurityCheck>
+			<SDLCheck/>
+			<ClangDebugInformationFormat>None</ClangDebugInformationFormat>
+			<ClangMSExtensions>true</ClangMSExtensions>
+			<StackProtectionLevel>None</StackProtectionLevel>
+		</ClCompile>
+		<Link>
+			<AdditionalDependencies>..\..\..\Editor/Bin/EngineAndroid.a;</AdditionalDependencies>
+			<GenerateDebugInformation>false</GenerateDebugInformation>
+			<SubSystem>Windows</SubSystem>
+			<LargeAddressAware>true</LargeAddressAware>
+			<OptimizeReferences>true</OptimizeReferences>
+			<EnableCOMDATFolding>true</EnableCOMDATFolding>
+			<LinkTimeCodeGeneration/>
+			<AdditionalLibraryDirectories/>
+			<IgnoreSpecificDefaultLibraries/>
+			<LibraryDependencies>log;android;EGL;GLESv3;z;OpenSLES;atomic</LibraryDependencies>
 		</Link>
 		<Manifest>
 			<AdditionalManifestFiles>Assets\Windows Manifest.xml</AdditionalManifestFiles>
@@ -1051,16 +1354,20 @@
 			<PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DX11|ARM'">Create</PrecompiledHeader>
 			<PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Universal DX11|ARM'">Create</PrecompiledHeader>
 			<PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DX11|x64'">Create</PrecompiledHeader>
+			<PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DX11|Android-arm64-v8a'">Create</PrecompiledHeader>
 			<PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DX11|NX64'">Create</PrecompiledHeader>
 			<PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Universal DX11|x64'">Create</PrecompiledHeader>
+			<PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Universal DX11|Android-arm64-v8a'">Create</PrecompiledHeader>
 			<PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Universal DX11|NX64'">Create</PrecompiledHeader>
 			<PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug DX11|Emscripten'">Create</PrecompiledHeader>
 			<PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug Universal DX11|Emscripten'">Create</PrecompiledHeader>
 			<PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DX11|ARM'">Create</PrecompiledHeader>
 			<PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|ARM'">Create</PrecompiledHeader>
 			<PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DX11|x64'">Create</PrecompiledHeader>
+			<PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DX11|Android-arm64-v8a'">Create</PrecompiledHeader>
 			<PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DX11|NX64'">Create</PrecompiledHeader>
 			<PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|x64'">Create</PrecompiledHeader>
+			<PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|Android-arm64-v8a'">Create</PrecompiledHeader>
 			<PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|NX64'">Create</PrecompiledHeader>
 			<PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release DX11|Emscripten'">Create</PrecompiledHeader>
 			<PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|Emscripten'">Create</PrecompiledHeader>
@@ -1076,7 +1383,9 @@
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|NX64'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|NX64'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|x64'">true</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|Android-arm64-v8a'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|x64'">true</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|Android-arm64-v8a'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|ARM'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|ARM'">true</ExcludedFromBuild>
 		</Media>
@@ -1090,7 +1399,9 @@
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|NX64'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|NX64'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|x64'">true</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|Android-arm64-v8a'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|x64'">true</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|Android-arm64-v8a'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|ARM'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|ARM'">true</ExcludedFromBuild>
 		</Media>
@@ -1104,7 +1415,9 @@
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|NX64'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|NX64'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|x64'">true</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|Android-arm64-v8a'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|x64'">true</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|Android-arm64-v8a'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|ARM'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|ARM'">true</ExcludedFromBuild>
 		</Image>
@@ -1118,7 +1431,9 @@
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|NX64'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|NX64'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|x64'">true</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|Android-arm64-v8a'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|x64'">true</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|Android-arm64-v8a'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|ARM'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|ARM'">true</ExcludedFromBuild>
 		</Image>
@@ -1132,7 +1447,9 @@
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|NX64'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|NX64'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|x64'">true</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|Android-arm64-v8a'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|x64'">true</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|Android-arm64-v8a'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|ARM'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|ARM'">true</ExcludedFromBuild>
 		</Image>
@@ -1146,7 +1463,9 @@
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|NX64'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|NX64'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|x64'">true</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|Android-arm64-v8a'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|x64'">true</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|Android-arm64-v8a'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|ARM'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|ARM'">true</ExcludedFromBuild>
 		</Image>
@@ -1160,7 +1479,9 @@
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|NX64'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|NX64'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|x64'">true</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|Android-arm64-v8a'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|x64'">true</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|Android-arm64-v8a'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|ARM'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|ARM'">true</ExcludedFromBuild>
 		</Image>
@@ -1174,7 +1495,9 @@
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|NX64'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|NX64'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|x64'">true</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|Android-arm64-v8a'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|x64'">true</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|Android-arm64-v8a'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|ARM'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|ARM'">true</ExcludedFromBuild>
 		</AppxManifest>
@@ -1182,7 +1505,9 @@
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Universal DX11|ARM'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|ARM'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Universal DX11|x64'">true</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Universal DX11|Android-arm64-v8a'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|x64'">true</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|Android-arm64-v8a'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug Universal DX11|Emscripten'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|Emscripten'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|Emscripten'">true</ExcludedFromBuild>
@@ -1191,6 +1516,8 @@
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|NX64'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|NX64'">true</ExcludedFromBuild>
 			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|NX64'">true</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release DX11|Android-arm64-v8a'">true</ExcludedFromBuild>
+			<ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug DX11|Android-arm64-v8a'">true</ExcludedFromBuild>
 		</ResourceCompile>
 	</ItemGroup>
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets"/>

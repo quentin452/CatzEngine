@@ -24,9 +24,9 @@
          || color_underwater_time>src.color_underwater_time;
    }
    void EditWaterMtrl::reset() {T=EditWaterMtrl();}
-   void EditWaterMtrl::newData()
+   void EditWaterMtrl::newData(C Project &proj)
    {
-      super::newData();
+      super::newData(proj);
       density_time++;
       scale_color_time++; scale_normal_time++; scale_bump_time++;
       refract_time++; refract_reflection_time++;

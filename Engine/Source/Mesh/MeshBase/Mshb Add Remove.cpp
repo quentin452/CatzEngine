@@ -369,10 +369,10 @@ Int MeshBase::mergeFaces(Int a, Int b)
    Int merged=-1;
    if(a!=b)
    {
-      Bool a_quad=FlagTest(a, SIGN_BIT), a_in_range; Int ai=a; if(a_quad){ai^=SIGN_BIT; a_in_range=InRange(ai, quad);}else a_in_range=InRange(ai, tri);
+      Bool a_quad=FlagOn(a, SIGN_BIT), a_in_range; Int ai=a; if(a_quad){ai^=SIGN_BIT; a_in_range=InRange(ai, quad);}else a_in_range=InRange(ai, tri);
       if(a_in_range)
       {
-         Bool b_quad=FlagTest(b, SIGN_BIT), b_in_range; Int bi=b; if(b_quad){bi^=SIGN_BIT; b_in_range=InRange(bi, quad);}else b_in_range=InRange(bi, tri);
+         Bool b_quad=FlagOn(b, SIGN_BIT), b_in_range; Int bi=b; if(b_quad){bi^=SIGN_BIT; b_in_range=InRange(bi, quad);}else b_in_range=InRange(bi, tri);
          if(b_in_range)
          {
             VecI4 a_ind , b_ind;

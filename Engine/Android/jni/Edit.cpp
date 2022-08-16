@@ -1,5 +1,0 @@
-﻿#include "../../Source/Edit/Save Changes.cpp"
-#include "../../Source/Edit/Undo.cpp"
-#include "../../Source/Edit/Viewport4.cpp"
-#include "../../Source/Edit/Version.cpp"
-#include "../../Source/Edit/Editor Interface.cpp"

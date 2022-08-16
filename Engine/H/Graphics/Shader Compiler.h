@@ -234,6 +234,7 @@ struct ShaderCompiler
    Memc<Source>       sources;
    Map <Str8, Buffer> buffers;
    Memc<Str8        > images, rw_images;
+   SyncLock           lock;
 
    void message(C Str &t) {messages.line()+=t;}
    Bool error  (C Str &t) {message(t); return false;}

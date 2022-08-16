@@ -14,8 +14,8 @@ struct FileVersion
             revision, // global revision number
             flag    ; // optional flags
 
-   Bool removed   ()C {return FlagTest(flag, REMOVED   );}
-   Bool compressed()C {return FlagTest(flag, COMPRESSED);}
+   Bool removed   ()C {return FlagOn(flag, REMOVED   );}
+   Bool compressed()C {return FlagOn(flag, COMPRESSED);}
 
    FileVersion& zero(                                                       ) {T.time.zero(); T.user=0   ; T.revision=       0; T.flag=   0; return T;}
    FileVersion& set (C DateTime &time, UInt user, UInt revision, UInt flag=0) {T.time=time  ; T.user=user; T.revision=revision; T.flag=flag; return T;}

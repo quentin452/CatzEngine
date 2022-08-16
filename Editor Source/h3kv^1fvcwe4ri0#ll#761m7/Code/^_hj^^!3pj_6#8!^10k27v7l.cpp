@@ -40,9 +40,9 @@ class EditWaterMtrl : EditMaterial
 
    // operations
    void reset() {T=EditWaterMtrl();}
-   void newData()
+   void newData(C Project &proj)
    {
-      super.newData();
+      super.newData(proj);
       density_time++;
       scale_color_time++; scale_normal_time++; scale_bump_time++;
       refract_time++; refract_reflection_time++;

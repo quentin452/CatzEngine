@@ -31,8 +31,8 @@ class ElmWaterMtrl : ElmData
 
    // operations
    void from(C EditWaterMtrl &src);
-   uint undo(C ElmWaterMtrl &src);  // don't adjust 'ver' here because it also relies on 'EditWaterMtrl', because of that this is included in 'ElmFileInShort', don't undo 'downsize_tex_mobile', 'flag' because they should be set only in 'from'
-   uint sync(C ElmWaterMtrl &src);  // don't adjust 'ver' here because it also relies on 'EditWaterMtrl', because of that this is included in 'ElmFileInShort', don't sync 'downsize_tex_mobile', 'flag' because they should be set only in 'from'
+   uint undo(C ElmWaterMtrl &src);  // don't adjust 'ver' here because it also relies on 'EditWaterMtrl', because of that this is included in 'ElmFileInShort', don't undo 'tex_downsize', 'flag' because they should be set only in 'from'
+   uint sync(C ElmWaterMtrl &src);  // don't adjust 'ver' here because it also relies on 'EditWaterMtrl', because of that this is included in 'ElmFileInShort', don't sync 'tex_downsize', 'flag' because they should be set only in 'from'
 
    // io
    virtual bool save(File &f)C override;

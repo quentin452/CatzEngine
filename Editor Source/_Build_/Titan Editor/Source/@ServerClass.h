@@ -49,16 +49,16 @@ class ServerClass : Connection
    void syncCodes         (  Memc<ElmTypeVer > &elms       );                         
    void syncCodes         (C Memc<ElmCodeData> &elms       );                         
 
-   void    newElm    (     Elm  &elm                                     );
-   void renameElm    (     Elm  &elm                                     );
-   void setElmParent (     Elm  &elm                                     );
-   void removeElms   (Memc<UID> &elms, bool removed   , C TimeStamp &time);
-   void noPublishElms(Memc<UID> &elms, bool no_publish, C TimeStamp &time);
-   void getElmNames  (Memc<UID> &elms                                    );
-   void getTextures  (Memc<UID> &texs                                    );
-   void getElmShort  (Memc<UID> &elms                                    );
-   void getElmLong   (Memc<UID> &elms                                    );
-   void getElmLong   (   C UID  &elm_id                                  );
+   void    newElm   (     Elm  &elm                                                         );
+   void renameElm   (     Elm  &elm                                                         );
+   void setElmParent(     Elm  &elm                                                         );
+   void  removeElms (Memc<UID> &elms, bool  removed,                       C TimeStamp &time);
+   void publishElms (Memc<UID> &elms, sbyte publish, sbyte publish_mobile, C TimeStamp &time);
+   void getElmNames (Memc<UID> &elms                                                        );
+   void getTextures (Memc<UID> &texs                                                        );
+   void getElmShort (Memc<UID> &elms                                                        );
+   void getElmLong  (Memc<UID> &elms                                                        );
+   void getElmLong  (   C UID  &elm_id                                                      );
 
    void setTex     (C UID &tex_id); // send if it wasn't available on the server yet, this should be called everytime a texture is created in the project (OR reused in case it was created before but not yet sent because it was not used at that time)
    void setElmShort(C UID &elm_id); // this sets only ID TYPE DATA       but no NAME, PARENT, etc.

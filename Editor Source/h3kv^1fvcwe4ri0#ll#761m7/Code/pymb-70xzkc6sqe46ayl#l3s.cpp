@@ -237,10 +237,10 @@ class SynchronizerClass
        if(1)l.name="_Downloading..";
             l.type=s.type;
             l.flag=s.flag;
-            l.    parent_id  =s.    parent_id;
-            l.    parent_time=s.    parent_time;
-            l.   removed_time=s.   removed_time;
-            l.no_publish_time=s.no_publish_time;
+            l. parent_id  =s.   parent_id;
+            l. parent_time=s. parent_time;
+            l.removed_time=s.removed_time;
+            l.publish_time=s.publish_time;
             l.opened(false); // keep new downloaded elements as closed
          }
       }
@@ -260,24 +260,24 @@ class SynchronizerClass
 
       // compare versions
       Memc<UID     > get_names, get_textures, set_textures, get_short, get_long, set_long;
-      Memc<Elm*    > set_names, set_parents, set_removed, set_no_publish;
+      Memc<Elm*    > set_names, set_parents, set_removed, set_publish;
       Memc<ElmDepth> set_full;
       FREPA(local.elms)
       {
          Elm &l=local.elms[i], *s=server.findElm(l.id);
          if( !s)set_full.New().elm=&l;else // if server doesn't have the element then send it fully
          {
-            if(l.name_time<s.name_time)get_names.add(l.id);else
-            if(l.name_time>s.name_time)set_names.add(&l);
+            if(l.name_time<s.name_time)get_names.add(l.id);else // get from server
+            if(l.name_time>s.name_time)set_names.add(&l);       // set to   server
 
-            if(l.parent_time<s.parent_time)l.setParent(s.parent_id, s.parent_time);else
-            if(l.parent_time>s.parent_time)set_parents.add(&l);
+            if(l.parent_time<s.parent_time)l.setParent(s.parent_id, s.parent_time);else // get from server
+            if(l.parent_time>s.parent_time)set_parents.add(&l);                         // set to   server
 
-            if(l.removed_time<s.removed_time)l.setRemoved(s.removed(), s.removed_time);else
-            if(l.removed_time>s.removed_time)set_removed.add(&l);
+            if(l.removed_time<s.removed_time)l.setRemoved(s.removed(), s.removed_time);else // get from server
+            if(l.removed_time>s.removed_time)set_removed.add(&l);                           // set to   server
 
-            if(l.no_publish_time<s.no_publish_time)l.setNoPublish(s.noPublish(), s.no_publish_time);else
-            if(l.no_publish_time>s.no_publish_time)set_no_publish.add(&l);
+            if(l.publish_time<s.publish_time)l.setPublish(s.publish(), s.publishMobile(), s.publish_time);else // get from server
+            if(l.publish_time>s.publish_time)set_publish.add(&l);                                              // set to   server
 
             // data
             if(s.type==l.type) // just in case
@@ -302,15 +302,15 @@ class SynchronizerClass
       REPA( local_texs)if(!server.texs.binaryHas( local_texs[i]))set_textures.add( local_texs[i]);
 
       // sync
-      Memc<UID> temp;
                            Server.getElmNames ( get_names     );
                            Server.getElmShort ( get_short     );
                            Server.getElmLong  ( get_long      );
                            Server.getTextures ( get_textures  );
       FREPA(set_names     )Server.renameElm   (*set_names  [i]);
       FREPA(set_parents   )Server.setElmParent(*set_parents[i]);
-      FREPA(set_removed   ){Elm &elm=*set_removed   [i]; temp(0)=elm.id; Server.   removeElms(temp, elm.  removed(), elm.   removed_time);}
-      FREPA(set_no_publish){Elm &elm=*set_no_publish[i]; temp(0)=elm.id; Server.noPublishElms(temp, elm.noPublish(), elm.no_publish_time);}
+      Memc<UID> temp1; temp1.setNum(1);
+      FREPA(set_removed){Elm &elm=*set_removed[i]; temp1[0]=elm.id; Server. removeElms(temp1, elm.removed(),                      elm.removed_time);}
+      FREPA(set_publish){Elm &elm=*set_publish[i]; temp1[0]=elm.id; Server.publishElms(temp1, elm.publish(), elm.publishMobile(), elm.publish_time);}
 
       // send elms
       REPAO(set_full).depth=Proj.depth(set_full[i].elm); set_full.sort(CompareDepth); // sort by depth so root elements are sent first

@@ -1588,6 +1588,11 @@ SecureSocket::RESULT SecureSocket::handshake()
    return ERROR;
 }
 /******************************************************************************/
+#if !SWITCH
+Bool HandleNetworkError() {return false;}
+Bool NetworkServiceAccountIDToken(CPtr &data, Int &size) {data=null; size=0; return true;}
+#endif
+/******************************************************************************/
 Bool InitSocket()
 {
    if(InitSocketEx())

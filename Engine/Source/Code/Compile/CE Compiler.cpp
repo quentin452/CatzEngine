@@ -406,7 +406,7 @@ static void CompileExpr(Expr &expr, Compiler &compiler, Memc<Byte> &code)
 
             if(func.func_call!=GetIgnoreCall())
             {
-               Int   params=(FlagTest(func.func_call_mask, Expr::FC_RESULT) + FlagTest(func.func_call_mask, Expr::FC_PARENT) + func.params.elms()),
+               Int   params=(FlagOn(func.func_call_mask, Expr::FC_RESULT) + FlagOn(func.func_call_mask, Expr::FC_PARENT) + func.params.elms()),
                      pos   =code.addNum(Call::Size(params));
                Call &call  =*(Call*)(&code[pos]);
                call.params=params;
@@ -467,7 +467,7 @@ static void CompileExpr(Expr &expr, Compiler &compiler, Memc<Byte> &code)
                   {
                      compiler.msgs.New().error(S+"Can't convert parameter #"+(i+1)+" from '"+src.symbol.modifName(true, true, false)+"' to '"+dest.modifName(true, true, false)+"'", src.origin);
                   }else
-                  if((is_null || LostConst(src.symbol.const_level, dest.const_level)) && FlagTest(dest.modifiers, Symbol::MODIF_REF)) // const int/int& -> int&  BAD
+                  if((is_null || LostConst(src.symbol.const_level, dest.const_level)) && FlagOn(dest.modifiers, Symbol::MODIF_REF)) // const int/int& -> int&  BAD
                   {
                      compiler.msgs.New().error("Can't convert const parameter to non-const reference", src.origin);
                   }else

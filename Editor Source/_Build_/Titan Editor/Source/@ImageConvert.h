@@ -35,7 +35,7 @@ class ImageConvert : SrcDest // src and dest files
 
    static bool SkipOptimize(int &type, DateTime &time); // skip formats which are slow to convert
 
-   void process(C bool *stop=null)C;
+   void process()C;
 
 public:
    ImageConvert();

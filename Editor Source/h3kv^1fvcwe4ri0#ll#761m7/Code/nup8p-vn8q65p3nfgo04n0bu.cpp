@@ -289,17 +289,17 @@ class ElmObjClass : ElmData
    byte flag=0; // FLAG, this should not be synced, it is set only from data
 
    // get
-   bool     ovrAccess()C {return FlagTest( flag, OVR_ACCESS           );}   void ovrAccess(bool     on  ) {FlagSet(flag, OVR_ACCESS, on);}
-   bool     terrain  ()C {return FlagTest( flag, TERRAIN              );}   void terrain  (bool     on  ) {FlagSet(flag, TERRAIN   , on);}
-   bool     ovrPath  ()C {return FlagTest( flag, OVR_PATH             );}   void ovrPath  (bool     on  ) {FlagSet(flag, OVR_PATH  , on);}
+   bool     ovrAccess()C {return   FlagOn( flag, OVR_ACCESS           );}   void ovrAccess(bool     on  ) {FlagSet(flag, OVR_ACCESS, on);}
+   bool     terrain  ()C {return   FlagOn( flag, TERRAIN              );}   void terrain  (bool     on  ) {FlagSet(flag, TERRAIN   , on);}
+   bool     ovrPath  ()C {return   FlagOn( flag, OVR_PATH             );}   void ovrPath  (bool     on  ) {FlagSet(flag, OVR_PATH  , on);}
    OBJ_PATH pathSelf ()C {return OBJ_PATH((flag>>PATH_SHIFT)&PATH_MASK);}   void pathSelf (OBJ_PATH path) {FlagDisable(flag, PATH_MASK<<PATH_SHIFT); flag|=((path&PATH_MASK)<<PATH_SHIFT);}
 
    // operations
    void from(C EditObject &params)
    {
       flag=0;
-      ovrAccess(FlagTest(params.flag, EditObject.OVR_ACCESS)); terrain (params.access==OBJ_ACCESS_TERRAIN);
-      ovrPath  (FlagTest(params.flag, EditObject.OVR_PATH  )); pathSelf(params.path                      );
+      ovrAccess(FlagOn(params.flag, EditObject.OVR_ACCESS)); terrain (params.access==OBJ_ACCESS_TERRAIN);
+      ovrPath  (FlagOn(params.flag, EditObject.OVR_PATH  )); pathSelf(params.path                      );
    }
    uint undo(C ElmObjClass &src) {return super.undo(src);} // don't adjust 'ver' here because it also relies on 'EditObject', because of that this is included in 'ElmFileInShort'
    uint sync(C ElmObjClass &src) {return super.sync(src);} // don't adjust 'ver' here because it also relies on 'EditObject', because of that this is included in 'ElmFileInShort'
@@ -607,16 +607,18 @@ class ElmMaterial : ElmData
       USES_TEX_GLOW =1<<2,
    }
    UID                       base_0_tex=UIDZero, base_1_tex=UIDZero, base_2_tex=UIDZero, detail_tex=UIDZero, macro_tex=UIDZero, emissive_tex=UIDZero;
-   byte                      downsize_tex_mobile=0, flag=0;
+   byte                      tex_downsize[TSP_NUM], flag=0;
    Edit.Material.TEX_QUALITY tex_quality=Edit.Material.MEDIUM;
+
+   ElmMaterial() {REPAO(tex_downsize)=0;}
 
    // get
    bool equal(C ElmMaterial &src)C {return super.equal(src);}
    bool newer(C ElmMaterial &src)C {return super.newer(src);}
 
-   bool usesTexAlpha()C {return FlagTest(flag, USES_TEX_ALPHA);}   void usesTexAlpha(bool on) {return FlagSet(flag, USES_TEX_ALPHA, on);}
-   bool usesTexBump ()C {return FlagTest(flag, USES_TEX_BUMP );}   void usesTexBump (bool on) {return FlagSet(flag, USES_TEX_BUMP , on);}
-   bool usesTexGlow ()C {return FlagTest(flag, USES_TEX_GLOW );}   void usesTexGlow (bool on) {return FlagSet(flag, USES_TEX_GLOW , on);}
+   bool usesTexAlpha()C {return FlagOn(flag, USES_TEX_ALPHA);}   void usesTexAlpha(bool on) {return FlagSet(flag, USES_TEX_ALPHA, on);}
+   bool usesTexBump ()C {return FlagOn(flag, USES_TEX_BUMP );}   void usesTexBump (bool on) {return FlagSet(flag, USES_TEX_BUMP , on);}
+   bool usesTexGlow ()C {return FlagOn(flag, USES_TEX_GLOW );}   void usesTexGlow (bool on) {return FlagSet(flag, USES_TEX_GLOW , on);}
 
    virtual bool mayContain (C UID &id)C override {return false;}
    virtual bool containsTex(C UID &id, bool test_merged)C override
@@ -648,19 +650,19 @@ class ElmMaterial : ElmData
          macro_tex=src.   macro_tex;
       emissive_tex=src.emissive_tex;
 
-      downsize_tex_mobile=src.downsize_tex_mobile;
-      tex_quality        =src.tex_quality;
+      Copy(tex_downsize,src.tex_downsize);
+           tex_quality =src.tex_quality;
 
       usesTexAlpha(src.usesTexColAlpha());
       usesTexBump (src.usesTexBump    ());
       usesTexGlow (src.usesTexGlow    ());
    }
-   uint undo(C ElmMaterial &src) // don't undo 'downsize_tex_mobile', 'flag' because they should be set only in 'from'
+   uint undo(C ElmMaterial &src) // don't undo 'tex_downsize', 'flag' because they should be set only in 'from'
    {
       uint   changed=super.undo(src);
       return changed; // don't adjust 'ver' here because it also relies on 'EditMaterial', because of that this is included in 'ElmFileInShort'
    }
-   uint sync(C ElmMaterial &src) // don't sync 'downsize_tex_mobile', 'flag' because they should be set only in 'from'
+   uint sync(C ElmMaterial &src) // don't sync 'tex_downsize', 'flag' because they should be set only in 'from'
    {
       uint   changed=super.sync(src);
       return changed; // don't adjust 'ver' here because it also relies on 'EditMaterial', because of that this is included in 'ElmFileInShort'
@@ -670,54 +672,60 @@ class ElmMaterial : ElmData
    virtual bool save(File &f)C override
    {
       super.save(f);
-      f.cmpUIntV(6);
-      f<<base_0_tex<<base_1_tex<<base_2_tex<<detail_tex<<macro_tex<<emissive_tex<<downsize_tex_mobile<<tex_quality<<flag;
+      f.cmpUIntV(7);
+      f<<base_0_tex<<base_1_tex<<base_2_tex<<detail_tex<<macro_tex<<emissive_tex<<tex_downsize<<tex_quality<<flag;
       return f.ok();
    }
    virtual bool load(File &f)override
    {
-      UID old_reflection_tex;
+      UID old_reflection_tex; byte tex_downsize_mobile;
       if(super.load(f))switch(f.decUIntV())
       {
+         case 7:
+         {
+            f>>base_0_tex>>base_1_tex>>base_2_tex>>detail_tex>>macro_tex>>emissive_tex>>tex_downsize>>tex_quality>>flag; ASSERT(ELMS(tex_downsize)==2);
+            if(f.ok())return true;
+         }break;
+
          case 6:
          {
-            f>>base_0_tex>>base_1_tex>>base_2_tex>>detail_tex>>macro_tex>>emissive_tex>>downsize_tex_mobile>>tex_quality>>flag;
+            f>>base_0_tex>>base_1_tex>>base_2_tex>>detail_tex>>macro_tex>>emissive_tex>>tex_downsize_mobile>>tex_quality>>flag; REPAO(tex_downsize)=tex_downsize_mobile;
             if(f.ok())return true;
          }break;
 
          case 5:
          {
-            f>>base_0_tex>>base_1_tex>>base_2_tex>>detail_tex>>macro_tex>>emissive_tex>>downsize_tex_mobile>>flag; if(flag&(1<<3)){tex_quality=Edit.Material.HIGH; FlagDisable(flag, 1<<3);}
+            f>>base_0_tex>>base_1_tex>>base_2_tex>>detail_tex>>macro_tex>>emissive_tex>>tex_downsize_mobile>>flag; if(flag&(1<<3)){tex_quality=Edit.Material.HIGH; FlagDisable(flag, 1<<3);} REPAO(tex_downsize)=tex_downsize_mobile;
             if(f.ok())return true;
          }break;
 
          case 4:
          {
-            f>>base_0_tex>>base_1_tex>>detail_tex>>macro_tex>>old_reflection_tex>>emissive_tex>>downsize_tex_mobile>>flag; base_2_tex.zero(); if(flag&(1<<3)){tex_quality=Edit.Material.HIGH; FlagDisable(flag, 1<<3);}
+            f>>base_0_tex>>base_1_tex>>detail_tex>>macro_tex>>old_reflection_tex>>emissive_tex>>tex_downsize_mobile>>flag; base_2_tex.zero(); if(flag&(1<<3)){tex_quality=Edit.Material.HIGH; FlagDisable(flag, 1<<3);} REPAO(tex_downsize)=tex_downsize_mobile;
             if(f.ok())return true;
          }break;
 
          case 3:
          {
-            byte max_tex_size; f>>max_tex_size>>base_0_tex>>base_1_tex>>detail_tex>>macro_tex>>old_reflection_tex>>emissive_tex; base_2_tex.zero(); downsize_tex_mobile=(max_tex_size>=1 && max_tex_size<=10); flag=0;
+            byte max_tex_size; f>>max_tex_size>>base_0_tex>>base_1_tex>>detail_tex>>macro_tex>>old_reflection_tex>>emissive_tex; base_2_tex.zero(); tex_downsize_mobile=(max_tex_size>=1 && max_tex_size<=10); flag=0; REPAO(tex_downsize)=tex_downsize_mobile;
             if(f.ok())return true;
          }break;
 
          case 2:
          {
-            byte max_tex_size; UID mesh_id; f>>max_tex_size>>base_0_tex>>base_1_tex>>detail_tex>>macro_tex>>old_reflection_tex>>emissive_tex>>mesh_id; base_2_tex.zero(); downsize_tex_mobile=(max_tex_size>=1 && max_tex_size<=10); flag=0;
+            byte max_tex_size; UID mesh_id; f>>max_tex_size>>base_0_tex>>base_1_tex>>detail_tex>>macro_tex>>old_reflection_tex>>emissive_tex>>mesh_id; base_2_tex.zero(); tex_downsize_mobile=(max_tex_size>=1 && max_tex_size<=10); flag=0; REPAO(tex_downsize)=tex_downsize_mobile;
             if(f.ok())return true;
          }break;
 
          case 1:
          {
-            UID mesh_id; f>>base_0_tex>>base_1_tex>>detail_tex>>macro_tex>>old_reflection_tex>>emissive_tex>>mesh_id; base_2_tex.zero(); downsize_tex_mobile=0; flag=0;
+            UID mesh_id; f>>base_0_tex>>base_1_tex>>detail_tex>>macro_tex>>old_reflection_tex>>emissive_tex>>mesh_id; base_2_tex.zero(); tex_downsize_mobile=0; flag=0; REPAO(tex_downsize)=tex_downsize_mobile;
             if(f.ok())return true;
          }break;
 
          case 0:
          {
-            UID mesh_id; f>>base_0_tex>>base_1_tex>>detail_tex>>macro_tex>>old_reflection_tex>>mesh_id; base_2_tex.zero(); downsize_tex_mobile=0; flag=0; emissive_tex.zero();
+            UID mesh_id; f>>base_0_tex>>base_1_tex>>detail_tex>>macro_tex>>old_reflection_tex>>mesh_id; base_2_tex.zero(); tex_downsize_mobile=0; flag=0; emissive_tex.zero(); REPAO(tex_downsize)=tex_downsize_mobile;
             if(f.ok())return true;
          }break;
       }
@@ -732,8 +740,9 @@ class ElmMaterial : ElmData
       if(  detail_tex.valid())nodes.New().setFN("Detail"           ,   detail_tex);
       if(   macro_tex.valid())nodes.New().setFN("Macro"            ,    macro_tex);
       if(emissive_tex.valid())nodes.New().setFN("Emissive"         , emissive_tex);
-      if(downsize_tex_mobile )nodes.New().set  ("MobileTexDownsize", downsize_tex_mobile);
-                              nodes.New().set  ("TexQuality"       ,  tex_quality);
+      if(tex_downsize[TSP_MOBILE])nodes.New().set  ("TexDownsizeMobile", tex_downsize[TSP_MOBILE]);
+      if(tex_downsize[TSP_SWITCH])nodes.New().set  ("TexDownsizeSwitch", tex_downsize[TSP_SWITCH]);
+                                  nodes.New().set  ("TexQuality"       , tex_quality);
       if(usesTexAlpha())nodes.New().set("UsesTexAlpha");
       if(usesTexBump ())nodes.New().set("UsesTexBump" );
       if(usesTexGlow ())nodes.New().set("UsesTexGlow" );
@@ -750,8 +759,9 @@ class ElmMaterial : ElmData
          if(n.name=="Detail"           )n.getValue(  detail_tex);else
          if(n.name=="Macro"            )n.getValue(   macro_tex);else
          if(n.name=="Emissive"         )n.getValue(emissive_tex);else
-         if(n.name=="MobileTexDownsize")downsize_tex_mobile=                           n.asInt();else
-         if(n.name=="TexQuality"       )tex_quality        =(Edit.Material.TEX_QUALITY)n.asInt();else
+         if(n.name=="TexDownsizeMobile")tex_downsize[TSP_MOBILE]=                           n.asInt();else
+         if(n.name=="TexDownsizeSwitch")tex_downsize[TSP_SWITCH]=                           n.asInt();else
+         if(n.name=="TexQuality"       )tex_quality             =(Edit.Material.TEX_QUALITY)n.asInt();else
          if(n.name=="UsesTexAlpha"     )FlagSet(flag, USES_TEX_ALPHA, n.asBool1());else
          if(n.name=="UsesTexBump"      )FlagSet(flag, USES_TEX_BUMP , n.asBool1());else
          if(n.name=="UsesTexGlow"      )FlagSet(flag, USES_TEX_GLOW , n.asBool1());
@@ -776,9 +786,9 @@ class ElmWaterMtrl : ElmData
    bool equal(C ElmMaterial &src)C {return super.equal(src);}
    bool newer(C ElmMaterial &src)C {return super.newer(src);}
 
-   bool usesTexAlpha()C {return FlagTest(flag, USES_TEX_ALPHA);}   void usesTexAlpha(bool on) {return FlagSet(flag, USES_TEX_ALPHA, on);}
-   bool usesTexBump ()C {return FlagTest(flag, USES_TEX_BUMP );}   void usesTexBump (bool on) {return FlagSet(flag, USES_TEX_BUMP , on);}
-   bool usesTexGlow ()C {return FlagTest(flag, USES_TEX_GLOW );}   void usesTexGlow (bool on) {return FlagSet(flag, USES_TEX_GLOW , on);}
+   bool usesTexAlpha()C {return FlagOn(flag, USES_TEX_ALPHA);}   void usesTexAlpha(bool on) {return FlagSet(flag, USES_TEX_ALPHA, on);}
+   bool usesTexBump ()C {return FlagOn(flag, USES_TEX_BUMP );}   void usesTexBump (bool on) {return FlagSet(flag, USES_TEX_BUMP , on);}
+   bool usesTexGlow ()C {return FlagOn(flag, USES_TEX_GLOW );}   void usesTexGlow (bool on) {return FlagSet(flag, USES_TEX_GLOW , on);}
 
    // get
    bool equal(C ElmWaterMtrl &src)C {return super.equal(src);}
@@ -814,8 +824,8 @@ class ElmWaterMtrl : ElmData
       usesTexBump (src.usesTexBump    ());
       usesTexGlow (src.usesTexGlow    ());
    }
-   uint undo(C ElmWaterMtrl &src) {return super.undo(src);} // don't adjust 'ver' here because it also relies on 'EditWaterMtrl', because of that this is included in 'ElmFileInShort', don't undo 'downsize_tex_mobile', 'flag' because they should be set only in 'from'
-   uint sync(C ElmWaterMtrl &src) {return super.sync(src);} // don't adjust 'ver' here because it also relies on 'EditWaterMtrl', because of that this is included in 'ElmFileInShort', don't sync 'downsize_tex_mobile', 'flag' because they should be set only in 'from'
+   uint undo(C ElmWaterMtrl &src) {return super.undo(src);} // don't adjust 'ver' here because it also relies on 'EditWaterMtrl', because of that this is included in 'ElmFileInShort', don't undo 'tex_downsize', 'flag' because they should be set only in 'from'
+   uint sync(C ElmWaterMtrl &src) {return super.sync(src);} // don't adjust 'ver' here because it also relies on 'EditWaterMtrl', because of that this is included in 'ElmFileInShort', don't sync 'tex_downsize', 'flag' because they should be set only in 'from'
 
    // io
    virtual bool save(File &f)C override
@@ -1154,11 +1164,12 @@ class ElmAnim : ElmData
    Vec       root_move=VecZero, root_rot=VecZero;
    flt       fps=0;
    ushort    flag=LOOP;
+   Str       imported_file_params; // used to adjust anim events when reimporting with different params
    TimeStamp loop_time, linear_time, skel_time, file_time;
 
    // get
-   bool loop  ()C {return FlagTest(flag, LOOP  );}   ElmAnim& loop  (bool on) {FlagSet(flag, LOOP  , on); return T;}
-   bool linear()C {return FlagTest(flag, LINEAR);}   ElmAnim& linear(bool on) {FlagSet(flag, LINEAR, on); return T;}
+   bool loop  ()C {return FlagOn(flag, LOOP  );}   ElmAnim& loop  (bool on) {FlagSet(flag, LOOP  , on); return T;}
+   bool linear()C {return FlagOn(flag, LINEAR);}   ElmAnim& linear(bool on) {FlagSet(flag, LINEAR, on); return T;}
 
    bool equal(C ElmAnim &src)C {return super.equal(src) && loop_time==src.loop_time && linear_time==src.linear_time && skel_time==src.skel_time && file_time==src.file_time;}
    bool newer(C ElmAnim &src)C {return super.newer(src) || loop_time> src.loop_time || linear_time> src.linear_time || skel_time> src.skel_time || file_time> src.file_time;}
@@ -1204,7 +1215,7 @@ class ElmAnim : ElmData
       changed|=Undo(skel_time, src.skel_time, skel_id, src.skel_id)*CHANGE_NORMAL; // SKEL ID is not stored in the ANIM file
       if(Undo(  loop_time, src.  loop_time)){changed|=CHANGE_AFFECT_FILE; loop  (src.loop  ());}
       if(Undo(linear_time, src.linear_time)){changed|=CHANGE_AFFECT_FILE; linear(src.linear());}
-      if(Undo(  file_time, src.  file_time)){changed|=CHANGE_AFFECT_FILE; transform=src.transform; root_move=src.root_move; root_rot=src.root_rot; fps=src.fps; FlagCopy(flag, src.flag, ROOT_ALL);}
+      if(Undo(  file_time, src.  file_time)){changed|=CHANGE_AFFECT_FILE; transform=src.transform; root_move=src.root_move; root_rot=src.root_rot; fps=src.fps; FlagCopy(flag, src.flag, ROOT_ALL); imported_file_params=src.imported_file_params;}
 
       if(changed)newVer();
       return changed;
@@ -1224,7 +1235,7 @@ class ElmAnim : ElmData
    {
       bool changed=false;
 
-      if(Sync(file_time, src.file_time)){changed|=true; transform=src.transform; root_move=src.root_move; root_rot=src.root_rot; fps=src.fps; FlagCopy(flag, src.flag, ROOT_ALL);}
+      if(Sync(file_time, src.file_time)){changed|=true; transform=src.transform; root_move=src.root_move; root_rot=src.root_rot; fps=src.fps; FlagCopy(flag, src.flag, ROOT_ALL); imported_file_params=src.imported_file_params;}
 
       if(equal(src))ver=src.ver;else if(changed)newVer();
       return true;
@@ -1259,50 +1270,75 @@ class ElmAnim : ElmData
       if(old&(1<<7))f|=ROOT_FROM_BODY;
       return f;
    }
+   void setImportedFileParams()
+   {
+      FileParams fps=src_file;
+      fps.name.clear(); // file name
+      fps.params.removeData(fps.findParam("name"), true); // anim name
+      imported_file_params=fps.encode();
+   }
+   void fix5()
+   {
+      FileParams fps=src_file;
+      REPA(fps.params)
+      {
+         TextParam &param=fps.params[i];
+         if(param.name=="start_frame")param.name="startFrame";else
+         if(param.name==  "end_frame")param.name=  "endFrame";
+      }
+      src_file=fps.encode();
+      setImportedFileParams();
+   }
    virtual bool save(File &f)C override
    {
       super.save(f);
-      f.cmpUIntV(5);
-      f<<skel_id<<transform<<root_move<<root_rot<<fps<<flag<<loop_time<<linear_time<<skel_time<<file_time;
+      f.cmpUIntV(6);
+      f<<skel_id<<transform<<root_move<<root_rot<<fps<<flag<<imported_file_params<<loop_time<<linear_time<<skel_time<<file_time;
       return f.ok();
    }
    virtual bool load(File &f)override
    {
       if(super.load(f))switch(f.decUIntV())
       {
+         case 6:
+         {
+            f>>skel_id>>transform>>root_move>>root_rot>>fps>>flag>>imported_file_params>>loop_time>>linear_time>>skel_time>>file_time;
+            if(f.ok())return true;
+         }break;
+
          case 5:
          {
-            f>>skel_id>>transform>>root_move>>root_rot>>fps>>flag>>loop_time>>linear_time>>skel_time>>file_time;
+            f>>skel_id>>transform>>root_move>>root_rot>>fps>>flag>>loop_time>>linear_time>>skel_time>>file_time; fix5();
             if(f.ok())return true;
          }break;
 
          case 4:
          {
-            f>>skel_id>>transform>>root_move>>root_rot>>fps; flag=OldFlag1(f.getUShort()); f>>loop_time>>linear_time>>skel_time>>file_time;
+            f>>skel_id>>transform>>root_move>>root_rot>>fps; flag=OldFlag1(f.getUShort()); f>>loop_time>>linear_time>>skel_time>>file_time; fix5();
             if(f.ok())return true;
          }break;
 
          case 3:
          {
-            f>>skel_id>>transform>>root_move>>root_rot; flag=OldFlag1(f.getUShort()); f>>loop_time>>linear_time>>skel_time>>file_time; fps=0;
+            f>>skel_id>>transform>>root_move>>root_rot; flag=OldFlag1(f.getUShort()); f>>loop_time>>linear_time>>skel_time>>file_time; fps=0; fix5();
             if(f.ok())return true;
          }break;
 
          case 2:
          {
-            f>>skel_id>>transform>>root_move>>root_rot; flag=OldFlag(f.getByte()); f>>loop_time>>linear_time>>skel_time>>file_time; fps=0;
+            f>>skel_id>>transform>>root_move>>root_rot; flag=OldFlag(f.getByte()); f>>loop_time>>linear_time>>skel_time>>file_time; fps=0; fix5();
             if(f.ok())return true;
          }break;
 
          case 1:
          {
-            f>>skel_id>>transform>>root_move; flag=OldFlag(f.getByte()); f>>loop_time>>linear_time>>skel_time>>file_time; rootRotZero(); fps=0;
+            f>>skel_id>>transform>>root_move; flag=OldFlag(f.getByte()); f>>loop_time>>linear_time>>skel_time>>file_time; rootRotZero(); fps=0; fix5();
             if(f.ok())return true;
          }break;
 
          case 0:
          {
-            f>>skel_id>>transform; flag=OldFlag(f.getByte()); f>>loop_time>>linear_time>>skel_time>>file_time; rootMoveZero(); rootRotZero(); fps=0;
+            f>>skel_id>>transform; flag=OldFlag(f.getByte()); f>>loop_time>>linear_time>>skel_time>>file_time; rootMoveZero(); rootRotZero(); fps=0; fix5();
             if(f.ok())return true;
          }break;
       }
@@ -1311,21 +1347,22 @@ class ElmAnim : ElmData
    virtual void save(MemPtr<TextNode> nodes)C override
    {
       super.save(nodes);
-      if(skel_id.valid()     )nodes.New().setFN ("Skeleton"     , skel_id);
-                              nodes.New().setRaw("Pose"         , transform);
-                              nodes.New().set   ("Loop"         , loop());
-                              nodes.New().set   ("Linear"       , linear());
-      if(rootMove()          )nodes.New().setRaw("RootMove"     , root_move);
-      if(rootRot ()          )nodes.New().setRaw("RootRot"      , root_rot );
-      if(flag&ROOT_DEL_POS   )nodes.New().set   ("RootDelPos"   , FlagAll(flag, ROOT_DEL_POS) ? S : S+(FlagTest(flag, ROOT_DEL_POS_X) ? 'X' : '\0')+(FlagTest(flag, ROOT_DEL_POS_Y) ? 'Y' : '\0')+(FlagTest(flag, ROOT_DEL_POS_Z) ? 'Z' : '\0'));
-      if(flag&ROOT_DEL_ROT   )nodes.New().set   ("RootDelRot"   , FlagAll(flag, ROOT_DEL_ROT) ? S : S+(FlagTest(flag, ROOT_DEL_ROT_X) ? 'X' : '\0')+(FlagTest(flag, ROOT_DEL_ROT_Y) ? 'Y' : '\0')+(FlagTest(flag, ROOT_DEL_ROT_Z) ? 'Z' : '\0'));
-      if(flag&ROOT_SMOOTH_ROT)nodes.New().set   ("RootSmoothRot");
-      if(flag&ROOT_SMOOTH_POS)nodes.New().set   ("RootSmoothPos");
-      if(fps>0               )nodes.New().set   ("FPS"          , fps);
-                              nodes.New().set   ("LoopTime"     ,   loop_time.text());
-                              nodes.New().set   ("LinearTime"   , linear_time.text());
-                              nodes.New().set   ("SkeletonTime" ,   skel_time.text());
-                              nodes.New().set   ("FileTime"     ,   file_time.text());
+      if(skel_id.valid()          )nodes.New().setFN ("Skeleton"          , skel_id);
+                                   nodes.New().setRaw("Pose"              , transform);
+                                   nodes.New().set   ("Loop"              , loop());
+                                   nodes.New().set   ("Linear"            , linear());
+      if(rootMove()               )nodes.New().setRaw("RootMove"          , root_move);
+      if(rootRot ()               )nodes.New().setRaw("RootRot"           , root_rot );
+      if(flag&ROOT_DEL_POS        )nodes.New().set   ("RootDelPos"        , FlagAll(flag, ROOT_DEL_POS) ? S : S+(FlagOn(flag, ROOT_DEL_POS_X) ? 'X' : '\0')+(FlagOn(flag, ROOT_DEL_POS_Y) ? 'Y' : '\0')+(FlagOn(flag, ROOT_DEL_POS_Z) ? 'Z' : '\0'));
+      if(flag&ROOT_DEL_ROT        )nodes.New().set   ("RootDelRot"        , FlagAll(flag, ROOT_DEL_ROT) ? S : S+(FlagOn(flag, ROOT_DEL_ROT_X) ? 'X' : '\0')+(FlagOn(flag, ROOT_DEL_ROT_Y) ? 'Y' : '\0')+(FlagOn(flag, ROOT_DEL_ROT_Z) ? 'Z' : '\0'));
+      if(flag&ROOT_SMOOTH_ROT     )nodes.New().set   ("RootSmoothRot"     );
+      if(flag&ROOT_SMOOTH_POS     )nodes.New().set   ("RootSmoothPos"     );
+      if(fps>0                    )nodes.New().set   ("FPS"               , fps);
+      if(imported_file_params.is())nodes.New().set   ("ImportedFileParams", imported_file_params);
+                                   nodes.New().set   ("LoopTime"          ,   loop_time.text());
+                                   nodes.New().set   ("LinearTime"        , linear_time.text());
+                                   nodes.New().set   ("SkeletonTime"      ,   skel_time.text());
+                                   nodes.New().set   ("FileTime"          ,   file_time.text());
    }
    virtual void load(C MemPtr<TextNode> &nodes)override
    {
@@ -1333,20 +1370,21 @@ class ElmAnim : ElmData
       REPA(nodes)
       {
        C TextNode &n=nodes[i];
-         if(n.name=="Skeleton"     )n.getValue   (skel_id);else
-         if(n.name=="Pose"         )n.getValueRaw(transform);else
-         if(n.name=="RootMove"     )n.getValueRaw(root_move);else
-         if(n.name=="RootRot"      )n.getValueRaw(root_rot);else
-         if(n.name=="Loop"         )loop  (n.asBool1());else
-         if(n.name=="Linear"       )linear(n.asBool1());else
-         if(n.name=="RootSmoothRot")FlagSet(flag, ROOT_SMOOTH_ROT, n.asBool1());else
-         if(n.name=="RootSmoothPos")FlagSet(flag, ROOT_SMOOTH_POS, n.asBool1());else
-         if(n.name=="FPS"          )        fps=n.asFlt ();else
-         if(n.name=="LoopTime"     )  loop_time=n.asText();else
-         if(n.name=="LinearTime"   )linear_time=n.asText();else
-         if(n.name=="SkeletonTime" )  skel_time=n.asText();else
-         if(n.name=="FileTime"     )  file_time=n.asText();else
-         if(n.name=="RootDelPos"   )
+         if(n.name=="Skeleton"          )n.getValue   (skel_id);else
+         if(n.name=="Pose"              )n.getValueRaw(transform);else
+         if(n.name=="RootMove"          )n.getValueRaw(root_move);else
+         if(n.name=="RootRot"           )n.getValueRaw(root_rot);else
+         if(n.name=="Loop"              )loop  (n.asBool1());else
+         if(n.name=="Linear"            )linear(n.asBool1());else
+         if(n.name=="RootSmoothRot"     )FlagSet(flag, ROOT_SMOOTH_ROT, n.asBool1());else
+         if(n.name=="RootSmoothPos"     )FlagSet(flag, ROOT_SMOOTH_POS, n.asBool1());else
+         if(n.name=="FPS"               )        fps=n.asFlt ();else
+         if(n.name=="ImportedFileParams")imported_file_params=n.asText();else
+         if(n.name=="LoopTime"          )  loop_time=n.asText();else
+         if(n.name=="LinearTime"        )linear_time=n.asText();else
+         if(n.name=="SkeletonTime"      )  skel_time=n.asText();else
+         if(n.name=="FileTime"          )  file_time=n.asText();else
+         if(n.name=="RootDelPos"        )
          {
             if(        !n.value.is()         )FlagEnable(flag, ROOT_DEL_POS);else
             if(CharFlag(n.value[0])&CHARF_DIG)FlagSet   (flag, ROOT_DEL_POS, n.asBool());else
@@ -1700,17 +1738,18 @@ class ElmImage : ElmData
    bool         envActual()C {return mode==IMAGE_CUBE && env();}
    bool     mipMapsActual()C {return envActual() ? true : mipMaps();} // if Cube Env then always create mip maps
    bool       ignoreAlpha()C {return IsCube(mode);}
-   bool       mipMaps    ()C {return FlagTest(flag, MIP_MAPS );}   void mipMaps (bool on) {FlagSet(flag, MIP_MAPS , on);}
-   bool       pow2       ()C {return FlagTest(flag, POW2     );}   void pow2    (bool on) {FlagSet(flag, POW2     , on);}
-   bool       sRGB       ()C {return FlagTest(flag, SRGB     );}   void sRGB    (bool on) {FlagSet(flag, SRGB     , on);}
-   bool       env        ()C {return FlagTest(flag, ENV      );}   void env     (bool on) {FlagSet(flag, ENV      , on);}
-   bool       alphaLum   ()C {return FlagTest(flag, ALPHA_LUM);}   void alphaLum(bool on) {FlagSet(flag, ALPHA_LUM, on);}
-   bool       hasColor   ()C {return FlagTest(flag, HAS_COLOR);}   void hasColor(bool on) {FlagSet(flag, HAS_COLOR, on);}
-   bool       hasAlpha   ()C {return FlagTest(flag, HAS_ALPHA);}   void hasAlpha(bool on) {FlagSet(flag, HAS_ALPHA, on);}
+   bool       mipMaps    ()C {return FlagOn(flag, MIP_MAPS );}   void mipMaps (bool on) {FlagSet(flag, MIP_MAPS , on);}
+   bool       pow2       ()C {return FlagOn(flag, POW2     );}   void pow2    (bool on) {FlagSet(flag, POW2     , on);}
+   bool       sRGB       ()C {return FlagOn(flag, SRGB     );}   void sRGB    (bool on) {FlagSet(flag, SRGB     , on);}
+   bool       env        ()C {return FlagOn(flag, ENV      );}   void env     (bool on) {FlagSet(flag, ENV      , on);}
+   bool       alphaLum   ()C {return FlagOn(flag, ALPHA_LUM);}   void alphaLum(bool on) {FlagSet(flag, ALPHA_LUM, on);}
+   bool       hasColor   ()C {return FlagOn(flag, HAS_COLOR);}   void hasColor(bool on) {FlagSet(flag, HAS_COLOR, on);}
+   bool       hasAlpha   ()C {return FlagOn(flag, HAS_ALPHA);}   void hasAlpha(bool on) {FlagSet(flag, HAS_ALPHA, on);}
    bool       hasAlpha2  ()C {return hasAlpha() || alphaLum();}
    bool       hasAlpha3  ()C {return ignoreAlpha() ? false : hasAlpha2();}
    IMAGE_TYPE androidType()C {return             (type==COMPRESSED                || type==COMPRESSED2)  ? hasAlpha3() ? (sRGB() ? IMAGE_ETC2_RGBA_SRGB : IMAGE_ETC2_RGBA) : (sRGB() ? IMAGE_ETC2_RGB_SRGB : IMAGE_ETC2_RGB) : IMAGE_NONE;} // if want to be compressed then use ETC2_RGBA or ETC2_RGB
-   IMAGE_TYPE     iOSType()C {return             (type==COMPRESSED                || type==COMPRESSED2)  ?               (sRGB() ? IMAGE_PVRTC1_4_SRGB  : IMAGE_PVRTC1_4 )                                                   : IMAGE_NONE;} // if want to be compressed then use PVRTC1_4
+   IMAGE_TYPE     iOSType()C {return androidType();}
+ //IMAGE_TYPE     iOSType()C {return             (type==COMPRESSED                || type==COMPRESSED2)  ?               (sRGB() ? IMAGE_PVRTC1_4_SRGB  : IMAGE_PVRTC1_4 )                                                   : IMAGE_NONE;} // if want to be compressed then use PVRTC1_4
    IMAGE_TYPE     uwpType()C {return (!UWPBC7 && (type==COMPRESSED && hasAlpha3() || type==COMPRESSED2)) ? hasAlpha3() ? (sRGB() ? IMAGE_BC3_SRGB       : IMAGE_BC3      ) : (sRGB() ? IMAGE_BC1_SRGB      : IMAGE_BC1     ) : IMAGE_NONE;} // in this case we only want to replace BC7 format, which will happen only if image is COMPRESSED with alpha, or COMPRESSED2
    IMAGE_TYPE     webType()C {return (!WebBC7 && (type==COMPRESSED && hasAlpha3() || type==COMPRESSED2)) ? hasAlpha3() ? (sRGB() ? IMAGE_BC3_SRGB       : IMAGE_BC3      ) : (sRGB() ? IMAGE_BC1_SRGB      : IMAGE_BC1     ) : IMAGE_NONE;} // in this case we only want to replace BC7 format, which will happen only if image is COMPRESSED with alpha, or COMPRESSED2
 
@@ -1893,8 +1932,8 @@ class ElmImageAtlas : ElmData
    Memc<Img> images;
    TimeStamp file_time, mip_maps_time, compress_time;
 
-   bool mipMaps ()C {return FlagTest(flag, MIP_MAPS);}   void mipMaps (bool on) {FlagSet(flag, MIP_MAPS, on);}
-   bool compress()C {return FlagTest(flag, COMPRESS);}   void compress(bool on) {FlagSet(flag, COMPRESS, on);}
+   bool mipMaps ()C {return FlagOn(flag, MIP_MAPS);}   void mipMaps (bool on) {FlagSet(flag, MIP_MAPS, on);}
+   bool compress()C {return FlagOn(flag, COMPRESS);}   void compress(bool on) {FlagSet(flag, COMPRESS, on);}
 
  C Img* find(C UID &id)C {return ConstCast(T).find(id);}
    Img* find(C UID &id)  {       return images.binaryFind  (id,    Img.Compare);}
@@ -2122,10 +2161,11 @@ class ElmIcon : ElmData
    TimeStamp icon_settings_time, obj_time, file_time, anim_id_time, anim_pos_time, variation_time;
 
    ElmImage.TYPE     type(Project *proj)C {if(proj)if(Elm *elm=proj.findElm(icon_settings_id))if(ElmIconSetts *data=elm.iconSettsData())return data.type; return ElmImage.COMPRESSED;}
-   bool          hasColor(             )C {return FlagTest(flag, HAS_COLOR);}   ElmIcon& hasColor(bool on) {FlagSet(flag, HAS_COLOR, on); return T;}
-   bool          hasAlpha(             )C {return FlagTest(flag, HAS_ALPHA);}   ElmIcon& hasAlpha(bool on) {FlagSet(flag, HAS_ALPHA, on); return T;}
+   bool          hasColor(             )C {return FlagOn(flag, HAS_COLOR);}   ElmIcon& hasColor(bool on) {FlagSet(flag, HAS_COLOR, on); return T;}
+   bool          hasAlpha(             )C {return FlagOn(flag, HAS_ALPHA);}   ElmIcon& hasAlpha(bool on) {FlagSet(flag, HAS_ALPHA, on); return T;}
    IMAGE_TYPE androidType(Project *proj)C {ElmImage.TYPE type=T.type(proj); return             (type==ElmImage.COMPRESSED               || type==ElmImage.COMPRESSED2)  ? hasAlpha() ? IMAGE_ETC2_RGBA_SRGB : IMAGE_ETC2_RGB_SRGB : IMAGE_NONE;} // if want to be compressed then use ETC2_RGBA or ETC2_RGB
-   IMAGE_TYPE     iOSType(Project *proj)C {ElmImage.TYPE type=T.type(proj); return             (type==ElmImage.COMPRESSED               || type==ElmImage.COMPRESSED2)  ?              IMAGE_PVRTC1_4_SRGB                        : IMAGE_NONE;} // if want to be compressed then use PVRTC1_4
+   IMAGE_TYPE     iOSType(Project *proj)C {return androidType(proj);}
+ //IMAGE_TYPE     iOSType(Project *proj)C {ElmImage.TYPE type=T.type(proj); return             (type==ElmImage.COMPRESSED               || type==ElmImage.COMPRESSED2)  ?              IMAGE_PVRTC1_4_SRGB                        : IMAGE_NONE;} // if want to be compressed then use PVRTC1_4
    IMAGE_TYPE     uwpType(Project *proj)C {ElmImage.TYPE type=T.type(proj); return (!UWPBC7 && (type==ElmImage.COMPRESSED && hasAlpha() || type==ElmImage.COMPRESSED2)) ? hasAlpha() ? IMAGE_BC3_SRGB       : IMAGE_BC1_SRGB      : IMAGE_NONE;} // in this case we only want to replace BC7 format, which will happen only if image is COMPRESSED with alpha, or COMPRESSED2
    IMAGE_TYPE     webType(Project *proj)C {ElmImage.TYPE type=T.type(proj); return (!WebBC7 && (type==ElmImage.COMPRESSED && hasAlpha() || type==ElmImage.COMPRESSED2)) ? hasAlpha() ? IMAGE_BC3_SRGB       : IMAGE_BC1_SRGB      : IMAGE_NONE;} // in this case we only want to replace BC7 format, which will happen only if image is COMPRESSED with alpha, or COMPRESSED2
 
@@ -2864,7 +2904,7 @@ class ElmApp : ElmData
       PUBLISH_PROJ_DATA     =1<<1,
       PUBLISH_PHYSX_DLL     =1<<2,
       PUBLISH_DATA_AS_PAK   =1<<3,
-      ANDROID_EXPANSION     =1<<4,
+      PLAY_ASSET_DELIVERY   =1<<4, // Android https://developer.android.com/guide/playcore/asset-delivery
       PUBLISH_STEAM_DLL     =1<<5,
       PUBLISH_OPEN_VR_DLL   =1<<6,
       EMBED_ENGINE_DATA_FULL=1<<7,
@@ -2877,7 +2917,9 @@ class ElmApp : ElmData
                      am_app_id_ios, am_app_id_google,
                      cb_app_id_ios, cb_app_signature_ios, cb_app_id_google, cb_app_signature_google, 
                      ms_publisher_name,
-                     nintendo_publisher_name;
+                     nintendo_initial_code,
+                     nintendo_publisher_name,
+                     nintendo_legal_info;
    int               build=1, save_size=-1;
    ulong             fb_app_id=0, 
                      xbl_title_id=0,
@@ -2891,16 +2933,17 @@ class ElmApp : ElmData
                      gui_skin=UIDZero, 
                      ms_publisher_id=UIDZero,
                      xbl_scid=UIDZero;
+   Mems<LANG_TYPE>   supported_languages;
    TimeStamp         dirs_windows_time, dirs_mac_time, dirs_linux_time, dirs_android_time, dirs_ios_time, dirs_nintendo_time,
                      headers_windows_time, headers_mac_time, headers_linux_time, headers_android_time, headers_ios_time, headers_nintendo_time,
                      fb_app_id_time, am_app_id_ios_time, am_app_id_google_time, cb_app_id_ios_time, cb_app_signature_ios_time, cb_app_id_google_time, cb_app_signature_google_time,
                      libs_windows_time, libs_mac_time, libs_linux_time, libs_android_time, libs_ios_time, libs_nintendo_time,
-                     package_time, android_license_key_time, location_usage_reason_time, build_time, save_size_time, storage_time, supported_orientations_time,
-                     embed_engine_data_time, publish_proj_data_time, publish_physx_dll_time, publish_steam_dll_time, publish_open_vr_dll_time, publish_data_as_pak_time, android_expansion_time,
+                     package_time, android_license_key_time, location_usage_reason_time, build_time, save_size_time, storage_time, supported_orientations_time, supported_languages_time,
+                     embed_engine_data_time, publish_proj_data_time, publish_physx_dll_time, publish_steam_dll_time, publish_open_vr_dll_time, publish_data_as_pak_time, play_asset_delivery_time,
                      icon_time, notification_icon_time, image_portrait_time, image_landscape_time, gui_skin_time,
                      ms_publisher_id_time, ms_publisher_name_time,
                      xbl_program_time, xbl_title_id_time, xbl_scid_time, 
-                     nintendo_app_id_time, nintendo_publisher_name_time;
+                     nintendo_initial_code_time, nintendo_app_id_time, nintendo_publisher_name_time, nintendo_legal_info_time;
 
    // get
    bool equal(C ElmApp &src)C
@@ -2912,12 +2955,12 @@ class ElmApp : ElmData
           && package_time==src.package_time && android_license_key_time==src.android_license_key_time && location_usage_reason_time==src.location_usage_reason_time && build_time==src.build_time && save_size_time==src.save_size_time
           && ms_publisher_id_time==src.ms_publisher_id_time && ms_publisher_name_time==src.ms_publisher_name_time
           && xbl_program_time==src.xbl_program_time && xbl_title_id_time==src.xbl_title_id_time && xbl_scid_time==src.xbl_scid_time
-          && nintendo_app_id_time==src.nintendo_app_id_time && nintendo_publisher_name_time==src.nintendo_publisher_name_time
+          && nintendo_initial_code_time==src.nintendo_initial_code_time && nintendo_app_id_time==src.nintendo_app_id_time && nintendo_publisher_name_time==src.nintendo_publisher_name_time && nintendo_legal_info_time==src.nintendo_legal_info_time
           && fb_app_id_time==src.fb_app_id_time
           && am_app_id_ios_time==src.am_app_id_ios_time && am_app_id_google_time==src.am_app_id_google_time
           && cb_app_id_ios_time==src.cb_app_id_ios_time && cb_app_signature_ios_time==src.cb_app_signature_ios_time && cb_app_id_google_time==src.cb_app_id_google_time && cb_app_signature_google_time==src.cb_app_signature_google_time
-          && storage_time==src.storage_time && supported_orientations_time==src.supported_orientations_time
-          && embed_engine_data_time==src.embed_engine_data_time && publish_proj_data_time==src.publish_proj_data_time && publish_physx_dll_time==src.publish_physx_dll_time && publish_steam_dll_time==src.publish_steam_dll_time && publish_open_vr_dll_time==src.publish_open_vr_dll_time && publish_data_as_pak_time==src.publish_data_as_pak_time && android_expansion_time==src.android_expansion_time
+          && storage_time==src.storage_time && supported_orientations_time==src.supported_orientations_time && supported_languages_time==src.supported_languages_time
+          && embed_engine_data_time==src.embed_engine_data_time && publish_proj_data_time==src.publish_proj_data_time && publish_physx_dll_time==src.publish_physx_dll_time && publish_steam_dll_time==src.publish_steam_dll_time && publish_open_vr_dll_time==src.publish_open_vr_dll_time && publish_data_as_pak_time==src.publish_data_as_pak_time && play_asset_delivery_time==src.play_asset_delivery_time
           && icon_time==src.icon_time && notification_icon_time==src.notification_icon_time && image_portrait_time==src.image_portrait_time && image_landscape_time==src.image_landscape_time && gui_skin_time==src.gui_skin_time;
    }
    bool newer(C ElmApp &src)C
@@ -2929,27 +2972,27 @@ class ElmApp : ElmData
           || package_time>src.package_time || android_license_key_time>src.android_license_key_time || location_usage_reason_time>src.location_usage_reason_time || build_time>src.build_time || save_size_time>src.save_size_time
           || ms_publisher_id_time>src.ms_publisher_id_time || ms_publisher_name_time>src.ms_publisher_name_time
           || xbl_program_time>src.xbl_program_time || xbl_title_id_time>src.xbl_title_id_time || xbl_scid_time>src.xbl_scid_time
-          || nintendo_app_id_time>src.nintendo_app_id_time || nintendo_publisher_name_time>src.nintendo_publisher_name_time
+          || nintendo_initial_code_time>src.nintendo_initial_code_time || nintendo_app_id_time>src.nintendo_app_id_time || nintendo_publisher_name_time>src.nintendo_publisher_name_time || nintendo_legal_info_time>src.nintendo_legal_info_time
           || fb_app_id_time>src.fb_app_id_time
           || am_app_id_ios_time>src.am_app_id_ios_time || am_app_id_google_time>src.am_app_id_google_time
           || cb_app_id_ios_time>src.cb_app_id_ios_time || cb_app_signature_ios_time>src.cb_app_signature_ios_time || cb_app_id_google_time>src.cb_app_id_google_time || cb_app_signature_google_time>src.cb_app_signature_google_time
-          || storage_time>src.storage_time || supported_orientations_time>src.supported_orientations_time
-          || embed_engine_data_time>src.embed_engine_data_time || publish_proj_data_time>src.publish_proj_data_time || publish_physx_dll_time>src.publish_physx_dll_time || publish_steam_dll_time>src.publish_steam_dll_time || publish_open_vr_dll_time>src.publish_open_vr_dll_time || publish_data_as_pak_time>src.publish_data_as_pak_time || android_expansion_time>src.android_expansion_time
+          || storage_time>src.storage_time || supported_orientations_time>src.supported_orientations_time || supported_languages_time>src.supported_languages_time
+          || embed_engine_data_time>src.embed_engine_data_time || publish_proj_data_time>src.publish_proj_data_time || publish_physx_dll_time>src.publish_physx_dll_time || publish_steam_dll_time>src.publish_steam_dll_time || publish_open_vr_dll_time>src.publish_open_vr_dll_time || publish_data_as_pak_time>src.publish_data_as_pak_time || play_asset_delivery_time>src.play_asset_delivery_time
           || icon_time>src.icon_time || notification_icon_time>src.notification_icon_time || image_portrait_time>src.image_portrait_time || image_landscape_time>src.image_landscape_time || gui_skin_time>src.gui_skin_time;
    }
 
    virtual bool mayContain(C UID &id)C override {return id==icon || id==notification_icon || id==image_portrait || id==image_landscape || id==gui_skin;}
 
-   int     embedEngineData(     )C {return FlagTest(flag, EMBED_ENGINE_DATA) ? FlagTest(flag, EMBED_ENGINE_DATA_FULL) ? 2 : 1 : 0;}
-   ElmApp& embedEngineData(int e)  {       FlagSet (flag, EMBED_ENGINE_DATA, e!=0); FlagSet(flag, EMBED_ENGINE_DATA_FULL, e>1); return T;}
+   int     embedEngineData(     )C {return FlagOn (flag, EMBED_ENGINE_DATA) ? FlagOn(flag, EMBED_ENGINE_DATA_FULL) ? 2 : 1 : 0;}
+   ElmApp& embedEngineData(int e)  {       FlagSet(flag, EMBED_ENGINE_DATA, e!=0); FlagSet(flag, EMBED_ENGINE_DATA_FULL, e>1); return T;}
 
-   bool publishProjData ()C {return FlagTest(flag, PUBLISH_PROJ_DATA  );}   ElmApp& publishProjData (bool on) {FlagSet(flag, PUBLISH_PROJ_DATA  , on); return T;}
-   bool publishPhysxDll ()C {return FlagTest(flag, PUBLISH_PHYSX_DLL  );}   ElmApp& publishPhysxDll (bool on) {FlagSet(flag, PUBLISH_PHYSX_DLL  , on); return T;}
-   bool publishSteamDll ()C {return FlagTest(flag, PUBLISH_STEAM_DLL  );}   ElmApp& publishSteamDll (bool on) {FlagSet(flag, PUBLISH_STEAM_DLL  , on); return T;}
-   bool publishOpenVRDll()C {return FlagTest(flag, PUBLISH_OPEN_VR_DLL);}   ElmApp& publishOpenVRDll(bool on) {FlagSet(flag, PUBLISH_OPEN_VR_DLL, on); return T;}
-   bool publishDataAsPak()C {return FlagTest(flag, PUBLISH_DATA_AS_PAK);}   ElmApp& publishDataAsPak(bool on) {FlagSet(flag, PUBLISH_DATA_AS_PAK, on); return T;}
-   bool androidExpansion()C {return FlagTest(flag, ANDROID_EXPANSION  );}   ElmApp& androidExpansion(bool on) {FlagSet(flag, ANDROID_EXPANSION  , on); return T;}
- //bool windowsCodeSign ()C {return FlagTest(flag, WINDOWS_CODE_SIGN  );}   ElmApp& windowsCodeSign (bool on) {FlagSet(flag, WINDOWS_CODE_SIGN  , on); return T;}
+   bool publishProjData  ()C {return FlagOn(flag, PUBLISH_PROJ_DATA  );}   ElmApp& publishProjData  (bool on) {FlagSet(flag, PUBLISH_PROJ_DATA  , on); return T;}
+   bool publishPhysxDll  ()C {return FlagOn(flag, PUBLISH_PHYSX_DLL  );}   ElmApp& publishPhysxDll  (bool on) {FlagSet(flag, PUBLISH_PHYSX_DLL  , on); return T;}
+   bool publishSteamDll  ()C {return FlagOn(flag, PUBLISH_STEAM_DLL  );}   ElmApp& publishSteamDll  (bool on) {FlagSet(flag, PUBLISH_STEAM_DLL  , on); return T;}
+   bool publishOpenVRDll ()C {return FlagOn(flag, PUBLISH_OPEN_VR_DLL);}   ElmApp& publishOpenVRDll (bool on) {FlagSet(flag, PUBLISH_OPEN_VR_DLL, on); return T;}
+   bool publishDataAsPak ()C {return FlagOn(flag, PUBLISH_DATA_AS_PAK);}   ElmApp& publishDataAsPak (bool on) {FlagSet(flag, PUBLISH_DATA_AS_PAK, on); return T;}
+   bool playAssetDelivery()C {return FlagOn(flag, PLAY_ASSET_DELIVERY);}   ElmApp& playAssetDelivery(bool on) {FlagSet(flag, PLAY_ASSET_DELIVERY, on); return T;}
+ //bool windowsCodeSign  ()C {return FlagOn(flag, WINDOWS_CODE_SIGN  );}   ElmApp& windowsCodeSign  (bool on) {FlagSet(flag, WINDOWS_CODE_SIGN  , on); return T;}
 
    // operations
    virtual void newData()override
@@ -2960,12 +3003,12 @@ class ElmApp : ElmData
       libs_windows_time++; libs_mac_time++; libs_linux_time++; libs_android_time++; libs_ios_time++; libs_nintendo_time++;
       ms_publisher_id_time++; ms_publisher_name_time++;
       xbl_program_time++; xbl_title_id_time++; xbl_scid_time++;
-      nintendo_app_id_time++; nintendo_publisher_name_time++;
+      nintendo_initial_code_time++; nintendo_app_id_time++; nintendo_publisher_name_time++; nintendo_legal_info_time++;
       fb_app_id_time++;
       am_app_id_ios_time++; am_app_id_google_time++;
       cb_app_id_ios_time++; cb_app_signature_ios_time++; cb_app_id_google_time++; cb_app_signature_google_time++;
-      package_time++; android_license_key_time++; location_usage_reason_time++; build_time++; save_size_time++; storage_time++; supported_orientations_time++;
-      embed_engine_data_time++; publish_proj_data_time++; publish_physx_dll_time++; publish_steam_dll_time++; publish_open_vr_dll_time++; publish_data_as_pak_time++; android_expansion_time++;
+      package_time++; android_license_key_time++; location_usage_reason_time++; build_time++; save_size_time++; storage_time++; supported_orientations_time++; supported_languages_time++;
+      embed_engine_data_time++; publish_proj_data_time++; publish_physx_dll_time++; publish_steam_dll_time++; publish_open_vr_dll_time++; publish_data_as_pak_time++; play_asset_delivery_time++;
       icon_time++; notification_icon_time++; image_portrait_time++; image_landscape_time++; gui_skin_time++;
    }
    uint undo(C ElmApp &src)
@@ -3003,8 +3046,10 @@ class ElmApp : ElmData
          ch|=Undo(            xbl_program_time, src.            xbl_program_time, xbl_program            , src.xbl_program            );
          ch|=Undo(           xbl_title_id_time, src.           xbl_title_id_time, xbl_title_id           , src.xbl_title_id           );
          ch|=Undo(               xbl_scid_time, src.               xbl_scid_time, xbl_scid               , src.xbl_scid               );
+         ch|=Undo(  nintendo_initial_code_time, src.  nintendo_initial_code_time, nintendo_initial_code  , src.nintendo_initial_code  );
          ch|=Undo(        nintendo_app_id_time, src.        nintendo_app_id_time, nintendo_app_id        , src.nintendo_app_id        );
          ch|=Undo(nintendo_publisher_name_time, src.nintendo_publisher_name_time, nintendo_publisher_name, src.nintendo_publisher_name);
+         ch|=Undo(    nintendo_legal_info_time, src.    nintendo_legal_info_time, nintendo_legal_info    , src.nintendo_legal_info    );
          ch|=Undo(              fb_app_id_time, src.              fb_app_id_time, fb_app_id              , src.fb_app_id              );
          ch|=Undo(          am_app_id_ios_time, src.          am_app_id_ios_time, am_app_id_ios          , src.am_app_id_ios          );
          ch|=Undo(       am_app_id_google_time, src.       am_app_id_google_time, am_app_id_google       , src.am_app_id_google       );
@@ -3013,16 +3058,17 @@ class ElmApp : ElmData
          ch|=Undo(       cb_app_id_google_time, src.       cb_app_id_google_time, cb_app_id_google       , src.cb_app_id_google       );
          ch|=Undo(cb_app_signature_google_time, src.cb_app_signature_google_time, cb_app_signature_google, src.cb_app_signature_google);
 
-         if(Undo(embed_engine_data_time  , src.embed_engine_data_time  )){ch=true; embedEngineData (src.embedEngineData ());}
-         if(Undo(publish_proj_data_time  , src.publish_proj_data_time  )){ch=true; publishProjData (src.publishProjData ());}
-         if(Undo(publish_physx_dll_time  , src.publish_physx_dll_time  )){ch=true; publishPhysxDll (src.publishPhysxDll ());}
-         if(Undo(publish_steam_dll_time  , src.publish_steam_dll_time  )){ch=true; publishSteamDll (src.publishSteamDll ());}
-         if(Undo(publish_open_vr_dll_time, src.publish_open_vr_dll_time)){ch=true; publishOpenVRDll(src.publishOpenVRDll());}
-         if(Undo(publish_data_as_pak_time, src.publish_data_as_pak_time)){ch=true; publishDataAsPak(src.publishDataAsPak());}
-         if(Undo(android_expansion_time  , src.android_expansion_time  )){ch=true; androidExpansion(src.androidExpansion());}
-       //if(Undo(windows_code_sign_time  , src.windows_code_sign_time  )){ch=true; windowsCodeSign (src.windowsCodeSign ());}
+         if(Undo(embed_engine_data_time  , src.embed_engine_data_time  )){ch=true; embedEngineData  (src.embedEngineData  ());}
+         if(Undo(publish_proj_data_time  , src.publish_proj_data_time  )){ch=true; publishProjData  (src.publishProjData  ());}
+         if(Undo(publish_physx_dll_time  , src.publish_physx_dll_time  )){ch=true; publishPhysxDll  (src.publishPhysxDll  ());}
+         if(Undo(publish_steam_dll_time  , src.publish_steam_dll_time  )){ch=true; publishSteamDll  (src.publishSteamDll  ());}
+         if(Undo(publish_open_vr_dll_time, src.publish_open_vr_dll_time)){ch=true; publishOpenVRDll (src.publishOpenVRDll ());}
+         if(Undo(publish_data_as_pak_time, src.publish_data_as_pak_time)){ch=true; publishDataAsPak (src.publishDataAsPak ());}
+         if(Undo(play_asset_delivery_time, src.play_asset_delivery_time)){ch=true; playAssetDelivery(src.playAssetDelivery());}
+       //if(Undo(windows_code_sign_time  , src.windows_code_sign_time  )){ch=true; windowsCodeSign  (src.windowsCodeSign  ());}
       }
       ch|=Undo(supported_orientations_time, src.supported_orientations_time, supported_orientations, src.supported_orientations);
+      ch|=Undo(   supported_languages_time, src.   supported_languages_time, supported_languages   , src.supported_languages   );
       ch|=Undo(                  icon_time, src.                  icon_time, icon                  , src.icon                  );
       ch|=Undo(     notification_icon_time, src.     notification_icon_time, notification_icon     , src.notification_icon     );
       ch|=Undo(        image_portrait_time, src.        image_portrait_time, image_portrait        , src.image_portrait        );
@@ -3069,8 +3115,10 @@ class ElmApp : ElmData
          ch|=Sync(            xbl_program_time, src.            xbl_program_time, xbl_program            , src.xbl_program            );
          ch|=Sync(           xbl_title_id_time, src.           xbl_title_id_time, xbl_title_id           , src.xbl_title_id           );
          ch|=Sync(               xbl_scid_time, src.               xbl_scid_time, xbl_scid               , src.xbl_scid               );
+         ch|=Sync(  nintendo_initial_code_time, src.  nintendo_initial_code_time, nintendo_initial_code  , src.nintendo_initial_code  );
          ch|=Sync(        nintendo_app_id_time, src.        nintendo_app_id_time, nintendo_app_id        , src.nintendo_app_id        );
          ch|=Sync(nintendo_publisher_name_time, src.nintendo_publisher_name_time, nintendo_publisher_name, src.nintendo_publisher_name);
+         ch|=Sync(    nintendo_legal_info_time, src.    nintendo_legal_info_time, nintendo_legal_info    , src.nintendo_legal_info    );
          ch|=Sync(              fb_app_id_time, src.              fb_app_id_time, fb_app_id              , src.fb_app_id              );
          ch|=Sync(          am_app_id_ios_time, src.          am_app_id_ios_time, am_app_id_ios          , src.am_app_id_ios          );
          ch|=Sync(       am_app_id_google_time, src.       am_app_id_google_time, am_app_id_google       , src.am_app_id_google       );
@@ -3079,16 +3127,17 @@ class ElmApp : ElmData
          ch|=Sync(       cb_app_id_google_time, src.       cb_app_id_google_time, cb_app_id_google       , src.cb_app_id_google       );
          ch|=Sync(cb_app_signature_google_time, src.cb_app_signature_google_time, cb_app_signature_google, src.cb_app_signature_google);
 
-         if(Sync(embed_engine_data_time  , src.embed_engine_data_time  )){ch=true; embedEngineData (src.embedEngineData ());}
-         if(Sync(publish_proj_data_time  , src.publish_proj_data_time  )){ch=true; publishProjData (src.publishProjData ());}
-         if(Sync(publish_physx_dll_time  , src.publish_physx_dll_time  )){ch=true; publishPhysxDll (src.publishPhysxDll ());}
-         if(Sync(publish_steam_dll_time  , src.publish_steam_dll_time  )){ch=true; publishSteamDll (src.publishSteamDll ());}
-         if(Sync(publish_open_vr_dll_time, src.publish_open_vr_dll_time)){ch=true; publishOpenVRDll(src.publishOpenVRDll());}
-         if(Sync(publish_data_as_pak_time, src.publish_data_as_pak_time)){ch=true; publishDataAsPak(src.publishDataAsPak());}
-         if(Sync(android_expansion_time  , src.android_expansion_time  )){ch=true; androidExpansion(src.androidExpansion());}
-       //if(Sync(windows_code_sign_time  , src.windows_code_sign_time  )){ch=true; windowsCodeSign (src.windowsCodeSign ());}
+         if(Sync(embed_engine_data_time  , src.embed_engine_data_time  )){ch=true; embedEngineData  (src.embedEngineData  ());}
+         if(Sync(publish_proj_data_time  , src.publish_proj_data_time  )){ch=true; publishProjData  (src.publishProjData  ());}
+         if(Sync(publish_physx_dll_time  , src.publish_physx_dll_time  )){ch=true; publishPhysxDll  (src.publishPhysxDll  ());}
+         if(Sync(publish_steam_dll_time  , src.publish_steam_dll_time  )){ch=true; publishSteamDll  (src.publishSteamDll  ());}
+         if(Sync(publish_open_vr_dll_time, src.publish_open_vr_dll_time)){ch=true; publishOpenVRDll (src.publishOpenVRDll ());}
+         if(Sync(publish_data_as_pak_time, src.publish_data_as_pak_time)){ch=true; publishDataAsPak (src.publishDataAsPak ());}
+         if(Sync(play_asset_delivery_time, src.play_asset_delivery_time)){ch=true; playAssetDelivery(src.playAssetDelivery());}
+       //if(Sync(windows_code_sign_time  , src.windows_code_sign_time  )){ch=true; windowsCodeSign  (src.windowsCodeSign  ());}
       }
       ch|=Sync(supported_orientations_time, src.supported_orientations_time, supported_orientations, src.supported_orientations);
+      ch|=Sync(   supported_languages_time, src.   supported_languages_time, supported_languages   , src.supported_languages   );
       ch|=Sync(                  icon_time, src.                  icon_time, icon                  , src.icon                  );
       ch|=Sync(     notification_icon_time, src.     notification_icon_time, notification_icon     , src.notification_icon     );
       ch|=Sync(        image_portrait_time, src.        image_portrait_time, image_portrait        , src.image_portrait        );
@@ -3104,14 +3153,14 @@ class ElmApp : ElmData
    virtual bool save(File &f)C override
    {
       super.save(f);
-      f.cmpUIntV(20);
+      f.cmpUIntV(23);
       f<<dirs_windows<<dirs_mac<<dirs_linux<<dirs_android<<dirs_ios<<dirs_nintendo;
       f<<headers_windows<<headers_mac<<headers_linux<<headers_android<<headers_ios<<headers_nintendo;
       f<<libs_windows<<libs_mac<<libs_linux<<libs_android<<libs_ios<<libs_nintendo;
       f<<package<<android_license_key<<location_usage_reason<<build<<save_size<<storage<<supported_orientations<<flag;
       f<<ms_publisher_id<<ms_publisher_id_time<<ms_publisher_name<<ms_publisher_name_time;
       f<<xbl_program<<xbl_program_time<<xbl_title_id<<xbl_title_id_time<<xbl_scid<<xbl_scid_time;
-      f<<nintendo_app_id<<nintendo_app_id_time<<nintendo_publisher_name<<nintendo_publisher_name_time;
+      f<<nintendo_initial_code<<nintendo_initial_code_time<<nintendo_app_id<<nintendo_app_id_time<<nintendo_publisher_name<<nintendo_publisher_name_time<<nintendo_legal_info<<nintendo_legal_info_time;
       f<<fb_app_id<<fb_app_id_time;
       f<<am_app_id_ios<<am_app_id_google<<am_app_id_ios_time<<am_app_id_google_time;
       f<<cb_app_id_ios<<cb_app_signature_ios<<cb_app_id_google<<cb_app_signature_google<<cb_app_id_ios_time<<cb_app_signature_ios_time<<cb_app_id_google_time<<cb_app_signature_google_time;
@@ -3119,10 +3168,10 @@ class ElmApp : ElmData
       f<<dirs_windows_time<<dirs_mac_time<<dirs_linux_time<<dirs_android_time<<dirs_ios_time<<dirs_nintendo_time;
       f<<headers_windows_time<<headers_mac_time<<headers_linux_time<<headers_android_time<<headers_ios_time<<headers_nintendo_time;
       f<<libs_windows_time<<libs_mac_time<<libs_linux_time<<libs_android_time<<libs_ios_time<<libs_nintendo_time;
-      f<<package_time<<android_license_key_time<<location_usage_reason_time<<build_time<<save_size_time<<storage_time<<supported_orientations_time;
-      f<<embed_engine_data_time<<publish_proj_data_time<<publish_physx_dll_time<<publish_steam_dll_time<<publish_open_vr_dll_time<<publish_data_as_pak_time<<android_expansion_time;
+      f<<package_time<<android_license_key_time<<location_usage_reason_time<<build_time<<save_size_time<<storage_time<<supported_orientations_time<<supported_languages_time;
+      f<<embed_engine_data_time<<publish_proj_data_time<<publish_physx_dll_time<<publish_steam_dll_time<<publish_open_vr_dll_time<<publish_data_as_pak_time<<play_asset_delivery_time;
       f<<icon_time<<notification_icon_time<<image_portrait_time<<image_landscape_time<<gui_skin_time;
-      return f.ok();
+      return supported_languages.saveRaw(f) && f.ok();
    }
    virtual bool load(File &f)override
    {
@@ -3131,6 +3180,72 @@ class ElmApp : ElmData
       T=ElmApp(); // reset to default, in case this is needed (for example when loading data from reused objects for code synchronization)
       if(super.load(f))switch(f.decUIntV())
       {
+         case 23:
+         {
+            f>>dirs_windows>>dirs_mac>>dirs_linux>>dirs_android>>dirs_ios>>dirs_nintendo;
+            f>>headers_windows>>headers_mac>>headers_linux>>headers_android>>headers_ios>>headers_nintendo;
+            f>>libs_windows>>libs_mac>>libs_linux>>libs_android>>libs_ios>>libs_nintendo;
+            f>>package>>android_license_key>>location_usage_reason>>build>>save_size>>storage>>supported_orientations>>flag;
+            f>>ms_publisher_id>>ms_publisher_id_time>>ms_publisher_name>>ms_publisher_name_time;
+            f>>xbl_program>>xbl_program_time>>xbl_title_id>>xbl_title_id_time>>xbl_scid>>xbl_scid_time;
+            f>>nintendo_initial_code>>nintendo_initial_code_time>>nintendo_app_id>>nintendo_app_id_time>>nintendo_publisher_name>>nintendo_publisher_name_time>>nintendo_legal_info>>nintendo_legal_info_time;
+            f>>fb_app_id>>fb_app_id_time;
+            f>>am_app_id_ios>>am_app_id_google>>am_app_id_ios_time>>am_app_id_google_time;
+            f>>cb_app_id_ios>>cb_app_signature_ios>>cb_app_id_google>>cb_app_signature_google>>cb_app_id_ios_time>>cb_app_signature_ios_time>>cb_app_id_google_time>>cb_app_signature_google_time;
+            f>>icon>>notification_icon>>image_portrait>>image_landscape>>gui_skin;
+            f>>dirs_windows_time>>dirs_mac_time>>dirs_linux_time>>dirs_android_time>>dirs_ios_time>>dirs_nintendo_time;
+            f>>headers_windows_time>>headers_mac_time>>headers_linux_time>>headers_android_time>>headers_ios_time>>headers_nintendo_time;
+            f>>libs_windows_time>>libs_mac_time>>libs_linux_time>>libs_android_time>>libs_ios_time>>libs_nintendo_time;
+            f>>package_time>>android_license_key_time>>location_usage_reason_time>>build_time>>save_size_time>>storage_time>>supported_orientations_time>>supported_languages_time;
+            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_open_vr_dll_time>>publish_data_as_pak_time>>play_asset_delivery_time;
+            f>>icon_time>>notification_icon_time>>image_portrait_time>>image_landscape_time>>gui_skin_time;
+            if(supported_languages.loadRaw(f) && f.ok())return true;
+         }break;
+
+         case 22:
+         {
+            f>>dirs_windows>>dirs_mac>>dirs_linux>>dirs_android>>dirs_ios>>dirs_nintendo;
+            f>>headers_windows>>headers_mac>>headers_linux>>headers_android>>headers_ios>>headers_nintendo;
+            f>>libs_windows>>libs_mac>>libs_linux>>libs_android>>libs_ios>>libs_nintendo;
+            f>>package>>android_license_key>>location_usage_reason>>build>>save_size>>storage>>supported_orientations>>flag;
+            f>>ms_publisher_id>>ms_publisher_id_time>>ms_publisher_name>>ms_publisher_name_time;
+            f>>xbl_program>>xbl_program_time>>xbl_title_id>>xbl_title_id_time>>xbl_scid>>xbl_scid_time;
+            f>>nintendo_initial_code>>nintendo_initial_code_time>>nintendo_app_id>>nintendo_app_id_time>>nintendo_publisher_name>>nintendo_publisher_name_time>>nintendo_legal_info>>nintendo_legal_info_time;
+            f>>fb_app_id>>fb_app_id_time;
+            f>>am_app_id_ios>>am_app_id_google>>am_app_id_ios_time>>am_app_id_google_time;
+            f>>cb_app_id_ios>>cb_app_signature_ios>>cb_app_id_google>>cb_app_signature_google>>cb_app_id_ios_time>>cb_app_signature_ios_time>>cb_app_id_google_time>>cb_app_signature_google_time;
+            f>>icon>>notification_icon>>image_portrait>>image_landscape>>gui_skin;
+            f>>dirs_windows_time>>dirs_mac_time>>dirs_linux_time>>dirs_android_time>>dirs_ios_time>>dirs_nintendo_time;
+            f>>headers_windows_time>>headers_mac_time>>headers_linux_time>>headers_android_time>>headers_ios_time>>headers_nintendo_time;
+            f>>libs_windows_time>>libs_mac_time>>libs_linux_time>>libs_android_time>>libs_ios_time>>libs_nintendo_time;
+            f>>package_time>>android_license_key_time>>location_usage_reason_time>>build_time>>save_size_time>>storage_time>>supported_orientations_time;
+            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_open_vr_dll_time>>publish_data_as_pak_time>>play_asset_delivery_time;
+            f>>icon_time>>notification_icon_time>>image_portrait_time>>image_landscape_time>>gui_skin_time;
+            if(f.ok())return true;
+         }break;
+
+         case 21:
+         {
+            f>>dirs_windows>>dirs_mac>>dirs_linux>>dirs_android>>dirs_ios>>dirs_nintendo;
+            f>>headers_windows>>headers_mac>>headers_linux>>headers_android>>headers_ios>>headers_nintendo;
+            f>>libs_windows>>libs_mac>>libs_linux>>libs_android>>libs_ios>>libs_nintendo;
+            f>>package>>android_license_key>>location_usage_reason>>build>>save_size>>storage>>supported_orientations>>flag;
+            f>>ms_publisher_id>>ms_publisher_id_time>>ms_publisher_name>>ms_publisher_name_time;
+            f>>xbl_program>>xbl_program_time>>xbl_title_id>>xbl_title_id_time>>xbl_scid>>xbl_scid_time;
+            f>>nintendo_initial_code>>nintendo_initial_code_time>>nintendo_app_id>>nintendo_app_id_time>>nintendo_publisher_name>>nintendo_publisher_name_time;
+            f>>fb_app_id>>fb_app_id_time;
+            f>>am_app_id_ios>>am_app_id_google>>am_app_id_ios_time>>am_app_id_google_time;
+            f>>cb_app_id_ios>>cb_app_signature_ios>>cb_app_id_google>>cb_app_signature_google>>cb_app_id_ios_time>>cb_app_signature_ios_time>>cb_app_id_google_time>>cb_app_signature_google_time;
+            f>>icon>>notification_icon>>image_portrait>>image_landscape>>gui_skin;
+            f>>dirs_windows_time>>dirs_mac_time>>dirs_linux_time>>dirs_android_time>>dirs_ios_time>>dirs_nintendo_time;
+            f>>headers_windows_time>>headers_mac_time>>headers_linux_time>>headers_android_time>>headers_ios_time>>headers_nintendo_time;
+            f>>libs_windows_time>>libs_mac_time>>libs_linux_time>>libs_android_time>>libs_ios_time>>libs_nintendo_time;
+            f>>package_time>>android_license_key_time>>location_usage_reason_time>>build_time>>save_size_time>>storage_time>>supported_orientations_time;
+            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_open_vr_dll_time>>publish_data_as_pak_time>>play_asset_delivery_time;
+            f>>icon_time>>notification_icon_time>>image_portrait_time>>image_landscape_time>>gui_skin_time;
+            if(f.ok())return true;
+         }break;
+
          case 20:
          {
             f>>dirs_windows>>dirs_mac>>dirs_linux>>dirs_android>>dirs_ios>>dirs_nintendo;
@@ -3148,7 +3263,7 @@ class ElmApp : ElmData
             f>>headers_windows_time>>headers_mac_time>>headers_linux_time>>headers_android_time>>headers_ios_time>>headers_nintendo_time;
             f>>libs_windows_time>>libs_mac_time>>libs_linux_time>>libs_android_time>>libs_ios_time>>libs_nintendo_time;
             f>>package_time>>android_license_key_time>>location_usage_reason_time>>build_time>>save_size_time>>storage_time>>supported_orientations_time;
-            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_open_vr_dll_time>>publish_data_as_pak_time>>android_expansion_time;
+            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_open_vr_dll_time>>publish_data_as_pak_time>>play_asset_delivery_time;
             f>>icon_time>>notification_icon_time>>image_portrait_time>>image_landscape_time>>gui_skin_time;
             if(f.ok())return true;
          }break;
@@ -3170,7 +3285,7 @@ class ElmApp : ElmData
             f>>headers_windows_time>>headers_mac_time>>headers_linux_time>>headers_android_time>>headers_ios_time>>headers_nintendo_time;
             f>>libs_windows_time>>libs_mac_time>>libs_linux_time>>libs_android_time>>libs_ios_time>>libs_nintendo_time;
             f>>package_time>>android_license_key_time>>location_usage_reason_time>>build_time>>storage_time>>supported_orientations_time;
-            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_open_vr_dll_time>>publish_data_as_pak_time>>android_expansion_time;
+            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_open_vr_dll_time>>publish_data_as_pak_time>>play_asset_delivery_time;
             f>>icon_time>>notification_icon_time>>image_portrait_time>>image_landscape_time>>gui_skin_time;
             if(f.ok())return true;
          }break;
@@ -3194,7 +3309,7 @@ class ElmApp : ElmData
             f>>fb_app_id_time;
             f>>am_app_id_ios_time>>am_app_id_google_time;
             f>>cb_app_id_ios_time>>cb_app_signature_ios_time>>cb_app_id_google_time>>cb_app_signature_google_time;
-            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_open_vr_dll_time>>publish_data_as_pak_time>>android_expansion_time;
+            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_open_vr_dll_time>>publish_data_as_pak_time>>play_asset_delivery_time;
             f>>icon_time>>notification_icon_time>>image_portrait_time>>image_landscape_time>>gui_skin_time;
             if(f.ok())return true;
          }break;
@@ -3216,7 +3331,7 @@ class ElmApp : ElmData
             f>>fb_app_id_time;
             f>>am_app_id_ios_time>>am_app_id_google_time;
             f>>cb_app_id_ios_time>>cb_app_signature_ios_time>>cb_app_id_google_time>>cb_app_signature_google_time;
-            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_open_vr_dll_time>>publish_data_as_pak_time>>android_expansion_time;
+            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_open_vr_dll_time>>publish_data_as_pak_time>>play_asset_delivery_time;
             f>>icon_time>>notification_icon_time>>image_portrait_time>>image_landscape_time>>gui_skin_time;
             if(f.ok())return true;
          }break;
@@ -3236,7 +3351,7 @@ class ElmApp : ElmData
             f>>package_time>>android_license_key_time>>location_usage_reason_time>>build_time>>storage_time>>supported_orientations_time;
             f>>fb_app_id_time;
             f>>cb_app_id_ios_time>>cb_app_signature_ios_time>>cb_app_id_google_time>>cb_app_signature_google_time;
-            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_open_vr_dll_time>>publish_data_as_pak_time>>android_expansion_time;
+            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_open_vr_dll_time>>publish_data_as_pak_time>>play_asset_delivery_time;
             f>>icon_time>>notification_icon_time>>image_portrait_time>>image_landscape_time>>gui_skin_time;
             if(f.ok())return true;
          }break;
@@ -3253,7 +3368,7 @@ class ElmApp : ElmData
             f>>package_time>>android_license_key_time>>location_usage_reason_time>>build_time>>storage_time>>supported_orientations_time;
             f>>fb_app_id_time;
             f>>cb_app_id_ios_time>>cb_app_signature_ios_time>>cb_app_id_google_time>>cb_app_signature_google_time;
-            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_open_vr_dll_time>>publish_data_as_pak_time>>android_expansion_time;
+            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_open_vr_dll_time>>publish_data_as_pak_time>>play_asset_delivery_time;
             f>>icon_time>>notification_icon_time>>image_portrait_time>>image_landscape_time>>gui_skin_time;
             if(f.ok())return true;
          }break;
@@ -3270,7 +3385,7 @@ class ElmApp : ElmData
             f>>package_time>>android_license_key_time>>location_usage_reason_time>>build_time>>storage_time>>supported_orientations_time;
             f>>fb_app_id_time;
             f>>cb_app_id_ios_time>>cb_app_signature_ios_time>>cb_app_id_google_time>>cb_app_signature_google_time;
-            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_open_vr_dll_time>>publish_data_as_pak_time>>android_expansion_time;
+            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_open_vr_dll_time>>publish_data_as_pak_time>>play_asset_delivery_time;
             f>>icon_time>>image_portrait_time>>image_landscape_time>>gui_skin_time;
             if(f.ok())return true;
          }break;
@@ -3287,7 +3402,7 @@ class ElmApp : ElmData
             f>>package_time>>android_license_key_time>>location_usage_reason_time>>build_time>>storage_time>>supported_orientations_time;
             f>>fb_app_id_time;
             f>>cb_app_id_ios_time>>cb_app_signature_ios_time>>cb_app_id_google_time>>cb_app_signature_google_time;
-            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_open_vr_dll_time>>publish_data_as_pak_time>>android_expansion_time;
+            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_open_vr_dll_time>>publish_data_as_pak_time>>play_asset_delivery_time;
             f>>icon_time>>image_portrait_time>>image_landscape_time>>gui_skin_time;
             if(f.ok())return true;
          }break;
@@ -3304,7 +3419,7 @@ class ElmApp : ElmData
             f>>package_time>>android_license_key_time>>location_usage_reason_time>>build_time>>storage_time>>supported_orientations_time;
             f>>fb_app_id_time;
             f>>cb_app_id_ios_time>>cb_app_signature_ios_time>>cb_app_id_google_time>>cb_app_signature_google_time;
-            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_data_as_pak_time>>android_expansion_time;
+            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_data_as_pak_time>>play_asset_delivery_time;
             f>>icon_time>>image_portrait_time>>image_landscape_time>>gui_skin_time;
             if(f.ok())return true;
          }break;
@@ -3319,7 +3434,7 @@ class ElmApp : ElmData
             f>>libs_windows_time>>libs_mac_time>>libs_linux_time>>libs_android_time>>libs_ios_time;
             f>>package_time>>android_license_key_time>>location_usage_reason_time>>build_time>>storage_time>>supported_orientations_time;
             f>>fb_app_id_time>>cb_app_id_ios_time>>cb_app_signature_ios_time;
-            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_data_as_pak_time>>android_expansion_time;
+            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_data_as_pak_time>>play_asset_delivery_time;
             f>>icon_time>>image_portrait_time>>image_landscape_time>>gui_skin_time;
             if(f.ok())return true;
          }break;
@@ -3334,7 +3449,7 @@ class ElmApp : ElmData
             f>>libs_windows_time>>libs_mac_time>>libs_linux_time>>libs_android_time>>libs_ios_time;
             f>>package_time>>android_license_key_time>>location_usage_reason_time>>build_time>>storage_time>>supported_orientations_time;
             f>>fb_app_id_time;
-            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_data_as_pak_time>>android_expansion_time;
+            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_steam_dll_time>>publish_data_as_pak_time>>play_asset_delivery_time;
             f>>icon_time>>image_portrait_time>>image_landscape_time>>gui_skin_time;
             if(f.ok())return true;
          }break;
@@ -3349,7 +3464,7 @@ class ElmApp : ElmData
             f>>libs_windows_time>>libs_mac_time>>libs_linux_time>>libs_android_time>>libs_ios_time;
             f>>package_time>>android_license_key_time>>location_usage_reason_time>>build_time>>storage_time>>supported_orientations_time;
             f>>fb_app_id_time;
-            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_data_as_pak_time>>android_expansion_time;
+            f>>embed_engine_data_time>>publish_proj_data_time>>publish_physx_dll_time>>publish_data_as_pak_time>>play_asset_delivery_time;
             f>>icon_time>>image_portrait_time>>image_landscape_time>>gui_skin_time;
             if(f.ok())return true;
          }break;
@@ -3448,7 +3563,7 @@ class ElmApp : ElmData
          {
             bool embed_engine_data;
             GetStr(f, headers_windows); GetStr(f, libs_windows); GetStr(f, package); f>>build>>storage>>supported_orientations>>embed_engine_data>>icon>>image_portrait>>headers_windows_time>>libs_windows_time>>package_time>>build_time>>storage_time>>supported_orientations_time>>embed_engine_data_time>>icon_time>>image_portrait_time;
-            embedEngineData(embed_engine_data).publishProjData(true).publishPhysxDll(true).publishDataAsPak(true).androidExpansion(false); // set non-saved options
+            embedEngineData(embed_engine_data).publishProjData(true).publishPhysxDll(true).publishDataAsPak(true).playAssetDelivery(false); // set non-saved options
             if(f.ok())return true;
          }break;
       }
@@ -3507,8 +3622,13 @@ class ElmApp : ElmData
       REPA(StorageModes)if(storage==StorageModes[i].mode){nodes.New().set("Storage", StorageModes[i].name); break;}
                                     nodes.New().set("SupportedOrientations", supported_orientations);
       if(location_usage_reason.is())nodes.New().set("LocationUsageReason"  , location_usage_reason);
-      if(androidExpansion        ())nodes.New().set("AndroidExpansion"     );
+      if(playAssetDelivery       ())nodes.New().set("PlayAssetDelivery"    );
       if(android_license_key  .is())nodes.New().set("AndroidLicenseKey"    , android_license_key);
+      if(supported_languages.elms())
+      {
+         TextNode &l=nodes.New().setName("SupportedLanguages");
+         FREPA(supported_languages)l.nodes.New().setValue(LanguageCode(supported_languages[i]));
+      }
 
       {
          TextNode &ms=nodes.New().setName("Microsoft");
@@ -3530,10 +3650,14 @@ class ElmApp : ElmData
 
       {
          TextNode &nintendo=nodes.New().setName("Nintendo");
+         if(nintendo_initial_code  .is())nintendo.nodes.New().set("InitialCode"      , nintendo_initial_code);
+                                         nintendo.nodes.New().set("InitialCodeTime"  , nintendo_initial_code_time.text());
          if(nintendo_app_id             )nintendo.nodes.New().set("AppID"            , nintendo_app_id);
                                          nintendo.nodes.New().set("AppIDTime"        , nintendo_app_id_time.text());
          if(nintendo_publisher_name.is())nintendo.nodes.New().set("PublisherName"    , nintendo_publisher_name);
                                          nintendo.nodes.New().set("PublisherNameTime", nintendo_publisher_name_time.text());
+         if(nintendo_legal_info    .is())nintendo.nodes.New().set("LegalInfo"        , nintendo_legal_info);
+                                         nintendo.nodes.New().set("LegalInfoTime"    , nintendo_legal_info_time.text());
       }
 
       if(fb_app_id)nodes.New().set("FacebookAppID", fb_app_id);
@@ -3596,8 +3720,9 @@ class ElmApp : ElmData
 
       nodes.New().set("StorageTime"              , storage_time.text());
       nodes.New().set("SupportedOrientationsTime", supported_orientations_time.text());
+      nodes.New().set("SupportedLanguagesTime"   , supported_languages_time.text());
       nodes.New().set("LocationUsageReasonTime"  , location_usage_reason_time.text());
-      nodes.New().set("AndroidExpansionTime"     , android_expansion_time.text());
+      nodes.New().set("PlayAssetDeliveryTime"    , play_asset_delivery_time.text());
       nodes.New().set("AndroidLicenseKeyTime"    , android_license_key_time.text());
 
       nodes.New().set("FacebookAppIDTime", fb_app_id_time.text());
@@ -3647,9 +3772,18 @@ class ElmApp : ElmData
          if(n.name=="Storage"                     ){REPA(StorageModes)if(n.value==StorageModes[i].name){storage=StorageModes[i].mode; break;}}else
          if(n.name=="SupportedOrientations"       )supported_orientations=n.asInt();else
          if(n.name=="LocationUsageReason"         )n.getValue(location_usage_reason);else
-         if(n.name=="AndroidExpansion"            )androidExpansion(n.asBool1());else
+         if(n.name=="PlayAssetDelivery"           )playAssetDelivery(n.asBool1());else
          if(n.name=="AndroidLicenseKey"           )n.getValue(android_license_key);else
 
+         if(n.name=="SupportedLanguages")
+         {
+            Memc<LANG_TYPE> langs;
+            FREPA(n.nodes)
+            {
+             C TextNode &l=n.nodes[i]; if(LANG_TYPE lang=LanguageCode(l.value))langs.include(lang);
+            }
+            supported_languages=langs;
+         }else
          if(n.name=="Microsoft")
          {
             REPA(n.nodes)
@@ -3679,14 +3813,18 @@ class ElmApp : ElmData
             REPA(n.nodes)
             {
              C TextNode &nintendo=n.nodes[i];
+               if(nintendo.name=="InitialCode"      )nintendo.getValue           (nintendo_initial_code);else
+               if(nintendo.name=="InitialCodeTime"  )nintendo_initial_code_time  =nintendo.asText();else
                if(nintendo.name=="AppID"            )nintendo.getValue           (nintendo_app_id);else
                if(nintendo.name=="AppIDTime"        )nintendo_app_id_time        =nintendo.asText();else
                if(nintendo.name=="PublisherName"    )nintendo.getValue           (nintendo_publisher_name);else
-               if(nintendo.name=="PublisherNameTime")nintendo_publisher_name_time=nintendo.asText();
+               if(nintendo.name=="PublisherNameTime")nintendo_publisher_name_time=nintendo.asText();else
+               if(nintendo.name=="LegalInfo"        )nintendo.getValue           (nintendo_legal_info);else
+               if(nintendo.name=="LegalInfoTime"    )nintendo_legal_info_time    =nintendo.asText();
             }
          }else
-         if(n.name=="FacebookAppID"               )n.getValue(fb_app_id);else
-         if(n.name=="AdMob"                       )
+         if(n.name=="FacebookAppID")n.getValue(fb_app_id);else
+         if(n.name=="AdMob"        )
          {
             REPA(n.nodes)
             {
@@ -3750,9 +3888,10 @@ class ElmApp : ElmData
 
          if(n.name=="StorageTime"              )storage_time=n.asText();else
          if(n.name=="SupportedOrientationsTime")supported_orientations_time=n.asText();else
-         if(n.name=="LocationUsageReasonTime"  )location_usage_reason_time=n.asText();else
-         if(n.name=="AndroidExpansionTime"     )android_expansion_time=n.asText();else
-         if(n.name=="AndroidLicenseKeyTime"    )android_license_key_time=n.asText();else
+         if(n.name=="SupportedLanguagesTime"   )supported_languages_time   =n.asText();else
+         if(n.name=="LocationUsageReasonTime"  )location_usage_reason_time =n.asText();else
+         if(n.name=="PlayAssetDeliveryTime"    )play_asset_delivery_time   =n.asText();else
+         if(n.name=="AndroidLicenseKeyTime"    )android_license_key_time   =n.asText();else
 
          if(n.name=="FacebookAppIDTime")fb_app_id_time=n.asText();
       }
@@ -3855,15 +3994,21 @@ class ElmMiniMap : ElmData
 /******************************************************************************/
 class Elm
 {
-   enum FLAG // !! these enums are saved !!
+   enum FLAG : byte // !! THESE ENUMS ARE SAVED !!
    {
-      IMPORTING       =1<<0,
-      OPENED          =1<<1,
-      REMOVED         =1<<2,
-      NO_PUBLISH      =1<<3,
-      FINAL_REMOVED   =1<<4,
-      FINAL_NO_PUBLISH=1<<5,
-      DATA            =1<<7, // used only in IO
+      IMPORTING        =1<<0,
+      OPENED           =1<<1,
+      REMOVED          =1<<2,
+      NO_PUBLISH       =1<<3,
+      NO_PUBLISH_MOBILE=1<<4,
+
+      // used only in memory (not saved) may overlap with IO
+      FINAL_REMOVED    =1<<6,
+      FINAL_NO_PUBLISH =1<<7,
+      FINAL            =FINAL_REMOVED|FINAL_NO_PUBLISH,
+
+      // used only in IO, may overlap with memory
+      DATA             =1<<7,
    }
    ELM_TYPE        type=ELM_NONE;
    byte                   flag=0; // FLAG
@@ -3875,7 +4020,7 @@ class Elm
                        name_time, // time when the element was named or renamed
                      parent_time, // time when the element was attached to the parent
                     removed_time, // time when the element was removed or restored
-                 no_publish_time; // time when the element had NO_PUBLISH changed
+                    publish_time; // time when the element had publishing changed
    ElmData            *data=null;
 
   ~Elm() {Delete(data);}
@@ -3887,9 +4032,9 @@ class Elm
          Delete(data);
          flag=src.flag;
          name=src.name;
-         name_time=src.      name_time;
-      removed_time=src.   removed_time;
-   no_publish_time=src.no_publish_time;
+         name_time=src.   name_time;
+      removed_time=src.removed_time;
+      publish_time=src.publish_time;
          if(set_parent)
          {
             parent_id  =src.parent_id;
@@ -3946,26 +4091,30 @@ class Elm
    Elm(C Elm &src) {T=src;}
 
    // get
-   bool importing     ()C {return  FlagTest(flag, IMPORTING       );}   Elm& importing     (bool on) {FlagSet(flag, IMPORTING       ,  on); return T;}
-   bool opened        ()C {return  FlagTest(flag, OPENED          );}   Elm& opened        (bool on) {FlagSet(flag, OPENED          ,  on); return T;}
-   bool removed       ()C {return  FlagTest(flag, REMOVED         );}   Elm& removed       (bool on) {FlagSet(flag, REMOVED         ,  on); return T;} // this checks only if this element is    removed, it doesn't check the parents
-   bool publish       ()C {return !FlagTest(flag, NO_PUBLISH      );}   Elm& publish       (bool on) {FlagSet(flag, NO_PUBLISH      , !on); return T;} // this checks only if this element is    publish, it doesn't check the parents
-   bool noPublish     ()C {return  FlagTest(flag, NO_PUBLISH      );}   Elm& noPublish     (bool on) {FlagSet(flag, NO_PUBLISH      ,  on); return T;} // this checks only if this element is no publish, it doesn't check the parents
-   bool finalRemoved  ()C {return  FlagTest(flag, FINAL_REMOVED   );}   Elm& finalRemoved  (bool on) {FlagSet(flag, FINAL_REMOVED   ,  on); return T;}
-   bool finalExists   ()C {return !FlagTest(flag, FINAL_REMOVED   );}   Elm& finalExists   (bool on) {FlagSet(flag, FINAL_REMOVED   , !on); return T;}
-   bool finalPublish  ()C {return !FlagTest(flag, FINAL_NO_PUBLISH);}   Elm& finalPublish  (bool on) {FlagSet(flag, FINAL_NO_PUBLISH, !on); return T;} // this includes 'finalExists'  as well !!
-   bool finalNoPublish()C {return  FlagTest(flag, FINAL_NO_PUBLISH);}   Elm& finalNoPublish(bool on) {FlagSet(flag, FINAL_NO_PUBLISH,  on); return T;} // this includes 'finalRemoved' as well !!
- C Str& srcFile       ()C {return data ?  data.src_file : S;}
-   bool initialized   ()C {return data && data.ver;}
+   bool importing      ()C {return FlagOn (flag, IMPORTING        );}   Elm& importing      (bool on) {FlagSet(flag, IMPORTING        ,  on); return T;}
+   bool opened         ()C {return FlagOn (flag, OPENED           );}   Elm& opened         (bool on) {FlagSet(flag, OPENED           ,  on); return T;}
+   bool exists         ()C {return FlagOff(flag, REMOVED          );}   Elm& exists         (bool on) {FlagSet(flag, REMOVED          , !on); return T;} // this checks only if this element       exists       , it doesn't check the parents
+   bool removed        ()C {return FlagOn (flag, REMOVED          );}   Elm& removed        (bool on) {FlagSet(flag, REMOVED          ,  on); return T;} // this checks only if this element is    removed      , it doesn't check the parents
+   bool   publish      ()C {return FlagOff(flag, NO_PUBLISH       );}   Elm&   publish      (bool on) {FlagSet(flag, NO_PUBLISH       , !on); return T;} // this checks only if this element is    publish      , it doesn't check the parents
+   bool noPublish      ()C {return FlagOn (flag, NO_PUBLISH       );}   Elm& noPublish      (bool on) {FlagSet(flag, NO_PUBLISH       ,  on); return T;} // this checks only if this element is no publish      , it doesn't check the parents
+   bool   publishMobile()C {return FlagOff(flag, NO_PUBLISH_MOBILE);}   Elm&   publishMobile(bool on) {FlagSet(flag, NO_PUBLISH_MOBILE, !on); return T;} // this checks only if this element is    publishMobile, it doesn't check the parents
+   bool noPublishMobile()C {return FlagOn (flag, NO_PUBLISH_MOBILE);}   Elm& noPublishMobile(bool on) {FlagSet(flag, NO_PUBLISH_MOBILE,  on); return T;} // this checks only if this element is no publishMobile, it doesn't check the parents
+   bool finalRemoved   ()C {return FlagOn (flag, FINAL_REMOVED    );}   Elm& finalRemoved   (bool on) {FlagSet(flag, FINAL_REMOVED    ,  on); return T;}
+   bool finalExists    ()C {return FlagOff(flag, FINAL_REMOVED    );}   Elm& finalExists    (bool on) {FlagSet(flag, FINAL_REMOVED    , !on); return T;}
+   bool finalPublish   ()C {return FlagOff(flag, FINAL_NO_PUBLISH );}   Elm& finalPublish   (bool on) {FlagSet(flag, FINAL_NO_PUBLISH , !on); return T;} // this includes 'finalExists'  and Platform as well !!
+   bool finalNoPublish ()C {return FlagOn (flag, FINAL_NO_PUBLISH );}   Elm& finalNoPublish (bool on) {FlagSet(flag, FINAL_NO_PUBLISH ,  on); return T;} // this includes 'finalRemoved' and Platform as well !!
+ C Str& srcFile        ()C {return data ?  data.src_file : S;}
+   bool initialized    ()C {return data && data.ver;}
 
-   void resetFinal() {FlagEnable(flag, FINAL_REMOVED|FINAL_NO_PUBLISH);}
+   void resetFinal() {FlagEnable(flag, FINAL);}
 
-   Elm& setRemoved  (  bool removed   , C TimeStamp &time=TimeStamp().getUTC()) {T.removed  (removed   ); T.   removed_time=time; return T;}
-   Elm& setNoPublish(  bool no_publish, C TimeStamp &time=TimeStamp().getUTC()) {T.noPublish(no_publish); T.no_publish_time=time; return T;}
-   Elm& setName     (C Str &name      , C TimeStamp &time=TimeStamp().getUTC()) {T.name     =name       ; T.      name_time=time; return T;}
-   Elm& setParent   (C UID &parent_id , C TimeStamp &time=TimeStamp().getUTC()) {T.parent_id=parent_id  ; T.    parent_time=time; return T;}
-   Elm& setParent   (C Elm *parent    , C TimeStamp &time=TimeStamp().getUTC()) {return setParent(parent ? parent.id : UIDZero, time);}
-   Elm& setSrcFile  (C Str &src_file  , C TimeStamp &time=TimeStamp().getUTC()) {if(ElmData *data=Data()){data.setSrcFile(src_file, time); data.newVer();} return T;}
+   Elm& setRemoved(  bool removed  ,              C TimeStamp &time=TimeStamp().getUTC()) {T.removed  (removed );                          T.removed_time=time; return T;}
+   Elm& setPublish(  bool all      ,              C TimeStamp &time=TimeStamp().getUTC()) {T.publish  (all     );                          T.publish_time=time; return T;}
+   Elm& setPublish(  bool all      , bool mobile, C TimeStamp &time=TimeStamp().getUTC()) {T.publish  (all     ); T.publishMobile(mobile); T.publish_time=time; return T;}
+   Elm& setName   (C Str &name     ,              C TimeStamp &time=TimeStamp().getUTC()) {T.name     =name     ;                          T.   name_time=time; return T;}
+   Elm& setParent (C UID &parent_id,              C TimeStamp &time=TimeStamp().getUTC()) {T.parent_id=parent_id;                          T. parent_time=time; return T;}
+   Elm& setParent (C Elm *parent   ,              C TimeStamp &time=TimeStamp().getUTC()) {return setParent(parent ? parent.id : UIDZero, time);}
+   Elm& setSrcFile(C Str &src_file ,              C TimeStamp &time=TimeStamp().getUTC()) {if(ElmData *data=Data()){data.setSrcFile(src_file, time); data.newVer();} return T;}
 
    ElmObjClass  *   objClassData() {if(type==ELM_OBJ_CLASS  ){if(!data)data=new ElmObjClass  ; return CAST(ElmObjClass  , data);} return null;}   C ElmObjClass  *   objClassData()C {return (type==ELM_OBJ_CLASS  ) ? CAST(ElmObjClass  , data) : null;}
    ElmObj       *        objData() {if(type==ELM_OBJ        ){if(!data)data=new ElmObj       ; return CAST(ElmObj       , data);} return null;}   C ElmObj       *        objData()C {return (type==ELM_OBJ        ) ? CAST(ElmObj       , data) : null;}
@@ -4121,14 +4270,25 @@ class Elm
    }
 
    // io
+   static void LoadOldFlag(byte &flag, File &f)
+   {
+      byte b; f>>b;
+                  flag =0;
+      if(b&(1<<0))flag|=IMPORTING;
+      if(b&(1<<1))flag|=OPENED;
+      if(b&(1<<2))flag|=REMOVED;
+      if(b&(1<<3))flag|=NO_PUBLISH;
+      if(b&(1<<7))flag|=DATA;
+   }
    bool save(File &f, bool network, bool skip_name_data)C
    {
       byte flag=T.flag;
-      if(data   )flag|=DATA;
+                 FlagDisable(flag, FINAL    ); // don't save FINAL because they're always recalculated
       if(network)FlagDisable(flag, IMPORTING); // don't transmit IMPORTING status over network, to make reload requests local only, so one reload doesn't trigger reload on all connected computers
-      f.cmpUIntV(3);
+      if(data   )flag|=DATA; // !! ENABLE AFTER DISABLING OTHERS ABOVE BECAUSE BITS MAY OVERLAP !!
+      f.cmpUIntV(4);
       f<<id<<parent_id<<type<<flag;
-      f<<name_time<<parent_time<<removed_time<<no_publish_time;
+      f<<name_time<<parent_time<<removed_time<<publish_time;
       if(!skip_name_data)f<<name;
 
       // data
@@ -4140,10 +4300,27 @@ class Elm
    {
       switch(f.decUIntV())
       {
-         case 3:
+         case 4:
          {
             f>>id>>parent_id>>type>>flag; if(type>=ELM_NUM)return false;
-            f>>name_time>>parent_time>>removed_time>>no_publish_time;
+            f>>name_time>>parent_time>>removed_time>>publish_time;
+            if(!skip_name_data)f>>name;
+
+            // data
+            Delete(data); if(flag&DATA) // if has data
+            {
+               FlagDisable(flag, DATA);
+               ElmData *data=Data(); if(!data)return false;
+               if(skip_name_data)f>>data.ver;
+               else             if(!data.load(f))return false;
+            }
+            if(f.ok())return true;
+         }break;
+
+         case 3:
+         {
+            f>>id>>parent_id>>type; LoadOldFlag(flag, f); if(type>=ELM_NUM)return false;
+            f>>name_time>>parent_time>>removed_time>>publish_time;
             if(!skip_name_data)f>>name;
 
             // data
@@ -4159,8 +4336,8 @@ class Elm
 
          case 2:
          {
-            f>>id>>parent_id>>type>>flag; if(type>=ELM_NUM)return false;
-            f>>name_time>>parent_time>>removed_time>>no_publish_time;
+            f>>id>>parent_id>>type; LoadOldFlag(flag, f); if(type>=ELM_NUM)return false;
+            f>>name_time>>parent_time>>removed_time>>publish_time;
             if(!skip_name_data)GetStr2(f, name);
 
             // data
@@ -4176,8 +4353,8 @@ class Elm
 
          case 1:
          {
-            f>>id>>parent_id>>type>>flag; if(type>=ELM_NUM)return false;
-            f>>name_time>>parent_time>>removed_time>>no_publish_time;
+            f>>id>>parent_id>>type; LoadOldFlag(flag, f); if(type>=ELM_NUM)return false;
+            f>>name_time>>parent_time>>removed_time>>publish_time;
             if(!skip_name_data)GetStr(f, name);
 
             // data
@@ -4193,8 +4370,8 @@ class Elm
 
          case 0:
          {
-            f>>id>>parent_id>>type>>flag; if(type>=ELM_NUM)return false;
-            f>>name_time>>parent_time>>removed_time; no_publish_time.zero();
+            f>>id>>parent_id>>type; LoadOldFlag(flag, f); if(type>=ELM_NUM)return false;
+            f>>name_time>>parent_time>>removed_time; publish_time.zero();
             if(!skip_name_data)GetStr(f, name);
 
             // data
@@ -4217,14 +4394,15 @@ class Elm
                            node.nodes.New().set  ("Name"   , name);
       if(parent_id.valid())node.nodes.New().setFN("Parent" , parent_id);
       if(removed        ())node.nodes.New().set  ("Removed");
-      if(noPublish      ())node.nodes.New().set  ("Publish", publish());
+      if(noPublish      ())node.nodes.New().set  ("Publish"      , publish      ());
+      if(noPublishMobile())node.nodes.New().set  ("PublishMobile", publishMobile());
 
-                              node.nodes.New().set("NameTime"   , name_time.text());
-                              node.nodes.New().set("ParentTime" , parent_time.text());
-      if(   removed_time.is())node.nodes.New().set("RemovedTime", removed_time.text());
-      if(no_publish_time.is())node.nodes.New().set("PublishTime", no_publish_time.text());
+                           node.nodes.New().set("NameTime"   ,    name_time.text());
+                           node.nodes.New().set("ParentTime" ,  parent_time.text());
+      if(removed_time.is())node.nodes.New().set("RemovedTime", removed_time.text());
+      if(publish_time.is())node.nodes.New().set("PublishTime", publish_time.text());
       // IMPORTING OPENED flags are not saved, because this text format is used for SVN synchronization, and we don't want to send these flags to other computers
-      // FINAL_REMOVED FINAL_NO_PUBLISH flags are not saved because they are calculated based on other flags and parents
+      // FINAL            flags are not saved, because they are calculated based on other flags and parents
       if(data)data.save(node.nodes.New().setName("Data").nodes);
    }
    bool load(C TextNode &node, Str &error) // assumes that 'error' doesn't need to be cleared at start, and 'T.id' was already set
@@ -4233,16 +4411,17 @@ class Elm
       REPA(node.nodes)
       {
        C TextNode &n=node.nodes[i];
-         if(n.name=="Type"       ){REP(ELM_NUM)if(n.value==ElmTypeNameNoSpaceDummy.names[i]){type=ELM_TYPE(i); break;}}else
-         if(n.name=="Name"       )n.getValue(name     );else
-         if(n.name=="Parent"     )n.getValue(parent_id);else
-         if(n.name=="Removed"    )removed        (n.asBool1());else
-         if(n.name=="Publish"    )publish        (n.asBool1());else
-         if(n.name=="NameTime"   )name_time      =n.asText () ;else
-         if(n.name=="ParentTime" )parent_time    =n.asText () ;else
-         if(n.name=="RemovedTime")removed_time   =n.asText () ;else
-         if(n.name=="PublishTime")no_publish_time=n.asText () ;else
-         if(n.name=="Data"       )data_node=&n; // remember for later, because to load data, first we must know the type
+         if(n.name=="Type"         ){REP(ELM_NUM)if(n.value==ElmTypeNameNoSpaceDummy.names[i]){type=ELM_TYPE(i); break;}}else
+         if(n.name=="Name"         )n.getValue(name     );else
+         if(n.name=="Parent"       )n.getValue(parent_id);else
+         if(n.name=="Removed"      )removed      (n.asBool1());else
+         if(n.name=="Publish"      )publish      (n.asBool1());else
+         if(n.name=="PublishMobile")publishMobile(n.asBool1());else
+         if(n.name=="NameTime"     )name_time    =n.asText () ;else
+         if(n.name=="ParentTime"   )parent_time  =n.asText () ;else
+         if(n.name=="RemovedTime"  )removed_time =n.asText () ;else
+         if(n.name=="PublishTime"  )publish_time =n.asText () ;else
+         if(n.name=="Data"         )data_node    =&n; // remember for later, because to load data, first we must know the type
       }
       if(!type){error=S+"Element \""+node.name+"\" has no type"; return false;}
       if(data_node)if(ElmData *data=Data())data.load(ConstCast(data_node.nodes));/*else return false; we can silently ignore this*/

@@ -250,7 +250,7 @@ void SysWindow::activate()C
 #if WINDOWS_OLD
    if(minimized())reset(false);
    UIntPtr act_thread=WindowActive().threadID(),
-           cur_thread=            GetThreadId();
+           cur_thread=            GetThreadID();
    if(cur_thread!=act_thread)AttachThreadInput(act_thread, cur_thread, true);
    BringWindowToTop   (window);
    SetForegroundWindow(window);
@@ -655,7 +655,7 @@ SysWindow WindowMouse()
 #if !WINDOWS_OLD
 void WindowList(MemPtr<SysWindow> windows)
 {
-   if(App.window())windows.setNum(1)[0]=App.window();else windows.clear();
+   if(App.window())windows.setNum(1).first()=App.window();else windows.clear();
 }
 #endif
 /******************************************************************************/
@@ -821,7 +821,7 @@ static void       Pause(Bool pause)
 }
 
 static Byte ResetCursorCounter;
-static void ResetCursor() {Ms.resetCursor(); if(ResetCursorCounter){ResetCursorCounter--; App._callbacks.include(ResetCursor);}} // calling immediately may not have any effect, we have to try a few times
+static void ResetCursor() {Ms.resetCursor(); if(ResetCursorCounter){ResetCursorCounter--; App.includeFuncCall(ResetCursor);}} // calling immediately may not have any effect, we have to try a few times
 
 static void ConditionalDraw()
 {
@@ -952,7 +952,7 @@ static LRESULT CALLBACK WindowMsg(HWND window, UInt msg, WPARAM wParam, LPARAM l
       case WM_DISPLAYCHANGE: if(D.initialized()) // needed only if device already initialized (to skip setting mouse cursor and screen size when initializing)
       {
        //VecI2 res(LOWORD(lParam), HIWORD(lParam)); // this is resolution of the primary monitor and not the one that's changing
-         ResetCursorCounter=8; App._callbacks.include(ResetCursor); // it was noticed that after changing resolution, Windows will rescale current cursor, to prevent that, we need to reset it, calling immediately may not have any effect, we have to try a few times
+         ResetCursorCounter=8; App.includeFuncCall(ResetCursor); // it was noticed that after changing resolution, Windows will rescale current cursor, to prevent that, we need to reset it, calling immediately may not have any effect, we have to try a few times
          D.getScreenInfo();
          if(auto screen_changed=D.screen_changed)screen_changed(D.w(), D.h()); // if 'D.scale' is set based on current screen resolution, then we may need to adjust it
       }break;
@@ -1011,7 +1011,7 @@ static LRESULT CALLBACK WindowMsg(HWND window, UInt msg, WPARAM wParam, LPARAM l
 
       // KEYBOARD
       // Order of keyboard events: 0-WM_INPUT, 1-WM_KEYDOWN, 2-WM_CHAR, 3-WM_KEYUP
-   #if KB_RAW_INPUT || MS_RAW_INPUT
+   #if KB_RAW_INPUT || MS_RAW_INPUT || JP_RAW_INPUT
       case WM_INPUT:
       {
          UINT size=0; GetRawInputData((HRAWINPUT)lParam, RID_INPUT, null, &size, sizeof(RAWINPUTHEADER));
@@ -1024,28 +1024,45 @@ static LRESULT CALLBACK WindowMsg(HWND window, UInt msg, WPARAM wParam, LPARAM l
                case RIM_TYPEKEYBOARD:
                {
                   KB_KEY key;
-               #if 1 // search by VKey (fewer checks)
+               #if DEBUG && 0
+                  LogN(S+Kb.keyName((KB_KEY)raw.data.keyboard.VKey)+"   "+TextHex((UInt)raw.data.keyboard.VKey)+"   "+raw.data.keyboard.MakeCode+"    "+raw.data.keyboard.Flags);
+               #endif
                   switch(raw.data.keyboard.VKey)
                   {
-                     case VK_CONTROL : if(raw.data.keyboard.MakeCode!=29)goto def; key=((raw.data.keyboard.Flags&RI_KEY_E0) ? KB_RCTRL  : KB_LCTRL ); break; // 29=KB_LCTRL and KB_RCTRL (this must be checked because VK_CONTROL also gets triggered by AltGr)
-                     case VK_SHIFT   :                                             key=((raw.data.keyboard.MakeCode==42   ) ? KB_LSHIFT : KB_RSHIFT); break; // 42=KB_LSHIFT, 54=KB_RSHIFT
-                     case VK_SNAPSHOT: key=KB_PRINT; break; // needed for exclusive mode
-                   //case 255        : if(raw.data.keyboard.MakeCode==42 && (raw.data.keyboard.Flags&(RI_KEY_E0|RI_KEY_E1))==RI_KEY_E0){key=KB_PRINT; break;} goto def; detect KB_PRINT because in 'Kb.exclusive', WM_HOTKEY isn't called, however this is also called when pressing "Insert" when NumLock is off so it can't be used
-                     default         : goto def;
+                     case VK_CONTROL: if(raw.data.keyboard.MakeCode!=29)return 0; key=((raw.data.keyboard.Flags&RI_KEY_E0) ? KB_RCTRL  : KB_LCTRL ); break; // 29=KB_LCTRL and KB_RCTRL (this must be checked because VK_CONTROL also gets triggered by AltGr)
+                     case VK_MENU   :                                             key=((raw.data.keyboard.Flags&RI_KEY_E0) ? KB_RALT   : KB_LALT  ); break;
+                     case VK_SHIFT  : switch(raw.data.keyboard.MakeCode) // 42=KB_LSHIFT, 54=KB_RSHIFT, 75=triggered when pressing Shift+Numpad
+                     {
+                        case 42: key=KB_LSHIFT; break;
+                        case 54: key=KB_RSHIFT; break;
+                        default: return 0;
+                     }break;
+                     case VK_INSERT : key=((raw.data.keyboard.Flags&RI_KEY_E0) ? KB_INS     : KB_NP0  ); break;
+                     case VK_END    : key=((raw.data.keyboard.Flags&RI_KEY_E0) ? KB_END     : KB_NP1  ); break;
+                     case VK_DOWN   : key=((raw.data.keyboard.Flags&RI_KEY_E0) ? KB_DOWN    : KB_NP2  ); break;
+                     case VK_NEXT   : key=((raw.data.keyboard.Flags&RI_KEY_E0) ? KB_PGDN    : KB_NP3  ); break;
+                     case VK_LEFT   : key=((raw.data.keyboard.Flags&RI_KEY_E0) ? KB_LEFT    : KB_NP4  ); break;
+                     case VK_CLEAR  : key=((raw.data.keyboard.Flags&RI_KEY_E0) ? KB_NONE    : KB_NP5  ); break;
+                     case VK_RIGHT  : key=((raw.data.keyboard.Flags&RI_KEY_E0) ? KB_RIGHT   : KB_NP6  ); break;
+                     case VK_HOME   : key=((raw.data.keyboard.Flags&RI_KEY_E0) ? KB_HOME    : KB_NP7  ); break;
+                     case VK_UP     : key=((raw.data.keyboard.Flags&RI_KEY_E0) ? KB_UP      : KB_NP8  ); break;
+                     case VK_PRIOR  : key=((raw.data.keyboard.Flags&RI_KEY_E0) ? KB_PGUP    : KB_NP9  ); break;
+                     case VK_DELETE : key=((raw.data.keyboard.Flags&RI_KEY_E0) ? KB_DEL     : KB_NPDEL); break;
+                     case VK_RETURN : key=((raw.data.keyboard.Flags&RI_KEY_E0) ? KB_NPENTER : KB_ENTER); break;
+                     default        : if(raw.data.keyboard.VKey>=255)return 0; key=(KB_KEY)raw.data.keyboard.VKey; break;
+                   //case 255       : if(raw.data.keyboard.MakeCode==42 && (raw.data.keyboard.Flags&(RI_KEY_E0|RI_KEY_E1))==RI_KEY_E0){key=KB_PRINT; break;} return 0; detect KB_PRINT because in 'Kb.exclusive', WM_HOTKEY isn't called, however this is also called when pressing "Insert" when NumLock is off so it can't be used
                   }
-               #else // search by MakeCode (slower)
-                  switch(raw.data.keyboard.MakeCode)
+                  if(raw.data.keyboard.Flags&RI_KEY_BREAK)Kb.release(key);else
                   {
-                     case 29: if(raw.data.keyboard.VKey!=VK_CONTROL )goto def; key=((raw.data.keyboard.Flags&RI_KEY_E0) ? KB_RCTRL : KB_LCTRL); break; // this is also called for PauseBreak
-                     case 42: if(raw.data.keyboard.VKey!=VK_SHIFT   )goto def; key=KB_LSHIFT                                                  ; break; // this is also called for Ins,Del,Home,End,PgUp,PgDn,PrintScr,Arrows
-                     case 54: if(raw.data.keyboard.VKey!=VK_SHIFT   )goto def; key=KB_RSHIFT                                                  ; break;
-                     case 55: if(raw.data.keyboard.VKey!=VK_SNAPSHOT)goto def; key=KB_PRINT                                                   ; break; // this is also called for NumPad*
-                     default: goto def;
+                     Kb.push(key, raw.data.keyboard.MakeCode);
+                     // !! queue characters after push !!
+                     if(Kb.anyCtrl() && !Kb.anyAlt()) // if Control is on, then WM_CHAR will not be called, so we must add this char here, don't do this with Alt pressed, because if Ctrl+Alt are pressed, then accented characters will get generated (even if it's left Alt)
+                     {
+                        if(key>='A' && key<='Z')Kb.queue(Char(key + (Kb.anyShift() ? 0 : 'a'-'A')), raw.data.keyboard.MakeCode);else
+                        if(key>='0' && key<='9')Kb.queue(Char(key)                                , raw.data.keyboard.MakeCode);
+                     }
                   }
-               #endif
-                  if(raw.data.keyboard.Flags&RI_KEY_BREAK)Kb.release(key);else Kb.push(key, raw.data.keyboard.MakeCode);
-                  return 0;
-               }break;
+               }return 0;
             #endif
 
             #if MS_RAW_INPUT
@@ -1067,7 +1084,48 @@ static LRESULT CALLBACK WindowMsg(HWND window, UInt msg, WPARAM wParam, LPARAM l
                      if(raw.data.mouse.usButtonFlags&RI_MOUSE_BUTTON_4_UP)Ms.release(3);
                      if(raw.data.mouse.usButtonFlags&RI_MOUSE_BUTTON_5_UP)Ms.release(4);
                   }
-                  return 0;
+               }return 0;
+            #endif
+
+            #if JP_RAW_INPUT
+               case RIM_TYPEHID:
+               {
+                  /*LogName(S);
+                  GetRawInputDeviceInfo(raw.header.hDevice, RIDI_PREPARSEDDATA, 0, &size);
+		            _HIDP_PREPARSED_DATA* data = (_HIDP_PREPARSED_DATA*)malloc(size);
+		            bool gotPreparsedData = GetRawInputDeviceInfo(raw.header.hDevice, RIDI_PREPARSEDDATA, data, &size) > 0;
+		            if (gotPreparsedData)
+		            {
+			            HIDP_CAPS caps;
+			            HidP_GetCaps(data, &caps);
+
+			            LogN("Values: ");
+			            HIDP_VALUE_CAPS* valueCaps = (HIDP_VALUE_CAPS*)malloc(caps.NumberInputValueCaps * sizeof(HIDP_VALUE_CAPS));
+			            HidP_GetValueCaps(HidP_Input, valueCaps, &caps.NumberInputValueCaps, data);
+			            for (USHORT i = 0; i < caps.NumberInputValueCaps; ++i)
+			            {
+				            ULONG value;
+				            HidP_GetUsageValue(HidP_Input, valueCaps[i].UsagePage, 0, valueCaps[i].Range.UsageMin, &value, data, (PCHAR)raw.data.hid.bRawData, raw.data.hid.dwSizeHid);
+				            LogN(S+i+" "+(ULong)value);
+			            }
+			            free(valueCaps);
+
+			            LogN("Buttons: ");
+			            HIDP_BUTTON_CAPS* buttonCaps = (HIDP_BUTTON_CAPS*)malloc(caps.NumberInputButtonCaps * sizeof(HIDP_BUTTON_CAPS));
+			            HidP_GetButtonCaps(HidP_Input, buttonCaps, &caps.NumberInputButtonCaps, data);
+			            for (USHORT i = 0; i < caps.NumberInputButtonCaps; ++i)
+			            {
+				            ULONG usageCount = buttonCaps->Range.UsageMax - buttonCaps->Range.UsageMin + 1;
+				            USAGE* usages = (USAGE*)malloc(sizeof(USAGE) * usageCount);
+				            HidP_GetUsages(HidP_Input, buttonCaps[i].UsagePage, 0, usages, &usageCount, data, (PCHAR)raw.data.hid.bRawData, raw.data.hid.dwSizeHid);
+				            for (ULONG usageIndex=0; usageIndex < usageCount; ++usageIndex) {
+					            LogN(S+i+" "+usages[usageIndex]);
+				            }
+				            free(usages);
+			            }
+			            free(buttonCaps);
+		            }
+		            free(data);*/
                }break;
             #endif
             }
@@ -1077,6 +1135,7 @@ static LRESULT CALLBACK WindowMsg(HWND window, UInt msg, WPARAM wParam, LPARAM l
 
       case WM_KEYDOWN   :
       case WM_SYSKEYDOWN: // SYSKEYDOWN handles Alt+keys
+   #if 0
       {
       #if DEBUG
          U16  rep=lParam&0xFFFF;
@@ -1102,28 +1161,13 @@ static LRESULT CALLBACK WindowMsg(HWND window, UInt msg, WPARAM wParam, LPARAM l
             if(key>='A' && key<='Z')Kb.queue(Char(key + (Kb.anyShift() ? 0 : 'a'-'A')), scan_code);else
             if(key>='0' && key<='9')Kb.queue(Char(key)                                , scan_code);
          }
-      }return 0;
-
-      case WM_SYSCHAR: // SYSCHAR handles Alt+chars, also disables beep on Alt+key menu sound when keyboard in non exclusive mode
-      case WM_CHAR   :
-      {
-      #if DEBUG
-         U16  rep=lParam&0xFFFF;
-         Bool ext=(lParam>>24)&1,
-              ctx_code=(lParam>>29)&1,
-              prev_state=(lParam>>30)&1,
-             trans_state=(lParam>>31)&1;
-      #endif
-         Byte scan_code=(lParam>>16)&0xFF;
-      #ifdef UNICODE
-         Kb.queue((Char)wParam, scan_code);
-      #else
-         Kb.queue(Char8To16Fast(wParam), scan_code); // we can assume that Str was already initialized
-      #endif
-      }return 0;
+      }
+   #endif
+      return 0;
 
       case WM_KEYUP   :
       case WM_SYSKEYUP: // for KB_SHIFT this will be called only if both shifts are released
+   #if 0
       {
       #if DEBUG
          Byte   scan_code=(lParam>>16)&0xFF;
@@ -1144,6 +1188,26 @@ static LRESULT CALLBACK WindowMsg(HWND window, UInt msg, WPARAM wParam, LPARAM l
             case KB_ALT  : key=((lParam&(1<<24)) ? KB_RALT   : KB_LALT  ); break;
          }
          Kb.release(key);
+      }
+   #endif
+      return 0;
+
+      case WM_SYSCHAR: // SYSCHAR handles Alt+chars, also disables beep on Alt+key menu sound when keyboard in non exclusive mode
+      case WM_CHAR   :
+      {
+      #if DEBUG
+         U16  rep=lParam&0xFFFF;
+         Bool ext=(lParam>>24)&1,
+              ctx_code=(lParam>>29)&1,
+              prev_state=(lParam>>30)&1,
+             trans_state=(lParam>>31)&1;
+      #endif
+         Byte scan_code=(lParam>>16)&0xFF;
+      #ifdef UNICODE
+         Kb.queue((Char)wParam, scan_code);
+      #else
+         Kb.queue(Char8To16Fast(wParam), scan_code); // we can assume that Str was already initialized
+      #endif
       }return 0;
 
       case WM_HOTKEY:
@@ -1215,10 +1279,10 @@ static LRESULT CALLBACK WindowMsg(HWND window, UInt msg, WPARAM wParam, LPARAM l
       case WM_POINTERDOWN :
       case WM_POINTERENTER:
       {
-         POINT  point={GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)}; VecI2 pixeli(point.x, point.y); ScreenToClient(App.window(), &point);
-         UInt   id=GET_POINTERID_WPARAM(wParam);
-         CPtr  pid=CPtr(id);
-         Bool   stylus=false;
+         POINT point={GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam)}; VecI2 pixeli(point.x, point.y); ScreenToClient(App.window(), &point);
+         UInt  id=GET_POINTERID_WPARAM(wParam);
+         CPtr pid=CPtr(id);
+         Bool  stylus=false;
 
       #if SUPPORT_WINDOWS_XP || SUPPORT_WINDOWS_7
          if(GetPointerType)
@@ -1339,10 +1403,13 @@ static LRESULT CALLBACK WindowMsg(HWND window, UInt msg, WPARAM wParam, LPARAM l
       {
          if(wParam==DBT_DEVICEARRIVAL
          || wParam==DBT_DEVICEREMOVECOMPLETE
-         || wParam==DBT_DEVNODES_CHANGED)App.addFuncCall(ListJoypads); // can't call 'ListJoypads' directly here, because we're inside a Windows callback, and when using Direct Input then 'IsXInputDevice' will not function well (might not detect XInput devices correctly due to errors "An outgoing call cannot be made since the application is dispatching an input-synchronous call.", also it could trigger 'WindowMsg' again as a nested call). Also on UWP during the 'OnGamepadAdded' and 'OnGamepadRemoved' callbacks the results were outdated in tests (from previous frame) so in case the same problem would occur here (Windows could break stuff), then better recheck joypads at a later stage.
+         || wParam==DBT_DEVNODES_CHANGED)
+         {
+            InputDevices.checkMouseKeyboard();
+            App.addFuncCall(ListJoypads); // can't call 'ListJoypads' directly here, because we're inside a Windows callback, and when using Direct Input then 'IsXInputDevice' will not function well (might not detect XInput devices correctly due to errors "An outgoing call cannot be made since the application is dispatching an input-synchronous call.", also it could trigger 'WindowMsg' again as a nested call). Also on UWP during the 'OnGamepadAdded' and 'OnGamepadRemoved' callbacks the results were outdated in tests (from previous frame) so in case the same problem would occur here (Windows could break stuff), then better recheck joypads at a later stage.
+         }
       }break;
    }
-def:
    return DefWindowProc(window, msg, wParam, lParam);
 }
 #endif
@@ -1350,7 +1417,7 @@ def:
 #if WINDOWS
 static BOOL CALLBACK EnumResources(HMODULE hModule, LPCWSTR lpType, LPWSTR lpName, LONG_PTR lParam)
 {
-   *((C wchar_t**)lParam)=lpName;
+  *((C wchar_t**)lParam)=lpName;
    return false; // stop iterating
 }
 static ATOM WindowClass=0;
@@ -1476,7 +1543,7 @@ void Application::setWindowFlags(Bool force_resizable)
 {
    if(XDisplay && window() && _MOTIF_WM_HINTS)
    {
-      force_resizable|=FlagTest(flag, APP_RESIZABLE);
+      force_resizable|=FlagOn(flag, APP_RESIZABLE);
       MotifWmHints2 hints; Zero(hints);
       hints.flags      =MWM_HINTS_FUNCTIONS|MWM_HINTS_DECORATIONS;
       hints.functions  =MWM_FUNC_MOVE |       ((flag&APP_NO_CLOSE)?0:MWM_FUNC_CLOSE) | ((flag&APP_MINIMIZABLE)?MWM_FUNC_MINIMIZE :0) | ((flag&APP_MAXIMIZABLE)?MWM_FUNC_MAXIMIZE :0) | (force_resizable?MWM_FUNC_RESIZE  :0);
@@ -1490,8 +1557,8 @@ void Application::windowCreate()
 {
    if(LogInit)LogN("Application.windowCreate");
 #if WINDOWS_OLD
-   Bool want_minmax = FlagTest(flag, APP_MINIMIZABLE|APP_MAXIMIZABLE),
-        want_close  =!FlagTest(flag, APP_NO_CLOSE                   ),
+   Bool want_minmax =FlagOn (flag, APP_MINIMIZABLE|APP_MAXIMIZABLE),
+        want_close  =FlagOff(flag, APP_NO_CLOSE                   ),
         want_buttons=(want_minmax || want_close);
 
  C wchar_t *icon=null;
@@ -1673,7 +1740,7 @@ void Application::windowCreate()
 #endif
 
 #if WINDOWS_OLD
-   Bool hide=FlagTest(flag, APP_HIDDEN);
+   Bool hide=FlagOn(flag, APP_HIDDEN);
    UInt ex_style=(drop ? WS_EX_ACCEPTFILES : 0);
 #if DX11
    #define WS_EX_NOREDIRECTIONBITMAP 0x00200000L

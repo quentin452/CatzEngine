@@ -8,6 +8,7 @@
 *.hpp  text diff=cpp
 *.hxx  text diff=cpp
 *.inl  text diff=cpp
+*.ispc text diff=cpp
 *.cc   text diff=cpp
 *.cpp  text diff=cpp
 *.cxx  text diff=cpp
@@ -33,6 +34,7 @@
 # Android
 *.mk         text merge=union diff=cpp
 *.properties text merge=union diff=cpp
+*.gradle     text merge=union diff=cpp
 
 # Linux
 *.sh text eol=lf diff=cpp

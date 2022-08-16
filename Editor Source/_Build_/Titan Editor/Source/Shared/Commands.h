@@ -50,10 +50,10 @@ void ClientSendRemoveElms(Connection &conn, Memc<UID> &elm_ids, bool removed, C 
 void ServerRecvRemoveElms(File &f, Memc<UID> &elm_ids, bool &removed, TimeStamp &removed_time);
 void ServerWriteRemoveElms(File &f, Memc<UID> &elm_ids, bool removed, C TimeStamp &removed_time, C UID &proj_id);
 void ClientRecvRemoveElms(File &f, Memc<UID> &elm_ids, bool &removed, TimeStamp &removed_time, UID &proj_id);
-void ClientSendNoPublishElms(Connection &conn, Memc<UID> &elm_ids, bool no_publish, C TimeStamp &no_publish_time);
-void ServerRecvNoPublishElms(File &f, Memc<UID> &elm_ids, bool &no_publish, TimeStamp &no_publish_time);
-void ServerWriteNoPublishElms(File &f, Memc<UID> &elm_ids, bool no_publish, C TimeStamp &no_publish_time, C UID &proj_id);
-void ClientRecvNoPublishElms(File &f, Memc<UID> &elm_ids, bool &no_publish, TimeStamp &no_publish_time, UID &proj_id);
+void ClientSendPublishElms(Connection &conn, Memc<UID> &elm_ids, sbyte publish, sbyte publish_mobile, C TimeStamp &publish_time);
+void ServerRecvPublishElms(File &f, Memc<UID> &elm_ids, sbyte &publish, sbyte &publish_mobile, TimeStamp &publish_time);
+void ServerWritePublishElms(File &f, Memc<UID> &elm_ids, sbyte publish, sbyte publish_mobile, C TimeStamp &publish_time, C UID &proj_id);
+void ClientRecvPublishElms(File &f, Memc<UID> &elm_ids, sbyte &publish, sbyte &publish_mobile, TimeStamp &publish_time, UID &proj_id);
 void ClientSendGetElmNames(Connection &conn, Memc<UID> &elm_ids);
 void ServerRecvGetElmNames(File &f, Memc<UID> &elm_ids);
 void ServerSendGetElmNames(Connection &conn, Memc<ElmName> &elm_names, C UID &proj_id);

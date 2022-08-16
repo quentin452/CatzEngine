@@ -142,6 +142,10 @@ static void Compile(API api, SC_FLAG flag=SC_NONE)
       src.New("DrawG" , "DrawUV_VS", "DrawTexG_PS");
       src.New("DrawA" , "DrawUV_VS", "Draw2DTexA_PS");
 
+      REPD(in0, 2)
+      REPD(in1, 2)
+      REPD(out, 2)src.New("Fade", "DrawUV_VS", "DrawFade_PS")("IN0_GAMMA", in0, "IN1_GAMMA", in1, "OUT_GAMMA", out);
+
       src.New("DrawX" , "DrawUV_VS", "DrawX_PS" );
       src.New("DrawXG", "DrawUV_VS", "DrawXG_PS");
       REPD(dither, 2)

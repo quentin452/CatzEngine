@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26228.4
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32328.378
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ispc_texcomp", "ispc_texcomp\ispc_texcomp.vcxproj", "{9B44F7B9-A9AF-45A4-8695-96792A18B052}"
 EndProject
@@ -11,6 +11,8 @@ Global
 		Debug|x64 = Debug|x64
 		Profile|Win32 = Profile|Win32
 		Profile|x64 = Profile|x64
+		Release Universal|Win32 = Release Universal|Win32
+		Release Universal|x64 = Release Universal|x64
 		Release|Win32 = Release|Win32
 		Release|x64 = Release|x64
 	EndGlobalSection
@@ -22,6 +24,10 @@ Global
 		{9B44F7B9-A9AF-45A4-8695-96792A18B052}.Profile|Win32.ActiveCfg = Release|Win32
 		{9B44F7B9-A9AF-45A4-8695-96792A18B052}.Profile|x64.ActiveCfg = Release|x64
 		{9B44F7B9-A9AF-45A4-8695-96792A18B052}.Profile|x64.Build.0 = Release|x64
+		{9B44F7B9-A9AF-45A4-8695-96792A18B052}.Release Universal|Win32.ActiveCfg = Release Universal|Win32
+		{9B44F7B9-A9AF-45A4-8695-96792A18B052}.Release Universal|Win32.Build.0 = Release Universal|Win32
+		{9B44F7B9-A9AF-45A4-8695-96792A18B052}.Release Universal|x64.ActiveCfg = Release Universal|x64
+		{9B44F7B9-A9AF-45A4-8695-96792A18B052}.Release Universal|x64.Build.0 = Release Universal|x64
 		{9B44F7B9-A9AF-45A4-8695-96792A18B052}.Release|Win32.ActiveCfg = Release|Win32
 		{9B44F7B9-A9AF-45A4-8695-96792A18B052}.Release|Win32.Build.0 = Release|Win32
 		{9B44F7B9-A9AF-45A4-8695-96792A18B052}.Release|x64.ActiveCfg = Release|x64
@@ -29,5 +35,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E9D44C45-E17B-431E-8A51-43E32F207358}
 	EndGlobalSection
 EndGlobal

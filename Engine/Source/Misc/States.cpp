@@ -86,11 +86,9 @@ Bool UpdateState()
    // change states
    if(StateNext!=StateActive)
    {
-      if( StateActive)    StateActive->shutDo(); StateActive=StateNext;
+      if( StateActive)    StateActive->shutDo(); StateActive=StateNext; Time._st=0; Time.skipUpdate(); // zero state time before 'StateInit'
       if(!StateActive || !StateActive->initDo())return false;
-      Time._st=0;
-      Time.skipUpdate();
-      D   .resetEyeAdaptation();
+      D.resetEyeAdaptation();
    }
 
    // update state & draw
@@ -120,13 +118,14 @@ Bool UpdateState()
 }
 Bool DrawState()
 {
-   if(App.minimized() || (D.full() && !App.activeOrBackFull()) || !D.created())return true; // needed for APP_ALLOW_NO_GPU/APP_ALLOW_NO_XDISPLAY
+   if(App.minimized() || (D.full() && !App.activeOrBackFull()) || !D.created()){UpdateStreamLoads(); return true;} // needed for APP_ALLOW_NO_GPU/APP_ALLOW_NO_XDISPLAY, 'UpdateStreamLoads' to release memory
    if(StateActive && StateActive->draw)
    {
       // draw
       Dbl start_time, flip_time;
       {
          SyncLockerEx locker(D._lock);
+         LockedUpdateStreamLoads();
          if(Renderer._t_measure)D.finish(); start_time=Time.curTime();
                 D._flip=Renderer._cur_main   ; // this will call 'discard', this is needed to hold ref count until 'D.flip' is called
          {ImageRTPtr ds=Renderer._cur_main_ds; // this will call 'discard', this is needed to hold ref count until DS is no longer needed

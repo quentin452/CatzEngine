@@ -142,11 +142,7 @@ void Panel::innerPadding(C Rect &rect, Rect &padding)C
    MAX(padding.max.y, bar_size);
    // border is not included
 }
-void Panel::defaultInnerPaddingSize(Vec2 &padd_size)C
-{
-   Rect padding; defaultInnerPadding(padding);
-   padd_size.set(padding.min.x+padding.max.x, padding.min.y+padding.max.y);
-}
+Vec2 Panel::defaultInnerPaddingSize()C {Rect padding; defaultInnerPadding(padding); return padding.min+padding.max;}
 /******************************************************************************/
 void Panel::reset()
 {

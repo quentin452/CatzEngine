@@ -687,7 +687,7 @@ Bool DecompressPVRTC(C Image &src, Image &dest, Int max_mip_maps)
 {
    if(src.hwType()==IMAGE_PVRTC1_2 || src.hwType()==IMAGE_PVRTC1_2_SRGB
    || src.hwType()==IMAGE_PVRTC1_4 || src.hwType()==IMAGE_PVRTC1_4_SRGB)
-   if(dest.is() || dest.createTry(src.w(), src.h(), src.d(), src.sRGB() ? IMAGE_R8G8B8A8_SRGB : IMAGE_R8G8B8A8, src.cube() ? IMAGE_SOFT_CUBE : IMAGE_SOFT, src.mipMaps())) // use 'IMAGE_R8G8B8A8' because 'pvrtcDecompress' operates on that format
+   if(dest.is() || dest.createTry(src.w(), src.h(), src.d(), src.sRGB() ? IMAGE_R8G8B8A8_SRGB : IMAGE_R8G8B8A8, AsSoft(src.mode()), src.mipMaps())) // use 'IMAGE_R8G8B8A8' because 'pvrtcDecompress' operates on that format
    if(dest.size3()==src.size3())
    {
       Byte  bits=((src.hwType()==IMAGE_PVRTC1_2 || src.hwType()==IMAGE_PVRTC1_2_SRGB) ? 2 : 4);

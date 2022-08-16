@@ -1,3 +1,7 @@
+/******************************************************************************
+
+   WARNING: TODO: sync will be broken if received data but failed to save it. (for example not enough disk space)
+
 /******************************************************************************/
 class Client : ConnectionServer.Client
 {
@@ -59,6 +63,11 @@ class Client : ConnectionServer.Client
             world_sync .del  ();
          mini_map_sync .del  ();
       }
+   }
+   
+   void saveError()
+   {
+      Gui.msgBox("Error", "Can't save data");
    }
 
    virtual bool update()override
@@ -211,14 +220,14 @@ class Client : ConnectionServer.Client
                File f; ServerWriteRemoveElms(f.writeMem(), processed, removed, removed_time, project.id); Server.distribute(f, project, this);
             }break;
 
-            case CS_NO_PUBLISH_ELMS: if(user && user.canWrite() && project)
+            case CS_PUBLISH_ELMS: if(user && user.canWrite() && project)
             {
-               Memc<UID> elm_ids; bool no_publish; TimeStamp no_publish_time; ServerRecvNoPublishElms(connection.data, elm_ids, no_publish, no_publish_time);
-               Memc<UID> processed; REPA(elm_ids)if(Elm *elm=project.findElm(elm_ids[i]))if(no_publish_time>elm.no_publish_time)
+               Memc<UID> elm_ids; sbyte publish, publish_mobile; TimeStamp publish_time; ServerRecvPublishElms(connection.data, elm_ids, publish, publish_mobile, publish_time);
+               Memc<UID> processed; REPA(elm_ids)if(Elm *elm=project.findElm(elm_ids[i]))if(publish_time>elm.publish_time)
                {
-                  elm.setNoPublish(no_publish, no_publish_time); processed.add(elm.id);
+                  elm.setPublish((publish>=0) ? publish : elm.publish(), (publish_mobile>=0) ? publish_mobile : elm.publishMobile(), publish_time); processed.add(elm.id);
                }
-               File f; ServerWriteNoPublishElms(f.writeMem(), processed, no_publish, no_publish_time, project.id); Server.distribute(f, project, this);
+               File f; ServerWritePublishElms(f.writeMem(), processed, publish, publish_mobile, publish_time, project.id); Server.distribute(f, project, this);
             }break;
 
             case CS_GET_ELM_NAMES: if(user && project)
@@ -240,8 +249,11 @@ class Client : ConnectionServer.Client
                UID tex_id; File cmpr_tex_data; ServerRecvSetTexture(connection.data, tex_id, cmpr_tex_data.writeMem());
                if(project.texs.binaryInclude(tex_id))
                {
-                  cmpr_tex_data.pos(0); SafeOverwrite(cmpr_tex_data, project.tex_path+EncodeFileName(tex_id));
-                  Server.distributeTex(tex_id, project, this);
+                  cmpr_tex_data.pos(0); if(SafeOverwrite(cmpr_tex_data, project.tex_path+EncodeFileName(tex_id)))Server.distributeTex(tex_id, project, this);else
+                  {
+                     saveError();
+                     project.texs.binaryExclude(tex_id);
+                  }
                }
             }break;
 
@@ -274,10 +286,10 @@ class Client : ConnectionServer.Client
                   }else
                   if(elm.type==proj_elm.type)
                   {
-                     if(elm.      name_time>proj_elm.      name_time)proj_elm.setName     (elm.name       , elm.      name_time);
-                     if(elm.    parent_time>proj_elm.    parent_time)proj_elm.setParent   (elm.parent_id  , elm.    parent_time);
-                     if(elm.   removed_time>proj_elm.   removed_time)proj_elm.setRemoved  (elm.removed  (), elm.   removed_time);
-                     if(elm.no_publish_time>proj_elm.no_publish_time)proj_elm.setNoPublish(elm.noPublish(), elm.no_publish_time);
+                     if(elm.   name_time>proj_elm.   name_time)proj_elm.setName   (elm.name     ,                      elm.   name_time);
+                     if(elm. parent_time>proj_elm. parent_time)proj_elm.setParent (elm.parent_id,                      elm. parent_time);
+                     if(elm.removed_time>proj_elm.removed_time)proj_elm.setRemoved(elm.removed(),                      elm.removed_time);
+                     if(elm.publish_time>proj_elm.publish_time)proj_elm.setPublish(elm.publish(), elm.publishMobile(), elm.publish_time);
                      if(elm.data && (!proj_elm.data || proj_elm.data.ver!=elm.data.ver))
                      {
                         data.pos(0); extra.pos(0); bool elm_newer_src, src_newer_elm; if(project.syncElm(proj_elm, elm, data, extra, true, elm_newer_src, src_newer_elm))Server.distributeElmLong(proj_elm.id, project, this);
@@ -603,7 +615,7 @@ class Client : ConnectionServer.Client
                {
                   Heightmap temp, *hm=null;
                   Memc<ObjData> objs;
-                  if(area_sync_flag&(AREA_SYNC_HEIGHT|AREA_SYNC_MTRL|AREA_SYNC_COLOR|AREA_SYNC_OBJ))hm=project.hmObjGet(world_id, area_xy, temp, objs, FlagTest(area_sync_flag, AREA_SYNC_HEIGHT|AREA_SYNC_MTRL|AREA_SYNC_COLOR), FlagTest(area_sync_flag, AREA_SYNC_OBJ));
+                  if(area_sync_flag&(AREA_SYNC_HEIGHT|AREA_SYNC_MTRL|AREA_SYNC_COLOR|AREA_SYNC_OBJ))hm=project.hmObjGet(world_id, area_xy, temp, objs, FlagOn(area_sync_flag, AREA_SYNC_HEIGHT|AREA_SYNC_MTRL|AREA_SYNC_COLOR), FlagOn(area_sync_flag, AREA_SYNC_OBJ));
                   ServerSendSetWorldArea(connection, world_id, area_xy, area_sync_flag, *area_ver, hm, objs, project.id, project.edit_path);
                }
             }

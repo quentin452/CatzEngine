@@ -27,6 +27,41 @@ static Sensors:: Magnetometer ^ magnetometer;
 
 static EventRegistrationToken MagnetometerToken, MouseToken;
 static TypedEventHandler<Sensors::Magnetometer^, MagnetometerReadingChangedEventArgs^> ^MagnetometerHandler;
+
+static Windows::Devices::Enumeration::DeviceWatcher ^DeviceWatcher;
+
+#if JP_GAMEPAD_INPUT
+static Int FindJoypadI(Windows::Gaming::Input::Gamepad          ^ gamepad            ) {REPA(Joypads)if(Joypads[i]._gamepad            ==gamepad            )return i; return -1;}
+static Int FindJoypadI(Windows::Gaming::Input::RawGameController^ raw_game_controller) {REPA(Joypads)if(Joypads[i]._raw_game_controller==raw_game_controller)return i; return -1;}
+static Int FindJoypadI(Windows::Gaming::Input::IGameController  ^ controller         )
+{
+   REPA(Joypads)
+   {
+      Joypad &jp=Joypads[i]; if(jp._gamepad==controller || jp._raw_game_controller==controller)return i;
+   }
+   return -1;
+}
+
+struct GamepadChange
+{
+   Bool               added;
+   Gamepad           ^gamepad;
+   RawGameController ^raw_game_controller;
+
+   void process();
+};
+static MemcThreadSafe<GamepadChange> GamepadChanges;
+
+static void GamepadChanged()
+{
+   MemcThreadSafeLock lock(GamepadChanges); FREPA(GamepadChanges)GamepadChanges.lockedElm(i).process(); GamepadChanges.lockedClear(); // process in order
+}
+static void GamepadChanged(Bool added, Gamepad ^gamepad, RawGameController ^raw_game_controller)
+{
+   {MemcThreadSafeLock lock(GamepadChanges); GamepadChange &gpc=GamepadChanges.lockedNew(); gpc.added=added; gpc.gamepad=gamepad; gpc.raw_game_controller=raw_game_controller;}
+   App.addFuncCall(GamepadChanged);
+}
+#endif
 /******************************************************************************/
 static void Kb_push(KB_KEY key, Int scan_code)
 {
@@ -113,6 +148,7 @@ void SetMagnetometerRefresh(Flt interval)
       }
    }
 }
+static void DeviceChanged() {InputDevices.checkMouseKeyboard();}
 
 #define KEY_EVENTS 1 // 1=better (can catch key events that occur when ALT is pressed) 0=(can't catch ALT+keys)
 
@@ -124,10 +160,18 @@ ref struct FrameworkView sealed : IFrameworkView
       applicationView->Activated  += ref new TypedEventHandler<CoreApplicationView^, IActivatedEventArgs^>(this, &FrameworkView::OnActivated );
       CoreApplication::Suspending += ref new      EventHandler<SuspendingEventArgs^                      >(this, &FrameworkView::OnSuspending);
       CoreApplication::Resuming   += ref new      EventHandler<             Object^                      >(this, &FrameworkView::OnResuming  );
+
+      Windows::System::MemoryManager::AppMemoryUsageIncreased += ref new EventHandler<Object^>(this, &FrameworkView::OnAppMemoryUsageIncreased);
    }
    virtual void SetWindow(CoreWindow^ window) // called before 'Load'
    {
       App.window().set(window);
+
+      DeviceWatcher=Windows::Devices::Enumeration::DeviceInformation::CreateWatcher();
+      DeviceWatcher->Added   += ref new TypedEventHandler<Windows::Devices::Enumeration::DeviceWatcher^, Windows::Devices::Enumeration::DeviceInformation      ^>(this, &FrameworkView::OnDeviceAdded);
+      DeviceWatcher->Removed += ref new TypedEventHandler<Windows::Devices::Enumeration::DeviceWatcher^, Windows::Devices::Enumeration::DeviceInformationUpdate^>(this, &FrameworkView::OnDeviceUpdate);
+      DeviceWatcher->Updated += ref new TypedEventHandler<Windows::Devices::Enumeration::DeviceWatcher^, Windows::Devices::Enumeration::DeviceInformationUpdate^>(this, &FrameworkView::OnDeviceUpdate);
+      DeviceWatcher->Start();
 
       DisplayInformation^ display_info = DisplayInformation::GetForCurrentView();
       ScreenScale=display_info->RawPixelsPerViewPixel;
@@ -164,6 +208,9 @@ ref struct FrameworkView sealed : IFrameworkView
 
       Gamepad::GamepadAdded   += ref new EventHandler<Gamepad^>(this, &FrameworkView::OnGamepadAdded);
       Gamepad::GamepadRemoved += ref new EventHandler<Gamepad^>(this, &FrameworkView::OnGamepadRemoved);
+
+      RawGameController::RawGameControllerAdded   += ref new EventHandler<RawGameController^>(this, &FrameworkView::OnRawGameControllerAdded);
+      RawGameController::RawGameControllerRemoved += ref new EventHandler<RawGameController^>(this, &FrameworkView::OnRawGameControllerRemoved);
 
       if(accelerometer=Accelerometer::GetDefault())
       {
@@ -259,6 +306,10 @@ ref struct FrameworkView sealed : IFrameworkView
       if(App._closed)return; // do nothing if app called 'Exit'
       ResumeSound();
     //App.setActive(true); just use 'OnWindowActivated'
+   }
+   void OnAppMemoryUsageIncreased(Object^ sender, Object^ args)
+   {
+      if(MemoryManager::AppMemoryUsageLevel==AppMemoryUsageLevel::OverLimit)App.lowMemory();
    }
    void OnWindowSizeChanged(CoreWindow^ sender, WindowSizeChangedEventArgs^ args)
    {
@@ -483,11 +534,12 @@ ref struct FrameworkView sealed : IFrameworkView
          }break;
       }
    }
-   void OnBackRequested(Object^ sender, BackRequestedEventArgs ^args)
+   void OnBackRequested(Object^ sender, BackRequestedEventArgs ^args) // This is called when pressing Gamepad B button, and on Windows Phone onscreen back button in the nav bar. By default these actions suspend the game
    {
-      args->Handled=true; // disable app close on back press
+      args->Handled=true; // !! THIS HAS TO BE CALLED TO DISABLE APP CLOSE !!
+    /*Don't trigger this because this function is also called due to Gamepad B buttons
       Kb.push   (KB_NAV_BACK, -1);
-      Kb.release(KB_NAV_BACK); // release immediately because there's no callback for a release
+      Kb.release(KB_NAV_BACK); // release immediately because there's no callback for a release*/
    }
 #if KEY_EVENTS
    void OnAcceleratorKeyActivated(CoreDispatcher^ sender, AcceleratorKeyEventArgs^ args)
@@ -584,36 +636,19 @@ ref struct FrameworkView sealed : IFrameworkView
 #endif
 
 #if JP_GAMEPAD_INPUT
-   static Int FindJoypadI(Windows::Gaming::Input::IGameController ^gamepad) {REPA(Joypads)if(Joypads[i]._gamepad==gamepad)return i; return -1;}
+   // !! THESE ARE CALLED ON SECONDARY THREADS !!
+   void OnGamepadAdded  (Object^ sender, Gamepad ^gamepad) {GamepadChanged(true , gamepad, null);}
+   void OnGamepadRemoved(Object^ sender, Gamepad ^gamepad) {GamepadChanged(false, gamepad, null);}
 
-   void OnGamepadRemoved(Object^ sender, Gamepad ^gamepad) {Joypads.remove(FindJoypadI(gamepad), true);}
-   void OnGamepadAdded  (Object^ sender, Gamepad ^gamepad)
-   {
-      if(FindJoypadI(gamepad)>=0)return; // make sure it's not already listed
-      UInt joypad_id;
-      auto controller=Windows::Gaming::Input::RawGameController::FromGameController(gamepad); if(controller)
-      {
-       C wchar_t *controller_id=controller->NonRoamableId->Data();
-            joypad_id=xxHash64Mem(controller_id, Length(controller_id));
-      }else joypad_id=0;
-      joypad_id=NewJoypadID(joypad_id); // make sure it's not used yet !! set this before creating new 'Joypad' !!
-      Joypad &joypad=Joypads.New(); joypad._id=joypad_id; joypad._connected=true; joypad._gamepad=gamepad;
-      if(controller)
-      {
-         joypad._name=controller->DisplayName->Data();
-         if(auto motors=controller->ForceFeedbackMotors)joypad._vibrations=(motors->Size>0);
-       //auto   prod_id=controller->HardwareProductId;
-       //auto vendor_id=controller->HardwareVendorId;
-      }
-      // set callback after everything was set, in case it's called right away
-      joypad._gamepad->UserChanged += ref new Windows::Foundation::TypedEventHandler<Windows::Gaming::Input::IGameController^, Windows::System::UserChangedEventArgs^>(this, &FrameworkView::OnGamepadUserChanged);
-   }
+   void OnRawGameControllerAdded  (Object^ sender, RawGameController ^raw_game_controller) {GamepadChanged(true , null, raw_game_controller);}
+   void OnRawGameControllerRemoved(Object^ sender, RawGameController ^raw_game_controller) {GamepadChanged(false, null, raw_game_controller);}
+
    void OnGamepadUserChanged(Windows::Gaming::Input::IGameController^ controller, Windows::System::UserChangedEventArgs^ args)
    {
       if(auto joypad_user_changed=App.joypad_user_changed) // copy to temporary first, to avoid multi-thread issues
          {Int joypad_i=FindJoypadI(controller); if(joypad_i>=0)joypad_user_changed(Joypads[joypad_i].id());}
    }
-#else
+#elif JP_X_INPUT
    void OnGamepadRemoved(Object^ sender, Gamepad ^gamepad) {App.addFuncCall(ListJoypads);} // can't call 'ListJoypads' directly because at this stage the XInput state might still be old, and return results from previous frame while the Joypad is still   available (this happened during testing)
    void OnGamepadAdded  (Object^ sender, Gamepad ^gamepad) {App.addFuncCall(ListJoypads);} // can't call 'ListJoypads' directly because at this stage the XInput state might still be old, and return results from previous frame while the Joypad is still unavailable (this happened during testing)
 #endif
@@ -698,6 +733,8 @@ ref struct FrameworkView sealed : IFrameworkView
       //This is the bounds of the whole control
       request.LayoutBounds.ControlBounds = contentRect;
    }*/
+   void OnDeviceAdded (Windows::Devices::Enumeration::DeviceWatcher ^watcher, Windows::Devices::Enumeration::DeviceInformation       ^device       ) {App.includeFuncCall(DeviceChanged);}
+   void OnDeviceUpdate(Windows::Devices::Enumeration::DeviceWatcher ^watcher, Windows::Devices::Enumeration::DeviceInformationUpdate ^device_update) {App.includeFuncCall(DeviceChanged);}
 
    // custom methods
    void setOrientation(DisplayOrientations orientation, DisplayOrientations native_orientation)
@@ -747,14 +784,71 @@ ref struct FrameworkView sealed : IFrameworkView
       D.modeSet(mode.x, mode.y, -1);
       D.getScreenInfo(); D.setColorLUT();
    }
-};
+}static ^FrameworkViewObj;
 ref struct FrameworkViewSource sealed : IFrameworkViewSource
 {
    virtual IFrameworkView^ CreateView()
    {
-      return ref new FrameworkView();
+      return FrameworkViewObj=ref new FrameworkView();
    }
 };
+#if JP_GAMEPAD_INPUT
+void GamepadChange::process()
+{
+   if(added)
+   {
+      if(gamepad             && FindJoypadI(gamepad            )>=0
+      || raw_game_controller && FindJoypadI(raw_game_controller)>=0)return; // make sure it's not already listed
+
+      UInt joypad_id;
+      if(gamepad) // gamepad callback
+      {
+         raw_game_controller=Windows::Gaming::Input::RawGameController::FromGameController(gamepad);
+      }else // raw_game_controller callback
+      {
+         if(Windows::Gaming::Input::Gamepad::FromGameController(raw_game_controller))return; // if this is a gamepad, then ignore this 'raw_game_controller' callback, as it will be processed using 'gamepad' callback, to avoid having the same gamepad listed twice
+      }
+
+      if(raw_game_controller)
+      {
+       C wchar_t *controller_id=raw_game_controller->NonRoamableId->Data();
+            joypad_id=xxHash64_32Mem(controller_id, SIZE(*controller_id)*Length(controller_id));
+      }else joypad_id=0;
+      joypad_id=NewJoypadID(joypad_id); // make sure it's not used yet !! set this before creating new 'Joypad' !!
+      SyncLocker lock(JoypadLock);
+      Bool added; Joypad &joypad=GetJoypad(joypad_id, added); if(added)
+      {
+         joypad._gamepad            =gamepad;
+         joypad._raw_game_controller=raw_game_controller;
+         if(raw_game_controller)
+         {
+            joypad._name    =    raw_game_controller->DisplayName->Data();
+            joypad._buttons =Min(raw_game_controller->ButtonCount, Elms(joypad._remap));
+            joypad._switches=    raw_game_controller->SwitchCount;
+            joypad._axes    =    raw_game_controller->  AxisCount;
+
+            if(auto motors=raw_game_controller->ForceFeedbackMotors)joypad._vibrations=(motors->Size>0);
+            joypad.setInfo(raw_game_controller->HardwareVendorId, raw_game_controller->HardwareProductId);
+
+            if(!joypad._gamepad)REPA(joypad._state) // this is needed only for 'raw_game_controller', check after 'setInfo' because that might delete '_gamepad'
+            {
+               auto &state=joypad._state[i]; // allocations below also zero memory, which is what we need
+               state.button=ref new Platform::Array<bool                        >(joypad._buttons );
+               state.Switch=ref new Platform::Array<GameControllerSwitchPosition>(joypad._switches);
+               state.axis  =ref new Platform::Array<double                      >(joypad._axes    ); REP(Min(joypad._axes, 4))state.axis->Data[i]=0.5f; // set initial state to centered
+            }
+         }
+         // set callback after everything was set, in case it's called right away
+         if(joypad._gamepad            )joypad._gamepad            ->UserChanged += ref new Windows::Foundation::TypedEventHandler<Windows::Gaming::Input::IGameController^, Windows::System::UserChangedEventArgs^>(FrameworkViewObj, &FrameworkView::OnGamepadUserChanged);else
+         if(joypad._raw_game_controller)joypad._raw_game_controller->UserChanged += ref new Windows::Foundation::TypedEventHandler<Windows::Gaming::Input::IGameController^, Windows::System::UserChangedEventArgs^>(FrameworkViewObj, &FrameworkView::OnGamepadUserChanged);
+      }
+   }else
+   {
+      if(gamepad            )Joypads.remove(FindJoypadI(gamepad            ));
+      if(raw_game_controller)Joypads.remove(FindJoypadI(raw_game_controller));
+   }
+}
+#endif
 void Application::wait(SyncEvent &event)
 {
    if(mainThread()) // on the main thread we need to keep processing events
@@ -775,6 +869,9 @@ void Application::wait(SyncEvent &event)
 #if WINDOWS_OLD
 INT WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow)
 {
+#if JP_GAMEPAD_INPUT
+   RoInitialize(RO_INIT_MULTITHREADED);
+#endif
 #if 1
    const Int start=1; // start from #1, because #0 is always the executable name (if file name has spaces, then they're included in the #0 argv)
    App.cmd_line.setNum(__argc-start); FREPAO(App.cmd_line)=__wargv[start+i];

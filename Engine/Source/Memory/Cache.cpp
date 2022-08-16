@@ -319,6 +319,16 @@ INLINE Int _Cache::absIndex(CPtr data)C // this function assumes that 'data' is 
 #endif
 }
 /******************************************************************************/
+Bool _Cache::has(CPtr data)C
+{
+   if(C Elm *elm=dataElm(data))
+   {
+      SyncUnlocker unlocker(D._lock); // must be used even though we're not using GPU
+      SyncLocker     locker(  _lock);
+      if(lockedContains(elm))return true;
+   }
+   return false;
+}
 Bool _Cache::contains(CPtr data)C
 {
    if(C Elm *elm=dataElm(data))
@@ -401,68 +411,94 @@ UID _Cache::id(CPtr data)C
    return UIDZero;
 }
 /******************************************************************************/
-INLINE void _Cache::removeData(CPtr data, Bool counted)
+INLINE void _Cache::lockedIncRef(CPtr data)
 {
-   if(Elm *elm=dataElm(data))
-   #if !SYNC_LOCK_SAFE // if 'SyncLock' is not safe then crash may occur when trying to lock, to prevent that, check if we have any elements (this means cache was already initialized)
-      if(_elms)
-   #endif
-   {
-      SyncUnlocker unlocker(D._lock); // this must be used also since later 'D._lock' can be locked when deleting the resource
-      SyncLocker     locker(  _lock);
+   Elm *elm=dataElm(data);
+ //if(elm)
+      if(lockedContains(elm))IncPtrNum(elmDesc(*elm).ptr_num);
+}
+void _Cache::lockedRemoveData(CPtr data, Bool counted)
+{
+   Elm *elm=dataElm(data);
+ //if(elm)
       if(lockedContains(elm))
+   {
+      Desc &desc=elmDesc(*elm);
+      if(counted)
       {
-         Desc &desc=elmDesc(*elm);
-         if(counted)
+         DEBUG_ASSERT(desc.ptr_num>0, "'_Cache.removeData' Decreasing 'ptr_num' when it's already zero");
+                      desc.ptr_num--;
+      }else
+      {
+         DEBUG_ASSERT(desc.flag& CACHE_ELM_STD_PTR, "'_Cache.removeData' Disabling CACHE_ELM_STD_PTR when it's already zero");
+          FlagDisable(desc.flag, CACHE_ELM_STD_PTR);
+      }
+      if(!desc.ptr_num && (!counted || !(desc.flag&CACHE_ELM_STD_PTR))) // if there are no more pointers accessing this element (in "!counted" we've already disabled CACHE_ELM_STD_PTR so don't have to check it anymore)
+      {
+         Flt delay_remove_time=_delay_remove_time;
+         if( delay_remove_time   >0 && GetThreadID()==DelayRemoveThreadID)delay_remove_time-=DelayRemoveWaited; // if want to use delayed remove by time and we're unloading because of parent getting delay unloaded, then decrease the time which the parent already waited
+         if( delay_remove_time   >0 // if want to use delayed remove by time
+         || _delay_remove_counter>0 // if want to use delayed remove temporarily
+         || (_can_be_removed && !_can_be_removed(data))) // or it can't be removed right now
          {
-            DEBUG_ASSERT(desc.ptr_num>0, "'_Cache.removeData' Decreasing 'ptr_num' when it's already zero");
-                         desc.ptr_num--;
-         }else
-         {
-            DEBUG_ASSERT(desc.flag& CACHE_ELM_STD_PTR, "'_Cache.removeData' Disabling CACHE_ELM_STD_PTR when it's already zero");
-             FlagDisable(desc.flag, CACHE_ELM_STD_PTR);
-         }
-         if(!desc.ptr_num && (!counted || !(desc.flag&CACHE_ELM_STD_PTR))) // if there are no more pointers accessing this element (in "!counted" we've already disabled CACHE_ELM_STD_PTR so don't have to check it anymore)
-         {
-            Flt delay_remove_time=_delay_remove_time;
-            if( delay_remove_time   >0 && GetThreadId()==DelayRemoveThreadID)delay_remove_time-=DelayRemoveWaited; // if want to use delayed remove by time and we're unloading because of parent getting delay unloaded, then decrease the time which the parent already waited
-            if( delay_remove_time   >0 // if want to use delayed remove by time
-            || _delay_remove_counter>0 // if want to use delayed remove temporarily
-            || (_can_be_removed && !_can_be_removed(data))) // or it can't be removed right now
+            Flt time=Time.appTime()+delay_remove_time; // set removal time
+            if(desc.flag&CACHE_ELM_DELAY_REMOVE) // if already listed
             {
-               Flt time=Time.appTime()+delay_remove_time; // set removal time
-               if(desc.flag&CACHE_ELM_DELAY_REMOVE) // if already listed
-               {
-                  Int i=findDelayRemove(*elm); DEBUG_ASSERT(i>=0, "'_Cache.decRef' Element has CACHE_ELM_DELAY_REMOVE but isn't listed in '_delay_remove'");
-                 _delay_remove[i].time=time; // adjust time
-               }else // not yet listed
-               {
-                  FlagEnable(desc.flag, CACHE_ELM_DELAY_REMOVE);
-                  DelayRemove &remove=_delay_remove.New();
-                  remove.elm =elm;
-                  remove.time=time;
-               }
-            }else // remove now
+               Int i=findDelayRemove(*elm); DEBUG_ASSERT(i>=0, "'_Cache.decRef' Element has CACHE_ELM_DELAY_REMOVE but isn't listed in '_delay_remove'");
+              _delay_remove[i].time=time; // adjust time
+            }else // not yet listed
             {
-               if(desc.flag&CACHE_ELM_DELAY_REMOVE)_delay_remove.remove(findDelayRemove(*elm)); // if was listed in the 'delay_remove' then remove it from it
-               removeFromOrder(*elm);
-              _memx.removeData( elm);
+               FlagEnable(desc.flag, CACHE_ELM_DELAY_REMOVE);
+               DelayRemove &remove=_delay_remove.New();
+               remove.elm =elm;
+               remove.time=time;
             }
+         }else // remove now
+         {
+            if(desc.flag&CACHE_ELM_DELAY_REMOVE)_delay_remove.remove(findDelayRemove(*elm)); // if was listed in the 'delay_remove' then remove it from it
+            removeFromOrder(*elm);
+           _memx.removeData( elm);
          }
       }
    }
 }
 /******************************************************************************/
-void _Cache::incRef(CPtr data)
+void _Cache::incRefContained(CPtr data) {Elm *elm=dataElm(data); /*if(elm)*/IncPtrNum(elmDesc(*elm).ptr_num);}
+void _Cache::incRef         (CPtr data)
 {
-   if(Elm *elm=dataElm(data))
+   if(data)
    #if !SYNC_LOCK_SAFE // if 'SyncLock' is not safe then crash may occur when trying to lock, to prevent that, check if we have any elements (this means cache was already initialized)
       if(_elms)
    #endif
    {
       SyncUnlocker unlocker(D._lock); // must be used even though we're not using GPU
       SyncLocker     locker(  _lock);
-      if(lockedContains(elm))IncPtrNum(elmDesc(*elm).ptr_num);
+      lockedIncRef(data);
+   }
+}
+INLINE void _Cache::removeData(CPtr data, Bool counted)
+{
+   if(data)
+   #if !SYNC_LOCK_SAFE // if 'SyncLock' is not safe then crash may occur when trying to lock, to prevent that, check if we have any elements (this means cache was already initialized)
+      if(_elms)
+   #endif
+   {
+      SyncUnlocker unlocker(D._lock); // this must be used also since later 'D._lock' can be locked when deleting the resource
+      SyncLocker     locker(  _lock);
+      lockedRemoveData(data, counted);
+   }
+}
+void _Cache::incDecRef(CPtr inc, CPtr dec)
+{
+   if(inc || dec)
+   #if !SYNC_LOCK_SAFE // if 'SyncLock' is not safe then crash may occur when trying to lock, to prevent that, check if we have any elements (this means cache was already initialized)
+      if(_elms)
+   #endif
+   {
+      SyncUnlocker unlocker(D._lock); // this must be used also since later 'D._lock' can be locked when deleting the resource
+      SyncLocker     locker(  _lock);
+      if(inc)lockedIncRef    (inc      ); // have to inc ref first, in case new pointer is a child of current that would get released if dec ref was first
+      if(dec)lockedRemoveData(dec, true);
    }
 }
 void _Cache::decRef    (CPtr data) {removeData(data, true );}
@@ -473,7 +509,7 @@ void _Cache::processDelayRemove(Bool always)
    if(_delay_remove.elms())
    {
       SyncUnlocker   unlocker(D._lock); // this must be used also since later 'D._lock' can be locked when deleting the resource
-      SyncLocker delay_locker(DelayRemoveLock); DelayRemoveThreadID=GetThreadId(); // support only one 'processDelayRemove' at a time, because we use only one global 'DelayRemoveWaited' based on 'DelayRemoveThreadID' for all caches/threads
+      SyncLocker delay_locker(DelayRemoveLock); DelayRemoveThreadID=GetThreadID(); // support only one 'processDelayRemove' at a time, because we use only one global 'DelayRemoveWaited' based on 'DelayRemoveThreadID' for all caches/threads
       SyncLocker       locker(  _lock);
      _delay_remove_check=Time.appTime()+_delay_remove_time*DELAY_REMOVE_STEP; // perform next check at this time
       REPA(_delay_remove)

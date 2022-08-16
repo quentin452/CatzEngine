@@ -283,7 +283,7 @@ void DrawProject()
 
          super::update(gpc);
 
-         if(Gui.kb()==this)
+         if(Gui.kb()==this || menu.contains(Gui.kb()))
          {
             KbSc rename(KB_F2), reload(KB_R, KBSC_CTRL_CMD), copyTo(KB_T, KBSC_CTRL_CMD), mulVol(KB_S, KBSC_CTRL_CMD|KBSC_ALT); // check manually, in case 'menu' is not created according to selection
             if(rename.pd())
@@ -365,12 +365,11 @@ void DrawProject()
          // since we're swapping, then we need to adjust the 'type' so next change will be the opposite of this operation
          switch(type)
          {
-            case PUBLISH_DISABLE: type=PUBLISH_ENABLE ; Proj. enablePublish(elms, false       ); break;
-            case PUBLISH_ENABLE : type=PUBLISH_DISABLE; Proj.disablePublish(elms, false, false); break;
-            case REMOVE         : type=RESTORE        ; Proj.       restore(elms, false       ); break;
-            case RESTORE        : type=REMOVE         ; Proj.       remove (elms, false, false); break;
-            case SET_PARENT     :                       Proj.  setElmParent(elm_parents,  true); break;
-            case SET_NAME       :                       Proj.  setElmNames (elm_names  ,  true); break;
+            case PUBLISH   : set^=test   ; Proj._setElmPublish(elms, test , set  , false, false); break; // "set^=test" means toggle "disable/enable"
+            case REMOVE    : type=RESTORE; Proj.       restore(elms,                      false); break;
+            case RESTORE   : type=REMOVE ; Proj.       remove (elms,               false, false); break;
+            case SET_PARENT:               Proj.  setElmParent(elm_parents, true); break;
+            case SET_NAME  :               Proj.  setElmNames (elm_names  , true); break;
          }
       }
    void ProjectEx::NewFolder(ProjectEx &proj) {proj.newElm(ELM_FOLDER     );}
@@ -407,8 +406,6 @@ void DrawProject()
    void ProjectEx::Reload(ProjectEx &proj) {proj.reload      (proj.menu_list_sel);}
    void ProjectEx::CancelReload(ProjectEx &proj) {proj.cancelReload(proj.menu_list_sel);}
    void ProjectEx::SplitAnim(ProjectEx &proj) {if(proj.menu_list_sel.elms())::SplitAnim.activate(proj.menu_list_sel[0]);}
-   void  ProjectEx::EnablePublish(ProjectEx &proj) {proj.list.kbSet(); proj. enablePublish(proj.menu_list_sel);}
-   void ProjectEx::DisablePublish(ProjectEx &proj) {proj.list.kbSet(); proj.disablePublish(proj.menu_list_sel, true);}
    void ProjectEx::UndoElmChange(ProjectEx &proj) {proj.elm_undos.undo();}
    void ProjectEx::RedoElmChange(ProjectEx &proj) {proj.elm_undos.redo();}
    void ProjectEx::Duplicate(ProjectEx &proj) {proj.list.kbSet(); proj.duplicate     (proj.menu_list_sel);}
@@ -423,6 +420,10 @@ void DrawProject()
    void ProjectEx::ShowRemoved(ProjectEx &proj) {proj.refresh(false, false);}
    void ProjectEx::ShowTheater(ProjectEx &proj) {Theater.setVisibility(true);}
    void ProjectEx::SoundPlay(ProjectEx &proj) {if(proj.sound.playing() && proj.list.sound_play.lit_id==proj.list.sound_play.play_id)proj.sound.close();else{proj.sound.close(); if(Elm *elm=proj.findElm(proj.list.sound_play.lit_id, ELM_SOUND)){proj.list.sound_play.play_id=elm->id; proj.sound.play(proj.gamePath(*elm));}}}
+   void  ProjectEx::EnablePublish(ProjectEx &proj) {proj.list.kbSet(); proj.setElmPublish(proj.menu_list_sel, true , -1, false);}
+   void ProjectEx::DisablePublish(ProjectEx &proj) {proj.list.kbSet(); proj.setElmPublish(proj.menu_list_sel, false, -1, true );}
+   void  ProjectEx::EnablePublishMobile(ProjectEx &proj) {proj.list.kbSet(); proj.setElmPublish(proj.menu_list_sel, -1, true , false);}
+   void ProjectEx::DisablePublishMobile(ProjectEx &proj) {proj.list.kbSet(); proj.setElmPublish(proj.menu_list_sel, -1, false, true );}
    void ProjectEx::ImageMipMapOn(ProjectEx &proj) {proj.imageMipMap(proj.menu_list_sel, true );}
    void ProjectEx::ImageMipMapOff(ProjectEx &proj) {proj.imageMipMap(proj.menu_list_sel, false);}
    void ProjectEx::ImageResize0(ProjectEx &proj) {proj.imageResize(proj.menu_list_sel, 0);}
@@ -465,9 +466,14 @@ void DrawProject()
    void ProjectEx::MtrlMerge(ProjectEx &proj) {MSM             .display(proj.menu_list_sel);}
    void ProjectEx::MtrlConvertToAtlas(ProjectEx &proj) {ConvertToAtlas  .setElms(proj.menu_list_sel);}
    void ProjectEx::MtrlConvertToDeAtlas(ProjectEx &proj) {ConvertToDeAtlas.setElms(proj.menu_list_sel);}
-   void ProjectEx::MtrlMobileTexSizeFull(ProjectEx &proj) {proj.mtrlDownsizeTexMobile(proj.menu_list_sel, 0);}
-   void ProjectEx::MtrlMobileTexSizeHalf(ProjectEx &proj) {proj.mtrlDownsizeTexMobile(proj.menu_list_sel, 1);}
-   void ProjectEx::MtrlMobileTexSizeQuarter(ProjectEx &proj) {proj.mtrlDownsizeTexMobile(proj.menu_list_sel, 2);}
+   void ProjectEx::MtrlTexSizeMobileFull(ProjectEx &proj) {proj.mtrlTexDownsize(proj.menu_list_sel, TSP_MOBILE, 0);}
+   void ProjectEx::MtrlTexSizeMobileHalf(ProjectEx &proj) {proj.mtrlTexDownsize(proj.menu_list_sel, TSP_MOBILE, 1);}
+   void ProjectEx::MtrlTexSizeMobileQuarter(ProjectEx &proj) {proj.mtrlTexDownsize(proj.menu_list_sel, TSP_MOBILE, 2);}
+   void ProjectEx::MtrlTexSizeMobileEighth(ProjectEx &proj) {proj.mtrlTexDownsize(proj.menu_list_sel, TSP_MOBILE, 3);}
+   void ProjectEx::MtrlTexSizeSwitchFull(ProjectEx &proj) {proj.mtrlTexDownsize(proj.menu_list_sel, TSP_SWITCH, 0);}
+   void ProjectEx::MtrlTexSizeSwitchHalf(ProjectEx &proj) {proj.mtrlTexDownsize(proj.menu_list_sel, TSP_SWITCH, 1);}
+   void ProjectEx::MtrlTexSizeSwitchQuarter(ProjectEx &proj) {proj.mtrlTexDownsize(proj.menu_list_sel, TSP_SWITCH, 2);}
+   void ProjectEx::MtrlTexSizeSwitchEighth(ProjectEx &proj) {proj.mtrlTexDownsize(proj.menu_list_sel, TSP_SWITCH, 3);}
    void ProjectEx::AnimClip(ProjectEx &proj) {proj.animClip  (proj.menu_list_sel);}
    void ProjectEx::AnimLinear(ProjectEx &proj) {proj.animLinear(proj.menu_list_sel, true );}
    void ProjectEx::AnimCubic(ProjectEx &proj) {proj.animLinear(proj.menu_list_sel, false);}
@@ -900,7 +906,7 @@ void DrawProject()
 
             case ELM_MTRL:
             {
-               EditMaterial edit; edit.newData(); Save(edit, editPath(elm));
+               EditMaterial edit; edit.newData(Proj); Save(edit, editPath(elm));
                if(ElmMaterial *data=elm.mtrlData()){data->newData(); data->from(edit);}
                makeGameVer(elm);
                Server.setElmFull(elm.id);
@@ -908,7 +914,7 @@ void DrawProject()
 
             case ELM_WATER_MTRL:
             {
-               EditWaterMtrl edit; edit.newData(); Save(edit, editPath(elm));
+               EditWaterMtrl edit; edit.newData(Proj); Save(edit, editPath(elm));
                if(ElmWaterMtrl *data=elm.waterMtrlData()){data->newData(); data->from(edit);}
                makeGameVer(elm);
                Server.setElmFull(elm.id);
@@ -1089,7 +1095,7 @@ void DrawProject()
       }
       return null;
    }
-   void ProjectEx::setMtrl(Elm &mtrl, XMaterialEx &src, C Str &src_file)
+   void ProjectEx::setMtrl(Elm &mtrl, C XMaterialEx &src, C Str &src_file)
    {
       if(ElmMaterial *data=mtrl.mtrlData())
       {
@@ -1112,7 +1118,7 @@ void DrawProject()
          elmChanged(mtrl);
       }
    }
-   Elm& ProjectEx::newMtrl(XMaterialEx &src, C UID parent_id, C Str &src_file) // create new material from 'src' !! this doesn't set elm list and doesn't send to the server !!
+   Elm& ProjectEx::newMtrl(C XMaterialEx &src, C UID parent_id, C Str &src_file) // create new material from 'src' !! this doesn't set elm list and doesn't send to the server !!
    {
       Elm &mtrl=super::newElm(src.name, parent_id, ELM_MTRL); mtrl.mtrlData()->newData();
       setMtrl(mtrl, src, src_file);
@@ -1194,46 +1200,46 @@ void DrawProject()
       WorldEdit.param_edit.objChanged(obj_id);
               ObjClassEdit.objChanged(obj_id);
    }
-   void ProjectEx::remove(ElmNode &node, Memc<UID> &ids, Memc<UID> &removed, C TimeStamp &time) // process recursively to remove only parents without their children
+   void ProjectEx::remove(ElmNode &node, Memc<UID> &sorted_ids, Memc<UID> &removed, C TimeStamp &time) // process recursively to remove only parents without their children
    {
       FREPA(node.children)
       {
-         int      child_i=node.children[i];
-         ElmNode &child  =hierarchy[child_i];
-         Elm     &elm    =elms     [child_i];
-         if(!elm.removed()) // if exists
+         int  child_i=node.children[i];
+         Elm &elm    =elms[child_i];
+         if(  elm.exists())
          {
-            if(ids.has(elm.id)) // if want to remove
+            if(sorted_ids.binaryHas(elm.id)) // if want to remove this element
             {
                if(time>elm.removed_time){elm.setRemoved(true, time); removed.add(elm.id);} // remove self, but skip the children
             }else // continue checking children
             {
-               remove(child, ids, removed, time);
+               remove(hierarchy[child_i], sorted_ids, removed, time);
             }
          }
       }
    }
-   void ProjectEx::remove(Memc<UID> &ids, bool parents_only, bool set_undo)
+   void ProjectEx::remove(Memc<UID> &ids, bool parents_only, bool set_undo) // !! WARNING: MIGHT SORT 'ids' !!
    {
       if(ids.elms())
       {
          setListCurSel();
          TimeStamp time; time.getUTC(); Memc<UID> removed;
 
-         if(parents_only)remove(root, ids, removed, time);else
-         REPA(ids)if(Elm *elm=findElm(ids[i]))if(!elm->removed() && time>elm->removed_time){elm->setRemoved(true, time); removed.add(elm->id);}
+         if(parents_only)
+         {
+            ids.sort(); remove(root, ids, removed, time);
+         }else
+         REPA(ids)if(Elm *elm=findElm(ids[i]))if(elm->exists() && time>elm->removed_time){elm->setRemoved(true, time); removed.add(elm->id);}
 
-         if(set_undo)if(ElmChange *change=elm_undos.set(null, true))
+         Server.removeElms(removed, true, time);
+         if(set_undo)if(ElmChange *change=elm_undos.set(null, true)) // !! 'force_create' ALSO NEEDED BECAUSE OF "Swap(change.elms" BELOW !!
          {
             change->type=ElmChange::REMOVE;
             change->name="Remove";
-            FREPA(removed)change->elms.binaryInclude(removed[i]);
+            Swap(change->elms, removed);
          }
-         Server.removeElms(removed, true, time);
          setList(false);
-         activateSources(); // rebuild sources if needed
-         WorldEdit.validateRefs();
-         paramEditObjChanged(); // removed elements should display in red in param list
+         elmChangedParentRemovePublish();
       }
    }
    void ProjectEx::restore(Memc<UID> &ids, bool set_undo)
@@ -1245,81 +1251,78 @@ void DrawProject()
 
          REPA(ids)if(Elm *elm=findElm(ids[i]))if(elm->removed() && time>elm->removed_time){elm->setRemoved(false, time); restored.add(elm->id);}
 
-         if(set_undo)if(ElmChange *change=elm_undos.set(null, true))
+         Server.removeElms(restored, false, time);
+         if(set_undo)if(ElmChange *change=elm_undos.set(null, true)) // !! 'force_create' ALSO NEEDED BECAUSE OF "Swap(change.elms" BELOW !!
          {
             change->type=ElmChange::RESTORE;
             change->name="Restore";
-            FREPA(restored)change->elms.binaryInclude(restored[i]);
+            Swap(change->elms, restored);
          }
-         Server.removeElms(restored, false, time);
          setList(false);
-         Importer.investigate(ids); // call after setting list because may rely on hierarchy
-         activateSources(); // rebuild sources if needed
-         WorldEdit.validateRefs();
-         paramEditObjChanged(); // removed elements should display in red in param list
+         Importer.investigate(ids); // !! CALL AFTER 'setList' BECAUSE MAY RELY ON HIERARCHY !!
+         elmChangedParentRemovePublish();
       }
    }
-   void ProjectEx::disablePublish(ElmNode &node, Memc<UID> &ids, Memc<UID> &processed, C TimeStamp &time) // process recursively to disable only parents without their children
+   void ProjectEx::_setElmPublish(ElmNode &node, Memc<UID> &sorted_ids, uint test, uint set, Memc<UID> &processed, C TimeStamp &time) // process recursively to disable only parents without their children
    {
-      FREPA(node.children)
+      REPA(node.children)
       {
-         int      child_i=node.children[i];
-         ElmNode &child  =hierarchy[child_i];
-         Elm     &elm    =elms     [child_i];
-         if(!elm.noPublish()) // if has publishing enabled
+         int  child_i=node.children[i];
+         Elm &elm    =elms[child_i];
+         if(!(elm.flag&test)) // if has publishing enabled ("!" because we have NO_PUBLISH* flags)
          {
-            if(ids.has(elm.id)) // if want to change
+            if(sorted_ids.binaryHas(elm.id)) // if want to set this element
             {
-               if(time>elm.no_publish_time){elm.setNoPublish(true, time); processed.add(elm.id);} // disable self, but skip the children
+               if(time>elm.publish_time){FlagCopy(elm.flag, set, test); elm.publish_time=time; processed.add(elm.id);} // disable self, but skip children
             }else // continue checking children
             {
-               disablePublish(child, ids, processed, time);
+              _setElmPublish(hierarchy[child_i], sorted_ids, test, set, processed, time);
             }
          }
       }
    }
-   void ProjectEx::disablePublish(Memc<UID> &ids, bool parents_only, bool set_undo)
+   void ProjectEx::_setElmPublish(Memc<UID> &ids, uint test, uint set, bool parents_only, bool set_undo) // !! WARNING: MIGHT SORT 'ids' !!
    {
       if(ids.elms())
       {
          TimeStamp time; time.getUTC(); Memc<UID> processed;
 
-         if(parents_only)disablePublish(root, ids, processed, time);else
-         REPA(ids)if(Elm *elm=findElm(ids[i]))if(!elm->noPublish() && time>elm->no_publish_time){elm->setNoPublish(true, time); processed.add(elm->id);}
-
-         if(set_undo)if(ElmChange *change=elm_undos.set(null, true))
+         if(parents_only && set==test) // supported only if all NO_PUBLISH* flags are enabled -> disabling publishing
          {
-            change->type=ElmChange::PUBLISH_DISABLE;
-            change->name="Disable Publishing";
-            FREPA(processed)change->elms.binaryInclude(processed[i]);
+            ids.sort(); _setElmPublish(root, ids, test, set, processed, time);
+         }else
+         REPA(ids)if(Elm *elm=findElm(ids[i]))if(time>elm->publish_time && (elm->flag&test)!=set){FlagCopy(elm->flag, set, test); elm->publish_time=time; processed.add(elm->id);}
+
+         Server.publishElms(processed, (test&Elm::NO_PUBLISH       ) ? FlagOff(set, Elm::NO_PUBLISH       ) : -1,
+                                       (test&Elm::NO_PUBLISH_MOBILE) ? FlagOff(set, Elm::NO_PUBLISH_MOBILE) : -1, time);
+         if(set_undo)if(ElmChange *change=elm_undos.set(null, true)) // !! 'force_create' ALSO NEEDED BECAUSE OF "Swap(change.elms" BELOW !!
+         {
+            change->type=ElmChange::PUBLISH;
+            change->name=((set==test) ? "Disable Publishing" // if all NO_PUBLISH* flags are enabled -> disabling publishing
+                       : (set==0   ) ?  "Enable Publishing" // if no  NO_PUBLISH* flags are enabled ->  enabling publishing
+                       :                "Change Publishing"); // some enabled, some disabled        ->  changing publishing
+            change->test=test;
+            change->set =set;
+            Swap(change->elms, processed);
          }
-         Server.noPublishElms(processed, true, time);
          refresh(false);
-         activateSources(); // rebuild sources if needed
-         WorldEdit.validateRefs();
-         paramEditObjChanged(); // removed elements should display in red in param list
+         elmChangedParentRemovePublish();
       }
    }
-   void ProjectEx::enablePublish(Memc<UID> &ids, bool set_undo)
+   void ProjectEx::setElmPublish(Memc<UID> &ids, sbyte all, sbyte mobile, bool parents_only, bool set_undo) // !! WARNING: MIGHT SORT 'ids' !!
    {
-      if(ids.elms())
+      if(ids.elms()) // any elements
+         if(all>=0 || mobile>=0) // anything to change
       {
-         TimeStamp time; time.getUTC(); Memc<UID> processed;
-
-         REPA(ids)if(Elm *elm=findElm(ids[i]))if(elm->noPublish() && time>elm->no_publish_time){elm->setNoPublish(false, time); processed.add(elm->id);}
-
-         if(set_undo)if(ElmChange *change=elm_undos.set(null, true))
-         {
-            change->type=ElmChange::PUBLISH_ENABLE;
-            change->name="Enable Publishing";
-            FREPA(processed)change->elms.binaryInclude(processed[i]);
-         }
-         Server.noPublishElms(processed, false, time);
-         refresh(false);
-         activateSources(); // rebuild sources if needed
-         WorldEdit.validateRefs();
-         paramEditObjChanged(); // removed elements should display in red in param list
+         uint test=0, set=0;
+         if(all   >=0){test|=Elm::NO_PUBLISH       ; if(!all   )set|=Elm::NO_PUBLISH       ;}
+         if(mobile>=0){test|=Elm::NO_PUBLISH_MOBILE; if(!mobile)set|=Elm::NO_PUBLISH_MOBILE;}
+        _setElmPublish(ids, test, set, parents_only, set_undo);
       }
+   }
+   void ProjectEx::disablePublish(Memc<UID> &ids, bool parents_only, bool set_undo) // !! WARNING: MIGHT SORT 'ids' !!
+   {
+      setElmPublish(ids, false, -1, parents_only, set_undo);
    }
    void ProjectEx::reload(Memc<UID> &elm_ids)
    {
@@ -1468,19 +1471,24 @@ void DrawProject()
       }
       return false;
    }
-   void ProjectEx::imageMipMap(C MemPtr<UID> &elm_ids, bool on)
+   bool ProjectEx::imageMipMap(C MemPtr<UID> &elm_ids, bool on)
    {
-      REPA(elm_ids)
-      if(Elm *image=findElm(elm_ids[i], ELM_IMAGE))
-      if(ElmImage *image_data=image->imageData())
-      if(image_data->mipMaps()!=on)
-      if(ImageEdit.elm==image)ImageEdit.setMipMap(on);else
+      bool ok=true;
+      REPA(elm_ids)if(Elm *image=findElm(elm_ids[i], ELM_IMAGE))
       {
-         image_data->newVer();
-         image_data->mipMaps(on); image_data->mip_maps_time.now();
-         makeGameVer(*image);
-         Server.setElmShort(image->id);
-      }
+         if(ElmImage *image_data=image->imageData())
+         {
+            if(image_data->mipMaps()!=on)
+            if(ImageEdit.elm==image)ImageEdit.setMipMap(on);else
+            {
+               image_data->newVer();
+               image_data->mipMaps(on); image_data->mip_maps_time.now();
+               makeGameVer(*image);
+               Server.setElmShort(image->id);
+            }
+         }else ok=false;
+      }else ok=false;
+      return ok;
    }
    void ProjectEx::imageResize(C MemPtr<UID> &elm_ids, C VecI2 &size)
    {
@@ -1758,87 +1766,105 @@ void DrawProject()
          }
       }
    }
-   void ProjectEx::mtrlDownsizeTexMobile(C MemPtr<UID> &elm_ids, byte downsize, C UID &base_0, C UID &base_1, C UID &base_2)
+   void ProjectEx::mtrlTexDownsize(C MemPtr<UID> &elm_ids, TEX_SIZE_PLATFORM tsp, byte downsize, C UID &base_0, C UID &base_1, C UID &base_2, bool precise) // 'precise'=if do a more precise but slower processing (if true then all materials from 'elm_ids' will have to be loaded from disk for checking, which might be slow)
    {
       Memt<UID> mtrls;
-      REPA(elm_ids)if(C Elm *mtrl=findElm(elm_ids[i]))if(C ElmMaterial *mtrl_data=mtrl->mtrlData())//if(mtrl_data.downsize_tex_mobile!=downsize) skip check here, so we can always process similar materials even if this one already has desired value
-         if(mtrls.binaryInclude(mtrl->id)) // if just added
+      REPA(elm_ids)if(C Elm *mtrl=findElm(elm_ids[i]))if(C ElmMaterial *mtrl_data=mtrl->mtrlData())
+         if(precise // if always check (will correctly set other materials)
+         || mtrl_data->tex_downsize[tsp]!=downsize) // only if different
+            if(mtrls.binaryInclude(mtrl->id)) // if just added
       {
          // include other materials that have the same textures
-         EditMaterial edit; if(mtrlGet(mtrl->id, edit))
+         // can't check by just 'mtrl_data.base_*_tex' because textures for this material could have been already reloaded with different quality, which could generate a different ID for them, instead we will check materials by Tex ID and Tex Src File
+         // can't just compare materials by Tex Src File because this is not stored in ElmMaterial and would require loading 'EditMaterial' for all materials which would be slow
+         // so only materials which tex ID is included in 'tex_ids' will be loaded
+         Memt<UID> tex_ids;
+         if(mtrl_data->base_0_tex.valid())tex_ids.binaryInclude(mtrl_data->base_0_tex); // include searching for 'mtrl_data.base_0_tex'
+         if(mtrl_data->base_1_tex.valid())tex_ids.binaryInclude(mtrl_data->base_1_tex); // include searching for 'mtrl_data.base_1_tex'
+         if(mtrl_data->base_2_tex.valid())tex_ids.binaryInclude(mtrl_data->base_2_tex); // include searching for 'mtrl_data.base_2_tex'
+         if(          base_0    .valid())tex_ids.binaryInclude(          base_0    ); // include searching for 'base_0' (Tex ID before reload)
+         if(          base_1    .valid())tex_ids.binaryInclude(          base_1    ); // include searching for 'base_1' (Tex ID before reload)
+         if(          base_2    .valid())tex_ids.binaryInclude(          base_2    ); // include searching for 'base_2' (Tex ID before reload)
+         if(tex_ids.elms()) // if has any Tex ID's to compare
          {
-            // can't check by just 'mtrl_data.base_*_tex' because textures for this material could have been already reloaded with different quality, which could generate a different ID for them, instead we will check materials by Tex ID and Tex Src File
-            // can't just compare materials by Tex Src File because this is not stored in ElmMaterial and would require loading 'EditMaterial' for all materials which would be slow
-            // so only materials which tex ID is included in 'tex_ids' will be loaded
-            Memt<UID> tex_ids;
-            if(mtrl_data->base_0_tex.valid())tex_ids.binaryInclude(mtrl_data->base_0_tex); // include searching for 'mtrl_data.base_0_tex'
-            if(mtrl_data->base_1_tex.valid())tex_ids.binaryInclude(mtrl_data->base_1_tex); // include searching for 'mtrl_data.base_1_tex'
-            if(mtrl_data->base_2_tex.valid())tex_ids.binaryInclude(mtrl_data->base_2_tex); // include searching for 'mtrl_data.base_2_tex'
-            if(          base_0    .valid())tex_ids.binaryInclude(          base_0    ); // include searching for 'base_0' (Tex ID before reload)
-            if(          base_1    .valid())tex_ids.binaryInclude(          base_1    ); // include searching for 'base_1' (Tex ID before reload)
-            if(          base_2    .valid())tex_ids.binaryInclude(          base_2    ); // include searching for 'base_2' (Tex ID before reload)
-            if(tex_ids.elms()) // if has any Tex ID's to compare
-               FREPA(elms)if(C ElmMaterial *test_data=elms[i].mtrlData())if(test_data->downsize_tex_mobile!=downsize) // check all materials
-                  if(tex_ids.binaryHas(test_data->base_0_tex) // if their textures match any in 'tex_ids'
-                  || tex_ids.binaryHas(test_data->base_1_tex)
-                  || tex_ids.binaryHas(test_data->base_2_tex))
+            bool         edit_loaded=false;
+            EditMaterial edit; // don't load 'edit' yet, because maybe we won't need it
+            FREPA(elms) // check all other materials, process in order to make 'binaryInclude' faster
             {
-               EditMaterial test;
-               if(mtrlGet(elms[i].id, test)) // do extra checks if maps are the same
-               if(edit. color_map.is() && EqualPath(edit. color_map, test. color_map)
-               || edit.smooth_map.is() && EqualPath(edit.smooth_map, test.smooth_map)
-               || edit. metal_map.is() && EqualPath(edit. metal_map, test. metal_map)
-               || edit.  bump_map.is() && EqualPath(edit.  bump_map, test.  bump_map)
-               || edit.normal_map.is() && EqualPath(edit.normal_map, test.normal_map)
-               || edit.  glow_map.is() && EqualPath(edit.  glow_map, test.  glow_map))
-                  mtrls.binaryInclude(elms[i].id); // process this material too
+             C Elm &elm=elms[i]; if(C ElmMaterial *test_data=elm.mtrlData())if(test_data->tex_downsize[tsp]!=downsize)if(mtrl!=&elm)
+               if(tex_ids.binaryHas(test_data->base_0_tex) // if their textures match any in 'tex_ids'
+               || tex_ids.binaryHas(test_data->base_1_tex)
+               || tex_ids.binaryHas(test_data->base_2_tex))
+               {
+                  if(!edit_loaded){if(mtrlGet(mtrl->id, edit))edit_loaded=true;else break;} // make sure 'edit' is now loaded
+
+                  EditMaterial test;
+                  if(mtrlGet(elm.id, test)) // do extra checks if maps are the same
+                  if(edit. color_map.is() && EqualPath(edit. color_map, test. color_map)
+                  || edit.smooth_map.is() && EqualPath(edit.smooth_map, test.smooth_map)
+                  || edit. metal_map.is() && EqualPath(edit. metal_map, test. metal_map)
+                  || edit.  bump_map.is() && EqualPath(edit.  bump_map, test.  bump_map)
+                  || edit.normal_map.is() && EqualPath(edit.normal_map, test.normal_map)
+                  || edit.  glow_map.is() && EqualPath(edit.  glow_map, test.  glow_map))
+                     mtrls.binaryInclude(elm.id); // process this material too
+               }
             }
          }
       }
-      REPA(mtrls)if(Elm *mtrl=findElm(mtrls[i]))if(ElmMaterial *mtrl_data=mtrl->mtrlData())if(mtrl_data->downsize_tex_mobile!=downsize)
+      REPA(mtrls)if(Elm *mtrl=findElm(mtrls[i]))if(ElmMaterial *mtrl_data=mtrl->mtrlData())if(mtrl_data->tex_downsize[tsp]!=downsize)
       {
-         if(MtrlEdit.elm==mtrl)MtrlEdit.downsizeTexMobile(downsize);else
+         if(MtrlEdit.elm==mtrl)MtrlEdit.texDownsize(tsp, downsize);else
          {
             EditMaterial edit; if(edit.load(editPath(mtrl->id)))
             {
                mtrl_data->newVer();
-               mtrl_data->downsize_tex_mobile=edit.downsize_tex_mobile=downsize; edit.downsize_tex_mobile_time.now();
+               mtrl_data->tex_downsize[tsp]=edit.tex_downsize[tsp]=downsize; edit.tex_downsize_time.now();
                Save(edit, editPath(mtrl->id));
-             //makeGameVer(*mtrl); this is not needed because 'downsize_tex_mobile' is not stored in the game version, instead textures are downsized during publishing
-               Server.setElmLong(mtrl->id); // Long is needed because 'downsize_tex_mobile_time' is only in edit
+             //makeGameVer(*mtrl); this is not needed because 'tex_downsize' is not stored in the game version, instead textures are downsized during publishing
+               Server.setElmLong(mtrl->id); // Long is needed because 'tex_downsize_time' is only in edit
             }
          }
       }
    }
-   bool ProjectEx::mtrlTexQuality(C MemPtr<UID> &elm_ids, Edit::Material::TEX_QUALITY quality, C UID &base_0, C UID &base_1, C UID &base_2) // !! this is not perfect !!
+   bool ProjectEx::mtrlTexQuality(C MemPtr<UID> &elm_ids, Edit::Material::TEX_QUALITY quality, C UID &base_0, C UID &base_1, C UID &base_2, bool precise) // 'precise'=if do a more precise but slower processing (if true then all materials from 'elm_ids' will have to be loaded from disk for checking, which might be slow) // !! this is not perfect !!
    {
       bool ok=true;
       Memt<UID> mtrls;
-      REPA(elm_ids)if(C Elm *mtrl=findElm(elm_ids[i]))if(C ElmMaterial *mtrl_data=mtrl->mtrlData())//if(mtrl_data.tex_quality!=quality) skip check here, so we can always process similar materials even if this one already has desired value
-         if(mtrls.binaryInclude(mtrl->id)) // if just added
+      REPA(elm_ids)if(C Elm *mtrl=findElm(elm_ids[i]))if(C ElmMaterial *mtrl_data=mtrl->mtrlData())
+         if(precise // if always check (will correctly set other materials)
+         || mtrl_data->tex_quality!=quality) // only if different
+            if(mtrls.binaryInclude(mtrl->id)) // if just added
       {
          // include other materials that have the same textures
-         EditMaterial edit; if(mtrlGet(mtrl->id, edit) && edit.color_map.is())
+         // tex quality affects only 'base_0'
+         // can't check by just 'mtrl_data.base_0_tex' because textures for this material could have been already reloaded with different quality, which could generate a different ID for them, instead we will check materials by Tex ID and Tex Src File
+         // can't just compare materials by Tex Src File because this is not stored in ElmMaterial and would require loading 'EditMaterial' for all materials which would be slow
+         // so only materials which tex ID is included in 'tex_ids' will be loaded
+         Memt<UID> tex_ids;
+         if(mtrl_data->base_0_tex.valid())tex_ids.binaryInclude(mtrl_data->base_0_tex); // include searching for 'mtrl_data.base_0_tex'
+         if(mtrl_data->base_1_tex.valid())tex_ids.binaryInclude(mtrl_data->base_1_tex); // include searching for 'mtrl_data.base_1_tex'
+         if(mtrl_data->base_2_tex.valid())tex_ids.binaryInclude(mtrl_data->base_2_tex); // include searching for 'mtrl_data.base_2_tex'
+         if(          base_0    .valid())tex_ids.binaryInclude(          base_0    ); // include searching for 'base_0' (Tex ID before reload)
+         if(          base_1    .valid())tex_ids.binaryInclude(          base_1    ); // include searching for 'base_1' (Tex ID before reload)
+         if(          base_2    .valid())tex_ids.binaryInclude(          base_2    ); // include searching for 'base_2' (Tex ID before reload)
+         if(tex_ids.elms()) // if has any Tex ID's to compare
          {
-            // tex quality affects only 'base_0'
-            // can't check by just 'mtrl_data.base_0_tex' because textures for this material could have been already reloaded with different quality, which could generate a different ID for them, instead we will check materials by Tex ID and Tex Src File
-            // can't just compare materials by Tex Src File because this is not stored in ElmMaterial and would require loading 'EditMaterial' for all materials which would be slow
-            // so only materials which tex ID is included in 'tex_ids' will be loaded
-            Memt<UID> tex_ids;
-            if(mtrl_data->base_0_tex.valid())tex_ids.binaryInclude(mtrl_data->base_0_tex); // include searching for 'mtrl_data.base_0_tex'
-            if(mtrl_data->base_1_tex.valid())tex_ids.binaryInclude(mtrl_data->base_1_tex); // include searching for 'mtrl_data.base_1_tex'
-            if(mtrl_data->base_2_tex.valid())tex_ids.binaryInclude(mtrl_data->base_2_tex); // include searching for 'mtrl_data.base_2_tex'
-            if(          base_0    .valid())tex_ids.binaryInclude(          base_0    ); // include searching for 'base_0' (Tex ID before reload)
-            if(          base_1    .valid())tex_ids.binaryInclude(          base_1    ); // include searching for 'base_1' (Tex ID before reload)
-            if(          base_2    .valid())tex_ids.binaryInclude(          base_2    ); // include searching for 'base_2' (Tex ID before reload)
-            if(tex_ids.elms()) // if has any Tex ID's to compare
-               FREPA(elms)if(C ElmMaterial *test_data=elms[i].mtrlData())if(test_data->tex_quality!=quality) // check all materials
-                  if(tex_ids.binaryHas(test_data->base_0_tex) // if their textures match any in 'tex_ids'
-                  || tex_ids.binaryHas(test_data->base_1_tex)
-                  || tex_ids.binaryHas(test_data->base_2_tex))
+            bool         edit_loaded=false;
+            EditMaterial edit; // don't load 'edit' yet, because maybe we won't need it
+            FREPA(elms) // check all other materials, process in order to make 'binaryInclude' faster
             {
-               EditMaterial test; if(mtrlGet(elms[i].id, test) && EqualPath(edit.color_map, test.color_map)) // do extra check if color map is the same
-                  mtrls.binaryInclude(elms[i].id); // process this material too
+             C Elm &elm=elms[i]; if(C ElmMaterial *test_data=elm.mtrlData())if(test_data->tex_quality!=quality)if(mtrl!=&elm)
+               if(tex_ids.binaryHas(test_data->base_0_tex) // if their textures match any in 'tex_ids'
+               || tex_ids.binaryHas(test_data->base_1_tex)
+               || tex_ids.binaryHas(test_data->base_2_tex))
+               {
+                  if(!edit_loaded){if(mtrlGet(mtrl->id, edit))edit_loaded=true;else break;} // make sure 'edit' is now loaded
+
+                  EditMaterial test;
+                  if(mtrlGet(elm.id, test)) // do extra checks if maps are the same
+                  if(edit.color_map.is() && EqualPath(edit.color_map, test.color_map))
+                     mtrls.binaryInclude(elm.id); // process this material too
+               }
             }
          }
       }
@@ -2260,7 +2286,7 @@ void DrawProject()
    {
       // TODO: generating textures when the sources were not found, will reuse existing images, but due to compression, the quality will be lost, and new textures will be generated even though images are the same, this is because BC7->RGBA->BC7 is not the same
       Image      base_0, base_1, base_2;
-      TEX_FLAG   textures=createBaseTextures(base_0, base_1, base_2, material, FlagTest(changed, EditMaterial::CHANGED_FLIP_NRM_Y), FlagTest(changed, EditMaterial::CHANGED_SMOOTH_IS_ROUGH));
+      TEX_FLAG   textures=createBaseTextures(base_0, base_1, base_2, material, FlagOn(changed, EditMaterial::CHANGED_FLIP_NRM_Y), FlagOn(changed, EditMaterial::CHANGED_SMOOTH_IS_ROUGH));
       UID        old_tex_id;
       IMAGE_TYPE ct;
 
@@ -2309,7 +2335,7 @@ void DrawProject()
    {
       // TODO: generating textures when the sources were not found, will reuse existing images, but due to compression, the quality will be lost, and new textures will be generated even though images are the same, this is because BC7->RGBA->BC7 is not the same
       Image      base_0, base_1, base_2;
-      TEX_FLAG   textures=createBaseTextures(base_0, base_1, base_2, material, FlagTest(changed, EditMaterial::CHANGED_FLIP_NRM_Y), FlagTest(changed, EditMaterial::CHANGED_SMOOTH_IS_ROUGH));
+      TEX_FLAG   textures=createBaseTextures(base_0, base_1, base_2, material, FlagOn(changed, EditMaterial::CHANGED_FLIP_NRM_Y), FlagOn(changed, EditMaterial::CHANGED_SMOOTH_IS_ROUGH));
       UID        old_tex_id;
       IMAGE_TYPE ct;
 
@@ -3139,6 +3165,12 @@ void DrawProject()
       Importer.investigate(root); // call after setting list because may rely on hierarchy
       resumeServer(); // call after setting list because may rely on hierarchy
    }
+   void ProjectEx::elmChangedParentRemovePublish(bool network)
+   {
+      activateSources(); // rebuild sources if needed
+      if( network)WorldEdit.delayedValidateRefs();else WorldEdit.validateRefs();
+      if(!network)paramEditObjChanged(); // removed elements should display in red in param list, however disable from network because this might cause keyboard to lose focus
+   }
    void ProjectEx::setElmParent(Memc<Edit::IDParam<UID>> &elms, bool adjust_elms, bool as_undo) // 'adjust_elms'=if this is performed because of undo, and in that case we need to remember current parents, so we can undo this change later
    {
       if(elms.elms())
@@ -3148,13 +3180,14 @@ void DrawProject()
             change->type=ElmChange::SET_PARENT;
             change->name="Change Parent";
          }
+         Memc<UID> changed;
          TimeStamp time; time.getUTC();
          FREPA(elms)
          {
                Elm *dest=findElm(elms[i].value); // !! first get desired parent before adjusting !! this can be null (no parent)
             if(Elm *elm =findElm(elms[i].id   )) //          get element
             {
-               if(adjust_elms)elms[i].value=elm->parent_id; // !! if we're adjusting, then set current parent, after setting 'dest' !!
+               if(adjust_elms)elms[i].value=elm->parent_id; // !! IF WE'RE ADJUSTING, THEN REMEMBER CURRENT PARENT, BEFORE SETTING 'dest' !!
                if(!dest || ElmCanHaveChildren(dest->type))
                if(ElmMovable(elm->type))if(!contains(*elm, dest))
                {
@@ -3166,11 +3199,13 @@ void DrawProject()
                   }
                   elm->setParent(dest, time);
                   Server.setElmParent(*elm);
+                  changed.add(elm->id);
                }
             }
          }
-         setList();
-         activateSources(); // rebuild sources if needed
+         refresh();
+         Importer.investigate(changed); // !! CALL AFTER 'setList' BECAUSE MAY RELY ON HIERARCHY !!
+         elmChangedParentRemovePublish();
       }
    }
    void ProjectEx::drag(Memc<UID> &elms, GuiObj *focus_obj, C Vec2 &screen_pos)
@@ -3186,6 +3221,7 @@ void DrawProject()
                change->type=ElmChange::SET_PARENT;
                change->name="Change Parent";
             }
+            Memc<UID> changed;
             TimeStamp time; time.getUTC();
             FREPA(elms)if(Elm *elm=findElm(elms[i]))if(ElmMovable(elm->type))if(!contains(*elm, dest))
             {
@@ -3197,10 +3233,12 @@ void DrawProject()
                }
                elm->setParent(dest, time);
                Server.setElmParent(*elm);
+               changed.add(elm->id);
             }
             elms.clear(); // processed
             refresh();
-            activateSources(); // rebuild sources if needed
+            Importer.investigate(changed); // !! CALL AFTER 'refresh' BECAUSE MAY RELY ON HIERARCHY !!
+            elmChangedParentRemovePublish();
          }
       }
    }
@@ -3225,35 +3263,33 @@ void DrawProject()
       REPA(node.children)
       {
          int  child_i=node.children[i];
-         Elm &child  =elms[child_i];
-         if( !child.removed() && ElmVisible(child.type))
+         Elm &elm    =elms[child_i];
+         if(  elm.exists() && ElmVisible(elm.type))
          {
-            child.opened(true);
-            ElmNode &child=hierarchy[child_i];
-            expandAll(child);
+            elm.opened(true);
+            expandAll(hierarchy[child_i]);
          }
       }
    }
-   void ProjectEx::floodExisting(ElmNode &node, bool no_publish)
+   void ProjectEx::floodExisting(ElmNode &node, uint publish_flag, bool parent_publish)
    {
       REPA(node.children)
       {
          int  child_i=node.children[i];
-         Elm &child  =elms[child_i];
-         if( !child.removed())
+         Elm &elm    =elms[child_i];
+         if(  elm.exists())
          {
-            bool np=(no_publish | child.noPublish());
-                   child.finalExists (true);
-            if(!np)child.finalPublish(true);
-            switch(child.type)
+            bool           elm_publish=(parent_publish && !(elm.flag&publish_flag)); // "!" because we have NO_PUBLISH* flags
+                           elm.finalExists (true);
+            if(elm_publish)elm.finalPublish(true);
+            switch(elm.type)
             {
-               case ELM_ENUM     : existing_enums      .binaryInclude(child.id); break;
-               case ELM_OBJ_CLASS: existing_obj_classes.binaryInclude(child.id); break;
-               case ELM_FONT     : existing_fonts      .binaryInclude(child.id); if(!np)publish_fonts.binaryInclude(child.id); break;
-               case ELM_APP      : existing_apps       .binaryInclude(child.id); break;
+               case ELM_ENUM     :               existing_enums      .binaryInclude(elm.id); break;
+               case ELM_OBJ_CLASS:               existing_obj_classes.binaryInclude(elm.id); break;
+               case ELM_FONT     : if(elm_publish)publish_fonts      .binaryInclude(elm.id); break;
+               case ELM_APP      :               existing_apps       .binaryInclude(elm.id); break;
             }
-            ElmNode &child=hierarchy[child_i];
-            floodExisting(child, np);
+            floodExisting(hierarchy[child_i], publish_flag, elm_publish);
          }
       }
    }
@@ -3261,11 +3297,10 @@ void DrawProject()
    {
       REPAO(elms).resetFinal();
                                       existing_apps .clear();
-                                      existing_fonts.clear();
       Memc<UID> old_enums      ; Swap(existing_enums      , old_enums      ); // this also clears 'existing_enums'
       Memc<UID> old_obj_classes; Swap(existing_obj_classes, old_obj_classes); // this also clears 'existing_obj_classes'
       Memc<UID> old_fonts      ; Swap( publish_fonts      , old_fonts      ); // this also clears 'publish_fonts'
-      floodExisting(root);
+      floodExisting(root, PublishableFlag());
       if(!Same(existing_enums      , old_enums      )
       || !Same(existing_obj_classes, old_obj_classes))enumChanged();
       if(!Same( publish_fonts      , old_fonts      ))fontChanged();
@@ -3556,38 +3591,62 @@ void DrawProject()
    }
    bool ProjectEx::hasInvalid(ElmNode &node)
    {
-      FREPA(node.children)
+      REPA(node.children)
       {
-         int      child_i=node.children[i];
-         ElmNode &child  =hierarchy[child_i];
-         Elm     &elm    =elms     [child_i];
-         if(!elm.removed() && !elm.noPublish() && ElmVisible(elm.type))if(invalidRefs(elm) || hasInvalid(child))return true;
+         int  child_i=node.children[i];
+         Elm &elm    =elms[child_i];
+         if(elm.finalPublish() && ElmVisible(elm.type)) // could use "elm.exists() && elm.publish()" here, however we need platform
+            if(invalidRefs(elm) || hasInvalid(hierarchy[child_i]))return true;
       }
       return false;
    }
-   void ProjectEx::getActiveAppElms(Memt<Elm*> &app_elms, C UID &app_id, ElmNode &node, bool inside_valid)
+   uint ProjectEx::PublishableFlag(Edit::EXE_TYPE exe_type)
+   {
+      uint flag=Elm::REMOVED|Elm::NO_PUBLISH; // must exist and be publishable
+      switch(exe_type)
+      {
+         case Edit::EXE_APK:
+         case Edit::EXE_AAB:
+         case Edit::EXE_IOS:
+         case Edit::EXE_WEB:
+       //case Edit.EXE_NS : Nintendo Switch excluded because its game sizes can be big
+            flag|=Elm::NO_PUBLISH_MOBILE; break;
+      }
+      return flag;
+   }
+   void ProjectEx::getPublishElms(Memt<Elm*> &app_elms, ElmNode &node, uint publish_flag)
    {
       REPA(node.children)
       {
-         int      child_i=node.children[i];
-         ElmNode &child  =hierarchy[child_i];
-         Elm     &elm    =elms     [child_i];
-         if(!elm.removed() && !elm.noPublish())
+         int  child_i=node.children[i];
+         Elm &elm    =elms[child_i];
+         if(!(elm.flag&publish_flag)) // exists and publishable, "!" because we have NO_PUBLISH* flags
          {
-            if(inside_valid)app_elms.add(&elm);
-            getActiveAppElms(app_elms, app_id, child, (elm.type==ELM_LIB) ? true : (elm.type==ELM_APP) ? (elm.id==app_id) : inside_valid); // include elements from all libraries and from active app only, in other case inherit valid from the parent
+            app_elms.add(&elm);
+            getPublishElms(app_elms, hierarchy[child_i], publish_flag);
          }
       }
    }
-   void ProjectEx::getActiveAppElms(Memt<Elm*> &app_elms)
+   void ProjectEx::getActiveAppElms(Memt<Elm*> &app_elms, ElmNode &node, uint publish_flag, C UID &app_id, bool inside_valid)
    {
-      getActiveAppElms(app_elms, curApp(), root, false); // set 'false' to ignore sources placed in root
+      REPA(node.children)
+      {
+         int  child_i=node.children[i];
+         Elm &elm    =elms[child_i];
+         if(!(elm.flag&publish_flag)) // exists and publishable, "!" because we have NO_PUBLISH* flags
+         {
+            if(inside_valid)app_elms.add(&elm);
+            getActiveAppElms(app_elms, hierarchy[child_i], publish_flag, app_id, (elm.type==ELM_LIB) ? true : (elm.type==ELM_APP) ? (elm.id==app_id) : inside_valid); // include elements from all libraries and from active app only, in other case inherit valid from the parent
+         }
+      }
    }
+   void ProjectEx::getPublishElms(Memt<Elm*> &app_elms, Edit::EXE_TYPE exe_type) {getPublishElms  (app_elms, root, PublishableFlag(exe_type));}
+   void ProjectEx::getActiveAppElms(Memt<Elm*> &app_elms, Edit::EXE_TYPE exe_type) {getActiveAppElms(app_elms, root, PublishableFlag(exe_type), curApp(), false);}
    void ProjectEx::activateSources(int rebuild) // -1=never, 0=auto, 1=always
    {
       UID cur_app=curApp(); if(app_id!=cur_app){CodeEdit.makeAuto(); app_id=cur_app;} // set last app id to currently available, 'makeAuto' because 'APP_NAME' relies on active app
       CodeEdit.clearActiveSources();
-      Memt<Elm*> app_elms; getActiveAppElms(app_elms); FREPA(app_elms)if(app_elms[i]->type==ELM_CODE)CodeEdit.activateSource(app_elms[i]->id);
+      Memt<Elm*> app_elms; getActiveAppElms(app_elms, CodeEdit.configEXE()); FREPA(app_elms)if(app_elms[i]->type==ELM_CODE)CodeEdit.activateSource(app_elms[i]->id);
       if(rebuild>=0)CodeEdit.activateApp(rebuild>=1);else CodeEdit.makeAuto(); // if not activating app then call 'makeAuto' which will activate the auto header
    }
    void ProjectEx::ActivateApp(ElmList::AppCheck &app_check) {Proj.activateApp(app_check.app_id);}
@@ -3607,19 +3666,19 @@ void DrawProject()
       }
       return false;
    }
-   void ProjectEx::setList(EEItem &item, int depth, bool parent_removed, bool parent_contains_name)
+   void ProjectEx::setList(EEItem &item, int depth, bool parent_contains_name)
    {
       bool this_contains_name=false, child_contains_name=false;
       if(filter().is())
       {
-          this_contains_name=FlagTest(item.flag, ELM_CONTAINS_NAME);
-         child_contains_name=FlagTest(item.flag, ELM_CONTAINS_NAME_CHILD);
+          this_contains_name=FlagOn(item.flag, ELM_CONTAINS_NAME);
+         child_contains_name=FlagOn(item.flag, ELM_CONTAINS_NAME_CHILD);
          if(!(child_contains_name || this_contains_name || parent_contains_name))return;
       }
-      bool     opened=(item.opened || child_contains_name || FlagTest(item.flag, ELM_EDITED_CHILD));
-      ListElm &e=list.data.New().set(item, opened, depth, parent_removed);
+      bool     opened=(item.opened || child_contains_name || FlagOn(item.flag, ELM_EDITED_CHILD));
+      ListElm &e=list.data.New().set(item, opened, depth);
       if(opened) // list children
-         FREPA(item.children)setList(item.children[i], depth+1, parent_removed, parent_contains_name || this_contains_name);
+         FREPA(item.children)setList(item.children[i], depth+1, parent_contains_name || this_contains_name);
    }
    void ProjectEx::includeElmFileSize(ListElm &e, ElmNode &node)
    {
@@ -3627,8 +3686,8 @@ void DrawProject()
       {
          int  child_i=node.children[i];
          Elm &elm    =elms[child_i];
-         if(!elm.removed() || show_removed())
-         if( elm.publish() || list.include_unpublished_elm_size)
+         if(  elm.      exists() || show_removed())
+         if(  elm.finalPublish() || list.include_unpublished_elm_size) // could use 'publish' here, however we need platform
          {
             e.includeSize(elm);
             includeElmFileSize(e, hierarchy[child_i]);
@@ -3642,11 +3701,11 @@ void DrawProject()
          int  child_i=node.children[i];
          Elm &elm    =elms[child_i];
          if(!ElmVisible(elm.type))
-            if(!elm.removed() || show_removed())
-            if( elm.publish() || list.include_unpublished_elm_size)
+            if(elm.      exists() || show_removed())
+            if(elm.finalPublish() || list.include_unpublished_elm_size) // could use 'publish' here, however we need platform
          {
             e.includeSize(elm);
-            includeElmFileSize(e, hierarchy[child_i]);
+            includeElmFileSize(e, hierarchy[child_i]); // 'includeElmFileSize' is correct, not 'includeElmNotVisibleFileSize' (because for these elements we want all of their children)
          }
       }
    }
@@ -3659,13 +3718,13 @@ void DrawProject()
          if(ElmVisible(elm.type))
          {
           C ElmNode &child=hierarchy[child_i];
-            if(!elm.removed() || show_removed() || FlagTest(child.flag, ELM_EDITED|ELM_EDITED_CHILD))
+            if(elm.exists() || show_removed() || FlagOn(child.flag, ELM_EDITED|ELM_EDITED_CHILD))
                if(list.show_elm_type[elm.type] || hasVisibleChildren(child))return true;
          }
       }
       return false;
    }
-   void ProjectEx::setList(ElmNode &node, int depth, int vis_parent, bool parent_removed, bool parent_contains_name, bool parent_no_publish)
+   void ProjectEx::setList(ElmNode &node, int depth, int vis_parent, bool parent_contains_name, bool parent_no_publish_all)
    {
       node.children.sort(CompareChildren);
       EEItem *ee=null; if(&node==&root && CodeEdit.items.elms() && list.show_all_elm_types)ee=&CodeEdit.items.first();
@@ -3674,72 +3733,85 @@ void DrawProject()
          int      child_i=node.children[i];
          ElmNode &child  =hierarchy[child_i];
          Elm     &elm    =elms     [child_i];
-         if(ee && CompareChildren(*ee, elm)<0){setList(*ee, depth, parent_removed, parent_contains_name); ee=null;} // if "Engine" item should be included before this element
-         if(!elm.removed() || show_removed() || FlagTest(child.flag, ELM_EDITED|ELM_EDITED_CHILD))if(ElmVisible(elm.type))
+         if(ee && CompareChildren(*ee, elm)<0){setList(*ee, depth, parent_contains_name); ee=null;} // if "Engine" item should be included before this element
+         if(elm.exists() || show_removed() || FlagOn(child.flag, ELM_EDITED|ELM_EDITED_CHILD))if(ElmVisible(elm.type))
          {
             bool this_contains_name=false, child_contains_name=false;
             if(filter().is())
             {
-                this_contains_name=FlagTest(child.flag, ELM_CONTAINS_NAME);
-               child_contains_name=FlagTest(child.flag, ELM_CONTAINS_NAME_CHILD);
+                this_contains_name=FlagOn(child.flag, ELM_CONTAINS_NAME);
+               child_contains_name=FlagOn(child.flag, ELM_CONTAINS_NAME_CHILD);
                if(!(child_contains_name || this_contains_name || parent_contains_name))continue;
             }
-            bool opened=(elm.opened() || child_contains_name || FlagTest(child.flag, ELM_EDITED_CHILD) || list.list_all_children), removed=(parent_removed || elm.removed()), no_publish=(parent_no_publish || elm.noPublish()), invalid=(!removed && !no_publish && invalidRefs(elm));
+            bool no_publish_all=(parent_no_publish_all || elm.noPublish()); // publish for all platforms
             if(list.show_elm_type[elm.type])
             {
-               int elm_list_index=list.data.elms();
-               list.data.New().set(elm, child, depth, vis_parent, parent_removed);
+               bool opened=(elm.opened() || child_contains_name || FlagOn(child.flag, ELM_EDITED_CHILD) || list.list_all_children),
+                    exists=elm.finalExists (), // final
+                   publish=elm.finalPublish(), // final (already includes exists)
+                   invalid=(publish && invalidRefs(elm));
 
-               if(opened)setList(child, depth+1, list.flat_is ? -1 : elm_list_index, removed, filter_is_id ? false : (parent_contains_name || this_contains_name), no_publish);else // list children, don't set 'parent_contains_name' when filter is by ID to make sure that desired element is listed last and its children are not listed at all
-               if(!removed && !no_publish && !invalid)invalid=hasInvalid(child); // if not listing children, then check if any of them are invalid and mark self as invalid
+               int elm_list_index=list.data.elms();
+               list.data.New().set(elm, child, depth, vis_parent);
+
+               if(opened)setList(child, depth+1, list.flat_is ? -1 : elm_list_index, filter_is_id ? false : (parent_contains_name || this_contains_name), no_publish_all);else // list children, don't set 'parent_contains_name' when filter is by ID to make sure that desired element is listed last and its children are not listed at all
+               if(publish && !invalid)invalid=hasInvalid(child); // if not listing children, then check if any of them are invalid and mark self as invalid
 
                ListElm &e=list.data[elm_list_index]; // !! get reference after calling 'setList' which may invalidate it if it was called after getting the ref !!
                e.hasVisibleChildren(list.flat_is ? false : (list.data.elms()>elm_list_index+1 || hasVisibleChildren(child)), opened); // first check if any new elements were listed after this one, because this check is faster than 'hasVisibleChildren'
 
-               if(list.file_size)
-                  if(!no_publish || list.include_unpublished_elm_size)
+               if(exists)
                {
-                  e.includeSize(elm);
-
-                  bool included_all_children=false;
-                  if(list.ics) // include children size
-                     if(!opened || list.ics==ElmList::ICS_ALWAYS) // ICS_FOLDED or ICS_ALWAYS
+                  if(list.file_size)
+                     if(publish || list.include_unpublished_elm_size)
                   {
-                     if(opened && list.show_all_elms) // if element is opened (then it means we've listed its children), and if all elements are listed, then we can use an optimization by summing just the first children sizes from the list, instead of all children recursively, because those first children will already include their children sizes
-                        for(int i=elm_list_index+1; i<list.data.elms(); i++) // iterate all elements added after this one (this will be its children and their children)
-                     {
-                        ListElm &child=list.data[i];
-                        if(child.depth==depth+1)e.includeSize(child); // add only for direct children (and not children of children)
-                     }else {includeElmFileSize(e, child); included_all_children=true;} // need to process all children recursively
-                  }
-                  if(!included_all_children) // if we haven't included all children yet
-                     includeElmNotVisibleFileSize(e, child); // always include !ElmVisible without checking for 'ics', because they are never listed
-               }
+                     e.includeSize(elm);
 
-               if(invalid)
-               {
-                  list.warnings.New().create(elm_list_index, true, e.offset);
-                  e.desc="Element uses other elements which are not found, marked as removed or have publishing disabled";
-               }else
-               if(!removed && no_publish)
-               {
-                  list.warnings.New().create(elm_list_index, false, e.offset);
-                  e.desc="Element will not be included in publishing";
-               }
-               if(!removed && elm.type==ELM_APP && existing_apps.elms()>1) // create checkboxes only if there are more than 1 apps
-               {
-                  ElmList::AppCheck &app_check=list.app_checks.New();
-                  app_check.create().func(ActivateApp, app_check).desc("Activate this application"); app_check.app_id=elm.id;
-                  app_check.setRect();
-                  list.addChild(app_check, elm_list_index);
+                     bool included_all_children=false;
+                     if(list.ics) // include children size
+                        if(!opened || list.ics==ElmList::ICS_ALWAYS) // ICS_FOLDED or ICS_ALWAYS
+                     {
+                        if(opened && list.show_all_elms) // if element is opened (then it means we've listed its children), and if all elements are listed, then we can use an optimization by summing just the first children sizes from the list, instead of all children recursively, because those first children will already include their children sizes
+                           for(int i=elm_list_index+1; i<list.data.elms(); i++) // iterate all elements added after this one (this will be its children and their children)
+                        {
+                           ListElm &child=list.data[i];
+                           if(child.depth==depth+1)e.includeSize(child); // add only for direct children (and not children of children)
+                        }else {includeElmFileSize(e, child); included_all_children=true;} // need to process all children recursively
+                     }
+                     if(!included_all_children) // if we haven't included all children yet
+                        includeElmNotVisibleFileSize(e, child); // always include !ElmVisible without checking for 'ics', because they are never listed
+                  }
+
+                  if(invalid)
+                  {
+                     list.warnings.New().create(elm_list_index, true, e.offset);
+                     e.desc="Element uses other elements which are not found, marked as removed or have publishing disabled";
+                  }else
+                  if(no_publish_all) // disabled for all platforms
+                  {
+                     list.warnings.New().create(elm_list_index, false, e.offset);
+                     e.desc="Element will not be included in publishing";
+                  }else
+                  if(!publish) // disabled for this platform
+                  {
+                     ElmList::Warning &warning=list.warnings.New(); warning.create(elm_list_index, false, e.offset+list.columnWidth(list.icon_col)); warning.color.a=128; // half-transparent on right side
+                     e.desc="Element will not be included in publishing for current Platform, but might be included for others";
+                  }
+                  if(elm.type==ELM_APP && existing_apps.elms()>1) // create checkboxes only if there are more than 1 apps
+                  {
+                     ElmList::AppCheck &app_check=list.app_checks.New();
+                     app_check.create().func(ActivateApp, app_check).desc("Activate this application"); app_check.app_id=elm.id;
+                     app_check.setRect();
+                     list.addChild(app_check, elm_list_index);
+                  }
                }
             }else // if this element is hidden, then don't list it, but proceed to children, regardless if this element is opened or not
             {
-               setList(child, depth, vis_parent, removed, filter_is_id ? false : (parent_contains_name || this_contains_name), no_publish); // list children, don't set 'parent_contains_name' when filter is by ID to make sure that desired element is listed last and its children are not listed at all
+               setList(child, depth, vis_parent, filter_is_id ? false : (parent_contains_name || this_contains_name), no_publish_all); // list children, don't set 'parent_contains_name' when filter is by ID to make sure that desired element is listed last and its children are not listed at all
             }
          }
       }
-      if(ee)setList(*ee, depth, parent_removed, parent_contains_name);
+      if(ee)setList(*ee, depth, parent_contains_name);
    }
    bool ProjectEx::setFilter(ElmNode &node)
    {
@@ -3749,11 +3821,11 @@ void DrawProject()
          int  filter_path_length=filter_path.tailSlash(true).length();
          REPA(node.children)
          {
-            int      child_i=node.children[i];
-            ElmNode &child  =hierarchy[child_i];
-            Elm     &elm    =elms     [child_i];
-            if(!elm.removed() || show_removed())
+            int  child_i=node.children[i];
+            Elm &elm    =elms[child_i];
+            if(  elm.exists() || show_removed())
             {
+               ElmNode &child=hierarchy[child_i];
                filter_path.clip(filter_path_length)+=elm.name;
                bool this_contains=(ElmVisible(elm.type) && (filter_is_id ? (elm.id==filter_id) : ContainsAny(elm.name, filter()) && ContainsAll(filter_path, filter()))), // !! check this first because 'setFilter' below will modify the 'filter_path' !!
                    child_contains=setFilter(child); // !! check this second !!
@@ -3762,7 +3834,7 @@ void DrawProject()
                flag|=child.flag;
             }
          }
-         return FlagTest(flag, ELM_CONTAINS_NAME|ELM_CONTAINS_NAME_CHILD);
+         return FlagOn(flag, ELM_CONTAINS_NAME|ELM_CONTAINS_NAME_CHILD);
       }
       return false;
    }
@@ -3782,7 +3854,7 @@ void DrawProject()
             FlagSet(item.flag, ELM_CONTAINS_NAME      ,  this_contains);
             flag|=item.flag;
          }
-         return FlagTest(flag, ELM_CONTAINS_NAME|ELM_CONTAINS_NAME_CHILD);
+         return FlagOn(flag, ELM_CONTAINS_NAME|ELM_CONTAINS_NAME_CHILD);
       }
       return false;
    }
@@ -3805,10 +3877,10 @@ void DrawProject()
          FlagSet(item.flag, ELM_EDITED_CHILD, editing(item.children, name));
          flag|=item.flag;
       }
-      return FlagTest(flag, ELM_EDITED|ELM_EDITED_CHILD);
+      return FlagOn(flag, ELM_EDITED|ELM_EDITED_CHILD);
    }
    ProjectEx& ProjectEx::editing(C Str &name) {editing(CodeEdit.items, name); return T;}
-   void ProjectEx::setList(bool set_hierarchy, bool set_existing)
+   void ProjectEx::setList(bool set_hierarchy, bool set_existing) // !! CALL 'setListCurSel' or 'clearListSel' before this !!
    {
       if(set_hierarchy)setHierarchy();else REPAO(hierarchy).flag=0; // if no need to set whole 'hierarchy' then reset flag manually
       if(set_existing )setExisting(); // after hierarchy
@@ -3840,8 +3912,9 @@ void DrawProject()
       // set cur/sel
       list.cur=(list_cur.valid() ? list.elmToVis(findElm(list_cur)) : list.itemToVis(list_cur_item)); list_cur.zero(); list_cur_item=null;
       list.sel.clear();
-      FREPA(list_sel     ){int abs=list. elmToAbs(findElm(list_sel     [i])); if(abs>=0)list.sel.add(abs);} list_sel     .clear();
-      FREPA(list_sel_item){int abs=list.itemToAbs(        list_sel_item[i] ); if(abs>=0)list.sel.add(abs);} list_sel_item.clear();
+      FREPA(list_sel     ){int abs=list. elmToAbs(findElm(list_sel     [i])); if(abs>=0)list.sel.add(abs);}
+      FREPA(list_sel_item){int abs=list.itemToAbs(        list_sel_item[i] ); if(abs>=0)list.sel.add(abs);}
+      clearListSel();
 
       Theater.refreshData();
    }
@@ -4214,11 +4287,19 @@ void DrawProject()
                   m.New().create("Move to its Object", MtrlMoveToObj, T).desc("This option will move the Material Element to the Object it belongs to");
                   m++;
                   {
-                     Node<MenuElm> &mts=(m+="Mobile Texture Size");
-                     mts.New().create("Full"   , MtrlMobileTexSizeFull   , T);
-                     mts.New().create("Half"   , MtrlMobileTexSizeHalf   , T);
-                     mts.New().create("Quarter", MtrlMobileTexSizeQuarter, T);
-                     ASSERT(MaxMaterialDownsize==3);
+                     Node<MenuElm> &tsm=(m+="Texture Size Mobile");
+                     tsm.New().create("Full"   , MtrlTexSizeMobileFull   , T);
+                     tsm.New().create("Half"   , MtrlTexSizeMobileHalf   , T);
+                     tsm.New().create("Quarter", MtrlTexSizeMobileQuarter, T);
+                     tsm.New().create("Eighth" , MtrlTexSizeMobileEighth , T);
+
+                     Node<MenuElm> &tss=(m+="Texture Size Switch");
+                     tss.New().create("Full"   , MtrlTexSizeSwitchFull   , T);
+                     tss.New().create("Half"   , MtrlTexSizeSwitchHalf   , T);
+                     tss.New().create("Quarter", MtrlTexSizeSwitchQuarter, T);
+                     tss.New().create("Eighth" , MtrlTexSizeSwitchEighth , T);
+
+                     ASSERT(MaxMaterialDownsize==4);
                   }
                }
             }
@@ -4291,9 +4372,15 @@ void DrawProject()
             c.New().create("To Another Project", CopyTo   , T).desc("This will copy selected elements into another Project").kbsc(KbSc(KB_T, KBSC_CTRL_CMD));
          }
          {
-            Node<MenuElm> &c=(n+="Publishing");
-            c.New().create("Disable", DisablePublish, T).desc(dis_publish_desc);
-            c.New().create( "Enable",  EnablePublish, T).desc( en_publish_desc);
+            Node<MenuElm> &p=(n+="Publishing");
+            p.New().create("Disable", DisablePublish, T).desc(dis_publish_desc);
+            p.New().create( "Enable",  EnablePublish, T).desc( en_publish_desc);
+            {
+               p++;
+               Node<MenuElm> &m=(p+="Mobile");
+               m.New().create("Disable", DisablePublishMobile, T).desc(dis_publish_desc);
+               m.New().create( "Enable",  EnablePublishMobile, T).desc( en_publish_desc);
+            }
          }
       }
       if(elm_undos.changes())
@@ -4324,7 +4411,7 @@ void DrawProject()
             if(ext=="mtrl"                                                                                      )type=ELM_MTRL ;else
             if(ext=="anim"                                                                                      )type=ELM_ANIM ;else
             if(ext=="c" || ext=="cpp" || ext=="h" || ext=="cc" || ext=="cxx" || ext=="m" || ext=="mm"           )type=ELM_CODE ;else
-            if(Ends(name, ".mesh.ascii") || Ends(name, ".xps.ascii")                                            )type=ELM_OBJ  ;else
+            if(ext=="skel" || Ends(name, ".mesh.ascii") || Ends(name, ".xps.ascii")                             )type=ELM_OBJ  ;else
                                                                                                                  type=ELM_FILE ;
             if(Elm *elm=newElm(type, parent_id, &NoTemp(GetBaseNoExt(name)), false))
             {
@@ -5278,6 +5365,6 @@ ProjectEx::ElmList::SoundPlay::SoundPlay() : lit_id(UIDZero), play_id(UIDZero) {
 
 ProjectEx::ElmList::AppCheck::AppCheck() : app_id(UIDZero) {}
 
-ProjectEx::ElmChange::ElmChange() : type(NONE) {}
+ProjectEx::ElmChange::ElmChange() : type(NONE), test(0), set(0) {}
 
 /******************************************************************************/

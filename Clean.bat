@@ -2,8 +2,10 @@ rmdir /s /q .vs
 rmdir /s /q Debug
 rmdir /s /q ipch
 rmdir /s /q Emscripten
+rmdir /s /q x64
 
-rmdir /s /q "Engine\Android\obj"
+rmdir /s /q "Engine\.vs"
+rmdir /s /q "Engine\Android-arm64-v8a"
 rmdir /s /q "Engine\Arm"
 rmdir /s /q "Engine\Asm"
 rmdir /s /q "Engine\Debug DX11"
@@ -17,23 +19,34 @@ rmdir /s /q "Engine\Release Universal DX11"
 rmdir /s /q "Engine\x64"
 rmdir /s /q "Engine\NX64"
 
+rmdir /s /q "Project\.vs"
+rmdir /s /q "Project\Android\app\build"
+rmdir /s /q "Project\Android\.agde"
+rmdir /s /q "Project\Android\.gradle"
+rmdir /s /q "Project\Android\Debug"
+rmdir /s /q "Project\Android\Release"
 rmdir /s /q "Project\Arm"
+rmdir /s /q "Project\Asm"
 rmdir /s /q "Project\Debug DX11"
 rmdir /s /q "Project\Debug GL"
 rmdir /s /q "Project\Debug Universal DX11"
 rmdir /s /q "Project\Emscripten"
 rmdir /s /q "Project\Generated Files"
+rmdir /s /q "Project\obj"
 rmdir /s /q "Project\Release DX11"
 rmdir /s /q "Project\Release GL"
 rmdir /s /q "Project\Release Universal DX11"
 rmdir /s /q "Project\x64"
 rmdir /s /q "Project\NX64"
-
-rmdir /s /q "x64"
+rmdir /s /q "Project\Project.nspd"
 
 del "Engine\*.lib"
+del "Engine\*.a"
+del "Engine\*.bc"
 del "Engine\*.sdf"
+del "Engine\*.pdb"
 del "Project\*.pdb"
+del "Project\*.log"
 
 rmdir /s /q "Editor\Projects\_Build_"
 rmdir /s /q "Editor\Projects\_Publish_"

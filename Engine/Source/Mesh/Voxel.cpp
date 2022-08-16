@@ -666,8 +666,8 @@ void GenerateVoxelTris()
    FREPAD(i, vts)
    {
       Int j=i;
-      FlagSet(j, 4, FlagTest(i, 8)); FlagSet(j, 8, FlagTest(i, 4)); // swap #2 and #3
-      FlagSet(j, 64, FlagTest(i, 128)); FlagSet(j, 128, FlagTest(i, 64)); // swap #6 and #7
+      FlagSet(j, 4, FlagOn(i, 8)); FlagSet(j, 8, FlagOn(i, 4)); // swap #2 and #3
+      FlagSet(j, 64, FlagOn(i, 128)); FlagSet(j, 128, FlagOn(i, 64)); // swap #6 and #7
       VoxelTri &vt=vts[j];
       vt.vtx_mask=0;
       for(Int p=0; VoxelTriEdgePoints[i][p]!=-1; p+=3)

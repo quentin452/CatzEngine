@@ -37,17 +37,21 @@ Bool NaN    (C Dbl &r); // if 'r' is Not a Number
 Bool Inf    (C Flt &r); // if 'r' is Infinite
 Bool Inf    (C Dbl &r); // if 'r' is Infinite
 
-#if EE_PRIVATE
-// minimum & maximum
-inline void MinMax (  Byte a, Byte b   , Byte &min, Byte &max) {if(a<b){min=a; max=b;}else{min=b; max=a;}} // get min max values : min=Min(a, b); max=Max(a, b);
-inline void MinMax (  Int  a, Int  b   , Int  &min, Int  &max) {if(a<b){min=a; max=b;}else{min=b; max=a;}} // get min max values : min=Min(a, b); max=Max(a, b);
-inline void MinMax (  Flt  a, Flt  b   , Flt  &min, Flt  &max) {if(a<b){min=a; max=b;}else{min=b; max=a;}} // get min max values : min=Min(a, b); max=Max(a, b);
-inline void MinMax (  Dbl  a, Dbl  b   , Dbl  &min, Dbl  &max) {if(a<b){min=a; max=b;}else{min=b; max=a;}} // get min max values : min=Min(a, b); max=Max(a, b);
-       void MinMax (C Flt *f, Int  elms, Flt  &min, Flt  &max); // get min max values :   min =Min(f[]);   max =Max(f[]);
-       void MinMax (C Dbl *f, Int  elms, Dbl  &min, Dbl  &max); // get min max values :   min =Min(f[]);   max =Max(f[]);
-       void MinMaxI(C Flt *f, Int  elms, Int  &min, Int  &max); // get min max index  : f[min]=Min(f[]); f[max]=Max(f[]);
-       void MinMaxI(C Dbl *f, Int  elms, Int  &min, Int  &max); // get min max index  : f[min]=Min(f[]); f[max]=Max(f[]);
-#endif
+// get minimum and maximum
+inline void MinMax (  Byte   a, Byte b  , Byte  &min, Byte  &max) {if(a<b){min=a; max=b;}else{min=b; max=a;}} // get min max value: min=Min(a, b); max=Max(a, b);
+inline void MinMax (  Int    a, Int  b  , Int   &min, Int   &max) {if(a<b){min=a; max=b;}else{min=b; max=a;}} // get min max value: min=Min(a, b); max=Max(a, b);
+inline void MinMax (  Flt    a, Flt  b  , Flt   &min, Flt   &max) {if(a<b){min=a; max=b;}else{min=b; max=a;}} // get min max value: min=Min(a, b); max=Max(a, b);
+inline void MinMax (  Dbl    a, Dbl  b  , Dbl   &min, Dbl   &max) {if(a<b){min=a; max=b;}else{min=b; max=a;}} // get min max value: min=Min(a, b); max=Max(a, b);
+       void MinMax (C Flt   *f, Int  num, Flt   &min, Flt   &max); // get min max value:   min =Min(f[]);   max =Max(f[]);
+       void MinMax (C Dbl   *f, Int  num, Dbl   &min, Dbl   &max); // get min max value:   min =Min(f[]);   max =Max(f[]);
+       void MinMaxI(C Flt   *f, Int  num, Int   &min, Int   &max); // get min max index: f[min]=Min(f[]); f[max]=Max(f[]);
+       void MinMaxI(C Dbl   *f, Int  num, Int   &min, Int   &max); // get min max index: f[min]=Min(f[]); f[max]=Max(f[]);
+       Bool MinMax (C Vec2  *v, Int  num, Vec2  &min, Vec2  &max);
+       Bool MinMax (C VecD2 *v, Int  num, VecD2 &min, VecD2 &max);
+       Bool MinMax (C Vec   *v, Int  num, Vec   &min, Vec   &max);
+       Bool MinMax (C VecD  *v, Int  num, VecD  &min, VecD  &max);
+       Bool MinMax (C Vec4  *v, Int  num, Vec4  &min, Vec4  &max);
+       Bool MinMax (C VecD4 *v, Int  num, VecD4 &min, VecD4 &max);
 
 // get absolute value
 constexpr Int   Abs(  Int    x) {return (x>=0) ? x : -x;}
@@ -132,10 +136,8 @@ inline VecSB4 SignEpsB(C Vec4 &v, Flt eps=EPS ) {return VecSB4(SignEps(v.x, eps)
 inline Int CompareEps(C Flt &a, C Flt &b) {return SignEps(a-b);}
 inline Int CompareEps(C Dbl &a, C Dbl &b) {return SignEps(a-b);}
 
-#if EE_PRIVATE
 inline Flt   PackInf(Flt x) {return 1-1/(x+1);} //   pack value from 0..Inf to 0..1
 inline Flt UnpackInf(Flt x) {return 1/(1-x)-1;} // unpack value from 0..1   to 0..Inf
-#endif
 
 inline Flt ScaleFactor (Flt x) {return (x>=0) ? (1+x) : (1/(1-x));} // get scaling factor from linear  value
 inline Dbl ScaleFactor (Dbl x) {return (x>=0) ? (1+x) : (1/(1-x));} // get scaling factor from linear  value

@@ -95,7 +95,7 @@ static struct ovrTexture
       image._size=image._hw_size.set(w, h, 1);
       image._type=image._hw_type=(LINEAR_GAMMA ? IMAGE_R8G8B8A8_SRGB : IMAGE_R8G8B8A8);
       image._mode=IMAGE_RT;
-      image._mms=1;
+      image._mips=1;
       image._samples=1;
       image._byte_pp=image.hwTypeInfo().byte_pp;
       image. setPartial();

@@ -195,7 +195,7 @@ void Object::base(C ObjectPtr &base)
 /******************************************************************************/
 Flt  Object::scale             ()C {return matrix.x.length();}
 Vec  Object::scale3            ()C {return matrix.scale();}
-Bool Object::constant          ()C {return FlagTest(_flag, OBJ_CONST);}
+Bool Object::constant          ()C {return FlagOn(_flag, OBJ_CONST);}
 Int  Object::meshVariationIndex()C {return _mesh_variation_id ? (_mesh ? _mesh->variationFind(_mesh_variation_id) : -1) : 0;}
 
 void Object::type           (Bool custom, C UID         &type    ) {                                               FlagSet(_flag, OBJ_OVR_TYPE          , custom); if(!custom)updateBaseSelf();else T._type             =type  ; }
@@ -207,15 +207,15 @@ void Object::phys           (Bool custom, C PhysBodyPtr &phys    ) {            
 void Object::scale          (Bool custom, C Vec         &scale   ) {                                               FlagSet(_flag, OBJ_OVR_SCALE         , custom); if(!custom)updateBaseSelf();else matrix.normalize(scale);}
 void Object::constant       (Bool custom,   Bool         on      ) {                                               FlagSet(_flag, OBJ_OVR_CONST         , custom); if(!custom)updateBaseSelf();else FlagSet(_flag, OBJ_CONST, on);}
 
-Bool Object::customType         ()C {return FlagTest(_flag, OBJ_OVR_TYPE          );}
-Bool Object::customAccess       ()C {return FlagTest(_flag, OBJ_OVR_ACCESS        );}
-Bool Object::customPath         ()C {return FlagTest(_flag, OBJ_OVR_PATH          );}
-Bool Object::customMesh         ()C {return FlagTest(_flag, OBJ_OVR_MESH          );}
-Bool Object::customMeshVariation()C {return FlagTest(_flag, OBJ_OVR_MESH_VARIATION);}
-Bool Object::customPhys         ()C {return FlagTest(_flag, OBJ_OVR_PHYS          );}
-Bool Object::customConstant     ()C {return FlagTest(_flag, OBJ_OVR_CONST         );}
-Bool Object::customScale        ()C {return FlagTest(_flag, OBJ_OVR_SCALE         );}
-Bool Object::customAlign        ()C {return FlagTest(_flag, OBJ_OVR_ALIGN         );}
+Bool Object::customType         ()C {return FlagOn(_flag, OBJ_OVR_TYPE          );}
+Bool Object::customAccess       ()C {return FlagOn(_flag, OBJ_OVR_ACCESS        );}
+Bool Object::customPath         ()C {return FlagOn(_flag, OBJ_OVR_PATH          );}
+Bool Object::customMesh         ()C {return FlagOn(_flag, OBJ_OVR_MESH          );}
+Bool Object::customMeshVariation()C {return FlagOn(_flag, OBJ_OVR_MESH_VARIATION);}
+Bool Object::customPhys         ()C {return FlagOn(_flag, OBJ_OVR_PHYS          );}
+Bool Object::customConstant     ()C {return FlagOn(_flag, OBJ_OVR_CONST         );}
+Bool Object::customScale        ()C {return FlagOn(_flag, OBJ_OVR_SCALE         );}
+Bool Object::customAlign        ()C {return FlagOn(_flag, OBJ_OVR_ALIGN         );}
 
 Bool Object::customMeshVariationAny()C
 {

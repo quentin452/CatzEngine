@@ -25,91 +25,32 @@
       However NDK input does not provide COMBINING_ACCENT and COMBINING_ACCENT_MASK for key codes.
       I still need to use 'KeyCharacterMap' instead of converting buttons to characters, because on Swiftkey Android 2.3 pressing '(' results in 'k' character, and 'KeyCharacterMap' fixes that.
 
-   Type Signature Java Type 
-   Z              boolean 
-   B              byte 
-   C              char 
-   S              short 
-   I              int 
-   J              long 
-   F              float 
-   D              double 
+   Type Signature Java Type
+   Z              boolean
+   B              byte
+   C              char
+   S              short
+   I              int
+   J              long
+   F              float
+   D              double
    L*;            "*" class
-   [*             *[] array 
+   [*             *[] array
    (params)ret    method
 
-   For example, the Java method:     long f(int n, String s, int[] arr); 
+   For example, the Java method:     long f(int n, String s, int[] arr);
    has the following type signature: (ILjava/lang/String;[I)J
 /******************************************************************************/
 #include "stdafx.h"
 #if ANDROID
+
+#include "../../../../ThirdPartyLibs/begin.h"
+#include "../../../../ThirdPartyLibs/play-core-native-sdk/include/asset_pack.h"
+#include "../../../../ThirdPartyLibs/end.h"
+
 ASSERT(SIZE(Long)>=SIZE(Ptr)); // some pointers are processed using Long's on Java
 namespace EE{
 /******************************************************************************/
-#ifndef AMETA_CAPS_LOCK_ON
-   #define AMETA_CAPS_LOCK_ON 0x100000
-#endif
-#ifndef AINPUT_SOURCE_STYLUS
-   #define AINPUT_SOURCE_STYLUS (0x00004000|AINPUT_SOURCE_CLASS_POINTER)
-#endif
-
-#ifndef AMOTION_EVENT_ACTION_HOVER_MOVE
-   #define AMOTION_EVENT_ACTION_HOVER_MOVE 7
-#endif
-#ifndef AMOTION_EVENT_ACTION_SCROLL
-   #define AMOTION_EVENT_ACTION_SCROLL 8
-#endif
-#ifndef AMOTION_EVENT_ACTION_HOVER_ENTER
-   #define AMOTION_EVENT_ACTION_HOVER_ENTER 9
-#endif
-#ifndef AMOTION_EVENT_ACTION_HOVER_EXIT
-   #define AMOTION_EVENT_ACTION_HOVER_EXIT 10
-#endif
-
-#ifndef AMOTION_EVENT_AXIS_VSCROLL
-   #define AMOTION_EVENT_AXIS_VSCROLL 9
-#endif
-#ifndef AMOTION_EVENT_AXIS_HSCROLL
-   #define AMOTION_EVENT_AXIS_HSCROLL 10
-#endif
-
-#ifndef AINPUT_SOURCE_JOYSTICK
-   #define AINPUT_SOURCE_JOYSTICK 0x01000010
-#endif
-
-#ifndef AMOTION_EVENT_AXIS_X
-   #define AMOTION_EVENT_AXIS_X 0
-#endif
-#ifndef AMOTION_EVENT_AXIS_Y
-   #define AMOTION_EVENT_AXIS_Y 1
-#endif
-#ifndef AMOTION_EVENT_AXIS_RX
-   #define AMOTION_EVENT_AXIS_RX 12
-#endif
-#ifndef AMOTION_EVENT_AXIS_RY
-   #define AMOTION_EVENT_AXIS_RY 13
-#endif
-#ifndef AMOTION_EVENT_AXIS_HAT_X
-   #define AMOTION_EVENT_AXIS_HAT_X 15
-#endif
-#ifndef AMOTION_EVENT_AXIS_HAT_Y
-   #define AMOTION_EVENT_AXIS_HAT_Y 16
-#endif
-
-#ifndef HISTORY_CURRENT
-   #define HISTORY_CURRENT (-0x80000000)
-#endif
-
-#ifndef AMETA_CTRL_ON
-   #define AMETA_CTRL_ON 0x1000
-#endif
-#ifndef AMETA_CTRL_LEFT_ON
-   #define AMETA_CTRL_LEFT_ON 0x2000
-#endif
-#ifndef AMETA_CTRL_RIGHT_ON
-   #define AMETA_CTRL_RIGHT_ON 0x4000
-#endif
-
 #if DEBUG
    #define LOG(x) LogN(x)
 #else
@@ -129,20 +70,19 @@ JNI Jni(null);
 
 static JavaVM        *JVM;
        jobject        Activity;
-       JClass         ActivityClass, ClipboardManagerClass, InputDeviceClass, KeyCharacterMapClass;
+       JClass         ActivityClass, ClipboardManagerClass, KeyCharacterMapClass;
        JObject        DefaultDisplay, ClipboardManager, LocationManager, KeyCharacterMap,
                       GPS_PROVIDER, NETWORK_PROVIDER, EsenthelLocationListener[2];
        JMethodID      getRotation,
-                      InputDeviceGetDevice, InputDeviceGetName,
                       KeyCharacterMapLoad, KeyCharacterMapGet,
-                      getLastKnownLocation, getLatitude, getLongitude, getAltitude, getAccuracy, getSpeed, getTime, requestLocationUpdates, removeUpdates;
+                      getLastKnownLocation, getLatitude, getLongitude, getAltitude, getAccuracy, getSpeed, getTime, requestLocationUpdates, removeUpdates, vibrate;
        Int            AndroidSDK;
        AAssetManager *AssetManager;
        android_app   *AndroidApp;
        Str8           AndroidPackageName;
        Str            AndroidAppPath, AndroidAppDataPath, AndroidAppDataPublicPath, AndroidAppCachePath, AndroidPublicPath, AndroidSDCardPath;
 static KB_KEY         KeyMap[256];
-static Byte           ShiftMap[3][128], JoyMap[256];
+static Byte           JoyMap[256];
 static Bool           Initialized, // !! This may be set to true when app is restarted (without previous crashing) !!
                       KeyboardLoaded, PossibleTap;
 static Int            KeyboardDeviceID;
@@ -226,13 +166,15 @@ jobject JObjectArray::operator[](Int i)C {return _jni->GetObjectArrayElement(T, 
      JObjectArray::JObjectArray(JNI &jni, int elms) : JObject(jni, jni->NewObjectArray(elms, jni->FindClass("java/lang/String"), NULL)) {}
 void JObjectArray::set(Int i, CChar8 *t) {if(_ && _jni)_jni->SetObjectArrayElement(T, i, _jni->NewStringUTF(t));}
 /******************************************************************************/
-static Str JavaInputDeviceName(Int i)
+void Overlay(C Str &text)
 {
-   if(Jni && InputDeviceGetDevice && InputDeviceGetName)
-      if(JObject device=Jni->CallStaticObjectMethod(InputDeviceClass, InputDeviceGetDevice, jint(i)))
-         if(JString name=Jni->CallObjectMethod(device, InputDeviceGetName))
-            return name.str();
-   return S;
+#if ANDROID
+   JNI jni;
+   if(jni && ActivityClass)
+   if(JMethodID overlay=jni.staticFunc(ActivityClass, "overlay", "(Ljava/lang/String;)V"))
+      if(JString jtext=JString(jni, text))
+         jni->CallStaticVoidMethod(ActivityClass, overlay, jtext());
+#endif
 }
 /******************************************************************************/
 static void UpdateOrientation()
@@ -261,43 +203,39 @@ static void UpdateSize()
    }
 }
 /******************************************************************************/
-static Char AdjustByShift(Char c, Bool shift, Bool caps)
-{
-   if(shift || caps)
-   {
-      if(InRange(U16(c), ShiftMap[0]))return ShiftMap[(shift | (caps<<1))-1][U16(c)];
-      if(shift!=caps)return CaseUp(c);
-   }
-   return c;
-}
 static int32_t InputCallback(android_app *app, AInputEvent *event)
 {
    LOG2("InputCallback");
    Int device=AInputEvent_getDeviceId(event);
+   Int source=AInputEvent_getSource  (event);
    switch(    AInputEvent_getType    (event))
    {
       case AINPUT_EVENT_TYPE_MOTION:
       {
-         Int  source      =(AInputEvent_getSource(event) & ~AINPUT_SOURCE_CLASS_POINTER), // disable 'AINPUT_SOURCE_CLASS_POINTER' because all have it (including AINPUT_SOURCE_MOUSE and AINPUT_SOURCE_STYLUS)
-              action      =AMotionEvent_getAction(event),
+         Int  action      =AMotionEvent_getAction(event),
               action_type = (action&AMOTION_EVENT_ACTION_MASK),
               action_index=((action&AMOTION_EVENT_ACTION_POINTER_INDEX_MASK)>>AMOTION_EVENT_ACTION_POINTER_INDEX_SHIFT);
-         Bool stylus      =FlagTest(source, AINPUT_SOURCE_STYLUS);
-         if(source&AINPUT_SOURCE_JOYSTICK)
+         Bool stylus      =FlagOn(source, AINPUT_SOURCE_STYLUS & ~AINPUT_SOURCE_CLASS_POINTER); // disable 'AINPUT_SOURCE_CLASS_POINTER' because (AINPUT_SOURCE_TOUCHSCREEN, AINPUT_SOURCE_MOUSE, AINPUT_SOURCE_STYLUS) have it
+         if(source&((AINPUT_SOURCE_DPAD|AINPUT_SOURCE_GAMEPAD|AINPUT_SOURCE_JOYSTICK) & ~AINPUT_SOURCE_CLASS_BUTTON)) // disable 'AINPUT_SOURCE_CLASS_BUTTON' because AINPUT_SOURCE_KEYBOARD has it
          {
             if(action_type==AMOTION_EVENT_ACTION_MOVE)
+               if(Joypad *joypad=Joypads.find(device))
             {
-               Joypad &jp=Joypads(action_index); if(!jp._name.is()){jp._name=JavaInputDeviceName(device); if(!jp._name.is())jp._name="Joypad";}
-               jp.dir     .set(AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_HAT_X, action_index),
-                              -AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_HAT_Y, action_index));
-               jp.dir_a[0].set(AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_X    , action_index),
-                              -AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_Y    , action_index));
-               jp.dir_a[1].set(AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_RX   , action_index),
-                              -AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_RY   , action_index));
-               jp.diri.set(Round(jp.dir.x), Round(jp.dir.y));
+                                                joypad->dir     .set( AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_HAT_X, action_index),
+                                                                     -AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_HAT_Y, action_index));
+                                                joypad->dir_a[0].set( AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_X    , action_index),
+                                                                     -AMotionEvent_getAxisValue(event, AMOTION_EVENT_AXIS_Y    , action_index));
+                                                joypad->dir_a[1].set( AMotionEvent_getAxisValue(event, joypad->_axis_stick_r_x , action_index),  // for performance set without checking for valid axis, in worst case, 0 is reported
+                                                                     -AMotionEvent_getAxisValue(event, joypad->_axis_stick_r_y , action_index)); // for performance set without checking for valid axis, in worst case, 0 is reported
+               if(joypad->_axis_trigger_l!=0xFF)joypad->setTrigger(0, AMotionEvent_getAxisValue(event, joypad->_axis_trigger_l , action_index) * joypad->_axis_trigger_mad[0].x + joypad->_axis_trigger_mad[0].y); // update only if have axis, to avoid conflicts with digital-bit-trigger buttons
+               if(joypad->_axis_trigger_r!=0xFF)joypad->setTrigger(1, AMotionEvent_getAxisValue(event, joypad->_axis_trigger_r , action_index) * joypad->_axis_trigger_mad[1].x + joypad->_axis_trigger_mad[1].y); // update only if have axis, to avoid conflicts with digital-bit-trigger buttons
+            #if DEBUG && 0
+               REP(256){Flt v=AMotionEvent_getAxisValue(event, i, action_index); if(v!=0)LogN(S+"Joy Axis: "+i+", Value: "+v);}
+            #endif
+               joypad->setDiri(Round(joypad->dir.x), Round(joypad->dir.y));
             }
          }else
-         if((source&AINPUT_SOURCE_MOUSE) && !stylus)  // check for stylus because on "Samsung Galaxy Note 2" stylus input generates both "AINPUT_SOURCE_STYLUS|AINPUT_SOURCE_MOUSE" at the same time
+         if((source&(AINPUT_SOURCE_MOUSE & ~AINPUT_SOURCE_CLASS_POINTER)) && !stylus) // disable 'AINPUT_SOURCE_CLASS_POINTER' because (AINPUT_SOURCE_TOUCHSCREEN, AINPUT_SOURCE_MOUSE, AINPUT_SOURCE_STYLUS) have it, check for 'stylus' because on "Samsung Galaxy Note 2" stylus input generates both "AINPUT_SOURCE_STYLUS|AINPUT_SOURCE_MOUSE" at the same time
          {
             if(action_type==AMOTION_EVENT_ACTION_SCROLL)
             {
@@ -310,7 +248,7 @@ static int32_t InputCallback(android_app *app, AInputEvent *event)
             if(action_type==AMOTION_EVENT_ACTION_DOWN && !button_state){PossibleTap=true; PossibleTapTime=Time.appTime();}else // 'getButtonState' does not detect tapping on the touchpad, so we need to detect it according to 'AMOTION_EVENT_ACTION_DOWN', also proceed only if no buttons are pressed in case this event is triggered by secondary mouse button
             if(PossibleTap && (button_state || (LastMousePos-Ms.desktopPos()).abs().max()>=6))PossibleTap=false; // if we've pressed a button or moved away too much then it's definitely not a tap
             if(action_type==AMOTION_EVENT_ACTION_UP   &&  PossibleTap ){PossibleTap=false; if(Time.appTime()<=PossibleTapTime+DoubleClickTime+Time.ad())Ms.push(0);} // this is a tap so push the button and it will be released line below because 'button_state' is 0
-            REPA(Ms._button)if(FlagTest(button_state, 1<<i)!=Ms.b(i))if(Ms.b(i))Ms.release(i);else Ms.push(i);
+            REPA(Ms._button)if(FlagOn(button_state, 1<<i)!=Ms.b(i))if(Ms.b(i))Ms.release(i);else Ms.push(i);
 
             // get scrolling and cursor position
             if(action_type!=AMOTION_EVENT_ACTION_UP // this can happen on release of TouchPad scroll, where the position is still at the dragged position
@@ -326,12 +264,14 @@ static int32_t InputCallback(android_app *app, AInputEvent *event)
                   Ms._wheel.y+=(pos.y-LastMousePos.y)*mul;
                }else
                {
-                  Ms._desktop_pixeli=pos;
-                  Ms. _window_pixeli.x=Round(AMotionEvent_getX(event, 0));
-                  Ms. _window_pixeli.y=Round(AMotionEvent_getY(event, 0));
+                  Ms.  _delta_pixeli_clp+=pos-Ms.desktopPos(); // calc based on desktop position and not window position, += because this can be called several times per frame
+                  Ms._desktop_pixeli     =pos;
+                  Ms. _window_pixeli.x   =Round(AMotionEvent_getX(event, 0));
+                  Ms. _window_pixeli.y   =Round(AMotionEvent_getY(event, 0));
                }
                LastMousePos=pos;
             }
+            Ms._hardware=true; // TODO: this could move to some device added/removed callback
          }else
          {
             switch(action_type)
@@ -457,23 +397,48 @@ static int32_t InputCallback(android_app *app, AInputEvent *event)
 
       case AINPUT_EVENT_TYPE_KEY:
       {
-         Int    code =AKeyEvent_getKeyCode  (event),
-                meta =AKeyEvent_getMetaState(event);
-         Bool   ctrl =FlagTest(meta, (Int)AMETA_CTRL_ON     ),
-                shift=FlagTest(meta, (Int)AMETA_SHIFT_ON    ),
-                alt  =FlagTest(meta, (Int)AMETA_ALT_ON      ),
-                caps =FlagTest(meta, (Int)AMETA_CAPS_LOCK_ON);
-         Byte   bcode=Byte(code);
-         KB_KEY key  =KeyMap[bcode];
-         Byte   joy  =JoyMap[bcode];
+         Int code=AKeyEvent_getKeyCode(event),
+           action=AKeyEvent_getAction (event);
+
+         if(source&((AINPUT_SOURCE_DPAD|AINPUT_SOURCE_GAMEPAD|AINPUT_SOURCE_JOYSTICK) & ~AINPUT_SOURCE_CLASS_BUTTON)) // disable 'AINPUT_SOURCE_CLASS_BUTTON' because AINPUT_SOURCE_KEYBOARD has it
+         {
+            if(Joypad *joypad=Joypads.find(device))
+            {
+               Byte button;
+               Int scan_code=AKeyEvent_getScanCode(event)-304; if(InRange(scan_code, joypad->_remap))
+               {
+                  button=joypad->_remap[scan_code]; if(button!=255)goto have_button;
+               }
+               if(InRange(code, JoyMap))
+               {
+                  button=JoyMap[code]; if(button!=255)
+                  {
+                  have_button:
+                     switch(action)
+                     {
+                        case AKEY_EVENT_ACTION_DOWN    : joypad->push   (button); break;
+                        case AKEY_EVENT_ACTION_UP      : joypad->release(button); break;
+                        case AKEY_EVENT_ACTION_MULTIPLE: joypad->push   (button); joypad->release(button); break;
+                     }
+                  }
+               }
+            }
+            return 1;
+         }
+
+         Int    meta =AKeyEvent_getMetaState(event);
+         Bool   ctrl =FlagOn(meta, (Int)AMETA_CTRL_ON     ),
+                shift=FlagOn(meta, (Int)AMETA_SHIFT_ON    ),
+                alt  =FlagOn(meta, (Int)AMETA_ALT_ON      ),
+                caps =FlagOn(meta, (Int)AMETA_CAPS_LOCK_ON);
+         KB_KEY key  =(InRange(code, KeyMap) ? KeyMap[code] : KB_NONE);
          /*if(shift && !ctrl && !alt && !Kb.anyWin())
          {
             if(key==KB_BACK ){key=KB_DEL; Kb._disable_shift=true;}else // Shift+Back  = Del (this is     universal behaviour on Android platform)
             if(key==KB_ENTER){key=KB_INS; Kb._disable_shift=true;}     // Shift+Enter = Ins (this is non-universal behaviour on Android platform)
          }*/
-         Joypad *joypad=null; if(joy){Bool empty=!InRange(0, Joypads); joypad=&Joypads(0); if(empty)joypad->_name=JavaInputDeviceName(device); joy--;}
 
-//LogN(S+"dev:"+device+", code:"+code+", meta:"+meta+", key:"+key+", action:"+(int)AKeyEvent_getAction(event));
+//LogN(S+"dev:"+device+", code:"+code+", meta:"+meta+", key:"+key+", action:"+action);
 //if(!key)LogN(S+"key:"+code);
 
          // check for characters here still because 'dispatchKeyEvent' does not catch keys from hardware keyboards (like tablet with attachable keyboard)
@@ -481,8 +446,7 @@ static int32_t InputCallback(android_app *app, AInputEvent *event)
          if(KeySource!=KEY_JAVA)
          {
             // get 'KeyCharacterMap' for this device
-            if(!joypad)
-               if(!KeyboardLoaded || KeyboardDeviceID!=device)
+            if(!KeyboardLoaded || KeyboardDeviceID!=device)
             {
                KeyboardLoaded  =true;
                KeyboardDeviceID=device;
@@ -500,43 +464,35 @@ static int32_t InputCallback(android_app *app, AInputEvent *event)
                if(!chr && (meta&AMETA_ALT_LEFT_ON))
                {
                   FlagDisable(meta, (Int)AMETA_ALT_LEFT_ON);
-                  FlagSet(meta, (Int)AMETA_ALT_ON, FlagTest(meta, (Int)AMETA_ALT_RIGHT_ON)); // setup correct ALT mask
+                  FlagSet(meta, (Int)AMETA_ALT_ON, FlagOn(meta, (Int)AMETA_ALT_RIGHT_ON)); // setup correct ALT mask
                   chr=Jni->CallIntMethod(KeyCharacterMap, KeyCharacterMapGet, jint(code), jint(meta));
                }
             }else
-            if(!Kb.b(KB_RALT))chr=AdjustByShift(Kb._key_char[key], shift, caps);
+            if(!Kb.b(KB_RALT))chr=Kb.keyChar(key, shift, caps);
 
             if(chr)KeySource=KEY_CPP; // if detected and character then set CPP source
          }
 
-         switch(AKeyEvent_getAction(event))
+         switch(action)
          {
             case AKEY_EVENT_ACTION_DOWN:
             {
-               if(joypad)joypad->push(joy);
-                         Kb     .push(key, code); Kb.queue(chr, code); // !! queue characters after push !!
+               Kb.push(key, code); Kb.queue(chr, code); // !! queue characters after push !!
             }break;
 
             case AKEY_EVENT_ACTION_UP:
             {
-               if(joypad)joypad->release(joy);
-                         Kb     .release(key);
+               Kb.release(key);
             }break;
 
             case AKEY_EVENT_ACTION_MULTIPLE:
             {
-               if(joypad)
-               {
-                  joypad->push   (joy);
-                  joypad->release(joy);
-               }
                Kb.push   (key, code); Kb.queue(chr, code); // !! queue characters after push !!
                Kb.release(key      );
             }break;
          }
          // on some systems 'dispatchKeyEvent' will not be called if we return 1
          if(chr              // if we did receive a character then we don't need 'dispatchKeyEvent' anymore
-         || joypad           // no point in forwarding joy buttons further
          || key==KB_NAV_BACK // on Asus Transformer Prime pressing this hardware keyboard key will close the app
          )return 1;
       }return 0; // call 'dispatchKeyEvent'
@@ -548,6 +504,80 @@ static int32_t InputCallback(android_app *app, AInputEvent *event)
       }break;
    }
    return 0;
+}
+static void SetMAD(Vec2 &mad, Flt min, Flt max) // convert from min..max -> 0..1
+{
+   mad.x=1.0f/(max-min);
+   mad.y=-min*mad.x; // min*mad.x+mad.y=0
+}
+static void DeviceRemoved(Ptr device_id_ptr) {UInt device_id=UIntPtr(device_id_ptr); REPA(Joypads)if(Joypads[i].id()==device_id){Joypads.remove(i); break;}}
+static void DeviceAdded  (Ptr device_id_ptr) {UInt device_id=UIntPtr(device_id_ptr); Bool added; Joypad &joypad=GetJoypad(device_id, added); if(added)
+   if(Jni)
+      if(JClass InputDevice="android/view/InputDevice")
+         if(JMethodID getDevice=Jni.staticFunc(InputDevice, "getDevice", "(I)Landroid/view/InputDevice;"))
+            if(JObject device=Jni->CallStaticObjectMethod(InputDevice, getDevice, jint(device_id)))
+   {
+                        if(JMethodID getName     =Jni.func(InputDevice, "getName"     , "()Ljava/lang/String;"))if(JString name=Jni->CallObjectMethod(device, getName))joypad._name=name.str();
+      Int  vendor_id=0; if(JMethodID getVendorId =Jni.func(InputDevice, "getVendorId" , "()I"                 )) vendor_id=Jni->CallIntMethod(device, getVendorId );
+      Int product_id=0; if(JMethodID getProductId=Jni.func(InputDevice, "getProductId", "()I"                 ))product_id=Jni->CallIntMethod(device, getProductId);
+
+      if(JMethodID DeviceHasAxis=Jni.staticFunc(ActivityClass, "DeviceHasAxis", "(Landroid/view/InputDevice;I)Z"))
+      if(JMethodID DeviceMinAxis=Jni.staticFunc(ActivityClass, "DeviceMinAxis", "(Landroid/view/InputDevice;I)F"))
+      if(JMethodID DeviceMaxAxis=Jni.staticFunc(ActivityClass, "DeviceMaxAxis", "(Landroid/view/InputDevice;I)F"))
+      {
+      #define HAS(axis) (Jni->CallStaticBooleanMethod(ActivityClass, DeviceHasAxis, device(), jint(axis)))
+      #define MIN(axis) (Jni->CallStaticFloatMethod  (ActivityClass, DeviceMinAxis, device(), jint(axis)))
+      #define MAX(axis) (Jni->CallStaticFloatMethod  (ActivityClass, DeviceMaxAxis, device(), jint(axis)))
+
+         { // stick right
+            // Xbox Elite Wireless Controller Series 2, Sony, Nintendo Switch Pro Controller, have X=AMOTION_EVENT_AXIS_Z, Y=AMOTION_EVENT_AXIS_RZ. Samsung EI-GP20 has AMOTION_EVENT_AXIS_RX, AMOTION_EVENT_AXIS_RY
+            Byte has[2], has_i=0, check[]={AMOTION_EVENT_AXIS_Z, AMOTION_EVENT_AXIS_RZ, AMOTION_EVENT_AXIS_RX, AMOTION_EVENT_AXIS_RY}; // order important (potential X first, Y next). Prefer AMOTION_EVENT_AXIS_Z/AMOTION_EVENT_AXIS_RZ because they're supported by popular gamepads and also they're mentioned in header for right stick
+            FREPA(check)if(HAS(check[i]))
+            {
+               has[has_i]=check[i]; if(++has_i==2) // found 2 axes
+               {
+                  joypad._axis_stick_r_x=has[0];
+                  joypad._axis_stick_r_y=has[1];
+                  break;
+               }
+            }
+         }
+
+         // triggers
+         {
+            // Xbox Elite Wireless Controller Series 2 uses AMOTION_EVENT_AXIS_BRAKE+AMOTION_EVENT_AXIS_GAS, Sony uses AMOTION_EVENT_AXIS_RX, AMOTION_EVENT_AXIS_RY
+            Byte has[2], has_i=0, check[]={AMOTION_EVENT_AXIS_BRAKE, AMOTION_EVENT_AXIS_GAS, AMOTION_EVENT_AXIS_LTRIGGER, AMOTION_EVENT_AXIS_RTRIGGER, AMOTION_EVENT_AXIS_RX, AMOTION_EVENT_AXIS_RY}; // order important (potential X first, Y next).
+            FREPA(check)
+            {
+               Byte axis=check[i]; if(axis!=joypad._axis_stick_r_x && axis!=joypad._axis_stick_r_y && HAS(axis))
+               {
+                  has[has_i]=axis; if(++has_i==2) // found 2 axes
+                  {
+                     joypad._axis_trigger_l=has[0];
+                     joypad._axis_trigger_r=has[1];
+                     break;
+                  }
+               }
+            }
+         }
+
+         joypad.setInfo(vendor_id, product_id);
+         if(joypad._axis_trigger_l!=0xFF) // has trigger axis
+         {
+            SetMAD(joypad._axis_trigger_mad[0], MIN(joypad._axis_trigger_l), MAX(joypad._axis_trigger_l)); // this is needed because Sony has triggers in range -1..1
+            REPA(joypad._remap)if(joypad._remap[i]==JB_L2)joypad._remap[i]=254; // use 254 as out of range to disable auto-convert
+         }
+         if(joypad._axis_trigger_r!=0xFF) // has trigger axis
+         {
+            SetMAD(joypad._axis_trigger_mad[1], MIN(joypad._axis_trigger_r), MAX(joypad._axis_trigger_r)); // this is needed because Sony has triggers in range -1..1
+            REPA(joypad._remap)if(joypad._remap[i]==JB_R2)joypad._remap[i]=254; // use 254 as out of range to disable auto-convert
+         }
+
+      #undef HAS
+      #undef MIN
+      #undef MAX
+      }
+   }
 }
 /******************************************************************************/
 enum ANDROID_STATE
@@ -626,7 +656,8 @@ static void CmdCallback(android_app *app, int32_t cmd)
       case APP_CMD_CONFIG_CHANGED:
       {
          LOG("APP_CMD_CONFIG_CHANGED");
-         Kb.setVisible();
+         InputDevices.checkMouseKeyboard();
+         Kb.setVisible(); // AFTER 'checkMouseKeyboard'
        /*EGLint w=-1, h=-1;
          eglQuerySurface(display, surface, EGL_WIDTH , &w);
          eglQuerySurface(display, surface, EGL_HEIGHT, &h);
@@ -645,8 +676,8 @@ static void CmdCallback(android_app *app, int32_t cmd)
       case APP_CMD_LOST_FOCUS  : LOG("APP_CMD_LOST_FOCUS"  ); FlagSet(AndroidState, AS_FOCUSED, false); SetActive(); break;
       case APP_CMD_START       : LOG("APP_CMD_START"       ); FlagSet(AndroidState, AS_STOPPED, false); SetActive(); break;
       case APP_CMD_STOP        : LOG("APP_CMD_STOP"        ); FlagSet(AndroidState, AS_STOPPED, true ); SetActive(); break;
-      case APP_CMD_PAUSE       : LOG("APP_CMD_PAUSE"       ); FlagSet(AndroidState, AS_PAUSED , true ); SetActive(); break;
-      case APP_CMD_RESUME      : LOG("APP_CMD_RESUME"      ); FlagSet(AndroidState, AS_PAUSED , false); SetActive(); break;
+      case APP_CMD_PAUSE       : LOG("APP_CMD_PAUSE"       ); FlagSet(AndroidState, AS_PAUSED , true ); SetActive(); AssetPackManager_onPause (); break;
+      case APP_CMD_RESUME      : LOG("APP_CMD_RESUME"      ); FlagSet(AndroidState, AS_PAUSED , false); SetActive(); AssetPackManager_onResume(); break;
 
       case APP_CMD_DESTROY             : LOG("APP_CMD_DESTROY"             ); break;
       case APP_CMD_SAVE_STATE          : LOG("APP_CMD_SAVE_STATE"          ); if(App.save_state)App.save_state(); break;
@@ -677,12 +708,10 @@ static void JavaShut()
    KeyCharacterMap     .del();
    KeyCharacterMapLoad =null;
    KeyCharacterMapGet  =null;
-   InputDeviceClass    .del();
-   InputDeviceGetName  =null;
-   InputDeviceGetDevice=null;
    DefaultDisplay      .del();
    Activity            =null;
    getRotation         =null;
+   vibrate             =null;
 
 #if 0 // we need these even after 'JavaShut'
    ActivityClass        .del();
@@ -806,13 +835,9 @@ static void JavaGetInput()
 {
    LOG("JavaGetInput");
 
-   if(!InputDeviceClass)
-      if(Jni)
-      if(InputDeviceClass="android/view/InputDevice")
-   {
-      InputDeviceGetDevice=Jni.staticFunc(InputDeviceClass, "getDevice", "(I)Landroid/view/InputDevice;");
-      InputDeviceGetName  =Jni.func      (InputDeviceClass, "getName"  , "()Ljava/lang/String;"         );
-   }
+   if(!vibrate)
+      if(Jni && ActivityClass)
+         vibrate=Jni.staticFunc(ActivityClass, "vibrate", "(II)V");
 }
 static void JavaDisplay()
 {
@@ -1071,48 +1096,261 @@ static void InitKeyMap()
    KeyMap[168]=KB_ZOOM_IN ; // AKEYCODE_ZOOM_IN
    KeyMap[169]=KB_ZOOM_OUT; // AKEYCODE_ZOOM_OUT
 
-   JoyMap[AKEYCODE_BUTTON_A     ]=1;
-   JoyMap[AKEYCODE_BUTTON_B     ]=2;
-   JoyMap[AKEYCODE_BUTTON_X     ]=3;
-   JoyMap[AKEYCODE_BUTTON_Y     ]=4;
-   JoyMap[AKEYCODE_BUTTON_L1    ]=5;
-   JoyMap[AKEYCODE_BUTTON_R1    ]=6;
-   JoyMap[AKEYCODE_BUTTON_L2    ]=7;
-   JoyMap[AKEYCODE_BUTTON_R2    ]=8;
-   JoyMap[AKEYCODE_BUTTON_SELECT]=9;
-   JoyMap[AKEYCODE_BUTTON_START ]=10;
-   JoyMap[AKEYCODE_BUTTON_THUMBL]=11;
-   JoyMap[AKEYCODE_BUTTON_THUMBR]=12;
+   SetMem(JoyMap, 255);
+   JoyMap[AKEYCODE_BUTTON_A     ]=JB_A;
+   JoyMap[AKEYCODE_BUTTON_B     ]=JB_B;
+   JoyMap[AKEYCODE_BUTTON_X     ]=JB_X;
+   JoyMap[AKEYCODE_BUTTON_Y     ]=JB_Y;
+   JoyMap[AKEYCODE_BUTTON_L1    ]=JB_L1;
+   JoyMap[AKEYCODE_BUTTON_R1    ]=JB_R1;
+   JoyMap[AKEYCODE_BUTTON_L2    ]=JB_L2;
+   JoyMap[AKEYCODE_BUTTON_R2    ]=JB_R2;
+   JoyMap[AKEYCODE_BUTTON_THUMBL]=JB_L3;
+   JoyMap[AKEYCODE_BUTTON_THUMBR]=JB_R3;
+   JoyMap[AKEYCODE_BUTTON_SELECT]=JB_SELECT;
+   JoyMap[AKEYCODE_BUTTON_START ]=JB_START;
+}
+/******************************************************************************/
+static Bool Loop()
+{
+   LOG2("ALooper_pollAll");
 
-   REPD(shift, 2)
-   REPD(caps , 2)if(shift || caps)
+   Bool wait_end_set=false; Int wait=(App.active() ? App.active_wait : 0); UInt wait_end; // don't wait for !active, because we already wait after the event loop, and that would make 2 waits
+
+   Int id, events; android_poll_source *source;
+wait:
+   while((id=ALooper_pollAll(wait, null, &events, (void**)&source))>=0) // process all events, using negative 'wait' for 'ALooper_pollAll' means unlimited wait
    {
-      Int m=((shift | (caps<<1))-1);
-      REPA(ShiftMap[m])ShiftMap[m][i]=((shift==caps) ? Char8(i) : CaseUp(Char8(i)));
-      if(shift)
+      LOG2(S+"ALooper Source:"+Ptr(source)+", id:"+id);
+      if(source)source->process(AndroidApp, source); // process this event
+      LOG2(S+"ALooper processed");
+
+      if(id==LOOPER_ID_USER) // sensor data
       {
-         ShiftMap[m][Byte('`')]='~';
-         ShiftMap[m][Byte('1')]='!';
-         ShiftMap[m][Byte('2')]='@';
-         ShiftMap[m][Byte('3')]='#';
-         ShiftMap[m][Byte('4')]='$';
-         ShiftMap[m][Byte('5')]='%';
-         ShiftMap[m][Byte('6')]='^';
-         ShiftMap[m][Byte('7')]='&';
-         ShiftMap[m][Byte('8')]='*';
-         ShiftMap[m][Byte('9')]='(';
-         ShiftMap[m][Byte('0')]=')';
-         ShiftMap[m][Byte('-')]='_';
-         ShiftMap[m][Byte('=')]='+';
-         ShiftMap[m][Byte('[')]='{';
-         ShiftMap[m][Byte(']')]='}';
-         ShiftMap[m][Byte(';')]=':';
-         ShiftMap[m][Byte('\'')]='"';
-         ShiftMap[m][Byte('\\')]='|';
-         ShiftMap[m][Byte(',')]='<';
-         ShiftMap[m][Byte('.')]='>';
-         ShiftMap[m][Byte('/')]='?';
+         ASensorEvent event;
+      #if DEBUG
+         if(!SensorEventQueue)LOG("Received sensor event but the 'SensorEventQueue' is null");
+      #endif
+         while(ASensorEventQueue_getEvents(SensorEventQueue, &event, 1)>0)switch(event.type)
+         {
+            case ASENSOR_TYPE_ACCELEROMETER : AccelerometerValue.set(-event.acceleration.x, -event.acceleration.y,  event.acceleration.z); break;
+            case ASENSOR_TYPE_GYROSCOPE     :     GyroscopeValue.set( event.vector      .x,  event.vector      .y, -event.vector      .z); break;
+            case ASENSOR_TYPE_MAGNETIC_FIELD:  MagnetometerValue.set( event.magnetic    .x,  event.magnetic    .y, -event.magnetic    .z); break;
+         }
       }
+
+      wait=0; // don't wait for next events, in case app 'activate' status changed or it was requested to be closed or destroyed
+      // no need to check for 'App._close' or 'AndroidApp->destroyRequested' here, because we will do it below since we're setting wait=0 we don't risk with unlimited waits
+   }
+   if(App._close) // first check if we want to close manually
+   {
+      App.del(); // manually call shut down
+      ExitNow(); // do complete reset (including state of global variables) by killing the process
+   }
+   if(AndroidApp->destroyRequested)return false; // this is triggered by 'ANativeActivity_finish', just break out of the loop so app can get minimized
+   if(!App.active()) // we may need to wait
+      if(wait=((App.flag&APP_WORK_IN_BACKGROUND) ? App.background_wait : -1)) // how long
+   {
+      if(wait>0) // finite wait
+      {
+         if(wait_end_set) // if we already set the end time limit
+         {
+            wait=wait_end-Time.curTimeMs(); if(wait<=0)goto stop; // calculate remaining time
+         }else
+         {
+            wait_end=Time.curTimeMs()+wait;
+            wait_end_set=true;
+         }
+      }//else wait=-1; // use negative wait to force unlimited wait in 'ALooper_pollAll', no need for this, because 'wait' is already negative
+      goto wait;
+   }
+stop:
+
+   // process input
+   Ms._delta_rel.x= Ms._delta_pixeli_clp.x;
+   Ms._delta_rel.y=-Ms._delta_pixeli_clp.y;
+
+   LOG2(S+"AndroidApp->window:"+(AndroidApp->window!=null));
+#if DEBUG
+   if(!eglGetCurrentContext())LOG("No current EGL Context available on the main thread");
+#endif
+   UpdateSize();
+   App.update();
+   return true;
+}
+/******************************************************************************/
+// PLAY ASSET DELIVERY
+/******************************************************************************
+commands for testing PAD locally without uploading to Play Store - https://developer.android.com/guide/playcore/asset-delivery/test
+bundletool-all downloaded from https://github.com/google/bundletool/releases
+For testing "Esenthel/Project/Project.vcxproj" first have to turn on all #PlayAssetDelivery in "build.gradle" and "settings.gradle"
+Rebuild Project
+May need to uninstall app on device if asset pack data was changed
+Run powershell in "Project/Android" path
+Copy all commands below and paste (Ctrl+V) to powershell, press Enter:
+
+./gradlew bundleRelease
+del app/build/output.apks
+java -jar C:/bundletool-all.jar build-apks --bundle=app/build/outputs/bundle/release/app-release.aab --output=app/build/output.apks --local-testing
+java -jar C:/bundletool-all.jar install-apks --apks=app/build/output.apks --adb=C:/Progs/AndroidSDK/platform-tools/adb.exe
+/******************************************************************************/
+struct PlayAssetDelivery
+{
+   Bool create(Int asset_packs, Cipher *project_cipher);
+   void del   ();
+
+   Bool update();
+
+   Bool  updating ()C {return _updating ;}
+   ULong completed()C {return _completed;}
+   ULong total    ()C {return _total    ;}
+
+#if !EE_PRIVATE
+private:
+#endif
+   Bool   _updating;
+   Int     asset_packs;
+   ULong  _completed, _total;
+   Cipher *cipher;
+
+#if EE_PRIVATE
+   void zero() {_updating=false; asset_packs=0; _completed=_total=0; cipher=null;}
+#endif
+
+  ~PlayAssetDelivery() {del();}
+   PlayAssetDelivery();
+};
+/******************************************************************************/
+static void Error(AssetPackErrorCode error)
+{
+   CChar8 *msg; 
+   switch(error)
+   {
+      case ASSET_PACK_APP_UNAVAILABLE      : msg="App Info unavailable"; break;
+      case ASSET_PACK_UNAVAILABLE          : msg="Asset pack unavailable"; break;
+      case ASSET_PACK_INVALID_REQUEST      : msg="Invalid request"; break;
+      case ASSET_PACK_DOWNLOAD_NOT_FOUND   : msg="Download not found"; break;
+      case ASSET_PACK_API_NOT_AVAILABLE    : msg="API unavailable"; break;
+      case ASSET_PACK_NETWORK_ERROR        : msg="Network error"; break;
+      case ASSET_PACK_ACCESS_DENIED        : msg="Access denied"; break;
+      case ASSET_PACK_INSUFFICIENT_STORAGE : msg="Insufficient storage"; break;
+      case ASSET_PACK_PLAY_STORE_NOT_FOUND : msg="Google Play Store app not found"; break;
+      case ASSET_PACK_NETWORK_UNRESTRICTED : msg="NETWORK_UNRESTRICTED"; break;
+      case ASSET_PACK_APP_NOT_OWNED        : msg="App isn't owned"; break;
+      case ASSET_PACK_INTERNAL_ERROR       : msg="Internal Error"; break;
+      case ASSET_PACK_INITIALIZATION_NEEDED: msg="Initialization needed"; break;
+      case ASSET_PACK_INITIALIZATION_FAILED: msg="Initialization failed"; break;
+      default                              : msg="Unknown error"; break;
+   }
+   Exit(S+"Google Play Asset Delivery failed:\n"+msg);
+}
+struct AssetPack
+{
+   AssetPackDownloadState *state=null;
+  ~AssetPack() {AssetPackDownloadState_destroy(state);}
+};
+static CChar8* AssetPackName(Char8 (&name)[16], Int i)
+{
+   Char8 temp[256]; Set(name, "Data"); Append(name, TextInt(i, temp));
+   return name;
+}
+PlayAssetDelivery::PlayAssetDelivery() {zero();}
+Bool PlayAssetDelivery::create(Int asset_packs, Cipher *project_cipher)
+{
+   del();
+
+   const int MAX_ASSET_PACKS=16;
+   if(asset_packs<=0)return true;
+   DYNAMIC_ASSERT(asset_packs<=MAX_ASSET_PACKS, "asset_packs>MAX_ASSET_PACKS");
+   T.asset_packs=asset_packs;
+   T.cipher=project_cipher;
+
+   auto error=AssetPackManager_init(AndroidApp->activity->vm, AndroidApp->activity->clazz); if(error!=ASSET_PACK_NO_ERROR)Error(error);
+    Char8  names   [MAX_ASSET_PACKS][16];
+   CChar8 *name_ptr[MAX_ASSET_PACKS];
+   FREP(asset_packs)name_ptr[i]=AssetPackName(names[i], i);
+   error=AssetPackManager_requestInfo(name_ptr, asset_packs); if(error!=ASSET_PACK_NO_ERROR)Error(error);
+
+   return update();
+}
+void PlayAssetDelivery::del()
+{
+   AssetPackManager_destroy();
+   zero();
+}
+Bool PlayAssetDelivery::update()
+{
+  _completed=_total=0;
+   Int finished=0, updating=0;
+   FREP(asset_packs)
+   {
+      Char8 name[16]; AssetPackName(name, i);
+      AssetPack asset_pack; auto error=AssetPackManager_getDownloadState(name, &asset_pack.state); if(error!=ASSET_PACK_NO_ERROR || !asset_pack.state)Error(error);
+      AssetPackDownloadStatus status=AssetPackDownloadState_getStatus(asset_pack.state);
+   #if DEBUG && 0
+      LogN(S+"state"+i+"   "+status);
+   #endif
+      switch(status)
+      {
+         case ASSET_PACK_DOWNLOAD_CANCELED:
+         case ASSET_PACK_NOT_INSTALLED:
+            {CChar8 *name_ptr[]={name}; error=AssetPackManager_requestDownload(name_ptr, 1); if(error!=ASSET_PACK_NO_ERROR)Error(error);} break;
+         case ASSET_PACK_WAITING_FOR_WIFI  : error=AssetPackManager_showCellularDataConfirmation(AndroidApp->activity->clazz); if(error!=ASSET_PACK_NO_ERROR)Error(error); break;
+         case ASSET_PACK_DOWNLOAD_COMPLETED: finished++; break;
+         case ASSET_PACK_TRANSFERRING      : updating++; break;
+      }
+     _completed+=AssetPackDownloadState_getBytesDownloaded     (asset_pack.state);
+     _total    +=AssetPackDownloadState_getTotalBytesToDownload(asset_pack.state);
+   }
+   if(finished==asset_packs) // all finished
+   {
+      FREP(asset_packs) // process in order
+      {
+         Char8 name[16]; AssetPackName(name, i);
+         AssetPackLocation *location=null; auto error=AssetPackManager_getAssetPackLocation(name, &location); if(error!=ASSET_PACK_NO_ERROR || !location)Error(error);
+      #if DEBUG && 0
+         AssetPackStorageMethod storage_method=AssetPackLocation_getStorageMethod(location); LogN(S+"storage:"+storage_method);
+      #endif
+         auto path=AssetPackLocation_getAssetsPath(location); if(!Is(path))Exit("Empty Asset Pack Path");
+         Paks.add(Str(path).tailSlash(true)+name+".pak", cipher, false);
+         AssetPackLocation_destroy(location); // !! after this can't use 'path' anymore !!
+      }
+      Paks.rebuild();
+      del(); return true;
+   }
+   if(finished+updating==asset_packs)_updating=true; // all finished downloading, but some are still updating
+   return false;
+}
+/******************************************************************************/
+static Bool  LoadAndroidAssetPacksUpdate() {return true;}
+static void  LoadAndroidAssetPacksDraw  () {if(D.created())D.clearCol();}
+static State LoadAndroidAssetPacksState (LoadAndroidAssetPacksUpdate, LoadAndroidAssetPacksDraw);
+static Str   MB(ULong i) {return TextInt(i>>20, -1, 3);}
+void LoadAndroidAssetPacks(Int asset_packs, Cipher *cipher)
+{
+   PlayAssetDelivery pad; if(!pad.create(asset_packs, cipher))
+   {
+      auto   app_flag=App.flag       ; FlagDisable(App.flag, APP_WORK_IN_BACKGROUND);
+      Int active_wait=App.active_wait;             App.active_wait=10;
+      State   *active=StateActive, *next=StateNext; StateActive=StateNext=&LoadAndroidAssetPacksState;
+      Flt time=Time.curTime()+1; // show message only after some time to avoid blinking if startup is fast
+   again:
+      if(Time.curTime()>=time)
+      {
+         if(pad.updating())Overlay("Updating Asset Packs\n\n");else
+         {
+            Str s="Downloading Asset Packs\n";
+            if(pad.total())s+=S+MB(pad.completed())+" / "+MB(pad.total())+" MB"; s+='\n';
+            if(pad.total())s+=S+pad.completed()*100/pad.total()+'%';
+            Overlay(s);
+         }
+      }
+      if(!Loop      ())Exit(); // destroy requested
+      if(!pad.update())goto again;
+      Overlay(S); // hide overlay
+      App.flag       =   app_flag;
+      App.active_wait=active_wait;
+      StateActive=active; StateNext=next;
    }
 }
 /******************************************************************************/
@@ -1134,6 +1372,9 @@ JNIEXPORT void JNICALL Java_com_esenthel_Native_resized  (JNIEnv *env, jclass cl
    if(l_size>=max_size)Kb._recti.set(       0,        0, l_size,      h);else // left   size is the biggest
                        Kb._recti.set(w-r_size,        0,      w,      h);     // right  size is the biggest
 }
+
+JNIEXPORT void JNICALL Java_com_esenthel_Native_deviceAdded  (JNIEnv *env, jclass clazz, jint device_id) {App._callbacks.add(DeviceAdded  , Ptr(device_id));} // may be called on a secondary thread
+JNIEXPORT void JNICALL Java_com_esenthel_Native_deviceRemoved(JNIEnv *env, jclass clazz, jint device_id) {App._callbacks.add(DeviceRemoved, Ptr(device_id));} // may be called on a secondary thread
 
 }
 /******************************************************************************/
@@ -1174,76 +1415,7 @@ void android_main(android_app *app)
    JavaLocation ();
    InitSensor   ();
    LOG("LoopStart");
-   for(;;)
-   {
-      VecI2 old_posi=Ms.desktopPos();
-
-      LOG2("ALooper_pollAll");
-
-      Bool wait_end_set=false; Int wait=(App.active() ? App.active_wait : 0); UInt wait_end; // don't wait for !active, because we already wait after the event loop, and that would make 2 waits
-
-      Int id, events; android_poll_source *source;
-   wait:
-      while((id=ALooper_pollAll(wait, null, &events, (void**)&source))>=0) // process all events, using negative 'wait' for 'ALooper_pollAll' means unlimited wait
-      {
-         LOG2(S+"ALooper Source:"+Ptr(source)+", id:"+id);
-         if(source)source->process(AndroidApp, source); // process this event
-         LOG2(S+"ALooper processed");
-
-         if(id==LOOPER_ID_USER) // sensor data
-         {
-            ASensorEvent event;
-         #if DEBUG
-            if(!SensorEventQueue)LOG("Received sensor event but the 'SensorEventQueue' is null");
-         #endif
-            while(ASensorEventQueue_getEvents(SensorEventQueue, &event, 1)>0)switch(event.type)
-            {
-               case ASENSOR_TYPE_ACCELEROMETER : AccelerometerValue.set(-event.acceleration.x, -event.acceleration.y,  event.acceleration.z); break;
-               case ASENSOR_TYPE_GYROSCOPE     :     GyroscopeValue.set( event.vector      .x,  event.vector      .y, -event.vector      .z); break;
-               case ASENSOR_TYPE_MAGNETIC_FIELD:  MagnetometerValue.set( event.magnetic    .x,  event.magnetic    .y, -event.magnetic    .z); break;
-            }
-         }
-
-         wait=0; // don't wait for next events, in case app 'activate' status changed or it was requested to be closed or destroyed
-         // no need to check for 'App._close' or 'AndroidApp->destroyRequested' here, because we will do it below since we're setting wait=0 we don't risk with unlimited waits
-      }
-      if(App._close) // first check if we want to close manually
-      {
-         App.del(); // manually call shut down
-         ExitNow(); // do complete reset (including state of global variables) by killing the process
-      }
-      if(AndroidApp->destroyRequested)break; // this is triggered by 'ANativeActivity_finish', just break out of the loop so app can get minimized
-      if(!App.active()) // we may need to wait
-         if(wait=((App.flag&APP_WORK_IN_BACKGROUND) ? App.background_wait : -1)) // how long
-      {
-         if(wait>0) // finite wait
-         {
-            if(wait_end_set) // if we already set the end time limit
-            {
-               wait=wait_end-Time.curTimeMs(); if(wait<=0)goto stop; // calculate remaining time
-            }else
-            {
-               wait_end=Time.curTimeMs()+wait;
-               wait_end_set=true;
-            }
-         }//else wait=-1; // use negative wait to force unlimited wait in 'ALooper_pollAll', no need for this, because 'wait' is already negative
-         goto wait;
-      }
-   stop:
-
-      // process input
-      Ms._delta_pixeli_clp= Ms. desktopPos()-old_posi;
-      Ms._delta_rel.x     = Ms._delta_pixeli_clp.x;
-      Ms._delta_rel.y     =-Ms._delta_pixeli_clp.y;
-
-      LOG2(S+"AndroidApp->window:"+(AndroidApp->window!=null));
-   #if DEBUG
-      if(!eglGetCurrentContext())LOG("No current EGL Context available on the main thread");
-   #endif
-      UpdateSize();
-      App.update();
-   }
-
+   for(; Loop(); );
    LOG("LoopEnd");
    KeyboardLoaded=false;
    ShutSensor(); // !! call before 'JavaShut' !!

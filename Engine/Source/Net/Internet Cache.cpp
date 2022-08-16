@@ -157,7 +157,7 @@ Bool InternetCache::busy()C
 }
 void InternetCache::enable()
 {
-   App._callbacks.include(ICUpdate, T);
+   App.includeFuncCall(ICUpdate, T);
 }
 void InternetCache::update()
 {

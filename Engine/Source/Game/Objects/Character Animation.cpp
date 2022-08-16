@@ -320,7 +320,9 @@ void Chr::updateAnimation()
          m.setRotate(v, head_neck_pitch).rotateZ(head_neck_roll);
          if(sac.neck>=0)skel.bones[sac.neck].orn*=m;
                         skel.bones[sac.head].orn*=m;
+                     #if HAS_ANIM_SKEL_ROT
                         skel.bones[sac.head].rot.axis.z-=anim.fly_strafe*anim.fly;
+                     #endif
       }
    }
 
@@ -346,6 +348,7 @@ void Chr::updateAnimation()
       }
 
       // adjust legs flying fake movement
+   #if HAS_ANIM_SKEL_ROT
       if(anim.fly>EPS_ANIM_BLEND)
       {
          Vec vec   =ctrl.actor.vel(); vec.y=-6;
@@ -367,6 +370,7 @@ void Chr::updateAnimation()
             }
          }
       }
+   #endif
    }
 
    // scale

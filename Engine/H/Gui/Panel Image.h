@@ -131,10 +131,10 @@ struct PanelImage
    void create(C PanelImageParams &params, Image *depth_map=null, Int super_sample=4, FILTER_TYPE filter=FILTER_BEST); // create 'PanelImage' from specified 'params', 'depth_map'=optional parameter allowing to obtain the depth map of the panel for debugging purposes, 'super_sample'=super sampling used for creating the Panel Image (higher value increases the quality of the image, but makes it slower to create it), 'filter'=filter used when down-sampling the super sampled image to normal size (unused when super sampling was not enabled)
 
    // get
-   Bool  extendedRect           (C Rect &rect, Rect &extended )C; // returns true if 'extended' is different than 'rect'
-   void  innerPadding           (C Rect &rect, Rect &padding  )C;                         // get         inner padding of 'rect' rectangle 'PanelImage'
- C Rect& defaultInnerPadding    (                             )C {return _inner_padding;} // get default inner padding
-   void  defaultInnerPaddingSize(              Vec2 &padd_size)C;
+   Bool  extendedRect           (C Rect &rect, Rect &extended)C; // returns true if 'extended' is different than 'rect'
+   void  innerPadding           (C Rect &rect, Rect &padding )C;                         // get         inner padding of 'rect' rectangle 'PanelImage'
+ C Rect& defaultInnerPadding    (                            )C {return _inner_padding;} // get default inner padding
+   Vec2  defaultInnerPaddingSize(                            )C;                         // get default inner padding size
 
    // draw
    void draw(                                    C Rect &rect)C; // draw at specified 'rect' screen rectangle
@@ -145,6 +145,7 @@ struct PanelImage
 
    void drawFrac        (C Color &color, C Color &color_add, C Rect &rect, Flt frac_x, Bool include_padding)C; // draw at specified 'rect' screen rectangle with custom colors and horizontally limited to 'frac_x' (0..1) fraction, 'include_padding'=if take padding into account when processing the fraction
    void drawVerticalFrac(C Color &color, C Color &color_add, C Rect &rect, Flt frac_y, Bool include_padding)C; // draw at specified 'rect' screen rectangle with custom colors and   vertically limited to 'frac_y' (0..1) fraction, 'include_padding'=if take padding into account when processing the fraction
+   void drawFrac2       (C Color &color, C Color &color_add, C Rect &rect, Flt frac_min_x, Flt frac_max_x  )C; // draw at specified 'rect' screen rectangle with custom colors and horizontally limited to 'frac_min_x'..'frac_max_x' (0..1) fraction
 
    void drawBaseLines   (C Color &line_color, C Rect &rect)C; // draw lines on unscaled image
    void drawScaledLines (C Color &line_color, C Rect &rect)C; // draw lines on   scaled image
@@ -161,6 +162,7 @@ struct PanelImage
 #if EE_PRIVATE
    void drawBorders         (C Color &color, C Color &color_add, C Rect &rect)C; // draw only borders
    Bool getSideScale        (C Rect &rect, Flt &scale)C;
+   Bool getSideScaleH       (  Flt   h   , Flt &scale)C;
    Bool getSideScaleVertical(C Rect &rect, Flt &scale)C;
    void zero();
 #else

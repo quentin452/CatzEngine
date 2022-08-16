@@ -13,13 +13,13 @@ enum BS_FLAG // Button State Flag
 #endif
 };
 SET_ENUM_FLAGS(BS_FLAG);
-inline Bool ButtonOn(BS_FLAG x) {return FlagTest(x, BS_ON      );} // if button is on
-inline Bool ButtonPd(BS_FLAG x) {return FlagTest(x, BS_PUSHED  );} // if button pushed
-inline Bool ButtonRs(BS_FLAG x) {return FlagTest(x, BS_RELEASED);} // if button released
-inline Bool ButtonDb(BS_FLAG x) {return FlagTest(x, BS_DOUBLE  );} // if button double clicked
-inline Bool ButtonTp(BS_FLAG x) {return FlagTest(x, BS_TAPPED  );} // if button tapped
+inline Bool ButtonOn(BS_FLAG x) {return FlagOn(x, BS_ON      );} // if button is on
+inline Bool ButtonPd(BS_FLAG x) {return FlagOn(x, BS_PUSHED  );} // if button pushed
+inline Bool ButtonRs(BS_FLAG x) {return FlagOn(x, BS_RELEASED);} // if button released
+inline Bool ButtonDb(BS_FLAG x) {return FlagOn(x, BS_DOUBLE  );} // if button double clicked
+inline Bool ButtonTp(BS_FLAG x) {return FlagOn(x, BS_TAPPED  );} // if button tapped
 #if EE_PRIVATE
-inline Bool ButtonRp(BS_FLAG x) {return FlagTest(x, BS_REPEAT  );} // if button repeat pushed
+inline Bool ButtonRp(BS_FLAG x) {return FlagOn(x, BS_REPEAT  );} // if button repeat pushed
 #endif
 /******************************************************************************/
 enum KB_KEY : Byte // Keyboard Keys

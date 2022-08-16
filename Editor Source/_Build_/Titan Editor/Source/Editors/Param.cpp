@@ -857,34 +857,34 @@ ObjClassEditor ObjClassEdit;
             Obj        &obj_full=Selection[0];
             EditObject &obj=obj_full.params;
             bool any_custom=(obj.access==OBJ_ACCESS_CUSTOM);
-            bool                                                                                mbase    =false; EditObjectPtr base    =obj.base      ;
-            bool oaccess  =FlagTest(obj.flag, EditObject::OVR_ACCESS        ), moaccess  =false, maccess  =false; OBJ_ACCESS    access  =obj.access    ;
-            bool otype    =FlagTest(obj.flag, EditObject::OVR_TYPE          ), motype    =false, mtype    =false; UID           type    =obj.type      ;
-            bool oconst   =FlagTest(obj.flag, EditObject::OVR_CONST         ), moconst   =false, mconst   =false; bool         bconst   =obj.constant();
-            bool opath    =FlagTest(obj.flag, EditObject::OVR_PATH          ), mopath    =false, mpath    =false; OBJ_PATH      path    =obj.path      ;
-            bool omesh_var=FlagTest(obj.flag, EditObject::OVR_MESH_VARIATION), momesh_var=false, mmesh_var=false; uint          mesh_var=obj.mesh_variation_id; cchar8 *mesh_var_name=obj_full.variationName();
-          //bool oscale   =FlagTest(obj.flag, OBJ_OVR_SCALE                ), moscale   =false, mscale   =false; Vec           scale   =obj.scale3  ()  ;
-          //bool omesh    =FlagTest(obj.flag, OBJ_OVR_MESH                 ), momesh    =false, mmesh    =false; Mesh         *mesh    =obj.mesh    ()();
-          //bool ophys    =FlagTest(obj.flag, OBJ_OVR_PHYS                 ), mophys    =false, mphys    =false; PhysBody     *phys    =obj.phys    ()();
-          //bool omtrl    =FlagTest(obj.flag, OBJ_OVR_MATERIAL             ), momtrl    =false, mmtrl    =false; Material     *material=obj.material()();
-          //bool oalign   =FlagTest(obj.flag, OBJ_OVR_ALIGN                ), moalign   =false, malign   =false; UInt          align   =(obj.alignX()|(obj.alignY()<<2)|(obj.alignZ()<<4));
+            bool                                                                              mbase    =false; EditObjectPtr base    =obj.base      ;
+            bool oaccess  =FlagOn(obj.flag, EditObject::OVR_ACCESS        ), moaccess  =false, maccess  =false; OBJ_ACCESS    access  =obj.access    ;
+            bool otype    =FlagOn(obj.flag, EditObject::OVR_TYPE          ), motype    =false, mtype    =false; UID           type    =obj.type      ;
+            bool oconst   =FlagOn(obj.flag, EditObject::OVR_CONST         ), moconst   =false, mconst   =false; bool         bconst   =obj.constant();
+            bool opath    =FlagOn(obj.flag, EditObject::OVR_PATH          ), mopath    =false, mpath    =false; OBJ_PATH      path    =obj.path      ;
+            bool omesh_var=FlagOn(obj.flag, EditObject::OVR_MESH_VARIATION), momesh_var=false, mmesh_var=false; uint          mesh_var=obj.mesh_variation_id; cchar8 *mesh_var_name=obj_full.variationName();
+          //bool oscale   =FlagOn(obj.flag, OBJ_OVR_SCALE                ), moscale   =false, mscale   =false; Vec           scale   =obj.scale3  ()  ;
+          //bool omesh    =FlagOn(obj.flag, OBJ_OVR_MESH                 ), momesh    =false, mmesh    =false; Mesh         *mesh    =obj.mesh    ()();
+          //bool ophys    =FlagOn(obj.flag, OBJ_OVR_PHYS                 ), mophys    =false, mphys    =false; PhysBody     *phys    =obj.phys    ()();
+          //bool omtrl    =FlagOn(obj.flag, OBJ_OVR_MATERIAL             ), momtrl    =false, mmtrl    =false; Material     *material=obj.material()();
+          //bool oalign   =FlagOn(obj.flag, OBJ_OVR_ALIGN                ), moalign   =false, malign   =false; UInt          align   =(obj.alignX()|(obj.alignY()<<2)|(obj.alignZ()<<4));
             REPA(Selection)
             {
                Obj        &obj_full=Selection[i];
                EditObject &obj=obj_full.params;
                if(obj.access==OBJ_ACCESS_CUSTOM)any_custom=true;
                                                                                                                    if(base    !=obj.base             )mbase    =true;
-               if(oaccess  !=FlagTest(obj.flag, EditObject::OVR_ACCESS        )){oaccess  =false; moaccess  =true;} if(access  !=obj.access           )maccess  =true;
-               if(otype    !=FlagTest(obj.flag, EditObject::OVR_TYPE          )){otype    =false; motype    =true;} if(type    !=obj.type             )mtype    =true;
-               if(oconst   !=FlagTest(obj.flag, EditObject::OVR_CONST         )){oconst   =false; moconst   =true;} if(bconst  !=obj.constant()       )mconst   =true;
-               if(opath    !=FlagTest(obj.flag, EditObject::OVR_PATH          )){opath    =false; mopath    =true;} if(path    !=obj.path             )mpath    =true;
-               if(omesh_var!=FlagTest(obj.flag, EditObject::OVR_MESH_VARIATION)){omesh_var=false; momesh_var=true;} if(mesh_var!=obj.mesh_variation_id && !Equal(mesh_var_name, obj_full.variationName()))mmesh_var=true;
-             //if(oscale   !=FlagTest(obj.flag, OBJ_OVR_SCALE                )){oscale   =false; moscale   =true;} if(!Equal(scale   , obj.scale3  () ))mscale =true;
-             //if(omesh    !=FlagTest(obj.flag, OBJ_OVR_MESH                 )){omesh    =false; momesh    =true;} if(       mesh    !=obj.mesh    ()())mmesh  =true;
-             //if(ophys    !=FlagTest(obj.flag, OBJ_OVR_PHYS                 )){ophys    =false; mophys    =true;} if(       phys    !=obj.phys    ()())mphys  =true;
-             //if(omtrl    !=FlagTest(obj.flag, OBJ_OVR_MATERIAL             )){omtrl    =false; momtrl    =true;} if(       material!=obj.material()())mmtrl  =true;
-             //if(oalign   !=FlagTest(obj.flag, OBJ_OVR_ALIGN                )){oalign   =false; moalign   =true;} if(       align   !=(obj.alignX()|(obj.alignY()<<2)|(obj.alignZ()<<4)))malign=true;
-             //                                                            force default |false| in above codes so next first click will toggle to true
+               if(oaccess  !=FlagOn(obj.flag, EditObject::OVR_ACCESS        )){oaccess  =false; moaccess  =true;} if(access  !=obj.access           )maccess  =true;
+               if(otype    !=FlagOn(obj.flag, EditObject::OVR_TYPE          )){otype    =false; motype    =true;} if(type    !=obj.type             )mtype    =true;
+               if(oconst   !=FlagOn(obj.flag, EditObject::OVR_CONST         )){oconst   =false; moconst   =true;} if(bconst  !=obj.constant()       )mconst   =true;
+               if(opath    !=FlagOn(obj.flag, EditObject::OVR_PATH          )){opath    =false; mopath    =true;} if(path    !=obj.path             )mpath    =true;
+               if(omesh_var!=FlagOn(obj.flag, EditObject::OVR_MESH_VARIATION)){omesh_var=false; momesh_var=true;} if(mesh_var!=obj.mesh_variation_id && !Equal(mesh_var_name, obj_full.variationName()))mmesh_var=true;
+             //if(oscale   !=FlagOn(obj.flag, OBJ_OVR_SCALE                )){oscale   =false; moscale   =true;} if(!Equal(scale   , obj.scale3  () ))mscale =true;
+             //if(omesh    !=FlagOn(obj.flag, OBJ_OVR_MESH                 )){omesh    =false; momesh    =true;} if(       mesh    !=obj.mesh    ()())mmesh  =true;
+             //if(ophys    !=FlagOn(obj.flag, OBJ_OVR_PHYS                 )){ophys    =false; mophys    =true;} if(       phys    !=obj.phys    ()())mphys  =true;
+             //if(omtrl    !=FlagOn(obj.flag, OBJ_OVR_MATERIAL             )){omtrl    =false; momtrl    =true;} if(       material!=obj.material()())mmtrl  =true;
+             //if(oalign   !=FlagOn(obj.flag, OBJ_OVR_ALIGN                )){oalign   =false; moalign   =true;} if(       align   !=(obj.alignX()|(obj.alignY()<<2)|(obj.alignZ()<<4)))malign=true;
+             //                                                          force default |false| in above codes so next first click will toggle to true
             }
                                                                                                                           T.t_obj     .set     (mbase ? MultipleName : Proj.elmFullName(base.id()), QUIET);
             T.o_const   .set(oconst          , QUIET); if(moconst           )T.o_const   .setMulti(); if(mconst          )T.v_const   .setMulti(                         );else T.v_const.set(bconst, QUIET); T.o_const.visible(any_custom); T.v_const.visible(any_custom);
@@ -910,10 +910,10 @@ ObjClassEditor ObjClassEdit;
          if(base && base->type==ELM_OBJ           )v_class.setText(Proj.elmFullName(base)  , true, QUIET);else
          if(base && base->type==ELM_OBJ_CLASS     )v_class.setText(base->name               , true, QUIET);else
          if(InRange(p->access, ObjAccessNamesElms))v_class.setText(ObjAccessNames[p->access], true, QUIET);else v_class.set(-1, QUIET);
-         o_const      .set(FlagTest(p->flag, EditObject::OVR_CONST         ), QUIET).visible(p->access==OBJ_ACCESS_CUSTOM); v_const.set(p->constant(), QUIET).visible(p->access==OBJ_ACCESS_CUSTOM);
-         o_path       .set(FlagTest(p->flag, EditObject::OVR_PATH          ), QUIET); v_path.set(p->path, QUIET);
+         o_const      .set(FlagOn(p->flag, EditObject::OVR_CONST         ), QUIET).visible(p->access==OBJ_ACCESS_CUSTOM); v_const.set(p->constant(), QUIET).visible(p->access==OBJ_ACCESS_CUSTOM);
+         o_path       .set(FlagOn(p->flag, EditObject::OVR_PATH          ), QUIET); v_path.set(p->path, QUIET);
          v_editor_type.set(Max(0, EditObjType.find(p->editor_type)), QUIET); // if not found then default to 0, hence "Max(0, -1)" -> 0
-         o_mesh_var   .set(FlagTest(p->flag, EditObject::OVR_MESH_VARIATION), QUIET); toGuiMeshVariation(p->mesh_variation_id);
+         o_mesh_var   .set(FlagOn(p->flag, EditObject::OVR_MESH_VARIATION), QUIET); toGuiMeshVariation(p->mesh_variation_id);
       }
       if(params)param_window.toGui();
    }

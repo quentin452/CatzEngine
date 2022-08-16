@@ -264,7 +264,7 @@ StoreClass AppStore;
             "10. These terms may change from time to time, failure to accept the new changes will result in your items being no longer available for sale to new customers (old customers can still access their purchased items according to the old terms)\n"
             "11. Esenthel Store operators offer no warranty in regards to the Store itself (for example if the Store becomes unavailable; your items disappear from the Store listing; by some technical error they would get accessible for free or at a different price that you've specified - the issues will try to be fixed ASAP, however you're not entitled to any refund/compensation and you will not take any legal action against the Esenthel Staff)\n"
             "12. Items are by default sold to Users with the Terms listed on Esenthel Store Login Screen, if you wish however to specify your own Terms of Use for the items that you submit, you need to include them in the Item Description visible on the Item Page in Esenthel Store, so the users can read the Terms before they make the purchase."
-            , &ts); terms.auto_line=AUTO_LINE_SPACE_SPLIT;
+            , &ts); terms.auto_line=true;
          T+=t_name.create("Item Name"); T+=name.create().maxLength(128);
          T+=b_create.create("Create").func(Create, T);
          return T;
@@ -345,7 +345,7 @@ StoreClass AppStore;
             super ::create(Rect_C(pos, 0.9f, 0.4f), "Log In").hide(); button[2].show();
          T+=yes   .create(Rect_C(clientWidth()*1/4, -clientHeight()+0.08f, 0.25f, 0.055f), "Yes"   ).func(Yes   , T);
          T+=cancel.create(Rect_C(clientWidth()*3/4, -clientHeight()+0.08f, 0.25f, 0.055f), "Cancel").func(Cancel, T);
-         T+=text  .create(Rect(0, yes.rect().max.y, clientWidth(), 0).extend(-0.05f)); text.auto_line=AUTO_LINE_SPACE_SPLIT;
+         T+=text  .create(Rect(0, yes.rect().max.y, clientWidth(), 0).extend(-0.05f)); text.auto_line=true;
          return T;
       }
       ::StoreClass::Register& StoreClass::Register::activate()
@@ -374,7 +374,7 @@ StoreClass AppStore;
             super  ::create(Rect_LU(0, 0, 0.9f, 0.22f), "Edit PayPal").barVisible(false).hide(); button[2].show(); FlagDisable(flag, WIN_MOVABLE);
          T+=paypal .create(Rect_L(0.03f, -clientHeight()+0.05f, 0.53f, 0.055f));
          T+=confirm.create(Rect  (paypal.rect().max.x+0.01f, paypal.rect().min.y, clientWidth()-0.03f, paypal.rect().max.y), "Confirm").func(Confirm, T);
-         T+=text   .create(Rect(0, confirm.rect().max.y, clientWidth(), 0).extend(-0.03f), "Please confirm your PayPal email address.\nIf you type it wrong you will not be able to receive payments !!", &ts); text.auto_line=AUTO_LINE_SPACE_SPLIT;
+         T+=text   .create(Rect(0, confirm.rect().max.y, clientWidth(), 0).extend(-0.03f), "Please confirm your PayPal email address.\nIf you type it wrong you will not be able to receive payments !!", &ts); text.auto_line=true;
          return T;
       }
       void StoreClass::ConfirmPayPal::setPos()
@@ -403,7 +403,7 @@ StoreClass AppStore;
          ts.reset().size=0.04f; ts.align.set(1, 0);
          super::create(Rect_C(pos, 1.32f, 0.30f), "Seller").barVisible(false).hide(); button[2].show();
          T+=engine_license.create(Rect_C(clientWidth()/2, -clientHeight()+0.06f, 0.5f, 0.055f), "Buy Engine License").func(EngineLicense, T);
-         T+=text          .create(Rect(0, engine_license.rect().max.y, clientWidth(), 0).extend(-0.05f), "In order to sell your own items in Esenthel Store you need to be a Licensed Developer (have an Engine License).\nOnce you're a Licensed Developer, you will be able to submit your own items to Esenthel Store and gain income from their sales.", &ts); text.auto_line=AUTO_LINE_SPACE_SPLIT;
+         T+=text          .create(Rect(0, engine_license.rect().max.y, clientWidth(), 0).extend(-0.05f), "In order to sell your own items in Esenthel Store you need to be a Licensed Developer (have an Engine License).\nOnce you're a Licensed Developer, you will be able to submit your own items to Esenthel Store and gain income from their sales.", &ts); text.auto_line=true;
          return T;
       }
       void StoreClass::Contribute::Buy(Contribute &contr)
@@ -422,7 +422,7 @@ StoreClass AppStore;
          ts.reset().size=0.045f;
          T+=amount    .create(Rect_C(clientWidth()*1/4, -clientHeight()+0.05f, 0.25f, 0.055f)).maxLength(32);
          T+=contribute.create(Rect_C(clientWidth()*3/4, -clientHeight()+0.05f, 0.25f, 0.055f), "Contribute").func(Buy, T);
-         T+=text.create(Rect(0, amount.pos().y, clientWidth(), 0).extend(-0.05f), "Please enter the amount of USD which you'd like to contribute", &ts); text.auto_line=AUTO_LINE_SPACE_SPLIT;
+         T+=text.create(Rect(0, amount.pos().y, clientWidth(), 0).extend(-0.05f), "Please enter the amount of USD which you'd like to contribute", &ts); text.auto_line=true;
          return T;
       }
       void StoreClass::Contribute::update(C GuiPC &gpc)
@@ -470,8 +470,8 @@ StoreClass AppStore;
                      rect.max+=padd.min; rect.max.y=rect.min.y-padd.min.y-padd.max.y;
                      D.clip(clip&rect);
                      rect.extendX(zoom()*-0.006f);
-                                        D.text(ts      , rect, item->name      , AUTO_LINE_SPACE_SPLIT);
-                     if(!item->purchased)D.text(ts_small, rect, item->price_text, AUTO_LINE_SPACE_SPLIT);else AppStore.ok_image->drawFit(Rect_RD(rect.rd(), 0.08f*zoom()));
+                                        D.text(ts      , rect, item->name      , null, 0, true);
+                     if(!item->purchased)D.text(ts_small, rect, item->price_text, null, 0, true);else AppStore.ok_image->drawFit(Rect_RD(rect.rd(), 0.08f*zoom()));
                   }
                }
             }
@@ -579,13 +579,13 @@ StoreClass AppStore;
                   if(SafeOverwrite(src, dest))
                   {
                      open.show(); cancel.text="Close"; if(GetExt(file)==ProjectPackageExt)import.show();
-                     text.set(S+"Done ("+FileSize(down.totalSize())+")");
+                     text.set(S+"Done ("+SizeBytes(down.totalSize())+")");
                   }else text.set("Failed to save file");
                   progress.set(1);
                 //flash();
                }
             }break;
-            case DWNL_DOWNLOAD: {long done=file_done.size()+down.done(); text.set(FileSize(done)+" / "+(down.totalSize()>=0 ? FileSize(down.totalSize()) : S+"?")); progress.set(done, down.totalSize());} break;
+            case DWNL_DOWNLOAD: {long done=file_done.size()+down.done(); text.set(SizeBytes(done)+" / "+(down.totalSize()>=0 ? SizeBytes(down.totalSize()) : S+"?")); progress.set(done, down.totalSize());} break;
             case DWNL_ERROR   : if(down.done())retry.show(); text.set("Error occured"); break; // if downloaded anything
             default           : text.set("Connecting"); break;
          }
@@ -674,7 +674,7 @@ StoreClass AppStore;
       ::StoreClass::RemoveFile& StoreClass::RemoveFile::create(C Vec2 &pos)
       {
              super::create(Rect_C(pos, 0.72f, 0.32f), "Remove File").hide(); button[2].show();
-         T+=t_name.create(Rect_C(clientWidth()/2, -0.09f, 0.7f, 0.0f), "Are you sure you wish to remove selected file?"); t_name.auto_line=AUTO_LINE_SPACE_SPLIT;
+         T+=t_name.create(Rect_C(clientWidth()/2, -0.09f, 0.7f, 0.0f), "Are you sure you wish to remove selected file?"); t_name.auto_line=true;
          T+=    ok.create(Rect_C(clientWidth()/2, -0.20f, 0.3f, 0.06f), "OK").func(OK, T);
          return T;
       }
@@ -696,7 +696,7 @@ StoreClass AppStore;
       {
            super::create(Rect_C(pos, 1.00f, 0.35f), "Confirm Publishing").hide(); button[2].show();
          T+=ok  .create(Rect_C(clientWidth()/2, -clientHeight()+0.07f, 0.3f, 0.06f), "OK").func(OK, T);
-         T+=text.create(Rect(0, ok.rect().max.y, clientWidth(), 0).extend(-0.05f), "You haven't specified the price for your item.\nAre you sure you wish to publish it for free?"); text.auto_line=AUTO_LINE_SPACE_SPLIT;
+         T+=text.create(Rect(0, ok.rect().max.y, clientWidth(), 0).extend(-0.05f), "You haven't specified the price for your item.\nAre you sure you wish to publish it for free?"); text.auto_line=true;
          return T;
       }
       void StoreClass::Upload::Cancel(Upload &up) {AppStore.store_uploads.removeData(&up);}
@@ -730,7 +730,7 @@ StoreClass AppStore;
       void StoreClass::Upload::update()
       {
          long sent=T.sent+down.sent(), size=src.size();
-         text.set(display+"("+FileSize(sent)+" / "+FileSize(size)+")");
+         text.set(display+"("+SizeBytes(sent)+" / "+SizeBytes(size)+")");
          progress.set(sent, size);
          visible(item_id==AppStore.cur_item);
       }
@@ -778,7 +778,7 @@ StoreClass AppStore;
             if(editable && !image)
             {
                TextStyleParams ts(true); ts.size=0.04f; ts.color.a=128;
-               D.text(ts, rect()+gpc.offset, "Drag and drop an image here", AUTO_LINE_SPACE_SPLIT);
+               D.text(ts, rect()+gpc.offset, "Drag and drop an image here", null, 0, true);
             }
             if(rect_color.a)r.draw(rect_color, false);
          }
@@ -1096,7 +1096,7 @@ StoreClass AppStore;
       mode.tab(1)+=  item_cid  .create().func(ItemCID, T).desc("Toggle if users are allowed to set Computer ID for their license keys of this item");
       mode.tab(1)+=  item_publish.create("PUBLISH").func(ItemPublish, T).desc("Any changes that you've made are just temporary, and they are not yet visible publicly.\nAfter you click this button, the item will be marked as ready for publishing.\nIt will be verified by Esenthel Staff within a few days.\nIf everything will be okay, it will automatically become available for sale with all the changes that you've made."); item_publish.mode=BUTTON_TOGGLE;
       mode.tab(1)+=  item_desc_region.create();
-      item_desc_region+=t_item_desc.create(Vec2(0.01f, -0.00f), S, &ts_desc); t_item_desc.auto_line=AUTO_LINE_SPACE_SPLIT;
+      item_desc_region+=t_item_desc.create(Vec2(0.01f, -0.00f), S, &ts_desc); t_item_desc.auto_line=true;
       mode.tab(1)+=item_tabs.create(item_t, Elms(item_t)).valid(true).set(0);
       FREPA(item_images)item_tabs.tab(0)+=item_images[i].create(true);
       mode.tab(1)+=buy.create().func(Buy, T);
@@ -1191,11 +1191,11 @@ StoreClass AppStore;
       if(TextStyle *ts=t_item_desc.getTextStyle())
       {
          Vec2 size=item_desc_region.size()-t_item_desc.pos()*Vec2(1, -1);
-         flt  h   =ts->textLines(t_item_desc(), size.x, t_item_desc.auto_line)*ts->lineHeight();
+         flt  h   =ts->textLines(t_item_desc.text, t_item_desc.extra.data(), t_item_desc.extra.elms(), size.x, t_item_desc.auto_line)*ts->lineHeight();
          if(h>size.y)
          {
             size.x-=item_desc_region.slidebarSize();
-            size.y =ts->textLines(t_item_desc(), size.x, t_item_desc.auto_line)*ts->lineHeight();
+            size.y =ts->textLines(t_item_desc.text, t_item_desc.extra.data(), t_item_desc.extra.elms(), size.x, t_item_desc.auto_line)*ts->lineHeight();
          }else size.y=h;
          t_item_desc.size(size);
       }
@@ -1442,7 +1442,7 @@ StoreClass AppStore;
                                       upload.params.New().set("item_file_file", file_file);
                                       upload.params.New().set("item_file_name", file_name);
                         upload.transfer();
-                     }else Gui.msgBox(S, S+"File size "+FileSize(src.size())+" exceeds "+FileSize(EsenthelStoreMaxFileSize)+" limit");
+                     }else Gui.msgBox(S, S+"File size "+SizeBytes(src.size())+" exceeds "+SizeBytes(EsenthelStoreMaxFileSize)+" limit");
                   }else Gui.msgBox(S, S+"Can't read file \""+name+"\"");
                }
             }
@@ -1472,7 +1472,7 @@ StoreClass AppStore;
                         Swap(src, upload.src);
                         Memt<HTTPParam> params; setUserParams(params, "set_item_icon"); params.New().set("i", S+cur_item); params.New().set("item_icon", ext);
                         upload.down.create(EsenthelStoreURL, params, &upload.src);
-                     }else Gui.msgBox(S, S+"File size "+FileSize(src.size())+" exceeds "+FileSize(EsenthelStoreMaxIconSize)+" limit");
+                     }else Gui.msgBox(S, S+"File size "+SizeBytes(src.size())+" exceeds "+SizeBytes(EsenthelStoreMaxIconSize)+" limit");
                   }else Gui.msgBox(S, S+"Couldn't import image \""+name+"\"");
                   break;
                }
@@ -1506,7 +1506,7 @@ StoreClass AppStore;
                         Swap(src, upload.src);
                         Memt<HTTPParam> params; setUserParams(params, "set_item_image"); params.New().set("i", S+cur_item); params.New().set("item_image_index", S+image_index); params.New().set("item_image_status", ext);
                         upload.down.create(EsenthelStoreURL, params, &upload.src);
-                     }else Gui.msgBox(S, S+"File size "+FileSize(src.size())+" exceeds "+FileSize(EsenthelStoreMaxImageSize)+" limit");
+                     }else Gui.msgBox(S, S+"File size "+SizeBytes(src.size())+" exceeds "+SizeBytes(EsenthelStoreMaxImageSize)+" limit");
                   }else Gui.msgBox(S, S+"Couldn't import image \""+name+"\"");
                   break;
                }

@@ -210,7 +210,6 @@ class PropEx;
 class PropExs;
 class PropWin;
 class PublishClass;
-class PublishPVRTC;
 class PublishResult;
 class RayTest;
 class RegisterWin;
@@ -402,7 +401,7 @@ enum CLIENT_SERVER_COMMANDS
    CS_RENAME_ELM,
    CS_SET_ELM_PARENT,
    CS_REMOVE_ELMS,
-   CS_NO_PUBLISH_ELMS,
+   CS_PUBLISH_ELMS,
    CS_GET_ELM_NAMES,
 
    CS_GET_TEXTURES,
@@ -624,6 +623,13 @@ enum OP_OBJ_MODE
    OP_OBJ_SET_GROUP,
 };
 /******************************************************************************/
+enum PROJ_CMPR_PLATFORM : byte
+{
+   PCP_DEFAULT,
+   PCP_MOBILE ,
+   PCP_NUM    ,
+};
+/******************************************************************************/
 enum PUBLISH_STAGE
 {
    PUBLISH_MTRL_SIMPLIFY,
@@ -643,6 +649,13 @@ enum SAVE_MODE
 {
    SAVE_DEFAULT, // default save
    SAVE_AUTO   , //    auto-save
+};
+/******************************************************************************/
+enum TEX_SIZE_PLATFORM : byte
+{
+   TSP_MOBILE,
+   TSP_SWITCH,
+   TSP_NUM   ,
 };
 /******************************************************************************/
 enum UNIT_TYPE
@@ -674,12 +687,12 @@ enum VIEW_MODE
 /******************************************************************************/
 // CONSTANTS
 /******************************************************************************/
-const int  APP_BUILD        =71;
+const int  APP_BUILD        =72;
 const int           ForceInstaller=-2, // -2=disable and don't update, -1=disable, 0=auto, 1=enable (this is used only in Debug)
                     HeightBrushNoiseRes=256,
                     MtrlBrushSlots=14,
                     MaxVisibleRadius=(X64 ? 20 : 15),
-                    MaxMaterialDownsize=3, // 0=full, 1=half, 2=quarter
+                    MaxMaterialDownsize=4, // 0=full, 1=half, 2=quarter, 3=eighth
                     ClientSendBufSize=3*1024*1024, // 3 MB
                     ServerSendBufSize=2*1024*1024, // 2 MB
                     InvalidCoordinate=SIGN_BIT,
@@ -699,8 +712,8 @@ const int           ForceInstaller=-2, // -2=disable and don't update, -1=disabl
                     MeshSplitMinVtxs=12000, // min number of vertexes in a mesh to split it
                     MeshSplitMinSize=4;
 const uint          NewElmTime=1;
-const uint ProjectVersion     =89, // !! increase this by one if any of engine/editor asset formats have changed !!
-           ClientServerVersion=89;
+const uint ProjectVersion     =98, // !! increase this by one if any of engine/editor asset formats have changed !!
+           ClientServerVersion=98;
 const int           ServerNetworkCompressionLevel=9           , ClientNetworkCompressionLevel=9            , ProjectPackageCompressionLevel=9;
 /******************************************************************************/
 // TYPEDEFS
@@ -749,7 +762,6 @@ ASSERT(OBJ_ACCESS_CUSTOM==0 && OBJ_ACCESS_TERRAIN==1 && OBJ_ACCESS_GRASS==2 && O
 #include "@RegisterWin.h"
 #include "@RayTest.h"
 #include "@PublishResult.h"
-#include "@PublishPVRTC.h"
 #include "@PropExs.h"
 #include "@ProjectUpdate.h"
 #include "@ProjectLocked.h"
@@ -838,10 +850,9 @@ ASSERT(OBJ_ACCESS_CUSTOM==0 && OBJ_ACCESS_TERRAIN==1 && OBJ_ACCESS_GRASS==2 && O
 #include "@AreaVer.h"
 #include "@AreaSync.h"
 #include "@AreaBuild.h"
-#include "@TextWhite.h"
 #include "@Project.h"
 #include "@GuiEditParam.h"
-#include "@GroupRegion.h"
+#include "@TextWhite.h"
 #include "@ViewportSkin.h"
 #include "@PathProps.h"
 #include "@ElmWorld.h"
@@ -856,7 +867,6 @@ ASSERT(OBJ_ACCESS_CUSTOM==0 && OBJ_ACCESS_TERRAIN==1 && OBJ_ACCESS_GRASS==2 && O
 #include "@ElmPanel.h"
 #include "@ElmObjClass.h"
 #include "@ElmObj.h"
-#include "@TextBlack.h"
 #include "@ElmMiniMap.h"
 #include "@ElmMesh.h"
 #include "@ElmMaterial.h"
@@ -870,10 +880,11 @@ ASSERT(OBJ_ACCESS_CUSTOM==0 && OBJ_ACCESS_TERRAIN==1 && OBJ_ACCESS_GRASS==2 && O
 #include "@ElmFile.h"
 #include "@ElmEnv.h"
 #include "@ElmEnum.h"
-#include "@WorldChange.h"
+#include "@TextBlack.h"
 #include "@ElmCodeData.h"
 #include "@ObjScale.h"
 #include "@ObjRot.h"
+#include "@WorldChange.h"
 #include "@ObjPos.h"
 #include "@ObjListClass.h"
 #include "@ObjData.h"
@@ -882,24 +893,23 @@ ASSERT(OBJ_ACCESS_CUSTOM==0 && OBJ_ACCESS_TERRAIN==1 && OBJ_ACCESS_GRASS==2 && O
 #include "@NewLodClass.h"
 #include "@EditWaterMtrl.h"
 #include "@StoreClass.h"
-#include "@WaypointPos.h"
 #include "@MiscRegion.h"
-#include "@TransformRegion.h"
+#include "@WaypointPos.h"
 #include "@MeshAOClass.h"
 #include "@MaterialRegion.h"
-#include "@WaterVer.h"
+#include "@TransformRegion.h"
 #include "@LodRegion.h"
 #include "@PublishClass.h"
 #include "@LeafRegion.h"
 #include "@PropWin.h"
-#include "@TheaterClass.h"
+#include "@WaterVer.h"
 #include "@PropEx.h"
 #include "@ImportTerrainClass.h"
 #include "@ImporterClass.h"
-#include "@SizeStatistics.h"
+#include "@TheaterClass.h"
 #include "@ProjectSettings.h"
 #include "@Projects.h"
-#include "@SetMtrlColorClass.h"
+#include "@SizeStatistics.h"
 #include "@BrushClass.h"
 #include "@ImageEditor.h"
 #include "@ProjectHierarchy.h"
@@ -909,40 +919,42 @@ ASSERT(OBJ_ACCESS_CUSTOM==0 && OBJ_ACCESS_TERRAIN==1 && OBJ_ACCESS_GRASS==2 && O
 #include "@AppPropsEditor.h"
 #include "@AnimEditor.h"
 #include "@AdjustBoneOrns.h"
-#include "@ElmProperties.h"
+#include "@ParamEditor.h"
+#include "@RemoveProjWin.h"
+#include "@PanelImageEditor.h"
+#include "@GroupRegion.h"
 #include "@MiniMapEditor.h"
 #include "@SoundEditor.h"
-#include "@TextureDownsize.h"
-#include "@IconSettings.h"
+#include "@GridPlaneLevel.h"
 #include "@MergeSimilarMaterials.h"
-#include "@TextStyleEditor.h"
-#include "@EnvEditor.h"
-#include "@EnumEditor.h"
-#include "@PhysMtrlEditor.h"
+#include "@ElmProperties.h"
+#include "@FontEditor.h"
+#include "@WaterMtrlRegion.h"
 #include "@DetectSimilarTextures.h"
-#include "@PanelEditor.h"
+#include "@TextureDownsize.h"
 #include "@CreateMaterials.h"
 #include "@CopyElements.h"
 #include "@ConvertToDeAtlasClass.h"
 #include "@ConvertToAtlasClass.h"
 #include "@CompareProjects.h"
-#include "@GuiView.h"
-#include "@RenameProjWin.h"
-#include "@GuiSkinEditor.h"
+#include "@SetMtrlColorClass.h"
+#include "@EnvEditor.h"
+#include "@EnumEditor.h"
+#include "@PanelEditor.h"
+#include "@TextStyleEditor.h"
 #include "@ObjPaintClass.h"
-#include "@VideoOptions.h"
-#include "@IconSettsEditor.h"
-#include "@ParamEditor.h"
-#include "@VideoEditor.h"
-#include "@PanelImageEditor.h"
-#include "@GridPlaneLevel.h"
-#include "@MulSoundVolumeClass.h"
-#include "@WaterMtrlRegion.h"
-#include "@RemoveProjWin.h"
-#include "@FontEditor.h"
-#include "@WorldView.h"
-#include "@ObjView.h"
+#include "@PhysMtrlEditor.h"
+#include "@RenameProjWin.h"
 #include "@ObjClassEditor.h"
+#include "@ObjView.h"
+#include "@GuiView.h"
+#include "@VideoOptions.h"
+#include "@GuiSkinEditor.h"
+#include "@IconSettings.h"
+#include "@VideoEditor.h"
+#include "@MulSoundVolumeClass.h"
+#include "@IconSettsEditor.h"
+#include "@WorldView.h"
 #include "@IconEditor.h"
 #include "@WorldBrushClass.h"
 /******************************************************************************/

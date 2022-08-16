@@ -110,7 +110,7 @@ void UpdateButtonState(BS_FLAG *dest, byte *on, int num)
 {
    REP(num)
    {
-      bool last=FlagTest(*dest, BS_ON);
+      bool last=FlagOn(*dest, BS_ON);
      *dest++=(*on++ ? (BS_ON|(last?BS_NONE:BS_PUSHED)) : (last?BS_RELEASED:BS_NONE));
    }
 }

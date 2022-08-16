@@ -502,8 +502,8 @@ ConvertToDeAtlas.drag(elms, obj, screen_pos);
       }
    }
    void NewWorldClass::OK(NewWorldClass &nw) {Proj.newWorld(nw.name(), nw.areaSize(), nw.heightmapRes(), nw.parent_id, true); HideProjAct(nw);}
-   int      NewWorldClass::areaSize() {return TextInt(     area_size.text());}
-   int NewWorldClass::heightmapRes() {return TextInt(heightmap_res .text());}
+   int      NewWorldClass::areaSize() {return TextInt(     area_size.text);}
+   int NewWorldClass::heightmapRes() {return TextInt(heightmap_res .text);}
    void NewWorldClass::create()
    {
       static cchar8 *area_siz[]=
@@ -734,12 +734,12 @@ ConvertToDeAtlas.drag(elms, obj, screen_pos);
          {
             if(elm->type==ELM_ANIM)
             {
-               if(set_start_frame())files[0].getParam("start_frame").value=start_frame();
-               if(set_end_frame  ())files[0].getParam(  "end_frame").value=  end_frame();
-               if(set_speed      ())files[0].getParam("speed"      ).value=speed      ();
-               if(set_optimize   ())files[0].getParam("optimize"   ).value=optimize   ();
-               if(mirror         ())files[0].getParam("mirror"     ); // uses 'TextBool1' so no need to specify =1
-               if(del_end_keys   ())files[0].getParam("delEndKeys" ); // uses 'TextBool1' so no need to specify =1
+               if(set_start_frame())files[0].getParam("startFrame").value=start_frame();
+               if(set_end_frame  ())files[0].getParam(  "endFrame").value=  end_frame();
+               if(set_speed      ())files[0].getParam("speed"     ).value=speed      ();
+               if(set_optimize   ())files[0].getParam("optimize"  ).value=optimize   ();
+               if(mirror         ())files[0].getParam("mirror"    ); // uses 'TextBool1' so no need to specify =1
+               if(del_end_keys   ())files[0].getParam("delEndKeys"); // uses 'TextBool1' so no need to specify =1
             }
             if(elm->type==ELM_ANIM || elm->type==ELM_MTRL)
             {
@@ -778,13 +778,13 @@ ConvertToDeAtlas.drag(elms, obj, screen_pos);
                T+=set_start_frame; T+=set_end_frame; T+=set_speed; T+=set_optimize; T+=mirror; T+=del_end_keys; T+=start_frame; T+=end_frame; T+=speed; T+=optimize;
                if(files.elms())
                {
-                C TextParam *start_frame =files[0].findParam("start_frame"); set_start_frame.set(start_frame!=null); T.start_frame .set(start_frame  ? start_frame ->value     : S    ); files[0].params.removeData(start_frame );
-                C TextParam *  end_frame =files[0].findParam(  "end_frame"); set_end_frame  .set(  end_frame!=null); T.  end_frame .set(  end_frame  ?   end_frame ->value     : S    ); files[0].params.removeData(  end_frame );
-                C TextParam *speed       =files[0].findParam("speed"      ); set_speed      .set(speed      !=null); T.speed       .set(speed        ? speed       ->value     : S+"1"); files[0].params.removeData(speed       );
-                C TextParam *optimize    =files[0].findParam("optimize"   ); set_optimize   .set(optimize   !=null); T.optimize    .set(optimize     ? optimize    ->value     : S+"1"); files[0].params.removeData(optimize    );
-                C TextParam *name        =files[0].findParam("name"       );                                         T.name        .set(name         ? name        ->value     : S    ); files[0].params.removeData(name        );
-                C TextParam *mirror      =files[0].findParam("mirror"     );                                         T.mirror      .set(mirror       ? mirror      ->asBool1() : false); files[0].params.removeData(mirror      );
-                C TextParam *del_end_keys=files[0].findParam("delEndKeys" );                                         T.del_end_keys.set(del_end_keys ? del_end_keys->asBool1() : false); files[0].params.removeData(del_end_keys);
+                C TextParam *start_frame =files[0].findParam("startFrame"); set_start_frame.set(start_frame!=null); T.start_frame .set(start_frame  ? start_frame ->value     : S    ); files[0].params.removeData(start_frame );
+                C TextParam *  end_frame =files[0].findParam(  "endFrame"); set_end_frame  .set(  end_frame!=null); T.  end_frame .set(  end_frame  ?   end_frame ->value     : S    ); files[0].params.removeData(  end_frame );
+                C TextParam *speed       =files[0].findParam("speed"     ); set_speed      .set(speed      !=null); T.speed       .set(speed        ? speed       ->value     : S+"1"); files[0].params.removeData(speed       );
+                C TextParam *optimize    =files[0].findParam("optimize"  ); set_optimize   .set(optimize   !=null); T.optimize    .set(optimize     ? optimize    ->value     : S+"1"); files[0].params.removeData(optimize    );
+                C TextParam *name        =files[0].findParam("name"      );                                         T.name        .set(name         ? name        ->value     : S    ); files[0].params.removeData(name        );
+                C TextParam *mirror      =files[0].findParam("mirror"    );                                         T.mirror      .set(mirror       ? mirror      ->asBool1() : false); files[0].params.removeData(mirror      );
+                C TextParam *del_end_keys=files[0].findParam("delEndKeys");                                         T.del_end_keys.set(del_end_keys ? del_end_keys->asBool1() : false); files[0].params.removeData(del_end_keys);
                }
             }break;
 
@@ -962,7 +962,7 @@ set_optimize      .create(Rect_L(0.98f, -0.328f, 0.25f, 0.0475f), "Set Optimize"
    void EraseRemovedElms::create()
    {
       Gui+=super ::create(Rect_C(0, 0, 1.44f, 1.5f), "Erase Removed Elements").hide(); button[2].func(HideProjAct, SCAST(GuiObj, T)).show();
-      T  +=text  .create(Rect_C(clientWidth()/2  , -0.15f, clientWidth()-0.05f, 0.1f), "Are you sure you wish to erase all removed elements from the project?\nWarning: This operation cannot be undone!\n\nThis will remove files only from the local computer - when connected to server it will redownload the elements."); text.auto_line=AUTO_LINE_SPACE_SPLIT;
+      T  +=text  .create(Rect_C(clientWidth()/2  , -0.15f, clientWidth()-0.05f, 0.1f), "Are you sure you wish to erase all removed elements from the project?\nWarning: This operation cannot be undone!\n\nThis will remove files only from the local computer - when connected to server it will redownload the elements."); text.auto_line=true;
       T  +=ok    .create(Rect_C(clientWidth()*1/4, -0.34f, 0.27f, 0.07f), "OK"    ).func(OK         ,               T ).focusable(false);
       T  +=full  .create(Rect_C(clientWidth()*2/4, -0.34f, 0.27f, 0.07f), "Full"  ).func(Full       ,               T ).focusable(false).desc("This is slower but it may remove more useless files");
       T  +=cancel.create(Rect_C(clientWidth()*3/4, -0.34f, 0.27f, 0.07f), "Cancel").func(HideProjAct, SCAST(GuiObj, T)).focusable(false);
@@ -1005,12 +1005,12 @@ set_optimize      .create(Rect_L(0.98f, -0.328f, 0.25f, 0.0475f), "Set Optimize"
    {
       T.proj_id=proj_id;
       Gui+=super ::create(Rect_C(0, 0, 1.59f, 0.38f), "Project Already Opened"); button[2].show();
-      T  +=text  .create(Rect_C(clientWidth()/2  , -0.10f, clientWidth()-0.08f, 0.1f), "This project appears to be already opened in another instance of the Editor.\nOpening the same project in multiple instances of the Editor may corrupt its data.\nWould you like to open it anyway?"); text.auto_line=AUTO_LINE_SPACE_SPLIT;
+      T  +=text  .create(Rect_C(clientWidth()/2  , -0.10f, clientWidth()-0.08f, 0.1f), "This project appears to be already opened in another instance of the Editor.\nOpening the same project in multiple instances of the Editor may corrupt its data.\nWould you like to open it anyway?"); text.auto_line=true;
       T  +=ok    .create(Rect_C(clientWidth()*1/3, -0.25f, 0.29f, 0.07f), "OK"    ).func(OK  ,               T ).focusable(false);
       T  +=cancel.create(Rect_C(clientWidth()*2/3, -0.25f, 0.29f, 0.07f), "Cancel").func(Hide, SCAST(GuiObj, T)).focusable(false);
    }
-   void ElmProperties::CopyID(ElmProperties &ep) {ClipSet(ep.id  ());}
-   void ElmProperties::CopyFile(ElmProperties &ep) {ClipSet(ep.file());}
+   void ElmProperties::CopyID(ElmProperties &ep) {ClipSet(ep.id  .str());}
+   void ElmProperties::CopyFile(ElmProperties &ep) {ClipSet(ep.file.str());}
    void ElmProperties::Explore(ElmProperties &ep) {if(Elm *elm=Proj.findElm(ep.elm_id))Proj.explore(*elm);}
    void ElmProperties::create()
    {
@@ -1020,7 +1020,7 @@ set_optimize      .create(Rect_L(0.98f, -0.328f, 0.25f, 0.0475f), "Set Optimize"
       T+=t_file .create(Vec2(0.02f, -0.12f), "File ID:"  , &ts); T+=file .create(Vec2(0.23f, -0.10f), S, &ts_small); T+=b_file.create(Rect_R(clientWidth()-0.02f, -0.12f, 0.15f, 0.05f), "Copy").func(CopyFile, T);
       T+=t_size .create(Vec2(0.02f, -0.19f), "Size:"     , &ts); T+=size .create(Vec2(0.23f, -0.17f), S, &ts_small);
       T+=t_class.create(Vec2(0.02f, -0.26f), "C++ Class:", &ts); T+=Class.create(Vec2(0.23f, -0.24f), S, &ts_small);
-      T+=t_src  .create(Vec2(0.02f, -0.33f), "Source:"   , &ts); T+=b_src.create(Rect_R(clientWidth()-0.02f, -0.33f, 0.15f, 0.05f), "Explore").func(Explore, T).desc("Open folder containing the source file"); T+=src.create(Rect(0.23f, -0.38f, b_src.rect().min.x-0.02f, -0.31f), S, &ts_small); src.auto_line=AUTO_LINE_SPACE_SPLIT;
+      T+=t_src  .create(Vec2(0.02f, -0.33f), "Source:"   , &ts); T+=b_src.create(Rect_R(clientWidth()-0.02f, -0.33f, 0.15f, 0.05f), "Explore").func(Explore, T).desc("Open folder containing the source file"); T+=src.create(Rect(0.23f, -0.38f, b_src.rect().min.x-0.02f, -0.31f), S, &ts_small); src.auto_line=true;
    }
    void ElmProperties::activate(Elm &elm)
    {
@@ -1031,12 +1031,12 @@ set_optimize      .create(Rect_L(0.98f, -0.328f, 0.25f, 0.0475f), "Set Optimize"
          elm_id=elm.id;
          id   .set(elm.id.asCString());
          file .set(EncodeFileName(elm.id));
-         size .clear(); if(FExist(Proj.gamePath(elm.id)))size.set(FileSize(FSize(Proj.gamePath(elm.id))));
+         size .clear(); if(FExist(Proj.gamePath(elm.id)))size.set(SizeBytes(FSize(Proj.gamePath(elm.id))));
          Class.set(ElmTypeClass[elm.type]);
          Mems<FileParams> files=FileParams::Decode(elm.srcFile());
          Str src_text; FREPA(files)src_text.line()+=files[i].name; // ignore parameters
          src  .set(src_text);
-         b_src.visible(src().is());
+         b_src.visible(src.hasData());
       }
    }
 RenameElmClass::RenameElmClass() : elm_id(UIDZero) {}

@@ -172,12 +172,10 @@ Str ProcName(UInt id)
       }
    #elif APPLE
       #if 1 // returns process full path file name
-         int    mib[3], max_data=0;
-         size_t size;
-
+         int mib[3], max_data=0;
          mib[0]=CTL_KERN;
          mib[1]=KERN_ARGMAX;
-         size=SIZE(max_data);
+         size_t size=SIZE(max_data);
          if(!sysctl(mib, 2, &max_data, &size, null, 0))
          {
             Memt<Char8> temp; temp.setNum(max_data);
@@ -185,7 +183,7 @@ Str ProcName(UInt id)
             mib[0]=CTL_KERN;
             mib[1]=KERN_PROCARGS2;
             mib[2]=id;
-            size=(size_t)max_data;
+            size  =temp.elmsMem();
             if(!sysctl(mib, 3, temp.data(), &size, null, 0))return FromUTF8(temp.data()+4);
          }
       #else // returns process window name
@@ -362,8 +360,12 @@ void ConsoleProcess::kill   (                )
 /******************************************************************************/
 static Bool ConsoleProcessFunc(Thread &thread)
 {
+   Char8 buf[65536+1];
+   const UInt total=SIZE(buf)-1; // make room for '\0'
+   const UInt time_ms=1; // wait 1 ms when there's no data
    ConsoleProcess &cp=*(ConsoleProcess*)thread.user;
    SyncLockerEx locker(cp._lock);
+
 start:
    if(cp._proc_id && cp._out_read)
    {
@@ -372,7 +374,7 @@ start:
 
    same_process:
    #if WINDOWS
-      Bool active=(WaitForSingleObject(cp._proc, 0)==WAIT_TIMEOUT);
+      Bool active=(WaitForSingleObject(cp._proc, time_ms)==WAIT_TIMEOUT);
       if( !active)
       {
          DWORD exit_code=0; GetExitCodeProcess(cp._proc, &exit_code); // warning: process may have used 'STILL_ACTIVE' for the 'ExitProcess'
@@ -390,40 +392,28 @@ start:
 
       locker.off(); // UNLOCK
 
-      Char8 buf[65536+1];
-      const UInt total=SIZE(buf)-1; // make room for '\0'
-
    #if WINDOWS
-      DWORD available;
-      if(active) // if process active
-      {
-         available=0; PeekNamedPipe(out_read, null, 0, null, &available, null); if(available)goto read_clamp; Time.wait(1); // if have data then read, if not then wait
-      }else
-      {
-         available=total; goto read; // we can always read from inactive pipe without freezing
-      }
-
    peek:
-      available=0; PeekNamedPipe(out_read, null, 0, null, &available, null); if(available) // check if there's any data available, this is to prevent freezes in 'ReadFile' when there's nothing available
+      DWORD available=0; PeekNamedPipe(out_read, null, 0, null, &available, null); if(available>0) // check if there's any data available, this is to prevent freezes in 'ReadFile' when there's nothing available
       {
-      read_clamp:
-         MIN(available, total);
-
-      read:
-         DWORD read=0; ReadFile(out_read, buf, available, &read, null); if(read>0)
+         DWORD read=0; ReadFile(out_read, buf, Min((UInt)available, total), &read, null); if(read>0)
    #else
-      const UInt time_ms=1;
-      fd_set fd; FD_ZERO(&fd); FD_SET(out_read, &fd);
-      timeval tv; tv.tv_sec=time_ms/1000; tv.tv_usec=(time_ms%1000)*1000;
-   peek:
-      if(select(out_read+1, &fd, null, null, &tv)>0) // if there's data available
+   wait:
+      fd_set fd; FD_ZERO(&fd); FD_SET(out_read, &fd);                     // !! THIS HAS TO BE REINITIALIZED BEFORE EACH 'select' CALL BECAUSE IT MODIFIES THE VALUE !!
+      timeval tv; tv.tv_sec=time_ms/1000; tv.tv_usec=(time_ms%1000)*1000; // !! THIS HAS TO BE REINITIALIZED BEFORE EACH 'select' CALL BECAUSE IT MODIFIES THE VALUE !!
+      if(select(out_read+1, &fd, null, null, &tv)>0) // wait until there's data available
       {
-      read:
-         UInt available=total;
       #if APPLE // do this only on Apple, as on Linux 'fstat' will give zero even if there's data available
-         struct stat s; fstat(out_read, &s); MIN(available, s.st_size); // limit reading to remaining file size, to avoid freezes when trying to read from empty file
+      peek:
+         struct stat s; if(!fstat(out_read, &s))
+         {
+            auto available=s.st_size; if(available>0)
+            {
+               Int read=::read(out_read, buf, Min(available, total)); if(read>0)
+      #else
+      read:
+         Int read=::read(out_read, buf, total); if(read>0)
       #endif
-         Int read=::read(out_read, buf, available); if(read>0)
    #endif
          {
             buf[read]='\0'; if(!cp._binary)ReplaceSelf(buf, '\r', '\0');
@@ -440,15 +430,25 @@ start:
                   CopyFast(cp._data._d.data()+cp._data.length(), buf, read+1); // append read data (including null character)
                   cp._data._length=length; // adjust length
                }
-            }else read=0; // clear 'read' so we don't try reading again from this pipe
 
-            if(read>0) // if read anything, then it's possible we've got more data waiting
-            {
-               locker.off(); // UNLOCK
-               if(active)goto peek; // if active then check first if we have data to avoid freezes
-                         goto read; // if inactive then we can read straight away and it won't block, on WINDOWS 'available' is already set to 'total'
+               // it's possible we've got more data waiting
+            #if WINDOWS || APPLE
+               if(available>read)
+            #endif
+               {
+                  locker.off(); // UNLOCK
+               #if WINDOWS || APPLE
+                  goto peek;
+               #else
+                  if(active)goto wait; // if active then check first if we have data to avoid freezes
+                            goto read; // if inactive then we can read straight away and it won't block
+               #endif
+               }
             }
          }
+      #if APPLE
+         }}
+      #endif
       }
 
       locker.on(); // LOCK
@@ -471,7 +471,7 @@ static void ProcessZombies()
 {
       ZombiePIDs.  lock(); REPA(ZombiePIDs){int status; pid_t pid=waitpid(ZombiePIDs.lockedElm(i), &status, WNOHANG); Bool active=(pid==0); if(!active)ZombiePIDs.lockedRemove(i);}
       ZombiePIDs.unlock();
-   if(ZombiePIDs.elms())App._callbacks.include(ProcessZombies); // queue again if we still have some zombies
+   if(ZombiePIDs.elms())App.includeFuncCall(ProcessZombies); // queue again if we still have some zombies
 }
 #endif
 void ConsoleProcess::del()
@@ -492,7 +492,7 @@ void ConsoleProcess::del()
    if(_proc_id && !_proc_exited) // if we have a Process ID but it still hasn't exited
    {
       ZombiePIDs.include(_proc_id); // add to the list of zombie PID's
-      App._callbacks.include(ProcessZombies); // start callback to remove them
+      App.includeFuncCall(ProcessZombies); // start callback to remove them
    }
   _proc_exited=false;
 #endif
@@ -533,8 +533,8 @@ Bool ConsoleProcess::create(C Str &name, C Str &params, Bool hidden, Bool binary
                   si.wShowWindow=SW_HIDE;
                }
 
-               Str app=name, base=GetBase(app), cmd, cur_dir;
-               if(GetExt(app)=="bat" || GetExt(app)=="cmd")
+               Str app=name, base=GetBase(app), cmd, cur_dir, ext=GetExt(app);
+               if(ext=="bat" || ext=="cmd")
                {
                   cur_dir=GetPath(app);
                   cmd    =(Contains(base, ' ') ? S+"/c \""+base+'"' : S+"/c "+base); // must use quotes only when needed, otherwise this will fail
@@ -874,7 +874,7 @@ Bool GetProcessesAccessingThisProcess(MemPtr<ProcessAccess> proc, Bool write_onl
                      {
                         ProcessAccess &p=proc.New();
                         p.proc_id=pid;
-                        p.write=FlagTest(handle.GrantedAccess, write_access);
+                        p.write=FlagOn(handle.GrantedAccess, write_access);
                      }
 
                   #if 0
@@ -892,9 +892,7 @@ Bool GetProcessesAccessingThisProcess(MemPtr<ProcessAccess> proc, Bool write_onl
                         // some known types: "Key", "Event", "Semaphore", "Timer", "WaitCompletionPacket", "IoCompletion", "ALPC Port", "IRTimer", "TpWorkerFactory", "DxgkSharedSyncObject", "WindowStation", "Process"
                            if(Equal(u.type.Name.Buffer, "Thread", true))
                            {
-                           #undef GetThreadId
                               Handles.add(S+ProcName(pid)+", Thread:"+(UInt)GetThreadId(dup_handle));
-                           #define GetThreadId _GetThreadId
                            }
                         }
                         if(NT_SUCCESS(NtQueryObject(dup_handle, ObjectNameInformation, &u.name, SIZE(u), null)))

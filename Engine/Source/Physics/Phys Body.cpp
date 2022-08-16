@@ -191,6 +191,21 @@ Bool PhysMesh::adjustStorage(Bool universal, Bool physx, Bool bullet, Bool *chan
    }
    return true;
 }
+Bool PhysPart::adjustStorage(Bool universal, Bool physx, Bool bullet, Bool *changed)
+{
+   if(_pm)
+   {
+      PhysPart temp; temp=T; Bool ok=temp._pm->adjustStorage(universal, physx, bullet, changed); Swap(temp, T); return ok; // adjust storage on separate 'pm' so any current actors using the mesh, will not get invalid
+   }
+   if(changed)*changed=false;
+   return true;
+}
+Bool PhysBody::adjustStorage(Bool universal, Bool physx, Bool bullet, Bool *changed)
+{
+   if(changed)*changed=false;
+   Bool   ok=true, c; REPA(T){ok&=parts[i].adjustStorage(universal, physx, bullet, &c); if(changed)*changed|=c;}
+   return ok;
+}
 /******************************************************************************/
 Bool PhysMesh::cookConvex(MeshBase *src, Bool mesh_is_already_convex) // cook data only if the body doesn't have yet any cooked data
 {
@@ -614,16 +629,6 @@ PhysPart& PhysPart::mirrorZ()
 }
 /******************************************************************************/
 void PhysPart::setPhysMesh() {if(_pm)_pm->setPhysMesh();}
-/******************************************************************************/
-Bool PhysPart::adjustStorage(Bool universal, Bool physx, Bool bullet, Bool *changed)
-{
-   if(_pm)
-   {
-      PhysPart temp; temp=T; Bool ok=temp._pm->adjustStorage(universal, physx, bullet, changed); Swap(temp, T); return ok; // adjust storage on separate 'pm' so any current actors using the mesh, will not get invalid
-   }
-   if(changed)*changed=false;
-   return true;
-}
 /******************************************************************************/
 PhysPart& PhysPart::freeHelperData() {if(_pm)_pm->freeHelperData(); return T;}
 /******************************************************************************/
@@ -1158,12 +1163,6 @@ PhysBody& PhysBody::mirrorX  (                 ) {REPAO(parts).mirrorX(); setBox
 PhysBody& PhysBody::mirrorY  (                 ) {REPAO(parts).mirrorY(); setBox(); return T;}
 PhysBody& PhysBody::mirrorZ  (                 ) {REPAO(parts).mirrorZ(); setBox(); return T;}
 /******************************************************************************/
-Bool PhysBody::adjustStorage(Bool universal, Bool physx, Bool bullet, Bool *changed)
-{
-   if(changed)*changed=false;
-   Bool   ok=true, c; REPA(T){ok&=parts[i].adjustStorage(universal, physx, bullet, &c); if(changed)*changed|=c;}
-   return ok;
-}
 PhysBody& PhysBody::freeHelperData() {REPAO(parts).freeHelperData(); return T;}
 /******************************************************************************/
 void PhysBody::draw(C Color &color)C

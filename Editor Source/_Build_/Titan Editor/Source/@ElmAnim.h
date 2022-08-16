@@ -25,6 +25,7 @@ class ElmAnim : ElmData
    Vec       root_move, root_rot;
    flt       fps;
    ushort    flag;
+   Str       imported_file_params; // used to adjust anim events when reimporting with different params
    TimeStamp loop_time, linear_time, skel_time, file_time;
 
    // get
@@ -55,6 +56,8 @@ class ElmAnim : ElmData
    // io
    static uint OldFlag1(ushort old);
    static uint OldFlag(byte old);
+   void setImportedFileParams();
+   void fix5();
    virtual bool save(File &f)C override;
    virtual bool load(File &f)override;
    virtual void save(MemPtr<TextNode> nodes)C override;

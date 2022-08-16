@@ -122,11 +122,11 @@ class ConvertToDeAtlasClass : PropWin
          REPA(non_deatlased)if(Elm *elm=Proj.findElm(non_deatlased[i]))
          {
             if(mode==REPLACE_NO_PUBLISH || mode==REPLACE_REMOVE){elm.setParent(deatlased[i], time); Server.setElmParent(*elm);} // move 'non_deatlased' to 'deatlased'
-            if(mode==REPLACE_NO_PUBLISH)elm.setNoPublish(true, time);else
-            if(mode==REPLACE_REMOVE    )elm.setRemoved  (true, time);
+            if(mode==REPLACE_NO_PUBLISH)elm.setPublish(false, time);else
+            if(mode==REPLACE_REMOVE    )elm.setRemoved(true , time);
          }
-         if(mode==REPLACE_NO_PUBLISH)Server.noPublishElms(non_deatlased, true, time);else
-         if(mode==REPLACE_REMOVE    )Server.removeElms   (non_deatlased, true, time);
+         if(mode==REPLACE_NO_PUBLISH)Server.publishElms(non_deatlased, false, -1, time);else
+         if(mode==REPLACE_REMOVE    )Server. removeElms(non_deatlased, true ,     time);
 
          /*if(mode!=NEW) // move materials to old ones, from 'deatlased' -> 'non_deatlased'
          {
@@ -145,7 +145,7 @@ class ConvertToDeAtlasClass : PropWin
       {
          mtrl.setParent(deatlased[0], time); Server.setElmParent(*mtrl);
       }
-      
+
       if(mode==REPLACE_NO_PUBLISH || mode==REPLACE_REMOVE) // check if we can remove/unpublish old materials
       {
          Proj.setList(); // first we need to reset the list to set 'finalRemoved' and 'finalPublish'

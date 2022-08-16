@@ -6,20 +6,15 @@
 
    Use 'Location*' functions to access device world location.
 
-   Use 'InputButton' and 'Input' as general inputs.
-
-   Use 'InputCombo' to check for keyboard button combinations.
-
 /******************************************************************************/
-#define INPUT_COMBO_NUM 8 // number of remembered input buttons
-
 #define        LongPressTime 0.55f // amount of time to consider any                   button press a long   press
 #define      DoubleClickTime 0.25f // amount of time to consider Keyboard/Mouse/Joypad button press a double click
 #define TouchDoubleClickTime 0.33f // amount of time to consider Touch                        press a double click
 #if EE_PRIVATE
 #define DragTime 0.15f
-#define FirstRepeatPressTime 0.21f // amount of time wait until triggering a first repeat press
-#define      RepeatPressTime 0.08f // amount of time wait until triggering a       repeat press
+#define  FirstRepeatPressTime 0.21f // amount of time wait until triggering a first repeat press
+#define       RepeatPressTime 0.05f // amount of time wait until triggering a       repeat press
+#define AnalogRepeatPressTime 0.08f // amount of time wait until triggering a       repeat press for analog input
 #endif
 /******************************************************************************/
 // ACCELEROMETER, GYROSCOPE, LOCATION
@@ -158,69 +153,21 @@ enum INPUT_TYPE : Byte // Input Device Type
    INPUT_MOUSE   , // Mouse
    INPUT_JOYPAD  , // Joypad
 };
-/******************************************************************************/
-struct InputButton // universal Input Button, may be a button from Keyboard, Mouse, Joypad
+struct Input
 {
+   Bool       pushed; // true=pushed, false=released
    INPUT_TYPE type  ; // input  type
-   Byte       button, // button index (KB_KEY for keyboard or index for Mouse/Joypad)
-              device; // device index (for example Joypad device index, unused for Keyboard and Mouse)
+   union
+   {
+      Byte          button; // for INPUT_MOUSE
+      KB_KEY        key   ; // for INPUT_KEYBOARD
+      JOYPAD_BUTTON jb    ; // for INPUT_JOYPAD
+   };
+   Byte device; // device index (for example Joypad device index, unused for Keyboard and Mouse)
 
-   Bool operator==(C InputButton &b)C; // if input buttons are equal
-   Bool operator!=(C InputButton &b)C; // if input buttons are different
-
-   Bool on()C; // if button on
-   Bool pd()C; // if button pushed
-   Bool rs()C; // if button released
-   Bool db()C; // if button double clicked
-
-   Str name()C; // get button name, can be one of the following : Kb.buttonName(button), Ms.buttonName(button), Joypads[device].buttonName(button), null
-
-   explicit InputButton(INPUT_TYPE type=INPUT_NONE, Byte button=0, Byte device=0) {T.type=type; T.button=button; T.device=device;}
+   void set(Bool pushed, INPUT_TYPE type, Byte button, Byte device=0) {T.pushed=pushed; T.type=type; T.button=button; T.device=device;}
 };
-/******************************************************************************/
-struct Input // Action Input (for example "walk_forward"), may be defined by maximum 3 custom buttons
-{
-   UInt        group; // custom input group (for example Movement, Interaction, Combat, ...)
-   Str         name ; // action name
-   InputButton b[3] ; // 3 custom buttons
-
-   Bool on()C; // if action on             (checks if any of the 3 buttons is on            )
-   Bool pd()C; // if action pushed         (checks if any of the 3 buttons is pushed        )
-   Bool rs()C; // if action released       (checks if any of the 3 buttons is released      )
-   Bool db()C; // if action double clicked (checks if any of the 3 buttons is double clicked)
-
-   void set(C Str &name=S, UInt group=0                                                                 ); // set action properties
-   void set(C Str &name  , UInt group, C InputButton &b0, C InputButton *b1=null, C InputButton *b2=null); // set action properties
-
-   Bool operator()(C InputButton &b)C; // if 'b' button enables action, this checks if any of the 3 buttons is equal to 'b'
-
-   Input() {group=0;}
-};
-/******************************************************************************/
-// INPUT COMBINATION
-/******************************************************************************/
-struct InputComboClass // Input Combination, used for detecting special moves/attacks
-{
-   void clear(); // clear stored combination
-
-   Bool operator()(C Input &i0, C Input &i1                                       )C; // if action 'i0' was pressed, followed by 'i1'
-   Bool operator()(C Input &i0, C Input &i1, C Input &i2                          )C; // if action 'i0' was pressed, followed by 'i1', 'i2'
-   Bool operator()(C Input &i0, C Input &i1, C Input &i2, C Input &i3             )C; // if action 'i0' was pressed, followed by 'i1', 'i2', 'i3'
-   Bool operator()(C Input &i0, C Input &i1, C Input &i2, C Input &i3, C Input &i4)C; // if action 'i0' was pressed, followed by 'i1', 'i2', 'i3', 'i4'
-
-#if EE_PRIVATE
-   void add(C InputButton &inp_btn);
-#endif
-
-   InputComboClass();
-
-private:
-   Byte        pos, length;
-   Flt         dt;
-   Dbl         t[INPUT_COMBO_NUM];
-   InputButton b[INPUT_COMBO_NUM];
-}extern
-   InputCombo;
+extern Memc<Input> Inputs; // all inputs that occurred in this frame (in order as they were received) 
 /******************************************************************************/
 #if EE_PRIVATE
 struct InputDevicesClass // Input Devices
@@ -234,10 +181,11 @@ struct InputDevicesClass // Input Devices
 #endif
 
    void del    ();
-   Bool create ();
+   void create ();
    void update ();
    void clear  ();
    void acquire(Bool on);
+   void checkMouseKeyboard();
 
    InputDevicesClass() {}
    NO_COPY_CONSTRUCTOR(InputDevicesClass);
@@ -277,4 +225,5 @@ void UpdateLocation(                  Bool gps, JNI &jni);
 void UpdateLocation(                            JNI &jni);
 #endif
 #endif
+void DeviceVibrate(Flt intensity, Flt duration); // set device vibration, 'intensity'=how strong 0..1, 'duration'=how long (in seconds)
 /******************************************************************************/

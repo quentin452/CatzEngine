@@ -13,7 +13,7 @@ static Bool Decompress(Image &image, IMAGE_TYPE &type, IMAGE_MODE &mode, Int &mi
    mip_maps=image.mipMaps();
    if(image.is())
    {
-      if(image.compressed())return image.copyTry(image, -1, -1, -1, ImageTypeUncompressed(type), image.cube() ? IMAGE_SOFT_CUBE : IMAGE_SOFT, 1);
+      if(image.compressed())return image.copyTry(image, -1, -1, -1, ImageTypeUncompressed(type), AsSoft(image.mode()), 1);
       return true;
    }
    return false;
@@ -45,18 +45,7 @@ static Bool ExtractMipMap(C Image &src, Image &dest, Int mip_map, DIR_ENUM cube_
       if(! src.lockRead(mip_map, cube_face))return false;
     //if(!dest.lock    (LOCK_WRITE        ))return false; not needed for SOFT
 
-      Int blocks_y=Min(ImageBlocksY(src.hwW(), src.hwH(), mip_map, src.hwType()), ImageBlocksY(dest.hwW(), dest.hwH(), 0, dest.hwType()));
-      REPD(z, Min(src.ld(), dest.ld()))
-      {
-       C Byte * src_data= src.data() + z* src.pitch2();
-         Byte *dest_data=dest.data() + z*dest.pitch2();
-         if(src.pitch()==dest.pitch())CopyFast(dest_data, src_data, Min(src.pitch2(), dest.pitch2()));else
-         {
-            Int pitch=Min(src.pitch(), dest.pitch());
-            REPD(y, blocks_y)CopyFast(dest_data + y*dest.pitch(), src_data + y*src.pitch(), pitch);
-            // TODO: we could zero remaining data to avoid garbage
-         }
-      }
+      CopyImgData(src.data(), dest.data(), src.pitch(), dest.pitch(), src.softBlocksY(mip_map), dest.softBlocksY(0), src.pitch2(), dest.pitch2(), src.ld(), dest.ld());
 
     //dest.unlock(); not needed for SOFT
        src.unlock();
@@ -64,7 +53,7 @@ static Bool ExtractMipMap(C Image &src, Image &dest, Int mip_map, DIR_ENUM cube_
    }
    return false;
 }
-Bool Image::extractMipMap(Image &dest, Int type, Int mip_map, DIR_ENUM cube_face)C
+Bool Image::extractMipMap(Image &dest, Int type, Int mip_map, DIR_ENUM cube_face, FILTER_TYPE filter, UInt flags)C
 {
    if(InRange(mip_map, mipMaps()))
    {
@@ -72,7 +61,7 @@ Bool Image::extractMipMap(Image &dest, Int type, Int mip_map, DIR_ENUM cube_face
       if(ExtractMipMap(T, img, mip_map, cube_face)) // extract
       {
          if(&img!=&dest)Swap(dest, img); // swap if needed
-         if(type>IMAGE_NONE && !dest.copyTry(dest, -1, -1, -1, type))return false; // apply conversion if needed
+         if(type>IMAGE_NONE && !dest.copyTry(dest, -1, -1, -1, type, -1, -1, filter, flags))return false; // apply conversion if needed
          return true;
       }
    }
@@ -94,17 +83,7 @@ Bool Image::injectMipMap(C Image &src, Int mip_map, DIR_ENUM cube_face, FILTER_T
          if(s->lockRead())
          {
             ok=true;
-            Int blocks_y=Min(ImageBlocksY(hwW(), hwH(), mip_map, hwType()), ImageBlocksY(s->hwW(), s->hwH(), 0, s->hwType()));
-            REPD(z, Min(ld(), s->ld()))
-            {
-             C Byte *src =s->data() + z*s->pitch2();
-               Byte *dest=   data() + z*   pitch2();
-               if(T.pitch()==s->pitch())CopyFast(dest, src, Min(pitch2(), s->pitch2()));else
-               {
-                  Int pitch=Min(T.pitch(), s->pitch());
-                  REPD(y, blocks_y)CopyFast(dest + y*T.pitch(), src + y*s->pitch(), pitch);
-               }
-            }
+            CopyImgData(s->data(), data(), s->pitch(), pitch(), s->softBlocksY(0), softBlocksY(mip_map), s->pitch2(), pitch2(), s->ld(), ld());
             s->unlock();
          }
          unlock();
@@ -115,7 +94,12 @@ Bool Image::injectMipMap(C Image &src, Int mip_map, DIR_ENUM cube_face, FILTER_T
 /******************************************************************************/
 Image& Image::clear()
 {
-   if(soft())ZeroFast(_data_all, memUsage());else
+#if IMAGE_STREAM_FULL
+   if(!waitForStream())return T; // in IMAGE_STREAM_FULL this image can be smaller, so the only thing we can do is wait to get full size
+#else
+   cancelStream(); baseMip(0); // can just cancel entire stream because we will overwrite the whole thing
+#endif
+   if(soft())ZeroFast(softData(), memUsage());else
    {
       Int faces=T.faces();
       REPD(m, mipMaps())
@@ -396,6 +380,85 @@ void Image::crop3D(Image &dest, Int x, Int y, Int z, Int w, Int h, Int d, C Vec4
    }
 }
 /******************************************************************************/
+static Bool TransparentX(C Image &image, Int x)
+{
+   REPD(z, image.ld())
+   REPD(y, image.lh())if(image.color3D(x, y, z).a)return false;
+   return true;
+}
+static Bool TransparentY(C Image &image, Int y)
+{
+   REPD(z, image.ld())
+   REPD(x, image.lw())if(image.color3D(x, y, z).a)return false;
+   return true;
+}
+static Bool TransparentZ(C Image &image, Int z)
+{
+   REPD(y, image.lh())
+   REPD(x, image.lw())if(image.color3D(x, y, z).a)return false;
+   return true;
+}
+Image& Image::cropTransparent(Bool border)
+{
+ C Image *src=this;
+   Image  temp;
+   if(compressed())if(copyTry(temp, -1, -1, -1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))src=&temp;else return T;
+
+   if(src->lockRead())
+   { // inclusive
+      Int z=0, z1=src->d()-1;
+      Int y=0, y1=src->h()-1;
+      Int x=0, x1=src->w()-1;
+
+      // Z
+      if(src->d()>1)
+      {
+         for(; TransparentZ(*src, z); )
+         {
+            if(z>=z1){x=x1=y=y1=z=z1=0; goto finish;} // fully transparent, return as 1x1x1 pixel
+            z++;
+         }
+         for(; z1>z && TransparentZ(*src, z1); )z1--;
+
+         if(border)
+         {
+            MAX(--z ,          0);
+            MIN(++z1, src->d()-1);
+         }
+      }
+
+      // Y
+      for(; TransparentY(*src, y); )
+      {
+         if(y>=y1){x=x1=y=y1=z=z1=0; goto finish;} // fully transparent, return as 1x1x1 pixel
+         y++;
+      }
+      for(; y1>y && TransparentY(*src, y1); )y1--;
+
+      // X
+      for(; TransparentX(*src, x); )
+      {
+         if(x>=x1){x=x1=y=y1=z=z1=0; goto finish;} // fully transparent, return as 1x1x1 pixel
+         x++;
+      }
+      for(; x1>x && TransparentX(*src, x1); )x1--;
+
+      if(border)
+      {
+         MAX(--y ,          0);
+         MIN(++y1, src->h()-1);
+         MAX(--x ,          0);
+         MIN(++x1, src->w()-1);
+      }
+
+   finish:
+      src->unlock();
+      src->crop3D(T, x, y, z, x1-x+1, y1-y+1, z1-z+1);
+   }
+   
+   return T;
+}
+/******************************************************************************/
 Image& Image::resize(Int w, Int h, FILTER_TYPE filter, UInt flags)
 {
    MAX(w, 1);
@@ -543,7 +606,7 @@ void Image::transform(Image &dest, C Matrix2 &matrix, FILTER_TYPE filter, UInt f
             if(work.lock(LOCK_WRITE))
          {
             Vec2 area_size=1/matrix.scale();
-            Bool clamp=IcClamp(flags), alpha_weight=FlagTest(flags, IC_ALPHA_WEIGHT),
+            Bool clamp=IcClamp(flags), alpha_weight=FlagOn(flags, IC_ALPHA_WEIGHT),
                  downsize=(filter!=FILTER_NONE && (area_size.x>1+EPS || area_size.y>1+EPS) && src->ld()==1); // if we're downsampling (any scale is higher than 1) then we must use more complex 'areaColor*' methods
             union
             {
@@ -2430,7 +2493,7 @@ Image& Image::transparentToNeighbor(Bool clamp, Flt step)
 {
 #if 1 // new method
    if(!typeInfo().a)return T;//true;
-   Int    mips=TotalMipMaps(w(), h(), d(), IMAGE_F32_4); if(mips<=1)return T;//true;
+   Int    mips=TotalMipMaps(w(), h(), d()); if(mips<=1)return T;//true;
    Image *src =this, temp; if(!src->highPrecision() || src->compressed())if(src->copyTry(temp, -1, -1, -1, IMAGE_F32_4, IMAGE_SOFT, 1, FILTER_BEST, IC_IGNORE_GAMMA))src=&temp;else return T;//false; // first we have to copy to IMAGE_F32_4 to make sure we have floating point, so that downsizing will not use ALPHA_LIMIT, this is absolutely critical
    Bool   ok  =false;
    if(src->lock())
@@ -3282,6 +3345,7 @@ Bool Image::blurCubeMipMaps()
 {
    if(cube() && mipMaps()>1)
    {
+      if(!waitForStream())return false; // since we'll access 'softData' without locking, make sure stream is finished
       Threads *threads=&ImageThreads.init();
       Image *img=this, temp;
       if(img->mode()!=IMAGE_SOFT_CUBE || img->compressed())if(img->copyTry(temp, -1, -1, -1, ImageTypeUncompressed(img->type()), IMAGE_SOFT_CUBE))img=&temp;else return false;
@@ -3361,8 +3425,8 @@ Bool ImageCompare::compare(C Image &a, C Image &b, Flt similar_dif, Bool alpha_w
 
                const Bool per_channel=false, // false=faster
                           high_prec  =(sa->highPrecision() || sb->highPrecision());
-               const Int      a_x_mul= sa->hwTypeInfo().bit_pp*2, // *2 because (4*4 colors / 8 bits)
-                              b_x_mul= sb->hwTypeInfo().bit_pp*2; // *2 because (4*4 colors / 8 bits)
+               const Int      a_x_mul= sa->hwTypeInfo().block_bytes,
+                              b_x_mul= sb->hwTypeInfo().block_bytes;
                const UInt    channels=4,
                             max_value=(high_prec ? 1 : 255),
                                 scale=channels*max_value;

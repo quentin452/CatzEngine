@@ -1,6 +1,10 @@
 /******************************************************************************/
 #include "iOS.h"
 #undef super // Objective-C has its own 'super'
+
+@interface GCController()
+@property (nonatomic) unsigned long long deviceHash;
+@end
 /******************************************************************************/
 Bool DontRemoveThisOrEAGLViewClassWontBeLinked;
 /******************************************************************************/
@@ -149,6 +153,10 @@ EAGLView* GetUIView()
       // setup notifications for the keyboard
       [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWasShown    :) name:UIKeyboardDidShowNotification  object:nil];
       [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillBeHidden:) name:UIKeyboardWillHideNotification object:nil]; 
+
+      // setup notifications for gamepads
+      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(controllerWasConnected   :) name:GCControllerDidConnectNotification    object:nil];
+      [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(controllerWasDisconnected:) name:GCControllerDidDisconnectNotification object:nil];
    }
    return self;
 }
@@ -171,6 +179,80 @@ EAGLView* GetUIView()
 -(void)keyboardVisible:(Bool)visible
 {
    if(visible)[self becomeFirstResponder];else [self resignFirstResponder];
+}
+/******************************************************************************/
+static Int Compare(C Joypad::Elm &a, C Joypad::Elm &b) {return ComparePtr(a.element, b.element);}
+static Joypad* FindJoypad(GCExtendedGamepad *gamepad)
+{
+   REPA(Joypads){Joypad &jp=Joypads[i]; if(jp._gamepad==gamepad)return &jp;}
+   return null;
+}
+-(void)controllerWasConnected:(NSNotification*)notification // these are called on the main thread
+{
+   GCController *controller=(GCController*)notification.object;
+   if(GCExtendedGamepad *gamepad=controller.extendedGamepad)
+   {
+      ULong id=0; if([controller respondsToSelector:@selector(deviceHash)])id=controller.deviceHash;
+      Bool added; Joypad &joypad=GetJoypad(NewJoypadID(id), added); if(added)
+      {
+         joypad._gamepad=gamepad;
+
+       //controller.productCategory; "Xbox One"
+         if([controller respondsToSelector:@selector(detailedProductCategory)])joypad._name=[controller detailedProductCategory]; // "Xbox Elite"
+         if(!joypad._name.is())joypad._name=controller.vendorName; // "Xbox Wireless Controller"
+
+
+         // add elements
+         joypad.addPad(gamepad.dpad);
+
+         joypad.addButton(gamepad.buttonA, JB_A);
+         joypad.addButton(gamepad.buttonB, JB_B);
+         joypad.addButton(gamepad.buttonX, JB_X);
+         joypad.addButton(gamepad.buttonY, JB_Y);
+
+         joypad.addButton(gamepad. leftShoulder, JB_L1);
+         joypad.addButton(gamepad.rightShoulder, JB_R1);
+
+         if(@available(macOS 10.14.1, iOS 12.1, tvOS 12.1, *))
+         {
+            joypad.addButton(gamepad. leftThumbstickButton, JB_L3);
+            joypad.addButton(gamepad.rightThumbstickButton, JB_R3);
+         }
+         if(@available(macOS 10.15, iOS 13, tvOS 13, *))
+         {
+            joypad.addButton(gamepad.buttonOptions, JB_BACK);
+            joypad.addButton(gamepad.buttonMenu   , JB_START);
+         }
+
+         joypad.addTrigger(gamepad. leftTrigger, 0);
+         joypad.addTrigger(gamepad.rightTrigger, 1);
+
+         joypad.addAxis(gamepad. leftThumbstick, 0);
+         joypad.addAxis(gamepad.rightThumbstick, 1);
+
+      #if 0
+         if(@available(macOS 11, iOS 14, tvOS 14, *))
+            if([gamepad isKindOfClass:[GCXboxGamepad class]])
+         {
+            GCXboxGamepad   *xbox_gamepad=(GCXboxGamepad*)gamepad;
+            joypad.addButton(xbox_gamepad.paddleButton1, JB_PADDLE1);
+            joypad.addButton(xbox_gamepad.paddleButton2, JB_PADDLE2);
+            joypad.addButton(xbox_gamepad.paddleButton3, JB_PADDLE3);
+            joypad.addButton(xbox_gamepad.paddleButton4, JB_PADDLE4);
+         }
+      #endif
+
+         joypad._elms.sort(Compare);
+
+         // set callback at the end
+         gamepad.valueChangedHandler=^(GCExtendedGamepad *gamepad, GCControllerElement *element) {if(Joypad *joypad=FindJoypad(gamepad))joypad->changed(element);};
+      }
+   }
+}
+-(void)controllerWasDisconnected:(NSNotification*)notification // these are called on the main thread
+{
+   GCController *controller=(GCController*)notification.object;
+   if(GCExtendedGamepad *gamepad=controller.extendedGamepad)Joypads.remove(FindJoypad(gamepad));
 }
 /******************************************************************************/
 -(void)layoutSubviews // this is called when the layer is initialized, resized or a sub view is added (like ads)

@@ -477,6 +477,7 @@
 		37C1127F1EFE25FD009A189F /* x86_celt_map.c in Sources */ = {isa = PBXBuildFile; fileRef = 3769E5851B9432FB00599A73 /* x86_celt_map.c */; };
 		37C112801EFE25FD009A189F /* x86cpu.c in Sources */ = {isa = PBXBuildFile; fileRef = 3769E5861B9432FB00599A73 /* x86cpu.c */; };
 		37C112891EFE2605009A189F /* x86_silk_map.c in Sources */ = {isa = PBXBuildFile; fileRef = 3769E6471B94332200599A73 /* x86_silk_map.c */; };
+		37ECD8CC282E1B8B00CF0962 /* vq_sse2.c in Sources */ = {isa = PBXBuildFile; fileRef = 371297471EFD510C00E99EBB /* vq_sse2.c */; };
 		37F436211EFE16C200807FA4 /* x86_silk_map.c in Sources */ = {isa = PBXBuildFile; fileRef = 3769E6471B94332200599A73 /* x86_silk_map.c */; };
 		37F83C5225C40A27000E5568 /* arm_celt_map.c in Sources */ = {isa = PBXBuildFile; fileRef = 3769E5321B9432AA00599A73 /* arm_celt_map.c */; };
 		37F83C5625C40A31000E5568 /* armcpu.c in Sources */ = {isa = PBXBuildFile; fileRef = 3769E5331B9432AA00599A73 /* armcpu.c */; };
@@ -1137,6 +1138,7 @@
 				378A9AB91BB8DE6D00A35D43 /* wincerts.c in Sources */,
 				378A9ABA1BB8DE6D00A35D43 /* inner_product_FLP.c in Sources */,
 				378A9ABB1BB8DE6D00A35D43 /* opus_compare.c in Sources */,
+				37ECD8CC282E1B8B00CF0962 /* vq_sse2.c in Sources */,
 				378A9ABC1BB8DE6D00A35D43 /* celt_encoder.c in Sources */,
 				378A9ABD1BB8DE6D00A35D43 /* cwrs.c in Sources */,
 				378A9ABE1BB8DE6D00A35D43 /* LPC_analysis_filter_FLP.c in Sources */,

@@ -160,7 +160,7 @@ static void                Update(PlatformStore &store) {store.update();}
       SyncLocker locker(_lock);
       if(_thread.created() && !_thread.active())_thread.del();
    }
-   if(_thread.created())App._callbacks.include(Update, T); // if still created then call the callback again later
+   if(_thread.created())App.includeFuncCall(Update, T); // if still created then call the callback again later
 
    // process updates
    if(_new_items.elms())
@@ -271,7 +271,7 @@ Bool PlatformStore::refreshItems(C CMemPtr<Str> &item_ids)
            _get_item_details.add(item_id); added=true;
          has:;
          }
-         if(_get_item_details.elms() && !_thread.active()){_thread.create(BackgroundUpdate, this); App._callbacks.include(Update, T);}
+         if(_get_item_details.elms() && !_thread.active()){_thread.create(BackgroundUpdate, this); App.includeFuncCall(Update, T);}
          return true;
       }
       return false;
@@ -341,7 +341,7 @@ Bool PlatformStore::refreshPurchases()
          if(!_refresh_purchases)
          {
            _refresh_purchases=true;
-            if(!_thread.active()){_thread.create(BackgroundUpdate, this); App._callbacks.include(Update, T);}
+            if(!_thread.active()){_thread.create(BackgroundUpdate, this); App.includeFuncCall(Update, T);}
          }
       }
       return true;
@@ -469,7 +469,7 @@ PlatformStore::RESULT PlatformStore::consume(C Str &token)
       SyncLocker locker(_lock);
       REPA(_consume)if(Equal(_consume[i], token, true))return WAITING;
      _consume.add(token);
-      if(!_thread.active()){_thread.create(BackgroundUpdate, this); App._callbacks.include(Update, T);}
+      if(!_thread.active()){_thread.create(BackgroundUpdate, this); App.includeFuncCall(Update, T);}
    }
    return WAITING;
 #elif IOS
@@ -550,7 +550,7 @@ JNIEXPORT void JNICALL Java_com_esenthel_Native_purchased(JNIEnv *env, jclass cl
 
    SyncLocker locker(Store._lock);
    Swap(Store._processed.New(), purchase);
-   App._callbacks.include(Update, Store);
+   App.includeFuncCall(Update, Store);
 }
 JNIEXPORT void JNICALL Java_com_esenthel_Native_licenseTest(JNIEnv *env, jclass clazz, jint result)
 {

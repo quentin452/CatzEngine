@@ -21,13 +21,13 @@ again:
       {
        C PRINTER_INFO_2 &src=list[i];
          PrinterInfo    &pi =printers[i];
-         pi.name  =         src.pPrinterName;
-         pi.model =         src.pDriverName;
-         pi.color =        (src.pDevMode->dmColor==DMCOLOR_COLOR);
-         pi.local =FlagTest(src.Attributes, PRINTER_ATTRIBUTE_LOCAL);
-         pi.width =         src.pDevMode->dmPaperWidth;
-         pi.height=         src.pDevMode->dmPaperLength;
-         pi.dpi   =         src.pDevMode->dmPrintQuality;
+         pi.name  =       src.pPrinterName;
+         pi.model =       src.pDriverName;
+         pi.color =      (src.pDevMode->dmColor==DMCOLOR_COLOR);
+         pi.local =FlagOn(src.Attributes, PRINTER_ATTRIBUTE_LOCAL);
+         pi.width =       src.pDevMode->dmPaperWidth;
+         pi.height=       src.pDevMode->dmPaperLength;
+         pi.dpi   =       src.pDevMode->dmPrintQuality;
          pi.res.set(pi.width, pi.height)*=pi.dpi; pi.res/=254; // 1 inch = 25.4 mm
       }
    }else
@@ -653,7 +653,7 @@ static void SetBit(Memt<Byte, 65536/3> &bits, Int bit, Bool value)
 }
 static Bool GetBit(Memt<Byte, 65536/3> &bits, Int bit)
 {
-   return FlagTest(bits[bit>>3], 1<<(bit&7));
+   return FlagOn(bits[bit>>3], 1<<(bit&7));
 }
 
 struct Best
@@ -708,7 +708,7 @@ struct Best
 
 static void Append(MemPtr<Bool> &data, Int &pos, UInt value, Int length)
 {
-   REP(length)data[pos++]=FlagTest(value, 1<<i);
+   REP(length)data[pos++]=FlagOn(value, 1<<i);
 }
 
 } // namespace Code128

@@ -91,10 +91,11 @@ ComboBox& ComboBox::resetText()
 {
    if(!(flag&COMBOBOX_CONST_TEXT))
    {
-      if(absSel()>=0)if(ListColumn *lc=menu.listColumn()){text=lc->md.asText(menu.list.absToData(absSel())); goto end;}
-      text.clear();
+      if(absSel()>=0)if(ListColumn *lc=menu.listColumn()){text=lc->md.asText(menu.list.absToData(absSel())); extra.clear(); goto end;}
+      text.clear(); extra.clear();
+   end:;
    }
-end: return T;
+   return T;
 }
 ComboBox& ComboBox::set(Int abs_sel, SET_MODE mode)
 {
@@ -103,36 +104,32 @@ ComboBox& ComboBox::set(Int abs_sel, SET_MODE mode)
    if(T._abs_sel!=abs_sel)
    {
       T._abs_sel=abs_sel;
-
-      if(!(flag&COMBOBOX_CONST_TEXT))
-      {
-         text.clear();
-         if(abs_sel>=0)if(ListColumn *lc=menu.listColumn())text=lc->md.asText(menu.list.absToData(abs_sel));
-      }
-
+      resetText();
       if(mode!=QUIET)call();
    }else resetText(); // if we're not changing selection, the element's text can be now different, so set it in case it got changed
    return T;
 }
 ComboBox& ComboBox::setText(C Str &text, Bool force, SET_MODE mode)
 {
+   StrEx extra;
+
    // find element that matches desired text
    if(ListColumn *lc=menu.listColumn())
    {
-      REPA(menu.list)if(Equal(lc->md.asText(menu.list.visToData(i), lc->precision), text))
+      REPA(menu.list)if(Equal(lc->md.asText(menu.list.visToData(i), lc->precision), text) && !extra.is())
       {
          return set(menu.list.visToAbs(i), mode);
       }
    }
 
    // element was not found
-   if(!Equal(T.text, text, true)) // new text is different
+   if(!Equal(T.text, text, true) || T.extra!=extra) // new text is different
    {
      _abs_sel=-1;
     //if(!(flag&COMBOBOX_CONST_TEXT))
       {
-         if(force)T.text=text;
-         else     T.text.clear();
+         if(force){T.text=text   ; T.extra=extra  ;}
+         else     {T.text.clear(); T.extra.clear();}
       }
       if(mode!=QUIET)call();
    }
@@ -140,11 +137,12 @@ ComboBox& ComboBox::setText(C Str &text, Bool force, SET_MODE mode)
 }
 ComboBox& ComboBox::setAbsText(Int abs, C Str &text)
 {
+   StrEx extra;
    if(menu.list.absToVis(abs)<0)abs=-1; // disable selecting hidden and out of range elements
-   if(abs!=_abs_sel || !Equal(T.text, text, true))
+   if(abs!=_abs_sel || !Equal(T.text, text, true) || T.extra!=extra)
    {
      _abs_sel=abs;
-      if(!(flag&COMBOBOX_CONST_TEXT))T.text=text;
+      if(!(flag&COMBOBOX_CONST_TEXT)){T.text=text; T.extra=extra;}
       call();
    }
    return T;

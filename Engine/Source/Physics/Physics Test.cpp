@@ -178,8 +178,8 @@ void ActorInfo::set(PxShape *shape)
    {
       PxRigidDynamic *rigid_dynamic=_actor->is<PxRigidDynamic>();
 
-      collision=                   FlagTest((UInt)        shape->getFlags         (),     PxShapeFlag::eSIMULATION_SHAPE) ;
-      dynamic  =(rigid_dynamic && !FlagTest((UInt)rigid_dynamic->getRigidBodyFlags(), PxRigidBodyFlag::eKINEMATIC       ));
+      collision=                  FlagOn ((UInt)        shape->getFlags         (),     PxShapeFlag::eSIMULATION_SHAPE) ;
+      dynamic  =(rigid_dynamic && FlagOff((UInt)rigid_dynamic->getRigidBodyFlags(), PxRigidBodyFlag::eKINEMATIC       ));
       group    =      shape->getSimulationFilterData().word0;
       user     =     _actor->userData;
       obj      =(Ptr)_actor->getName();
@@ -975,7 +975,7 @@ void ActorInfo::set(RigidBody *actor)
 {
    if(T._actor=actor)
    {
-      collision=!FlagTest(actor->getCollisionFlags(), btCollisionObject::CF_NO_CONTACT_RESPONSE);
+      collision= FlagOff(actor->getCollisionFlags(), btCollisionObject::CF_NO_CONTACT_RESPONSE);
       dynamic  =!actor->isStaticOrKinematicObject();
       group    = actor->getBroadphaseProxy()->m_collisionFilterGroup;
       user     = actor->user;
@@ -1004,8 +1004,8 @@ struct ContactResultCallback : btCollisionWorld::ContactResultCallback
 	{
     C btCollisionObject &colObj0=*colObj0Wrap->m_collisionObject,
                         &colObj1=*colObj1Wrap->m_collisionObject;
-	   if((!test || &colObj0!=test) && !FlagTest(colObj0.getCollisionFlags(), btCollisionObject::CF_NO_CONTACT_RESPONSE)  // Actor.collision()==true
-	   || (!test || &colObj1!=test) && !FlagTest(colObj1.getCollisionFlags(), btCollisionObject::CF_NO_CONTACT_RESPONSE)) // Actor.collision()==true
+	   if((!test || &colObj0!=test) && FlagOff(colObj0.getCollisionFlags(), btCollisionObject::CF_NO_CONTACT_RESPONSE)  // Actor.collision()==true
+	   || (!test || &colObj1!=test) && FlagOff(colObj1.getCollisionFlags(), btCollisionObject::CF_NO_CONTACT_RESPONSE)) // Actor.collision()==true
 	   {
 	      hit=true;
 	   }
@@ -1037,7 +1037,7 @@ struct ContactResultCallbackAll : btCollisionWorld::ContactResultCallback
        C btCollisionObject &colObj0=*colObj0Wrap->m_collisionObject,
                            &colObj1=*colObj1Wrap->m_collisionObject;
 	      if(RigidBody *rb=(RigidBody*)((&colObj0!=test) ? colObj0 : colObj1).getUserPointer())
-	         if(!FlagTest(rb->getCollisionFlags(), btCollisionObject::CF_NO_CONTACT_RESPONSE)) // Actor.collision()==true
+	         if(FlagOff(rb->getCollisionFlags(), btCollisionObject::CF_NO_CONTACT_RESPONSE)) // Actor.collision()==true
          {
             ActorInfo ai; ai.set(rb); if(!callback->hit(ai))callback=null;
          }
@@ -1277,7 +1277,7 @@ struct ConvexResultCallback : btCollisionWorld::ConvexResultCallback
 	virtual btScalar addSingleResult(btCollisionWorld::LocalConvexResult& convexResult, bool normalInWorldSpace)
 	{
 	   if(RigidBody *actor=(RigidBody*)convexResult.m_hitCollisionObject)
-	      if(!FlagTest(actor->getCollisionFlags(), btCollisionObject::CF_NO_CONTACT_RESPONSE)) // Actor.collision()==true
+	      if(FlagOff(actor->getCollisionFlags(), btCollisionObject::CF_NO_CONTACT_RESPONSE)) // Actor.collision()==true
 	   {
 	      if(phys_hit)if(!hit || convexResult.m_hitFraction<phys_hit->frac)
          {
@@ -1370,7 +1370,7 @@ struct ConvexResultCallbackAll : btCollisionWorld::ConvexResultCallback
 	{
 	   if(callback)
 	      if(RigidBody *actor=(RigidBody*)convexResult.m_hitCollisionObject)
-	         if(!FlagTest(actor->getCollisionFlags(), btCollisionObject::CF_NO_CONTACT_RESPONSE)) // Actor.collision()==true
+	         if(FlagOff(actor->getCollisionFlags(), btCollisionObject::CF_NO_CONTACT_RESPONSE)) // Actor.collision()==true
 	   {
 	      phys_hit.set(actor);
          phys_hit.face=(convexResult.m_localShapeInfo ? convexResult.m_localShapeInfo->m_triangleIndex : -1);
@@ -1464,7 +1464,7 @@ Bool Actor::sweep(C Vec &move, PhysHit *phys_hit, UInt groups)C
       virtual btScalar addSingleResult(btCollisionWorld::LocalConvexResult& convexResult, bool normalInWorldSpace)
       {
          if(RigidBody *actor=(RigidBody*)convexResult.m_hitCollisionObject)
-	         if(!FlagTest(actor->getCollisionFlags(), btCollisionObject::CF_NO_CONTACT_RESPONSE)) // Actor.collision()==true
+	         if(FlagOff(actor->getCollisionFlags(), btCollisionObject::CF_NO_CONTACT_RESPONSE)) // Actor.collision()==true
          {
             if(phys_hit)if(!hit || convexResult.m_hitFraction<phys_hit->frac)
             {
@@ -1540,7 +1540,7 @@ void Actor::sweep(C Vec &move, PhysHitCallback &callback, UInt groups)C
       {
          if(callback)
             if(RigidBody *actor=(RigidBody*)convexResult.m_hitCollisionObject)
-	            if(!FlagTest(actor->getCollisionFlags(), btCollisionObject::CF_NO_CONTACT_RESPONSE)) // Actor.collision()==true
+	            if(FlagOff(actor->getCollisionFlags(), btCollisionObject::CF_NO_CONTACT_RESPONSE)) // Actor.collision()==true
          {
 	         phys_hit.set(actor);
             phys_hit.face=(convexResult.m_localShapeInfo ? convexResult.m_localShapeInfo->m_triangleIndex : -1);

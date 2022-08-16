@@ -46,6 +46,8 @@ constexpr UInt   Unsigned(Int    x) {return x;}
 constexpr UInt   Unsigned(UInt   x) {return x;}
 constexpr ULong  Unsigned(Long   x) {return x;}
 constexpr ULong  Unsigned(ULong  x) {return x;}
+
+T2(TYPE, RET_TYPE) constexpr ENABLE_IF_ENUM(TYPE, RET_TYPE) Unsigned(TYPE x) {return Unsigned(ENUM_TYPE(TYPE)(x));}
 /******************************************************************************/
 template<typename TYPE, Int elms>   constexpr Int Elms(C TYPE (&Array)[elms]) {return elms;} // get number of elements in array
 
@@ -58,8 +60,13 @@ constexpr Bool InRange(Long  i, Long  elms) {return ULong(i)<ULong(elms);} // if
 constexpr Bool InRange(Long  i, ULong elms) {return ULong(i)<ULong(elms);} // if 'i' index is in range "0..elms-1", this assumes that "elms>=0"
 constexpr Bool InRange(ULong i, ULong elms) {return ULong(i)<ULong(elms);} // if 'i' index is in range "0..elms-1", this assumes that "elms>=0"
 
-T1(TYPE) constexpr ENABLE_IF_ENUM(TYPE, Bool) InRange(Int  i, TYPE enum_value) {return Unsigned(i)<Unsigned(ENUM_TYPE(TYPE)(enum_value));} // template specialization for enums
-T1(TYPE) constexpr ENABLE_IF_ENUM(TYPE, Bool) InRange(Long i, TYPE enum_value) {return Unsigned(i)<Unsigned(ENUM_TYPE(TYPE)(enum_value));} // template specialization for enums
+T1(TYPE) constexpr ENABLE_IF_ENUM(TYPE, Bool) InRange(Int  i, TYPE   elms) {return Unsigned(i)<Unsigned(elms);} // template specialization for enums
+T1(TYPE) constexpr ENABLE_IF_ENUM(TYPE, Bool) InRange(UInt i, TYPE   elms) {return Unsigned(i)<Unsigned(elms);} // template specialization for enums
+T1(TYPE) constexpr ENABLE_IF_ENUM(TYPE, Bool) InRange(Long i, TYPE   elms) {return Unsigned(i)<Unsigned(elms);} // template specialization for enums
+T1(TYPE) constexpr ENABLE_IF_ENUM(TYPE, Bool) InRange(TYPE i, Int    elms) {return Unsigned(i)<Unsigned(elms);} // template specialization for enums
+T1(TYPE) constexpr ENABLE_IF_ENUM(TYPE, Bool) InRange(TYPE i, UInt   elms) {return Unsigned(i)<Unsigned(elms);} // template specialization for enums
+T1(TYPE) constexpr ENABLE_IF_ENUM(TYPE, Bool) InRange(TYPE i, ULong  elms) {return Unsigned(i)<Unsigned(elms);} // template specialization for enums
+T1(TYPE) constexpr ENABLE_IF_ENUM(TYPE, Bool) InRange(TYPE i, TYPE   elms) {return Unsigned(i)<Unsigned(elms);} // template specialization for enums
 
 T1(TYPE) DISABLE_IF_ENUM(TYPE, Bool) InRange(Int   i, C TYPE &container); // if 'i' index is in range of container, 'container' can be of many types, for example a C++ array (x[]), memory container ('Memc', 'Memb', ..) or any other type for which 'Elms' function was defined
 T1(TYPE) DISABLE_IF_ENUM(TYPE, Bool) InRange(UInt  i, C TYPE &container); // if 'i' index is in range of container, 'container' can be of many types, for example a C++ array (x[]), memory container ('Memc', 'Memb', ..) or any other type for which 'Elms' function was defined
@@ -82,8 +89,9 @@ constexpr inline Enum  operator^  (Enum  a, Enum b) {return  Enum  (   ENUM_TYPE
           inline Enum& operator&= (Enum &a, Enum b) {return (Enum&)( ((ENUM_TYPE(Enum)&)a) &= ENUM_TYPE(Enum)(b) );} \
           inline Enum& operator^= (Enum &a, Enum b) {return (Enum&)( ((ENUM_TYPE(Enum)&)a) ^= ENUM_TYPE(Enum)(b) );}
 
-T2(TA,TB   ) inline Bool FlagTest   (TA  flags, TB f           ) {return (flags&f)!=0;}                                   // check if 'f' flag is enabled                in 'flags', in case 'f' contains multiple options then this will succeed if any of them are enabled
-T2(TA,TB   ) inline Bool FlagAll    (TA  flags, TB f           ) {return (flags&f)==f;}                                   // check if 'f' flag is enabled                in 'flags', in case 'f' contains multiple options then this will succeed if all of them are enabled
+T2(TA,TB   ) inline Bool FlagOn     (TA  flags, TB f           ) {return (flags&f)!=0;}                                   // check if 'f' flag is  enabled               in 'flags', in case 'f' contains multiple options then this will succeed if any of them are  enabled
+T2(TA,TB   ) inline Bool FlagAll    (TA  flags, TB f           ) {return (flags&f)==f;}                                   // check if 'f' flag is  enabled               in 'flags', in case 'f' contains multiple options then this will succeed if all of them are  enabled
+T2(TA,TB   ) inline Bool FlagOff    (TA  flags, TB f           ) {return (flags&f)==0;}                                   // check if 'f' flag is disabled               in 'flags', in case 'f' contains multiple options then this will succeed if all of them are disabled
 T2(TA,TB   ) inline void FlagEnable (TA &flags, TB f           ) {flags|= f;}                                             // enable   'f' flag                           in 'flags'
 T2(TA,TB   ) inline void FlagDisable(TA &flags, TB f           ) {flags&=~f;}                                             // disable  'f' flag                           in 'flags'
 T2(TA,TB   ) inline void FlagToggle (TA &flags, TB f           ) {flags^= f;}                                             // toggle   'f' flag                           in 'flags'
@@ -195,6 +203,11 @@ UInt Shr(UInt x, Int i); // safe "x>>i", works ok on negative 'i', and 'i' great
 UInt Rol(UInt x, Int i); // safe "x ROL i" (Rotate Left ), works ok on negative 'i', and 'i' greater than 32
 UInt Ror(UInt x, Int i); // safe "x ROR i" (Rotate Right), works ok on negative 'i', and 'i' greater than 32
 
+Str SizeBytes(Long size, Char dot=','); // return size in      Bytes as text in a shortened version, example: SizeBytes(1024) -> "1,0 KB", SizeBytes(1024*1024) ->   "1,0 MB", SizeBytes(1024*1024*1024) ->       "1,0 GB"
+Str SizeKB   (Long size, Char dot=','); // return size in Kilo-Bytes as text in a shortened version, example: SizeKB   (1024) -> "1,0 KB", SizeKB   (1024*1024) -> "1 024 KB", SizeKB   (1024*1024*1024) -> "1 048 576 KB"
+Str SizeMB   (Long size, Char dot=','); // return size in Mega-Bytes as text in a shortened version, example: SizeMB   (1024) -> "0,0 MB", SizeMB   (1024*1024) ->   "1,0 MB", SizeMB   (1024*1024*1024) ->     "1 024 MB"
+Str SizeGB   (Long size, Char dot=','); // return size in Giga-Bytes as text in a shortened version, example: SizeGB   (1024) -> "0,0 GB", SizeGB   (1024*1024) ->   "0,0 GB", SizeMB   (1024*1024*1024) ->       "1,0 GB"
+
 void LogConsole(  Bool on=true);                  // open a console window which will include all messages that were passed to 'Log' and 'LogN' functions, if 'on' is set to false then the console window will be closed instead of opened, this function does not prevent from outputting messages to the log file, if you wish to output only to the console the please open the console using 'LogConsole' and clear the log file name using "LogName(S);" (this function works only on Windows)
 void LogName   (C Str &name   );   Str LogName(); // set/get name for the log file, default="log.txt" (null on Mobile platforms), specifying an empty file name prevents any writing to the file
 void LogDel    (              );                  // delete           the log file
@@ -205,55 +218,13 @@ void LogShow   (Bool thread_id, Bool date, Bool time, Bool cur_time); // set whi
 Bool ClipSet(C Str &text); // set system clipboard value to 'text'
 Str  ClipGet(           ); // get system clipboard value
 
-enum OS_VER : Byte // Operating System Version
-{
-   OS_UNKNOWN,
-
-   WINDOWS_UNKNOWN,
-   WINDOWS_2000,
-   WINDOWS_XP,
-   WINDOWS_XP_64,
-   WINDOWS_VISTA,
-   WINDOWS_7,
-   WINDOWS_8,
-   WINDOWS_10,
-   WINDOWS_11,
-   WINDOWS_SERVER_2003,
-   WINDOWS_SERVER_2003_R2,
-   WINDOWS_SERVER_2008,
-   WINDOWS_SERVER_2008_R2,
-   WINDOWS_SERVER_2012,
-   WINDOWS_SERVER_2012_R2,
-   WINDOWS_SERVER_2016,
-   WINDOWS_SERVER_2019,
-   WINDOWS_SERVER_2022,
-
-   OS_MAC,
-
-   OS_LINUX,
-
-   OS_ANDROID,
-
-   OS_IOS,
-
-   OS_NINTENDO_SWITCH,
-};
-       VecI4   OSVerNumber     (                  ); // get Operating System version number
-       OS_VER  OSVer           (                  ); // get Operating System version
-       OS_VER  OSGroup         (OS_VER ver=OSVer()); // get Operating System group, this ignores specific versions and returns just the main groups, such as WINDOWS_UNKNOWN, OS_MAC, OS_LINUX, OS_ANDROID, OS_IOS, OS_NINTENDO_SWITCH
-       CChar8* OSName          (OS_VER ver=OSVer()); // get Operating System name
-inline Bool    OSWindows       (OS_VER ver=OSVer()) {return ver>=WINDOWS_UNKNOWN && ver<=WINDOWS_SERVER_2022;} // if  Operating System is Windows
-inline Bool    OSMac           (OS_VER ver=OSVer()) {return ver==OS_MAC                                     ;} // if  Operating System is Mac
-inline Bool    OSLinux         (OS_VER ver=OSVer()) {return ver==OS_LINUX                                   ;} // if  Operating System is Linux
-inline Bool    OSAndroid       (OS_VER ver=OSVer()) {return ver==OS_ANDROID                                 ;} // if  Operating System is Android
-inline Bool    OSiOS           (OS_VER ver=OSVer()) {return ver==OS_IOS                                     ;} // if  Operating System is iOS
-inline Bool    OSNintendoSwitch(OS_VER ver=OSVer()) {return ver==OS_NINTENDO_SWITCH                         ;} // if  Operating System is Nintendo Switch
-
+Bool OSUserNameNeedsPermission(       ); // if calling 'OSUserName' might result in OS asking for permission
 Str  OSUserName (Bool short_name=false); // get the user name  of currently logged in user in the Operating System, on Android this requires PERMISSION_USER_NAME
 Str  OSUserEmail(                     ); // get the user email of currently logged in user in the Operating System, on Android this requires PERMISSION_USER_NAME, supported only on Android
 Bool OSUserIcon (Image &image         ); // get the user icon  of currently logged in user in the Operating System, supported only on Nintendo Switch
 
 void OSMsgBox(C Str &title, C Str &text, Bool error=false); // show OS message box, 'error'=if display as error or message
+void OSToast (              C Str &text                  ); // show OS message toast
 
 Bool Explore(C Str &name, Bool select=false                                      ); // explore selected 'name' location, 'select'=if explore the parent location instead, and inside it select desired element. This function will only open folders, drives, URL links using the System File Explorer or Browser, it will never run any programs. If 'name' points to a file, then its parent folder will be opened and the file will always be selected regardless of 'select', false on fail.
 Bool Run    (C Str &name, C Str &params=S, Bool hidden=false, Bool as_admin=false); // run     selected 'name' command/application/file/folder/drive/URL link, 'as_admin'=if run as administrator, Sample Usage: Run("C:/App.exe"), Run("http://www.esenthel.com"), false on fail
@@ -398,21 +369,20 @@ enum SYSTEM_PATH // System Path Type
 #endif
 };
 Str SystemPath(SYSTEM_PATH type); // get system path, Sample Usage: SystemPath(SP_PROG_FILES) -> "C:/Program Files"
-
-Str AndroidExpansionFileName(Int version, Bool main=true); // get Android Expansion File Name, 'version'=app build version associated with the expansion file, 'main'=if this is the main or patch expansion file
 /******************************************************************************/
 enum PERMISSION // Permissions
 {
-   PERMISSION_EXTERNAL_STORAGE, // allow accessing files outside of application folders
-   PERMISSION_LOCATION        , // allow accessing device location  using 'Location*' functions
-   PERMISSION_SOUND_RECORD    , // allow recording sounds           using 'SoundRecord'
-   PERMISSION_USER_NAME       , // allow accessing system user name using 'OSUserName' and 'OSUserEmail'
+   PERMISSION_EXTERNAL_STORAGE  , // allow accessing files outside of application folders                  [Supported Platforms: Android]
+   PERMISSION_LOCATION          , // allow accessing device location  using 'Location*' functions          [Supported Platforms: Android]
+   PERMISSION_SOUND_RECORD      , // allow recording sounds           using 'SoundRecord'                  [Supported Platforms: Android]
+   PERMISSION_USER_NAME         , // allow accessing system user name using 'OSUserName' and 'OSUserEmail' [Supported Platforms: Android]
+   PERMISSION_USER_COMMUNICATION, // allow communication between users                                     [Supported Platforms: NintendoSwitch]
 #if EE_PRIVATE
-   PERMISSION_NUM             , // number of permissions
+   PERMISSION_NUM               , // number of permissions
 #endif
 };
-Bool HasPermission(PERMISSION permission); // check if Application has specified 'permission', this function is only intended for Android, on other platforms it   always returns true
-void GetPermission(PERMISSION permission); // request                  specified 'permission', this function is only intended for Android, on other platforms it's always ignored
+Bool HasPermission(PERMISSION permission); // check if Application has specified 'permission'
+void GetPermission(PERMISSION permission); // request                  specified 'permission'
 #if EE_PRIVATE
 void RequirePermission(PERMISSION permission); // if(!HasPermission(permission))GetPermission(permission)
 #endif
@@ -612,6 +582,50 @@ Int Compare    (C DataRangeRel &a, C DataRangeRel &b);
 Int Compare    (C DataRangeAbs &a, C DataRangeAbs &b);
 Int CompareSize(C DataRangeRel &a, C DataRangeRel &b);
 /******************************************************************************/
+enum OS_VER : Byte // Operating System Version
+{
+   OS_UNKNOWN,
+
+   WINDOWS_UNKNOWN,
+   WINDOWS_2000,
+   WINDOWS_XP,
+   WINDOWS_XP_64,
+   WINDOWS_VISTA,
+   WINDOWS_7,
+   WINDOWS_8,
+   WINDOWS_10,
+   WINDOWS_11,
+   WINDOWS_SERVER_2003,
+   WINDOWS_SERVER_2003_R2,
+   WINDOWS_SERVER_2008,
+   WINDOWS_SERVER_2008_R2,
+   WINDOWS_SERVER_2012,
+   WINDOWS_SERVER_2012_R2,
+   WINDOWS_SERVER_2016,
+   WINDOWS_SERVER_2019,
+   WINDOWS_SERVER_2022,
+
+   OS_MAC,
+
+   OS_LINUX,
+
+   OS_ANDROID,
+
+   OS_IOS,
+
+   OS_NINTENDO_SWITCH,
+};
+       VecI4   OSVerNumber     (                  ); // get Operating System version number
+       OS_VER  OSVer           (                  ); // get Operating System version
+       OS_VER  OSGroup         (OS_VER ver=OSVer()); // get Operating System group, this ignores specific versions and returns just the main groups, such as WINDOWS_UNKNOWN, OS_MAC, OS_LINUX, OS_ANDROID, OS_IOS, OS_NINTENDO_SWITCH
+       CChar8* OSName          (OS_VER ver=OSVer()); // get Operating System name
+inline Bool    OSWindows       (OS_VER ver=OSVer()) {return ver>=WINDOWS_UNKNOWN && ver<=WINDOWS_SERVER_2022;} // if  Operating System is Windows
+inline Bool    OSMac           (OS_VER ver=OSVer()) {return ver==OS_MAC                                     ;} // if  Operating System is Mac
+inline Bool    OSLinux         (OS_VER ver=OSVer()) {return ver==OS_LINUX                                   ;} // if  Operating System is Linux
+inline Bool    OSAndroid       (OS_VER ver=OSVer()) {return ver==OS_ANDROID                                 ;} // if  Operating System is Android
+inline Bool    OSiOS           (OS_VER ver=OSVer()) {return ver==OS_IOS                                     ;} // if  Operating System is iOS
+inline Bool    OSNintendoSwitch(OS_VER ver=OSVer()) {return ver==OS_NINTENDO_SWITCH                         ;} // if  Operating System is Nintendo Switch
+/******************************************************************************/
 enum LANG_TYPE : Byte
 {
 #ifndef _WINNT_
@@ -740,7 +754,9 @@ enum LANG_TYPE : Byte
    LANG_YORUBA       =0x6A,
    LANG_ZULU         =0x35,
 #endif
-   LANG_UNKNOWN=LANG_NEUTRAL,
+   LANG_NONE=LANG_NEUTRAL,
+
+   LANG_ENGLISH_K=0xFF,
 
    EN=LANG_ENGLISH   ,
    CN=LANG_CHINESE   ,
@@ -756,7 +772,262 @@ enum LANG_TYPE : Byte
    TH=LANG_THAI      ,
 };
 LANG_TYPE OSLanguage        (              ); // get Operating System Language
-LANG_TYPE   LanguageCode    (   C Str &lang); // get language      from language code
+LANG_TYPE   LanguageCode    (CChar8   *code); // get language      from language code
+LANG_TYPE   LanguageCode    (C Str    &code); // get language      from language code
 CChar8*     LanguageCode    (LANG_TYPE lang); // get language code from language
+CChar8*     LanguageName    (LANG_TYPE lang); // get language name from language
 Str         LanguageSpecific(LANG_TYPE lang); // get specific alphabet characters for the selected language
+/******************************************************************************/
+enum COUNTRY : Byte
+{
+   COUNTRY_NONE,
+   COUNTRY_AFGHANISTAN,
+   COUNTRY_ALBANIA,
+   COUNTRY_ALGERIA,
+   COUNTRY_AMERICAN_SAMOA,
+   COUNTRY_ANDORRA,
+   COUNTRY_ANGOLA,
+   COUNTRY_ANGUILLA,
+   COUNTRY_ANTARCTICA,
+   COUNTRY_ANTIGUA_AND_BARBUDA,
+   COUNTRY_ARGENTINA,
+   COUNTRY_ARMENIA,
+   COUNTRY_ARUBA,
+   COUNTRY_AUSTRALIA,
+   COUNTRY_AUSTRIA,
+   COUNTRY_AZERBAIJAN,
+   COUNTRY_BAHAMAS,
+   COUNTRY_BAHRAIN,
+   COUNTRY_BANGLADESH,
+   COUNTRY_BARBADOS,
+   COUNTRY_BELARUS,
+   COUNTRY_BELGIUM,
+   COUNTRY_BELIZE,
+   COUNTRY_BENIN,
+   COUNTRY_BERMUDA,
+   COUNTRY_BHUTAN,
+   COUNTRY_BOLIVIA,
+   COUNTRY_BOSNIA_AND_HERZEGOVINA,
+   COUNTRY_BOTSWANA,
+   COUNTRY_BRAZIL,
+   COUNTRY_BRITISH_INDIAN_OCEAN_TERRITORY,
+   COUNTRY_BRITISH_VIRGIN_ISLANDS,
+   COUNTRY_BRUNEI,
+   COUNTRY_BULGARIA,
+   COUNTRY_BURKINA_FASO,
+   COUNTRY_BURUNDI,
+   COUNTRY_CAMBODIA,
+   COUNTRY_CAMEROON,
+   COUNTRY_CANADA,
+   COUNTRY_CAPE_VERDE,
+   COUNTRY_CAYMAN_ISLANDS,
+   COUNTRY_CENTRAL_AFRICAN_REPUBLIC,
+   COUNTRY_CHAD,
+   COUNTRY_CHILE,
+   COUNTRY_CHINA,
+   COUNTRY_CHRISTMAS_ISLAND,
+   COUNTRY_COCOS_ISLANDS,
+   COUNTRY_COLOMBIA,
+   COUNTRY_COMOROS,
+   COUNTRY_COOK_ISLANDS,
+   COUNTRY_COSTA_RICA,
+   COUNTRY_CROATIA,
+   COUNTRY_CUBA,
+   COUNTRY_CURACAO,
+   COUNTRY_CYPRUS,
+   COUNTRY_CZECH_REPUBLIC,
+   COUNTRY_DEMOCRATIC_REPUBLIC_OF_THE_CONGO,
+   COUNTRY_DENMARK,
+   COUNTRY_DJIBOUTI,
+   COUNTRY_DOMINICA,
+   COUNTRY_DOMINICAN_REPUBLIC,
+   COUNTRY_EAST_TIMOR,
+   COUNTRY_ECUADOR,
+   COUNTRY_EGYPT,
+   COUNTRY_EL_SALVADOR,
+   COUNTRY_EQUATORIAL_GUINEA,
+   COUNTRY_ERITREA,
+   COUNTRY_ESTONIA,
+   COUNTRY_ETHIOPIA,
+   COUNTRY_FALKLAND_ISLANDS,
+   COUNTRY_FAROE_ISLANDS,
+   COUNTRY_FIJI,
+   COUNTRY_FINLAND,
+   COUNTRY_FRANCE,
+   COUNTRY_FRENCH_POLYNESIA,
+   COUNTRY_GABON,
+   COUNTRY_GAMBIA,
+   COUNTRY_GEORGIA,
+   COUNTRY_GERMANY,
+   COUNTRY_GHANA,
+   COUNTRY_GIBRALTAR,
+   COUNTRY_GREECE,
+   COUNTRY_GREENLAND,
+   COUNTRY_GRENADA,
+   COUNTRY_GUAM,
+   COUNTRY_GUATEMALA,
+   COUNTRY_GUERNSEY,
+   COUNTRY_GUINEA,
+   COUNTRY_GUINEA_BISSAU,
+   COUNTRY_GUYANA,
+   COUNTRY_HAITI,
+   COUNTRY_HONDURAS,
+   COUNTRY_HONG_KONG,
+   COUNTRY_HUNGARY,
+   COUNTRY_ICELAND,
+   COUNTRY_INDIA,
+   COUNTRY_INDONESIA,
+   COUNTRY_IRAN,
+   COUNTRY_IRAQ,
+   COUNTRY_IRELAND,
+   COUNTRY_ISLE_OF_MAN,
+   COUNTRY_ISRAEL,
+   COUNTRY_ITALY,
+   COUNTRY_IVORY_COAST,
+   COUNTRY_JAMAICA,
+   COUNTRY_JAPAN,
+   COUNTRY_JERSEY,
+   COUNTRY_JORDAN,
+   COUNTRY_KAZAKHSTAN,
+   COUNTRY_KENYA,
+   COUNTRY_KIRIBATI,
+   COUNTRY_KOSOVO,
+   COUNTRY_KUWAIT,
+   COUNTRY_KYRGYZSTAN,
+   COUNTRY_LAOS,
+   COUNTRY_LATVIA,
+   COUNTRY_LEBANON,
+   COUNTRY_LESOTHO,
+   COUNTRY_LIBERIA,
+   COUNTRY_LIBYA,
+   COUNTRY_LIECHTENSTEIN,
+   COUNTRY_LITHUANIA,
+   COUNTRY_LUXEMBOURG,
+   COUNTRY_MACAU,
+   COUNTRY_MACEDONIA,
+   COUNTRY_MADAGASCAR,
+   COUNTRY_MALAWI,
+   COUNTRY_MALAYSIA,
+   COUNTRY_MALDIVES,
+   COUNTRY_MALI,
+   COUNTRY_MALTA,
+   COUNTRY_MARSHALL_ISLANDS,
+   COUNTRY_MAURITANIA,
+   COUNTRY_MAURITIUS,
+   COUNTRY_MAYOTTE,
+   COUNTRY_MEXICO,
+   COUNTRY_MICRONESIA,
+   COUNTRY_MOLDOVA,
+   COUNTRY_MONACO,
+   COUNTRY_MONGOLIA,
+   COUNTRY_MONTENEGRO,
+   COUNTRY_MONTSERRAT,
+   COUNTRY_MOROCCO,
+   COUNTRY_MOZAMBIQUE,
+   COUNTRY_MYANMAR,
+   COUNTRY_NAMIBIA,
+   COUNTRY_NAURU,
+   COUNTRY_NEPAL,
+   COUNTRY_NETHERLANDS,
+   COUNTRY_NETHERLANDS_ANTILLES,
+   COUNTRY_NEW_CALEDONIA,
+   COUNTRY_NEW_ZEALAND,
+   COUNTRY_NICARAGUA,
+   COUNTRY_NIGER,
+   COUNTRY_NIGERIA,
+   COUNTRY_NIUE,
+   COUNTRY_NORTH_KOREA,
+   COUNTRY_NORTHERN_MARIANA_ISLANDS,
+   COUNTRY_NORWAY,
+   COUNTRY_OMAN,
+   COUNTRY_PAKISTAN,
+   COUNTRY_PALAU,
+   COUNTRY_PALESTINE,
+   COUNTRY_PANAMA,
+   COUNTRY_PAPUA_NEW_GUINEA,
+   COUNTRY_PARAGUAY,
+   COUNTRY_PERU,
+   COUNTRY_PHILIPPINES,
+   COUNTRY_PITCAIRN,
+   COUNTRY_POLAND,
+   COUNTRY_PORTUGAL,
+   COUNTRY_PUERTO_RICO,
+   COUNTRY_QATAR,
+   COUNTRY_REPUBLIC_OF_THE_CONGO,
+   COUNTRY_REUNION,
+   COUNTRY_ROMANIA,
+   COUNTRY_RUSSIA,
+   COUNTRY_RWANDA,
+   COUNTRY_SAINT_BARTHELEMY,
+   COUNTRY_SAINT_HELENA,
+   COUNTRY_SAINT_KITTS_AND_NEVIS,
+   COUNTRY_SAINT_LUCIA,
+   COUNTRY_SAINT_MARTIN,
+   COUNTRY_SAINT_PIERRE_AND_MIQUELON,
+   COUNTRY_SAINT_VINCENT_AND_THE_GRENADINES,
+   COUNTRY_SAMOA,
+   COUNTRY_SAN_MARINO,
+   COUNTRY_SAO_TOME_AND_PRINCIPE,
+   COUNTRY_SAUDI_ARABIA,
+   COUNTRY_SENEGAL,
+   COUNTRY_SERBIA,
+   COUNTRY_SEYCHELLES,
+   COUNTRY_SIERRA_LEONE,
+   COUNTRY_SINGAPORE,
+   COUNTRY_SINT_MAARTEN,
+   COUNTRY_SLOVAKIA,
+   COUNTRY_SLOVENIA,
+   COUNTRY_SOLOMON_ISLANDS,
+   COUNTRY_SOMALIA,
+   COUNTRY_SOUTH_AFRICA,
+   COUNTRY_SOUTH_KOREA,
+   COUNTRY_SOUTH_SUDAN,
+   COUNTRY_SPAIN,
+   COUNTRY_SRI_LANKA,
+   COUNTRY_SUDAN,
+   COUNTRY_SURINAME,
+   COUNTRY_SVALBARD_AND_JAN_MAYEN,
+   COUNTRY_SWAZILAND,
+   COUNTRY_SWEDEN,
+   COUNTRY_SWITZERLAND,
+   COUNTRY_SYRIA,
+   COUNTRY_TAIWAN,
+   COUNTRY_TAJIKISTAN,
+   COUNTRY_TANZANIA,
+   COUNTRY_THAILAND,
+   COUNTRY_TOGO,
+   COUNTRY_TOKELAU,
+   COUNTRY_TONGA,
+   COUNTRY_TRINIDAD_AND_TOBAGO,
+   COUNTRY_TUNISIA,
+   COUNTRY_TURKEY,
+   COUNTRY_TURKMENISTAN,
+   COUNTRY_TURKS_AND_CAICOS_ISLANDS,
+   COUNTRY_TUVALU,
+   COUNTRY_US_VIRGIN_ISLANDS,
+   COUNTRY_UGANDA,
+   COUNTRY_UKRAINE,
+   COUNTRY_UNITED_ARAB_EMIRATES,
+   COUNTRY_UNITED_KINGDOM,
+   COUNTRY_UNITED_STATES,
+   COUNTRY_URUGUAY,
+   COUNTRY_UZBEKISTAN,
+   COUNTRY_VANUATU,
+   COUNTRY_VATICAN,
+   COUNTRY_VENEZUELA,
+   COUNTRY_VIETNAM,
+   COUNTRY_WALLIS_AND_FUTUNA,
+   COUNTRY_WESTERN_SAHARA,
+   COUNTRY_YEMEN,
+   COUNTRY_ZAMBIA,
+   COUNTRY_ZIMBABWE,
+   COUNTRY_NUM,
+};
+COUNTRY CountryCode2(CChar8 *code   ); // get country                 from country code (2  -letter)
+COUNTRY CountryCode2(C Str  &code   ); // get country                 from country code (2  -letter)
+COUNTRY CountryCode3(C Str  &code   ); // get country                 from country code (  3-letter)
+COUNTRY CountryCode (C Str  &code   ); // get country                 from country code (2/3-letter)
+CChar8* CountryCode2(COUNTRY country); // get country code (2-letter) from country      
+CChar8* CountryCode3(COUNTRY country); // get country code (3-letter) from country      
+CChar8* CountryName (COUNTRY country); // get country name            from country
 /******************************************************************************/

@@ -61,18 +61,22 @@ mutable Byte         _d_lock;
   CPtr   elmData(C Elm &elm )C {return          (Byte*)&elm/*+_data_offset*/ ;} // assumes that '_data_offset' is zero
    Elm*  dataElm( CPtr  data)C {return  (Elm *)((Byte*)data/*-_data_offset*/);} // assumes that '_data_offset' is zero
 
-   Elm*       findExact(CChar *file, Int    &stop);
-   Elm*       findElm  (CChar *file, CChar  *path);
-   Int  findDelayRemove(  Elm &elm);
-   Ptr     validElmData(  Elm &elm , Bool counted);
-   void      addToOrder(  Elm &elm);
-   void removeFromOrder(  Elm &elm);
-   Bool  lockedContains(C Elm *elm )C {return _memx.  contains(        elm  );} // this is NOT thread-safe
-   Int         absIndex(C Elm *elm )C {return _memx.  absIndex(        elm  );} // this is NOT thread-safe
-   Int       validIndex(C Elm *elm )C {return _memx.validIndex(        elm  );} // this is NOT thread-safe
-   Int         absIndex( CPtr  data)C {return         absIndex(dataElm(data));} // this is NOT thread-safe, assumes that '_data_offset' is zero
-   Int       validIndex( CPtr  data)C {return       validIndex(dataElm(data));} // this is NOT thread-safe, assumes that '_data_offset' is zero
-   void      removeData( CPtr  data, Bool counted);
+   Elm*        findExact(CChar *file, Int    &stop);
+   Elm*        findElm  (CChar *file, CChar  *path);
+   Int   findDelayRemove(  Elm &elm);
+   Ptr      validElmData(  Elm &elm , Bool counted);
+   void       addToOrder(  Elm &elm);
+   void  removeFromOrder(  Elm &elm);
+   Bool   lockedContains(C Elm *elm )C {return _memx.  contains(        elm  );} // this is NOT thread-safe
+   Int          absIndex(C Elm *elm )C {return _memx.  absIndex(        elm  );} // this is NOT thread-safe
+   Int        validIndex(C Elm *elm )C {return _memx.validIndex(        elm  );} // this is NOT thread-safe
+   Int          absIndex( CPtr  data)C {return         absIndex(dataElm(data));} // this is NOT thread-safe, assumes that '_data_offset' is zero
+   Int        validIndex( CPtr  data)C {return       validIndex(dataElm(data));} // this is NOT thread-safe, assumes that '_data_offset' is zero
+   Bool              has( CPtr  data)C;
+   void lockedIncRef    ( CPtr  data);
+   void lockedRemoveData( CPtr  data, Bool counted);
+   void       removeData( CPtr  data, Bool counted);
+   void  incRefContained( CPtr  data);
 #endif
    Ptr    find      (CChar *file, CChar *path, Bool counted);
    Ptr    find      (C UID &id  , CChar *path, Bool counted);
@@ -89,6 +93,7 @@ mutable Byte         _d_lock;
    UID    id        (CPtr   data                           )C;
    void   removeData(CPtr   data                           );
 
+   void incDecRef(CPtr inc, CPtr dec);
    void incRef(CPtr data);
    void decRef(CPtr data);
 

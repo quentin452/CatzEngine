@@ -1,7 +1,7 @@
 /******************************************************************************
 
    !! BEFORE RUNNING THIS TUTORIAL, PLEASE READ THE INSTRUCTIONS ON HOW TO SETUP FACEBOOK !!
-   !! INSTRUCTIONS ARE IN "Engine\Net\Facebook" Header File                      !!
+   !! INSTRUCTIONS ARE IN "Engine\Net\Facebook" Header File                               !!
 
 /******************************************************************************/
 const bool IHaveReadInstructionsAtTheTop=false; // read the instructions above, then set this to true

@@ -749,7 +749,9 @@ C SHA2::Hash& SHA2::operator()()
 /******************************************************************************/
 UInt          CRC32Mem(CPtr data, Int size) {CRC32 hash; hash.update(data, size); return hash();}
 UInt       xxHash32Mem(CPtr data, Int size) {return XXH32(data, size, 0);}
+#pragma runtime_checks("", off)
 UInt    xxHash64_32Mem(CPtr data, Int size) {return XXH64(data, size, 0);}
+#pragma runtime_checks("", restore)
 ULong      xxHash64Mem(CPtr data, Int size) {return XXH64(data, size, 0);}
 UInt   SpookyHash32Mem(CPtr data, Int size) {return            _SpookyHash  ::Hash32 (data, size, 0);}
 ULong  SpookyHash64Mem(CPtr data, Int size) {return            _SpookyHash  ::Hash64 (data, size, 0);}

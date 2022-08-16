@@ -106,10 +106,10 @@ class Projects
       t_email          .create("E-mail", &ts_left);
       t_pass           .create("Password", &ts_left);
       t_path_desc      .create("This is the path where files of all your projects will be kept.", &ts_small_left_up);
-      t_login_desc     .create("Log in to the server to create games in collaborative mode with other people (this is optional).", &ts_small_left_up).auto_line=AUTO_LINE_SPACE_SPLIT;
+      t_login_desc     .create("Log in to the server to create games in collaborative mode with other people (this is optional).", &ts_small_left_up).auto_line=true;
       t_projects       .create("Projects");
       t_editor_network_interface     .create("Editor Network Interface", &ts_left_down);
-      t_editor_network_interface_desc.create("Allow programs to connect to this editor and access your projects (this is optional). This allows you to create and use addons to the editor. Only programs from this computer will be able to connect.", &ts_small_left_up).auto_line=AUTO_LINE_SPACE_SPLIT;
+      t_editor_network_interface_desc.create("Allow programs to connect to this editor and access your projects (this is optional). This allows you to create and use addons to the editor. Only programs from this computer will be able to connect.", &ts_small_left_up).auto_line=true;
         editor_network_interface     .create("Allow Incoming Connections").func(HostEditorServer, T).mode=BUTTON_TOGGLE;
       proj_path_explore.create("Explore").func(PathExplore, T);
       proj_path        .create(ProjectsPath).func(PathChanged, T, true).maxLength(1024); // set immediate change in case we set this through Editor Network Interface, and we need the change to be performed immediately
@@ -156,8 +156,7 @@ class Projects
       t_editor_network_interface     .pos (editor_network_interface.rect().lu());
       t_editor_network_interface_desc.rect(Rect_LU(editor_network_interface.rect().ld(), proj_path.rect().w(), 0));
 
-      if(TextStyle *text_style=t_login_desc.getTextStyle())
-         proj_region.rect(Rect(-D.w()+0.05, -D.h()+0.06, D.w()-0.05, t_login_desc.rect().min.y-0.08-text_style.lineHeight()*text_style.textLines(t_login_desc(), t_login_desc.rect().w(), t_login_desc.auto_line)));
+      proj_region    .rect(Rect(-D.w()+0.05, -D.h()+0.06, D.w()-0.05, t_login_desc.rect().min.y-t_login_desc.textSize().y-0.08));
       t_projects     .pos (proj_region.rect().up()+Vec2(0, 0.03));
       new_proj       .rect(Rect_RD(proj_region.rect().ru(), 0.3 , h));
       import_proj    .rect(Rect_RU(new_proj   .rect().lu(), 0.55, h));
@@ -510,7 +509,7 @@ class RemoveProjWin : ClosableWindow
    void create()
    {
       Gui+= super.create(Rect_C(0, 0, 0.75, 0.37), "Delete Project").hide(); button[2].func(HideProjsAct, SCAST(GuiObj, T)).show();
-      T  +=t_name.create(Rect_C(clientWidth()/2, -0.11, 0.7, 0.0), "Are you sure you wish to delete selected project from your disk?"); t_name.auto_line=AUTO_LINE_SPACE_SPLIT;
+      T  +=t_name.create(Rect_C(clientWidth()/2, -0.11, 0.7, 0.0), "Are you sure you wish to delete selected project from your disk?"); t_name.auto_line=true;
       T  +=    ok.create(Rect_C(clientWidth()/2, -0.23, 0.3, 0.06), "OK").func(OK, T);
    }
 }

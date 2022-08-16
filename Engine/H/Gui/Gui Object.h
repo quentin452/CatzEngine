@@ -244,6 +244,7 @@ const_mem_addr struct GuiObj // Gui Object interface inherited by all Gui Object
    GuiObjChildren* children(); // get children container (null if none)
    void      notifyChildrenOfClientRectChange(C Rect *old_client, C Rect *new_client);
    void      notifyParentOfRectChange        (C Rect &old_rect  ,   Bool  old_visible);
+   void      notifyParentOfRectChange        ();
 #endif
 
    virtual ~GuiObj(); // set virtual destructor so 'Delete' can be used together with extended classes

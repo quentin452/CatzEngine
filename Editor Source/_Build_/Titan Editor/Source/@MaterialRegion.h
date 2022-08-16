@@ -91,10 +91,12 @@ public:
    static Str  Tech(C MaterialRegion &mr          );
    static void Tech(  MaterialRegion &mr, C Str &t);
 
-   static cchar8 *DownsizeTexMobileText[]
-; ASSERT(MaxMaterialDownsize==3);
-   static Str  DownsizeTexMobile(C MaterialRegion &mr          );
-   static void DownsizeTexMobile(  MaterialRegion &mr, C Str &t);
+   static cchar8 *TexDownsizeText[]
+; ASSERT(MaxMaterialDownsize==4);
+   static Str  TexDownsizeMobile(C MaterialRegion &mr          );
+   static void TexDownsizeMobile(  MaterialRegion &mr, C Str &t);
+   static Str  TexDownsizeSwitch(C MaterialRegion &mr          );
+   static void TexDownsizeSwitch(  MaterialRegion &mr, C Str &t);
 
    class TexQualityND : NameDesc
    {
@@ -300,17 +302,17 @@ public:
 
    bool bigVisible()C;
 
-   void   setRGB         (C Vec                   &srgb              );
-   void   setNormal      (flt                    normal              );
-   void   setSmooth      (flt                    smooth              );
-   void   setReflect     (flt reflect_min, flt reflect_max           );
-   void resetAlpha       (                                           );
-   void cull             (bool                      on               );
-   void flipNrmY         (bool                      on               ); // 'rebuildBase' already calls 'setChanged' and 'toGui'
-   void smoothIsRough    (bool                      on               ); // 'rebuildBase' already calls 'setChanged' and 'toGui'
- //void maxTexSize       (Edit.MAX_TEX_SIZE         mts              ) {if(edit.max_tex_size       !=mts                                 ){        undos.set("mts"       ); edit.max_tex_size       =mts                              ; edit.       max_tex_size_time.getUTC(); setChanged(); toGui();}}
-   void downsizeTexMobile(byte                      ds               );  
-   void texQuality       (Edit::Material::TEX_QUALITY q, bool undo=true); // 'rebuildBase' already calls 'setChanged' and 'toGui'
+   void   setRGB     (C Vec                   &srgb              );
+   void   setNormal  (flt                    normal              );
+   void   setSmooth  (flt                    smooth              );
+   void   setReflect (flt reflect_min, flt reflect_max           );
+   void resetAlpha   (                                           );
+   void cull         (bool                      on               );
+   void flipNrmY     (bool                      on               ); // 'rebuildBase' already calls 'setChanged' and 'toGui'
+   void smoothIsRough(bool                      on               ); // 'rebuildBase' already calls 'setChanged' and 'toGui'
+ //void maxTexSize   (Edit.MAX_TEX_SIZE         mts              ) {if(edit.max_tex_size       !=mts                                 ){        undos.set("mts"       ); edit.max_tex_size       =mts                              ; edit.   max_tex_size_time.getUTC(); setChanged(); toGui();}}
+   void texDownsize  (TEX_SIZE_PLATFORM tsp, byte downsize       );  
+   void texQuality   (Edit::Material::TEX_QUALITY q, bool undo=true); // 'rebuildBase' already calls 'setChanged' and 'toGui'
 
    virtual void resizeBase(C VecI2 &size, bool relative=false);
    virtual void resizeBase0(C VecI2 &size, bool relative=false);

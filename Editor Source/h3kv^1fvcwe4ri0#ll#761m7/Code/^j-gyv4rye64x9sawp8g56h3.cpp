@@ -14,6 +14,11 @@ class CodeView : Region, Edit.CodeEditorInterface
    Memx<EEItem > items;
    Memc<EEItem*> items_sorted;
 
+   void clearAuto()
+   {
+      android_asset_packs=-1;
+   }
+
    virtual void configChangedDebug()override
    {
       Misc.build.menu("Debug"  ,  configDebug(), QUIET);
@@ -35,11 +40,15 @@ class CodeView : Region, Edit.CodeEditorInterface
       Misc.build.menu("Windows LIB"      , configEXE()==Edit.EXE_LIB  , QUIET);
       Misc.build.menu("Windows Universal", configEXE()==Edit.EXE_UWP  , QUIET);
       Misc.build.menu("Android APK"      , configEXE()==Edit.EXE_APK  , QUIET);
+      Misc.build.menu("Android AAB"      , configEXE()==Edit.EXE_AAB  , QUIET);
       Misc.build.menu("Mac APP"          , configEXE()==Edit.EXE_MAC  , QUIET);
       Misc.build.menu("iOS APP"          , configEXE()==Edit.EXE_IOS  , QUIET);
       Misc.build.menu("Linux"            , configEXE()==Edit.EXE_LINUX, QUIET);
       Misc.build.menu("Web"              , configEXE()==Edit.EXE_WEB  , QUIET);
       Misc.build.menu("Nintendo Switch"  , configEXE()==Edit.EXE_NS   , QUIET);
+      Misc.build.text=Edit.ShortName(configEXE());
+      Proj.refresh(false, true); // 'refresh' because 'finalPublish' depends on Platform 'configEXE', have to reset publish, set invalid refs (missing dependencies), warnings, etc.
+      Proj.elmChangedParentRemovePublish();
    }
    virtual void visibleChangedOptions      ()override {Misc.build.menu("View Options"           , visibleOptions      (), QUIET);}
    virtual void visibleChangedOpenedFiles  ()override {}
@@ -75,9 +84,12 @@ class CodeView : Region, Edit.CodeEditorInterface
    virtual ULong             appXboxLiveTitleID                 ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())return app_data.xbl_title_id           ; return super.appXboxLiveTitleID();}
    virtual UID               appXboxLiveSCID                    ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())return app_data.xbl_scid               ; return super.appXboxLiveSCID();}
    virtual Str               appGooglePlayLicenseKey            ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())return app_data.android_license_key    ; return super.appGooglePlayLicenseKey();}
+   virtual bool              appGooglePlayAssetDelivery         ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())return app_data.playAssetDelivery()    ; return super.appGooglePlayAssetDelivery();}
    virtual Str               appLocationUsageReason             ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())return app_data.location_usage_reason  ; return super.appLocationUsageReason();}
+   virtual Str               appNintendoInitialCode             ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())return app_data.nintendo_initial_code  ; return super.appNintendoInitialCode();}
    virtual ULong             appNintendoAppID                   ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())return app_data.nintendo_app_id        ; return super.appNintendoAppID();}
    virtual Str               appNintendoPublisherName           ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())return app_data.nintendo_publisher_name; return super.appNintendoPublisherName();}
+   virtual Str               appNintendoLegalInformation        ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())return app_data.nintendo_legal_info    ; return super.appNintendoLegalInformation();}
    virtual Int               appBuild                           ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())return app_data.build                  ; return super.appBuild();}
    virtual Long              appSaveSize                        ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())return app_data.save_size              ; return super.appSaveSize();}
    virtual ulong             appFacebookAppID                   ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())return app_data.fb_app_id              ; return super.appFacebookAppID();}
@@ -92,35 +104,41 @@ class CodeView : Region, Edit.CodeEditorInterface
    virtual UID               appGuiSkin                         ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())return app_data.gui_skin               ; return super.appGuiSkin();}
    virtual int               appEmbedEngineData                 ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())return app_data.embedEngineData ()     ; return super.appEmbedEngineData();}
    virtual Cipher*           appEmbedCipher                     ()override {static ProjectCipher cipher; /*if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())*/return cipher.set(Proj)(); return super.appEmbedCipher();}
-   virtual COMPRESS_TYPE     appEmbedCompress                   ()override {/*if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())*/return Proj.compress_type              ; return super.appEmbedCompress();}
-   virtual int               appEmbedCompressLevel              ()override {/*if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())*/return Proj.compress_level             ; return super.appEmbedCompressLevel();}
-   virtual DateTime          appEmbedSettingsTime               ()override {/*if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())*/return Max(Max(Proj.compress_type_time, Proj.compress_level_time), Max(Proj.cipher_time, Proj.cipher_key_time)).asDateTime(); return super.appEmbedSettingsTime();} // return Max of all params affecting PAKs
    virtual Bool              appPublishProjData                 ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())return app_data.publishProjData ()     ; return super.appPublishProjData();}
    virtual Bool              appPublishPhysxDll                 ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())return app_data.publishPhysxDll ()     ; return super.appPublishPhysxDll();}
    virtual Bool              appPublishSteamDll                 ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())return app_data.publishSteamDll ()     ; return super.appPublishSteamDll();}
    virtual Bool              appPublishOpenVRDll                ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())return app_data.publishOpenVRDll()     ; return super.appPublishOpenVRDll();}
    virtual Bool              appPublishDataAsPak                ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())return app_data.publishDataAsPak()     ; return super.appPublishDataAsPak();}
-   virtual Bool              appAndroidExpansion                ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())return app_data.androidExpansion()     ; return super.appAndroidExpansion();}
  //virtual Bool              appWindowsCodeSign                 ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())return app_data.windowsCodeSign ()     ; return super.appWindowsCodeSign();}
    virtual ImagePtr          appIcon                            ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())if(app_data.icon             .valid())return ImagePtr().get(Proj.gamePath(app_data.icon             )); return super.appIcon();}
    virtual ImagePtr          appImagePortrait                   ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())if(app_data.image_portrait   .valid())return ImagePtr().get(Proj.gamePath(app_data.image_portrait   )); return super.appImagePortrait();}
    virtual ImagePtr          appImageLandscape                  ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())if(app_data.image_landscape  .valid())return ImagePtr().get(Proj.gamePath(app_data.image_landscape  )); return super.appImageLandscape();}
    virtual ImagePtr          appNotificationIcon                ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())if(app_data.notification_icon.valid())return ImagePtr().get(Proj.gamePath(app_data.notification_icon)); return super.appNotificationIcon();}
+   virtual void              appLanguages                       (MemPtr<LANG_TYPE> langs)override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData()){langs=app_data.supported_languages; return;} return super.appLanguages(langs);}
+
+   virtual int  editorAddrPort(              )override {return EditServer.port        ();}
+   virtual void editorAddr    (SockAddr &addr)override {  addr=EditServer.localAddress();}
 
    virtual void focus()override {if(Mode.tabAvailable(MODE_CODE))Mode.set(MODE_CODE);}
 
    static void ImageGenerateProcess(ImageGenerate &generate, ptr user, int thread_index) {ThreadMayUseGPUData(); generate.process();}
-   static void ImageConvertProcess (ImageConvert  &convert , ptr user, int thread_index) {ThreadMayUseGPUData(); convert .process();}
 
-   virtual void appSpecificFiles(MemPtr<PakFileData> files)override
+   virtual COMPRESS_TYPE appEmbedCompress     (                           Edit.EXE_TYPE exe_type)override {/*if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())*/return     Proj.compress_type [ProjCompres(exe_type)]; return super.appEmbedCompress     (exe_type);}
+   virtual int           appEmbedCompressLevel(                           Edit.EXE_TYPE exe_type)override {/*if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())*/return     Proj.compress_level[ProjCompres(exe_type)]; return super.appEmbedCompressLevel(exe_type);}
+   virtual DateTime      appEmbedSettingsTime (                           Edit.EXE_TYPE exe_type)override {/*if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())*/return Max(Proj.compress_time [ProjCompres(exe_type)], Max(Proj.cipher_time, Proj.cipher_key_time)).asDateTime(); return super.appEmbedSettingsTime(exe_type);} // return Max of all params affecting PAKs
+   virtual void          appSpecificFiles     (MemPtr<PakFileData> files, Edit.EXE_TYPE exe_type)override
    {
       Memc<ImageGenerate> generate;
       Memc<ImageConvert>  convert;
-      Memt<Elm*>          app_elms; Proj.getActiveAppElms(app_elms);
-      AddPublishFiles(app_elms, files, generate, convert);
+      Memt<Elm*>          app_elms; Proj.getActiveAppElms(app_elms, exe_type);
+      AddPublishFiles(app_elms, files, generate, convert, exe_type);
       // all generations/conversions need to be processed here so 'files' point correctly
       WorkerThreads.process1(generate, ImageGenerateProcess);
-      WorkerThreads.process1(convert , ImageConvertProcess );
+      if(convert.elms()) // image compression is already multi-threaded, so allow only one at a time
+      {
+         ThreadMayUseGPUData       (); FREPAO(convert).process();
+         ThreadFinishedUsingGPUData();
+      }
    }
    virtual void appInvalidProperty(C Str &msg)override
    {
@@ -215,7 +233,7 @@ class CodeView : Region, Edit.CodeEditorInterface
    }
    virtual Str idToText(C UID &id, Bool *valid)override {return Proj.idToText(id, valid, ProjectEx.ID_SKIP_UNKNOWN);} // if we're in code then it already displays an ID, no need to write the same ID on top of that
 
-   virtual void getProjPublishElms(Memc<ElmLink> &elms)override
+   virtual void getProjPublishElms(Memc<ElmLink> &elms)override // get all publishable elements in the project, this is used for auto-complete
    {
       elms.clear(); FREPA(Proj.elms) // process in order
       {
@@ -301,7 +319,6 @@ class CodeView : Region, Edit.CodeEditorInterface
          data+=S+"#define    OPEN_VR "+appPublishOpenVRDll()+" // if Application properties have OpenVR enabled\n"; // display it here even if it's just Auto.cpp and doesn't affect other codes, so that the user sees the macro and can be aware of it
          data+=S+"const bool PUBLISH          =" +TextBool(publish)+"; // this is set to true when compiling for publishing\n";
          data+=S+"const bool EMBED_ENGINE_DATA=("+TextBool(appEmbedEngineData()!=0)+" && !WINDOWS_NEW && !MOBILE && !WEB); // this is set to true when \"Embed Engine Data\" was enabled in application settings, this is always disabled for WindowsNew, Mobile and Web builds\n";
-         data+=S+"const bool ANDROID_EXPANSION=" +TextBool(appAndroidExpansion())+"; // this is set to true when auto-download of Android Expansion Files is enabled\n";
        //data+=S+"cchar *C   EE_SDK_PATH      =                                     \""+Replace(SDKPath()                             , '\\', '/').tailSlash(false)+"\";\n";
        //data+=S+"cchar *C   EE_PHYSX_DLL_PATH=((WINDOWS_NEW || MOBILE || WEB) ? null             : PUBLISH ? u\"Bin\"             : u\""+Replace(BinPath()             , '\\', '/').tailSlash(false)+"\");\n";
          data+=S+"cchar *C    ENGINE_DATA_PATH=((WINDOWS_NEW || MOBILE || WEB) ? u\"Engine.pak\"  : PUBLISH ? u\"Bin/Engine.pak\"  : u\""+Replace(BinPath()+"Engine.pak", '\\', '/').tailSlash(false)+"\");\n";
@@ -310,6 +327,7 @@ class CodeView : Region, Edit.CodeEditorInterface
          data+=S+"cchar *C   APP_NAME         =u\""+CString(appName())+"\";\n";
          data+=S+"const int  APP_BUILD        ="+appBuild()+";\n";
          data+=S+"const UID  APP_GUI_SKIN     ="+appGuiSkin().asCString()+";\n";
+       //data+=S+"const bool GOOGLE_PLAY_ASSET_DELIVERY="+TextBool(appGooglePlayAssetDelivery())+"; // this is set to true when project data is managed by Google Play Asset Delivery\n";
          if(cchar8 *cipher_class=(InRange(Proj.cipher, CIPHER_NUM) ? CipherText[Proj.cipher].clazz : null))
          {
             data+=S+cipher_class+"   _PROJECT_CIPHER   ("; FREPA(Proj.cipher_key){if(i)data+=", "; data+=Proj.cipher_key[i];} data+=");\n";
@@ -331,13 +349,9 @@ if(appGuiSkin().valid())data+="   Gui.default_skin=APP_GUI_SKIN; // set default 
          data+="   if(load_engine_data )if(!EMBED_ENGINE_DATA)Paks.add(ENGINE_DATA_PATH); // load engine data\n";
          data+="   if(load_project_data) // load project data\n";
          data+="   {\n";
+      if(android_asset_packs>=0) // generate this code only when using asset packs
+       data+=S+"      if(ANDROID)LoadAndroidAssetPacks("+android_asset_packs+", PROJECT_CIPHER);else\n";
          data+="      if(WINDOWS_NEW || MOBILE || WEB || PUBLISH)Paks.add(PROJECT_DATA_PATH, PROJECT_CIPHER);else DataPath(PROJECT_DATA_PATH);\n";
-         data+="      if(ANDROID && ANDROID_EXPANSION)\n";
-         data+="      {\n";
-         data+="         REP(APP_BUILD+1)if(Paks.addTry(AndroidExpansionFileName(i), PROJECT_CIPHER))goto added;\n";
-         data+="         Exit(\"Can't load Project Data\");\n";
-         data+="      added:;\n";
-         data+="      }\n";
          data+="   }\n";
          data+="}\n";
          data+="void INIT_OBJ_TYPE() // this function will setup 'ObjType' enum used for object types\n";
@@ -399,10 +413,10 @@ if(appGuiSkin().valid())data+="   Gui.default_skin=APP_GUI_SKIN; // set default 
    {
       switch(mode)
       {
-         case Edit.BUILD_BUILD  :                 super.build  ();                  break;
-         case Edit.BUILD_PUBLISH: makeAuto(true); super.publish(); makeAuto(false); break;
-         case Edit.BUILD_PLAY   :                 super.play   ();                  break;
-         case Edit.BUILD_DEBUG  :                 super.debug  ();                  break;
+         case Edit.BUILD_BUILD  :                 super.build  ();                               break;
+         case Edit.BUILD_PUBLISH: makeAuto(true); super.publish(); clearAuto(); makeAuto(false); break; // 'clearAuto' so we already set correct codes with this 'makeAuto'
+         case Edit.BUILD_PLAY   :                 super.play   ();                               break;
+         case Edit.BUILD_DEBUG  :                 super.debug  ();                               break;
       }
    }
    void buildDo(Edit.BUILD_MODE mode)
@@ -432,10 +446,10 @@ if(appGuiSkin().valid())data+="   Gui.default_skin=APP_GUI_SKIN; // set default 
       makeAuto(true); // before exporting, reset auto header to force PUBLISH as true, important because exported projects are meant to be distributed to other computers, and compiled for publishing (such as EE Editor), in such case they can't be using paths from this computer, therefore publishing will make them use target paths
       if(ok=super.Export(mode))if(data)
       {
-         Edit.EXE_TYPE exe=(Edit.EXE_TYPE)-1;
+         Edit.EXE_TYPE exe=Edit.EXE_NUM;
          switch(mode)
          {
-            case Edit.EXPORT_EXE    : exe=configEXE(); break;
+            case Edit.EXPORT_EXE    : exe=configEXE() ; break;
             case Edit.EXPORT_ANDROID: exe=Edit.EXE_APK; break;
             case Edit.EXPORT_XCODE  : exe=Edit.EXE_IOS; break;
 
@@ -447,7 +461,7 @@ if(appGuiSkin().valid())data+="   Gui.default_skin=APP_GUI_SKIN; // set default 
             case Edit.EXPORT_VS2022:
                exe=Edit.EXE_UWP; break;
          }
-         if(exe>=0 && PublishDataNeeded(exe))StartPublish(S, exe, Edit.BUILD_PUBLISH, true);
+         if(exe!=Edit.EXE_NUM && PublishDataNeeded(exe))StartPublish(S, exe, Edit.BUILD_PUBLISH, true);
       }
       makeAuto(false); // restore after exporting
       return ok;
@@ -459,7 +473,7 @@ if(appGuiSkin().valid())data+="   Gui.default_skin=APP_GUI_SKIN; // set default 
       {
          if(PublishDataNeeded(exe_type)) // if data was already published then package is ready
          {
-            PublishSuccess(exe_name, S+"File name: "+GetBase(exe_name)+"\nFile size: "+FileSize(FSize(exe_name)));
+            PublishSuccess(exe_name, S+"File name: "+GetBase(exe_name)+"\nFile size: "+SizeBytes(FSize(exe_name)));
          }else // proceed to data publishing
          {
             StartPublish(exe_name, exe_type, build_mode);
@@ -557,6 +571,7 @@ CodeView CodeEdit;
 /******************************************************************************/
 class AppPropsEditor : PropWin
 {
+   static const LANG_TYPE Languages[]={EN, DE, LANG_DUTCH, FR, IT, SP, PO, PL, RU, JP, KO, CN, TH};
    enum ORIENT
    {
       ORIENT_PORTRAIT        ,
@@ -589,8 +604,8 @@ class AppPropsEditor : PropWin
    }; ASSERT(Edit.STORAGE_INTERNAL==0 && Edit.STORAGE_EXTERNAL==1 && Edit.STORAGE_AUTO==2);
    static ORIENT FlagToOrient(uint flag)
    {
-      bool portrait =FlagTest(flag, DIRF_Y),
-           landscape=FlagTest(flag, DIRF_X);
+      bool portrait =FlagOn(flag, DIRF_Y),
+           landscape=FlagOn(flag, DIRF_X);
       if( flag==(DIRF_X|DIRF_UP)  )return ORIENT_ALL_NO_DOWN     ;
       if((flag&DIRF_X)==DIRF_RIGHT)return ORIENT_LANDSCAPE_LOCKED;
       if((flag&DIRF_Y)==DIRF_UP   )return ORIENT_PORTRAIT_LOCKED ;
@@ -658,19 +673,20 @@ class AppPropsEditor : PropWin
    UID       elm_id=UIDZero;
    Elm      *elm=null;
    bool      changed=false, changed_headers=false;
-   Property *p_icon=null, *p_image_portrait=null, *p_image_landscape=null, *p_notification_icon;
+   Property *p_icon=null, *p_image_portrait=null, *p_image_landscape=null, *p_notification_icon=null, *p_languages=null;
    AppImage    icon     ,    image_portrait     ,    image_landscape     ,    notification_icon;
    Tabs      platforms;
    PropExs   win_props, mac_props, linux_props, android_props, ios_props, nintendo_props;
 
    static void Changed              (C Property &prop) {AppPropsEdit.setChanged();}
-   static void GetAndroidLicenseKey (  ptr           ) {Explore("https://play.google.com/apps/publish/");}
+   static void GetAndroidLicenseKey (  ptr           ) {Explore("https://play.google.com/console/");}
    static void GetFacebookAppID     (  ptr           ) {Explore("https://developers.facebook.com/apps");}
    static void GetAdMobApp          (  ptr           ) {Explore("https://apps.admob.com");}
    static void GetChartboostApp     (  ptr           ) {Explore("https://dashboard.chartboost.com/tools/sdk");}
    static void GetMicrosoftPublisher(  ptr           ) {Explore("https://partner.microsoft.com/en-us/dashboard/account/v3/organization/legalinfo");}
    static void GetXboxLive          (  ptr           ) {Explore("https://partner.microsoft.com/en-us/dashboard/windows/overview");}
    static void GetNintendo          (  ptr           ) {Explore("https://developer.nintendo.com/group/development/products");}
+   static void GetNintendoLegal     (  ptr           ) {Explore("https://slim.mng.nintendo.net/slim/home");}
 
    static void DirsWin                     (  AppPropsEditor &ap, C Str &text) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData()){app_data.dirs_windows=text; app_data.dirs_windows_time.getUTC(); ap.changed_headers=true;}}
    static Str  DirsWin                     (C AppPropsEditor &ap             ) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData())return app_data.dirs_windows; return S;}
@@ -720,12 +736,18 @@ class AppPropsEditor : PropWin
    static Str  XboxLiveTitleID             (C AppPropsEditor &ap             ) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData())if(app_data.xbl_title_id)return app_data.xbl_title_id; return S;}
    static void XboxLiveSCID                (  AppPropsEditor &ap, C Str &text) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData()){app_data.xbl_scid.fromCanonical(text); app_data.xbl_scid_time.getUTC();}}
    static Str  XboxLiveSCID                (C AppPropsEditor &ap             ) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData())if(app_data.xbl_scid.valid())return CaseDown(app_data.xbl_scid.asCanonical()); return S;}
+   static void NintendoInitialCode         (  AppPropsEditor &ap, C Str &text) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData()){app_data.nintendo_initial_code=text; app_data.nintendo_initial_code_time.getUTC();}}
+   static Str  NintendoInitialCode         (C AppPropsEditor &ap             ) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData())return app_data.nintendo_initial_code; return S;}
    static void NintendoAppID               (  AppPropsEditor &ap, C Str &text) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData()){app_data.nintendo_app_id=TextULong(text); app_data.nintendo_app_id_time.getUTC();}}
    static Str  NintendoAppID               (C AppPropsEditor &ap             ) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData())if(app_data.nintendo_app_id)return TextHex(app_data.nintendo_app_id, 16, 0, true); return S;}
    static void NintendoPublisherName       (  AppPropsEditor &ap, C Str &text) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData()){app_data.nintendo_publisher_name=text; app_data.nintendo_publisher_name_time.getUTC();}}
    static Str  NintendoPublisherName       (C AppPropsEditor &ap             ) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData())return app_data.nintendo_publisher_name; return S;}
+   static void NintendoLegalInfo           (  AppPropsEditor &ap, C Str &text) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData()){app_data.nintendo_legal_info=text; app_data.nintendo_legal_info_time.getUTC();}}
+   static Str  NintendoLegalInfo           (C AppPropsEditor &ap             ) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData())return app_data.nintendo_legal_info; return S;}
    static void AndroidLicenseKey           (  AppPropsEditor &ap, C Str &text) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData()){app_data.android_license_key=text; app_data.android_license_key_time.getUTC();}}
    static Str  AndroidLicenseKey           (C AppPropsEditor &ap             ) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData())return app_data.android_license_key; return S;}
+   static void PlayAssetDelivery           (  AppPropsEditor &ap, C Str &text) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData()){app_data.playAssetDelivery(TextBool(text)); app_data.play_asset_delivery_time.getUTC(); if(ap.elm_id==Proj.curApp())CodeEdit.makeAuto();}}
+   static Str  PlayAssetDelivery           (C AppPropsEditor &ap             ) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData())return app_data.playAssetDelivery(); return S;}
    static void Build                       (  AppPropsEditor &ap, C Str &text) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData()){app_data.build=TextInt(text); app_data.build_time.getUTC(); if(ap.elm_id==Proj.curApp())CodeEdit.makeAuto();}}
    static Str  Build                       (C AppPropsEditor &ap             ) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData())return app_data.build; return S;}
    static void SaveSize                    (  AppPropsEditor &ap, C Str &text) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData()){CalcValue cv; TextValue(text, cv, false); int v=(cv.type ? cv.asInt() : -1); app_data.save_size=((v>=0) ? v*1024*1024 : -1); app_data.save_size_time.getUTC();}}
@@ -756,8 +778,6 @@ class AppPropsEditor : PropWin
    static Str  PublishProjData             (C AppPropsEditor &ap             ) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData())return app_data.publishProjData(); return S;}
    static void PublishDataAsPak            (  AppPropsEditor &ap, C Str &text) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData()){app_data.publishDataAsPak(TextBool(text)).publish_data_as_pak_time.getUTC(); if(ap.elm_id==Proj.curApp())CodeEdit.makeAuto();}}
    static Str  PublishDataAsPak            (C AppPropsEditor &ap             ) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData())return app_data.publishDataAsPak(); return S;}
-   static void AndroidExpansion            (  AppPropsEditor &ap, C Str &text) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData()){app_data.androidExpansion(TextBool(text)).android_expansion_time.getUTC(); if(ap.elm_id==Proj.curApp())CodeEdit.makeAuto();}}
-   static Str  AndroidExpansion            (C AppPropsEditor &ap             ) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData())return app_data.androidExpansion(); return S;}
    static void PublishPhysxDll             (  AppPropsEditor &ap, C Str &text) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData()){app_data.publishPhysxDll(TextBool(text)).publish_physx_dll_time.getUTC(); if(ap.elm_id==Proj.curApp())CodeEdit.makeAuto();}}
    static Str  PublishPhysxDll             (C AppPropsEditor &ap             ) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData())return app_data.publishPhysxDll(); return S;}
    static void PublishSteamDll             (  AppPropsEditor &ap, C Str &text) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData()){app_data.publishSteamDll(TextBool(text)).publish_steam_dll_time.getUTC(); if(ap.elm_id==Proj.curApp()){CodeEdit.makeAuto(); CodeEdit.rebuildSymbols();}}}
@@ -768,6 +788,17 @@ class AppPropsEditor : PropWin
  //static Str  WindowsCodeSign             (C AppPropsEditor &ap             ) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData())return app_data.windowsCodeSign(); return S;}
    static void Orientation                 (  AppPropsEditor &ap, C Str &text) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData()){app_data.supported_orientations=OrientToFlag(ORIENT(TextInt(text))); app_data.supported_orientations_time.getUTC();}}
    static Str  Orientation                 (C AppPropsEditor &ap             ) {if(ap.elm)if(ElmApp *app_data=ap.elm.appData())return FlagToOrient(app_data.supported_orientations); return S;}
+   static void Language                    (ptr lang_ptr                     )
+   {
+      if(AppPropsEdit.p_languages && AppPropsEdit.elm)if(ElmApp *app_data=AppPropsEdit.elm.appData())
+      {
+         LANG_TYPE lang_type=LANG_TYPE((intptr)lang_ptr);
+         if(AppPropsEdit.p_languages.combobox.menu(LanguageName(lang_type)))app_data.supported_languages.include(lang_type);
+         else                                                               app_data.supported_languages.exclude(lang_type);
+         app_data.supported_languages_time.getUTC();
+         AppPropsEdit.setLanguages();
+      }
+   }
 
    enum PLATFORM
    {
@@ -798,9 +829,15 @@ class AppPropsEditor : PropWin
       flt h=0.05;
 
                         add("Package Name"               , MemberDesc(DATA_STR                               ).setFunc(Package                     , Package                     )).desc("Application package name.\nMust be in following format: \"com.company_name.app_name\"\nWhere 'company_name' is the name of developer/company,\nand 'app_name' is the name of the application.\n\nThe package name should be unique.\nThe name parts may contain uppercase or lowercase letters 'A' through 'Z', numbers, hyphens '-' and underscores '_'.\n\nOnce you publish your application, you cannot change the package name.\nThe package name defines your application's identity,\nso if you change it, then it is considered to be a different application\nand users of the previous version cannot update to the new version.");
-                        add("Build Number"               , MemberDesc(DATA_INT                               ).setFunc(Build                       , Build                       )).desc("Application build number.\nUsed to identify the version of the application.\nThis must be specified in order for the application to update correctly through online stores.\nTypically you should increase this value by 1 when making each new release.").min(1).mouseEditSpeed(2);
+                        add("Build Number"               , MemberDesc(DATA_INT                               ).setFunc(Build                       , Build                       )).desc("Application build number.\nUsed to identify the version of the application.\nThis must be specified in order for the application to update correctly through online stores.\nTypically you should increase this value by 1 when making each new release.").min(0).mouseEditSpeed(2); // was min(1) but Nintendo requires submitting Version 0 first, 1 fails
     Property &fb_app_id=add("Facebook App ID"            , MemberDesc(MEMBER(ElmApp, fb_app_id              )).setFunc(FacebookAppID               , FacebookAppID               )).desc("Facebook Application ID").mouseEditDel();
                         add("Supported Orientations"     , MemberDesc(DATA_INT                               ).setFunc(Orientation                 , Orientation                 )).setEnum(OrientName, Elms(OrientName)).desc("Supported orientations for mobile platforms");
+           p_languages=&add("Supported Languages"        , MemberDesc(DATA_INT                               )).setEnum();
+   {
+      Node<MenuElm> n;
+      FREPA(Languages)n.New().create(LanguageName(Languages[i]), Language, ptr(Languages[i])).flag(MENU_TOGGLABLE);
+      p_languages.combobox.setData(n);
+   }
                         add("Default Gui Skin"           , MemberDesc(MEMBER(ElmApp, gui_skin               )).setFunc(GuiSkin                     , GuiSkin                     )).elmType(ELM_GUI_SKIN).desc("Set default Gui Skin used by this Application.\nGui Skin will be loaded during Application Engine initialization stage.");
       PropEx &embed    =add("Embed Engine Data"          , MemberDesc(DATA_INT                               ).setFunc(EmbedEngineData             , EmbedEngineData             )).setEnum().desc("If embed engine data into the application executable file, so it doesn't require separate \"Engine.pak\" file.\nThis option is recommended for applications that want to be distributed as standalone executables without any additional files.\nThis option is ignored for Mobile and Web builds.\nDefault value for this option is \"No\"."); embed.combobox.setColumns(NameDescListColumn, Elms(NameDescListColumn)).setData(EmbedEngine, Elms(EmbedEngine)).menu.list.setElmDesc(MEMBER(NameDesc, desc));
                         add("Publish Project Data"       , MemberDesc(DATA_BOOL                              ).setFunc(PublishProjData             , PublishProjData             )).desc("If include project data when publishing the application.\nDisable this if your application will not initially include the data, but will download it manually later.\nDefault value for this option is true.");
@@ -834,12 +871,12 @@ class AppPropsEditor : PropWin
       android_props.add("Include Headers"    , MemberDesc(DATA_STR).setFunc(HeadersAndroid, HeadersAndroid)).desc("Type full paths to header file names.\nSeparate each with | for example:\nC:\\Lib1\\Main.h | C:\\Lib2\\Main.h");
       android_props.add("Include Libraries"  , MemberDesc(DATA_STR).setFunc(LibsAndroid   , LibsAndroid   )).desc("Type full paths to lib file names.\nSeparate each with | for example:\nC:\\Lib1\\XXX.a | C:\\Lib2\\libXXX.so\n\n$(TARGET_ARCH_ABI) can be used in the path, which will be replaced with target architecture (such as armeabi-v7a, arm64-v8a, x86, x86_64), for example:\nC:\\Path\\XXX-$(TARGET_ARCH_ABI).a\nC:\\Path\\$(TARGET_ARCH_ABI)\\libXXX.so");
       android_props.add("Include Directories", MemberDesc(DATA_STR).setFunc(DirsAndroid   , DirsAndroid   )).desc("Type full paths to additional include directories.\nSeparate each with | for example:\nC:\\Lib1 | C:\\Lib2");
-      PropEx &am_ai_g  =android_props.add("AdMob App ID"               , MemberDesc(MEMBER(ElmApp, am_app_id_google       )).setFunc(AdMobAppIDGoogle            , AdMobAppIDGoogle            )).desc("AdMob Application ID");
-      PropEx &cb_ai_g  =android_props.add("Chartboost App ID"          , MemberDesc(MEMBER(ElmApp, cb_app_id_google       )).setFunc(ChartboostAppIDGoogle       , ChartboostAppIDGoogle       )).desc("Chartboost Application ID");
-      PropEx &cb_as_g  =android_props.add("Chartboost App Signature"   , MemberDesc(MEMBER(ElmApp, cb_app_signature_google)).setFunc(ChartboostAppSignatureGoogle, ChartboostAppSignatureGoogle)).desc("Chartboost Application Signature");
-      PropEx &google_lk=android_props.add("License Key"                , MemberDesc(DATA_STR                               ).setFunc(AndroidLicenseKey           , AndroidLicenseKey           )).desc("Google Play app license key.\nThis key is used for verification of purchases in Google Play Store, and for downloading Expansion Files hosted in Google Play.\nYou can obtain this key from \"Google Play Developer Console website \\ Your App \\ Services & APIs \\ YOUR LICENSE KEY FOR THIS APPLICATION\".\nUpon providing your license key, all purchases will be automatically verified and only those that pass the verification test will be returned.\nIf you don't specify your key then all purchases will be listed without any verification and you will not be able to download Expansion Files.");
-      PropEx &storage  =android_props.add("Preferred Storage"          , MemberDesc(DATA_INT                               ).setFunc(Storage                     , Storage                     )).setEnum().desc("Preferred installation location for the application\n\nInternal - The application must be installed on the internal device storage only. If this is set, the application will never be installed on the external storage. If the internal storage is full, then the system will not install the application.\n\nExternal - The application prefers to be installed on the external storage (SD card). There is no guarantee that the system will honor this request. The application might be installed on internal storage if the external media is unavailable or full, or if the application uses the forward-locking mechanism (not supported on external storage). Once installed, the user can move the application to either internal or external storage through the system settings.\n\nAuto - The application may be installed on the external storage, but the system will install the application on the internal storage by default. If the internal storage is full, then the system will install it on the external storage. Once installed, the user can move the application to either internal or external storage through the system settings."); storage.combobox.setColumns(NameDescListColumn, Elms(NameDescListColumn)).setData(StorageName, Elms(StorageName)).menu.list.setElmDesc(MEMBER(NameDesc, desc));
-      PropEx &expansion=android_props.add("Expansion Files"            , MemberDesc(DATA_BOOL                              ).setFunc(AndroidExpansion            , AndroidExpansion            )).desc("If automatically download Android Expansion Files from Google Play for this APK before starting the App.\nWhen this option is enabled then the engine will automatically download any Expansion Files hosted on Google Play that are needed for this Android APK.\nThe application will be started only after the Expansion Files have been downloaded, which means that once your game codes are executed, the Expansion Files will already be in place.\nYou can access the Expansion Files from code using 'AndroidExpansionFileName' function.\nMain Expansion File will be automatically loaded in 'INIT' function.\nTypically when enabling this option you should disable \"Publish Project Data\" so the Project Data is not included in the APK, and manually export the Data using \"Build\\Export\\Project data optimized for Android\".\nDefault value for this option is false.");
+      PropEx &am_ai_g   =android_props.add("AdMob App ID"               , MemberDesc(MEMBER(ElmApp, am_app_id_google       )).setFunc(AdMobAppIDGoogle            , AdMobAppIDGoogle            )).desc("AdMob Application ID");
+      PropEx &cb_ai_g   =android_props.add("Chartboost App ID"          , MemberDesc(MEMBER(ElmApp, cb_app_id_google       )).setFunc(ChartboostAppIDGoogle       , ChartboostAppIDGoogle       )).desc("Chartboost Application ID");
+      PropEx &cb_as_g   =android_props.add("Chartboost App Signature"   , MemberDesc(MEMBER(ElmApp, cb_app_signature_google)).setFunc(ChartboostAppSignatureGoogle, ChartboostAppSignatureGoogle)).desc("Chartboost Application Signature");
+      PropEx &google_lk =android_props.add("License Key"                , MemberDesc(DATA_STR                               ).setFunc(AndroidLicenseKey           , AndroidLicenseKey           )).desc("Google Play app license key.\nThis key is used for verification of purchases in Google Play Store.\nYou can obtain this key from \"Google Play Developer Console website \\ Your App \\ Monetize \\ Monetization setup \\ Licensing\".\nUpon providing your license key, all purchases will be automatically verified and only those that pass the verification test will be returned.\nIf you don't specify your key then all purchases will be listed without any verification.");
+      PropEx &google_pad=android_props.add("Play Asset Delivery"        , MemberDesc(DATA_BOOL                              ).setFunc(PlayAssetDelivery           , PlayAssetDelivery           ));
+      PropEx &storage   =android_props.add("Preferred Storage"          , MemberDesc(DATA_INT                               ).setFunc(Storage                     , Storage                     )).setEnum().desc("Preferred installation location for the application\n\nInternal - The application must be installed on the internal device storage only. If this is set, the application will never be installed on the external storage. If the internal storage is full, then the system will not install the application.\n\nExternal - The application prefers to be installed on the external storage (SD card). There is no guarantee that the system will honor this request. The application might be installed on internal storage if the external media is unavailable or full, or if the application uses the forward-locking mechanism (not supported on external storage). Once installed, the user can move the application to either internal or external storage through the system settings.\n\nAuto - The application may be installed on the external storage, but the system will install the application on the internal storage by default. If the internal storage is full, then the system will install it on the external storage. Once installed, the user can move the application to either internal or external storage through the system settings."); storage.combobox.setColumns(NameDescListColumn, Elms(NameDescListColumn)).setData(StorageName, Elms(StorageName)).menu.list.setElmDesc(MEMBER(NameDesc, desc));
 
       ios_props.add("Include Headers"    , MemberDesc(DATA_STR).setFunc(HeadersiOS, HeadersiOS)).desc("Type full paths to header file names.\nSeparate each with | for example:\n/Lib1/Main.h | /Lib2/Main.h");
       ios_props.add("Include Libraries"  , MemberDesc(DATA_STR).setFunc(LibsiOS   , LibsiOS   )).desc("Type full paths to lib file names.\nSeparate each with | for example:\n/Lib1/Main.a | /Lib2/Main.a");
@@ -849,12 +886,14 @@ class AppPropsEditor : PropWin
       PropEx &cb_as_i  =ios_props.add("Chartboost App Signature"   , MemberDesc(MEMBER(ElmApp, cb_app_signature_ios   )).setFunc(ChartboostAppSignatureiOS   , ChartboostAppSignatureiOS   )).desc("Chartboost Application Signature");
       PropEx &loc_usage=ios_props.add("Location Usage Reason"      , MemberDesc(DATA_STR                               ).setFunc(LocationUsageReason         , LocationUsageReason         )).desc("Reason for accessing the user's location information.\nThis is needed for iOS (on other platforms this is ignored).\nThis will be displayed on the user screen when trying to access the Location.");
 
-                        nintendo_props.add("Include Headers"         , MemberDesc(DATA_STR).setFunc(HeadersNintendo, HeadersNintendo)).desc("Type full paths to header file names.\nSeparate each with | for example:\nC:\\Lib1\\Main.h | C:\\Lib2\\Main.h");
-                        nintendo_props.add("Include Libraries"       , MemberDesc(DATA_STR).setFunc(LibsNintendo   , LibsNintendo   )).desc("Type full paths to lib file names.\nSeparate each with | for example:\nC:\\Lib1\\Main.a | C:\\Lib2\\Main.a");
-                        nintendo_props.add("Include Directories"     , MemberDesc(DATA_STR).setFunc(DirsNintendo   , DirsNintendo   )).desc("Type full paths to additional include directories.\nSeparate each with | for example:\nC:\\Lib1 | C:\\Lib2");
-      PropEx &nn_app_id=nintendo_props.add("Nintendo App ID"         , MemberDesc(DATA_STR).setFunc(NintendoAppID               , NintendoAppID               ));
-      PropEx &nn_pub_nm=nintendo_props.add("Nintendo Publisher Name" , MemberDesc(DATA_STR).setFunc(NintendoPublisherName       , NintendoPublisherName       ));
-                        nintendo_props.add("Max Save Disk Usage (MB)", MemberDesc(DATA_STR).setFunc(SaveSize, SaveSize)).desc("Maximum disk usage for all save files in MegaBytes");
+                        nintendo_props.add("Include Headers"           , MemberDesc(DATA_STR).setFunc(HeadersNintendo      , HeadersNintendo      )).desc("Type full paths to header file names.\nSeparate each with | for example:\nC:\\Lib1\\Main.h | C:\\Lib2\\Main.h");
+                        nintendo_props.add("Include Libraries"         , MemberDesc(DATA_STR).setFunc(LibsNintendo         , LibsNintendo         )).desc("Type full paths to lib file names.\nSeparate each with | for example:\nC:\\Lib1\\Main.a | C:\\Lib2\\Main.a");
+                        nintendo_props.add("Include Directories"       , MemberDesc(DATA_STR).setFunc(DirsNintendo         , DirsNintendo         )).desc("Type full paths to additional include directories.\nSeparate each with | for example:\nC:\\Lib1 | C:\\Lib2");
+      PropEx &nn_ini_cd=nintendo_props.add("Nintendo Initial Code"     , MemberDesc(DATA_STR).setFunc(NintendoInitialCode  , NintendoInitialCode  ));
+      PropEx &nn_app_id=nintendo_props.add("Nintendo App ID"           , MemberDesc(DATA_STR).setFunc(NintendoAppID        , NintendoAppID        ));
+      PropEx &nn_pub_nm=nintendo_props.add("Nintendo Publisher Name"   , MemberDesc(DATA_STR).setFunc(NintendoPublisherName, NintendoPublisherName));
+      PropEx &nn_legal =nintendo_props.add("Nintendo Legal Information", MemberDesc(DATA_STR).setFunc(NintendoLegalInfo    , NintendoLegalInfo    ));
+                        nintendo_props.add("Max Save Disk Usage (MB)"  , MemberDesc(DATA_STR).setFunc(SaveSize             , SaveSize             )).desc("Maximum disk usage for all save files in MegaBytes");
 
       autoData(this); win_props.autoData(this); mac_props.autoData(this); linux_props.autoData(this); android_props.autoData(this); ios_props.autoData(this); nintendo_props.autoData(this);
       flt  vw=0.85;
@@ -887,8 +926,10 @@ class AppPropsEditor : PropWin
       platforms.tab(PIOS)+=cb_ai_i.button.create(Rect_RU(cb_ai_i.textline.rect().ru()+Vec2(th, 0), th*2, th), "Get").func(GetChartboostApp); cb_ai_i.textline.rect(Rect(cb_ai_i.textline.rect().ld(), cb_ai_i.button.rect().lu()));
       platforms.tab(PIOS)+=cb_as_i.button.create(Rect_RU(cb_as_i.textline.rect().ru()+Vec2(th, 0), th*2, th), "Get").func(GetChartboostApp); cb_as_i.textline.rect(Rect(cb_as_i.textline.rect().ld(), cb_as_i.button.rect().lu()));
 
+      platforms.tab(PNIN)+=nn_ini_cd.button.create(Rect_RU(nn_ini_cd.textline.rect().ru()+Vec2(th, 0), th*2, th), "Get").func(GetNintendo); nn_ini_cd.textline.rect(Rect(nn_ini_cd.textline.rect().ld(), nn_ini_cd.button.rect().lu()));
       platforms.tab(PNIN)+=nn_app_id.button.create(Rect_RU(nn_app_id.textline.rect().ru()+Vec2(th, 0), th*2, th), "Get").func(GetNintendo); nn_app_id.textline.rect(Rect(nn_app_id.textline.rect().ld(), nn_app_id.button.rect().lu()));
       platforms.tab(PNIN)+=nn_pub_nm.button.create(Rect_RU(nn_pub_nm.textline.rect().ru()+Vec2(th, 0), th*2, th), "Get").func(GetNintendo); nn_pub_nm.textline.rect(Rect(nn_pub_nm.textline.rect().ld(), nn_pub_nm.button.rect().lu()));
+      platforms.tab(PNIN)+=nn_legal .button.create(Rect_RU(nn_legal .textline.rect().ru()+Vec2(th, 0), th*2, th), "Get").func(GetNintendoLegal); nn_legal .textline.rect(Rect(nn_legal .textline.rect().ld(), nn_legal .button.rect().lu()));
 
       p_image_portrait   .move(Vec2(rect.w()  /3, h  ));
       p_image_landscape  .move(Vec2(rect.w()*2/3, h*2));
@@ -900,6 +941,14 @@ class AppPropsEditor : PropWin
 
       clientRect(Rect_C(0, 0, clientWidth(), -pos.y+h*9+0.02));
    }
+   void setLanguages()
+   {
+      if(p_languages)
+      {
+         p_languages.combobox.text.clear();
+         if(elm)if(ElmApp *app_data=elm.appData())FREPA(app_data.supported_languages)p_languages.combobox.text.space()+=CaseUp(LanguageCode(app_data.supported_languages[i]));
+      }
+   }
    void toGui()
    {
       super.toGui(); win_props.toGui(); mac_props.toGui(); linux_props.toGui(); android_props.toGui(); ios_props.toGui(); nintendo_props.toGui();
@@ -907,6 +956,13 @@ class AppPropsEditor : PropWin
       image_portrait   .setImage();
       image_landscape  .setImage();
       notification_icon.setImage();
+
+      setLanguages();
+      if(p_languages)
+      {
+         ElmApp *app_data=(elm ? elm.appData() : null);
+         FREPA(Languages)p_languages.combobox.menu(LanguageName(Languages[i]), app_data && app_data.supported_languages.has(Languages[i]), QUIET);
+      }
    }
 
    virtual AppPropsEditor& hide()override {set(null); super.hide(); return T;}

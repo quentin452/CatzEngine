@@ -516,7 +516,7 @@ void Joint::changed()
 Bool Joint::broken()C
 {
 #if PHYSX
-   return _joint ? FlagTest((UInt)_joint->getConstraintFlags(), PxConstraintFlag::eBROKEN) : true;
+   return _joint ? FlagOn((UInt)_joint->getConstraintFlags(), PxConstraintFlag::eBROKEN) : true;
 #else
    return _joint ? _joint->getUserConstraintType()!=0 : true;
 #endif
@@ -571,7 +571,7 @@ Flt Joint::hingeVel()C
 Bool Joint::hingeDriveEnabled()C
 {
 #if PHYSX
-   if(_joint)if(PxRevoluteJoint *hinge=_joint->is<PxRevoluteJoint>())return FlagTest((UInt)hinge->getRevoluteJointFlags(), PxRevoluteJointFlag::eDRIVE_ENABLED);
+   if(_joint)if(PxRevoluteJoint *hinge=_joint->is<PxRevoluteJoint>())return FlagOn((UInt)hinge->getRevoluteJointFlags(), PxRevoluteJointFlag::eDRIVE_ENABLED);
 #endif
    return false;
 }
@@ -585,7 +585,7 @@ Joint& Joint::hingeDriveEnabled(Bool on)
 Bool Joint::hingeDriveFreeSpin()C
 {
 #if PHYSX
-   if(_joint)if(PxRevoluteJoint *hinge=_joint->is<PxRevoluteJoint>())return FlagTest((UInt)hinge->getRevoluteJointFlags(), PxRevoluteJointFlag::eDRIVE_FREESPIN);
+   if(_joint)if(PxRevoluteJoint *hinge=_joint->is<PxRevoluteJoint>())return FlagOn((UInt)hinge->getRevoluteJointFlags(), PxRevoluteJointFlag::eDRIVE_FREESPIN);
 #endif
    return false;
 }
@@ -649,7 +649,7 @@ enum JOINT_FLAG
    JOINT_SPHERICAL_LIMIT_SWING_Y=1<<2,
    JOINT_SPHERICAL_LIMIT_SWING_Z=1<<3,
 };
-Bool Joint::save(File &f)C
+Bool Joint::save(File &f)C // !! IF MAKING ANY CHANGE, UPDATE TO NEW VERSION BECAUSE THIS IS USED IN SAVE GAMES !!
 {
    f.cmpUIntV(0); // version
 
@@ -700,8 +700,8 @@ Bool Joint::save(File &f)C
          axis  [1]=m1.x;
          normal[0]=m0.y;
          normal[1]=m1.y;
-         collision  =FlagTest((UInt)hinge.getConstraintFlags   (), PxConstraintFlag   ::eCOLLISION_ENABLED);
-         limit_angle=FlagTest((UInt)hinge.getRevoluteJointFlags(), PxRevoluteJointFlag::eLIMIT_ENABLED    );
+         collision  =FlagOn((UInt)hinge.getConstraintFlags   (), PxConstraintFlag   ::eCOLLISION_ENABLED);
+         limit_angle=FlagOn((UInt)hinge.getRevoluteJointFlags(), PxRevoluteJointFlag::eLIMIT_ENABLED    );
          angle.x    =-limit.upper; // min
          angle.y    =-limit.lower; // max
       #else
@@ -735,9 +735,9 @@ Bool Joint::save(File &f)C
          axis  [1]=m1.x;
          normal[0]=m0.y;
          normal[1]=m1.y;
-         collision  =FlagTest((UInt)spherical.getConstraintFlags    (), PxConstraintFlag    ::eCOLLISION_ENABLED  );
-         limit_swing=FlagTest((UInt)spherical.getSphericalJointFlags(), PxSphericalJointFlag::eLIMIT_ENABLED      );
-         limit_twist=FlagTest((UInt)spherical.getSphericalJointFlags(), PxSphericalJointFlag::eTWIST_LIMIT_ENABLED);
+         collision  =FlagOn((UInt)spherical.getConstraintFlags    (), PxConstraintFlag    ::eCOLLISION_ENABLED  );
+         limit_swing=FlagOn((UInt)spherical.getSphericalJointFlags(), PxSphericalJointFlag::eLIMIT_ENABLED      );
+         limit_twist=FlagOn((UInt)spherical.getSphericalJointFlags(), PxSphericalJointFlag::eTWIST_LIMIT_ENABLED);
          swing      =limit.yAngle;
          twist      =limit.twistAngle;
       #else
@@ -752,7 +752,7 @@ Bool Joint::save(File &f)C
          axis  [1]=m1.x;
          normal[0]=m0.y;
          normal[1]=m1.y;
-         if(FlagTest((UInt)spherical.getConstraintFlags(), PxConstraintFlag::eCOLLISION_ENABLED))flag|=JOINT_COLLISION;
+         if(FlagOn((UInt)spherical.getConstraintFlags(), PxConstraintFlag::eCOLLISION_ENABLED))flag|=JOINT_COLLISION;
          switch(spherical.getMotion(PxD6Axis::eTWIST )){case PxD6Motion::eLOCKED: flag|=JOINT_SPHERICAL_LIMIT_TWIST  ; twist  =0; break;   case PxD6Motion::eLIMITED: flag|=JOINT_SPHERICAL_LIMIT_TWIST  ; twist  =twist_limit. upper; break;}
          switch(spherical.getMotion(PxD6Axis::eSWING1)){case PxD6Motion::eLOCKED: flag|=JOINT_SPHERICAL_LIMIT_SWING_Y; swing_y=0; break;   case PxD6Motion::eLIMITED: flag|=JOINT_SPHERICAL_LIMIT_SWING_Y; swing_y=swing_limit.yAngle; break;}
          switch(spherical.getMotion(PxD6Axis::eSWING2)){case PxD6Motion::eLOCKED: flag|=JOINT_SPHERICAL_LIMIT_SWING_Z; swing_z=0; break;   case PxD6Motion::eLIMITED: flag|=JOINT_SPHERICAL_LIMIT_SWING_Z; swing_z=swing_limit.zAngle; break;}
@@ -795,7 +795,7 @@ Bool Joint::save(File &f)C
          axis  [1]=m1.x;
          normal[0]=m0.y;
          normal[1]=m1.y;
-         collision=FlagTest((UInt)slider.getConstraintFlags(), PxConstraintFlag::eCOLLISION_ENABLED);
+         collision=FlagOn((UInt)slider.getConstraintFlags(), PxConstraintFlag::eCOLLISION_ENABLED);
          min      =-limit.upper;
          max      =-limit.lower;
       #else
@@ -818,8 +818,8 @@ Bool Joint::save(File &f)C
          PxDistanceJoint &distance=*_joint->is<PxDistanceJoint>();
          anchor[0] =Physx.vec(distance.getLocalPose(PxJointActorIndex::eACTOR0).p);
          anchor[1] =Physx.vec(distance.getLocalPose(PxJointActorIndex::eACTOR1).p);
-         collision =FlagTest((UInt)distance.getConstraintFlags   (), PxConstraintFlag   ::eCOLLISION_ENABLED);
-         use_spring=FlagTest((UInt)distance.getDistanceJointFlags(), PxDistanceJointFlag::eSPRING_ENABLED   );
+         collision =FlagOn((UInt)distance.getConstraintFlags   (), PxConstraintFlag   ::eCOLLISION_ENABLED);
+         use_spring=FlagOn((UInt)distance.getDistanceJointFlags(), PxDistanceJointFlag::eSPRING_ENABLED   );
          min       =distance.getMinDistance();
          max       =distance.getMaxDistance();
       #else
@@ -895,7 +895,7 @@ Bool Joint::load(File &f, Actor &a0, Actor *a1)
                if(flag&JOINT_SPHERICAL_LIMIT_SWING_Y)f>>swing_y;
                if(flag&JOINT_SPHERICAL_LIMIT_SWING_Z)f>>swing_z;
 
-               createSpherical(a0, a1, anchor, axis, normal, FlagTest(flag, JOINT_SPHERICAL_LIMIT_TWIST) ? &twist : null, FlagTest(flag, JOINT_SPHERICAL_LIMIT_SWING_Y) ? &swing_y : null, FlagTest(flag, JOINT_SPHERICAL_LIMIT_SWING_Z) ? &swing_z : null, FlagTest(flag, JOINT_COLLISION));
+               createSpherical(a0, a1, anchor, axis, normal, FlagOn(flag, JOINT_SPHERICAL_LIMIT_TWIST) ? &twist : null, FlagOn(flag, JOINT_SPHERICAL_LIMIT_SWING_Y) ? &swing_y : null, FlagOn(flag, JOINT_SPHERICAL_LIMIT_SWING_Z) ? &swing_z : null, FlagOn(flag, JOINT_COLLISION));
             }break;
 
             case JOINT_SLIDER:

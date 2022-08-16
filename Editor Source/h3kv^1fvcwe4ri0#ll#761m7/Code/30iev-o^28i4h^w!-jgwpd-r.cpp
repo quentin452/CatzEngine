@@ -296,8 +296,8 @@ class NewWorldClass : ClosableWindow
 
    static void OK(NewWorldClass &nw) {Proj.newWorld(nw.name(), nw.areaSize(), nw.heightmapRes(), nw.parent_id, true); HideProjAct(nw);}
 
-   int      areaSize() {return TextInt(     area_size.text());}
-   int heightmapRes () {return TextInt(heightmap_res .text());}
+   int      areaSize() {return TextInt(     area_size.text);}
+   int heightmapRes () {return TextInt(heightmap_res .text);}
 
    void create()
    {
@@ -578,12 +578,12 @@ class ReloadElmClass : ClosableWindow
          {
             if(elm.type==ELM_ANIM)
             {
-               if(set_start_frame())files[0].getParam("start_frame").value=start_frame();
-               if(set_end_frame  ())files[0].getParam(  "end_frame").value=  end_frame();
-               if(set_speed      ())files[0].getParam("speed"      ).value=speed      ();
-               if(set_optimize   ())files[0].getParam("optimize"   ).value=optimize   ();
-               if(mirror         ())files[0].getParam("mirror"     ); // uses 'TextBool1' so no need to specify =1
-               if(del_end_keys   ())files[0].getParam("delEndKeys" ); // uses 'TextBool1' so no need to specify =1
+               if(set_start_frame())files[0].getParam("startFrame").value=start_frame();
+               if(set_end_frame  ())files[0].getParam(  "endFrame").value=  end_frame();
+               if(set_speed      ())files[0].getParam("speed"     ).value=speed      ();
+               if(set_optimize   ())files[0].getParam("optimize"  ).value=optimize   ();
+               if(mirror         ())files[0].getParam("mirror"    ); // uses 'TextBool1' so no need to specify =1
+               if(del_end_keys   ())files[0].getParam("delEndKeys"); // uses 'TextBool1' so no need to specify =1
             }
             if(elm.type==ELM_ANIM || elm.type==ELM_MTRL)
             {
@@ -622,13 +622,13 @@ class ReloadElmClass : ClosableWindow
                T+=set_start_frame; T+=set_end_frame; T+=set_speed; T+=set_optimize; T+=mirror; T+=del_end_keys; T+=start_frame; T+=end_frame; T+=speed; T+=optimize;
                if(files.elms())
                {
-                C TextParam *start_frame =files[0].findParam("start_frame"); set_start_frame.set(start_frame!=null); T.start_frame .set(start_frame  ? start_frame .value     : S    ); files[0].params.removeData(start_frame );
-                C TextParam *  end_frame =files[0].findParam(  "end_frame"); set_end_frame  .set(  end_frame!=null); T.  end_frame .set(  end_frame  ?   end_frame .value     : S    ); files[0].params.removeData(  end_frame );
-                C TextParam *speed       =files[0].findParam("speed"      ); set_speed      .set(speed      !=null); T.speed       .set(speed        ? speed       .value     : S+"1"); files[0].params.removeData(speed       );
-                C TextParam *optimize    =files[0].findParam("optimize"   ); set_optimize   .set(optimize   !=null); T.optimize    .set(optimize     ? optimize    .value     : S+"1"); files[0].params.removeData(optimize    );
-                C TextParam *name        =files[0].findParam("name"       );                                         T.name        .set(name         ? name        .value     : S    ); files[0].params.removeData(name        );
-                C TextParam *mirror      =files[0].findParam("mirror"     );                                         T.mirror      .set(mirror       ? mirror      .asBool1() : false); files[0].params.removeData(mirror      );
-                C TextParam *del_end_keys=files[0].findParam("delEndKeys" );                                         T.del_end_keys.set(del_end_keys ? del_end_keys.asBool1() : false); files[0].params.removeData(del_end_keys);
+                C TextParam *start_frame =files[0].findParam("startFrame"); set_start_frame.set(start_frame!=null); T.start_frame .set(start_frame  ? start_frame .value     : S    ); files[0].params.removeData(start_frame );
+                C TextParam *  end_frame =files[0].findParam(  "endFrame"); set_end_frame  .set(  end_frame!=null); T.  end_frame .set(  end_frame  ?   end_frame .value     : S    ); files[0].params.removeData(  end_frame );
+                C TextParam *speed       =files[0].findParam("speed"     ); set_speed      .set(speed      !=null); T.speed       .set(speed        ? speed       .value     : S+"1"); files[0].params.removeData(speed       );
+                C TextParam *optimize    =files[0].findParam("optimize"  ); set_optimize   .set(optimize   !=null); T.optimize    .set(optimize     ? optimize    .value     : S+"1"); files[0].params.removeData(optimize    );
+                C TextParam *name        =files[0].findParam("name"      );                                         T.name        .set(name         ? name        .value     : S    ); files[0].params.removeData(name        );
+                C TextParam *mirror      =files[0].findParam("mirror"    );                                         T.mirror      .set(mirror       ? mirror      .asBool1() : false); files[0].params.removeData(mirror      );
+                C TextParam *del_end_keys=files[0].findParam("delEndKeys");                                         T.del_end_keys.set(del_end_keys ? del_end_keys.asBool1() : false); files[0].params.removeData(del_end_keys);
                }
             }break;
 
@@ -870,7 +870,7 @@ class EraseRemovedElms : ClosableWindow
    void create()
    {
       Gui+=super .create(Rect_C(0, 0, 1.44, 1.5), "Erase Removed Elements").hide(); button[2].func(HideProjAct, SCAST(GuiObj, T)).show();
-      T  +=text  .create(Rect_C(clientWidth()/2  , -0.15, clientWidth()-0.05, 0.1), "Are you sure you wish to erase all removed elements from the project?\nWarning: This operation cannot be undone!\n\nThis will remove files only from the local computer - when connected to server it will redownload the elements."); text.auto_line=AUTO_LINE_SPACE_SPLIT;
+      T  +=text  .create(Rect_C(clientWidth()/2  , -0.15, clientWidth()-0.05, 0.1), "Are you sure you wish to erase all removed elements from the project?\nWarning: This operation cannot be undone!\n\nThis will remove files only from the local computer - when connected to server it will redownload the elements."); text.auto_line=true;
       T  +=ok    .create(Rect_C(clientWidth()*1/4, -0.34, 0.27, 0.07), "OK"    ).func(OK         ,               T ).focusable(false);
       T  +=full  .create(Rect_C(clientWidth()*2/4, -0.34, 0.27, 0.07), "Full"  ).func(Full       ,               T ).focusable(false).desc("This is slower but it may remove more useless files");
       T  +=cancel.create(Rect_C(clientWidth()*3/4, -0.34, 0.27, 0.07), "Cancel").func(HideProjAct, SCAST(GuiObj, T)).focusable(false);
@@ -923,7 +923,7 @@ class ProjectLocked : ClosableWindow
    {
       T.proj_id=proj_id;
       Gui+=super .create(Rect_C(0, 0, 1.59, 0.38), "Project Already Opened"); button[2].show();
-      T  +=text  .create(Rect_C(clientWidth()/2  , -0.10, clientWidth()-0.08, 0.1), "This project appears to be already opened in another instance of the Editor.\nOpening the same project in multiple instances of the Editor may corrupt its data.\nWould you like to open it anyway?"); text.auto_line=AUTO_LINE_SPACE_SPLIT;
+      T  +=text  .create(Rect_C(clientWidth()/2  , -0.10, clientWidth()-0.08, 0.1), "This project appears to be already opened in another instance of the Editor.\nOpening the same project in multiple instances of the Editor may corrupt its data.\nWould you like to open it anyway?"); text.auto_line=true;
       T  +=ok    .create(Rect_C(clientWidth()*1/3, -0.25, 0.29, 0.07), "OK"    ).func(OK  ,               T ).focusable(false);
       T  +=cancel.create(Rect_C(clientWidth()*2/3, -0.25, 0.29, 0.07), "Cancel").func(Hide, SCAST(GuiObj, T)).focusable(false);
    }
@@ -938,8 +938,8 @@ class ElmProperties : ClosableWindow
    Button  b_id, b_file,                  b_src;
    UID     elm_id=UIDZero;
 
-   static void CopyID  (ElmProperties &ep) {ClipSet(ep.id  ());}
-   static void CopyFile(ElmProperties &ep) {ClipSet(ep.file());}
+   static void CopyID  (ElmProperties &ep) {ClipSet(ep.id  .str());}
+   static void CopyFile(ElmProperties &ep) {ClipSet(ep.file.str());}
    static void Explore (ElmProperties &ep) {if(Elm *elm=Proj.findElm(ep.elm_id))Proj.explore(*elm);}
 
    void create()
@@ -950,7 +950,7 @@ class ElmProperties : ClosableWindow
       T+=t_file .create(Vec2(0.02, -0.12), "File ID:"  , &ts); T+=file .create(Vec2(0.23, -0.10), S, &ts_small); T+=b_file.create(Rect_R(clientWidth()-0.02, -0.12, 0.15, 0.05), "Copy").func(CopyFile, T);
       T+=t_size .create(Vec2(0.02, -0.19), "Size:"     , &ts); T+=size .create(Vec2(0.23, -0.17), S, &ts_small);
       T+=t_class.create(Vec2(0.02, -0.26), "C++ Class:", &ts); T+=Class.create(Vec2(0.23, -0.24), S, &ts_small);
-      T+=t_src  .create(Vec2(0.02, -0.33), "Source:"   , &ts); T+=b_src.create(Rect_R(clientWidth()-0.02, -0.33, 0.15, 0.05), "Explore").func(Explore, T).desc("Open folder containing the source file"); T+=src.create(Rect(0.23, -0.38, b_src.rect().min.x-0.02, -0.31), S, &ts_small); src.auto_line=AUTO_LINE_SPACE_SPLIT;
+      T+=t_src  .create(Vec2(0.02, -0.33), "Source:"   , &ts); T+=b_src.create(Rect_R(clientWidth()-0.02, -0.33, 0.15, 0.05), "Explore").func(Explore, T).desc("Open folder containing the source file"); T+=src.create(Rect(0.23, -0.38, b_src.rect().min.x-0.02, -0.31), S, &ts_small); src.auto_line=true;
    }
    void activate(Elm &elm)
    {
@@ -961,12 +961,12 @@ class ElmProperties : ClosableWindow
          elm_id=elm.id;
          id   .set(elm.id.asCString());
          file .set(EncodeFileName(elm.id));
-         size .clear(); if(FExist(Proj.gamePath(elm.id)))size.set(FileSize(FSize(Proj.gamePath(elm.id))));
+         size .clear(); if(FExist(Proj.gamePath(elm.id)))size.set(SizeBytes(FSize(Proj.gamePath(elm.id))));
          Class.set(ElmTypeClass[elm.type]);
          Mems<FileParams> files=FileParams.Decode(elm.srcFile());
          Str src_text; FREPA(files)src_text.line()+=files[i].name; // ignore parameters
          src  .set(src_text);
-         b_src.visible(src().is());
+         b_src.visible(src.hasData());
       }
    }
 }

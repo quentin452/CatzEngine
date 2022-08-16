@@ -17,6 +17,7 @@
 struct SyncLock // Synchronization Lock (multi-threaded safe)
 {
    Bool created()C; // if           lock is still created and not yet deleted in the constructor
+   Bool locked ()C; // if           lock is locked
    Bool owned  ()C; // if           lock is owned by current thread
    Bool tryOn  ()C; // try entering lock, false on fail (after receiving 'true' you must call the 'off' method, while after receiving 'false' you may not call the 'off' method)
    void on     ()C; //     enter    lock
@@ -75,8 +76,8 @@ struct SyncLockerEx // Synchronization Locker Extended
 
    Bool tryOn() {if(!_on && _lock.tryOn())_on=true; return _on;} // try entering locking, false on fail
 
-   explicit SyncLockerEx(C SyncLock &lock, Bool on=true) : _lock(lock) {if(_on=on)lock.on();}
-           ~SyncLockerEx(                              )               {off();}
+   explicit SyncLockerEx(C SyncLock &lock, Bool on=true) : _lock(lock) {if(_on=on)_lock.on ();}
+           ~SyncLockerEx(                              )               {if(_on   )_lock.off();}
 
 private:
    Bool      _on;
@@ -756,7 +757,11 @@ void  AtomicSet(  Long  &x, Long  y); // set value of 'x' to 'y' in an atomic op
 void  AtomicSet(  ULong &x, ULong y); // set value of 'x' to 'y' in an atomic operation, this is a thread-safe version of function "x=y;     " (this allows to modify the value across multiple threads without usage of Synchronization Locks)
 void  AtomicSet(  Flt   &x, Flt   y); // set value of 'x' to 'y' in an atomic operation, this is a thread-safe version of function "x=y;     " (this allows to modify the value across multiple threads without usage of Synchronization Locks)
 
-Int AtomicGetSet(Int &x, Int y); // set value of 'x' to 'y' in an atomic operation and return its previous value, this is a thread-safe version of function "Int old=x; x=y; return old;" (this allows to modify the value across multiple threads without usage of Synchronization Locks)
+Int   AtomicGetSet(Int   &x, Int   y); // set value of 'x' to 'y' in an atomic operation and return its previous value, this is a thread-safe version of function "Int   old=x; x=y; return old;" (this allows to modify the value across multiple threads without usage of Synchronization Locks)
+UInt  AtomicGetSet(UInt  &x, UInt  y); // set value of 'x' to 'y' in an atomic operation and return its previous value, this is a thread-safe version of function "UInt  old=x; x=y; return old;" (this allows to modify the value across multiple threads without usage of Synchronization Locks)
+Long  AtomicGetSet(Long  &x, Long  y); // set value of 'x' to 'y' in an atomic operation and return its previous value, this is a thread-safe version of function "Long  old=x; x=y; return old;" (this allows to modify the value across multiple threads without usage of Synchronization Locks)
+ULong AtomicGetSet(ULong &x, ULong y); // set value of 'x' to 'y' in an atomic operation and return its previous value, this is a thread-safe version of function "ULong old=x; x=y; return old;" (this allows to modify the value across multiple threads without usage of Synchronization Locks)
+T1(TYPE) TYPE* AtomicGetSet(TYPE *&x, TYPE *y) {return (TYPE*)AtomicGetSet((UIntPtr&)x, UIntPtr(y));}
 
 Bool AtomicCAS(Int   &x, Int   compare, Int   new_value); // set value of 'x' to 'new_value' if 'x' is equal to 'compare' in an atomic operation, this is a thread-safe version of function "if(x==compare){x=new_value; return true;} return false;" (this allows to modify the value across multiple threads without usage of Synchronization Locks)
 Bool AtomicCAS(UInt  &x, UInt  compare, UInt  new_value); // set value of 'x' to 'new_value' if 'x' is equal to 'compare' in an atomic operation, this is a thread-safe version of function "if(x==compare){x=new_value; return true;} return false;" (this allows to modify the value across multiple threads without usage of Synchronization Locks)
@@ -766,8 +771,8 @@ Bool AtomicCAS(Flt   &x, Flt   compare, Flt   new_value); // set value of 'x' to
 T1(TYPE) Bool AtomicCAS(TYPE *&x, TYPE *compare, TYPE *new_value) {return AtomicCAS((UIntPtr&)x, UIntPtr(compare), UIntPtr(new_value));}
 
 // Thread functions
-UIntPtr GetThreadId  (                                             ); // get current thread ID
-void    SetThreadName(C Str8 &name, UIntPtr thread_id=GetThreadId()); // set custom thread name for debugging purpose
+UIntPtr GetThreadID  (                                             ); // get current thread ID
+void    SetThreadName(C Str8 &name, UIntPtr thread_id=GetThreadID()); // set custom thread name for debugging purpose
 
 void ThreadMayUseGPUData       (); // call    this from a secondary thread if you expect the thread to perform any operations on GPU data (like Mesh, Material, Image, Shaders, ..., this includes any operation like creating, editing, loading, saving, deleting, ...). This function is best called at the start of the thread, it needs to be called at least once, further calls are ignored. Once the function is called, the thread locks a secondary OpenGL context (if no context is available, then the function waits until other threads finish processing and release their context lock, amount of OpenGL contexts is specified in 'D.secondaryOpenGLContexts'). Context lock is automatically released once the thread exits. This call is required only for OpenGL renderer.
 void ThreadFinishedUsingGPUData(); // calling this function is optional (it does not need to be called manually), call it if you wish to manually release a thread from locking an OpenGL context. Threads automatically call this function at end of their life, which means that they automatically release any locked contexts, however in some scenarios you may want to manually release any locked context if you wish to provide more contexts for background processing on other threads. This call is used only for OpenGL renderer.
@@ -866,8 +871,8 @@ private:
    INLINE void UpdateThreads() {EmulatedThreads.update();}
 #endif
 
-     INLINE UIntPtr _GetThreadId() {return PLATFORM(GetCurrentThreadId(), (UIntPtr)pthread_self());}
-#define GetThreadId _GetThreadId // use this macro so all engine functions access '_GetThreadId' directly
+     INLINE UIntPtr _GetThreadID() {return PLATFORM(GetCurrentThreadId(), (UIntPtr)pthread_self());}
+#define GetThreadID _GetThreadID // use this macro so all engine functions access '_GetThreadID' directly
 
 INLINE void Yield() {std::this_thread::yield();}
 #endif

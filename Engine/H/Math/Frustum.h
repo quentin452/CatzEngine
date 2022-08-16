@@ -49,8 +49,8 @@ struct FrustumClass // Frustum
    void from(C BoxD     &box                          ); // set from box
    void from(C PyramidM &pyramid                      ); // set from pyramid
 
-   void setExtraPlane(C PlaneM &plane, Bool chs=false);   Bool extraPlane()C {return FlagTest(extra, PLANE);}
-   void setExtraBall (C BallM  &ball                 );   Bool extraBall ()C {return FlagTest(extra, BALL );}   void clearExtraBall() {FlagDisable(extra, BALL);}
+   void setExtraPlane(C PlaneM &plane, Bool chs=false);   Bool extraPlane()C {return FlagOn(extra, PLANE);}
+   void setExtraBall (C BallM  &ball                 );   Bool extraBall ()C {return FlagOn(extra, BALL );}   void clearExtraBall() {FlagDisable(extra, BALL);}
 
    void draw(C Color &color=WHITE)C; // this relies on active object matrix which can be set using 'SetMatrix' function
 #endif

@@ -1,9 +1,11 @@
 /******************************************************************************/
 const_mem_addr struct Text : GuiObj // Gui Text !! must be stored in constant memory address !!
 {
-   AUTO_LINE_MODE auto_line; // automatically calculate new lines when drawing text, default=AUTO_LINE_NONE
-   TextStylePtr  text_style; // text style   , default=null (if set to null then current value of 'skin.text.text_style' is used)
-   GuiSkinPtr          skin; // skin override, default=null (if set to null then current value of 'Gui.skin'             is used)
+   Bool          auto_line; // automatically calculate new lines when drawing text, default=false
+   TextStylePtr text_style; // text style   , default=null (if set to null then current value of 'skin.text.text_style' is used)
+   GuiSkinPtr         skin; // skin override, default=null (if set to null then current value of 'Gui.skin'             is used)
+   Str                text;
+   StrEx             extra;
 
    // manage
    virtual Text& del   (                                                    )override;                                 // delete
@@ -13,22 +15,19 @@ const_mem_addr struct Text : GuiObj // Gui Text !! must be stored in constant me
            Text& create(C Text &src                                         );                                         // create from 'src'
 
    // get / set
-   Text& clear(           );                                      // clear   text value
-   Text& set  (C Str &text); C Str& operator()()C {return _text;} // set/get text value
-   Text& code (C Str &code);   Str  code      ()C;                // set/get text value in code format
-      // 1. code format accepts following keywords:   in following formats:
-      //    col, color                                RGB, RGBA, RRGGBB, RRGGBBAA (hexadecimal format)
-      //    shadow                                    X, XX                       (hexadecimal format)
-      // 2. codes should be surrounded by '[' ']' signs
-      // 3. removing the effect of a code should be handled by '/' sign followed by code name
-      // 4. sample codes:
-      //       "Text without code. [color=F00]Text with code[/color]"        - will force red color  on "Text with code"
-      //       "[shadow=0]No Shadow[/shadow] [shadow=F]Full Shadow[/shadow]" - will force no  shadow on "No Shadow"      and full shadow on "Full Shadow"
+   Bool hasData()C {return text.is() || extra.is ();}
+   Str  str    ()C {return text      +  extra.str();} // return as string (ignoring image, color, shadow, panel, font elements)
+
+   Text& clear(           ); // clear text value
+   Text& set  (C Str &text); // set   text value
 
    GuiSkin  * getSkin     ()C {return skin ? skin() : Gui.skin();} // get actual skin
    TextStyle* getTextStyle()C;                                     // get actual text style
 
-   Vec2 textSize()C; // get visible text size
+   Flt  textWidthLine(                 )C; // get text width, this function assumes all text is in one line
+   Int  textLines    (C Flt *width=null)C; // get number of lines when using 'width' space, use null to use current width
+   Flt  textHeight   (C Flt *width=null)C; // get text heigh      when using 'width' space, use null to use current width
+   Vec2 textSize     (                 )C; // get text size
 
    // main
    virtual void draw(C GuiPC &gpc)override; // draw object
@@ -45,13 +44,6 @@ protected:
    virtual Bool load(File &f, CChar *path=null)  override;
 
 private:
-   Str _text;
-#if !EE_PRIVATE
-   Ptr _code; Int _codes;
-#else
-   TextCodeData *_code; Int _codes;
-#endif
-
    NO_COPY_CONSTRUCTOR(Text);
 };
 /******************************************************************************/

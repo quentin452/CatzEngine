@@ -474,10 +474,10 @@ static void SetPixelF(Byte *data, IMAGE_TYPE type, Flt pixel)
       case IMAGE_R8 :
       case IMAGE_A8 :
       case IMAGE_L8 : case IMAGE_L8_SRGB:
-      case IMAGE_I8 : (*(U8 *)data)=FltToByte( pixel)             ; break; // it's okay   to clamp int for small  values
-      case IMAGE_I16: (*(U16*)data)=RoundU(Sat(pixel)*0x0000FFFFu); break; // it's better to clamp flt for bigger values
-      case IMAGE_I32: (*(U32*)data)=RoundU(Sat(pixel)*0xFFFFFFFFu); break; // it's better to clamp flt for bigger values
-      case IMAGE_I24: {  U32  c    =RoundU(Sat(pixel)*0x00FFFFFFu); (*(U16*)data)=c; data[2]=(c>>16);} break; // it's better to clamp flt for bigger values
+      case IMAGE_I8 : (*(U8 *)data)=FltToByte  (    pixel             ); break; // it's okay   to clamp int for small  values
+      case IMAGE_I16: (*(U16*)data)=RoundU     (Sat(pixel)*0x0000FFFFu); break; // it's better to clamp flt for bigger values
+      case IMAGE_I32: (*(U32*)data)=RoundUClamp(Sat(pixel)*0xFFFFFFFFu); break; // it's better to clamp flt for bigger values
+      case IMAGE_I24: {  U32  c    =RoundU     (Sat(pixel)*0x00FFFFFFu); (*(U16*)data)=c; data[2]=(c>>16);} break; // it's better to clamp flt for bigger values
  
       case IMAGE_R11G11B10F: SetR11G11B10F(data, pixel); break;
    }
@@ -813,9 +813,9 @@ static void _SetColorF(Byte *data, IMAGE_TYPE type, C Vec4 &color)
       case IMAGE_A8: (*(U8*)data)=FltToByte(color.w); break; // it's okay to clamp int for small values
       case IMAGE_I8: (*(U8*)data)=FltToByte(color.x); break; // it's okay to clamp int for small values
 
-      case IMAGE_I16: (*(U16*)data)=RoundU(Sat(color.x)*0x0000FFFFu); break; // it's better to clamp flt for bigger values
-      case IMAGE_I32: (*(U32*)data)=RoundU(Sat(color.x)*0xFFFFFFFFu); break; // it's better to clamp flt for bigger values
-      case IMAGE_I24: {  U32  c    =RoundU(Sat(color.x)*0x00FFFFFFu); (*(U16*)data)=c; data[2]=(c>>16);} break; // it's better to clamp flt for bigger values
+      case IMAGE_I16: (*(U16*)data)=RoundU     (Sat(color.x)*0x0000FFFFu); break; // it's better to clamp flt for bigger values
+      case IMAGE_I32: (*(U32*)data)=RoundUClamp(Sat(color.x)*0xFFFFFFFFu); break; // it's better to clamp flt for bigger values
+      case IMAGE_I24: {  U32  c    =RoundU     (Sat(color.x)*0x00FFFFFFu); (*(U16*)data)=c; data[2]=(c>>16);} break; // it's better to clamp flt for bigger values
 
       case IMAGE_L8  : case IMAGE_L8_SRGB  :   (*(U8*)data)=     FltToByte(color.xyz.max()); break; // it's okay to clamp int for small values
       case IMAGE_L8A8: case IMAGE_L8A8_SRGB: ((VecB2*)data)->set(FltToByte(color.xyz.max()), FltToByte(color.w)); break;
@@ -900,9 +900,9 @@ static void _SetColorL(Byte *data, IMAGE_TYPE type, C Vec4 &color)
       case IMAGE_A8: (*(U8*)data)=FltToByte(color.w); break; // it's okay to clamp int for small values
       case IMAGE_I8: (*(U8*)data)=FltToByte(color.x); break; // it's okay to clamp int for small values
 
-      case IMAGE_I16: (*(U16*)data)=RoundU(Sat(color.x)*0x0000FFFFu); break; // it's better to clamp flt for bigger values
-      case IMAGE_I32: (*(U32*)data)=RoundU(Sat(color.x)*0xFFFFFFFFu); break; // it's better to clamp flt for bigger values
-      case IMAGE_I24: {  U32  c    =RoundU(Sat(color.x)*0x00FFFFFFu); (*(U16*)data)=c; data[2]=(c>>16);} break; // it's better to clamp flt for bigger values
+      case IMAGE_I16: (*(U16*)data)=RoundU     (Sat(color.x)*0x0000FFFFu); break; // it's better to clamp flt for bigger values
+      case IMAGE_I32: (*(U32*)data)=RoundUClamp(Sat(color.x)*0xFFFFFFFFu); break; // it's better to clamp flt for bigger values
+      case IMAGE_I24: {  U32  c    =RoundU     (Sat(color.x)*0x00FFFFFFu); (*(U16*)data)=c; data[2]=(c>>16);} break; // it's better to clamp flt for bigger values
 
       case IMAGE_L8     : (*(U8*)data)=   FltToByte    (color.xyz.max()); break; // it's okay to clamp int for small values
       case IMAGE_L8_SRGB: (*(U8*)data)=LinearToByteSRGB(color.xyz.max()); break; // it's okay to clamp int for small values
@@ -995,9 +995,9 @@ static void _SetColorS(Byte *data, IMAGE_TYPE type, C Vec4 &color)
       case IMAGE_A8: (*(U8*)data)= FltToByte      (color.w); break; // it's okay to clamp int for small values
       case IMAGE_I8: (*(U8*)data)=SRGBToLinearByte(color.x); break; // it's okay to clamp int for small values
 
-      case IMAGE_I16: (*(U16*)data)=RoundU(Sat(SRGBToLinear(color.x))*0x0000FFFFu); break; // it's better to clamp flt for bigger values
-      case IMAGE_I32: (*(U32*)data)=RoundU(Sat(SRGBToLinear(color.x))*0xFFFFFFFFu); break; // it's better to clamp flt for bigger values
-      case IMAGE_I24: {  U32  c    =RoundU(Sat(SRGBToLinear(color.x))*0x00FFFFFFu); (*(U16*)data)=c; data[2]=(c>>16);} break; // it's better to clamp flt for bigger values
+      case IMAGE_I16: (*(U16*)data)=RoundU     (Sat(SRGBToLinear(color.x))*0x0000FFFFu); break; // it's better to clamp flt for bigger values
+      case IMAGE_I32: (*(U32*)data)=RoundUClamp(Sat(SRGBToLinear(color.x))*0xFFFFFFFFu); break; // it's better to clamp flt for bigger values
+      case IMAGE_I24: {  U32  c    =RoundU     (Sat(SRGBToLinear(color.x))*0x00FFFFFFu); (*(U16*)data)=c; data[2]=(c>>16);} break; // it's better to clamp flt for bigger values
 
       case IMAGE_L8     : (*(U8*)data)=SRGBToLinearByte(color.xyz.max()); break; // it's okay to clamp int for small values
       case IMAGE_L8_SRGB: (*(U8*)data)= FltToByte      (color.xyz.max()); break; // it's okay to clamp int for small values
@@ -4614,7 +4614,7 @@ static Bool NeedMultiChannel(IMAGE_TYPE src, IMAGE_TYPE dest)
 {
    return ImageTI[src].channels>1 || src!=dest;
 }
-void CopyNoStretch(C Image &src, Image &dest, Bool clamp, Bool ignore_gamma) // assumes 'src,dest' are locked and non-compressed
+void CopyNoStretch(C Image &src, Image &dest, Bool clamp, Bool ignore_gamma) // assumes 'src', 'dest' are locked and non-compressed
 {
    Bool high_precision=(src.highPrecision() && dest.highPrecision()); // high precision requires FP
    if(CanDoRawCopy(src, dest, ignore_gamma)) // no retype
@@ -5283,9 +5283,9 @@ struct CopyContext
 
    CopyContext(C Image &src, Image &dest, FILTER_TYPE filter, UInt flags) : src(src), dest(dest),
       clamp(IcClamp(flags)),
-      keep_edges(FlagTest(flags, IC_KEEP_EDGES)),
-      alpha_weight(FlagTest(flags, IC_ALPHA_WEIGHT) && src.typeInfo().a), // only if source has alpha
-      no_alpha_limit(FlagTest(flags, IC_NO_ALPHA_LIMIT)),
+      keep_edges    (FlagOn(flags, IC_KEEP_EDGES)),
+      alpha_weight  (FlagOn(flags, IC_ALPHA_WEIGHT) && src.typeInfo().a), // only if source has alpha
+      no_alpha_limit(FlagOn(flags, IC_NO_ALPHA_LIMIT)),
       src_srgb(src.sRGB()), dest_srgb(dest.sRGB()),
       ignore_gamma(IgnoreGamma(flags, src.hwType(), dest.hwType())),
 
@@ -5324,29 +5324,7 @@ struct CopyContext
          {
             if(CanDoRawCopy(src, dest, ignore_gamma)) // no retype
             {
-               Int valid_blocks_y=ImageBlocksY(src.w(), src.h(), mip, src.hwType()); // use "w(), h()" instead of "hwW(), hwH()" to copy only valid pixels
-               FREPD(z, src.ld())
-               {
-                C Byte *s=src .data() + z*src .pitch2();
-                  Byte *d=dest.data() + z*dest.pitch2();
-                  if(src.pitch()==dest.pitch())
-                  {
-                     Int copy_size=Min(src.pitch2(), dest.pitch2());
-                     CopyFast(d, s, copy_size);
-                     ZeroFast(d+copy_size, dest.pitch2()-copy_size); // zero unwritten data
-                  }else
-                  {
-                     Int copy_size=Min(src.pitch(), dest.pitch()), zero=dest.pitch()-copy_size;
-                     FREPD(y, valid_blocks_y)
-                     {
-                        Byte *dy=d + y*dest.pitch();
-                                CopyFast(dy, s + y*src.pitch(), copy_size);
-                        if(zero)ZeroFast(dy+copy_size, zero); // zero unwritten data
-                     }
-                     copy_size=dest.pitch()*valid_blocks_y;
-                     ZeroFast(d+copy_size, dest.pitch2()-copy_size); // zero unwritten data
-                  }
-               }
+               CopyImgData(src.data(), dest.data(), src.pitch(), dest.pitch(), src.softBlocksY(mip), dest.softBlocksY(mip), src.pitch2(), dest.pitch2(), src.ld(), dest.ld());
             }else // retype
             {
                IMAGE_TYPE src_hwType= src.hwType(),//src_type= src.type(),
@@ -5544,7 +5522,7 @@ struct CopyContext
                }else
                if((filter==FILTER_BEST || filter==FILTER_WAIFU) && ResizeWaifu && (dest.lw()>src.lw() || dest.lh()>src.lh()) && src.ld()==1 && dest.ld()==1 && ResizeWaifu(src, dest, flags)){}else
                // !! Codes below operate on Source Image Native Gamma !! because upscaling sRGB images looks better if they're not sRGB, and linear images (such as normal maps) need linear anyway
-               if((filter==FILTER_BEST || filter==FILTER_CUBIC_PLUS || filter==FILTER_CUBIC_PLUS_SHARP) // optimized Cubic+ upscale, check FILTER_BEST again in case Waifu was not available
+               if((filter==FILTER_BEST || filter==FILTER_WAIFU || filter==FILTER_CUBIC_PLUS || filter==FILTER_CUBIC_PLUS_SHARP) // optimized Cubic+ upscale, check FILTER_BEST/FILTER_WAIFU again in case Waifu was not available
                && src.ld()==1)
                {
                   alpha_limit=(no_alpha_limit ? ALPHA_LIMIT_NONE : (filter==FILTER_CUBIC_PLUS_SHARP) ? ALPHA_LIMIT_CUBIC_PLUS_SHARP : ALPHA_LIMIT_CUBIC_PLUS);

@@ -114,8 +114,8 @@ public:
    template<int i>   static Str  TabsTabText (C Tabs &tabs          );
    template<int i>   static void TabsTabText (  Tabs &tabs, C Str &t);
 
-   static void TextCodeFunc(  Text &text, C Str &t);
-   static Str  TextCodeFunc(C Text &text          );
+   static void TextText(  Text &text, C Str &t);
+   static Str  TextText(C Text &text          );
 
    static Str  TextLineText     (C TextLine &textline          );
    static void TextLineText     (  TextLine &textline, C Str &t);

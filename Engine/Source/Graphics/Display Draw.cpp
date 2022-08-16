@@ -891,7 +891,7 @@ void DisplayDraw::drawShadow(Byte alpha, C Rect &rect, Flt shadow_radius)
    if(Gui.image_shadow)
    {
       Flt tex_frac=1.0f/3;
-      Sh.Color[0]->set(Vec4(0, 0, 0, 1-ByteSRGBToDisplay(255-alpha)));
+      Sh.Color[0]->set(Vec4(0, 0, 0, AlphaToDisplay(ByteToFlt(alpha))));
       Sh.Color[1]->set(Vec4Zero);
       VI.image  (Gui.image_shadow());
       VI.setType(VI_2D_TEX, VI_SP_COL);
@@ -947,7 +947,7 @@ void DisplayDraw::drawShadowBorders(Byte alpha, C Rect &rect, Flt shadow_radius)
    if(Gui.image_shadow)
    {
       Flt tex_frac=1.0f/3;
-      Sh.Color[0]->set(Vec4(0, 0, 0, 1-ByteSRGBToDisplay(255-alpha)));
+      Sh.Color[0]->set(Vec4(0, 0, 0, AlphaToDisplay(ByteToFlt(alpha))));
       Sh.Color[1]->set(Vec4Zero);
       VI.image  (Gui.image_shadow());
       VI.setType(VI_2D_TEX, VI_SP_COL);

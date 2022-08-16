@@ -292,7 +292,7 @@ class RemoveUserWin : ClosableWindow
    void create()
    {
       Gui+=super.create(Rect_C(0, 0, 0.85, 0.37), "Delete User").level(EditUser.level()+1).hide(); button[2].show();
-      T+=t_name.create(Rect_C(clientWidth()/2, -0.11, 0.7, 0.0), "Are you sure you wish to delete selected user?"); t_name.auto_line=AUTO_LINE_SPACE_SPLIT;
+      T+=t_name.create(Rect_C(clientWidth()/2, -0.11, 0.7, 0.0), "Are you sure you wish to delete selected user?"); t_name.auto_line=true;
       T+=    ok.create(Rect_C(clientWidth()/2, -0.23, 0.3, 0.06), "OK").func(OK, T);
    }
 }
@@ -325,7 +325,7 @@ class EraseRemovedElms : ClosableWindow
    void create()
    {
       Gui+=super.create(Rect_C(0, 0, 1.10, 0.60), "Erase Removed Elements").level(EditUser.level()+1).hide(); button[2].show();
-      T+=text.create(Rect_C(clientWidth()/2, -0.22, clientWidth()-0.09, 0.0), "Are you sure you wish to erase all removed elements from the project?\nWarning: This operation cannot be undone!\n\nThis will remove files only on the server - when clients connect, they will reupload the elements.\nMake sure to erase removed elements on all clients while being disconnected from the server."); text.auto_line=AUTO_LINE_SPACE_SPLIT;
+      T+=text.create(Rect_C(clientWidth()/2, -0.22, clientWidth()-0.09, 0.0), "Are you sure you wish to erase all removed elements from the project?\nWarning: This operation cannot be undone!\n\nThis will remove files only on the server - when clients connect, they will reupload the elements.\nMake sure to erase removed elements on all clients while being disconnected from the server."); text.auto_line=true;
       T+=ok  .create(Rect_C(clientWidth()*1/3, -0.47, 0.25, 0.06), "OK"  ).func(OK  , T);
       T+=full.create(Rect_C(clientWidth()*2/3, -0.47, 0.25, 0.06), "Full").func(Full, T).desc("This is slower but it may remove more useless files");
    }

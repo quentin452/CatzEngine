@@ -5,7 +5,7 @@ namespace Edit{
 /******************************************************************************/
 void LineMode::setTokens(Line &line)
 {
-   C Str &s=line;
+ C Str &s=line;
    tokens.clear();
    FREPA(s)
    {
@@ -171,7 +171,7 @@ Bool LineMode::save(File &f, StrLibrary &sl, C Str &text)C
 }
 Bool LineMode::load(File &f, StrLibrary &sl, C Str &text, Line &line, Str &temp)
 {
-   Byte flag; f>>flag; starts_with_comment=FlagTest(flag, SWC); ends_with_comment=FlagTest(flag, EWC); preproc=FlagTest(flag, PRP); starts_with_preproc=FlagTest(flag, SWP); ends_with_preproc=FlagTest(flag, EWP); starts_with_macro_param=FlagTest(flag, SWM);
+   Byte flag; f>>flag; starts_with_comment=FlagOn(flag, SWC); ends_with_comment=FlagOn(flag, EWC); preproc=FlagOn(flag, PRP); starts_with_preproc=FlagOn(flag, SWP); ends_with_preproc=FlagOn(flag, EWP); starts_with_macro_param=FlagOn(flag, SWM);
    if(type.loadRaw(f))
    {
       tokens.setNum(f.decUIntV()); FREPA(tokens)if(!tokens[i].load(f, sl, text, line, temp))goto error;
@@ -296,8 +296,8 @@ Bool Line::load(File &f, StrLibrary &sl, Int line, Source &source, Str &temp)
    T.source=&source;
    Byte flag;
    f.getStr(T)>>flag;
-   tokens_preproc_use                  =FlagTest(flag, TOKENS_PREPROC_USE);
-   tokens_preproc_condition_unavailable=FlagTest(flag, TOKENS_PREPROC_CONDITION_UNAVAILABLE);
+   tokens_preproc_use                  =FlagOn(flag, TOKENS_PREPROC_USE);
+   tokens_preproc_condition_unavailable=FlagOn(flag, TOKENS_PREPROC_CONDITION_UNAVAILABLE);
    if(LineMode   ::load(f, sl, T, T, temp))
  //if(comment_mode.load(f, sl, T, T, temp))
    {
@@ -320,15 +320,13 @@ Str Line::textTokens()C
    }
    return text;
 }
-Str Line::textCode() // must be in sync with "Source::ViewLine::textCode"
+void Line::setTextData() // must be in sync with "Source::ViewLine::setTextData"
 {
-   Str code;
+   extra.clear();
    if(tokens_preproc_condition_unavailable)
    {
-      code ="[color=";
-      code+=Theme.colors[TOKEN_PREPROC_DISABLED].asHex();
-      code+="][nocode]";
-      code+=T;
+      extra.color(Theme.colors[TOKEN_PREPROC_DISABLED]);
+      extra+=T;
    }else
    {
       // parse functions to detect symbols and their colorization
@@ -361,8 +359,8 @@ Str Line::textCode() // must be in sync with "Source::ViewLine::textCode"
                   if(token_prc_cur->macro)type=TOKEN_KEYWORD;else
                   if(Symbol *symbol=token_prc_cur->symbol())
                {
-                  if(symbol->type==Symbol::ENUM                                                                   )type=TOKEN_ENUM_TYPE;else
-                  if(symbol->type==Symbol::ENUM_ELM                                                               )type=TOKEN_ENUM_ELM ;else
+                  if( symbol->type==Symbol::ENUM                                                                  )type=TOKEN_ENUM_TYPE;else
+                  if( symbol->type==Symbol::ENUM_ELM                                                              )type=TOKEN_ENUM_ELM ;else
                   if((symbol->type==Symbol::FUNC_LIST || symbol->type==Symbol::FUNC) && symbol->isGlobalOrStatic())type=TOKEN_FUNC     ;else
                   if((symbol->modifiers&Symbol::MODIF_DATA_TYPE) || symbol->type==Symbol::NAMESPACE               )type=TOKEN_KEYWORD;
                }
@@ -381,105 +379,85 @@ Str Line::textCode() // must be in sync with "Source::ViewLine::textCode"
 
             if(ValidType(type))
             {
-               Color c=Theme.colors[type];
-               if(last_color!=c)
-               {
-                  last_color=c;
-                  if(code.is())code+="[/nocode][/color]";
-                  code+="[color=";
-                  code+=c.asHex();
-                  code+="][nocode]";
-               }
+               Color c=Theme.colors[type]; if(last_color!=c)extra.color(last_color=c);
             }
          }
-         code+=T[i];
+         extra+=T[i];
       }
    }
-   return code;
 }
-Str Source::ViewLine::textCode() // must be in sync with "Line::textCode"
+void Source::ViewLine::setTextData() // must be in sync with "Line::setTextData"
 {
-   Str code;
+   extra.clear();
    if(Line *line=((source && InRange(T.line(), source->lines)) ? &source->lines[T.line()] : null))
       if(line->tokens_preproc_condition_unavailable)
+   {
+      extra.color(Theme.colors[TOKEN_PREPROC_DISABLED]);
+      extra+=asStr();
+   }else
+   {
+      // parse functions to detect symbols and their colorization
       {
-         code ="[color=";
-         code+=Theme.colors[TOKEN_PREPROC_DISABLED].asHex();
-         code+="][nocode]";
-         code+=asStr();
-      }else
+         Memc<Token> &tokens=line->Tokens(); FREPA(tokens)if(Symbol *symbol=tokens[i].parent)if(Symbol *func=symbol->func())if(func->source)func->source->parseFunc(*func);
+      }
+
+      TOKEN_TYPE last_type =TOKEN_NONE;
+      Color      last_color=TRANSPARENT;
+      Token     *token_org_cur, *token_org_end, *token_prc_cur, *token_prc_end;
+      if(line->tokens  .elms()){token_org_cur=line->tokens  .data(); token_org_end=token_org_cur+line->tokens  .elms();}else token_org_cur=null; // set null when there are no elements
+      if(line->Tokens().elms()){token_prc_cur=line->Tokens().data(); token_prc_end=token_prc_cur+line->Tokens().elms();}else token_prc_cur=null; // set null when there are no elements
+
+      FREPA(T)
       {
-         // parse functions to detect symbols and their colorization
+         TOKEN_TYPE type=CodeLine::type(i);
+         Int        col =          cols[i].pos.x;
+         if(last_type!=type)
          {
-            Memc<Token> &tokens=line->Tokens(); FREPA(tokens)if(Symbol *symbol=tokens[i].parent)if(Symbol *func=symbol->func())if(func->source)func->source->parseFunc(*func);
-         }
+            last_type=type;
 
-         TOKEN_TYPE last_type =TOKEN_NONE;
-         Color      last_color=TRANSPARENT;
-         Token     *token_org_cur, *token_org_end, *token_prc_cur, *token_prc_end;
-         if(line->tokens  .elms()){token_org_cur=line->tokens  .data(); token_org_end=token_org_cur+line->tokens  .elms();}else token_org_cur=null; // set null when there are no elements
-         if(line->Tokens().elms()){token_prc_cur=line->Tokens().data(); token_prc_end=token_prc_cur+line->Tokens().elms();}else token_prc_cur=null; // set null when there are no elements
-
-         FREPA(T)
-         {
-            TOKEN_TYPE type=CodeLine::type(i);
-            Int        col =          cols[i].pos.x;
-            if(last_type!=type)
+            // check if data type or namespace
+            if(token_prc_cur)
             {
-               last_type=type;
-
-               // check if data type or namespace
-               if(token_prc_cur)
+               for(; token_prc_cur->col<col; )
                {
-                  for(; token_prc_cur->col<col; )
-                  {
-                     token_prc_cur++;
-                     if(token_prc_cur==token_prc_end){token_prc_cur=null; break;}
-                  }
-                  if(token_prc_cur && token_prc_cur->col==col)
-                     if(token_prc_cur->macro)type=TOKEN_KEYWORD;else
-                     if(Symbol *symbol=token_prc_cur->symbol())
-                  {
-                     if(symbol->type==Symbol::ENUM                                                                   )type=TOKEN_ENUM_TYPE;else
-                     if(symbol->type==Symbol::ENUM_ELM                                                               )type=TOKEN_ENUM_ELM ;else
-                     if((symbol->type==Symbol::FUNC_LIST || symbol->type==Symbol::FUNC) && symbol->isGlobalOrStatic())type=TOKEN_FUNC     ;else
-                     if((symbol->modifiers&Symbol::MODIF_DATA_TYPE) || symbol->type==Symbol::NAMESPACE               )type=TOKEN_KEYWORD;
-                  }
+                  token_prc_cur++;
+                  if(token_prc_cur==token_prc_end){token_prc_cur=null; break;}
                }
-
-               // check if macro
-               if(token_org_cur)
+               if(token_prc_cur && token_prc_cur->col==col)
+                  if(token_prc_cur->macro)type=TOKEN_KEYWORD;else
+                  if(Symbol *symbol=token_prc_cur->symbol())
                {
-                  for(; token_org_cur->col<col; )
-                  {
-                     token_org_cur++;
-                     if(token_org_cur==token_org_end){token_org_cur=null; break;}
-                  }
-                  if(token_org_cur && token_org_cur->col==col && token_org_cur->macro)type=TOKEN_MACRO;
-               }
-
-               if(ValidType(type))
-               {
-                  Color c=Theme.colors[type];
-                  if(last_color!=c)
-                  {
-                     last_color=c;
-                     if(code.is())code+="[/nocode][/color]";
-                     code+="[color=";
-                     code+=c.asHex();
-                     code+="][nocode]";
-                  }
+                  if(symbol->type==Symbol::ENUM                                                                   )type=TOKEN_ENUM_TYPE;else
+                  if(symbol->type==Symbol::ENUM_ELM                                                               )type=TOKEN_ENUM_ELM ;else
+                  if((symbol->type==Symbol::FUNC_LIST || symbol->type==Symbol::FUNC) && symbol->isGlobalOrStatic())type=TOKEN_FUNC     ;else
+                  if((symbol->modifiers&Symbol::MODIF_DATA_TYPE) || symbol->type==Symbol::NAMESPACE               )type=TOKEN_KEYWORD;
                }
             }
-            code+=T[i];
+
+            // check if macro
+            if(token_org_cur)
+            {
+               for(; token_org_cur->col<col; )
+               {
+                  token_org_cur++;
+                  if(token_org_cur==token_org_end){token_org_cur=null; break;}
+               }
+               if(token_org_cur && token_org_cur->col==col && token_org_cur->macro)type=TOKEN_MACRO;
+            }
+
+            if(ValidType(type))
+            {
+               Color c=Theme.colors[type]; if(last_color!=c)extra.color(last_color=c);
+            }
          }
+         extra+=T[i];
       }
-   return code;
+   }
 }
 void Source::ViewLine::setRect(Int i)
 {
-   Flt lh=CE.ts.lineHeight();
-   super::rect(Rect_LU(0, -lh*i + CE.fontSpaceOffset(), CE.ts.textWidth(asStr()), lh));
+   Flt h=CE.ts.lineHeight(), o=CE.fontSpaceOffset();
+   super::rect(Rect(0, h*(-i-1) + o, CE.ts.textWidth(asStr()), h*(-i))); // operate on absolute values, instead of relative, to get the same exact values for previous/next lines
 }
 /******************************************************************************/
 // DETECT
@@ -529,7 +507,7 @@ Bool Source::getSymbolMacroID(C VecI2 &cur, SymbolPtr &symbol_ptr, Macro* &macro
          {
             Memt<SymbolPtr> funcs; // definition + declaration
             SymbolPtr       func_list; if(func_list.find(GetPath(symbol->full_name)))REPA(func_list->funcs)if(symbol->sameFunc(*func_list->funcs[i]))funcs.add(func_list->funcs[i]); // gather same funcs into container
-            Symbol         *preference=null; REPA(funcs)if(FlagTest(funcs[i]->modifiers, Symbol::MODIF_FUNC_BODY)==prefer_definition){preference=funcs[i](); break;} // find preference
+            Symbol         *preference=null; REPA(funcs)if(FlagOn(funcs[i]->modifiers, Symbol::MODIF_FUNC_BODY)==prefer_definition){preference=funcs[i](); break;} // find preference
             if(preference && preference->source==this && InRange(preference->token_index, tokens) && tokens[preference->token_index]->lineIndex()==cur.y)preference=null; // if we're already at the preference and trying to jump to it again, then cancel jumping to preference
             if(preference)symbol=preference;else REPA(funcs)if(funcs[i]==symbol){symbol=funcs[(i+1)%funcs.elms()](); break;} // if preference is available then jump to it, if not then select next function in the list
          }
@@ -960,10 +938,10 @@ Bool Source::save(File &f, StrLibrary &sl)C
 Bool Source::load(File &f, StrLibrary &sl, Str &temp)
 {
    Byte flag; f>>flag;
-   header       =FlagTest(flag,        HEADER);
-   engine_header=FlagTest(flag, ENGINE_HEADER);
-   cpp          =FlagTest(flag, CPP          );
-   Const        =FlagTest(flag, SRC_CONST    );
+   header       =FlagOn(flag,        HEADER);
+   engine_header=FlagOn(flag, ENGINE_HEADER);
+   cpp          =FlagOn(flag, CPP          );
+   Const        =FlagOn(flag, SRC_CONST    );
    sl.getStr(f, loc.file_name); loc.setFile(loc.file_name);
    if(!modify_time.load(f))goto error;
 #if SOURCE_DEBUG_SPEED_SIZE
@@ -1006,7 +984,7 @@ ERROR_TYPE Source::load()
    }
    sel=-1; cur=0;
    fromText(data);
-   if(error==EE_ERR_NONE && loc.file){FileInfo fi; if(fi.getSystem(loc.file_name)){modify_time=fi.modify_time_utc; Const=FlagTest(fi.attrib, FATTRIB_READ_ONLY);}} // adjust modification time after 'changed'
+   if(error==EE_ERR_NONE && loc.file){FileInfo fi; if(fi.getSystem(loc.file_name)){modify_time=fi.modify_time_utc; Const=FlagOn(fi.attrib, FATTRIB_READ_ONLY);}} // adjust modification time after 'changed'
    return error;
 }
 void Source::reload()

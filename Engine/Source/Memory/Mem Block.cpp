@@ -21,7 +21,7 @@ _Memb::_Memb(Int elm_size, Int block_elms, void (*_new)(Ptr elm), void (*_del)(P
 /******************************************************************************/
 void _Memb::clear()
 {
-   if(_del)REPA(T)_del(T[i]);
+   if(_del)REPA(T)_del(T[i]); // destroy as the first step
   _elms=0;
 }
 void _Memb::del()
@@ -62,11 +62,11 @@ void _Memb::setNum(Int num)
    {
       reserve(num);
       Int old_elms=elms(); _elms=num;
-      if(_new)for(Int i=old_elms; i<elms(); i++)_new(T[i]);
+      if(_new)for(Int i=old_elms; i<elms(); i++)_new(T[i]); // create as the last step
    }else
    if(num<elms()) // remove elements
    {
-      if(_del)for(Int i=elms(); --i>=num; )_del(T[i]);
+      if(_del)for(Int i=elms(); --i>=num; )_del(T[i]); // destroy as the first step
      _elms=num;
    }
 }
@@ -77,11 +77,11 @@ void _Memb::setNumZero(Int num)
    {
       reserve(num);
       Int old_elms=elms(); _elms=num;
-      for(Int i=old_elms; i<elms(); i++){Ptr elm=T[i]; ZeroFast(elm, elmSize()); if(_new)_new(elm);}
+      for(Int i=old_elms; i<elms(); i++){Ptr elm=T[i]; ZeroFast(elm, elmSize()); if(_new)_new(elm);} // create as the last step
    }else
    if(num<elms()) // remove elements
    {
-      if(_del)for(Int i=elms(); --i>=num; )_del(T[i]);
+      if(_del)for(Int i=elms(); --i>=num; )_del(T[i]); // destroy as the first step
      _elms=num;
    }
 }
@@ -100,7 +100,7 @@ void _Memb::removeLast()
 {
    if(elms())
    {
-      if(_del)_del(T[elms()-1]);
+      if(_del)_del(T[elms()-1]); // destroy as the first step
      _elms--;
    }
 }
@@ -108,7 +108,7 @@ void _Memb::remove(Int i, Bool keep_order)
 {
    if(InRange(i, T))
    {
-      if(_del)_del(T[i]);
+      if(_del)_del(T[i]); // destroy as the first step
       if(elms()-1>i)
       {
          if(!keep_order              )CopyFast(T[i], T[elms()-1], elmSize());else

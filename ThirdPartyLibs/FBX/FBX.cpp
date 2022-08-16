@@ -130,14 +130,14 @@ struct FBX
    FbxGlobalSettings        *global_settings=null;
    Int                       sdk_major=0, sdk_minor=0, sdk_revision=0;
    Mems<Node>                nodes;
-   Memc<FbxSurfaceMaterial*> ee_mtrl_to_fbx_mtrl; // this will point from EE Material 'materials' container index to FBX Material pointer
+   Memc<FbxSurfaceMaterial*> engine_mtrl_to_fbx_mtrl; // this will point from Engine Material 'materials' container index to FBX Material pointer
    Flt                       scale=1.0f;
    Str                       app_name;
 
    Int   findNodeI(FbxNode *node)C {REPA(nodes)if(nodes[i].node==node)return i; return -1;}
    Node* findNode (FbxNode *node)  {return nodes.addr(findNodeI(node));}
 
-   Int findMaterial(FbxSurfaceMaterial *mtrl)C {return ee_mtrl_to_fbx_mtrl.find(mtrl);}
+   Int findMaterial(FbxSurfaceMaterial *mtrl)C {return engine_mtrl_to_fbx_mtrl.find(mtrl);}
 
   ~FBX()
    {
@@ -202,19 +202,23 @@ struct FBX
 
                // set nodes
                nodes.setNum(scene->GetNodeCount()); // create all nodes up-front !! this is important because we're using 'Mems' !!
-               REPAO(nodes).node=scene->GetNode(i); // set node link
-               REPA (nodes)
+                REPAO(nodes).node=scene->GetNode(i); // set node link
+               FREPA (nodes)
                {
                   Node &node=nodes[i];
                   node.ee_name=node.full_name=FromUTF8(node.node->GetName());
 
                   // type
-                  if(FbxNodeAttribute *attrib=node.node->GetNodeAttribute()) // this will be null for the identity "RootNode"
-                     switch(attrib->GetAttributeType())
+                  if(i || node.full_name!="RootNode") // all FBX have a dummy "RootNode" at 0 index, always ignore it because there's a limit of 255 bones
                   {
-                     case FbxNodeAttribute::eNull    : node.dummy=true; node.bone=all_nodes_as_bones; break;
-                     case FbxNodeAttribute::eSkeleton: node.bone =true; break;
-                     case FbxNodeAttribute::eMesh    : node.mesh =true; break;
+                     if(FbxNodeAttribute *attrib=node.node->GetNodeAttribute()) // this will be null for the identity "RootNode", but can also be null for some animations
+                        switch(attrib->GetAttributeType())
+                     {
+                        case FbxNodeAttribute::eNull    : node.dummy=true; node.bone=all_nodes_as_bones; break;
+                        case FbxNodeAttribute::eSkeleton: node.bone =true; break;
+                        case FbxNodeAttribute::eMesh    : node.mesh =true; break;
+                     }else
+                     if(all_nodes_as_bones)node.bone=true; // this is needed because some animations can have all node attributes null
                   }
 
                   // matrix
@@ -434,7 +438,7 @@ struct FBX
             // params
             if(FbxSurfacePhong *phong=FbxCast<FbxSurfacePhong>(mtrl))
             {
-               xm=&materials.New(); ee_mtrl_to_fbx_mtrl.add(mtrl);
+               xm=&materials.New(); engine_mtrl_to_fbx_mtrl.add(mtrl);
             /* Don't set anything because artists never set those parameters, and they usually should be tweaked in-engine anyway
                FbxDouble3 amb  =phong->Ambient           ; //xm->emissive  .set(amb[0], amb[1], amb[2]);
                FbxDouble3 dif  =phong->Diffuse           ; xm->color.xyz.set(dif[0], dif[1], dif[2]);
@@ -448,7 +452,7 @@ struct FBX
             }else
             if(FbxSurfaceLambert *lambert=FbxCast<FbxSurfaceLambert>(mtrl))
             {
-               xm=&materials.New(); ee_mtrl_to_fbx_mtrl.add(mtrl);
+               xm=&materials.New(); engine_mtrl_to_fbx_mtrl.add(mtrl);
             /* Don't set anything because artists never set those parameters, and they usually should be tweaked in-engine anyway
                FbxDouble3 amb  =lambert->Ambient           ; //xm->emissive  .set(amb[0], amb[1], amb[2]);
                FbxDouble3 dif  =lambert->Diffuse           ; xm->color.xyz.set(dif[0], dif[1], dif[2]);
@@ -518,7 +522,7 @@ struct FBX
             }
          #endif
          }
-         REPA(duplicate_name)if(duplicate_name[i])materials[i].name+=S+'\\'+(ULong)ee_mtrl_to_fbx_mtrl[i]->GetUniqueID(); // append the name with materials Unique ID
+         REPA(duplicate_name)if(duplicate_name[i])materials[i].name+=S+'\\'+(ULong)engine_mtrl_to_fbx_mtrl[i]->GetUniqueID(); // append the name with materials Unique ID
       }
    }
    void boneRemap(C MemPtrN<Byte, 256> &old_to_new)
@@ -679,7 +683,7 @@ struct FBX
                if(polys>0)
                {
                   MeshBase base;
-                  Int      texs=Mid(fbx_mesh->GetElementUVCount(), 0, 4); // EE supports only up to 4
+                  Int      texs=Mid(fbx_mesh->GetElementUVCount(), 0, 4); // Engine supports only up to 4
 
                   Bool one_material=true;
                   REP(fbx_mesh->GetElementMaterialCount())
@@ -1077,12 +1081,10 @@ struct FBX
                      {
                         rot_times.clear(); pos_times.clear(); scale_times.clear();
 
-                        Node *animated_node_ancestor=&node; // there's following node hierarchy starting from root: null <-> root <-> .. <-> bone_node_parent (nearest node that is a bone) <-> .. (some bones) <-> animated_node_ancestor (first node that has some animations, in most cases this is 'node' however if there were some parent bones that are ignored, then this could point to one of them) <-> .. <-> node (currently processed node), at start set to "&node" so we don't have to call 'hasAnim' below, this is never set to another node that is a bone (only 'node' can be set or another nodes that have animations but aren't bones)
+                        Node *animated_node_ancestor=&node; // there's following node hierarchy starting from root: null <-> root <-> .. <-> bone_node_parent (nearest node that is a bone) <-> .. (some nodes) <-> animated_node_ancestor (first node that has some animations, in most cases this is 'node' however if there were some parent bones that are ignored, then this could point to one of them) <-> .. <-> node (currently processed node), at start set to "&node" so we don't have to call 'hasAnim' below, this is never set to another node that is a bone (only 'node' can be set or another nodes that have animations but aren't bones)
 
                         for(Node *cur=&node; ; )
                         {
-                           if(cur!=&node && cur->hasAnim(anim_layer))animated_node_ancestor=cur; // remember the last encountered node that has some animations !! 'hasAnim' assumes that 'SetCurrentAnimationStack' was already called !!
-
                            AddKeyTimes(cur->node->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_X), rot_times, fps);
                            AddKeyTimes(cur->node->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y), rot_times, fps);
                            AddKeyTimes(cur->node->LclRotation.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z), rot_times, fps);
@@ -1095,7 +1097,8 @@ struct FBX
                            AddKeyTimes(cur->node->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Y), scale_times, fps);
                            AddKeyTimes(cur->node->LclScaling.GetCurve(anim_layer, FBXSDK_CURVENODE_COMPONENT_Z), scale_times, fps);
 
-                           cur=cur->parent; if(!cur || cur->bone)break; // if there's no parent, or it's a bone (its animations are alread stored in it so we can skip them), then break
+                           cur=cur->parent; if(!cur || cur->bone)break; // if there's no parent, or it's a bone (its animations are already stored in it so we can skip them), then break
+                           if(cur->hasAnim(anim_layer))animated_node_ancestor=cur; // remember the last encountered node that has some animations !! 'hasAnim' assumes that 'SetCurrentAnimationStack' was already called !! check this after proceeding to the parent, so we don't call this for 'node' itself, since we've already set 'animated_node_ancestor' to it
                         }
 
                         if(rot_times.elms() || pos_times.elms() || scale_times.elms())
@@ -1119,19 +1122,17 @@ struct FBX
                         #endif
                            SkelBone &sbon=skeleton->bones[node.bone_index];
                            AnimBone &abon=xanim.anim.bones.New(); abon.set(sbon.name);
-                           MatrixD   parent_matrix_inv; if(sbon.parent!=0xFF)skeleton->bones[sbon.parent].inverse(parent_matrix_inv);
+                           MatrixD3  parent_matrix_inv; if(sbon.parent!=0xFF)skeleton->bones[sbon.parent].inverse(parent_matrix_inv);
 
                            // orientation
                            MatrixD3 local_to_world; animated_node_ancestor->local.orn().inverseNonOrthogonal(local_to_world); local_to_world*=animated_node_ancestor->global.orn(); // GetTransform(animated_node_ancestor->local.orn(), animated_node_ancestor->global.orn());
-                           MatrixD3 local_node_to_local_bone; if(sbon.parent!=0xFF)local_to_world.mul(parent_matrix_inv.orn(), local_node_to_local_bone);else local_node_to_local_bone=local_to_world; // after we convert to world space with 'local_to_world', we then convert it to bone in its parent space
+                           MatrixD3 local_node_to_local_bone; if(sbon.parent!=0xFF)local_to_world.mul(parent_matrix_inv, local_node_to_local_bone);else local_node_to_local_bone=local_to_world; // after we convert to world space with 'local_to_world', we then convert it to bone in its parent space
 
                            // position
-                           Node   *animated_node_ancestor_parent=animated_node_ancestor->parent;
-                           Bool    pos_transform=(animated_node_ancestor_parent || sbon.parent!=0xFF); // if have to transform by 'pos_matrix'
                            MatrixD pos_matrix;
-                           if(animated_node_ancestor_parent && sbon.parent!=0xFF)           animated_node_ancestor_parent->global.mul(parent_matrix_inv, pos_matrix);else // both transforms, pos_matrix=animated_node_ancestor_parent->global*parent_matrix_inv
-                           if(animated_node_ancestor_parent                     )pos_matrix=animated_node_ancestor_parent->global                                   ;else // 1    transform , pos_matrix=animated_node_ancestor_parent->global
-                           if(                                 sbon.parent!=0xFF)pos_matrix=                                          parent_matrix_inv             ;     // 1    transform , pos_matrix=                                      parent_matrix_inv
+                           if(Node *parent=animated_node_ancestor->parent)pos_matrix=parent->global;else pos_matrix.identity();
+                                                                          pos_matrix.moveBack(sbon.pos);
+                           if(sbon.parent!=0xFF                          )pos_matrix*=parent_matrix_inv;
 
                            abon.orns  .setNum(  rot_times.elms());
                            abon.poss  .setNum(  pos_times.elms());
@@ -1149,11 +1150,11 @@ struct FBX
                             C FbxTime   &time      =times[i];
                               Flt        t         =time.GetSecondDouble()-time_start;
                               FbxAMatrix transform =node.node->EvaluateLocalTransform(time);
-                              MatrixD    node_local=node.local;
+                              MatrixD3   node_local=node.local;
                               for(Node *n=&node; n!=animated_node_ancestor; ) // gather all transforms starting from this 'node' to 'animated_node_ancestor' inclusive
                               {
                                  n=n->parent;
-                                 transform=n->node->EvaluateLocalTransform(time)*transform; // FBX multiply order is reversed compared to EE
+                                 transform=n->node->EvaluateLocalTransform(time)*transform; // FBX multiply order is reversed compared to Engine
                                  node_local*=n->local;
                               }
                               MatrixD anim_matrix=MATRIX(transform);
@@ -1167,7 +1168,7 @@ struct FBX
                                  anim.z=anim_matrix.x;
                               #if 0
                                  anim*=local_to_world; // convert to world space
-                                 if(sbon.parent!=0xFF)anim*=parent_matrix_inv.orn(); // convert to local space (relative to skeleton parent bone)
+                                 if(sbon.parent!=0xFF)anim*=parent_matrix_inv; // convert to local space (relative to skeleton parent bone)
                               #else // optimized
                                  anim*=local_node_to_local_bone; // convert from local node to local bone space
                               #endif
@@ -1179,12 +1180,13 @@ struct FBX
                               // position
                               if(pos_times.binarySearch(time, index, CompareTime))
                               {
-                                 VecD p=anim_matrix.pos-node_local.pos;
+                                 VecD p=anim_matrix.pos;
                               #if 0
                                  if(Node *parent=animated_node_ancestor->parent)p*=parent->global; // convert to world space (here we don't use 'local_to_world' because that includes this node orientation, but node position is independent on its orientation)
-                                 if(sbon.parent!=0xFF)p*=parent_matrix_inv; // convert to local space (relative to skeleton parent bone)
+                                                                                p-=sbon.pos; // set as world space delta from bone
+                                 if(sbon.parent!=0xFF                          )p*=parent_matrix_inv; // convert to local space (relative to skeleton parent bone)
                               #else // optimized
-                                 if(pos_transform)p*=pos_matrix;
+                                 p*=pos_matrix;
                               #endif
                                  AnimKeys::Pos &pos=abon.poss[index]; pos.time=t; pos.pos=p;
                               }
@@ -1231,7 +1233,7 @@ Bool _ImportFBX(C Str &name, Mesh *mesh, Skeleton *skeleton, MemPtr<XAnimation> 
       Skeleton temp, *skel=(skeleton ? skeleton : (mesh || xskeleton || animations) ? &temp : null); // if skel not specified, but we want mesh, xskeleton or animations, then we have to process it (mesh requires it for skinning: bone names and types, animations require for skeleton bone transforms, parents, etc.)
       {
          SyncLocker locker(Lock);
-         fbx.set(materials); // !! call before creating meshes to setup 'ee_mtrl_to_fbx_mtrl' !!
+         fbx.set(materials); // !! call before creating meshes to setup 'engine_mtrl_to_fbx_mtrl' !!
          if(skel)
          {
             fbx.setNodesAsBoneFromSkin();
@@ -1348,7 +1350,7 @@ extern "C" __declspec(dllexport) CPtr __cdecl ImportFBXData(CChar *name, Int &si
    Memc<XMaterial >  mtrls; MemPtr<XMaterial > mtrls_ptr; if(flag&FBX_MTRL)mtrls_ptr.point(mtrls);
    Memc<Int       >  pmi  ; MemPtr<Int       >   pmi_ptr; if(flag&FBX_PMI )  pmi_ptr.point(pmi  );
 
-   if(_ImportFBX(name, mesh_ptr, skel_ptr, anims_ptr, mtrls_ptr, pmi_ptr, xskel_ptr, FlagTest(flag, FBX_ALL_NODES_AS_BONES), S8))
+   if(_ImportFBX(name, mesh_ptr, skel_ptr, anims_ptr, mtrls_ptr, pmi_ptr, xskel_ptr, FlagOn(flag, FBX_ALL_NODES_AS_BONES), S8))
    {
       File f; f.writeMem(); SaveFBXData(f, mesh_ptr, skel_ptr, anims_ptr, mtrls_ptr, pmi_ptr, xskel_ptr); // save data to file
       Ptr    data=Alloc(f.size()); f.pos(0); f.get(data, size=f.size()); // copy file to memory

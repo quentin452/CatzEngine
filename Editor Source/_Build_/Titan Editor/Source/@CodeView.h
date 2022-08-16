@@ -4,6 +4,8 @@ class CodeView : Region, Edit::CodeEditorInterface
    Memx<EEItem > items;
    Memc<EEItem*> items_sorted;
 
+   void clearAuto();
+
    virtual void configChangedDebug()override;
    virtual void configChanged32Bit()override;
    virtual void configChangedAPI()override;
@@ -42,9 +44,12 @@ class CodeView : Region, Edit::CodeEditorInterface
    virtual ULong             appXboxLiveTitleID                 ()override; 
    virtual UID               appXboxLiveSCID                    ()override; 
    virtual Str               appGooglePlayLicenseKey            ()override; 
+   virtual bool              appGooglePlayAssetDelivery         ()override; 
    virtual Str               appLocationUsageReason             ()override; 
+   virtual Str               appNintendoInitialCode             ()override; 
    virtual ULong             appNintendoAppID                   ()override; 
    virtual Str               appNintendoPublisherName           ()override; 
+   virtual Str               appNintendoLegalInformation        ()override; 
    virtual Int               appBuild                           ()override; 
    virtual Long              appSaveSize                        ()override; 
    virtual ulong             appFacebookAppID                   ()override; 
@@ -59,27 +64,29 @@ class CodeView : Region, Edit::CodeEditorInterface
    virtual UID               appGuiSkin                         ()override; 
    virtual int               appEmbedEngineData                 ()override; 
    virtual Cipher*           appEmbedCipher                     ()override; 
-   virtual COMPRESS_TYPE     appEmbedCompress                   ()override; 
-   virtual int               appEmbedCompressLevel              ()override; 
-   virtual DateTime          appEmbedSettingsTime               ()override;  // return Max of all params affecting PAKs
    virtual Bool              appPublishProjData                 ()override; 
    virtual Bool              appPublishPhysxDll                 ()override; 
    virtual Bool              appPublishSteamDll                 ()override; 
    virtual Bool              appPublishOpenVRDll                ()override; 
    virtual Bool              appPublishDataAsPak                ()override; 
-   virtual Bool              appAndroidExpansion                ()override; 
  //virtual Bool              appWindowsCodeSign                 ()override {if(Elm *app=Proj.findElm(Proj.curApp()))if(ElmApp *app_data=app.appData())return app_data.windowsCodeSign ()     ; return super.appWindowsCodeSign();}
-   virtual ImagePtr          appIcon                            ()override;
-   virtual ImagePtr          appImagePortrait                   ()override;
-   virtual ImagePtr          appImageLandscape                  ()override;
-   virtual ImagePtr          appNotificationIcon                ()override;
+   virtual ImagePtr          appIcon                            ()override;                      
+   virtual ImagePtr          appImagePortrait                   ()override;                      
+   virtual ImagePtr          appImageLandscape                  ()override;                      
+   virtual ImagePtr          appNotificationIcon                ()override;                      
+   virtual void              appLanguages                       (MemPtr<LANG_TYPE>langs)override;
+
+   virtual int  editorAddrPort(              )override;
+   virtual void editorAddr    (SockAddr &addr)override;
 
    virtual void focus()override;
 
    static void ImageGenerateProcess(ImageGenerate &generate, ptr user, int thread_index);
-   static void ImageConvertProcess (ImageConvert  &convert , ptr user, int thread_index);
 
-   virtual void appSpecificFiles(MemPtr<PakFileData> files)override;
+   virtual COMPRESS_TYPE appEmbedCompress     (                           Edit::EXE_TYPE exe_type)override;
+   virtual int           appEmbedCompressLevel(                           Edit::EXE_TYPE exe_type)override;
+   virtual DateTime      appEmbedSettingsTime (                           Edit::EXE_TYPE exe_type)override; // return Max of all params affecting PAKs
+   virtual void          appSpecificFiles     (MemPtr<PakFileData> files, Edit::EXE_TYPE exe_type)override;
    virtual void appInvalidProperty(C Str &msg)override;
 
    virtual void validateActiveSources()override;
@@ -100,7 +107,7 @@ class CodeView : Region, Edit::CodeEditorInterface
    virtual void elmPreview  (C UID &id, C Vec2 &pos, bool mouse, C Rect&clip)override;
    virtual Str idToText(C UID &id, Bool *valid)override;                     // if we're in code then it already displays an ID, no need to write the same ID on top of that
 
-   virtual void getProjPublishElms(Memc<ElmLink> &elms)override;
+   virtual void getProjPublishElms(Memc<ElmLink> &elms)override; // get all publishable elements in the project, this is used for auto-complete
 
    Str importPaths(C Str &path)C;
 

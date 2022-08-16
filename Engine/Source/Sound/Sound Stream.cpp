@@ -1101,7 +1101,7 @@ struct FLAC
    {
       File &f=*((FLAC*)client_data)->file;
       if(*bytes<=0)return FLAC__STREAM_DECODER_READ_STATUS_ABORT;
-      *bytes=f.getReturnSize(buffer, *bytes);
+     *bytes=f.getReturnSize(buffer, *bytes);
       return (*bytes>0) ? FLAC__STREAM_DECODER_READ_STATUS_CONTINUE : FLAC__STREAM_DECODER_READ_STATUS_END_OF_STREAM;
    }
    static FLAC__StreamDecoderSeekStatus Seek(const FLAC__StreamDecoder *decoder, FLAC__uint64 absolute_byte_offset, void *client_data)

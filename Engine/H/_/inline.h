@@ -1,18 +1,18 @@
 /******************************************************************************/
-inline Bool Any(C Half &x                                 ) {return FlagTest(x.data                           , 0x7FFF);} // faster version of "x!=0"
-inline Bool Any(C Half &x, C Half &y                      ) {return FlagTest(x.data | y.data                  , 0x7FFF);} // faster version of "x!=0 || y!=0"
-inline Bool Any(C Half &x, C Half &y, C Half &z           ) {return FlagTest(x.data | y.data | z.data         , 0x7FFF);} // faster version of "x!=0 || y!=0 || z!=0"
-inline Bool Any(C Half &x, C Half &y, C Half &z, C Half &w) {return FlagTest(x.data | y.data | z.data | w.data, 0x7FFF);} // faster version of "x!=0 || y!=0 || z!=0 || w!=0"
+inline Bool Any(C Half &x                                 ) {return FlagOn(x.data                           , 0x7FFF);} // faster version of "x!=0"
+inline Bool Any(C Half &x, C Half &y                      ) {return FlagOn(x.data | y.data                  , 0x7FFF);} // faster version of "x!=0 || y!=0"
+inline Bool Any(C Half &x, C Half &y, C Half &z           ) {return FlagOn(x.data | y.data | z.data         , 0x7FFF);} // faster version of "x!=0 || y!=0 || z!=0"
+inline Bool Any(C Half &x, C Half &y, C Half &z, C Half &w) {return FlagOn(x.data | y.data | z.data | w.data, 0x7FFF);} // faster version of "x!=0 || y!=0 || z!=0 || w!=0"
 
-inline Bool Any(C Flt &x                              ) {return FlagTest((U32&)x                              , ~SIGN_BIT);} // faster version of "x!=0"
-inline Bool Any(C Flt &x, C Flt &y                    ) {return FlagTest((U32&)x | (U32&)y                    , ~SIGN_BIT);} // faster version of "x!=0 || y!=0"
-inline Bool Any(C Flt &x, C Flt &y, C Flt &z          ) {return FlagTest((U32&)x | (U32&)y | (U32&)z          , ~SIGN_BIT);} // faster version of "x!=0 || y!=0 || z!=0"
-inline Bool Any(C Flt &x, C Flt &y, C Flt &z, C Flt &w) {return FlagTest((U32&)x | (U32&)y | (U32&)z | (U32&)w, ~SIGN_BIT);} // faster version of "x!=0 || y!=0 || z!=0 || w!=0"
+inline Bool Any(C Flt &x                              ) {return FlagOn((U32&)x                              , ~SIGN_BIT);} // faster version of "x!=0"
+inline Bool Any(C Flt &x, C Flt &y                    ) {return FlagOn((U32&)x | (U32&)y                    , ~SIGN_BIT);} // faster version of "x!=0 || y!=0"
+inline Bool Any(C Flt &x, C Flt &y, C Flt &z          ) {return FlagOn((U32&)x | (U32&)y | (U32&)z          , ~SIGN_BIT);} // faster version of "x!=0 || y!=0 || z!=0"
+inline Bool Any(C Flt &x, C Flt &y, C Flt &z, C Flt &w) {return FlagOn((U32&)x | (U32&)y | (U32&)z | (U32&)w, ~SIGN_BIT);} // faster version of "x!=0 || y!=0 || z!=0 || w!=0"
 
-inline Bool Any(C Dbl &x                              ) {return FlagTest((U64&)x                              , (~0ull)>>1);} // faster version of "x!=0"
-inline Bool Any(C Dbl &x, C Dbl &y                    ) {return FlagTest((U64&)x | (U64&)y                    , (~0ull)>>1);} // faster version of "x!=0 || y!=0"
-inline Bool Any(C Dbl &x, C Dbl &y, C Dbl &z          ) {return FlagTest((U64&)x | (U64&)y | (U64&)z          , (~0ull)>>1);} // faster version of "x!=0 || y!=0 || z!=0"
-inline Bool Any(C Dbl &x, C Dbl &y, C Dbl &z, C Dbl &w) {return FlagTest((U64&)x | (U64&)y | (U64&)z | (U64&)w, (~0ull)>>1);} // faster version of "x!=0 || y!=0 || z!=0 || w!=0"
+inline Bool Any(C Dbl &x                              ) {return FlagOn((U64&)x                              , (~0ull)>>1);} // faster version of "x!=0"
+inline Bool Any(C Dbl &x, C Dbl &y                    ) {return FlagOn((U64&)x | (U64&)y                    , (~0ull)>>1);} // faster version of "x!=0 || y!=0"
+inline Bool Any(C Dbl &x, C Dbl &y, C Dbl &z          ) {return FlagOn((U64&)x | (U64&)y | (U64&)z          , (~0ull)>>1);} // faster version of "x!=0 || y!=0 || z!=0"
+inline Bool Any(C Dbl &x, C Dbl &y, C Dbl &z, C Dbl &w) {return FlagOn((U64&)x | (U64&)y | (U64&)z | (U64&)w, (~0ull)>>1);} // faster version of "x!=0 || y!=0 || z!=0 || w!=0"
 /******************************************************************************/
 inline Bool AtomicGet(C Bool &x        ) {return x;}
 inline Byte AtomicGet(C Byte &x        ) {return x;}
@@ -74,11 +74,15 @@ extern Bool  _CompressETC (C Image &src, Image &dest, Int quality=-1);
 extern Bool (*CompressETC)(C Image &src, Image &dest, Int quality   );
 inline void   SupportCompressETC() {CompressETC=_CompressETC;}
 
+extern Bool  _CompressASTC (C Image &src, Image &dest);
+extern Bool (*CompressASTC)(C Image &src, Image &dest);
+inline void   SupportCompressASTC() {CompressASTC=_CompressASTC;}
+
 extern Bool  _CompressPVRTC (C Image &src, Image &dest, Int quality=-1);
 extern Bool (*CompressPVRTC)(C Image &src, Image &dest, Int quality   );
 inline void   SupportCompressPVRTC() {if(WINDOWS_OLD || MAC || LINUX)CompressPVRTC=_CompressPVRTC;}
 
-inline void SupportCompressAll() {SupportCompressBC(); SupportCompressETC(); SupportCompressPVRTC();}
+inline void SupportCompressAll() {SupportCompressBC(); SupportCompressETC(); SupportCompressASTC(); SupportCompressPVRTC();}
 
 extern Bool  _ResizeWaifu (C Image &src, Image &dest, UInt flags);
 extern Bool (*ResizeWaifu)(C Image &src, Image &dest, UInt flags);
@@ -147,9 +151,11 @@ void _Sort(Ptr data, Int elms, Int elm_size, CPtr user, Int compare(CPtr a, CPtr
 T1(TYPE) void Sort(TYPE *data, Int elms,            Int compare(C TYPE &a, C TYPE &b           )) {_Sort(Ptr(data), elms, SIZE(TYPE),       (Int(*)(CPtr, CPtr      ))compare);}
 T1(TYPE) void Sort(TYPE *data, Int elms, CPtr user, Int compare(C TYPE &a, C TYPE &b, CPtr user)) {_Sort(Ptr(data), elms, SIZE(TYPE), user, (Int(*)(CPtr, CPtr, CPtr))compare);}
 
-Bool _BinarySearch(CPtr data, Int elms, Int elm_size, CPtr value, Int &index, Int compare(CPtr a, CPtr b));
+Bool _BinarySearch     (CPtr data, Int elms, Int elm_size, CPtr value, Int &index, Int compare(CPtr a, CPtr b));
+Bool _BinarySearchFirst(CPtr data, Int elms, Int elm_size, CPtr value, Int &index, Int compare(CPtr a, CPtr b));
 
-T2(DATA, VALUE) Bool BinarySearch(C DATA *data, Int elms, C VALUE &value, Int &index, Int compare(C DATA &a, C VALUE &b)) {return _BinarySearch(data, elms, SIZE(DATA), &value, index, (Int(*)(CPtr, CPtr))compare);}
+T2(DATA, VALUE) Bool BinarySearch     (C DATA *data, Int elms, C VALUE &value, Int &index, Int compare(C DATA &a, C VALUE &b)) {return _BinarySearch     (data, elms, SIZE(DATA), &value, index, (Int(*)(CPtr, CPtr))compare);}
+T2(DATA, VALUE) Bool BinarySearchFirst(C DATA *data, Int elms, C VALUE &value, Int &index, Int compare(C DATA &a, C VALUE &b)) {return _BinarySearchFirst(data, elms, SIZE(DATA), &value, index, (Int(*)(CPtr, CPtr))compare);}
 
 #if EE_PRIVATE
 struct FloatIndex // Float + Index
@@ -192,14 +198,10 @@ T1(TYPE) void   ReverseOrder(TYPE *data, Int elms                        ) {  _R
 T1(TYPE) void    RotateOrder(TYPE *data, Int elms, Int offset            ) {   _RotateOrder(data, elms, SIZE(TYPE), offset        );}
 T1(TYPE) void RandomizeOrder(TYPE *data, Int elms, Randomizer &random    ) {_RandomizeOrder(data, elms, SIZE(TYPE), random        );}
 T1(TYPE) void      MoveElm  (TYPE *data, Int elms, Int elm, Int new_index) {     _MoveElm  (data, elms, SIZE(TYPE), elm, new_index);}
-
-#if APPLE || WEB // for Apple and Web 'size_t' is not 'UIntPtr'
-inline Ptr  Alloc    (                      size_t size) {return Alloc    (             (UIntPtr)size);}
-inline Ptr  AllocZero(                      size_t size) {return AllocZero(             (UIntPtr)size);}
-inline void Zero     (Ptr data,             size_t size) {       Zero     (data,        (UIntPtr)size);}
-inline void SetMem   (Ptr data, Byte value, size_t size) {       SetMem   (data, value, (UIntPtr)size);}
-inline void Copy     (Ptr dest, CPtr src  , size_t size) {       Copy     (dest, src  , (UIntPtr)size);}
-#endif
+/******************************************************************************/
+// MISC
+/******************************************************************************/
+inline Bool Application::mainThread()C {return GetThreadID()==_thread_id;}
 /******************************************************************************/
 // REFERENCE
 /******************************************************************************/
@@ -225,7 +227,7 @@ template<typename TYPE> T1(EXTENDED)  FixedElm<TYPE>&  FixedElm<TYPE>::replaceCl
 /******************************************************************************/
 T1(TYPE)  Mems<TYPE>&  Mems<TYPE>::clear()
 {
-   if(ClassFunc<TYPE>::HasDel())REPA(T)T[i].~TYPE();
+   if(ClassFunc<TYPE>::HasDel())REPA(T)T[i].~TYPE(); // destroy as the first step
    Free(_data); _elms=0;
    return T;
 }
@@ -267,7 +269,7 @@ T1(TYPE)  TYPE&  Mems<TYPE>::NewAt(Int i)
    CopyFastN(temp    , data()  ,        i);
    CopyFastN(temp+i+1, data()+i, elms()-i);
    Free(_data); _data=temp; _elms++;
-   TYPE &elm=T[i]; new(&elm)TYPE; return elm;
+   TYPE &elm=T[i]; new(&elm)TYPE; return elm; // create as the last step
 }
 
 T1(TYPE)  Int  Mems<TYPE>::index(C TYPE *elm)C
@@ -282,7 +284,7 @@ T1(TYPE)  Mems<TYPE>&  Mems<TYPE>::remove(Int i, Bool /*keep_order*/)
 {
    if(InRange(i, T))
    {
-      T[i].~TYPE();
+      T[i].~TYPE(); // destroy as the first step
       TYPE *temp=Alloc<TYPE>(elms()-1);
       CopyFastN(temp  , data()    ,        i  );
       CopyFastN(temp+i, data()+i+1, elms()-i-1);
@@ -302,11 +304,11 @@ T1(TYPE)  Mems<TYPE>&  Mems<TYPE>::setNum(Int num)
       TYPE *temp=Alloc<TYPE>(num);
       CopyFastN(temp, data(), elms());
       Free(_data); _data=temp; _elms=num;
-      if(ClassFunc<TYPE>::HasNew())for(Int i=old_elms; i<elms(); i++)new(&T[i])TYPE;
+      if(ClassFunc<TYPE>::HasNew())for(Int i=old_elms; i<elms(); i++)new(&T[i])TYPE; // create as the last step
    }else
    if(num<elms()) // remove elements
    {
-      if(ClassFunc<TYPE>::HasDel())for(Int i=elms(); --i>=num; )T[i].~TYPE();
+      if(ClassFunc<TYPE>::HasDel())for(Int i=elms(); --i>=num; )T[i].~TYPE(); // destroy as the first step
       TYPE *temp=Alloc<TYPE>(num);
       CopyFastN(temp, data(), num);
       Free(_data); _data=temp; _elms=num;
@@ -323,11 +325,11 @@ T1(TYPE)  Mems<TYPE>&  Mems<TYPE>::setNumZero(Int num)
       CopyFastN(temp       , data(),     elms()); // copy old elements
       ZeroFastN(temp+elms(),         num-elms()); // zero new elements
       Free(_data); _data=temp; _elms=num;
-      if(ClassFunc<TYPE>::HasNew())for(Int i=old_elms; i<elms(); i++)new(&T[i])TYPE;
+      if(ClassFunc<TYPE>::HasNew())for(Int i=old_elms; i<elms(); i++)new(&T[i])TYPE; // create as the last step
    }else
    if(num<elms()) // remove elements
    {
-      if(ClassFunc<TYPE>::HasDel())for(Int i=elms(); --i>=num; )T[i].~TYPE();
+      if(ClassFunc<TYPE>::HasDel())for(Int i=elms(); --i>=num; )T[i].~TYPE(); // destroy as the first step
       TYPE *temp=Alloc<TYPE>(num);
       CopyFastN(temp, data(), num);
       Free(_data); _data=temp; _elms=num;
@@ -339,21 +341,21 @@ T1(TYPE)  Mems<TYPE>&  Mems<TYPE>::setNum(Int num, Int keep)
 {
    MAX(num, 0);
    Clamp(keep, 0, Min(elms(), num));
-   if(ClassFunc<TYPE>::HasDel())for(Int i=elms(); --i>=keep; )T[i].~TYPE(); // delete unkept elements
+   if(ClassFunc<TYPE>::HasDel())for(Int i=elms(); --i>=keep; )T[i].~TYPE(); // delete unkept elements, destroy as the first step
    if(num!=elms()) // resize memory
    {
       TYPE *temp=Alloc<TYPE>(num);
       CopyFastN(temp, data(), keep); // copy kept elements
       Free(_data); _data=temp; _elms=num;
    }
-   if(ClassFunc<TYPE>::HasNew())for(Int i=keep; i<elms(); i++)new(&T[i])TYPE; // create new elements
+   if(ClassFunc<TYPE>::HasNew())for(Int i=keep; i<elms(); i++)new(&T[i])TYPE; // create new elements, create as the last step
    return T;
 }
 T1(TYPE)  Mems<TYPE>&  Mems<TYPE>::setNumZero(Int num, Int keep)
 {
    MAX(num, 0);
    Clamp(keep, 0, Min(elms(), num));
-   if(ClassFunc<TYPE>::HasDel())for(Int i=elms(); --i>=keep; )T[i].~TYPE(); // delete unkept elements
+   if(ClassFunc<TYPE>::HasDel())for(Int i=elms(); --i>=keep; )T[i].~TYPE(); // delete unkept elements, destroy as the first step
    if(num!=elms()) // resize memory
    {
       TYPE *temp=Alloc<TYPE>(num);
@@ -361,7 +363,7 @@ T1(TYPE)  Mems<TYPE>&  Mems<TYPE>::setNumZero(Int num, Int keep)
       Free(_data); _data=temp; _elms=num;
    }
    ZeroFastN(data()+keep, elms()-keep); // zero new elements
-   if(ClassFunc<TYPE>::HasNew())for(Int i=keep; i<elms(); i++)new(&T[i])TYPE; // create new elements
+   if(ClassFunc<TYPE>::HasNew())for(Int i=keep; i<elms(); i++)new(&T[i])TYPE; // create new elements, create as the last step
    return T;
 }
 
@@ -370,9 +372,9 @@ T1(TYPE)  Mems<TYPE>&  Mems<TYPE>::setNumDiscard(Int num)
    MAX(num, 0);
    if( num!=elms())
    {
-      if(ClassFunc<TYPE>::HasDel())REPA(T)T[i].~TYPE(); // delete all elements
+      if(ClassFunc<TYPE>::HasDel())REPA(T)T[i].~TYPE(); // delete all elements, destroy as the first step
       Alloc(Free(_data), _elms=num);
-      if(ClassFunc<TYPE>::HasNew())FREPA(T)new(&T[i])TYPE; // create new elements
+      if(ClassFunc<TYPE>::HasNew())FREPA(T)new(&T[i])TYPE; // create new elements, create as the last step
    }
    return T;
 }
@@ -381,16 +383,17 @@ T1(TYPE)  void  Mems<TYPE>::minNumDiscard(Int num)
 {
    if(Greater(num, elms())) // num>elms()
    {
-      if(ClassFunc<TYPE>::HasDel())REPA(T)T[i].~TYPE(); // delete all elements
+      if(ClassFunc<TYPE>::HasDel())REPA(T)T[i].~TYPE(); // delete all elements, destroy as the first step
       Alloc(Free(_data), _elms=num);
-      if(ClassFunc<TYPE>::HasNew())FREPA(T)new(&T[i])TYPE; // create new elements
+      if(ClassFunc<TYPE>::HasNew())FREPA(T)new(&T[i])TYPE; // create new elements, create as the last step
    }
 }
 #endif
 
 T1(TYPE)  Int  Mems<TYPE>::addNum(Int num) {Int index=elms(); Long new_elms=Long(index)+num; if(new_elms>INT_MAX)Exit("'Mems.addNum' size too big"); setNum((Int)new_elms); return index;}
 
-T1(TYPE) T1(VALUE)  Bool  Mems<TYPE>::binarySearch(C VALUE &value, Int &index, Int compare(C TYPE &a, C VALUE &b))C {return _BinarySearch(data(), elms(), elmSize(), &value, index, (Int(*)(CPtr, CPtr))compare);}
+T1(TYPE) T1(VALUE)  Bool  Mems<TYPE>::binarySearch     (C VALUE &value, Int &index, Int compare(C TYPE &a, C VALUE &b))C {return _BinarySearch     (data(), elms(), elmSize(), &value, index, (Int(*)(CPtr, CPtr))compare);}
+T1(TYPE) T1(VALUE)  Bool  Mems<TYPE>::binarySearchFirst(C VALUE &value, Int &index, Int compare(C TYPE &a, C VALUE &b))C {return _BinarySearchFirst(data(), elms(), elmSize(), &value, index, (Int(*)(CPtr, CPtr))compare);}
 
 T1(TYPE)  Mems<TYPE>&  Mems<TYPE>::sort(           Int compare(C TYPE &a, C TYPE &b           )) {_Sort(data(), elms(), elmSize(),       (Int(*)(CPtr, CPtr      ))compare); return T;}
 T1(TYPE)  Mems<TYPE>&  Mems<TYPE>::sort(CPtr user, Int compare(C TYPE &a, C TYPE &b, CPtr user)) {_Sort(data(), elms(), elmSize(), user, (Int(*)(CPtr, CPtr, CPtr))compare); return T;}
@@ -409,6 +412,9 @@ T1(TYPE)                     Mems<TYPE>&  Mems<TYPE>::operator=(C  Memx  <TYPE  
 T1(TYPE)                     Mems<TYPE>&  Mems<TYPE>::operator=(C  Meml  <TYPE      >  &src) {                    setNum(src.elms()); FREPAO(T)=src[i];  return T;}
 T1(TYPE) template<Int size>  Mems<TYPE>&  Mems<TYPE>::operator=(C CMemPtr<TYPE, size>  &src) {if(this!=src._mems){setNum(src.elms()); FREPAO(T)=src[i];} return T;}
 T1(TYPE)                     Mems<TYPE>&  Mems<TYPE>::operator=(   Mems  <TYPE      > &&src) {Swap(T, src); return T;}
+
+T1(TYPE)  Bool  Mems<TYPE>::operator==(C Mems<TYPE> &x)C {if(elms()!=x.elms())return false; REPA(T)if(T[i]!=x[i])return false; return true ;}
+T1(TYPE)  Bool  Mems<TYPE>::operator!=(C Mems<TYPE> &x)C {if(elms()!=x.elms())return true ; REPA(T)if(T[i]!=x[i])return true ; return false;}
 
 #if EE_PRIVATE
 T1(TYPE)  void         Mems<TYPE>::copyTo  (  TYPE *dest)C {if(dest)CopyFast(dest  , data(), elmsMem());          }
@@ -444,7 +450,7 @@ T1(TYPE)  Bool  Mems<TYPE>::_load   (File &f)  {setNum(f.getInt(      )); FREPA(
 
 T1(TYPE)  Mems<TYPE>::~Mems(            )          {del();}
 T1(TYPE)  Mems<TYPE>:: Mems(            )          {_data=null; _elms=0;}
-T1(TYPE)  Mems<TYPE>:: Mems(  Int   elms)          {MAX(elms, 0); Alloc(_data, elms); _elms=elms; if(ClassFunc<TYPE>::HasNew())FREPA(T)new(&T[i])TYPE;} // create new elements
+T1(TYPE)  Mems<TYPE>:: Mems(  Int   elms)          {MAX(elms, 0); Alloc(_data, elms); _elms=elms; if(ClassFunc<TYPE>::HasNew())FREPA(T)new(&T[i])TYPE;} // create new elements, create as the last step
 T1(TYPE)  Mems<TYPE>:: Mems(C Mems  &src) : Mems() {T=src;}
 T1(TYPE)  Mems<TYPE>:: Mems(  Mems &&src) : Mems() {Swap(T, src);}
 /******************************************************************************/
@@ -515,6 +521,9 @@ T1(TYPE)                     Memc<TYPE>&  Memc<TYPE>::operator=(C  Memx  <TYPE  
 T1(TYPE)                     Memc<TYPE>&  Memc<TYPE>::operator=(C  Meml  <TYPE      >  &src) {                    setNum(src.elms()); FREPAO(T)=src[i];  return T;}
 T1(TYPE) template<Int size>  Memc<TYPE>&  Memc<TYPE>::operator=(C CMemPtr<TYPE, size>  &src) {if(this!=src._memc){setNum(src.elms()); FREPAO(T)=src[i];} return T;}
 T1(TYPE)                     Memc<TYPE>&  Memc<TYPE>::operator=(   Memc  <TYPE      > &&src) {Swap(T, src); return T;}
+
+T1(TYPE)  Bool  Memc<TYPE>::operator==(C Memc<TYPE> &x)C {if(elms()!=x.elms())return false; REPA(T)if(T[i]!=x[i])return false; return true ;}
+T1(TYPE)  Bool  Memc<TYPE>::operator!=(C Memc<TYPE> &x)C {if(elms()!=x.elms())return true ; REPA(T)if(T[i]!=x[i])return true ; return false;}
 
 T1(TYPE) T1(EXTENDED)  Memc<TYPE>&  Memc<TYPE>::replaceClass          ()  {ASSERT_BASE_EXTENDED<TYPE, EXTENDED>(); super::_reset(SIZE(EXTENDED), ClassFunc<EXTENDED>::GetNew(), ClassFunc<EXTENDED>::GetDel()); return T;}
 T1(TYPE) T1(BASE    )               Memc<TYPE>::operator   Memc<BASE>&()  {ASSERT_BASE_EXTENDED<BASE, TYPE    >(); return *(  Memc<BASE>*)this;}
@@ -588,8 +597,10 @@ T1(TYPE)  MemcAbstract<TYPE>::MemcAbstract() : _Memc(0, null, null) {}
 /******************************************************************************/
 // MEMC THREAD SAFE
 /******************************************************************************/
-T1(TYPE)  MemcThreadSafe<TYPE>&  MemcThreadSafe<TYPE>::clear() {super::clear(); return T;}
-T1(TYPE)  MemcThreadSafe<TYPE>&  MemcThreadSafe<TYPE>::del  () {super::del  (); return T;}
+T1(TYPE)  MemcThreadSafe<TYPE>&  MemcThreadSafe<TYPE>::lockedClear() {super::lockedClear(); return T;}
+T1(TYPE)  MemcThreadSafe<TYPE>&  MemcThreadSafe<TYPE>::lockedDel  () {super::lockedDel  (); return T;}
+T1(TYPE)  MemcThreadSafe<TYPE>&  MemcThreadSafe<TYPE>::      clear() {super::      clear(); return T;}
+T1(TYPE)  MemcThreadSafe<TYPE>&  MemcThreadSafe<TYPE>::      del  () {super::      del  (); return T;}
 
 T1(TYPE)  Int      MemcThreadSafe<TYPE>::elms    ()C {return super::elms    ();}
 T1(TYPE)  UInt     MemcThreadSafe<TYPE>::elmSize ()C {return super::elmSize ();}
@@ -611,6 +622,7 @@ T1(TYPE)  TYPE  MemcThreadSafe<TYPE>::lockedPop     (                      ) {TY
 T1(TYPE)  void  MemcThreadSafe<TYPE>::lockedSwapPopFirst(TYPE &dest,        Bool keep_order) {Swap(dest, lockedFirst( )); lockedRemove    (0, keep_order);}
 T1(TYPE)  void  MemcThreadSafe<TYPE>::lockedSwapPop     (TYPE &dest, Int i, Bool keep_order) {Swap(dest, lockedElm  (i)); lockedRemove    (i, keep_order);}
 T1(TYPE)  void  MemcThreadSafe<TYPE>::lockedSwapPop     (TYPE &dest                        ) {Swap(dest, lockedLast ( )); lockedRemoveLast(             );}
+T1(TYPE)  void  MemcThreadSafe<TYPE>::      swapPop     (TYPE &dest                        ) {SyncLocker locker(_lock);   lockedSwapPop   (dest         );}
 
 T1(TYPE)  C TYPE*  MemcThreadSafe<TYPE>::lockedData (     )C {return ConstCast(T).lockedData ( );}
 T1(TYPE)  C TYPE*  MemcThreadSafe<TYPE>::lockedAddr (Int i)C {return ConstCast(T).lockedAddr (i);}
@@ -658,7 +670,7 @@ T1(TYPE)  MemcThreadSafe<TYPE>::MemcThreadSafe() : _MemcThreadSafe(SIZE(TYPE), C
 /******************************************************************************/
 template<typename TYPE, Int size>  Memt<TYPE, size>&  Memt<TYPE, size>::clear()
 {
-   if(ClassFunc<TYPE>::HasDel())REPA(T)T[i].~TYPE();
+   if(ClassFunc<TYPE>::HasDel())REPA(T)T[i].~TYPE(); // destroy as the first step
   _elms=0;
    return T;
 }
@@ -714,7 +726,7 @@ template<typename TYPE, Int size>  TYPE&  Memt<TYPE, size>::NewAt(Int i)
    {
       MoveFastN(&T[i+1], &T[i], old_elms-i);
    }
-   TYPE &elm=T[i]; new(&elm)TYPE; return elm;
+   TYPE &elm=T[i]; new(&elm)TYPE; return elm; // create as the last step
 }
 
 template<typename TYPE, Int size>  Int  Memt<TYPE, size>::index(C TYPE *elm)C
@@ -729,7 +741,7 @@ template<typename TYPE, Int size>  Memt<TYPE, size>&  Memt<TYPE, size>::remove(I
 {
    if(InRange(i, T))
    {
-      T[i].~TYPE();
+      T[i].~TYPE(); // destroy as the first step
       if(i<elms()-1) // if this is not the last element
       {
          if(keep_order)MoveFastN(&T[i], &T[     i+1], elms()-i-1);
@@ -761,11 +773,11 @@ template<typename TYPE, Int size>  Memt<TYPE, size>&  Memt<TYPE, size>::setNum(I
    {
       reserve(num);
       Int old_elms=elms(); _elms=num;
-      if(ClassFunc<TYPE>::HasNew())for(Int i=old_elms; i<elms(); i++)new(&T[i])TYPE;
+      if(ClassFunc<TYPE>::HasNew())for(Int i=old_elms; i<elms(); i++)new(&T[i])TYPE; // create as the last step
    }else
    if(num<elms()) // remove elements
    {
-      if(ClassFunc<TYPE>::HasDel())for(Int i=elms(); --i>=num; )T[i].~TYPE();
+      if(ClassFunc<TYPE>::HasDel())for(Int i=elms(); --i>=num; )T[i].~TYPE(); // destroy as the first step
      _elms=num;
    }
    return T;
@@ -778,11 +790,11 @@ template<typename TYPE, Int size>  Memt<TYPE, size>&  Memt<TYPE, size>::setNumZe
       reserve(num);
       Int old_elms=elms(); _elms=num;
       ZeroFastN(&T[old_elms], elms()-old_elms);
-      if(ClassFunc<TYPE>::HasNew())for(Int i=old_elms; i<elms(); i++)new(&T[i])TYPE;
+      if(ClassFunc<TYPE>::HasNew())for(Int i=old_elms; i<elms(); i++)new(&T[i])TYPE; // create as the last step
    }else
    if(num<elms()) // remove elements
    {
-      if(ClassFunc<TYPE>::HasDel())for(Int i=elms(); --i>=num; )T[i].~TYPE();
+      if(ClassFunc<TYPE>::HasDel())for(Int i=elms(); --i>=num; )T[i].~TYPE(); // destroy as the first step
      _elms=num;
    }
    return T;
@@ -792,21 +804,21 @@ template<typename TYPE, Int size>  Memt<TYPE, size>&  Memt<TYPE, size>::setNum(I
 {
    MAX(num, 0);
    Clamp(keep, 0, Min(elms(), num));
-   if(ClassFunc<TYPE>::HasDel())for(Int i=elms(); --i>=keep; )T[i].~TYPE(); // delete unkept elements
+   if(ClassFunc<TYPE>::HasDel())for(Int i=elms(); --i>=keep; )T[i].~TYPE(); // delete unkept elements, destroy as the first step
    if(Greater(num, maxElms())) // resize memory, num>maxElms()
    {
      _elms=keep; // set '_elms' before 'reserve' to copy only 'keep' elements
       reserve(num);
    }
   _elms=num; // set '_elms' before accessing new elements to avoid range assert
-   if(ClassFunc<TYPE>::HasNew())for(Int i=keep; i<elms(); i++)new(&T[i])TYPE; // create new elements
+   if(ClassFunc<TYPE>::HasNew())for(Int i=keep; i<elms(); i++)new(&T[i])TYPE; // create new elements, create as the last step
    return T;
 }
 template<typename TYPE, Int size>  Memt<TYPE, size>&  Memt<TYPE, size>::setNumZero(Int num, Int keep)
 {
    MAX(num, 0);
    Clamp(keep, 0, Min(elms(), num));
-   if(ClassFunc<TYPE>::HasDel())for(Int i=elms(); --i>=keep; )T[i].~TYPE(); // delete unkept elements
+   if(ClassFunc<TYPE>::HasDel())for(Int i=elms(); --i>=keep; )T[i].~TYPE(); // delete unkept elements, destroy as the first step
    if(Greater(num, maxElms())) // resize memory, num>maxElms()
    {
      _elms=keep; // set '_elms' before 'reserve' to copy only 'keep' elements
@@ -814,7 +826,7 @@ template<typename TYPE, Int size>  Memt<TYPE, size>&  Memt<TYPE, size>::setNumZe
    }
   _elms=num; // set '_elms' before accessing new elements to avoid range assert
    ZeroFastN(&_element(keep), elms()-keep); // zero new elements, have to use '_element' to avoid out of range errors
-   if(ClassFunc<TYPE>::HasNew())for(Int i=keep; i<elms(); i++)new(&T[i])TYPE;  // create new elements
+   if(ClassFunc<TYPE>::HasNew())for(Int i=keep; i<elms(); i++)new(&T[i])TYPE; // create new elements, create as the last step
    return T;
 }
 
@@ -828,16 +840,16 @@ template<typename TYPE, Int size>  Memt<TYPE, size>&  Memt<TYPE, size>::setNumDi
          clear(); // clear before 'reserve' to skip copying old elements
          reserve(num);
         _elms=num; // set '_elms' before accessing new elements to avoid range assert
-         if(ClassFunc<TYPE>::HasNew())FREPA(T)new(&T[i])TYPE; // create new elements
+         if(ClassFunc<TYPE>::HasNew())FREPA(T)new(&T[i])TYPE; // create new elements, create as the last step
       }else
       if(num>elms()) // add elements in existing memory
       {
          Int old_elms=elms(); _elms=num; // set '_elms' before accessing new elements to avoid range assert
-         if(ClassFunc<TYPE>::HasNew())for(Int i=old_elms; i<elms(); i++)new(&T[i])TYPE;
+         if(ClassFunc<TYPE>::HasNew())for(Int i=old_elms; i<elms(); i++)new(&T[i])TYPE; // create as the last step
       }else
     //if(num<elms()) // remove elements, "if" not needed because we already know that "num!=elms && !(num>elms())"
       {
-         if(ClassFunc<TYPE>::HasDel())for(Int i=elms(); --i>=num; )T[i].~TYPE();
+         if(ClassFunc<TYPE>::HasDel())for(Int i=elms(); --i>=num; )T[i].~TYPE(); // destroy as the first step
         _elms=num;
       }
    }
@@ -853,11 +865,11 @@ template<typename TYPE, Int size>  void  Memt<TYPE, size>::minNumDiscard(Int num
          clear(); // clear before 'reserve' to skip copying old elements
          reserve(num);
         _elms=num; // set '_elms' before accessing new elements to avoid range assert
-         if(ClassFunc<TYPE>::HasNew())FREPA(T)new(&T[i])TYPE; // create new elements
+         if(ClassFunc<TYPE>::HasNew())FREPA(T)new(&T[i])TYPE; // create new elements, create as the last step
       }else // add elements in existing memory
       {
          Int old_elms=elms(); _elms=num; // set '_elms' before accessing new elements to avoid range assert
-         if(ClassFunc<TYPE>::HasNew())for(Int i=old_elms; i<elms(); i++)new(&T[i])TYPE;
+         if(ClassFunc<TYPE>::HasNew())for(Int i=old_elms; i<elms(); i++)new(&T[i])TYPE; // create as the last step
       }
    }
 }
@@ -893,6 +905,9 @@ template<typename TYPE, Int Memt_elms>                         MemtN<TYPE, Memt_
 template<typename TYPE, Int Memt_elms>                         MemtN<TYPE, Memt_elms>&  MemtN<TYPE, Memt_elms>::operator=(C  Memx  <TYPE           > &src) {Memt<TYPE, SIZE(TYPE)*Memt_elms>::operator=(src); return T;}
 template<typename TYPE, Int Memt_elms>                         MemtN<TYPE, Memt_elms>&  MemtN<TYPE, Memt_elms>::operator=(C  Meml  <TYPE           > &src) {Memt<TYPE, SIZE(TYPE)*Memt_elms>::operator=(src); return T;}
 template<typename TYPE, Int Memt_elms> template<Int src_size>  MemtN<TYPE, Memt_elms>&  MemtN<TYPE, Memt_elms>::operator=(C CMemPtr<TYPE,  src_size> &src) {Memt<TYPE, SIZE(TYPE)*Memt_elms>::operator=(src); return T;}
+
+template<typename TYPE, Int size>  Bool  Memt<TYPE, size>::operator==(C Memt<TYPE, size> &x)C {if(elms()!=x.elms())return false; REPA(T)if(T[i]!=x[i])return false; return true ;}
+template<typename TYPE, Int size>  Bool  Memt<TYPE, size>::operator!=(C Memt<TYPE, size> &x)C {if(elms()!=x.elms())return true ; REPA(T)if(T[i]!=x[i])return true ; return false;}
 
 template<typename TYPE, Int size>  Bool  Memt<TYPE, size>::save(File &f)C {       f.cmpUIntV(elms()) ; FREPA(T)if(!T[i].save(f))return false; return f.ok();}
 template<typename TYPE, Int size>  Bool  Memt<TYPE, size>::save(File &f)  {       f.cmpUIntV(elms()) ; FREPA(T)if(!T[i].save(f))return false; return f.ok();}
@@ -1740,11 +1755,11 @@ template<typename TYPE, Int Memt_size>  Bool  MemPtr<TYPE, Memt_size>::loadRaw(F
 T1(TYPE)  void  CountedPtr<TYPE>::DecRef(TYPE *data) {ASSERT_BASE_EXTENDED<PtrCounter, TYPE>(); SCAST(PtrCounter, *data).decRef(ClassFunc<TYPE>::Unload   );}
 T1(TYPE)  void  CountedPtr<TYPE>::IncRef(TYPE *data) {ASSERT_BASE_EXTENDED<PtrCounter, TYPE>(); SCAST(PtrCounter, *data).incRef(ClassFunc<TYPE>::LoadEmpty);}
 
-T1(TYPE)  CountedPtr<TYPE>&  CountedPtr<TYPE>::clear    (                   ) {            DecRef(T._data);        T._data=      null ;  return T;}
-T1(TYPE)  CountedPtr<TYPE>&  CountedPtr<TYPE>::operator=(  TYPE       * data) {if(T!=data){DecRef(T._data); IncRef(T._data=      data);} return T;}
-T1(TYPE)  CountedPtr<TYPE>&  CountedPtr<TYPE>::operator=(C CountedPtr & eptr) {if(T!=eptr){DecRef(T._data); IncRef(T._data=eptr._data);} return T;}
-T1(TYPE)  CountedPtr<TYPE>&  CountedPtr<TYPE>::operator=(  CountedPtr &&eptr) {Swap(_data, eptr._data);                                  return T;}
-T1(TYPE)  CountedPtr<TYPE>&  CountedPtr<TYPE>::operator=(  null_t           ) {clear();                                                  return T;}
+T1(TYPE)  CountedPtr<TYPE>&  CountedPtr<TYPE>::clear    (                   ) {                                DecRef(T._data); T._data=       null ;  return T;}
+T1(TYPE)  CountedPtr<TYPE>&  CountedPtr<TYPE>::operator=(  TYPE       * data) {if(T!=data){IncRef(      data); DecRef(T._data); T._data=       data ;} return T;} // have to inc ref first, in case new pointer is a child of current that would get released if dec ref was first
+T1(TYPE)  CountedPtr<TYPE>&  CountedPtr<TYPE>::operator=(C CountedPtr & eptr) {if(T!=eptr){IncRef(eptr._data); DecRef(T._data); T._data= eptr._data ;} return T;} // have to inc ref first, in case new pointer is a child of current that would get released if dec ref was first
+T1(TYPE)  CountedPtr<TYPE>&  CountedPtr<TYPE>::operator=(  CountedPtr &&eptr) {                                              Swap(_data, eptr._data);  return T;}
+T1(TYPE)  CountedPtr<TYPE>&  CountedPtr<TYPE>::operator=(  null_t           ) {clear();                                                                return T;}
 
 T1(TYPE)  CountedPtr<TYPE>:: CountedPtr(  null_t           ) {       T._data=      null ;}
 T1(TYPE)  CountedPtr<TYPE>:: CountedPtr(  TYPE       * data) {IncRef(T._data=      data);}
@@ -1775,6 +1790,9 @@ T1(TYPE)  C Str&  Cache<TYPE>::name    (C TYPE *data             )C {return supe
 T1(TYPE)  CChar*  Cache<TYPE>::name    (C TYPE *data, CChar *path)C {return super::name    (data,  path);}
 T1(TYPE)  UID     Cache<TYPE>::id      (C TYPE *data             )C {return super::id      (data       );}
 T1(TYPE)  Int     Cache<TYPE>::ptrCount(C TYPE *data             )C {return super::ptrCount(data       );}
+#if EE_PRIVATE
+T1(TYPE)  Bool    Cache<TYPE>::has     (C TYPE *data             )C {return super::has     (data       );}
+#endif
 T1(TYPE)  Bool    Cache<TYPE>::contains(C TYPE *data             )C {return super::contains(data       );}
 T1(TYPE)  Bool    Cache<TYPE>::dummy   (C TYPE *data             )C {return super::dummy   (data       );}
 T1(TYPE)  void    Cache<TYPE>::dummy   (C TYPE *data, Bool  dummy)  {       super::dummy   (data, dummy);}
@@ -1809,11 +1827,14 @@ template<typename TYPE, Cache<TYPE> &CACHE>  UID     CacheElmPtr<TYPE,CACHE>::id
 template<typename TYPE, Cache<TYPE> &CACHE>  Bool    CacheElmPtr<TYPE,CACHE>::dummy(            )C {return CACHE.dummy(_data       );}
 template<typename TYPE, Cache<TYPE> &CACHE>  void    CacheElmPtr<TYPE,CACHE>::dummy(Bool   dummy)  {       CACHE.dummy(_data, dummy);}
 
-template<typename TYPE, Cache<TYPE> &CACHE>  CacheElmPtr<TYPE,CACHE>&  CacheElmPtr<TYPE,CACHE>::clear    (                    ) {            CACHE.decRef(T._data);              T._data=      null ;  return T;}
-template<typename TYPE, Cache<TYPE> &CACHE>  CacheElmPtr<TYPE,CACHE>&  CacheElmPtr<TYPE,CACHE>::operator=(  TYPE        * data) {if(T!=data){CACHE.decRef(T._data); CACHE.incRef(T._data=      data);} return T;}
-template<typename TYPE, Cache<TYPE> &CACHE>  CacheElmPtr<TYPE,CACHE>&  CacheElmPtr<TYPE,CACHE>::operator=(C CacheElmPtr & eptr) {if(T!=eptr){CACHE.decRef(T._data); CACHE.incRef(T._data=eptr._data);} return T;}
-template<typename TYPE, Cache<TYPE> &CACHE>  CacheElmPtr<TYPE,CACHE>&  CacheElmPtr<TYPE,CACHE>::operator=(  CacheElmPtr &&eptr) {Swap(_data, eptr._data);                                              return T;}
-template<typename TYPE, Cache<TYPE> &CACHE>  CacheElmPtr<TYPE,CACHE>&  CacheElmPtr<TYPE,CACHE>::operator=(  null_t            ) {clear();                                                              return T;}
+template<typename TYPE, Cache<TYPE> &CACHE>  CacheElmPtr<TYPE,CACHE>&  CacheElmPtr<TYPE,CACHE>::clear    (                    ) {            CACHE.   decRef(            T._data); T._data=       null ;  return T;}
+template<typename TYPE, Cache<TYPE> &CACHE>  CacheElmPtr<TYPE,CACHE>&  CacheElmPtr<TYPE,CACHE>::operator=(  TYPE        * data) {if(T!=data){CACHE.incDecRef(      data, T._data); T._data=       data ;} return T;} // have to inc ref first, in case new pointer is a child of current that would get released if dec ref was first
+template<typename TYPE, Cache<TYPE> &CACHE>  CacheElmPtr<TYPE,CACHE>&  CacheElmPtr<TYPE,CACHE>::operator=(C CacheElmPtr & eptr) {if(T!=eptr){CACHE.incDecRef(eptr._data, T._data); T._data= eptr._data ;} return T;} // have to inc ref first, in case new pointer is a child of current that would get released if dec ref was first
+template<typename TYPE, Cache<TYPE> &CACHE>  CacheElmPtr<TYPE,CACHE>&  CacheElmPtr<TYPE,CACHE>::operator=(  CacheElmPtr &&eptr) {                                               Swap(_data, eptr._data);  return T;}
+template<typename TYPE, Cache<TYPE> &CACHE>  CacheElmPtr<TYPE,CACHE>&  CacheElmPtr<TYPE,CACHE>::operator=(  null_t            ) {clear();                                                                 return T;}
+#if EE_PRIVATE
+template<typename TYPE, Cache<TYPE> &CACHE>  CacheElmPtr<TYPE,CACHE>&  CacheElmPtr<TYPE,CACHE>::setContained(TYPE       * data) {if(T!=data){CACHE.incRefContained(data); CACHE.decRef(T._data); T._data=data;} return T;} // have to inc ref first, in case new pointer is a child of current that would get released if dec ref was first
+#endif
 
 template<typename TYPE, Cache<TYPE> &CACHE>  CacheElmPtr<TYPE,CACHE>&  CacheElmPtr<TYPE,CACHE>::find     (CChar  *file, CChar *path) {TYPE *old=T._data; T._data=(TYPE*)CACHE._Cache::find   (    file , path, true); CACHE.decRef(old); return T;}
 template<typename TYPE, Cache<TYPE> &CACHE>  CacheElmPtr<TYPE,CACHE>&  CacheElmPtr<TYPE,CACHE>::find     (CChar8 *file, CChar *path) {TYPE *old=T._data; T._data=(TYPE*)CACHE._Cache::find   (Str(file), path, true); CACHE.decRef(old); return T;}
@@ -1987,11 +2008,11 @@ inline Int Elms(C _MapTS &map) {return map.elms();}
 template<typename KEY, typename DATA, MapEx<KEY,DATA> &MAP>  Bool    MapElmPtr<KEY,DATA,MAP>::dummy(          )C {return MAP.dummy(_data       );}
 template<typename KEY, typename DATA, MapEx<KEY,DATA> &MAP>  void    MapElmPtr<KEY,DATA,MAP>::dummy(Bool dummy)  {       MAP.dummy(_data, dummy);}
 
-template<typename KEY, typename DATA, MapEx<KEY,DATA> &MAP>  MapElmPtr<KEY,DATA,MAP>&  MapElmPtr<KEY,DATA,MAP>::clear    (                  ) {            MAP.decRef(T._data);            T._data=      null ;  return T;}
-template<typename KEY, typename DATA, MapEx<KEY,DATA> &MAP>  MapElmPtr<KEY,DATA,MAP>&  MapElmPtr<KEY,DATA,MAP>::operator=(  DATA      * data) {if(T!=data){MAP.decRef(T._data); MAP.incRef(T._data=      data);} return T;}
-template<typename KEY, typename DATA, MapEx<KEY,DATA> &MAP>  MapElmPtr<KEY,DATA,MAP>&  MapElmPtr<KEY,DATA,MAP>::operator=(C MapElmPtr & eptr) {if(T!=eptr){MAP.decRef(T._data); MAP.incRef(T._data=eptr._data);} return T;}
-template<typename KEY, typename DATA, MapEx<KEY,DATA> &MAP>  MapElmPtr<KEY,DATA,MAP>&  MapElmPtr<KEY,DATA,MAP>::operator=(  MapElmPtr &&eptr) {Swap(_data, eptr._data);                                           return T;}
-template<typename KEY, typename DATA, MapEx<KEY,DATA> &MAP>  MapElmPtr<KEY,DATA,MAP>&  MapElmPtr<KEY,DATA,MAP>::operator=(  null_t          ) {clear();                                                           return T;}
+template<typename KEY, typename DATA, MapEx<KEY,DATA> &MAP>  MapElmPtr<KEY,DATA,MAP>&  MapElmPtr<KEY,DATA,MAP>::clear    (                  ) {                                    MAP.decRef(T._data); T._data=       null ;  return T;}
+template<typename KEY, typename DATA, MapEx<KEY,DATA> &MAP>  MapElmPtr<KEY,DATA,MAP>&  MapElmPtr<KEY,DATA,MAP>::operator=(  DATA      * data) {if(T!=data){MAP.incRef(      data); MAP.decRef(T._data); T._data=       data ;} return T;} // have to inc ref first, in case new pointer is a child of current that would get released if dec ref was first
+template<typename KEY, typename DATA, MapEx<KEY,DATA> &MAP>  MapElmPtr<KEY,DATA,MAP>&  MapElmPtr<KEY,DATA,MAP>::operator=(C MapElmPtr & eptr) {if(T!=eptr){MAP.incRef(eptr._data); MAP.decRef(T._data); T._data= eptr._data ;} return T;} // have to inc ref first, in case new pointer is a child of current that would get released if dec ref was first
+template<typename KEY, typename DATA, MapEx<KEY,DATA> &MAP>  MapElmPtr<KEY,DATA,MAP>&  MapElmPtr<KEY,DATA,MAP>::operator=(  MapElmPtr &&eptr) {                                                      Swap(_data, eptr._data);  return T;}
+template<typename KEY, typename DATA, MapEx<KEY,DATA> &MAP>  MapElmPtr<KEY,DATA,MAP>&  MapElmPtr<KEY,DATA,MAP>::operator=(  null_t          ) {clear();                                                                        return T;}
 
 template<typename KEY, typename DATA, MapEx<KEY,DATA> &MAP>  MapElmPtr<KEY,DATA,MAP>&  MapElmPtr<KEY,DATA,MAP>::find     (C KEY &key) {DATA *old=T._data; T._data=(DATA*)MAP.find   (&key, true); MAP.decRef(old); return T;}
 template<typename KEY, typename DATA, MapEx<KEY,DATA> &MAP>  MapElmPtr<KEY,DATA,MAP>&  MapElmPtr<KEY,DATA,MAP>::get      (C KEY &key) {DATA *old=T._data; T._data=(DATA*)MAP.get    (&key, true); MAP.decRef(old); return T;}
@@ -2109,17 +2130,6 @@ T1(TYPE)  void SplineInterpolator<TYPE>::add(C TYPE &value, C InterpolatorTemp &
 T1(TYPE)  void AngularInterpolator<TYPE>::update(C InterpolatorTemp &temp) {if(temp.op){              _prev=_cur; _cur=_next;} _value=Lerp (        _prev, _cur,                  temp.frac);}
 T1(TYPE)  void  LinearInterpolator<TYPE>::update(C InterpolatorTemp &temp) {if(temp.op){              _prev=_cur; _cur=_next;} _value=Lerp (        _prev, _cur,                  temp.frac);}
 T1(TYPE)  void  SplineInterpolator<TYPE>::update(C InterpolatorTemp &temp) {if(temp.op){_prev2=_prev; _prev=_cur; _cur=_next;} _value=Lerp4(_prev2, _prev, _cur, _cur-_prev+_cur, temp.frac);} // predict next instead of using '_next' because we may not know it in all cases
-/******************************************************************************/
-// INPUT
-/******************************************************************************/
-inline Bool Joypad::mini()C
-{
-#if SWITCH
-   return _mini;
-#else
-   return false;
-#endif
-}
 /******************************************************************************/
 // IO
 /******************************************************************************/

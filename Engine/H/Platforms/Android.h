@@ -45,9 +45,9 @@ struct JObject
    JObject& operator= (jobject j);
 
            ~JObject() {del();}
-            JObject(          jobject j=null) : _jni(Jni), _(j), _global(false) {}
-   explicit JObject(JNI &jni, jobject j=null) : _jni(jni), _(j), _global(false) {}
-            JObject(JObject &&temp) : _jni(temp._jni), _(temp._), _global(temp._global) {temp.clear();}
+            JObject(          jobject j=null) : _(j), _jni(Jni), _global(false) {}
+   explicit JObject(JNI &jni, jobject j=null) : _(j), _jni(jni), _global(false) {}
+            JObject(JObject &&temp) : _(temp._), _jni(temp._jni), _global(temp._global) {temp.clear();}
 
 protected:
    jobject _;
@@ -122,7 +122,7 @@ typedef jfieldID  JFieldID;
 extern jobject   Activity; // 'Activity' should not use 'JObject' because it's not dynamically obtained
 extern JClass    ActivityClass, ClipboardManagerClass;
 extern JObject   ClipboardManager, LocationManager, GPS_PROVIDER, NETWORK_PROVIDER, EsenthelLocationListener[2];
-extern JMethodID getLastKnownLocation, getLatitude, getLongitude, getAltitude, getAccuracy, getSpeed, getTime, requestLocationUpdates, removeUpdates;
+extern JMethodID getLastKnownLocation, getLatitude, getLongitude, getAltitude, getAccuracy, getSpeed, getTime, requestLocationUpdates, removeUpdates, vibrate;
 
 extern android_app   *AndroidApp;
 extern Str8           AndroidPackageName;

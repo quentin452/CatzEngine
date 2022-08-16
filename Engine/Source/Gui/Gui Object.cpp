@@ -175,6 +175,11 @@ void GuiObj::notifyParentOfRectChange(C Rect &old_rect, Bool old_visible)
    DEBUG_BYTE_LOCK(_used);
    if(parent())parent()->childRectChanged(old_visible ? &old_rect : null, visible() ? &rect() : null, T);
 }
+void GuiObj::notifyParentOfRectChange()
+{
+   DEBUG_BYTE_LOCK(_used);
+   if(parent())parent()->childRectChanged(&Rect(FLT_MAX, -FLT_MAX, FLT_MAX, -FLT_MAX), &Rect(-FLT_MAX, FLT_MAX, -FLT_MAX, FLT_MAX), T); // this will trigger full reset
+}
 /******************************************************************************/
 Bool GuiObj::contains(C GuiObj *child)C // !! this method is safe to work with "this==null" upon changing that, fix all calls to this !!
 {
@@ -190,7 +195,8 @@ GuiObj* GuiObj::firstContainer(                 )
    {
       case GO_DESKTOP:
       case GO_REGION :
-      case GO_WINDOW : return go;
+      case GO_WINDOW :
+         return go;
    }
    return null;
 }
@@ -203,7 +209,8 @@ GuiObj* GuiObj::firstKbParent()
       case GO_MENU   :
       case GO_REGION :
       case GO_TAB    :
-      case GO_WINDOW : return go;
+      case GO_WINDOW :
+         return go;
    }
    return null;
 }
@@ -234,7 +241,8 @@ Bool GuiObj::kbCatch()C
       case GO_TEXTBOX :
       case GO_TEXTLINE:
       case GO_VIEWPORT:
-      case GO_WINDOW  : return visible() && enabled();
+      case GO_WINDOW  :
+         return visible() && enabled();
 
       case GO_BUTTON  : return asButton  ().focusable() && visible() && enabled();
       case GO_CHECKBOX: return asCheckBox().focusable() && visible() && enabled();
@@ -243,7 +251,7 @@ Bool GuiObj::kbCatch()C
       case GO_SLIDEBAR: return asSlideBar().focusable() && visible() && enabled();
       case GO_SLIDER  : return asSlider  ().focusable() && visible() && enabled();
       case GO_TAB     : return asTab     ().focusable() && visible() && enabled();
-      case GO_LIST    : return                             visible() && enabled();
+      case GO_LIST    : return asList    ().focusable() && visible() && enabled();
       default         : return false;
    }
 }
@@ -319,12 +327,12 @@ GuiObj& GuiObj::kbClear()
    // remove from parents kb focus
    if(GuiObj *kb=firstKbParent())switch(kb->type())
    {
-      case GO_DESKTOP: { Desktop &desktop=kb->asDesktop(); if(desktop._children.kb==this)desktop._children.kb=null      ;} break;
-      case GO_LIST   : {_List    &list   =kb->asList   (); if(list   ._children.kb==this)list   ._children.kb=null      ;} break;
-      case GO_MENU   : { Menu    &menu   =kb->asMenu   (); if(menu   .         _kb==this)menu   .         _kb=&menu.list;} break;
-      case GO_REGION : { Region  &region =kb->asRegion (); if(region ._children.kb==this)region ._children.kb=null      ;} break;
-      case GO_TAB    : { Tab     &tab    =kb->asTab    (); if(tab    ._children.kb==this)tab    ._children.kb=null      ;} break;
-      case GO_WINDOW : { Window  &window =kb->asWindow (); if(window ._children.kb==this)window ._children.kb=null      ;} break;
+      case GO_DESKTOP: { Desktop &desktop=kb->asDesktop(); if(contains(desktop._children.kb))desktop._children.kb=null      ;} break;
+      case GO_LIST   : {_List    &list   =kb->asList   (); if(contains(list   ._children.kb))list   ._children.kb=null      ;} break;
+      case GO_MENU   : { Menu    &menu   =kb->asMenu   (); if(contains(menu   .         _kb))menu   .         _kb=&menu.list;} break;
+      case GO_REGION : { Region  &region =kb->asRegion (); if(contains(region ._children.kb))region ._children.kb=null      ;} break;
+      case GO_TAB    : { Tab     &tab    =kb->asTab    (); if(contains(tab    ._children.kb))tab    ._children.kb=null      ;} break;
+      case GO_WINDOW : { Window  &window =kb->asWindow (); if(contains(window ._children.kb))window ._children.kb=null      ;} break;
    }
 
    // adjust global focus
@@ -850,9 +858,12 @@ void GuiObjChildren::del()
 }
 Bool GuiObjChildren::remove(GuiObj &child)
 {
+   Bool deactivate=true; // deactivation can be made optional only if we add to another parent that belongs to Gui.desktop, in that case make 'deactivate' as function parameter, and process in 'GuiObjChildren::add', make sure to properly adjust Gui.kb and GuiObjChildren.kb of the new parent and its parents, call some Gui.kbSet? also check Gui.window, and others
    Int i; if(find(child, i))
    {
-      children.remove(i, true); if(child.contains(kb))kb=null; child._parent=null; changed=true; // don't deactivate 'child' because we may be just changing parents for it
+      children.remove(i, true);
+      if(deactivate)child.deactivate();else if(child.contains(kb))kb=null; // deactivate before clearing '_parent'
+      child._parent=null; changed=true;
       return true;
    }
    return false;
@@ -871,7 +882,8 @@ GuiObjChildren::Child* GuiObjChildren::add(GuiObj &child, GuiObj &parent)
       }
 
       Child &c=children.NewAt(l); c.go=&child; child._parent=&parent; child.parentClientRectChanged(old_parent ? &NoTemp(old_parent->localClientRect()) : null, &NoTemp(parent.localClientRect()));
-      if(!kb && child.kbCatch())kb=&child;
+      if(!MOBILE) // skip for Mobile platforms, because of the soft keyboard overlay, which could keep popping up annoyingly and occlude big portion of the screen
+         if(!kb && child.kbCatch())kb=&child;
       changed=true;
       return &c;
    }

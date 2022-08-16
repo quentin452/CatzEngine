@@ -184,8 +184,8 @@ Bool Image::ImportTGA(File &f, Int type, Int mode, Int mip_maps)
    tga.palette.setNum(Unaligned(header.CmapLength));
    FREPA(tga.palette){Color &c=tga.palette[i]; f>>c.b>>c.g>>c.r; c.a=255;}
 
-   Bool mirror_x=FlagTest(Unaligned(header.ImagDesc), 16),
-        mirror_y=FlagTest(Unaligned(header.ImagDesc), 32);
+   Bool mirror_x=FlagOn(Unaligned(header.ImagDesc), 16),
+        mirror_y=FlagOn(Unaligned(header.ImagDesc), 32);
 
    if(type<=0)if(map)type=IMAGE_R8G8B8_SRGB;else switch(Unaligned(header.PixelDepth))
    {

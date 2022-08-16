@@ -299,7 +299,7 @@ void TextLine::update(C GuiPC &gpc)
             if(!ts.font())ts.font(skin->font()); // adjust font in case it's empty and the custom skin has a different font than the 'Gui.skin'
          #endif
 
-            Int pos=ts.textPos(displayText(), touch_pos->x - rect().min.x - ((Gui._overlay_textline==this) ? Gui._overlay_textline_offset.x : gpc.offset.x) - _offset - ts.size.x*TEXTLINE_OFFSET, !ButtonDb(touch_state) && !_edit.overwrite);
+            Int pos=ts.textIndex(displayText(), touch_pos->x - rect().min.x - ((Gui._overlay_textline==this) ? Gui._overlay_textline_offset.x : gpc.offset.x) - _offset - ts.size.x*TEXTLINE_OFFSET, (ButtonDb(touch_state) || _edit.overwrite) ? TEXT_INDEX_OVERWRITE : TEXT_INDEX_DEFAULT);
 
             if(ButtonDb(touch_state))
             {

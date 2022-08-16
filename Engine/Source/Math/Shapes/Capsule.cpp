@@ -42,6 +42,7 @@ CapsuleM& CapsuleM::operator/=(C Vec &v)
    return T;
 }
 
+/******************************************************************************/
 Capsule& Capsule::operator*=(C Matrix3 &m)
 {
    pos*=m;
@@ -91,6 +92,55 @@ Capsule& Capsule::operator/=(C MatrixM &m)
    return T;
 }
 /******************************************************************************/
+CapsuleM& CapsuleM::operator*=(C Matrix3 &m)
+{
+   pos*=m;
+   up *=m;
+   h  *=up.normalize();
+   r  *=m .avgScale ();
+   return T;
+}
+CapsuleM& CapsuleM::operator/=(C Matrix3 &m)
+{
+   pos/=m;
+   up /=m;
+   h  *=up.normalize(); // 'h' should indeed be multiplied here because 'up' already got transformed in correct way
+   r  /=m .avgScale ();
+   return T;
+}
+CapsuleM& CapsuleM::operator*=(C Matrix &m)
+{
+   pos*=m;
+   up *=m .orn();
+   h  *=up.normalize();
+   r  *=m .avgScale ();
+   return T;
+}
+CapsuleM& CapsuleM::operator/=(C Matrix &m)
+{
+   pos/=m;
+   up /=m .orn();
+   h  *=up.normalize(); // 'h' should indeed be multiplied here because 'up' already got transformed in correct way
+   r  /=m .avgScale ();
+   return T;
+}
+CapsuleM& CapsuleM::operator*=(C MatrixM &m)
+{
+   pos*=m;
+   up *=m .orn();
+   h  *=up.normalize();
+   r  *=m .avgScale ();
+   return T;
+}
+CapsuleM& CapsuleM::operator/=(C MatrixM &m)
+{
+   pos/=m;
+   up /=m .orn();
+   h  *=up.normalize(); // 'h' should indeed be multiplied here because 'up' already got transformed in correct way
+   r  /=m .avgScale ();
+   return T;
+}
+/******************************************************************************/
 Capsule& Capsule::set(Flt r, C Vec &from, C Vec &to)
 {
    T.r  =r;
@@ -108,15 +158,39 @@ Capsule& Capsule::setEdge(Flt r, C Vec &from, C Vec &to)
    return T;
 }
 /******************************************************************************/
-Vec Capsule::nearest(C Vec &normal)C
+Vec Capsule::nearestNrm(C Vec &normal)C
 {
    return isBall() ? pos - normal*ballR()
                    : pos - normal*r - up*( Sign(Dot(up, normal))*innerHeightHalf() );
 }
-VecD CapsuleM::nearest(C Vec &normal)C
+VecD CapsuleM::nearestNrm(C Vec &normal)C
 {
    return isBall() ? pos - normal*ballR()
                    : pos - normal*r - up*( Sign(Dot(up, normal))*innerHeightHalf() );
+}
+Vec Capsule::nearestPos(C Vec &pos, Bool inside)C
+{
+   Vec nearest; if(isBall())nearest=T.pos;else
+   {
+      Flt ihh=innerHeightHalf(), y=Mid(DistPointPlane(pos, T.pos, up), -ihh, ihh);
+      nearest=T.pos+up*y;
+   }
+   Vec dir=pos-nearest;
+   Flt len2=dir.length2();
+   if(inside ? len2<=Sqr(r) : !len2)return pos; // inside or div by zero
+   return nearest+dir*(r/SqrtFast(len2));
+}
+VecD CapsuleM::nearestPos(C VecD &pos, Bool inside)C
+{
+   VecD nearest; if(isBall())nearest=T.pos;else
+   {
+      Dbl ihh=innerHeightHalf(), y=Mid(DistPointPlane(pos, T.pos, up), -ihh, ihh);
+      nearest=T.pos+up*y;
+   }
+   VecD dir=pos-nearest;
+   Dbl  len2=dir.length2();
+   if(inside ? len2<=Sqr(r) : !len2)return pos; // inside or div by zero
+   return nearest+dir*(r/SqrtFast(len2));
 }
 /******************************************************************************/
 void Capsule::draw(C Color &color, Bool fill, Int resolution)C
@@ -135,7 +209,17 @@ Flt Dist(C Vec &point, C Capsule &capsule)
                             if(capsule.isBall())return Max(0, Dist         (point, capsule.pos                   )-capsule.ballR());
    Vec up=capsule.up*capsule.innerHeightHalf(); return Max(0, DistPointEdge(point, capsule.pos-up, capsule.pos+up)-capsule.r      ); // 'DistPointEdge' is safe in case edge is zero length
 }
+Dbl Dist(C VecD &point, C CapsuleM &capsule)
+{
+                            if(capsule.isBall())return Max(0, Dist         (point, capsule.pos                   )-capsule.ballR());
+   Vec up=capsule.up*capsule.innerHeightHalf(); return Max(0, DistPointEdge(point, capsule.pos-up, capsule.pos+up)-capsule.r      ); // 'DistPointEdge' is safe in case edge is zero length
+}
 Flt Dist(C Edge &edge, C Capsule &capsule)
+{
+   return Max(0, capsule.isBall() ? Dist(capsule.pos       , edge)-capsule.ballR()
+                                  : Dist(capsule.ballEdge(), edge)-capsule.r);
+}
+Dbl Dist(C EdgeD &edge, C CapsuleM &capsule)
 {
    return Max(0, capsule.isBall() ? Dist(capsule.pos       , edge)-capsule.ballR()
                                   : Dist(capsule.ballEdge(), edge)-capsule.r);
@@ -177,17 +261,25 @@ Flt Dist(C Capsule &a, C Capsule &b)
                                           : Dist(a.ballEdge(), b.ballEdge())
                  )-a.r-b.r); // !! WARNING: for simplicity this assumes that ballR==r !!
 }
+Flt DistFull(C Capsule &a, C Capsule &b)
+{
+   return (a.isBall() ? b.isBall() ? Dist(a.pos       , b.pos       )
+                                   : Dist(a.pos       , b.ballEdge())
+                      : b.isBall() ? Dist(b.pos       , a.ballEdge())
+                                   : Dist(a.ballEdge(), b.ballEdge())
+          )-a.r-b.r; // !! WARNING: for simplicity this assumes that ballR==r !!
+}
 Flt DistCapsulePlane(C Capsule &capsule, C Vec &plane, C Vec &normal)
 {
-   return DistPointPlane(capsule.nearest(normal), plane, normal);
+   return DistPointPlane(capsule.nearestNrm(normal), plane, normal);
 }
 Dbl DistCapsulePlane(C Capsule &capsule, C VecD &plane, C Vec &normal)
 {
-   return DistPointPlane(capsule.nearest(normal), plane, normal);
+   return DistPointPlane(capsule.nearestNrm(normal), plane, normal);
 }
 Dbl DistCapsulePlane(C CapsuleM &capsule, C VecD &plane, C Vec &normal)
 {
-   return DistPointPlane(capsule.nearest(normal), plane, normal);
+   return DistPointPlane(capsule.nearestNrm(normal), plane, normal);
 }
 /******************************************************************************/
 Bool Cuts(C Vec &point, C Capsule &capsule)
@@ -332,12 +424,12 @@ Bool SweepCapsuleEdge(C Capsule &capsule, C Vec &move, C Edge &edge, Flt *hit_fr
 Bool SweepCapsulePlane(C Capsule &capsule, C Vec &move, C Plane &plane, Flt *hit_frac, Vec *hit_normal, Vec *hit_pos)
 {
    if(Dot(move, plane.normal)>=0)return false;
-   return SweepPointPlane(capsule.nearest(plane.normal), move, plane, hit_frac, hit_normal, hit_pos);
+   return SweepPointPlane(capsule.nearestNrm(plane.normal), move, plane, hit_frac, hit_normal, hit_pos);
 }
 Bool SweepCapsuleTri(C Capsule &capsule, C Vec &move, C TriN &tri, Flt *hit_frac, Vec *hit_normal)
 {
    if(Dot(move, tri.n)>=0)return false;
-   if(SweepPointTri(capsule.nearest(tri.n), move, tri, hit_frac))
+   if(SweepPointTri(capsule.nearestNrm(tri.n), move, tri, hit_frac))
    {
       if(hit_normal)*hit_normal=tri.n;
       return true;

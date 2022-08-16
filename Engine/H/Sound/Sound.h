@@ -120,7 +120,7 @@ const_mem_addr struct _Sound // can be moved however 'memAddressChanged' needs t
    void play ();
 
    // get / set
-                                 Bool noRef    ()C {return FlagTest(AtomicGet(flag), SOUND_NO_REF);} // if there's no external reference to this sound
+                                 Bool noRef    ()C {return FlagOn(AtomicGet(flag), SOUND_NO_REF);} // if there's no external reference to this sound
                                  Bool is       ()C;                   // if created
                                  Bool is3D     ()C {return _is3D   ;} // if is 3D
                                  Bool playing  ()C {return _playing;} // if playing

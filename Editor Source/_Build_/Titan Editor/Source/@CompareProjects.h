@@ -66,7 +66,7 @@ public:
    void create();
    static bool DiffElm(C Project &proj_a, C Elm &elm_a, C Project &proj_b, C Elm &elm_b);
    void refresh();
-   void changed(C UID &proj_id);
+   void changed(C UID &proj_id); // project with 'proj_id' has changed
    void compare(C MemPtr<UID> &proj_ids);
    virtual void update(C GuiPC &gpc)override;
 

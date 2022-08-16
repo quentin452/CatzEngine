@@ -147,7 +147,7 @@ static Bool LockedMipHasAlpha(C Image &image) // assumes that image is not compr
    }
    return false;
 }
-Bool _ResizeWaifu(C Image &src, Image &dest, UInt flags) // assumes that images are not compressed and already locked, 'src' is smaller than 'dest', processes locked mip-map only
+Bool _ResizeWaifu(C Image &src, Image &dest, UInt flags) // assumes that image HW types are not compressed and already locked, 'src' is smaller than 'dest', processes locked mip-map only
 {
    if(Waifu.init())
    {
@@ -179,7 +179,7 @@ Bool _ResizeWaifu(C Image &src, Image &dest, UInt flags) // assumes that images 
       // process ALPHA
       if(dest.typeInfo().a && LockedMipHasAlpha(src)) // it's important to skip alpha when not needed because it requires a separate resize call (making resize 2x slower)
       {
-         if(!s->copyTry(temp_alpha, -1, -1, -1, dest.type(), IMAGE_SOFT, 1, FILTER_BEST, flags))return false; // copy to 'temp_alpha' and include alpha channel format
+         if(!s->copyTry(temp_alpha, -1, -1, -1, dest.hwType(), IMAGE_SOFT, 1, FILTER_BEST, flags))return false; // copy to 'temp_alpha' and include alpha channel format !! THIS MUST USE 'hwType' BECAUSE 'type' CAN BE COMPRESSED !!
 
          // copy alpha channel from 'src' into 'temp' as RGB
          s=&src;

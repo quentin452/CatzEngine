@@ -633,9 +633,9 @@ void DisplayState::colWrite(Byte color_mask, Byte index)
       if(!index){color_mask&=Col0WriteAllow; if(color_mask==Col0WriteReal)return; Col0WriteReal=color_mask;}
    #endif
    #if GL_ES
-      if(!index)glColorMask(FlagTest(color_mask, COL_WRITE_R), FlagTest(color_mask, COL_WRITE_G), FlagTest(color_mask, COL_WRITE_B), FlagTest(color_mask, COL_WRITE_A)); // TODO: 'glColorMaski' requires GLES 3.2 - https://www.khronos.org/registry/OpenGL-Refpages/es3/html/glColorMask.xhtml
+      if(!index)glColorMask(FlagOn(color_mask, COL_WRITE_R), FlagOn(color_mask, COL_WRITE_G), FlagOn(color_mask, COL_WRITE_B), FlagOn(color_mask, COL_WRITE_A)); // TODO: 'glColorMaski' requires GLES 3.2 - https://www.khronos.org/registry/OpenGL-Refpages/es3/html/glColorMask.xhtml
    #else
-      glColorMaski(index, FlagTest(color_mask, COL_WRITE_R), FlagTest(color_mask, COL_WRITE_G), FlagTest(color_mask, COL_WRITE_B), FlagTest(color_mask, COL_WRITE_A));
+      glColorMaski(index, FlagOn(color_mask, COL_WRITE_R), FlagOn(color_mask, COL_WRITE_G), FlagOn(color_mask, COL_WRITE_B), FlagOn(color_mask, COL_WRITE_A));
    #endif
    }
 #endif
@@ -650,7 +650,7 @@ void DisplayState::colWriteAllow(Byte color_mask) // this operates only on "inde
       if(Col0WriteReal!=color_mask)
       {
          Col0WriteReal=color_mask;
-         glColorMask(FlagTest(color_mask, COL_WRITE_R), FlagTest(color_mask, COL_WRITE_G), FlagTest(color_mask, COL_WRITE_B), FlagTest(color_mask, COL_WRITE_A));
+         glColorMask(FlagOn(color_mask, COL_WRITE_R), FlagOn(color_mask, COL_WRITE_G), FlagOn(color_mask, COL_WRITE_B), FlagOn(color_mask, COL_WRITE_A));
       }
    }
 }
@@ -753,7 +753,7 @@ void DisplayState::setDeviceSettings()
    #endif
    #if !IOS
       if(DepthReal)glEnable   (GL_DEPTH_TEST);else glDisable(GL_DEPTH_TEST);
-                   glColorMask(FlagTest(Col0WriteReal, COL_WRITE_R), FlagTest(Col0WriteReal, COL_WRITE_G), FlagTest(Col0WriteReal, COL_WRITE_B), FlagTest(Col0WriteReal, COL_WRITE_A));
+                   glColorMask(FlagOn(Col0WriteReal, COL_WRITE_R), FlagOn(Col0WriteReal, COL_WRITE_G), FlagOn(Col0WriteReal, COL_WRITE_B), FlagOn(Col0WriteReal, COL_WRITE_A));
    #endif
 #endif
 

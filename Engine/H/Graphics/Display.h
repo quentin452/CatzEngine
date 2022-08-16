@@ -206,6 +206,7 @@ struct DisplayClass : DisplayState, DisplayDraw // Display Control
                                                                      Bool             colorManaged      ()C {return _color_lut.is()   ;} // if need to perform any color transformations
 #endif
                                                                    C Rect&            rect              ()C {return _rect             ;} // get     full screen rectangle Rect(-w(), -h(), w(), h())
+                                                                   C Rect&            rectUI            ()C {return _rect_ui          ;} // get     full screen rectangle that's safe for UI placement, normally it's equal to 'rect' however it may be smaller due to system controls, rounded corners, notch, etc.
    DisplayClass& exclusive        (Bool             exclusive   );   Bool             exclusive         ()C {return _exclusive        ;} // get/set if fullscreen mode should be exclusive (true/false                         , default=            false                             ), this affects only Windows DirectX fullscreen mode, exclusive offers better performance, non-exclusive offers faster Alt+Tab switching
    DisplayClass& colorSpace       (COLOR_SPACE      color_space );   COLOR_SPACE      colorSpace        ()C {return _color_space      ;} // get/set if App should be color managed         (COLOR_SPACE                        , default= COLOR_SPACE_NONE                             ), if enabled then Application will convert colors from specified color space into monitor color space, based on selected monitor color profile in the Operating System. If there's no monitor color profile selected in the Operating System, then this option will have no effect. Using COLOR_SPACE_NONE disables color management, while other modes enable it. Warning: enabling color management reduces performance.
    DisplayClass& density          (Flt              density     );   Flt              density           ()C;                             // get/set Rendering Pixel Density                (0..2                               , default=                1                             ), density affects the number of pixels used during rendering, density=2 makes the rendering use 2x bigger render targets (super sampling) but slower performance, density=0.5 makes the rendering use 2x smaller render targets making the result more blurry but with faster performance, the change is NOT instant, avoid calling real-time
@@ -265,7 +266,7 @@ struct DisplayClass : DisplayState, DisplayDraw // Display Control
    DisplayClass& colorPalette1    (C ImagePtr &palette); C ImagePtr& colorPalette1    ()C {return _color_palette[1]   ;} // set/get color palette image that is used during RM_PALETTE1 rendering mode, palette textures need to have a height of 4 pixels (width can be set freely), where each row represents an intensity color palette for respectively (red, green, blue, alpha) components when rendering in RM_PALETTE1 mode, default=null
 
    // Particles
-   DisplayClass& particlesSoft      (Bool on);   Bool particlesSoft      ()C {return _particles_soft  ;} // set/get Particles Softing          (true/false, default=true (false for Mobile)), the change is instant, you can call it real-time
+   DisplayClass& particlesSoft      (Bool on);   Bool particlesSoft      ()C {return _particles_soft  ;} // set/get Particles Softing          (true/false, default=true                   ), the change is instant, you can call it real-time
    DisplayClass& particlesSmoothAnim(Bool on);   Bool particlesSmoothAnim()C {return _particles_smooth;} // set/get Particles Smooth Animation (true/false, default=true (false for Mobile)), if enabled then particles with animated images will be displayed with better quality by smooth blending between animation frames, the change is instant, you can call it real-time
 
    // Temporal
@@ -612,7 +613,7 @@ private:
                      _shd_map_split;
    Vec               _amb_color_l, _ns_color_l, _env_color, _eye_adapt_weight;
    Vec2              _view_center, _view_fov_tan_gui, _view_fov_tan_full;
-   Rect              _rect, _view_rect, _view_eye_rect[2];
+   Rect              _rect, _rect_ui, _view_rect, _view_eye_rect[2];
    Viewport          _view_main, _view_active;
    Str8              _device_name;
    ImagePtr          _color_palette[2], _env_map;
@@ -782,4 +783,5 @@ inline DisplayClass &Display=D; // 'Display' alias ('Display' can be used the sa
 #endif
 
 #endif
+void SetFov(Vec2 &fov, FOV_MODE fov_mode, Flt aspect);
 /******************************************************************************/

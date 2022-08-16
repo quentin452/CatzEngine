@@ -469,7 +469,7 @@ void Find::ResultRegion::find(C Str &text, Bool case_sensitive, Bool whole_word,
          {
             Symbol &symbol=Symbols.lockedData(i);
             if(!(symbol.modifiers&Symbol::MODIF_SKIP_SUGGESTIONS) && symbol.valid && symbol.type!=Symbol::PREPROC && symbol.type!=Symbol::TYPENAME && !symbol.insideFunc())
-               if(Int p=SuggestionsPriority(full_name ? symbol.full_name : symbol, t, FlagTest(symbol.modifiers, Symbol::MODIF_ALL_UP_CASE)))
+               if(Int p=SuggestionsPriority(full_name ? symbol.full_name : symbol, t, FlagOn(symbol.modifiers, Symbol::MODIF_ALL_UP_CASE)))
             {
                if(symbol.type==Symbol::FUNC_LIST)
                {

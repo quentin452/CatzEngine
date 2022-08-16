@@ -105,16 +105,16 @@ public:
    {
       enum TYPE
       {
-         NONE           ,
-         REMOVE         ,
-         RESTORE        ,
-         PUBLISH_DISABLE,
-         PUBLISH_ENABLE ,
-         SET_PARENT     ,
-         SET_NAME       ,
+         NONE      ,
+         REMOVE    ,
+         RESTORE   ,
+         PUBLISH   ,
+         SET_PARENT,
+         SET_NAME  ,
       };
 
       TYPE                    type;
+      uint                    test, set; // 'test'=mask for Elm.flags, 'set'=what to set
       Str                     name; // keep 'name' even though we could extract it from 'type', because 'type' will get changed in 'swap', while 'name' needs to remain constant
       Memc<UID>               elms;
       Memc<Edit::IDParam<UID>> elm_parents;
@@ -128,7 +128,6 @@ public:
 
    Memc<UID>            existing_enums      , // binary sorted container of existing (not removed) ELM_ENUM      elements
                         existing_obj_classes, // binary sorted container of existing (not removed) ELM_OBJ_CLASS elements
-                        existing_fonts      , // binary sorted container of existing (not removed) ELM_FONT      elements
                          publish_fonts      , // binary sorted container of existing (not removed) ELM_FONT      elements that are publishable
                         existing_apps       ; // binary sorted container of existing (not removed) ELM_APP       elements
    ComboBox             list_options;
@@ -197,8 +196,6 @@ public:
    static void Reload        (ProjectEx &proj);
    static void CancelReload  (ProjectEx &proj);
    static void SplitAnim     (ProjectEx &proj);
-   static void  EnablePublish(ProjectEx &proj);
-   static void DisablePublish(ProjectEx &proj);
    static void UndoElmChange (ProjectEx &proj);
    static void RedoElmChange (ProjectEx &proj);
    static void Duplicate     (ProjectEx &proj);
@@ -213,6 +210,11 @@ public:
    static void ShowRemoved   (ProjectEx &proj);
    static void ShowTheater   (ProjectEx &proj);
    static void SoundPlay     (ProjectEx &proj);
+
+   static void  EnablePublish      (ProjectEx &proj);
+   static void DisablePublish      (ProjectEx &proj);
+   static void  EnablePublishMobile(ProjectEx &proj);
+   static void DisablePublishMobile(ProjectEx &proj);
 
    static void ImageMipMapOn (ProjectEx &proj);
    static void ImageMipMapOff(ProjectEx &proj);
@@ -260,9 +262,14 @@ public:
    static void MtrlMerge               (ProjectEx &proj);
    static void MtrlConvertToAtlas      (ProjectEx &proj);
    static void MtrlConvertToDeAtlas    (ProjectEx &proj);
-   static void MtrlMobileTexSizeFull   (ProjectEx &proj);
-   static void MtrlMobileTexSizeHalf   (ProjectEx &proj);
-   static void MtrlMobileTexSizeQuarter(ProjectEx &proj);
+   static void MtrlTexSizeMobileFull   (ProjectEx &proj);
+   static void MtrlTexSizeMobileHalf   (ProjectEx &proj);
+   static void MtrlTexSizeMobileQuarter(ProjectEx &proj);
+   static void MtrlTexSizeMobileEighth (ProjectEx &proj);
+   static void MtrlTexSizeSwitchFull   (ProjectEx &proj);
+   static void MtrlTexSizeSwitchHalf   (ProjectEx &proj);
+   static void MtrlTexSizeSwitchQuarter(ProjectEx &proj);
+   static void MtrlTexSizeSwitchEighth (ProjectEx &proj);
 
    static void AnimClip   (ProjectEx &proj);
    static void AnimLinear (ProjectEx &proj);
@@ -342,8 +349,8 @@ public:
    void newElm(ELM_TYPE type);
    Elm* newElm(ELM_TYPE type, C UID &parent_id, C Str *name=null, bool refresh_elm_list=true);
    Elm* newWorld(C Str &name, int area_size, int hm_res, C UID &parent_id, bool set_cur);
-   void setMtrl(Elm &mtrl, XMaterialEx &src, C Str &src_file=S);
-   Elm& newMtrl(XMaterialEx &src, C UID parent_id=UIDZero, C Str &src_file=S); // create new material from 'src' !! this doesn't set elm list and doesn't send to the server !!
+   void setMtrl(Elm &mtrl, C XMaterialEx &src, C Str &src_file=S);
+   Elm& newMtrl(C XMaterialEx &src, C UID parent_id=UIDZero, C Str &src_file=S); // create new material from 'src' !! this doesn't set elm list and doesn't send to the server !!
 
    void setElmName(Elm &elm, C Str &name, C TimeStamp &time=TimeStamp().getUTC());
    void setElmNames(Memc<Edit::IDParam<Str>> &elms, bool adjust_elms=false); // 'adjust_elms'=if this is performed because of undo, and in that case we need to remember current names, so we can undo this change later
@@ -354,14 +361,15 @@ public:
    void paramEditObjChanged(C UID *obj_id=null);
 
    // remove
-   void remove(ElmNode &node, Memc<UID> &ids, Memc<UID> &removed, C TimeStamp &time); // process recursively to remove only parents without their children
-   void remove(Memc<UID> &ids, bool parents_only, bool set_undo=true);
+   void remove(ElmNode &node, Memc<UID> &sorted_ids, Memc<UID> &removed, C TimeStamp &time); // process recursively to remove only parents without their children
+   void remove(Memc<UID> &ids, bool parents_only, bool set_undo=true); // !! WARNING: MIGHT SORT 'ids' !!
    void restore(Memc<UID> &ids, bool set_undo=true);
 
    // publish
-   void disablePublish(ElmNode &node, Memc<UID> &ids, Memc<UID> &processed, C TimeStamp &time); // process recursively to disable only parents without their children
-   void disablePublish(Memc<UID> &ids, bool parents_only, bool set_undo=true);
-   void enablePublish(Memc<UID> &ids, bool set_undo=true);
+   void _setElmPublish(ElmNode &node, Memc<UID> &sorted_ids, uint test, uint set, Memc<UID> &processed, C TimeStamp &time); // process recursively to disable only parents without their children
+   void _setElmPublish(Memc<UID> &ids, uint test, uint set, bool parents_only, bool set_undo); // !! WARNING: MIGHT SORT 'ids' !!
+   void setElmPublish(Memc<UID> &ids, sbyte all, sbyte mobile, bool parents_only, bool set_undo=true); // !! WARNING: MIGHT SORT 'ids' !!
+   void disablePublish(Memc<UID> &ids, bool parents_only, bool set_undo=true); // !! WARNING: MIGHT SORT 'ids' !!
 
    void reload(Memc<UID> &elm_ids);
    void cancelReload(C MemPtr<UID> &elm_ids);
@@ -370,7 +378,7 @@ public:
    void meshMergeCoplanarFaces(C MemPtr<UID> &elm_ids);
    bool forceImageSize(Str &file, C VecI2 &size, bool relative);
    bool forceImageSize(Str &file, C VecI2 &size, bool relative, TimeStamp &file_time, C TimeStamp &time);
-   void imageMipMap(C MemPtr<UID> &elm_ids, bool on);
+   bool imageMipMap(C MemPtr<UID> &elm_ids, bool on);
    void imageResize(C MemPtr<UID> &elm_ids, C VecI2 &size);
    void mtrlResetAlpha(C MemPtr<UID> &elm_ids);
    void mtrlSetRGB(C MemPtr<UID> &elm_ids, C Vec &srgb, bool mul=false);
@@ -389,8 +397,8 @@ public:
    void mtrlCull(C MemPtr<UID> &elm_ids, bool on);
    void mtrlFlipNrmY(C MemPtr<UID> &elm_ids, bool on);
    void mtrlSmoothIsRough(C MemPtr<UID> &elm_ids, bool on);
-   void mtrlDownsizeTexMobile(C MemPtr<UID> &elm_ids, byte downsize, C UID &base_0=UIDZero, C UID &base_1=UIDZero, C UID &base_2=UIDZero);
-   bool mtrlTexQuality(C MemPtr<UID> &elm_ids, Edit::Material::TEX_QUALITY quality, C UID &base_0=UIDZero, C UID &base_1=UIDZero, C UID &base_2=UIDZero); // !! this is not perfect !!
+   void mtrlTexDownsize(C MemPtr<UID> &elm_ids, TEX_SIZE_PLATFORM tsp, byte downsize, C UID &base_0=UIDZero, C UID &base_1=UIDZero, C UID &base_2=UIDZero, bool precise=false); // 'precise'=if do a more precise but slower processing (if true then all materials from 'elm_ids' will have to be loaded from disk for checking, which might be slow)
+   bool mtrlTexQuality(C MemPtr<UID> &elm_ids, Edit::Material::TEX_QUALITY quality, C UID &base_0=UIDZero, C UID &base_1=UIDZero, C UID &base_2=UIDZero, bool precise=false); // 'precise'=if do a more precise but slower processing (if true then all materials from 'elm_ids' will have to be loaded from disk for checking, which might be slow) // !! this is not perfect !!
    bool mtrlMulTexCol(C MemPtr<UID> &elm_ids);
    bool mtrlMulTexNormal(C MemPtr<UID> &elm_ids);
    bool mtrlMulTexSmooth(C MemPtr<UID> &elm_ids);
@@ -522,6 +530,8 @@ public:
    virtual void eraseWorldAreaObjs(C UID &world_id, C VecI2 &area_xy)override;
    virtual void eraseRemoved(bool full)override;
 
+   void elmChangedParentRemovePublish(bool network=false);
+
    void setElmParent(Memc<Edit::IDParam<UID>> &elms, bool adjust_elms=false, bool as_undo=false); // 'adjust_elms'=if this is performed because of undo, and in that case we need to remember current parents, so we can undo this change later
    void drag(Memc<UID> &elms, GuiObj *focus_obj, C Vec2 &screen_pos);
    void collapse (Memc<UID> &ids, Memc<EEItem*> &items);           
@@ -529,7 +539,7 @@ public:
    void expandAll(Memc<UID> &ids, Memc<EEItem*> &items);
    void expandAll(ElmNode &node);
 
-   void floodExisting(ElmNode &node, bool no_publish=false);
+   void floodExisting(ElmNode &node, uint publish_flag, bool parent_publish=true);
    void setExisting();
 
    static int CompareEnum(C Str &a, C Str &b);
@@ -551,22 +561,26 @@ public:
    static int CompareChildren(C int &a, C int &b);
    static int CompareChildren(C EEItem &a, C Elm &b);
    bool hasInvalid(ElmNode &node);
-   void getActiveAppElms(Memt<Elm*> &app_elms, C UID &app_id, ElmNode &node, bool inside_valid);
-   void getActiveAppElms(Memt<Elm*> &app_elms);
+   static uint PublishableFlag(Edit::EXE_TYPE exe_type=CodeEdit.configEXE());
+   void getPublishElms(Memt<Elm*> &app_elms, ElmNode &node, uint publish_flag);
+   void getActiveAppElms(Memt<Elm*> &app_elms, ElmNode &node, uint publish_flag, C UID&app_id, bool inside_valid);
+   void getPublishElms  (Memt<Elm*> &app_elms, Edit::EXE_TYPE exe_type);                                        
+   void getActiveAppElms(Memt<Elm*> &app_elms, Edit::EXE_TYPE exe_type);                                         // set 'false' to ignore sources placed in root
+
    void activateSources(int rebuild=0); // -1=never, 0=auto, 1=always
    static void ActivateApp(ElmList::AppCheck &app_check);
           bool activateApp(C UID            &elm_id   );
-   void setList(EEItem &item, int depth, bool parent_removed, bool parent_contains_name);
+   void setList(EEItem &item, int depth, bool parent_contains_name);
    void includeElmFileSize(ListElm &e, ElmNode &node);
    void includeElmNotVisibleFileSize(ListElm &e, ElmNode &node);
    bool hasVisibleChildren(C ElmNode &node)C;
-   void setList(ElmNode &node, int depth=0, int vis_parent=-1, bool parent_removed=false, bool parent_contains_name=false, bool parent_no_publish=false);
+   void setList(ElmNode &node, int depth=0, int vis_parent=-1, bool parent_contains_name=false, bool parent_no_publish_all=false);
    bool setFilter(ElmNode &node);
    bool setFilter(Memx<EEItem> &items);
    ProjectEx& editing(C UID &elm_id, bool force_open_parents=true);
    bool editing(Memx<EEItem> &items, C Str &name);
    ProjectEx& editing(C Str &name);                              
-   void setList(bool set_hierarchy=true, bool set_existing=true);
+   void setList(bool set_hierarchy=true, bool set_existing=true); // !! CALL 'setListCurSel' or 'clearListSel' before this !!
    void clearListSel(); // clear list selection
    void setListSel(Memc<UID> &list_sel, MemPtr<EEItem*> list_sel_item=null);
    void setListCurSel(); // needs to be called before adding/removing elements from 'elms'

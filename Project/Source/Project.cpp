@@ -8,8 +8,10 @@ void InitPre()
 #ifdef DEBUG
    App.flag|=APP_MEM_LEAKS|APP_BREAKPOINT_ON_ERROR;
 #endif
+#if DESKTOP
    DataPath("../Data");
-#if WINDOWS_NEW
+#endif
+#if WINDOWS_NEW || MOBILE
    Paks.add("Engine.pak");
 #endif
 }

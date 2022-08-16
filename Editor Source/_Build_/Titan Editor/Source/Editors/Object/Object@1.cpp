@@ -296,7 +296,7 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
          if(allow_lit && p==lit_part)return true;
          if(mesh_parts.edit_selected() && !mesh_parts.partOp(p))return false;
       }
-      return !FlagTest(part.part_flag, MSHP_HIDDEN);
+      return FlagOff(part.part_flag, MSHP_HIDDEN);
    }
    bool ObjView::partOp(int p)C {return                                   !mesh_parts.edit_selected() && mesh_parts.partOp (p);}
    bool ObjView::partSel(int p)C {return (mode()==MESH || mode()==SKIN) && !mesh_parts.edit_selected() && mesh_parts.partSel(p);}
@@ -411,8 +411,8 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
                         REP(part.variations())if(Proj.invalidRef(part.variation    (i).id(), optional)){invalid=true; break;}
                      }
                      bool lit=(allow_lit && i==lit_part), sel=partSel(i);
-                     if(mode()==PHYS && phys_tabs()==PHYS_TOGGLE)SetHighlight(Color((FlagTest(part.part_flag, MSHP_NO_PHYS_BODY) && interval) ? 85 : 0, lit ? 85 : 0, lit ? 85 : 0, 0));else
-                     if(mode()==REMOVE                          )SetHighlight(Color((FlagTest(part.part_flag, MSHP_HIDDEN      ) && interval) ? 85 : 0, lit ? 85 : 0, lit ? 85 : 0, 0));else
+                     if(mode()==PHYS && phys_tabs()==PHYS_TOGGLE)SetHighlight(Color((FlagOn(part.part_flag, MSHP_NO_PHYS_BODY) && interval) ? 85 : 0, lit ? 85 : 0, lit ? 85 : 0, 0));else
+                     if(mode()==REMOVE                          )SetHighlight(Color((FlagOn(part.part_flag, MSHP_HIDDEN      ) && interval) ? 85 : 0, lit ? 85 : 0, lit ? 85 : 0, 0));else
                      if(invalid   )SetHighlight(Color(85,  0,  0, 0));else
                      if(sel && lit)SetHighlight(Color(40,  0,  0, 0));else
                      if(sel       )SetHighlight(Color(40, 40,  0, 0));else
@@ -746,8 +746,8 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
       {
          D.depthLock(false);
          SetMatrix(trans.matrix);
-         FREPA (mesh_skel->bones)if(mesh_skel->bones[i].flag&BONE_RAGDOLL)mesh_skel->bones[i].shape.draw(ColorAlpha(                                                  ORANGE    , (lit_bone==i) ? 1 : 0.55f), false, 16);
-         FREPAO(mesh_skel->bones)                                                                .draw(ColorAlpha(FlagTest(mesh_skel->bones[i].flag, BONE_RAGDOLL) ? RED : CYAN, (lit_bone==i) ? 1 : 0.60f));
+         FREPA (mesh_skel->bones)if(mesh_skel->bones[i].flag&BONE_RAGDOLL)mesh_skel->bones[i].shape.draw(ColorAlpha(                                                ORANGE    , (lit_bone==i) ? 1 : 0.55f), false, 16);
+         FREPAO(mesh_skel->bones)                                                                .draw(ColorAlpha(FlagOn(mesh_skel->bones[i].flag, BONE_RAGDOLL) ? RED : CYAN, (lit_bone==i) ? 1 : 0.60f));
          if(ragdoll_tabs()!=RAGDOLL_TOGGLE)if(InRange(sel_bone, mesh_skel->bones)){Matrix m=mesh_skel->bones[sel_bone]; m.scaleOrn(SkelSlotSize); DrawMatrix(m, boneAxis());}
          D.depthUnlock();
       }
@@ -869,7 +869,8 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
    void ObjView::MeshAlignXZ(ObjView &editor) {editor.meshAlign      (true );}
    void ObjView::MeshAlign(ObjView &editor) {editor.meshAlign      (false);}
    void ObjView::MeshWeldPos(ObjView &editor) {editor.meshWeldPos    ();}
-   void ObjView::MeshSetPos(ObjView &editor) {editor.meshSetPos     ();}
+   void ObjView::MeshSetPos(ObjView &editor) {editor.meshSetPos     (false);}
+   void ObjView::MeshSetPosKeepUV(ObjView &editor) {editor.meshSetPos     (true );}
    void ObjView::MeshReverse(ObjView &editor) {editor.meshReverse    ();}
    void ObjView::MeshReverseNrm(ObjView &editor) {editor.meshReverseNrm ();}
    void ObjView::MeshSetNormalFa(ObjView &editor) {editor.meshSetNrmFace (         );}
@@ -959,7 +960,7 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
       {
          MeshLod &lod=mesh.lod(i); REPA(lod.parts)if(!only_selected || ObjEdit.partOp(i) || !ObjEdit.mesh_parts.visibleOnActiveDesktop())
          {
-            MeshPart &part=lod.parts[i]; if(!mtrl || HasMaterial(part, mtrl))if(FlagTest(part.base.flag()|part.render.flag(), flag)){part.exclude(flag); changed=true;}
+            MeshPart &part=lod.parts[i]; if(!mtrl || HasMaterial(part, mtrl))if(FlagOn(part.base.flag()|part.render.flag(), flag)){part.exclude(flag); changed=true;}
          }
       }
       if(changed)
@@ -1420,6 +1421,8 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
          v.New().create("Next Object"    , NextObj  , T).kbsc(KbSc(KB_PGDN, KBSC_CTRL_CMD|KBSC_REPEAT)).flag(MENU_HIDDEN|MENU_TOGGLABLE);
          v.New().create("Undo" , Undo, T).kbsc(KbSc(KB_Z, KBSC_CTRL_CMD|KBSC_REPEAT));
          v.New().create("Redo" , Redo, T).kbsc(KbSc(KB_Y, KBSC_CTRL_CMD|KBSC_REPEAT)).kbsc2(KbSc(KB_Z, KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_REPEAT));
+         v.New().create("Undo2", Undo, T).kbsc(KbSc(KB_BACK, KBSC_ALT           |KBSC_REPEAT)).flag(MENU_HIDDEN); // keep those hidden because they occupy too much of visible space (besides on Windows Notepad they also work and are not listed)
+         v.New().create("Redo2", Redo, T).kbsc(KbSc(KB_BACK, KBSC_ALT|KBSC_SHIFT|KBSC_REPEAT)).flag(MENU_HIDDEN); // keep those hidden because they occupy too much of visible space (besides on Windows Notepad they also work and are not listed)
          break;
       }
    }
@@ -1519,6 +1522,7 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
          n.New().create("Split"                         , MeshSplit        , T).kbsc(KbSc(KB_S, KBSC_CTRL_CMD                    )).desc("This option will split selected vertexes/faces into new Mesh Parts");
          n.New().create("Weld Vertex Positions"         , MeshWeldPos      , T).kbsc(KbSc(KB_W, KBSC_CTRL_CMD                    )).desc("This option will weld positions of selected vertexes making them share one position");
          n.New().create("Set Vertex Positions"          , MeshSetPos       , T).kbsc(KbSc(KB_W, KBSC_CTRL_CMD|KBSC_SHIFT         )).desc("This option will set positions of selected vertexes to the same position as the highlighted vertex.\nTo use:\n-Select vertexes\n-Highlight target vertex\n-Press Keyboard shortcut for this option");
+         n.New().create("Set Vertex Positions (Keep UV)", MeshSetPosKeepUV , T).kbsc(KbSc(KB_W, KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_ALT)).desc("This option will set positions of selected vertexes to the same position as the highlighted vertex.\nTo use:\n-Select vertexes\n-Highlight target vertex\n-Press Keyboard shortcut for this option");
          n.New().create("Reverse"                       , MeshReverse      , T).kbsc(KbSc(KB_R, KBSC_CTRL_CMD                    )).desc("This option will reverse the selected faces");
          n.New().create("Reverse Normals"               , MeshReverseNrm   , T).kbsc(KbSc(KB_R, KBSC_CTRL_CMD|KBSC_SHIFT         )).desc("This option will reverse normals of selected vertexes/faces");
          n.New().create("Set Normals (Normal)"          , MeshSetNormalN   , T).kbsc(KbSc(KB_N, KBSC_CTRL_CMD                    )).desc("This option will set normals of selected vertexes/faces\nNormals will be smoothened based on existing normal vertex connections");
@@ -1936,7 +1940,7 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
 
       if(mesh_data)mesh_matrix=mesh_data->transform();else mesh_matrix.identity();
       if(skel_data)saved_skel_matrix=skel_data->transform();else saved_skel_matrix=mesh_matrix;
-      if(mesh_data && mesh_data->body_id.valid() && (mode()==TRANSFORM || mode()==SLOTS /*|| mode()==BONES*/ || mode()==RAGDOLL))mode.set(-1); // disable unavailable modes if it's a cloth object
+      if(mesh_data && mesh_data->body_id.valid() && (mode()==TRANSFORM /*|| mode()==SLOTS || mode()==BONES*/ || mode()==RAGDOLL))mode.set(-1); // disable unavailable modes if it's a cloth/armor object
       setBox();
       lod.toGui();
       toGuiSkel();
@@ -2473,7 +2477,7 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
          if(VisibleQuads(lod))a.add(S+VisibleVtxs(lod)+" vtx"+CountS(VisibleVtxs(lod))+", "+VisibleTris     (lod)+" tri"+CountS(VisibleTris     (lod))+", "+VisibleQuads(lod)+" quad"+CountS(VisibleQuads(lod)));
          else                 a.add(S+VisibleVtxs(lod)+" vtx"+CountS(VisibleVtxs(lod))+", "+VisibleTrisTotal(lod)+" tri"+CountS(VisibleTrisTotal(lod)));
          int parts=lod.partsAfterJoinAll(true, true, false, MeshJoinAllTestVtxFlag, true); a.add(S+parts+" draw call"+CountS(parts));
-         int size=0; REP(mesh.lods())size+=VisibleSize(mesh.lod(i)); a.add(S+"Mesh size "+FileSize(size));
+         int size=0; REP(mesh.lods())size+=VisibleSize(mesh.lod(i)); a.add(S+"Mesh size "+SizeBytes(size));
          if(mode()==LOD)a.add(S+mesh.lods()+" LOD"+CountS(mesh.lods()));
          if(mesh.is())
          {
@@ -3636,6 +3640,7 @@ cur_skel_to_saved_skel.bones.del();
                         if(bone)
                         {
                            Vec axis;
+                           bool freeze=Kb.b(KB_F);
                            switch(bone_axis)
                            {
                               case  0: axis=bone->cross()      ; break;
@@ -3645,17 +3650,26 @@ cur_skel_to_saved_skel.bones.del();
                            }
                            Matrix m;
                            m.setTransformAtPos(bone->pos, Matrix3().setRotate(axis, angle)); bone->transform(m);
-                           if(bone_children_rot())REPA(mesh_skel->bones)if(sel_bone!=i && mesh_skel->contains(sel_bone, i))mesh_skel->bones[i].transform(m);
+                           if(bone_children_rot())REPA(mesh_skel->bones)if(sel_bone!=i && mesh_skel->contains(sel_bone, i))
+                           {
+                              SkelBone &bone=mesh_skel->bones[i]; if(freeze)bone.rotateDir(angle);else bone.transform(m);
+                           }
                            if(bone_mirror)
                            {
                               axis.chsY().chsZ();
                               m.setTransformAtPos(bone_mirror->pos, Matrix3().setRotate(axis, angle)); bone_mirror->transform(m);
-                              if(bone_children_rot())REPA(mesh_skel->bones)if(mirror_bone!=i && mesh_skel->contains(mirror_bone, i))mesh_skel->bones[i].transform(m);
+                              if(bone_children_rot())REPA(mesh_skel->bones)if(mirror_bone!=i && mesh_skel->contains(mirror_bone, i))
+                              {
+                                 SkelBone &bone=mesh_skel->bones[i]; if(freeze)bone.rotateDir(-angle);else bone.transform(m);
+                              }
                            }
                         }else
                         {
                            mesh_skel->transform(Matrix3().setRotate(ActiveCam.matrix.z, angle));
                         }
+                        mesh_skel->setBoneTypes();
+                        mesh.skeleton(mesh_skel, true).skeleton(null);
+                        setChangedMesh(true, false);
                      }break;
 
                      case BONE_SCALE:

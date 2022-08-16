@@ -825,7 +825,7 @@ Bool      Download::error (                ) // !! this is not thread-safe !! th
    state(DWNL_ERROR); // set this as last
    return false;
 }
-Bool Download::authFailed()C {return FlagTest(_flags, AUTH_FAILED);}
+Bool Download::authFailed()C {return FlagOn(_flags, AUTH_FAILED);}
 /******************************************************************************/
 }
 /******************************************************************************/

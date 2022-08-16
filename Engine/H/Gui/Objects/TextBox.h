@@ -75,7 +75,7 @@ private:
 #endif
    Bool       _word_wrap, _can_select, _func_immediate;
    Int        _max_length;
-   Flt        _slidebar_size;
+   Flt        _slidebar_size, _text_space;
    Str        _text;
    TextEdit   _edit;
    Ptr        _func_user;

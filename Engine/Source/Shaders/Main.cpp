@@ -82,6 +82,29 @@ VecH4 Draw2DTex_PS (NOPERSP Vec2 uv:UV):TARGET {return       Tex(Img, uv);}
 VecH4 Draw2DTexC_PS(NOPERSP Vec2 uv:UV):TARGET {return       Tex(Img, uv)*Color[0]+Color[1];}
 VecH4 Draw2DTexA_PS(NOPERSP Vec2 uv:UV):TARGET {return VecH4(Tex(Img, uv).rgb, Step);}
 
+#if defined IN0_GAMMA && defined IN1_GAMMA && defined OUT_GAMMA
+VecH4 DrawFade_PS(NOPERSP Vec2 uv:UV):TARGET
+{
+#define FAST_GAMMA (IN0_GAMMA && IN1_GAMMA && OUT_GAMMA) // can use fast gamma only if we do all conversions in the shader
+   VecH s0=Tex(Img , uv).rgb;
+   VecH s1=Tex(Img1, uv).rgb;
+#if IN0_GAMMA
+   s0=(FAST_GAMMA ? LinearToSRGBFast(s0) : LinearToSRGB(s0));
+#endif
+#if IN1_GAMMA
+   s1=(FAST_GAMMA ? LinearToSRGBFast(s1) : LinearToSRGB(s1));
+#endif
+   VecH4 dest;
+   dest.rgb=Lerp(s1, s0, Step);
+#if OUT_GAMMA
+   dest.rgb=(FAST_GAMMA ? SRGBToLinearFast(dest.rgb) : SRGBToLinear(dest.rgb));
+#endif
+   dest.a=1;
+   return dest;
+#undef FAST_GAMMA
+}
+#endif
+
 VecH4 DrawTexX_PS(NOPERSP Vec2 uv:UV):TARGET {return VecH4(Tex(Img, uv).xxx, 1);}
 VecH4 DrawTexY_PS(NOPERSP Vec2 uv:UV):TARGET {return VecH4(Tex(Img, uv).yyy, 1);}
 VecH4 DrawTexZ_PS(NOPERSP Vec2 uv:UV):TARGET {return VecH4(Tex(Img, uv).zzz, 1);}

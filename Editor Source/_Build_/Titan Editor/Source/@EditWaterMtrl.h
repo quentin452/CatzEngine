@@ -24,8 +24,8 @@ class EditWaterMtrl : EditMaterial
    bool newer(C EditWaterMtrl &src)C;
 
    // operations
-   void reset();  
-   void newData();
+   void reset();                
+   void newData(C Project&proj);
    /*void create(C WaterMtrl &src, C TimeStamp &time=TimeStamp().getUTC())
    {
       super.create(Material(), time); // call super to setup times for all values

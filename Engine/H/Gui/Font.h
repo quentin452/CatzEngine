@@ -64,8 +64,8 @@ struct Font
    Int charWidth(Char  c)C; // get width of character (in pixels)
    Int charWidth(Char8 c)C; // get width of character (in pixels)
 
-   Int textWidth(Int &base_chars, SPACING_MODE spacing, CChar  *text, Int max_length=-1)C; // get width of text (in pixels)
-   Int textWidth(Int &base_chars, SPACING_MODE spacing, CChar8 *text, Int max_length=-1)C; // get width of text (in pixels)
+   Int textWidth(Int &spacings, SPACING_MODE spacing, CChar  *text, Int max_length=-1)C; // get width of text (in pixels)
+   Int textWidth(Int &spacings, SPACING_MODE spacing, CChar8 *text, Int max_length=-1)C; // get width of text (in pixels)
 
    // operations
    Font& freeOpenGLESData(                                         ); // this method is used only under OpenGL ES (on other platforms it is ignored), the method frees the software copy of the GPU data which increases available memory, however after calling this method the data can no longer be accessed on the CPU (can no longer be locked or saved to file)

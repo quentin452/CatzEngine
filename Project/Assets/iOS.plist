@@ -1,7 +1,7 @@
 ﻿<plist version="1.0">
 	<dict>
 		<key>CFBundleDisplayName</key>
-		<string>Calculator</string>
+		<string>Project</string>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>English</string>
 		<key>CFBundleExecutable</key>
@@ -51,7 +51,7 @@
 		<key>FacebookAppID</key>
 		<string>0</string>
 		<key>FacebookDisplayName</key>
-		<string>Calculator</string>
+		<string>Project</string>
 		<key>GADApplicationIdentifier</key>
 		<string></string>
 		<key>ChartboostAppID</key>

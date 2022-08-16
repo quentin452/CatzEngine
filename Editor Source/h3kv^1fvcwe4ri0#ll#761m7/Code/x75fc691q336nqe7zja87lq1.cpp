@@ -29,8 +29,8 @@ class SizeStatistics : ClosableWindow
       }
 
       static Str FinalName(C ElmListElm &elm) {return elm.finalName();}
-      static Str Size     (C ElmListElm &elm) {return FileSize(elm.size);}
-      static Str SizeCmpr (C ElmListElm &elm) {return FileSize(elm.size_compressed);}
+      static Str Size     (C ElmListElm &elm) {return SizeBytes(elm.size);}
+      static Str SizeCmpr (C ElmListElm &elm) {return SizeBytes(elm.size_compressed);}
    }
 
    Memc<ElmListElm> data;

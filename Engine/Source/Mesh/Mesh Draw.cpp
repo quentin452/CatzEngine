@@ -1570,7 +1570,7 @@ void Mesh   ::drawBlend(C AnimatedSkeleton &anim_skel,                      C Ve
 void MeshPart::drawBoneHighlight(Int bone)C
 {
    if(_draw_mask&Renderer._mesh_draw_mask)
-      if(Shader *s=ShaderFiles("Bone Highlight")->get(S+FlagAll(render.flag(), VTX_SKIN)+(FlagTest(render.flag(), VTX_NRM) ? SBUMP_FLAT : SBUMP_ZERO)))
+      if(Shader *s=ShaderFiles("Bone Highlight")->get(S+FlagAll(render.flag(), VTX_SKIN)+(FlagOn(render.flag(), VTX_NRM) ? SBUMP_FLAT : SBUMP_ZERO)))
    {
     C Variation &variation=          getVariation();
     C Material  &material =variation.getMaterial ();

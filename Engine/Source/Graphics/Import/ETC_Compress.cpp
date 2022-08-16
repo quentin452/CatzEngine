@@ -1,14 +1,14 @@
 /******************************************************************************
 
-   Have to keep this as a separate file, so it won't be linked if unused.
-   Because it's linked separately, its name can't include spaces (due to Android building toolchain).
+   !! KEEP THIS AS SEPARATE CPP, SO WHEN UNUSED IT WON'T INCREASE BINARY SIZE !!
 
 /******************************************************************************/
 #include "stdafx.h"
 /******************************************************************************/
-#define ETC_LIB_ISPC    1 // only ETC1 compression, quality is good and comparable to ETC_LIB_ETCPACK with quality=0, but much faster
-#define ETC_LIB_RG      2 // only ETC1
-#define ETC_LIB_ETCPACK 3
+#define ETC_LIB_ISPC     1 // only ETC1 compression, quality is good and comparable to ETC_LIB_ETCPACK with quality=0, but much faster
+#define ETC_LIB_RG       2 // only ETC1
+#define ETC_LIB_ETCPACK  3
+#define ETC_LIB_ETC2COMP 4 // quality similar to ETCPACK however it's around 100x slower
 
 #define ETC1_ENC ETC_LIB_ISPC
 #define ETC2_ENC ETC_LIB_ETCPACK
@@ -59,6 +59,21 @@
    }
 #endif
 
+#if ETC1_ENC==ETC_LIB_ETC2COMP || ETC2_ENC==ETC_LIB_ETC2COMP
+   #include "../../../../ThirdPartyLibs/etc2comp/lib/EtcImage.cpp"
+   #include "../../../../ThirdPartyLibs/etc2comp/lib/EtcBlock4x4.cpp"
+   #include "../../../../ThirdPartyLibs/etc2comp/lib/EtcBlock4x4Encoding.cpp"
+   #include "../../../../ThirdPartyLibs/etc2comp/lib/EtcBlock4x4Encoding_ETC1.cpp"
+   #include "../../../../ThirdPartyLibs/etc2comp/lib/EtcBlock4x4Encoding_R11.cpp"
+   #include "../../../../ThirdPartyLibs/etc2comp/lib/EtcBlock4x4Encoding_RG11.cpp"
+   #include "../../../../ThirdPartyLibs/etc2comp/lib/EtcBlock4x4Encoding_RGB8.cpp"
+   #include "../../../../ThirdPartyLibs/etc2comp/lib/EtcBlock4x4Encoding_RGB8A1.cpp"
+   #include "../../../../ThirdPartyLibs/etc2comp/lib/EtcBlock4x4Encoding_RGBA8.cpp"
+   #include "../../../../ThirdPartyLibs/etc2comp/lib/EtcSortedBlockList.cpp"
+   #include "../../../../ThirdPartyLibs/etc2comp/lib/EtcDifferentialTrys.cpp"
+   #include "../../../../ThirdPartyLibs/etc2comp/lib/EtcIndividualTrys.cpp"
+   #include "../../../../ThirdPartyLibs/etc2comp/lib/EtcMath.cpp"
+#endif
 
 #include "../../../../ThirdPartyLibs/end.h"
 /******************************************************************************/
@@ -88,6 +103,7 @@ struct ETCContext
    
    ETCContext(C Image &src, Image &dest, Int quality) : quality(quality), src(src), dest(dest) {}
 
+#if ETC1_ENC==ETC_LIB_ETCPACK || ETC2_ENC==ETC_LIB_ETCPACK // ETCPACK
    static void Process(IntPtr elm_index, ETCContext &ctx, Int thread_index) {ctx.process(elm_index);}
           void process(Int    by)
    {
@@ -217,6 +233,7 @@ struct ETCContext
          no_swap:;
       }
    }
+#endif
 
    Bool process()
    {
@@ -248,7 +265,7 @@ struct ETCContext
          {
             if(quality<0)quality=0; // default to 0 as 1 is just too slow
             quality=Mid(quality, 0, EXHAUSTIVE_CODE_ACTIVE);
-            block_size=dest.hwTypeInfo().bit_pp*2;
+            block_size=dest.hwTypeInfo().block_bytes;
          }
       #endif
 
@@ -258,15 +275,15 @@ struct ETCContext
          {
             s=&src;
             Bool read_from_src=true;
-            Int  dest_mip_hwW=PaddedWidth (dest.hwW(), dest.hwH(), mip, dest.hwType()),
+            Int  dest_mip_hwW=PaddedWidth (dest.hwW(), dest.hwH(), mip, dest.hwType()), // operate on mip HW size to process partial and Pow2Padded blocks too
                  dest_mip_hwH=PaddedHeight(dest.hwW(), dest.hwH(), mip, dest.hwType());
          #if ETC1_ENC==ETC_LIB_ISPC // ISPC
             if(etc1)
             {
                // to directly read from 'src', we need to match requirements for compressor, which needs:
                read_from_src=((src.hwType()==IMAGE_R8G8B8A8 || src.hwType()==IMAGE_R8G8B8A8_SRGB) // IMAGE_R8G8B8A8 hw type
-                           && PaddedWidth (src.hwW(), src.hwH(), mip, src.hwType())==dest_mip_hwW   // src mip width  must be exactly the same as dest mip width
-                           && PaddedHeight(src.hwW(), src.hwH(), mip, src.hwType())==dest_mip_hwH); // src mip height must be exactly the same as dest mip height
+                           && Max(1, src.w()>>mip)>=dest_mip_hwW   // src mip width  must be at least as dest mip width
+                           && Max(1, src.h()>>mip)>=dest_mip_hwH); // src mip height must be at least as dest mip height
                if(!read_from_src)s=&temp;
             }
          #endif
@@ -286,8 +303,8 @@ struct ETCContext
                if(etc1)
                {
                   fast=(dest.pitch()==x_blocks*8);
-                  surf.width =s->lw   ();
-                  surf.height=s->lh   ();
+                  surf.width =dest_mip_hwW;
+                  surf.height=dest_mip_hwH;
                   surf.stride=s->pitch();
                }
             #endif
@@ -349,6 +366,37 @@ struct ETCContext
 /******************************************************************************/
 Bool _CompressETC(C Image &src, Image &dest, Int quality)
 {
+#if ETC1_ENC==ETC_LIB_ETC2COMP || ETC2_ENC==ETC_LIB_ETC2COMP
+   unfinished
+   Etc::Image::Format format;
+   switch(type)
+   {
+      case IMAGE_ETC1           : format=Etc::Image::Format::ETC1       ; break;
+      case IMAGE_ETC2_R         : format=Etc::Image::Format::R11        ; break;
+      case IMAGE_ETC2_R_SIGN    : format=Etc::Image::Format::SIGNED_R11 ; break;
+      case IMAGE_ETC2_RG        : format=Etc::Image::Format::RG11       ; break;
+      case IMAGE_ETC2_RG_SIGN   : format=Etc::Image::Format::SIGNED_RG11; break;
+      case IMAGE_ETC2_RGB       : format=Etc::Image::Format::RGB8       ; break;
+      case IMAGE_ETC2_RGB_SRGB  : format=Etc::Image::Format::SRGB8      ; break;
+      case IMAGE_ETC2_RGBA1     : format=Etc::Image::Format::RGB8A1     ; break;
+      case IMAGE_ETC2_RGBA1_SRGB: format=Etc::Image::Format::SRGB8A1    ; break;
+      case IMAGE_ETC2_RGBA      : format=Etc::Image::Format::RGBA8      ; break;
+      case IMAGE_ETC2_RGBA_SRGB : format=Etc::Image::Format::SRGBA8     ; break;
+      default                   : format=Etc::Image::Format::UNKNOWN    ; break;
+   }
+   if(format!=Etc::Image::Format::UNKNOWN)
+   {
+      Image src; img.mustCopy(src, -1, -1, -1, img.sRGB() ? IMAGE_F32_4_SRGB : IMAGE_F32_4);
+
+		auto error_metric=src.sRGB() ? Etc::ErrorMetric::REC709 : Etc::ErrorMetric::RGBX; // FIXME can use NORMALXYZ? careful maybe it needs Z which is not included in RG
+      auto effort=70; // REC709(100 = 83.7s, 70=44.1s, 40=8.3s), RGBX(70=26.3s)
+      Etc::Image image((Flt*)src.data(), src.w(), src.h(), error_metric);
+
+		image.Encode(format, error_metric, effort, Cpu.threads(), Cpu.threads());
+      Image out; out.mustCreateSoft(src.w(), src.h(), src.d(), type, 1);
+      CopyFast(out.data(), image.GetEncodingBits(), out.memUsage());
+   }
+#endif
    return ETCContext(src, dest, quality).process();
 }
 /******************************************************************************/

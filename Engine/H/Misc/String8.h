@@ -34,8 +34,8 @@ struct Str8 // Text String (8-bit per character)
 
    Str8& removeOuterWhiteChars(); // remove white characters at the start and end of the string
 
-   Str8& space(Int num=1); // add a space if string isn't empty and does not end with a new line or space, 'num'=number of spaces to insert
-   Str8& line (Int num=1); // add a line  if string isn't empty and does not end with a new line         , 'num'=number of lines  to insert
+   Str8& space(); // add a space if string isn't empty and does not end with a new line or space
+   Str8& line (); // add a line  if string isn't empty and does not end with a new line
 
 #if EE_PRIVATE
    void alwaysAppend(Char8 c);

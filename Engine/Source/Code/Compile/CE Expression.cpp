@@ -782,7 +782,7 @@ CAST_MATCH Expr::calculate(Compiler &compiler)
                {
                   Expr &a=func.params[0];
                   if(a.known() && compiler.strict){compiler.msgs.New().error(S+"Can't perform cast on a known constant", origin); return CAST_NONE;}
-                  temporary=a.temporary; memFrom(a.mem, compiler); FlagSet(symbol.modifiers, Symbol::MODIF_REF, FlagTest(a.symbol.modifiers, Symbol::MODIF_REF)); // discard reference from the func, and keep it from the original 'a' parameter
+                  temporary=a.temporary; memFrom(a.mem, compiler); FlagSet(symbol.modifiers, Symbol::MODIF_REF, FlagOn(a.symbol.modifiers, Symbol::MODIF_REF)); // discard reference from the func, and keep it from the original 'a' parameter
                }
                return CAST_MAX;
             }else
@@ -1446,7 +1446,7 @@ void Expr::memFrom(Memory &mem, Compiler &compiler)
 }
 void Expr::memOffset(Long offset)
 {
-   mem.addOffset(offset, FlagTest(symbol.modifiers, Symbol::MODIF_REF));
+   mem.addOffset(offset, FlagOn(symbol.modifiers, Symbol::MODIF_REF));
 }
 /******************************************************************************/
 static void CastTo(Expr &expr, Symbol::Modif &dest, CAST_MATCH &max_cast, Expr &max_result, Compiler &compiler, RecTest &rt=NoTemp(RecTest())) // function which recursively updates the cast
@@ -1747,7 +1747,7 @@ Bool Expr::castParentToSymbolClass(Compiler &compiler)
          if( !found){compiler.msgs.New().error(S+"Member not found in class", origin); return COMPILE_FAILED;}
 
          mem=parent_instance->mem;
-         mem.addOffset(member_offset, FlagTest(parent_instance->symbol.modifiers, Symbol::MODIF_REF)); // here 'this.ref' should be ignored for 'memOffset' and only 'parent.ref' should be checked
+         mem.addOffset(member_offset, FlagOn(parent_instance->symbol.modifiers, Symbol::MODIF_REF)); // here 'this.ref' should be ignored for 'memOffset' and only 'parent.ref' should be checked
 
          if(parent_instance->symbol.modifiers&Symbol::MODIF_REF)
          {
@@ -1840,7 +1840,7 @@ Bool Expr::setThis(Symbol *caller, Token *origin, Compiler &compiler)
          if(func->isClassNonStaticFunc())
    {
       toSymbol(func->Class());
-      instance=true; symbol.const_level=FlagTest(func->modifiers, Symbol::MODIF_FUNC_CONST); // if the function is const "void func()const" then mark the data as const
+      instance=true; symbol.const_level=FlagOn(func->modifiers, Symbol::MODIF_FUNC_CONST); // if the function is const "void func()const" then mark the data as const
       mem.setThis();
    }
    if(!symbol)compiler.msgs.New().error(S+"'this' can be used only in non-static class methods", origin);

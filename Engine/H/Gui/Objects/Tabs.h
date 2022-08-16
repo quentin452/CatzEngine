@@ -29,6 +29,7 @@ private:
    GuiObjChildren _children;
 protected:
    virtual void parentClientRectChanged(C Rect *old_client, C Rect *new_client)override;
+   virtual void        childRectChanged(C Rect *old_rect  , C Rect *new_rect, GuiObj &child)override;
    virtual Bool load(File &f, CChar *path=null)override;
 };
 /******************************************************************************/
@@ -102,6 +103,7 @@ private:
 
 protected:
    virtual void parentClientRectChanged(C Rect *old_client, C Rect *new_client)override;
+   virtual void        childRectChanged(C Rect *old_rect  , C Rect *new_rect, GuiObj &child)override;
    virtual void nearest(C GuiPC &gpc, GuiObjNearest &gon)override;
    virtual Bool save(File &f, CChar *path=null)C override;
    virtual Bool load(File &f, CChar *path=null)  override;

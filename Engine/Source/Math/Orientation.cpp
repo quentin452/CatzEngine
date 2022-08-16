@@ -225,6 +225,12 @@ Orient& Orient::fixPerp()
    if(perp.normalize()<=EPS)perp=PerpN(dir); // if point on plane distance was very small, then it's very likely that due to precision issues, the vector will not be perpendicular to 'dir', so use epsilon comparison. This is very important, because we expect 'perp' to always be perpendicular to 'dir'
    return T;
 }
+Orient& Orient::fixDir()
+{
+      dir=PointOnPlane(dir, perp);
+   if(dir.normalize()<=EPS)dir=PerpN(perp); // if point on plane distance was very small, then it's very likely that due to precision issues, the vector will not be perpendicular to 'dir', so use epsilon comparison. This is very important, because we expect 'perp' to always be perpendicular to 'dir'
+   return T;
+}
 OrientD& OrientD::fixPerp()
 {
       perp=PointOnPlane(perp, dir);
@@ -264,6 +270,14 @@ Orient& Orient::rotateCross(Flt angle)
       dir = dir*cos - perp*sin;
       perp=_dir*sin + perp*cos;
    }
+   return T;
+}
+Orient& Orient::rotateCross(Flt cos, Flt sin)
+{
+   Vec _dir=T.dir;
+
+   dir = dir*cos - perp*sin;
+   perp=_dir*sin + perp*cos;
    return T;
 }
 /******************************************************************************/
@@ -316,6 +330,12 @@ Orient& Orient::rotateZ(Flt angle)
    return T;
 }
 /******************************************************************************/
+Orient& Orient::rotateToDirFast(C Vec &dir)
+{
+   T.perp*=Matrix3().setRotation(T.dir, dir);
+   T.dir  =dir;
+   return T;
+}
 Orient& Orient::rotateToDir(C Vec &dir)
 {
    T.perp*=Matrix3().setRotation(T.dir, dir);
@@ -334,6 +354,19 @@ Orient& Orient::rotateToDir(C Vec &dir)
    */
    return T;
 }
+Orient& Orient::rotateToPerpFast(C Vec &perp)
+{
+   T.dir*=Matrix3().setRotation(T.perp, perp);
+   T.perp=perp;
+   return T;
+}
+Orient& Orient::rotateToPerp(C Vec &perp)
+{
+   T.dir*=Matrix3().setRotation(T.perp, perp);
+   T.perp=perp;
+   fixDir();
+   return T;
+}
 OrientD& OrientD::rotateToDir(C VecD &dir)
 {
    T.perp*=MatrixD3().setRotation(T.dir, dir);
@@ -343,6 +376,13 @@ OrientD& OrientD::rotateToDir(C VecD &dir)
 Orient& Orient::rotateToDir(C Vec &dir, Flt blend)
 {
    Matrix3 m; m.setRotation(T.dir, dir, blend);
+   T.perp*=m;
+   T.dir *=m;
+   return T;
+}
+Orient& Orient::rotateToPerp(C Vec &perp, Flt blend)
+{
+   Matrix3 m; m.setRotation(T.perp, perp, blend);
    T.perp*=m;
    T.dir *=m;
    return T;

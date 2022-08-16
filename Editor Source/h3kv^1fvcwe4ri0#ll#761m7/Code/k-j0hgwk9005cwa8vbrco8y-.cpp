@@ -495,7 +495,7 @@ class PanelImageEditor : PropWin
       autoData(&params);
 
       props_w=super.create("Panel Image Editor", Vec2(prop_x, 0), 0.036, prop_h, 0.3).max.x+0.02; button[1].show(); button[2].func(HideProjAct, SCAST(GuiObj, T)).show(); flag|=WIN_RESIZABLE;
-      T+=undo  .create(Rect_LU(0.02, -0.01     , 0.05, 0.05)).func(Undo, T).focusable(false).desc("Undo"); undo.image="Gui/Misc/undo.img";
+      T+=undo  .create(Rect_LU(0.02, -0.01       , 0.05, 0.05)).func(Undo, T).focusable(false).desc("Undo"); undo.image="Gui/Misc/undo.img";
       T+=redo  .create(Rect_LU(undo  .rect().ru(), 0.05, 0.05)).func(Redo, T).focusable(false).desc("Redo"); redo.image="Gui/Misc/redo.img";
       T+=locate.create(Rect_LU(redo  .rect().ru()+Vec2(0.01, 0), 0.14, 0.05), "Locate").func(Locate, T).focusable(false).desc("Locate this element in the Project");
       T+=copy  .create(Rect_LU(locate.rect().ru()+Vec2(0.01, 0), 0.11, 0.05), "Copy"  ).func(Copy  , T).focusable(false).desc("Copy values to system clipboard");

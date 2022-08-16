@@ -759,9 +759,6 @@
 		0BFCADED148C1FEA00A3C772 /* PVRTC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0BFCADCF148C1FEA00A3C772 /* PVRTC.cpp */; };
 		0BFCADEE148C1FEA00A3C772 /* PVRTC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0BFCADCF148C1FEA00A3C772 /* PVRTC.cpp */; };
 		0BFCADEF148C1FEA00A3C772 /* PVRTC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0BFCADCF148C1FEA00A3C772 /* PVRTC.cpp */; };
-		0BFCADF0148C1FEA00A3C772 /* PVRTC.h in Headers */ = {isa = PBXBuildFile; fileRef = 0BFCADD0148C1FEA00A3C772 /* PVRTC.h */; };
-		0BFCADF1148C1FEA00A3C772 /* PVRTC.h in Headers */ = {isa = PBXBuildFile; fileRef = 0BFCADD0148C1FEA00A3C772 /* PVRTC.h */; };
-		0BFCADF2148C1FEA00A3C772 /* PVRTC.h in Headers */ = {isa = PBXBuildFile; fileRef = 0BFCADD0148C1FEA00A3C772 /* PVRTC.h */; };
 		0BFCADF3148C1FEA00A3C772 /* TGA.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0BFCADD1148C1FEA00A3C772 /* TGA.cpp */; };
 		0BFCADF4148C1FEA00A3C772 /* TGA.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0BFCADD1148C1FEA00A3C772 /* TGA.cpp */; };
 		0BFCADF5148C1FEA00A3C772 /* TGA.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0BFCADD1148C1FEA00A3C772 /* TGA.cpp */; };
@@ -875,12 +872,6 @@
 		3773600C1B1822D30026D698 /* Chartboost.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 377360081B1822D30026D698 /* Chartboost.cpp */; };
 		3773600D1B1822D30026D698 /* Chartboost.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 377360081B1822D30026D698 /* Chartboost.cpp */; };
 		3773600E1B1822D30026D698 /* Chartboost.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 377360081B1822D30026D698 /* Chartboost.cpp */; };
-		3778B76C21F71218001D764E /* FBSDKCoreKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3778B76721F71213001D764E /* FBSDKCoreKit.a */; };
-		3778B76D21F71218001D764E /* FBSDKLoginKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3778B76621F71213001D764E /* FBSDKLoginKit.a */; };
-		3778B76E21F71218001D764E /* FBSDKShareKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3778B76821F71213001D764E /* FBSDKShareKit.a */; };
-		3778B76F21F7121A001D764E /* FBSDKCoreKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3778B76721F71213001D764E /* FBSDKCoreKit.a */; };
-		3778B77021F7121A001D764E /* FBSDKLoginKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3778B76621F71213001D764E /* FBSDKLoginKit.a */; };
-		3778B77121F7121A001D764E /* FBSDKShareKit.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3778B76821F71213001D764E /* FBSDKShareKit.a */; };
 		377E23621ADC91550035617E /* BC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 377E23601ADC91550035617E /* BC.cpp */; };
 		377E23631ADC91550035617E /* BC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 377E23601ADC91550035617E /* BC.cpp */; };
 		377E23641ADC91550035617E /* BC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 377E23601ADC91550035617E /* BC.cpp */; };
@@ -931,6 +922,9 @@
 		379084A91B3E624C00B8E7DC /* Object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 379084A81B3E624C00B8E7DC /* Object.cpp */; };
 		379084AA1B3E624C00B8E7DC /* Object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 379084A81B3E624C00B8E7DC /* Object.cpp */; };
 		379084AB1B3E624C00B8E7DC /* Object.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 379084A81B3E624C00B8E7DC /* Object.cpp */; };
+		37916A4F282D5CA0009EAF63 /* ASTC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37916A4E282D5CA0009EAF63 /* ASTC.cpp */; };
+		37916A50282D5CA0009EAF63 /* ASTC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37916A4E282D5CA0009EAF63 /* ASTC.cpp */; };
+		37916A51282D5CA0009EAF63 /* ASTC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37916A4E282D5CA0009EAF63 /* ASTC.cpp */; };
 		379434AB1AF9D30300696096 /* Mesh Optimize.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 379434AA1AF9D30300696096 /* Mesh Optimize.cpp */; };
 		379434AC1AF9D30300696096 /* Mesh Optimize.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 379434AA1AF9D30300696096 /* Mesh Optimize.cpp */; };
 		379434AD1AF9D30300696096 /* Mesh Optimize.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 379434AA1AF9D30300696096 /* Mesh Optimize.cpp */; };
@@ -976,6 +970,9 @@
 		37E70CD31FEC8DCE00F10018 /* libmbedTLS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 37E70CD21FEC8DCE00F10018 /* libmbedTLS.a */; };
 		37E70CD51FEC8DDE00F10018 /* libmbedTLS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 37E70CD41FEC8DDD00F10018 /* libmbedTLS.a */; };
 		37E70CD71FEC8DF000F10018 /* libmbedTLS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 37E70CD61FEC8DF000F10018 /* libmbedTLS.a */; };
+		37ECD8D1282E46C100CF0962 /* ASTC_Compress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37ECD8D0282E46C100CF0962 /* ASTC_Compress.cpp */; };
+		37ECD8D2282E46C100CF0962 /* ASTC_Compress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37ECD8D0282E46C100CF0962 /* ASTC_Compress.cpp */; };
+		37ECD8D3282E46C100CF0962 /* ASTC_Compress.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37ECD8D0282E46C100CF0962 /* ASTC_Compress.cpp */; };
 		37F025632580CC07005583A8 /* HDR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37F025622580CC07005583A8 /* HDR.cpp */; };
 		37F025642580CC07005583A8 /* HDR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37F025622580CC07005583A8 /* HDR.cpp */; };
 		37F025652580CC07005583A8 /* HDR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37F025622580CC07005583A8 /* HDR.cpp */; };
@@ -1013,6 +1010,9 @@
 		37FA23A51D229F2200EEFAAE /* OpenVR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D4D6A61D05419E00F6A3D6 /* OpenVR.cpp */; };
 		37FA23A61D229F2200EEFAAE /* Touch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B18995312DA3FD300499CA9 /* Touch.cpp */; };
 		37FA23A71D229F2200EEFAAE /* Virtual Reality.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 37D4D6A71D05419E00F6A3D6 /* Virtual Reality.cpp */; };
+		A375E780283A313400C71054 /* Translation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A375E77F283A313400C71054 /* Translation.cpp */; };
+		A375E781283A313400C71054 /* Translation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A375E77F283A313400C71054 /* Translation.cpp */; };
+		A375E782283A313400C71054 /* Translation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = A375E77F283A313400C71054 /* Translation.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -1533,7 +1533,6 @@
 		0BFCADCD148C1FEA00A3C772 /* PNG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PNG.cpp; sourceTree = "<group>"; };
 		0BFCADCE148C1FEA00A3C772 /* PSD.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PSD.cpp; sourceTree = "<group>"; };
 		0BFCADCF148C1FEA00A3C772 /* PVRTC.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PVRTC.cpp; sourceTree = "<group>"; };
-		0BFCADD0148C1FEA00A3C772 /* PVRTC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PVRTC.h; sourceTree = "<group>"; };
 		0BFCADD1148C1FEA00A3C772 /* TGA.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TGA.cpp; sourceTree = "<group>"; };
 		0BFCADF6148C200100A3C772 /* Image IO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "Image IO.cpp"; sourceTree = "<group>"; };
 		0BFCADF7148C200100A3C772 /* Image Operations.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "Image Operations.cpp"; sourceTree = "<group>"; };
@@ -1613,9 +1612,6 @@
 		3764B5C92684429100BE7F56 /* Sound Resample.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "Sound Resample.cpp"; sourceTree = "<group>"; };
 		377360071B1822D30026D698 /* AdMob.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AdMob.cpp; sourceTree = "<group>"; };
 		377360081B1822D30026D698 /* Chartboost.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Chartboost.cpp; sourceTree = "<group>"; };
-		3778B76621F71213001D764E /* FBSDKLoginKit.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = FBSDKLoginKit.a; path = ../ThirdPartyLibs/Facebook/iOS/FBSDKLoginKit.a; sourceTree = "<group>"; };
-		3778B76721F71213001D764E /* FBSDKCoreKit.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = FBSDKCoreKit.a; path = ../ThirdPartyLibs/Facebook/iOS/FBSDKCoreKit.a; sourceTree = "<group>"; };
-		3778B76821F71213001D764E /* FBSDKShareKit.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = FBSDKShareKit.a; path = ../ThirdPartyLibs/Facebook/iOS/FBSDKShareKit.a; sourceTree = "<group>"; };
 		377E23601ADC91550035617E /* BC.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = BC.cpp; sourceTree = "<group>"; };
 		377E23611ADC91550035617E /* BC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BC.h; sourceTree = "<group>"; };
 		377FCFB61B1826E90007F1BD /* libChartboost.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libChartboost.a; path = ../ThirdPartyLibs/Chartboost/libChartboost.a; sourceTree = "<group>"; };
@@ -1650,6 +1646,7 @@
 		379084A01B3E61FE00B8E7DC /* Object.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Object.h; sourceTree = "<group>"; };
 		379084A41B3E623100B8E7DC /* Obj.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Obj.cpp; sourceTree = "<group>"; };
 		379084A81B3E624C00B8E7DC /* Object.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Object.cpp; sourceTree = "<group>"; };
+		37916A4E282D5CA0009EAF63 /* ASTC.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ASTC.cpp; sourceTree = "<group>"; };
 		379434AA1AF9D30300696096 /* Mesh Optimize.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "Mesh Optimize.cpp"; sourceTree = "<group>"; };
 		379434AE1AF9D63A00696096 /* Steam.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Steam.cpp; sourceTree = "<group>"; };
 		3799265118BEC54900A933D5 /* Callback.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Callback.cpp; sourceTree = "<group>"; };
@@ -1685,6 +1682,7 @@
 		37E70CD21FEC8DCE00F10018 /* libmbedTLS.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libmbedTLS.a; path = ../ThirdPartyLibs/mbedTLS/Mac/Build/Release/libmbedTLS.a; sourceTree = "<group>"; };
 		37E70CD41FEC8DDD00F10018 /* libmbedTLS.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libmbedTLS.a; path = "../ThirdPartyLibs/mbedTLS/Mac/Build/Release-iphoneos/libmbedTLS.a"; sourceTree = "<group>"; };
 		37E70CD61FEC8DF000F10018 /* libmbedTLS.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libmbedTLS.a; path = "../ThirdPartyLibs/mbedTLS/Mac/Build/Release-iphonesimulator/libmbedTLS.a"; sourceTree = "<group>"; };
+		37ECD8D0282E46C100CF0962 /* ASTC_Compress.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ASTC_Compress.cpp; sourceTree = "<group>"; };
 		37F025622580CC07005583A8 /* HDR.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = HDR.cpp; sourceTree = "<group>"; };
 		37F5ECC521B6269C0045D7DE /* Voxel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Voxel.cpp; sourceTree = "<group>"; };
 		37F5ECC921B626C90045D7DE /* Voxel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Voxel.h; sourceTree = "<group>"; };
@@ -1702,6 +1700,7 @@
 		37F83D7725C44AB6000E5568 /* libPhysXCommon_static_64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libPhysXCommon_static_64.a; path = ../ThirdPartyLibs/PhysX/physx/bin/ios.arm_64/release/libPhysXCommon_static_64.a; sourceTree = "<group>"; };
 		37F83D7825C44AB7000E5568 /* libPhysXVehicle_static_64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libPhysXVehicle_static_64.a; path = ../ThirdPartyLibs/PhysX/physx/bin/ios.arm_64/release/libPhysXVehicle_static_64.a; sourceTree = "<group>"; };
 		37F83D7925C44AB7000E5568 /* libPhysXExtensions_static_64.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libPhysXExtensions_static_64.a; path = ../ThirdPartyLibs/PhysX/physx/bin/ios.arm_64/release/libPhysXExtensions_static_64.a; sourceTree = "<group>"; };
+		A375E77F283A313400C71054 /* Translation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Translation.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1709,7 +1708,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3778B76F21F7121A001D764E /* FBSDKCoreKit.a in Frameworks */,
 				3716E2C41BB8EB990037177D /* libSnappy.a in Frameworks */,
 				3716E2901BB8EA140037177D /* libJpegTurbo.a in Frameworks */,
 				3716E2B01BB8EAF10037177D /* libOgg.a in Frameworks */,
@@ -1719,7 +1717,6 @@
 				3706B2E81E972C190057BFB5 /* libFDK-AAC.a in Frameworks */,
 				377FCFB81B1826E90007F1BD /* libChartboost.a in Frameworks */,
 				3716E29A1BB8EA7A0037177D /* libLZHAM.a in Frameworks */,
-				3778B77021F7121A001D764E /* FBSDKLoginKit.a in Frameworks */,
 				3716E2B21BB8EB050037177D /* libOpus.a in Frameworks */,
 				3716E28E1BB8E95D0037177D /* libFlac.a in Frameworks */,
 				3747E0AD21AE44BC0001AFC5 /* libGameAnalytics.a in Frameworks */,
@@ -1731,7 +1728,6 @@
 				3716E2861BB8E9000037177D /* libBullet.a in Frameworks */,
 				3716E2B81BB8EB310037177D /* libPng.a in Frameworks */,
 				3716E2A41BB8EAA50037177D /* libLZMA.a in Frameworks */,
-				3778B77121F7121A001D764E /* FBSDKShareKit.a in Frameworks */,
 				3716E2E61BB8EC840037177D /* libWebP.a in Frameworks */,
 				37A8F9CC18F782DE00B1A466 /* libGoogleMobileAds.a in Frameworks */,
 				3716E2CA1BB8EBDA0037177D /* libSQLite.a in Frameworks */,
@@ -1782,7 +1778,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				3716E2DE1BB8EC510037177D /* libVorbis.a in Frameworks */,
-				3778B76C21F71218001D764E /* FBSDKCoreKit.a in Frameworks */,
 				37F83D8025C44AB7000E5568 /* libPhysXExtensions_static_64.a in Frameworks */,
 				37DB7BF5190CA38800275AEE /* libGoogleMobileAds.a in Frameworks */,
 				3716E2D21BB8EC060037177D /* libTheora.a in Frameworks */,
@@ -1805,10 +1800,8 @@
 				37AE2BDB1D30F185004D8A41 /* libZStd.a in Frameworks */,
 				3716E2D81BB8EC270037177D /* libTiff.a in Frameworks */,
 				37F83D7E25C44AB7000E5568 /* libPhysXCommon_static_64.a in Frameworks */,
-				3778B76D21F71218001D764E /* FBSDKLoginKit.a in Frameworks */,
 				3716E2961BB8EA510037177D /* libLZ4.a in Frameworks */,
 				3716E2921BB8EA1D0037177D /* libJpegTurbo.a in Frameworks */,
-				3778B76E21F71218001D764E /* FBSDKShareKit.a in Frameworks */,
 				37F83D7D25C44AB7000E5568 /* libPhysXCooking_static_64.a in Frameworks */,
 				3716E28C1BB8E9530037177D /* libFlac.a in Frameworks */,
 				3716E2C01BB8EB5D0037177D /* libRecast.a in Frameworks */,
@@ -2045,6 +2038,8 @@
 		0B18992012DA3FD300499CA9 /* Import */ = {
 			isa = PBXGroup;
 			children = (
+				37ECD8D0282E46C100CF0962 /* ASTC_Compress.cpp */,
+				37916A4E282D5CA0009EAF63 /* ASTC.cpp */,
 				377E23601ADC91550035617E /* BC.cpp */,
 				378590FF1F9DAE1400F8950C /* BC_Compress.cpp */,
 				377E23611ADC91550035617E /* BC.h */,
@@ -2061,7 +2056,6 @@
 				0BFCADCE148C1FEA00A3C772 /* PSD.cpp */,
 				0BFCADCF148C1FEA00A3C772 /* PVRTC.cpp */,
 				378590FD1F9DAE1300F8950C /* PVRTC_Compress.cpp */,
-				0BFCADD0148C1FEA00A3C772 /* PVRTC.h */,
 				0BFCADD1148C1FEA00A3C772 /* TGA.cpp */,
 				370E5A3A195FE0BA00A719A5 /* TIF.cpp */,
 				0BED41B517F03CA600B2DD6C /* WEBP.cpp */,
@@ -2251,6 +2245,7 @@
 				0B189B2412DA3FED00499CA9 /* String.cpp */,
 				0B189B2612DA3FED00499CA9 /* Thread.cpp */,
 				0B189B2712DA3FED00499CA9 /* Timer.cpp */,
+				A375E77F283A313400C71054 /* Translation.cpp */,
 				0BED2FC216B6E4210088106C /* Video.cpp */,
 				0B189B2812DA3FED00499CA9 /* Windows.cpp */,
 			);
@@ -2975,9 +2970,6 @@
 		3778B76521F711F6001D764E /* Facebook */ = {
 			isa = PBXGroup;
 			children = (
-				3778B76721F71213001D764E /* FBSDKCoreKit.a */,
-				3778B76621F71213001D764E /* FBSDKLoginKit.a */,
-				3778B76821F71213001D764E /* FBSDKShareKit.a */,
 			);
 			name = Facebook;
 			sourceTree = "<group>";
@@ -3039,7 +3031,6 @@
 				377E23671ADC91550035617E /* BC.h in Headers */,
 				37ABC66018BD32CF00F9F630 /* IAPManager.h in Headers */,
 				0BFCADE3148C1FEA00A3C772 /* ETC.h in Headers */,
-				0BFCADF2148C1FEA00A3C772 /* PVRTC.h in Headers */,
 				0BB71908162EDD82003FC814 /* CE Func List.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3055,7 +3046,6 @@
 				377E23651ADC91550035617E /* BC.h in Headers */,
 				3744B39E20707570004E3CFE /* Counted Pointer.h in Headers */,
 				0BFCADE1148C1FEA00A3C772 /* ETC.h in Headers */,
-				0BFCADF0148C1FEA00A3C772 /* PVRTC.h in Headers */,
 				0BB71906162EDD82003FC814 /* CE Func List.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3070,7 +3060,6 @@
 				377E23661ADC91550035617E /* BC.h in Headers */,
 				37ABC65F18BD32CF00F9F630 /* IAPManager.h in Headers */,
 				0BFCADE2148C1FEA00A3C772 /* ETC.h in Headers */,
-				0BFCADF1148C1FEA00A3C772 /* PVRTC.h in Headers */,
 				0BB71907162EDD82003FC814 /* CE Func List.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3304,6 +3293,7 @@
 				0B189BDD12DA3FED00499CA9 /* Member.cpp in Sources */,
 				0B189BDE12DA3FED00499CA9 /* Misc.cpp in Sources */,
 				0B189BDF12DA3FED00499CA9 /* Param.cpp in Sources */,
+				37916A51282D5CA0009EAF63 /* ASTC.cpp in Sources */,
 				0B189BE112DA3FED00499CA9 /* Pathfind.cpp in Sources */,
 				37877F131DD9AFA100A62A86 /* Import XPS.cpp in Sources */,
 				0B189BE212DA3FED00499CA9 /* Process.cpp in Sources */,
@@ -3316,6 +3306,7 @@
 				0B189BEA12DA3FED00499CA9 /* Connection.cpp in Sources */,
 				0B189BEB12DA3FED00499CA9 /* Download.cpp in Sources */,
 				0B189BEC12DA3FED00499CA9 /* Ftp.cpp in Sources */,
+				A375E782283A313400C71054 /* Translation.cpp in Sources */,
 				0B189BEF12DA3FED00499CA9 /* Socket.cpp in Sources */,
 				0B18A0DA12DA4DA400499CA9 /* Chunk.cpp in Sources */,
 				0B18A0DB12DA4DA400499CA9 /* File Text.cpp in Sources */,
@@ -3323,6 +3314,7 @@
 				0B18A0DE12DA4DA400499CA9 /* IO.cpp in Sources */,
 				0B18A0DF12DA4DA400499CA9 /* Pak.cpp in Sources */,
 				0B18A11612DA4E3500499CA9 /* EAGLView.mm in Sources */,
+				37ECD8D3282E46C100CF0962 /* ASTC_Compress.cpp in Sources */,
 				379084AB1B3E624C00B8E7DC /* Object.cpp in Sources */,
 				0B18A11812DA4E3500499CA9 /* iOSAppDelegate.mm in Sources */,
 				3773600B1B1822D30026D698 /* AdMob.cpp in Sources */,
@@ -3585,6 +3577,7 @@
 				0B189B4712DA3FED00499CA9 /* Mesh Overlay.cpp in Sources */,
 				0B189B4812DA3FED00499CA9 /* Mesh Part.cpp in Sources */,
 				0B3F4C62183199FB00518C8B /* Esenthel Store.cpp in Sources */,
+				A375E780283A313400C71054 /* Translation.cpp in Sources */,
 				0B189B4912DA3FED00499CA9 /* Mesh Render.cpp in Sources */,
 				3701EA801D570B9C00A6C9DB /* Cipher.cpp in Sources */,
 				0B189B4A12DA3FED00499CA9 /* Mshb Add Remove.cpp in Sources */,
@@ -3670,6 +3663,7 @@
 				0B124C511316C07B00FC00E2 /* CheckBox.cpp in Sources */,
 				0B124C521316C07B00FC00E2 /* Color Picker.cpp in Sources */,
 				0B124C531316C07B00FC00E2 /* ComboBox.cpp in Sources */,
+				37916A4F282D5CA0009EAF63 /* ASTC.cpp in Sources */,
 				0B124C551316C07B00FC00E2 /* Desktop.cpp in Sources */,
 				0B124C561316C07B00FC00E2 /* Gui Custom.cpp in Sources */,
 				0B124C571316C07B00FC00E2 /* Gui Image.cpp in Sources */,
@@ -3709,6 +3703,7 @@
 				0BFCAE00148C200100A3C772 /* Image Pixel.cpp in Sources */,
 				0BFCAE03148C200100A3C772 /* Image.cpp in Sources */,
 				0B0C86FD152D5E860094E5C2 /* Android.cpp in Sources */,
+				37ECD8D1282E46C100CF0962 /* ASTC_Compress.cpp in Sources */,
 				0BFABA581578F775009FA7D9 /* Image Atlas.cpp in Sources */,
 				0B002CC41594A6EB005892FA /* ICO.cpp in Sources */,
 				3773600C1B1822D30026D698 /* Chartboost.cpp in Sources */,
@@ -3912,6 +3907,7 @@
 				0B189B9A12DA3FED00499CA9 /* Cpu.cpp in Sources */,
 				0B189B9B12DA3FED00499CA9 /* Date Time.cpp in Sources */,
 				0B189B9C12DA3FED00499CA9 /* Enum.cpp in Sources */,
+				37916A50282D5CA0009EAF63 /* ASTC.cpp in Sources */,
 				0B189B9D12DA3FED00499CA9 /* Member.cpp in Sources */,
 				37877F121DD9AFA000A62A86 /* Import XPS.cpp in Sources */,
 				0B189B9E12DA3FED00499CA9 /* Misc.cpp in Sources */,
@@ -3924,6 +3920,7 @@
 				0B189BA712DA3FED00499CA9 /* Thread.cpp in Sources */,
 				0B189BA812DA3FED00499CA9 /* Timer.cpp in Sources */,
 				0B189BA912DA3FED00499CA9 /* Windows.cpp in Sources */,
+				A375E781283A313400C71054 /* Translation.cpp in Sources */,
 				0B189BAA12DA3FED00499CA9 /* Connection.cpp in Sources */,
 				0B189BAB12DA3FED00499CA9 /* Download.cpp in Sources */,
 				0B189BAC12DA3FED00499CA9 /* Ftp.cpp in Sources */,
@@ -3931,6 +3928,7 @@
 				0B18A0D212DA4DA400499CA9 /* Chunk.cpp in Sources */,
 				0B18A0D312DA4DA400499CA9 /* File Text.cpp in Sources */,
 				0B18A0D512DA4DA400499CA9 /* File.cpp in Sources */,
+				37ECD8D2282E46C100CF0962 /* ASTC_Compress.cpp in Sources */,
 				0B18A0D612DA4DA400499CA9 /* IO.cpp in Sources */,
 				0B18A0D712DA4DA400499CA9 /* Pak.cpp in Sources */,
 				379084AA1B3E624C00B8E7DC /* Object.cpp in Sources */,

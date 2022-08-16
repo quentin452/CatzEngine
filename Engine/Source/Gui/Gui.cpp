@@ -4,7 +4,8 @@ namespace EE{
 /******************************************************************************/
 struct QueuedMsgBox // queue these commands for thread-safety, this is so that 'Gui.msgBox' does not require 'Gui.cs' lock, this is important in case for example the main thread is deleting a thread inside a 'Gui.update' callback "Gui.update -> thread.del()" while that thread is "if(thread.wantStop())Gui.msgBox(failed)" calling 'Gui.msgBox' would require 'Gui.cs' lock which is already locked on the main thread
 {
-   Str          title, text; 
+   Str          title, text;
+   StrEx        extra;
    TextStylePtr text_style;
 
    void set(C Str &title, C Str &text, C TextStylePtr &text_style) {T.title=title; T.text=text; T.text_style=text_style;}
@@ -174,6 +175,55 @@ GuiObj* GUI::objNearest(C Vec2 &pos, C Vec2 &dir, Vec2 &out_pos)C
    out_pos=pos;
    return null;
 }
+void GUI::moveMouse(C Vec2 &dir)C
+{
+   if(Gui.msLit())
+   {
+     _List *list;
+      if(Gui.msLit()->type()==GO_LIST)
+      {
+         list=&Gui.msLit()->asList();
+      list:
+         Vec2 pos=Ms.pos()+list->scrollDelta().chsY();
+         if(list->flag&LIST_NEAREST_COLUMN && list->drawMode()==LDM_LIST)
+         {
+            VecI2 col_vis=list->nearest2(pos, dir); if(col_vis.y>=0)
+            {
+               list->scrollToCol(col_vis.x).scrollTo(col_vis.y); if(list->scrolling())
+               {
+                  Ms.pos(list->visToScreenRect(col_vis).center()-list->scrollDelta().chsY());
+                  return;
+               }
+            }
+         }else
+         {
+            int vis=list->nearest(pos, dir); if(vis>=0)
+            {
+               list->scrollTo(vis); if(list->scrollingMain())
+               {
+                  Ms.pos(list->visToScreenRect(vis).center()-list->scrollDelta().chsY());
+                  return;
+               }
+            }
+         }
+      }else
+      if(Region *region=Gui.msLit()->firstScrollableRegion())
+         if(GuiObj *nearest=region->nearest(Ms.pos()+region->scrollDelta().chsY(), dir))
+      {
+         if(nearest->type()==GO_LIST)
+         {
+            list=&nearest->asList();
+            goto list;
+         }
+         region->scrollTo(*nearest); if(region->scrolling())
+         {
+            Ms.pos(nearest->screenRect().center()-region->scrollDelta().chsY());
+            return;
+         }
+      }
+   }
+   Vec2 pos; if(GuiObj *nearest=Gui.objNearest(Ms.pos(), dir, pos))Ms.pos(pos);
+}
 /******************************************************************************/
 Color GUI::backgroundColor()C {if(GuiSkin *skin=Gui.skin())return skin->background_color; return         WHITE;}
 Color GUI::    borderColor()C {if(GuiSkin *skin=Gui.skin())return skin->    border_color; return Color(0, 112);}
@@ -184,15 +234,15 @@ TextLine* GUI::overlayTextLine(Vec2 &offset)
    {
       TextLine &tl=kb()->asTextLine();
       Rect_LU   tl_rect(tl.screenPos(), tl.size());
-      if(Cuts(tl_rect, kb_rect) || tl_rect.min.y<-D.h())
+      if(Cuts(tl_rect, kb_rect) || tl_rect.min.y<D.rectUI().min.y)
       {
          // try to move above kb rect first (because when typing with fingers the hands are usually downwards, so they would occlude what's below them)
-         if(kb_rect.max.y+tl_rect.h()<=D.h()) // if it fits in the visible screen area
+         if(kb_rect.max.y+tl_rect.h()<=D.rectUI().max.y) // if it fits in the visible screen area
          {
             offset=kb_rect.up()+tl_rect.size()*Vec2(-0.5f, 1.0f)-tl.pos();
          }else // move at the bottom of the screen
          {
-            offset=Vec2(0, -D.h())+tl_rect.size()*Vec2(-0.5f, 1.0f)-tl.pos();
+            offset=Vec2(0, D.rectUI().min.y)+tl_rect.size()*Vec2(-0.5f, 1.0f)-tl.pos();
          }
          return &tl;
       }
@@ -352,7 +402,10 @@ void GUI::update()
          REPA(MsgBox::MsgBoxs)
          {
           C MsgBox &mb=MsgBox::MsgBoxs[i];
-            if(Equal(mb.title, qmb.title, true) && Equal(mb.text(), qmb.text, true) && mb.text.text_style==qmb.text_style)goto skip; // if already exists then do nothing
+            if(Equal(mb.title          , qmb.title, true)
+            && Equal(mb.text.text      , qmb.text , true)
+            &&       mb.text.extra     ==qmb.extra
+            &&       mb.text.text_style==qmb.text_style)goto skip; // if already exists then do nothing
          }
          // create new one
          MsgBox::MsgBoxs.New().create(qmb.title, qmb.text, qmb.text_style, null);
@@ -411,33 +464,6 @@ void GUI::update()
   _update_time=Time.curTime()-t;
 }
 /******************************************************************************/
-static void DrawPanelText(C Panel *panel, C Color &panel_color, Flt padding, C TextStyleParams &ts, C Vec2 &pos, CChar *text, Bool mouse)
-{
-   if(Is(text))
-   {
-      Set(Tls16, text, ts, D.w2()-padding*2, AUTO_LINE_SPACE_SPLIT);
-
-      Flt width =0,
-          height=Tls16.elms()*ts.lineHeight();
-      REPA(Tls16){TextLineSplit16 &t=Tls16[i]; MAX(width, ts.textWidth(t.text, t.length));}
-
-      Rect_LU r(pos, width, height); r.extend(padding); if(mouse)
-      {
-         Int height=32; // default mouse cursor height
-         if(Ms._cursor && Ms._cursor->_image)height=Ms._cursor->_image->h()-Ms._cursor->_hot_spot.y;
-         Flt y=D.pixelToScreenSize().y*height;
-         r.min.y-=y;
-         r.max.y-=y;
-      }
-      if(r.max.x> D.w()){r.min.x-=r.max.x-D.w(); r.max.x=D.w();} if(r.min.x<-D.w()){r.max.x+=-D.w()-r.min.x; r.min.x=-D.w();}
-      if(r.min.y<-D.h()){r+=Vec2(0, pos.y-r.min.y+padding)    ;} if(r.max.y> D.h()){r.min.y-= r.max.y-D.h(); r.max.y= D.h();}
-
-      if(panel        )panel->draw(panel_color, r);else
-      if(panel_color.a)     r.draw(panel_color);
-
-      ts.drawSplit(r.extend(-padding), Tls16, null, 0);
-   }
-}
 static void DrawDescriptionObj(GuiObj &obj, C Vec2 &pos, Flt start_time, Bool mouse)
 {
    Bool   immediate=false;
@@ -447,7 +473,7 @@ static void DrawDescriptionObj(GuiObj &obj, C Vec2 &pos, Flt start_time, Bool mo
       case GO_LIST:
       {
         _List &list=obj.asList();
-         immediate=FlagTest(list.flag, LIST_IMMEDIATE_DESC);
+         immediate=FlagOn(list.flag, LIST_IMMEDIATE_DESC);
          if(list._desc_offset>=0)
             if(Ptr data=list.screenToData(pos))text=*(Char**)((Byte*)data+list._desc_offset);
       }break;
@@ -519,8 +545,6 @@ void GUI::del()
    MsgBox::MsgBoxs.del();
   _desktops       .del();
   _callbacks      .del();
-   Tls8           .del();
-   Tls16          .del();
    GuiSkins       .del();
    Panels         .del();
    PanelImages    .del();

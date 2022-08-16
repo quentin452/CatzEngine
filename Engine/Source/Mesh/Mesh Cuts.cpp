@@ -1259,8 +1259,8 @@ Matrix GetRestMatrix(C CMemPtr<C MeshPart*> &meshes, C Matrix *initial_matrix, C
    REPA(meshes)
       if(C MeshPart *part=meshes[i])
    {
-      if(!only_visible || !FlagTest(part->part_flag, MSHP_HIDDEN))
-      if(!only_phys    || !FlagTest(part->part_flag, MSHP_NO_PHYS_BODY))
+      if(!only_visible || FlagOff(part->part_flag, MSHP_HIDDEN))
+      if(!only_phys    || FlagOff(part->part_flag, MSHP_NO_PHYS_BODY))
          if(part->base  .is())    temp.add(&part->base  );else
          if(part->render.is())gpu_temp.add(&part->render);
    }

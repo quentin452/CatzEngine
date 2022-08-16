@@ -7,33 +7,20 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		3782F7BC1C86878900413552 /* Default-568h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3782F7B31C86878900413552 /* Default-568h@2x.png */; };
-		3782F7BD1C86878900413552 /* Default-667h@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3782F7B41C86878900413552 /* Default-667h@2x.png */; };
-		3782F7BE1C86878900413552 /* Default-Portrait.png in Resources */ = {isa = PBXBuildFile; fileRef = 3782F7B51C86878900413552 /* Default-Portrait.png */; };
-		3782F7BF1C86878900413552 /* Default@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3782F7B61C86878900413552 /* Default@2x.png */; };
-		3782F7C01C86878900413552 /* Icon-60@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3782F7B71C86878900413552 /* Icon-60@2x.png */; };
-		3782F7C11C86878900413552 /* Icon-60@3x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3782F7B81C86878900413552 /* Icon-60@3x.png */; };
-		3782F7C21C86878900413552 /* Icon-76.png in Resources */ = {isa = PBXBuildFile; fileRef = 3782F7B91C86878900413552 /* Icon-76.png */; };
-		3782F7C31C86878900413552 /* Icon-76@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 3782F7BA1C86878900413552 /* Icon-76@2x.png */; };
-		3782F7C61C86888E00413552 /* Engine Builder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 378309D91A0711C8002383BF /* Engine Builder.cpp */; };
-		378309DA1A0711C8002383BF /* Engine Builder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 378309D91A0711C8002383BF /* Engine Builder.cpp */; };
+		3776F2A2282FCCD400033774 /* Engine Builder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3776F2A1282FCCD300033774 /* Engine Builder.cpp */; };
+		3776F2A3282FCCD400033774 /* Engine Builder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3776F2A1282FCCD300033774 /* Engine Builder.cpp */; };
+		3776F2A5282FCCDE00033774 /* Engine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 37AE6A4218E67FDF00319BDA /* Engine.a */; };
+		3776F2AB282FD73A00033774 /* Engine.pak in Resources */ = {isa = PBXBuildFile; fileRef = 3776F2AA282FD73A00033774 /* Engine.pak */; };
 		3799264518BD4AB300A933D5 /* iOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3799260818BD4AB300A933D5 /* iOS.xib */; };
 		37AD1FB91F52D16900C80985 /* Engine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 37AE6A3F18E67FD300319BDA /* Engine.a */; };
-		37AE6A4318E67FDF00319BDA /* Engine.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 37AE6A4218E67FDF00319BDA /* Engine.a */; };
 		37C573321C868FFA00039CB1 /* Icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 37C573311C868FFA00039CB1 /* Icon.icns */; };
+		A3340A352831151700FA23D2 /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A3340A342831151700FA23D2 /* Images.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0BDA9C7F121EE06400ED5E97 /* iOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = iOS.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		3782F7B31C86878900413552 /* Default-568h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-568h@2x.png"; path = "Assets/Default-568h@2x.png"; sourceTree = "<group>"; };
-		3782F7B41C86878900413552 /* Default-667h@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-667h@2x.png"; path = "Assets/Default-667h@2x.png"; sourceTree = "<group>"; };
-		3782F7B51C86878900413552 /* Default-Portrait.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default-Portrait.png"; path = "Assets/Default-Portrait.png"; sourceTree = "<group>"; };
-		3782F7B61C86878900413552 /* Default@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Default@2x.png"; path = "Assets/Default@2x.png"; sourceTree = "<group>"; };
-		3782F7B71C86878900413552 /* Icon-60@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-60@2x.png"; path = "Assets/Icon-60@2x.png"; sourceTree = "<group>"; };
-		3782F7B81C86878900413552 /* Icon-60@3x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-60@3x.png"; path = "Assets/Icon-60@3x.png"; sourceTree = "<group>"; };
-		3782F7B91C86878900413552 /* Icon-76.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-76.png"; path = "Assets/Icon-76.png"; sourceTree = "<group>"; };
-		3782F7BA1C86878900413552 /* Icon-76@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "Icon-76@2x.png"; path = "Assets/Icon-76@2x.png"; sourceTree = "<group>"; };
-		378309D91A0711C8002383BF /* Engine Builder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "Engine Builder.cpp"; path = "Source/Engine Builder.cpp"; sourceTree = "<group>"; };
+		3776F2A1282FCCD300033774 /* Engine Builder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "Engine Builder.cpp"; path = "Source/Engine Builder.cpp"; sourceTree = "<group>"; };
+		3776F2AA282FD73A00033774 /* Engine.pak */ = {isa = PBXFileReference; lastKnownFileType = file; name = Engine.pak; path = ../Editor/Bin/Mobile/Engine.pak; sourceTree = "<group>"; };
 		3799260718BD4AB300A933D5 /* iOS.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = iOS.plist; path = Assets/iOS.plist; sourceTree = "<group>"; };
 		3799260818BD4AB300A933D5 /* iOS.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = iOS.xib; path = Assets/iOS.xib; sourceTree = "<group>"; };
 		3799260A18BD4AB300A933D5 /* Mac.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; name = Mac.plist; path = Assets/Mac.plist; sourceTree = "<group>"; };
@@ -44,6 +31,7 @@
 		37DB7C081922F09D00275AEE /* Engine.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = Engine.a; path = ../Engine/build/Debug/Engine.a; sourceTree = "<group>"; };
 		37DB7C091922F17500275AEE /* Engine.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = Engine.a; path = "../Engine/build/Debug-iphoneos/Engine.a"; sourceTree = "<group>"; };
 		8D1107320486CEB800E47090 /* Project.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Project.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A3340A342831151700FA23D2 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Assets/Images.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,7 +39,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				37AE6A4318E67FDF00319BDA /* Engine.a in Frameworks */,
+				3776F2A5282FCCDE00033774 /* Engine.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -69,7 +57,7 @@
 		080E96DDFE201D6D7F000001 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				378309D91A0711C8002383BF /* Engine Builder.cpp */,
+				3776F2A1282FCCD300033774 /* Engine Builder.cpp */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -145,14 +133,8 @@
 		29B97317FDCFA39411CA2CEA /* Assets */ = {
 			isa = PBXGroup;
 			children = (
-				3782F7B31C86878900413552 /* Default-568h@2x.png */,
-				3782F7B41C86878900413552 /* Default-667h@2x.png */,
-				3782F7B51C86878900413552 /* Default-Portrait.png */,
-				3782F7B61C86878900413552 /* Default@2x.png */,
-				3782F7B71C86878900413552 /* Icon-60@2x.png */,
-				3782F7B81C86878900413552 /* Icon-60@3x.png */,
-				3782F7B91C86878900413552 /* Icon-76.png */,
-				3782F7BA1C86878900413552 /* Icon-76@2x.png */,
+				A3340A342831151700FA23D2 /* Images.xcassets */,
+				3776F2AA282FD73A00033774 /* Engine.pak */,
 				37C573311C868FFA00039CB1 /* Icon.icns */,
 				3799260718BD4AB300A933D5 /* iOS.plist */,
 				3799260818BD4AB300A933D5 /* iOS.xib */,
@@ -258,15 +240,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A3340A352831151700FA23D2 /* Images.xcassets in Resources */,
 				3799264518BD4AB300A933D5 /* iOS.xib in Resources */,
-				3782F7C31C86878900413552 /* Icon-76@2x.png in Resources */,
-				3782F7C21C86878900413552 /* Icon-76.png in Resources */,
-				3782F7BD1C86878900413552 /* Default-667h@2x.png in Resources */,
-				3782F7BF1C86878900413552 /* Default@2x.png in Resources */,
-				3782F7BE1C86878900413552 /* Default-Portrait.png in Resources */,
-				3782F7C11C86878900413552 /* Icon-60@3x.png in Resources */,
-				3782F7BC1C86878900413552 /* Default-568h@2x.png in Resources */,
-				3782F7C01C86878900413552 /* Icon-60@2x.png in Resources */,
+				3776F2AB282FD73A00033774 /* Engine.pak in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -285,7 +261,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				3782F7C61C86888E00413552 /* Engine Builder.cpp in Sources */,
+				3776F2A3282FCCD400033774 /* Engine Builder.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -293,7 +269,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				378309DA1A0711C8002383BF /* Engine Builder.cpp in Sources */,
+				3776F2A2282FCCD400033774 /* Engine Builder.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -303,54 +279,47 @@
 		0BDA9C82121EE06400ED5E97 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 2KA8LL48VG;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Assets/iOS.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"../Engine/Build/Release-iphoneos",
 				);
 				OTHER_LDFLAGS = (
-					"-framework",
-					QuartzCore,
-					"-framework",
-					UIKit,
-					"-framework",
-					Foundation,
-					"-framework",
-					EventKit,
-					"-framework",
-					EventKitUI,
-					"-framework",
-					CoreMedia,
-					"-framework",
-					CoreMotion,
-					"-framework",
-					CoreLocation,
-					"-framework",
-					CoreGraphics,
-					"-framework",
-					CoreTelephony,
-					"-framework",
-					AudioToolbox,
-					"-framework",
-					AVFoundation,
-					"-framework",
-					SystemConfiguration,
-					"-framework",
-					MessageUI,
-					"-framework",
-					AdSupport,
-					"-framework",
-					OpenGLES,
-					"-framework",
-					OpenAL,
+					"-framework QuartzCore",
+					"-framework UIKit",
+					"-framework WebKit",
+					"-framework CoreMotion",
+					"-framework CoreLocation",
+					"-framework GameController",
+					"-weak_framework CoreHaptics", // requires iOS 13.0
+					"-framework AudioToolbox",
+					"-framework OpenGLES",
+					"-framework OpenAL",
 					"-lz",
+
+					// needed by Chartboost
+					"-framework AVFoundation",
+					"-framework CoreGraphics",
+					"-framework Security",
+
+					// needed by AdMob
+					"-framework AdSupport",
+					"-framework SystemConfiguration",
+					"-framework EventKit",
+					"-framework EventKitUI",
+					"-framework MessageUI",
+					"-framework CoreTelephony",
+					"-framework CoreMedia",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.esenthel.test;
 				PRODUCT_NAME = iOS;
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -364,54 +333,47 @@
 		0BDA9C83121EE06400ED5E97 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_INCLUDE_ALL_APPICON_ASSETS = NO;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 2KA8LL48VG;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = Assets/iOS.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"../Engine/Build/Release-iphoneos",
 				);
 				OTHER_LDFLAGS = (
-					"-framework",
-					QuartzCore,
-					"-framework",
-					UIKit,
-					"-framework",
-					Foundation,
-					"-framework",
-					EventKit,
-					"-framework",
-					EventKitUI,
-					"-framework",
-					CoreMedia,
-					"-framework",
-					CoreMotion,
-					"-framework",
-					CoreLocation,
-					"-framework",
-					CoreGraphics,
-					"-framework",
-					CoreTelephony,
-					"-framework",
-					AudioToolbox,
-					"-framework",
-					AVFoundation,
-					"-framework",
-					SystemConfiguration,
-					"-framework",
-					MessageUI,
-					"-framework",
-					AdSupport,
-					"-framework",
-					OpenGLES,
-					"-framework",
-					OpenAL,
+					"-framework QuartzCore",
+					"-framework UIKit",
+					"-framework WebKit",
+					"-framework CoreMotion",
+					"-framework CoreLocation",
+					"-framework GameController",
+					"-weak_framework CoreHaptics", // requires iOS 13.0
+					"-framework AudioToolbox",
+					"-framework OpenGLES",
+					"-framework OpenAL",
 					"-lz",
+
+					// needed by Chartboost
+					"-framework AVFoundation",
+					"-framework CoreGraphics",
+					"-framework Security",
+
+					// needed by AdMob
+					"-framework AdSupport",
+					"-framework SystemConfiguration",
+					"-framework EventKit",
+					"-framework EventKitUI",
+					"-framework MessageUI",
+					"-framework CoreTelephony",
+					"-framework CoreMedia",
 				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.esenthel.test;
 				PRODUCT_NAME = iOS;
 				PROVISIONING_PROFILE = "";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -425,6 +387,7 @@
 		C01FCF4B08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = x86_64;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CONFIGURATION_BUILD_DIR = .;
@@ -441,6 +404,7 @@
 		C01FCF4C08A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ARCHS = x86_64;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CONFIGURATION_BUILD_DIR = .;
@@ -456,7 +420,6 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = x86_64;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
@@ -494,22 +457,21 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
+					.,
 					../ThirdPartyLibs,
 					../ThirdPartyLibs/Bullet/lib/src,
-					"../ThirdPartyLibs/Facebook/facebook-ios-sdk/src",
+					../ThirdPartyLibs/Facebook/iOS,
 					../ThirdPartyLibs/FBX,
-					../ThirdPartyLibs/Vorbis/include,
 					../ThirdPartyLibs/Ogg/include,
+					../ThirdPartyLibs/Vorbis/include,
+					../ThirdPartyLibs/Opus/lib/include,
+					../ThirdPartyLibs/Opus/file/include,
 					../ThirdPartyLibs/Theora/include,
-					../ThirdPartyLibs/Cg/Mac,
-					../ThirdPartyLibs/PhysX/PhysX/Include,
-					../ThirdPartyLibs/PhysX/PhysX/Include/common,
-					../ThirdPartyLibs/PhysX/PhysX/Include/geometry,
-					../ThirdPartyLibs/PhysX/PhysX/Source/Common/src,
-					../ThirdPartyLibs/PhysX/PhysX/Source/GeomUtils/src,
-					../ThirdPartyLibs/PhysX/PxShared/include,
-					../ThirdPartyLibs/PhysX/PxShared/src/foundation/include,
-					.,
+					../ThirdPartyLibs/PhysX/physx/include,
+					../ThirdPartyLibs/PhysX/pxshared/include,
+					../ThirdPartyLibs/PhysX/physx/source/common/src,
+					../ThirdPartyLibs/PhysX/physx/source/foundation/include,
+					../ThirdPartyLibs/PhysX/physx/source/geomutils/src,
 				);
 				ONLY_ACTIVE_ARCH = YES;
 				OTHER_CFLAGS = (
@@ -555,7 +517,6 @@
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = x86_64;
 				CLANG_CXX_LANGUAGE_STANDARD = "c++17";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
@@ -593,22 +554,21 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
+					.,
 					../ThirdPartyLibs,
 					../ThirdPartyLibs/Bullet/lib/src,
-					"../ThirdPartyLibs/Facebook/facebook-ios-sdk/src",
+					../ThirdPartyLibs/Facebook/iOS,
 					../ThirdPartyLibs/FBX,
-					../ThirdPartyLibs/Vorbis/include,
 					../ThirdPartyLibs/Ogg/include,
+					../ThirdPartyLibs/Vorbis/include,
+					../ThirdPartyLibs/Opus/lib/include,
+					../ThirdPartyLibs/Opus/file/include,
 					../ThirdPartyLibs/Theora/include,
-					../ThirdPartyLibs/Cg/Mac,
-					../ThirdPartyLibs/PhysX/PhysX/Include,
-					../ThirdPartyLibs/PhysX/PhysX/Include/common,
-					../ThirdPartyLibs/PhysX/PhysX/Include/geometry,
-					../ThirdPartyLibs/PhysX/PhysX/Source/Common/src,
-					../ThirdPartyLibs/PhysX/PhysX/Source/GeomUtils/src,
-					../ThirdPartyLibs/PhysX/PxShared/include,
-					../ThirdPartyLibs/PhysX/PxShared/src/foundation/include,
-					.,
+					../ThirdPartyLibs/PhysX/physx/include,
+					../ThirdPartyLibs/PhysX/pxshared/include,
+					../ThirdPartyLibs/PhysX/physx/source/common/src,
+					../ThirdPartyLibs/PhysX/physx/source/foundation/include,
+					../ThirdPartyLibs/PhysX/physx/source/geomutils/src,
 				);
 				OTHER_CFLAGS = (
 					"-fshort-wchar",

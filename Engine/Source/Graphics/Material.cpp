@@ -419,6 +419,21 @@ Material& Material::validate() // #MaterialTextureLayout
    }
    return T;
 }
+static inline void WaitForStream(Bool &ok, C ImagePtr &image)
+{
+   if(image)ok&=image->waitForStream();
+}
+Bool Material::waitForStream()C
+{
+   Bool ok=true;
+   WaitForStream(ok,   base_0    );
+   WaitForStream(ok,   base_1    );
+   WaitForStream(ok,   base_2    );
+   WaitForStream(ok,   detail_map);
+   WaitForStream(ok,    macro_map);
+   WaitForStream(ok, emissive_map);
+   return ok;
+}
 /******************************************************************************/
 void Material::setOpaque()C
 {

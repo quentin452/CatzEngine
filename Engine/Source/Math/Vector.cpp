@@ -589,6 +589,55 @@ Int VecB4::find(Int value)C {if(c[0]==value)return 0; if(c[1]==value)return 1; i
 VecI & VecI ::rotateOrder() {Int t=z;      z=y; y=x; x=t; return T;}
 VecI4& VecI4::rotateOrder() {Int t=w; w=z; z=y; y=x; x=t; return T;}
 /******************************************************************************/
+void MinMax(C Flt *f, Int num, Flt &min, Flt &max)
+{
+   if(num)for(min=max=*f++; --num; )
+   {
+      Flt r=*f++;
+      if(r<min)min=r;else
+      if(r>max)max=r;
+   }
+}
+void MinMax(C Dbl *f, Int num, Dbl &min, Dbl &max)
+{
+   if(num)for(min=max=*f++; --num; )
+   {
+      Dbl r=*f++;
+      if(r<min)min=r;else
+      if(r>max)max=r;
+   }
+}
+void MinMaxI(C Flt *f, Int num, Int &min, Int &max)
+{
+   if(num)
+   {
+      Flt _min, _max;
+     _min=_max=f[0];
+      min= max=  0 ;
+      for(Int i=1; i<num; i++)
+      {
+         Flt r=f[i];
+         if( r<_min){_min=r; min=i;}else
+         if( r>_max){_max=r; max=i;}
+      }
+   }
+}
+void MinMaxI(C Dbl *f, Int num, Int &min, Int &max)
+{
+   if(num)
+   {
+      Dbl _min, _max;
+     _min=_max=f[0];
+      min= max=  0 ;
+      for(Int i=1; i<num; i++)
+      {
+         Dbl r=f[i];
+         if( r<_min){_min=r; min=i;}else
+         if( r>_max){_max=r; max=i;}
+      }
+   }
+}
+/******************************************************************************/
 Bool MinMax(C Vec2 *v, Int num, Vec2 &min, Vec2 &max)
 {
    if(num<=0 || !v)return false;

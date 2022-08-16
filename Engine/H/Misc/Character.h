@@ -78,12 +78,28 @@ const Char  CharBullet    =u'•',
             CharMul       =u'×',
             CharDiv       =u'÷',
             CharStar      =u'★',
+
             CharLeft      =u'←',
             CharRight     =u'→',
             CharDown      =u'↓',
             CharUp        =u'↑',
+            CharUpLeft    =u'↖',
+            CharUpRight   =u'↗',
+            CharDownLeft  =u'↙',
+            CharDownRight =u'↘',
             CharLeftRight =u'↔',
             CharDownUp    =u'↕',
+
+            CharTriLeft   =u'⯇',
+            CharTriRight  =u'⯈',
+            CharTriDown   =u'⯆',
+            CharTriUp     =u'⯅',
+
+            CharTriangleUp=u'△',
+            CharSquare    =u'□', // med=◻, large=⬜
+            CharCircle    =u'○', // med=⚪, large=◯
+            CharCross     =u'✕', // ╳❌✖⨉🗙🞪
+
             CharCopyright =u'©',
             CharRegTM     =u'®',
             CharTrademark =u'™',

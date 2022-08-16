@@ -1,22 +1,6 @@
 ﻿/******************************************************************************/
 #include "stdafx.h"
 namespace EE{
-/******************************************************************************
-
-   We must unlock 'D._lock' everywhere before we want to lock 'T._lock'
-
-   This is to avoid deadlocks, when one thread locks first 'D._lock' and then 'T._lock'
-                            and another thread locks first 'T._lock' and then 'D._lock'
-
-   For example:
-      -background loading thread calls               (Images._lock, D._lock.on)
-      -inside 'Draw' during drawing we load an image (D._lock.on, Images._lock) -> deadlock
-   Instead of it, during drawing it will be: D._lock.on, D._lock.off, Images.lock and unlocks...
-
-   We have to do this even if we're not going to perform and 'D' operations:
-      -background loading thread calls                                 (Images._lock, D._lock.on)
-      -during 'Draw' drawing (where D is already locked) we use 'find' (D._lock.on, Images._lock) -> deadlock
-
 /******************************************************************************/
 typedef Map<Int, Int> MapInt; ASSERT(OFFSET(MapInt::Elm, data)==0); // '_data_offset' is not used because it's assumed to be always 0
 /******************************************************************************/
@@ -37,13 +21,12 @@ _MapEx::_MapEx(Int block_elms, Int compare(CPtr key_a, CPtr key_b), Bool create(
 }
 _MapTS::_MapTS(Int block_elms, Int compare(CPtr key_a, CPtr key_b), Bool create(Ptr data, CPtr key, Ptr user), Ptr user, void (&copy_key)(Ptr dest, CPtr src)) : _Map(block_elms, compare, create, user, copy_key)
 {
-  _d_lock=0;
 }
 void _Map::clear() {_memx.clear(); _elms=0;              } // here can't Free '_order' because it assumes that its size is '_memx.maxElms()'
 void _Map::del  () {_memx.del  (); _elms=0; Free(_order);}
 
-void _MapTS::clear() {SyncUnlocker unlocker(D._lock); SyncLocker locker(_lock); super::clear();}
-void _MapTS::del  () {SyncUnlocker unlocker(D._lock); SyncLocker locker(_lock); super::del  ();}
+void _MapTS::clear() {SyncLocker locker(_lock); super::clear();}
+void _MapTS::del  () {SyncLocker locker(_lock); super::del  ();}
 
 Byte _Map::mode(Byte mode) {auto old_mode=T._mode; T._mode=mode; return old_mode;}
 
@@ -55,38 +38,8 @@ CPtr _Map::absData(Int abs_i)C {return elmData(_memx.absElm(abs_i));}
 
 INLINE Int _Map::dataInMapToAbsIndex(CPtr data)C {return data ? _memx.absIndexFastUnsafeValid(dataElm(data)) : -1;}
 /******************************************************************************/
-void _MapTS::lock()C
-{
-   Byte d_locked=0;
-   if(!_lock.owned()) // if we don't have the '_lock' yet
-   {
-   #if SYNC_UNLOCK_SINGLE
-      if(D._lock.owned()){d_locked=true; D._lock.off();} // if we own the 'D._lock' then disable it and remember that we had it
-   #else
-      for(; D._lock.owned(); d_locked++)D._lock.off(); // if we own the 'D._lock' then disable it and remember that we had it
-   #endif
-   }
-  _lock.on();
-   if(d_locked)_d_lock=d_locked; // if we've disabled 'D._lock' then set how many times
-}
-void _MapTS::unlock()C
-{
-   Byte d_locked=_d_lock; // remember if we had 'D._lock' disabled
-       _d_lock  =0; // disable before releasing '_lock'
-  _lock.off();
-
-   if(!_lock.owned()) // if we no longer own '_lock' then we can restore 'D._lock' if we disabled it
-   {
-   #if SYNC_UNLOCK_SINGLE
-      if(d_locked)D._lock.on();
-   #else
-      REP(d_locked)D._lock.on();
-   #endif
-   }else // if we still own '_lock' then we should keep the variable about 'D._lock'
-   {
-     _d_lock=d_locked;
-   }
-}
+void _MapTS::  lock()C {_lock.on ();}
+void _MapTS::unlock()C {_lock.off();}
 /******************************************************************************/
 _Map::Elm* _Map::findElm(CPtr key, Int &stop)C
 {
@@ -131,20 +84,17 @@ Int _Map::findValidIndex(CPtr key)C
 }
 Ptr _MapTS::find(CPtr key)C
 {
-   SyncUnlocker unlocker(D._lock); // must be used even though we're not using GPU
-   SyncLocker     locker(  _lock);
+   SyncLocker locker(_lock);
    return super::find(key);
 }
 Int _MapTS::findValidIndex(CPtr key)C
 {
-   SyncUnlocker unlocker(D._lock); // must be used even though we're not using GPU
-   SyncLocker     locker(  _lock);
+   SyncLocker locker(_lock);
    return super::findValidIndex(key);
 }
 Int _MapTS::findAbsIndex(CPtr key)C
 {
-   SyncUnlocker unlocker(D._lock); // must be used even though we're not using GPU
-   SyncLocker     locker(  _lock);
+   SyncLocker locker(_lock);
    return super::findAbsIndex(key);
 }
 /******************************************************************************/
@@ -203,20 +153,17 @@ Ptr _Map::get          (CPtr key)
 }
 Ptr _MapTS::get(CPtr key)
 {
-   SyncUnlocker unlocker(D._lock);
-   SyncLocker     locker(  _lock);
+   SyncLocker locker(_lock);
    return super::get(key);
 }
 /*Int _MapTS::getValidIndex(CPtr key)
 {
-   SyncUnlocker unlocker(D._lock);
-   SyncLocker     locker(  _lock);
+   SyncLocker locker(_lock);
    return super::getValidIndex(key);
 }*/
 Int _MapTS::getAbsIndex(CPtr key)
 {
-   SyncUnlocker unlocker(D._lock);
-   SyncLocker     locker(  _lock);
+   SyncLocker locker(_lock);
    return super::getAbsIndex(key);
 }
 /******************************************************************************/
@@ -256,8 +203,7 @@ Bool _MapTS::containsData(CPtr data)C
 {
    if(data)
    {
-      SyncUnlocker unlocker(D._lock); // must be used even though we're not using GPU
-      SyncLocker     locker(  _lock);
+      SyncLocker locker(_lock);
       return super::containsData(data);
    }
    return false;
@@ -292,8 +238,7 @@ CPtr _MapTS::dataToKey(CPtr data)C
 {
    if(data)
    {
-      SyncUnlocker unlocker(D._lock); // must be used even though we're not using GPU
-      SyncLocker     locker(  _lock);
+      SyncLocker locker(_lock);
       return super::dataToKey(data);
    }
    return null;
@@ -311,8 +256,7 @@ Int _MapTS::dataToIndex(CPtr data)C
 {
    if(data)
    {
-      SyncUnlocker unlocker(D._lock); // must be used even though we're not using GPU
-      SyncLocker     locker(  _lock);
+      SyncLocker locker(_lock);
       return super::dataToIndex(data);
    }
    return -1;
@@ -331,8 +275,7 @@ void _MapTS::remove(Int i)
 {
    if(InRange(i, _elms))
    {
-      SyncUnlocker unlocker(D._lock); // must be used even though we're not using GPU
-      SyncLocker     locker(  _lock);
+      SyncLocker locker(_lock);
       super::remove(i);
    }
 }
@@ -346,8 +289,7 @@ void _Map::removeKey(CPtr key)
 }
 void _MapTS::removeKey(CPtr key)
 {
-   SyncUnlocker unlocker(D._lock); // must be used even though we're not using GPU
-   SyncLocker     locker(  _lock);
+   SyncLocker locker(_lock);
    super::removeKey(key);
 }
 void _Map::removeData(CPtr data)
@@ -365,8 +307,7 @@ void _MapTS::removeData(CPtr data)
 {
    if(data)
    {
-      SyncUnlocker unlocker(D._lock); // must be used even though we're not using GPU
-      SyncLocker     locker(  _lock);
+      SyncLocker locker(_lock);
       super::removeData(data);
    }
 }
@@ -414,8 +355,7 @@ Bool _Map::replaceKey(CPtr src_key, CPtr dest_key)
 }
 Bool _MapTS::replaceKey(CPtr src_key, CPtr dest_key)
 {
-   SyncUnlocker unlocker(D._lock); // must be used even though we're not using GPU
-   SyncLocker     locker(  _lock);
+   SyncLocker locker(_lock);
    return super::replaceKey(src_key, dest_key);
 }
 /******************************************************************************/
@@ -426,8 +366,7 @@ void _Map::reserve(Int num)
 }
 void _MapTS::reserve(Int num)
 {
-   SyncUnlocker unlocker(D._lock); // must be used even though we're not using GPU
-   SyncLocker     locker(  _lock);
+   SyncLocker locker(_lock);
    return super::reserve(num);
 }
 /******************************************************************************/
@@ -446,8 +385,7 @@ void _Map::compare(Int compare(CPtr key_a, CPtr key_b))
 }
 void _MapTS::compare(Int compare(CPtr key_a, CPtr key_b))
 {
-   SyncUnlocker unlocker(D._lock); // must be used even though we're not using GPU
-   SyncLocker     locker(  _lock);
+   SyncLocker locker(_lock);
    return super::compare(compare);
 }
 /******************************************************************************/
@@ -560,7 +498,7 @@ void _MapEx::decRef(CPtr data)
          if(!--desc.ptr_num && !(desc.flag&CACHE_ELM_STD_PTR)) // if there are no more pointers accessing this element
          {
             Flt delay_remove_time=_delay_remove_time;
-          //if( delay_remove_time   >0 && GetThreadId()==DelayRemoveThreadID)delay_remove_time-=DelayRemoveWaited; // if want to use delayed remove by time and we're unloading because of parent getting delay unloaded, then decrease the time which the parent already waited
+          //if( delay_remove_time   >0 && GetThreadID()==DelayRemoveThreadID)delay_remove_time-=DelayRemoveWaited; // if want to use delayed remove by time and we're unloading because of parent getting delay unloaded, then decrease the time which the parent already waited
             if( delay_remove_time   >0 // if want to use delayed remove by time
           //|| _delay_remove_counter>0 // if want to use delayed remove temporarily
           //|| (_can_be_removed && !_can_be_removed(data)) // or it can't be removed right now
@@ -593,7 +531,7 @@ void _MapEx::processDelayRemove(Bool always)
    if(_delay_remove.elms())
    {
     /*SyncUnlocker   unlocker(D._lock); // this must be used also since later 'D._lock' can be locked when deleting the resource
-      SyncLocker delay_locker(DelayRemoveLock); DelayRemoveThreadID=GetThreadId(); // support only one 'processDelayRemove' at a time, because we use only one global 'DelayRemoveWaited' based on 'DelayRemoveThreadID' for all maps/threads
+      SyncLocker delay_locker(DelayRemoveLock); DelayRemoveThreadID=GetThreadID(); // support only one 'processDelayRemove' at a time, because we use only one global 'DelayRemoveWaited' based on 'DelayRemoveThreadID' for all maps/threads
       SyncLocker       locker(  _lock);*/
      _delay_remove_check=Time.appTime()+_delay_remove_time*DELAY_REMOVE_STEP; // perform next check at this time
       REPA(_delay_remove)

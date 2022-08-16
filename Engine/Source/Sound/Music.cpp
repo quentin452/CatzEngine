@@ -242,7 +242,7 @@ void MusicManager::set(Playlist *playlist)
 }
 void MusicManager::play(Playlist *playlist, Int song)
 {
-   if(playlist!=T._playlist || song>=0) // if different playlist or a song was specified
+   if(playlist!=T._playlist || song>=0 || _song[CUR]<0) // if different playlist or a song was specified or nothing playing right now
    {
       T._playlist=playlist;
       playSong(playlist ? playlist->globalSong(song, shuffle, _random) : -1);
@@ -349,7 +349,7 @@ void MusicManager::playSong(Int global_song)
    }else
    {
       fadeOut(OLD);
-      fadeOut(CUR);
+      fadeOut(CUR); _song[CUR]=-1; // clear to -1 to prevent from auto-playing the next song
    }
 }
 /******************************************************************************/

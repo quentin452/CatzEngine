@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29009.5
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32328.378
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Project", "Project.vcxproj", "{D5E88CFD-53A1-4136-9D8C-2958A7F05334}"
 EndProject
@@ -11,18 +11,22 @@ Global
 		Debug DX11|2) ARM = Debug DX11|2) ARM
 		Debug DX11|3) Web = Debug DX11|3) Web
 		Debug DX11|4) Nintendo Switch = Debug DX11|4) Nintendo Switch
+		Debug DX11|5) Android = Debug DX11|5) Android
 		Debug Universal DX11|1) 64 bit = Debug Universal DX11|1) 64 bit
 		Debug Universal DX11|2) ARM = Debug Universal DX11|2) ARM
 		Debug Universal DX11|3) Web = Debug Universal DX11|3) Web
 		Debug Universal DX11|4) Nintendo Switch = Debug Universal DX11|4) Nintendo Switch
+		Debug Universal DX11|5) Android = Debug Universal DX11|5) Android
 		Release DX11|1) 64 bit = Release DX11|1) 64 bit
 		Release DX11|2) ARM = Release DX11|2) ARM
 		Release DX11|3) Web = Release DX11|3) Web
 		Release DX11|4) Nintendo Switch = Release DX11|4) Nintendo Switch
+		Release DX11|5) Android = Release DX11|5) Android
 		Release Universal DX11|1) 64 bit = Release Universal DX11|1) 64 bit
 		Release Universal DX11|2) ARM = Release Universal DX11|2) ARM
 		Release Universal DX11|3) Web = Release Universal DX11|3) Web
 		Release Universal DX11|4) Nintendo Switch = Release Universal DX11|4) Nintendo Switch
+		Release Universal DX11|5) Android = Release Universal DX11|5) Android
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Debug DX11|1) 64 bit.ActiveCfg = Debug DX11|x64
@@ -33,6 +37,8 @@ Global
 		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Debug DX11|3) Web.Build.0 = Debug DX11|Emscripten
 		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Debug DX11|4) Nintendo Switch.ActiveCfg = Debug DX11|NX64
 		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Debug DX11|4) Nintendo Switch.Build.0 = Debug DX11|NX64
+		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Debug DX11|5) Android.ActiveCfg = Debug DX11|Android-arm64-v8a
+		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Debug DX11|5) Android.Build.0 = Debug DX11|Android-arm64-v8a
 		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Debug Universal DX11|1) 64 bit.ActiveCfg = Debug Universal DX11|x64
 		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Debug Universal DX11|1) 64 bit.Build.0 = Debug Universal DX11|x64
 		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Debug Universal DX11|1) 64 bit.Deploy.0 = Debug Universal DX11|x64
@@ -42,6 +48,8 @@ Global
 		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Debug Universal DX11|3) Web.ActiveCfg = Debug Universal DX11|Emscripten
 		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Debug Universal DX11|4) Nintendo Switch.ActiveCfg = Debug Universal DX11|NX64
 		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Debug Universal DX11|4) Nintendo Switch.Build.0 = Debug Universal DX11|NX64
+		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Debug Universal DX11|5) Android.ActiveCfg = Debug Universal DX11|Android-arm64-v8a
+		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Debug Universal DX11|5) Android.Build.0 = Debug Universal DX11|Android-arm64-v8a
 		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Release DX11|1) 64 bit.ActiveCfg = Release DX11|x64
 		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Release DX11|1) 64 bit.Build.0 = Release DX11|x64
 		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Release DX11|2) ARM.ActiveCfg = Release DX11|ARM
@@ -50,6 +58,8 @@ Global
 		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Release DX11|3) Web.Build.0 = Release DX11|Emscripten
 		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Release DX11|4) Nintendo Switch.ActiveCfg = Release DX11|NX64
 		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Release DX11|4) Nintendo Switch.Build.0 = Release DX11|NX64
+		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Release DX11|5) Android.ActiveCfg = Release DX11|Android-arm64-v8a
+		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Release DX11|5) Android.Build.0 = Release DX11|Android-arm64-v8a
 		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Release Universal DX11|1) 64 bit.ActiveCfg = Release Universal DX11|x64
 		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Release Universal DX11|1) 64 bit.Build.0 = Release Universal DX11|x64
 		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Release Universal DX11|1) 64 bit.Deploy.0 = Release Universal DX11|x64
@@ -59,6 +69,8 @@ Global
 		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Release Universal DX11|3) Web.ActiveCfg = Release Universal DX11|Emscripten
 		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Release Universal DX11|4) Nintendo Switch.ActiveCfg = Release Universal DX11|NX64
 		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Release Universal DX11|4) Nintendo Switch.Build.0 = Release Universal DX11|NX64
+		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Release Universal DX11|5) Android.ActiveCfg = Release Universal DX11|Android-arm64-v8a
+		{D5E88CFD-53A1-4136-9D8C-2958A7F05334}.Release Universal DX11|5) Android.Build.0 = Release Universal DX11|Android-arm64-v8a
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

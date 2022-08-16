@@ -115,6 +115,9 @@ template<const_mem_addr typename TYPE, Int size> struct Memt // Temporary Memory
                           Memt& operator=(C  Meml  <TYPE          > &src); // copy elements using assignment operator
    template<Int src_size> Memt& operator=(C CMemPtr<TYPE, src_size> &src); // copy elements using assignment operator
 
+   Bool operator==(C Memt<TYPE, size> &x)C;
+   Bool operator!=(C Memt<TYPE, size> &x)C;
+
 #if EE_PRIVATE
    void  copyTo  (  TYPE *dest)C {CopyN(dest  , data(), elms());          } // copy raw memory of all elements to   'dest'
    Memt& copyFrom(C TYPE *src )  {CopyN(data(), src   , elms()); return T;} // copy raw memory of all elements from 'src '

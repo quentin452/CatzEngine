@@ -12,14 +12,14 @@
    #pragma message("!! Warning: Use this only for debugging !!")
 #endif
 
-#define ALLOC16 ((WINDOWS && X64) || APPLE || SWITCH || PLAYSTATION) // platforms that have 16-byte guaranteed alignment (Win-32, Android-64 are confirmed to have only 8, Linux most likely too), Apple - https://developer.apple.com/library/archive/documentation/Performance/Conceptual/ManagingMemory/Articles/MemoryAlloc.html
+#define ALLOC16 ((WINDOWS && X64) || APPLE || SWITCH || SONY) // platforms that have 16-byte guaranteed alignment (Win-32, Android-64 are confirmed to have only 8, Linux most likely too), Apple - https://developer.apple.com/library/archive/documentation/Performance/Conceptual/ManagingMemory/Articles/MemoryAlloc.html
 /******************************************************************************/
 namespace EE{
 /******************************************************************************/
 #if !SWITCH
 Bool MemStats::get()
 {
-#if WINDOWS_OLD
+#if WINDOWS_OLD || WINDOWS_NEW
    MEMORYSTATUSEX ms;
    ms.dwLength=SIZE(ms);
    if(GlobalMemoryStatusEx(&ms))
@@ -1095,6 +1095,6 @@ Bool EqualMem(CPtr a, CPtr b, IntPtr size)
 /******************************************************************************/
 }
 /******************************************************************************/
-Ptr  operator new   (size_t size)         {return Alloc(size);}
-void operator delete(Ptr    data)noexcept {       Free (data);}
+Ptr  operator new   (size_t size)         {return Alloc((UIntPtr)size);}
+void operator delete(Ptr    data)noexcept {       Free (         data);}
 /******************************************************************************/

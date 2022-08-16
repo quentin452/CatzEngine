@@ -179,7 +179,7 @@ PanelEditor PanelEdit;
       autoData(&edit);
 
       Rect r=super ::create("Panel Editor", Vec2(0.02f, -0.07f), 0.036f, 0.043f, PropElmNameWidth); button[2].func(HideProjAct, SCAST(GuiObj, T)).show(); flag|=WIN_RESIZABLE; super::changed(Changed, PreChanged);
-      T+=undo      .create(Rect_LU(0.02f, -0.01f     , 0.05f, 0.05f)).func(Undo, T).focusable(false).desc("Undo"); undo.image="Gui/Misc/undo.img";
+      T+=undo      .create(Rect_LU(0.02f, -0.01f       , 0.05f, 0.05f)).func(Undo, T).focusable(false).desc("Undo"); undo.image="Gui/Misc/undo.img";
       T+=redo      .create(Rect_LU(undo  .rect().ru(), 0.05f, 0.05f)).func(Redo, T).focusable(false).desc("Redo"); redo.image="Gui/Misc/redo.img";
       T+=locate    .create(Rect_LU(redo  .rect().ru()+Vec2(0.01f, 0), 0.14f, 0.05f), "Locate").func(Locate, T).focusable(false).desc("Locate this element in the Project");
       T+=show_lines.create(Rect_LU(locate.rect().ru()+Vec2(0.01f, 0), 0.22f, 0.05f), "Show Lines").focusable(false); show_lines.mode=BUTTON_TOGGLE;

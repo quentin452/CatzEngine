@@ -283,7 +283,7 @@ INLINE static void ActivateTexture(Int index)
 }
 void DisplayState::texBind(UInt mode, UInt tex) // this should be called instead of 'glBindTexture'
 {
-   if(GetThreadId()==App.threadID()) // textures are bound per-context, so remember them only on the main thread
+   if(App.mainThread()) // textures are bound per-context, so remember them only on the main thread
    {
       if(Tex[ActiveTexture]==tex)return;
          Tex[ActiveTexture]= tex;
@@ -1571,7 +1571,13 @@ UInt ShaderGL::compile(MemPtr<ShaderSubGL> vs_array, MemPtr<ShaderSubGL> ps_arra
    // load from cache
    if(PrecompiledShaderCache.is())
    {
-      File f; if(f.readTry(ShaderFiles.name(shader)+ShaderSeparator+T.name, PrecompiledShaderCache.pak))if(prog=CreateProgramFromBinary(f))return prog;
+      File f; if(f.readTry(ShaderFiles.name(shader)+ShaderSeparator+T.name, PrecompiledShaderCache.pak))
+      {
+         if(prog=CreateProgramFromBinary(f))return prog;
+      #if SWITCH // if there's Precompiled ShaderCache, but failed to create, then report this, it could happen due to updated Nintendo SDK
+         static Bool msg=true; if(msg){msg=false; LogN("Precompiled ShaderCache is outdated. Please regenerate it using \"Precompile Shaders\" tool, located inside \"Editor Source\\Tools\".");}
+      #endif
+      }
    }
    Str shader_cache_name; // this name will be used for loading from cache, and if failed to load, then save to cache
    if(ShaderCache.is())

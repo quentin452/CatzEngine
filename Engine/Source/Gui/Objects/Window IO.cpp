@@ -215,7 +215,7 @@ WindowIO& WindowIO::create(C Str &ext, C Str &path, C Str &sub_path, void (*load
    remove .size(Vec2(0.24f, 0.06f));
    explore.size(Vec2(0.26f, 0.06f));
    quick  .size(Vec2(0.06f, 0.06f));
-   rect(Rect_C(0, 0, Min(1.3f, D.w2()), Min(1.28f, D.h2())));
+   rect(Rect_C(D.rectUI().center(), Min(1.3f, D.rectUI().w()), Min(1.28f, D.rectUI().h())));
 
    T.ext (ext);
    T.path(path, sub_path  );

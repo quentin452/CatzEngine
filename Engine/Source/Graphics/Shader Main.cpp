@@ -115,7 +115,7 @@ void CreateRenderSampler()
       glSamplerParameteri(SamplerRender.sampler, GL_TEXTURE_MAX_ANISOTROPY, Max(D.texFilter   (), 1));
       glSamplerParameteri(SamplerRender.sampler, GL_TEXTURE_MIN_FILTER    ,     D.texMipFilter() ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR_MIPMAP_NEAREST);
       glSamplerParameteri(SamplerRender.sampler, GL_TEXTURE_MAG_FILTER    ,     D.texFilter   () ? GL_LINEAR : GL_NEAREST);
-      glSamplerParameteri(SamplerRender.sampler, GL_TEXTURE_BASE_LEVEL    ,     D.texMipMin   ());
+      glSamplerParameterf(SamplerRender.sampler, GL_TEXTURE_MIN_LOD       ,     D.texMipMin   ());
       glSamplerParameterf(SamplerRender.sampler, GL_TEXTURE_LOD_BIAS      ,     D.texMipBias  ());
    }
 #if GL_ES
@@ -124,7 +124,7 @@ void CreateRenderSampler()
       glSamplerParameteri(SamplerRender.sampler_no_filter, GL_TEXTURE_MAX_ANISOTROPY,        Max(D.texFilter   (), 1));
       glSamplerParameteri(SamplerRender.sampler_no_filter, GL_TEXTURE_MIN_FILTER    , GLNoFilter(D.texMipFilter() ? GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR_MIPMAP_NEAREST));
       glSamplerParameteri(SamplerRender.sampler_no_filter, GL_TEXTURE_MAG_FILTER    , GLNoFilter(D.texFilter   () ? GL_LINEAR : GL_NEAREST));
-      glSamplerParameteri(SamplerRender.sampler_no_filter, GL_TEXTURE_BASE_LEVEL    ,            D.texMipMin   ());
+      glSamplerParameterf(SamplerRender.sampler_no_filter, GL_TEXTURE_MIN_LOD       ,            D.texMipMin   ());
       glSamplerParameterf(SamplerRender.sampler_no_filter, GL_TEXTURE_LOD_BIAS      ,            D.texMipBias  ());
    }
 #endif
@@ -165,6 +165,8 @@ void MainShaderClass::del()
 }
 void MainShaderClass::createSamplers()
 {
+   if(!D.created())return; // don't bother with samplers for APP_ALLOW_NO_GPU/APP_ALLOW_NO_XDISPLAY
+
 #if DX11
    D3D11_SAMPLER_DESC sd; Zero(sd);
    sd.MipLODBias    =0;
@@ -644,11 +646,10 @@ void MainShaderClass::getTechniques()
    // BASIC 2D
    REPD(alpha , 2)
    REPD(dither, 2)Draw[alpha][dither]=get(S8+"Draw"+alpha+dither);
-   SetCol=get("SetCol" );
-   DrawC =get("DrawC"  );
-   DrawG =get("DrawG"  );
-   DrawCG=get("DrawCG" );
-   DrawA =get("DrawA"  );
+   SetCol=get("SetCol");
+   DrawC =get("DrawC" );
+   DrawG =get("DrawG" );
+   DrawCG=get("DrawCG");
    if(D.shaderModel()>=SM_4)
    {
                                  DrawMs1=get("DrawMs1");

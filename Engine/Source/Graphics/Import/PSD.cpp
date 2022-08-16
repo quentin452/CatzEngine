@@ -709,7 +709,7 @@ Bool PSD::ProccessBuffer(Byte *pData, Image &dest)
             {
                for(; nCounter<nTotalBytes; nCounter+=header_info.nChannels*bytesPerPixelPerChannel)
                {
-                  UInt u=Calculate(pData+nCounter, bytesPerPixelPerChannel); if(header_info.nBitsPerPixel==32)u=Sat(Pow((Flt&)u, 1.0f/1.75f))*0xFFFFFFFFu;
+                  UInt u=Calculate(pData+nCounter, bytesPerPixelPerChannel); if(header_info.nBitsPerPixel==32)u=RoundUClamp(Sat(Pow((Flt&)u, 1.0f/1.75f))*0xFFFFFFFFu);
                   dest.pixel(x, y, u);
                   x++; if(x>=nWidth){x=0; y++;}
                }

@@ -65,8 +65,8 @@ class SplitAnimation : ClosableWindow
                {
                   TimeStamp time; time.getUTC();
                                     files[0].params.clear().setNum(3+anim_name.is());
-                                    files[0].params[0].name="start_frame";
-                                    files[0].params[1].name=  "end_frame";
+                                    files[0].params[0].name="startFrame";
+                                    files[0].params[1].name=  "endFrame";
                                     files[0].params[2].name="loop";
                   if(anim_name.is())files[0].params[3].set( "name", anim_name);
                   FREPA(anims)
@@ -113,7 +113,7 @@ class SplitAnimation : ClosableWindow
    void create()
    {
       Gui+=super  .create(Rect_C (0, 0, 1.3, 1.15)); button[2].show().func(Hide, T);
-      T+=text     .create(Rect_C (clientWidth()/2   , -0.07, clientWidth()-0.04, 0), "Drag and drop a file with animations list on this window,\nor use the button to detect them from clipboard."); text.auto_line=AUTO_LINE_SPACE_SPLIT;
+      T+=text     .create(Rect_C (clientWidth()/2   , -0.07, clientWidth()-0.04, 0), "Drag and drop a file with animations list on this window,\nor use the button to detect them from clipboard."); text.auto_line=true;
       T+=clear    .create(Rect_LU(              0.04, -0.15, 0.2, 0.06), "Clear"                ).func(Clear    , T);
       T+=clipboard.create(Rect_U (clientWidth()/2   , -0.15, 0.5, 0.06), "Detect from Clipboard").func(Clipboard, T);
       T+=add_new  .create(Rect_RU(clientWidth()-0.04, -0.15, 0.2, 0.06), "New"                  ).func(New      , T);
@@ -136,7 +136,7 @@ class SplitAnimation : ClosableWindow
       }
    }
    static bool Create(int &data, C Str &key, ptr user) {data=0; return true;} // initial occurence is zero
-   static bool IsNumber(C Str &str) {return FlagTest(CharFlag(str[0]), CHARF_DIG);}
+   static bool IsNumber(C Str &str) {return FlagOn(CharFlag(str[0]), CHARF_DIG);}
    void add(C Str &text)
    {
       // auto-detect from following samples: (watch out as names may include numbers)

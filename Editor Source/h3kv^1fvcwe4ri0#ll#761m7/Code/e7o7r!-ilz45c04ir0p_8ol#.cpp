@@ -151,7 +151,7 @@ class SoundEditor : PropWin
       if(channels)channels.display(S+"Channels: " +((sound.channels()==1) ? S+"Mono" : (sound.channels()==2) ? S+"Stereo" : S+sound.channels()));
       if(freq    )freq    .display(S+"Frequency: "+sound.frequency());
       if(kbps    )kbps    .display(S+"Kbps: "     +DivRound(sound.bitRate(), 1000));
-      if(size    )size    .display(S+"Size: "     +FileSize(FSize(sound.name())));
+      if(size    )size    .display(S+"Size: "     +SizeBytes(FSize(sound.name())));
       if(codec   )codec   .display(S+"Codec: "    +sound.codecName());
    }
 

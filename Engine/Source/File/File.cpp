@@ -88,6 +88,49 @@ namespace EE{
       BUF_SIZE:8388608,  1:38.799, 4:14.405, 4k:5.961
       BUF_SIZE:16777216,  1:38.953, 4:14.765, 4k:5.981
 
+   Nintendo Switch:
+      File f;
+      byte temp[16*1024*1024];
+      void Read(int size)
+      {
+         f.pos(0);
+         dbl t=Time.curTime();
+         for(; !f.end(); )
+         {
+            f.get(temp, Min(size, f.left()));
+         }
+         t=Time.curTime()-t;
+         LogN(S+size+" - "+flt(t));
+      }
+      f.mustRead(..);
+      for(int size=16384; size<=SIZE(temp); size*=2)Read(size);
+   
+   USB and read data from PC
+      16384 - 11.430
+      32768 - 13.293
+      65536 - 11.400
+      131072 - 10.154
+      262144 - 9.079
+      524288 - 8.815
+      1048576 - 8.636
+      2097152 - 8.539
+      4194304 - 8.493
+      8388608 - 8.445
+      16777216 - 8.422
+
+   Device
+      16384 - 4.955
+      32768 - 5.007
+      65536 - 4.686
+      131072 - 4.661
+      262144 - 4.510
+      524288 - 3.988
+      1048576 - 3.347
+      2097152 - 2.876
+      4194304 - 2.703
+      8388608 - 2.549
+      16777216 - 2.515
+
 /******************************************************************************/
 #define      BUF_SIZE (1<<16) //  64 KB
 #define TEMP_BUF_SIZE (1<<17) // 128 KB
@@ -108,12 +151,14 @@ static INLINE Int Read (Int handle,  Ptr data, Int size) {return PLATFORM(_read 
 // !! if adding any members here then adjust 'copyToAndDiscard', 'writeMemFixed' !!
 void File::zeroNoBuf()
 {
-  _type=FILE_NONE; _writable=false; _ok=true; _path=FILE_PATH(0);
+  _type=FILE_NONE; _writable=_allocated=false; _ok=true; _path=FILE_PATH(0);
   _buf_pos=_buf_len=_cipher_offset=_handle=0;
-  _offset=_pos=_size=0;
+  _offset=_pos=_size=_full_size=0;
   _pak=null;
   _cipher=null;
   _mem=null;
+  _stream=null;
+  _stream_buf=null;
 #if ANDROID
   _aasset=null;
 #endif
@@ -155,9 +200,11 @@ void File::close()
          if(_writable)FlushIO(); // check for '_writable' instead of 'FILE_STD_WRITE' because File could have been created as writable but later switched to FILE_STD_READ
       }break;
 
-      case FILE_MEM: if(_writable)Free(_mem); break; // write memory was dynamically allocated
+      case FILE_MEM: if(_allocated)Free(_mem); break;
 
       case FILE_MEMB: if(FILE_MEMB_UNION)DTOR(_memb);else _memb.clear(); break;
+
+      case FILE_STREAM: DTOR(*_stream); Free(_stream); break;
    }
 #if ANDROID
    if(_aasset)AAsset_close((AAsset*)_aasset);
@@ -172,7 +219,7 @@ File& File::reset()
      _memb.reset();
      _ok=true;
      _cipher_offset=0;
-     _offset=_pos=_size=0;
+     _offset=_pos=_size=_full_size=0;
    }
    return T;
 }
@@ -191,14 +238,14 @@ File& File::mustRead   (C UID     &id                  , Cipher  *cipher) {if(! 
 
 Bool File::copyToAndDiscard(Mems<Byte> &dest)
 {
-   if(T._type==FILE_MEM && T._writable && !_cipher && posAbs()==0) // check if we can just swap memories
+   if(T._type==FILE_MEM && T._allocated && !_cipher && posAbs()==0) // check if we can just swap memories
    {  // swap memories, perhaps 'File' may reuse 'Mems' data for future operations
       Ptr data=dest.data(); Int elms=dest.elms(); dest.setTemp((Byte*)T._mem, T._size);
       T._ok           =true;
       T._cipher_offset=0;
       T._offset       =0;
       T._pos          =0;
-      T._size         =elms;
+      T._size         =T._full_size=elms;
       T._cipher       =null;
       T._mem          =data;
       return true;
@@ -208,9 +255,23 @@ Bool File::copyToAndDiscard(Mems<Byte> &dest)
       return getFast(dest.data(), dest.elms());
    }
 }
+File& File::writeMemDest(Ptr data, Int size, Cipher *cipher)
+{
+   close();
+   if(size>=0)
+   {
+      T._type     =FILE_MEM;
+      T._writable =true;
+    //T._allocated=false; already cleared in 'close'
+      T._mem      =data;
+      T._size     =_full_size=size;
+      T._cipher   =cipher;
+   }
+   return T;
+}
 File& File::writeMemFixed(Int size, Cipher *cipher)
 {
-   if(T._size==size && T._type==FILE_MEM && T._writable) // check if we can reuse existing memory
+   if(T._size==size && T._type==FILE_MEM && T._writable && T._allocated) // check if we can reuse existing memory
    {
       T._ok           =true;
       T._cipher_offset=0;
@@ -222,10 +283,11 @@ File& File::writeMemFixed(Int size, Cipher *cipher)
       close();
       if(!size || (_mem=Alloc(size)))
       {
-         T._type    =FILE_MEM;
-         T._writable=true;
-         T._size    =size;
-         T._cipher  =cipher;
+         T._type     =FILE_MEM;
+         T._writable =true;
+         T._allocated=true;
+         T._size     =_full_size=size;
+         T._cipher   =cipher;
       }
    }
    return T;
@@ -259,26 +321,65 @@ File& File::readMem(CPtr data, Int size, Cipher *cipher)
    close();
    if(size>=0)
    {
-      T._type    =FILE_MEM;
-      T._writable=false;
-      T._mem     =(Ptr)data;
-      T._size    =size;
-      T._cipher  =cipher;
+      T._type     =FILE_MEM;
+    //T._writable =false; already cleared in 'close'
+    //T._allocated=false; already cleared in 'close'
+      T._mem      =(Ptr)data;
+      T._size     =_full_size=size;
+      T._cipher   =cipher;
    }
    return T;
 }
 /******************************************************************************/
+Bool File::decompress(COMPRESS_TYPE compression, ULong decompressed_size, Bool stream)
+{
+   if(!compression || end())return true; // no compression or nothing left to decompress
+   if(stream)
+   {
+      FileStream *stream=null;
+      switch(compression)
+      {
+      #if SUPPORT_LZ4
+         case COMPRESS_LZ4 : if(decompressed_size<=LZ4_BUF_SIZE      )goto mem; stream=Alloc<FileStreamLZ4>(); CTOR(*(FileStreamLZ4*)stream); break; // #LZ4Mem
+      #endif
+      #if SUPPORT_ZSTD
+         case COMPRESS_ZSTD: if(decompressed_size<=ZSTD_BLOCKSIZE_MAX)goto mem; UInt buf_size=ZSTDDecompressBufSize(decompressed_size); FileStreamZSTD *zstd=(FileStreamZSTD*)Alloc(SIZE(FileStreamZSTD)+buf_size); CTOR(*zstd); zstd->buf_size=buf_size; stream=zstd; break; // #ZSTDMem
+      #endif
+      }
+      if(stream)
+      {
+         if(CPtr buf=stream->init())
+         {
+            Swap(T, stream->src);
+           _type=FILE_STREAM;
+           _size=_full_size=decompressed_size;
+           _stream    =stream;
+           _stream_buf=buf;
+            return true;
+         }
+         DTOR(*stream); Free(stream);
+         goto error;
+      }
+   }
+mem:
+   {
+      File temp; if(DecompressRaw(T, temp, compression, left(), decompressed_size, true) && temp.pos(0)){Swap(T, temp); return true;}
+   }
+error:
+   close(); return false;
+}
+/******************************************************************************/
 #if WINDOWS
-Bool File::  editTry     (C Str &name, Cipher *cipher) {close(); if(name.is() && !_wsopen_s(&_handle, name, _O_BINARY|_O_RDWR|_O_CREAT         , _SH_DENYWR, _S_IREAD|_S_IWRITE)){SetLastError(0); _type=FILE_STD_WRITE; if(setBuf(BUF_SIZE)){_writable=true; _path=FILE_CUR; _size=Max(0, _filelengthi64(_handle));                                          _cipher=cipher; return true;} _type=FILE_NONE; _close(_handle); _handle=0;} return false;} // clear error 183 file already exists
-Bool File::appendTry     (C Str &name, Cipher *cipher) {close(); if(name.is() && !_wsopen_s(&_handle, name, _O_BINARY|_O_RDWR|_O_CREAT         , _SH_DENYWR, _S_IREAD|_S_IWRITE)){SetLastError(0); _type=FILE_STD_WRITE; if(setBuf(BUF_SIZE)){_writable=true; _path=FILE_CUR; _size=Max(0, _filelengthi64(_handle)); _pos=Max(0, Seek(_handle, 0, SEEK_END)); _cipher=cipher; return true;} _type=FILE_NONE; _close(_handle); _handle=0;} return false;} // clear error 183 file already exists
-Bool File:: writeTry     (C Str &name, Cipher *cipher) {close(); if(name.is() && !_wsopen_s(&_handle, name, _O_BINARY|_O_RDWR|_O_CREAT|_O_TRUNC, _SH_DENYWR, _S_IREAD|_S_IWRITE)){SetLastError(0); _type=FILE_STD_WRITE; if(setBuf(BUF_SIZE)){_writable=true; _path=FILE_CUR;                                                                                 _cipher=cipher; return true;} _type=FILE_NONE; _close(_handle); _handle=0;} return false;} // clear error 183 file already exists
+Bool File::  editTry     (C Str &name, Cipher *cipher) {close(); if(name.is() && !_wsopen_s(&_handle, name, _O_BINARY|_O_RDWR|_O_CREAT         , _SH_DENYWR, _S_IREAD|_S_IWRITE)){SetLastError(0); _type=FILE_STD_WRITE; if(setBuf(BUF_SIZE)){_writable=true; _path=FILE_CUR; _size=_full_size=Max(0, _filelengthi64(_handle));                                          _cipher=cipher; return true;} _type=FILE_NONE; _close(_handle); _handle=0;} return false;} // clear error 183 file already exists
+Bool File::appendTry     (C Str &name, Cipher *cipher) {close(); if(name.is() && !_wsopen_s(&_handle, name, _O_BINARY|_O_RDWR|_O_CREAT         , _SH_DENYWR, _S_IREAD|_S_IWRITE)){SetLastError(0); _type=FILE_STD_WRITE; if(setBuf(BUF_SIZE)){_writable=true; _path=FILE_CUR; _size=_full_size=Max(0, _filelengthi64(_handle)); _pos=Max(0, Seek(_handle, 0, SEEK_END)); _cipher=cipher; return true;} _type=FILE_NONE; _close(_handle); _handle=0;} return false;} // clear error 183 file already exists
+Bool File:: writeTry     (C Str &name, Cipher *cipher) {close(); if(name.is() && !_wsopen_s(&_handle, name, _O_BINARY|_O_RDWR|_O_CREAT|_O_TRUNC, _SH_DENYWR, _S_IREAD|_S_IWRITE)){SetLastError(0); _type=FILE_STD_WRITE; if(setBuf(BUF_SIZE)){_writable=true; _path=FILE_CUR;                                                                                            _cipher=cipher; return true;} _type=FILE_NONE; _close(_handle); _handle=0;} return false;} // clear error 183 file already exists
 Bool File::  readStdTryEx(C Str &name, Cipher *cipher, UInt max_buf_size)
 {
    close(); if(name.is())
    {
       if(!_wsopen_s(&_handle, name, _O_BINARY|_O_RDONLY, _SH_DENYNO, _S_IREAD|_S_IWRITE))
       {
-        _type=FILE_STD_READ; _size=Max(0, _filelengthi64(_handle)); if(setBuf(Min(max_buf_size, Min(BUF_SIZE, _size)))){_writable=false; _path=FILE_CUR; _cipher=cipher; return true;}
+        _type=FILE_STD_READ; _size=Max(0, _filelengthi64(_handle)); if(setBuf(Min(max_buf_size, Min(BUF_SIZE, _size)))){/*_writable=false; already cleared in 'close'*/ _path=FILE_CUR; _cipher=cipher; _full_size=_size; return true;}
         _type=FILE_NONE    ; _close(_handle); _handle=0; _size=0; return false;
       }
       if(DataPath().is() && !FullPath(name))
@@ -286,7 +387,7 @@ Bool File::  readStdTryEx(C Str &name, Cipher *cipher, UInt max_buf_size)
          Char path_name[MAX_LONG_PATH]; MergePath(path_name, DataPath(), name);
          if(!_wsopen_s(&_handle, WChar(path_name), _O_BINARY|_O_RDONLY, _SH_DENYNO, _S_IREAD|_S_IWRITE))
          {
-           _type=FILE_STD_READ; _size=Max(0, _filelengthi64(_handle)); if(setBuf(Min(max_buf_size, Min(BUF_SIZE, _size)))){_writable=false; _path=FILE_DATA; _cipher=cipher; return true;}
+           _type=FILE_STD_READ; _size=Max(0, _filelengthi64(_handle)); if(setBuf(Min(max_buf_size, Min(BUF_SIZE, _size)))){/*_writable=false; already cleared in 'close'*/ _path=FILE_DATA; _cipher=cipher; _full_size=_size; return true;}
            _type=FILE_NONE    ; _close(_handle); _handle=0; _size=0; return false;
          }
       }
@@ -302,9 +403,9 @@ static void DetectSymLink(File &f, C Str8 &unix_name)
       ssize_t read=readlink(unix_name, (char*)f._buf, Min(f._buf_size, f.size())); if(read>0)f._buf_len=Int(read);
    }
 }
-Bool File::  editTry     (C Str &name, Cipher *cipher) {close(); if(name.is()){_handle=open(UnixPathUTF8(name), O_RDWR|O_CREAT|        O_EXLOCK|O_NONBLOCK|O_SYMLINK, S_IRWXU|S_IRWXG|S_IRWXO); if(_handle>=0){_type=FILE_STD_WRITE; if(setBuf(BUF_SIZE)){_writable=true; _path=FILE_CUR; _pos=_size=Max(0, Seek(_handle, 0, SEEK_END)); Long pos=Seek(_handle, 0, SEEK_SET); if(pos>=0)_pos=pos; _cipher=cipher; return true;} _type=FILE_NONE; ::close(_handle); _handle=0;}} return false;}
-Bool File::appendTry     (C Str &name, Cipher *cipher) {close(); if(name.is()){_handle=open(UnixPathUTF8(name), O_RDWR|O_CREAT|        O_EXLOCK|O_NONBLOCK|O_SYMLINK, S_IRWXU|S_IRWXG|S_IRWXO); if(_handle>=0){_type=FILE_STD_WRITE; if(setBuf(BUF_SIZE)){_writable=true; _path=FILE_CUR; _pos=_size=Max(0, Seek(_handle, 0, SEEK_END));                                                          _cipher=cipher; return true;} _type=FILE_NONE; ::close(_handle); _handle=0;}} return false;}
-Bool File:: writeTry     (C Str &name, Cipher *cipher) {close(); if(name.is()){_handle=open(UnixPathUTF8(name), O_RDWR|O_CREAT|O_TRUNC|O_EXLOCK|O_NONBLOCK|O_SYMLINK, S_IRWXU|S_IRWXG|S_IRWXO); if(_handle>=0){_type=FILE_STD_WRITE; if(setBuf(BUF_SIZE)){_writable=true; _path=FILE_CUR;                                                                                                         _cipher=cipher; return true;} _type=FILE_NONE; ::close(_handle); _handle=0;}} return false;}
+Bool File::  editTry     (C Str &name, Cipher *cipher) {close(); if(name.is()){_handle=open(UnixPathUTF8(name), O_RDWR|O_CREAT|        O_EXLOCK|O_NONBLOCK|O_SYMLINK, S_IRWXU|S_IRWXG|S_IRWXO); if(_handle>=0){_type=FILE_STD_WRITE; if(setBuf(BUF_SIZE)){_writable=true; _path=FILE_CUR; _pos=_size=_full_size=Max(0, Seek(_handle, 0, SEEK_END)); Long pos=Seek(_handle, 0, SEEK_SET); if(pos>=0)_pos=pos; _cipher=cipher; return true;} _type=FILE_NONE; ::close(_handle); _handle=0;}} return false;}
+Bool File::appendTry     (C Str &name, Cipher *cipher) {close(); if(name.is()){_handle=open(UnixPathUTF8(name), O_RDWR|O_CREAT|        O_EXLOCK|O_NONBLOCK|O_SYMLINK, S_IRWXU|S_IRWXG|S_IRWXO); if(_handle>=0){_type=FILE_STD_WRITE; if(setBuf(BUF_SIZE)){_writable=true; _path=FILE_CUR; _pos=_size=_full_size=Max(0, Seek(_handle, 0, SEEK_END));                                                          _cipher=cipher; return true;} _type=FILE_NONE; ::close(_handle); _handle=0;}} return false;}
+Bool File:: writeTry     (C Str &name, Cipher *cipher) {close(); if(name.is()){_handle=open(UnixPathUTF8(name), O_RDWR|O_CREAT|O_TRUNC|O_EXLOCK|O_NONBLOCK|O_SYMLINK, S_IRWXU|S_IRWXG|S_IRWXO); if(_handle>=0){_type=FILE_STD_WRITE; if(setBuf(BUF_SIZE)){_writable=true; _path=FILE_CUR;                                                                                                                    _cipher=cipher; return true;} _type=FILE_NONE; ::close(_handle); _handle=0;}} return false;}
 Bool File::  readStdTryEx(C Str &name, Cipher *cipher, UInt max_buf_size)
 {
    close(); if(name.is())
@@ -312,7 +413,7 @@ Bool File::  readStdTryEx(C Str &name, Cipher *cipher, UInt max_buf_size)
       Str8 unix_name=UnixPathUTF8(name);
      _handle=open(unix_name, O_RDONLY|O_NONBLOCK|O_SYMLINK); if(_handle>=0)
       {
-        _type=FILE_STD_READ; _size=Max(0, Seek(_handle, 0, SEEK_END)); if(setBuf(Min(max_buf_size, Min(BUF_SIZE, _size)))){_writable=false; _path=FILE_CUR; Seek(_handle, 0, SEEK_SET); _cipher=cipher; DetectSymLink(T, unix_name); return true;}
+        _type=FILE_STD_READ; _size=Max(0, Seek(_handle, 0, SEEK_END)); if(setBuf(Min(max_buf_size, Min(BUF_SIZE, _size)))){/*_writable=false; already cleared in 'close'*/ _path=FILE_CUR; Seek(_handle, 0, SEEK_SET); _cipher=cipher; _full_size=_size; DetectSymLink(T, unix_name); return true;}
         _type=FILE_NONE    ; ::close(_handle); _handle=0; _size=0; return false;
       }
       if(DataPath().is() && !FullPath(name))
@@ -321,7 +422,7 @@ Bool File::  readStdTryEx(C Str &name, Cipher *cipher, UInt max_buf_size)
          unix_name=UnixPathUTF8(path_name);
         _handle=open(unix_name, O_RDONLY|O_NONBLOCK|O_SYMLINK); if(_handle>=0)
          {
-           _type=FILE_STD_READ; _size=Max(0, Seek(_handle, 0, SEEK_END)); if(setBuf(Min(max_buf_size, Min(BUF_SIZE, _size)))){_writable=false; _path=FILE_DATA; Seek(_handle, 0, SEEK_SET); _cipher=cipher; DetectSymLink(T, unix_name); return true;}
+           _type=FILE_STD_READ; _size=Max(0, Seek(_handle, 0, SEEK_END)); if(setBuf(Min(max_buf_size, Min(BUF_SIZE, _size)))){/*_writable=false; already cleared in 'close'*/ _path=FILE_DATA; Seek(_handle, 0, SEEK_SET); _cipher=cipher; _full_size=_size; DetectSymLink(T, unix_name); return true;}
            _type=FILE_NONE    ; ::close(_handle); _handle=0; _size=0; return false;
          }
       }
@@ -329,9 +430,9 @@ Bool File::  readStdTryEx(C Str &name, Cipher *cipher, UInt max_buf_size)
    return false;
 }
 #elif LINUX || SWITCH || WEB
-Bool File::  editTry     (C Str &name, Cipher *cipher) {close(); if(name.is()){_handle=open64(UnixPathUTF8(name), O_RDWR|O_CREAT|        O_NONBLOCK, S_IRWXU|S_IRWXG|S_IRWXO); if(_handle>=0){_type=FILE_STD_WRITE; if(setBuf(BUF_SIZE)){_writable=true; _path=FILE_CUR; _pos=_size=Max(0, Seek(_handle, 0, SEEK_END)); Long pos=Seek(_handle, 0, SEEK_SET); if(pos>=0)_pos=pos; _cipher=cipher; return true;} _type=FILE_NONE; ::close(_handle); _handle=0;}} return false;}
-Bool File::appendTry     (C Str &name, Cipher *cipher) {close(); if(name.is()){_handle=open64(UnixPathUTF8(name), O_RDWR|O_CREAT|        O_NONBLOCK, S_IRWXU|S_IRWXG|S_IRWXO); if(_handle>=0){_type=FILE_STD_WRITE; if(setBuf(BUF_SIZE)){_writable=true; _path=FILE_CUR; _pos=_size=Max(0, Seek(_handle, 0, SEEK_END));                                                          _cipher=cipher; return true;} _type=FILE_NONE; ::close(_handle); _handle=0;}} return false;}
-Bool File:: writeTry     (C Str &name, Cipher *cipher) {close(); if(name.is()){_handle=open64(UnixPathUTF8(name), O_RDWR|O_CREAT|O_TRUNC|O_NONBLOCK, S_IRWXU|S_IRWXG|S_IRWXO); if(_handle>=0){_type=FILE_STD_WRITE; if(setBuf(BUF_SIZE)){_writable=true; _path=FILE_CUR;                                                                                                         _cipher=cipher; return true;} _type=FILE_NONE; ::close(_handle); _handle=0;}} return false;}
+Bool File::  editTry     (C Str &name, Cipher *cipher) {close(); if(name.is()){_handle=open64(UnixPathUTF8(name), O_RDWR|O_CREAT|        O_NONBLOCK, S_IRWXU|S_IRWXG|S_IRWXO); if(_handle>=0){_type=FILE_STD_WRITE; if(setBuf(BUF_SIZE)){_writable=true; _path=FILE_CUR; _pos=_size=_full_size=Max(0, Seek(_handle, 0, SEEK_END)); Long pos=Seek(_handle, 0, SEEK_SET); if(pos>=0)_pos=pos; _cipher=cipher; return true;} _type=FILE_NONE; ::close(_handle); _handle=0;}} return false;}
+Bool File::appendTry     (C Str &name, Cipher *cipher) {close(); if(name.is()){_handle=open64(UnixPathUTF8(name), O_RDWR|O_CREAT|        O_NONBLOCK, S_IRWXU|S_IRWXG|S_IRWXO); if(_handle>=0){_type=FILE_STD_WRITE; if(setBuf(BUF_SIZE)){_writable=true; _path=FILE_CUR; _pos=_size=_full_size=Max(0, Seek(_handle, 0, SEEK_END));                                                          _cipher=cipher; return true;} _type=FILE_NONE; ::close(_handle); _handle=0;}} return false;}
+Bool File:: writeTry     (C Str &name, Cipher *cipher) {close(); if(name.is()){_handle=open64(UnixPathUTF8(name), O_RDWR|O_CREAT|O_TRUNC|O_NONBLOCK, S_IRWXU|S_IRWXG|S_IRWXO); if(_handle>=0){_type=FILE_STD_WRITE; if(setBuf(BUF_SIZE)){_writable=true; _path=FILE_CUR;                                                                                                                    _cipher=cipher; return true;} _type=FILE_NONE; ::close(_handle); _handle=0;}} return false;}
 Bool File::  readStdTryEx(C Str &name, Cipher *cipher, UInt max_buf_size)
 {
    close(); if(name.is())
@@ -339,7 +440,7 @@ Bool File::  readStdTryEx(C Str &name, Cipher *cipher, UInt max_buf_size)
       Str8 unix_name=UnixPathUTF8(name);
      _handle=open64(unix_name, O_RDONLY|O_NONBLOCK); if(_handle>=0)
       {
-        _type=FILE_STD_READ; _size=Max(0, Seek(_handle, 0, SEEK_END)); if(setBuf(Min(max_buf_size, Min(BUF_SIZE, _size)))){_writable=false; _path=FILE_CUR; Seek(_handle, 0, SEEK_SET); _cipher=cipher; return true;}
+        _type=FILE_STD_READ; _size=Max(0, Seek(_handle, 0, SEEK_END)); if(setBuf(Min(max_buf_size, Min(BUF_SIZE, _size)))){/*_writable=false; already cleared in 'close'*/ _path=FILE_CUR; Seek(_handle, 0, SEEK_SET); _cipher=cipher; _full_size=_size; return true;}
         _type=FILE_NONE    ; ::close(_handle); _handle=0; _size=0; return false;
       }
       if(DataPath().is() && !FullPath(name))
@@ -348,7 +449,7 @@ Bool File::  readStdTryEx(C Str &name, Cipher *cipher, UInt max_buf_size)
          unix_name=UnixPathUTF8(path_name);
         _handle=open64(unix_name, O_RDONLY|O_NONBLOCK); if(_handle>=0)
          {
-           _type=FILE_STD_READ; _size=Max(0, Seek(_handle, 0, SEEK_END)); if(setBuf(Min(max_buf_size, Min(BUF_SIZE, _size)))){_writable=false; _path=FILE_DATA; Seek(_handle, 0, SEEK_SET); _cipher=cipher; return true;}
+           _type=FILE_STD_READ; _size=Max(0, Seek(_handle, 0, SEEK_END)); if(setBuf(Min(max_buf_size, Min(BUF_SIZE, _size)))){/*_writable=false; already cleared in 'close'*/ _path=FILE_DATA; Seek(_handle, 0, SEEK_SET); _cipher=cipher; _full_size=_size; return true;}
            _type=FILE_NONE    ; ::close(_handle); _handle=0; _size=0; return false;
          }
       }
@@ -356,9 +457,9 @@ Bool File::  readStdTryEx(C Str &name, Cipher *cipher, UInt max_buf_size)
    return false;
 }
 #elif ANDROID // Android has 'open64' only on API 21 and newer, however it's the same as 'open' with O_LARGEFILE
-Bool File::  editTry     (C Str &name, Cipher *cipher) {close(); if(name.is()){_handle=open(UnixPathUTF8(name), O_RDWR|O_CREAT|        O_NONBLOCK|O_LARGEFILE, S_IRWXU|S_IRWXG|S_IRWXO); if(_handle>=0){_type=FILE_STD_WRITE; if(setBuf(BUF_SIZE)){_writable=true; _path=FILE_CUR; _pos=_size=Max(0, Seek(_handle, 0, SEEK_END)); Long pos=Seek(_handle, 0, SEEK_SET); if(pos>=0)_pos=pos; _cipher=cipher; return true;} _type=FILE_NONE; ::close(_handle); _handle=0;}} return false;}
-Bool File::appendTry     (C Str &name, Cipher *cipher) {close(); if(name.is()){_handle=open(UnixPathUTF8(name), O_RDWR|O_CREAT|        O_NONBLOCK|O_LARGEFILE, S_IRWXU|S_IRWXG|S_IRWXO); if(_handle>=0){_type=FILE_STD_WRITE; if(setBuf(BUF_SIZE)){_writable=true; _path=FILE_CUR; _pos=_size=Max(0, Seek(_handle, 0, SEEK_END));                                                          _cipher=cipher; return true;} _type=FILE_NONE; ::close(_handle); _handle=0;}} return false;}
-Bool File:: writeTry     (C Str &name, Cipher *cipher) {close(); if(name.is()){_handle=open(UnixPathUTF8(name), O_RDWR|O_CREAT|O_TRUNC|O_NONBLOCK|O_LARGEFILE, S_IRWXU|S_IRWXG|S_IRWXO); if(_handle>=0){_type=FILE_STD_WRITE; if(setBuf(BUF_SIZE)){_writable=true; _path=FILE_CUR;                                                                                                         _cipher=cipher; return true;} _type=FILE_NONE; ::close(_handle); _handle=0;}} return false;}
+Bool File::  editTry     (C Str &name, Cipher *cipher) {close(); if(name.is()){_handle=open(UnixPathUTF8(name), O_RDWR|O_CREAT|        O_NONBLOCK|O_LARGEFILE, S_IRWXU|S_IRWXG|S_IRWXO); if(_handle>=0){_type=FILE_STD_WRITE; if(setBuf(BUF_SIZE)){_writable=true; _path=FILE_CUR; _pos=_size=_full_size=Max(0, Seek(_handle, 0, SEEK_END)); Long pos=Seek(_handle, 0, SEEK_SET); if(pos>=0)_pos=pos; _cipher=cipher; return true;} _type=FILE_NONE; ::close(_handle); _handle=0;}} return false;}
+Bool File::appendTry     (C Str &name, Cipher *cipher) {close(); if(name.is()){_handle=open(UnixPathUTF8(name), O_RDWR|O_CREAT|        O_NONBLOCK|O_LARGEFILE, S_IRWXU|S_IRWXG|S_IRWXO); if(_handle>=0){_type=FILE_STD_WRITE; if(setBuf(BUF_SIZE)){_writable=true; _path=FILE_CUR; _pos=_size=_full_size=Max(0, Seek(_handle, 0, SEEK_END));                                                          _cipher=cipher; return true;} _type=FILE_NONE; ::close(_handle); _handle=0;}} return false;}
+Bool File:: writeTry     (C Str &name, Cipher *cipher) {close(); if(name.is()){_handle=open(UnixPathUTF8(name), O_RDWR|O_CREAT|O_TRUNC|O_NONBLOCK|O_LARGEFILE, S_IRWXU|S_IRWXG|S_IRWXO); if(_handle>=0){_type=FILE_STD_WRITE; if(setBuf(BUF_SIZE)){_writable=true; _path=FILE_CUR;                                                                                                                    _cipher=cipher; return true;} _type=FILE_NONE; ::close(_handle); _handle=0;}} return false;}
 Bool File::  readStdTryEx(C Str &name, Cipher *cipher, UInt max_buf_size, Bool *processed)
 {
    if(processed)*processed=false;
@@ -373,10 +474,11 @@ Bool File::  readStdTryEx(C Str &name, Cipher *cipher, UInt max_buf_size, Bool *
          if( size<0)ok=false;else
          if(!size  ) // no need for opening the file using Android API when it has no size
          {
-            T._type    =FILE_MEM;
-            T._writable=false;
-            T._size    =0;
-            T._cipher  =cipher;
+            T._type     =FILE_MEM;
+          //T._writable =false; already cleared in 'close'
+          //T._allocated=false; already cleared in 'close'
+          //T._size     =_full_size=0; already cleared in 'close'
+            T._cipher   =cipher;
             ok=true;
          }else // size>0
          {
@@ -386,11 +488,12 @@ Bool File::  readStdTryEx(C Str &name, Cipher *cipher, UInt max_buf_size, Bool *
               _size=length;
                if(setBuf(Min(max_buf_size, Min(BUF_SIZE, _size))))
                {
-                  T._handle  =fd;
-                  T._type    =FILE_STD_READ;
-                  T._writable=false;
-                  T._path    =FILE_ANDROID_ASSET;
-                  T._cipher  =cipher;
+                  T._handle   =fd;
+                  T._type     =FILE_STD_READ;
+                //T._writable =false; already cleared in 'close'
+                  T._path     =FILE_ANDROID_ASSET;
+                  T._cipher   =cipher;
+                  T._full_size=_size;
                   Seek(_handle, T._offset=offset, SEEK_SET);
                   ok=true;
                }else
@@ -402,12 +505,13 @@ Bool File::  readStdTryEx(C Str &name, Cipher *cipher, UInt max_buf_size, Bool *
             if(_mem=(Ptr)AAsset_getBuffer(asset))
             {
                if(processed)*processed=true; // file had to be decompressed
-               T._type    =FILE_MEM;
-               T._writable=false;
-               T._path    =FILE_ANDROID_ASSET;
-               T._size    =size;
-               T._cipher  =cipher;
-               T._aasset  =asset;
+               T._type     =FILE_MEM;
+             //T._writable =false; already cleared in 'close'
+             //T._allocated=false; already cleared in 'close'
+               T._path     =FILE_ANDROID_ASSET;
+               T._size     =_full_size=size;
+               T._cipher   =cipher;
+               T._aasset   =asset;
                return true; // return here and don't close 'asset' because that would make the '_mem' buffer invalid
             }
          }
@@ -418,7 +522,7 @@ Bool File::  readStdTryEx(C Str &name, Cipher *cipher, UInt max_buf_size, Bool *
       // original path
      _handle=open(UnixPathUTF8(name), O_RDONLY|O_NONBLOCK|O_LARGEFILE); if(_handle>=0)
       {
-        _type=FILE_STD_READ; _size=Max(0, Seek(_handle, 0, SEEK_END)); if(setBuf(Min(max_buf_size, Min(BUF_SIZE, _size)))){_writable=false; _path=FILE_CUR; Seek(_handle, 0, SEEK_SET); _cipher=cipher; return true;}
+        _type=FILE_STD_READ; _size=Max(0, Seek(_handle, 0, SEEK_END)); if(setBuf(Min(max_buf_size, Min(BUF_SIZE, _size)))){/*_writable=false; already cleared in 'close'*/ _path=FILE_CUR; Seek(_handle, 0, SEEK_SET); _cipher=cipher; _full_size=_size; return true;}
         _type=FILE_NONE    ; ::close(_handle); _handle=0; _size=0; return false;
       }
 
@@ -428,7 +532,7 @@ Bool File::  readStdTryEx(C Str &name, Cipher *cipher, UInt max_buf_size, Bool *
          Char path_name[MAX_LONG_PATH]; MergePath(path_name, DataPath(), name);
         _handle=open(UnixPathUTF8(path_name), O_RDONLY|O_NONBLOCK|O_LARGEFILE); if(_handle>=0)
          {
-           _type=FILE_STD_READ; _size=Max(0, Seek(_handle, 0, SEEK_END)); if(setBuf(Min(max_buf_size, Min(BUF_SIZE, _size)))){_writable=false; _path=FILE_DATA; Seek(_handle, 0, SEEK_SET); _cipher=cipher; return true;}
+           _type=FILE_STD_READ; _size=Max(0, Seek(_handle, 0, SEEK_END)); if(setBuf(Min(max_buf_size, Min(BUF_SIZE, _size)))){/*_writable=false; already cleared in 'close'*/ _path=FILE_DATA; Seek(_handle, 0, SEEK_SET); _cipher=cipher; _full_size=_size; return true;}
            _type=FILE_NONE    ; ::close(_handle); _handle=0; _size=0; return false;
          }
       }
@@ -464,6 +568,7 @@ Bool File::readTryRaw(C PakFile &file, C Pak &pak)
                   T._pos          =0;
                   T._cipher       =pak._file_cipher; // re-apply cipher because this could have been changed in 'readTryEx'
                   T._cipher_offset=(pak._cipher_per_file ? 0 : pak._file_cipher_offset+file.data_offset);
+                  T._full_size    =_size;
                   return true;
                }
             }
@@ -474,7 +579,7 @@ Bool File::readTryRaw(C PakFile &file, C Pak &pak)
             if(Seek(_handle, _offset, SEEK_SET)==_offset)
             {
                T._pak          =&pak;
-               T._size         =file.data_size_compressed;
+               T._size         =_full_size=file.data_size_compressed;
                T._cipher_offset=(pak._cipher_per_file ? 0 : pak._file_cipher_offset+file.data_offset);
                return true;
             }
@@ -483,16 +588,15 @@ Bool File::readTryRaw(C PakFile &file, C Pak &pak)
    }
    close(); return false;
 }
-Bool File::readTryEx(C PakFile &file, C Pak &pak, Cipher *cipher, Bool *processed)
+Bool File::readTryEx(C PakFile &file, C Pak &pak, Cipher *cipher, Bool *processed, Bool stream)
 {
    if(readTryRaw(file, pak))
    {
       Bool p=false;
       if(file.compression) // first decompress with original cipher
       {
+         if(!decompress(file.compression, file.data_size, stream))goto error;
          p=true; // we had to perform processing
-         File temp; if(!DecompressRaw(T, temp, file.compression, file.data_size_compressed, file.data_size, true))goto error;
-         Swap(T, temp); pos(0);
       }
       if(cipher) // if we want to use custom cipher on top of what's already available (don't check for 'cipher!=T._cipher' because we want to add new cipher on top of existing)
       {
@@ -515,7 +619,7 @@ Bool File::readTryEx(C PakFile &file, C Pak &pak, Cipher *cipher, Bool *processe
    if(processed)*processed=false; return false;
 }
 
-Bool File::readTryEx(C Str &name, C PakSet &paks, Cipher *cipher, Bool *processed)
+Bool File::readTryEx(C Str &name, C PakSet &paks, Cipher *cipher, Bool *processed, Bool stream)
 {
  //if(name.is())) in most cases the 'name' is going to be specified
    {
@@ -526,12 +630,12 @@ Bool File::readTryEx(C Str &name, C PakSet &paks, Cipher *cipher, Bool *processe
        C PakFile &pf =*file->file;
          locker.off(); // now when references have been copied, we can unlock
 
-         return readTryEx(pf, pak, cipher, processed);
+         return readTryEx(pf, pak, cipher, processed, stream);
       }
    }
    close(); if(processed)*processed=false; return false;
 }
-Bool File::readTryEx(C UID &id, C PakSet &paks, Cipher *cipher, Bool *processed)
+Bool File::readTryEx(C UID &id, C PakSet &paks, Cipher *cipher, Bool *processed, Bool stream)
 {
  //if(id.valid())) in most cases the 'id' is going to be specified
    {
@@ -542,24 +646,24 @@ Bool File::readTryEx(C UID &id, C PakSet &paks, Cipher *cipher, Bool *processed)
        C PakFile &pf =*file->file;
          locker.off(); // now when references have been copied, we can unlock
 
-         return readTryEx(pf, pak, cipher, processed);
+         return readTryEx(pf, pak, cipher, processed, stream);
       }
    }
    close(); if(processed)*processed=false; return false;
 }
 
-Bool File::readTryEx(C Str &name, Cipher *cipher, Bool *processed)
+Bool File::readTryEx(C Str &name, Cipher *cipher, Bool *processed, Bool stream)
 {
-                                      if(readTryEx   (name, Paks, cipher, processed))return true;
+                                      if(readTryEx   (name, Paks, cipher, processed, stream))return true;
 #if !ANDROID
    if(processed)*processed=false; return readStdTryEx(name, cipher);
 #else
                                   return readStdTryEx(name, cipher, UINT_MAX, processed);
 #endif
 }
-Bool File::readTryEx(C UID &id, Cipher *cipher, Bool *processed)
+Bool File::readTryEx(C UID &id, Cipher *cipher, Bool *processed, Bool stream)
 {
-                                      if(readTryEx   (                id , Paks, cipher, processed))return true;
+                                      if(readTryEx   (                id , Paks, cipher, processed, stream))return true;
 #if !ANDROID
    if(processed)*processed=false; return readStdTryEx(_EncodeFileName(id), cipher);
 #else
@@ -618,7 +722,7 @@ Bool File::pos(Long pos)
             {
               _buf_len-=delta;
               _buf_pos+=delta;
-               T._pos=pos; return true; // don't seek (because file position is already in order with the buffer)
+                T._pos =pos  ; return true; // don't seek (because file position is already in order with the buffer)
             }
          }
          clearBuf(); // if we're going to seek then we need to clear the buffer if any
@@ -641,6 +745,32 @@ Bool File::pos(Long pos)
 
       case FILE_MEM :
       case FILE_MEMB: T._pos=pos; return true;
+
+      case FILE_STREAM:
+      {
+         if(pos<T._pos) // go back
+         {
+            Long delta=pos-T._pos;
+            if( -delta<=_buf_pos) // we skip backward and we have previous data in the buffer
+            {
+              _buf_len-=delta;
+              _buf_pos+=delta;
+                T._pos =pos  ; return true;
+            }
+         }else // go forward
+         {
+            if(!_buf_len)stream_get: _stream->get(T); // read from stream
+            if( _buf_len)
+            {
+               Int skip=Min(pos-T._pos, _buf_len);
+              _buf_len-=skip;
+              _buf_pos+=skip;
+                T._pos+=skip;
+             if(T._pos==pos)return true; // if reached target
+               goto stream_get; // read again
+            }
+         }
+      }break;
    }
    return false;
 }
@@ -1025,10 +1155,11 @@ UInt File::memUsage()C
    UInt mem=_buf_size;
    switch(_type)
    {
-      case FILE_MEM : if(_writable)mem+=_size           ; break;
+      case FILE_MEM   : if(_allocated)mem+=_full_size         ; break;
    #if FILE_MEMB_UNION
-      case FILE_MEMB:              mem+=_memb.memUsage(); break;
+      case FILE_MEMB  :               mem+=_memb  . memUsage(); break;
    #endif
+      case FILE_STREAM:               mem+=_stream->memUsage(); break;
    }
 #if !FILE_MEMB_UNION
    mem+=_memb.memUsage();
@@ -1045,6 +1176,8 @@ FSTD_TYPE File::stdType()C
       case FILE_STD_READ :
       case FILE_STD_WRITE:
          return FSTD_FILE;
+
+      case FILE_STREAM: return _stream->src.stdType();
    }
 }
 /******************************************************************************/
@@ -1142,18 +1275,18 @@ Bool File::size(Long size)
          {
             // no need to call 'setBuf' because we can only change size for files in write mode, an in this mode files always have BUF_SIZE buffer
             // no need to clip current position to size limit, because 'File' allows position being after the end
-           _size=size;
+           _size=_full_size=size;
             discardBuf(false); // disable flushing because we've already tried it at the start, and doing it again could change the file size
          }
       }break;
 
       case FILE_MEM:
       {
-         if(_writable)_Realloc(_mem, Unsigned(size), _size); // write mode allocated memory manually, so we need to reallocate it
-        _size=size;
+         if(_allocated)_Realloc(_mem, Unsigned(size), _size); // memory allocated manually must be reallocated
+        _size=_full_size=size;
       }break;
 
-      case FILE_MEMB: _size=_memb.setNum(size).elms(); break; // set '_size' from what 'Memb' will actually have
+      case FILE_MEMB: _size=_full_size=_memb.setNum(size).elms(); break; // set '_size' from what 'Memb' will actually have
    }
    return _size==size;
 }
@@ -1171,7 +1304,7 @@ Int File::getReturnSize(Ptr data, Int size)
             if(!discardBuf(true))break; // if this fails then we can't read, because we're expecting to read at the current position
            _type=FILE_STD_READ; // set new mode and fall down for reading
          } // !! no break on purpose !!
-         case FILE_STD_READ :
+         case FILE_STD_READ:
          {
             if(_buf_len) // have data in the buffer
             {
@@ -1197,7 +1330,7 @@ Int File::getReturnSize(Ptr data, Int size)
                data =(Byte*)data+l; // can be placed after break
             }
             // read to buffer
-            Int l =Read(_handle, _buf, Min(_buf_size, left())); // read as much as possible
+            Int l =Read(_handle, _buf, Min(_buf_size, fullLeft())); // read as much as possible, including data after limited size, for future reuse
             if( l<=0)break;
             if(_cipher)_cipher->decrypt(_buf, _buf, l, posCipher()); // decrypt entire buffer at the same time (faster)
            _buf_pos=0;
@@ -1207,7 +1340,7 @@ Int File::getReturnSize(Ptr data, Int size)
 
          case FILE_MEM:
          {
-            Ptr src=memFast();
+            CPtr src=memFast();
             if(_cipher)_cipher->decrypt(data, src, size, posCipher());
             else               CopyFast(data, src, size             );
            _pos+=size;
@@ -1228,6 +1361,25 @@ Int File::getReturnSize(Ptr data, Int size)
                size-=l; if(size<=0)break;
                data =(Byte*)data+l; // can be placed after break
             }
+         }break;
+
+         case FILE_STREAM:
+         {
+            if(_buf_len) // have data in the buffer
+            {
+            get_from_stream_buffer:
+               Int l=Min(_buf_len, size);
+               CPtr src=(Byte*)_stream_buf+_buf_pos;
+               if(_cipher)_cipher->decrypt(data, src, l, posCipher());
+               else               CopyFast(data, src, l             );
+              _buf_pos+=l;
+              _buf_len-=l;
+              _pos +=l;
+               size-=l; if(size<=0)break;
+               data =(Byte*)data+l; // can be placed after break
+            }
+           _stream->get(T);
+            if(_buf_len)goto get_from_stream_buffer;
          }break;
       }
    }
@@ -1310,7 +1462,7 @@ Int File::putReturnSize(CPtr data, Int size)
             }while(size>0);
          }break;
       }
-      MAX(_size, _pos);
+      MAX(_full_size, MAX(_size, _pos));
    }
    return _pos-old_pos; // return number of bytes written
 }
@@ -1659,8 +1811,8 @@ Bool File::discardBuf(Bool flush)
    return true;
 }
 /******************************************************************************/
-void File::  limit(ULong &total_size, ULong &applied_offset, Long new_size) {total_size=size(); applied_offset=pos(); T._size=  new_size; T._offset+=applied_offset; T._cipher_offset+=applied_offset; T._pos-=applied_offset;}
-void File::unlimit(ULong &total_size, ULong &applied_offset               ) {                                         T._size=total_size; T._offset-=applied_offset; T._cipher_offset-=applied_offset; T._pos+=applied_offset; applied_offset=0;}
+void File::  limit(ULong &total_size, ULong &applied_offset, Long new_size) {total_size=size(); applied_offset=pos(); T._size=  new_size; T._offset+=applied_offset; T._cipher_offset+=applied_offset; T._pos-=applied_offset; T._full_size-=applied_offset;}
+void File::unlimit(ULong &total_size, ULong &applied_offset               ) {                                         T._size=total_size; T._offset-=applied_offset; T._cipher_offset-=applied_offset; T._pos+=applied_offset; T._full_size+=applied_offset; applied_offset=0;}
 /******************************************************************************/
 UInt File::crc32(Long max_size)
 {
@@ -1784,6 +1936,11 @@ SHA2::Hash File::sha2(Long max_size)
    }
    return hash();
 }
+/******************************************************************************/
+// FILE STREAM
+/******************************************************************************/
+UInt FileStreamLZ4 ::memUsage()C {return SIZE(T)+super::memUsage();}
+UInt FileStreamZSTD::memUsage()C {return SIZE(T)+super::memUsage()+buf_size;}
 /******************************************************************************/
 // DEPRECATED, DO NOT USE
 /******************************************************************************/

@@ -150,6 +150,8 @@ struct Mesh : MeshLod // Mesh (array of Mesh LODs)
 
    Mesh& freeOpenGLESData(); // this method is used only under OpenGL ES (on other platforms it is ignored), the method frees the software copy of the GPU data which increases available memory, however after calling this method the data can no longer be accessed on the CPU (can no longer be locked or saved to file)
 
+   Bool waitForStream()C; // wait until streaming has finished, false on fail
+
    // variations
    Mesh& variations      (Int variations              );   Int     variations   (            )C; // set/get number of material variations (meshes always have at least 1 material variation)
    Mesh& variationName   (Int variation, C Str8 &name );   CChar8* variationName(Int     i   )C; // set/get           material variation name (first material variation always has name = null and it can't be changed)

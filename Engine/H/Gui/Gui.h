@@ -46,6 +46,8 @@ struct GUI // Graphical User Interface
    GuiObj* objAtPos  (C Vec2 &pos                            )C; // get         gui object at            'pos' screen position
    GuiObj* objNearest(C Vec2 &pos, C Vec2 &dir, Vec2 &out_pos)C; // get nearest gui object starting from 'pos' screen position towards 'dir' direction
 
+   void moveMouse(C Vec2 &dir)C; // move mouse cursor to the nearest gui object from current mouse position towards 'dir' direction
+
    Flt updateTime()C {return _update_time;} // get CPU time needed to perform last 'update' method
 
    Color backgroundColor()C; // get background color of the current skin, this is 'Gui.skin.background_color'
@@ -138,6 +140,9 @@ private:
 }extern
    Gui; // Main GUI
 /******************************************************************************/
+#if EE_PRIVATE
+void DrawPanelText(C Panel *panel, C Color &panel_color, Flt padding, C TextStyleParams &ts, C Vec2 &pos, CChar *text, Bool mouse);
+#endif
 void DrawKeyboardHighlight(GuiObj *obj, C Rect &rect, C GuiSkin *skin       ); // default Keyboard Highlight                 drawing function
 void DrawDescription      (GuiObj *obj, C Vec2 &pos, CChar *text, Bool mouse); // default Gui Object Description             drawing function
 void DrawIMM              (GuiObj *obj                                      ); // default IMM (Windows Input Method Manager) drawing function

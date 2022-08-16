@@ -374,7 +374,7 @@ ImageRTPtr RendererClass::getBackBuffer() // this may get called during renderin
 {
    if(Image *src=_cur[0])
    {
-      ImageRTPtr hlp(ImageRTDesc(src->w(), src->h(), IMAGERT_SRGBA)); // here Alpha is used for storing opacity
+      ImageRTPtr hlp(ImageRTDesc(src->w(), src->h(), GetImageRTType(src->type())));
       src->copyHw(*hlp, true);
       return hlp;
    }
@@ -1918,7 +1918,7 @@ void RendererClass::temporal(ImageRTPtr &dilated_motion) // !! assumes 'resolveM
             Sh.ImgX[3]->set(old_weight);
          }
       #endif
-         set(_ctx->new_data, _ctx->new_alpha, _ctx->new_col, null, null, true);
+         set(_ctx->new_col, _ctx->new_data, _ctx->new_alpha, null, null, true);
          Shader *shader=Sh.Temporal[D.temporalAntiAlias()+2*D.temporalSuperRes()-1][D._view_main.full][alpha];
          REPS(_eye, _eye_num)
          {
@@ -2266,14 +2266,14 @@ void RendererClass::postProcess()
    // !! WARNING: 'temporal' might output '_col' that points to 'new_col', in that case it can't be modified because it's needed for the next frame !!
    // !! so if any effect wants to modify '_col' instead of drawing to another RT, it first must check it for 'ColConst' !!
    Bool temporal =_temporal_use       , // hasTemporal()
-        alpha    = processAlphaFinal(), // this is always enabled for 'slowCombine'
         adapt_eye= hasEyeAdapt      (),
         motion   = hasMotion        (),
         bloom    =(hasBloom         () || _has_glow || D.toneMap()),
+        alpha    = processAlphaFinal(), // this is always enabled for 'slowCombine'
         dof      = hasDof           (),
+        sharpen  = D.sharpen        (),
         combine  = slowCombine      (),
-        alpha_set= fastCombine      (), // if alpha channel is set properly in the RT, skip this if we're doing 'fastCombine' because we're rendering to existing RT which has its Alpha already set
-        sharpen  = D.sharpen        ();
+        alpha_set= fastCombine      (); // if alpha channel is set properly in the RT, skip this if we're doing 'fastCombine' because we're rendering to existing RT which has its Alpha already set
 
    if(alpha){if(!_alpha)setAlphaFromDepthAndCol();} // create '_alpha' if not yet available
    else          _alpha.clear(); // make sure to clear if we don't use it
@@ -2292,7 +2292,7 @@ void RendererClass::postProcess()
 
    ImageRTDesc rt_desc(fxW(), fxH(), IMAGERT_SRGBA/*this is changed later*/);
    Bool upscale=(_final->w()>_col->w() || _final->h()>_col->h()); // we're going to upscale at the end, this needs to be set after 'temporal' which might upscale '_col'
-   Int  fxs=(_get_target ? -1 : alpha+adapt_eye+motion+bloom+dof+upscale+sharpen); // this counter specifies how many effects are still left in the queue, and if we can render directly to '_final'
+   Int  fxs=(_get_target ? -1 : adapt_eye+motion+bloom+alpha+dof+upscale+sharpen); // this counter specifies how many effects are still left in the queue, and if we can render directly to '_final'
    Sh.ImgClamp->setConditional(ImgClamp(rt_desc.size)); // set 'ImgClamp' that may be needed for Bloom, DoF, MotionBlur, this is the viewport rect within texture, so reading will be clamped to what was rendered inside the viewport
 
    ImageRT *exposure=null;
@@ -2505,7 +2505,9 @@ void RendererClass::postProcess()
    {
       if(_col!=_final)
       {
-         DEBUG_ASSERT(false, "Rendering Performance penalty!\n'_col' in most cases should already be applied onto '_final'.\nThis is possible to happen, however it could also be a sign of problem with 'fxs' calculation.");
+      #if DEBUG
+         static Bool shown=false; if(!shown){shown=true; OSMsgBox("Warning", S+"Rendering Performance penalty.\n'_col' in most cases should already be applied onto '_final'.\nThis is possible to happen and it's just a DEBUG warning which can be ignored, however it could also be a sign of problem with 'fxs' calculation.\n" __FILE__ "\"\nLine: "+__LINE__);}
+      #endif
          if(!D._view_main.full)
          {
             Int pixels=1+1; // 1 for filtering + 1 for borders (because source is smaller and may not cover the entire range for dest, for example in dest we want 100 pixels, but 1 source pixel covers 30 dest pixels, so we may get only 3 source pixels covering 90 dest pixels)

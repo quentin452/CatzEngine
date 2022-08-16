@@ -350,7 +350,7 @@ class BuyClass : Window
    void create()
    {
       Gui+=super.create(Rect_C(0, 0, 1.2, 0.49), "Buy Full Version").level(LicenseCheck.level()-1).hide(); FlagDisable(flag, WIN_MOVABLE);
-      T+=text.create(Rect_C(clientWidth()/2, -0.15, clientWidth()*0.95, 0.1), "You're running a demo version.\nWould you like to purchase full version?\n\nBy purchasing the license you're contributing to making the engine better."); text.auto_line=AUTO_LINE_SPACE_SPLIT;
+      T+=text.create(Rect_C(clientWidth()/2, -0.15, clientWidth()*0.95, 0.1), "You're running a demo version.\nWould you like to purchase full version?\n\nBy purchasing the license you're contributing to making the engine better."); text.auto_line=true;
       T+= yes.create(Rect_C(clientWidth()*1/3, -0.35, 0.29, 0.07), "Yes").focusable(false).func(Yes);
       T+=  no.create(Rect_C(clientWidth()*2/3, -0.35, 0.29, 0.07), "No" ).focusable(false).func(HideEditAct, SCAST(GuiObj, T));
    }

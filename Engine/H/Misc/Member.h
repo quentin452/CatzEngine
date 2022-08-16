@@ -13,6 +13,7 @@ enum DATA_TYPE : Byte // Data Type
    DATA_CHAR8_PTR, // Char8*    pointer to   8-bit character array forming a text
    DATA_STR      , // Str       String with 16-bit per character
    DATA_STR8     , // Str8      String with  8-bit per character
+   DATA_STR_EX   , // StrEx     String
    DATA_BOOL     , // Bool      boolean
    DATA_INT      , // Int       integer
    DATA_UINT     , // UInt      unsigned integer
@@ -71,7 +72,8 @@ struct MemberDesc // Member Description - Description of a Member in a C++ class
    UID   asUID  (CPtr object                       )C; // get member value as UID                   , 'object'=pointer to C++ object of class that this member belongs to, UIDZero           on fail
    Int   asEnum (CPtr object                       )C; // get member value as Enum Int              , 'object'=pointer to C++ object of class that this member belongs to, -1                on fail
 #if EE_PRIVATE
-   Image* asImage(CPtr object                     )C; // get member value as Image pointer         , 'object'=pointer to C++ object of class that this member belongs to
+   Image* asImage(CPtr object                      )C; // get member value as Image pointer         , 'object'=pointer to C++ object of class that this member belongs to, null on fail
+   StrEx* asStrEx(CPtr object                      )C; // get member value as StrEx pointer         , 'object'=pointer to C++ object of class that this member belongs to, null on fail
 #endif
 
    T1(TYPE) TYPE& as(Ptr object)C {return *(TYPE*)((Byte*)object+offset);} // get reference to member, 'object'=pointer to C++ object of class that this member belongs to !! specified TYPE should be the exact same type of the class member !!
@@ -109,6 +111,7 @@ struct MemberDesc // Member Description - Description of a Member in a C++ class
                         MemberDesc& set(CChar8*  &member       ) {return setDefault(DATA_CHAR8_PTR, member);}
                         MemberDesc& set(Str      &member       ) {return setDefault(DATA_STR      , member);}
                         MemberDesc& set(Str8     &member       ) {return setDefault(DATA_STR8     , member);}
+                        MemberDesc& set(StrEx    &member       ) {return setDefault(DATA_STR_EX   , member);}
                         MemberDesc& set(Bool     &member       ) {return setDefault(DATA_BOOL     , member);}
                         MemberDesc& set(SByte    &member       ) {return setDefault(DATA_INT      , member);}
                         MemberDesc& set(Short    &member       ) {return setDefault(DATA_INT      , member);}

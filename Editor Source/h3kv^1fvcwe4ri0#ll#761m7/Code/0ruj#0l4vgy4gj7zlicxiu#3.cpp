@@ -34,24 +34,6 @@ void RemoveChunk(C Str &file, C Str &chunk, ReadWriteSync &rws)
    }
 }
 /******************************************************************************/
-cchar8 *SizeSuffix[]={"", " KB", " MB", " GB", " TB"};
-Str FileSize(long size, char dot=',')
-{
-   const int f=10;
-   size*=f;
-   int i=0; for(; i<Elms(SizeSuffix)-1 && size>=1000*f; i++, size>>=10); // check for "1000*f" instead of "1024*f", because we want to avoid displaying things like "1 001 MB"
-   Str s=TextInt(size/f, -1, 3); if(size<100*f && i){s+=dot; s+=size%10;} s+=SizeSuffix[i];
-   return s;
-}
-Str FileSizeKB(long size)
-{
-   const int f=10;
-   size*=f;
-   int i=1; size>>=10;
-   Str s=TextInt(size/f, -1, 3); if(size<100*f && i){s+=','; s+=size%10;} s+=SizeSuffix[i];
-   return s;
-}
-/******************************************************************************/
 void SavedImage        (C Str &name) {if(ImagePtr       e=ImagePtr     ().find(name))if(!IsServer)e->load(name);} // on server the file may be compressed
 void SavedImageAtlas   (C Str &name) {if(ImageAtlasPtr  e=ImageAtlasPtr().find(name))if(!IsServer)e->load(name);}
 void SavedEditSkel     (C Str &name) {}
@@ -314,9 +296,17 @@ bool Undo(TimeStamp &time, C TimeStamp &src_time) {if(src_time!=time){MAX1(time,
 {
    if(Sync(time, src_time)){data=src_data; return true;} return false;
 }
+<TYPE> bool SyncMem(TimeStamp &time, C TimeStamp &src_time, TYPE &data, C TYPE &src_data)
+{
+   if(Sync(time, src_time)){Copy(data, src_data); return true;} return false;
+}
 <TYPE> bool UndoByTime(TimeStamp &time, C TimeStamp &src_time, TYPE &data, C TYPE &src_data)
 {
    if(Undo(time, src_time)){data=src_data; return true;} return false;
+}
+<TYPE> bool UndoByTimeMem(TimeStamp &time, C TimeStamp &src_time, TYPE &data, C TYPE &src_data)
+{
+   if(Undo(time, src_time)){Copy(data, src_data); return true;} return false;
 }
 
 <TYPE> bool SyncByValue(TimeStamp &time, C TimeStamp &src_time, TYPE &data, C TYPE &src_data)
@@ -327,26 +317,39 @@ bool Undo(TimeStamp &time, C TimeStamp &src_time) {if(src_time!=time){MAX1(time,
 {
    if(!Equal(data, src_data)){data=src_data; time=src_time; return true;} return false;
 }
+<TYPE> bool SyncByValueMem(TimeStamp &time, C TimeStamp &src_time, TYPE &data, C TYPE &src_data)
+{
+   if(!EqualMem(data, src_data)){Copy(data, src_data); time=src_time; return true;} return false;
+}
 
 <TYPE> bool UndoByValue(TimeStamp &time, C TimeStamp &src_time, TYPE &data, C TYPE &src_data)
 {
    if(data!=src_data){data=src_data; MAX1(time, src_time); return true;} return false;
 }
-/*<TYPE> bool UndoByValueEqual(TimeStamp &time, C TimeStamp &src_time, TYPE &data, C TYPE &src_data)
+<TYPE> bool UndoByValueEqual(TimeStamp &time, C TimeStamp &src_time, TYPE &data, C TYPE &src_data)
 {
    if(!Equal(data, src_data)){data=src_data; MAX1(time, src_time); return true;} return false;
-}*/
+}
+<TYPE> bool UndoByValueMem(TimeStamp &time, C TimeStamp &src_time, TYPE &data, C TYPE &src_data)
+{
+   if(!EqualMem(data, src_data)){Copy(data, src_data); MAX1(time, src_time); return true;} return false;
+}
 
 <TYPE> bool Undo(TimeStamp &time, C TimeStamp &src_time, TYPE &data, C TYPE &src_data) // ByTimeAndValue, make this the default function because there can be a lot of changes in the same second on the local computer
 {
    return UndoByTime (time, src_time, data, src_data) // first check by time because it's faster
        || UndoByValue(time, src_time, data, src_data);
 }
-/*<TYPE> bool UndoEqual(TimeStamp &time, C TimeStamp &src_time, TYPE &data, C TYPE &src_data) // ByTimeAndValue
+<TYPE> bool UndoEqual(TimeStamp &time, C TimeStamp &src_time, TYPE &data, C TYPE &src_data) // ByTimeAndValue
 {
    return UndoByTime      (time, src_time, data, src_data) // first check by time because it's faster
        || UndoByValueEqual(time, src_time, data, src_data);
-}*/
+}
+<TYPE> bool UndoMem(TimeStamp &time, C TimeStamp &src_time, TYPE &data, C TYPE &src_data) // ByTimeAndValue
+{
+   return UndoByTimeMem (time, src_time, data, src_data) // first check by time because it's faster
+       || UndoByValueMem(time, src_time, data, src_data);
+}
 
 void SetUndo(C Edit._Undo &undos, Button &undo, Button &redo)
 {
@@ -472,7 +475,7 @@ void ImageProps(C Image &image, UID *hash, IMAGE_TYPE *best_type=null, uint flag
               bc2=true, // BC2 8-bit uses 4-bit alpha
               bc4=true, // BC4 4-bit is (R,0,0,1)
               bc5=true, // BC5 8-bit is (R,G,0,1)
-              srgb=FlagTest(flags, SRGB),
+              srgb=FlagOn(flags, SRGB),
               calc_type=(type==IMAGE_NONE), // if have to calculate type, always calculate type if unknown (even if 'best_type' is null), because it affects hash
               force_alpha=((flags&IGNORE_ALPHA) && image.typeInfo().a), // if we want to ignore alpha, and source had alpha, then we need to adjust as if it has full alpha, this is done because: ignoring alpha may save the image in format that doesn't support the alpha channel, however if the same image is later used for something else, and now wants to use that alpha channel, then it needs to be created as a different texture (with different hash)
               extract=((hash && (sign ? image.hwType()!=IMAGE_R8G8B8A8_SIGN : (image.hwType()!=IMAGE_R8G8B8A8 && image.hwType()!=IMAGE_R8G8B8A8_SRGB))) // hash is based on RGBA format
@@ -685,7 +688,7 @@ bool EditToGameImage(Image &edit, Image &game, bool pow2, bool srgb, bool alpha_
       if(&edit!=&game){src.copyTry(temp); src=&temp;}
       src.alphaFromBrightness().divRgbByAlpha();
    }
-   if(ignore_alpha && src.typeInfo().a) // if want to ignore alpha then set it to full as some compressed texture formats will benefit from better quality (like PVRTC)
+   if(ignore_alpha && src.typeInfo().a) // if want to ignore alpha then set it to full as some compressed texture formats will benefit from better quality (like BC7, ETC2, ASTC, PVRTC)
    {
       if(mip_maps<0)mip_maps=((src.mipMaps()==1) ? 1 : 0); // source will have now only one mip-map so we can't use "-1", auto-detect instead
       if(mode    <0)mode    =src.mode();                   // source will now be as IMAGE_SOFT      so we can't use "-1", auto-detect instead
@@ -810,6 +813,7 @@ bool NonMonoTransform   (C TextParam &p   ) // if can change a mono image to non
        || p.name=="lerpRGB" && values>2
        || p.name=="iLerpRGB" && values>2
        || p.name=="mulRGB" && TextVecEx(p.value).anyDifferent()
+       || p.name=="mulRGBLin" && TextVecEx(p.value).anyDifferent()
        || p.name=="addRGB" && TextVecEx(p.value).anyDifferent()
        || p.name=="setRGB" && TextVecEx(p.value).anyDifferent()
        || p.name=="mulAddRGB" && values>2
@@ -843,7 +847,7 @@ bool NonMonoTransform   (C TextParam &p   ) // if can change a mono image to non
 bool HighPrecTransform(C Str &name)
 {
    return ResizeTransform(name)
-       || name=="mulRGB" || name=="addRGB" || name=="setRGB" || name=="mulAddRGB" || name=="addMulRGB" || name=="mulA"
+       || name=="mulRGB" || name=="mulRGBLin" || name=="addRGB" || name=="setRGB" || name=="mulAddRGB" || name=="addMulRGB" || name=="mulA"
        || name=="mulRGBbyA"
        || name=="mulRGBS" || name=="mulRGBIS" || name=="mulRGBH" || name=="mulRGBHS"
        || name=="normalize"
@@ -853,7 +857,7 @@ bool HighPrecTransform(C Str &name)
        || name=="blur" || name=="sharpen"
        || name=="bump" || name=="bumpClamp"
        || name=="contrast" || name=="contrastLum" || name=="contrastAlphaWeight" || name=="contrastLumAlphaWeight"
-       || name=="brightness" || name=="brightnessLum"
+       || name=="brightness" || name=="brightnessLum" || name=="brightnessLumS"
        || name=="gamma" || name=="gammaA" || name=="gammaLum" || name=="gammaLumPhoto" || name=="gammaSat"
        || name=="SRGBToLinear" || name=="LinearToSRGB"
        || name=="greyPhoto"
@@ -1219,6 +1223,18 @@ Vec2 ILerpToMad(flt from, flt to) {return Vec2(1/(to-from), from/(from-to));}
 flt   FloatSelf(flt x) {return x;}
 flt   PowMax   (flt x, flt y) {return (x<=0) ? 0 : Pow(x, y);}
 
+flt _ApplyBrightness(flt x, flt brightness) // !! ASSUMES THAT "x>0 && x<1 && brightness" !!
+{
+   x=Sqr(x);
+   if(brightness<0)x=SigmoidSqrtInv(x*SigmoidSqrt(brightness))/            brightness ;
+   else            x=SigmoidSqrt   (x*            brightness )/SigmoidSqrt(brightness);
+   return SqrtFast(x);
+}
+void ApplyBrightness(flt &x, flt brightness)
+{
+   if(x>0 && x<1 && brightness)x=_ApplyBrightness(x, brightness);
+}
+
 void Crop(Image &image, int x, int y, int w, int h, C Color &background, bool hp=true)
 {
    Vec4 clear_color=background;
@@ -1535,6 +1551,19 @@ void TransformImage(Image &image, TextParam param, bool clamp, C Color &backgrou
    {  // x=x*m+a, x=(x+A)*M
       Vec add, mul; if(TextVecVecEx(param.value, add, mul)){AdjustImage(image, true, false, false); image.mulAdd(Vec4(mul, 1), Vec4(add*mul, 0), &box);}
    }else
+   if(param.name=="mulRGBLin")
+   {
+      Vec mul=TextVecEx(param.value);
+      if( mul!=VecOne)
+      for(int z=box.min.z; z<box.max.z; z++)
+      for(int y=box.min.y; y<box.max.y; y++)
+      for(int x=box.min.x; x<box.max.x; x++)
+      {
+         Vec4 c=image.color3DF(x, y, z);
+         c.xyz=LinearToSRGB(SRGBToLinear(c.xyz)*mul);
+         image.color3DF(x, y, z, c);
+      }
+   }else
    if(param.name=="mulRGBbyA")
    {
       for(int z=box.min.z; z<box.max.z; z++)
@@ -1697,7 +1726,8 @@ void TransformImage(Image &image, TextParam param, bool clamp, C Color &backgrou
       flt bright=param.asFlt(), mul; flt (*f)(flt);
       if( bright)
       {
-         if(bright<0){mul=1/bright; bright=SigmoidSqrt(bright); f=SigmoidSqrtInv;}else{mul=1/SigmoidSqrt(bright); f=SigmoidSqrt;}
+         if(bright<0){mul=1/            bright ; bright=SigmoidSqrt(bright); f=SigmoidSqrtInv;}
+         else        {mul=1/SigmoidSqrt(bright);                             f=SigmoidSqrt   ;}
          for(int z=box.min.z; z<box.max.z; z++)
          for(int y=box.min.y; y<box.max.y; y++)
          for(int x=box.min.x; x<box.max.x; x++)
@@ -1708,6 +1738,25 @@ void TransformImage(Image &image, TextParam param, bool clamp, C Color &backgrou
                flt new_lum=Sqr(old_lum);
                new_lum=f(new_lum*bright)*mul;
                new_lum=SqrtFast(new_lum);
+               c.xyz*=new_lum/old_lum;
+               image.color3DF(x, y, z, c);
+            }
+         }
+      }
+   }else
+   if(param.name=="brightnessLumS")
+   {
+      if(flt bright=param.asFlt())
+      for(int z=box.min.z; z<box.max.z; z++)
+      for(int y=box.min.y; y<box.max.y; y++)
+      for(int x=box.min.x; x<box.max.x; x++)
+      {
+         Vec4 c=image.color3DF(x, y, z);
+         flt old_lum=c.xyz.max(); if(old_lum>0 && old_lum<1)
+         {
+            flt sat=RgbToHsb(c.xyz).y; if(flt b=bright*sat)
+            {
+               flt new_lum=_ApplyBrightness(old_lum, b);
                c.xyz*=new_lum/old_lum;
                image.color3DF(x, y, z, c);
             }
@@ -2748,12 +2797,9 @@ force_src_resize:
                               case APPLY_BRIGHTNESS:
                               {
                                  c=base;
-                                 Vec &bright=l.xyz; if(bright.any())
-                                 {
-                                    if(c.x>0 && c.x<1){c.x=Sqr(c.x); if(bright.x<0)c.x=SigmoidSqrtInv(c.x*SigmoidSqrt(bright.x))/bright.x;else c.x=SigmoidSqrt(c.x*bright.x)/SigmoidSqrt(bright.x); c.x=SqrtFast(c.x);}
-                                    if(c.y>0 && c.y<1){c.y=Sqr(c.y); if(bright.y<0)c.y=SigmoidSqrtInv(c.y*SigmoidSqrt(bright.y))/bright.y;else c.y=SigmoidSqrt(c.y*bright.y)/SigmoidSqrt(bright.y); c.y=SqrtFast(c.y);}
-                                    if(c.z>0 && c.z<1){c.z=Sqr(c.z); if(bright.z<0)c.z=SigmoidSqrtInv(c.z*SigmoidSqrt(bright.z))/bright.z;else c.z=SigmoidSqrt(c.z*bright.z)/SigmoidSqrt(bright.z); c.z=SqrtFast(c.z);}
-                                 }
+                                 ApplyBrightness(c.x, l.x);
+                                 ApplyBrightness(c.y, l.y);
+                                 ApplyBrightness(c.z, l.z);
                               }break;
 
                               case APPLY_BRIGHTNESS_LUM:
@@ -2763,11 +2809,7 @@ force_src_resize:
                                  {
                                     flt old_lum=c.xyz.max(); if(old_lum>0 && old_lum<1)
                                     {
-                                       flt mul; flt (*f)(flt);
-                                       if(bright<0){mul=1/bright; bright=SigmoidSqrt(bright); f=SigmoidSqrtInv;}else{mul=1/SigmoidSqrt(bright); f=SigmoidSqrt;}
-                                       flt new_lum=Sqr(old_lum);
-                                       new_lum=f(new_lum*bright)*mul;
-                                       new_lum=SqrtFast(new_lum);
+                                       flt new_lum=_ApplyBrightness(old_lum, bright);
                                        c.xyz*=new_lum/old_lum;
                                     }
                                  }
@@ -2838,7 +2880,19 @@ class XMaterialEx : XMaterial
    Image    base_0, base_1, base_2, detail, macro, emissive_img;
    UID      base_0_id=UIDZero, base_1_id=UIDZero, base_2_id=UIDZero, detail_id=UIDZero, macro_id=UIDZero, emissive_id=UIDZero;
    bool     adjust_params=true;
+   byte     tex_downsize[TSP_NUM];
    TEX_FLAG has_textures=TEXF_NONE, known_textures=TEXF_NONE;
+
+   XMaterialEx(C Project *proj=null)
+   {
+      if(proj)
+      {
+         Copy(tex_downsize, proj.tex_downsize);
+      }else
+      {
+         REPAO(tex_downsize)=0;
+      }
+   }
 
    void create(C Material &src)
    {
@@ -3427,7 +3481,7 @@ bool DelEndKeys(Animation &anim) // return if any change was made
 /******************************************************************************/
 // MATH
 /******************************************************************************/
-inline bool NegativeSB(flt  x) {return FlagTest  ((uint&)x, SIGN_BIT);} // have to work with SIGN_BIT for special case of -0
+inline bool NegativeSB(flt  x) {return FlagOn    ((uint&)x, SIGN_BIT);} // have to work with SIGN_BIT for special case of -0
 inline void      CHSSB(flt &x) {       FlagToggle((uint&)x, SIGN_BIT);} // have to work with SIGN_BIT for special case of -0
 /******************************************************************************/
 int UniquePairs(int elms) {return elms*(elms-1)/2;}

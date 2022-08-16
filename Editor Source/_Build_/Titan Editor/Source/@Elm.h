@@ -2,15 +2,21 @@
 /******************************************************************************/
 class Elm
 {
-   enum FLAG // !! these enums are saved !!
+   enum FLAG : byte // !! THESE ENUMS ARE SAVED !!
    {
-      IMPORTING       =1<<0,
-      OPENED          =1<<1,
-      REMOVED         =1<<2,
-      NO_PUBLISH      =1<<3,
-      FINAL_REMOVED   =1<<4,
-      FINAL_NO_PUBLISH=1<<5,
-      DATA            =1<<7, // used only in IO
+      IMPORTING        =1<<0,
+      OPENED           =1<<1,
+      REMOVED          =1<<2,
+      NO_PUBLISH       =1<<3,
+      NO_PUBLISH_MOBILE=1<<4,
+
+      // used only in memory (not saved) may overlap with IO
+      FINAL_REMOVED    =1<<6,
+      FINAL_NO_PUBLISH =1<<7,
+      FINAL            =FINAL_REMOVED|FINAL_NO_PUBLISH,
+
+      // used only in IO, may overlap with memory
+      DATA             =1<<7,
    };
    ELM_TYPE        type;
    byte                   flag; // FLAG
@@ -22,7 +28,7 @@ class Elm
                        name_time, // time when the element was named or renamed
                      parent_time, // time when the element was attached to the parent
                     removed_time, // time when the element was removed or restored
-                 no_publish_time; // time when the element had NO_PUBLISH changed
+                    publish_time; // time when the element had publishing changed
    ElmData            *data;
 
   ~Elm();
@@ -32,26 +38,30 @@ class Elm
    Elm(C Elm &src);        
 
    // get
-   bool importing     ()C;   Elm& importing     (bool on);
-   bool opened        ()C;   Elm& opened        (bool on);
-   bool removed       ()C;   Elm& removed       (bool on); // this checks only if this element is    removed, it doesn't check the parents
-   bool publish       ()C;   Elm& publish       (bool on); // this checks only if this element is    publish, it doesn't check the parents
-   bool noPublish     ()C;   Elm& noPublish     (bool on); // this checks only if this element is no publish, it doesn't check the parents
-   bool finalRemoved  ()C;   Elm& finalRemoved  (bool on);
-   bool finalExists   ()C;   Elm& finalExists   (bool on);
-   bool finalPublish  ()C;   Elm& finalPublish  (bool on); // this includes 'finalExists'  as well !!
-   bool finalNoPublish()C;   Elm& finalNoPublish(bool on); // this includes 'finalRemoved' as well !!
- C Str& srcFile       ()C;
-   bool initialized   ()C;
+   bool importing      ()C;   Elm& importing      (bool on);
+   bool opened         ()C;   Elm& opened         (bool on);
+   bool exists         ()C;   Elm& exists         (bool on); // this checks only if this element       exists       , it doesn't check the parents
+   bool removed        ()C;   Elm& removed        (bool on); // this checks only if this element is    removed      , it doesn't check the parents
+   bool   publish      ()C;   Elm&   publish      (bool on); // this checks only if this element is    publish      , it doesn't check the parents
+   bool noPublish      ()C;   Elm& noPublish      (bool on); // this checks only if this element is no publish      , it doesn't check the parents
+   bool   publishMobile()C;   Elm&   publishMobile(bool on); // this checks only if this element is    publishMobile, it doesn't check the parents
+   bool noPublishMobile()C;   Elm& noPublishMobile(bool on); // this checks only if this element is no publishMobile, it doesn't check the parents
+   bool finalRemoved   ()C;   Elm& finalRemoved   (bool on);
+   bool finalExists    ()C;   Elm& finalExists    (bool on);
+   bool finalPublish   ()C;   Elm& finalPublish   (bool on); // this includes 'finalExists'  and Platform as well !!
+   bool finalNoPublish ()C;   Elm& finalNoPublish (bool on); // this includes 'finalRemoved' and Platform as well !!
+ C Str& srcFile        ()C;
+   bool initialized    ()C;
 
    void resetFinal();
 
-   Elm& setRemoved  (  bool removed   , C TimeStamp &time=TimeStamp().getUTC());
-   Elm& setNoPublish(  bool no_publish, C TimeStamp &time=TimeStamp().getUTC());
-   Elm& setName     (C Str &name      , C TimeStamp &time=TimeStamp().getUTC());
-   Elm& setParent   (C UID &parent_id , C TimeStamp &time=TimeStamp().getUTC());
-   Elm& setParent   (C Elm *parent    , C TimeStamp &time=TimeStamp().getUTC());
-   Elm& setSrcFile  (C Str &src_file  , C TimeStamp &time=TimeStamp().getUTC());
+   Elm& setRemoved(  bool removed  ,              C TimeStamp &time=TimeStamp().getUTC());
+   Elm& setPublish(  bool all      ,              C TimeStamp &time=TimeStamp().getUTC());
+   Elm& setPublish(  bool all      , bool mobile, C TimeStamp &time=TimeStamp().getUTC());
+   Elm& setName   (C Str &name     ,              C TimeStamp &time=TimeStamp().getUTC());
+   Elm& setParent (C UID &parent_id,              C TimeStamp &time=TimeStamp().getUTC());
+   Elm& setParent (C Elm *parent   ,              C TimeStamp &time=TimeStamp().getUTC());
+   Elm& setSrcFile(C Str &src_file ,              C TimeStamp &time=TimeStamp().getUTC());
 
    ElmObjClass  *   objClassData();   C ElmObjClass  *   objClassData()C;
    ElmObj       *        objData();   C ElmObj       *        objData()C;
@@ -88,6 +98,7 @@ class Elm
    uint syncData(C Elm &src);
 
    // io
+   static void LoadOldFlag(byte &flag, File &f);
    bool save(File &f, bool network, bool skip_name_data)C;
    bool load(File &f, bool network, bool skip_name_data);
    void save(TextNode &node)C;

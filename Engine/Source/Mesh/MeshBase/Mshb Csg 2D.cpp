@@ -343,13 +343,13 @@ static UInt SolidNext(MC_EDGE &edge, Int point_ind, Bool type)
    Bool solid, left=(edge.ind.c[0]==point_ind);
    if(type==TYPE_A)
    {
-      if(left)solid=FlagTest(edge.solid, SOLID_AL);
-      else    solid=FlagTest(edge.solid, SOLID_AR);
+      if(left)solid=FlagOn(edge.solid, SOLID_AL);
+      else    solid=FlagOn(edge.solid, SOLID_AR);
       return  solid ? (SOLID_AL|SOLID_AR) : (SOLID_NAL|SOLID_NAR);
    }else
    {
-      if(left)solid=FlagTest(edge.solid, SOLID_BL);
-      else    solid=FlagTest(edge.solid, SOLID_BR);
+      if(left)solid=FlagOn(edge.solid, SOLID_BL);
+      else    solid=FlagOn(edge.solid, SOLID_BR);
       return  solid ? (SOLID_BL|SOLID_BR) : (SOLID_NBL|SOLID_NBR);
    }
 }

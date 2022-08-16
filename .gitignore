@@ -15,6 +15,7 @@
 *.pri
 *.recipe
 *.tlog
+.*
 ipch/
 asm/
 
@@ -55,8 +56,6 @@ Desktop.ini
 !/Engine
 !/Project
 !/ThirdPartyLibs
-/ThirdPartyLibs/DLSS
-/ThirdPartyLibs/Xbox Live/2018.6.20181010.2/x64
 !/Clean.bat
 !/Titan.sln
 Lock

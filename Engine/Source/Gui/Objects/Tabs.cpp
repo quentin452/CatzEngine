@@ -4,8 +4,8 @@ namespace EE{
 /******************************************************************************/
 // TAB
 /******************************************************************************/
-void Tab::   addChild(GuiObj &child) {_children.add   (child, T);}
-void Tab::removeChild(GuiObj &child) {_children.remove(child   );}
+void Tab::   addChild(GuiObj &child) {if(_children.add   (child, T))childRectChanged(null, child.visible() ? &child.rect() : null, child);}
+void Tab::removeChild(GuiObj &child) {if(_children.remove(child   ))childRectChanged(child.visible() ? &child.rect() : null, null, child);}
 
 Tab& Tab::del()
 {
@@ -233,7 +233,7 @@ Tabs& Tabs::rect(C Rect &rect, Flt space, Bool auto_size)
 {
    if(T.rect()!=rect || T.space()!=space || T.autoSize()!=auto_size)
    {
-      T._rect     =rect;
+      super::rect(rect);
       T._space    =space;
       T._auto_size=auto_size;
       setRect();
@@ -271,6 +271,7 @@ Tabs& Tabs::set(Int i, SET_MODE mode)
       if(valid() && InRange(T(), T))tab(T())._lit=0; // disable highlight for newly selected tab
       if(kb)if(InRange(T(), T))tab(T()).kbSet();else kbSet();
       if(mode!=QUIET)call(mode!=NO_SOUND);
+      notifyParentOfRectChange(); // children attached to tabs might affect rects
    }
    return T;
 }
@@ -305,9 +306,9 @@ Tabs& Tabs::remove(Int i)
 {
    if(InRange(i, T))
    {
-      if(_sel==i)_sel=-1;else
-      if(_sel> i)_sel--;
      _tabs.removeValid(i, true);
+      if(_sel==i){_sel=-1; notifyParentOfRectChange();}else // children attached to tabs might affect rects
+      if(_sel> i) _sel--;
       setRect();
    }
    return T;
@@ -425,6 +426,15 @@ void Tab::parentClientRectChanged(C Rect *old_client, C Rect *new_client)
 void Tabs::parentClientRectChanged(C Rect *old_client, C Rect *new_client)
 {
    notifyChildrenOfClientRectChange(old_client, new_client); // pass on to the children
+}
+void Tab::childRectChanged(C Rect *old_rect, C Rect *new_rect, GuiObj &child)
+{
+   if(parent())parent()->childRectChanged(old_rect, new_rect, T); // have to pass 'T' instead of 'child'
+}
+void Tabs::childRectChanged(C Rect *old_rect, C Rect *new_rect, GuiObj &child)
+{
+   if(InRange(T(), T) && &tab(T())==&child && parent())
+      parent()->childRectChanged(old_rect, new_rect, T); // have to pass 'T' instead of 'child'
 }
 /******************************************************************************/
 }

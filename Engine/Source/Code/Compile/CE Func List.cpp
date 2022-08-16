@@ -457,8 +457,8 @@ void Call::Param::set(Expr &expr, Compiler &compiler, Bool auto_map)
    {
       case Expr::Memory::GLOBAL:
       {
-         if(expr.mem.index>=0)                                                         {setHeap  (expr.mem.index+expr.mem.offset, expr.mem.offset2, FlagTest(expr.symbol.modifiers, Symbol::MODIF_REF)); return;} // set successfully
-         if(expr.mem.symbol)if(CPtr addr=FindGlobalVar(expr.mem.symbol->fullCppName())){setGlobal((Byte*)addr   +expr.mem.offset, expr.mem.offset2, FlagTest(expr.symbol.modifiers, Symbol::MODIF_REF)); return;} // set successfully
+         if(expr.mem.index>=0)                                                         {setHeap  (expr.mem.index+expr.mem.offset, expr.mem.offset2, FlagOn(expr.symbol.modifiers, Symbol::MODIF_REF)); return;} // set successfully
+         if(expr.mem.symbol)if(CPtr addr=FindGlobalVar(expr.mem.symbol->fullCppName())){setGlobal((Byte*)addr   +expr.mem.offset, expr.mem.offset2, FlagOn(expr.symbol.modifiers, Symbol::MODIF_REF)); return;} // set successfully
       }break;
 
       case Expr::Memory::LOCAL:
@@ -469,8 +469,8 @@ void Call::Param::set(Expr &expr, Compiler &compiler, Bool auto_map)
             if(local.stack_offset< 0 && auto_map)compiler.mapLocalInStack(expr.mem); // auto map only if allowed
             if(local.stack_offset>=0)
             {
-               if(local.force_heap)setHeap (local.stack_offset+expr.mem.offset, expr.mem.offset2, FlagTest(expr.symbol.modifiers, Symbol::MODIF_REF));
-               else                setStack(local.stack_offset+expr.mem.offset, expr.mem.offset2, FlagTest(expr.symbol.modifiers, Symbol::MODIF_REF));
+               if(local.force_heap)setHeap (local.stack_offset+expr.mem.offset, expr.mem.offset2, FlagOn(expr.symbol.modifiers, Symbol::MODIF_REF));
+               else                setStack(local.stack_offset+expr.mem.offset, expr.mem.offset2, FlagOn(expr.symbol.modifiers, Symbol::MODIF_REF));
                return; // set successfully
             }
          }
@@ -478,12 +478,12 @@ void Call::Param::set(Expr &expr, Compiler &compiler, Bool auto_map)
 
       case Expr::Memory::PARAM:
       {
-         if(expr.mem.index>=0){setParamStack(expr.mem.index+expr.mem.offset, expr.mem.offset2, FlagTest(expr.symbol.modifiers, Symbol::MODIF_REF)); return;} // set successfully
+         if(expr.mem.index>=0){setParamStack(expr.mem.index+expr.mem.offset, expr.mem.offset2, FlagOn(expr.symbol.modifiers, Symbol::MODIF_REF)); return;} // set successfully
       }break;
 
       case Expr::Memory::THIS:
       {
-         setThis(expr.mem.offset, expr.mem.offset2, FlagTest(expr.symbol.modifiers, Symbol::MODIF_REF)); return; // set successfully
+         setThis(expr.mem.offset, expr.mem.offset2, FlagOn(expr.symbol.modifiers, Symbol::MODIF_REF)); return; // set successfully
       }break;
 
       case Expr::Memory::RESULT:

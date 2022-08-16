@@ -870,6 +870,18 @@ MeshPart& MeshPart::setRandomLeafBending(Flt random_value)
 }
 MeshPart& MeshPart::delRandomLeafBending() {exclude(VTX_SIZE); return T;}
 /******************************************************************************/
+static inline void WaitForStream(Bool &ok, C MaterialPtr &material)
+{
+   if(material)ok&=material->waitForStream();
+}
+Bool MeshPart::waitForStream()C
+{
+   Bool ok=true;    WaitForStream(ok, _variation    .material);
+   REPA(_variations)WaitForStream(ok, _variations[i].material);
+   REPA(_materials )WaitForStream(ok,               _materials[i]);
+   return ok;
+}
+/******************************************************************************/
 MeshPart& MeshPart::operator+=(C MeshPart &src)
 {
    base  +=src.base  ;

@@ -35,7 +35,8 @@ void Button::zero()
 Button::Button() {zero();}
 Button& Button::del()
 {
-   text .clear();
+   text .del  ();
+   extra.del  ();
    image.clear();
    skin .clear();
    super::del(); zero(); return T;
@@ -70,6 +71,7 @@ Button& Button::create(C Button &src)
          text_align    =src. text_align;
          text_size     =src. text_size;
          text          =src. text;
+         extra         =src. extra;
          image         =src. image;
          skin          =src. skin;
         _push_button   =src._push_button;
@@ -96,7 +98,15 @@ Button& Button::func(void (*func)(Ptr), Ptr user, Bool immediate)
 }
 void Button::call(Bool allow_sound)
 {
-   if(allow_sound && sound && mode!=BUTTON_CONTINUOUS && _sub_type==BUTTON_TYPE_DEFAULT)Gui.playClickSound(); // don't play sounds for 'Tab' because they're played by 'Tabs'
+   if(allow_sound && sound && mode!=BUTTON_CONTINUOUS)switch(_sub_type) // don't play sounds for 'Tab' because they're played by 'Tabs'
+   {
+      case BUTTON_TYPE_DEFAULT:
+      case BUTTON_TYPE_COMBOBOX:
+      case BUTTON_TYPE_WINDOW_MINIMIZE:
+      case BUTTON_TYPE_WINDOW_MAXIMIZE:
+      case BUTTON_TYPE_WINDOW_CLOSE:
+         Gui.playClickSound(); break;
+   }
    if(_func)
    {
       if(_func_immediate)
@@ -140,7 +150,7 @@ TextStyle* Button::textParams(Flt &text_size, Flt &text_padd, C Flt *height)C
 }
 Flt Button::textWidth(C Flt *height)C
 {
-   if(text.is())
+   if(hasData())
    {
       Flt text_size, text_padd; if(TextStyle *text_style=textParams(text_size, text_padd, height))
       {
@@ -148,10 +158,26 @@ Flt Button::textWidth(C Flt *height)C
       #if DEFAULT_FONT_FROM_CUSTOM_SKIN
          if(!ts.font())if(GuiSkin *skin=getSkin())ts.font(skin->font()); // adjust font in case it's empty and the custom skin has a different font than the 'Gui.skin'
       #endif
-         return ts.textWidth(text);
+         return ts.textWidth(text, extra.data(), extra.elms());
       }
    }
    return 0;
+}
+Button& Button::fitText()
+{
+   if(hasData())
+   {
+      Flt text_size, text_padd; if(TextStyle *text_style=textParams(text_size, text_padd))
+      {
+         TextStyleParams ts=*text_style; ts.size=text_size;
+      #if DEFAULT_FONT_FROM_CUSTOM_SKIN
+         if(!ts.font())if(GuiSkin *skin=getSkin())ts.font(skin->font()); // adjust font in case it's empty and the custom skin has a different font than the 'Gui.skin'
+      #endif
+         Flt text_width=ts.textWidth(text, extra.data(), extra.elms()), avail_width=rect().w()-text_padd*2;
+         if( text_width>avail_width)T.text_size*=avail_width/text_width;
+      }
+   }
+   return T;
 }
 /******************************************************************************/
 Button& Button::set(Bool on, SET_MODE mode)
@@ -163,11 +189,11 @@ Button& Button::set(Bool on, SET_MODE mode)
    }
    return T;
 }
-Button& Button::push    (                   ) {T._push_button=true ; return T;}
-Button& Button::setText (C Str        &text ) {T. text       =text ; return T;}
-Button& Button::setImage(C ImagePtr   &image) {T. image      =image; return T;}
-Button& Button::setSkin (C GuiSkinPtr &skin ) {T. skin       =skin ; return T;}
-Button& Button::subType (BUTTON_TYPE   type ) {T._sub_type   =type ; return T;}
+Button& Button::push    (                   ) {T._push_button=true ;              return T;}
+Button& Button::setText (C Str        &text ) {T. text       =text ; extra.del(); return T;}
+Button& Button::setImage(C ImagePtr   &image) {T. image      =image;              return T;}
+Button& Button::setSkin (C GuiSkinPtr &skin ) {T. skin       =skin ;              return T;}
+Button& Button::subType (BUTTON_TYPE   type ) {T._sub_type   =type ;              return T;}
 /******************************************************************************/
 Button& Button:: enabled (Bool  enabled) {if(T. enabled()!= enabled){if(!enabled && mode!=BUTTON_TOGGLE)_on=false; super:: enabled( enabled);} return T;}
 Button& Button::disabled (Bool disabled) {if(T.disabled()!=disabled){if(disabled && mode!=BUTTON_TOGGLE)_on=false; super::disabled(disabled);} return T;}
@@ -318,7 +344,7 @@ void Button::draw(C GuiPC &gpc)
          Rect       text_rect;
          TextStyle *text_style=null;
 
-         if(text.is())
+         if(hasData())
          {
             text_rect=r;
             if(text_style=textParams(text_size, text_padd)){text_rect.min.x+=text_padd; text_rect.max.x-=text_padd;}
@@ -336,12 +362,12 @@ void Button::draw(C GuiPC &gpc)
          {
             Color col=ColorMul(image_color, *pushed_color); // 'image_color' is user modification, 'pushed_color' is push/disabled modification
             if(!panel_image)image->draw   (col, highlight, r);else // if there's no 'panel_image' then there's no way to determine the button boundaries, so let's stretch the custom image to entire rect
-            if( text.is()  )image->draw   (col, highlight, Rect(text_rect.min.x, text_rect.min.y, text_rect.min.x+image->aspect()*text_rect.h(), text_rect.max.y));else // draw on the left if there's text available
+            if( hasData()  )image->draw   (col, highlight, Rect(text_rect.min.x, text_rect.min.y, text_rect.min.x+image->aspect()*text_rect.h(), text_rect.max.y));else // draw on the left if there's text available
                             image->drawFit(col, highlight, r);
          }
 
          // draw text
-         if(text.is() && text_style)
+         if(hasData() && text_style)
          {
             TextStyleParams ts=*text_style; ts.size=text_size; ts.align.x=text_align;
             // modify text color based on pushed/disabled
@@ -370,7 +396,7 @@ void Button::draw(C GuiPC &gpc)
          #if DEFAULT_FONT_FROM_CUSTOM_SKIN
             if(!ts.font())ts.font(skin->font()); // adjust font in case it's empty and the custom skin has a different font than the 'Gui.skin'
          #endif
-            D.text(ts, text_rect, text);
+            D.text(ts, text_rect, text, extra.data(), extra.elms());
          }
 
          // draw special image (draw after text in case of combobox arrows)
@@ -405,7 +431,8 @@ Bool Button::save(File &f, CChar *path)C
 {
    if(super::save(f, path))
    {
-      f.putMulti(Byte(7), mode, sound, image_color, text_align, text_size, _on, _focusable)<<text; // version
+      f.putMulti(Byte(8), mode, sound, image_color, text_align, text_size, _on, _focusable)<<text; // version
+      extra.save(f, path);
       f.putAsset(image.id());
       f.putAsset(skin .id());
       // '_pixel_align' doesn't need to be saved as it's currently being used only by Tab      and there it's always set manually
@@ -419,6 +446,17 @@ Bool Button::load(File &f, CChar *path)
 {
    del(); if(super::load(f, path))switch(f.decUIntV()) // version
    {
+      case 8:
+      {
+         setParams();
+         f.getMulti(mode, sound, image_color, text_align, text_size, _on, _focusable)>>text; if(extra.load(f, path))
+         {
+            image.require(f.getAssetID(), path);
+            skin .require(f.getAssetID(), path);
+            if(f.ok())return true;
+         }
+      }break;
+
       case 7:
       {
          setParams();

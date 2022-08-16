@@ -310,8 +310,10 @@ class TransformRegion : Region
          {
             ObjEdit.mesh_undos.set("transform");
             MeshLod &lod=ObjEdit.getLod();
-            Matrix  matrix=ObjEdit.mesh_matrix*T.matrix/ObjEdit.mesh_matrix; // "edit mesh" is in 'MatrixIdentity' however we're expecting it to be in 'mesh_matrix'
-            Matrix3 matrix_nrm=matrix; if(scale_normal)matrix_nrm.inverseScale();else matrix_nrm.normalize();
+            Matrix3 matrix_nrm=T.matrix; if(scale_normal)matrix_nrm.inverseScale();else matrix_nrm.normalize();
+                    matrix_nrm=ObjEdit.mesh_matrix.orn()*  matrix_nrm/ObjEdit.mesh_matrix.orn(); // "edit mesh" is in 'MatrixIdentity' however we're expecting it to be in 'mesh_matrix'
+            Matrix  matrix    =ObjEdit.mesh_matrix      *T.matrix    /ObjEdit.mesh_matrix      ; // "edit mesh" is in 'MatrixIdentity' however we're expecting it to be in 'mesh_matrix'
+
             if(ObjEdit.mesh_parts.edit_selected())
             {
                Memt<int  > parts;

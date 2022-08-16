@@ -209,7 +209,7 @@ class PanelEditor : PropWin
       autoData(&edit);
 
       Rect r=super .create("Panel Editor", Vec2(0.02, -0.07), 0.036, 0.043, PropElmNameWidth); button[2].func(HideProjAct, SCAST(GuiObj, T)).show(); flag|=WIN_RESIZABLE; super.changed(Changed, PreChanged);
-      T+=undo      .create(Rect_LU(0.02, -0.01     , 0.05, 0.05)).func(Undo, T).focusable(false).desc("Undo"); undo.image="Gui/Misc/undo.img";
+      T+=undo      .create(Rect_LU(0.02, -0.01       , 0.05, 0.05)).func(Undo, T).focusable(false).desc("Undo"); undo.image="Gui/Misc/undo.img";
       T+=redo      .create(Rect_LU(undo  .rect().ru(), 0.05, 0.05)).func(Redo, T).focusable(false).desc("Redo"); redo.image="Gui/Misc/redo.img";
       T+=locate    .create(Rect_LU(redo  .rect().ru()+Vec2(0.01, 0), 0.14, 0.05), "Locate").func(Locate, T).focusable(false).desc("Locate this element in the Project");
       T+=show_lines.create(Rect_LU(locate.rect().ru()+Vec2(0.01, 0), 0.22, 0.05), "Show Lines").focusable(false); show_lines.mode=BUTTON_TOGGLE;

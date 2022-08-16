@@ -37,7 +37,7 @@ const_mem_addr struct Property // Class Member Gui Control !! must be stored in 
    Property& setSlider(                                             ); // set as slider type
 
    // get / set
-   Property& display(C Str &name);   C Str& display()C {return text();} // set/get property display name
+   Property& display(C Str &name);   C Str& display()C {return text.text;} // set/get property display name
 
    Property& desc(C Str &desc);   C Str& desc()C; // set/get property description
 
@@ -132,7 +132,7 @@ private:
    NO_COPY_CONSTRUCTOR(Property);
 };
 /******************************************************************************/
-Rect AddProperties(Memx<Property> &properties, GuiObj &parent, C Vec2 &left_up, Flt property_height, Flt value_width, C TextStylePtr &text_style=null, Flt *parent_width=null); // add 'properties' properties to 'parent' gui object, 'left_up'=coordinates in parent space where to start adding elements, 'property_height'=height of a single property element, 'value_width'=width of gui elements specified for value presentation, returns rectangle containing the properties, 'ts'=text style used for describing properties (the object is not copied, only the pointer to the object is remembered, therefore it must point to a constant memory address !!), 'parent_width'=if parent width is provided then 'value_width' will be limited to don't exceed parent size
+Rect AddProperties(Memx<Property> &properties, GuiObj &parent, C Vec2 &left_up, Flt property_height, Flt value_width, C TextStylePtr &text_style=null, C Flt *parent_width=null); // add 'properties' properties to 'parent' gui object, 'left_up'=coordinates in parent space where to start adding elements, 'property_height'=height of a single property element, 'value_width'=width of gui elements specified for value presentation, returns rectangle containing the properties, 'ts'=text style used for describing properties (the object is not copied, only the pointer to the object is remembered, therefore it must point to a constant memory address !!), 'parent_width'=if parent width is provided then 'value_width' will be limited to don't exceed parent size
 
 void SaveProperties(C Memx<Property> &properties,    MemPtr<TextNode>  nodes, Char space_replacement=' ', Bool handle_same_names=false); // save properties to   text nodes, 'space_replacement'=replace spaces with this character, 'handle_same_names'=if handle case when some properties have same names
 void LoadProperties(  Memx<Property> &properties, C CMemPtr<TextNode> &nodes, Char space_replacement=' ', Bool handle_same_names=false); // load properties from text nodes, 'space_replacement'=replace spaces with this character, 'handle_same_names'=if handle case when some properties have same names

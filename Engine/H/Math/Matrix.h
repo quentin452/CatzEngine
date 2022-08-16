@@ -346,6 +346,7 @@ struct MatrixD3 // Matrix 3x3 (orientation + scale, double precision)
    Dbl  angle    (            Bool normalized=false)C; // get rotation angle               , if you know that the matrix is normalized then set 'normalized=true' for more performance
    Dbl  axisAngle(VecD &axis, Bool normalized=false)C; // get rotation axis and angle      , if you know that the matrix is normalized then set 'normalized=true' for more performance
    VecD axisAngle(            Bool normalized=false)C; // get rotation axis scaled by angle, if you know that the matrix is normalized then set 'normalized=true' for more performance
+   Dbl  angleY   (            Bool normalized=false)C; // get rotation angle along Y axis  , if you know that the matrix is normalized then set 'normalized=true' for more performance, this is the same as "axisAngle(normalized).y" but faster
 
    Str asText(Int precision=INT_MAX)C {return S+"X: "+x.asText(precision)+", Y: "+y.asText(precision)+", Z:"+z.asText(precision);} // get text description
 

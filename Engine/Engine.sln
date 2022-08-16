@@ -1,6 +1,6 @@
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29009.5
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32328.378
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Engine", "Engine.vcxproj", "{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}"
 EndProject
@@ -11,31 +11,37 @@ Global
 		Debug DX11|3) ARM = Debug DX11|3) ARM
 		Debug DX11|4) Web = Debug DX11|4) Web
 		Debug DX11|5) Nintendo Switch = Debug DX11|5) Nintendo Switch
+		Debug DX11|6) Android = Debug DX11|6) Android
 		Debug GL|1) 64 bit = Debug GL|1) 64 bit
 		Debug GL|2) 32 bit = Debug GL|2) 32 bit
 		Debug GL|3) ARM = Debug GL|3) ARM
 		Debug GL|4) Web = Debug GL|4) Web
 		Debug GL|5) Nintendo Switch = Debug GL|5) Nintendo Switch
+		Debug GL|6) Android = Debug GL|6) Android
 		Debug Universal DX11|1) 64 bit = Debug Universal DX11|1) 64 bit
 		Debug Universal DX11|2) 32 bit = Debug Universal DX11|2) 32 bit
 		Debug Universal DX11|3) ARM = Debug Universal DX11|3) ARM
 		Debug Universal DX11|4) Web = Debug Universal DX11|4) Web
 		Debug Universal DX11|5) Nintendo Switch = Debug Universal DX11|5) Nintendo Switch
+		Debug Universal DX11|6) Android = Debug Universal DX11|6) Android
 		Release DX11|1) 64 bit = Release DX11|1) 64 bit
 		Release DX11|2) 32 bit = Release DX11|2) 32 bit
 		Release DX11|3) ARM = Release DX11|3) ARM
 		Release DX11|4) Web = Release DX11|4) Web
 		Release DX11|5) Nintendo Switch = Release DX11|5) Nintendo Switch
+		Release DX11|6) Android = Release DX11|6) Android
 		Release GL|1) 64 bit = Release GL|1) 64 bit
 		Release GL|2) 32 bit = Release GL|2) 32 bit
 		Release GL|3) ARM = Release GL|3) ARM
 		Release GL|4) Web = Release GL|4) Web
 		Release GL|5) Nintendo Switch = Release GL|5) Nintendo Switch
+		Release GL|6) Android = Release GL|6) Android
 		Release Universal DX11|1) 64 bit = Release Universal DX11|1) 64 bit
 		Release Universal DX11|2) 32 bit = Release Universal DX11|2) 32 bit
 		Release Universal DX11|3) ARM = Release Universal DX11|3) ARM
 		Release Universal DX11|4) Web = Release Universal DX11|4) Web
 		Release Universal DX11|5) Nintendo Switch = Release Universal DX11|5) Nintendo Switch
+		Release Universal DX11|6) Android = Release Universal DX11|6) Android
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Debug DX11|1) 64 bit.ActiveCfg = Debug DX11|x64
@@ -48,6 +54,8 @@ Global
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Debug DX11|4) Web.Build.0 = Debug DX11|Emscripten
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Debug DX11|5) Nintendo Switch.ActiveCfg = Debug DX11|NX64
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Debug DX11|5) Nintendo Switch.Build.0 = Debug DX11|NX64
+		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Debug DX11|6) Android.ActiveCfg = Debug DX11|Android-arm64-v8a
+		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Debug DX11|6) Android.Build.0 = Debug DX11|Android-arm64-v8a
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Debug GL|1) 64 bit.ActiveCfg = Debug GL|x64
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Debug GL|1) 64 bit.Build.0 = Debug GL|x64
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Debug GL|2) 32 bit.ActiveCfg = Debug GL|Win32
@@ -58,6 +66,8 @@ Global
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Debug GL|4) Web.Build.0 = Debug GL|Emscripten
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Debug GL|5) Nintendo Switch.ActiveCfg = Debug GL|NX64
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Debug GL|5) Nintendo Switch.Build.0 = Debug GL|NX64
+		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Debug GL|6) Android.ActiveCfg = Debug GL|Android-arm64-v8a
+		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Debug GL|6) Android.Build.0 = Debug GL|Android-arm64-v8a
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Debug Universal DX11|1) 64 bit.ActiveCfg = Debug Universal DX11|x64
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Debug Universal DX11|1) 64 bit.Build.0 = Debug Universal DX11|x64
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Debug Universal DX11|2) 32 bit.ActiveCfg = Debug Universal DX11|Win32
@@ -68,6 +78,8 @@ Global
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Debug Universal DX11|4) Web.Build.0 = Debug Universal DX11|Emscripten
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Debug Universal DX11|5) Nintendo Switch.ActiveCfg = Debug Universal DX11|NX64
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Debug Universal DX11|5) Nintendo Switch.Build.0 = Debug Universal DX11|NX64
+		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Debug Universal DX11|6) Android.ActiveCfg = Debug Universal DX11|Android-arm64-v8a
+		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Debug Universal DX11|6) Android.Build.0 = Debug Universal DX11|Android-arm64-v8a
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Release DX11|1) 64 bit.ActiveCfg = Release DX11|x64
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Release DX11|1) 64 bit.Build.0 = Release DX11|x64
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Release DX11|2) 32 bit.ActiveCfg = Release DX11|Win32
@@ -78,6 +90,8 @@ Global
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Release DX11|4) Web.Build.0 = Release DX11|Emscripten
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Release DX11|5) Nintendo Switch.ActiveCfg = Release DX11|NX64
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Release DX11|5) Nintendo Switch.Build.0 = Release DX11|NX64
+		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Release DX11|6) Android.ActiveCfg = Release DX11|Android-arm64-v8a
+		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Release DX11|6) Android.Build.0 = Release DX11|Android-arm64-v8a
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Release GL|1) 64 bit.ActiveCfg = Release GL|x64
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Release GL|1) 64 bit.Build.0 = Release GL|x64
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Release GL|2) 32 bit.ActiveCfg = Release GL|Win32
@@ -88,6 +102,8 @@ Global
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Release GL|4) Web.Build.0 = Release GL|Emscripten
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Release GL|5) Nintendo Switch.ActiveCfg = Release GL|NX64
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Release GL|5) Nintendo Switch.Build.0 = Release GL|NX64
+		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Release GL|6) Android.ActiveCfg = Release GL|Android-arm64-v8a
+		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Release GL|6) Android.Build.0 = Release GL|Android-arm64-v8a
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Release Universal DX11|1) 64 bit.ActiveCfg = Release Universal DX11|x64
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Release Universal DX11|1) 64 bit.Build.0 = Release Universal DX11|x64
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Release Universal DX11|2) 32 bit.ActiveCfg = Release Universal DX11|Win32
@@ -98,6 +114,8 @@ Global
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Release Universal DX11|4) Web.Build.0 = Release Universal DX11|Emscripten
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Release Universal DX11|5) Nintendo Switch.ActiveCfg = Release Universal DX11|NX64
 		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Release Universal DX11|5) Nintendo Switch.Build.0 = Release Universal DX11|NX64
+		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Release Universal DX11|6) Android.ActiveCfg = Release Universal DX11|Android-arm64-v8a
+		{01571E12-3EF1-4A21-ABEC-7F9ECE949D55}.Release Universal DX11|6) Android.Build.0 = Release Universal DX11|Android-arm64-v8a
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

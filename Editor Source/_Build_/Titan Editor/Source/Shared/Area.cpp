@@ -260,20 +260,20 @@ bool LoadGame(C Str &name, Mesh *hm_mesh, PhysPart *hm_phys, Memc<Game::Area::Da
       }
       return false;
    }
-   bool     ObjVer::removed(             )C {return FlagTest(flag, REMOVED);}
-   bool     ObjVer::ovrPath(             )C {return FlagTest(flag, OVR_PATH);}
-   bool     ObjVer::meshVarOvr(             )C {return FlagTest(flag, OVR_MESH_VARIATION);}
-   bool     ObjVer::terrain(Project &proj)C {if(flag&OVR_ACCESS)return FlagTest(flag, TERRAIN); return proj.getObjTerrain(elm_obj_id);}
-   OBJ_PATH ObjVer::path(Project &proj)C {if(ovrPath()      )return pathSelf();              return proj.getObjPath   (elm_obj_id);}
+   bool     ObjVer::removed(             )C {return FlagOn(flag, REMOVED);}
+   bool     ObjVer::ovrPath(             )C {return FlagOn(flag, OVR_PATH);}
+   bool     ObjVer::meshVarOvr(             )C {return FlagOn(flag, OVR_MESH_VARIATION);}
+   bool     ObjVer::terrain(Project &proj)C {if(flag&OVR_ACCESS)return FlagOn(flag, TERRAIN); return proj.getObjTerrain(elm_obj_id);}
+   OBJ_PATH ObjVer::path(Project &proj)C {if(ovrPath()      )return pathSelf();            return proj.getObjPath   (elm_obj_id);}
    OBJ_PATH ObjVer::pathSelf(             )C {return OBJ_PATH((flag>>PATH_SHIFT)&PATH_MASK);}
    bool ObjVer::set(C ObjData &obj, C VecI2 &area_xy) // return true if any member was changed
    {
       bool changed=false;
       uint flag   =0;
       FlagSet(flag, REMOVED           , obj.removed);
-      FlagSet(flag, OVR_ACCESS        , FlagTest(obj.params.flag, EditObject::OVR_ACCESS        )); FlagSet(flag, TERRAIN, obj.params.access==OBJ_ACCESS_TERRAIN);
-      FlagSet(flag, OVR_PATH          , FlagTest(obj.params.flag, EditObject::OVR_PATH          )); flag|=((obj.params.path&PATH_MASK)<<PATH_SHIFT);
-      FlagSet(flag, OVR_MESH_VARIATION, FlagTest(obj.params.flag, EditObject::OVR_MESH_VARIATION));
+      FlagSet(flag, OVR_ACCESS        , FlagOn(obj.params.flag, EditObject::OVR_ACCESS        )); FlagSet(flag, TERRAIN, obj.params.access==OBJ_ACCESS_TERRAIN);
+      FlagSet(flag, OVR_PATH          , FlagOn(obj.params.flag, EditObject::OVR_PATH          )); flag|=((obj.params.path&PATH_MASK)<<PATH_SHIFT);
+      FlagSet(flag, OVR_MESH_VARIATION, FlagOn(obj.params.flag, EditObject::OVR_MESH_VARIATION));
                                                    if(T.flag             !=flag                        ){T.flag             =flag                        ; changed=true;}
                                                    if(T.area_xy          !=area_xy                     ){T.area_xy          =area_xy                     ; changed=true;}
                                                    if(T.mesh_variation_id!=obj.params.mesh_variation_id){T.mesh_variation_id=obj.params.mesh_variation_id; changed=true;}

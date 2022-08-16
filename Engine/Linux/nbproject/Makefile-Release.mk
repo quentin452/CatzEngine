@@ -119,6 +119,8 @@ OBJECTFILES= \
 	${OBJECTDIR}/_ext/f2a5efb0/Image_RT.o \
 	${OBJECTDIR}/_ext/f2a5efb0/Image.o \
 	${OBJECTDIR}/_ext/f2a5efb0/ImageFilterWaifu.o \
+	${OBJECTDIR}/_ext/96794b04/ASTC.o \
+	${OBJECTDIR}/_ext/96794b04/ASTC_Compress.o \
 	${OBJECTDIR}/_ext/96794b04/BC.o \
 	${OBJECTDIR}/_ext/96794b04/BC_Compress.o \
 	${OBJECTDIR}/_ext/96794b04/BMP.o \
@@ -287,6 +289,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/_ext/36aac491/String.o \
 	${OBJECTDIR}/_ext/36aac491/Thread.o \
 	${OBJECTDIR}/_ext/36aac491/Timer.o \
+	${OBJECTDIR}/_ext/36aac491/Translation.o \
 	${OBJECTDIR}/_ext/36aac491/Video.o \
 	${OBJECTDIR}/_ext/36aac491/Windows.o \
 	${OBJECTDIR}/_ext/c7f50158/AdMob.o \
@@ -776,6 +779,16 @@ ${OBJECTDIR}/_ext/f2a5efb0/ImageFilterWaifu.o: ../Source/Graphics/ImageFilterWai
 	${MKDIR} -p ${OBJECTDIR}/_ext/f2a5efb0
 	${RM} "$@.d"
 	$(COMPILE.cc) -O3 -DDEBUG=0 -I.. -I../H/_ -I../../ThirdPartyLibs -I../../ThirdPartyLibs/Bullet/lib/src -I../../ThirdPartyLibs/FBX -I../../ThirdPartyLibs/FreeType/lib/include -I../../ThirdPartyLibs/Ogg/include -I../../ThirdPartyLibs/Opus/lib/include -I../../ThirdPartyLibs/Opus/file/include -I../../ThirdPartyLibs/Theora/include -I../../ThirdPartyLibs/Vorbis/include -I../../ThirdPartyLibs/VP/libvpx/third_party/libwebm -I../../ThirdPartyLibs/FDK-AAC/lib/libAACdec/include -I../../ThirdPartyLibs/FDK-AAC/lib/libAACenc/include -I../../ThirdPartyLibs/FDK-AAC/lib/libFDK/include -I../../ThirdPartyLibs/FDK-AAC/lib/libMpegTPDec/include -I../../ThirdPartyLibs/FDK-AAC/lib/libMpegTPEnc/include -I../../ThirdPartyLibs/FDK-AAC/lib/libPCMutils/include -I../../ThirdPartyLibs/FDK-AAC/lib/libSBRdec/include -I../../ThirdPartyLibs/FDK-AAC/lib/libSBRenc/include -I../../ThirdPartyLibs/FDK-AAC/lib/libSYS/include -I../../ThirdPartyLibs/PhysX/physx/include -I../../ThirdPartyLibs/PhysX/pxshared/include -I../../ThirdPartyLibs/PhysX/physx/source/common/src -I../../ThirdPartyLibs/PhysX/physx/source/foundation/include -I../../ThirdPartyLibs/PhysX/physx/source/geomutils/src -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/f2a5efb0/ImageFilterWaifu.o ../Source/Graphics/ImageFilterWaifu.cpp
+
+${OBJECTDIR}/_ext/96794b04/ASTC.o: ../Source/Graphics/Import/ASTC.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/96794b04
+	${RM} "$@.d"
+	$(COMPILE.cc) -O3 -DDEBUG=0 -I.. -I../H/_ -I../../ThirdPartyLibs -I../../ThirdPartyLibs/Bullet/lib/src -I../../ThirdPartyLibs/FBX -I../../ThirdPartyLibs/FreeType/lib/include -I../../ThirdPartyLibs/Ogg/include -I../../ThirdPartyLibs/Opus/lib/include -I../../ThirdPartyLibs/Opus/file/include -I../../ThirdPartyLibs/Theora/include -I../../ThirdPartyLibs/Vorbis/include -I../../ThirdPartyLibs/VP/libvpx/third_party/libwebm -I../../ThirdPartyLibs/FDK-AAC/lib/libAACdec/include -I../../ThirdPartyLibs/FDK-AAC/lib/libAACenc/include -I../../ThirdPartyLibs/FDK-AAC/lib/libFDK/include -I../../ThirdPartyLibs/FDK-AAC/lib/libMpegTPDec/include -I../../ThirdPartyLibs/FDK-AAC/lib/libMpegTPEnc/include -I../../ThirdPartyLibs/FDK-AAC/lib/libPCMutils/include -I../../ThirdPartyLibs/FDK-AAC/lib/libSBRdec/include -I../../ThirdPartyLibs/FDK-AAC/lib/libSBRenc/include -I../../ThirdPartyLibs/FDK-AAC/lib/libSYS/include -I../../ThirdPartyLibs/PhysX/physx/include -I../../ThirdPartyLibs/PhysX/pxshared/include -I../../ThirdPartyLibs/PhysX/physx/source/common/src -I../../ThirdPartyLibs/PhysX/physx/source/foundation/include -I../../ThirdPartyLibs/PhysX/physx/source/geomutils/src -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/96794b04/ASTC.o ../Source/Graphics/Import/ASTC.cpp
+
+${OBJECTDIR}/_ext/96794b04/ASTC_Compress.o: ../Source/Graphics/Import/ASTC_Compress.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/96794b04
+	${RM} "$@.d"
+	$(COMPILE.cc) -O3 -DDEBUG=0 -I.. -I../H/_ -I../../ThirdPartyLibs -I../../ThirdPartyLibs/Bullet/lib/src -I../../ThirdPartyLibs/FBX -I../../ThirdPartyLibs/FreeType/lib/include -I../../ThirdPartyLibs/Ogg/include -I../../ThirdPartyLibs/Opus/lib/include -I../../ThirdPartyLibs/Opus/file/include -I../../ThirdPartyLibs/Theora/include -I../../ThirdPartyLibs/Vorbis/include -I../../ThirdPartyLibs/VP/libvpx/third_party/libwebm -I../../ThirdPartyLibs/FDK-AAC/lib/libAACdec/include -I../../ThirdPartyLibs/FDK-AAC/lib/libAACenc/include -I../../ThirdPartyLibs/FDK-AAC/lib/libFDK/include -I../../ThirdPartyLibs/FDK-AAC/lib/libMpegTPDec/include -I../../ThirdPartyLibs/FDK-AAC/lib/libMpegTPEnc/include -I../../ThirdPartyLibs/FDK-AAC/lib/libPCMutils/include -I../../ThirdPartyLibs/FDK-AAC/lib/libSBRdec/include -I../../ThirdPartyLibs/FDK-AAC/lib/libSBRenc/include -I../../ThirdPartyLibs/FDK-AAC/lib/libSYS/include -I../../ThirdPartyLibs/PhysX/physx/include -I../../ThirdPartyLibs/PhysX/pxshared/include -I../../ThirdPartyLibs/PhysX/physx/source/common/src -I../../ThirdPartyLibs/PhysX/physx/source/foundation/include -I../../ThirdPartyLibs/PhysX/physx/source/geomutils/src -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/96794b04/ASTC_Compress.o ../Source/Graphics/Import/ASTC_Compress.cpp
 
 ${OBJECTDIR}/_ext/96794b04/BC.o: ../Source/Graphics/Import/BC.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/96794b04
@@ -1616,6 +1629,11 @@ ${OBJECTDIR}/_ext/36aac491/Timer.o: ../Source/Misc/Timer.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/36aac491
 	${RM} "$@.d"
 	$(COMPILE.cc) -O3 -DDEBUG=0 -I.. -I../H/_ -I../../ThirdPartyLibs -I../../ThirdPartyLibs/Bullet/lib/src -I../../ThirdPartyLibs/FBX -I../../ThirdPartyLibs/FreeType/lib/include -I../../ThirdPartyLibs/Ogg/include -I../../ThirdPartyLibs/Opus/lib/include -I../../ThirdPartyLibs/Opus/file/include -I../../ThirdPartyLibs/Theora/include -I../../ThirdPartyLibs/Vorbis/include -I../../ThirdPartyLibs/VP/libvpx/third_party/libwebm -I../../ThirdPartyLibs/FDK-AAC/lib/libAACdec/include -I../../ThirdPartyLibs/FDK-AAC/lib/libAACenc/include -I../../ThirdPartyLibs/FDK-AAC/lib/libFDK/include -I../../ThirdPartyLibs/FDK-AAC/lib/libMpegTPDec/include -I../../ThirdPartyLibs/FDK-AAC/lib/libMpegTPEnc/include -I../../ThirdPartyLibs/FDK-AAC/lib/libPCMutils/include -I../../ThirdPartyLibs/FDK-AAC/lib/libSBRdec/include -I../../ThirdPartyLibs/FDK-AAC/lib/libSBRenc/include -I../../ThirdPartyLibs/FDK-AAC/lib/libSYS/include -I../../ThirdPartyLibs/PhysX/physx/include -I../../ThirdPartyLibs/PhysX/pxshared/include -I../../ThirdPartyLibs/PhysX/physx/source/common/src -I../../ThirdPartyLibs/PhysX/physx/source/foundation/include -I../../ThirdPartyLibs/PhysX/physx/source/geomutils/src -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/36aac491/Timer.o ../Source/Misc/Timer.cpp
+
+${OBJECTDIR}/_ext/36aac491/Translation.o: ../Source/Misc/Translation.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/36aac491
+	${RM} "$@.d"
+	$(COMPILE.cc) -O3 -DDEBUG=0 -I.. -I../H/_ -I../../ThirdPartyLibs -I../../ThirdPartyLibs/Bullet/lib/src -I../../ThirdPartyLibs/FBX -I../../ThirdPartyLibs/FreeType/lib/include -I../../ThirdPartyLibs/Ogg/include -I../../ThirdPartyLibs/Opus/lib/include -I../../ThirdPartyLibs/Opus/file/include -I../../ThirdPartyLibs/Theora/include -I../../ThirdPartyLibs/Vorbis/include -I../../ThirdPartyLibs/VP/libvpx/third_party/libwebm -I../../ThirdPartyLibs/FDK-AAC/lib/libAACdec/include -I../../ThirdPartyLibs/FDK-AAC/lib/libAACenc/include -I../../ThirdPartyLibs/FDK-AAC/lib/libFDK/include -I../../ThirdPartyLibs/FDK-AAC/lib/libMpegTPDec/include -I../../ThirdPartyLibs/FDK-AAC/lib/libMpegTPEnc/include -I../../ThirdPartyLibs/FDK-AAC/lib/libPCMutils/include -I../../ThirdPartyLibs/FDK-AAC/lib/libSBRdec/include -I../../ThirdPartyLibs/FDK-AAC/lib/libSBRenc/include -I../../ThirdPartyLibs/FDK-AAC/lib/libSYS/include -I../../ThirdPartyLibs/PhysX/physx/include -I../../ThirdPartyLibs/PhysX/pxshared/include -I../../ThirdPartyLibs/PhysX/physx/source/common/src -I../../ThirdPartyLibs/PhysX/physx/source/foundation/include -I../../ThirdPartyLibs/PhysX/physx/source/geomutils/src -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/36aac491/Translation.o ../Source/Misc/Translation.cpp
 
 ${OBJECTDIR}/_ext/36aac491/Video.o: ../Source/Misc/Video.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/36aac491

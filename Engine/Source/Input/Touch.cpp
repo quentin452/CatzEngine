@@ -178,13 +178,16 @@ void TouchesUpdate()
       // dragging
       if(t.on())
       {
-         if(!t.selecting())
+         if(!t.dragging()) // since dragging can be enabled only if selecting, then check this first to allow skipping check for selecting
          {
-            Flt dist2=Dist2(t.pos(), t.startPos())*Sqr(D.scale()*(D.smallSize() ? 0.5f : 1.0f));
-            if(t.stylus() ? (dist2>=TouchSelectDist2 && t.life()>=StylusSelectTime+Time.ad()) || dist2>=TouchSelectBigDist2 // stylus can be slippery, because of that process it differently (for short distance require time, or allow big distance in case user made long swipe)
-                          :  dist2>=TouchSelectDist2                                                                       )t._selecting=true;
+            if(!t.selecting())
+            {
+               Flt dist2=Dist2(t.pos(), t.startPos())*Sqr(D.scale()*(D.smallSize() ? 0.5f : 1.0f));
+               if(t.stylus() ? (dist2>=TouchSelectDist2 && t.life()>=StylusSelectTime+Time.ad()) || dist2>=TouchSelectBigDist2 // stylus can be slippery, because of that process it differently (for short distance require time, or allow big distance in case user made long swipe)
+                             :  dist2>=TouchSelectDist2                                                                       )t._selecting=true;
+            }
+            if(/*!t.dragging() && already checked above*/ t.selecting() && t.life()>=DragTime+Time.ad())t._dragging=true;
          }
-         if(!t.dragging() && t.selecting() && t.life()>=DragTime+Time.ad())t._dragging=true;
 
          // scroll regions
          if(t._allow_scrolling) // only if allowed

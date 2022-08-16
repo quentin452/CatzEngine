@@ -65,9 +65,9 @@ void CodeEditor::validateDevEnv()
 }
 /******************************************************************************/
 void CodeEditor::setVSPath         (C Str &path) {          vs_path=path; options.          vs_path.set(path, QUIET); validateDevEnv();}
-void CodeEditor::setNBPath         (C Str &path) {    netbeans_path=path; options.    netbeans_path.set(path, QUIET);                  }
-void CodeEditor::setASPath         (C Str &path) {      android_sdk=path; options.      android_sdk.set(path, QUIET);                  }
-void CodeEditor::setANPath         (C Str &path) {      android_ndk=path; options.      android_ndk.set(path, QUIET);                  }
+void CodeEditor::setNetBeansPath   (C Str &path) {    netbeans_path=path; options.    netbeans_path.set(path, QUIET);                  }
+void CodeEditor::setAndroidSDKPath (C Str &path) {      android_sdk=path; options.      android_sdk.set(path, QUIET);                  }
+void CodeEditor::setAndroidNDKPath (C Str &path) {      android_ndk=path; options.      android_ndk.set(path, QUIET);                  }
 void CodeEditor::setJDKPath        (C Str &path) {         jdk_path=path; options.         jdk_path.set(path, QUIET);                  }
 void CodeEditor::setAndroidCertPath(C Str &path) {android_cert_file=path; options.android_cert_file.set(path, QUIET);                  }
 void CodeEditor::setAndroidCertPass(C Str &pass) {android_cert_pass=pass; options.android_cert_pass.set(pass, QUIET);                  }
@@ -97,6 +97,18 @@ static Str AndroidPackage(C Str &name) {return Replace(name, '-', '_');} // Andr
 Bool CodeEditor::verifyVS()
 {
    if(build_exe_type==EXE_UWP && !ValidatePackage())return false;
+   if(build_exe_type==EXE_NS && build_mode==BUILD_PUBLISH)
+   {
+      Str error;
+      if(!cei().appNintendoInitialCode  ().is())error.line()+="Please specify Nintendo Initial Code.";
+      if( cei().appNintendoAppID        ()  <=0)error.line()+="Please specify Nintendo App ID.";
+      if(!cei().appNintendoPublisherName().is())error.line()+="Please specify Nintendo Publisher Name.";
+      if(error.is())
+      {
+         CE.cei().appInvalidProperty(error);
+         return false;
+      }
+   }
    if(devenv_version.x<=0)validateDevEnv();
    Str message; if(CheckVisualStudio(devenv_version, &message, false))return true; // we can't check the minor version because EXE have it always set to 0 (last tested on VS 2017 regular+preview)
    options.activatePaths(); return Error(message);
@@ -114,13 +126,13 @@ Bool CodeEditor::verifyAndroid()
 {
    Str error;
 
-   if(! android_sdk  .is())error.line(2)+="The path to Android SDK has not been specified.";else
-   if(!     adbPath().is())error.line(2)+="Can't find \"adb\" tool in Android SDK.";else
-   if(!zipalignPath().is())error.line(2)+="Can't find \"zipalign\" tool in Android SDK.";
+        if(! android_sdk  .is())error.line()+="The path to Android SDK has not been specified.";else
+        if(!     adbPath().is())error.line()+="Can't find \"adb\" tool in Android SDK.";
+ /*else if(!zipalignPath().is())error.line()+="Can't find \"zipalign\" tool in Android SDK.";
 
-   if(! android_ndk  .is()      )error.line(2)+="The path to Android NDK has not been specified.";else
-   if(Contains(android_ndk, ' '))error.line(2)+="Android NDK will not work if it's stored in a path with spaces.\nPlease move the Android NDK folder to a path without spaces and try again.";else
-   if(!ndkBuildPath().is()      )error.line(2)+="Can't find \"ndk-build\" tool in Android NDK.";
+   if(! android_ndk  .is()      )error.line()+="The path to Android NDK has not been specified.";else
+   if(Contains(android_ndk, ' '))error.line()+="Android NDK will not work if it's stored in a path with spaces.\nPlease move the Android NDK folder to a path without spaces and try again.";else
+   if(!ndkBuildPath().is()      )error.line()+="Can't find \"ndk-build\" tool in Android NDK.";*/
 
    if(error.is())
    {
@@ -132,9 +144,7 @@ Bool CodeEditor::verifyAndroid()
    Str key=cei().appGooglePlayLicenseKey();
    if(Contains(key, '"') || Contains(key, '\n') || Contains(key, '\\')){cei().appInvalidProperty("App License Key is invalid."); return false;}
 
-   if(cei().appAndroidExpansion() && !key.is()){cei().appInvalidProperty("Auto-downloading Android Expansion Files requires setting Android License Key."); return false;}
-
-   return true;
+   return verifyVS();
 }
 Bool CodeEditor::verifyLinuxMake    () {return true;}
 Bool CodeEditor::verifyLinuxNetBeans()
@@ -159,7 +169,7 @@ static Str AppName(C Str &str, EXE_TYPE exe_type)
    FREPA(str)
    {
       Char c=str[i];
-      if(exe_type==EXE_APK)
+      if(exe_type==EXE_APK || exe_type==EXE_AAB)
       {
          if(c=='&')c='n'; // android will fail when uploading '&' APK to device
       }
@@ -320,10 +330,11 @@ Bool CodeEditor::verifyBuildPath()
       case EXE_UWP  : build_exe=build_path+build_project_name+".exe"; break;
       case EXE_MAC  : build_exe=build_path+build_project_name+".app"; break;
       case EXE_IOS  : build_exe=build_path+build_project_name+".app"; break;
-      case EXE_APK  : build_exe=build_path+"Android/bin/"+build_project_name; break;
+      case EXE_APK  : build_exe=build_path+"Android/"+(build_debug ? "Debug/" : "Release/")+build_project_name+".apk"; break;
+      case EXE_AAB  : build_exe=build_path+"Android/app/build/outputs/bundle/"+(build_debug ? "debug" : "release")+"/app-"+(build_debug ? "debug" : "release")+".aab"; break;
       case EXE_LINUX: build_exe=build_path+CleanNameForMakefile(build_project_name); break;
-      case EXE_WEB  : build_exe=build_path+"Emscripten/"+(build_debug ? "Debug DX11/" : "Release DX11/")+build_project_name+".html"; break; // warning: this must match codes below if(build_exe_type==EXE_WEB)config+=" DX11";
       case EXE_NS   : build_exe=build_path+"NX64/"      +(build_debug ? "Debug DX11/" : "Release DX11/")+build_project_name+".nsp" ; break; // warning: this must match codes below if(build_exe_type==EXE_NS )config+=" DX11";
+      case EXE_WEB  : build_exe=build_path+"Emscripten/"+(build_debug ? "Debug DX11/" : "Release DX11/")+build_project_name+".html"; break; // warning: this must match codes below if(build_exe_type==EXE_WEB)config+=" DX11";
       default       : build_exe.clear(); return false;
    }
    return true;
@@ -840,8 +851,8 @@ Bool CodeEditor::generateCPPH(Memc<Symbol*> &sorted_classes, EXPORT_MODE export_
                ft.depth--;
                ft.putLine("#endif");
             }
-            ListHeaders(ft,    linux_headers, "defined __linux__ && !defined ANDROID // Android also has '__linux__' defined");
-            ListHeaders(ft,  android_headers, "defined ANDROID");
+            ListHeaders(ft,    linux_headers, "defined __linux__ && !defined __ANDROID__ // Android also has '__linux__' defined");
+            ListHeaders(ft,  android_headers, "defined __ANDROID__");
             ListHeaders(ft, nintendo_headers, "defined __NINTENDO__");
             ListHeaders(ft,      web_headers, "defined EMSCRIPTEN");
             ft.putLine(S+"#include \""+UnixPath(bin_path+"Engine\\_\\System\\end.h")+'"');
@@ -968,7 +979,7 @@ static void Add(Memb<PakFileData> &files, Pak &pak, C PakFile &pf)
 }
 static void AddFile(Memb<PakFileData> &files, Pak &pak, C PakFile &pf)
 {
-   if(!FlagTest(pf.flag, PF_STD_DIR))Add(files, pak, pf); // skip folders
+   if(FlagOff(pf.flag, PF_STD_DIR))Add(files, pak, pf); // skip folders
 }
 static void Add        (Memb<PakFileData> &files,           C PaksFile *pf) {if(pf)Add    (files, *pf->pak, *pf->file);}
 static void AddFile    (Memb<PakFileData> &files, Pak &pak, C PakFile  *pf) {if(pf)AddFile(files,      pak, *pf      );}
@@ -1025,11 +1036,10 @@ static Bool CreateEngineEmbedPak(C Str &src, C Str &dest, Bool use_cipher, Bool 
       FREP(src_pak->rootFiles())AddFile(files, *src_pak, src_pak->file(i)); // add all root files (gui files)
    }
 
-
    Cipher *cipher=(use_cipher ? CE.cei().appEmbedCipher() : null);
-   if(CompareFile(FileInfoSystem(dest).modify_time_utc, CE.cei().appEmbedSettingsTime())>0 && PakEqual(files, dest, cipher))return true; // if existing Pak time is newer than settings (compression/encryption) and Pak is what we want, then use it
+   if(CompareFile(FileInfoSystem(dest).modify_time_utc, CE.cei().appEmbedSettingsTime(CE.build_exe_type))>0 && PakEqual(files, dest, cipher))return true; // if existing Pak time is newer than settings (compression/encryption) and Pak is what we want, then use it
    if(changed)*changed=true;
-   if(!PakCreate(files, dest, 0, cipher, CE.cei().appEmbedCompress(), CE.cei().appEmbedCompressLevel()))return Error("Can't create Embedded Engine Pak");
+   if(!PakCreate(files, dest, 0, cipher, CE.cei().appEmbedCompress(CE.build_exe_type), CE.cei().appEmbedCompressLevel(CE.build_exe_type)))return Error("Can't create Embedded Engine Pak");
    return true;
 }
 static Bool CreateAppPak(C Str &name, Bool &exists, Bool *changed=null)
@@ -1038,13 +1048,13 @@ static Bool CreateAppPak(C Str &name, Bool &exists, Bool *changed=null)
    exists=false;
    if(changed)*changed=false;
 
-   Memb<PakFileData> files; CE.cei().appSpecificFiles(files);
+   Memb<PakFileData> files; CE.cei().appSpecificFiles(files, CE.build_exe_type);
    if(files.elms())
    {
       exists=true;
       Cipher *cipher=CE.cei().appEmbedCipher();
-      if(CompareFile(FileInfoSystem(name).modify_time_utc, CE.cei().appEmbedSettingsTime())>0 && PakEqual(files, name, cipher))ok=true; // if existing Pak time is newer than settings (compression/encryption) and Pak is what we want, then use it
-      else {if(changed)*changed=true; ok=PakCreate(files, name, 0, cipher, CE.cei().appEmbedCompress(), CE.cei().appEmbedCompressLevel());}
+      if(CompareFile(FileInfoSystem(name).modify_time_utc, CE.cei().appEmbedSettingsTime(CE.build_exe_type))>0 && PakEqual(files, name, cipher))ok=true; // if existing Pak time is newer than settings (compression/encryption) and Pak is what we want, then use it
+      else {if(changed)*changed=true; ok=PakCreate(files, name, 0, cipher, CE.cei().appEmbedCompress(CE.build_exe_type), CE.cei().appEmbedCompressLevel(CE.build_exe_type));}
    }else
    {
       ok=true;
@@ -1203,7 +1213,7 @@ Bool CodeEditor::generateVSProj(Int version)
 {
    // !! For UWP don't store assets deeper than "Assets" (for example "Assets/UWP") because that would affect the final asset locations in the UWP executable !!
 
-   if(build_exe_type!=EXE_EXE && build_exe_type!=EXE_DLL /*&& build_exe_type!=EXE_LIB*/ && build_exe_type!=EXE_UWP && build_exe_type!=EXE_WEB && build_exe_type!=EXE_NS)return Error("Visual Studio projects support only EXE, DLL, Universal, Web and NintendoSwitch configurations.");
+   if(build_exe_type!=EXE_EXE && build_exe_type!=EXE_DLL /*&& build_exe_type!=EXE_LIB*/ && build_exe_type!=EXE_UWP && build_exe_type!=EXE_APK && build_exe_type!=EXE_AAB && build_exe_type!=EXE_NS && build_exe_type!=EXE_WEB)return Error("Visual Studio projects support only EXE, DLL, Universal, Android, NintendoSwitch and Web configurations.");
    if(build_exe_type==EXE_WEB && version<10)return Error("WEB configuration requires Visual Studio 2010 or newer.");
 
    Str bin_path    =BinPath(false),
@@ -1338,12 +1348,14 @@ Bool CodeEditor::generateVSProj(Int version)
       BuildFile &bf=build_files[i];
       BuildTree(tree, bf, bf.filter.is() ? bf.filter : bf.dest_proj_path);
    }
-   Memc<Str> libs_win=GetFiles(cei().appLibsWindows()),
-             dirs_win=GetFiles(cei().appDirsWindows()),
-             libs_web=GetFiles(cei().appLibsWeb    ()),
-             dirs_web=GetFiles(cei().appDirsWeb    ()),
-             libs_ns =GetFiles(cei().appLibsNintendo()),
-             dirs_ns =GetFiles(cei().appDirsNintendo());
+   Memc<Str> libs_win    =GetFiles(cei().appLibsWindows ()),
+             dirs_win    =GetFiles(cei().appDirsWindows ()),
+             libs_android=GetFiles(cei().appLibsAndroid ()),
+             dirs_android=GetFiles(cei().appDirsAndroid ()),
+             libs_ns     =GetFiles(cei().appLibsNintendo()),
+             dirs_ns     =GetFiles(cei().appDirsNintendo()),
+             libs_web    =GetFiles(cei().appLibsWeb     ()),
+             dirs_web    =GetFiles(cei().appDirsWeb     ());
 
    // Web html
    if(build_exe_type==EXE_WEB)
@@ -1370,35 +1382,35 @@ Bool CodeEditor::generateVSProj(Int version)
       {
          if(XmlNode *Core=NintendoSdkMeta->findNode("Core"))
          {
-          //if(XmlNode *Name=Core->findNode("Name"))Name->data.setNum(1)[0]=cei().appName();
-            if(auto app_id=cei().appNintendoAppID())if(XmlNode *ApplicationId=Core->findNode("ApplicationId"))ApplicationId->data.setNum(1)[0]=TextHex(app_id, 16, 0, true);
+          //if(XmlNode *Name=Core->findNode("Name"))Name->data.setNum(1).first()=cei().appName();
+            if(auto app_id=cei().appNintendoAppID())if(XmlNode *ApplicationId=Core->findNode("ApplicationId"))ApplicationId->data.setNum(1).first()=TextHex(app_id, 16, 0, true);
          }
          if(XmlNode *Application=NintendoSdkMeta->findNode("Application"))
          {
             if(XmlNode *Title=Application->findNode("Title"))
             {
-               if(XmlNode *Name     =Title->findNode("Name"     ))Name     ->data.setNum(1)[0]=cei().appName();
-               if(XmlNode *Publisher=Title->findNode("Publisher"))Publisher->data.setNum(1)[0]=cei().appNintendoPublisherName();
+               if(XmlNode *Name     =Title->findNode("Name"     ))Name     ->data.setNum(1).first()=cei().appName();
+               if(XmlNode *Publisher=Title->findNode("Publisher"))Publisher->data.setNum(1).first()=cei().appNintendoPublisherName();
             }
-            if(XmlNode *ReleaseVersion=Application->findNode("ReleaseVersion"))ReleaseVersion->data.setNum(1)[0]=cei().appBuild();
-            if(XmlNode *DisplayVersion=Application->findNode("DisplayVersion"))DisplayVersion->data.setNum(1)[0]=cei().appBuild();
+            if(XmlNode *ReleaseVersion=Application->findNode("ReleaseVersion"))ReleaseVersion->data.setNum(1).first()=cei().appBuild();
+            if(XmlNode *DisplayVersion=Application->findNode("DisplayVersion"))DisplayVersion->data.setNum(1).first()=cei().appBuild();
 
             {
                Mems<LANG_TYPE> langs; cei().appLanguages(langs);
-               const Bool all=true;
-               if(all || langs.has(EN)){AddNintendoLang(*Application, "AmericanEnglish"); AddNintendoLang(*Application, "BritishEnglish");}
-               if(all || langs.has(DE)) AddNintendoLang(*Application, "German");
-               if(all || langs.has(LANG_DUTCH)) AddNintendoLang(*Application, "Dutch");
-               if(all || langs.has(FR)){AddNintendoLang(*Application, "French"); AddNintendoLang(*Application, "CanadianFrench");}
-               if(all || langs.has(IT)) AddNintendoLang(*Application, "Italian");
-               if(all || langs.has(SP)){AddNintendoLang(*Application, "Spanish"); AddNintendoLang(*Application, "LatinAmericanSpanish");}
-               if(all || langs.has(PO)){AddNintendoLang(*Application, "Portuguese"); AddNintendoLang(*Application, "BrazilianPortuguese");}
-             //if(all || langs.has(PL)) AddNintendoLang(*Application, "Polish"); unsupported by Nintendo
-               if(all || langs.has(RU)) AddNintendoLang(*Application, "Russian");
-               if(all || langs.has(JP)) AddNintendoLang(*Application, "Japanese");
-               if(all || langs.has(KO)) AddNintendoLang(*Application, "Korean");
-               if(all || langs.has(CN)){AddNintendoLang(*Application, "SimplifiedChinese"); AddNintendoLang(*Application, "TraditionalChinese");}
-             //if(all || langs.has(TH)) AddNintendoLang(*Application, "Thai"); unsupported by Nintendo
+               Int nodes=Application->nodes.elms();
+               if(langs.has(DE)) AddNintendoLang(*Application, "German");
+               if(langs.has(LANG_DUTCH)) AddNintendoLang(*Application, "Dutch");
+               if(langs.has(FR)){AddNintendoLang(*Application, "French"); /*AddNintendoLang(*Application, "CanadianFrench");*/}
+               if(langs.has(IT)) AddNintendoLang(*Application, "Italian");
+               if(langs.has(SP)){AddNintendoLang(*Application, "Spanish"); /*AddNintendoLang(*Application, "LatinAmericanSpanish");*/}
+               if(langs.has(PO)){AddNintendoLang(*Application, "Portuguese"); /*AddNintendoLang(*Application, "BrazilianPortuguese");*/}
+             //if(langs.has(PL)) AddNintendoLang(*Application, "Polish"); unsupported by Nintendo
+               if(langs.has(RU)) AddNintendoLang(*Application, "Russian");
+               if(langs.has(JP)) AddNintendoLang(*Application, "Japanese");
+               if(langs.has(KO)) AddNintendoLang(*Application, "Korean");
+               if(langs.has(CN)){AddNintendoLang(*Application, "SimplifiedChinese"); /*AddNintendoLang(*Application, "TraditionalChinese");*/} // Nintendo won't accept "TraditionalChinese" if only Simplified is supported
+             //if(langs.has(TH)) AddNintendoLang(*Application, "Thai"); unsupported by Nintendo
+               if(langs.has(EN) || nodes==Application->nodes.elms()){AddNintendoLang(*Application, "AmericanEnglish"); /*AddNintendoLang(*Application, "BritishEnglish");*/} // always add English if no language added
             }
 
             Long save_size=cei().appSaveSize(); if(save_size<0)save_size=32*1024*1024; // if save size is unspecified, then for simplicity use max possible without having to contact Nintendo for approval (32MB*2=64MB total)
@@ -1408,6 +1420,12 @@ Bool CodeEditor::generateVSProj(Int version)
                Application->nodes.New().setName("UserAccountSaveDataSize"       ).data.add(s);
                Application->nodes.New().setName("UserAccountSaveDataJournalSize").data.add(s);
             }
+
+            Str initial_code=cei().appNintendoInitialCode();
+            if( initial_code.is())Application->getNode("ApplicationErrorCodeCategory").data.setNum(1).first()=initial_code;
+
+            Str legal=cei().appNintendoLegalInformation();
+            if( legal.is())Application->getNode("LegalInformationFilePath").data.setNum(1).first()=legal;
          }
       }
       if(!OverwriteOnChangeLoud(xml, build_path+"Assets/Nintendo Switch/Project.nmeta"))return false;
@@ -1457,8 +1475,8 @@ Bool CodeEditor::generateVSProj(Int version)
          }
          if(XmlNode *properties=package->findNode("Properties"))
          {
-            if(XmlNode *display_name=properties->findNode("DisplayName"))display_name->data.setNum(1)[0]=cei().appName();
-            Str publisher_name=cei().appMicrosoftPublisherName(); if(publisher_name.is())if(XmlNode *publisher_display_name=properties->findNode("PublisherDisplayName"))publisher_display_name->data.setNum(1)[0]=publisher_name; // replace only if specified, because can't be empty
+            if(XmlNode *display_name=properties->findNode("DisplayName"))display_name->data.setNum(1).first()=cei().appName();
+            Str publisher_name=cei().appMicrosoftPublisherName(); if(publisher_name.is())if(XmlNode *publisher_display_name=properties->findNode("PublisherDisplayName"))publisher_display_name->data.setNum(1).first()=publisher_name; // replace only if specified, because can't be empty
          }
          if(XmlNode *applications=package->findNode("Applications"))
             if(XmlNode *application=applications->findNode("Application"))
@@ -1590,7 +1608,7 @@ Bool CodeEditor::generateVSProj(Int version)
             if(version==14)sdk="10.0.14393.795";else // latest SDK available for VS 2015
             if(version==15)sdk="10.0.17763.0"  ;     // latest SDK available for VS 2017
                                                      // VS 2019 does not require "WindowsTargetPlatformVersion" - when it's empty, then "latest SDK" is used, so don't specify it
-            if(sdk)prop->getNode("WindowsTargetPlatformVersion").data.setNum(1)[0]=sdk;
+            if(sdk)prop->getNode("WindowsTargetPlatformVersion").data.setNum(1).first()=sdk;
 
             break;
          }
@@ -1624,19 +1642,21 @@ Bool CodeEditor::generateVSProj(Int version)
             Int pos=TextPosI(dest, "Engine");
             if( pos>=0)
             {
-               Int len=TextPosI(dest()+pos, ';');
+               Int len=TextPosI(dest()+pos, ';'); if(len<0)len=dest.length()-pos;
                Str lib; FREP(len)lib+=dest[pos+i];
                dest.remove(pos, len+1);
-               dest.insert(0, S+'"'+bin_path_rel+lib+"\";");
+               Char8 quote=(Contains(lib, "Android") ? '\0' : '"'); // compile for Android will fail if "" is present
+               dest.insert(0, S+quote+bin_path_rel+lib+quote+";");
             }
             Memc<Str> *libs=&libs_win;
             if(XmlParam *condition=item->findParam("Condition"))
             {
-               if(Contains(condition->value, "Emscripten", false, WHOLE_WORD_STRICT))libs=&libs_web;else
-               if(Contains(condition->value, "NX64"      , false, WHOLE_WORD_STRICT))libs=&libs_ns ;
+               if(Contains(condition->value, "Android"   , false, WHOLE_WORD_STRICT))libs=&libs_android;else
+               if(Contains(condition->value, "NX64"      , false, WHOLE_WORD_STRICT))libs=&libs_ns     ;else
+               if(Contains(condition->value, "Emscripten", false, WHOLE_WORD_STRICT))libs=&libs_web    ;
             }
             if(libs)FREPA(*libs){if(dest.is() && dest.last()!=';')dest+=';'; dest+=S+'"'+(*libs)[i]+'"';}
-            Swap(dependencies->data.setNum(1)[0], dest);
+            Swap(dependencies->data.setNum(1).first(), dest);
          }
 
          // set dirs
@@ -1648,18 +1668,31 @@ Bool CodeEditor::generateVSProj(Int version)
             Memc<Str> *dirs=&dirs_win;
             if(XmlParam *condition=item->findParam("Condition"))
             {
-               if(Contains(condition->value, "Emscripten", false, WHOLE_WORD_STRICT))dirs=&dirs_web;else
-               if(Contains(condition->value, "NX64"      , false, WHOLE_WORD_STRICT))dirs=&dirs_ns;
+               if(Contains(condition->value, "Android"   , false, WHOLE_WORD_STRICT))dirs=&dirs_android;else
+               if(Contains(condition->value, "NX64"      , false, WHOLE_WORD_STRICT))dirs=&dirs_ns     ;else
+               if(Contains(condition->value, "Emscripten", false, WHOLE_WORD_STRICT))dirs=&dirs_web    ;
             }
             if(dirs)FREPA(*dirs){if(dest.is() && dest.last()!=';')dest+=';'; dest+=S+'"'+(*dirs)[i]+'"';}
-            Swap(directories->data.setNum(1)[0], dest);
+            Swap(directories->data.setNum(1).first(), dest);
          }
 
          // set exe/dll
          if(build_exe_type==EXE_DLL)
             for(Int i=0; XmlNode *prop=proj->findNode("PropertyGroup", i); i++)
                if(XmlNode *type=prop->findNode("ConfigurationType"))
-                  type->data.setNum(1)[0]="DynamicLibrary"; // or "Application" or "StaticLibrary"
+                  type->data.setNum(1).first()="DynamicLibrary"; // or "Application" or "StaticLibrary"
+
+         // Android
+         /* this will not work because if AndroidEnablePackaging is disabled then gradle is not run and 'AndroidExtraGradleArgs' is ignored, have to manually run
+            this will not work because if APK is up to date then 'bundleRelease' is ignored
+         if(build_exe_type==EXE_AAB)
+            for(Int i=0; XmlNode *prop=proj->findNode("PropertyGroup", i); i++)
+               if(C XmlParam *condition=prop->findParam("Condition"))
+                  if(Contains(condition->value, "Android", false, WHOLE_WORD_STRICT))
+         {
+            prop->getNode("AndroidEnablePackaging").data.setNum(1).first()="false"; // disable APK generation #AndroidEnablePackaging !! AT THE MOMENT CAN'T DISABLE BECAUSE THIS IS NEEDED TO GENERATE ".agde" !!
+            prop->getNode("AndroidExtraGradleArgs").data.add(Contains(condition->value, "Debug", false, WHOLE_WORD_STRICT) ? "bundleDebug" : "bundleRelease"); // enable bundle generation !! WILL BE IGNORED IF APK IS UP TO DATE !!
+         }*/
 
          // Platform toolset #VisualStudio
          CChar8 *platform_toolset=null, *platform_toolset_xp=null;
@@ -1676,12 +1709,12 @@ Bool CodeEditor::generateVSProj(Int version)
                if(C XmlParam *label=prop->findParam("Label"))if(label->value=="Configuration")
          {
           C XmlParam *condition=prop->findParam("Condition");
-            Bool      keep     =(condition && Contains(condition->value, "Emscripten"));
+            Bool      keep     =(condition && Contains(condition->value, "Emscripten", false, WHOLE_WORD_STRICT));
             if(!keep) // keep default value
             {
                Bool winXP=(condition && Contains(condition->value, "Win32", false, WHOLE_WORD_STRICT) && ContainsAny(condition->value, u"GL DX9", false, WHOLE_WORD_STRICT)); // only Win32 DX9/GL is for WinXP
                XmlNode &PlatformToolset=prop->getNode("PlatformToolset");
-               PlatformToolset.data.setNum(1)[0]=(winXP ? platform_toolset_xp : platform_toolset);
+               PlatformToolset.data.setNum(1).first()=(winXP ? platform_toolset_xp : platform_toolset);
             }
          }
 
@@ -1911,20 +1944,26 @@ Bool CodeEditor::generateXcodeProj()
    // iOS.plist
    if(!xml.load("Code/Apple/iOS.plist"))return ErrorRead("Code/Apple/iOS.plist");
    if(XmlNode *plist=xml   .findNode("plist"))
-   if(XmlNode *dict =plist->findNode("dict" ))FREPA(dict->nodes)if(dict->nodes[i].name=="key" && InRange(i+1, dict->nodes))
+   if(XmlNode *dict =plist->findNode("dict" ))FREPA(dict->nodes)if(dict->nodes[i].name=="key" && dict->nodes[i].data.elms() && InRange(i+1, dict->nodes))
    {
-      XmlNode &node =dict->nodes[i  ];
+    C Str     &key  =dict->nodes[i].data[0];
       XmlNode &value=dict->nodes[i+1];
-      Str key; FREPA(node.data)key.space()+=node.data[i];
       if(key=="CFBundleDisplayName")
       {
          value.setName("string").nodes.del();
-         value.data.setNum(1)[0]=cei().appName();
+         value.data.setNum(1).first()=cei().appName();
       }else
       if(key=="CFBundleVersion" || key=="CFBundleShortVersionString")
       {
          value.setName("string").nodes.del();
-         value.data.setNum(1)[0]=cei().appBuild();
+         value.data.setNum(1).first()=cei().appBuild();
+      }else
+      if(key=="CFBundleLocalizations")
+      {
+         value.setName("array").nodes.del();
+         Mems<LANG_TYPE> languages; cei().appLanguages(languages);
+         FREPA(languages)if(CChar8 *code=LanguageCode(languages[i]))value.nodes.New().setName("string").data.add(code);
+         if(!value.nodes.elms())value.nodes.New().setName("string").data.add("en"); // always add English if no language added
       }else
       if(key=="UISupportedInterfaceOrientations")
       {
@@ -1938,37 +1977,37 @@ Bool CodeEditor::generateXcodeProj()
       if(key=="NSLocationAlwaysUsageDescription" || key=="NSLocationWhenInUseUsageDescription")
       {
          value.setName("string").nodes.del();
-         value.data.setNum(1)[0]=cei().appLocationUsageReason();
+         value.data.setNum(1).first()=cei().appLocationUsageReason();
       }else
       if(key=="NSCalendarsUsageDescription")
       {
          value.setName("string").nodes.del();
-         value.data.setNum(1)[0]="Unknown";
+         value.data.setNum(1).first()="Unknown";
       }else
       if(key=="FacebookAppID")
       {
          value.setName("string").nodes.del();
-         value.data.setNum(1)[0]=cei().appFacebookAppID();
+         value.data.setNum(1).first()=cei().appFacebookAppID();
       }else
       if(key=="FacebookDisplayName")
       {
          value.setName("string").nodes.del();
-         value.data.setNum(1)[0]=cei().appName();
+         value.data.setNum(1).first()=cei().appName();
       }else
       if(key=="GADApplicationIdentifier")
       {
          value.setName("string").nodes.del();
-         value.data.setNum(1)[0]=cei().appAdMobAppIDiOS();
+         value.data.setNum(1).first()=cei().appAdMobAppIDiOS();
       }else
       if(key=="ChartboostAppID")
       {
          value.setName("string").nodes.del();
-         value.data.setNum(1)[0]=cei().appChartboostAppIDiOS();
+         value.data.setNum(1).first()=cei().appChartboostAppIDiOS();
       }else
       if(key=="ChartboostAppSignature")
       {
          value.setName("string").nodes.del();
-         value.data.setNum(1)[0]=cei().appChartboostAppSignatureiOS();
+         value.data.setNum(1).first()=cei().appChartboostAppSignatureiOS();
       }else
       if(key=="CFBundleURLTypes")
       {
@@ -1993,12 +2032,12 @@ Bool CodeEditor::generateXcodeProj()
       if(key=="CFBundleDisplayName")
       {
          value.setName("string").nodes.del();
-         value.data.setNum(1)[0]=cei().appName();
+         value.data.setNum(1).first()=cei().appName();
       }else
       if(key=="CFBundleVersion")
       {
          value.setName("string").nodes.del();
-         value.data.setNum(1)[0]=cei().appBuild();
+         value.data.setNum(1).first()=cei().appBuild();
       }
    }
    if(!OverwriteOnChangeLoud(xml, build_path+"Assets/Mac.plist"))return false;
@@ -2310,6 +2349,302 @@ static Str UnixEncode(C Str &s)
 /******************************************************************************/
 Bool CodeEditor::generateAndroidProj()
 {
+   Int asset_packs=cei().android_asset_packs;
+   Str bin_path=BinPath(false),
+       src_path="Code/Android/", // this is inside "Editor.pak"
+      dest_path=build_path+"Android/";
+
+   // assets
+   {
+      Str assets=dest_path+"app/src/main/assets/";
+
+      // remove all unwanted
+      CChar8 *allowed[]=
+      {
+         "Engine.pak",
+         "Project.pak",
+      };
+      DelExcept(assets, allowed, Elms(allowed)); // remove all except 'allowed'
+
+      // Engine.pak
+      FCreateDirs(assets);
+      Str src=bin_path+"Mobile/Engine.pak", dest=assets+"Engine.pak";
+      if(cei().appEmbedEngineData()==1) // 2D only
+      {
+         if(!CreateEngineEmbedPak(src, dest, false))return false;
+      }else
+         if(!CopyFile(src, dest))return false;
+   }
+
+   // asset packs
+   Str app_build_gradle_asset_packs;
+   FREP(asset_packs)
+   {
+      Str name=S+"Data"+i;
+      FileText f; f.writeMem(UTF_8_NAKED);
+      f.putLine("apply plugin: 'com.android.asset-pack'");
+      f.putLine("assetPack {");
+      f.depth++;
+      f.putLine(S+"packName = '"+name+'\'');
+      f.putLine("dynamicDelivery {");
+      f.depth++;
+      f.putLine("deliveryType = 'fast-follow'");
+      f.depth--;
+      f.putLine("}");
+      f.depth--;
+      f.putLine("}");
+      if(!OverwriteOnChangeLoud(f, dest_path+name+"/build.gradle"))return false;
+      if(app_build_gradle_asset_packs.is())app_build_gradle_asset_packs+=", "; app_build_gradle_asset_packs+=S+"\":"+name+'"';
+   }
+
+   Str res=dest_path+"app/src/main/res/";
+
+   // resources
+   {
+      FCreateDirs(res+"values");
+       XmlData  xml;
+       XmlNode &resources=xml      .nodes.New().setName("resources");
+      {XmlNode &n        =resources.nodes.New().setName("string"); n.params.New().set("name", "facebook_app_id"         ); n.data.add(       cei().appFacebookAppID());}
+      {XmlNode &n        =resources.nodes.New().setName("string"); n.params.New().set("name", "fb_login_protocol_scheme"); n.data.add(S+"fb"+cei().appFacebookAppID());}
+      if(!OverwriteOnChangeLoud(xml, res+"values/strings.xml"))return false;
+   }
+
+   // icons
+   Image      icon, notification_icon; DateTime icon_time, notification_icon_time;
+   if(GetIcon(icon, icon_time))
+   {
+      FCreateDirs(res); icon.transparentToNeighbor();
+      Memc<ImageConvert> convert;
+      Str name;
+
+      // list images starting from the smallest
+      name=res+"drawable-ldpi/icon.png"  ; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize( 36,  36);
+      name=res+"drawable-mdpi/icon.png"  ; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize( 48,  48);
+      name=res+"drawable-hdpi/icon.png"  ; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize( 72,  72);
+      name=res+"drawable-xhdpi/icon.png" ; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize( 96,  96);
+      name=res+"drawable-xxhdpi/icon.png"; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize(144, 144);
+
+      // https://developer.android.com/guide/practices/ui_guidelines/icon_design_status_bar.html
+      GetNotificationIcon(notification_icon, notification_icon_time, icon, icon_time);
+      name=res+"drawable-ldpi/notification.png"  ; if(CompareFile(FileInfoSystem(name).modify_time_utc, notification_icon_time))convert.New().set(name, notification_icon, notification_icon_time).resize(18, 18);
+      name=res+"drawable-mdpi/notification.png"  ; if(CompareFile(FileInfoSystem(name).modify_time_utc, notification_icon_time))convert.New().set(name, notification_icon, notification_icon_time).resize(24, 24);
+      name=res+"drawable-hdpi/notification.png"  ; if(CompareFile(FileInfoSystem(name).modify_time_utc, notification_icon_time))convert.New().set(name, notification_icon, notification_icon_time).resize(36, 36);
+      name=res+"drawable-xhdpi/notification.png" ; if(CompareFile(FileInfoSystem(name).modify_time_utc, notification_icon_time))convert.New().set(name, notification_icon, notification_icon_time).resize(48, 48);
+      name=res+"drawable-xxhdpi/notification.png"; if(CompareFile(FileInfoSystem(name).modify_time_utc, notification_icon_time))convert.New().set(name, notification_icon, notification_icon_time).resize(72, 72);
+
+      convert.reverseOrder(); // start working from the biggest ones because they take the most time, yes this is correct
+      MultiThreadedCall(convert, ImageConvert::Func);
+      FREPA(convert)if(!convert[i].ok)return ErrorWrite(convert[i].dest);
+   }
+
+   Str  app_package=AndroidPackage(cei().appPackage()),
+   cstr_app_name   =       CString(cei().appName   ()); // android expects this as a C String
+   Bool chartboost          =(cei().appChartboostAppIDGooglePlay().is() && cei().appChartboostAppSignatureGooglePlay().is()),
+        google_play_services=(cei().appAdMobAppIDGooglePlay     ().is() || chartboost),
+        facebook            =(cei().appFacebookAppID()!=0);
+
+   // AndroidManifest.xml
+   XmlData xml;
+   if(!xml.load(src_path+"app/src/main/AndroidManifest.xml"))return ErrorRead("AndroidManifest.xml");
+   if(XmlNode *manifest=xml.findNode("manifest"))
+   {
+      manifest->getParam("package"                ).value=app_package;
+      manifest->getParam("android:versionCode"    ).value=cei().appBuild();
+      manifest->getParam("android:versionName"    ).value=cei().appBuild();
+      manifest->getParam("android:installLocation").value=((cei().appPreferredStorage()==STORAGE_EXTERNAL) ? "preferExternal" : (cei().appPreferredStorage()==STORAGE_AUTO) ? "auto" : "internalOnly");
+      XmlNode &application=manifest->getNode("application");
+      {
+         if(icon.is())application.getParam("android:icon" ).value="@drawable/icon";
+                      application.getParam("android:label").value=cstr_app_name;
+
+         // iterate activities
+         REPA(application.nodes)
+         {
+            XmlNode &node=application.nodes[i]; if(node.name=="activity")if(XmlParam *name=node.findParam("android:name"))
+            {
+               if(name->value=="EsenthelActivity" || name->value=="LoaderActivity")
+               {
+                  node.getParam("android:label").value=cstr_app_name;
+
+                  // orientations
+                  {
+                     UInt flag     =cei().appSupportedOrientations();
+                     Bool landscape=FlagOn(flag, DIRF_X),
+                          portrait =FlagOn(flag, DIRF_Y);
+                     CChar8    *orn=null;
+                     if( flag==(DIRF_X|DIRF_UP)  )orn="sensor"         ;else // up/left/right no down
+                     if((flag&DIRF_X)==DIRF_RIGHT)orn="landscape"      ;else // only one horizontal
+                     if((flag&DIRF_Y)==DIRF_UP   )orn="portrait"       ;else // only one vertical
+                     if( landscape && !portrait  )orn="sensorLandscape";else
+                     if(!landscape &&  portrait  )orn="sensorPortrait" ;else
+                                                  orn="fullSensor"     ;
+                     node.getParam("android:screenOrientation").value=orn;
+                  }
+               }
+            }
+         }
+         // needed for opening files through "content://" instead of deprecated "file://"
+         {
+            XmlNode &n=application.nodes.New().setName("provider" ); n.params.New().set("android:name", "EsenthelActivity$FileProvider"      ); n.params.New().set("android:authorities", app_package+".fileprovider"); n.params.New().set("android:exported", "false"); n.params.New().set("android:grantUriPermissions", "true");
+          //XmlNode &m=          n.nodes.New().setName("meta-data"); m.params.New().set("android:name", "android.support.FILE_PROVIDER_PATHS"); m.params.New().set("android:resource", "@xml/file_paths"); // needed for "android.support.v4.content.FileProvider"
+         }
+         Str s;
+         if(google_play_services){XmlNode &n=application.nodes.New().setName("meta-data"); n.params.New().set("android:name", "com.google.android.gms.version"); n.params.New().set("android:value", "@integer/google_play_services_version");}
+         s=cei().appAdMobAppIDGooglePlay(); if(s.is())
+         {
+            {XmlNode &n=application.nodes.New().setName("activity" ); n.params.New().set("android:name", "com.google.android.gms.ads.AdActivity"    ); n.params.New().set("android:configChanges", "keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize");}
+            {XmlNode &n=application.nodes.New().setName("meta-data"); n.params.New().set("android:name", "com.google.android.gms.ads.APPLICATION_ID"); n.params.New().set("android:value", s);}
+         }
+         if(chartboost)
+         {
+            XmlNode &n=application.nodes.New().setName("activity");
+            n.params.New().set("android:name", "com.chartboost.sdk.CBImpressionActivity");
+            n.params.New().set("android:excludeFromRecents", "true");
+            n.params.New().set("android:hardwareAccelerated", "true");
+            n.params.New().set("android:theme", "@android:style/Theme.Translucent.NoTitleBar.Fullscreen");
+            n.params.New().set("android:configChanges", "keyboardHidden|orientation|screenSize");
+         }
+         if(ULong id=cei().appFacebookAppID())
+         {
+            {XmlNode &n=application.nodes.New().setName("meta-data"); n.params.New().set("android:name", "com.facebook.sdk.ApplicationId"      ); n.params.New().set("android:value", "@string/facebook_app_id"/*id*/);}
+            {XmlNode &n=application.nodes.New().setName("activity" ); n.params.New().set("android:name", "com.facebook.FacebookActivity"       ); n.params.New().set("android:configChanges", "keyboard|keyboardHidden|screenLayout|screenSize|orientation"); n.params.New().set("android:label", cstr_app_name);}
+            {XmlNode &n=application.nodes.New().setName("provider" ); n.params.New().set("android:name", "com.facebook.FacebookContentProvider"); n.params.New().set("android:authorities", S+"com.facebook.app.FacebookContentProvider"+id); n.params.New().set("android:exported", "true");}
+            {XmlNode &n=application.nodes.New().setName("activity" ); n.params.New().set("android:name", "com.facebook.CustomTabActivity"      ); n.params.New().set("android:exported", "true");
+             XmlNode &intent_filter=n.nodes.New().setName("intent-filter");
+             intent_filter.nodes.New().setName("action"  ).params.New().set("android:name"  , "android.intent.action.VIEW");
+             intent_filter.nodes.New().setName("category").params.New().set("android:name"  , "android.intent.category.DEFAULT");
+             intent_filter.nodes.New().setName("category").params.New().set("android:name"  , "android.intent.category.BROWSABLE");
+             intent_filter.nodes.New().setName("data"    ).params.New().set("android:scheme", "@string/fb_login_protocol_scheme"/*S+"fb"+id*/);
+            }
+         }
+      }
+   }
+   if(!OverwriteOnChangeLoud(xml, dest_path+"app/src/main/AndroidManifest.xml"))return false;
+
+   // libraries
+   Str load_libraries;
+   Memc<Str> libs=GetFiles(cei().appLibsAndroid()); FREPA(libs)
+   {
+    C Str &lib=libs[i];
+      if(GetExt(lib)=="so") // shared lib
+      {
+         // libs can be specified to include "$(TARGET_ARCH_ABI)", for example "/path/$(TARGET_ARCH_ABI)/libXXX.so" or "/path/libXXX-$(TARGET_ARCH_ABI).so"
+         Str name=GetBaseNoExt(lib);
+       //name=Replace(name, "-$(TARGET_ARCH_ABI)", "");
+       //name=Replace(name,  "$(TARGET_ARCH_ABI)", "");
+         if(!Starts(name, "lib"))return Error(S+"Shared library file names must start with \"lib\".\n\""+libs[i]+'"');
+         load_libraries.line()+=S+"System.loadLibrary(\""+SkipStart(name, "lib")+"\");";
+      }
+   }
+
+   // modules
+   Str src_libs=src_path+"libs/",
+      dest_libs=Str(projects_build_path).tailSlash(true)+"_Android_\\"; FCreateDir(dest_libs); // path where to store Android libs "_Build_\_Android_\"
+   Memc<Str> modules;
+   if(cei().appGooglePlayLicenseKey().is())modules.add("play-licensing");
+
+   Memc<Str> deps; // dependencies
+   Memc<Str> extract=modules;
+   if(asset_packs>=0)
+   {
+      extract.add("play-core-native-sdk");
+      deps.add(S+"implementation files('"+UnixPath(GetRelativePath(dest_path+"app", dest_libs+"play-core-native-sdk/playcore.aar"))+"')");
+      deps.add(  "implementation('com.google.android.play:integrity:1.0.0')"); // needed by "play-core-native-sdk" - https://developer.android.com/guide/playcore/asset-delivery/integrate-native#setup-play-core-native
+   }
+   FREPA(extract) // process in order
+   {
+    C Str &lib=extract[i];
+      Str src_path=src_libs+lib, dest_path=dest_libs+lib;
+      if(C PaksFile *pf=Paks.find(src_path)){if(!FCopy(*pf->pak, *pf->file, dest_path, FILE_OVERWRITE_DIFFERENT))return ErrorWrite(dest_path);}else return ErrorRead(src_path);
+   }
+
+   // java
+   FCreateDirs(dest_path+"app/src/main/java");
+   // EsenthelActivity.java
+   {
+      FileText ft; if(!ft.read(src_path+"app/src/main/java/EsenthelActivity.java"))return ErrorRead("EsenthelActivity.java");
+      Str data=ft.getAll(), s;
+      data=Replace(data, "com.esenthel.project",      app_package, true, WHOLE_WORD_STRICT);
+      data=Replace(data, "APP_NAME"            , cstr_app_name   , true, WHOLE_WORD_STRICT);
+
+      s=cei().appGooglePlayLicenseKey();
+                data=Replace(data, "APP_LICENSE_KEY" , s                , true, WHOLE_WORD_STRICT); // always replace even if empty
+      if(s.is())data=Replace(data, "/*LICENSE_KEY*\\", "/*LICENSE_KEY*/", true, WHOLE_WORD_STRICT);
+
+      s=cei().appAdMobAppIDGooglePlay();
+      if(s.is())
+      {
+         data=Replace(data, "ADMOB_APP_ID", CString(s) , true, WHOLE_WORD_STRICT);
+         data=Replace(data, "/*ADMOB*\\"  , "/*ADMOB*/", true, WHOLE_WORD_STRICT);
+      }
+
+      if(chartboost)
+      {
+         data=Replace(data, "/*CHARTBOOST*\\"         , "/*CHARTBOOST*/"                                    , true, WHOLE_WORD_STRICT);
+         data=Replace(data, "CHARTBOOST_APP_ID"       , CString(cei().appChartboostAppIDGooglePlay       ()), true, WHOLE_WORD_STRICT);
+         data=Replace(data, "CHARTBOOST_APP_SIGNATURE", CString(cei().appChartboostAppSignatureGooglePlay()), true, WHOLE_WORD_STRICT);
+      }
+
+      if(facebook)data=Replace(data, "/*FACEBOOK*\\", "/*FACEBOOK*/", true, WHOLE_WORD_STRICT);
+
+      data=Replace(data, "/*LOAD_LIBRARIES*/", load_libraries, true, WHOLE_WORD_STRICT);
+
+      SetFile(ft, data, UTF_8_NAKED);
+      if(!OverwriteOnChangeLoud(ft, dest_path+"app/src/main/java/EsenthelActivity.java"))return false;
+   }
+   // build.gradle
+   {
+      FileText ft; if(!ft.read(src_path+"app/build.gradle"))return ErrorRead("build.gradle");
+      Str data=ft.getAll();
+      data=Replace(data, "com.esenthel.project", app_package, true, WHOLE_WORD_STRICT);
+
+      if(!android_cert_file.is() || !FExistSystem(android_cert_file)){options.activateCert(); return Error("Android Certificate File was not specified or was not found.");}
+      if( android_cert_pass.length()<6                              ){options.activateCert(); return Error("Android Certificate Password must be at least 6 characters long.");}
+      data=Replace(data, "CERTIFICATE_PATH", UnixPath(android_cert_file), true, WHOLE_WORD_STRICT);
+      data=Replace(data, "CERTIFICATE_PASS",          android_cert_pass , true, WHOLE_WORD_STRICT);
+
+      if(modules.elms() || deps.elms())
+      {
+         Str src="dependencies {", dest=src;
+         FREPA(modules)dest+=S+"\n\timplementation project(':"+modules[i]+"')";
+         FREPA(deps   )dest+=S+"\n\t"+deps[i];
+         data=Replace(data, src, dest, true, WHOLE_WORD_STRICT);
+      }
+
+      data=Replace(data, "ASSET_PACKS", app_build_gradle_asset_packs, true, WHOLE_WORD_STRICT);
+
+      SetFile(ft, data, UTF_8_NAKED);
+      if(!OverwriteOnChangeLoud(ft, dest_path+"app/build.gradle"))return false;
+   }
+   // settings.gradle
+   {
+      FileText f; f.writeMem(UTF_8_NAKED);
+      f.putLine("include ':app'");
+      FREP(asset_packs)f.putLine(S+"include ':Data"+i+'\'');
+      if(modules.elms())
+      {
+         Str rel_path=UnixPath(GetRelativePath(dest_path, dest_libs));
+         FREPA(modules)
+         {
+          C Str &module=modules[i];
+            f.putLine(S+"include ':"+module+"'");
+            f.putLine(S+"project(':"+module+"').projectDir = file('"+rel_path+module+"')");
+         }
+      }
+      if(!OverwriteOnChangeLoud(f, dest_path+"settings.gradle"))return false;
+   }
+   FCreateDirs(dest_path+"gradle/wrapper");
+   if(!CopyFile(src_path+"app/src/main/java/Native.java"           , dest_path+"app/src/main/java/Native.java"           ))return false;
+   if(!CopyFile(src_path+"app/src/main/java/Base64.java"           , dest_path+"app/src/main/java/Base64.java"           ))return false;
+   if(!CopyFile(src_path+"app/proguard-rules.pro"                  , dest_path+"app/proguard-rules.pro"                  ))return false;
+   if(!CopyFile(src_path+"gradle/wrapper/gradle-wrapper.jar"       , dest_path+"gradle/wrapper/gradle-wrapper.jar"       ))return false;
+   if(!CopyFile(src_path+"gradle/wrapper/gradle-wrapper.properties", dest_path+"gradle/wrapper/gradle-wrapper.properties"))return false;
+   if(!CopyFile(src_path+"build.gradle"                            , dest_path+"build.gradle"                            ))return false;
+   if(!CopyFile(src_path+"gradle.properties"                       , dest_path+"gradle.properties"                       ))return false;
+   if(!CopyFile(src_path+"gradlew"                                 , dest_path+"gradlew"                                 ))return false;
+   if(!CopyFile(src_path+"gradlew.bat"                             , dest_path+"gradlew.bat"                             ))return false;
+
+#if 0 // WIP
    FCreateDirs(build_path+"Android/jni");
    FCreateDir (build_path+"Android/libs");
    FCreateDir (build_path+"Android/src");
@@ -2318,40 +2653,11 @@ Bool CodeEditor::generateAndroidProj()
    FCreateDirs(build_path+"Android/res/values");
  //FCreateDirs(build_path+"Android/res/xml"); // needed for "android.support.v4.content.FileProvider"
 
-   Str bin_path=BinPath(false),
-   android_path=bin_path+"Android/";
-
-   // assets
-   {
-      // remove all unwanted
-      CChar8 *allowed[]=
-      {
-         "Engine.pak",
-         "Project.pak",
-      };
-      DelExcept(build_path+"Android/assets", allowed, Elms(allowed)); // remove all except 'allowed'
-
-      // Engine.pak
-      FCreateDirs(build_path+"Android/assets");
-      Str src=bin_path+"Mobile/Engine.pak", dest=build_path+"Android/assets/Engine.pak";
-      if(cei().appEmbedEngineData()==1) // 2D only
-      {
-         if(!CreateEngineEmbedPak(src, dest, false))return false;
-      }else
-         if(!CopyFile(src, dest))return false;
-   }
+   Str android_path=bin_path+"Android/";
 
    // layouts
    if(!CopyFile("Code/Android/LoaderLayout.xml", build_path+"Android/res/layout/loader.xml"))return false;
 
-   // resources
-   {
-       XmlData  xml;
-       XmlNode &res=xml.nodes.New().setName("resources");
-      {XmlNode &n  =res.nodes.New().setName("string"); n.params.New().set("name", "facebook_app_id"         ); n.data.add(       cei().appFacebookAppID());}
-      {XmlNode &n  =res.nodes.New().setName("string"); n.params.New().set("name", "fb_login_protocol_scheme"); n.data.add(S+"fb"+cei().appFacebookAppID());}
-      if(!OverwriteOnChangeLoud(xml, build_path+"Android/res/values/strings.xml"))return false;
-   }
  /*// file paths needed for "android.support.v4.content.FileProvider"
    {
       XmlData  xml;
@@ -2449,118 +2755,6 @@ Bool CodeEditor::generateAndroidProj()
       if(!OverwriteOnChangeLoud(main, build_path+"Android/jni/Main.cpp"))return false;
    }
 
-   // icons
-   Image      icon, notification_icon; DateTime icon_time, notification_icon_time;
-   if(GetIcon(icon, icon_time))
-   {
-      File f; f.writeMem();
-      FCreateDir(build_path+"Android/res"); icon.transparentToNeighbor();
-      Memc<ImageConvert> convert;
-      CChar8 *rel;
-
-      // list images starting from the smallest
-      rel="Android/res/drawable-ldpi/icon.png"  ; if(CompareFile(FileInfoSystem(build_path+rel).modify_time_utc, icon_time))convert.New().set(build_path+rel, icon, icon_time).resize( 36,  36);
-      rel="Android/res/drawable-mdpi/icon.png"  ; if(CompareFile(FileInfoSystem(build_path+rel).modify_time_utc, icon_time))convert.New().set(build_path+rel, icon, icon_time).resize( 48,  48);
-      rel="Android/res/drawable-hdpi/icon.png"  ; if(CompareFile(FileInfoSystem(build_path+rel).modify_time_utc, icon_time))convert.New().set(build_path+rel, icon, icon_time).resize( 72,  72);
-      rel="Android/res/drawable-xhdpi/icon.png" ; if(CompareFile(FileInfoSystem(build_path+rel).modify_time_utc, icon_time))convert.New().set(build_path+rel, icon, icon_time).resize( 96,  96);
-      rel="Android/res/drawable-xxhdpi/icon.png"; if(CompareFile(FileInfoSystem(build_path+rel).modify_time_utc, icon_time))convert.New().set(build_path+rel, icon, icon_time).resize(144, 144);
-
-      // https://developer.android.com/guide/practices/ui_guidelines/icon_design_status_bar.html
-      GetNotificationIcon(notification_icon, notification_icon_time, icon, icon_time);
-      rel="Android/res/drawable-ldpi/notification.png"  ; if(CompareFile(FileInfoSystem(build_path+rel).modify_time_utc, notification_icon_time))convert.New().set(build_path+rel, notification_icon, notification_icon_time).resize(18, 18);
-      rel="Android/res/drawable-mdpi/notification.png"  ; if(CompareFile(FileInfoSystem(build_path+rel).modify_time_utc, notification_icon_time))convert.New().set(build_path+rel, notification_icon, notification_icon_time).resize(24, 24);
-      rel="Android/res/drawable-hdpi/notification.png"  ; if(CompareFile(FileInfoSystem(build_path+rel).modify_time_utc, notification_icon_time))convert.New().set(build_path+rel, notification_icon, notification_icon_time).resize(36, 36);
-      rel="Android/res/drawable-xhdpi/notification.png" ; if(CompareFile(FileInfoSystem(build_path+rel).modify_time_utc, notification_icon_time))convert.New().set(build_path+rel, notification_icon, notification_icon_time).resize(48, 48);
-      rel="Android/res/drawable-xxhdpi/notification.png"; if(CompareFile(FileInfoSystem(build_path+rel).modify_time_utc, notification_icon_time))convert.New().set(build_path+rel, notification_icon, notification_icon_time).resize(72, 72);
-
-      convert.reverseOrder(); // start working from the biggest ones because they take the most time, yes this is correct
-      MultiThreadedCall(convert, ImageConvert::Func);
-      FREPA(convert)if(!convert[i].ok)return ErrorWrite(convert[i].dest);
-   }
-
-   Str  app_package=AndroidPackage(cei().appPackage());
-   Bool chartboost          =(cei().appChartboostAppIDGooglePlay().is() && cei().appChartboostAppSignatureGooglePlay().is()),
-        google_play_services=(cei().appAdMobAppIDGooglePlay     ().is() || chartboost),
-        facebook            =(cei().appFacebookAppID()!=0);
-
-   // AndroidManifest.xml
-   XmlData xml;
-   if(!xml.load("Code/Android/AndroidManifest.xml"))return ErrorRead("Code/Android/AndroidManifest.xml");
-   if(XmlNode *manifest=xml.findNode("manifest"))
-   {
-      manifest->getParam("package"                ).value=app_package;
-      manifest->getParam("android:versionCode"    ).value=cei().appBuild();
-      manifest->getParam("android:versionName"    ).value=cei().appBuild();
-      manifest->getParam("android:installLocation").value=((cei().appPreferredStorage()==STORAGE_EXTERNAL) ? "preferExternal" : (cei().appPreferredStorage()==STORAGE_AUTO) ? "auto" : "internalOnly");
-      XmlNode &application=manifest->getNode("application");
-      {
-         if(icon.is())application.getParam("android:icon" ).value="@drawable/icon";
-                      application.getParam("android:label").value=CString(cei().appName()); // android expects this as a C String
-
-         // iterate activities
-         REPA(application.nodes)
-         {
-            XmlNode &node=application.nodes[i]; if(node.name=="activity")if(XmlParam *name=node.findParam("android:name"))
-            {
-               if(name->value=="EsenthelActivity" || name->value=="LoaderActivity")
-               {
-                  node.getParam("android:label").value=CString(cei().appName()); // android expects this as a C String
-
-                  // orientations
-                  {
-                     UInt flag     =cei().appSupportedOrientations();
-                     Bool landscape=FlagTest(flag, DIRF_X),
-                          portrait =FlagTest(flag, DIRF_Y);
-                     CChar8    *orn=null;
-                     if( flag==(DIRF_X|DIRF_UP)  )orn="sensor"         ;else // up/left/right no down
-                     if((flag&DIRF_X)==DIRF_RIGHT)orn="landscape"      ;else // only one horizontal
-                     if((flag&DIRF_Y)==DIRF_UP   )orn="portrait"       ;else // only one vertical
-                     if( landscape && !portrait  )orn="sensorLandscape";else
-                     if(!landscape &&  portrait  )orn="sensorPortrait" ;else
-                                                  orn="fullSensor"     ;
-                     node.getParam("android:screenOrientation").value=orn;
-                  }
-               }
-            }
-         }
-         // needed for opening files through "content://" instead of deprecated "file://"
-         {
-            XmlNode &n=application.nodes.New().setName("provider" ); n.params.New().set("android:name", "EsenthelActivity$FileProvider"      ); n.params.New().set("android:authorities", app_package+".fileprovider"); n.params.New().set("android:exported", "false"); n.params.New().set("android:grantUriPermissions", "true");
-          //XmlNode &m=          n.nodes.New().setName("meta-data"); m.params.New().set("android:name", "android.support.FILE_PROVIDER_PATHS"); m.params.New().set("android:resource", "@xml/file_paths"); // needed for "android.support.v4.content.FileProvider"
-         }
-         Str s;
-         if(google_play_services){XmlNode &n=application.nodes.New().setName("meta-data"); n.params.New().set("android:name", "com.google.android.gms.version"); n.params.New().set("android:value", "@integer/google_play_services_version");}
-         s=cei().appAdMobAppIDGooglePlay(); if(s.is())
-         {
-            {XmlNode &n=application.nodes.New().setName("activity" ); n.params.New().set("android:name", "com.google.android.gms.ads.AdActivity"    ); n.params.New().set("android:configChanges", "keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize");}
-            {XmlNode &n=application.nodes.New().setName("meta-data"); n.params.New().set("android:name", "com.google.android.gms.ads.APPLICATION_ID"); n.params.New().set("android:value", s);}
-         }
-         if(chartboost)
-         {
-            XmlNode &n=application.nodes.New().setName("activity");
-            n.params.New().set("android:name", "com.chartboost.sdk.CBImpressionActivity");
-            n.params.New().set("android:excludeFromRecents", "true");
-            n.params.New().set("android:hardwareAccelerated", "true");
-            n.params.New().set("android:theme", "@android:style/Theme.Translucent.NoTitleBar.Fullscreen");
-            n.params.New().set("android:configChanges", "keyboardHidden|orientation|screenSize");
-         }
-         if(ULong id=cei().appFacebookAppID())
-         {
-            {XmlNode &n=application.nodes.New().setName("meta-data"); n.params.New().set("android:name", "com.facebook.sdk.ApplicationId"      ); n.params.New().set("android:value", "@string/facebook_app_id"/*id*/);}
-            {XmlNode &n=application.nodes.New().setName("activity" ); n.params.New().set("android:name", "com.facebook.FacebookActivity"       ); n.params.New().set("android:configChanges", "keyboard|keyboardHidden|screenLayout|screenSize|orientation"); n.params.New().set("android:label", CString(cei().appName()));} // android expects this as a C String
-            {XmlNode &n=application.nodes.New().setName("provider" ); n.params.New().set("android:name", "com.facebook.FacebookContentProvider"); n.params.New().set("android:authorities", S+"com.facebook.app.FacebookContentProvider"+id); n.params.New().set("android:exported", "true");}
-            {XmlNode &n=application.nodes.New().setName("activity" ); n.params.New().set("android:name", "com.facebook.CustomTabActivity"      ); n.params.New().set("android:exported", "true");
-             XmlNode &intent_filter=n.nodes.New().setName("intent-filter");
-             intent_filter.nodes.New().setName("action"  ).params.New().set("android:name"  , "android.intent.action.VIEW");
-             intent_filter.nodes.New().setName("category").params.New().set("android:name"  , "android.intent.category.DEFAULT");
-             intent_filter.nodes.New().setName("category").params.New().set("android:name"  , "android.intent.category.BROWSABLE");
-             intent_filter.nodes.New().setName("data"    ).params.New().set("android:scheme", "@string/fb_login_protocol_scheme"/*S+"fb"+id*/);
-            }
-         }
-      }
-   }
-   if(!OverwriteOnChangeLoud(xml, build_path+"Android/AndroidManifest.xml"))return false;
-
    android_path="Code/Android/"; // this is inside "Editor.pak"
    Str       android_libs_path=Str(projects_build_path).tailSlash(true)+"_Android_\\"; FCreateDir(android_libs_path); // path where to store Android libs "_Build_\_Android_\"
    Memc<Str> android_libs, jars;
@@ -2573,13 +2767,7 @@ Bool CodeEditor::generateAndroidProj()
    }
  //"play-services-auth-base", // login/authentication
  //"play-services-drive", // google drive
-#if 1
-   android_libs.add("play-apk-expansion"); // allows downloading APK expansions
-   android_libs.add("play-licensing"); // needed for "play-apk-expansion"
-#else
-   android_libs.add("market_apk_expansion"); // allows downloading APK expansions
-   android_libs.add("market_licensing"); // needed for "market_apk_expansion"
-#endif
+   android_libs.add("play-licensing");
    if(facebook)
    {
       android_libs.add("facebook-share"); jars.add("facebook-share");
@@ -2638,44 +2826,9 @@ Bool CodeEditor::generateAndroidProj()
    // IInAppBillingService.aidl
    if(!CopyFile("Code/Android/IInAppBillingService.aidl", build_path+"Android/src/com/android/vending/billing/IInAppBillingService.aidl"))return false;
 
-   // EsenthelActivity.java
-   {
-      FileText ft; if(!ft.read("Code/Android/EsenthelActivity.java"))return ErrorRead("Code/Android/EsenthelActivity.java");
-      Str data=ft.getAll(), s;
-      data=Replace(data, "EE_PACKAGE"              , app_package             , true, WHOLE_WORD_STRICT);
-      data=Replace(data, "EE_APP_NAME"             , CString(cei().appName()), true, WHOLE_WORD_STRICT);
-      s=cei().appGooglePlayLicenseKey();
-      data=Replace(data, "EE_LICENSE_KEY"          , s                 , true, WHOLE_WORD_STRICT);
-      data=Replace(data, "LICENSE_KEY_BEGIN"       , s.is() ? "" : "/*", true, WHOLE_WORD_STRICT);
-      data=Replace(data, "LICENSE_KEY_END"         , s.is() ? "" : "*/", true, WHOLE_WORD_STRICT);
-      s=cei().appAdMobAppIDGooglePlay();
-      data=Replace(data, "ADMOB_APP_ID"            , CString(s)            , true, WHOLE_WORD_STRICT);
-      data=Replace(data, "ADMOB_BEGIN"             , s.is()     ? "" : "/*", true, WHOLE_WORD_STRICT);
-      data=Replace(data, "ADMOB_END"               , s.is()     ? "" : "*/", true, WHOLE_WORD_STRICT);
-      data=Replace(data, "CHARTBOOST_BEGIN"        , chartboost ? "" : "/*", true, WHOLE_WORD_STRICT);
-      data=Replace(data, "CHARTBOOST_END"          , chartboost ? "" : "*/", true, WHOLE_WORD_STRICT);
-      data=Replace(data, "CHARTBOOST_APP_ID"       , CString(cei().appChartboostAppIDGooglePlay       ()), true, WHOLE_WORD_STRICT);
-      data=Replace(data, "CHARTBOOST_APP_SIGNATURE", CString(cei().appChartboostAppSignatureGooglePlay()), true, WHOLE_WORD_STRICT);
-      data=Replace(data, "FACEBOOK_BEGIN"          , facebook   ? "" : "/*", true, WHOLE_WORD_STRICT);
-      data=Replace(data, "FACEBOOK_END"            , facebook   ? "" : "*/", true, WHOLE_WORD_STRICT);
-      data=Replace(data, "EE_LOAD_LIBRARIES"       , load_libraries        , true, WHOLE_WORD_STRICT);
-      SetFile(ft, data, UTF_8_NAKED);
-      if(!OverwriteOnChangeLoud(ft, build_path+"Android/src/EsenthelActivity.java"))return false;
-   }
-   // LoaderActivity.java
-   {
-      FileText ft; if(!ft.read("Code/Android/LoaderActivity.java"))return ErrorRead("Code/Android/LoaderActivity.java");
-      Str data=ft.getAll();
-      data=Replace(data, "EE_PACKAGE"           , app_package                    , true, WHOLE_WORD_STRICT);
-      data=Replace(data, "EE_LICENSE_KEY"       , cei().appGooglePlayLicenseKey(), true, WHOLE_WORD_STRICT);
-      data=Replace(data, "EE_DOWNLOAD_EXPANSION", TextBool(cei().appAndroidExpansion() && cei().appGooglePlayLicenseKey().is()), true, WHOLE_WORD_STRICT); // require license key provided, because otherwise the Java codes will crash throwing an exception
-      SetFile(ft, data, UTF_8_NAKED);
-      if(!OverwriteOnChangeLoud(ft, build_path+"Android/src/LoaderActivity.java"))return false;
-   }
-   if(!CopyFile("Code/Android/Native.java", build_path+"Android/src/Native.java"))return false;
-   if(!CopyFile("Code/Android/Base64.java", build_path+"Android/src/Base64.java"))return false;
-
    return true;
+#endif
+   return generateVSProj(devenv_version.x);
 }
 /******************************************************************************/
 Bool CodeEditor::generateLinuxMakeProj()
@@ -2887,10 +3040,13 @@ static EXPORT_MODE ExeToMode(EXE_TYPE exe)
    {
       default: return EXPORT_VS;
 
-      case EXE_APK: return EXPORT_ANDROID;
+      case EXE_APK:
+      case EXE_AAB:
+         return EXPORT_ANDROID;
 
       case EXE_MAC:
-      case EXE_IOS: return EXPORT_XCODE;
+      case EXE_IOS:
+         return EXPORT_XCODE;
 
       case EXE_LINUX: return EXPORT_LINUX_NETBEANS;
    }
@@ -2903,13 +3059,14 @@ Bool CodeEditor::Export(EXPORT_MODE mode, BUILD_MODE build_mode)
    switch(mode) // override EXE type when exporting
    {
       case EXPORT_LINUX_NETBEANS:
-      case EXPORT_LINUX_MAKE    : build_exe_type=EXE_LINUX; break;
-      case EXPORT_ANDROID       : build_exe_type=EXE_APK  ; break;
-      case EXPORT_XCODE         : if(build_exe_type!=EXE_MAC && build_exe_type!=EXE_IOS)build_exe_type=EXE_MAC; break;
+      case EXPORT_LINUX_MAKE    :                                                       build_exe_type=EXE_LINUX; break;
+      case EXPORT_ANDROID       : if(build_exe_type!=EXE_APK && build_exe_type!=EXE_AAB)build_exe_type=EXE_APK  ; break;
+      case EXPORT_XCODE         : if(build_exe_type!=EXE_MAC && build_exe_type!=EXE_IOS)build_exe_type=EXE_MAC  ; break;
       // no need to check for VS as it will just fail with a message box about exe/dll/web support only
    }
 
    if(build_exe_type==EXE_DLL && (build_mode==BUILD_PLAY || build_mode==BUILD_DEBUG))build_mode=BUILD_BUILD;
+   if(build_exe_type==EXE_AAB && (build_mode==BUILD_PLAY || build_mode==BUILD_DEBUG))build_exe_type=EXE_APK; // cannot play AAB, only APK
  T.build_mode             =build_mode;
    build_debug            =((build_mode==BUILD_PUBLISH) ? false : config_debug); // set before 'verifyBuildPath' and before creating android project
    build_windows_code_sign=((build_mode==BUILD_PUBLISH) && build_exe_type==EXE_EXE && options.authenticode()/*cei().appWindowsCodeSign()*/);
@@ -2998,9 +3155,35 @@ void CodeEditor::killBuild()
 /******************************************************************************/
 void CodeEditor::build(BUILD_MODE mode)
 {
-   if((mode==BUILD_PLAY || mode==BUILD_PUBLISH) && (config_exe==EXE_UWP || config_exe==EXE_IOS || config_exe==EXE_NS)){openIDE(); return;} // Play/Publish for WindowsNew and iOS must be done from the IDE
+   if(mode==BUILD_DEBUG)switch(config_exe) // DEBUG
+   {
+      case EXE_EXE:
+      case EXE_UWP:
+      case EXE_NS :
+         if(Export(EXPORT_VS, BUILD_DEBUG))VSRun(build_project_file, S); break;
 
-   if(Export(EXPORT_EXE, mode))
+      case EXE_APK:
+      case EXE_AAB:
+         if(Export(EXPORT_ANDROID, BUILD_DEBUG))VSRun(build_project_file, S); break;
+
+      case EXE_DLL:
+      case EXE_LIB:
+         break;
+
+      default: openIDE(); break;
+   }else
+   if( mode==BUILD_IDE // OPEN IDE
+   || (mode==BUILD_PLAY || mode==BUILD_PUBLISH) && (config_exe==EXE_UWP || config_exe==EXE_IOS || config_exe==EXE_NS)) // Play/Publish for WindowsNew, iOS and Switch must be done from the IDE
+   {
+   #if WINDOWS
+                               if(Export((config_exe==EXE_APK || config_exe==EXE_AAB) ? EXPORT_ANDROID : EXPORT_VS, mode))VSOpen(build_project_file);
+   #elif MAC
+                               if(Export(EXPORT_XCODE                                                             , mode))Run   (build_project_file);
+   #elif LINUX
+      if(verifyLinuxNetBeans())if(Export(EXPORT_LINUX_NETBEANS                                                    , mode))Run   (Str(netbeans_path).tailSlash(true)+"bin/netbeans", S+"--open \""+build_path+'"');
+   #endif
+   }else
+   if(Export(EXPORT_EXE, mode)) // BUILD
    {
       build_list.highlight_line=-1;
       build_list.highlight_time= 0;
@@ -3009,7 +3192,7 @@ void CodeEditor::build(BUILD_MODE mode)
       build_phases =build_steps=0;
 
       Int build_threads=Cpu.threads();
-      if(build_exe_type==EXE_EXE || build_exe_type==EXE_DLL || build_exe_type==EXE_LIB || build_exe_type==EXE_UWP || build_exe_type==EXE_WEB || build_exe_type==EXE_NS)
+      if(build_exe_type==EXE_EXE || build_exe_type==EXE_DLL || build_exe_type==EXE_LIB || build_exe_type==EXE_UWP || build_exe_type==EXE_APK || build_exe_type==EXE_AAB || build_exe_type==EXE_NS || build_exe_type==EXE_WEB)
       {
          build_phases=1+build_windows_code_sign;
          build_steps =3+build_windows_code_sign; FREPA(build_files)if(build_files[i].mode==BuildFile::SOURCE)build_steps++; // stdafx.cpp, linking, wait for end, *.cpp
@@ -3017,12 +3200,14 @@ void CodeEditor::build(BUILD_MODE mode)
          Str config=(build_debug ? "Debug" : "Release");
          if(build_exe_type==EXE_UWP)config+=" Universal";
 
+         if(build_exe_type==EXE_APK
+         || build_exe_type==EXE_AAB)config+=" DX11";else // always use the same config for APK because it uses    GL
          if(build_exe_type==EXE_NS )config+=" DX11";else // always use the same config for NS  because it uses    GL, warning: this must match codes above: (build_debug ? "Debug DX11/" : "Release DX11/")
          if(build_exe_type==EXE_WEB)config+=" DX11";else // always use the same config for WEB because it uses WebGL, warning: this must match codes above: (build_debug ? "Debug DX11/" : "Release DX11/")
          if(build_exe_type==EXE_UWP)config+=" DX11";else
                                     config+=" DX11"; // config_api
 
-         Str platform=((build_exe_type==EXE_NS) ? "4) Nintendo Switch" : (build_exe_type==EXE_WEB) ? "3) Web" : /*config_32_bit ? "2) 32 bit" :*/ "1) 64 bit");
+         Str platform=((build_exe_type==EXE_APK || build_exe_type==EXE_AAB) ? "5) Android" : (build_exe_type==EXE_NS) ? "4) Nintendo Switch" : (build_exe_type==EXE_WEB) ? "3) Web" : /*config_32_bit ? "2) 32 bit" :*/ "1) 64 bit");
 
          if(build_exe_type==EXE_WEB) // currently WEB compilation is available only through VC++ 2010
          {
@@ -3046,12 +3231,20 @@ void CodeEditor::build(BUILD_MODE mode)
             {
                Str params=MSBuildParams(build_project_file, config, platform);
                if(build_exe_type==EXE_UWP)params.space()+="/p:AppxPackageSigningEnabled=false"; // disable code signing for Windows Universal builds, otherwise build will fail
+             //if(build_exe_type==EXE_AAB)params.space()+="/p:AndroidEnablePackaging=false"; // disable APK generation because it's not needed for AAB #AndroidEnablePackaging, however with this command ".agde" is not generated, and gradle build fails
                build_msbuild=build_process.create(msbuild, params);
             }
             if(!build_msbuild)
             {
                if(!devenv_com){build_log=build_path+"build_log.txt"; FDelFile(build_log);} // if we have "devenv.com" then we get the output from the console (devenv.exe does not generate any output)
                VSBuild(build_project_file, config, platform, build_log);
+            }
+
+            if(build_exe_type==EXE_AAB)build_phases=2;else // build + "gradlew bundle*" #AndroidEnablePackaging
+            if(build_exe_type==EXE_APK && build_mode==BUILD_PLAY)
+            {
+               build_package=AndroidPackage(cei().appPackage());
+               build_phases=2; // build + adb(install)
             }
          }
       }else
@@ -3069,8 +3262,8 @@ void CodeEditor::build(BUILD_MODE mode)
 
          if(!build_process.create("xcodebuild", XcodeBuildParams(build_project_file, build_debug ? "Debug" : "Release", (build_exe_type==EXE_MAC) ? "Mac" : "iOS"))) // sdk "iphonesimulator"
             Error("Error launching \"xcodebuild\" system command.\nPlease make sure you have Xcode installed.");
-      }else
-      if(build_exe_type==EXE_APK)
+      }/*else
+      if(build_exe_type==EXE_APK || build_exe_type==EXE_AAB)
       {
          Bool sign=!build_debug; // we want to sign with our own certificate (note that this can be done only in RELEASE mode, because in DEBUG, Android SDK will automatically sign the package with its own Debug certificate, and our own signing will fail)
          if(  sign)
@@ -3082,7 +3275,6 @@ void CodeEditor::build(BUILD_MODE mode)
             if(!jdk_path.is() || !FExistSystem(jdk_path.tailSlash(true)+"bin/jarsigner.exe")){options.activatePaths(); Error("Path to Java Development Kit was not specified or is invalid."); return;}
          #endif
          }
-         if(build_mode==BUILD_PLAY || build_mode==BUILD_DEBUG)Run(adbPath(), "start-server", true); // if we're going to launch the app then make sure that the ADB server is running, or else custom launched ADB processess will never exit
          build_steps =0;
          build_phases=1+1+sign+(build_debug ? 0 : 1)+((build_mode==BUILD_PLAY || build_mode==BUILD_DEBUG) ? 2 : 0); // ndk-build (compile) + ant (link) + jarsigner + zipalign (in release) + adb (force_stop) + adb (install)
        //if(1){build_log=build_path+"build_log.txt"; FDelFile(build_log);} this causes some freeze during building?
@@ -3094,43 +3286,15 @@ void CodeEditor::build(BUILD_MODE mode)
          FDelFile(build_path+"Android/libs/armeabi-v7a/libProject.so");
          FDelFile(build_path+"Android/libs/arm64-v8a/libProject.so");
          FDelFile(build_path+"Android/libs/x86/libProject.so");
-      }
+      }*/
       buildClear ();
       buildUpdate();
    }
 }
 /******************************************************************************/
-void CodeEditor::play()
-{
-   build(BUILD_PLAY);
-}
-/******************************************************************************/
-void CodeEditor::debug()
-{
- //build(BUILD_DEBUG);
-   switch(config_exe)
-   {
-      case EXE_EXE:
-      case EXE_UWP:
-      case EXE_NS :
-         if(Export(EXPORT_VS, BUILD_DEBUG))VSRun(build_project_file, S); break;
-
-      case EXE_DLL: build(); break;
-
-      default: play(); break;
-   }
-}
-/******************************************************************************/
-void CodeEditor::openIDE()
-{
-#if WINDOWS
-                            if(Export(EXPORT_VS            , BUILD_IDE))VSOpen(build_project_file);
-#elif MAC
-                            if(Export(EXPORT_XCODE         , BUILD_IDE))Run   (build_project_file);
-#elif LINUX
-   if(verifyLinuxNetBeans())if(Export(EXPORT_LINUX_NETBEANS, BUILD_IDE))Run   (Str(netbeans_path).tailSlash(true)+"bin/netbeans", S+"--open \""+build_path+'"');
-#endif
-}
+void CodeEditor::play   () {build(BUILD_PLAY );}
+void CodeEditor::debug  () {build(BUILD_DEBUG);}
+void CodeEditor::openIDE() {build(BUILD_IDE  );}
 /******************************************************************************/
 void CodeEditor::runToCursor()
 {

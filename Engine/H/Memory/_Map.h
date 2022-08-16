@@ -159,8 +159,7 @@ struct _MapTS : private _Map // Map Thread Safe (base) - Do not use this class, 
  ~_MapTS() {del();}
 
 private:
-   mutable Byte _d_lock;
-   SyncLock       _lock;
+   SyncLock _lock;
 
    void clear();
    void del  ();

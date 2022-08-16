@@ -211,7 +211,11 @@ Flt _List::columnDataWidth(Int i, Bool visible)C
          REP(visible ? visibleElms() : totalElms())
          {
             Ptr      data=(visible ? visToData(i) : absToData(i));
-            Flt elm_width=ts.textWidth(lc.md.asText(data, lc.precision));
+            Flt elm_width; switch(lc.md.type)
+            {
+               case DATA_STR_EX: {StrEx &sx=*(StrEx*)((Byte*)data+lc.md.offset); elm_width=ts.textWidth(null, sx.data(), sx.elms()      );} break;
+               default         :                                                 elm_width=ts.textWidth(lc.md.asText(data, lc.precision));  break;
+            }
             if(_offset_offset>=0)elm_width+=*(Flt*)((Byte*)data+_offset_offset);
             MAX(max_width, elm_width);
          }
@@ -259,14 +263,25 @@ _List& _List::columnVisible(Int i, Bool visible)
 {
    if(InRange(i, _columns))
    {
-      ListColumn &lc=_columns[i]; 
+      ListColumn &lc=_columns[i];
       if(lc.visible()!=visible){lc.visible(visible); setRects();}
    }
    return T;
 }
-Flt  _List::columnWidth  (Int i)C {return InRange(i, _columns) ? _columns[i].rect().w() :     0;}
-Bool _List::columnVisible(Int i)C {return InRange(i, _columns) ? _columns[i].visible () : false;}
-Flt  _List::columnOffset (Int i)C
+_List& _List::columnText(Int i, C Str &text)
+{
+   if(InRange(i, _columns))
+   {
+      ListColumn &lc=_columns[i];
+      if(!Equal(lc.text, text, true)){lc.text=text; setRects();}
+   }
+   return T;
+}
+Flt    _List::columnWidth  (Int i)C {return InRange(i, _columns) ? _columns[i].rect().w() :     0;}
+Bool   _List::columnVisible(Int i)C {return InRange(i, _columns) ? _columns[i].visible () : false;}
+C Str& _List::columnText   (Int i)C {return InRange(i, _columns) ? _columns[i].text       :     S;}
+
+Flt _List::columnOffset(Int i)C
 {
    if(i>=1)
    {
@@ -280,6 +295,18 @@ Int _List::localToColumnX(Flt local_x)C
    REPA(_columns)
    {
     C ListColumn &lc=_columns[i]; if(lc.visible() && lc.rect().includesX(local_x))return i;
+   }
+   return -1;
+}
+Int _List::localToVirtualColumnX(Flt local_x)C
+{
+   if(_columns.elms())
+   {
+      if(local_x>_columns.last().rect().max.x)return _columns.elms();
+      REPA(_columns)
+      {
+       C ListColumn &lc=_columns[i]; if(lc.visible() && local_x>=lc.rect().min.x)return i;
+      }
    }
    return -1;
 }
@@ -347,6 +374,7 @@ void _List::zero()
   _columns_hidden=false;
   _offset_first_column=true;
   _kb_action=false;
+  _focusable=true;
 
   _data=null;
   _memb=null;
@@ -478,6 +506,7 @@ _List& _List::create(C _List &src)
 
         _offset_first_column=src._offset_first_column;
         _horizontal         =src._horizontal;
+        _focusable          =src._focusable;
         _kb_action          =false;
 
         _data=src._data;
@@ -686,7 +715,7 @@ void _List::setRects()
    {
       if(!_rects)Alloc(_rects, visibleElms());
 
-      Bool type_new_line=(FlagTest(flag, LIST_TYPE_SORT) && FlagTest(flag, LIST_TYPE_LINE) && _type_offset>=0);
+      Bool type_new_line=(FlagOn(flag, LIST_TYPE_SORT) && FlagOn(flag, LIST_TYPE_LINE) && _type_offset>=0);
       UInt type_prev    =0,
            type_cur     =0;
       Dbl  x=0, y=0; // use double precision to improve precision for a lot of elements (this gets increased for every element, so errors get accumulated)
@@ -782,6 +811,7 @@ _List& _List::     zoomStep(  Flt   step                               ) {_zoom_
 _List& _List::     drawMode(  LIST_DRAW_MODE mode                      ) {                                              if(T._draw_mode!=mode                                                          ){T.     _draw_mode=mode      ;                                                setRects();} return T;}
 _List& _List::   horizontal(  Bool           horizontal                ) {                                              if(T._horizontal!=horizontal                                                   ){T.    _horizontal=horizontal;                                                setRects();} return T;}
 _List& _List::     vertical(  Bool           vertical                  ) {return horizontal(!vertical);}
+_List& _List::    focusable(  Bool           on                        ) {if(T._focusable!=on){_focusable=on; if(!on)kbClear();} return T;}
 /******************************************************************************/
 Ptr _List::visToData(Int visible)C
 {
@@ -906,6 +936,8 @@ Int _List::localToVis(C Vec2 &local_pos)C
 Int _List::localToVisX(Flt local_x)C {Int v=localToVirtualX(local_x); return InRange(v, visibleElms()) ? v : -1;}
 Int _List::localToVisY(Flt local_y)C {Int v=localToVirtualY(local_y); return InRange(v, visibleElms()) ? v : -1;}
 
+Vec2 _List::screenToLocal(C Vec2 &pos, C GuiPC *gpc)C {return pos-(gpc ? gpc->offset : screenPos());}
+
 Int _List::screenToVisX     (  Flt   x  , C GuiPC *gpc)C {return localToVisX     (x  -(gpc ? gpc->offset.x : screenPos().x));}
 Int _List::screenToVisY     (  Flt   y  , C GuiPC *gpc)C {return localToVisY     (y  -(gpc ? gpc->offset.y : screenPos().y));}
 Int _List::screenToVis      (C Vec2 &pos, C GuiPC *gpc)C {return localToVis      (pos-(gpc ? gpc->offset   : screenPos()  ));}
@@ -968,6 +1000,16 @@ Rect _List::visToScreenRect(Int visible, C GuiPC *gpc)C
    }
    return pos;
 }
+Rect _List::visToScreenRect(C VecI2 &col_vis, C GuiPC *gpc)C
+{
+   Vec2 pos=(gpc ? gpc->offset : screenPos()); if(columnsVisible())pos.y-=columnHeight();
+   switch(drawMode())
+   {
+      case LDM_LIST : {pos.y-=col_vis.y*_height_ez; Rect rect; rect.setY(pos.y-_height_ez, pos.y); if(InRange(col_vis.x, columns())){C Rect &col_rect=column(col_vis.x).rect(); rect.setX(col_rect.min.x+pos.x, col_rect.max.x+pos.x);}else rect.setX(pos.x, pos.x+T.rect().w()); return rect;}
+      case LDM_RECTS: if(_rects && InRange(col_vis.y, visibleElms()))return _rects[col_vis.y]+pos; break;
+   }
+   return pos;
+}
 /******************************************************************************/
 Rect _List::elmsScreenRect(C GuiPC *gpc)C
 {
@@ -1005,8 +1047,8 @@ Int _List::nearest(C Vec2 &screen_pos, C Vec2 &dir)C
       case LDM_LIST: if(dir.y)
       {
          Int v=screenToVirtualY(screen_pos.y);
-         if(dir.y>0){v--; return Mid(v, -1, visibleElms()-1);}
-                     v++; if(v>=visibleElms())return -1; return Max(v, 0);
+         if(dir.y>0)return Mid(v-1, -1, visibleElms()-1);
+                    v++; if(v>=visibleElms())return -1; return Max(v, 0);
       }break;
 
       case LDM_RECTS:
@@ -1072,6 +1114,45 @@ Int _List::nearest(C Vec2 &screen_pos, C Vec2 &dir)C
    }
    return -1;
 }
+VecI2 _List::nearest2(C Vec2 &screen_pos, C Vec2 &dir)C
+{
+   if(visibleElms())switch(drawMode())
+   {
+      case LDM_LIST: if(dir.any())
+      {
+         Vec2 local_pos=screenToLocal(screen_pos);
+         Int  v=localToVirtualY(local_pos.y);
+         if(dir.y>0)v=Min(v-1, visibleElms()-1);else // move up
+         if(dir.y<0)v=Max(v+1,               0);     // move down
+         if(InRange(v, visibleElms()))
+         {
+            Int c=localToVirtualColumnX(local_pos.x);
+            if(dir.x>0) // move right
+            {
+            right:
+               MAX(++c, 0);
+            next_col: // find next visible column
+               if(!InRange(c, columns()))return -1;
+               if(!columnVisible(c)){c++; goto next_col;}
+            }else
+            if(dir.x<0) // move left
+            {
+            left:
+               MIN(--c, visibleElms()-1);
+            prev_col: // find previous visible column
+               if(!InRange(c, columns()))return -1;
+               if(!columnVisible(c)){c--; goto prev_col;}
+            }else // if not moving, then clamp to nearest visible column
+            if(c< 0        )goto right;else
+            if(c>=columns())goto left ;
+            return VecI2(c, v);
+         }
+      }break;
+
+      case LDM_RECTS: return VecI2(0, nearest(screen_pos, dir));
+   }
+   return -1;
+}
 Int _List::pageElms(C GuiPC *gpc)C
 {
    Int page_elms=1;
@@ -1083,6 +1164,11 @@ Int _List::pageElms(C GuiPC *gpc)C
    return page_elms;
 }
 /******************************************************************************/
+Bool _List::scrolling()C
+{
+   if(_parent && _parent->isRegion())return _parent->asRegion().scrolling();
+   return false;
+}
 Bool _List::scrollingMain()C
 {
    if(_parent && _parent->isRegion())
@@ -1125,6 +1211,19 @@ _List& _List::scrollTo(Int i, Bool immediate, Flt center)
             else           {e=(             h      -rect.h())*center; region.scrollFitY(-rect.max.y-e, -rect.min.y+add+e, immediate);}
          }break;
       }
+   }
+   return T;
+}
+_List& _List::scrollToCol(Int column, Bool immediate, Flt center)
+{
+   Clamp(column, 0, columns()-1);
+   if(InRange(column, _columns) && _parent && _parent->isRegion() && drawMode()==LDM_LIST)
+   {
+      center=Sat(center)*0.5f;
+      Region &region=_parent->asRegion();
+    C Rect   &rect=T.column(column).rect();
+      Flt     w=region.clientWidth(), e=(w-rect.w())*center;
+      region.scrollFitX(rect.min.x-e, rect.max.x+e, immediate);
    }
    return T;
 }
@@ -1194,7 +1293,7 @@ static Int ListCompareMap(C Int &i0, C Int &i1)
 }
 void _List::sort()
 {
-   Bool type_sort=(FlagTest(flag, LIST_TYPE_SORT) && _type_offset>=0);
+   Bool type_sort=(FlagOn(flag, LIST_TYPE_SORT) && _type_offset>=0);
    if(  type_sort || sort_column[0]>=0 || sort_column[1]>=0 || sort_column[2]>=0)
    {
       cur=visToAbs(cur);
@@ -1426,8 +1525,23 @@ void _List::nearest(C GuiPC &gpc, GuiObjNearest &gon)
                {
                   rect.max.y=pos.y     -i*_height_ez;
                   rect.min.y=rect.max.y-  _height_ez;
-                  if(ignore_start && Cuts(gon.plane.pos, rect))continue;
-                  gon.add(rect&gpc.clip, area, T);
+                  if(flag&LIST_NEAREST_COLUMN)REP(columns())
+                  {
+                   C ListColumn &col=_columns[i]; if(col.visible())
+                     {
+                        rect.min.x=pos.x+col.rect().min.x;
+                        rect.max.x=pos.x+col.rect().max.x;
+                        if(CutsX(gpc.clip, rect))
+                        {
+                           if(ignore_start && Cuts(gon.plane.pos, rect))continue;
+                           gon.add(rect&gpc.clip, rect.area(), T);
+                        }
+                     }
+                  }else
+                  {
+                     if(ignore_start && Cuts(gon.plane.pos, rect))continue;
+                     gon.add(rect&gpc.clip, area, T);
+                  }
                }
             }break;
 
@@ -1454,7 +1568,7 @@ Bool _List::setSel(Int visible) // returns if selection has changed, this may ca
       if(sel.elms()!=1 || sel[0]!=abs)
       {
          callSelChanging();
-         sel.setNum(1)[0]=abs;
+         sel.setNum(1).first()=abs;
          return true;
       }
    }else
@@ -1492,7 +1606,7 @@ _List& _List::processSel(Int absolute, Int sel_mode) // this may call ONLY 'selC
       {
          if(absolute>=0) // set only 'absolute'
          {
-            if(sel.elms()!=1 || sel[0]!=absolute){callSelChanging(); sel.setNum(1)[0]=absolute; sel_changed=true;}
+            if(sel.elms()!=1 || sel[0]!=absolute){callSelChanging(); sel.setNum(1).first()=absolute; sel_changed=true;}
          }else
          {
             if(sel.elms()){callSelChanging(); sel.clear(); sel_changed=true;}
@@ -1941,16 +2055,44 @@ void _List::draw(C GuiPC &gpc)
                   }else
                   FREPAD(c, _columns)
                   {
-                     ListColumn &lc=_columns[c];
-                     if(lc.visible() && lc.md.type)
+                     ListColumn &lc=_columns[c]; if(lc.visible())switch(lc.md.type)
                      {
-                        if(Image *image=lc.md.asImage(data))
+                        case DATA_NONE: break;
+
+                        case DATA_IMAGE    :
+                        case DATA_IMAGE_PTR:
+                        case DATA_IMAGEPTR :
+                           if(Image *image=lc.md.asImage(data))
+                           {
+                              ALPHA_MODE alpha=D.alpha(image_alpha);
+                              D.clip (elms_rect);
+                              image->drawFit(color, color_add, Rect_LU(lc.rect().min.x+x+ofs, y, lc.rect().w(), _height_ez));
+                              D.alpha(alpha);
+                           }
+                        break;
+
+                        case DATA_MENU_PTR:
+                        case DATA_CHECK:
                         {
-                           ALPHA_MODE alpha=D.alpha(image_alpha);
-                           D.clip (elms_rect);
-                           image->drawFit(color, color_add, Rect_LU(lc.rect().min.x+x+ofs, y, lc.rect().w(), _height_ez));
-                           D.alpha(alpha);
-                        }else
+                           Color color; if(C ImagePtr &image=DataGuiImage(data, lc, color))
+                           {
+                              D.clip(gpc.clip & Rect(lc.rect().min.x+wae_2+x, elms_rect.min.y, lc.rect().max.x-wae_2+x, elms_rect.max.y));
+                              image->drawFit(color, TRANSPARENT, Rect_C(Vec2(lc.rect().centerX()+x+ofs, yt), Vec2(ts.size.avg())));
+                           }
+                        }break;
+
+                        case DATA_STR_EX:
+                        {
+                           StrEx &sx=*(StrEx*)((Byte*)data+lc.md.offset); if(sx.is())
+                           {
+                              ts.align.x=lc.text_align;
+                              D.clip(gpc.clip & Rect(lc.rect().min.x+wae_2+x, elms_rect.min.y, lc.rect().max.x-wae_2+x, elms_rect.max.y));
+                              D.text(ts, Lerp(lc.rect().max.x-wae, lc.rect().min.x+wae, lc.text_align*0.5f+0.5f)+x+ofs, yt, (CChar*)null, sx.data(), sx.elms());
+                           }
+                           if(_offset_first_column)ofs=0; // reset offset for >=1 columns, this should not be done for images
+                        }break;
+
+                        default:
                         {
                          C Str &text=lc.md.asText(data, lc.precision); if(text.is())
                            {
@@ -1958,14 +2100,8 @@ void _List::draw(C GuiPC &gpc)
                               D.clip(gpc.clip & Rect(lc.rect().min.x+wae_2+x, elms_rect.min.y, lc.rect().max.x-wae_2+x, elms_rect.max.y));
                               D.text(ts, Lerp(lc.rect().max.x-wae, lc.rect().min.x+wae, lc.text_align*0.5f+0.5f)+x+ofs, yt, text);
                            }
-                        }
-                        Color color;
-                        if(C ImagePtr &image=DataGuiImage(data, lc, color))
-                        {
-                           D.clip(gpc.clip & Rect(lc.rect().min.x+wae_2+x, elms_rect.min.y, lc.rect().max.x-wae_2+x, elms_rect.max.y));
-                           image->drawFit(color, TRANSPARENT, Rect_C(Vec2(lc.rect().centerX()+x+ofs, yt), Vec2(ts.size.avg())));
-                        }
-                        if(!DataIsImage(lc.md.type) && _offset_first_column)ofs=0; // reset offset for >=1 columns
+                           if(_offset_first_column)ofs=0; // reset offset for >=1 columns, this should not be done for images
+                        }break;
                      }
                   }
                }

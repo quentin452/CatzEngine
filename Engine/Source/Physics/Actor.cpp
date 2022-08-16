@@ -75,14 +75,14 @@ Actor& Actor::addAccel  (C Vec &accel              ) {if(_dynamic && !kinematic(
 
 Actor& Actor::gravity  (Bool on)  {if(    _actor   && gravity  ()!=on){_actor  ->setActorFlag     (   PxActorFlag    ::eDISABLE_GRAVITY, !on); if( on)sleep(false);} return T;}
 Actor& Actor::kinematic(Bool on)  {if(    _dynamic && kinematic()!=on){_dynamic->setRigidBodyFlag (   PxRigidBodyFlag::eKINEMATIC      ,  on); if(!on)sleep(false);} return T;}
-Bool   Actor::kinematic(       )C {return _dynamic ?    FlagTest((UInt)_dynamic->getRigidBodyFlags(), PxRigidBodyFlag::eKINEMATIC           ) : false;}
-Bool   Actor::gravity  (       )C {return _actor   ?   !FlagTest((UInt)_actor  ->getActorFlags    (), PxActorFlag    ::eDISABLE_GRAVITY     ) : true ;}
-Bool   Actor::ccd      (       )C {return _dynamic ?    FlagTest((UInt)_dynamic->getRigidBodyFlags(), PxRigidBodyFlag::eENABLE_CCD          ) : false;}
+Bool   Actor::kinematic(       )C {return _dynamic ?     FlagOn ((UInt)_dynamic->getRigidBodyFlags(), PxRigidBodyFlag::eKINEMATIC           ) : false;}
+Bool   Actor::gravity  (       )C {return _actor   ?     FlagOff((UInt)_actor  ->getActorFlags    (), PxActorFlag    ::eDISABLE_GRAVITY     ) : true ;}
+Bool   Actor::ccd      (       )C {return _dynamic ?     FlagOn ((UInt)_dynamic->getRigidBodyFlags(), PxRigidBodyFlag::eENABLE_CCD          ) : false;}
 
-Bool Actor::ray      ()C {if(_actor){PxShape *shape; if(_actor->getShapes(&shape, 1))return FlagTest((UInt)shape->getFlags(), PxShapeFlag::eSCENE_QUERY_SHAPE);} return false;}
-Bool Actor::trigger  ()C {if(_actor){PxShape *shape; if(_actor->getShapes(&shape, 1))return FlagTest((UInt)shape->getFlags(), PxShapeFlag::eTRIGGER_SHAPE    );} return false;}
-Bool Actor::collision()C {if(_actor){PxShape *shape; if(_actor->getShapes(&shape, 1))return FlagTest((UInt)shape->getFlags(), PxShapeFlag::eSIMULATION_SHAPE );} return false;}
-Byte Actor::group    ()C {if(_actor){PxShape *shape; if(_actor->getShapes(&shape, 1))return                shape->getSimulationFilterData().word0             ;} return     0;}
+Bool Actor::ray      ()C {if(_actor){PxShape *shape; if(_actor->getShapes(&shape, 1))return FlagOn((UInt)shape->getFlags(), PxShapeFlag::eSCENE_QUERY_SHAPE);} return false;}
+Bool Actor::trigger  ()C {if(_actor){PxShape *shape; if(_actor->getShapes(&shape, 1))return FlagOn((UInt)shape->getFlags(), PxShapeFlag::eTRIGGER_SHAPE    );} return false;}
+Bool Actor::collision()C {if(_actor){PxShape *shape; if(_actor->getShapes(&shape, 1))return FlagOn((UInt)shape->getFlags(), PxShapeFlag::eSIMULATION_SHAPE );} return false;}
+Byte Actor::group    ()C {if(_actor){PxShape *shape; if(_actor->getShapes(&shape, 1))return              shape->getSimulationFilterData().word0             ;} return     0;}
 
 Actor& Actor::ccd(Bool on)
 {
@@ -173,15 +173,15 @@ PhysMtrl* Actor::material()C
    return null;
 }
 
-Bool Actor::freezePosX()C {return _dynamic ? FlagTest((UInt)_dynamic->getRigidDynamicLockFlags(), PxRigidDynamicLockFlag::eLOCK_LINEAR_X) : false;}
-Bool Actor::freezePosY()C {return _dynamic ? FlagTest((UInt)_dynamic->getRigidDynamicLockFlags(), PxRigidDynamicLockFlag::eLOCK_LINEAR_Y) : false;}
-Bool Actor::freezePosZ()C {return _dynamic ? FlagTest((UInt)_dynamic->getRigidDynamicLockFlags(), PxRigidDynamicLockFlag::eLOCK_LINEAR_Z) : false;}
-Bool Actor::freezePos ()C {return _dynamic ? FlagTest((UInt)_dynamic->getRigidDynamicLockFlags(), UInt(PxRigidDynamicLockFlag::eLOCK_LINEAR_X | PxRigidDynamicLockFlag::eLOCK_LINEAR_Y | PxRigidDynamicLockFlag::eLOCK_LINEAR_Z)) : false;}
+Bool Actor::freezePosX()C {return _dynamic ? FlagOn((UInt)_dynamic->getRigidDynamicLockFlags(), PxRigidDynamicLockFlag::eLOCK_LINEAR_X) : false;}
+Bool Actor::freezePosY()C {return _dynamic ? FlagOn((UInt)_dynamic->getRigidDynamicLockFlags(), PxRigidDynamicLockFlag::eLOCK_LINEAR_Y) : false;}
+Bool Actor::freezePosZ()C {return _dynamic ? FlagOn((UInt)_dynamic->getRigidDynamicLockFlags(), PxRigidDynamicLockFlag::eLOCK_LINEAR_Z) : false;}
+Bool Actor::freezePos ()C {return _dynamic ? FlagOn((UInt)_dynamic->getRigidDynamicLockFlags(), UInt(PxRigidDynamicLockFlag::eLOCK_LINEAR_X | PxRigidDynamicLockFlag::eLOCK_LINEAR_Y | PxRigidDynamicLockFlag::eLOCK_LINEAR_Z)) : false;}
 
-Bool Actor::freezeRotX()C {return _dynamic ? FlagTest((UInt)_dynamic->getRigidDynamicLockFlags(), PxRigidDynamicLockFlag::eLOCK_ANGULAR_X) : false;}
-Bool Actor::freezeRotY()C {return _dynamic ? FlagTest((UInt)_dynamic->getRigidDynamicLockFlags(), PxRigidDynamicLockFlag::eLOCK_ANGULAR_Y) : false;}
-Bool Actor::freezeRotZ()C {return _dynamic ? FlagTest((UInt)_dynamic->getRigidDynamicLockFlags(), PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z) : false;}
-Bool Actor::freezeRot ()C {return _dynamic ? FlagTest((UInt)_dynamic->getRigidDynamicLockFlags(), UInt(PxRigidDynamicLockFlag::eLOCK_ANGULAR_X | PxRigidDynamicLockFlag::eLOCK_ANGULAR_Y | PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z)) : false;}
+Bool Actor::freezeRotX()C {return _dynamic ? FlagOn((UInt)_dynamic->getRigidDynamicLockFlags(), PxRigidDynamicLockFlag::eLOCK_ANGULAR_X) : false;}
+Bool Actor::freezeRotY()C {return _dynamic ? FlagOn((UInt)_dynamic->getRigidDynamicLockFlags(), PxRigidDynamicLockFlag::eLOCK_ANGULAR_Y) : false;}
+Bool Actor::freezeRotZ()C {return _dynamic ? FlagOn((UInt)_dynamic->getRigidDynamicLockFlags(), PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z) : false;}
+Bool Actor::freezeRot ()C {return _dynamic ? FlagOn((UInt)_dynamic->getRigidDynamicLockFlags(), UInt(PxRigidDynamicLockFlag::eLOCK_ANGULAR_X | PxRigidDynamicLockFlag::eLOCK_ANGULAR_Y | PxRigidDynamicLockFlag::eLOCK_ANGULAR_Z)) : false;}
 
 Actor& Actor::freezePosX(Bool freeze)
 {
@@ -319,12 +319,12 @@ Actor& Actor::user(Ptr data)  {if(    _actor)  _actor->user=data; return T;}
 Ptr    Actor::obj(       )C {return _actor ? _actor->obj : null       ;}
 Actor& Actor::obj(Ptr obj)  {if(    _actor)  _actor->obj=obj; return T;}
 
-Bool   Actor::gravity(       )C {return _actor ? !FlagTest(_actor->getFlags(), BT_DISABLE_WORLD_GRAVITY) : true;}
+Bool   Actor::gravity(       )C {return _actor ? FlagOff(_actor->getFlags(), BT_DISABLE_WORLD_GRAVITY) : true;}
 Actor& Actor::gravity(Bool on)
 {
    if(_actor)
    {
-      UInt flags=_actor->getFlags(); if(FlagTest(flags, BT_DISABLE_WORLD_GRAVITY)==on)
+      UInt flags=_actor->getFlags(); if(FlagOn(flags, BT_DISABLE_WORLD_GRAVITY)==on)
       {
          flags^=BT_DISABLE_WORLD_GRAVITY; _actor->setFlags(flags);
         _actor->setGravity(Bullet.vec(on ? Physics.gravity() : VecZero));
@@ -529,12 +529,12 @@ Actor& Actor::ccd        (Bool on   )
    }
    return T;
 }
-Bool   Actor::kinematic(       )C {return _actor ? FlagTest(_actor->getCollisionFlags(), btCollisionObject::CF_KINEMATIC_OBJECT) : false;}
+Bool   Actor::kinematic(       )C {return _actor ? FlagOn(_actor->getCollisionFlags(), btCollisionObject::CF_KINEMATIC_OBJECT) : false;}
 Actor& Actor::kinematic(Bool on)
 {
    if(_actor)
    {
-      UInt flags=_actor->getCollisionFlags(); if(FlagTest(flags, btCollisionObject::CF_KINEMATIC_OBJECT)!=on)
+      UInt flags=_actor->getCollisionFlags(); if(FlagOn(flags, btCollisionObject::CF_KINEMATIC_OBJECT)!=on)
       {
          FlagToggle(flags, btCollisionObject::CF_KINEMATIC_OBJECT); _actor->setCollisionFlags(flags);
          if(on)
@@ -547,7 +547,7 @@ Actor& Actor::kinematic(Bool on)
    }
    return T;
 }
-Bool   Actor::collision(       )C {return _actor ? !FlagTest(_actor->getCollisionFlags(), btCollisionObject::CF_NO_CONTACT_RESPONSE) : true;}
+Bool   Actor::collision(       )C {return _actor ? FlagOff(_actor->getCollisionFlags(), btCollisionObject::CF_NO_CONTACT_RESPONSE) : true;}
 Actor& Actor::collision(Bool on)
 {
    if(_actor)
@@ -856,7 +856,7 @@ Bool Actor::loadState(File &f) // don't delete on fail, as here we're loading on
       {
          ActorDesc desc; if(f.getFast(desc))
          {
-            kinematic(FlagTest(Unaligned(desc.flag), ACTOR_KINEMATIC)); // !! set 'kinematic' as first, because it could disallow setting other members (such as 'vel, angVel, sleep') !!
+            kinematic(FlagOn(Unaligned(desc.flag), ACTOR_KINEMATIC)); // !! set 'kinematic' as first, because it could disallow setting other members (such as 'vel, angVel, sleep') !!
 
             group    (     Unaligned(desc.group    ));
             dominance(     Unaligned(desc.dominance));
@@ -871,19 +871,19 @@ Bool Actor::loadState(File &f) // don't delete on fail, as here we're loading on
                vel(Unaligned(desc.    vel));
             angVel(Unaligned(desc.ang_vel));
 
-            freezePosX(FlagTest(Unaligned(desc.flag), ACTOR_FREEZE_POS_X));
-            freezePosY(FlagTest(Unaligned(desc.flag), ACTOR_FREEZE_POS_Y));
-            freezePosZ(FlagTest(Unaligned(desc.flag), ACTOR_FREEZE_POS_Z));
-            freezeRotX(FlagTest(Unaligned(desc.flag), ACTOR_FREEZE_ROT_X));
-            freezeRotY(FlagTest(Unaligned(desc.flag), ACTOR_FREEZE_ROT_Y));
-            freezeRotZ(FlagTest(Unaligned(desc.flag), ACTOR_FREEZE_ROT_Z));
-            gravity   (FlagTest(Unaligned(desc.flag), ACTOR_GRAVITY     ));
-            ray       (FlagTest(Unaligned(desc.flag), ACTOR_RAY         ));
-            collision (FlagTest(Unaligned(desc.flag), ACTOR_COLLISION   ));
-            trigger   (FlagTest(Unaligned(desc.flag), ACTOR_TRIGGER     ));
-            ccd       (FlagTest(Unaligned(desc.flag), ACTOR_CCD         ));
+            freezePosX(FlagOn(Unaligned(desc.flag), ACTOR_FREEZE_POS_X));
+            freezePosY(FlagOn(Unaligned(desc.flag), ACTOR_FREEZE_POS_Y));
+            freezePosZ(FlagOn(Unaligned(desc.flag), ACTOR_FREEZE_POS_Z));
+            freezeRotX(FlagOn(Unaligned(desc.flag), ACTOR_FREEZE_ROT_X));
+            freezeRotY(FlagOn(Unaligned(desc.flag), ACTOR_FREEZE_ROT_Y));
+            freezeRotZ(FlagOn(Unaligned(desc.flag), ACTOR_FREEZE_ROT_Z));
+            gravity   (FlagOn(Unaligned(desc.flag), ACTOR_GRAVITY     ));
+            ray       (FlagOn(Unaligned(desc.flag), ACTOR_RAY         ));
+            collision (FlagOn(Unaligned(desc.flag), ACTOR_COLLISION   ));
+            trigger   (FlagOn(Unaligned(desc.flag), ACTOR_TRIGGER     ));
+            ccd       (FlagOn(Unaligned(desc.flag), ACTOR_CCD         ));
 
-            sleep(FlagTest(Unaligned(desc.flag), ACTOR_SLEEP)); // !! set 'sleep' as last, because other methods may change it !!
+            sleep(FlagOn(Unaligned(desc.flag), ACTOR_SLEEP)); // !! set 'sleep' as last, because other methods may change it !!
 
             if(f.ok())return true;
          }

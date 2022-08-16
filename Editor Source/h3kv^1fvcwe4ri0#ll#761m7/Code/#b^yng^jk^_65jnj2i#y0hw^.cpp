@@ -131,9 +131,9 @@ class CompareProjects : PropWin
                   if(elm_b && elm_b.finalExists())
                   {
                      if(test_data    && (elm_a.data ? elm_a.data.ver.ver : 0)!=(elm_b.data ? elm_b.data.ver.ver : 0) && DiffElm(proj_a, elm_a, proj_b, *elm_b)
-                     || test_name    && elm_a.  name_time!=elm_b.  name_time && !Equal(elm_a.name, elm_b.name, true)
-                     || test_parent  && elm_a.parent_time!=elm_b.parent_time &&        elm_a.parent_id!=elm_b.parent_id
-                     || test_publish && elm_a.noPublish()!=elm_b.noPublish())
+                     || test_name    &&  elm_a.  name_time!=elm_b.  name_time && !Equal(elm_a.name           , elm_b.name, true)
+                     || test_parent  &&  elm_a.parent_time!=elm_b.parent_time &&        elm_a.parent_id      !=elm_b.parent_id
+                     || test_publish && (elm_a.publish()  !=elm_b.publish()   ||        elm_a.publishMobile()!=elm_b.publishMobile()))
                         if(different.binaryInclude(elm_a.id))
                            data.New().setElm(proj_a, elm_a);
                   }else
@@ -146,20 +146,25 @@ class CompareProjects : PropWin
       }
       list.setData(data);
    }
-   void changed(C UID &proj_id)
+   void changed(C UID &proj_id) // project with 'proj_id' has changed
    {
-      if(visible())REPA(projects)
+      if(visible())
       {
-         Project &proj=projects[i]; if(proj.id==proj_id)
+         bool refresh=false;
+         REPA(projects)
          {
-            if(proj_id==Proj.id)proj=Proj;else
+            Project &proj=projects[i]; if(proj.id==proj_id || proj.id==Proj.id) // refresh 'proj_id' and also current 'Proj', since this is called when copying elements from 'Proj' to 'proj_id', 'Proj' also could have changed in the meantime
             {
-               Str path=proj.path;
-               int ver; Str error; proj.load3(path, ver, error);
-               proj.setIDPath(proj_id, path);
+               refresh=true;
+               if(proj_id==Proj.id)proj=Proj;else
+               {
+                  Str path=proj.path;
+                  int ver; Str error; proj.load3(path, ver, error);
+                  proj.setIDPath(proj_id, path);
+               }
             }
-            refresh(); break;
          }
+         if(refresh)T.refresh();
       }
    }
    void compare(C MemPtr<UID> &proj_ids)

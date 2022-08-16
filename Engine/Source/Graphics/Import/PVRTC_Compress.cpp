@@ -1,7 +1,6 @@
 /******************************************************************************
 
-   Have to keep this as a separate file, so it won't be linked if unused.
-   Because it's linked separately, its name can't include spaces (due to Android building toolchain).
+   !! KEEP THIS AS SEPARATE CPP, SO WHEN UNUSED IT WON'T INCREASE BINARY SIZE !!
 
 /******************************************************************************/
 #include "stdafx.h"

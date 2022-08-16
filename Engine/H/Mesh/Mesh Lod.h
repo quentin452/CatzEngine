@@ -42,8 +42,9 @@ struct MeshLod // Level of Detail, array of Mesh Part's
    Flt       area     (Vec *center=null                     )C;                            // get surface area of all mesh faces, 'center'=if specified then it will be calculated as the average surface center
    Flt       dist     (                                     )C;   MeshLod& dist(Flt dist); // get/set LOD distance
 
-   Bool hasDrawGroup    ( Int draw_group_index)C; // check if at least one MeshPart has specified draw group enum index
-   Bool hasDrawGroupMask(UInt draw_group_mask )C; // check if at least one MeshPart has specified draw group enum mask
+   Bool hasDrawGroup           ( Int draw_group_index               )C; // check if at least one MeshPart has specified draw group enum index
+   Bool hasDrawGroupMask       (UInt draw_group_mask                )C; // check if at least one MeshPart has specified draw group enum mask
+   Bool hasDrawGroupInVariation( Int draw_group_index, Int variation)C; // check if at least one MeshPart has specified draw group enum index and is visible in specified variation
 
    Int partsAfterJoinAll(Bool test_material, Bool test_draw_group, Bool test_name, MESH_FLAG test_vtx_flag=MESH_NONE, Bool skip_hidden=true)C; // calculate how many parts this mesh will have after 'joinAll' would be called with specified parameters, 'test_material'=join only those MeshParts which have the same material, 'test_draw_group'=join only those MeshParts which have the same draw group, 'test_name'=join only those MeshParts which have the same name, 'test_vtx_flag'=join only those MeshParts which have same vertex flag, 'skip_hidden'=if skip calculating hidden parts
 
@@ -138,6 +139,8 @@ struct MeshLod // Level of Detail, array of Mesh Part's
    MeshLod& setVtxAO(Flt strength, Flt bias, Flt max, Flt ray_length, Flt pos_eps=EPS, Int rays=1024, MESH_AO_FUNC func=MAF_FULL, Threads *threads=null); // calculate per-vertex ambient occlusion in vertex colors, 'strength'=0..1 AO strength, 'bias'=0..1, 'max'=AO limit 0..1, 'ray_length'=max ray distance to test, 'rays'=number of rays to use for AO calculation, 'func'=falloff function
 
    MeshLod& freeOpenGLESData(); // this method is used only under OpenGL ES (on other platforms it is ignored), the method frees the software copy of the GPU data which increases available memory, however after calling this method the data can no longer be accessed on the CPU (can no longer be locked or saved to file)
+
+   Bool waitForStream()C; // wait until streaming has finished, false on fail
 
    // fix
    MeshLod& fixTexOffset  (Byte tex_index=0); // fix texture offset  , this reduces big texture coordinates to small ones increasing texturing quality on low precision video cards

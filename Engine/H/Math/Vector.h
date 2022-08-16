@@ -120,6 +120,7 @@ constexpr Int   Min(Int   x, Int   y) {return (x<y) ? x : y;}
 constexpr Int   Min(UInt  x, Int   y) {return (Long(x)<y) ? x : y;}
 constexpr Int   Min(Int   x, UInt  y) {return (x<Long(y)) ? x : y;}
 constexpr UInt  Min(UInt  x, UInt  y) {return (x<y) ? x : y;}
+constexpr UInt  Min(ULong x, UInt  y) {return (x<y) ? x : y;}
 constexpr Long  Min(Int   x, Long  y) {return (x<y) ? x : y;}
 constexpr Long  Min(UInt  x, Long  y) {return (x<y) ? x : y;}
 constexpr Long  Min(Long  x, Int   y) {return (x<y) ? x : y;}
@@ -244,12 +245,14 @@ inline Bool Any(C Dbl &x, C Dbl &y, C Dbl &z, C Dbl &w); // faster version of "x
 /******************************************************************************/
 // CHANGE SIGN
 /******************************************************************************/
-inline void CHS(Int  &x) {x=-x;}
-inline void CHS(Long &x) {x=-x;}
-inline void CHS(Flt  &x) {((U32&) x)   ^=SIGN_BIT;} // works as "x=-x;" but faster
-inline void CHS(Dbl  &x) {((U32*)&x)[1]^=SIGN_BIT;} // works as "x=-x;" but faster
+inline void CHS(SByte &x) {x=-x;}
+inline void CHS(Short &x) {x=-x;}
+inline void CHS(Int   &x) {x=-x;}
+inline void CHS(Long  &x) {x=-x;}
+inline void CHS(Flt   &x) {((U32&) x)   ^=SIGN_BIT;} // works as "x=-x;" but faster
+inline void CHS(Dbl   &x) {((U32*)&x)[1]^=SIGN_BIT;} // works as "x=-x;" but faster
 #if EE_PRIVATE
-INLINE Bool NegativeSB(Flt  x) {return FlagTest   ((UInt&)x, SIGN_BIT);}
+INLINE Bool NegativeSB(Flt  x) {return FlagOn     ((UInt&)x, SIGN_BIT);}
 INLINE void      CHSSB(Flt &x) {       FlagToggle ((UInt&)x, SIGN_BIT);}
 INLINE void      ABSSB(Flt &x) {       FlagDisable((UInt&)x, SIGN_BIT);}
 
@@ -1252,6 +1255,9 @@ struct VecSB2 // Vector 2D (SByte)
    VecSB2& set (SByte i         ) {x=y=i;        return T;}
    VecSB2& set (SByte x, SByte y) {T.x=x; T.y=y; return T;}
 
+   VecSB2& operator+=(C VecSB2 &v) {x+=v.x; y+=v.y; return T;}
+   VecSB2& operator-=(C VecSB2 &v) {x-=v.x; y-=v.y; return T;}
+
    Bool operator==(C VecSB2 &v)C {return x==v.x && y==v.y;}
    Bool operator!=(C VecSB2 &v)C {return x!=v.x || y!=v.y;}
 
@@ -1266,10 +1272,13 @@ struct VecSB2 // Vector 2D (SByte)
    Int     max         ()C {return    Max (x, y);} // components maximum
    Int     sum         ()C {return         x+ y ;} // components sum
    VecSB2& reverse     ()  {Swap(x, y); return T;} // reverse components order
+   VecSB2& chsX        ()  {CHS(x);     return T;} // change sign of X component
+   VecSB2& chsY        ()  {CHS(y);     return T;} // change sign of Y component
 
-   VecSB2() {}
-   VecSB2(SByte i         ) {set(i   );}
-   VecSB2(SByte x, SByte y) {set(x, y);}
+              VecSB2() {}
+              VecSB2(SByte i         ) {set(i   );}
+              VecSB2(SByte x, SByte y) {set(x, y);}
+   CONVERSION VecSB2(C VecI2 &v);
 };
 /******************************************************************************/
 struct VecB // Vector 3D (Byte)
@@ -1301,9 +1310,10 @@ struct VecB // Vector 3D (Byte)
    Int   find        (Int value)C;                               // get index of first component that equals 'value' (-1 if none)
    VecB& reverse     (         )  {       Swap(x, z); return T;} // reverse components order
 
-   VecB() {}
-   VecB(Byte i                ) {set(i      );}
-   VecB(Byte x, Byte y, Byte z) {set(x, y, z);}
+              VecB() {}
+              VecB(Byte i                ) {set(i      );}
+              VecB(Byte x, Byte y, Byte z) {set(x, y, z);}
+   CONVERSION VecB(C VecI &v);
 };
 /******************************************************************************/
 struct VecSB // Vector 3D (SByte)
@@ -1334,10 +1344,14 @@ struct VecSB // Vector 3D (SByte)
    Int    sum         (         )C {return             x+ y+ z ;} // components sum
    Int    find        (Int value)C;                               // get index of first component that equals 'value' (-1 if none)
    VecSB& reverse     (         )  {       Swap(x, z); return T;} // reverse components order
+   VecSB& chsX        (         )  {           CHS(x); return T;} // change sign of X component
+   VecSB& chsY        (         )  {           CHS(y); return T;} // change sign of Y component
+   VecSB& chsZ        (         )  {           CHS(z); return T;} // change sign of Z component
 
-   VecSB() {}
-   VecSB(SByte i                  ) {set(i      );}
-   VecSB(SByte x, SByte y, SByte z) {set(x, y, z);}
+              VecSB() {}
+              VecSB(SByte i                  ) {set(i      );}
+              VecSB(SByte x, SByte y, SByte z) {set(x, y, z);}
+   CONVERSION VecSB(C VecI &v);
 };
 /******************************************************************************/
 struct VecB4 // Vector 4D (Byte)
@@ -1390,9 +1404,10 @@ struct VecB4 // Vector 4D (Byte)
 
    Str asTextDots()C; // return as text with components separated using dots "x.y.z.w"
 
-   VecB4() {}
-   VecB4(Byte i                        ) {set(i         );}
-   VecB4(Byte x, Byte y, Byte z, Byte w) {set(x, y, z, w);}
+              VecB4() {}
+              VecB4(Byte i                        ) {set(i         );}
+              VecB4(Byte x, Byte y, Byte z, Byte w) {set(x, y, z, w);}
+   CONVERSION VecB4(C VecI4 &v);
 };
 /******************************************************************************/
 struct VecSB4 // Vector 4D (SByte)
@@ -1424,11 +1439,16 @@ struct VecSB4 // Vector 4D (SByte)
    Int     max         (         )C {return Max (x, y, z, w);}                             // components maximum
    Int     sum         (         )C {return      x+ y+ z+ w ;}                             // components sum
    Int     find        (Int value)C;                                                       // get index of first component that equals 'value' (-1 if none)
-   VecSB4& reverse     (         ) {Swap(c[0], c[3]); Swap(c[1], c[2]); return T;}         // reverse components order
+   VecSB4& reverse     (         )  {Swap(c[0], c[3]); Swap(c[1], c[2]); return T;}        // reverse components order
+   VecSB4& chsX        (         )  {CHS(x); return T;}                                    // change sign of X component
+   VecSB4& chsY        (         )  {CHS(y); return T;}                                    // change sign of Y component
+   VecSB4& chsZ        (         )  {CHS(z); return T;}                                    // change sign of Z component
+   VecSB4& chsW        (         )  {CHS(w); return T;}                                    // change sign of W component
 
-   VecSB4() {}
-   VecSB4(SByte i                           ) {set(i         );}
-   VecSB4(SByte x, SByte y, SByte z, SByte w) {set(x, y, z, w);}
+              VecSB4() {}
+              VecSB4(SByte i                           ) {set(i         );}
+              VecSB4(SByte x, SByte y, SByte z, SByte w) {set(x, y, z, w);}
+   CONVERSION VecSB4(C VecI4 &v);
 };
 /******************************************************************************/
 struct VecUS2 // Vector 2D (Unsigned Short)
@@ -2176,13 +2196,14 @@ inline    VecI  Round  (C VecD  &x) {return VecI (Round(x.x), Round(x.y), Round(
 inline    VecI4 Round  (C Vec4  &x) {return VecI4(Round(x.x), Round(x.y), Round(x.z), Round(x.w));}
 inline    VecI4 Round  (C VecD4 &x) {return VecI4(Round(x.x), Round(x.y), Round(x.z), Round(x.w));}
 #if EE_PRIVATE
-constexpr Int   RoundEps(  Flt   x, Flt eps) {return (x>=0) ? Trunc(x+eps) : Trunc(x-eps);}
-constexpr Int   RoundPos(  Flt   x) {return Trunc(x+0.5f);} // doesn't care if round of negative value will not be precise, but unlike 'RoundU' the result will still be negative
-constexpr Int   RoundPos(  Dbl   x) {return Trunc(x+0.5 );} // doesn't care if round of negative value will not be precise, but unlike 'RoundU' the result will still be negative
-constexpr Int   RoundGPU(  Flt   x) {return Round(x-0.0001f);} // if the coordinate is located exactly between 2 pixels "Frac(x)==0.5" then due to numerical precision issues sometimes this can be rounded up and sometimes down, and flickering can occur for example when window is moved on the screen, to prevent that, apply a small offset, the value "0.0001f" has been tested having a Window and a button at 0.5 coordinates, then moving the window around the screen and noticing when does it stop flickering, keep as "-offset" instead of "+offset" because it works better with clipping (for example if Region draws a pixel border and it is located exactly between 2 pixels, then its children may overlap the border because the clipping has 1 extra pixel)
-inline    VecI2 RoundPos(C Vec2 &x) {return VecI2(RoundPos(x.x), RoundPos(x.y)               );}
-inline    VecI  RoundPos(C Vec  &x) {return VecI (RoundPos(x.x), RoundPos(x.y), RoundPos(x.z));}
-inline    VecI2 RoundGPU(C Vec2 &v) {return VecI2(RoundGPU(v.x), RoundGPU(v.y)               );}
+inline    UInt  RoundUClamp(  Flt   x) {return (x>=UINT_MAX) ? UINT_MAX : RoundU(x);} // this is needed because 1.0f*UINT_MAX=UINT_MAX+1 float, which converted to UInt overflows to 0
+constexpr Int   RoundEps   (  Flt   x, Flt eps) {return (x>=0) ? Trunc(x+eps) : Trunc(x-eps);}
+constexpr Int   RoundPos   (  Flt   x) {return Trunc(x+0.5f);} // doesn't care if round of negative value will not be precise, but unlike 'RoundU' the result will still be negative
+constexpr Int   RoundPos   (  Dbl   x) {return Trunc(x+0.5 );} // doesn't care if round of negative value will not be precise, but unlike 'RoundU' the result will still be negative
+constexpr Int   RoundGPU   (  Flt   x) {return Round(x-0.0001f);} // if the coordinate is located exactly between 2 pixels "Frac(x)==0.5" then due to numerical precision issues sometimes this can be rounded up and sometimes down, and flickering can occur for example when window is moved on the screen, to prevent that, apply a small offset, the value "0.0001f" has been tested having a Window and a button at 0.5 coordinates, then moving the window around the screen and noticing when does it stop flickering, keep as "-offset" instead of "+offset" because it works better with clipping (for example if Region draws a pixel border and it is located exactly between 2 pixels, then its children may overlap the border because the clipping has 1 extra pixel)
+inline    VecI2 RoundPos   (C Vec2 &x) {return VecI2(RoundPos(x.x), RoundPos(x.y)               );}
+inline    VecI  RoundPos   (C Vec  &x) {return VecI (RoundPos(x.x), RoundPos(x.y), RoundPos(x.z));}
+inline    VecI2 RoundGPU   (C Vec2 &v) {return VecI2(RoundGPU(v.x), RoundGPU(v.y)               );}
 #endif
 
 // floor, round to nearest integer which is smaller or equal to value, Sample Usage: Floor(7.3) -> 7, Floor(7.9) -> 7
@@ -2262,6 +2283,11 @@ inline    Dbl   AlignCeil (Dbl   x, Dbl   align) {return    ceil  (x/ align)*ali
 // FUNCTIONS
 /******************************************************************************/
 inline VecB2 ::VecB2 (C VecI2  &v) {set(v.x, v.y          );}
+inline VecSB2::VecSB2(C VecI2  &v) {set(v.x, v.y          );}
+inline VecB  ::VecB  (C VecI   &v) {set(v.x, v.y, v.z     );}
+inline VecSB ::VecSB (C VecI   &v) {set(v.x, v.y, v.z     );}
+inline VecB4 ::VecB4 (C VecI4  &v) {set(v.x, v.y, v.z, v.w);}
+inline VecSB4::VecSB4(C VecI4  &v) {set(v.x, v.y, v.z, v.w);}
 inline VecUS2::VecUS2(C VecB2  &v) {set(v.x, v.y          );}
 inline VecUS2::VecUS2(C VecI2  &v) {set(v.x, v.y          );}
 inline VecUS ::VecUS (C VecB   &v) {set(v.x, v.y, v.z     );}
@@ -2475,21 +2501,24 @@ Flt Dist2Wrap(C Vec2 &a, C Vec2 &b);
 #endif
 
 // dot product
-inline Flt Dot(C Vec2  &a, C Vec2  &b) {return a.x*b.x + a.y*b.y                    ;}
-inline Dbl Dot(C Vec2  &a, C VecD2 &b) {return a.x*b.x + a.y*b.y                    ;}
-inline Dbl Dot(C VecD2 &a, C Vec2  &b) {return a.x*b.x + a.y*b.y                    ;}
-inline Dbl Dot(C VecD2 &a, C VecD2 &b) {return a.x*b.x + a.y*b.y                    ;}
-inline Flt Dot(C Vec2  &a, C VecI2 &b) {return a.x*b.x + a.y*b.y                    ;}
-inline Flt Dot(C VecI2 &a, C Vec2  &b) {return a.x*b.x + a.y*b.y                    ;}
-inline Int Dot(C VecI2 &a, C VecI2 &b) {return a.x*b.x + a.y*b.y                    ;}
-inline Flt Dot(C Vec   &a, C Vec   &b) {return a.x*b.x + a.y*b.y + a.z*b.z          ;}
-inline Dbl Dot(C Vec   &a, C VecD  &b) {return a.x*b.x + a.y*b.y + a.z*b.z          ;}
-inline Dbl Dot(C VecD  &a, C Vec   &b) {return a.x*b.x + a.y*b.y + a.z*b.z          ;}
-inline Dbl Dot(C VecD  &a, C VecD  &b) {return a.x*b.x + a.y*b.y + a.z*b.z          ;}
-inline Int Dot(C VecI  &a, C VecI  &b) {return a.x*b.x + a.y*b.y + a.z*b.z          ;}
-inline Flt Dot(C Vec4  &a, C Vec4  &b) {return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w;}
-inline Dbl Dot(C VecD4 &a, C VecD4 &b) {return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w;}
-inline Int Dot(C VecI4 &a, C VecI4 &b) {return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w;}
+inline Flt Dot(C Vec2   &a, C Vec2   &b) {return a.x*b.x + a.y*b.y                    ;}
+inline Dbl Dot(C Vec2   &a, C VecD2  &b) {return a.x*b.x + a.y*b.y                    ;}
+inline Dbl Dot(C VecD2  &a, C Vec2   &b) {return a.x*b.x + a.y*b.y                    ;}
+inline Dbl Dot(C VecD2  &a, C VecD2  &b) {return a.x*b.x + a.y*b.y                    ;}
+inline Flt Dot(C Vec2   &a, C VecI2  &b) {return a.x*b.x + a.y*b.y                    ;}
+inline Flt Dot(C VecI2  &a, C Vec2   &b) {return a.x*b.x + a.y*b.y                    ;}
+inline Int Dot(C VecI2  &a, C VecI2  &b) {return a.x*b.x + a.y*b.y                    ;}
+inline Int Dot(C VecSB2 &a, C VecSB2 &b) {return a.x*b.x + a.y*b.y                    ;}
+inline Flt Dot(C Vec    &a, C Vec    &b) {return a.x*b.x + a.y*b.y + a.z*b.z          ;}
+inline Dbl Dot(C Vec    &a, C VecD   &b) {return a.x*b.x + a.y*b.y + a.z*b.z          ;}
+inline Dbl Dot(C VecD   &a, C Vec    &b) {return a.x*b.x + a.y*b.y + a.z*b.z          ;}
+inline Dbl Dot(C VecD   &a, C VecD   &b) {return a.x*b.x + a.y*b.y + a.z*b.z          ;}
+inline Int Dot(C VecI   &a, C VecI   &b) {return a.x*b.x + a.y*b.y + a.z*b.z          ;}
+inline Int Dot(C VecSB  &a, C VecSB  &b) {return a.x*b.x + a.y*b.y + a.z*b.z          ;}
+inline Flt Dot(C Vec4   &a, C Vec4   &b) {return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w;}
+inline Dbl Dot(C VecD4  &a, C VecD4  &b) {return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w;}
+inline Int Dot(C VecI4  &a, C VecI4  &b) {return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w;}
+inline Int Dot(C VecSB4 &a, C VecSB4 &b) {return a.x*b.x + a.y*b.y + a.z*b.z + a.w*b.w;}
 
 // cross product
 Flt Cross(C Vec2  &a, C Vec2  &b);
@@ -2639,14 +2668,6 @@ void Reverse(VecI4 *v, Int num);
 void SwapXZ(VecI  *v, Int num);
 void SwapXZ(VecI4 *v, Int num);
 
-// get minimum and maximum from array of vectors
-Bool MinMax(C Vec2  *v, Int num, Vec2  &min, Vec2  &max);
-Bool MinMax(C VecD2 *v, Int num, VecD2 &min, VecD2 &max);
-Bool MinMax(C Vec   *v, Int num, Vec   &min, Vec   &max);
-Bool MinMax(C VecD  *v, Int num, VecD  &min, VecD  &max);
-Bool MinMax(C Vec4  *v, Int num, Vec4  &min, Vec4  &max);
-Bool MinMax(C VecD4 *v, Int num, VecD4 &min, VecD4 &max);
-
 #if EE_PRIVATE
 // convert from right hand to left hand coordinate system
 void RightToLeft(Vec *vec, Int num);
@@ -2739,27 +2760,30 @@ struct SmoothValueAccel
 {
    Flt value, velocity;
 
+   void zero() {value=0; velocity=0;}
    void update(Flt target, C SmoothValueSettings &settings);
 
-   SmoothValueAccel(                         ) : value(    0), velocity(       0) {}
+   SmoothValueAccel(                         ) {zero();}
    SmoothValueAccel(Flt value, Flt velocity=0) : value(value), velocity(velocity) {}
 };
 struct SmoothValueAccel2
 {
    Vec2 value, velocity;
 
+   void zero() {value.zero(); velocity.zero();}
    void update(C Vec2 &target, C SmoothValueSettings &settings);
 
-   SmoothValueAccel2(                                        ) : value(    0), velocity(       0) {}
+   SmoothValueAccel2(                                        ) {zero();}
    SmoothValueAccel2(C Vec2 &value, C Vec2 &velocity=Vec2Zero) : value(value), velocity(velocity) {}
 };
 struct SmoothValueAccel3
 {
    Vec value, velocity;
 
+   void zero() {value.zero(); velocity.zero();}
    void update(C Vec &target, C SmoothValueSettings &settings);
 
-   SmoothValueAccel3(                                     ) : value(    0), velocity(       0) {}
+   SmoothValueAccel3(                                     ) {zero();}
    SmoothValueAccel3(C Vec &value, C Vec &velocity=VecZero) : value(value), velocity(velocity) {}
 };
 /******************************************************************************/

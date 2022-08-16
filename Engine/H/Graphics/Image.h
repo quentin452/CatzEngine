@@ -122,6 +122,24 @@ enum IMAGE_TYPE : Byte // Image Type, comments specify in which mode the type is
 
    IMAGE_ETC1, // Ericsson 4-bit lossy RGB compression with no alpha (R,G,B,1), linear gamma, Soft, Android
 
+   // compressing images to these formats is available only when 'SupportCompressASTC' was called in 'InitPre')
+   IMAGE_ASTC_4x4     , // ASTC 8.00-bit lossy RGBA compression (R,G,B,A), linear gamma, Soft, partial GL, GL ES
+   IMAGE_ASTC_4x4_SRGB, // ASTC 8.00-bit lossy RGBA compression (R,G,B,A), sRGB   gamma, Soft, partial GL, GL ES
+   IMAGE_ASTC_5x4     , // ASTC 6.40-bit lossy RGBA compression (R,G,B,A), linear gamma, Soft, partial GL, GL ES
+   IMAGE_ASTC_5x4_SRGB, // ASTC 6.40-bit lossy RGBA compression (R,G,B,A), sRGB   gamma, Soft, partial GL, GL ES
+   IMAGE_ASTC_5x5     , // ASTC 5.12-bit lossy RGBA compression (R,G,B,A), linear gamma, Soft, partial GL, GL ES
+   IMAGE_ASTC_5x5_SRGB, // ASTC 5.12-bit lossy RGBA compression (R,G,B,A), sRGB   gamma, Soft, partial GL, GL ES
+   IMAGE_ASTC_6x5     , // ASTC 4.27-bit lossy RGBA compression (R,G,B,A), linear gamma, Soft, partial GL, GL ES
+   IMAGE_ASTC_6x5_SRGB, // ASTC 4.27-bit lossy RGBA compression (R,G,B,A), sRGB   gamma, Soft, partial GL, GL ES
+   IMAGE_ASTC_6x6     , // ASTC 3.56-bit lossy RGBA compression (R,G,B,A), linear gamma, Soft, partial GL, GL ES
+   IMAGE_ASTC_6x6_SRGB, // ASTC 3.56-bit lossy RGBA compression (R,G,B,A), sRGB   gamma, Soft, partial GL, GL ES
+   IMAGE_ASTC_8x5     , // ASTC 3.20-bit lossy RGBA compression (R,G,B,A), linear gamma, Soft, partial GL, GL ES
+   IMAGE_ASTC_8x5_SRGB, // ASTC 3.20-bit lossy RGBA compression (R,G,B,A), sRGB   gamma, Soft, partial GL, GL ES
+   IMAGE_ASTC_8x6     , // ASTC 2.67-bit lossy RGBA compression (R,G,B,A), linear gamma, Soft, partial GL, GL ES
+   IMAGE_ASTC_8x6_SRGB, // ASTC 2.67-bit lossy RGBA compression (R,G,B,A), sRGB   gamma, Soft, partial GL, GL ES
+   IMAGE_ASTC_8x8     , // ASTC 2.00-bit lossy RGBA compression (R,G,B,A), linear gamma, Soft, partial GL, GL ES
+   IMAGE_ASTC_8x8_SRGB, // ASTC 2.00-bit lossy RGBA compression (R,G,B,A), sRGB   gamma, Soft, partial GL, GL ES
+
    IMAGE_R11G11B10F,
    IMAGE_R9G9B9E5F ,
 
@@ -200,7 +218,10 @@ struct ImageTypeInfo // Image Type Information
                          a             , // number of alpha   bits
                          d             , // number of depth   bits
                          s             , // number of stencil bits
-                         channels      ; // number of channels
+                         channels      , // number of channels
+                         block_w       , // number of pixels in block X
+                         block_h       , // number of pixels in block Y
+                         block_bytes   ; // number of bytes  in block (size)
    const IMAGE_PRECISION precision     ;
 
           Byte usage     ()C {return _usage      ;} // get a combination of USAGE_FLAG, valid only if 'usageKnown' (on DX11/12, OpenGL 4.2+)
@@ -241,8 +262,8 @@ enum IMAGE_COPY_FLAG
 #endif
 };
 #if EE_PRIVATE
-   inline Bool IcWrap (UInt flag) {return  FlagTest(flag, IC_WRAP);}
-   inline Bool IcClamp(UInt flag) {return !FlagTest(flag, IC_WRAP);}
+   inline Bool IcWrap (UInt flag) {return FlagOn (flag, IC_WRAP);}
+   inline Bool IcClamp(UInt flag) {return FlagOff(flag, IC_WRAP);}
 #endif
 /******************************************************************************/
 struct Image // Image (Texture)
@@ -268,7 +289,7 @@ struct Image // Image (Texture)
    IMAGE_TYPE   type ()C {return _type            ;} // get image  type
    IMAGE_TYPE hwType ()C {return _hw_type         ;} // get image  type in which it is stored on the GPU (this can be different than 'type' if it is not supported directly on the hardware, for example image was created as compressed format which the GPU does not support, 'type' will be set to the compressed format but 'hwType' may be set to R8G8B8A8 format as stored on the GPU)
    IMAGE_MODE mode   ()C {return _mode            ;} // get image  mode
-   Int        mipMaps()C {return _mms             ;} // get number of mipmaps
+   Int        mipMaps()C {return _mips            ;} // get number of mip maps
    Byte       samples()C {return _samples         ;} // get number of samples per pixel
    Bool  multiSample ()C {return _samples>1       ;} // if  this   is a multi sampled image
    Bool       partial()C {return _partial         ;} // if  'hwSize' is different than 'size'
@@ -277,8 +298,8 @@ struct Image // Image (Texture)
    Bool            hw()C {return IsHW  (mode())   ;} // if this is a hardware image NOT (IMAGE_SOFT, IMAGE_SOFT_CUBE)
    Bool          cube()C {return IsCube(mode())   ;} // if this is a cube     image     (IMAGE_CUBE, IMAGE_SOFT_CUBE or IMAGE_RT_CUBE)
 
-   Int       lMipMap  ()C {return _lmm       ;} // get index              of locked mip map
-   DIR_ENUM  lCubeFace()C {return _lcf       ;} // get                       locked cube face
+   Int       lMipMap  ()C {return _lock_mip  ;} // get index              of locked mip map
+   DIR_ENUM  lCubeFace()C {return _lock_face ;} // get                       locked cube face
    UInt      pitch    ()C {return _pitch     ;} // get width        pitch of locked mip map
    UInt      pitch2   ()C {return _pitch2    ;} // get width*height pitch of locked mip map
    Byte*     data     ()  {return _data      ;} // get address            of locked data, memory accessed using this method should be interpreted according to 'hwType' (and not 'type')
@@ -301,17 +322,14 @@ struct Image // Image (Texture)
    Bool                  isSByte()C {return IsSByte(_hw_type)          ;} // if  this is a signed byte/8-bit precision
 #if EE_PRIVATE
    constexpr Bool     filterable()C {return hwTypeInfo().  filterable();}
+   Byte                  baseMip()C {return _base_mip;}
 #endif
 
    CUBE_LAYOUT cubeLayout()C; // auto-detect cube layout based on image size
 
    // manage
 #if EE_PRIVATE
-   Bool createEx(Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int mip_maps, Byte samples=1, CPtr src_data=null, C Image *src=null
-      #if GL_ES
-               , Bool can_del_src=false // 'can_del_src'=if allow deleting 'src' (always enable if possible, to allow faster creation of images on GL_ES)
-      #endif
-                );
+   Bool createEx(Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int mip_maps, Byte samples=1, CPtr *data=null, Int base_mip=0);
 #endif
    Image& del(); // delete
 
@@ -336,11 +354,15 @@ struct Image // Image (Texture)
  C Byte* softData()C {return _data_all;} // get software image data without locking the image
    Byte* softData(Int mip_map, DIR_ENUM cube_face=DIR_RIGHT);                                                     // get software image data for 'mip_map' and 'cube_face' without locking the image
  C Byte* softData(Int mip_map, DIR_ENUM cube_face=DIR_RIGHT)C {return ConstCast(T).softData(mip_map, cube_face);} // get software image data for 'mip_map' and 'cube_face' without locking the image
-   Int   softFaceSize(Int mip_map)C; // get size in bytes for a single cube face for specified 'mip_map'
-   UInt  softPitch   (Int mip_map)C; // get pitch of specified 'mip_map'
+   UInt  softPitch   (Int mip_map)C; // get pitch     of specified 'mip_map'
+   UInt  softBlocksY (Int mip_map)C; // get blocksY   of specified 'mip_map'
+   UInt  softPitch2  (Int mip_map)C; // get pitch2    of specified 'mip_map' = pitch  * blocksY
+   Int   softFaceSize(Int mip_map)C; // get face size of specified 'mip_map' = pitch2 * depth
+   Int   softMipSize (Int mip_map)C; // get mip  size of specified 'mip_map' = face   * faces
 
    void lockSoft();
-   Bool setFrom(CPtr data, Int data_pitch, Int mip_map=0, DIR_ENUM cube_face=DIR_RIGHT);
+   void lockedSetMipData(CPtr data, Int mip_map); // set data for 'mip_map' for all faces, assumes that 'data' is in HW alignment !! NEEDS 'D._lock' !!
+   Bool      setFaceData(CPtr data, Int data_pitch, Int mip_map=0, DIR_ENUM cube_face=DIR_RIGHT);
 #endif
    Bool     lock    (LOCK_MODE lock=LOCK_READ_WRITE, Int mip_map=0, DIR_ENUM cube_face=DIR_RIGHT) ; //   lock image for editing specified 'mip_map', this needs to be called before manual setting/getting pixels/colors on hardware images (IMAGE_SOFT doesn't need locking), 'cube_face'=desired cube face (this is used only for IMAGE_CUBE modes)
    Bool     lockRead(                                Int mip_map=0, DIR_ENUM cube_face=DIR_RIGHT)C; //   lock image for reading specified 'mip_map', this needs to be called before manual setting/getting pixels/colors on hardware images (IMAGE_SOFT doesn't need locking), 'cube_face'=desired cube face (this is used only for IMAGE_CUBE modes), this method has the same effect as calling "lock(LOCK_READ, mip_map, cube_face)", however unlike 'lock' method it has 'const' modifier and can be called on "const Image" objects
@@ -348,8 +370,12 @@ struct Image // Image (Texture)
  C Image& unlock    (                                                                           )C; // unlock image                                , this needs to be called after  manual setting/getting pixels/colors on hardware images (IMAGE_SOFT doesn't need locking), if you want the mip maps to be updated according to any change applied during the lock then you must call 'updateMipMaps' after 'unlock'
 
 #if EE_PRIVATE
+   void lockedBaseMip(Int base_mip); // !! NEEDS 'D._lock' !!
+   void       baseMip(Int base_mip);
+   void  cancelStream();
    Bool updateMipMaps(C Image &src, Int src_mip, FILTER_TYPE filter=FILTER_BEST, UInt flags=IC_CLAMP, Int mip_start=0);
 #endif
+   Bool   waitForStream(Int mip=0)C; // wait until streaming has finished, false on fail
    Image& updateMipMaps(FILTER_TYPE filter=FILTER_BEST, UInt flags=IC_CLAMP, Int mip_start=0); // update mip maps of the image, 'flags'=IMAGE_COPY_FLAG, 'mip_start'=index of the mip map to start with (this mip map will be taken, and downsampled to following mip maps)
 
    Bool blurCubeMipMaps(); // blur mip maps based on increasing angles per mip-map, this method is only for Cube Images, false on fail
@@ -431,6 +457,7 @@ struct Image // Image (Texture)
    void   bumpToNormal         (  Image &dest, Flt  scale, Bool high_precision=false                                                                                                                       )C; // convert bump map to normal map, 'scale'=bump scaling factor 0..Inf, 'high_precision'=if create signed float image type, or unsigned byte image type
    void   crop                 (  Image &dest, Int x, Int y,        Int w, Int h       , C Vec4 *clear_color=&Vec4Zero                                                                                     )C; // crop      image, 'clear_color'=color to be used for pixels that didn't exist in the source (if null then they will remain uninitialized)
    void   crop3D               (  Image &dest, Int x, Int y, Int z, Int w, Int h, Int d, C Vec4 *clear_color=&Vec4Zero                                                                                     )C; // crop   3D image, 'clear_color'=color to be used for pixels that didn't exist in the source (if null then they will remain uninitialized)
+   Image& cropTransparent      (               Bool border=false                                                                                                                                           ) ; // crop transparent pixels, 'border'=if keep 1 pixel border
    Image& resize               (               Int w, Int h,        FILTER_TYPE filter=FILTER_BEST, UInt flags=IC_CLAMP                                                                                    ) ; // resize    image, 'flags'=IMAGE_COPY_FLAG
    Image& resize3D             (               Int w, Int h, Int d, FILTER_TYPE filter=FILTER_BEST, UInt flags=IC_CLAMP                                                                                    ) ; // resize 3D image, 'flags'=IMAGE_COPY_FLAG
    Image& mirrorX              (                                                                                                                                                                           ) ; // mirror    image horizontally
@@ -449,8 +476,8 @@ struct Image // Image (Texture)
    void   transform            (  Image &dest, C Matrix2 &matrix, FILTER_TYPE filter=FILTER_BEST, UInt flags=IC_CLAMP                                                                                      )C; // transform image by 'matrix' and store in 'dest'
    Bool   extractNonCompressedMipMapNoStretch(Image &dest, Int w, Int h, Int d, Int mip_map, DIR_ENUM cube_face=DIR_RIGHT, Bool clamp=true)C;
 #endif
-   Bool   extractMipMap        (  Image &dest, Int type, Int mip_map, DIR_ENUM cube_face=DIR_RIGHT                                                                                                         )C; // extract specified mipmap to   'dest' 0-th mipmap, false on fail, 'type'=IMAGE_TYPE (-1=keep), 'dest' will always be IMAGE_SOFT
-   Bool    injectMipMap        (C Image &src ,           Int mip_map, DIR_ENUM cube_face=DIR_RIGHT, FILTER_TYPE filter=FILTER_BEST, UInt flags=IC_CLAMP                                                    ) ; //  inject specified mipmap from 'src'  0-th mipmap, false on fail, 'filter'=what kind of filtering to use when source is of different size than the target, 'flags'=IMAGE_COPY_FLAG
+   Bool   extractMipMap        (  Image &dest, Int type, Int mip_map, DIR_ENUM cube_face=DIR_RIGHT, FILTER_TYPE filter=FILTER_BEST, UInt flags=IC_CLAMP                                                    )C; // extract specified mipmap to   'dest' 0-th mipmap, false on fail, 'type'=IMAGE_TYPE (-1=keep), 'dest' will always be IMAGE_SOFT, 'filter'=what kind of filtering to use when source is of different size than the target, 'flags'=IMAGE_COPY_FLAG
+   Bool    injectMipMap        (C Image &src ,           Int mip_map, DIR_ENUM cube_face=DIR_RIGHT, FILTER_TYPE filter=FILTER_BEST, UInt flags=IC_CLAMP                                                    ) ; //  inject specified mipmap from 'src'  0-th mipmap, false on fail                                                               , 'filter'=what kind of filtering to use when source is of different size than the target, 'flags'=IMAGE_COPY_FLAG
    Image& downSample           (               FILTER_TYPE filter=FILTER_BEST, UInt flags=IC_CLAMP                                                                                                         ) ; // downsample to half resolution size, 'flags'=IMAGE_COPY_FLAG
    Bool   averageX             (  Image &dest,   Int   range, Bool clamp                                                                                                                                   )C; // horizontal average, 'range'=range of blurring (in pixels), false on fail
    Bool   averageY             (  Image &dest,   Int   range, Bool clamp                                                                                                                                   )C; // vertical   average, 'range'=range of blurring (in pixels), false on fail
@@ -614,10 +641,9 @@ struct Image // Image (Texture)
    void operator=(C Str  &name) ; // load, Exit  on fail
    void operator=(C UID  &id  ) ; // load, Exit  on fail
 #if EE_PRIVATE
-   Bool saveData (  File &f                                         )C; // save, false on fail
-   Bool loadData (  File &f, ImageHeader *header=null, C Str &name=S) ; // load, false on fail
-
-   Bool _loadData(  File &f, ImageHeader *header=null, C Str &name=S) ; // load, false on fail - Deprecated do not use !!
+   Bool  saveData(  File &f                                                               )C; // save, false on fail
+   Bool  loadData(  File &f, ImageHeader *header=null, C Str &name=S, Bool can_del_f=false) ; // load, false on fail, 'can_del_f'=if allow deleting 'f' (always enable if possible, to allow image streaming)
+   Bool _loadData(  File &f, ImageHeader *header=null, C Str &name=S                      ) ; // load, false on fail - Deprecated do not use !!
 #endif
    Bool save     (C Str  &name)C; // save, false on fail
    Bool load     (C Str  &name) ; // load, false on fail
@@ -691,6 +717,8 @@ struct Image // Image (Texture)
 
 #if EE_PRIVATE
    void    zero     () {Zero(T);}
+   Bool    setSRV   ();
+   Bool    finalize ();
    Bool    setInfo  ();
    void  forceInfo  (Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int samples);
    void adjustInfo  (Int w, Int h, Int d, IMAGE_TYPE type);
@@ -712,8 +740,8 @@ private:
    IMAGE_TYPE _type, _hw_type;
    IMAGE_MODE _mode;
     LOCK_MODE _lock_mode;
-     DIR_ENUM _lcf;
-   Byte       _mms, _samples, _lmm, _byte_pp;
+     DIR_ENUM _lock_face;
+   Byte       _mips, _samples, _lock_mip, _byte_pp, _base_mip, _stream;
    Bool       _partial, _discard;
    Int        _lock_count;
    UInt       _pitch, _pitch2;
@@ -751,6 +779,7 @@ struct ImageHeader
    IMAGE_TYPE type;
    IMAGE_MODE mode;
 
+   Bool             is()C;
    void           zero() {size.zero(); mip_maps=0; type=IMAGE_NONE; mode=IMAGE_2D;}
    ImageHeader() {zero();}
 };
@@ -789,6 +818,7 @@ DIR_ENUM DirToCubeFace(C Vec &dir, Int res, Vec2 &tex); // convert vector direct
 Vec      CubeFaceToDir(Flt x, Flt y, Int res, DIR_ENUM cube_face); // convert image coordinates, 'x,y'=image coordinates (0..res-1), 'res'=cube image resolution, 'cube_face'=image cube face, returned vector is not normalized, however its on a cube with radius=1 ("Abs(dir).max()=1")
 
 #if EE_PRIVATE
+#define MAX_MIP_MAPS 32
 struct ImageThreadsClass : Threads
 {
    ImageThreadsClass& init()
@@ -815,17 +845,19 @@ PtrImageColor     GetImageColorF   (FILTER_TYPE filter);
 PtrImageColor3D   GetImageColor3DF (FILTER_TYPE filter);
 PtrImageAreaColor GetImageAreaColor(FILTER_TYPE filter, Bool &linear_gamma);
 
+IMAGE_MODE                 AsSoft           (IMAGE_MODE mode);
 Int                        ImageFaces       (IMAGE_MODE mode);
 Int                        PaddedWidth      (Int w, Int h,        Int mip, IMAGE_TYPE type);
 Int                        PaddedHeight     (Int w, Int h,        Int mip, IMAGE_TYPE type);
 Int                        ImagePitch       (Int w, Int h,        Int mip, IMAGE_TYPE type);
 Int                        ImageBlocksY     (Int w, Int h,        Int mip, IMAGE_TYPE type);
-Int                        ImageMipSize     (Int w, Int h,        Int mip, IMAGE_TYPE type);
-Int                        ImageMipSize     (Int w, Int h, Int d, Int mip, IMAGE_TYPE type);
+Int                        ImagePitch2      (Int w, Int h,        Int mip, IMAGE_TYPE type);
+Int                        ImageFaceSize    (Int w, Int h, Int d, Int mip, IMAGE_TYPE type);
+UInt                       ImageMipOffset   (Int w, Int h, Int d,          IMAGE_TYPE type, IMAGE_MODE mode, Int mip_maps, Int mip_map);
 UInt                       ImageSize        (Int w, Int h, Int d,          IMAGE_TYPE type, IMAGE_MODE mode, Int mip_maps);
 GPU_API(DXGI_FORMAT, UInt) ImageTypeToFormat(Int type); // convert from IMAGE_TYPE to API_FORMAT
 IMAGE_TYPE                 ImageFormatToType(GPU_API(DXGI_FORMAT, UInt) format); // convert from API_FORMAT to IMAGE_TYPE
-Int                        TotalMipMaps     (Int w, Int h, Int d, IMAGE_TYPE type);
+Int                        TotalMipMaps     (Int w, Int h, Int d);
 
 IMAGE_TYPE ImageTypeOnFail(IMAGE_TYPE type);
 Bool ImageSupported(IMAGE_TYPE type, IMAGE_MODE mode, Byte samples=1);
@@ -837,6 +869,15 @@ Bool CompatibleLock(LOCK_MODE cur, LOCK_MODE lock); // if 'lock' is okay to be a
 Vec4 ImageColorF(CPtr data, IMAGE_TYPE hw_type);
 Vec4 ImageColorL(CPtr data, IMAGE_TYPE hw_type);
 void CopyNoStretch(C Image &src, Image &dest, Bool clamp, Bool ignore_gamma=false); // assumes 'src,dest' are locked and non-compressed
+
+void _CopyImgData(C Byte *&src_data, Byte *&dest_data, Int src_pitch, Int dest_pitch, Int src_blocks_y, Int dest_blocks_y);
+void _CopyImgData(C Byte *&src_data, Byte *&dest_data, Int src_pitch, Int dest_pitch, Int src_blocks_y, Int dest_blocks_y, Int src_pitch2, Int dest_pitch2, Int src_d, Int dest_d);
+void _CopyImgData(C Byte *&src_data, Byte *&dest_data, Int src_pitch, Int dest_pitch, Int src_blocks_y, Int dest_blocks_y, Int src_pitch2, Int dest_pitch2, Int src_d, Int dest_d, Int faces);
+
+inline void CopyImgData(C Byte *src_data, Byte *dest_data, Int src_pitch, Int dest_pitch, Int src_blocks_y, Int dest_blocks_y                                                                   ) {_CopyImgData(src_data, dest_data, src_pitch, dest_pitch, src_blocks_y, dest_blocks_y);}
+inline void CopyImgData(C Byte *src_data, Byte *dest_data, Int src_pitch, Int dest_pitch, Int src_blocks_y, Int dest_blocks_y, Int src_pitch2, Int dest_pitch2, Int src_d, Int dest_d           ) {_CopyImgData(src_data, dest_data, src_pitch, dest_pitch, src_blocks_y, dest_blocks_y, src_pitch2, dest_pitch2, src_d, dest_d);}
+inline void CopyImgData(C Byte *src_data, Byte *dest_data, Int src_pitch, Int dest_pitch, Int src_blocks_y, Int dest_blocks_y, Int src_pitch2, Int dest_pitch2, Int src_d, Int dest_d, Int faces) {_CopyImgData(src_data, dest_data, src_pitch, dest_pitch, src_blocks_y, dest_blocks_y, src_pitch2, dest_pitch2, src_d, dest_d, faces);}
+
 #if WINDOWS
    HICON CreateIcon(C Image &image, C VecI2 *cursor_hot_spot=null); // 'cursor_hot_spot'=if this is specified then the icon is treated as a mouse cursor with given hot spot, otherwise it's a normal icon
 #endif
@@ -844,5 +885,15 @@ void CopyNoStretch(C Image &src, Image &dest, Bool clamp, Bool ignore_gamma=fals
    UInt SourceGLFormat(IMAGE_TYPE type);
    UInt SourceGLType  (IMAGE_TYPE type);
 #endif
+
+#define IMAGE_STREAM_FULL true // load only small image, but stream the entire full image and replace the small with the full one, much faster on both DX and GL !! WARNING: IN THIS MODE THE IMAGES ARE CREATED SMALLER, BUT THEIR MEMBERS: SIZE/MIPS ARE SET AS IF FULL, WHICH DOES NOT MATCH THE ACTUAL IMAGE DATA !!
+enum
+{
+   IMAGE_STREAM_LOADING  =1<<0, // if still loading - in streaming queue
+   IMAGE_STREAM_NEED_MORE=1<<1, // if still need more data to load (this can be enabled even if Image is not IMAGE_STREAM_LOADING anymore, for example due to an error, but there's still data left unstreamed)
+};
+void LockedUpdateStreamLoads(); // assumes 'D._lock'
+void       UpdateStreamLoads();
+void         ShutStreamLoads();
 #endif
 /******************************************************************************/

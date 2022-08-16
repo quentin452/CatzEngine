@@ -71,15 +71,15 @@ static Bool  Active;   void SetActive() {App.setActive(Active && !App.minimized(
          UInt f=[theEvent modifierFlags];
          KeyState ks[]=
          {
-            {KB_LCTRL , FlagTest(f, Kb.swapCtrlCmd() ? 0x00008 : 0x00001)},
-            {KB_RCTRL , FlagTest(f, Kb.swapCtrlCmd() ? 0x00010 : 0x02000)},
-            {KB_LSHIFT, FlagTest(f,                              0x00002)},
-            {KB_RSHIFT, FlagTest(f,                              0x00004)},
-            {KB_LALT  , FlagTest(f,                              0x00020)},
-            {KB_RALT  , FlagTest(f,                              0x00040)},
-            {KB_LWIN  , FlagTest(f, Kb.swapCtrlCmd() ? 0x00001 : 0x00008)},
-            {KB_RWIN  , FlagTest(f, Kb.swapCtrlCmd() ? 0x02000 : 0x00010)},
-            {KB_CAPS  , FlagTest(f,                              0x10000)}, // enables access to only whether CapsLock is on or off (not if pushed/released)
+            {KB_LCTRL , FlagOn(f, Kb.swapCtrlCmd() ? 0x00008 : 0x00001)},
+            {KB_RCTRL , FlagOn(f, Kb.swapCtrlCmd() ? 0x00010 : 0x02000)},
+            {KB_LSHIFT, FlagOn(f,                              0x00002)},
+            {KB_RSHIFT, FlagOn(f,                              0x00004)},
+            {KB_LALT  , FlagOn(f,                              0x00020)},
+            {KB_RALT  , FlagOn(f,                              0x00040)},
+            {KB_LWIN  , FlagOn(f, Kb.swapCtrlCmd() ? 0x00001 : 0x00008)},
+            {KB_RWIN  , FlagOn(f, Kb.swapCtrlCmd() ? 0x02000 : 0x00010)},
+            {KB_CAPS  , FlagOn(f,                              0x10000)}, // enables access to only whether CapsLock is on or off (not if pushed/released)
          };
          REPA(ks)if(Kb.b(ks[i].b)!=ks[i].on){if(ks[i].on)Kb.push(ks[i].b, -1);else Kb.release(ks[i].b);}
       }return;

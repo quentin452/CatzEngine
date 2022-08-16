@@ -73,6 +73,7 @@ enum LIST_FLAG // List Flag
    LIST_TYPE_LINE        =0x040, // if elements of different "types" won't be displayed in the same line in LDM_RECTS mode, this will work only if LIST_TYPE_SORT is enabled
    LIST_MULTI_SEL        =0x080, // if list supports selection of multiple elements at one time (by using Shift, Ctrl, ..)
    LIST_RESIZABLE_COLUMNS=0x100, // if list columns can be resized using mouse
+   LIST_NEAREST_COLUMN   =0x200, // if perform "nearest" operations per column
 };
 /******************************************************************************/
 const_mem_addr struct _List : GuiObj // Gui List !! must be stored in constant memory address !!
@@ -135,6 +136,7 @@ const_mem_addr struct _List : GuiObj // Gui List !! must be stored in constant m
                                                                                 TextStyle * getTextStyle()C;                                       //     get actual text style
   _List&    horizontal(Bool           horizontal                           );   Bool          horizontal()C {return                  _horizontal;} // set/get if LDM_RECTS mode should be displayed horizontally, default=false
   _List&      vertical(Bool           vertical                             );   Bool            vertical()C {return                 !_horizontal;} // set/get if LDM_RECTS mode should be displayed   vertically, default=true
+  _List&     focusable(Bool           on                                   );   Bool           focusable()C {return                   _focusable;} // set/get if can catch keyboard focus, default=true
   _List&      drawMode(LIST_DRAW_MODE mode                                 );   LIST_DRAW_MODE  drawMode()C {return                   _draw_mode;} // set/get draw      mode, LIST_DRAW_MODE, default=LDM_LIST
                                                                                 LIST_SEL_MODE    selMode()C;                                       //     get selection mode affected by keyboard modifiers
 
@@ -156,26 +158,30 @@ const_mem_addr struct _List : GuiObj // Gui List !! must be stored in constant m
    Int dataToVis  (CPtr data    )C;                             // convert data           to visible  index
    Int dataToAbs  (CPtr data    )C;                             // convert data           to absolute index
 
-           Int screenToVisX      (  Flt   x      , C GuiPC *gpc=null)C; // convert screen  position X to visible index                                        , if you know the 'GuiPC' then pass it to 'gpc' which will speed up calculations (otherwise leave it to null)
-           Int screenToVisY      (  Flt   y      , C GuiPC *gpc=null)C; // convert screen  position Y to visible index                                        , if you know the 'GuiPC' then pass it to 'gpc' which will speed up calculations (otherwise leave it to null)
-   virtual Int screenToVis       (C Vec2 &pos    , C GuiPC *gpc=null)C; // convert screen  position   to visible index                                        , if you know the 'GuiPC' then pass it to 'gpc' which will speed up calculations (otherwise leave it to null)
-           Ptr screenToData      (  Flt   y      , C GuiPC *gpc=null)C; // convert screen  position Y to data                                                 , if you know the 'GuiPC' then pass it to 'gpc' which will speed up calculations (otherwise leave it to null)
-           Ptr screenToData      (C Vec2 &pos    , C GuiPC *gpc=null)C; // convert screen  position   to data                                                 , if you know the 'GuiPC' then pass it to 'gpc' which will speed up calculations (otherwise leave it to null)
-           Int screenToColumnX   (  Flt   x      , C GuiPC *gpc=null)C; // convert screen  position X to column  index                                        , if you know the 'GuiPC' then pass it to 'gpc' which will speed up calculations (otherwise leave it to null)
-           Vec2   visToScreenPos (  Int   visible, C GuiPC *gpc=null)C; // convert visible index      to top left corner position of the element on the screen, if you know the 'GuiPC' then pass it to 'gpc' which will speed up calculations (otherwise leave it to null)
-           Rect   visToScreenRect(  Int   visible, C GuiPC *gpc=null)C; // convert visible index      to rectangle                of the element on the screen, if you know the 'GuiPC' then pass it to 'gpc' which will speed up calculations (otherwise leave it to null)
-           Flt    visToLocalY    (  Int   visible                   )C; // convert visible index      to top             position of the element in local space
-           Vec2   visToLocalPos  (  Int   visible                   )C; // convert visible index      to top left corner position of the element in local space
-           Rect   visToLocalRect (  Int   visible                   )C; // convert visible index      to rectangle                of the element in local space
+           Int  screenToVisX      (  Flt    x      , C GuiPC *gpc=null)C; // convert screen  position X       to visible index                                        , if you know the 'GuiPC' then pass it to 'gpc' which will speed up calculations (otherwise leave it to null)
+           Int  screenToVisY      (  Flt    y      , C GuiPC *gpc=null)C; // convert screen  position Y       to visible index                                        , if you know the 'GuiPC' then pass it to 'gpc' which will speed up calculations (otherwise leave it to null)
+   virtual Int  screenToVis       (C Vec2  &pos    , C GuiPC *gpc=null)C; // convert screen  position         to visible index                                        , if you know the 'GuiPC' then pass it to 'gpc' which will speed up calculations (otherwise leave it to null)
+           Ptr  screenToData      (  Flt    y      , C GuiPC *gpc=null)C; // convert screen  position Y       to data                                                 , if you know the 'GuiPC' then pass it to 'gpc' which will speed up calculations (otherwise leave it to null)
+           Ptr  screenToData      (C Vec2  &pos    , C GuiPC *gpc=null)C; // convert screen  position         to data                                                 , if you know the 'GuiPC' then pass it to 'gpc' which will speed up calculations (otherwise leave it to null)
+           Int  screenToColumnX   (  Flt    x      , C GuiPC *gpc=null)C; // convert screen  position X       to column  index                                        , if you know the 'GuiPC' then pass it to 'gpc' which will speed up calculations (otherwise leave it to null)
+           Vec2    visToScreenPos (  Int    visible, C GuiPC *gpc=null)C; // convert            visible index to top left corner position of the element on the screen, if you know the 'GuiPC' then pass it to 'gpc' which will speed up calculations (otherwise leave it to null)
+           Rect    visToScreenRect(  Int    visible, C GuiPC *gpc=null)C; // convert            visible index to rectangle                of the element on the screen, if you know the 'GuiPC' then pass it to 'gpc' which will speed up calculations (otherwise leave it to null)
+           Rect    visToScreenRect(C VecI2 &col_vis, C GuiPC *gpc=null)C; // convert column and visible index to rectangle                of the element on the screen, if you know the 'GuiPC' then pass it to 'gpc' which will speed up calculations (otherwise leave it to null), 'col_vis.x=column', 'col_vis.y=visible index'
+           Flt     visToLocalY    (  Int    visible                   )C; // convert            visible index to top             position of the element in local space
+           Vec2    visToLocalPos  (  Int    visible                   )C; // convert            visible index to top left corner position of the element in local space
+           Rect    visToLocalRect (  Int    visible                   )C; // convert            visible index to rectangle                of the element in local space
 
-   Int nearest(C Vec2 &screen_pos, C Vec2 &dir)C; // get nearest visible index, starting from 'screen_pos' screen position towards 'dir' direction, -1 on fail
+   Int   nearest (C Vec2 &screen_pos, C Vec2 &dir)C; // get nearest visible index, starting from 'screen_pos' screen position towards 'dir' direction, -1 on fail
+   VecI2 nearest2(C Vec2 &screen_pos, C Vec2 &dir)C; // get nearest visible index, starting from 'screen_pos' screen position towards 'dir' direction, -1 on fail, this function includes columns (x=column, y=row)
 
    Int         columns(     )C {return _columns.elms();} // number of columns
    ListColumn& column (Int i)  {return _columns[i]    ;} // get i-th  column
+ C ListColumn& column (Int i)C {return _columns[i]    ;} // get i-th  column
 
-                                               Flt  columnOffset (Int i)C; //     get i-th column horizontal offset
-  _List& columnWidth  (Int i, Flt  width  );   Flt  columnWidth  (Int i)C; // set/get i-th column width, ('width' can also be set to LCW_DATA, LCW_PARENT or LCW_MAX_DATA_PARENT)
-  _List& columnVisible(Int i, Bool visible);   Bool columnVisible(Int i)C; // set/get i-th column visibility
+                                                 Flt  columnOffset (Int i)C; //     get i-th column horizontal offset
+  _List& columnWidth  (Int i,   Flt  width  );   Flt  columnWidth  (Int i)C; // set/get i-th column width, ('width' can also be set to LCW_DATA, LCW_PARENT or LCW_MAX_DATA_PARENT)
+  _List& columnVisible(Int i,   Bool visible);   Bool columnVisible(Int i)C; // set/get i-th column visibility
+  _List& columnText   (Int i, C Str &text   ); C Str& columnText   (Int i)C; // set/get i-th column text
 
    Int firstColumn    (DATA_TYPE type); // return index of first 'ListColumn' which is of 'type'   , -1 on fail
    Int firstColumnText(              ); // return index of first 'ListColumn' which is of text type, -1 on fail
@@ -214,9 +220,11 @@ const_mem_addr struct _List : GuiObj // Gui List !! must be stored in constant m
   _List& offsetAllColumns(Bool on); // if apply per element offset to all columns, if set to false then only first column is offsetted, default=false
 
    // operations
+   Bool  scrolling    (                                                 )C; // if list is currently scrolling along any      direction
    Bool  scrollingMain(                                                 )C; // if list is currently scrolling along its main direction
    Vec2  scrollDelta  (                                                 )C; // get amount of scroll that's still left to be done
   _List& scrollTo     (Int i     , Bool immediate=false, Flt center=0.0f) ; // scroll to i-th visible element, 'center'=how much (0..1) to center on the element (0=no centering, 0.5=half centering, 1=full centering)
+  _List& scrollToCol  (Int column, Bool immediate=false, Flt center=0.0f) ; // scroll to column              , 'center'=how much (0..1) to center on the element (0=no centering, 0.5=half centering, 1=full centering)
   _List& scrollY      (Flt delta , Bool immediate=false                 ) ; // vertical scroll by delta
   _List& sort         (Int column, Int  swap     =-1                    ) ; // sort according to 'column' column
   _List& setCur       (Int i                                            ) ; // set     cursor    to specified index, and if list has 'LIST_MULTI_SEL' enabled then set 'sel' accordingly
@@ -233,22 +241,25 @@ const_mem_addr struct _List : GuiObj // Gui List !! must be stored in constant m
    virtual void    draw   (C GuiPC &gpc)override; // draw   object
 
 #if EE_PRIVATE
+   Int   localToVirtualX      (  Flt   local_x  )C; // this is a visible index without clamping to existing elements (-Inf..Inf)
+   Int   localToVirtualY      (  Flt   local_y  )C; // this is a visible index without clamping to existing elements (-Inf..Inf)
+   Flt   localToVirtualYF     (  Flt   local_y  )C; // this is a visible index without clamping to existing elements (-Inf..Inf)
+   Int   localToVisX          (  Flt   local_x  )C; // this is a visible index with    clamping to existing elements (  -1..elms()-1) -1 on fail
+   Int   localToVisY          (  Flt   local_y  )C; // this is a visible index with    clamping to existing elements (  -1..elms()-1) -1 on fail
+   Int   localToVis           (C Vec2 &local_pos)C; // this is a visible index with    clamping to existing elements (  -1..elms()-1) -1 on fail
+   Int   localToColumnX       (  Flt   local_x  )C; // -1 on fail
+   Int   localToVirtualColumnX(  Flt   local_x  )C; // this is a column  index without clamping (-1 .. columns)
+   Vec2 screenToLocal         (C Vec2 &pos, C GuiPC *gpc=null)C; // convert screen position   to local position, if you know the 'GuiPC' then pass it to 'gpc' which will speed up calculations (otherwise leave it to null)
+   Int  screenToVirtualX      (  Flt   x  , C GuiPC *gpc=null)C; // convert screen position X to virtual index , if you know the 'GuiPC' then pass it to 'gpc' which will speed up calculations (otherwise leave it to null)
+   Int  screenToVirtualY      (  Flt   y  , C GuiPC *gpc=null)C; // convert screen position Y to virtual index , if you know the 'GuiPC' then pass it to 'gpc' which will speed up calculations (otherwise leave it to null)
+   Flt  screenToVirtualYF     (  Flt   y  , C GuiPC *gpc=null)C; // convert screen position Y to virtual index , if you know the 'GuiPC' then pass it to 'gpc' which will speed up calculations (otherwise leave it to null)
+
    Bool columnsVisible   ()C {return !_columns_hidden && _columns.elms();}
    void zero             ();
    void init             (Int elms, C CMemPtr<Bool> &visible, Bool keep_cur);
    void setRects         ();
    Bool setCurEx         (Int cur, Int dir=0, Bool pushed=false, UInt touch_id=0);
    Bool setSel           (Int visible);
-   Int  localToVirtualX  (  Flt   local_x  )C; // this is a visible index without clamping to existing elements (-Inf..Inf)
-   Int  localToVirtualY  (  Flt   local_y  )C; // this is a visible index without clamping to existing elements (-Inf..Inf)
-   Flt  localToVirtualYF (  Flt   local_y  )C; // this is a visible index without clamping to existing elements (-Inf..Inf)
-   Int  localToVisX      (  Flt   local_x  )C; // this is a visible index with    clamping to existing elements (  -1..elms()-1) -1 on fail
-   Int  localToVisY      (  Flt   local_y  )C; // this is a visible index with    clamping to existing elements (  -1..elms()-1) -1 on fail
-   Int  localToVis       (C Vec2 &local_pos)C; // this is a visible index with    clamping to existing elements (  -1..elms()-1) -1 on fail
-   Int  localToColumnX   (  Flt   local_x  )C; // -1 on fail
-   Int screenToVirtualX  (Flt x, C GuiPC *gpc=null)C; // convert screen position X to virtual index, if you know the 'GuiPC' then pass it to 'gpc' which will speed up calculations (otherwise leave it to null)
-   Int screenToVirtualY  (Flt y, C GuiPC *gpc=null)C; // convert screen position Y to virtual index, if you know the 'GuiPC' then pass it to 'gpc' which will speed up calculations (otherwise leave it to null)
-   Flt screenToVirtualYF (Flt y, C GuiPC *gpc=null)C; // convert screen position Y to virtual index, if you know the 'GuiPC' then pass it to 'gpc' which will speed up calculations (otherwise leave it to null)
    void sort             ();
    void removeChild      (  GuiObj &child);
    Vec2 childOffset      (C GuiObj &child)C;
@@ -295,7 +306,7 @@ private:
   _Map  *_map ;
   _Memx *_node;
 
-   Bool           _horizontal, _columns_hidden, _offset_first_column, _kb_action;
+   Bool           _horizontal, _columns_hidden, _offset_first_column, _kb_action, _focusable;
    Byte           _search_i;
    LIST_DRAW_MODE _draw_mode;
    Char           _search[32];

@@ -438,42 +438,48 @@ Window& CodeEditor::Options::hide()
    if(ce)ce->cei().visibleChangedOptions();
    return T;
 }
-static void  VSDownload        (             CodeEditor::Options &op) {Explore("https://www.visualstudio.com/downloads/download-visual-studio-vs#d-community");}
-static void  NBDownload        (             CodeEditor::Options &op) {Explore("https://netbeans.apache.org/download/index.html");}
-static void EASDownload        (             CodeEditor::Options &op) {Explore("https://esenthel.com/?id=store");}
-static void  ASDownload        (             CodeEditor::Options &op) {Explore("https://developer.android.com/studio/#command-tools");}
-static void  ANDownload        (             CodeEditor::Options &op) {Explore("https://developer.android.com/ndk/downloads/");}
-static void JDKDownload        (             CodeEditor::Options &op) {Explore("https://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html");}
-static void AppleTeamIDGet     (             CodeEditor::Options &op) {Explore("https://developer.apple.com/account/#/membership/");}
-static void   VSChanged        (             CodeEditor::Options &op) {if(op.ce)op.ce->setVSPath         (op.          vs_path());}
-static void   NBChanged        (             CodeEditor::Options &op) {if(op.ce)op.ce->setNBPath         (op.    netbeans_path());}
-static void   ASChanged        (             CodeEditor::Options &op) {if(op.ce)op.ce->setASPath         (op.      android_sdk());}
-static void   ANChanged        (             CodeEditor::Options &op) {if(op.ce)op.ce->setANPath         (op.      android_ndk());}
-static void  JDKChanged        (             CodeEditor::Options &op) {if(op.ce)op.ce->setJDKPath        (op.         jdk_path());}
-static void AndroidCertChangedF(             CodeEditor::Options &op) {if(op.ce)op.ce->setAndroidCertPath(op.android_cert_file());}
-static void AndroidCertChangedP(             CodeEditor::Options &op) {if(op.ce)op.ce->setAndroidCertPass(op.android_cert_pass());}
-static void AppleTeamIDChanged (             CodeEditor::Options &op) {if(op.ce)op.ce->setAppleTeamID    (op.    apple_team_id());}
-static void   VSSelect         (             CodeEditor::Options &op) {op.w_vs_path          .activate();}
-static void   NBSelect         (             CodeEditor::Options &op) {op.w_netbeans_path    .activate();}
-static void   ASSelect         (             CodeEditor::Options &op) {op.w_android_sdk      .activate();}
-static void   ANSelect         (             CodeEditor::Options &op) {op.w_android_ndk      .activate();}
-static void  JDKSelect         (             CodeEditor::Options &op) {op.w_jdk_path         .activate();}
-static void AndroidCertSelect  (             CodeEditor::Options &op) {op.w_android_cert_file.activate();}
-static void   VSLoad           (C Str &path, CodeEditor::Options &op) {if(op.ce)op.ce->setVSPath         (path);}
-static void   NBLoad           (C Str &path, CodeEditor::Options &op) {if(op.ce)op.ce->setNBPath         (path);}
-static void   ASLoad           (C Str &path, CodeEditor::Options &op) {if(op.ce)op.ce->setASPath         (path);}
-static void   ANLoad           (C Str &path, CodeEditor::Options &op) {if(op.ce)op.ce->setANPath         (path);}
-static void  JDKLoad           (C Str &path, CodeEditor::Options &op) {if(op.ce)op.ce->setJDKPath        (path);}
-static void AndroidCertLoad    (C Str &path, CodeEditor::Options &op) {if(op.ce)op.ce->setAndroidCertPath(path);}
-static void  VSAutodetect      (             CodeEditor::Options &op) {op.vs_versions.activate();}
-static void  ASAutodetect      (             CodeEditor::Options &op) {Str p=GetRegStr(RKG_LOCAL_MACHINE, "Software/Android SDK Tools/Path"); if(p.is())ASLoad(p, op);}
-static void JDKAutodetect      (             CodeEditor::Options &op) {Str p=GetRegStr(RKG_LOCAL_MACHINE, "Software/JavaSoft/Java Development Kit/1.8/JavaHome"); if(p.is())JDKLoad(p, op);}
-static void  ANAutodetect      (             CodeEditor::Options &op)
+static void         VSDownload  (             CodeEditor::Options &op) {Explore("https://visualstudio.microsoft.com/downloads/");}
+static void   NetBeansDownload  (             CodeEditor::Options &op) {Explore("https://netbeans.apache.org/download/index.html");}
+static void        EASDownload  (             CodeEditor::Options &op) {Explore("https://esenthel.com/?id=store");}
+static void AndroidSDKDownload  (             CodeEditor::Options &op) {Explore("https://developer.android.com/studio#command-tools");}
+static void AndroidNDKDownload  (             CodeEditor::Options &op) {Explore("https://developer.android.com/ndk/downloads/");}
+static void        JDKDownload  (             CodeEditor::Options &op) {Explore("https://www.oracle.com/java/technologies/downloads/");}
+static void AppleTeamIDGet      (             CodeEditor::Options &op) {Explore("https://developer.apple.com/account/#/membership/");}
+static void          VSChanged  (             CodeEditor::Options &op) {if(op.ce)op.ce->setVSPath         (op.          vs_path());}
+static void    NetBeansChanged  (             CodeEditor::Options &op) {if(op.ce)op.ce->setNetBeansPath   (op.    netbeans_path());}
+static void  AndroidSDKChanged  (             CodeEditor::Options &op) {if(op.ce)op.ce->setAndroidSDKPath (op.      android_sdk());}
+static void  AndroidNDKChanged  (             CodeEditor::Options &op) {if(op.ce)op.ce->setAndroidNDKPath (op.      android_ndk());}
+static void         JDKChanged  (             CodeEditor::Options &op) {if(op.ce)op.ce->setJDKPath        (op.         jdk_path());}
+static void AndroidCertChangedF (             CodeEditor::Options &op) {if(op.ce)op.ce->setAndroidCertPath(op.android_cert_file());}
+static void AndroidCertChangedP (             CodeEditor::Options &op) {if(op.ce)op.ce->setAndroidCertPass(op.android_cert_pass());}
+static void AppleTeamIDChanged  (             CodeEditor::Options &op) {if(op.ce)op.ce->setAppleTeamID    (op.    apple_team_id());}
+static void          VSSelect   (             CodeEditor::Options &op) {op.w_vs_path          .activate();}
+static void    NetBeansSelect   (             CodeEditor::Options &op) {op.w_netbeans_path    .activate();}
+static void  AndroidSDKSelect   (             CodeEditor::Options &op) {op.w_android_sdk      .activate();}
+static void  AndroidNDKSelect   (             CodeEditor::Options &op) {op.w_android_ndk      .activate();}
+static void         JDKSelect   (             CodeEditor::Options &op) {op.w_jdk_path         .activate();}
+static void AndroidCertSelect   (             CodeEditor::Options &op) {op.w_android_cert_file.activate();}
+static void          VSLoad     (C Str &path, CodeEditor::Options &op) {if(op.ce)op.ce->setVSPath         (path);}
+static void    NetBeansLoad     (C Str &path, CodeEditor::Options &op) {if(op.ce)op.ce->setNetBeansPath   (path);}
+static void  AndroidSDKLoad     (C Str &path, CodeEditor::Options &op) {if(op.ce)op.ce->setAndroidSDKPath (path);}
+static void  AndroidNDKLoad     (C Str &path, CodeEditor::Options &op) {if(op.ce)op.ce->setAndroidNDKPath (path);}
+static void         JDKLoad     (C Str &path, CodeEditor::Options &op) {if(op.ce)op.ce->setJDKPath        (path);}
+static void AndroidCertLoad     (C Str &path, CodeEditor::Options &op) {if(op.ce)op.ce->setAndroidCertPath(path);}
+static void         VSAutodetect(             CodeEditor::Options &op) {op.vs_versions.activate();}
+static void AndroidSDKAutodetect(             CodeEditor::Options &op) {Str p=GetRegStr(RKG_CURRENT_USER, "Environment/ANDROID_SDK_ROOT"); if(p.is())AndroidSDKLoad(p, op);}
+static void        JDKAutodetect(             CodeEditor::Options &op)
 {
-   Memc<Str> paths; // list of Android SDK paths
-   Str p=GetPath(op.android_sdk()); if(p.is())paths.binaryInclude(p, ComparePathCI);
-       p=GetPath(GetRegStr(RKG_LOCAL_MACHINE, "Software/Android SDK Tools/Path")); if(p.is())paths.binaryInclude(p, ComparePathCI);
-   FREPA(paths)for(FileFind ff(paths[i]); ff(); )if(FExistSystem(ff.pathName()+("/" PLATFORM("ndk-build.cmd", "ndk-build")))){ANLoad(ff.pathName(), op); return;} // check if in same paths there is NDK found
+   Str p=GetRegStr(RKG_CURRENT_USER, "Environment/JAVA_HOME");
+   if(!p.is())
+   {
+                p=GetRegStr(RKG_LOCAL_MACHINE,   "Software/JavaSoft/JDK/CurrentVersion");
+      if(p.is())p=GetRegStr(RKG_LOCAL_MACHINE, S+"Software/JavaSoft/JDK/"+p+"/JavaHome");
+   }
+   if(p.is())JDKLoad(p, op);
+}
+static void AndroidNDKAutodetect(CodeEditor::Options &op)
+{
+   // check in "AndroidSDK\ndk\*" AndroidNDKLoad(, op);
 }
 static void AndroidCertCreate     (CodeEditor::Options &op) {if(op.ce)op.ce->android_certificate.activate();}
 static void FontSizeChanged       (CodeEditor::Options &op) {if(op.ce)op.ce->  fontChanged();}
@@ -484,6 +490,7 @@ static void ScrollChanged         (CodeEditor::Options &op) {if(op.ce)op.ce->scr
 static void LineNumbersChanged    (CodeEditor::Options &op) {if(op.ce && op.ce->cur())op.ce->cur()->setRegionSize();}
 static void HideHorizontalSlidebar(CodeEditor::Options &op) {if(op.ce)op.ce->hideSlideBarChanged();}
 static void AutoHideMenuBar       (CodeEditor::Options &op) {if(op.ce)op.ce->setMenuBarVisibility();}
+static void ShowFileTabs          (CodeEditor::Options &op) {CE.code_tabs.visible(op.show_file_tabs()); CE.resize();}
 
 static void FacebookAndroidKeyHash(CodeEditor::Options &op)
 {
@@ -533,7 +540,7 @@ void CodeEditor::Options::create(CodeEditor &ce)
    };
 
    T.ce=&ce;
-   Gui+=super::create(Rect_C(0, 0, 1.2f, 0.885f), "Editor Options").hide(); button[2].show();
+   Gui+=super::create(Rect_C(0, 0, 1.2f, 0.954f), "Editor Options").hide(); button[2].show();
    CChar8 *tabs_t[]={"Code Editor", "Paths", "Certificates", "Importing"};
    Flt Y=-0.05f;
    T+=tabs.create(Rect_C(clientWidth()/2, Y, 0.8f, 0.05f), 0, tabs_t, Elms(tabs_t), true).valid(true).set(0); Y-=0.10f;
@@ -556,6 +563,7 @@ void CodeEditor::Options::create(CodeEditor &ce)
       tab+=  line_numbers            .create(Rect_C(clientWidth()/2, y, w, h), "Show Line Numbers"         ).func(LineNumbersChanged, T); line_numbers.mode=BUTTON_TOGGLE; y-=s;
       tab+=  hide_horizontal_slidebar.create(Rect_C(clientWidth()/2, y, w, h), "Hide Horizontal SlideBar"  ).func(HideHorizontalSlidebar, T); hide_horizontal_slidebar.mode=BUTTON_TOGGLE; y-=s;
       tab+=  auto_hide_menu          .create(Rect_C(clientWidth()/2, y, w, h), "Auto-Hide MenuBar"         ).func(AutoHideMenuBar, T); auto_hide_menu.mode=BUTTON_TOGGLE; y-=s;
+      tab+=  show_file_tabs          .create(Rect_C(clientWidth()/2, y, w, h), "Show File Tabs"            ).func(ShowFileTabs, T); show_file_tabs.mode=BUTTON_TOGGLE; show_file_tabs.set(true, QUIET); y-=s;
       tab+=t_export_path_mode        .create(Vec2(0.475f, y), "Project Export Paths:");
       tab+=  export_path_mode        .create(Rect_R((clientWidth()+w)/2, y, 0.24f, h), path_mode_t, Elms(path_mode_t)).set(0); y-=s;
    }
@@ -571,24 +579,24 @@ void CodeEditor::Options::create(CodeEditor &ce)
       tab+=d_vs          .create(Rect_RD(vs_path.rect().ru(), 0.22f, h), "Download").func(VSDownload  , T);
       tab+=  vs_path_auto.create(Rect_RU(d_vs.rect().lu(), 0.26f, h), "Auto-Detect").func(VSAutodetect, T);
    #elif LINUX
-      tab+=  netbeans_path     .create(Rect_C (clientWidth()/2, y, w, h), ce.netbeans_path).func(NBChanged, T); y-=s;
+      tab+=  netbeans_path     .create(Rect_C (clientWidth()/2, y, w, h), ce.netbeans_path).func(NetBeansChanged, T); y-=s;
       tab+=t_netbeans_path     .create(netbeans_path.rect().lu(), "NetBeans Path", &ts);
-      tab+=b_netbeans_path     .create(Rect_LU(netbeans_path.rect().ru(), h, h), "...").func(NBSelect, T);
-      tab+=d_netbeans          .create(Rect_RD(netbeans_path.rect().ru(), 0.22f, h), "Download").func(NBDownload  , T);
+      tab+=b_netbeans_path     .create(Rect_LU(netbeans_path.rect().ru(), h, h), "...").func(NetBeansSelect, T);
+      tab+=d_netbeans          .create(Rect_RD(netbeans_path.rect().ru(), 0.22f, h), "Download").func(NetBeansDownload  , T);
     //tab+=  netbeans_path_auto.create(Rect_RU(d_netbeans.rect().lu(), 0.26f, h), "Auto-Detect").func(NBAutodetect, T);
    #endif
 
-      tab+=  android_sdk.create(Rect_C(clientWidth()/2, y, w, h), ce.android_sdk).func(ASChanged, T); y-=s;
+      tab+=  android_sdk.create(Rect_C(clientWidth()/2, y, w, h), ce.android_sdk).func(AndroidSDKChanged, T); y-=s;
       tab+=t_android_sdk.create(android_sdk.rect().lu(), "Android SDK Path", &ts);
-      tab+=b_android_sdk.create(Rect_LU(android_sdk.rect().ru(), h, h), "...").func(ASSelect, T);
-      tab+=d_android_sdk.create(Rect_RD(android_sdk.rect().ru(), 0.22f, h), "Download").func(ASDownload, T);
-      tab+=  android_sdk_auto.create(Rect_RU(d_android_sdk.rect().lu(), 0.26f, h), "Auto-Detect").func(ASAutodetect, T);
+      tab+=b_android_sdk.create(Rect_LU(android_sdk.rect().ru(), h, h), "...").func(AndroidSDKSelect, T);
+      tab+=d_android_sdk.create(Rect_RD(android_sdk.rect().ru(), 0.22f, h), "Download").func(AndroidSDKDownload, T);
+      tab+=  android_sdk_auto.create(Rect_RU(d_android_sdk.rect().lu(), 0.26f, h), "Auto-Detect").func(AndroidSDKAutodetect, T);
 
-      tab+=  android_ndk.create(Rect_C(clientWidth()/2, y, w, h), ce.android_ndk).func(ANChanged, T); y-=s;
+    /*tab+=  android_ndk.create(Rect_C(clientWidth()/2, y, w, h), ce.android_ndk).func(AndroidNDKChanged, T); y-=s;
       tab+=t_android_ndk.create(android_ndk.rect().lu(), "Android NDK Path", &ts);
-      tab+=b_android_ndk.create(Rect_LU(android_ndk.rect().ru(), h, h), "...").func(ANSelect, T);
-      tab+=d_android_ndk.create(Rect_RD(android_ndk.rect().ru(), 0.22f, h), "Download").func(ANDownload, T);
-      tab+=  android_ndk_auto.create(Rect_RU(d_android_ndk.rect().lu(), 0.26f, h), "Auto-Detect").func(ANAutodetect, T);
+      tab+=b_android_ndk.create(Rect_LU(android_ndk.rect().ru(), h, h), "...").func(AndroidNDKSelect, T);
+      tab+=d_android_ndk.create(Rect_RD(android_ndk.rect().ru(), 0.22f, h), "Download").func(AndroidNDKDownload, T);
+      tab+=  android_ndk_auto.create(Rect_RU(d_android_ndk.rect().lu(), 0.26f, h), "Auto-Detect").func(AndroidNDKAutodetect, T);*/
 
    #if WINDOWS
       tab+=  jdk_path     .create(Rect_C (clientWidth()/2, y, w, h), ce.jdk_path).func(JDKChanged, T); y-=s;
@@ -634,9 +642,9 @@ void CodeEditor::Options::create(CodeEditor &ce)
    }
 
    w_vs_path          .create().modeDirSelect().io(         VSLoad,          VSLoad, T);
-   w_netbeans_path    .create().modeDirSelect().io(         NBLoad,          NBLoad, T);
-   w_android_sdk      .create().modeDirSelect().io(         ASLoad,          ASLoad, T);
-   w_android_ndk      .create().modeDirSelect().io(         ANLoad,          ANLoad, T);
+   w_netbeans_path    .create().modeDirSelect().io(   NetBeansLoad,    NetBeansLoad, T);
+   w_android_sdk      .create().modeDirSelect().io( AndroidSDKLoad,  AndroidSDKLoad, T);
+   w_android_ndk      .create().modeDirSelect().io( AndroidNDKLoad,  AndroidNDKLoad, T);
    w_jdk_path         .create().modeDirSelect().io(        JDKLoad,         JDKLoad, T);
    w_android_cert_file.create()                .io(AndroidCertLoad, AndroidCertLoad, T);
           vs_versions.create(ce);
@@ -729,22 +737,8 @@ void CodeEditor::visibleAndroidDevLog(Bool on)
       if(on && !devlog_process.active())
       {
          adb_path=adbPath();
-         if(!adb_path.is()){options.activatePaths(); Gui.msgBox(S, "The path to Android SDK has not been specified or is invalid.");}else
-         {
-            if(adb_server.create(adb_path, "start-server")) // if we're going to launch the app then make sure that the ADB server is running, or else custom launched ADB processess will never exit
-            {
-               if(adb_server.wait(1000/60)) // wait up to 1 frame of 60 fps for it to show up
-               {
-                  devlog_process.create(adb_path, "logcat -v time");
-                  adb_server.del();
-               }else
-               {  // let it run and start devlog once it finished
-                  devlog_data.clear();
-                  devlog_data.New().message="Starting Android Debug Bridge..";
-                  devlog_list.setData(devlog_data);
-               }
-            }
-         }
+         if(!adb_path.is()){options.activatePaths(); Gui.msgBox(S, "The path to Android SDK has not been specified or is invalid.");}
+         else               devlog_process.create(adb_path, "logcat -v time");
       }
       resize();
    }
@@ -765,6 +759,9 @@ void CodeEditor::resize()
 
    menu.parentClientRectChanged(null, &NoTemp(D.rect()));
    Flt menu_h=menu.rect().h();
+
+   Rect r=CE.cei().sourceRect();
+   code_tabs.rect(Rect(r.min.x, r.max.y-0.045f, r.max.x, r.max.y));
 
    RegionRect(build_region, Rect(-D.w(), -D.h(), D.w(), -D.h()*0.5f)+Vec2(0, menu_on_top ? 0 : menu_h));
    build_list.elmHeight(ts.size.y).textSize(ts.size.y);//.columnHeight(ts.size.y*1.3f);
@@ -946,13 +943,9 @@ Bool CodeEditor::BuildResult::jumpTo()
             if( line>=0)
             {
                text.clip(pos);
-               if(FullPath(text) || StartsPath(text, "Source") || StartsPath(text, "jni") || StartsPath(text, ".."))
+               if(FullPath(text) || StartsPath(text, "Source") || StartsPath(text, ".."))
                {
-                  if(!FullPath(text))
-                  {
-                     if(CE.build_exe_type==EXE_APK)text=NormalizePath(CE.build_path+"Android/"+text);
-                     else                          text=NormalizePath(CE.build_path+           text);
-                  }
+                  if(!FullPath(text))text=NormalizePath(CE.build_path+text);
                   if(JumpTo(text, line))return true;
                }
             }

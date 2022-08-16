@@ -650,7 +650,7 @@ void _Sound::updatePlaying(Int thread_index)
          {
             if(flag&SOUND_CHANGED_SPEED)setSpeed(); // !! call this first before 'set3DParams' !!
             if(flag&(SOUND_CHANGED_POS|SOUND_CHANGED_ORN|SOUND_CHANGED_RANGE|SOUND_CHANGED_VEL|SOUND_CHANGED_SPEED)) // need to check for SOUND_CHANGED_ORN because of Listener changes
-              _buffer.set3DParams(T, FlagTest(flag, SOUND_CHANGED_POS|SOUND_CHANGED_ORN|SOUND_CHANGED_RANGE), FlagTest(flag, SOUND_CHANGED_POS|SOUND_CHANGED_VEL|SOUND_CHANGED_SPEED));
+              _buffer.set3DParams(T, FlagOn(flag, SOUND_CHANGED_POS|SOUND_CHANGED_ORN|SOUND_CHANGED_RANGE), FlagOn(flag, SOUND_CHANGED_POS|SOUND_CHANGED_VEL|SOUND_CHANGED_SPEED));
          }else
          {
             if(flag&SOUND_CHANGED_SPEED){setSpeed(); _buffer.speed(SoundSpeed(_actual_speed));}
@@ -660,7 +660,7 @@ void _Sound::updatePlaying(Int thread_index)
          {
             if(flag&SOUND_CHANGED_SPEED)setSpeed(); // !! call this first before 'set3DParams' !!
             if(flag&(SOUND_CHANGED_VOLUME|SOUND_CHANGED_POS|SOUND_CHANGED_ORN|SOUND_CHANGED_RANGE|SOUND_CHANGED_VEL|SOUND_CHANGED_SPEED)) // need to check for SOUND_CHANGED_ORN because of Listener changes
-              _buffer.set3DParams(T, FlagTest(flag, SOUND_CHANGED_VOLUME|SOUND_CHANGED_POS|SOUND_CHANGED_ORN|SOUND_CHANGED_RANGE), FlagTest(flag, SOUND_CHANGED_POS|SOUND_CHANGED_VEL|SOUND_CHANGED_SPEED));
+              _buffer.set3DParams(T, FlagOn(flag, SOUND_CHANGED_VOLUME|SOUND_CHANGED_POS|SOUND_CHANGED_ORN|SOUND_CHANGED_RANGE), FlagOn(flag, SOUND_CHANGED_POS|SOUND_CHANGED_VEL|SOUND_CHANGED_SPEED));
          }else
          {
             if(flag&SOUND_CHANGED_SPEED){setSpeed(); _buffer.speed(SoundSpeed(_actual_speed));}
@@ -746,12 +746,12 @@ Int _Sound::loadResult(File &f, CChar *path) // this does not call delete on its
             SoundDesc desc; if(f.getFast(desc) && f.ok())
             {
                Byte flag=Unaligned(desc.flag);
-               init(_name, null, FlagTest(flag, SD_3D), Unaligned(desc.volume_group));
+               init(_name, null, FlagOn(flag, SD_3D), Unaligned(desc.volume_group));
 
                Unaligned(_fade  , desc.fade  );
                Unaligned(_fade_d, desc.fade_d);
 
-               loop  (FlagTest(flag, SD_LOOP));
+               loop  (FlagOn(flag, SD_LOOP));
                time  (Unaligned(desc.time  ));
                volume(Unaligned(desc.volume));
                speed (Unaligned(desc.speed ));
@@ -759,7 +759,7 @@ Int _Sound::loadResult(File &f, CChar *path) // this does not call delete on its
                pos   (Unaligned(desc.pos   ));
                vel   (Unaligned(desc.vel   ));
 
-               if(FlagTest(flag, SD_PLAYING))play(); // call this last after all parameters have been set
+               if(FlagOn(flag, SD_PLAYING))play(); // call this last after all parameters have been set
                return SOUND_LOAD_OK;
             }
          }else if(f.ok())return SOUND_LOAD_EMPTY;
@@ -949,8 +949,8 @@ again:
    if(AtomicGet(SoundPause))
    {
       Int        state=AtomicGet(SoundPause);
-      Bool want_paused=FlagTest(state, SOUND_WANT_PAUSED),
-                paused=FlagTest(state, SOUND_PAUSED     );
+      Bool want_paused=FlagOn(state, SOUND_WANT_PAUSED),
+                paused=FlagOn(state, SOUND_PAUSED     );
       if(  want_paused!=paused)
       {
          SOUND_API_LOCK;

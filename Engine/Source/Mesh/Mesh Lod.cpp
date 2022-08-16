@@ -95,8 +95,9 @@ MeshLod& MeshLod::dist(Flt dist)
    return T;
 }
 /******************************************************************************/
-Bool MeshLod::hasDrawGroup    ( Int draw_group_index)C {REPA(parts)if(    parts[i].drawGroup()==draw_group_index)return true; return false;}
-Bool MeshLod::hasDrawGroupMask(UInt draw_group_mask )C {REPA(parts)if((1<<parts[i].drawGroup())&draw_group_mask )return true; return false;}
+Bool MeshLod::hasDrawGroup           ( Int draw_group_index               )C {REPA(parts)if(    parts[i].drawGroup()==draw_group_index)return true; return false;}
+Bool MeshLod::hasDrawGroupMask       (UInt draw_group_mask                )C {REPA(parts)if((1<<parts[i].drawGroup())&draw_group_mask )return true; return false;}
+Bool MeshLod::hasDrawGroupInVariation( Int draw_group_index, Int variation)C {REPA(parts){C MeshPart &part=parts[i]; if(part.drawGroup()==draw_group_index && part.variation(variation))return true;} return false;} // check only parts with non-null (visible) variation material
 /******************************************************************************/
 // SET
 /******************************************************************************/
@@ -602,6 +603,8 @@ void     MeshLod::includeUsedBones(Bool (&bones)[256]       )C {REPAO(parts).inc
 void     MeshLod::    setUsedBones(Bool (&bones)[256]       )C {Zero(bones); includeUsedBones(bones);}
 
 MeshLod& MeshLod::freeOpenGLESData() {REPAO(parts).freeOpenGLESData(); return T;}
+
+Bool MeshLod::waitForStream()C {Bool ok=true; REPA(parts)ok&=parts[i].waitForStream(); return ok;}
 /******************************************************************************/
 // FIX
 /******************************************************************************/

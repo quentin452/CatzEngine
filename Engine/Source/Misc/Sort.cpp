@@ -503,6 +503,27 @@ Bool _BinarySearch(CPtr data, Int elms, Int elm_size, CPtr value, Int &index, In
    }
    index=l; return false;
 }
+Bool _BinarySearchFirst(CPtr data, Int elms, Int elm_size, CPtr value, Int &index, Int compare(CPtr a, CPtr b))
+{
+   Int l=0, r=elms; for(; l<r; )
+   {
+      Int   mid=UInt(l+r)/2;
+      Byte *mid_data=((Byte*)data)+mid*elm_size;
+      Int   c  =compare(mid_data, value);
+      if(   c<0)l=mid+1;else
+      if(   c>0)r=mid  ;else
+      {
+      prev:
+         if(mid>l)
+         {
+            mid_data-=elm_size; if(!compare(mid_data, value)){mid--; goto prev;}
+         }
+         index=mid;
+         return true;
+      }
+   }
+   index=l; return false;
+}
 Bool _Memb::binarySearch(CPtr value, Int &index, Int compare(CPtr a, CPtr b))C
 {
    Int l=0, r=elms(); for(; l<r; )

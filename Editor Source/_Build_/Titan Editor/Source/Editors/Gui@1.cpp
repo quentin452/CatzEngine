@@ -209,8 +209,8 @@ GuiView GuiEdit;
                      void GuiView::TabsSpace(  Tabs &tabs, C Str &t) {       tabs.rect(tabs.rect(), TextFlt(t), tabs.autoSize());}
                      Str  GuiView::TabsAutoSize(C Tabs &tabs          ) {return tabs.autoSize();}
                      void GuiView::TabsAutoSize(  Tabs &tabs, C Str &t) {       tabs.rect(tabs.rect(), tabs.space(), TextBool(t));}
-   void GuiView::TextCodeFunc(  Text &text, C Str &t) {               text.code(Replace(t, "\\n", "\n" ));}
-   Str  GuiView::TextCodeFunc(C Text &text          ) {return Replace(text.code(),         "\n" , "\\n") ;}
+   void GuiView::TextText(  Text &text, C Str &t) {       text.set(t);}
+   Str  GuiView::TextText(C Text &text          ) {return text.text;}
    Str  GuiView::TextLineText(C TextLine &textline          ) {return textline();}
    void GuiView::TextLineText(  TextLine &textline, C Str &t) {       textline.set(t);}
    Str  GuiView::TextLinePassword(C TextLine &textline          ) {return textline.password();}
@@ -224,9 +224,9 @@ GuiView GuiEdit;
    void GuiView::WindowLevel(  Window &window, C Str &t) {       window.level(TextInt(t));}
    Str  GuiView::WindowLevel(C Window &window          ) {return window.level();}
    void GuiView::WindowMovable(  Window &window, C Str &t) {       FlagSet (window.flag, WIN_MOVABLE, TextBool(t));}
-   Str  GuiView::WindowMovable(C Window &window          ) {return FlagTest(window.flag, WIN_MOVABLE);}
-   void GuiView::WindowResizable(  Window &window, C Str &t) {       FlagSet (window.flag, WIN_RESIZABLE, TextBool(t));}
-   Str  GuiView::WindowResizable(C Window &window          ) {return FlagTest(window.flag, WIN_RESIZABLE);}
+   Str  GuiView::WindowMovable(C Window &window          ) {return FlagOn (window.flag, WIN_MOVABLE);}
+   void GuiView::WindowResizable(  Window &window, C Str &t) {       FlagSet(window.flag, WIN_RESIZABLE, TextBool(t));}
+   Str  GuiView::WindowResizable(C Window &window          ) {return FlagOn (window.flag, WIN_RESIZABLE);}
    void GuiView::WindowBarVisible(  Window &window, C Str &t) {       window.barVisible(TextBool(t));}
    Str  GuiView::WindowBarVisible(C Window &window          ) {return window.barVisible();}
    void GuiView::ButtonImage(Button   &button  , C Str &t) {button  .image=Proj.gamePath(Proj.findElmImageID(t));}
@@ -565,34 +565,10 @@ GuiView GuiEdit;
       obj_edit[GO_SLIDER].add("Value"        , MemberDesc(DATA_REAL).setFunc(SliderValue, SliderValue)).range(0, 1).mouseEditSpeed(0.1f);
       obj_edit[GO_SLIDER].add("Skin Override", MemberDesc(DATA_STR ).setFunc(SliderSkin , SliderSkin )).elmType(ELM_GUI_SKIN).desc("Override Skin, if no skin is specified then default will be used");
 
-      static cchar8 *auto_line[]=
-      {
-         "NONE"       , // 0
-         "SPACE"      , // 1
-         "SPACE_SPLIT", // 2
-         "SPLIT"      , // 3
-      }; ASSERT(AUTO_LINE_NONE==0 && AUTO_LINE_SPACE==1 && AUTO_LINE_SPACE_SPLIT==2 && AUTO_LINE_SPLIT==3 && AUTO_LINE_NUM==4);
-
       obj_edit[GO_TEXT].add("Name", MemberDesc(MEMBER(Text2, name)));
       obj_edit[GO_TEXT].add("Desc", MemberDesc(DATA_STR).setFunc(Desc, Desc));
-      obj_edit[GO_TEXT].add("Code", MemberDesc(DATA_STR).setFunc(TextCodeFunc, TextCodeFunc)).desc(
-         "1. code format accepts following keywords:   in following formats:\n"
-         "   col, color   -   RGB, RGBA, RRGGBB, RRGGBBAA (hexadecimal format)\n"
-         "   shadow   -   X, XX (hexadecimal format)\n"
-         "\n"
-         "2. codes should be surrounded by '[' ']' signs\n"
-         "\n"
-         "3. removing the effect of a code should be handled by '/' sign followed by code name\n"
-         "\n"
-         "4. sample codes:\n"
-         "      \"Text without code. [color=F00]Text with code[/color]\"   -   will force red color on \"Text with code\"\n"
-         "      \"[shadow=0]No Shadow[/shadow] [shadow=F]Full Shadow[/shadow]\"   -   will force no shadow on \"No Shadow\" and full shadow on \"Full Shadow\"");
-      obj_edit[GO_TEXT].add("Auto Line", MemberDesc(MEMBER(Text2, auto_line))).setEnum(auto_line, Elms(auto_line)).desc(
-         "NONE            - only manual new lines '\\n' are used\n"
-         "SPACE          - new lines can be  calculated on spaces, words are not split\n"
-         "SPACE_SPLIT - new lines can be  calculated on spaces, words can be  split if their length exceeds available width\n"
-         "SPLIT            - new lines are not calculated on spaces, words can be  split if their length exceeds available width");
-
+      obj_edit[GO_TEXT].add("Text", MemberDesc(DATA_STR).setFunc(TextText, TextText));
+      obj_edit[GO_TEXT].add("Auto Line", MemberDesc(MEMBER(Text2, auto_line))).desc("Automatically calculate lines");
       obj_edit[GO_TEXT].add("Text Style"   , MemberDesc(DATA_STR).setFunc(TextTextStyle, TextTextStyle)).elmType(ELM_TEXT_STYLE);
       obj_edit[GO_TEXT].add("Skin Override", MemberDesc(DATA_STR).setFunc(TextSkin     , TextSkin     )).elmType(ELM_GUI_SKIN).desc("Override Skin, if no skin is specified then default will be used");
 

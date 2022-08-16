@@ -406,6 +406,29 @@ Bool AnimKeys::color(Vec4 &color, C AnimParams &params)C
    }
 }
 #endif
+/******************************************************************************/
+void AnimKeys::matrixNoScale(Matrix &matrix, C AnimParams &params)C
+{
+   Orient orn; if( T.orn(       orn, params))matrix.orn()=orn;else matrix.orn().identity(); // if empty then call 'identity' because it's faster than setting from 'Orient'
+               if(!T.pos(matrix.pos, params) && !SET_ON_FAIL)matrix.pos.zero();
+}
+void AnimKeys::matrix(Matrix &matrix, C AnimParams &params)C
+{
+   matrixNoScale(matrix, params);
+   Vec scale; if(T.scales.elms() && T.scale(scale, params))matrix.scaleOrnL(ScaleFactor(scale)); // most likely there won't be any scale, so do a fast check without the function call
+}
+void AnimKeys::matrix(Matrix3 &matrix, C AnimParams &params, C Matrix3 &default_orn)C
+{
+   Orient orn; if(                   T.orn  (  orn, params))matrix=orn;else matrix=default_orn;
+   Vec  scale; if(T.scales.elms() && T.scale(scale, params))matrix.scaleL(ScaleFactor(scale)); // most likely there won't be any scale, so do a fast check without the function call
+}
+void AnimKeys::matrix(Matrix &matrix, C AnimParams &params, C Matrix3 &default_orn)C
+{
+   Orient orn; if(                   T.orn  (       orn, params))matrix.orn()=orn;else matrix.orn()=default_orn;
+               if(                  !T.pos  (matrix.pos, params) && !SET_ON_FAIL)matrix.pos.zero();
+   Vec  scale; if(T.scales.elms() && T.scale(     scale, params))matrix.scaleOrnL(ScaleFactor(scale)); // most likely there won't be any scale, so do a fast check without the function call
+}
+/******************************************************************************/
 void AnimKeys::Orn::save(MemPtr<TextNode> nodes)C
 {
    nodes.New().set("time"    , time    );
@@ -561,6 +584,13 @@ static Int Compare(C AnimKeys::Rot   &k0, C AnimKeys::Rot   &k1) {return Compare
 static Int Compare(C AnimKeys::Color &k0, C AnimKeys::Color &k1) {return Compare(k0.time, k1.time);}
 #endif
 
+static Int Compare(C AnimKeys::Orn   &k, C Flt &time) {return Compare(k.time, time);}
+static Int Compare(C AnimKeys::Pos   &k, C Flt &time) {return Compare(k.time, time);}
+static Int Compare(C AnimKeys::Scale &k, C Flt &time) {return Compare(k.time, time);}
+
+static Int CompareEps(C AnimKeys::Orn &k, C Flt &time) {return CompareEps(k.time, time);}
+static Int CompareEps(C AnimKeys::Pos &k, C Flt &time) {return CompareEps(k.time, time);}
+
 AnimKeys& AnimKeys::sortFrames()
 {
    orns  .sort(Compare);
@@ -605,7 +635,7 @@ AnimKeys& AnimKeys::scaleTime(Flt scale, Flt anim_length)
 #endif
    return T;
 }
-AnimKeys& AnimKeys::slideTime(Flt dt, Flt anim_length)
+AnimKeys& AnimKeys::offsetTime(Flt dt, Flt anim_length)
 {
    REPAO(orns  ).time=Frac(orns  [i].time+dt, anim_length);
    REPAO(poss  ).time=Frac(poss  [i].time+dt, anim_length);
@@ -1412,10 +1442,17 @@ AnimKeys& AnimKeys::clip(Bool anim_loop, Bool anim_linear, Flt anim_length, Flt 
 }
 /******************************************************************************/
 void AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times)C
+{ // process forward because keys are sorted
+   if(  orn_times){if(  orn_times.elms())FREPA(  orns)  orn_times.binaryInclude(  orns[i].time, CompareEps);else {  orn_times.setNum(  orns.elms()); REPAO(  orn_times)=  orns[i].time;}}
+   if(  pos_times){if(  pos_times.elms())FREPA(  poss)  pos_times.binaryInclude(  poss[i].time, CompareEps);else {  pos_times.setNum(  poss.elms()); REPAO(  pos_times)=  poss[i].time;}}
+   if(scale_times){if(scale_times.elms())FREPA(scales)scale_times.binaryInclude(scales[i].time, CompareEps);else {scale_times.setNum(scales.elms()); REPAO(scale_times)=scales[i].time;}}
+}
+void AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times, Flt start, Flt end)C
 {
-   if(  orn_times){if(  orn_times.elms())FREPA(  orns)  orn_times.binaryInclude(  orns[i].time, CompareEps);else {  orn_times.setNum(  orns.elms()); REPAO(  orn_times)=  orns[i].time;}} // process forward because keys are sorted
-   if(  pos_times){if(  pos_times.elms())FREPA(  poss)  pos_times.binaryInclude(  poss[i].time, CompareEps);else {  pos_times.setNum(  poss.elms()); REPAO(  pos_times)=  poss[i].time;}} // process forward because keys are sorted
-   if(scale_times){if(scale_times.elms())FREPA(scales)scale_times.binaryInclude(scales[i].time, CompareEps);else {scale_times.setNum(scales.elms()); REPAO(scale_times)=scales[i].time;}} // process forward because keys are sorted
+   Int i; // process forward because keys are sorted
+   if(  orn_times){  orns.binarySearch(start, i, Compare); for(; i<  orns.elms(); i++){Flt time=  orns[i].time; if(time>=end)break;   orn_times.binaryInclude(time, CompareEps);}}
+   if(  pos_times){  poss.binarySearch(start, i, Compare); for(; i<  poss.elms(); i++){Flt time=  poss[i].time; if(time>=end)break;   pos_times.binaryInclude(time, CompareEps);}}
+   if(scale_times){scales.binarySearch(start, i, Compare); for(; i<scales.elms(); i++){Flt time=scales[i].time; if(time>=end)break; scale_times.binaryInclude(time, CompareEps);}}
 }
 static void IncludeTimes(C CMemPtr<Flt, 16384> &src, MemPtr<Flt, 16384> dest)
 {
@@ -1704,6 +1741,9 @@ void AnimBone::save(TextNode &node)C
 /******************************************************************************/
 // ANIMATION EVENT
 /******************************************************************************/
+static Int Compare(C AnimEvent &a, C AnimEvent &b     ) {return Compare(a.time, b.time);}
+static Int Compare(C AnimEvent &a, C Flt       &b_time) {return Compare(a.time, b_time);}
+
 Bool AnimEvent::operator==(C AnimEvent &event)C
 {
    return time==event.time && Equal(name, event.name);
@@ -1750,34 +1790,96 @@ Int Animation::eventCount(CChar8 *name)C
    Int    num=0; REPA(events)if(Equal(events[i].name, name))num++;
    return num;
 }
-// FIXME: TODO: events are now sorted by 'time', functions can be optimized to make use of that
-Bool Animation::eventAfter(CChar8 *name, Flt time)C
+Bool Animation::eventAfter(CChar8 *name, Flt time)C // event.name==name && event.time<=time (time>=event.time)
 {
-   REPA(events)
+   FREPA(events) // check all events from the start until 'time'
    {
     C AnimEvent &event=events[i];
-      if(Equal(event.name, name) && time>=event.time)return true;
+      if(      event.time> time )break;
+      if(Equal(event.name, name))return true;
+   }
+   return false;
+}
+Bool Animation::eventBefore(CChar8 *name, Flt time)C // event.name==name && event.time>time (time<event.time)
+{
+   REPA(events) // check all events from the end until 'time'
+   {
+    C AnimEvent &event=events[i];
+      if(      event.time<=time )break;
+      if(Equal(event.name, name))return true;
    }
    return false;
 }
 Bool Animation::eventOccurred(CChar8 *name, Flt start_time, Flt dt)C
 {
-   Bool frac=false;
-   REPA(events)
+   if(loop())
    {
-    C AnimEvent &event=events[i]; if(Equal(event.name, name))
+      start_time=Frac(start_time, _length);
+      Flt end_time=start_time+dt;
+      Int start_event; events.binarySearchFirst(start_time, start_event, Compare);
+      for(Int i=start_event; i<events.elms(); i++)
       {
-         Flt event_time=event.time;
-         if(loop())
-         {
-            if(!frac){frac=true; start_time=Frac(start_time, _length);}
-            if(event_time<start_time)event_time+=_length; // make sure that 'event_time' is after 'start_time'
-         }
-         if(EventOccurred(event_time, start_time, dt))return true;
+       C AnimEvent &event=events[i];
+         if(      event.time>=end_time )goto end; // EventOccurred(event_time, start_time, dt) = (start_time<=event_time && end_time>event_time)
+         if(Equal(event.name,     name))return true;
+      }
+      for(Int i=0; i<start_event; i++) // check events before 'start_time' but treating them as if they're after animation
+      {
+       C AnimEvent &event=events[i];
+         Flt      event_time =event.time+_length;
+         if(      event_time>=  end_time )goto end; // EventOccurred(event_time, start_time, dt) = (start_time<=event_time && end_time>event_time)
+         if(Equal(event.name,       name))return true;
+      }
+   }else
+   {
+      Flt end_time=start_time+dt;
+      Int   start_event; events.binarySearchFirst(start_time, start_event, Compare);
+      for(; start_event< events.elms(); start_event++)
+      {
+       C AnimEvent &event=events[start_event];
+         if(      event.time>=end_time )goto end; // EventOccurred(event_time, start_time, dt) = (start_time<=event_time && end_time>event_time)
+         if(Equal(event.name,     name))return true;
       }
    }
+end:
    return false;
 }
+Int Animation::eventsOccurred(Int &first_event, Flt start_time, Flt dt)C
+{
+   Int num=0;
+   if(loop())
+   {
+      start_time=Frac(start_time, _length);
+      Flt end_time=start_time+dt;
+      Int start_event; events.binarySearchFirst(start_time, start_event, Compare); first_event=start_event;
+      for(Int i=start_event; i<events.elms(); i++)
+      {
+       C AnimEvent &event=events[i];
+         if(event.time>=end_time)goto end; // EventOccurred(event_time, start_time, dt) = (start_time<=event_time && end_time>event_time)
+         num++;
+      }
+      for(Int i=0; i<start_event; i++) // check events before 'start_time' but treating them as if they're after animation
+      {
+       C AnimEvent &event=events[i];
+         Flt event_time =event.time+_length;
+         if( event_time>=  end_time)goto end; // EventOccurred(event_time, start_time, dt) = (start_time<=event_time && end_time>event_time)
+         num++;
+      }
+   }else
+   {
+      Flt end_time=start_time+dt;
+      Int   start_event; events.binarySearchFirst(start_time, start_event, Compare); first_event=start_event;
+      for(; start_event< events.elms(); start_event++)
+      {
+       C AnimEvent &event=events[start_event];
+         if(event.time>=end_time)goto end; // EventOccurred(event_time, start_time, dt) = (start_time<=event_time && end_time>event_time)
+         num++;
+      }
+   }
+end:
+   return num;
+}
+// FIXME: TODO: events are now sorted by 'time', functions below can be optimized to make use of that
 Bool Animation::eventBetween(CChar8 *from, CChar8 *to, Flt start_time, Flt dt)C
 {
  C AnimEvent *event_from=null,
@@ -1819,6 +1921,7 @@ found:
    }
    return LerpR(event_from->time, time_to, time);
 }
+/******************************************************************************/
 AnimBone* Animation::findBone(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub) {return bones.addr(findBoneI(name, type, type_index, type_sub));}
 AnimBone& Animation:: getBone(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub)
 {
@@ -1875,25 +1978,15 @@ Animation& Animation::setRootMatrix()
    setRootMatrix2();
    return T;
 }
-static void GetRootMatrixNoScale(C AnimKeys &keys, Matrix &matrix, C AnimParams &params)
-{
-   Orient orn; if( keys.orn(       orn, params))matrix.orn()=orn;else matrix.orn().identity(); // if empty then call 'identity' because it's faster than setting from 'Orient'
-               if(!keys.pos(matrix.pos, params) && !SET_ON_FAIL)matrix.pos.zero();
-}
-static void GetRootMatrix(C AnimKeys &keys, Matrix &matrix, C AnimParams &params)
-{
-   GetRootMatrixNoScale(keys, matrix, params);
-   Vec scale; if(keys.scales.elms() && keys.scale(scale, params))matrix.scaleOrnL(ScaleFactor(scale)); // most likely there won't be any scale, so do a fast check without the function call
-}
 void Animation::getRootMatrix(Matrix &matrix, Flt time)C
 {
    AnimParams params(T, time);
-   GetRootMatrix(keys, matrix, params);
+   keys.matrix(matrix, params);
 }
 void Animation::getRootMatrixCumulative(Matrix &matrix, Flt time)C
 {
    AnimParams params(T, time);
-   GetRootMatrix(keys, matrix, params);
+   keys.matrix(matrix, params);
    if(params.loop)
       if(Int rounds=Round((time-params.time)/params.length))
    {
@@ -1910,7 +2003,7 @@ void Animation::getRootMatrixCumulative(Matrix &matrix, Flt time)C
 void Animation::getRootMatrixExactTime(Matrix &matrix, Flt time)C
 {
    AnimParams params(T, time); params.time=time; // re-apply time to remove possible fraction
-   GetRootMatrix(keys, matrix, params);
+   keys.matrix(matrix, params);
 }
 void Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_time)C
 {
@@ -1954,7 +2047,7 @@ void Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_t
       }else // orientation with optional position
       {
          params.set(T, start_time);
-         GetRootMatrixNoScale(keys, m, params);
+         keys.matrixNoScale(m, params);
          params.time+=end_time-start_time;
          if(params.loop)
          {
@@ -1967,7 +2060,7 @@ void Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_t
                   params.time-=rounds*params.length;
                   transform.mulTimes(rounds, rootTransform());
                }
-               GetRootMatrixNoScale(keys, m, params);
+               keys.matrixNoScale(m, params);
                m.mul(_root_start_inv, rm); // this is "GetTransformNormalized(rm, rootStart(), m)"
                transform*=rm;
                return;
@@ -1981,18 +2074,18 @@ void Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_t
                   params.time-=rounds*params.length;
                   transform.mulTimes(rounds, rootTransform());
                }
-               GetRootMatrixNoScale(keys, m, params);
+               keys.matrixNoScale(m, params);
                GetTransformNormalized(rm, rootEnd(), m);
                transform*=rm;
                return;
             }
          }
-         Matrix end; GetRootMatrixNoScale(keys, end, params); GetTransformNormalized(transform, m, end);
+         Matrix end; keys.matrixNoScale(end, params); GetTransformNormalized(transform, m, end);
       }
    }else // scaled with optional orientation+position
    {
       params.set(T, start_time);
-      GetRootMatrix(keys, m, params);
+      keys.matrix(m, params);
       params.time+=end_time-start_time;
       if(params.loop)
       {
@@ -2005,7 +2098,7 @@ void Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_t
                params.time-=rounds*params.length;
                transform.mulTimes(rounds, rootTransform());
             }
-            GetRootMatrix(keys, m, params);
+            keys.matrix(m, params);
             m.mul(_root_start_inv, rm); // this is "GetTransform(rm, rootStart(), m)"
             transform*=rm;
             return;
@@ -2019,13 +2112,13 @@ void Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_t
                params.time-=rounds*params.length;
                transform.mulTimes(rounds, rootTransform());
             }
-            GetRootMatrix(keys, m, params);
+            keys.matrix(m, params);
             GetTransform(rm, rootEnd(), m);
             transform*=rm;
             return;
          }
       }
-      Matrix end; GetRootMatrix(keys, end, params); GetTransform(transform, m, end);
+      Matrix end; keys.matrix(end, params); GetTransform(transform, m, end);
    }
 }
 /******************************************************************************/
@@ -2198,9 +2291,9 @@ static void DelRot(Animation &anim, UInt flag)
 {
    if(FlagAll(flag, ROOT_DEL_ROTATION))anim.keys.orns.del();else
    {
-      Bool x=FlagTest(flag, ROOT_DEL_ROTATION_X),
-           y=FlagTest(flag, ROOT_DEL_ROTATION_Y),
-           z=FlagTest(flag, ROOT_DEL_ROTATION_Z);
+      Bool x=FlagOn(flag, ROOT_DEL_ROTATION_X),
+           y=FlagOn(flag, ROOT_DEL_ROTATION_Y),
+           z=FlagOn(flag, ROOT_DEL_ROTATION_Z);
       REPA(anim.keys.orns)
       {
          Orient    &orn=anim.keys.orns[i].orn;
@@ -2926,6 +3019,295 @@ Animation& Animation::offsetRootBones(C Skeleton &skeleton, C Vec &move)
    return T;
 }
 /******************************************************************************/
+static void FreezePos(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_index, C Vec *delta)
+{
+   Bool root=(skel_bone<0);
+   if(  root || InRange(skel_bone, skel.bones))
+   {
+      AnimBone *abon;
+      AnimKeys *keys;
+      Matrix3   default_orn;
+      if(root)
+      {
+         abon=null;
+         keys=&anim.keys;
+         default_orn.identity();
+      }else
+      {
+       C SkelBone &sbon=skel.bones[skel_bone];
+         if(abon=anim.findBone(sbon.name, sbon.type, sbon.type_index, sbon.type_sub))
+         {  keys       =abon;
+            default_orn=GetAnimOrient(sbon, skel.bones.addr(sbon.parent));
+         }else return;
+      }
+      Bool all_keys=(key_index<0);
+      if(  all_keys || InRange(key_index, keys->poss))
+      {
+         Byte bone_index=(root ? 0xFF : skel_bone);
+
+         Memt<Flt, 16384> times;
+         Flt prev_time, next_time;
+         if(all_keys)keys->includeTimes(times, times, times);else
+         {
+               prev_time=(InRange(key_index-1, keys->poss) ? keys->poss[key_index-1].time :             0);
+            Flt key_time=                                    keys->poss[key_index  ].time                 ;
+               next_time=(InRange(key_index+1, keys->poss) ? keys->poss[key_index+1].time : anim.length());
+            times.binaryInclude(prev_time, CompareEps);
+            times.binaryInclude( key_time, CompareEps);
+            times.binaryInclude(next_time, CompareEps);
+            keys->includeTimes(times, null, times, prev_time, next_time); // include orientation and scale keys between 'prev_time..next_time'
+         }
+
+         AnimKeys src=*keys; // before removal TODO: it's not optimal to copy like this
+
+         if(delta) // move
+         {
+            if(all_keys)REPAO(keys->poss          ).pos+=*delta;
+            else              keys->poss[key_index].pos+=*delta;
+         }else // delete
+         {
+            if(all_keys)keys->poss.del();
+            else        keys->poss.remove(key_index, true);
+         }
+         keys->setTangents(anim.loop(), anim.length());
+         if(root)anim.setRootMatrix();
+
+         AnimKeys cur=*keys; // after removal, keep as copy because 'removeData' and 'getBone' below, might change mem address TODO: it's not optimal to copy like this
+
+         if(abon && !abon->is())anim.bones.removeData(abon);
+         // !! CAN'T ACCESS 'keys', 'abon' ANYMORE AFTER THIS POINT !!
+
+         AnimParams anim_params(anim, 0);
+         REPA(skel.bones)
+         {
+          C SkelBone &child_sbon=skel.bones[i]; if(child_sbon.parent==bone_index) // 'skel_bone' child
+            {
+               AnimBone &abon=anim.getBone(child_sbon.name, child_sbon.type, child_sbon.type_index, child_sbon.type_sub); // 'skel_bone' child
+
+               Memt<Flt, 16384> child_times=times; // include child orientation keys for higher precision
+               if(all_keys)abon.includeTimes(child_times, null, null);
+               else        abon.includeTimes(child_times, null, null, prev_time, next_time);
+
+               // add keys (Warning: TODO: this is precise only for linear interpolation, for other case we would have to copy 'abon' to temporary and calculate from it)
+               FREPA(child_times) // process forward because keys are sorted
+               {
+                  Flt time=child_times[i];
+                  Int index; if(!abon.poss.binarySearch(time, index, CompareEps))
+                  {
+                     Vec pos; anim_params.time=time; if(!abon.pos(pos, anim_params) && !SET_ON_FAIL)pos.zero(); // calculate before adding
+                     AnimKeys::Pos &key=abon.poss.NewAt(index); key.time=time; key.pos=pos; ASSERT(!HAS_ANIM_TANGENT);
+                  }
+               }
+
+               Int start, end;
+               if(all_keys)
+               {
+                  start=0; end=abon.poss.elms();
+               }else
+               {
+                     abon.poss.binarySearch(prev_time, start, Compare);
+                  if(abon.poss.binarySearch(next_time, end  , Compare))end++; // end is exclusive, so if found match, process it too, in case key is at the end
+               }
+               for(Int i=start; i<end; i++) // process keys from start to end
+               {
+                  AnimKeys::Pos &pos=abon.poss[i];
+                  anim_params.time=pos.time;
+                  Matrix src_matrix    ;     src.matrix(src_matrix    , anim_params, default_orn);
+                  Vec    cur_matrix_pos; if(!cur.pos   (cur_matrix_pos, anim_params) && !SET_ON_FAIL)cur_matrix_pos.zero(); // only position has changed
+                  pos.pos+=(src_matrix.pos-cur_matrix_pos)/src_matrix.orn();
+               }
+
+               abon.setTangents(anim.loop(), anim.length());
+            }
+         }
+      }
+   }
+}
+static void FreezeRot(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_index, C Matrix3 *matrix, Bool pos)
+{
+   Bool root=(skel_bone<0);
+   if(  root || InRange(skel_bone, skel.bones))
+   {
+    C SkelBone *sbon;
+      AnimBone *abon;
+      AnimKeys *keys;
+      Orient    default_orn;
+      if(root)
+      {
+         sbon=null;
+         abon=null;
+         keys=&anim.keys;
+         default_orn.identity();
+      }else
+      {
+            sbon=&skel.bones[skel_bone];
+         if(abon= anim.findBone(sbon->name, sbon->type, sbon->type_index, sbon->type_sub))
+         {  keys       =abon;
+            default_orn=GetAnimOrient(*sbon, skel.bones.addr(sbon->parent));
+         }else return;
+      }
+      Bool all_keys=(key_index<0);
+      if(  all_keys || InRange(key_index, keys->orns))
+      {
+         Byte bone_index=(root ? 0xFF : skel_bone);
+
+         Memt<Flt, 16384> times;
+         Flt prev_time, next_time;
+         if(all_keys)keys->includeTimes(times, null, null);else
+         {
+               prev_time=(InRange(key_index-1, keys->orns) ? keys->orns[key_index-1].time :             0);
+            Flt key_time=                                    keys->orns[key_index  ].time                 ;
+               next_time=(InRange(key_index+1, keys->orns) ? keys->orns[key_index+1].time : anim.length());
+            times.binaryInclude(prev_time, CompareEps);
+            times.binaryInclude( key_time, CompareEps);
+            times.binaryInclude(next_time, CompareEps);
+         }
+
+         AnimKeys src=*keys; // before removal TODO: it's not optimal to copy like this
+
+         if(matrix) // transform
+         {
+            if(all_keys)REPAO(keys->orns          ).orn.mul(*matrix, true).fix();
+            else              keys->orns[key_index].orn.mul(*matrix, true).fix();
+         }else // delete
+         {
+            if(all_keys)keys->orns.del();
+            else        keys->orns.remove(key_index, true);
+         }
+         keys->setTangents(anim.loop(), anim.length());
+         if(root)anim.setRootMatrix();
+
+         AnimKeys cur=*keys; // after removal, keep as copy because 'removeData' and 'getBone' below, might change mem address TODO: it's not optimal to copy like this
+
+         if(abon && !abon->is())anim.bones.removeData(abon);
+         // !! CAN'T ACCESS 'keys', 'abon' ANYMORE AFTER THIS POINT !!
+
+         AnimParams anim_params(anim, 0);
+         REPA(skel.bones)
+         {
+          C SkelBone &child_sbon=skel.bones[i]; if(child_sbon.parent==bone_index) // 'skel_bone' child
+            {
+               AnimBone &abon=anim.getBone(child_sbon.name, child_sbon.type, child_sbon.type_index, child_sbon.type_sub); // 'skel_bone' child
+
+               // add keys (Warning: TODO: this is precise only for linear interpolation, for other case we would have to copy 'abon' to temporary and calculate from it)
+               FREPA(times) // process forward because keys are sorted
+               {
+                  Flt time=times[i];
+                  Int index; if(!abon.orns.binarySearch(time, index, CompareEps))
+                  {
+                     Orient orn; anim_params.time=time; if(!abon.orn(orn, anim_params))orn=GetAnimOrient(child_sbon, sbon); // calculate before adding
+                     AnimKeys::Orn &key=abon.orns.NewAt(index); key.time=time; key.orn=orn; ASSERT(!HAS_ANIM_TANGENT);
+                  }
+               }
+
+               Int start, end;
+               if(all_keys)
+               {
+                  start=0; end=abon.orns.elms();
+               }else
+               {
+                     abon.orns.binarySearch(prev_time, start, Compare);
+                  if(abon.orns.binarySearch(next_time, end  , Compare))end++; // end is exclusive, so if found match, process it too, in case key is at the end
+               }
+               for(Int i=start; i<end; i++) // process keys from start to end
+               {
+                  AnimKeys::Orn &orn=abon.orns[i];
+                  anim_params.time=orn.time;
+                  Orient src_orn; if(!src.orn(src_orn, anim_params))src_orn=default_orn;
+                  Orient cur_orn; if(!cur.orn(cur_orn, anim_params))cur_orn=default_orn;
+
+               // orn * src_orn           = orn1 * cur_orn
+               // orn * src_orn / cur_orn = orn1
+
+                  orn.orn.mul(src_orn, true);
+                  orn.orn.div(cur_orn, true);
+               }
+
+               abon.setTangents(anim.loop(), anim.length());
+            }
+         }
+
+         if(pos)
+         {
+            Matrix3 sbon_matrix;
+            if(!root)
+            {
+               sbon_matrix=*sbon;
+               abon=anim.findBone(sbon->name, sbon->type, sbon->type_index, sbon->type_sub);
+               keys=abon;
+            }
+            if(keys)
+            {  // orientation is already included in 'times'
+               if(all_keys)keys->includeTimes(null, times, times);
+               else        keys->includeTimes(null, times, times, prev_time, next_time);
+            }
+            Matrix3 default_orn_m=default_orn;
+            REPA(skel.bones)
+            {
+             C SkelBone &child_sbon=skel.bones[i]; if(child_sbon.parent==bone_index) // 'skel_bone' child
+               {
+                  AnimBone &abon=anim.getBone(child_sbon.name, child_sbon.type, child_sbon.type_index, child_sbon.type_sub); // 'skel_bone' child
+
+                  Memt<Flt, 16384> child_times=times; // include child orientation keys for higher precision
+                  if(all_keys)abon.includeTimes(child_times, null, null);
+                  else        abon.includeTimes(child_times, null, null, prev_time, next_time);
+
+                  // add keys (Warning: TODO: this is precise only for linear interpolation, for other case we would have to copy 'abon' to temporary and calculate from it)
+                  FREPA(child_times) // process forward because keys are sorted
+                  {
+                     Flt time=child_times[i];
+                     Int index; if(!abon.poss.binarySearch(time, index, CompareEps))
+                     {
+                        Vec pos; anim_params.time=time; if(!abon.pos(pos, anim_params) && !SET_ON_FAIL)pos.zero(); // calculate before adding
+                        AnimKeys::Pos &key=abon.poss.NewAt(index); key.time=time; key.pos=pos; ASSERT(!HAS_ANIM_TANGENT);
+                     }
+                  }
+
+                  Int start, end;
+                  if(all_keys)
+                  {
+                     start=0; end=abon.poss.elms();
+                  }else
+                  {
+                        abon.poss.binarySearch(prev_time, start, Compare);
+                     if(abon.poss.binarySearch(next_time, end  , Compare))end++; // end is exclusive, so if found match, process it too, in case key is at the end
+                  }
+
+                  Vec rel=child_sbon.pos; if(sbon) // child position relative to parent
+                  {
+                     rel-=sbon->pos;
+                     rel.divNormalized(sbon_matrix); // convert to parent space
+                  }
+
+                  for(Int i=start; i<end; i++) // process keys from start to end
+                  {
+                     AnimKeys::Pos &pos=abon.poss[i];
+                     anim_params.time=pos.time;
+                     Matrix3 src_matrix; src.matrix(src_matrix, anim_params, default_orn_m);
+                     Matrix3 cur_matrix; cur.matrix(cur_matrix, anim_params, default_orn_m);
+
+                     // (rel+pos)*src_matrix = (rel+pos1)*cur_matrix
+                     // (rel+pos)*src_matrix/cur_matrix = rel+pos1
+                     // (rel+pos)*src_matrix/cur_matrix - rel = pos1
+
+                     pos.pos+=rel;
+                     pos.pos.mul(src_matrix);
+                     pos.pos.div(cur_matrix);
+                     pos.pos-=rel;
+                  }
+
+                  abon.setTangents(anim.loop(), anim.length());
+               }
+            }
+         }
+      }
+   }
+}
+void Animation::freezeDelPos(C Skeleton &skel, Int skel_bone, Int key_index                             ) {FreezePos(T, skel, skel_bone, key_index,  null  );}
+void Animation::freezeMove  (C Skeleton &skel, Int skel_bone, Int key_index, C Vec     &delta           ) {FreezePos(T, skel, skel_bone, key_index, &delta );}
+void Animation::freezeDelRot(C Skeleton &skel, Int skel_bone, Int key_index                   , Bool pos) {FreezeRot(T, skel, skel_bone, key_index,  null  , pos);}
+void Animation::freezeRotate(C Skeleton &skel, Int skel_bone, Int key_index, C Matrix3 &matrix, Bool pos) {FreezeRot(T, skel, skel_bone, key_index, &matrix, pos);}
+/******************************************************************************/
 Animation& Animation::setBoneTypeIndexesFromSkeleton(C Skeleton &skeleton)
 {
    enum MODE
@@ -2964,9 +3346,12 @@ Animation& Animation::reverse()
 {
          keys  .reverse(length());
    REPAO(bones).reverse(length());
+
+   REPA(events){AnimEvent &event=events[i]; event.time=length()-event.time;}
+        events.reverseOrder();
+
    return setRootMatrix();
 }
-static Int Compare(C AnimEvent &a, C AnimEvent &b) {return Compare(a.time, b.time);}
 Animation& Animation::sortEvents()
 {
    events.sort(Compare);
@@ -2997,9 +3382,20 @@ Animation& Animation::clip(Flt start_time, Flt end_time, Bool remove_unused_bone
  //if(start_time!=0 || end_time!=length()) don't check this, because we may have keyframe data outside of this range that needs to be removed
    {
             keys  .clip(loop(), linear(), length(), start_time, end_time);
-      REPAO(bones).clip(loop(), linear(), length(), start_time, end_time);
-      if(remove_unused_bones)removeUnused();
+      REPAO(bones).clip(loop(), linear(), length(), start_time, end_time); if(remove_unused_bones)removeUnused();
+
      _length=Abs(end_time-start_time);
+
+      Flt start_eps_m=start_time-EPS, end_eps_m=end_time-EPS,
+          start_eps_p=start_time+EPS, end_eps_p=end_time+EPS;
+      REPA(events)
+      {
+         Flt &time=events[i].time;
+         if(time>   end_eps_p || time<start_eps_m)events.remove(i, true);else
+         if(time>=  end_eps_m                    )time =   _length;else
+         if(time<=start_eps_p                    )time =         0;else
+                                                  time-=start_time;
+      }
       setRootMatrix();
    }
    return T;
@@ -3024,14 +3420,14 @@ Animation& Animation::maximizeLength()
    Flt min, max; timeRange(min, max);
    return length(Max(length(), max), false);
 }
-Animation& Animation::slideTime(Flt dt)
+Animation& Animation::offsetTime(Flt dt)
 {
    if(Flt time=Frac(-dt, length()))
    {
       if(1)
       {
          AnimParams params(T, time);
-         Matrix cur, transform, transform2, start=(1 ? MatrixIdentity : rootStart()); GetRootMatrix(keys, cur, params); GetTransform(transform, cur, start);
+         Matrix cur, transform, transform2, start=(1 ? MatrixIdentity : rootStart()); keys.matrix(cur, params); GetTransform(transform, cur, start);
         _root_start_inv.mul(rootEnd(), transform2); // this is "GetTransform(transform2, rootStart(), rootEnd())" can't just copy from 'rootTransform' because that's in 'RevMatrix' format, this converts from root start space to root end space
          transform2*=transform; // this will additionally convert from 'cur' to 'start' space
       #if DEBUG && 0
@@ -3101,9 +3497,10 @@ Animation& Animation::slideTime(Flt dt)
          }
       #endif
          // TODO: Warning: here scale is ignored
-            keys.setTangents(loop(), length());
-      }else keys.slideTime(dt, length());
-      REPAO(bones).slideTime(dt, length());
+              keys .setTangents(loop(), length());
+      }else   keys .offsetTime(dt, length());
+      REPAO( bones).offsetTime(dt, length());
+      REPAO(events).time=Frac(events[i].time+dt, length()); sortEvents();
       setRootMatrix();
    }
    return T;
@@ -3299,7 +3696,7 @@ Animation& Animation::transform(C Matrix &matrix, C Skeleton &source, Bool skel_
 
             default: new_bone=old_bone=bone; break; // ANIM_TRANSFORM_SKEL_CONST
          }
-      Memt<Flt, 16384> times, times2; keys.includeTimes(times, times, null); Mems<AnimKeys::Pos> poss; // reuse these from the top
+         Memt<Flt, 16384> times, times2; keys.includeTimes(times, times, null); Mems<AnimKeys::Pos> poss; // reuse these from the top
          times2=times; abon.includeTimes(null, times2, null);
          poss.setNumDiscard(times2.elms());
          REPA(poss)
@@ -3307,9 +3704,9 @@ Animation& Animation::transform(C Matrix &matrix, C Skeleton &source, Bool skel_
             AnimKeys::Pos &pos=poss[i];
             pos.time=anim_params.time=times2[i];
             Vec bone_offset; if(!abon.pos(bone_offset, anim_params) && !SET_ON_FAIL)bone_offset.zero();
-            Matrix old_root; GetRootMatrix(old , old_root, anim_params);
-            Matrix new_root; GetRootMatrix(keys, new_root, anim_params);
-                                    DEBUG_ASSERT(Equal(old_root*matrix/new_root, matrix), "matrixes should be equal");
+            Matrix old_root; old .matrix(old_root, anim_params);
+            Matrix new_root; keys.matrix(new_root, anim_params);
+                                   DEBUG_ASSERT(Equal(old_root*matrix/new_root, matrix), "matrixes should be equal");
             DEBUG_ASSERT(Equal((old_bone+bone_offset)*old_root*matrix/new_root-new_bone, (old_bone+bone_offset)*matrix-new_bone), "vectors should be equal");
                        pos.pos=(old_bone+bone_offset)*old_root*matrix/new_root-new_bone; //Vec global=(old_bone+bone_offset)*old_root; "old_root*matrix/new_root"=matrix
                          //pos=(old_bone+bone_offset)*matrix-new_bone;

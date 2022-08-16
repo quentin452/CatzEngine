@@ -358,7 +358,7 @@ class PreviewClass : Window // create as window so it will be above other window
             {
                sound_id=elm.id;
                SoundHeader sound; sound.load(Proj.gamePath(elm));
-               sound_info=S+"Length: "+TextReal(sound.length, -2)+"s\nChannels: "+sound.channels+"\nFrequency: "+sound.frequency+"\nKbps: "+DivRound(sound.bit_rate, 1000)+"\nSize: "+FileSize(FSize(Proj.gamePath(elm)))+"\nCodec: "+sound.codecName();
+               sound_info=S+"Length: "+TextReal(sound.length, -2)+"s\nChannels: "+sound.channels+"\nFrequency: "+sound.frequency+"\nKbps: "+DivRound(sound.bit_rate, 1000)+"\nSize: "+SizeBytes(FSize(Proj.gamePath(elm)))+"\nCodec: "+sound.codecName();
             }
             drawBack(rect); D.clip(rect); D.text(TextStyleParams(true), rect, sound_info); D.clip();
          }break;

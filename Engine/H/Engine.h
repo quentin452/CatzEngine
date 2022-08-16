@@ -1,7 +1,7 @@
 /******************************************************************************/
 #pragma once // include the header only once
 /******************************************************************************/
-#define ENGINE_BUILD           71 // this is an integer value specifying build iteration of the Engine, this gets incremented with each new release
+#define ENGINE_BUILD           72 // this is an integer value specifying build iteration of the Engine, this gets incremented with each new release
 #define ENGINE_NAME           "Titan"
 #define ENGINE_DEVELOPER_NAME "Esenthel"
 /******************************************************************************
@@ -78,7 +78,7 @@
 #endif
 
 // Android
-#ifdef ANDROID
+#ifdef __ANDROID__
    #undef  ANDROID
    #define ANDROID 1
 #else
@@ -93,7 +93,7 @@
 #endif
 
 // Linux
-#if defined __linux__ && !ANDROID // Android also has '__linux__' defined
+#if defined __linux__ && !defined __ANDROID__ // Android also has '__linux__' defined
    #define LINUX 1
 #else
    #define LINUX 0
@@ -110,6 +110,8 @@
 #define WINDOWS (WINDOWS_OLD || WINDOWS_NEW)
 
 #define APPLE (MAC || IOS)
+
+#define NINTENDO (SWITCH)
 
 #define DESKTOP (WINDOWS || MAC || LINUX )
 #define MOBILE  (ANDROID || IOS || SWITCH)
@@ -145,6 +147,7 @@ namespace EE // Esenthel Engine namespace
    #include "Misc/Cpu.h"
    #include "Memory/Mem Pointer.h"
    #include "Misc/Misc.h"
+   #include "Misc/Translation.h"
    #include "Memory/_Memc.h"
    #include "Memory/Mem Continuous.h"
    #include "Misc/UID.h"
@@ -182,11 +185,11 @@ namespace EE // Esenthel Engine namespace
    #include "Memory/_Map.h"
    #include "Memory/Map.h"
    #include "Misc/States.h"
+   #include "Misc/Compress.h"
    #include "File/IO.h"
    #include "File/File.h"
    #include "File/File Text.h"
    #include "File/Chunk.h"
-   #include "Misc/Compress.h"
    #include "File/Pak.h"
    #include "Misc/Enum.h"
    #include "Misc/Param.h"
@@ -233,6 +236,7 @@ namespace EE // Esenthel Engine namespace
    #include "Graphics/Image Atlas.h"
    #include "Graphics/Image RT.h"
    #include "Gui/Font.h"
+   #include "Gui/Panel Image.h"
    #include "Gui/Text Style.h"
    #include "Graphics/Material.h"
    #include "Graphics/Display Draw.h"
@@ -291,10 +295,10 @@ namespace EE // Esenthel Engine namespace
    #include "Misc/Windows.h"
    #include "Misc/Application.h"
    #include "Input/Input Buttons.h"
-   #include "Input/Input.h"
    #include "Input/Keyboard.h"
    #include "Input/Mouse.h"
    #include "Input/Joypad.h"
+   #include "Input/Input.h"
    #include "Memory/_Grid.h"
    #include "Memory/Grid.h"
    #include "Misc/Pathfind 2D.h"
@@ -314,7 +318,6 @@ namespace EE // Esenthel Engine namespace
    /******************************************************************************/
    // GUI
    /******************************************************************************/
-   #include "Gui/Panel Image.h"
    #include "Gui/Panel.h"
    #include "Gui/Gui Skin.h"
    #include "Gui/Gui Object.h"

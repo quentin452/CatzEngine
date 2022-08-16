@@ -603,11 +603,11 @@ Bool MeshRender::loadData(File &f)
          {
             if(_vb._vtx_num || _ib._ind_num)
             {
-               Byte storage; f>>storage; _storage=(FlagTest(storage, 1<<0) ? MSHR_COMPRESS : 0);
+               Byte storage; f>>storage; _storage=(FlagOn(storage, 1<<0) ? MSHR_COMPRESS : 0);
               _flag=MeshFlagOld(f);
                Mems<BoneSplit> bone_split; bone_split._loadRaw(f);
               _tris=_ib._ind_num/3;
-               adjustToPlatform(FlagTest(storage, 1<<0), FlagTest(storage, 1<<1), FlagTest(storage, 1<<2), bone_split);
+               adjustToPlatform(FlagOn(storage, 1<<0), FlagOn(storage, 1<<1), FlagOn(storage, 1<<2), bone_split);
                if(!setVF())goto error; // !! call at the end (when have VB IB and flag/storage) !!
             }
           //if(App.flag&APP_AUTO_FREE_MESH_OPEN_GL_ES_DATA)freeOpenGLESData(); don't free here because skinning information may be needed for Mesh-Skeleton link (in 'Mesh.loadData')
@@ -622,11 +622,11 @@ Bool MeshRender::loadData(File &f)
          {
             if(_vb._vtx_num || _ib._ind_num)
             {
-               Byte storage; f>>storage; _storage=(FlagTest(storage, 1<<0) ? MSHR_COMPRESS : 0);
+               Byte storage; f>>storage; _storage=(FlagOn(storage, 1<<0) ? MSHR_COMPRESS : 0);
               _flag=MeshFlagOld(f);
                Mems<BoneSplit> bone_split; bone_split._loadRaw(f);
               _tris=_ib._ind_num/3;
-               adjustToPlatform(FlagTest(storage, 1<<0), FlagTest(storage, 1<<1), FlagTest(storage, 1<<2), bone_split);
+               adjustToPlatform(FlagOn(storage, 1<<0), FlagOn(storage, 1<<1), FlagOn(storage, 1<<2), bone_split);
                if(!setVF())goto error; // !! call at the end (when have VB IB and flag/storage) !!
                Fix(T, false, true);
             }

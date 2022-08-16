@@ -1,4 +1,4 @@
-/******************************************************************************
+﻿/******************************************************************************
 
    Use 'Keyboard' to access Keyboard input.
 
@@ -11,13 +11,13 @@ struct KeyboardKey
    KB_KEY k;
    Byte   flags;
 
-   Bool any    ()C {return  c || k                ;} // if any character or key pressed
-   Bool ctrl   ()C {return  FlagTest(flags, CTRL );} // if any  Control pressed
-   Bool shift  ()C {return  FlagTest(flags, SHIFT);} // if any  Shift   pressed
-   Bool alt    ()C {return  FlagTest(flags, ALT  );} // if any  Alt     pressed
-   Bool win    ()C {return  FlagTest(flags, WIN  );} // if any  Win     pressed
-   Bool lalt   ()C {return  FlagTest(flags, LALT );} // if Left Alt     pressed
-   Bool first  ()C {return  FlagTest(flags, FIRST);} // if this is the first press of the key (if false then it's a repeated press)
+   Bool any    ()C {return    c || k              ;} // if any character or key pressed
+   Bool ctrl   ()C {return    FlagOn(flags, CTRL );} // if any  Control pressed
+   Bool shift  ()C {return    FlagOn(flags, SHIFT);} // if any  Shift   pressed
+   Bool alt    ()C {return    FlagOn(flags, ALT  );} // if any  Alt     pressed
+   Bool win    ()C {return    FlagOn(flags, WIN  );} // if any  Win     pressed
+   Bool lalt   ()C {return    FlagOn(flags, LALT );} // if Left Alt     pressed
+   Bool first  ()C {return    FlagOn(flags, FIRST);} // if this is the first press of the key (if false then it's a repeated press)
    Bool ctrlCmd()C {return APPLE ? win () : ctrl();} // if any Ctrl is on (on platforms other than Apple), and if any Command is on (on Apple platforms)
    Bool winCtrl()C {return APPLE ? ctrl() : win ();} // if any Win  is on (on platforms other than Apple), and if any Control is on (on Apple platforms)
 
@@ -69,11 +69,15 @@ struct KeyboardClass // Keyboard Input
    Bool anyWin  ()C {return ButtonOn(_button[KB_LWIN  ]|_button[KB_RWIN  ]);}
 #endif
 
-   Char   keyChar(KB_KEY key)C; // get key character, example: keyChar(KB_SPACE) -> ' '
-  CChar8* keyName(KB_KEY key)C; // get key name     , example: keyName(KB_SPACE) -> "Space"
+   Char   keyChar  (KB_KEY key)C; // get key character, example: keyChar  (KB_SPACE) -> ' '    , keyChar  (KB_UP) -> '\0'
+  CChar8* keyName  (KB_KEY key)C; // get key name     , example: keyName  (KB_SPACE) -> "Space", keyName  (KB_UP) -> "Up"
+  CChar * keySymbol(KB_KEY key)C; // get key symbol   , example: keySymbol(KB_SPACE) -> "Space", keySymbol(KB_UP) -> "⯅", Warning: this function might return "⯇⯈⯆⯅", if you want to display symbols on the screen be sure to include these characters in your Font
+#if EE_PRIVATE
+   Char   keyChar  (KB_KEY key, Bool shift, Bool caps)C;
+#endif
 
-   Bool hwAvailable(          ); // if hardware keyboard is available
-   Bool rect       (Rect &rect); // get on-screen keyboard rectangle, false if no on-screen keyboard is currently displayed
+   Bool hardware(          )C {return _hardware;} // if hardware keyboard is available
+   Bool rect    (Rect &rect)C;                    // get on-screen keyboard rectangle, false if no on-screen keyboard is currently displayed
 
    KB_KEY qwerty(KB_KEY qwerty)C; // convert key from QWERTY layout to layout of current keyboard
 
@@ -138,7 +142,7 @@ struct KeyboardClass // Keyboard Input
 #if !EE_PRIVATE
 private:
 #endif
-   Bool        _ctrl, _shift, _alt, _win, _cur_hidden, _swap_ctrl_cmd, _visible, _imm, _imm_candidate_hidden, _exclusive;
+   Bool        _ctrl, _shift, _alt, _win, _cur_hidden, _swap_ctrl_cmd, _visible, _imm, _imm_candidate_hidden, _exclusive, _hardware;
    Byte        _key_buffer_pos, _key_buffer_len;
    BS_FLAG     _button[256];
    Char8       _key_char[256];
@@ -151,7 +155,8 @@ private:
    VecI2       _imm_selection;
    Str         _imm_buffer;
    Memc<Str>   _imm_candidate, _imm_candidate_temp;
-   CChar8     *_key_name[256];
+   CChar8     *_key_name  [256];
+   CChar      *_key_symbol[256];
 #if WINDOWS_OLD
 #if EE_PRIVATE && KB_DIRECT_INPUT
    IDirectInputDevice8 *_device;

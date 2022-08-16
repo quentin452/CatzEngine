@@ -1607,9 +1607,9 @@ NOINLINE Bool Heightmap::buildEx2(Mesh &mesh, Int quality, UInt flag, BuildMemSo
               ao_range=2*ao_step;
    const Flt  nrm_y   =2.00f/res1,
               ao_mul  =0.19f*res1;
-   const Bool ambient_occlusion=FlagTest(flag, HM_AO),
-              soft             =FlagTest(flag, HM_SOFT),
-              build_null_mtrl  =FlagTest(flag, HM_BUILD_NULL_MTRL);
+   const Bool ambient_occlusion=FlagOn(flag, HM_AO),
+              soft             =FlagOn(flag, HM_SOFT),
+              build_null_mtrl  =FlagOn(flag, HM_BUILD_NULL_MTRL);
 
    // vars
    Flt     sharpness=0; Int sharpness_count=0;

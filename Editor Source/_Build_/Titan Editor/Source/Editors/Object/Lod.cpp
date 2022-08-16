@@ -18,7 +18,7 @@ NewLodClass NewLod;
          if(InRange(lod_index, ObjEdit.mesh.lods()))
          {
             MeshLod &base=ObjEdit.mesh, &lod=ObjEdit.mesh.lod(lod_index); flt dist=ObjEdit.lodDist(lod);
-            D.text(ts, r, S+"Lod "+lod_index+"\nVtxs "+VisibleVtxs(lod)+"\nTris "+VisibleTrisTotal(lod)+"\nSize "+FileSize(VisibleSize(lod))+"\nQuality "+Round(VisibleLodQuality(ObjEdit.mesh, lod_index)*100)+"%\n"+(NegativeSB(dist) ? S+"DISABLED" : lod_index>0 ? S+"Distance "+TextSimple(dist) : S));
+            D.text(ts, r, S+"Lod "+lod_index+"\nVtxs "+VisibleVtxs(lod)+"\nTris "+VisibleTrisTotal(lod)+"\nSize "+SizeBytes(VisibleSize(lod))+"\nQuality "+Round(VisibleLodQuality(ObjEdit.mesh, lod_index)*100)+"%\n"+(NegativeSB(dist) ? S+"DISABLED" : lod_index>0 ? S+"Distance "+TextSimple(dist) : S));
          }else
          {
             D.text(ts, r, "New");

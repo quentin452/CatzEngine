@@ -39,9 +39,10 @@ struct Orient // Orientation
    Orient& rightToLeft(); // convert right to left hand coordinate system
 #endif
 
-   Orient& rotateDir  (Flt angle); // rotate along 'dir'   vector, this is equal to "mul(Matrix3().setRotate(dir    , angle), true)" but faster
-   Orient& rotatePerp (Flt angle); // rotate along 'perp'  vector, this is equal to "mul(Matrix3().setRotate(perp   , angle), true)" but faster
-   Orient& rotateCross(Flt angle); // rotate along 'cross' vector, this is equal to "mul(Matrix3().setRotate(cross(), angle), true)" but faster
+   Orient& rotateDir  (Flt angle       ); // rotate along 'dir'   vector, this is equal to "mul(Matrix3().setRotate(dir    , angle), true)" but faster
+   Orient& rotatePerp (Flt angle       ); // rotate along 'perp'  vector, this is equal to "mul(Matrix3().setRotate(perp   , angle), true)" but faster
+   Orient& rotateCross(Flt angle       ); // rotate along 'cross' vector, this is equal to "mul(Matrix3().setRotate(cross(), angle), true)" but faster
+   Orient& rotateCross(Flt cos, Flt sin); // rotate along 'cross' vector, this is equal to "mul(Matrix3().setRotate(cross(), angle), true)" but faster, this method works like 'rotateCross(Flt angle)' however it accepts 'Cos' and 'Sin' of 'angle'
 
    Orient& rotateX(Flt angle); // rotate along X axis, this is equal to "mul(Matrix3().setRotateX(angle), true)" but faster
    Orient& rotateY(Flt angle); // rotate along Y axis, this is equal to "mul(Matrix3().setRotateY(angle), true)" but faster
@@ -50,8 +51,13 @@ struct Orient // Orientation
    Orient& mul(C Matrix3 &matrix, Bool normalized=false); // transform by matrix, if 'matrix' is normalized set 'normalized' to true for more performance
    Orient& div(C Matrix3 &matrix, Bool normalized=false); // divide    by matrix, if 'matrix' is normalized set 'normalized' to true for more performance
 
-   Orient& rotateToDir(C Vec &dir           ); // rotate current orientation to 'dir' vector, 'dir' must be normalized
-   Orient& rotateToDir(C Vec &dir, Flt blend); // rotate current orientation to 'dir' vector, 'dir' must be normalized, 'blend'=how much to rotate (0=no rotation, 0.5=half rotation, 1.0=full rotation)
+   Orient& rotateToDir    (C Vec &dir           ); // rotate current orientation to 'dir' vector, 'dir' must be normalized
+   Orient& rotateToDir    (C Vec &dir, Flt blend); // rotate current orientation to 'dir' vector, 'dir' must be normalized, 'blend'=how much to rotate (0=no rotation, 0.5=half rotation, 1.0=full rotation)
+   Orient& rotateToDirFast(C Vec &dir           ); // rotate current orientation to 'dir' vector, 'dir' must be normalized
+
+   Orient& rotateToPerp    (C Vec &perp           ); // rotate current orientation to 'perp' vector, 'perp' must be normalized
+   Orient& rotateToPerp    (C Vec &perp, Flt blend); // rotate current orientation to 'perp' vector, 'perp' must be normalized, 'blend'=how much to rotate (0=no rotation, 0.5=half rotation, 1.0=full rotation)
+   Orient& rotateToPerpFast(C Vec &perp           ); // rotate current orientation to 'perp' vector, 'perp' must be normalized
 
    Orient& inverse(              ) ; // inverse orientation
    void    inverse(Orient   &dest)C; // inverse orientation and store it in 'dest'
@@ -60,7 +66,8 @@ struct Orient // Orientation
 
    // operations
    Orient& normalize(); // normalize vectors
-   Orient& fixPerp  (); // fix perpendicular, use when 'dir' or 'perp' has changed, this method aligns 'perp' so it's perpendicular to 'dir' and normalized
+   Orient& fixPerp  (); // fix perpendicular, use when 'dir' or 'perp' has changed, this method aligns 'perp' so it's perpendicular to 'dir'  and normalized
+   Orient& fixDir   (); // fix direction    , use when 'dir' or 'perp' has changed, this method aligns 'dir'  so it's perpendicular to 'perp' and normalized
    Bool    fix      (); // normalize and fix perpendicular, false on fail
 
    // io

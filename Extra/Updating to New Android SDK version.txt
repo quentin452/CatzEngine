@@ -1,20 +1,27 @@
 /******************************************************************************/
-update Android NDK, SDK
-use SDK Manager to download desired SDK and delete other
-/******************************************************************************/
+MIN SDK:
+update Android SDK, NDK
+delete old packages
+
 Min SDK required to run the app on Android:
 
-Update all "Application.mk"
-APP_PLATFORM := android-18
+Update "Editor Data\Code\Android\app\src\main\AndroidManifest.xml"
+<uses-sdk android:minSdkVersion=""
 
-Update "AndroidManifest.xml"
-<uses-sdk android:minSdkVersion="18"
+Update "Engine\Engine.vcxproj"
+Update "Project\Project.vcxproj"
+Update "Editor Data\Code\Windows\Project.vcxproj"
+VS project properties \ General \ Minimum Android SDK Version
 /******************************************************************************/
-SDK version installed on Developer Computer:
 
-Update "CE Editor C++.cpp"
-project.putLine("target=android-28");
 
-Update all "project.properties"
-target=android-28
+
+/******************************************************************************/
+TARGET SDK:
+Update "Editor Data\Code\Android\app\src\main\AndroidManifest.xml"
+android:targetSdkVersion=""
+
+Update "Editor Data\Code\Android\app\build.gradle"
+Update "Project\Android\app\build.gradle"
+targetSdkVersion
 /******************************************************************************/

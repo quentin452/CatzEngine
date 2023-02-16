@@ -169,6 +169,7 @@ void Image::drawFilter(C Rect &rect, FILTER_TYPE filter)C
 
       case FILTER_CUBIC_FAST       :
       case FILTER_CUBIC_FAST_SMOOTH:
+      case FILTER_CUBIC_FAST_MED   :
       case FILTER_CUBIC_FAST_SHARP : Sh.imgSize(T); VI.shader(Sh.DrawTexCubicFast[false]); break;
 
       case FILTER_CUBIC_PLUS      :
@@ -210,6 +211,7 @@ void Image::drawFilter(C Color &color, C Color &color_add, C Rect &rect, FILTER_
 
       case FILTER_CUBIC_FAST       :
       case FILTER_CUBIC_FAST_SMOOTH:
+      case FILTER_CUBIC_FAST_MED   :
       case FILTER_CUBIC_FAST_SHARP : Sh.imgSize(T); VI.shader(Sh.DrawTexCubicFast[true]); break;
 
       case FILTER_CUBIC_PLUS      :

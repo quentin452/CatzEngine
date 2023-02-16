@@ -4,7 +4,7 @@
 bool LoadEditHeightmap(C Str &name, Heightmap &hm, C Str &game_path)
 {
    ReadLock rl(WorldAreaSync);
-   File f; if(f.readTry(name))for(ChunkReader cr(f); File *f=cr(); )
+   File f; if(f.read(name))for(ChunkReader cr(f); File *f=cr(); )
    {
       if(EqualPath(cr.name(), "Heightmap"))switch(cr.ver())
       {
@@ -43,7 +43,7 @@ bool LoadEditObject(int ver, File &f, Memc<ObjData> &objs, C Str &edit_path)
 bool LoadEditObject(C Str &name, Memc<ObjData> &objs, C Str &edit_path)
 {
    ReadLock rl(WorldAreaSync);
-   File f; if(f.readTry(name))for(ChunkReader cr(f); File *f=cr(); )
+   File f; if(f.read(name))for(ChunkReader cr(f); File *f=cr(); )
    {
       if(EqualPath(cr.name(), "Object"))return LoadEditObject(cr.ver(), *f, objs, edit_path);
    }
@@ -53,7 +53,7 @@ bool LoadEditObject(C Str &name, Memc<ObjData> &objs, C Str &edit_path)
 bool LoadEdit(C Str &name, Heightmap *hm, Memc<ObjData> *objs, C Str &game_path, C Str &edit_path)
 {
    ReadLock rl(WorldAreaSync);
-   File f; if(f.readTry(name))
+   File f; if(f.read(name))
    {
       for(ChunkReader cr(f); File *f=cr(); )
       {
@@ -71,7 +71,7 @@ bool LoadEdit(C Str &name, Heightmap *hm, Memc<ObjData> *objs, C Str &game_path,
 bool LoadGame(C Str &name, Mesh *hm_mesh, PhysPart *hm_phys, Memc<Game::Area::Data::AreaObj> *objs, MeshGroup *obj_mesh, PhysBody *obj_phys, Memc<WaterMesh> *waters, C Str &game_path)
 {
    ReadLock rl(WorldAreaSync);
-   File f; if(f.readTry(name))
+   File f; if(f.read(name))
    {
       for(ChunkReader cr(f); File *f=cr(); )
       {
@@ -489,7 +489,7 @@ bool LoadGame(C Str &name, Mesh *hm_mesh, PhysPart *hm_phys, Memc<Game::Area::Da
    {
       T.path=name;
       T.world_id=FileNameID(GetPath(name)); // ignore "Data" and grab the WorldID
-      File f; if(f.readTry(name))return load(f);
+      File f; if(f.read(name))return load(f);
       return false;
    }
    void WorldVer::flush()
@@ -553,7 +553,7 @@ bool LoadGame(C Str &name, Mesh *hm_mesh, PhysPart *hm_phys, Memc<Game::Area::Da
    {
       T.path=name;
       T.mini_map_id=FileNameID(name);
-      File f; if(f.readTry(name))return load(f);
+      File f; if(f.read(name))return load(f);
       return false;
    }
    void MiniMapVer::flush()

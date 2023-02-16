@@ -1172,18 +1172,18 @@ class AnimEditor : Viewport4Region
          v.New().create("Mode 3"     , Mode3     , T, true).kbsc(KbSc(KB_F3));
          v.New().create("Mode 4"     , Mode4     , T, true).kbsc(KbSc(KB_F4));
          v.New().create("Edit"       , Fullscreen, T).kbsc(KbSc(KB_E    , KBSC_CTRL_CMD)).flag(MENU_HIDDEN);
-         v.New().create("Play"       , Play      , T).kbsc(KbSc(KB_P    , KBSC_CTRL_CMD)).kbsc2(KbSc(KB_D, KBSC_CTRL_CMD)).flag(MENU_HIDDEN);
+         v.New().create("Play"       , Play      , T).kbsc(KbSc(KB_P    , KBSC_CTRL_CMD)).kbsc1(KbSc(KB_D, KBSC_CTRL_CMD)).flag(MENU_HIDDEN);
          v.New().create("Bones"      , DrawBones , T).kbsc(KbSc(KB_B    , KBSC_ALT     )).flag(MENU_HIDDEN|MENU_TOGGLABLE);
          v.New().create("Mesh"       , DrawMesh  , T).kbsc(KbSc(KB_M    , KBSC_ALT     )).flag(MENU_HIDDEN|MENU_TOGGLABLE);
          v.New().create("Grid"       , Grid      , T).kbsc(KbSc(KB_G    , KBSC_ALT     )).flag(MENU_HIDDEN|MENU_TOGGLABLE);
          v.New().create("Axis"       , Identity  , T).kbsc(KbSc(KB_A    , KBSC_ALT     )).flag(MENU_HIDDEN|MENU_TOGGLABLE);
          v.New().create("Settings"   , Settings  , T).kbsc(KbSc(KB_S    , KBSC_ALT     )).flag(MENU_HIDDEN|MENU_TOGGLABLE);
-         v.New().create("Start"      , Start     , T).kbsc(KbSc(KB_HOME , KBSC_CTRL_CMD)).kbsc2(KbSc(KB_LBR  , KBSC_CTRL_CMD)).flag(MENU_HIDDEN);
-         v.New().create("End"        , End       , T).kbsc(KbSc(KB_END  , KBSC_CTRL_CMD)).kbsc2(KbSc(KB_RBR  , KBSC_CTRL_CMD)).flag(MENU_HIDDEN);
-         v.New().create("Prev Frame" , PrevFrame , T).kbsc(KbSc(KB_LEFT , KBSC_CTRL_CMD|KBSC_REPEAT)).kbsc2(KbSc(KB_COMMA, KBSC_CTRL_CMD|KBSC_REPEAT)).flag(MENU_HIDDEN);
-         v.New().create("Next Frame" , NextFrame , T).kbsc(KbSc(KB_RIGHT, KBSC_CTRL_CMD|KBSC_REPEAT)).kbsc2(KbSc(KB_DOT  , KBSC_CTRL_CMD|KBSC_REPEAT)).flag(MENU_HIDDEN);
-         v.New().create("Prev Frames", PrevFrame , T).kbsc(KbSc(KB_LEFT , KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_REPEAT)).kbsc2(KbSc(KB_COMMA, KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_REPEAT)).flag(MENU_HIDDEN);
-         v.New().create("Next Frames", NextFrame , T).kbsc(KbSc(KB_RIGHT, KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_REPEAT)).kbsc2(KbSc(KB_DOT  , KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_REPEAT)).flag(MENU_HIDDEN);
+         v.New().create("Start"      , Start     , T).kbsc(KbSc(KB_HOME , KBSC_CTRL_CMD)).kbsc1(KbSc(KB_LBR  , KBSC_CTRL_CMD)).flag(MENU_HIDDEN);
+         v.New().create("End"        , End       , T).kbsc(KbSc(KB_END  , KBSC_CTRL_CMD)).kbsc1(KbSc(KB_RBR  , KBSC_CTRL_CMD)).flag(MENU_HIDDEN);
+         v.New().create("Prev Frame" , PrevFrame , T).kbsc(KbSc(KB_LEFT , KBSC_CTRL_CMD|KBSC_REPEAT)).kbsc1(KbSc(KB_COMMA, KBSC_CTRL_CMD|KBSC_REPEAT)).flag(MENU_HIDDEN);
+         v.New().create("Next Frame" , NextFrame , T).kbsc(KbSc(KB_RIGHT, KBSC_CTRL_CMD|KBSC_REPEAT)).kbsc1(KbSc(KB_DOT  , KBSC_CTRL_CMD|KBSC_REPEAT)).flag(MENU_HIDDEN);
+         v.New().create("Prev Frames", PrevFrame , T).kbsc(KbSc(KB_LEFT , KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_REPEAT)).kbsc1(KbSc(KB_COMMA, KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_REPEAT)).flag(MENU_HIDDEN);
+         v.New().create("Next Frames", NextFrame , T).kbsc(KbSc(KB_RIGHT, KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_REPEAT)).kbsc1(KbSc(KB_DOT  , KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_REPEAT)).flag(MENU_HIDDEN);
          v.New().create("Previous Animation", PrevAnim, T).kbsc(KbSc(KB_PGUP, KBSC_CTRL_CMD|KBSC_REPEAT)).flag(MENU_HIDDEN|MENU_TOGGLABLE);
          v.New().create("Next Animation"    , NextAnim, T).kbsc(KbSc(KB_PGDN, KBSC_CTRL_CMD|KBSC_REPEAT)).flag(MENU_HIDDEN|MENU_TOGGLABLE);
          break;
@@ -1215,7 +1215,7 @@ class AnimEditor : Viewport4Region
       op.tab(OP_SCALE).setImage("Gui/Misc/scale.img"  ).desc(S+"Set Scale KeyFrames\n\nSelect with LeftClick\nTransform with RightClick\nHold Shift for more precision\nHold "+Kb.ctrlCmdName()+" to transform all KeyFrames\n\nKeyboard Shortcut: F4");
       Node<MenuElm> n;
       n.New().create("Undo" , Undo, T).kbsc(KbSc(KB_Z, KBSC_CTRL_CMD|KBSC_REPEAT)).flag(MENU_HIDDEN); // keep those hidden because they occupy too much of visible space
-      n.New().create("Redo" , Redo, T).kbsc(KbSc(KB_Y, KBSC_CTRL_CMD|KBSC_REPEAT)).kbsc2(KbSc(KB_Z, KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_REPEAT)).flag(MENU_HIDDEN); // keep those hidden because they occupy too much of visible space
+      n.New().create("Redo" , Redo, T).kbsc(KbSc(KB_Y, KBSC_CTRL_CMD|KBSC_REPEAT)).kbsc1(KbSc(KB_Z, KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_REPEAT)).flag(MENU_HIDDEN); // keep those hidden because they occupy too much of visible space
       n.New().create("Undo2", Undo, T).kbsc(KbSc(KB_BACK, KBSC_ALT           |KBSC_REPEAT)).flag(MENU_HIDDEN); // keep those hidden because they occupy too much of visible space
       n.New().create("Redo2", Redo, T).kbsc(KbSc(KB_BACK, KBSC_ALT|KBSC_SHIFT|KBSC_REPEAT)).flag(MENU_HIDDEN); // keep those hidden because they occupy too much of visible space
       n.New().create("Delete KeyFrame"                 , DelFrame      , T).kbsc(KbSc(KB_DEL, KBSC_CTRL_CMD)).desc("This will delete a single keyframe for selected bone");

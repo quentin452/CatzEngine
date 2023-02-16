@@ -773,8 +773,8 @@ VecD Randomizer::operator()(C MeshBase &mshb, C AnimatedSkeleton &anim_skel)
    if(  Int  faces=mshb.faces  ())
    if(C Vec *pos  =mshb.vtx.pos())
    {
-    C VecB4 *bone;
-    C VecB4 *weight;
+    C VtxBone *bone;
+    C VecB4   *weight;
       Int face=T(faces);
       if( face<mshb.tris()) // triangle
       {
@@ -784,12 +784,12 @@ VecD Randomizer::operator()(C MeshBase &mshb, C AnimatedSkeleton &anim_skel)
               &c  =pos[ind.z];
          if(/*anim_skel &&*/ (bone=mshb.vtx.matrix()) && (weight=mshb.vtx.blend())) // animated
          {
-            Byte msb_a=bone[ind.x].c[weight[ind.x].maxI()], // for performance reasons only one bone with biggest weight is used
+            auto msb_a=bone[ind.x].c[weight[ind.x].maxI()], // for performance reasons only one bone with biggest weight is used
                  msb_b=bone[ind.y].c[weight[ind.y].maxI()],
                  msb_c=bone[ind.z].c[weight[ind.z].maxI()];
-            return T(TriD(a*anim_skel.boneRoot(msb_a-1).matrix(),
-                          b*anim_skel.boneRoot(msb_b-1).matrix(),
-                          c*anim_skel.boneRoot(msb_c-1).matrix()));
+            return T(TriD(a*anim_skel.boneRoot(msb_a-VIRTUAL_ROOT_BONE).matrix(),
+                          b*anim_skel.boneRoot(msb_b-VIRTUAL_ROOT_BONE).matrix(),
+                          c*anim_skel.boneRoot(msb_c-VIRTUAL_ROOT_BONE).matrix()));
          }else // static
          {
             return T(Tri(a, b, c));
@@ -804,14 +804,14 @@ VecD Randomizer::operator()(C MeshBase &mshb, C AnimatedSkeleton &anim_skel)
                &d  =pos[ind.w];
          if(/*anim_skel &&*/ (bone=mshb.vtx.matrix()) && (weight=mshb.vtx.blend())) // animated
          {
-            Byte msb_a=bone[ind.x].c[weight[ind.x].maxI()], // for performance reasons only one bone with biggest weight is used
+            auto msb_a=bone[ind.x].c[weight[ind.x].maxI()], // for performance reasons only one bone with biggest weight is used
                  msb_b=bone[ind.y].c[weight[ind.y].maxI()],
                  msb_c=bone[ind.z].c[weight[ind.z].maxI()],
                  msb_d=bone[ind.w].c[weight[ind.w].maxI()];
-            return T(QuadD(a*anim_skel.boneRoot(msb_a-1).matrix(),
-                           b*anim_skel.boneRoot(msb_b-1).matrix(),
-                           c*anim_skel.boneRoot(msb_c-1).matrix(),
-                           d*anim_skel.boneRoot(msb_d-1).matrix()));
+            return T(QuadD(a*anim_skel.boneRoot(msb_a-VIRTUAL_ROOT_BONE).matrix(),
+                           b*anim_skel.boneRoot(msb_b-VIRTUAL_ROOT_BONE).matrix(),
+                           c*anim_skel.boneRoot(msb_c-VIRTUAL_ROOT_BONE).matrix(),
+                           d*anim_skel.boneRoot(msb_d-VIRTUAL_ROOT_BONE).matrix()));
          }else // static
          {
             return T(Quad(a, b, c, d));
@@ -878,14 +878,14 @@ VecD Randomizer::operator()(C MeshRender &mshr, C AnimatedSkeleton &anim_skel)
               weight_ofs;
             if(/*anim_skel &&*/ ((bone_ofs=mshr.vtxOfs(VTX_MATRIX))>=0) && ((weight_ofs=mshr.vtxOfs(VTX_BLEND))>=0)) // animated
             {
-             C VecB4 &  bone_a=*(VecB4*)(vtx_data+vtx_ofs.x+  bone_ofs),
+             C VecB4 &  bone_a=*(VecB4*)(vtx_data+vtx_ofs.x+  bone_ofs), // #MeshVtxBoneHW
                      &  bone_b=*(VecB4*)(vtx_data+vtx_ofs.y+  bone_ofs),
-                     &  bone_c=*(VecB4*)(vtx_data+vtx_ofs.z+  bone_ofs),
-                     &weight_a=*(VecB4*)(vtx_data+vtx_ofs.x+weight_ofs),
+                     &  bone_c=*(VecB4*)(vtx_data+vtx_ofs.z+  bone_ofs);
+             C VecB4 &weight_a=*(VecB4*)(vtx_data+vtx_ofs.x+weight_ofs),
                      &weight_b=*(VecB4*)(vtx_data+vtx_ofs.y+weight_ofs),
                      &weight_c=*(VecB4*)(vtx_data+vtx_ofs.z+weight_ofs);
                // get most significant bone
-               Byte msb_a=bone_a.c[weight_a.maxI()],
+               auto msb_a=bone_a.c[weight_a.maxI()],
                     msb_b=bone_b.c[weight_b.maxI()],
                     msb_c=bone_c.c[weight_c.maxI()];
              /*if(mshr._bone_split)
@@ -903,9 +903,9 @@ VecD Randomizer::operator()(C MeshRender &mshr, C AnimatedSkeleton &anim_skel)
                      tris+=bs.tris;
                   }
                }*/
-               out=T(TriD(a*anim_skel.boneRoot(msb_a-1).matrix(),
-                          b*anim_skel.boneRoot(msb_b-1).matrix(),
-                          c*anim_skel.boneRoot(msb_c-1).matrix()));
+               out=T(TriD(a*anim_skel.boneRoot(msb_a-VIRTUAL_ROOT_BONE).matrix(),
+                          b*anim_skel.boneRoot(msb_b-VIRTUAL_ROOT_BONE).matrix(),
+                          c*anim_skel.boneRoot(msb_c-VIRTUAL_ROOT_BONE).matrix()));
             }else // static
             {
                out=T(Tri(a, b, c));

@@ -44,7 +44,9 @@ enum IntegrityErrorCode {
   /// Ask the user to check for a connection.
   INTEGRITY_NETWORK_ERROR = -3,
 
-  /// No Play Store account is found on device.
+  /// No Play Store account is found on device. Note that the Play Integrity API
+  /// now supports unauthenticated requests. This error code is used only for
+  /// older Play Store versions that lack support.
   ///
   /// Ask the user to authenticate in Play Store.
   INTEGRITY_PLAY_STORE_ACCOUNT_NOT_FOUND = -4,
@@ -108,6 +110,13 @@ enum IntegrityErrorCode {
   ///
   /// Ask the user to update Google Play Services.
   INTEGRITY_PLAY_SERVICES_VERSION_OUTDATED = -15,
+
+  /// The provided cloud project number is invalid.
+  ///
+  /// Use the cloud project number which can be found in Project info in your
+  /// Google Cloud Console for the cloud project where Play Integrity API is
+  /// enabled.
+  INTEGRITY_CLOUD_PROJECT_NUMBER_IS_INVALID = -16,
 
   /// Unknown internal error.
   ///
@@ -225,6 +234,9 @@ IntegrityErrorCode IntegrityTokenResponse_getStatus(
 /// client app. In particular, never expose any decryption keys to the client
 /// app.
 ///
+/// <p>See
+/// https://developer.android.com/google/play/integrity/verdict#token-format.
+///
 /// The string returned here is owned by the API, and the pointer will be valid
 /// until the corresponding IntegrityTokenResponse is freed by calling
 /// IntegrityTokenResponse_destroy().
@@ -244,15 +256,10 @@ IntegrityErrorCode IntegrityTokenRequest_create(
 
 /// Sets the nonce in an IntegrityTokenRequest with a given string.
 ///
-/// <p>A nonce is a unique token which is ideally bound to the context (e.g.
-/// hash of the user id and timestamp). The provided nonce will be a part of the
-/// signed response token, which will allow you to compare it to the original
-/// one and hence prevent replay attacks.
+/// <p>It must be base64 encoded in web-safe no-wrap form.
 ///
-/// <p>Nonces should always be generated in a secure server environment. Do not
-/// generate a nonce from within the client app.
-///
-/// <p>It must be Base64 encoded in web-safe no-wrap form.
+/// <p>See https://developer.android.com/google/play/integrity/verdict#nonce
+/// for details about the nonce requirements and recommendations.
 ///
 /// @param request The IntegrityTokenRequest for which to set token.
 /// @param nonce The nonce for the request.
@@ -263,12 +270,20 @@ IntegrityErrorCode IntegrityTokenRequest_setNonce(
 
 /// Sets the cloud project number to link to the integrity token.
 ///
-/// <p>This is an optional field and is meant to be used only for apps not
-/// available on Google Play or by SDKs that include the Play Integrity API.
+/// <p>This field is required for <a
+/// href="https://developer.android.com/google/play/integrity/setup#apps-exclusively-distributed-outside-google-play">
+/// apps exclusively distributed outside of Google Play</a> and <a
+/// href="https://developer.android.com/google/play/integrity/setup#sdks">SDKs</a>.
+/// For apps distributed on Google Play, the cloud project number is configured
+/// in the Play Console and need not be set on the request.
 ///
-/// <p>Cloud project number is an automatically generated unique identifier for
-/// your Google Cloud project. It can be found in Project info in your Google
-/// Cloud Console for the cloud project where Play Integrity API is enabled.
+/// <p>Cloud project number can be found in Project info in your Google Cloud
+/// Console for the cloud project where Play Integrity API is enabled.
+///
+/// <p>Calls to <a
+/// href="https://developer.android.com/google/play/integrity/verdict#decrypt-verify-google-servers">
+/// decrypt the token on Google's server</a> must be authenticated using the
+/// cloud account that was linked to the token in this request.
 ///
 /// @param request The IntegrityTokenRequest to set cloudProjectNumber.
 /// @param cloudProjectNumber The cloudProjectNumber for the request.

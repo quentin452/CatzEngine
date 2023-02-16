@@ -111,7 +111,7 @@ File* ChunkReader::operator()()
       if(!_f->end()) // don't read more at the end of file because that would trigger an error (f.ok=false), this is because chunks are normally processed in this way: "for(ChunkReader cr(f); File *f=cr(); )", keep reading as long as they exist
          switch(_f->decUIntV()) // read internal chunk container version
       {
-       //default: _f->_ok=false; break; // unsupported version
+       //default: _f->error(); break; // unsupported version
 
          case 3:
          {

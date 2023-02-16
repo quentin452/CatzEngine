@@ -30,8 +30,8 @@ Half Cubic(Half x, Half blur, Half sharpen) // x=0..2
    return (x<=1) ? ((12-9*blur-6*sharpen)/6*x3 + (-18+12*blur+6*sharpen)/6*x2 +                             (6-2*blur         )/6)
                  : ((-blur-6*sharpen    )/6*x3 + (6*blur+30*sharpen    )/6*x2 + (-12*blur-48*sharpen)/6*x + (8*blur+24*sharpen)/6);
 }
-Flt  CubicMed(Flt  x) {return Cubic(x, 0.0, 0.375);}
-Half CubicMed(Half x) {return Cubic(x, 0.0, 0.375);}
+Flt  CubicMed(Flt  x) {return Cubic(x, 0.0, 1.0/3);}
+Half CubicMed(Half x) {return Cubic(x, 0.0, 1.0/3);}
 
 /*VecH4 TexLerp(Flt x0, Flt x1, Flt y, Flt l, Flt r)
 {

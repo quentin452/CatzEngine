@@ -1,4 +1,4 @@
-/******************************************************************************/
+﻿/******************************************************************************/
 #include "stdafx.h"
 #include "../Platforms/iOS/iOS.h"
 namespace EE{
@@ -239,7 +239,7 @@ static void glewSafe()
 // GL CONTEXT
 /******************************************************************************/
 #if GL
-static Ptr GetCurrentContext()
+Ptr GetCurrentContext()
 {
 #if WINDOWS
    return wglGetCurrentContext();
@@ -460,6 +460,12 @@ VecI2 DisplayClass::screen()C
    return App.desktop(); // this is not changed when device is rotated (obtained at app startup)
 }
 #endif
+Rect DisplayClass::rectUIKB()C
+{
+   Rect r=D.rectUI();
+   Rect kb; if(Kb.rect(kb))MAX(r.min.y, kb.max.y); // TODO: this assumes screen keyboard is at the bottom
+   return r;
+}
 /******************************************************************************/
 void DisplayClass::setShader(C Material *material)
 {
@@ -526,6 +532,7 @@ Str8 DisplayClass::apiName()C
    return "OpenGL";
 #endif
 }
+#if !SWITCH
 Bool DisplayClass::smallSize()C
 {
 #if WINDOWS_NEW
@@ -539,11 +546,10 @@ Bool DisplayClass::smallSize()C
 #elif IOS
    // UI_USER_INTERFACE_IDIOM UIUserInterfaceIdiomPhone UIUserInterfaceIdiomPad 
    return UI_USER_INTERFACE_IDIOM()==UIUserInterfaceIdiomPhone;
-#elif SWITCH
-   return true;
 #endif
    return false;
 }
+#endif
 Flt DisplayClass::browserZoom()C
 {
 #if WEB
@@ -1767,10 +1773,13 @@ void ThreadMayUseGPUData()
       ContextLock.on();
       for(;;)
       {
-         REPA(SecondaryContexts)if(!SecondaryContexts[i].locked)
+         REPA(SecondaryContexts)
          {
-            SecondaryContexts[i].lock();
-            goto context_locked;
+            GLContext &ctx=SecondaryContexts[i]; if(!ctx.locked)
+            {
+               ctx.lock();
+               goto context_locked;
+            }
          }
          if(!SecondaryContexts.elms())Exit("No secondary OpenGL contexts have been created");
          ContextLock.off(); ContextUnlocked.wait(); // wait until any other context is unlocked
@@ -1787,10 +1796,13 @@ void ThreadFinishedUsingGPUData()
    if(Ptr context=GetCurrentContext())
    {
       ContextLock.on();
-      REPA(SecondaryContexts)if(SecondaryContexts[i].context==context)
+      REPA(SecondaryContexts)
       {
-         SecondaryContexts[i].unlock();
-         goto context_unlocked;
+         GLContext &ctx=SecondaryContexts[i]; if(ctx.context==context)
+         {
+            ctx.unlock();
+            goto context_unlocked;
+         }
       }
    context_unlocked:
       ContextLock.off();
@@ -2166,7 +2178,7 @@ void DisplayClass::getCaps()
 
    REP(IMAGE_ALL_TYPES)
    {
-      UInt usage=0; UINT fs; if(OK(D3D->CheckFormatSupport(ImageTI[i].format, &fs)))
+      ImageTypeInfo &type_info=ImageTI[i]; UInt usage=0; UINT fs; if(OK(D3D->CheckFormatSupport(type_info.format, &fs)))
       {
          if(fs&D3D11_FORMAT_SUPPORT_IA_VERTEX_BUFFER           )usage|=ImageTypeInfo::USAGE_VTX;
          if(fs&D3D11_FORMAT_SUPPORT_TEXTURE2D                  )usage|=ImageTypeInfo::USAGE_IMAGE_2D;
@@ -2177,7 +2189,7 @@ void DisplayClass::getCaps()
          if(fs&D3D11_FORMAT_SUPPORT_MULTISAMPLE_RENDERTARGET   )usage|=ImageTypeInfo::USAGE_IMAGE_MS;
          if(fs&D3D11_FORMAT_SUPPORT_TYPED_UNORDERED_ACCESS_VIEW)usage|=ImageTypeInfo::USAGE_IMAGE_UAV;
       }
-      ImageTI[i]._usage=usage;
+      type_info._usage=usage;
    }
    ImageTypeInfo::_usage_known=true;
 
@@ -2231,15 +2243,22 @@ void DisplayClass::getCaps()
    GLint max_col_attach  =   1; glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS     , & max_col_attach  ); _max_rt=Mid(Min(max_draw_buffers, max_col_attach), 1, 255);
    ImageTypeInfo::_usage_known=false;
 
-   #if !GL_ES && (defined GL_INTERNALFORMAT_SUPPORTED || defined GL_COLOR_RENDERABLE || defined GL_DEPTH_RENDERABLE) // on GL_ES glGetInternalformativ works only for GL_RENDERBUFFER
-   #if WINDOWS
-      if(glGetInternalformativ) // requires GL 4.2
-   #endif
+#if GL_ES || defined GL_INTERNALFORMAT_SUPPORTED // needed for Mac which is limited to GL 4.1
+   if(
+#if WINDOWS
+   glGetInternalformativ // requires GL 4.2
+#else
+   1
+#endif
+   )
+   {
+      glGetError(); // clear any previous errors
+      REP(IMAGE_ALL_TYPES)
       {
-         glGetError(); // clear any previous errors
-         REP(IMAGE_ALL_TYPES)
+         ImageTypeInfo &type_info=ImageTI[i]; UInt usage=0; if(GLenum internalformat=type_info.format)
          {
-            GLint params[1]; UInt usage=0; GLenum internalformat=ImageTI[i].format;
+            GLint params[1]; 
+         #if !GL_ES
             // no ImageTypeInfo::USAGE_VTX ?
             glGetInternalformativ(GL_TEXTURE_2D            , internalformat, GL_INTERNALFORMAT_SUPPORTED, Elms(params), params); if(glGetError()==GL_NO_ERROR && params[0])usage|=ImageTypeInfo::USAGE_IMAGE_2D;
             glGetInternalformativ(GL_TEXTURE_3D            , internalformat, GL_INTERNALFORMAT_SUPPORTED, Elms(params), params); if(glGetError()==GL_NO_ERROR && params[0])usage|=ImageTypeInfo::USAGE_IMAGE_3D;
@@ -2248,11 +2267,56 @@ void DisplayClass::getCaps()
             glGetInternalformativ(GL_TEXTURE_2D            , internalformat, GL_DEPTH_RENDERABLE        , Elms(params), params); if(glGetError()==GL_NO_ERROR && params[0])usage|=ImageTypeInfo::USAGE_IMAGE_DS;
             glGetInternalformativ(GL_TEXTURE_2D_MULTISAMPLE, internalformat, GL_COLOR_RENDERABLE        , Elms(params), params); if(glGetError()==GL_NO_ERROR && params[0])usage|=ImageTypeInfo::USAGE_IMAGE_MS;
             glGetInternalformativ(GL_TEXTURE_2D_MULTISAMPLE, internalformat, GL_DEPTH_RENDERABLE        , Elms(params), params); if(glGetError()==GL_NO_ERROR && params[0])usage|=ImageTypeInfo::USAGE_IMAGE_MS;
-            ImageTI[i]._usage=usage;
+         #else // on GL_ES glGetInternalformativ works only for GL_RENDERBUFFER and only for GL_NUM_SAMPLE_COUNTS
+            glGetInternalformativ(GL_RENDERBUFFER, internalformat, GL_NUM_SAMPLE_COUNTS, Elms(params), params); if(glGetError()==GL_NO_ERROR && params[0]>0)
+            {
+               if(type_info.r)usage|=ImageTypeInfo::USAGE_IMAGE_2D | ImageTypeInfo::USAGE_IMAGE_RT;else
+               if(type_info.d)usage|=ImageTypeInfo::USAGE_IMAGE_2D | ImageTypeInfo::USAGE_IMAGE_DS;
+            }
+         #endif
          }
-         ImageTypeInfo::_usage_known=true;
+         type_info._usage=usage;
       }
+   #if !GL_ES
+      ImageTypeInfo::_usage_known=true;
    #endif
+   }else
+#endif
+   {
+      REP(IMAGE_ALL_TYPES)
+      {
+         ImageTypeInfo &type_info=ImageTI[i]; UInt usage=0; if(GLenum internalformat=type_info.format)if(!type_info.compressed)
+         {
+            ImageRT temp;
+            type_info._usage=~0; // temporarily mark as full support so we can try it
+            if(type_info.r)
+            {
+               if(temp.create(1, IMAGE_TYPE(i), IMAGE_RT))
+               {
+                  Renderer.set(&temp, null, false);
+                  if(glCheckFramebufferStatus(GL_FRAMEBUFFER)==GL_FRAMEBUFFER_COMPLETE)usage|=ImageTypeInfo::USAGE_IMAGE_2D | ImageTypeInfo::USAGE_IMAGE_RT;
+               }
+            }else
+            if(type_info.d)
+            {
+               if(temp.create(1, IMAGE_TYPE(i), IMAGE_DS))
+               {
+                  Renderer.set(null, &temp, false);
+                  if(glCheckFramebufferStatus(GL_FRAMEBUFFER)==GL_FRAMEBUFFER_COMPLETE)usage|=ImageTypeInfo::USAGE_IMAGE_2D | ImageTypeInfo::USAGE_IMAGE_DS;
+               }
+            }
+         }
+         type_info._usage=usage;
+      }
+   }
+#if DEBUG && 0
+   REP(IMAGE_ALL_TYPES)
+   {
+      ImageTypeInfo &type_info=ImageTI[i];
+      if(type_info._usage & ImageTypeInfo::USAGE_IMAGE_RT)LogN(S+type_info.name+" RT");else
+      if(type_info._usage & ImageTypeInfo::USAGE_IMAGE_DS)LogN(S+type_info.name+" DS");
+   }
+#endif
 #endif
 
 #if IOS
@@ -2677,6 +2741,37 @@ void DisplayClass::validateCoords(Int eye)
    Sh.Coords->setConditional(coords);
 }
 /******************************************************************************/
+#if ANDROID
+extern "C" JNIEXPORT void JNICALL Java_com_esenthel_Native_setRects(JNIEnv *env, jclass clazz, jint l, jint t, jint r, jint b, jint kb_h)
+{
+   D._rect_ui.min.x+=l*D._pixel_size.x; D._rect_ui.max.x-=r*D._pixel_size.x;
+   D._rect_ui.min.y+=b*D._pixel_size.y; D._rect_ui.max.y-=t*D._pixel_size.y;
+
+   Bool kb_changed=false, kb_vis=(kb_h>0);
+   if(Kb._visible!=kb_vis){Kb._visible^=1; kb_changed=true;}
+   if(Kb._visible)
+   {
+      RectI r(0, D.resH()-kb_h, D.resW(), D.resH());
+      if(Kb._recti!=r){Kb._recti=r; kb_changed=true;}
+   }
+   if(kb_changed)Kb.screenChanged();
+}
+#endif
+
+void DisplayClass::setRectUI()
+{
+   D._rect_ui=D._rect;
+#if IOS
+   if(auto view=GetUIView())
+   {
+      Vec2 scale=ScreenScale*D._pixel_size; // convert from iOS points to pixels, then to screen
+      D._rect_ui.min.x+=view.safeAreaInsets.left  *scale.x; D._rect_ui.max.x-=view.safeAreaInsets.right*scale.x;
+      D._rect_ui.min.y+=view.safeAreaInsets.bottom*scale.y; D._rect_ui.max.y-=view.safeAreaInsets.top  *scale.y;
+   }
+#elif ANDROID
+   if(Jni && ActivityClass && Activity)if(JMethodID getRects=Jni.func(ActivityClass, "getRects", "()V"))Jni->CallVoidMethod(Activity, getRects); // this will call 'setRects' above
+#endif
+}
 void DisplayClass::sizeChanged()
 {
    D._rect.min=-(D._rect.max=D._unscaled_size/D._scale);
@@ -2703,17 +2798,7 @@ void DisplayClass::sizeChanged()
       D._window_pixel_to_screen_add*=D._window_pixel_to_screen_scale;
    }
 
-   // rect UI
-   D._rect_ui=D._rect;
-#if IOS
-   if(auto view=GetUIView())
-   {
-      Vec2 scale=ScreenScale*D._pixel_size; // convert from iOS points to pixels, then to screen
-      D._rect_ui.min.x+=view.safeAreaInsets.left  *scale.x; D._rect_ui.max.x-=view.safeAreaInsets.right*scale.x;
-      D._rect_ui.min.y+=view.safeAreaInsets.bottom*scale.y; D._rect_ui.max.y-=view.safeAreaInsets.top  *scale.y;
-   }
-#endif
-
+   setRectUI(); // rect UI
    viewReset();
 }
 DisplayClass& DisplayClass::scale(Flt scale)
@@ -3837,8 +3922,8 @@ void DisplayClass::fadeDraw()
 static void SetPalette(Int index, C ImagePtr &palette) // !! Warning: '_color_palette_soft' must be of IMAGE_SOFT IMAGE_R8G8B8A8_SRGB type because 'Particles.draw' codes require that !!
 {
    D._color_palette[index]=palette;
-   if(palette)palette->copyTry(D._color_palette_soft[index], -1, -1, -1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1);
-   else                        D._color_palette_soft[index].del();
+   if(palette)palette->copy(D._color_palette_soft[index], -1, -1, -1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1);
+   else                     D._color_palette_soft[index].del();
 }
 DisplayClass& DisplayClass::colorPalette     (C ImagePtr &palette) {SetPalette(0, palette);    return T;}
 DisplayClass& DisplayClass::colorPalette1    (C ImagePtr &palette) {SetPalette(1, palette);    return T;}

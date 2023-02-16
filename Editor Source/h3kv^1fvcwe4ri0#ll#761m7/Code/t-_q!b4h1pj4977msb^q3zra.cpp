@@ -257,7 +257,7 @@ class Projects
       {
          case LOAD_NEWER : Gui.msgBox(S,   "This project was created with a newer version of " ENGINE_NAME " Engine.\nPlease upgrade your " ENGINE_NAME " software and try again."); break;
          case LOAD_LOCKED: Gui.msgBox(S,   "This project appears to be already opened in another instance of the Editor.\nIf it isn't, then please try re-opening it manually first."); break;
-         case LOAD_ERROR : Gui.msgBox(S, S+"This project failed to load."+(error.is() ? '\n' : '\0')+error); break;
+         case LOAD_ERROR : Gui.msgBox(S, S+"This project failed to load."+(error.is() ? "\n" : null)+error); break;
 
          case LOAD_OK    :
          case LOAD_EMPTY : proj.synchronize^=1; proj.close(); refresh(); return true;
@@ -273,7 +273,7 @@ class Projects
          {
             case LOAD_NEWER : Gui.msgBox(S,   "This project was created with a newer version of " ENGINE_NAME " Engine.\nPlease upgrade your " ENGINE_NAME " software and try again."); break;
             case LOAD_LOCKED: Gui.msgBox(S,   "This project appears to be already opened in another instance of the Editor.\nIf it isn't, then please try re-opening it manually first."); break;
-            case LOAD_ERROR : Gui.msgBox(S, S+"This project failed to load."+(error.is() ? '\n' : '\0')+error); break;
+            case LOAD_ERROR : Gui.msgBox(S, S+"This project failed to load."+(error.is() ? "\n" : null)+error); break;
 
             case LOAD_OK    :
             case LOAD_EMPTY : proj.name=name; proj.close(); refresh(); selectProj(proj_id); return true;
@@ -297,7 +297,7 @@ class Projects
       {
          Str error; LOAD_RESULT result=Proj.open(proj.id, proj.name, path, error, ignore_lock);
          if(result==LOAD_NEWER )Gui.msgBox(S,   "This project was created with a newer version of " ENGINE_NAME " Engine.\nPlease upgrade your " ENGINE_NAME " software and try again.");else
-         if(result==LOAD_ERROR )Gui.msgBox(S, S+"This project failed to load."+(error.is() ? '\n' : '\0')+error);else
+         if(result==LOAD_ERROR )Gui.msgBox(S, S+"This project failed to load."+(error.is() ? "\n" : null)+error);else
          if(result==LOAD_LOCKED)ProjectLock.create(proj.id);else
          {
             SetProjectState();

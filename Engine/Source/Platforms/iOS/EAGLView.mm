@@ -163,19 +163,13 @@ EAGLView* GetUIView()
 /******************************************************************************/
 -(void)keyboardWasShown:(NSNotification*)notification
 {
-   Kb._visible=true;
    NSDictionary *info=[notification userInfo];
    CGRect rect=[[info objectForKey:UIKeyboardFrameEndUserInfoKey] CGRectValue];
-   RectI  recti(Round(rect.origin.x*ScreenScale), Round(rect.origin.y*ScreenScale), Round((rect.origin.x+rect.size.width)*ScreenScale), Round((rect.origin.y+rect.size.height)*ScreenScale));
-   switch(App.orientation())
-   {
-      default       : Kb._recti=recti; break;
-      case DIR_DOWN : Kb._recti.set(recti.min.x, D.resH()-recti.max.y, recti.max.x, D.resH()-recti.min.y); break;
-      case DIR_RIGHT: Kb._recti.set(recti.min.y,          recti.min.x, recti.max.y,          recti.max.x); break;
-      case DIR_LEFT : Kb._recti.set(recti.min.y, D.resH()-recti.max.x, recti.max.y, D.resH()-recti.min.x); break;
-   }
+   Kb._recti.set(Round(rect.origin.x*ScreenScale), Round(rect.origin.y*ScreenScale), Round((rect.origin.x+rect.size.width)*ScreenScale), Round((rect.origin.y+rect.size.height)*ScreenScale));
+   Kb._visible=true;
+   Kb.screenChanged();
 }
--(void)keyboardWillBeHidden:(NSNotification*)notification {Kb._visible=false;}
+-(void)keyboardWillBeHidden:(NSNotification*)notification {Kb._visible=false; Kb.screenChanged();}
 -(void)keyboardVisible:(Bool)visible
 {
    if(visible)[self becomeFirstResponder];else [self resignFirstResponder];
@@ -200,7 +194,6 @@ static Joypad* FindJoypad(GCExtendedGamepad *gamepad)
        //controller.productCategory; "Xbox One"
          if([controller respondsToSelector:@selector(detailedProductCategory)])joypad._name=[controller detailedProductCategory]; // "Xbox Elite"
          if(!joypad._name.is())joypad._name=controller.vendorName; // "Xbox Wireless Controller"
-
 
          // add elements
          joypad.addPad(gamepad.dpad);
@@ -246,6 +239,8 @@ static Joypad* FindJoypad(GCExtendedGamepad *gamepad)
 
          // set callback at the end
          gamepad.valueChangedHandler=^(GCExtendedGamepad *gamepad, GCControllerElement *element) {if(Joypad *joypad=FindJoypad(gamepad))joypad->changed(element);};
+
+         if(auto func=App.joypad_changed)func(); // call at the end
       }
    }
 }
@@ -368,8 +363,11 @@ static Joypad* FindJoypad(GCExtendedGamepad *gamepad)
 {
    Str s=text; FREPA(s)
    {
-      Char c=s[i]; Kb.queue(c, -1);
-    //U16  u=c   ; if(InRange(u, KeyMap)){KB_KEY k=KeyMap[u]; Kb.push(k); Kb.release(k);}
+      Char c=s[i]; if(Safe(c))
+      {
+         if(c=='\n'){Kb.push (KB_ENTER, c); Kb.release(KB_ENTER);} //U16 u=c; if(InRange(u, KeyMap)){KB_KEY k=KeyMap[u]; Kb.push(k); Kb.release(k);}
+                     Kb.queue(c, c);
+		}
    }
 }
 -(void)deleteBackward

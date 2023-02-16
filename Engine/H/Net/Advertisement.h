@@ -13,7 +13,7 @@
 struct AdMobClass
 {
 #if EE_PRIVATE
-   // !! these enums must be equal to "EsenthelActivity.java" !!
+   // !! THESE ENUMS MUST BE EQUAL TO "EsenthelActivity.java" !!
 #endif
    enum BANNER_TYPE : Byte
    {                    // Size   | Description         | Availability
@@ -70,9 +70,9 @@ private:
 struct ChartboostClass
 {
 #if EE_PRIVATE
-   // !! these enums must be equal to "EsenthelActivity.java" !!
+   // !! THESE ENUMS MUST BE EQUAL TO "EsenthelActivity.java" !!
 #endif
-   enum RESULT
+   enum RESULT : Byte
    {
       INTERSTITIAL_LOADED   , // called when an interstitial has been loaded from the Chartboost API servers and cached locally
       INTERSTITIAL_LOAD_FAIL, // called when an interstitial has attempted to load from the Chartboost API servers but failed

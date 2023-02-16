@@ -621,7 +621,7 @@ void Shut()\n\
 {\n\
 }\n\
 /******************************************************************************/\n\
-Bool Update()\n\
+bool Update()\n\
 {\n\
    if(Kb.bp(KB_ESC))return false;\n\
    Gui.update();\n\
@@ -717,17 +717,17 @@ void CodeEditor::setMenu(Node<MenuElm> &menu)
          Node<MenuElm> &f=(menu+="File");
        /*f.New().create("New"      , MenuNew      ).kbsc(KbSc(KB_N, KBSC_CTRL_CMD));
          f++;*/
-         f.New().create("Save"     , MenuOverwrite).kbsc(KbSc(KB_F2               )).kbsc2(KbSc(KB_S, KBSC_CTRL_CMD           ));
-       /*f.New().create("Save"     , MenuSave     ).kbsc(KbSc(KB_F2, KBSC_CTRL_CMD)).kbsc2(KbSc(KB_S, KBSC_CTRL_CMD|KBSC_SHIFT));
+         f.New().create("Save"     , MenuOverwrite).kbsc(KbSc(KB_F2               )).kbsc1(KbSc(KB_S, KBSC_CTRL_CMD           ));
+       /*f.New().create("Save"     , MenuSave     ).kbsc(KbSc(KB_F2, KBSC_CTRL_CMD)).kbsc1(KbSc(KB_S, KBSC_CTRL_CMD|KBSC_SHIFT));
          f++;
-         f.New().create("Load"     , MenuLoad     ).kbsc(KbSc(KB_F3                      )).kbsc2(KbSc(KB_O, KBSC_CTRL_CMD));*/
-         f.New().create("Close"    , MenuClose    ).kbsc(KbSc(KB_F3, KBSC_ALT|KBSC_REPEAT)).kbsc2(KbSc('q' , KBSC_CTRL_CMD|KBSC_REPEAT));
+         f.New().create("Load"     , MenuLoad     ).kbsc(KbSc(KB_F3                      )).kbsc1(KbSc(KB_O, KBSC_CTRL_CMD));*/
+         f.New().create("Close"    , MenuClose    ).kbsc(KbSc(KB_F3, KBSC_ALT|KBSC_REPEAT)).kbsc1(KbSc('q' , KBSC_CTRL_CMD|KBSC_REPEAT));
          f.New().create("Locate"   , MenuLocate   ).kbsc(KbSc(KB_L , KBSC_CTRL_CMD       )).desc("Locate this file in the Project");
       }
       {
          Node<MenuElm> &e=(menu+="Edit");
          e.New().create("Undo" , EditUndo).kbsc(KbSc(KB_Z, KBSC_CTRL_CMD|KBSC_REPEAT));
-         e.New().create("Redo" , EditRedo).kbsc(KbSc(KB_Y, KBSC_CTRL_CMD|KBSC_REPEAT)).kbsc2(KbSc(KB_Z, KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_REPEAT));
+         e.New().create("Redo" , EditRedo).kbsc(KbSc(KB_Y, KBSC_CTRL_CMD|KBSC_REPEAT)).kbsc1(KbSc(KB_Z, KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_REPEAT));
          e.New().create("Undo2", EditUndo).kbsc(KbSc(KB_BACK, KBSC_ALT           |KBSC_REPEAT)).flag(MENU_HIDDEN); // keep those hidden because they occupy too much of visible space (besides on Windows Notepad they also work and are not listed)
          e.New().create("Redo2", EditRedo).kbsc(KbSc(KB_BACK, KBSC_ALT|KBSC_SHIFT|KBSC_REPEAT)).flag(MENU_HIDDEN); // keep those hidden because they occupy too much of visible space (besides on Windows Notepad they also work and are not listed)
          e++;
@@ -750,14 +750,14 @@ void CodeEditor::setMenu(Node<MenuElm> &menu)
          e.New().create("Find Previous", FindPrev, find).kbsc(KbSc('D', KBSC_CTRL_CMD|KBSC_REPEAT));
          e.New().create("Replace"      , EditReplace   ).kbsc(KbSc('r', KBSC_CTRL_CMD));
          e++;
-         e.New().create("Next Opened File"    , EditNextFile).kbsc(KbSc(KB_F6,            KBSC_REPEAT)).kbsc2(KbSc(KB_TAB, KBSC_CTRL_CMD           |KBSC_REPEAT));
-         e.New().create("Previous Opened File", EditPrevFile).kbsc(KbSc(KB_F6, KBSC_SHIFT|KBSC_REPEAT)).kbsc2(KbSc(KB_TAB, KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_REPEAT));
+         e.New().create("Next Opened File"    , EditNextFile).kbsc(KbSc(KB_F6,            KBSC_REPEAT)).kbsc1(KbSc(KB_TAB, KBSC_CTRL_CMD           |KBSC_REPEAT));
+         e.New().create("Previous Opened File", EditPrevFile).kbsc(KbSc(KB_F6, KBSC_SHIFT|KBSC_REPEAT)).kbsc1(KbSc(KB_TAB, KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_REPEAT));
          e++;
          e.New().create("Next Issue"    , EditNextIssue).kbsc(KbSc('e', KBSC_CTRL_CMD|KBSC_REPEAT)).desc("Go to the next compiler issue");
          e.New().create("Previous Issue", EditPrevIssue).kbsc(KbSc('E', KBSC_CTRL_CMD|KBSC_REPEAT)).desc("Go to the previous compiler issue");
          e++;
-         e.New().create("Navigate Forward"  , EditNextCurPos).kbsc(KbSc(KB_RIGHT, KBSC_ALT|KBSC_REPEAT)).kbsc2(KbSc(KB_RBR, KBSC_CTRL_CMD|KBSC_REPEAT));
-         e.New().create("Navigate Backward" , EditPrevCurPos).kbsc(KbSc(KB_LEFT , KBSC_ALT|KBSC_REPEAT)).kbsc2(KbSc(KB_LBR, KBSC_CTRL_CMD|KBSC_REPEAT));
+         e.New().create("Navigate Forward"  , EditNextCurPos).kbsc(KbSc(KB_RIGHT, KBSC_ALT|KBSC_REPEAT)).kbsc1(KbSc(KB_RBR, KBSC_CTRL_CMD|KBSC_REPEAT));
+         e.New().create("Navigate Backward" , EditPrevCurPos).kbsc(KbSc(KB_LEFT , KBSC_ALT|KBSC_REPEAT)).kbsc1(KbSc(KB_LBR, KBSC_CTRL_CMD|KBSC_REPEAT));
          e.New().create("Navigate Forward2" , EditNextCurPos).kbsc(KbSc(KB_NAV_FORWARD, KBSC_REPEAT)).flag(MENU_HIDDEN);
          e.New().create("Navigate Backward2", EditPrevCurPos).kbsc(KbSc(KB_NAV_BACK   , KBSC_REPEAT)).flag(MENU_HIDDEN);
          e++;
@@ -1154,7 +1154,7 @@ Str CodeEditor::title()
    if(cur())
    {
       Str path=cur()->loc.asText();
-      if( path.is())return S+'"'+path+(cur()->modified() ? '*' : '\0')+'"'+(cur()->Const ? " (Read Only)" : null);
+      if( path.is())return S+'"'+path+(cur()->modified() ? "*" : null)+'"'+(cur()->Const ? " (Read Only)" : null);
    }
    return S;
 }
@@ -1194,7 +1194,7 @@ Str CodeEditor::ndkBuildPath()C
 static Bool EmbedAppResource(C Str &dest, File &src, UInt type) // used only for Linux apps
 {
    const UInt CC4_CHNK=CC4('C', 'H', 'N', 'K');
-   File f; if(f.appendTry(dest))
+   File f; if(f.append(dest))
    {
       Long pos=f.pos();
       f.putUInt(CC4_CHNK);
@@ -1212,7 +1212,7 @@ static Bool EmbedAppResource(C Str &dest, File &src, UInt type) // used only for
 }
 static Bool EmbedAppResource(C Str &dest, C Str &src, UInt type)
 {
-   File f; if(f.readStdTry(src))return EmbedAppResource(dest, f, type);
+   File f; if(f.readStd(src))return EmbedAppResource(dest, f, type);
    return false;
 }
 void CodeEditor::BuildResult::setWarning() {mode=1; setColor();}
@@ -1431,7 +1431,7 @@ void CodeEditor::update(Bool active)
                   if(build_exe_type==EXE_EXE || build_exe_type==EXE_DLL)
                {
                   Str  error;
-                  File f; if(!f.readStdTry(build_exe))error="Can't open file";else
+                  File f; if(!f.readStd(build_exe))error="Can't open file";else
                   {
                      Memc<ExeSection> sections; if(!ParseExe(f, sections))error="Can't parse EXE";else
                      {
@@ -1459,7 +1459,7 @@ void CodeEditor::update(Bool active)
                            if(!f.pos(section_hash_ptr->offset))error="Seek failed";else
                            {
                               if( f.getULong()==hash)goto hash_ok; // file already has correct hash, check this in case we are building for 2nd time and file was already adjusted, perhaps that EXE is already running so we can't modify it
-                              if(!f.appendTry(build_exe))error="Can't edit EXE";else // modify hash
+                              if(!f.append(build_exe))error="Can't edit EXE";else // modify hash
                               if(!f.pos(section_hash_ptr->offset))error="Seek failed";else
                               {
                                  f.putULong(hash);

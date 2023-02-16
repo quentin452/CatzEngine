@@ -8,7 +8,8 @@ public class Native
 {
    public static native void   key            (int chr, int key_code);
    public static native void   text           (String text, int start, int end);
-   public static native void   resized        (int w, int h, int visible_x, int visible_y, int visible_w, int visible_h);
+   public static native void   resized        ();
+   public static native void   setRects       (int l, int t, int r, int b, int kb_h);
    public static native void   connected      (boolean inapp_supported, boolean subs_supported);
    public static native String getStr         (long user  , int index);
    public static native void   listItem       (long user  , String sku, String name, String desc , String price, boolean sub);
@@ -27,6 +28,7 @@ public class Native
    public static native void   notification   (int id, boolean selected);
    public static native void   deviceAdded    (int device_id);
    public static native void   deviceRemoved  (int device_id);
+   public static native void   drop           (int fd);
 
    static
    {

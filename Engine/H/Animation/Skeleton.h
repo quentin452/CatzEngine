@@ -53,7 +53,12 @@ enum BONE_TYPE : Byte
 enum BONE_FLAG
 {
    BONE_RAGDOLL=1<<0, // if this option is enabled then the bone will be used to create an actor in the Ragdoll
+   BONE_DYNAMIC=1<<1, // bone should be simulated using physics instead of being animated
 };
+
+typedef UShort BoneType;
+typedef VecUS4 VtxBone;
+const BoneType BONE_NULL=~0;
 
 struct BoneID
 {
@@ -76,14 +81,14 @@ struct BoneID
 typedef SkeletonBone SkelBone;
 struct  SkeletonBone : OrientP, BoneID // Skeleton Bone
 {
-   Byte    parent         , // bone parent index             , default=0xFF, 0xFF=none
-           children_offset, // offset of children in 'Skeleton.bones'
-           children_num   , // number of children
-           flag           ; // BONE_FLAG                     , default=0
-   Flt     length         , // bone length                   , default=0.3
-           width          ; // bone width                    , default=0.2 (proportionally to 'length')
-   Vec     offset         ; // bone offset applied to 'shape', default=(0, 0, 0)
-   Capsule shape          ; // shape covering the bone, automatically set by 'Skeleton.setBoneShapes' method, depending on bone position, orientation, length, width and being a ragdoll bone
+   BoneType parent         , // bone parent index             , default=BONE_NULL
+            children_offset; // offset of children in 'Skeleton.bones'
+   Byte     children_num   , // number of children
+            flag           ; // BONE_FLAG                     , default=0
+   Flt      length         , // bone length                   , default=0.3
+            width          ; // bone width                    , default=0.2 (proportionally to 'length')
+   Vec      offset         ; // bone offset applied to 'shape', default=(0, 0, 0)
+   Capsule  shape          ; // shape covering the bone, automatically set by 'Skeleton.setBoneShapes' method, depending on bone position, orientation, length, width and being a ragdoll bone
 
    // get
    Vec     to ()C {return pos  +dir  * length      ;} // get bone ending position
@@ -133,11 +138,11 @@ struct  SkeletonBone : OrientP, BoneID // Skeleton Bone
 typedef SkeletonSlot SkelSlot;
 struct  SkeletonSlot : OrientP // Skeleton Slot
 {
-   Char8 name[32]; // name
-   Byte  bone    , //           bone index to which slot belongs, 0xFF=none
-         bone1   ; // secondary bone index to which slot belongs, 0xFF=none, for best performance this should be set to the same value as 'bone' (to have only one parent), if this is different than 'bone' then slot will be set as average based on 2 bone parents
+   Char8    name[32]; // name
+   BoneType bone    , //           bone index to which slot belongs, BONE_NULL=none
+            bone1   ; // secondary bone index to which slot belongs, BONE_NULL=none, for best performance this should be set to the same value as 'bone' (to have only one parent), if this is different than 'bone' then slot will be set as average based on 2 bone parents
 
-   void setParent(Byte bone) {T.bone=T.bone1=bone;}
+   void setParent(BoneType bone) {T.bone=T.bone1=bone;}
 
    SkeletonSlot& operator*=(  Flt      f);
    SkeletonSlot& operator*=(C Vec     &v) {super::operator*=(v); return T;}
@@ -164,8 +169,8 @@ struct Skeleton // Animation Skeleton - base skeleton used by 'AnimatedSkeleton'
 #if EE_PRIVATE
    Int boneParents(Int bone)C; // get total number of parents that a bone has, 0 if none
    Int boneLevel  (Int bone)C; // get bone level
-   Int bonesSharedParent(MemPtr<Byte, 256> bones)C; // get nearest parent which all bones share, or 0xFF if none
-   Int hierarchyDistance(Int bone_a, Int bone_b )C; // get hierarchy distance between bones
+   Int bonesSharedParent(MemPtrN<BoneType, 256> bones)C; // get nearest parent which all bones share, or BONE_NULL if none
+   Int hierarchyDistance(Int bone_a, Int bone_b)C; // get hierarchy distance between bones
 
    SkelAnim* findSkelAnim(C Str &name)C {return _skel_anims.get(name);} // find skeleton animation, null on fail
    SkelAnim* findSkelAnim(C UID &id  )C {return _skel_anims.get(id  );} // find skeleton animation, null on fail
@@ -208,7 +213,7 @@ struct Skeleton // Animation Skeleton - base skeleton used by 'AnimatedSkeleton'
 
    UInt memUsage()C; // get memory usage
 
-   void getSkin(C Vec &pos, VecB4 &blend, VecB4 &matrix)C; // get bone 'blend matrix' skinning according to 'pos' position
+   void getSkin(C Vec &pos, VecB4 &blend, VtxBone &matrix)C; // get bone 'blend matrix' skinning according to 'pos' position
 
    // transform
    Skeleton& operator+=(C Vec     &move  ) {return T.move     (move  );} // move
@@ -232,14 +237,14 @@ struct Skeleton // Animation Skeleton - base skeleton used by 'AnimatedSkeleton'
    // operations
    Skeleton& setBoneTypes (); // automatically set 'SkelBone.type, type_index, type_sub' for all bones in this Skeleton, this method should be called after making changes to skeleton bones
    Skeleton& setBoneShapes(); // automatically set 'SkelBone.shape'                      for all bones in this Skeleton, this method should be called after making changes to skeleton bones
-   Bool      setBoneParent(Int child, Int parent, MemPtr<Byte, 256> old_to_new=null); // set 'parent' as the parent of 'child' bone, if 'old_to_new' is passed it will be set as bone remap "old_to_new[old_index]=new_index", false is returned if no change was made (in that case 'old_to_new' will be empty)
-   Bool      removeBone   (Int i    ,             MemPtr<Byte, 256> old_to_new=null); // remove i-th bone                          , if 'old_to_new' is passed it will be set as bone remap "old_to_new[old_index]=new_index", false is returned if no change was made (in that case 'old_to_new' will be empty)
-   Skeleton& add          (C Skeleton &src      , MemPtr<Byte, 256> old_to_new=null); // add  bones and slots from 'src' to self   , if 'old_to_new' is passed it will be set as bone remap "old_to_new[old_index]=new_index"
-   Skeleton& addSlots     (C Skeleton &src                                         ); // add            slots from 'src' to self
-   Skeleton& sortBones    (                       MemPtr<Byte, 256> old_to_new=null); // sort bones in parent<->child order and calculate children count and offsets, this is required when changing bone parents, if 'old_to_new' is passed it will be set as bone remap "old_to_new[old_index]=new_index"
+   Bool      setBoneParent(Int child, Int parent, MemPtrN<BoneType, 256> old_to_new=null); // set 'parent' as the parent of 'child' bone, if 'old_to_new' is passed it will be set as bone remap "old_to_new[old_index]=new_index", false is returned if no change was made (in that case 'old_to_new' will be empty)
+   Bool      removeBone   (Int i    ,             MemPtrN<BoneType, 256> old_to_new=null); // remove i-th bone                          , if 'old_to_new' is passed it will be set as bone remap "old_to_new[old_index]=new_index", false is returned if no change was made (in that case 'old_to_new' will be empty)
+   Skeleton& add          (C Skeleton &src      , MemPtrN<BoneType, 256> old_to_new=null); // add  bones and slots from 'src' to self   , if 'old_to_new' is passed it will be set as bone remap "old_to_new[old_index]=new_index"
+   Skeleton& addSlots     (C Skeleton &src                                              ); // add            slots from 'src' to self
+   Skeleton& sortBones    (                       MemPtrN<BoneType, 256> old_to_new=null); // sort bones in parent<->child order and calculate children count and offsets, this is required when changing bone parents, if 'old_to_new' is passed it will be set as bone remap "old_to_new[old_index]=new_index"
 #if EE_PRIVATE
-   Skeleton& setBoneLengths(                                                       ); // automatically set bone lengths
-   void      boneRemap     (                   C CMemPtr<Byte, 256> &old_to_new    );
+   Skeleton& setBoneLengths(                                                            ); // automatically set bone lengths
+   void      boneRemap     (                   C CMemPtrN<BoneType, 256> &old_to_new    );
 #endif
    void      recreateSkelAnims(); // this can be called if animations got reloaded
 
@@ -434,15 +439,14 @@ struct BoneMap
 
    Bool same(C Skeleton &skeleton)C; // if contains the same data as the 'skeleton'
 
-   void    remap(                   C CMemPtr<Byte, 256> &old_to_new                    ) ; //     remap
-   void setRemap(C Skeleton &skeleton, MemPtr<Byte, 256>  old_to_new, Bool by_name=false)C; // set remap that maps from current bone mapping to 'skeleton' bone mapping, 'by_name'=if remap by name only and ignore type/indexes
+   void    remap(                   C CMemPtrN<BoneType, 256> &old_to_new                    ) ; //     remap
+   void setRemap(C Skeleton &skeleton, MemPtrN<BoneType, 256>  old_to_new, Bool by_name=false)C; // set remap that maps from current bone mapping to 'skeleton' bone mapping, 'by_name'=if remap by name only and ignore type/indexes
 
    Bool save(File &f)C;
    Bool load(File &f) ;
 
-   Bool saveOld1(File &f)C;
+   Bool loadOld2(File &f) ;
    Bool loadOld1(File &f) ;
-   Bool saveOld (File &f)C;
    Bool loadOld (File &f) ;
 #endif
 
@@ -459,7 +463,7 @@ private:
       BONE_TYPE type       ;
       SByte     type_index ;
       Byte      type_sub   ;
-      Byte      parent     ;
+      BoneType  parent     ;
       U16       name_offset;
    };
    Bone *_bone; // right after '_bone' array, array of bone names is allocated (using Char8)

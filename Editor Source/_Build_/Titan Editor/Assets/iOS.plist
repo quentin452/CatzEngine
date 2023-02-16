@@ -4,6 +4,10 @@
 		<string>Titan Editor</string>
 		<key>CFBundleDevelopmentRegion</key>
 		<string>English</string>
+		<key>CFBundleLocalizations</key>
+		<array>
+			<string>en</string>
+		</array>
 		<key>CFBundleExecutable</key>
 		<string>${EXECUTABLE_NAME}</string>
 		<key>CFBundleIdentifier</key>
@@ -15,9 +19,9 @@
 		<key>CFBundleSignature</key>
 		<string>????</string>
 		<key>CFBundleVersion</key>
-		<string>71</string>
+		<string>73</string>
 		<key>CFBundleShortVersionString</key>
-		<string>71</string>
+		<string>73</string>
 		<key>LSRequiresIPhoneOS</key>
 		<true/>
 		<key>NSMainNibFile</key>
@@ -36,7 +40,7 @@
 			<string>UIInterfaceOrientationLandscapeLeft</string>
 		</array>
 		<key>UIViewControllerBasedStatusBarAppearance</key>
-		<false/>
+		<true/>
 		<key>NSAppTransportSecurity</key>
 		<dict>
 			<key>NSAllowsArbitraryLoads</key>
@@ -48,6 +52,8 @@
 		<string></string>
 		<key>NSCalendarsUsageDescription</key>
 		<string>Unknown</string>
+		<key>ITSAppUsesNonExemptEncryption</key>
+		<false/>
 		<key>FacebookAppID</key>
 		<string>0</string>
 		<key>FacebookDisplayName</key>

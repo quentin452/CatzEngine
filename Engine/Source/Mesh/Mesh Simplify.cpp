@@ -206,11 +206,12 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
    };
    struct VtxData
    {
-      Vec   hlp, nrm;
-      Vec2  tex0, tex1, tex2, tex3;
-      Vec4  color, material; // here material is allowed to be 0, because 'to' method supports that case
-      VecB4 matrix, blend;
-      Flt   size;
+      Vec     hlp, nrm;
+      Vec2    tex0, tex1, tex2, tex3;
+      Vec4    color, material; // here material is allowed to be 0, because 'to' method supports that case
+      VtxBone matrix;
+      VecB4   blend;
+      Flt     size;
 
       void zero()
       {
@@ -573,20 +574,20 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       return false;
    }
 
-   static inline void AddSkin(MemtN<IndexWeight, 256> &skin, C VecB4 &matrix, C VecB4 &blend, Flt weight)
+   static inline void AddSkin(MemtN<IndexWeight, 256> &skin, C VtxBone &matrix, C VecB4 &blend, Flt weight)
    {
       REPA(matrix){Flt w=blend.c[i]*weight; if(w>0)skin.New().set(matrix.c[i], w);}
    }
-   static Bool EqualSkin(C VecB4 &m0, C VecB4 &w0, C VecB4 &m1, C VecB4 &w1)
+   static Bool EqualSkin(C VtxBone &m0, C VecB4 &w0, C VtxBone &m1, C VecB4 &w1)
    {
       return m0==m1 && w0==w1; // Warning: normally we should check every matrix index separately, in case for example m0.x==m1.y (different order, and that would be much slower), however 'SetSkin' was designed to sort matrix/weight so they can be compared in this fast way
    }
-   static inline Int GetBlend(Byte index, VecB4 matrix, VecB4 blend) // find blend value for 'index' in 'matrix' 'blend' skinning
+   static inline Int GetBlend(BoneType index, C VtxBone &matrix, C VecB4 &blend) // find blend value for 'index' in 'matrix' 'blend' skinning
    {
       Int    b=0; REPA(matrix)if(matrix.c[i]==index)b+=blend.c[i];
       return b;
    }
-   static Int SkinDifference(VecB4 matrix_a, VecB4 blend_a, VecB4 matrix_b, VecB4 blend_b)
+   static Int SkinDifference(C VtxBone &matrix_a, C VecB4 &blend_a, C VtxBone &matrix_b, C VecB4 &blend_b)
    {
       Int dif=0;
       REP(4)
@@ -825,7 +826,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
                   AddSkin(got_skin, vtx_n.matrix, vtx_n.blend, blend.x);
                   AddSkin(got_skin, vtx1 .matrix, vtx1 .blend, blend.y);
                   AddSkin(got_skin, vtx2 .matrix, vtx2 .blend, blend.z);
-                  VecB4 bone_index, bone_weight; SetSkin(got_skin, bone_index, bone_weight, null);
+                  VtxBone bone_index; VecB4 bone_weight; SetSkin(got_skin, bone_index, bone_weight, null);
                   if(SkinDifference(bone_index, bone_weight, vtx0.matrix, vtx0.blend)>max_skin)return false;
                }
             }else // calculate new position in the old triangle
@@ -876,7 +877,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
                   AddSkin(expected_skin, tri.vtxs[0].matrix, tri.vtxs[0].blend, blend.x);
                   AddSkin(expected_skin, tri.vtxs[1].matrix, tri.vtxs[1].blend, blend.y);
                   AddSkin(expected_skin, tri.vtxs[2].matrix, tri.vtxs[2].blend, blend.z);
-                  VecB4 bone_index, bone_weight; SetSkin(expected_skin, bone_index, bone_weight, null);
+                  VtxBone bone_index; VecB4 bone_weight; SetSkin(expected_skin, bone_index, bone_weight, null);
                   if(SkinDifference(bone_index, bone_weight, vtx_n.matrix, vtx_n.blend)>max_skin)return false;
                }
             }

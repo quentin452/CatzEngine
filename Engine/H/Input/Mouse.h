@@ -68,8 +68,8 @@ struct MouseClass // Mouse Input
    Int wheelI ()C {return _wheel_i.y;} // get vertical   mouse wheel delta in integer steps
    Int wheelIX()C {return _wheel_i.x;} // get horizontal mouse wheel delta in integer steps
 
-   Dbl startTime()C {return                    _start_time ;} // get time of when the latest button was pushed, obtained using "Time.appTime()"
-   Flt life     ()C {return Flt(Time.appTime()-_start_time);} // get how long     the latest button is  pushed
+   Dbl startTime()C {return                    _start_time ;} // get time when the latest button was pushed, obtained using "Time.appTime()"
+   Flt life     ()C {return Flt(Time.appTime()-_start_time);} // get how  long the latest button is  pushed
 
    Bool selecting()C {return _selecting;} // if enough                     movement occurred since the latest button was pushed to consider it selecting
    Bool dragging ()C {return _dragging ;} // if enough time has passed and movement occurred since the latest button was pushed to consider it dragging

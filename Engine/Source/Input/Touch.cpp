@@ -40,6 +40,7 @@ Touch::Touch()
   _state=BS_NONE;
   _axis_moved=0;
   _id=0;
+  _life=0;
   _start_time=Time.appTime();
   _start_pos=_prev_pos=_pos=_sm_pos=_delta=_abs_delta=_vel=0; _pixeli=_delta_pixeli_clp=0;
   _handle=null;
@@ -62,6 +63,7 @@ Touch& Touch::reinit(C VecI2 &pixeli, C Vec2 &pos)
    user_ptr  =null;
   _allow_scrolling=true;
   _selecting=_dragging=_scrolling=false;
+  _life=0;
   _start_time=Time.appTime();
   _start_pos =_pos=pos;
   _pixeli    =pixeli;
@@ -166,6 +168,8 @@ void TouchesUpdate()
    REPA(Touches)
    {
       Touch &t=Touches[i];
+      Flt old_life=t.life(); // below perform calculations on 'old_life' to workaround problems with single long frame times?
+      t._life     =t.Life();
       t._delta    =t._pos-t._prev_pos; t._prev_pos=t._pos;
       t._abs_delta=t._delta*D.scale();
       t._sm_pos   =t._sv_pos.update(t._pos);
@@ -182,11 +186,14 @@ void TouchesUpdate()
          {
             if(!t.selecting())
             {
+               if(old_life  < LongPressTime
+               &&   t.life()>=LongPressTime)t._state|=BS_LONG_PRESS;
+
                Flt dist2=Dist2(t.pos(), t.startPos())*Sqr(D.scale()*(D.smallSize() ? 0.5f : 1.0f));
-               if(t.stylus() ? (dist2>=TouchSelectDist2 && t.life()>=StylusSelectTime+Time.ad()) || dist2>=TouchSelectBigDist2 // stylus can be slippery, because of that process it differently (for short distance require time, or allow big distance in case user made long swipe)
-                             :  dist2>=TouchSelectDist2                                                                       )t._selecting=true;
+               if(t.stylus() ? (dist2>=TouchSelectDist2 && old_life>=StylusSelectTime) || dist2>=TouchSelectBigDist2 // stylus can be slippery, because of that process it differently (for short distance require time, or allow big distance in case user made long swipe)
+                             :  dist2>=TouchSelectDist2                                                             )t._selecting=true;
             }
-            if(/*!t.dragging() && already checked above*/ t.selecting() && t.life()>=DragTime+Time.ad())t._dragging=true;
+            if(/*!t.dragging() && already checked above*/ t.selecting() && old_life>=DragTime)t._dragging=true;
          }
 
          // scroll regions
@@ -225,7 +232,7 @@ void TouchesUpdate()
 
       if(t.rs())
       {
-         if(!t.selecting() && t.life()<=0.25f+Time.ad())t._state|=BS_TAPPED;
+         if(!t.selecting() && old_life<=TapTime)t._state|=BS_TAPPED;
 
          // scroll regions (don't check for 't.scrolling' here because we want to process dragging region slidebars too and for those the scrolling is not enabled)
          if(t._axis_moved && t.id()!=Gui._drag_touch_id) // only if not dragging something

@@ -256,16 +256,18 @@ Bool GuiObj::kbCatch()C
    }
 }
 /******************************************************************************/
-static void AdjustGuiKb() // call when 'Gui.kb' got changed (or just 'kbSet' getting called to force showing soft keyboard when clicking on 'TextLine' or 'TextBox', etc.)
+static void GuiKbChanged() // call when 'Gui.kb' got changed
 {
    Gui._window=&Gui.kb()->first(GO_WINDOW)->asWindow();
-   Kb.setVisible();
+   Gui.hideTextMenu();
 }
 GuiObj& GuiObj::kbSet() // this means setting keyboard focus to this element
 {
    if(is()) // allow setting focus only if created, to keep consistency with clearing kb focus when deleting object
    {
       DEBUG_BYTE_LOCK(_used);
+
+      GuiObj *old=Gui.kb();
 
       if(MOBILE // do this for all types on Mobile platforms, because of the soft keyboard overlay, which could keep popping up annoyingly and occlude big portion of the screen
       || isDesktop() || isList()) // if this is a 'Desktop' or a 'List' then clear the sub kb focus so children won't have it, and only this object will
@@ -316,7 +318,8 @@ GuiObj& GuiObj::kbSet() // this means setting keyboard focus to this element
          }
       }
 
-      AdjustGuiKb();
+      if(Gui.kb()!=old)GuiKbChanged();
+      Kb.setVisible(); // always call, not just on change, because screen keyboard might got hidden, but we want to show it again even without changing Gui.kb
    }
    return T;
 }
@@ -340,7 +343,8 @@ GuiObj& GuiObj::kbClear()
    {
       Gui._kb=(_parent ? _parent : null);
       for(; Gui.kb() && !Gui.kb()->kbCatch(); )Gui._kb=Gui.kb()->parent();
-      AdjustGuiKb();
+      GuiKbChanged();
+      Kb.setVisible();
    }
    return T;
 }
@@ -499,7 +503,7 @@ GuiObj& GuiObj::deactivate()
    if(contains(Gui._overlay_textline))Gui._overlay_textline=null;
    if(contains(Gui.      _desc      ))Gui.      _desc      =null;
    if(contains(Gui._touch_desc      ))Gui._touch_desc      =null;
-   REPA(Touches)if(contains(Touches[i].guiObj()))Touches[i]._gui_obj=null;
+   REPA(Touches){Touch &touch=Touches[i]; if(contains(touch.guiObj()))touch._gui_obj=null;}
    return T;
 }
 GuiObj& GuiObj::setText()
@@ -590,9 +594,10 @@ Vec2 GuiObj::clientOffset()C
 {
    switch(type())
    {
-      case GO_MENU  : return asMenu  ().clientRect().lu()-pos();
-      case GO_WINDOW: return asWindow().clientRect().lu()-pos();
-      case GO_REGION: return asRegion().clientRect().lu()-pos();
+      case GO_MENU   : return asMenu   ().clientRect().lu()-pos();
+      case GO_WINDOW : return asWindow ().clientRect().lu()-pos();
+      case GO_REGION : return asRegion ().clientRect().lu()-pos();
+      case GO_TEXTBOX: return asTextBox().clientRect().lu()-pos();
    }
    return 0;
 }
@@ -600,10 +605,12 @@ Vec2 GuiObj::clientSize()C
 {
    switch(type())
    {
-      case GO_MENU  : return asMenu  ().clientSize();
-      case GO_WINDOW: return asWindow().clientSize();
-      case GO_REGION: return asRegion().clientSize();
-      default       : return size();
+      case GO_MENU    : return asMenu    ().clientSize();
+      case GO_WINDOW  : return asWindow  ().clientSize();
+      case GO_REGION  : return asRegion  ().clientSize();
+      case GO_TEXTBOX : return asTextBox ().clientSize();
+      case GO_TEXTLINE: return asTextLine().clientSize();
+      default         : return                    size();
    }
 }
 Rect GuiObj::localClientRect()C

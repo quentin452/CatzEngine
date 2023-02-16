@@ -2187,9 +2187,8 @@ Animation& Animation::adjustForSameSkeletonWithDifferentPose(C Skeleton &source,
                {
                   OrientD orient_source=bone_source; if(old_parent)orient_source.div(*old_parent, true); // convert to parent space
                   OrientD orient_target=bone_target; if(new_parent)orient_target.div(*new_parent, true); // convert to parent space
-                  #define EPS_ANIM_COS_PRECISE 0.9999
-                  if(Dot(orient_source.dir , orient_target.dir )<EPS_ANIM_COS_PRECISE
-                  || Dot(orient_source.perp, orient_target.perp)<EPS_ANIM_COS_PRECISE)
+                  if(Dot(orient_source.dir , orient_target.dir )<EPS_COS
+                  || Dot(orient_source.perp, orient_target.perp)<EPS_COS)
                   {
                      AnimKeys::Orn &orn=getBone(bone_target.name, bone_target.type, bone_target.type_index, bone_target.type_sub).orns.New();
                      orn.time=0;
@@ -2955,7 +2954,7 @@ Animation& Animation::offsetRootBones(C Skeleton &skeleton, C Vec &move)
       }
       REPA(skeleton.bones)
       {
-       C SkelBone &sbon=skeleton.bones[i]; if(sbon.parent==0xFF)
+       C SkelBone &sbon=skeleton.bones[i]; if(sbon.parent==BONE_NULL)
          {
             AnimBone &abon=getBone(sbon.name, sbon.type, sbon.type_index, sbon.type_sub);
             if(keys.orns.elms())
@@ -3043,7 +3042,7 @@ static void FreezePos(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_
       Bool all_keys=(key_index<0);
       if(  all_keys || InRange(key_index, keys->poss))
       {
-         Byte bone_index=(root ? 0xFF : skel_bone);
+         BoneType bone_index=(root ? BONE_NULL : skel_bone);
 
          Memt<Flt, 16384> times;
          Flt prev_time, next_time;
@@ -3149,7 +3148,7 @@ static void FreezeRot(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_
       Bool all_keys=(key_index<0);
       if(  all_keys || InRange(key_index, keys->orns))
       {
-         Byte bone_index=(root ? 0xFF : skel_bone);
+         BoneType bone_index=(root ? BONE_NULL : skel_bone);
 
          Memt<Flt, 16384> times;
          Flt prev_time, next_time;
@@ -3624,7 +3623,7 @@ Animation& Animation::transform(C Matrix &matrix, C Skeleton &source, Bool skel_
       if(set_orn || set_pos) // if we have to set oriention/pos keys
          FREPA(source.bones) // iterate all skeleton bones
       {
-       C SkelBone &bone=source.bones[i]; if(bone.parent==0xFF) // process only main bones
+       C SkelBone &bone=source.bones[i]; if(bone.parent==BONE_NULL) // process only main bones
          {
             AnimBone &abon=getBone(bone.name, bone.type, bone.type_index, bone.type_sub);
             if(set_orn && !abon.orns.elms()) // if there are no orn keys
@@ -3650,7 +3649,7 @@ Animation& Animation::transform(C Matrix &matrix, C Skeleton &source, Bool skel_
    #else
       Int       sbon_index=source.findBoneI(abon.name, abon.type, abon.type_index, abon.type_sub);
    #endif
-      Bool      main      =(sbon_index>=0 && source.bones[sbon_index].parent==0xFF);
+      Bool      main      =(sbon_index>=0 && source.bones[sbon_index].parent==BONE_NULL);
       if(main)
       {
       #if 1 // optimized
@@ -3801,75 +3800,6 @@ Animation& Animation::copyParams(C Animation &src)
    T._flag  =src._flag  ;
    return T;
 }
-/******************************************************************************
-static Int BonePriority(BONE_TYPE type, Int sub)
-{
-   Int p;
-   switch(type) // prefer toes
-   {
-      default            : return   0; // we don't want other types at all
-      case BONE_UPPER_LEG: p=1; break;
-      case BONE_LOWER_LEG: p=2; break;
-      case BONE_FOOT     : p=3; break;
-      case BONE_TOE      : p=4; sub=255-sub; break; // for toes actually prefer lower sub bones, to be closer to the foot
-   }
-   return p*256 + sub;
-}
-Flt calcMovement     (C Skeleton &skel)C; // calculate how much does the skeleton move forward in this animation, calculation is done by analyzing the leg movement
-Flt calcMovementSpeed(C Skeleton &skel)C; // calculate average skeleton forward movement speed in this animation, calculation is done by analyzing the leg movement
-Flt Animation::calcMovementSpeed(C Skeleton &skel)C {return length() ? calcMovement(skel)/length() : 0;}
-Flt Animation::calcMovement     (C Skeleton &skel)C
-{
-   Byte   leg_bone[256]; // best bone for i-th leg, 0xFF if none
-   SetMem(leg_bone, 0xFF);
-   REPA(bones)
-   {
-    C SkelBone &new_bone=skel.bones[i];
-      if(Int    new_bone_priority=BonePriority(new_bone.type, new_bone.type_sub)) // if this is a leg bone
-      {
-         Byte      abs_index=(new_bone.type_index&0xFF); // convert to Byte, in case 'type_index' is SByte, using a Byte also guarantees that the index will fit in 'leg_bone' range
-       C SkelBone *old_bone =skel.bones.addr(leg_bone[abs_index]);
-         if(new_bone_priority>BonePriority(old_bone ? old_bone->type : BONE_UNKNOWN, old_bone ? old_bone->type_sub : 0)) // if new bone is better than the old one
-            leg_bone[abs_index]=i; // set this bone as the best bone for 'abs_index' leg
-      }
-   }
-
-   Flt movement=0;
-
-   // collect all leg bones at the start
-   Int   leg_bones=0;
-   FREPA(leg_bone)if(leg_bone[i]!=0xFF)leg_bone[leg_bones++]=leg_bone[i];
-   if(   leg_bones)
-   {
-      // get times for all legs and their parents
-      Memt<Flt, 16384> times;
-      times.add(0); // include first frame
-      REP(leg_bones)includeTimesForBoneAndItsParents(skel, leg_bone[i], times, times, times);
-      times.binaryInclude(length(), CompareEps); // include last frame
-
-      Flt      bone_pos[256]; // bone positions
-      SkelAnim skel_anim(skel, T);
-      AnimSkel anim_skel; anim_skel.create(&skel);
-      FREPAD(frame, times) // animate forward
-      {
-         anim_skel.clear().animateEx(skel_anim, times[frame]).updateMatrix();
-         Flt frame_movement=0; // how much did legs move in this frame, we start with zero and maximize it by each leg, this avoids negative movement, max is used instead of average, for example zombie walk animation could have one leg not moving and just being dragged, and only other one doing the walking, averaging would make the movement smaller than it is
-         REPD(b, leg_bones) // iterate all legs
-         {
-            Int       skel_bone_index=leg_bone[b]; // leg bone index in the skeleton
-          C SkelBone &skel_bone      =skel.bones[skel_bone_index];
-            Vec       anchor         =((skel_bone.type==BONE_TOE) ? skel_bone.pos : skel_bone.to()); // for toes use the starting position, and for others use the target, this is because we're interested in the position which is in contact with the ground, and which "moves" the ground
-            Flt       new_pos        =(anchor*anim_skel.bones[skel_bone_index].matrix()).z,
-                     &old_pos        =bone_pos[b];
-            if(frame) // ignore first frame which was not set yet
-               MAX(frame_movement, old_pos-new_pos); // how much this bone moved back
-            old_pos=new_pos; // remember old position
-         }
-         movement+=frame_movement;
-      }
-   }
-   return movement;
-}
 /******************************************************************************/
 void Animation::freezeBone(C Skeleton &skel, Int skel_bone)
 {
@@ -3884,13 +3814,13 @@ void Animation::freezeBone(C Skeleton &skel, Int skel_bone)
       Vec start_pos=bone_sel.pos*abone_sel.matrix();
 
       // get root bones
-      Byte root_bone[256]; Int root_bones=0;
-      REPA(skel.bones)if(skel.bones[i].parent==0xFF){root_bone[root_bones++]=i; if(!InRange(root_bones, root_bone))break;}
-      Memt<AnimKeys, 32> root_bone_keys; root_bone_keys.setNumDiscard(root_bones);
-      Memt<Flt  , 16384> root_times; // keep outside the loop to reduce overhead
-      REPD(rb, root_bones) // iterate all root bones
+      MemtN<BoneType, 32> root_bones;
+      REPA(skel.bones)if(skel.bones[i].parent==BONE_NULL)root_bones.add(i);
+      MemtN<AnimKeys, 32> root_bone_keys; root_bone_keys.setNumDiscard(root_bones.elms());
+      Memt <Flt  , 16384> root_times; // keep outside the loop to reduce overhead
+      REPAD(rb, root_bones) // iterate all root bones
       {
-                  Int  iroot=     root_bone [rb];
+             BoneType  iroot=     root_bones[rb];
        C     SkelBone & root=     skel.bones[iroot];
        C AnimSkelBone &aroot=anim_skel.bones[iroot];
              AnimKeys & keys=     root_bone_keys[rb];
@@ -3914,9 +3844,9 @@ void Animation::freezeBone(C Skeleton &skel, Int skel_bone)
       }
 
       // once all is ready, we need to store results in this animation, this can't be done before, because that would affect results of animating the skeleton
-      REPD(rb, root_bones)
+      REPAD(rb, root_bones)
       {
-              Int iroot=root_bone [rb];
+         BoneType iroot=root_bones[rb];
        C SkelBone &root=skel.bones[iroot];
          AnimKeys &keys=root_bone_keys[rb];
          Swap(getBone(root.name, root.type, root.type_index, root.type_sub).poss, keys.poss); // swap only positions
@@ -4098,12 +4028,12 @@ error:
 /******************************************************************************/
 Bool Animation::save(C Str &name)C
 {
-   File f; if(f.writeTry(name)){if(save(f) && f.flush())return true; f.del(); FDelFile(name);}
+   File f; if(f.write(name)){if(save(f) && f.flush())return true; f.del(); FDelFile(name);}
    return false;
 }
 Bool Animation::load(C Str &name)
 {
-   File f; if(f.readTry(name))return load(f);
+   File f; if(f.read(name))return load(f);
    del(); return false;
 }
 void Animation::operator=(C UID &id  ) {T=_EncodeFileName(id);}
@@ -4153,12 +4083,12 @@ Bool XAnimation::load(File &f)
 }
 Bool XAnimation::save(C Str &name)C
 {
-   File f; if(f.writeTry(name)){if(save(f) && f.flush())return true; f.del(); FDelFile(name);}
+   File f; if(f.write(name)){if(save(f) && f.flush())return true; f.del(); FDelFile(name);}
    return false;
 }
 Bool XAnimation::load(C Str &name)
 {
-   File f; if(f.readTry(name))return load(f);
+   File f; if(f.read(name))return load(f);
    del(); return false;
 }
 /******************************************************************************/
@@ -4199,7 +4129,7 @@ SkelAnim& SkelAnim::create(C Skeleton &skeleton, C Animation &animation)
    {
     C AnimBone &abon=animation.bones[i];
       Int       sbon=skeleton .findBoneI(abon.name, abon.type, abon.type_index, abon.type_sub); // here we should always use names/types/indexes because we may share animation between multiple skeletons
-     _bone[i]=((sbon>=0) ? sbon : 0xFF);
+     _bone[i]=((sbon>=0) ? sbon : BONE_NULL);
    }
    return T;
 }

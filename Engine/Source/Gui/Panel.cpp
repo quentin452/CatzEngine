@@ -142,6 +142,11 @@ void Panel::innerPadding(C Rect &rect, Rect &padding)C
    MAX(padding.max.y, bar_size);
    // border is not included
 }
+void Panel::outerMargin(C Rect &rect, Rect &margin)C
+{
+   Rect ext; extendedRect(rect, ext);
+   margin.set(rect.min.x-ext.min.x, rect.min.y-ext.min.y, ext.max.x-rect.max.x, ext.max.y-rect.max.y);
+}
 Vec2 Panel::defaultInnerPaddingSize()C {Rect padding; defaultInnerPadding(padding); return padding.min+padding.max;}
 /******************************************************************************/
 void Panel::reset()
@@ -912,12 +917,12 @@ Bool Panel::load(File &f, CChar *path)
 }
 Bool Panel::save(C Str &name)C
 {
-   File f; if(f.writeTry(name)){if(save(f, _GetPath(name)) && f.flush())return true; f.del(); FDelFile(name);}
+   File f; if(f.write(name)){if(save(f, _GetPath(name)) && f.flush())return true; f.del(); FDelFile(name);}
    return false;
 }
 Bool Panel::load(C Str &name)
 {
-   File f; if(f.readTry(name))return load(f, _GetPath(name));
+   File f; if(f.read(name))return load(f, _GetPath(name));
    reset(); return false;
 }
 void Panel::operator=(C Str &name)

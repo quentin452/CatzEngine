@@ -3,7 +3,6 @@
    Use 'File' to handle binary files management.
 
 /******************************************************************************/
-#if EE_PRIVATE
 enum FILE_TYPE : Byte // File Type
 {
    FILE_NONE     , // none
@@ -13,7 +12,6 @@ enum FILE_TYPE : Byte // File Type
    FILE_MEMB     , // Memb  , always readable+writable
    FILE_STREAM   , // Stream, readable, only forward, no seeking
 };
-#endif
 struct File
 {
    // manage
@@ -26,29 +24,30 @@ struct File
 #endif
    File& del(); // manually delete the file object (this does not delete the file on the disk, it only closes the handle of the C++ file object and releases used memory)
 
-   Bool   editTry   (C Str     &name, const_mem_addr Cipher *cipher=null); // try to edit        stdio file, reading is     allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), if a file doesn't exist then a new file is created, if a file already exists then that file is opened, its contents are preserved, position is set to the start
-   Bool appendTry   (C Str     &name, const_mem_addr Cipher *cipher=null); // try to append      stdio file, reading is     allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), if a file doesn't exist then a new file is created, if a file already exists then that file is opened, its contents are preserved, position is set to the end
-   Bool  writeTry   (C Str     &name, const_mem_addr Cipher *cipher=null); // try to write to    stdio file, reading is     allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), if a file doesn't exist then a new file is created, if a file already exists then that file is opened, its contents are destroyed, position is set to the start, size is reset to 0
-   Bool   readStdTry(C Str     &name, const_mem_addr Cipher *cipher=null); // try to read        stdio file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed)
-   Bool   readTry   (C Str     &name, const_mem_addr Cipher *cipher=null); // try to read Pak or stdio file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed)
-   Bool   readTry   (C UID     &id  , const_mem_addr Cipher *cipher=null); // try to read Pak or stdio file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed)
-   Bool   readTry   (C Str     &name, C Pak    &pak                     ); // try to read Pak          file, writing is not allowed in this mode, false on fail
-   Bool   readTry   (C UID     &id  , C Pak    &pak                     ); // try to read Pak          file, writing is not allowed in this mode, false on fail
-   Bool   readTry   (C Str     &name, C PakSet &paks                    ); // try to read Pak          file, writing is not allowed in this mode, false on fail
-   Bool   readTry   (C UID     &id  , C PakSet &paks                    ); // try to read Pak          file, writing is not allowed in this mode, false on fail
-   Bool   readTry   (C PakFile &file, C Pak    &pak                     ); // try to read Pak          file, writing is not allowed in this mode, false on fail
+   Bool   edit   (C Str     &name, const_mem_addr Cipher *cipher=null); // try to edit        stdio file, reading is     allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), if a file doesn't exist then a new file is created, if a file already exists then that file is opened, its contents are preserved, position is set to the start
+   Bool append   (C Str     &name, const_mem_addr Cipher *cipher=null); // try to append      stdio file, reading is     allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), if a file doesn't exist then a new file is created, if a file already exists then that file is opened, its contents are preserved, position is set to the end
+   Bool  write   (C Str     &name, const_mem_addr Cipher *cipher=null); // try to write to    stdio file, reading is     allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), if a file doesn't exist then a new file is created, if a file already exists then that file is opened, its contents are destroyed, position is set to the start, size is reset to 0
+   Bool   readStd(C Str     &name, const_mem_addr Cipher *cipher=null); // try to read        stdio file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed)
+   Bool   read   (C Str     &name, const_mem_addr Cipher *cipher=null); // try to read Pak or stdio file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed)
+   Bool   read   (C UID     &id  , const_mem_addr Cipher *cipher=null); // try to read Pak or stdio file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed)
+   Bool   read   (C Str     &name, C Pak    &pak                     ); // try to read Pak          file, writing is not allowed in this mode, false on fail
+   Bool   read   (C UID     &id  , C Pak    &pak                     ); // try to read Pak          file, writing is not allowed in this mode, false on fail
+   Bool   read   (C Str     &name, C PakSet &paks                    ); // try to read Pak          file, writing is not allowed in this mode, false on fail
+   Bool   read   (C UID     &id  , C PakSet &paks                    ); // try to read Pak          file, writing is not allowed in this mode, false on fail
+   Bool   read   (C PakFile &file, C Pak    &pak                     ); // try to read Pak          file, writing is not allowed in this mode, false on fail
 #if EE_PRIVATE
 #if ANDROID
-   Bool   readStdTryEx(C Str     &name,                 const_mem_addr Cipher *cipher, UInt max_buf_size=UINT_MAX, Bool *processed=null); // try to read stdio file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed)
+   Bool   readStdEx(C Str     &name,                 const_mem_addr Cipher *cipher, UInt max_buf_size=UINT_MAX, Bool *processed=null); // try to read stdio file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed)
 #else
-   Bool   readStdTryEx(C Str     &name,                 const_mem_addr Cipher *cipher, UInt max_buf_size=UINT_MAX        ); // try to read        stdio file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed)
+   Bool   readStdEx(C Str     &name,                 const_mem_addr Cipher *cipher, UInt max_buf_size=UINT_MAX        ); // try to read        stdio file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed)
 #endif
-   Bool   readTryEx   (C Str     &name,                 const_mem_addr Cipher *cipher, Bool *processed, Bool stream=false); // try to read Pak or stdio file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), 'processed'=if original file had to be processed
-   Bool   readTryEx   (C UID     &id  ,                 const_mem_addr Cipher *cipher, Bool *processed, Bool stream=false); // try to read Pak or stdio file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), 'processed'=if original file had to be processed
-   Bool   readTryEx   (C Str     &name, C PakSet &paks, const_mem_addr Cipher *cipher, Bool *processed, Bool stream=false); // try to read Pak          file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), 'processed'=if original file had to be processed
-   Bool   readTryEx   (C UID     &id  , C PakSet &paks, const_mem_addr Cipher *cipher, Bool *processed, Bool stream=false); // try to read Pak          file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), 'processed'=if original file had to be processed
-   Bool   readTryEx   (C PakFile &file, C Pak    &pak , const_mem_addr Cipher *cipher, Bool *processed, Bool stream=false); // try to read Pak          file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), 'processed'=if original file had to be processed
-   Bool   readTryRaw  (C PakFile &file, C Pak    &pak                                                                    ); // try to read Pak          file, writing is not allowed in this mode, false on fail, this reads file in raw mode (does not decompress files)
+   Bool   readEx   (C Str     &name,                 const_mem_addr Cipher *cipher, Bool *processed, Bool stream=false); // try to read Pak or stdio file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), 'processed'=if original file had to be processed
+   Bool   readEx   (C UID     &id  ,                 const_mem_addr Cipher *cipher, Bool *processed, Bool stream=false); // try to read Pak or stdio file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), 'processed'=if original file had to be processed
+   Bool   readEx   (C Str     &name, C PakSet &paks, const_mem_addr Cipher *cipher, Bool *processed, Bool stream=false); // try to read Pak          file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), 'processed'=if original file had to be processed
+   Bool   readEx   (C UID     &id  , C PakSet &paks, const_mem_addr Cipher *cipher, Bool *processed, Bool stream=false); // try to read Pak          file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), 'processed'=if original file had to be processed
+   Bool   readEx   (C PakFile &file, C Pak    &pak , const_mem_addr Cipher *cipher, Bool *processed, Bool stream=false); // try to read Pak          file, writing is not allowed in this mode, false on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed), 'processed'=if original file had to be processed
+   Bool   readRaw  (C PakFile &file, C Pak    &pak                                                                    ); // try to read Pak          file, writing is not allowed in this mode, false on fail, this reads file in raw mode (does not decompress files)
+   Bool   readFD   (  Int      fd, const_mem_addr Cipher *cipher=null);
 #endif
 
    File& writeMemFixed(           Int size    , const_mem_addr Cipher *cipher=null); // start writing to   fixed     memory file   , reading is     allowed in this mode, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed)
@@ -78,21 +77,18 @@ struct File
    Ptr       mem      (        ) ; // get raw memory pointer for FILE_MEM
    UInt      memUsage (        )C; // get memory usage
    FSTD_TYPE stdType  (        )C; // get FSTD_TYPE
-   void      cipher           (Cipher *cipher);                             // adjust file cipher
-   void      cipherOffset     (Int     offset);                             // adjust file cipher offset
-   void      cipherOffset     (Long    offset) {cipherOffset((Int)offset);} // adjust file cipher offset, can be Int (instead Long) because Cipher operates on Int offset only
-   void      cipherOffsetClear(              ) {cipherOffset(-pos()     );} // adjust file cipher offset so that "posCipher()==0 -> pos+cipher_offset==0 -> cipher_offset=-pos", this will result in encryption being always the same, regardless of current location
-   Long      fullLeft         (              )C{return _full_size-_pos   ;} // get size left (number of bytes from current position to the end of the file)
+   Long      fullLeft (        )C{return _full_size-_pos;} // get size left (number of bytes from current position to the end of the file)
 #endif
-   Bool  is     (        )C {return _type!=0    ;} // if  file is opened
-   Bool  pos    (Long pos);                        // set position, false on fail
-   Long  pos    (        )C {return _pos        ;} // get position
-   Long  size   (        )C {return _size       ;} // get size
-   Long  left   (        )C {return _size-_pos  ;} // get size left (number of bytes from current position to the end of the file)
-   Bool  end    (        )C {return _pos>=_size ;} // if  current position is at the end of the file
-   Bool  skip   (Long n  )  {return  pos(_pos+n);} // skip 'n' bytes going forward
-   Bool       ok(        )C {return _ok         ;} // check if no errors occurred during reading/writing. When a new file is opened this will be set to true by default, if any 'put' or 'get' call will fail then this will be set to false
-   File& resetOK(        )  {_ok=true;  return T;} // reset 'ok' status to default
+   Bool  is     (        )C {return _type!=FILE_NONE;} // if  file is opened
+   Bool  pos    (Long pos);                            // set position, false on fail
+   Long  pos    (        )C {return _pos            ;} // get position
+   Long  size   (        )C {return _size           ;} // get size
+   Long  left   (        )C {return _size-_pos      ;} // get size left (number of bytes from current position to the end of the file)
+   Bool  end    (        )C {return _pos>=_size     ;} // if  current position is at the end of the file
+   Bool  skip   (Long n  )  {return  pos(_pos+n)    ;} // skip 'n' bytes going forward
+   Bool       ok(        )C {return _ok             ;} // check if no errors occurred during reading/writing. When a new file is opened this will be set to true by default, if any 'put' or 'get' call will fail then this will be set to false
+   File& resetOK(        )  {_ok= true;     return T;} // reset 'ok' status to default
+   File&   error(        )  {_ok=false;     return T;} //   set 'ok' status to ERROR
 
    // put / get
 #if EE_PRIVATE
@@ -266,6 +262,15 @@ struct File
    T2(TYPE_FROM, TYPE_TO)  File& getRange(  TYPE_FROM &from,   TYPE_TO &to) {get(&from, UIntPtr(&to)-UIntPtr(&from)+SIZE(to)); return T;}
 #endif
 
+   // cipher
+   Cipher* cipher(                             )C {return _cipher;} // get file cipher
+   void    cipher(const_mem_addr Cipher *cipher);                   // set file cipher
+#if EE_PRIVATE
+   void    cipherOffset     (Int  offset);                             // adjust file cipher offset
+   void    cipherOffset     (Long offset) {cipherOffset((Int)offset);} // adjust file cipher offset, can be Int (instead Long) because Cipher operates on Int offset only
+   void    cipherOffsetClear(           ) {cipherOffset(-pos()     );} // adjust file cipher offset so that "posCipher()==0 -> pos+cipher_offset==0 -> cipher_offset=-pos", this will result in encryption being always the same, regardless of current location
+#endif
+
            ~File() {del();}
             File();
    explicit File(C Str     &name,              const_mem_addr Cipher *cipher=null); // read Pak or stdio file, Exit on fail, 'cipher' must point to object in constant memory address (only pointer is stored through which the object can be later accessed)
@@ -277,7 +282,7 @@ struct File
 #if !EE_PRIVATE
 private:
 #endif
-   Byte       _type;
+   FILE_TYPE  _type;
    Bool       _writable, _ok;
    FILE_PATH  _path;
    Int        _buf_pos, _buf_len, _buf_size, _cipher_offset;

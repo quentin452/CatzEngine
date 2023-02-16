@@ -90,10 +90,11 @@ WorldView WorldEdit;
    void WorldView::OpMove(WorldView &world) {world.obj_op.toggle(OP_MOVE     );}
    void WorldView::OpRot(WorldView &world) {world.obj_op.toggle(OP_ROT      );}
    void WorldView::OpScale(WorldView &world) {world.obj_op.toggle(OP_SCALE    );}
-   void WorldView::Op4(WorldView &world) {world.obj_op.toggle(OP_SEPARATE );}
-   void WorldView::Op5(WorldView &world) {world.obj_op.toggle(OP_MOVE_Y   );}
-   void WorldView::Op6(WorldView &world) {world.obj_op.toggle(OP_ROT_Y    );}
-   void WorldView::Op7(WorldView &world) {world.obj_op.toggle(OP_ROT_GROUP);}
+   void WorldView::Op4(WorldView &world) {world.obj_op.toggle(OP_SCALE_ALL);}
+   void WorldView::Op5(WorldView &world) {world.obj_op.toggle(OP_SEPARATE );}
+   void WorldView::Op6(WorldView &world) {world.obj_op.toggle(OP_MOVE_Y   );}
+   void WorldView::Op7(WorldView &world) {world.obj_op.toggle(OP_ROT_Y    );}
+   void WorldView::Op8(WorldView &world) {world.obj_op.toggle(OP_ROT_GROUP);}
    void WorldView::AlignHm(WorldView &world) {world.obj_hm_align.push();}
    void WorldView::AlignGrid(WorldView &world) {world.show_obj_grid.toggle(0);}
    void WorldView::CurPos(WorldView &world) {world.show_cur_pos.push();}
@@ -458,7 +459,7 @@ WorldView WorldEdit;
          v.New().create("Cur Pos"   , CurPos     , T).kbsc(KbSc(KB_C  , KBSC_ALT));
 
          v.New().create("Undo" , Undo, T).kbsc(KbSc(KB_Z, KBSC_CTRL_CMD|KBSC_REPEAT));
-         v.New().create("Redo" , Redo, T).kbsc(KbSc(KB_Y, KBSC_CTRL_CMD|KBSC_REPEAT)).kbsc2(KbSc(KB_Z, KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_REPEAT));
+         v.New().create("Redo" , Redo, T).kbsc(KbSc(KB_Y, KBSC_CTRL_CMD|KBSC_REPEAT)).kbsc1(KbSc(KB_Z, KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_REPEAT));
          v.New().create("Undo2", Undo, T).kbsc(KbSc(KB_BACK, KBSC_ALT           |KBSC_REPEAT)).flag(MENU_HIDDEN); // keep those hidden because they occupy too much of visible space (besides on Windows Notepad they also work and are not listed)
          v.New().create("Redo2", Redo, T).kbsc(KbSc(KB_BACK, KBSC_ALT|KBSC_SHIFT|KBSC_REPEAT)).flag(MENU_HIDDEN); // keep those hidden because they occupy too much of visible space (besides on Windows Notepad they also work and are not listed)
 
@@ -473,6 +474,7 @@ WorldView WorldEdit;
          o.New().create("Op 5"      , Op5         , T).kbsc(KbSc(KB_B));
          o.New().create("Op 6"      , Op6         , T).kbsc(KbSc(KB_N));
          o.New().create("Op 7"      , Op7         , T).kbsc(KbSc(KB_M));
+         o.New().create("Op 8"      , Op8         , T).kbsc(KbSc(KB_COMMA));
          o.New().create("Align Hm"  , AlignHm     , T).kbsc(KbSc(KB_H, KBSC_CTRL_CMD));
          o.New().create("Align Grid", AlignGrid   , T).kbsc(KbSc(KB_G, KBSC_CTRL_CMD));
          o.New().create("Obj List"  , ShowObjList , T).kbsc(KbSc(KB_L, KBSC_CTRL_CMD));
@@ -501,15 +503,16 @@ WorldView WorldEdit;
    void WorldView::createObj()
    {
       flt h=0.05f;
-      mode.tab(OBJECT)+=obj_op.create(Rect_U(mode.tab(OBJECT).rect().down()+Vec2(0.13f, -0.01f), 0.055f*8, 0.055f), 0, (cchar**)null, 8).func(ObjOpChanged, T);
+      mode.tab(OBJECT)+=obj_op.create(Rect_U(mode.tab(OBJECT).rect().down()+Vec2(0.13f, -0.01f), 0.055f*8, 0.055f), 0, (cchar**)null, OP_SEL).func(ObjOpChanged, T);
       obj_op.tab(OP_INS      ).setText ("+1"                        ).desc("Copy object\nSelect existing with LeftClick\nCopy with RightClick\n\nKeyboard Shortcut: Insert");
       obj_op.tab(OP_MOVE     ).setImage("Gui/Misc/move.img"         ).desc(S+    "Move object\nSelect with LeftClick\nMove with RightClick\nHold Shift for more precision\n\nKeyboard Shortcut: Z");
       obj_op.tab(OP_ROT      ).setImage("Gui/Misc/rotate.img"       ).desc(S+  "Rotate object\nSelect with LeftClick\nRotate with RightClick\nHold Shift for more precision\n\nKeyboard Shortcut: X");
       obj_op.tab(OP_SCALE    ).setImage("Gui/Misc/scale.img"        ).desc(S+   "Scale object\nSelect with LeftClick\nScale with RightClick\nHold Shift for more precision\n\nKeyboard Shortcut: C");
-      obj_op.tab(OP_SEPARATE ).setImage("Gui/Misc/separate.img"     ).desc(S+"Separate objects (this will move objects away from each other)\nSelect with LeftClick\nSeparate with RightClick\n\nKeyboard Shortcut: V (or "+Kb.ctrlCmdName()+"+Shift)");
-      obj_op.tab(OP_MOVE_Y   ).setImage("Gui/Misc/move_vertical.img").desc(S+    "Move object vertically\nSelect with LeftClick\nMove with RightClick\nHold Shift for more precision\n\nKeyboard Shortcut: B (or "+Kb.ctrlCmdName()+")");
-      obj_op.tab(OP_ROT_Y    ).setImage("Gui/Misc/rotate_y.img"     ).desc(S+  "Rotate objects by Y axis\nSelect with LeftClick\nRotate with RightClick\nHold Shift for more precision\n\nKeyboard Shortcut: N (or Alt)");
-      obj_op.tab(OP_ROT_GROUP).setImage("Gui/Misc/rotate_group.img" ).desc(S+  "Rotate objects around their middle position\nSelect with LeftClick\nRotate with RightClick\nHold Shift for more precision\n\nKeyboard Shortcut: M (or "+Kb.ctrlCmdName()+"+Alt)");
+      obj_op.tab(OP_SCALE_ALL).setImage("Gui/Misc/scale_all.img"    ).desc(S+   "Scale objects\nSelect with LeftClick\nScale with RightClick\nHold Shift for more precision\n\nKeyboard Shortcut: V");
+      obj_op.tab(OP_SEPARATE ).setImage("Gui/Misc/separate.img"     ).desc(S+"Separate objects (this will move objects away from each other)\nSelect with LeftClick\nSeparate with RightClick\n\nKeyboard Shortcut: B (or "+Kb.ctrlCmdName()+"+Shift)");
+      obj_op.tab(OP_MOVE_Y   ).setImage("Gui/Misc/move_vertical.img").desc(S+    "Move object vertically\nSelect with LeftClick\nMove with RightClick\nHold Shift for more precision\n\nKeyboard Shortcut: N (or "+Kb.ctrlCmdName()+")");
+      obj_op.tab(OP_ROT_Y    ).setImage("Gui/Misc/rotate_y.img"     ).desc(S+  "Rotate objects by Y axis\nSelect with LeftClick\nRotate with RightClick\nHold Shift for more precision\n\nKeyboard Shortcut: M (or Alt)");
+      obj_op.tab(OP_ROT_GROUP).setImage("Gui/Misc/rotate_group.img" ).desc(S+  "Rotate objects around their middle position\nSelect with LeftClick\nRotate with RightClick\nHold Shift for more precision\n\nKeyboard Shortcut: , (or "+Kb.ctrlCmdName()+"+Alt)");
 
       cchar8 *obj_grid_t[]={"Grid"};
       mode.tab(OBJECT)+=show_obj_grid.create(Rect_RU(obj_op.rect().lu()-Vec2(h, 0), 0.10f, obj_op.rect().h()), 0, obj_grid_t, Elms(obj_grid_t)).desc(S+"Align objects to grid on movement\nKeyboard Shortcut: "+Kb.ctrlCmdName()+"+G");
@@ -525,8 +528,9 @@ WorldView WorldEdit;
       n.New().create("Align to Terrain Normal", ObjAlignNrm ).kbsc(KbSc(KB_N, KBSC_CTRL_CMD|KBSC_SHIFT));
       n.New().create("Align to Grid"          , ObjAlignGrid).kbsc(KbSc(KB_G, KBSC_CTRL_CMD|KBSC_SHIFT));
       n++;
-      n.New().create("Randomize Rotation", ObjRandomRot).kbsc(KbSc(KB_R, KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_REPEAT));
-      n.New().create("Reset Rotation"    , ObjResetRot ).kbsc(KbSc(KB_R, KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_ALT));
+      n.New().create("Randomize Rotation"   , ObjRandomRot  ).kbsc(KbSc(KB_R, KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_REPEAT));
+      n.New().create("Randomize Rotation 90", ObjRandomRot90);
+      n.New().create("Reset Rotation"       , ObjResetRot   ).kbsc(KbSc(KB_R, KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_ALT));
       n++;
       n.New().create("Rotate X", ObjRotX).kbsc(KbSc(KB_X, KBSC_CTRL_CMD|KBSC_ALT|KBSC_REPEAT));
       n.New().create("Rotate Y", ObjRotY).kbsc(KbSc(KB_Y, KBSC_CTRL_CMD|KBSC_ALT|KBSC_REPEAT));
@@ -753,6 +757,7 @@ WorldView WorldEdit;
          if(!(elm->data && elm->worldData() && elm->worldData()->valid())){Gui.msgBox(S, "World settings not available.\nPerhaps they didn't finish downloading from the server."); elm=null;}
       if(T.elm!=elm)
       {
+         obj_pos.apply();
          HeightBrush.updateChanged();
          flushSettings ();
          flushWaypoints();
@@ -1165,7 +1170,7 @@ WorldView WorldEdit;
       REPAO(obj_update)->update();
 
       // get highlighted axis of selected object
-      if(mode()!=OBJECT || (obj_op()!=OP_MOVE && obj_op()!=OP_SCALE && obj_op()!=OP_ROT) || Selection.elms()!=1)obj_axis=-1;else
+      if(mode()!=OBJECT || (obj_op()!=OP_MOVE && obj_op()!=OP_SCALE && obj_op()!=OP_SCALE_ALL && obj_op()!=OP_ROT) || Selection.elms()!=1)obj_axis=-1;else
       {
          Cursor *editing=((cur.onViewport() && Ms.b(1)) ? &cur : null); REPA(cur_touch)if(cur_touch[i].onViewport() && cur_touch[i].on()){editing=&cur_touch[i]; break;}
          bool first_push=true; REP(curTotal())if(curAll(i).notFirstEdit()){first_push=false; break;}

@@ -4,7 +4,7 @@ namespace EE{
 static Int Compare(C Edit::Elm &elm, C UID &id) {return Compare(elm.id, id);}
 namespace Edit{
 /******************************************************************************/
-#define EI_VER 56 // this needs to be increased every time a new command is added, existing one is changed, or some of engine class file formats get updated
+#define EI_VER 57 // this needs to be increased every time a new command is added, existing one is changed, or some of engine class file formats get updated
 #define EI_STR (ENGINE_NAME " Editor Network Interface")
 
 #define CLIENT_WAIT_TIME         (   60*1000) //    60 seconds
@@ -38,8 +38,8 @@ parent:
 /******************************************************************************/
 void MaterialMap::create(Int resolution)
 {
-  _m .createSoftTry(resolution, resolution, 1, IMAGE_R8G8B8A8);
-  _i .createSoftTry(resolution, resolution, 1, IMAGE_R8G8B8A8);
+  _m .createSoft(resolution, resolution, 1, IMAGE_R8G8B8A8);
+  _i .createSoft(resolution, resolution, 1, IMAGE_R8G8B8A8);
   _ip.clear();
 }
 void MaterialMap::del()
@@ -266,6 +266,7 @@ Bool ObjChange::load(File &f, CChar *path)
 ObjData& ObjData::reset()
 {
    elm_obj_class_id.zero();
+            base_id.zero();
    access=OBJ_ACCESS_TERRAIN;
    path  =OBJ_PATH_CREATE;
    params.clear();
@@ -284,8 +285,8 @@ ObjData::Param* ObjData::findParam(C Str &name, PARAM_TYPE type, Bool include_re
    }
    return null;
 }
-Bool ObjData::save(File &f)C {f<<elm_obj_class_id<<access<<path; return params.save(f) && f.ok();}
-Bool ObjData::load(File &f)  {f>>elm_obj_class_id>>access>>path; return params.load(f) && f.ok();}
+Bool ObjData::save(File &f)C {f<<elm_obj_class_id<<base_id<<access<<path; return params.save(f) && f.ok();}
+Bool ObjData::load(File &f)  {f>>elm_obj_class_id>>base_id>>access>>path; return params.load(f) && f.ok();}
 /******************************************************************************/
 // CLIENT
 /******************************************************************************/
@@ -902,7 +903,7 @@ Bool EditorInterface::worldObjCreate(C UID &world_id, C CMemPtr<WorldObjParams> 
 }
 Bool EditorInterface::worldObjGetDesc(C UID &world_id, MemPtr<WorldObjDesc> objs, C CMemPtr<UID> &world_obj_instance_ids, C RectI *areas, Bool only_selected, Bool include_removed)
 {
-   if(world_id.valid() && world_obj_instance_ids.elms() && connected())
+   if(world_id.valid() && connected())
    {
       File &f=_conn.data.reset(); f.putByte(EI_GET_WORLD_OBJ_BASIC).putUID(world_id).putBool(areas!=null); if(areas)f<<*areas; f<<only_selected<<include_removed; world_obj_instance_ids.saveRaw(f); f.pos(0);
       if(_conn.send(f))
@@ -915,11 +916,11 @@ Bool EditorInterface::worldObjGetDesc(C UID &world_id, MemPtr<WorldObjDesc> objs
       disconnect();
    }
 fail:
-   objs.clear(); return !(world_id.valid() && world_obj_instance_ids.elms());
+   objs.clear(); return !world_id.valid();
 }
 Bool EditorInterface::worldObjGetData(C UID &world_id, MemPtr<WorldObjData> objs, C CMemPtr<UID> &world_obj_instance_ids, C RectI *areas, Bool only_selected, Bool include_removed, Bool include_removed_params)
 {
-   if(world_id.valid() && world_obj_instance_ids.elms() && connected())
+   if(world_id.valid() && connected())
    {
       File &f=_conn.data.reset(); f.putByte(EI_GET_WORLD_OBJ_FULL).putUID(world_id).putBool(areas!=null); if(areas)f<<*areas; f<<only_selected<<include_removed<<include_removed_params; world_obj_instance_ids.saveRaw(f); f.pos(0);
       if(_conn.send(f))
@@ -932,7 +933,7 @@ Bool EditorInterface::worldObjGetData(C UID &world_id, MemPtr<WorldObjData> objs
       disconnect();
    }
 fail:
-   objs.clear(); return !(world_id.valid() && world_obj_instance_ids.elms());
+   objs.clear(); return !world_id.valid();
 }
 // !! when sending object data - HANDLE CORRECT REL PATH FOR OBJ PARAM ENUMS !!
 /******************************************************************************/

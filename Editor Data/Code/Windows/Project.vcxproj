@@ -162,12 +162,12 @@
     <NintendoSdkBuildType>Release</NintendoSdkBuildType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DX11|Emscripten'" Label="Configuration">
-    <CharacterSet>NotSet</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <PlatformToolset>emcc</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|Emscripten'" Label="Configuration">
-    <CharacterSet>NotSet</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DX11|x64'" Label="Configuration">
@@ -215,11 +215,11 @@
     <NintendoSdkBuildType>Release</NintendoSdkBuildType>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DX11|Emscripten'" Label="Configuration">
-    <CharacterSet>NotSet</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>emcc</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Universal DX11|Emscripten'" Label="Configuration">
-    <CharacterSet>NotSet</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings" />
@@ -337,6 +337,7 @@
     <AndroidGradleBuildDir>$(MSBuildProjectDirectory)\Android\</AndroidGradleBuildDir>
     <AndroidApplicationModule>app</AndroidApplicationModule>
     <AndroidApkName>$(ProjectName).apk</AndroidApkName>
+    <AndroidGradlePackageOutputName>$(ProjectName).apk</AndroidGradlePackageOutputName>
     <AndroidApplicationVariant>Debug</AndroidApplicationVariant>
     <TargetName>libProject</TargetName>
   </PropertyGroup>
@@ -347,6 +348,7 @@
     <AndroidGradleBuildDir>$(MSBuildProjectDirectory)\Android\</AndroidGradleBuildDir>
     <AndroidApplicationModule>app</AndroidApplicationModule>
     <AndroidApkName>$(ProjectName).apk</AndroidApkName>
+    <AndroidGradlePackageOutputName>$(ProjectName).apk</AndroidGradlePackageOutputName>
     <AndroidApplicationVariant>Debug</AndroidApplicationVariant>
     <TargetName>libProject</TargetName>
   </PropertyGroup>
@@ -357,6 +359,7 @@
     <AndroidGradleBuildDir>$(MSBuildProjectDirectory)\Android\</AndroidGradleBuildDir>
     <AndroidApplicationModule>app</AndroidApplicationModule>
     <AndroidApkName>$(ProjectName).apk</AndroidApkName>
+    <AndroidGradlePackageOutputName>$(ProjectName).apk</AndroidGradlePackageOutputName>
     <AndroidApplicationVariant>Release</AndroidApplicationVariant>
     <TargetName>libProject</TargetName>
   </PropertyGroup>
@@ -367,6 +370,7 @@
     <AndroidGradleBuildDir>$(MSBuildProjectDirectory)\Android\</AndroidGradleBuildDir>
     <AndroidApplicationModule>app</AndroidApplicationModule>
     <AndroidApkName>$(ProjectName).apk</AndroidApkName>
+    <AndroidGradlePackageOutputName>$(ProjectName).apk</AndroidGradlePackageOutputName>
     <AndroidApplicationVariant>Release</AndroidApplicationVariant>
     <TargetName>libProject</TargetName>
   </PropertyGroup>
@@ -532,7 +536,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
-      <AdditionalOptions>-Wno-comment -Wno-parentheses -Wno-misleading-indentation -Wno-int-to-void-pointer-cast -Wno-unused-local-typedef -Wno-overloaded-virtual -Wno-switch -Wno-undefined-bool-conversion -Wno-null-dereference -Wno-missing-braces -Wno-invalid-noreturn -Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable -Wno-address-of-temporary</AdditionalOptions>
+      <AdditionalOptions>-fno-delete-null-pointer-checks -Wno-comment -Wno-parentheses -Wno-misleading-indentation -Wno-int-to-void-pointer-cast -Wno-unused-local-typedef -Wno-overloaded-virtual -Wno-switch -Wno-undefined-bool-conversion -Wno-null-dereference -Wno-missing-braces -Wno-invalid-noreturn -Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable -Wno-address-of-temporary</AdditionalOptions>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>StdAfx.h</PrecompiledHeaderFile>
@@ -675,7 +679,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
-      <AdditionalOptions>-Wno-comment -Wno-parentheses -Wno-misleading-indentation -Wno-int-to-void-pointer-cast -Wno-unused-local-typedef -Wno-overloaded-virtual -Wno-switch -Wno-undefined-bool-conversion -Wno-null-dereference -Wno-missing-braces -Wno-invalid-noreturn -Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable -Wno-address-of-temporary</AdditionalOptions>
+      <AdditionalOptions>-fno-delete-null-pointer-checks -Wno-comment -Wno-parentheses -Wno-misleading-indentation -Wno-int-to-void-pointer-cast -Wno-unused-local-typedef -Wno-overloaded-virtual -Wno-switch -Wno-undefined-bool-conversion -Wno-null-dereference -Wno-missing-braces -Wno-invalid-noreturn -Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable -Wno-address-of-temporary</AdditionalOptions>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>StdAfx.h</PrecompiledHeaderFile>
@@ -771,7 +775,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
-      <AdditionalOptions>-Wno-invalid-offsetof -Wno-comment -Wno-parentheses -Wno-switch -Wno-empty-body -Wno-address-of-temporary -Wno-constant-logical-operand -Wno-null-dereference -Wno-int-to-void-pointer-cast -Wno-dynamic-class-memaccess -fms-extensions -std=c++17</AdditionalOptions>
+      <AdditionalOptions>-fno-delete-null-pointer-checks -Wno-invalid-offsetof -Wno-comment -Wno-parentheses -Wno-switch -Wno-empty-body -Wno-address-of-temporary -Wno-constant-logical-operand -Wno-null-dereference -Wno-int-to-void-pointer-cast -Wno-dynamic-class-memaccess -fms-extensions -std=c++17</AdditionalOptions>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>StdAfx.h</PrecompiledHeaderFile>
@@ -817,7 +821,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
-      <AdditionalOptions>-Wno-invalid-offsetof -Wno-comment -Wno-parentheses -Wno-switch -Wno-empty-body -Wno-address-of-temporary -Wno-constant-logical-operand -Wno-null-dereference -Wno-int-to-void-pointer-cast -Wno-dynamic-class-memaccess -fms-extensions -std=c++17</AdditionalOptions>
+      <AdditionalOptions>-fno-delete-null-pointer-checks -Wno-invalid-offsetof -Wno-comment -Wno-parentheses -Wno-switch -Wno-empty-body -Wno-address-of-temporary -Wno-constant-logical-operand -Wno-null-dereference -Wno-int-to-void-pointer-cast -Wno-dynamic-class-memaccess -fms-extensions -std=c++17</AdditionalOptions>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>StdAfx.h</PrecompiledHeaderFile>
@@ -1002,7 +1006,7 @@
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>-Wno-comment -Wno-parentheses -Wno-misleading-indentation -Wno-int-to-void-pointer-cast -Wno-unused-local-typedef -Wno-overloaded-virtual -Wno-switch -Wno-undefined-bool-conversion -Wno-null-dereference -Wno-missing-braces -Wno-invalid-noreturn -Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable -Wno-address-of-temporary</AdditionalOptions>
+      <AdditionalOptions>-fno-delete-null-pointer-checks -Wno-comment -Wno-parentheses -Wno-misleading-indentation -Wno-int-to-void-pointer-cast -Wno-unused-local-typedef -Wno-overloaded-virtual -Wno-switch -Wno-undefined-bool-conversion -Wno-null-dereference -Wno-missing-braces -Wno-invalid-noreturn -Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable -Wno-address-of-temporary</AdditionalOptions>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>StdAfx.h</PrecompiledHeaderFile>
@@ -1157,7 +1161,7 @@
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalOptions>-Wno-comment -Wno-parentheses -Wno-misleading-indentation -Wno-int-to-void-pointer-cast -Wno-unused-local-typedef -Wno-overloaded-virtual -Wno-switch -Wno-undefined-bool-conversion -Wno-null-dereference -Wno-missing-braces -Wno-invalid-noreturn -Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable -Wno-address-of-temporary</AdditionalOptions>
+      <AdditionalOptions>-fno-delete-null-pointer-checks -Wno-comment -Wno-parentheses -Wno-misleading-indentation -Wno-int-to-void-pointer-cast -Wno-unused-local-typedef -Wno-overloaded-virtual -Wno-switch -Wno-undefined-bool-conversion -Wno-null-dereference -Wno-missing-braces -Wno-invalid-noreturn -Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable -Wno-address-of-temporary</AdditionalOptions>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>StdAfx.h</PrecompiledHeaderFile>
@@ -1266,7 +1270,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
-      <AdditionalOptions>-Wno-invalid-offsetof -Wno-comment -Wno-parentheses -Wno-switch -Wno-empty-body -Wno-address-of-temporary -Wno-constant-logical-operand -Wno-null-dereference -Wno-int-to-void-pointer-cast -Wno-dynamic-class-memaccess -fms-extensions -std=c++17</AdditionalOptions>
+      <AdditionalOptions>-fno-delete-null-pointer-checks -Wno-invalid-offsetof -Wno-comment -Wno-parentheses -Wno-switch -Wno-empty-body -Wno-address-of-temporary -Wno-constant-logical-operand -Wno-null-dereference -Wno-int-to-void-pointer-cast -Wno-dynamic-class-memaccess -fms-extensions -std=c++17</AdditionalOptions>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>StdAfx.h</PrecompiledHeaderFile>
@@ -1313,7 +1317,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
-      <AdditionalOptions>-Wno-invalid-offsetof -Wno-comment -Wno-parentheses -Wno-switch -Wno-empty-body -Wno-address-of-temporary -Wno-constant-logical-operand -Wno-null-dereference -Wno-int-to-void-pointer-cast -Wno-dynamic-class-memaccess -fms-extensions -std=c++17</AdditionalOptions>
+      <AdditionalOptions>-fno-delete-null-pointer-checks -Wno-invalid-offsetof -Wno-comment -Wno-parentheses -Wno-switch -Wno-empty-body -Wno-address-of-temporary -Wno-constant-logical-operand -Wno-null-dereference -Wno-int-to-void-pointer-cast -Wno-dynamic-class-memaccess -fms-extensions -std=c++17</AdditionalOptions>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>StdAfx.h</PrecompiledHeaderFile>

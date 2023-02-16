@@ -136,5 +136,6 @@ DECLARE_CACHE(Font, Fonts, FontPtr); // 'Fonts' cache storing 'Font' objects whi
 /******************************************************************************/
 #if EE_PRIVATE
 void ShutFont();
+#define SUPPORT_EMOJI 1 // if enabled, then for simplicity/speed all emojis are assumed to be square, with size same as Font height, and everything that is not found in '_wide_to_font' is treated as emoji (even if not found), except '\0'
 #endif
 /******************************************************************************/

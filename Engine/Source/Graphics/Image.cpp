@@ -139,6 +139,29 @@ ImageTypeInfo ImageTI[IMAGE_ALL_TYPES]= // !! in case multiple types have the sa
 }; ASSERT(IMAGE_ALL_TYPES==89);
 Bool ImageTypeInfo::_usage_known=false;
 /******************************************************************************/
+static FILTER_TYPE FilterDown(FILTER_TYPE filter)
+{
+   switch(filter)
+   {
+      case FILTER_BEST :
+      case FILTER_WAIFU:
+      case FILTER_EASU :
+               return FILTER_DOWN;
+      default: return filter;
+   }
+}
+static FILTER_TYPE FilterMip(FILTER_TYPE filter)
+{
+   switch(filter)
+   {
+      case FILTER_BEST :
+      case FILTER_WAIFU:
+      case FILTER_EASU :
+               return FILTER_MIP;
+      default: return filter;
+   }
+}
+/******************************************************************************/
 Bool IsSRGB(IMAGE_TYPE type)
 {
    switch(type)
@@ -412,28 +435,41 @@ IMAGE_TYPE ImageTypeOnFail(IMAGE_TYPE type) // this is for HW images, don't retu
 {
    switch(type)
    {
+      /* RGB_A *****************/
+      case IMAGE_BC1 : // use since there's no other desktop compressed format without alpha
+      case IMAGE_ETC1:
+      case IMAGE_ETC2_RGB:
+      #if !DX11 // DX11 doesn't support HW RGB DXGI_FORMAT_R8G8B8_UNORM
+         return IMAGE_R8G8B8;
+      #endif
       default: return IMAGE_R8G8B8A8;
+      /*************************/
 
-      case IMAGE_NONE         : // don't try if original is empty
-      case IMAGE_R8G8B8A8     : // don't try the same type again
-      case IMAGE_R8G8B8A8_SRGB:
-         return IMAGE_NONE;
-
+      /* RGB_A_SRGB ************/
+      case IMAGE_BC1_SRGB:
+      case IMAGE_ETC2_RGB_SRGB:
+      #if !DX11 // DX11 doesn't support HW RGB_SRGB DXGI_FORMAT_R8G8B8_UNORM_SRGB
+         return IMAGE_R8G8B8_SRGB;
+      #endif
       case IMAGE_B8G8R8A8_SRGB  :
       case IMAGE_B8G8R8_SRGB    :
       case IMAGE_R8G8B8_SRGB    :
       case IMAGE_L8_SRGB        :
       case IMAGE_L8A8_SRGB      :
-      case IMAGE_BC1_SRGB       :
       case IMAGE_BC2_SRGB       :
       case IMAGE_BC3_SRGB       :
       case IMAGE_BC7_SRGB       :
-      case IMAGE_ETC2_RGB_SRGB  :
       case IMAGE_ETC2_RGBA1_SRGB:
       case IMAGE_ETC2_RGBA_SRGB :
       case IMAGE_PVRTC1_2_SRGB  :
       case IMAGE_PVRTC1_4_SRGB  :
          return IMAGE_R8G8B8A8_SRGB;
+      /*************************/
+
+      case IMAGE_NONE         : // don't try if original is empty
+      case IMAGE_R8G8B8A8     : // don't try the same type again
+      case IMAGE_R8G8B8A8_SRGB:
+         return IMAGE_NONE;
 
       case IMAGE_F16_3:
          return IMAGE_F16_4;
@@ -594,7 +630,11 @@ Bool ImageSupported(IMAGE_TYPE type, IMAGE_MODE mode, Byte samples)
    if(!InRange(type, IMAGE_ALL_TYPES))return false; // invalid type
    if( IsSoft (mode)                 )return true ; // software supports all modes
    if(!type                          )return true ; // empty type is OK
-   if(!ImageTypeInfo::usageKnown()   )return true ; // if usage unknown then assume it's supported so we can try
+   if(!ImageTypeInfo::usageKnown()                  // if usage unknown then assume it's supported so we can try
+   #if GL
+   && mode!=IMAGE_RT && mode!=IMAGE_DS // GL has IMAGE_RT and IMAGE_DS always set. These checks are needed because on OpenGL 'Image.create' can succeed, but when binding to FBO, 'glCheckFramebufferStatus' might fail
+   #endif
+                                     )return true ;
    UInt need=0, got=ImageTI[type].usage();
    switch(mode)
    {
@@ -615,6 +655,14 @@ Bool ImageSupported(IMAGE_TYPE type, IMAGE_MODE mode, Byte samples)
    }
    if(samples>1 && !(got&ImageTypeInfo::USAGE_IMAGE_MS))return false; // if need multi-sampling then require USAGE_IMAGE_MS
    return FlagAll(got, need); // require all flags from 'need'
+}
+IMAGE_TYPE ImageTypeForMode(IMAGE_TYPE type, IMAGE_MODE mode)
+{
+   for(;;)
+   {
+      if(ImageSupported(type, mode))return type;
+      type=ImageTypeOnFail(type);
+   }
 }
 #if DX11
 static DXGI_FORMAT Typeless(IMAGE_TYPE type)
@@ -762,7 +810,7 @@ Int PaddedHeight(Int w, Int h, Int mip, IMAGE_TYPE type)
    UInt   mip_h=Max(1, h>>mip); if(ti.block_h>1)mip_h=AlignCeil(mip_h, (UInt)ti.block_h); // 'UInt' for faster 'AlignCeil'
    return mip_h;
 }
-Int ImagePitch(Int w, Int h, Int mip, IMAGE_TYPE type)
+UInt ImagePitch(Int w, Int h, Int mip, IMAGE_TYPE type)
 {
  C auto &ti=ImageTI[type];
 
@@ -779,7 +827,7 @@ Int ImagePitch(Int w, Int h, Int mip, IMAGE_TYPE type)
    UInt   mip_w=Max(1, w>>mip); if(ti.block_w>1)mip_w=DivCeil(mip_w, (UInt)ti.block_w); // 'UInt' for faster 'DivCeil'
    return mip_w*ti.block_bytes;
 }
-Int ImageBlocksY(Int w, Int h, Int mip, IMAGE_TYPE type)
+UInt ImageBlocksY(Int w, Int h, Int mip, IMAGE_TYPE type)
 {
  C auto &ti=ImageTI[type];
 
@@ -797,26 +845,50 @@ Int ImageBlocksY(Int w, Int h, Int mip, IMAGE_TYPE type)
    UInt   mip_h=Max(1, h>>mip); if(ti.block_h>1)mip_h=DivCeil(mip_h, (UInt)ti.block_h); // 'UInt' for faster 'DivCeil'
    return mip_h;
 }
-Int ImagePitch2(Int w, Int h, Int mip, IMAGE_TYPE type)
+
+UInt ImagePitch2(Int w, Int h, Int mip, IMAGE_TYPE type)
 {
    return ImagePitch  (w, h, mip, type)
          *ImageBlocksY(w, h, mip, type);
 }
-Int ImageFaceSize(Int w, Int h, Int d, Int mip, IMAGE_TYPE type)
+ULong ImagePitch2L(Int w, Int h, Int mip, IMAGE_TYPE type)
+{
+   return (ULong)ImagePitch  (w, h, mip, type)
+         *(ULong)ImageBlocksY(w, h, mip, type);
+}
+
+UInt ImageFaceSize(Int w, Int h, Int d, Int mip, IMAGE_TYPE type)
 {
    return ImagePitch2(w, h, mip, type)*Max(1, d>>mip);
 }
+ULong ImageFaceSizeL(Int w, Int h, Int d, Int mip, IMAGE_TYPE type)
+{
+   return ImagePitch2L(w, h, mip, type)*Max(1, d>>mip);
+}
+
 UInt ImageMipOffset(Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int mip_maps, Int mip_map)
 {
    UInt   size=0; mip_map++; REP(mip_maps-mip_map)size+=ImageFaceSize(w, h, d, mip_map+i, type); if(IsCube(mode))size*=6; // #MipOrder
    return size;
 }
+
 UInt ImageSize(Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int mip_maps)
 {
    UInt   size=0; REP(mip_maps)size+=ImageFaceSize(w, h, d, i, type); if(IsCube(mode))size*=6;
    return size;
 }
+ULong ImageSizeL(Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int mip_maps)
+{
+   ULong  size=0; REP(mip_maps)size+=ImageFaceSizeL(w, h, d, i, type); if(IsCube(mode))size*=6;
+   return size;
+}
 /******************************************************************************/
+Int TotalMipMaps(Int w, Int h)
+{
+ //if(type==IMAGE_PVRTC1_2 || type==IMAGE_PVRTC1_4 || type==IMAGE_PVRTC1_2_SRGB || type==IMAGE_PVRTC1_4_SRGB)w=h=CeilPow2(Max(w, h)); // PVRTC1 must be square and power of 2, for simplicity ignore this. In worst case we won't have the last 1x1 mip for non-square PVRTC
+   Int    total=0; for(Int i=Max(w, h); i>=1; i>>=1)total++;
+   return total;
+}
 Int TotalMipMaps(Int w, Int h, Int d)
 {
  //if(type==IMAGE_PVRTC1_2 || type==IMAGE_PVRTC1_4 || type==IMAGE_PVRTC1_2_SRGB || type==IMAGE_PVRTC1_4_SRGB)w=h=CeilPow2(Max(w, h)); // PVRTC1 must be square and power of 2, for simplicity ignore this. In worst case we won't have the last 1x1 mip for non-square PVRTC
@@ -1076,6 +1148,7 @@ Image& Image::del()
       #endif
          if(D.created())
          {
+            DEBUG_ASSERT(GetCurrentContext(), "No GL Ctx");
             glDeleteTextures     (1, &_txtr);
             glDeleteRenderbuffers(1, &_rb  );
          }
@@ -1247,6 +1320,10 @@ void Image::adjustInfo(Int w, Int h, Int d, IMAGE_TYPE type)
    if(soft())lockSoft();
    setPartial();
 }
+void Image::adjustType(IMAGE_TYPE type)
+{
+  _type=type;
+}
 /******************************************************************************/
 void Image::setGLParams()
 {
@@ -1372,7 +1449,13 @@ Bool Image::createEx(Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int 
    #if GPU_LOCK // lock not needed for 'D3D'
       SyncLockerEx locker(D._lock, hw);
    #endif
-      if(hw && !D.created())goto error; // device not yet created, check this after lock
+      if(hw)
+      {
+         if(!D.created())goto error; // device not yet created, check this after lock
+      #if GL
+         DEBUG_ASSERT(GetCurrentContext(), "No GL Ctx");
+      #endif
+      }
 
       // do a quick check, check this after 'D.created()'
       if(!ImageSupported(type, mode, samples))goto error;
@@ -1385,6 +1468,8 @@ Bool Image::createEx(Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int 
      _mode   =mode     ;
      _mips   =mip_maps ; _base_mip=base_mip;
      _samples=samples  ;
+
+      if(ImageSizeL(hwW(), hwH(), hwD(), hwType(), T.mode(), mipMaps())>UINT_MAX)goto error; // currently allocations and memory offsets operate on UInt
 
    #if DX11
       D3D11_SUBRESOURCE_DATA *initial_data; MemtN<D3D11_SUBRESOURCE_DATA, MAX_MIP_MAPS*6> res_data; // mip maps * faces
@@ -1787,7 +1872,7 @@ Bool Image::createEx(Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int 
 error:
    del(); return false;
 }
-Bool Image::createTry(Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int mip_maps, Bool alt_type_on_fail)
+Bool Image::create(Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int mip_maps, Bool alt_type_on_fail)
 {
    if(createEx(w, h, d, type, mode, mip_maps, 1))return true;
 
@@ -1795,7 +1880,7 @@ Bool Image::createTry(Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int
       for(IMAGE_TYPE alt_type=type; alt_type=ImageTypeOnFail(alt_type); )
          if(createEx(w, h, d, alt_type, mode, mip_maps, 1))
    {
-      adjustInfo(w, h, d, type);
+      adjustType(type);
       return true;
    }
 
@@ -1803,9 +1888,46 @@ Bool Image::createTry(Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int
 }
 Image& Image::mustCreate(Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int mip_maps, Bool alt_type_on_fail)
 {
-   if(!createTry(w, h, d, type, mode, mip_maps, alt_type_on_fail))Exit(MLT(S+"Can't create Image "        +w+'x'+h+'x'+d+", type "+ImageTI[type].name+", mode "+mode+".",
-                                                                       PL,S+u"Nie można utworzyć obrazka "+w+'x'+h+'x'+d+", typ " +ImageTI[type].name+", tryb "+mode+"."));
+   if(!create(w, h, d, type, mode, mip_maps, alt_type_on_fail))Exit(MLT(S+"Can't create Image "        +w+'x'+h+'x'+d+", type "+ImageTI[type].name+", mode "+mode+".",
+                                                                    PL,S+u"Nie można utworzyć obrazka "+w+'x'+h+'x'+d+", typ " +ImageTI[type].name+", tryb "+mode+"."));
    return T;
+}
+/******************************************************************************/
+Bool Image::createHWfromSoft(C Image &soft, IMAGE_TYPE type, IMAGE_MODE mode, UInt flags)
+{
+ C Image *src=&soft;
+
+   if(!src->soft()
+   ||  src->hwW()!=PaddedWidth (src->w(), src->h(), 0, src->hwType())
+   ||  src->hwH()!=PaddedHeight(src->w(), src->h(), 0, src->hwType()))return false;
+
+   CPtr mip_data[MAX_MIP_MAPS];
+   if(!CheckMipNum(src->mipMaps()))return false; REP(src->mipMaps())mip_data[i]=src->softData(i);
+
+   Image temp_dest, &dest=((src==this) ? temp_dest : *this);
+   if(!dest.createEx(src->w(), src->h(), src->d(), src->hwType(), mode, src->mipMaps(), src->samples(), mip_data))
+   {
+      if(flags&IC_NO_ALT_TYPE)return false;
+      FlagDisable(flags, IC_ENV_CUBE     ); // disable IC_ENV_CUBE      because it's assumed to be already applied
+      FlagDisable(flags, IC_IGNORE_GAMMA ); // disable IC_IGNORE_GAMMA  because we always need to convert gamma
+      FlagEnable (flags, IC_CONVERT_GAMMA); //  enable IC_CONVERT_GAMMA because we always need to convert gamma
+
+      Image temp_src;
+      for(IMAGE_TYPE alt_type=src->hwType(); ; )
+      {
+         alt_type=ImageTypeOnFail(alt_type); if(!alt_type)return false;
+         if(ImageSupported(alt_type, mode, src->samples()) // do a quick check before 'copy' to avoid it if we know creation will fail
+         && src->copy(temp_src, -1, -1, -1, alt_type, -1, -1, FILTER_BEST, flags)) // we have to keep size, mode, mip maps
+         {
+            src=&temp_src;
+            if(!CheckMipNum(src->mipMaps()))return false; REP(src->mipMaps())mip_data[i]=src->softData(i);
+            if( dest.createEx(src->w(), src->h(), src->d(), src->hwType(), mode, src->mipMaps(), src->samples(), mip_data))break; // success
+         }
+      }
+   }
+   if(&dest!=this)Swap(dest, T);
+   adjustType(type);
+   return true;
 }
 /******************************************************************************/
 // COPY
@@ -1852,11 +1974,11 @@ static Bool Decompress(C Image &src, Image &dest, Int max_mip_maps=INT_MAX) // a
       case IMAGE_ASTC_8x8: case IMAGE_ASTC_8x8_SRGB:
          return DecompressASTC(src, dest, max_mip_maps);
    }
-   if(dest.is() || dest.createTry(src.w(), src.h(), src.d(), decompress_block        ? (src.sRGB() ? IMAGE_R8G8B8A8_SRGB : IMAGE_R8G8B8A8) // use 'IMAGE_R8G8B8A8'  because Decompress Block functions operate on 'Color'
-                                                           : decompress_block_SByte  ?               IMAGE_R8_SIGN                         // use 'IMAGE_R8_SIGN'   because Decompress Block functions operate on 'SByte'
-                                                           : decompress_block_VecSB2 ?               IMAGE_R8G8_SIGN                       // use 'IMAGE_R8G8_SIGN' because Decompress Block functions operate on 'VecSB2'
-                                                           : decompress_block_VecH   ?               IMAGE_F16_3                           // use 'IMAGE_F16_3'     because Decompress Block functions operate on 'VecH'
-                                                           :                                         IMAGE_NONE, AsSoft(src.mode()), src.mipMaps()))
+   if(dest.is() || dest.create(src.w(), src.h(), src.d(), decompress_block        ? (src.sRGB() ? IMAGE_R8G8B8A8_SRGB : IMAGE_R8G8B8A8) // use 'IMAGE_R8G8B8A8'  because Decompress Block functions operate on 'Color'
+                                                        : decompress_block_SByte  ?               IMAGE_R8_SIGN                         // use 'IMAGE_R8_SIGN'   because Decompress Block functions operate on 'SByte'
+                                                        : decompress_block_VecSB2 ?               IMAGE_R8G8_SIGN                       // use 'IMAGE_R8G8_SIGN' because Decompress Block functions operate on 'VecSB2'
+                                                        : decompress_block_VecH   ?               IMAGE_F16_3                           // use 'IMAGE_F16_3'     because Decompress Block functions operate on 'VecH'
+                                                        :                                         IMAGE_NONE, AsSoft(src.mode()), src.mipMaps()))
       if(dest.size3()==src.size3())
    {
       Int src_faces1=src.faces()-1,
@@ -2066,7 +2188,7 @@ static Bool Decompress(C Image &src, Image &dest, Int max_mip_maps=INT_MAX) // a
    return false;
 }
 /******************************************************************************/
-static Bool Compress(C Image &src, Image &dest) // assumes that 'src' and 'dest' are 2 different objects, 'src' is created as non-compressed, and 'dest' is created as compressed, they have the same 'size3'
+static Bool Compress(C Image &src, Image &dest) // assumes that 'src' and 'dest' are 2 different objects, 'src' is created as non-compressed, and 'dest' is created as compressed, they have the same 'size3'. This will copy all mip-maps
 {
    switch(dest.hwType())
    {
@@ -2142,10 +2264,10 @@ static Int CopyMipMaps(C Image &src, Image &dest, Bool ignore_gamma, Int max_mip
 static Bool BlurCubeMipMaps(Image &src, Image &dest, Int type, Int mode, FILTER_TYPE filter, UInt flags)
 {
    return src.blurCubeMipMaps()
-       && src.copyTry(dest, -1, -1, -1, IMAGE_TYPE(type), IMAGE_MODE(mode), -1, filter, flags&~IC_ENV_CUBE); // disable IC_ENV_CUBE because we've already blurred mip-maps
+       && src.copy(dest, -1, -1, -1, IMAGE_TYPE(type), IMAGE_MODE(mode), -1, filter, flags&~IC_ENV_CUBE); // disable IC_ENV_CUBE because we've already blurred mip-maps
 }
 /******************************************************************************/
-Bool Image::copyTry(Image &dest, Int w, Int h, Int d, Int type, Int mode, Int mip_maps, FILTER_TYPE filter, UInt flags)C
+Bool Image::copy(Image &dest, Int w, Int h, Int d, Int type, Int mode, Int mip_maps, FILTER_TYPE filter, UInt flags)C
 {
    if(!is()){dest.del(); return true;}
 
@@ -2187,26 +2309,46 @@ Bool Image::copyTry(Image &dest, Int w, Int h, Int d, Int type, Int mode, Int mi
    if(this==&dest && w==T.w() && h==T.h() && d==T.d() && mode==T.mode() && mip_maps==T.mipMaps() && !env) // here check 'T' instead of 'src' (which could've already encountered some cube conversion, however here we want to check if we can just return without doing any conversions at all)
    {
       if(type==T.type())return true;
-      if(soft() && CanDoRawCopy(T.hwType(), (IMAGE_TYPE)type, IgnoreGamma(flags, T.hwType(), IMAGE_TYPE(type))))
+      if(T.soft() && CanDoRawCopy(T.hwType(), (IMAGE_TYPE)type, IgnoreGamma(flags, T.hwType(), IMAGE_TYPE(type))))
          {dest._hw_type=dest._type=(IMAGE_TYPE)type; return true;} // if software and can do a raw copy, then just adjust types
    }
+
+   // try copy to soft, and create HW dest out of soft copy, this can be much faster because it will create HW image without locks directly from source data
+   if(src->soft() && IsHW(IMAGE_MODE(mode)))
+   {
+      IMAGE_TYPE hw_type=ImageTypeForMode(IMAGE_TYPE(type), IMAGE_MODE(mode)); if(!hw_type)return false;
+      if(hw_type==type || alt_type_on_fail)
+      {
+         IMAGE_MODE soft_mode=AsSoft(IMAGE_MODE(mode));
+         Int             hw_w=PaddedWidth (w, h, 0, hw_type),
+                         hw_h=PaddedHeight(w, h, 0, hw_type);
+         if(w!=src->w() || h!=src->h() || d!=src->d() || hw_w!=src->hwW() || hw_h!=src->hwH() || hw_type!=src->hwType() || soft_mode!=src->mode() || mip_maps!=src->mipMaps() || env) // conversion is needed
+         {
+            if(!ImageTypeInfo::usageKnown() && ImageTI[hw_type].compressed)goto skip; // if it's unknown if 'hw_type' is supported, and if it's compressed, then skip this, because we could waste time resizing/env/compressing when it's possible we couldn't use results, and the results would lose quality due to compression
+            if(src->copy(temp_src, w, h, d, hw_type, soft_mode, mip_maps, filter, flags)){src=&temp_src; FlagDisable(flags, IC_ENV_CUBE); env=false;}else goto skip; // we've just processed env, so disable it
+         }
+         if(dest.createHWfromSoft(*src, IMAGE_TYPE(type), IMAGE_MODE(mode), flags))goto success;
+      }
+   }
+skip:;
 
    // convert
    {
       // create destination
       Image temp_dest, &target=((src==&dest) ? temp_dest : dest);
-      if(!target.createTry(w, h, d, env ? ImageTypeUncompressed(IMAGE_TYPE(type)) : IMAGE_TYPE(type), env ? IMAGE_SOFT_CUBE : IMAGE_MODE(mode), mip_maps, alt_type_on_fail))return false; // 'env'/'blurCubeMipMaps' requires uncompressed/soft image
+      if(!target.create(w, h, d, env ? ImageTypeUncompressed(IMAGE_TYPE(type)) : IMAGE_TYPE(type), env ? IMAGE_SOFT_CUBE : IMAGE_MODE(mode), mip_maps, alt_type_on_fail))return false; // 'env'/'blurCubeMipMaps' requires uncompressed/soft image
       Bool ignore_gamma=IgnoreGamma(flags, src->hwType(), target.hwType()); // calculate after knowing 'target.hwType'
 
       // copy
       Int  copied_mip_maps=0,
               max_mip_maps=(env ? 1 : INT_MAX); // for 'env' copy only the first mip map, the rest will be blurred manually
       Bool same_size=(src->size3()==target.size3());
+      FILTER_TYPE filter_mip=FILTER_BEST;
       if(same_size // if we use the same size (for which case 'filter' and IC_KEEP_EDGES are ignored)
       || (
-            (filter==FILTER_BEST || filter==FILTER_DOWN || filter==FILTER_WAIFU) // we're going to use default filter for downsampling (which is typically used for mip-map generation), FILTER_WAIFU falls back to FILTER_BEST
-         && FlagOff(flags, IC_KEEP_EDGES)                                        // we're not keeping the edges                        (which is typically used for mip-map generation)
-         && !env                                                                 // for 'env' allow copying only if we have same size, so we can copy only first mip-map (in case others are blurred specially)
+            FilterDown(filter)==FilterMip(filter_mip) // we're going to use the same filter that's used for generating mip-maps
+         && FlagOff(flags, IC_KEEP_EDGES)             // we're not keeping the edges                        (which is typically used for mip-map generation)
+         && !env                                      // for 'env' allow copying only if we have same size, so we can copy only first mip-map (in case others are blurred specially)
          )
       )copied_mip_maps=CopyMipMaps(*src, target, ignore_gamma, max_mip_maps);
       if(!copied_mip_maps)
@@ -2234,13 +2376,14 @@ Bool Image::copyTry(Image &dest, Int w, Int h, Int d, Int type, Int mode, Int mi
                Image resized_src;
                if(!same_size) // resize needed
                {
-                  if(!resized_src.createTry(target.w(), target.h(), target.d(), src->hwType(), (src->cube() && target.cube()) ? IMAGE_SOFT_CUBE : IMAGE_SOFT, 1))return false; // for resize use only 1 mip map, and remaining set with 'updateMipMaps' below
+                  if(!resized_src.create(target.w(), target.h(), target.d(), src->hwType(), (src->cube() && target.cube()) ? IMAGE_SOFT_CUBE : IMAGE_SOFT, 1))return false; // for resize use only 1 mip map, and remaining set with 'updateMipMaps' below
                   if(!src->copySoft(resized_src, filter, flags))return false; src=&resized_src; decompressed_src.del(); // we don't need 'decompressed_src' anymore so delete it to release memory
                }
-               if(!Compress(*src, target))return false;
+               // now 'src' and 'target' are same size
+               if(!Compress(*src, target))return false; // this will copy all mip-maps
                // in this case we have to use last 'src' mip map as the base mip map to set remaining 'target' mip maps, because now 'target' is compressed and has lower quality, while 'src' has better, this is also faster because we don't have to decompress initial mip map
                Int mip_start=src->mipMaps()-1;
-               target.updateMipMaps(*src, mip_start, FILTER_BEST, flags, mip_start);
+               target.updateMipMaps(*src, mip_start, filter_mip, flags, mip_start);
                goto skip_mip_maps; // we've already set mip maps, so skip them
             }else
             {
@@ -2253,15 +2396,17 @@ Bool Image::copyTry(Image &dest, Int w, Int h, Int d, Int type, Int mode, Int mi
       }
    finish:
       if(env)return BlurCubeMipMaps(target, dest, type, mode, filter, flags);
-      target.updateMipMaps(FILTER_BEST, flags, copied_mip_maps-1);
+      target.updateMipMaps(filter_mip, flags, copied_mip_maps-1);
    skip_mip_maps:
       if(&target!=&dest)Swap(dest, target);
-      return true;
    }
+success:
+   if(App.flag&APP_AUTO_FREE_IMAGE_OPEN_GL_ES_DATA)dest.freeOpenGLESData();
+   return true;
 }
 void Image::mustCopy(Image &dest, Int w, Int h, Int d, Int type, Int mode, Int mip_maps, FILTER_TYPE filter, UInt flags)C
 {
-   if(!copyTry(dest, w, h, d, type, mode, mip_maps, filter, flags))
+   if(!copy(dest, w, h, d, type, mode, mip_maps, filter, flags))
    {
       Str s="Can't copy Image";
       if(!CanCompress((IMAGE_TYPE)type))s+="\n'SupportCompress*' function was not called";
@@ -2287,13 +2432,13 @@ Bool Image::toCube(C Image &src, Int layout, Int size, Int type, Int mode, Int m
       if(!IsCube(IMAGE_MODE(mode)))mode    =(IsSoft(src.mode()) ? IMAGE_SOFT_CUBE : IMAGE_CUBE);
       if(mip_maps<0               )mip_maps=((src.mipMaps()==1) ? 1 : 0); // if source has 1 mip map, then create only 1, else create full
 
-      Int dest_total_mip_maps=TotalMipMaps(size, size, 1);
+      Int dest_total_mip_maps=TotalMipMaps(size, size);
       if(mip_maps<=0)mip_maps=dest_total_mip_maps ; // if mip maps not specified then use full chain
       else       MIN(mip_maps,dest_total_mip_maps); // don't use more than maximum allowed
 
       Bool  alt_type_on_fail=FlagOff(flags, IC_NO_ALT_TYPE),
             env=(FlagOn(flags, IC_ENV_CUBE) && mip_maps>1);
-      Image temp; if(temp.createTry(size, size, 1, env ? ImageTypeUncompressed(IMAGE_TYPE(type)) : IMAGE_TYPE(type), env ? IMAGE_SOFT_CUBE : IMAGE_MODE(mode), mip_maps, alt_type_on_fail)) // 'env'/'blurCubeMipMaps' requires uncompressed/soft image
+      Image temp; if(temp.create(size, size, 1, env ? ImageTypeUncompressed(IMAGE_TYPE(type)) : IMAGE_TYPE(type), env ? IMAGE_SOFT_CUBE : IMAGE_MODE(mode), mip_maps, alt_type_on_fail)) // 'env'/'blurCubeMipMaps' requires uncompressed/soft image
       {
          if(layout==CUBE_LAYOUT_ONE)
          {
@@ -2301,7 +2446,7 @@ Bool Image::toCube(C Image &src, Int layout, Int size, Int type, Int mode, Int m
          }else
          {
           C Image *s=&src;
-            Image  decompressed; if(src.compressed()){if(!src.copyTry(decompressed, -1, -1, -1, ImageTypeUncompressed(src.type()), IMAGE_SOFT, 1))return false; s=&decompressed;}
+            Image  decompressed; if(src.compressed()){if(!src.copy(decompressed, -1, -1, -1, ImageTypeUncompressed(src.type()), IMAGE_SOFT, 1))return false; s=&decompressed;}
             Image  face; // keep outside the loop in case we can reuse it
             REP(6)
             {
@@ -2322,6 +2467,7 @@ Bool Image::toCube(C Image &src, Int layout, Int size, Int type, Int mode, Int m
          }
          if(env)return BlurCubeMipMaps(temp, T, type, mode, filter, flags);
          Swap(T, temp.updateMipMaps());
+         if(App.flag&APP_AUTO_FREE_IMAGE_OPEN_GL_ES_DATA)freeOpenGLESData();
          return true;
       }
    }
@@ -2338,7 +2484,7 @@ Bool Image::fromCube(C Image &src, Int uncompressed_type)
 
       // extract 6 faces
       Int   size=src.h();
-      Image temp; if(!temp.createTry(size*6, size, 1, type, IMAGE_SOFT, 1))return false;
+      Image temp; if(!temp.create(size*6, size, 1, type, IMAGE_SOFT, 1))return false;
       if(temp.lock(LOCK_WRITE))
       {
          Image face; // keep outside the loop in case we can reuse it
@@ -2366,7 +2512,7 @@ Bool Image::fromCube(C Image &src, Int uncompressed_type)
          }
 
          temp.unlock();
-       //if(!temp.copyTry(temp, -1, -1, -1, type, IMAGE_SOFT))return false; skip this step to avoid unnecessary operations, this method uses 'uncompressed_type' instead of 'type'
+       //if(!temp.copy(temp, -1, -1, -1, type, IMAGE_SOFT))return false; skip this step to avoid unnecessary operations, this method uses 'uncompressed_type' instead of 'type'
          Swap(T, temp); return true;
       }
    }
@@ -2527,7 +2673,7 @@ Bool Image::lock(LOCK_MODE lock, Int mip_map, DIR_ENUM cube_face)
                   if(lock==LOCK_WRITE)Alloc(_data, pitch2);else
                   {
                      // get from GPU
-                     Image temp; if(temp.createTry(PaddedWidth(hwW(), hwH(), mip_map, hwType()), PaddedHeight(hwW(), hwH(), mip_map, hwType()), 1, hwType(), IMAGE_STAGING, 1, false))
+                     Image temp; if(temp.create(PaddedWidth(hwW(), hwH(), mip_map, hwType()), PaddedHeight(hwW(), hwH(), mip_map, hwType()), 1, hwType(), IMAGE_STAGING, 1, false))
                      {
                         D3DC->CopySubresourceRegion(temp._txtr, D3D11CalcSubresource(0, 0, temp.mipMaps()), 0, 0, 0, _txtr, D3D11CalcSubresource(mip_map, cube_face, mipMaps()), null);
                         if(temp.lockRead())
@@ -2583,6 +2729,7 @@ Bool Image::lock(LOCK_MODE lock, Int mip_map, DIR_ENUM cube_face)
                      Alloc(_data, CeilGL(pitch2));
                      if(lock!=LOCK_WRITE) // get from GPU
                      {
+                        DEBUG_ASSERT(GetCurrentContext(), "No GL Ctx");
                         glGetError(); // clear any previous errors
                                              D.texBind(GL_TEXTURE_2D, _txtr);
                         if(!compressed())glGetTexImage(GL_TEXTURE_2D, mip_map, SourceGLFormat(hwType()), SourceGLType(hwType()), data());
@@ -2599,6 +2746,7 @@ Bool Image::lock(LOCK_MODE lock, Int mip_map, DIR_ENUM cube_face)
                         Alloc(_data, CeilGL(pitch2));
                         if(lock!=LOCK_WRITE && mip_map==0) // get from GPU
                         {
+                           DEBUG_ASSERT(GetCurrentContext(), "No GL Ctx");
                            ImageRT *rt[Elms(Renderer._cur)], *ds;
                            Bool     restore_viewport=!D._view_active.full;
                            REPAO(rt)=Renderer._cur[i];
@@ -2660,6 +2808,7 @@ Bool Image::lock(LOCK_MODE lock, Int mip_map, DIR_ENUM cube_face)
                   Alloc(_data, CeilGL(pitch2*ld));
                   if(lock!=LOCK_WRITE) // get from GPU
                   {
+                     DEBUG_ASSERT(GetCurrentContext(), "No GL Ctx");
                      glGetError(); // clear any previous errors
                                           D.texBind(GL_TEXTURE_3D, _txtr);
                      if(!compressed())glGetTexImage(GL_TEXTURE_3D, mip_map, SourceGLFormat(hwType()), SourceGLType(hwType()), data());
@@ -2694,6 +2843,7 @@ Bool Image::lock(LOCK_MODE lock, Int mip_map, DIR_ENUM cube_face)
                   Alloc(_data, CeilGL(pitch2));
                   if(lock!=LOCK_WRITE) // get from GPU
                   {
+                     DEBUG_ASSERT(GetCurrentContext(), "No GL Ctx");
                      glGetError(); // clear any previous errors
                                           D.texBind(GL_TEXTURE_CUBE_MAP, _txtr);
                      if(!compressed())glGetTexImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X+cube_face, mip_map, SourceGLFormat(hwType()), SourceGLType(hwType()), data());
@@ -2797,6 +2947,7 @@ Image& Image::unlock()
                   }else
                #endif
                   {
+                     DEBUG_ASSERT(GetCurrentContext(), "No GL Ctx");
                     _lock_count++; locker.off(); // OpenGL has per-thread context states, which means we don't need to be locked during following calls, this is important as following calls can be slow
                                          D.texBind(GL_TEXTURE_2D, _txtr);
                      if(!compressed())glTexImage2D(GL_TEXTURE_2D, lMipMap(), hwTypeInfo().format, Max(1, hwW()>>lMipMap()), Max(1, hwH()>>lMipMap()), 0, SourceGLFormat(hwType()), SourceGLType(hwType()), data());
@@ -2826,6 +2977,7 @@ Image& Image::unlock()
             {
                if(_lock_mode!=LOCK_READ && D.created())
                {
+                  DEBUG_ASSERT(GetCurrentContext(), "No GL Ctx");
                  _lock_count++; locker.off(); // OpenGL has per-thread context states, which means we don't need to be locked during following calls, this is important as following calls can be slow
                                       D.texBind(GL_TEXTURE_3D, _txtr);
                   if(!compressed())glTexImage3D(GL_TEXTURE_3D, lMipMap(), hwTypeInfo().format, Max(1, hwW()>>lMipMap()), Max(1, hwH()>>lMipMap()), Max(1, hwD()>>lMipMap()), 0, SourceGLFormat(hwType()), SourceGLType(hwType()), data());
@@ -2853,6 +3005,7 @@ Image& Image::unlock()
             {
                if(_lock_mode!=LOCK_READ && D.created())
                {
+                  DEBUG_ASSERT(GetCurrentContext(), "No GL Ctx");
                  _lock_count++; locker.off(); // OpenGL has per-thread context states, which means we don't need to be locked during following calls, this is important as following calls can be slow
                                       D.texBind(GL_TEXTURE_CUBE_MAP, _txtr);
                   if(!compressed())glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+lCubeFace(), lMipMap(), hwTypeInfo().format, Max(1, hwW()>>lMipMap()), Max(1, hwH()>>lMipMap()), 0, SourceGLFormat(hwType()), SourceGLType(hwType()), data());
@@ -2918,6 +3071,7 @@ void Image::lockedSetMipData(CPtr data, Int mip_map)
                case IMAGE_RT:
                case IMAGE_DS:
                { // OpenGL has per-thread context states, which means we don't need to be locked during following calls, this is important as following calls can be slow
+                  DEBUG_ASSERT(GetCurrentContext(), "No GL Ctx");
                                       D.texBind(GL_TEXTURE_2D, _txtr);
                   if(!compressed())glTexImage2D(GL_TEXTURE_2D, mip_map, format, size.x, size.y, 0, gl_format, gl_type, data);
                   else   glCompressedTexImage2D(GL_TEXTURE_2D, mip_map, format, size.x, size.y, 0, softPitch2(mip_map), data);
@@ -2927,6 +3081,7 @@ void Image::lockedSetMipData(CPtr data, Int mip_map)
 
                case IMAGE_3D:
                { // OpenGL has per-thread context states, which means we don't need to be locked during following calls, this is important as following calls can be slow
+                  DEBUG_ASSERT(GetCurrentContext(), "No GL Ctx");
                                       D.texBind(GL_TEXTURE_3D, _txtr);
                   if(!compressed())glTexImage3D(GL_TEXTURE_3D, mip_map, format, size.x, size.y, size.z, 0, gl_format, gl_type, data);
                   else   glCompressedTexImage3D(GL_TEXTURE_3D, mip_map, format, size.x, size.y, size.z, 0, softFaceSize(mip_map), data);
@@ -2936,6 +3091,7 @@ void Image::lockedSetMipData(CPtr data, Int mip_map)
                case IMAGE_CUBE:
                case IMAGE_RT_CUBE:
                { // OpenGL has per-thread context states, which means we don't need to be locked during following calls, this is important as following calls can be slow
+                  DEBUG_ASSERT(GetCurrentContext(), "No GL Ctx");
                   Int pitch2=softPitch2(mip_map);
                   D.texBind(GL_TEXTURE_CUBE_MAP, _txtr);
                   FREPD(face, 6)
@@ -2995,6 +3151,7 @@ Bool Image::setFaceData(CPtr data, Int data_pitch, Int mip_map, DIR_ENUM cube_fa
                case IMAGE_RT:
                case IMAGE_DS:
                { // OpenGL has per-thread context states, which means we don't need to be locked during following calls, this is important as following calls can be slow
+                  DEBUG_ASSERT(GetCurrentContext(), "No GL Ctx");
                                       D.texBind(GL_TEXTURE_2D, _txtr);
                   if(!compressed())glTexImage2D(GL_TEXTURE_2D, mip_map, format, size.x, size.y, 0, gl_format, gl_type, data);
                   else   glCompressedTexImage2D(GL_TEXTURE_2D, mip_map, format, size.x, size.y, 0, img_pitch2, data);
@@ -3005,6 +3162,7 @@ Bool Image::setFaceData(CPtr data, Int data_pitch, Int mip_map, DIR_ENUM cube_fa
 
                case IMAGE_3D:
                { // OpenGL has per-thread context states, which means we don't need to be locked during following calls, this is important as following calls can be slow
+                  DEBUG_ASSERT(GetCurrentContext(), "No GL Ctx");
                                       D.texBind(GL_TEXTURE_3D, _txtr);
                   if(!compressed())glTexImage3D(GL_TEXTURE_3D, mip_map, format, size.x, size.y, size.z, 0, gl_format, gl_type, data);
                   else   glCompressedTexImage3D(GL_TEXTURE_3D, mip_map, format, size.x, size.y, size.z, 0, img_pitch2*size.z, data);
@@ -3015,6 +3173,7 @@ Bool Image::setFaceData(CPtr data, Int data_pitch, Int mip_map, DIR_ENUM cube_fa
                case IMAGE_CUBE:
                case IMAGE_RT_CUBE:
                { // OpenGL has per-thread context states, which means we don't need to be locked during following calls, this is important as following calls can be slow
+                  DEBUG_ASSERT(GetCurrentContext(), "No GL Ctx");
                                       D.texBind(GL_TEXTURE_CUBE_MAP, _txtr);
                   if(!compressed())glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+cube_face, mip_map, format, size.x, size.y, 0, gl_format, gl_type, data);
                   else   glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+cube_face, mip_map, format, size.x, size.y, 0, img_pitch2, data);
@@ -3052,12 +3211,15 @@ Bool Image::updateMipMaps(C Image &src, Int src_mip, FILTER_TYPE filter, UInt fl
    }
    if(!InRange(mip_start+1, mipMaps()))return true ; // if we can set the next one
    if(!InRange(src_mip, src.mipMaps()))return false; // if we can access the source
-   Bool  ok=true;
-   Int   src_faces1=src.faces()-1;
+   Bool       ok=true;
+   Int        src_faces1=src.faces()-1;
+   IMAGE_TYPE type=hwType(); // get type based on destination, because we extract only one time, but inject several times. Prefer dest 'hwType', so we can avoid conversions in 'injectMipMap'. For example 'type' can be RGB but 'hwType' can be RGBA, so we're actually setting RGBA data
+   if(ImageTI[type].compressed)type=ImageTypeUncompressed(type); // however if it's compressed, then use uncompressed type so we don't lose quality in each 'downSample'
    Image temp; // keep outside the loop in case we can reuse the image
+   filter=FilterMip(filter);
    REPD(face, faces())
    {
-      ok&=src.extractMipMap(temp, typeInfo().compressed ? ImageTypeUncompressed(type()) : type(), src_mip, (DIR_ENUM)Min(face, src_faces1)); // use 'type' instead of 'hwType' (this is correct), use destination type instead of 'src.type' because we extract only one time, but inject several times
+      ok&=src.extractMipMap(temp, type, src_mip, (DIR_ENUM)Min(face, src_faces1));
       for(Int mip=mip_start; ++mip<mipMaps(); )
       {
          temp.downSample(filter, flags);
@@ -3187,7 +3349,9 @@ void Image::copyHw(ImageRT &dest, Bool restore_rt, C RectI *rect_src, C RectI *r
 {
    if(this!=&dest)
    {
-      if(!rect_dest)dest.discard(); // if we set entire 'dest' then we can discard it
+      if(!rect_dest
+      ||  rect_dest->min.x<=0 && rect_dest->min.y<=0 && rect_dest->max.x>=dest.w() && rect_dest->max.y>=dest.h())dest.discard(); // if we set entire 'dest' then we can discard it
+
    #if GL
       if(this==&Renderer._main) // in OpenGL cannot directly copy from main
       {
@@ -3228,6 +3392,7 @@ void Image::copyHw(ImageRT &dest, Bool restore_rt, C RectI *rect_src, C RectI *r
          return;
       }
    #endif
+
       // remember settings
       ImageRT *rt[Elms(Renderer._cur)], *ds;
       Bool     restore_viewport;
@@ -3302,6 +3467,81 @@ void Image::copyHw(ImageRT &dest, Bool restore_rt, C RectI *rect_src, C RectI *r
       if(restore_rt)Renderer.set(rt[0], rt[1], rt[2], rt[3], ds, restore_viewport);
    }
 }
+void Image::copyDepth(ImageRT &dest, Bool restore_rt, C RectI *rect_src, C RectI *rect_dest)C
+{
+   if(this!=&dest)
+   {
+      if(!rect_dest
+      ||  rect_dest->min.x<=0 && rect_dest->min.y<=0 && rect_dest->max.x>=dest.w() && rect_dest->max.y>=dest.h())dest.discard(); // if we set entire 'dest' then we can discard it
+
+      // remember settings
+      ImageRT *rt[Elms(Renderer._cur)], *ds;
+      Bool     restore_viewport;
+      if(restore_rt)
+      {
+         REPAO(rt)=Renderer._cur[i];
+               ds =Renderer._cur_ds;
+         restore_viewport=!D._view_active.full;
+      }
+
+      Renderer.set(null, &dest, false);
+      ALPHA_MODE alpha=D.alpha(ALPHA_NONE); D.depthLock(true); D.depthFunc(FUNC_ALWAYS);
+
+      VI.image  (this);
+      VI.shader (Sh.SetDepth);
+      VI.setType(VI_2D_TEX, VI_STRIP);
+      if(Vtx2DTex *v=(Vtx2DTex*)VI.addVtx(4))
+      {
+         if(!rect_dest)
+         {
+            v[0].pos.set(-1,  1);
+            v[1].pos.set( 1,  1);
+            v[2].pos.set(-1, -1);
+            v[3].pos.set( 1, -1);
+         }else
+         {
+            Flt  xm=2.0f/dest.hwW(),
+                 ym=2.0f/dest.hwH();
+            Rect frac(rect_dest->min.x*xm-1, -rect_dest->max.y*ym+1,
+                      rect_dest->max.x*xm-1, -rect_dest->min.y*ym+1);
+            v[0].pos.set(frac.min.x, frac.max.y);
+            v[1].pos.set(frac.max.x, frac.max.y);
+            v[2].pos.set(frac.min.x, frac.min.y);
+            v[3].pos.set(frac.max.x, frac.min.y);
+         }
+
+         if(!rect_src)
+         {
+            v[0].tex.set(0, 0);
+            v[1].tex.set(1, 0);
+            v[2].tex.set(0, 1);
+            v[3].tex.set(1, 1);
+         }else
+         {
+            Rect tex(Flt(rect_src->min.x)/hwW(), Flt(rect_src->min.y)/hwH(),
+                     Flt(rect_src->max.x)/hwW(), Flt(rect_src->max.y)/hwH());
+            v[0].tex.set(tex.min.x, tex.min.y);
+            v[1].tex.set(tex.max.x, tex.min.y);
+            v[2].tex.set(tex.min.x, tex.max.y);
+            v[3].tex.set(tex.max.x, tex.max.y);
+         }
+      #if GL
+         if(!D.mainFBO()) // in OpenGL when drawing to RenderTarget the 'dest.pos.y' must be flipped
+         {
+            CHS(v[0].pos.y);
+            CHS(v[1].pos.y);
+            CHS(v[2].pos.y);
+            CHS(v[3].pos.y);
+         }
+      #endif
+      }
+      VI.end();
+
+      // restore settings
+      D.alpha(alpha); D.depthUnlock(); D.depthFunc(FUNC_DEFAULT);
+      if(restore_rt)Renderer.set(rt[0], rt[1], rt[2], rt[3], ds, restore_viewport);
+   }
+}
 static void SetRects(C Image &src, C Image &dest, RectI &rect_src, RectI &rect_dest, C Rect &rect)
 {
    Rect uv=D.screenToUV(rect);
@@ -3320,6 +3560,12 @@ void Image::copyHw(ImageRT &dest, Bool restore_rt, C Rect &rect)C
    SetRects(T, dest, rect_src, rect_dest, rect);
    copyHw(dest, restore_rt, &rect_src, &rect_dest);
 }
+void Image::copyDepth(ImageRT &dest, Bool restore_rt, C Rect &rect)C
+{
+   RectI rect_src, rect_dest;
+   SetRects(T, dest, rect_src, rect_dest, rect);
+   copyDepth(dest, restore_rt, &rect_src, &rect_dest);
+}
 /******************************************************************************/
 Bool Image::capture(C ImageRT &src)
 {
@@ -3329,13 +3575,13 @@ Bool Image::capture(C ImageRT &src)
       SyncLocker locker(D._lock);
       if(src.multiSample())
       {
-         if(createTry(src.w(), src.h(), 1, src.hwType(), IMAGE_2D, 1, false))
+         if(create(src.w(), src.h(), 1, src.hwType(), IMAGE_2D, 1, false))
          {
             D3DC->ResolveSubresource(_txtr, 0, src._txtr, 0, src.hwTypeInfo().format);
             return true;
          }
       }else
-      if(createTry(PaddedWidth(src.hwW(), src.hwH(), 0, src.hwType()), PaddedHeight(src.hwW(), src.hwH(), 0, src.hwType()), 1, src.hwType(), IMAGE_STAGING, 1, false))
+      if(create(PaddedWidth(src.hwW(), src.hwH(), 0, src.hwType()), PaddedHeight(src.hwW(), src.hwH(), 0, src.hwType()), 1, src.hwType(), IMAGE_STAGING, 1, false))
       {
          D3DC->CopySubresourceRegion(_txtr, D3D11CalcSubresource(0, 0, mipMaps()), 0, 0, 0, src._txtr, D3D11CalcSubresource(0, 0, src.mipMaps()), null);
          return true;
@@ -3345,14 +3591,14 @@ Bool Image::capture(C ImageRT &src)
    if(src.lockRead())
    {
       Bool ok=false;
-      if(createTry(src.w(), src.h(), 1, src.hwType(), IMAGE_SOFT, 1, false))ok=src.copySoft(T, FILTER_NO_STRETCH);
+      if(create(src.w(), src.h(), 1, src.hwType(), IMAGE_SOFT, 1, false))ok=src.copySoft(T, FILTER_NO_STRETCH);
       src.unlock();
       return ok;
    }else
    {
       Bool depth=(src.hwTypeInfo().d>0);
       if( !depth || src.depthTexture())
-         if(createTry(src.w(), src.h(), 1, depth ? IMAGE_F32 : src.hwType(), IMAGE_RT, 1, false))
+         if(create(src.w(), src.h(), 1, depth ? IMAGE_F32 : src.hwType(), IMAGE_RT, 1, false))
       {
          ImageRT temp; Swap(T, SCAST(Image, temp)); // we can do a swap because on OpenGL 'ImageRT' doesn't have anything extra, this swap is only to allow 'capture' to be a method of 'Image' instead of having to use 'ImageRT'
          {SyncLocker locker(D._lock); src.copyHw(temp, true);}

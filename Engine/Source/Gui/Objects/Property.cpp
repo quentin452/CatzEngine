@@ -116,7 +116,7 @@ void Property::Color::update(C GuiPC &gpc)
 {
    if(gpc.visible && gpc.enabled && visible() && enabled())
    {
-      Bool pushed=(Gui.ms()==this && Ms.bp(0)); if(!pushed)REPA(Touches)if(Touches[i].guiObj()==this && Touches[i].pd())pushed=true;
+      Bool pushed=(Gui.ms()==this && Ms.bp(0)); if(!pushed)REPA(Touches){Touch &touch=Touches[i]; if(touch.guiObj()==this && touch.pd()){pushed=true; break;}}
       if(  pushed)
       {
          Property &prop=*(Property*)user;

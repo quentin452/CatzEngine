@@ -69,7 +69,7 @@ class CreateMaterials : PropWin
          IMAGE_TYPE ct; ImageProps(base_0, &edit.base_0_tex, &ct, MTRL_BASE_0, edit.tex_quality);
 
          locker.on();
-         if(Proj.includeTex(edit.base_0_tex)){locker.off(); base_0.copyTry(base_0, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP); Proj.saveTex(base_0, edit.base_0_tex);}
+         if(Proj.includeTex(edit.base_0_tex)){locker.off(); base_0.copy(base_0, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP); Proj.saveTex(base_0, edit.base_0_tex);}
 
          // save materials
          Str name=GetBase(src.name); if(src.file.is())name=GetExtNot(name); // if this is from a file, then eat the extension

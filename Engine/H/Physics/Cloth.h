@@ -22,7 +22,7 @@ const_mem_addr struct ClothMesh // Physical Cloth Mesh, it is created from MeshB
  C MaterialPtr& material()C {return _material;} // get ClothMesh material
 
    // operations
-   void boneRemap(C CMemPtr<Byte, 256> &old_to_new, Bool remap_names=true); // remap vertex bone/matrix indexes according to bone 'old_to_new' remap, 'remap_names'=if remap the bone names as well
+   void boneRemap(C CMemPtrN<BoneType, 256> &old_to_new, Bool remap_names=true); // remap vertex bone/matrix indexes according to bone 'old_to_new' remap, 'remap_names'=if remap the bone names as well
 
    // io
    Bool save(C Str &name)C; // save, false on fail

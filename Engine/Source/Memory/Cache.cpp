@@ -114,7 +114,7 @@ void _Cache::unlock()C
    }
 }
 /******************************************************************************/
-_Cache::Elm* _Cache::findExact(CChar *file, Int &stop)
+_Cache::Elm* _Cache::findExact(CChar *file, Int &stop)C
 {
    Int l=0, r=_elms; for(; l<r; )
    {
@@ -132,7 +132,7 @@ _Cache::Elm* _Cache::findExact(CChar *file, Int &stop)
    return null;
 }
 /******************************************************************************/
-_Cache::Elm* _Cache::findElm(CChar *file, CChar *path)
+_Cache::Elm* _Cache::findElm(CChar *file, CChar *path)C
 {
    Int  stop;
    Elm *elm;
@@ -182,6 +182,18 @@ Ptr _Cache::validElmData(Elm &elm, Bool counted)
    return null;
 }
 /******************************************************************************/
+Bool _Cache::has(CChar *file, CChar *path)C
+{
+   if(Is(file)) // valid file name
+   {
+      // lock
+      SyncUnlocker unlocker(D._lock); // must be used even though we're not using GPU
+      SyncLocker     locker(  _lock);
+
+      if(Elm *elm=findElm(file, path))return true;
+   }
+   return false;
+}
 Ptr _Cache::find(CChar *file, CChar *path, Bool counted)
 {
    if(Is(file)) // valid file name

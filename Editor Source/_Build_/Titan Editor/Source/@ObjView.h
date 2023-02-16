@@ -552,6 +552,7 @@ public:
       BONE_ADD,
       BONE_RENAME,
       BONE_PARENT,
+      BONE_DYNAMIC,
    };
    static cchar8 *bone_desc[]
 ;

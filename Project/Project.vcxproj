@@ -166,7 +166,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v143</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>NotSet</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug GL|Win32'" Label="Configuration">
@@ -180,7 +180,7 @@
     <ConfigurationType>Application</ConfigurationType>
     <PlatformToolset>v143</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>NotSet</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DX11|Win32'" Label="Configuration">
@@ -278,7 +278,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release GL|Emscripten'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>NotSet</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
     <PlatformToolset>emcc</PlatformToolset>
   </PropertyGroup>
@@ -313,7 +313,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug GL|Emscripten'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>NotSet</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
     <PlatformToolset>emcc</PlatformToolset>
   </PropertyGroup>
@@ -382,13 +382,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DX11|Emscripten'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>NotSet</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|Emscripten'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>NotSet</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
     <AppContainerApplication>true</AppContainerApplication>
   </PropertyGroup>
@@ -457,13 +457,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DX11|Emscripten'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>NotSet</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Universal DX11|Emscripten'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
-    <CharacterSet>NotSet</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>false</WholeProgramOptimization>
     <AppContainerApplication>true</AppContainerApplication>
   </PropertyGroup>
@@ -661,6 +661,7 @@
     <IntDir>Android\Debug\</IntDir>
     <AndroidApkName>$(ProjectName).apk</AndroidApkName>
     <TargetName>libProject</TargetName>
+    <AndroidGradlePackageOutputName>$(ProjectName).apk</AndroidGradlePackageOutputName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug DX11|NX64'">
     <LinkIncremental>false</LinkIncremental>
@@ -684,6 +685,7 @@
     <IntDir>Android\Debug\</IntDir>
     <AndroidApkName>$(ProjectName).apk</AndroidApkName>
     <TargetName>libProject</TargetName>
+    <AndroidGradlePackageOutputName>$(ProjectName).apk</AndroidGradlePackageOutputName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug Universal DX11|NX64'">
     <LinkIncremental>false</LinkIncremental>
@@ -733,8 +735,9 @@
     <AndroidApplicationVariant>Release</AndroidApplicationVariant>
     <OutDir>$(ProjectDir)Android\Release\$(PlatformTarget)\</OutDir>
     <IntDir>Android\Release\</IntDir>
-    <AndroidApkName>$(ProjectName).apk</AndroidApkName>
     <TargetName>libProject</TargetName>
+    <AndroidApkName>$(ProjectName).apk</AndroidApkName>
+    <AndroidGradlePackageOutputName>$(ProjectName).apk</AndroidGradlePackageOutputName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release DX11|NX64'">
     <LinkIncremental>false</LinkIncremental>
@@ -758,6 +761,7 @@
     <IntDir>Android\Release\</IntDir>
     <AndroidApkName>$(ProjectName).apk</AndroidApkName>
     <TargetName>libProject</TargetName>
+    <AndroidGradlePackageOutputName>$(ProjectName).apk</AndroidGradlePackageOutputName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release Universal DX11|NX64'">
     <LinkIncremental>false</LinkIncremental>
@@ -799,6 +803,7 @@
     <IntDir>Android\Debug\</IntDir>
     <AndroidApkName>$(ProjectName).apk</AndroidApkName>
     <TargetName>libProject</TargetName>
+    <AndroidGradlePackageOutputName>$(ProjectName).apk</AndroidGradlePackageOutputName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug GL|NX64'">
     <LinkIncremental>false</LinkIncremental>
@@ -836,6 +841,7 @@
     <IntDir>Android\Release\</IntDir>
     <AndroidApkName>$(ProjectName).apk</AndroidApkName>
     <TargetName>libProject</TargetName>
+    <AndroidGradlePackageOutputName>$(ProjectName).apk</AndroidGradlePackageOutputName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release GL|NX64'">
     <LinkIncremental>false</LinkIncremental>
@@ -1224,7 +1230,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <ClangMSExtensions>true</ClangMSExtensions>
-      <AdditionalOptions>-Wno-comment -Wno-parentheses -Wno-misleading-indentation -Wno-int-to-void-pointer-cast -Wno-unused-local-typedef -Wno-overloaded-virtual -Wno-switch -Wno-undefined-bool-conversion -Wno-null-dereference -Wno-missing-braces -Wno-invalid-noreturn -Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable -Wno-address-of-temporary</AdditionalOptions>
+      <AdditionalOptions>-fno-delete-null-pointer-checks -Wno-comment -Wno-parentheses -Wno-misleading-indentation -Wno-int-to-void-pointer-cast -Wno-unused-local-typedef -Wno-overloaded-virtual -Wno-switch -Wno-undefined-bool-conversion -Wno-null-dereference -Wno-missing-braces -Wno-invalid-noreturn -Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable -Wno-address-of-temporary</AdditionalOptions>
       <NeonCodegen />
     </ClCompile>
     <ResourceCompile>
@@ -1419,7 +1425,7 @@
       <DisableSpecificWarnings>4244;4312;4521</DisableSpecificWarnings>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <ClangMSExtensions>true</ClangMSExtensions>
-      <AdditionalOptions>-Wno-comment -Wno-parentheses -Wno-misleading-indentation -Wno-int-to-void-pointer-cast -Wno-unused-local-typedef -Wno-overloaded-virtual -Wno-switch -Wno-undefined-bool-conversion -Wno-null-dereference -Wno-missing-braces -Wno-invalid-noreturn -Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable -Wno-address-of-temporary</AdditionalOptions>
+      <AdditionalOptions>-fno-delete-null-pointer-checks -Wno-comment -Wno-parentheses -Wno-misleading-indentation -Wno-int-to-void-pointer-cast -Wno-unused-local-typedef -Wno-overloaded-virtual -Wno-switch -Wno-undefined-bool-conversion -Wno-null-dereference -Wno-missing-braces -Wno-invalid-noreturn -Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable -Wno-address-of-temporary</AdditionalOptions>
       <NeonCodegen />
     </ClCompile>
     <ResourceCompile>
@@ -2028,7 +2034,7 @@
       <ClangDebugInformationFormat>None</ClangDebugInformationFormat>
       <StackProtectionLevel>None</StackProtectionLevel>
       <ClangMSExtensions>true</ClangMSExtensions>
-      <AdditionalOptions>-Wno-comment -Wno-parentheses -Wno-misleading-indentation -Wno-int-to-void-pointer-cast -Wno-unused-local-typedef -Wno-overloaded-virtual -Wno-switch -Wno-undefined-bool-conversion -Wno-null-dereference -Wno-missing-braces -Wno-invalid-noreturn -Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable -Wno-address-of-temporary</AdditionalOptions>
+      <AdditionalOptions>-fno-delete-null-pointer-checks -Wno-comment -Wno-parentheses -Wno-misleading-indentation -Wno-int-to-void-pointer-cast -Wno-unused-local-typedef -Wno-overloaded-virtual -Wno-switch -Wno-undefined-bool-conversion -Wno-null-dereference -Wno-missing-braces -Wno-invalid-noreturn -Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable -Wno-address-of-temporary</AdditionalOptions>
       <NeonCodegen />
     </ClCompile>
     <ResourceCompile>
@@ -2245,7 +2251,7 @@
       <ClangDebugInformationFormat>None</ClangDebugInformationFormat>
       <StackProtectionLevel>None</StackProtectionLevel>
       <ClangMSExtensions>true</ClangMSExtensions>
-      <AdditionalOptions>-Wno-comment -Wno-parentheses -Wno-misleading-indentation -Wno-int-to-void-pointer-cast -Wno-unused-local-typedef -Wno-overloaded-virtual -Wno-switch -Wno-undefined-bool-conversion -Wno-null-dereference -Wno-missing-braces -Wno-invalid-noreturn -Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable -Wno-address-of-temporary</AdditionalOptions>
+      <AdditionalOptions>-fno-delete-null-pointer-checks -Wno-comment -Wno-parentheses -Wno-misleading-indentation -Wno-int-to-void-pointer-cast -Wno-unused-local-typedef -Wno-overloaded-virtual -Wno-switch -Wno-undefined-bool-conversion -Wno-null-dereference -Wno-missing-braces -Wno-invalid-noreturn -Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable -Wno-address-of-temporary</AdditionalOptions>
       <NeonCodegen />
     </ClCompile>
     <ResourceCompile>
@@ -2717,7 +2723,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <ClangMSExtensions>true</ClangMSExtensions>
-      <AdditionalOptions>-Wno-comment -Wno-parentheses -Wno-misleading-indentation -Wno-int-to-void-pointer-cast -Wno-unused-local-typedef -Wno-overloaded-virtual -Wno-switch -Wno-undefined-bool-conversion -Wno-null-dereference -Wno-missing-braces -Wno-invalid-noreturn -Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable -Wno-address-of-temporary</AdditionalOptions>
+      <AdditionalOptions>-fno-delete-null-pointer-checks -Wno-comment -Wno-parentheses -Wno-misleading-indentation -Wno-int-to-void-pointer-cast -Wno-unused-local-typedef -Wno-overloaded-virtual -Wno-switch -Wno-undefined-bool-conversion -Wno-null-dereference -Wno-missing-braces -Wno-invalid-noreturn -Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable -Wno-address-of-temporary</AdditionalOptions>
       <NeonCodegen />
     </ClCompile>
     <ResourceCompile>
@@ -3114,7 +3120,7 @@
       <ClangDebugInformationFormat>None</ClangDebugInformationFormat>
       <StackProtectionLevel>None</StackProtectionLevel>
       <ClangMSExtensions>true</ClangMSExtensions>
-      <AdditionalOptions>-Wno-comment -Wno-parentheses -Wno-misleading-indentation -Wno-int-to-void-pointer-cast -Wno-unused-local-typedef -Wno-overloaded-virtual -Wno-switch -Wno-undefined-bool-conversion -Wno-null-dereference -Wno-missing-braces -Wno-invalid-noreturn -Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable -Wno-address-of-temporary</AdditionalOptions>
+      <AdditionalOptions>-fno-delete-null-pointer-checks -Wno-comment -Wno-parentheses -Wno-misleading-indentation -Wno-int-to-void-pointer-cast -Wno-unused-local-typedef -Wno-overloaded-virtual -Wno-switch -Wno-undefined-bool-conversion -Wno-null-dereference -Wno-missing-braces -Wno-invalid-noreturn -Wno-unused-function -Wno-unused-variable -Wno-unused-const-variable -Wno-address-of-temporary</AdditionalOptions>
       <NeonCodegen />
     </ClCompile>
     <ResourceCompile>

@@ -682,7 +682,7 @@ class Project
          FCreateDirs(gamePath(mini_map_id));
    }
 
-   bool loadImages(Image &image, TextParam *image_resize, C Str &src, bool srgb=true, bool clamp=false, C Color &background=TRANSPARENT, C Image *color=null, C TextParam *color_resize=null, C Image *smooth=null, C TextParam *smooth_resize=null, C Image *bump=null, C TextParam *bump_resize=null)C
+   bool loadImages(Image &image, TextParam *image_resize, C Str &src, bool srgb=true, bool clamp=true, C Color &background=TRANSPARENT, C Image *color=null, C TextParam *color_resize=null, C Image *smooth=null, C TextParam *smooth_resize=null, C Image *bump=null, C TextParam *bump_resize=null)C
    {
       return LoadImages(this, image, image_resize, src, srgb, clamp, background, color, color_resize, smooth, smooth_resize, bump, bump_resize);
    }
@@ -729,7 +729,7 @@ class Project
 
          case ELM_IMAGE:
          {
-            Image image; image.ImportTry(file_edit_path); EditToGameImage(image, image, *elm.imageData());
+            Image image; image.Import(file_edit_path); EditToGameImage(image, image, *elm.imageData());
             Save( image, file_game_path); savedGame(elm, file_game_path);
          }break;
 
@@ -1117,7 +1117,7 @@ class Project
       {
          REPA(elms)if(elms[i].type==ELM_SKEL)
          {
-            Str path=gamePath(elms[i]); if(f.readTry(path) && Compress(f, temp.writeMem(), ClientNetworkCompression, ClientNetworkCompressionLevel))
+            Str path=gamePath(elms[i]); if(f.read(path) && Compress(f, temp.writeMem(), ClientNetworkCompression, ClientNetworkCompressionLevel))
             {
                f.del(); temp.pos(0); SafeOverwrite(temp, path);
             }
@@ -1146,7 +1146,7 @@ class Project
 
             case ELM_ANIM: if(ver<=47)if(ElmAnim *anim_data=elm.animData())
             {
-               src=&f; if(src.readTry(gamePath(*elm)))
+               src=&f; if(src.read(gamePath(*elm)))
                {
                   if(compress_anim)if(Decompress(*src, temp, true)){src=&temp; src.pos(0);}else src=null;
                   if(src)
@@ -1156,7 +1156,7 @@ class Project
                         // load skeleton
                         if(Elm *skel_elm=findElm(anim_data.skel_id))
                         {
-                           src=&f; if(src.readTry(gamePath(*skel_elm)))
+                           src=&f; if(src.read(gamePath(*skel_elm)))
                            {
                               if(compress_skel)if(Decompress(*src, temp, true)){src=&temp; src.pos(0);}else src=null;
                               if(src)
@@ -1189,7 +1189,7 @@ class Project
          {
             case ELM_SKEL: if(ver<=47)
             {
-               src=&f; if(src.readTry(gamePath(*elm)))
+               src=&f; if(src.read(gamePath(*elm)))
                {
                   if(compress_skel)if(Decompress(*src, temp, true)){src=&temp; src.pos(0);}else continue;
                   Skeleton skel; if(skel.load(*src))
@@ -2583,7 +2583,7 @@ class Project
    error:
       return false;
    }
-   bool loadOldSettings (C Str &name)  {File f; return f.readTry(name) && loadOldSettings(f);}
+   bool loadOldSettings (C Str &name)  {File f; return f.read(name) && loadOldSettings(f);}
    bool loadOldSettings2(C Str &name)  {return loadOldSettings(name) || loadOldSettings(name+".old");}
 
    void save(MemPtr<TextNode> nodes)C
@@ -2632,17 +2632,17 @@ class Project
          if(node.name=="EncryptionKey"        )node.getValueRaw(cipher_key);else
          if(node.name=="Compress"             ){REP(COMPRESS_NUM)if(node.value==CompressionName(COMPRESS_TYPE(i))){compress_type[PCP_DEFAULT]=COMPRESS_TYPE(i); break;}}else
          if(node.name=="CompressMobile"       ){REP(COMPRESS_NUM)if(node.value==CompressionName(COMPRESS_TYPE(i))){compress_type[PCP_MOBILE ]=COMPRESS_TYPE(i); break;}}else
-         if(node.name=="CompressLevel"        )compress_level[PCP_DEFAULT]=node.asInt ();else
-         if(node.name=="CompressLevelMobile"  )compress_level[PCP_MOBILE ]=node.asInt ();else
+         if(node.name=="CompressLevel"        )compress_level[PCP_DEFAULT]=node.asInt();else
+         if(node.name=="CompressLevelMobile"  )compress_level[PCP_MOBILE ]=node.asInt();else
          if(node.name=="SimplifyMaterials"    )material_simplify          =(MATERIAL_SIMPLIFY)node.asInt();else
-         if(node.name=="TexDownsizeMobile"    )tex_downsize[TSP_MOBILE]   =node.asInt ();else
-         if(node.name=="TexDownsizeSwitch"    )tex_downsize[TSP_SWITCH]   =node.asInt ();else
-         if(node.name=="EncryptTime"          )cipher_time                =node.asText();else
-         if(node.name=="EncryptionKeyTime"    )cipher_key_time            =node.asText();else
-         if(node.name=="CompressTime"         )compress_time[PCP_DEFAULT] =node.asText();else
-         if(node.name=="CompressTimeMobile"   )compress_time[PCP_MOBILE ] =node.asText();else
-         if(node.name=="SimplifyMaterialsTime")material_simplify_time     =node.asText();else
-         if(node.name=="TexDownsizeTime"      )tex_downsize_time          =node.asText();else
+         if(node.name=="TexDownsizeMobile"    )tex_downsize[TSP_MOBILE]   =node.asInt();else
+         if(node.name=="TexDownsizeSwitch"    )tex_downsize[TSP_SWITCH]   =node.asInt();else
+         if(node.name=="EncryptTime"          )cipher_time                .text(node);else
+         if(node.name=="EncryptionKeyTime"    )cipher_key_time            .text(node);else
+         if(node.name=="CompressTime"         )compress_time[PCP_DEFAULT] .text(node);else
+         if(node.name=="CompressTimeMobile"   )compress_time[PCP_MOBILE ] .text(node);else
+         if(node.name=="SimplifyMaterialsTime")material_simplify_time     .text(node);else
+         if(node.name=="TexDownsizeTime"      )tex_downsize_time          .text(node);else
          if(node.name=="Elements"             )
          {
             // remember 'IMPORTING' and 'OPENED' which are not saved in text
@@ -2687,7 +2687,7 @@ class Project
       del(); return LOAD_NEWER;
    }
 
-   LOAD_RESULT load(C Str &name, int &ver, SAVE_DATA mode=SAVE_ALL)  {File f; if(f.readTry(name))return load(f, ver, false, mode); ver=-1; del(); return LOAD_EMPTY;}
+   LOAD_RESULT load(C Str &name, int &ver, SAVE_DATA mode=SAVE_ALL)  {File f; if(f.read(name))return load(f, ver, false, mode); ver=-1; del(); return LOAD_EMPTY;}
    bool        save(C Str &name                                   )C {File f; save(f.writeMem()); f.pos(0); return SafeOverwrite(f, name);}
 
    LOAD_RESULT load2(C Str &name, int &ver, SAVE_DATA mode=SAVE_ALL)  {LOAD_RESULT result=load(name, ver, mode); if(result==LOAD_EMPTY || result==LOAD_ERROR)result=load(name+".old", ver, mode); return result;}
@@ -2773,7 +2773,7 @@ class Project
       if(!_path.is() ){error="Invalid Path"; return LOAD_ERROR;} // path must be valid
       Str lock_name=_path+"Lock";
       if(!ignore_lock && FExistSystem(lock_name))return LOAD_LOCKED; // check if it's already opened, do this at start so the project won't be opened
-      File f; f.writeTry(lock_name); f.del(); // lock it
+      File f; f.write(lock_name); f.del(); // lock it
 
       int ver; LOAD_RESULT result=load3(_path, ver, error);
       if(LoadOK(result))

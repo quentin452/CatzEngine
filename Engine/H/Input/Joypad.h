@@ -285,7 +285,7 @@ private:
 #if EE_PRIVATE
    GCExtendedGamepad *_gamepad=null;
 #else
-   Ptr     _gamepad=null
+   Ptr       _gamepad=null;
 #endif
 #endif
 

@@ -19,6 +19,7 @@ struct Str8 // Text String (8-bit per character)
    // operations
    Str8& del       (                     ); // clear stored data and free helper memory
    Str8& clear     (                     ); // clear stored data
+   Str8& erase     (                     ); // clear stored data and zero helper memory, this can be used to protect private data
    Str8& insert    (Int i,   Char8 c     ); // insert 'c'    at 'i' string position
    Str8& insert    (Int i, C Str8 &text  ); // insert 'text' at 'i' string position
    Str8& remove    (Int i,   Int   num=1 ); // remove      'num' characters starting from 'i-th'
@@ -38,7 +39,6 @@ struct Str8 // Text String (8-bit per character)
    Str8& line (); // add a line  if string isn't empty and does not end with a new line
 
 #if EE_PRIVATE
-   void alwaysAppend(Char8 c);
    explicit Str8(C Str8 &s, UInt extra_length);
 #endif
    Str8(           );
@@ -77,6 +77,7 @@ struct Str8 // Text String (8-bit per character)
    Str8(C VecI4  &v);   Str8& operator=(C VecI4  &v);   Str8& operator+=(C VecI4  &v);   Str8 operator+(C VecI4  &v)C;
    Str8(C VecB4  &v);   Str8& operator=(C VecB4  &v);   Str8& operator+=(C VecB4  &v);   Str8 operator+(C VecB4  &v)C;
    Str8(C VecSB4 &v);   Str8& operator=(C VecSB4 &v);   Str8& operator+=(C VecSB4 &v);   Str8 operator+(C VecSB4 &v)C;
+   Str8(C VecUS4 &v);   Str8& operator=(C VecUS4 &v);   Str8& operator+=(C VecUS4 &v);   Str8 operator+(C VecUS4 &v)C;
    Str8(C BStr   &s);   Str8& operator=(C BStr   &s);   Str8& operator+=(C BStr   &s);   Str  operator+(C BStr   &s)C;
 
    T1(TYPE) Str8(TYPE i, ENABLE_IF_ENUM(TYPE, Ptr  ) dummy=null)      : Str8(ENUM_TYPE(TYPE)(i)) {}
@@ -136,6 +137,7 @@ inline Str8&& operator+(Str8 &&a, C VecD4  &b) {return RValue(a+=b);}
 inline Str8&& operator+(Str8 &&a, C VecI4  &b) {return RValue(a+=b);}
 inline Str8&& operator+(Str8 &&a, C VecB4  &b) {return RValue(a+=b);}
 inline Str8&& operator+(Str8 &&a, C VecSB4 &b) {return RValue(a+=b);}
+inline Str8&& operator+(Str8 &&a, C VecUS4 &b) {return RValue(a+=b);}
 inline Str    operator+(Str8 &&a, C BStr   &b) {return        a+ b ;}
 T1(TYPE) ENABLE_IF_ENUM(TYPE, Str8&&) operator+(Str8 &&a, TYPE b) {return RValue(a+=ENUM_TYPE(TYPE)(b));}
 /******************************************************************************/

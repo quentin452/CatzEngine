@@ -315,15 +315,15 @@ void Region::update(C GuiPC &gpc)
          if(Gui.ms()==&view)
          {
             Ms.freeze();
-            slidebar[0].setOffset(slidebar[0]._offset + Ms.d().x*2);
-            slidebar[1].setOffset(slidebar[1]._offset - Ms.d().y*2);
+            slidebar[0].offset(slidebar[0]._offset + Ms.d().x*2);
+            slidebar[1].offset(slidebar[1]._offset - Ms.d().y*2);
          }
          REPA(Touches)
          {
             Touch &t=Touches[i]; if(t.guiObj()==&view && t.on())
             {
-               slidebar[0].setOffset(slidebar[0]._offset + t.d().x*2);
-               slidebar[1].setOffset(slidebar[1]._offset - t.d().y*2);
+               slidebar[0].offset(slidebar[0]._offset + t.d().x*2);
+               slidebar[1].offset(slidebar[1]._offset - t.d().y*2);
             }
          }
       }

@@ -378,14 +378,14 @@ Mesh& Mesh::joinAll(Bool test_material, Bool test_draw_group, Bool test_name, ME
 /******************************************************************************/
 // TEXTURIZE
 /******************************************************************************/
-Mesh& Mesh::texMap   (  Flt     scale , Byte tex_index) {REP(lods())lod(i).texMap   (scale , tex_index); return T;}
-Mesh& Mesh::texMap   (C Matrix &matrix, Byte tex_index) {REP(lods())lod(i).texMap   (matrix, tex_index); return T;}
-Mesh& Mesh::texMap   (C Plane  &plane , Byte tex_index) {REP(lods())lod(i).texMap   (plane , tex_index); return T;}
-Mesh& Mesh::texMap   (C Ball   &ball  , Byte tex_index) {REP(lods())lod(i).texMap   (ball  , tex_index); return T;}
-Mesh& Mesh::texMap   (C Tube   &tube  , Byte tex_index) {REP(lods())lod(i).texMap   (tube  , tex_index); return T;}
-Mesh& Mesh::texMove  (C Vec2   &move  , Byte tex_index) {REP(lods())lod(i).texMove  (move  , tex_index); return T;}
-Mesh& Mesh::texScale (C Vec2   &scale , Byte tex_index) {REP(lods())lod(i).texScale (scale , tex_index); return T;}
-Mesh& Mesh::texRotate(  Flt     angle , Byte tex_index) {REP(lods())lod(i).texRotate(angle , tex_index); return T;}
+Mesh& Mesh::texMap   (  Flt     scale , Byte uv_index) {REP(lods())lod(i).texMap   (scale , uv_index); return T;}
+Mesh& Mesh::texMap   (C Matrix &matrix, Byte uv_index) {REP(lods())lod(i).texMap   (matrix, uv_index); return T;}
+Mesh& Mesh::texMap   (C Plane  &plane , Byte uv_index) {REP(lods())lod(i).texMap   (plane , uv_index); return T;}
+Mesh& Mesh::texMap   (C Ball   &ball  , Byte uv_index) {REP(lods())lod(i).texMap   (ball  , uv_index); return T;}
+Mesh& Mesh::texMap   (C Tube   &tube  , Byte uv_index) {REP(lods())lod(i).texMap   (tube  , uv_index); return T;}
+Mesh& Mesh::texMove  (C Vec2   &move  , Byte uv_index) {REP(lods())lod(i).texMove  (move  , uv_index); return T;}
+Mesh& Mesh::texScale (C Vec2   &scale , Byte uv_index) {REP(lods())lod(i).texScale (scale , uv_index); return T;}
+Mesh& Mesh::texRotate(  Flt     angle , Byte uv_index) {REP(lods())lod(i).texRotate(angle , uv_index); return T;}
 /******************************************************************************/
 // TRANSFORM
 /******************************************************************************/
@@ -430,14 +430,14 @@ Int Mesh::boneFind(CChar8 *bone_name)C {return _bone_map.find(bone_name);}
 //Bool boneRename(C Str8 &src, C Str8 &dest                             ) ; // rename 'src' bone to 'dest' bone, returns true if a bone was renamed
 //Bool Mesh::boneRename(C Str8 &src, C Str8 &dest) {return _bone_map.rename(src, dest);}
 
-Mesh& Mesh::boneRemap(C CMemPtr<Byte, 256> &old_to_new, Bool remap_names)
+Mesh& Mesh::boneRemap(C CMemPtrN<BoneType, 256> &old_to_new, Bool remap_names)
 {
    REP(lods())lod(i).boneRemap(old_to_new);
    if(remap_names)_bone_map.remap(old_to_new);
    return T;
 }
-void Mesh::includeUsedBones(Bool (&bones)[256])C {REP(lods())lod(i).includeUsedBones(bones);}
-void Mesh::    setUsedBones(Bool (&bones)[256])C {Zero(bones); includeUsedBones(bones);}
+void Mesh::includeUsedBones(MemPtrN<Bool, 256> bones)C {REP(lods())lod(i).includeUsedBones(bones);}
+void Mesh::    setUsedBones(MemPtrN<Bool, 256> bones)C {bones.clear();    includeUsedBones(bones);}
 
 Mesh& Mesh::setVtxAO(Flt strength, Flt bias, Flt max, Flt ray_length, Flt pos_eps, Int rays, MESH_AO_FUNC func, Threads *threads) {REP(lods())lod(i).setVtxAO(strength, bias, max, ray_length, pos_eps, rays, func, threads); return T;}
 
@@ -447,8 +447,8 @@ Bool Mesh::waitForStream()C {Bool ok=true; REP(lods())ok&=lod(i).waitForStream()
 /******************************************************************************/
 // FIX
 /******************************************************************************/
-Mesh& Mesh::fixTexWrapping(Byte tex_index) {REP(lods())lod(i).fixTexWrapping(tex_index); return T;}
-Mesh& Mesh::fixTexOffset  (Byte tex_index) {REP(lods())lod(i).fixTexOffset  (tex_index); return T;}
+Mesh& Mesh::fixTexWrapping(Byte uv_index) {REP(lods())lod(i).fixTexWrapping(uv_index); return T;}
+Mesh& Mesh::fixTexOffset  (Byte uv_index) {REP(lods())lod(i).fixTexOffset  (uv_index); return T;}
 /******************************************************************************/
 // CONVERT
 /******************************************************************************/
@@ -592,7 +592,7 @@ Mesh& Mesh::skeleton(Skeleton *skeleton, Bool by_name)
    {
       if(_bone_map.is()) // remap vertexes only if the mesh already had a bone map (otherwise the vertex bone could be set, but the bone map doesn't exist yet, and in that case the vertex bone data could be lost if we've performed remapping)
       {
-         Memt<Byte, 256> old_to_new;
+         MemtN<BoneType, 256> old_to_new;
         _bone_map.setRemap(*skeleton, old_to_new, by_name);
          boneRemap(old_to_new, false); // set false to not waste time on adjusting the '_bone_map' itself, because we're going to recreate it anyway below
       }

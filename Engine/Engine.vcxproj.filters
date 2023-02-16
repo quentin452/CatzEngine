@@ -295,6 +295,12 @@
     <Filter Include="H\_\Libs\64\SPIRV-Cross">
       <UniqueIdentifier>{45ae6e2e-2c10-4e8c-a6f9-ff69016d9022}</UniqueIdentifier>
     </Filter>
+    <Filter Include="H\_\Libs\Android\AVIF">
+      <UniqueIdentifier>{a4a88396-0900-4708-8a24-a7ec9fc59804}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="H\_\Libs\Android\AOM">
+      <UniqueIdentifier>{c68ebe3f-857c-4e7f-b813-51611021c6e2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="H\Engine.h">
@@ -1979,7 +1985,7 @@
     <ClCompile Include="Source\Platforms\Windows\Windows Platform.cpp">
       <Filter>Source\Platforms\Windows</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Sound\VorbisEncoder.cpp">
+    <ClCompile Include="Source\Sound\Vorbis Encoder.cpp">
       <Filter>Source\Sound</Filter>
     </ClCompile>
     <ClCompile Include="Source\Input\Virtual Reality.cpp">
@@ -2006,10 +2012,10 @@
     <ClCompile Include="..\ThirdPartyLibs\GL\glew.cpp">
       <Filter>H\_\OpenGL</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Graphics\Import\PVRTC_Compress.cpp">
+    <ClCompile Include="Source\Graphics\Import\PVRTC Compress.cpp">
       <Filter>Source\Graphics\Import</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Graphics\Import\ETC_Compress.cpp">
+    <ClCompile Include="Source\Graphics\Import\ETC Compress.cpp">
       <Filter>Source\Graphics\Import</Filter>
     </ClCompile>
     <ClCompile Include="Source\Memory\Counted Pointer.cpp">
@@ -2024,7 +2030,7 @@
     <ClCompile Include="Source\Misc\Printer.cpp">
       <Filter>Source\Misc</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Graphics\Import\BC_Compress.cpp">
+    <ClCompile Include="Source\Graphics\Import\BC Compress.cpp">
       <Filter>Source\Graphics\Import</Filter>
     </ClCompile>
     <ClCompile Include="Source\Shaders\FXAA.cpp">
@@ -2123,7 +2129,7 @@
     <ClCompile Include="Source\Graphics\Shader Compilers.cpp">
       <Filter>Source\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Graphics\ImageFilterWaifu.cpp">
+    <ClCompile Include="Source\Graphics\Image Filter Waifu.cpp">
       <Filter>Source\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Source\Shaders\Temporal.cpp">
@@ -2153,11 +2159,23 @@
     <ClCompile Include="Source\Graphics\Import\ASTC.cpp">
       <Filter>Source\Graphics\Import</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Graphics\Import\ASTC_Compress.cpp">
+    <ClCompile Include="Source\Graphics\Import\ASTC Compress.cpp">
       <Filter>Source\Graphics\Import</Filter>
     </ClCompile>
     <ClCompile Include="Source\Misc\Translation.cpp">
       <Filter>Source\Misc</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Graphics\Import\AVIF.cpp">
+      <Filter>Source\Graphics\Import</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Graphics\Import\JPEG XL.cpp">
+      <Filter>Source\Graphics\Import</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Graphics\Import\JPEG XL Compress.cpp">
+      <Filter>Source\Graphics\Import</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Graphics\Import\AVIF Compress.cpp">
+      <Filter>Source\Graphics\Import</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -2705,6 +2723,24 @@
     </Library>
     <Library Include="..\ThirdPartyLibs\SPIRV-Cross\lib\spirv-cross-core.lib">
       <Filter>H\_\Libs\64\SPIRV-Cross</Filter>
+    </Library>
+    <Library Include="..\ThirdPartyLibs\AVIF\Windows\Release\avif.lib">
+      <Filter>H\_\Libs\64</Filter>
+    </Library>
+    <Library Include="..\ThirdPartyLibs\dav1d\Windows\src\libdav1d.lib">
+      <Filter>H\_\Libs\64</Filter>
+    </Library>
+    <Library Include="..\ThirdPartyLibs\JpegXL\Windows\third_party\highway\Release\hwy.lib">
+      <Filter>H\_\Libs\64</Filter>
+    </Library>
+    <Library Include="..\ThirdPartyLibs\JpegXL\Windows\lib\Release\jxl_threads-static.lib">
+      <Filter>H\_\Libs\64</Filter>
+    </Library>
+    <Library Include="..\ThirdPartyLibs\JpegXL\Windows\lib\Release\jxl-static.lib">
+      <Filter>H\_\Libs\64</Filter>
+    </Library>
+    <Library Include="..\ThirdPartyLibs\AOM\Windows\Release\aom.lib">
+      <Filter>H\_\Libs\64</Filter>
     </Library>
   </ItemGroup>
   <ItemGroup>
@@ -6380,12 +6416,6 @@
     <Object Include="..\ThirdPartyLibs\play-core-native-sdk\obj\state_helper_impl.cc.o">
       <Filter>H\_\Libs\Android\play-core-native-sdk</Filter>
     </Object>
-    <Object Include="..\ThirdPartyLibs\play-core-native-sdk\obj\task_manager_impl.cc.o">
-      <Filter>H\_\Libs\Android\play-core-native-sdk</Filter>
-    </Object>
-    <Object Include="..\ThirdPartyLibs\play-core-native-sdk\obj\tasks.cc.o">
-      <Filter>H\_\Libs\Android\play-core-native-sdk</Filter>
-    </Object>
     <Object Include="..\ThirdPartyLibs\play-core-native-sdk\obj\app_update.cc.o">
       <Filter>H\_\Libs\Android\play-core-native-sdk</Filter>
     </Object>
@@ -6394,6 +6424,765 @@
     </Object>
     <Object Include="..\ThirdPartyLibs\play-core-native-sdk\obj\app_update_manager.cc.o">
       <Filter>H\_\Libs\Android\play-core-native-sdk</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AVIF\Android\Release\Android-arm64-v8a\avif.o">
+      <Filter>H\_\Libs\Android\AVIF</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AVIF\Android\Release\Android-arm64-v8a\codec_aom.o">
+      <Filter>H\_\Libs\Android\AVIF</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AVIF\Android\Release\Android-arm64-v8a\colr.o">
+      <Filter>H\_\Libs\Android\AVIF</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AVIF\Android\Release\Android-arm64-v8a\diag.o">
+      <Filter>H\_\Libs\Android\AVIF</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AVIF\Android\Release\Android-arm64-v8a\exif.o">
+      <Filter>H\_\Libs\Android\AVIF</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AVIF\Android\Release\Android-arm64-v8a\io.o">
+      <Filter>H\_\Libs\Android\AVIF</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AVIF\Android\Release\Android-arm64-v8a\mem.o">
+      <Filter>H\_\Libs\Android\AVIF</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AVIF\Android\Release\Android-arm64-v8a\obu.o">
+      <Filter>H\_\Libs\Android\AVIF</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AVIF\Android\Release\Android-arm64-v8a\rawdata.o">
+      <Filter>H\_\Libs\Android\AVIF</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AVIF\Android\Release\Android-arm64-v8a\read.o">
+      <Filter>H\_\Libs\Android\AVIF</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AVIF\Android\Release\Android-arm64-v8a\reformat.o">
+      <Filter>H\_\Libs\Android\AVIF</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AVIF\Android\Release\Android-arm64-v8a\reformat_libsharpyuv.o">
+      <Filter>H\_\Libs\Android\AVIF</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AVIF\Android\Release\Android-arm64-v8a\reformat_libyuv.o">
+      <Filter>H\_\Libs\Android\AVIF</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AVIF\Android\Release\Android-arm64-v8a\scale.o">
+      <Filter>H\_\Libs\Android\AVIF</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AVIF\Android\Release\Android-arm64-v8a\stream.o">
+      <Filter>H\_\Libs\Android\AVIF</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AVIF\Android\Release\Android-arm64-v8a\utils.o">
+      <Filter>H\_\Libs\Android\AVIF</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AVIF\Android\Release\Android-arm64-v8a\write.o">
+      <Filter>H\_\Libs\Android\AVIF</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AVIF\Android\Release\Android-arm64-v8a\alpha.o">
+      <Filter>H\_\Libs\Android\AVIF</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\timing.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\tokenize.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\tpl_model.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\tx_search.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\txb_common.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\txb_rdopt.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\var_based_part.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\variance.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\variance_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\vector.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\warp_plane_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\warped_motion.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\wedge_utils.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\wedge_utils_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\wiener_convolve_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\yv12config.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\yv12extend.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\allintra_vis.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\alloccommon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\aom_av1_dummy.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\aom_codec.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\aom_config.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\aom_convolve.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\aom_convolve_copy_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\aom_decoder.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\aom_dsp_dummy.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\aom_dsp_rtcd.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\aom_encoder.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\aom_image.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\aom_integer.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\aom_mem.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\aom_ports_static_dummy.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\aom_scale.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\aom_scale_rtcd.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\aom_thread.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\aom_version_dummy.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\aq_complexity.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\aq_cyclicrefresh.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\aq_variance.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\arg_defs.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\args_helper.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\av1_cx_iface.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\av1_dx_iface.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\av1_error_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\av1_fwd_txfm1d.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\av1_fwd_txfm2d.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\av1_fwd_txfm2d_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\av1_highbd_quantize_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\av1_inv_txfm_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\av1_inv_txfm1d.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\av1_inv_txfm2d.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\av1_loopfilter.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\av1_noise_estimate.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\av1_quantize.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\av1_rtcd.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\av1_txfm.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\av1_txfm_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\avg.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\avg_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\binary_codes_reader.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\binary_codes_writer.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\bitreader.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\bitreader_buffer.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\bitstream.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\bitwriter.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\bitwriter_buffer.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\blend_a64_hmask.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\blend_a64_hmask_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\blend_a64_mask.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\blend_a64_mask_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\blend_a64_vmask.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\blend_a64_vmask_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\blk_sse_sum.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\blockd.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\cdef.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\cdef_block.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\cdef_block_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\cfl.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\cfl_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\cnn.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\common_data.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\compound_type.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\context_tree.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\convert_argb.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\convolve.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\convolve_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\corner_detect.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\corner_match.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\cost.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\cpu_id.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\debug_util.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\debugmodes.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\decodeframe.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\decodemv.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\decoder.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\decodetxb.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\detokenize.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\disflow.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\dwt.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\encode_strategy.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\encodeframe.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\encodeframe_utils.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\encodemb.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\encodemv.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\encoder.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\encoder_utils.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\encodetxb.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\encodetxb_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\entcode.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\entdec.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\entenc.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\entropy.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\entropymode.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\entropymv.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\ethread.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\extend.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\external_partition.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\fast.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\fast_9.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\fft.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\firstpass.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\flow_estimation.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\frame_buffers.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\fwd_txfm.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\fwd_txfm_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\gen_scalers.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\global_motion.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\global_motion_facade.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\gop_structure.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\grain_synthesis.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\grain_table.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\hadamard_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\hash.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\hash_motion.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\highbd_fwd_txfm_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\highbd_intrapred_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\highbd_inv_txfm_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\highbd_loopfilter_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\highbd_quantize_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\highbd_variance_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\hybrid_fwd_txfm.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\hybrid_fwd_txfm_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\idct.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\interp_search.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\intra_mode_search.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\intrapred.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\intrapred_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\jnt_convolve_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\level.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\lookahead.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\loopfilter.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\loopfilter_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\mcomp.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\ml.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\ml_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\motion_search_facade.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\mv_prec.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\mvref_common.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\noise_model.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\noise_util.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\nonmax.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\nonrd_pickmode.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\obu.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\obu_util.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\odintrin.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\palette.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\partition_search.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\partition_strategy.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\pass2_strategy.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\pickcdef.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\picklpf.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\pickrst.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\picksrt_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\planar_functions.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\pred_common.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\psnr.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\quant_common.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\quantize.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\quantize_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\ransac.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\ratectrl.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\ratectrl_qmode.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\ratectrl_qmode_interface.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\rd.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\rdopt.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\rdopt_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\reconinter.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\reconinter_enc.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\reconinter_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\reconintra.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\reconintra_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\reference_manager.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\resize.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\resize_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\restoration.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\row_any.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\row_common.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\row_gcc.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\row_mips.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\row_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\row_neon64.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\row_win.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\sad.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\sad_av1.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\sad_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\sad4d_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\scale.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\scale_any.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\scale_common.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\scale_gcc.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\scale_mips.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\scale_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\scale_neon64.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\scale_uv.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\scale_win.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\scan.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\seg_common.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\segmentation.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\selfguided_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\speed_features.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\sse.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\sse_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\ssim.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\subpel_variance_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\subtract.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\subtract_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\sum_squares.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\sum_squares_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\superres_scale.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\svc_layercontext.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\temporal_filter.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\temporal_filter_neon.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\thirdpass.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\thread_common.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
+    </Object>
+    <Object Include="..\ThirdPartyLibs\AOM\Android\Release\Android-arm64-v8a\tile_common.o">
+      <Filter>H\_\Libs\Android\AOM</Filter>
     </Object>
   </ItemGroup>
 </Project>

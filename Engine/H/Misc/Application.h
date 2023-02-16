@@ -38,7 +38,7 @@ enum APP_FLAG // Application Flags
 enum AWAKE_MODE : Byte
 {
 #if EE_PRIVATE
-   // !! these enums must be equal to "EsenthelActivity.java" !!
+   // !! THESE ENUMS MUST BE EQUAL TO "EsenthelActivity.java" !!
 #endif
    AWAKE_OFF   , // the system and screen can go to sleep
    AWAKE_SYSTEM, // prevent the system from going to sleep, however the screen can go to sleep
@@ -48,7 +48,7 @@ enum AWAKE_MODE : Byte
 enum SYSTEM_BAR : Byte
 {
 #if EE_PRIVATE
-   // !! these enums must be equal to "EsenthelActivity.java" !!
+   // !! THESE ENUMS MUST BE EQUAL TO "EsenthelActivity.java" !!
 #endif
    SYSTEM_BAR_HIDDEN , // completely hidden
    SYSTEM_BAR_OVERLAY, // semi-transparent drawn on top of the application
@@ -63,16 +63,18 @@ struct Application // Application Settings
        background_wait; // amount of milliseconds the application should wait before making 'Update' calls when in background mode and with APP_WORK_IN_BACKGROUND enabled, -1=unlimited (app will wait until it's activated), 0=instant (app will keep calling 'Update' continuously), >0=wait (app will wait specified time until activated    before making 'Update' calls), default=0. It's recommended to use this instead of manually waiting with 'Time.wait', because this method allows app to resume instantly when it gets activated, unlike 'Time.wait' which waits without stopping.
    Mems<Str>  cmd_line; // command line arguments
 
-   void (*receive_data       )(CPtr data, Int size, C SysWindow &sender_window        ); // pointer to custom function called when application has received binary data sent using 'SysWindow.sendData' function, application may not access 'data' memory after the callback function returns, 'sender_window'=system window of the sender, default=null
    void (*save_state         )(                                                       ); // pointer to custom function called when application is being put into background or will be terminated, in this function you should save current state of data which you may want to restore at next application startup, this function is used only on mobile platforms where the Operating System may close the application for any reason, default=null
    void (* paused            )(                                                       ); // pointer to custom function called when application is being  paused (lost   focus), default=null
    void (*resumed            )(                                                       ); // pointer to custom function called when application is being resumed (gained focus), default=null
    void (*drop               )(Memc<Str> &names, GuiObj *focus_obj, C Vec2 &screen_pos); // pointer to custom function called when a file is Drag and Dropped on the application window, 'names'=list of file names being drag and dropped, 'focus_obj'=gui object at which elements are being dropped, 'screen_pos'=screen position at which dropping occurs, default=null
+   void (*receive_file       )(File &f                                                ); // pointer to custom function called when a file is received [Supported Platforms: Android, iOS]
+   void (*receive_data       )(CPtr data, Int size, C SysWindow &sender_window        ); // pointer to custom function called when application has received binary data sent using 'SysWindow.sendData' function, application may not access 'data' memory after the callback function returns, 'sender_window'=system window of the sender, default=null
    void (*quit               )(                                                       ); // pointer to custom function called when the application was requested to quit (for example by pressing Alt+F4 or clicking on the "X" close window button), if this member is different than null, then the application will not exit automatically, manual exiting can be called inside custom 'quit' function (for example by activating 'StateExit' State), this member is ignored when the application was created with APP_NO_CLOSE flag, default=null, this is not supported on Windows Universal Apps
    void (*exit               )(CChar *error                                           ); // pointer to custom function called when 'Exit' function is called, typically this happens when application has encountered an error and is about to be terminated, default=null
    void (*low_memory         )(                                                       ); // pointer to custom function called when the application has received low memory notification from the system, inside it you can release any unnecessary memory, default=null
    void (*notification       )(Notification &notification, Bool selected              ); // pointer to custom function called when the application notification was selected or dismissed. If the callback is specified, then this notification is not automatically removed, you should call 'notification.remove' to remove it. If no callback is specified, then 'notification.remove' is called automatically.
    void (*sleep              )(Bool sleep                                             ); // pointer to custom function called when the device is going to sleep.
+   void (*joypad_changed     )(                                                       ); // pointer to custom function called when a Joypad has been added, removed or changed order, default=null
    void (*joypad_user_changed)(UInt joypad_id                                         ); // pointer to custom function called when user associated with a Joypad has changed. This is called on Windows UWP only.
 
    // get / set
@@ -115,14 +117,18 @@ struct Application // Application Settings
    Application& backgroundFull(Bool   on      );                           // set if Application is allowed to remain visible on the screen when in fullscreen mode but inactive (if false then application is minimized), default=false
 
    // system bars
-   Bool    getSystemBars(SYSTEM_BAR &status, SYSTEM_BAR &navigation)C;   Application& systemBars(SYSTEM_BAR status, SYSTEM_BAR navigation); // get/set system     bars [Supported Platforms: Android]
-   SYSTEM_BAR statusBar (                                          )C;   Application& statusBar (SYSTEM_BAR bar                          ); // get/set status     bar  [Supported Platforms: Android]
-   SYSTEM_BAR navBar    (                                          )C;   Application&    navBar (SYSTEM_BAR bar                          ); // get/set navigation bar  [Supported Platforms: Android]
+                                                          Application& systemBars    (SYSTEM_BAR status, SYSTEM_BAR navigation); //     set system     bars      [Supported Platforms: Android, iOS]
+   SYSTEM_BAR statusBar     ()C {return _status      ;}   Application& statusBar     (SYSTEM_BAR bar                          ); // get/set status     bar       [Supported Platforms: Android, iOS]
+   SYSTEM_BAR    navBar     ()C {return    _nav      ;}   Application&    navBar     (SYSTEM_BAR bar                          ); // get/set navigation bar       [Supported Platforms: Android, iOS]
+   Bool       statusBarColor()C {return _status_color;}   Application& statusBarColor(Bool       light                        ); // get/set status     bar color [Supported Platforms: Android, iOS]
+   Bool          navBarColor()C {return    _nav_color;}   Application&    navBarColor(Bool       light                        ); // get/set navigation bar color [Supported Platforms: Android     ]
 
    // operations
    Bool renameSelf      (C Str &dest); // rename application executable file to 'dest' location, false on fail
    void deleteSelfAtExit(           ); // notify that the exe should delete itself at application exit
    void close           (           ); // request application to be closed, if 'App.quit' was specified then it will be called instead
+
+   void pickPhoto(Int max_files); // open Photo Picker allowing to select 'max_files' number of images, they will be received through 'App.receive_file' callback [Supported Platforms: Android, iOS]
 
    // function callbacks
             void addFuncCall(void func(          )            ) {_callbacks.add(func      );}             // add custom function to the Application callback list to be automatically called during Application Update on the main thread
@@ -172,13 +178,14 @@ struct Application // Application Settings
 #if !EE_PRIVATE
 private:
 #endif
-   Bool                _active, _initialized, _minimized, _maximized, _close, _closed, _del_self_at_exit, _elevated, _back_full;
+   Bool                _active, _initialized, _minimized, _maximized, _close, _closed, _del_self_at_exit, _elevated, _back_full, _status_color, _nav_color;
 #if WINDOWS_NEW
    Bool                _waiting;
 #endif
    AWAKE_MODE          _stay_awake;
    DIR_ENUM            _orientation=DIR_UP;
    LANG_TYPE           _lang;
+   SYSTEM_BAR          _status, _nav;
    Int                 _mem_leaks;
    mutable UInt        _parent_process_id;
    UInt                _process_id;

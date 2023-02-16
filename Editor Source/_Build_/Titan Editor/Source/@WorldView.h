@@ -18,6 +18,7 @@ class WorldView : Viewport4Region, WorldData
       OP_MOVE     ,
       OP_ROT      ,
       OP_SCALE    ,
+      OP_SCALE_ALL,
       OP_SEPARATE ,
       OP_MOVE_Y   ,
       OP_ROT_Y    ,
@@ -189,6 +190,7 @@ class WorldView : Viewport4Region, WorldData
    static void Op5             (WorldView &world);
    static void Op6             (WorldView &world);
    static void Op7             (WorldView &world);
+   static void Op8             (WorldView &world);
    static void AlignHm         (WorldView &world);
    static void AlignGrid       (WorldView &world);
    static void CurPos          (WorldView &world);

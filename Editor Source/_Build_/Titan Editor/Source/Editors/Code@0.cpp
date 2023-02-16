@@ -1,6 +1,7 @@
 ﻿/******************************************************************************/
 #include "stdafx.h"
 /******************************************************************************/
+int Compare(C Enum::Elm &a, C Enum::Elm &b) {return Compare(a.name, b.name, true);}
 CodeView CodeEdit;
 /******************************************************************************/
 AppPropsEditor AppPropsEdit;
@@ -310,7 +311,6 @@ AppPropsEditor AppPropsEdit;
       super::cleanAll(); // first call super to stop any build in progress
       FDelDirs(ProjectsPath.tailSlash(true)+ProjectsPublishPath);
    }
-   int CodeView::Compare(C Enum::Elm &a, C Enum::Elm &b) {return ::Compare(a.name, b.name, true);}
    void CodeView::makeAuto(bool publish)
    {
       if(Proj.valid())
@@ -609,7 +609,7 @@ if(appGuiSkin().valid())data+="   Gui.default_skin=APP_GUI_SKIN; // set default 
             VecI2 size=image->size();
             if(size.x>256)size=size*256/size.x;
             if(size.y>256)size=size*256/size.y;
-            image->copyTry(image_2d, Max(size.x, 1), Max(size.y, 1), 1, ImageTypeUncompressed(image->type()), IMAGE_2D, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT);
+            image->copy(image_2d, Max(size.x, 1), Max(size.y, 1), 1, ImageTypeUncompressed(image->type()), IMAGE_2D, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT);
             image=&image_2d;
          }
          remove.visible(id.valid());
@@ -627,7 +627,7 @@ if(appGuiSkin().valid())data+="   Gui.default_skin=APP_GUI_SKIN; // set default 
       {
          T.md=md;
          T.md_time=md_time;
-         parent+=super::create(rect); fit=true;
+         parent+=super::create(rect); fit=FIT_FULL;
          parent+=remove.create(Rect_RU(rect.ru(), 0.045f, 0.045f)).func(Remove, T); remove.image="Gui/close.img";
          return T;
       }

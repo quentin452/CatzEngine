@@ -180,7 +180,7 @@
    }
    bool EditEnums::load(C Str &name)
    {
-      File f; if(f.readTry(name))return load(f); del(); return false;
+      File f; if(f.read(name))return load(f); del(); return false;
    }
 EditEnum::EditEnum() : removed(false), id(UID().randomizeValid()) {}
 

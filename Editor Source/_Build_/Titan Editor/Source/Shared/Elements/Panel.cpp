@@ -254,7 +254,7 @@
    }
    bool EditPanel::load(C Str &name)
    {
-      File f; if(f.readTry(name))return load(f);
+      File f; if(f.read(name))return load(f);
       reset(); return false;
    }
 EditPanel::EditPanel() : center_image(UIDZero), bar_image(UIDZero), border_image(UIDZero), top_image(UIDZero), bottom_image(UIDZero), left_right_image(UIDZero), top_corner_image(UIDZero), bottom_corner_image(UIDZero), panel_image(UIDZero) {}

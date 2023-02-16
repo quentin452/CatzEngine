@@ -145,11 +145,14 @@ Bool ImportPSK(C Str &name, Mesh *mesh, Skeleton *skeleton, MemPtr<XMaterial> ma
 Bool ImportPSA(C Str &name, Skeleton *skeleton, MemPtr<XAnimation> animations); // import data from PSA 'name' file, false on fail
 
 // Xna Posing Studio - XPS
-Bool ImportXPS(C Str &name, Mesh *mesh, Skeleton *skeleton, MemPtr<XMaterial> materials, MemPtr<Int> part_material_index); // import data from XPS 'name' file, false on fail
+Bool ImportXPSBinary(C Str &name, Mesh *mesh, Skeleton *skeleton, MemPtr<XMaterial> materials, MemPtr<Int> part_material_index);
+Bool ImportXPSText  (C Str &name, Mesh *mesh, Skeleton *skeleton, MemPtr<XMaterial> materials, MemPtr<Int> part_material_index);
+Bool ImportXPS      (C Str &name, Mesh *mesh, Skeleton *skeleton, MemPtr<XMaterial> materials, MemPtr<Int> part_material_index); // import data from XPS 'name' file, false on fail
 
 Bool Import(C Str &name, Mesh *mesh, Skeleton *skeleton, MemPtr<XAnimation> animations, MemPtr<XMaterial> materials, MemPtr<Int> part_material_index, XSkeleton *xskeleton=null, Bool all_nodes_as_bones=false); // import data according to file extension, false on fail
 
 #if EE_PRIVATE
 void CleanMesh(Mesh &mesh);
+void ProcessBoneNames(MemPtrN<Str8, 256> names);
 #endif
 /******************************************************************************/

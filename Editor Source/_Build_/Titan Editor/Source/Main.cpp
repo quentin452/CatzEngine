@@ -124,7 +124,7 @@ void InitPre()
          }
       }
    }
-   
+
    ASSERT(ELM_NUM==(int)Edit::ELM_NUM); // they must match exactly
    Str path=GetPath(App.exe()).tailSlash(true);
    InstallerMode=(STEAM ? false : !(FExistSystem(path+"Bin/Code Editor.dat") && FExistSystem(path+"Bin/Engine.pak") && FExistSystem(path+"Bin/Editor.pak") && FExistSystem(path+"Bin/Mobile/Engine.pak") && FExistSystem(path+"Bin/Engine/Engine.h")));

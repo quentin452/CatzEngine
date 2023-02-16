@@ -151,7 +151,7 @@
    }
    bool IconSettings::load(C Str &name)
    {
-      File f; if(f.readTry(name))return load(f);
+      File f; if(f.read(name))return load(f);
       reset(); return false;
    }
 IconSettings::IconSettings() : mip_maps(false), auto_center(true), light0_shadow(true), light1_shadow(true), type(ElmImage::COMPRESSED), width(128), height(128), scale(1), fov(PI_6), ambient_occl(1.2f), ambient_range(0.1f), bloom_original(1.0f), bloom_scale(0.8f), bloom_cut(0.3f), bloom_glow(1.0f), cam_angle(0), cam_focus(0), ambient_col(0.4f), light0_col(0.7f), light1_col(0.0f), light0_angle( PI_4,  PI_4), light1_angle(-PI_4, -PI_4) {}

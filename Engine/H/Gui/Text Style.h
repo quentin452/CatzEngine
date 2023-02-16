@@ -171,10 +171,12 @@ struct TextStyleParams // Text Style Params
    Flt textWidth(CChar8 *text, Int max_length=-1         )C; // get width of one line 'text' text
    Flt textWidth(CChar  *text, C StrData *data, Int datas)C; // get width of one line 'text' text
 
-   Int textIndex(CChar  *text,                             Flt x,        TEXT_INDEX_MODE index_mode                                      )C; // get index of character at 'x'   position, returns "0 .. Length(text)"
-   Int textIndex(CChar8 *text,                             Flt x,        TEXT_INDEX_MODE index_mode                                      )C; // get index of character at 'x'   position, returns "0 .. Length(text)"
-   Int textIndex(CChar  *text,                             Flt x, Flt y, TEXT_INDEX_MODE index_mode, Flt width, Bool auto_line, Bool &eol)C; // get index of character at 'x,y' position, returns "0 .. Length(text)"
-   Int textIndex(CChar  *text, C StrData *data, Int datas, Flt x, Flt y, TEXT_INDEX_MODE index_mode, Flt width, Bool auto_line, Bool &eol)C; // get index of character at 'x,y' position, returns "0 .. Length(text)"
+   Int textIndex(CChar  *text,                             Flt x,        TEXT_INDEX_MODE index_mode                                       )C; // get index of character at 'x'   position, returns "0 .. Length(text)"
+   Int textIndex(CChar8 *text,                             Flt x,        TEXT_INDEX_MODE index_mode                                       )C; // get index of character at 'x'   position, returns "0 .. Length(text)"
+   Int textIndex(CChar  *text,                             Flt x, Flt y, TEXT_INDEX_MODE index_mode, Flt  width, Bool auto_line, Bool &eol)C; // get index of character at 'x,y' position, returns "0 .. Length(text)"
+   Int textIndex(CChar  *text, C StrData *data, Int datas, Flt x, Flt y, TEXT_INDEX_MODE index_mode, Flt  width, Bool auto_line, Bool &eol)C; // get index of character at 'x,y' position, returns "0 .. Length(text)"
+
+   Int textIndexAlign(CChar *text, C StrData *data, Int datas, Flt x, Flt y, TEXT_INDEX_MODE index_mode, C Vec2 &size, Bool auto_line, Bool clamp, Bool &eol)C; // get index of character at 'x,y' position, returns "-1 .. Length(text)", 'clamp'=if position is outside of text then clamp to nearest character (if this is false then -1 is returned), this function uses 'align'
 
    Vec2 textPos(CChar *text,                             Int index, Flt width, Bool auto_line)C; // get position of character at 'index' location
    Vec2 textPos(CChar *text, C StrData *data, Int datas, Int index, Flt width, Bool auto_line)C; // get position of character at 'index' location
@@ -182,6 +184,10 @@ struct TextStyleParams // Text Style Params
    Int textLines(CChar  *text,                             Flt width, Bool auto_line, Flt *actual_width=null)C; // get number of lines needed to draw 'text' in space as wide as 'width', 'actual_width'=actual width of the text (this is the Max of all line widths)
    Int textLines(CChar  *text, C StrData *data, Int datas, Flt width, Bool auto_line, Flt *actual_width=null)C; // get number of lines needed to draw 'text' in space as wide as 'width', 'actual_width'=actual width of the text (this is the Max of all line widths)
    Int textLines(CChar8 *text, C StrData *data, Int datas, Flt width, Bool auto_line, Flt *actual_width=null)C; // get number of lines needed to draw 'text' in space as wide as 'width', 'actual_width'=actual width of the text (this is the Max of all line widths)
+
+   Flt textHeight(CChar  *text,                             Flt width, Bool auto_line, Flt *actual_width=null)C; // get height needed to draw 'text' in space as wide as 'width', 'actual_width'=actual width of the text (this is the Max of all line widths)
+   Flt textHeight(CChar  *text, C StrData *data, Int datas, Flt width, Bool auto_line, Flt *actual_width=null)C; // get height needed to draw 'text' in space as wide as 'width', 'actual_width'=actual width of the text (this is the Max of all line widths)
+   Flt textHeight(CChar8 *text, C StrData *data, Int datas, Flt width, Bool auto_line, Flt *actual_width=null)C; // get height needed to draw 'text' in space as wide as 'width', 'actual_width'=actual width of the text (this is the Max of all line widths)
 
    // operations
    TextStyleParams& reset          (Bool gui=false); // reset all   parameters to default settings, this copies settings from 'Gui.skin.text_style' when 'gui' is false, and 'Gui.skin.text.text_style' when 'gui' is true

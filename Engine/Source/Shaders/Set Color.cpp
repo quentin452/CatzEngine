@@ -52,7 +52,7 @@ void VS
         pos=          TransformPos(vtx.pos());
    }else
    {
-      VecU bone=vtx.bone();
+      VecU4 bone=vtx.bone();
    #if TESSELATE
       O.nrm=Normalize(TransformDir(vtx.nrm(), bone, vtx.weight()));
    #endif

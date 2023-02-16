@@ -39,7 +39,7 @@ Str FileSize(long size)
 /******************************************************************************/
 bool SafeCopy(C Str &src, C Str &dest)
 {
-   File f; return f.readStdTry(src) && SafeOverwrite(f, dest, &NoTemp(FileInfoSystem(src).modify_time_utc), null, S+"@new"+Random());
+   File f; return f.readStd(src) && SafeOverwrite(f, dest, &NoTemp(FileInfoSystem(src).modify_time_utc), null, S+"@new"+Random());
 }
 bool ErrorCopy(C Str &src, C Str &dest)
 {

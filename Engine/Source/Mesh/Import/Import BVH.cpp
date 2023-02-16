@@ -16,7 +16,7 @@ enum CHANNEL : Byte
 struct JOINT
 {
    Bool          has_end;
-   Byte          sbon_index;
+   BoneType      sbon_index;
    Int           abon_index;
    Str           name;
    Vec           offset, end_offset, pos;
@@ -24,7 +24,7 @@ struct JOINT
    Memx<JOINT  > joints; // use 'Memx' because joints are referencing each other using 'parent'
    JOINT        *parent;
 
-   JOINT() {has_end=false; sbon_index=0xFF; abon_index=-1; offset.zero(); parent=null;}
+   JOINT() {has_end=false; sbon_index=BONE_NULL; abon_index=-1; offset.zero(); parent=null;}
 
    void import(FileTextEx &f, JOINT *parent)
    {
@@ -66,7 +66,7 @@ struct JOINT
       }
    }
    
-   void toBone(Skeleton &skeleton, Byte parent_index)
+   void toBone(Skeleton &skeleton, BoneType parent_index)
    {
           sbon_index=skeleton.bones.elms();
       SkelBone &sbon=skeleton.bones.New ();
@@ -124,7 +124,7 @@ struct JOINT
 
    void loadFrame(Skeleton &skeleton, Animation &animation, FileTextEx &f, Int frame)
    {
-      if(sbon_index!=0xFF && abon_index>=0)
+      if(sbon_index!=BONE_NULL && abon_index>=0)
       {
          SkelBone &sbon=skeleton .bones[sbon_index];
          AnimBone &abon=animation.bones[abon_index];
@@ -199,7 +199,7 @@ Bool ImportBVH(C Str &name, Skeleton *skeleton, XAnimation *animation)
             if(skel)
             {
                root.import(f, null);
-               root.toBone(*skel, 0xFF);
+               root.toBone(*skel, BONE_NULL);
             }
          }else
          if(f.cur("MOTION"))

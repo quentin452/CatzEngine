@@ -224,7 +224,7 @@
    }
    bool EditFont::load(C Str &name)
    {
-      File f; if(f.readTry(name))return load(f);
+      File f; if(f.read(name))return load(f);
       reset(); return false;
    }
 EditFont::EditFont() : diagonal_shadow(true), clear_type(false), software(false), ascii(true), german(false), french(false), polish(false), chinese(false), japanese(false), korean(false), russian(false), mip_maps(0), size(48), scale(1), weight(0), shadow_blur(0.04f), shadow_opacity(1.0f), shadow_spread(0.0f), font("Arial") {}

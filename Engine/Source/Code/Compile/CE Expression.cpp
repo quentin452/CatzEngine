@@ -1261,13 +1261,13 @@ Char Expr::asChar(Compiler &compiler)
    }
    return '\0';
 }
-Memc<Char> Expr::asText(Compiler &compiler)
+Str Expr::asText(Compiler &compiler)
 {
    Str s=T;
    if((s[0]=='8' || s[0]=='u' || s[0]=='U' || s[0]=='L') && s[1]=='"' && s.last()=='"')s.remove(0); // eat 8,u,U,L from 8"..", u"..", U"..", L".."
    if(s[0]=='"' && s.last()=='"')s.removeLast().remove(0); // eat "" from ".."
-   Memc<Char> out; for(Int i=0; i<s.length(); )out.add(CppChar(s, i, origin, compiler)); out.add('\0');
-   return     out;
+   Str    out; for(Int i=0; i<s.length(); )out+=CppChar(s, i, origin, compiler); out+='\0'; // append 0 because strings are always NUL terminated
+   return out;
 }
 U64 Expr::asRaw(Compiler &compiler)
 {

@@ -540,6 +540,7 @@ const_mem_addr struct Threads // Worker Threads, allow to process data on multip
    T2(DATA, USER_DATA)   Int cancelFunc(void func(DATA &data, USER_DATA *user, Int thread_index)) {return _cancel((void (*)(Ptr data, Ptr user, Int thread_index))func);}
    T2(DATA, USER_DATA)   Int cancelFunc(void func(DATA &data, USER_DATA &user, Int thread_index)) {return _cancel((void (*)(Ptr data, Ptr user, Int thread_index))func);}
 
+   Int cancel(C CMemPtr<Call> &calls); // cancel multiple calls, returns the number of canceled calls, please note that call that's already in progress can't be canceled
    Threads& cancel(); // cancel all queued calls
 
    // wait until queued calls on 'func' function with 'data' and 'user' parameters have finished processing
@@ -563,6 +564,7 @@ const_mem_addr struct Threads // Worker Threads, allow to process data on multip
    T2(DATA, USER_DATA)   void waitFunc(void func(DATA &data, USER_DATA *user, Int thread_index)) {_wait((void (*)(Ptr data, Ptr user, Int thread_index))func);}
    T2(DATA, USER_DATA)   void waitFunc(void func(DATA &data, USER_DATA &user, Int thread_index)) {_wait((void (*)(Ptr data, Ptr user, Int thread_index))func);}
 
+   void     wait (C CMemPtr<Call> &calls); // wait for multiple calls
    Threads& wait (); // wait until all queued calls have finished processing
    Threads& wait1(); // wait until all queued calls have finished processing, process calls on current thread while waiting, 'thread_index' will always be 0..'threads' (inclusive), which means if you're using per-thread data, then make sure to allocate 'threads'+1 per-thread data (use 'threads1' method to get the number of elements)
 

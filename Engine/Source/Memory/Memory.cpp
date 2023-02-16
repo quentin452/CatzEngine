@@ -684,250 +684,61 @@ void _CopyList(Ptr dest, CPtr src, C CMemPtr<Int> &list, UInt elm_size)
    }
 }
 /******************************************************************************/
+// !! EXPAND - THESE MUST WORK IN-PLACE WHEN 'dest'=='src' !!
 void Copy8To16(Ptr dest, CPtr src, Int elms)
 {
-#if X64 || ARM || !WINDOWS
    if(U16 *d=(U16*)dest)
-   if(U8  *s=(U8 *)src )REP(elms)*d++=*s++;
-#else
-  _asm
-   {
-      mov esi, src
-      or  esi, esi
-      jz  end
-      mov edi, dest
-      or  edi, edi
-      jz  end
-      mov ecx, elms
-      or  ecx, ecx
-      jle end // signed<=
-      xor eax, eax
-   start:
-      lodsb
-      stosw
-      dec ecx
-      jnz start
-   end:
-   }
-#endif
+   if(U8  *s=(U8 *)src )REP(elms)d[i]=s[i];
 }
 void Copy8To32(Ptr dest, CPtr src, Int elms)
 {
-#if X64 || ARM || !WINDOWS
    if(U32 *d=(U32*)dest)
-   if(U8  *s=(U8 *)src )REP(elms)*d++=*s++;
-#else
-  _asm
-   {
-      mov esi, src
-      or  esi, esi
-      jz  end
-      mov edi, dest
-      or  edi, edi
-      jz  end
-      mov ecx, elms
-      or  ecx, ecx
-      jle end // signed<=
-      xor eax, eax
-   start:
-      lodsb
-      stosd
-      dec ecx
-      jnz start
-   end:
-   }
-#endif
-}
-void Copy16To8(Ptr dest, CPtr src, Int elms)
-{
-#if X64 || ARM || !WINDOWS
-   if(U8  *d=(U8 *)dest)
-   if(U16 *s=(U16*)src )REP(elms)*d++=*s++;
-#else
-  _asm
-   {
-      mov esi, src
-      or  esi, esi
-      jz  end
-      mov edi, dest
-      or  edi, edi
-      jz  end
-      mov ecx, elms
-      or  ecx, ecx
-      jle end // signed<=
-   start:
-      lodsw
-      stosb
-      dec ecx
-      jnz start
-   end:
-   }
-#endif
+   if(U8  *s=(U8 *)src )REP(elms)d[i]=s[i];
 }
 void Copy16To32(Ptr dest, CPtr src, Int elms)
 {
-#if X64 || ARM || !WINDOWS
    if(U32 *d=(U32*)dest)
-   if(U16 *s=(U16*)src )REP(elms)*d++=*s++;
-#else
-  _asm
-   {
-      mov esi, src
-      or  esi, esi
-      jz  end
-      mov edi, dest
-      or  edi, edi
-      jz  end
-      mov ecx, elms
-      or  ecx, ecx
-      jle end // signed<=
-      xor eax, eax
-   start:
-      lodsw
-      stosd
-      dec ecx
-      jnz start
-   end:
-   }
-#endif
+   if(U16 *s=(U16*)src )REP(elms)d[i]=s[i];
 }
 void Copy24To32(Ptr dest, CPtr src, Int elms)
 {
-#if X64 || ARM || !WINDOWS
-   if(U8 *d=(U8*)dest)
-   if(U8 *s=(U8*)src )if(elms)
+   if(U32 *d=(U32*)dest)
+   if(U8  *s=(U8 *)src )if(elms>0)
    {
-      REP(elms-1)
-      {
-         *(U32*)d=*(U32*)s;
-         d[3]=0;
-         d+=4;
-         s+=3;
-      }
-      *(U16*)d   =*(U16*)s   ;
-             d[2]=       s[2];
-             d[3]=          0;
+      elms--;
+      U8   *end=s+elms*3;
+      VecB4 v; v.u=*(U16*)end; v.z=end[2]; d[elms]=v.u; // when copying last element, read only 16+8 bits, excluding last 8 bits which could result in invalid memory access
+      REP(elms)d[i]=(*(U32*)(s+i*3))&0xFFFFFF;
    }
-#else
-  _asm
-   {
-      mov esi, src
-      or  esi, esi
-      jz  end
-      mov edi, dest
-      or  edi, edi
-      jz  end
-      mov ecx, elms
-      or  ecx, ecx
-      jle end // signed<=
-      dec ecx
-      jz  last
-   start:
-      movsd
-      mov byte ptr[edi-1], 0
-      dec esi
-      dec ecx
-      jnz start
-   last:
-      movsw
-      movsb
-      mov byte ptr[edi], 0
-   end:
-   }
-#endif
+}
+// !! COMPRESS - THESE MUST WORK IN-PLACE WHEN 'dest'=='src' !!
+void Copy16To8(Ptr dest, CPtr src, Int elms)
+{
+   if(U8  *d=(U8 *)dest)
+   if(U16 *s=(U16*)src )FREP(elms)d[i]=s[i]&0xFF;
 }
 void Copy32To8(Ptr dest, CPtr src, Int elms)
 {
-#if X64 || ARM || !WINDOWS
    if(U8  *d=(U8 *)dest)
-   if(U32 *s=(U32*)src )REP(elms)*d++=*s++;
-#else
-  _asm
-   {
-      mov esi, src
-      or  esi, esi
-      jz  end
-      mov edi, dest
-      or  edi, edi
-      jz  end
-      mov ecx, elms
-      or  ecx, ecx
-      jle end // signed<=
-   start:
-      lodsd
-      stosb
-      dec ecx
-      jnz start
-   end:
-   }
-#endif
+   if(U32 *s=(U32*)src )FREP(elms)d[i]=s[i];
 }
 void Copy32To16(Ptr dest, CPtr src, Int elms)
 {
-#if X64 || ARM || !WINDOWS
    if(U16 *d=(U16*)dest)
-   if(U32 *s=(U32*)src )REP(elms)*d++=*s++;
-#else
-  _asm
-   {
-      mov esi, src
-      or  esi, esi
-      jz  end
-      mov edi, dest
-      or  edi, edi
-      jz  end
-      mov ecx, elms
-      or  ecx, ecx
-      jle end // signed<=
-   start:
-      lodsd
-      stosw
-      dec ecx
-      jnz start
-   end:
-   }
-#endif
+   if(U32 *s=(U32*)src )FREP(elms)d[i]=s[i];
 }
 void Copy32To24(Ptr dest, CPtr src, Int elms)
 {
-#if X64 || ARM || !WINDOWS
-   if(U8 *d=(U8*)dest)
-   if(U8 *s=(U8*)src )if(elms)
+   if(U8  *d=(U8 *)dest)
+   if(U32 *s=(U32*)src )if(elms>0)
    {
-      REP(elms-1)
-      {
-         *(U32*)d=*(U32*)s;
-         d+=3;
-         s+=4;
-      }
-      *(U16*)d   =*(U16*)s   ;
-             d[2]=       s[2];
+      elms--;
+      FREP(elms)*(U32*)(d+i*3)=s[i];
+      d+=elms*3;
+      s+=elms;
+      *(U16*)d   =*(U16*)s    ; // when copying last element, write only 16+8 bits, excluding last 8 bits which would result in overwriting other memory
+             d[2]=((U8 *)s)[2];
    }
-#else
-  _asm
-   {
-      mov esi, src
-      or  esi, esi
-      jz  end
-      mov edi, dest
-      or  edi, edi
-      jz  end
-      mov ecx, elms
-      or  ecx, ecx
-      jle end // signed<=
-      dec ecx
-      jz  last
-   start:
-      movsd
-      dec edi
-      dec ecx
-      jnz start
-   last:
-      movsw
-      movsb
-   end:
-   }
-#endif
 }
 /******************************************************************************/
 // SWAP

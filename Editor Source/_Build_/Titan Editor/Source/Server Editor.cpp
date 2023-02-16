@@ -7,7 +7,7 @@ EditorServer EditServer;
 /******************************************************************************/
    void EditorServer::ConvertHeight(C Heightmap &src, Image &dest, flt area_size)
    {
-      dest.createSoftTry(src.resolution(), src.resolution(), 1, IMAGE_F32);
+      dest.createSoft(src.resolution(), src.resolution(), 1, IMAGE_F32);
       REPD(y, dest.h())
       REPD(x, dest.w())dest.pixF(x, y)=src.height(x, y)*area_size;
    }
@@ -19,7 +19,7 @@ EditorServer EditServer;
    }
    void EditorServer::ConvertColor(C Heightmap &src, Image &dest)
    {
-      dest.createSoftTry(src.resolution(), src.resolution(), 1, IMAGE_R8G8B8_SRGB);
+      dest.createSoft(src.resolution(), src.resolution(), 1, IMAGE_R8G8B8_SRGB);
       REPD(y, dest.h())
       REPD(x, dest.w())dest.color(x, y, src.color(x, y));
    }
@@ -743,7 +743,7 @@ EditorServer EditServer;
                      if(WorldVer *world_ver=Proj.worldVerGet(world_id))
                   {
                      ok=true;
-                     if(world_obj_instance_ids.elms()) // filter out selected objects
+                     if(limit_obj_ids) // filter out selected objects
                      {
                         REPA(world_obj_instance_ids)
                         {
@@ -959,7 +959,7 @@ EditorServer EditServer;
                   if(Elm *elm=Proj.findElm(elm_id))
                   {
                      if(elm->type==ELM_OBJ){ok=true; matrix.identity(); elm=Proj.objToMeshElm(elm);} // if this is an object, then set ok to true, in case it has no mesh, we will just send empty data
-                     if(elm && elm->type==ELM_MESH)if(ok=data.readTry(Proj.editPath(*elm)))matrix=elm->meshData()->transform();
+                     if(elm && elm->type==ELM_MESH)if(ok=data.read(Proj.editPath(*elm)))matrix=elm->meshData()->transform();
                   }
                   f.reset().putByte(Edit::EI_GET_MESH).putBool(ok); if(ok){f<<matrix; data.copy(f);} f.pos(0); connection.send(f);
                }break;
@@ -983,7 +983,7 @@ EditorServer EditServer;
                      if(elm && elm->type==ELM_SKEL)
                      {
                      #if 0
-                        ok=data.readTry(Proj.gamePath(*elm));
+                        ok=data.read(Proj.gamePath(*elm));
                      #else
                         Skeleton skel; if(ok=Proj.skelGet(elm->id, skel)){skel.save(data.writeMem()); data.pos(0);}
                      #endif
@@ -1059,7 +1059,7 @@ EditorServer EditServer;
                   if(Elm *elm=Proj.findElm(elm_id))
                   {
                      if(elm->type==ELM_OBJ){ok=true; elm=Proj.objToPhysElm(elm);} // if this is an object, then set ok to true, in case it has no phys, we will just send empty data
-                     if(elm && elm->type==ELM_PHYS)ok=data.readTry(Proj.gamePath(*elm));
+                     if(elm && elm->type==ELM_PHYS)ok=data.read(Proj.gamePath(*elm));
                   }
                   f.reset().putByte(Edit::EI_GET_PHYS).putBool(ok); if(ok)data.copy(f); f.pos(0); connection.send(f);
                }break;

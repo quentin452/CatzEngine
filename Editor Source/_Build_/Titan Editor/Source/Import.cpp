@@ -11,8 +11,10 @@ ImporterClass Importer;
             Mems<FileParams> texs=FileParams::Decode(tex);
             FREPA(texs)if(!FExistSystem(texs[i].name))
             {
-               Str test=path; test.tailSlash(true)+=GetBaseNoExt(texs[i].name); test+=".webp";
-               if(FExistSystem(test))texs[i].name=test;
+               Str test=path; test.tailSlash(true)+=GetBaseNoExt(texs[i].name); test+='.';
+               Str test_ext=test+"webp"; if(FExistSystem(test_ext))texs[i].name=test_ext;
+                   test_ext=test+"avif"; if(FExistSystem(test_ext))texs[i].name=test_ext;
+                   test_ext=test+"jxl" ; if(FExistSystem(test_ext))texs[i].name=test_ext;
             }
             tex=FileParams::Encode(texs);
          }
@@ -96,10 +98,10 @@ ImporterClass Importer;
                                   known_textures =TEXF_BASE|TEXF_EMISSIVE;
 
                // process textures only if they're added for the first time, otherwise delete them so they won't be saved
-               IMAGE_TYPE ct; ImageProps(      base_0, &  base_0_id, &ct, MTRL_BASE_0  ); if(Importer.includeTex(  base_0_id))                                 base_0      .copyTry(base_0      , -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP); else   base_0    .del();
-                              ImageProps(      base_1, &  base_1_id, &ct, MTRL_BASE_1  ); if(Importer.includeTex(  base_1_id))                                 base_1      .copyTry(base_1      , -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP); else   base_1    .del();
-                              ImageProps(      base_2, &  base_2_id, &ct, MTRL_BASE_2  ); if(Importer.includeTex(  base_2_id))                                 base_2      .copyTry(base_2      , -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP); else   base_2    .del();
-                              ImageProps(emissive_img, &emissive_id, &ct, MTRL_EMISSIVE); if(Importer.includeTex(emissive_id)){SetFullAlpha(emissive_img, ct); emissive_img.copyTry(emissive_img, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);}else emissive_img.del();
+               IMAGE_TYPE ct; ImageProps(      base_0, &  base_0_id, &ct, MTRL_BASE_0  ); if(Importer.includeTex(  base_0_id))                                 base_0      .copy(base_0      , -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP); else   base_0    .del();
+                              ImageProps(      base_1, &  base_1_id, &ct, MTRL_BASE_1  ); if(Importer.includeTex(  base_1_id))                                 base_1      .copy(base_1      , -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP); else   base_1    .del();
+                              ImageProps(      base_2, &  base_2_id, &ct, MTRL_BASE_2  ); if(Importer.includeTex(  base_2_id))                                 base_2      .copy(base_2      , -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP); else   base_2    .del();
+                              ImageProps(emissive_img, &emissive_id, &ct, MTRL_EMISSIVE); if(Importer.includeTex(emissive_id)){SetFullAlpha(emissive_img, ct); emissive_img.copy(emissive_img, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);}else emissive_img.del();
             }
          }
       Str ImporterClass::Import::nodeName(int bone_i)C
@@ -153,7 +155,7 @@ ImporterClass Importer;
                   // load helper data from the project
                   File src;
                   UID  image_id;
-                  REPA(files)if(DecodeFileName(files[i].name, image_id))if(src.readTry(Proj.editPath(image_id)))
+                  REPA(files)if(DecodeFileName(files[i].name, image_id))if(src.read(Proj.editPath(image_id)))
                   {
                      ImageEx &image=images(i);
                      src.copy(image.raw.writeMem());
@@ -161,7 +163,7 @@ ImporterClass Importer;
                   }
 
                   // check if any of the images were not imported
-                  if(src.readTry(Proj.editPath(elm_id)))src.copy(raw.writeMem());
+                  if(src.read(Proj.editPath(elm_id)))src.copy(raw.writeMem());
                }
             }break;
 
@@ -316,17 +318,17 @@ ImporterClass Importer;
                   }
                }
             error:
-               File f; if(f.readStdTry(file)){f.copy(raw.writeMem()); return true;}
+               File f; if(f.readStd(file)){f.copy(raw.writeMem()); return true;}
             }break;
 
             case ELM_VIDEO:
             {
-               File f; if(f.readStdTry(file)){f.copy(raw.writeMem()); return true;}
+               File f; if(f.readStd(file)){f.copy(raw.writeMem()); return true;}
             }break;
 
             case ELM_FILE:
             {
-               File f; if(f.readStdTry(file))f.copy(raw.writeMem());
+               File f; if(f.readStd(file))f.copy(raw.writeMem());
             }return true; // allow replacing with empty file
 
             case ELM_CODE:
@@ -390,7 +392,7 @@ ImporterClass Importer;
                   {
                      ImageEx &image=images(i); if(!ImportImage(image, files[i].name))
                      {
-                        image.raw.pos(0); if(image.ImportTry(image.raw))
+                        image.raw.pos(0); if(image.Import(image.raw))
                         {
                            if(image.cube)image.crop(image, i*image.w()/6, 0, image.w()/6, image.h()); // crop to i-th face for cubes
                         }
@@ -401,10 +403,10 @@ ImporterClass Importer;
                   // check if any of the images were not imported
                   REPA(images)if(!images[i].is())
                   {
-                     Image src; raw.pos(0); if(src.ImportTry(raw)) // try extracting from existing data
+                     Image src; raw.pos(0); if(src.Import(raw)) // try extracting from existing data
                      {
                         bool one=(src.aspect()<Avg(1.0f, 6.0f)); // source is only 1 face, not "6 x face"
-                        REPA(images)if(!images[i].is())if(one)src.copyTry(images[i]);else src.crop(images[i], i*src.w()/6, 0, src.w()/6, src.h());
+                        REPA(images)if(!images[i].is())if(one)src.copy(images[i]);else src.crop(images[i], i*src.w()/6, 0, src.w()/6, src.h());
                      }
                      break;
                   }
@@ -417,7 +419,7 @@ ImporterClass Importer;
                   // if actually has some images
                   if(size>0)
                   {
-                     Image dest; if(dest.createSoftTry(size*6, size, 1, IMAGE_R8G8B8A8_SRGB)) // create soft RGBA so we can use simple mem copy
+                     Image dest; if(dest.createSoft(size*6, size, 1, IMAGE_R8G8B8A8_SRGB)) // create soft RGBA so we can use simple mem copy
                      {
                         // clear to zero in case some images are not found
                         dest.clear();
@@ -426,7 +428,7 @@ ImporterClass Importer;
                         REPA(images)
                         {
                            Image &src=images[i];
-                           if(src.is() && src.copyTry(src, size, size, 1, dest.hwType(), IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_NO_ALT_TYPE)) // copy to the same size and HW type as dest so simple mem copy can be used
+                           if(src.is() && src.copy(src, size, size, 1, dest.hwType(), IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_NO_ALT_TYPE)) // copy to the same size and HW type as dest so simple mem copy can be used
                               if(src.lockRead())
                            {
                               // copy non-compressed 2D face to non-compressed 6*2D
@@ -449,12 +451,14 @@ ImporterClass Importer;
                {
                   Str  ext=GetExt(file);
                   bool transforms=(files.elms()>1 || (files.elms() && files[0].params.elms())); // if want to apply any transforms
-                  if(!transforms && (ext=="jpg" || ext=="jpeg" || ext=="webp"/* || ext=="png"*/)) // images are already in accepted format (even though PNG is compressed, we can achieve much better compression with WEBP)
+                  if(!transforms && (ext=="jpg" || ext=="jpeg" || ext=="jxl" || ext=="webp" || ext=="avif"/* || ext=="png"*/)) // images are already in accepted format (even though PNG is compressed, we can achieve much better compression with WEBP)
                   {
-                     File f; if(!f.readStdTry(file))break; f.copy(raw.writeMem());
+                     File f; if(!f.readStd(file))break; f.copy(raw.writeMem());
                      if(ext=="jpg" || ext=="jpeg"){Image image; raw.pos(0); if(image.ImportJPG (raw)){has_color=HasColor(image); has_alpha=false          ;}}else // JPG never has any alpha
+                     if(ext=="jxl"               ){Image image; raw.pos(0); if(image.ImportJXL (raw)){has_color=HasColor(image); has_alpha=HasAlpha(image);}}else
                      if(ext=="png"               ){Image image; raw.pos(0); if(image.ImportPNG (raw)){has_color=HasColor(image); has_alpha=HasAlpha(image);}}else
-                     if(ext=="webp"              ){Image image; raw.pos(0); if(image.ImportWEBP(raw)){has_color=HasColor(image); has_alpha=HasAlpha(image);}}
+                     if(ext=="webp"              ){Image image; raw.pos(0); if(image.ImportWEBP(raw)){has_color=HasColor(image); has_alpha=HasAlpha(image);}}else
+                     if(ext=="avif"              ){Image image; raw.pos(0); if(image.ImportAVIF(raw)){has_color=HasColor(image); has_alpha=HasAlpha(image);}}
                      return true;
                   }else // import and export as WEBP
                   {
@@ -1060,7 +1064,7 @@ ImporterClass Importer;
                                  if( new_bone>=0){slot.bone=new_bone; goto found;}
                               }
                            }
-                           slot.bone=0xFF; // not found
+                           slot.bone=BONE_NULL; // not found
                         found:;
 
                            for(int old_bone_i=slot.bone1; C SkelBone *old_bone=old_skel->bones.addr(old_bone_i); old_bone_i=old_skel->boneParent(old_bone_i)) // iterate bone and its parents
@@ -1074,7 +1078,7 @@ ImporterClass Importer;
                                  if( new_bone>=0){slot.bone1=new_bone; goto found1;}
                               }
                            }
-                           slot.bone1=0xFF; // not found
+                           slot.bone1=BONE_NULL; // not found
                         found1:;
                         }
                         // bones
@@ -1221,8 +1225,8 @@ ImporterClass Importer;
                   RectI images=ver->images.last(); REPA(ver->images)images|=ver->images[i];
                   VecI2 images_size=image_size*(images.size()+1);
                   Image &all=import.images[0], single, temp;
-                  if(all.copyTry(all, images_size.x, images_size.y, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1)
-                  && single.createSoftTry(image_size, image_size, 1, IMAGE_R8G8B8A8_SRGB))
+                  if(all.copy(all, images_size.x, images_size.y, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1)
+                  && single.createSoft(image_size, image_size, 1, IMAGE_R8G8B8A8_SRGB))
                   {
                      ver->changed=true;
                      ver->time=time; // update time of mini map
@@ -1234,7 +1238,7 @@ ImporterClass Importer;
                             oy=(            images.max.y-image_pos.y)*image_size;
                         REPD(y, single.h())
                         REPD(x, single.w())single.pixel(x, y, all.pixel(x+ox, y+oy));
-                        if(single.copyTry(temp, -1, -1, -1, IMAGE_BC1_SRGB, IMAGE_2D, 1))
+                        if(single.copy(temp, -1, -1, -1, IMAGE_BC1_SRGB, IMAGE_2D, 1))
                         {
                            temp.save(Proj.gamePath(elm->id).tailSlash(true)+image_pos);
                            Synchronizer.setMiniMapImage(elm->id, image_pos);
@@ -1457,19 +1461,19 @@ ImporterClass Importer;
                   {
                      EditSkeleton edit_skel; if(edit_skel.load(Proj.editPath(mesh_data->skel_id)))
                      {
-                        Memt<byte, 256> old_to_new; old_to_new.setNum(import.skel.bones.elms());
+                        MemtN<BoneType, 256> old_to_new; old_to_new.setNum(import.skel.bones.elms());
                         FREPA(old_to_new) // process from the start
                         {
                            int edit_bone=edit_skel.nodeToBone(edit_skel.findNodeI(import.nodeName(i), import.nodeUID(i))); // find imported bone/node in current edit skeleton
                            if(InRange(edit_bone, edit_skel.bones))
                            {
                               int bone=mesh_skel->findBoneI(edit_skel.bones[edit_bone].name); // find edit bone in mesh skel
-                              if(InRange(bone, 256)){old_to_new[i]=bone; goto bone_set;}
+                              if(InRange(bone, BONE_NULL+1)){old_to_new[i]=bone; goto bone_set;}
                            }
 
                            {
-                              byte parent_index=import.skel.bones[i].parent;
-                              old_to_new[i]=(InRange(parent_index, i) ? old_to_new[parent_index] : 0xFF); // set "new bone" as the same as "old parents new bone", use 'i' for range check to check for 'old_to_new' that was already set
+                              BoneType parent_index=import.skel.bones[i].parent;
+                              old_to_new[i]=(InRange(parent_index, i) ? old_to_new[parent_index] : BONE_NULL); // set "new bone" as the same as "old parents new bone", use 'i' for range check to check for 'old_to_new' that was already set
                            }
                         bone_set:;
                         }

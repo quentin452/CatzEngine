@@ -41,7 +41,7 @@ class CopyElements : ClosableWindow
 
             if(result==LOAD_NEWER        )Gui.msgBox(S,   "Target project was created with a newer version of " ENGINE_NAME " Engine.\nPlease upgrade your " ENGINE_NAME " software and try again.");else
             if(result==LOAD_LOCKED       )Gui.msgBox(S,   "Target project appears to be already opened in another instance of the Editor.\nIf it isn't, then please try re-opening it manually first.");else
-            if(result==LOAD_ERROR        )Gui.msgBox(S, S+"Target project failed to load."+(error.is() ? '\n' : '\0')+error);else
+            if(result==LOAD_ERROR        )Gui.msgBox(S, S+"Target project failed to load."+(error.is() ? "\n" : null)+error);else
             if(CopyElms.dest.needUpdate())Gui.msgBox(S,   "Target project needs to be updated first.\nPlease first open the target project normally in order to update it.");else
             {
                if(result==LOAD_EMPTY)CopyElms.dest.initSettings(*CopyElms.src); // if dest project didn't exist yet, then copy all settings from source
@@ -86,7 +86,7 @@ class CopyElements : ClosableWindow
 
          if(result==LOAD_NEWER        )Gui.msgBox(S,   "Target project was created with a newer version of " ENGINE_NAME " Engine.\nPlease upgrade your " ENGINE_NAME " software and try again.");else
          if(result==LOAD_LOCKED       )Gui.msgBox(S,   "Target project appears to be already opened in another instance of the Editor.\nIf it isn't, then please try re-opening it manually first.");else
-         if(result==LOAD_ERROR        )Gui.msgBox(S, S+"Target project failed to load."+(error.is() ? '\n' : '\0')+error);else
+         if(result==LOAD_ERROR        )Gui.msgBox(S, S+"Target project failed to load."+(error.is() ? "\n" : null)+error);else
          if(CopyElms.dest.needUpdate())Gui.msgBox(S,   "Target project needs to be updated first.\nPlease first open the target project normally in order to update it.");else
          {
             data.clear();
@@ -462,14 +462,14 @@ class CopyElements : ClosableWindow
             }
 
             src=&temp_src;
-            File f; f.readTry("Data", project_package_pak); switch(src.load(f, src_ver)) // call 'load' always, and not only when 'readTry' succeeded, since we can't update the "ProjectPackage" file, we will update the destination project once it finished copying
+            File f; f.read("Data", project_package_pak); switch(src.load(f, src_ver)) // call 'load' always, and not only when 'read' succeeded, since we can't update the "ProjectPackage" file, we will update the destination project once it finished copying
             {
                case LOAD_EMPTY :
                case LOAD_ERROR :
                case LOAD_LOCKED: Gui.msgBox(S, "Invalid project file"); return;
                case LOAD_NEWER : Gui.msgBox(S, "This project was created with a newer version of " ENGINE_NAME " Engine.\nPlease upgrade your " ENGINE_NAME " software and try again."); return;
             }
-            if(src_ver<=34 && f.readTry("Settings", project_package_pak))src.loadOldSettings(f); // ver 34 and below had settings in a separate file
+            if(src_ver<=34 && f.read("Settings", project_package_pak))src.loadOldSettings(f); // ver 34 and below had settings in a separate file
             src.setIDPath(UIDZero, S); // set paths too because for example when copying textures, then 'tex_path' is used
             src.setHierarchy();
 
@@ -594,7 +594,7 @@ bool CopyElmsFunc(Thread &thread)
                {
                   if(C PakFile *pf=pak.find(sep))if(!FCopy(pak, *pf, dep+suffix)){FDelDirs(dep+suffix);                       goto error;} // copy to temp folder
                   if(C PakFile *pf=pak.find(sgp))if(!FCopy(pak, *pf, dgp+suffix)){FDelDirs(dep+suffix); FDelDirs(dgp+suffix); goto error;} // copy to temp folder
-                  File f; if(f.readTry(src.worldVerPath(id), pak))if(world_ver_temp.load(f))src_world_ver=&world_ver_temp;
+                  File f; if(f.read(src.worldVerPath(id), pak))if(world_ver_temp.load(f))src_world_ver=&world_ver_temp;
                }else
                {
                   if(FExist(sep) && !FCopyDir(sep, dep+suffix)){FDelDirs(dep+suffix);                       goto error;} // copy to temp folder
@@ -612,7 +612,7 @@ bool CopyElmsFunc(Thread &thread)
                {
                   if(C PakFile *pf=pak.find(sgp))if(!FCopy(pak, *pf, dgp+suffix                              ))                           {FDelDirs(dgp+suffix); goto error;} // copy to temp folder
                   if(C PakFile *pf=pak.find(sep)){if(FCopy(pak, *pf, dep, FILE_OVERWRITE_ALWAYS, null, suffix))SavedEdit(s.type, dep);else{FDelDirs(dgp+suffix); goto error;}}else FDelFile(dep);
-                  File f; if(f.readTry(src.miniMapVerPath(id), pak))if(mini_map_ver_temp.load(f))src_mini_map_ver=&mini_map_ver_temp;
+                  File f; if(f.read(src.miniMapVerPath(id), pak))if(mini_map_ver_temp.load(f))src_mini_map_ver=&mini_map_ver_temp;
                }else
                {
                   if( FExist(sgp) && !FCopyDir(sgp, dgp+suffix))                                                                              {FDelDirs(dgp+suffix); goto error;} // copy to temp folder

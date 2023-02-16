@@ -118,7 +118,8 @@ struct ObjData
       Param() {id.zero(); removed=inherited=false;}
    };
 
-   UID         elm_obj_class_id; // ID of ELM_OBJ_CLASS element in the project (this is the project element object class of this object)
+   UID         elm_obj_class_id; // ID of ELM_OBJ_CLASS            element in the project (this is the project element object class of this object)
+   UID                  base_id; // ID of ELM_OBJ_CLASS or ELM_OBJ element in the project that this element is based on
    OBJ_ACCESS  access; // access mode of the object
    OBJ_PATH    path  ; // path   mode of the object
    Memc<Param> params; // parameters  of the object

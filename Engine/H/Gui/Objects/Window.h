@@ -116,13 +116,22 @@ private:
    GuiObj _background;
 };
 /******************************************************************************/
-struct Dialog : Window // Dialog (has text and custom amount of buttons, creating it automatically sets the correct rectangles for the window and its children)
+struct Dialog : ModalWindow // Dialog (has text and custom amount of buttons, creating it automatically sets the correct rectangles for the window and its children)
 {
+   Bool         modal=false; // if use 'ModalWindow'
    TextNoTest   text;
    Memx<Button> buttons;
 
    Dialog& create  (C Str &title, C Str &text, C CMemPtr<Str> &buttons, C TextStylePtr &text_style=null); // create with given parameters, this automatically calls 'set'
    Dialog& set     (C Str &title, C Str &text, C CMemPtr<Str> &buttons, C TextStylePtr &text_style=null); // adjust an already created Dialog with given parameters, this automatically calls 'autoSize'
    Dialog& autoSize(); // set window, text and buttons rectangles based on their values
+
+   Dialog& extendX            (Flt e    ); // extend width keeping elements in the center
+   Dialog& separateTextButtons(Flt space); // separate text and buttons with 'space'
+
+   virtual GuiObj* test(C GuiPC &gpc, C Vec2 &pos, GuiObj* &mouse_wheel)override;
+   virtual void nearest(C GuiPC &gpc, GuiObjNearest &gon)override;
+   virtual void  update(C GuiPC &gpc)override;
+   virtual void    draw(C GuiPC &gpc)override;
 };
 /******************************************************************************/

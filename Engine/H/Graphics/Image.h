@@ -5,21 +5,25 @@
 /******************************************************************************/
 enum FILTER_TYPE : Byte // Filtering Type
 {
-   FILTER_NONE             , //  1.0000 speed, worst  quality, uses 1x1 samples no 2D filtering
+   FILTER_NONE             , //  1.0000 speed, worst  quality, uses 1x1 samples no 2D filtering. Also known as Point/Nearest filter
    FILTER_LINEAR           , // ~0.7500 speed, low    quality, uses 2x2 samples in 2D filtering
    FILTER_CUBIC_FAST       , // ~0.1700 speed, high   quality, uses 4x4 samples in 2D filtering, low    sharpening is applied
    FILTER_CUBIC_FAST_SMOOTH, // ~0.1700 speed, blurry quality, uses 4x4 samples in 2D filtering, no     sharpening is applied, result will appear blurry however without aliasing
-   FILTER_CUBIC_FAST_SHARP , // ~0.1700 speed, high   quality, uses 4x4 samples in 2D filtering, high   sharpening is applied (best for down-scaling)
+   FILTER_CUBIC_FAST_MED   , // ~0.1700 speed, high   quality, uses 4x4 samples in 2D filtering, medium sharpening is applied (best for down-scaling)
+   FILTER_CUBIC_FAST_SHARP , // ~0.1700 speed, high   quality, uses 4x4 samples in 2D filtering, high   sharpening is applied (best for  mip-maps   )
    FILTER_CUBIC_PLUS       , // ~0.1000 speed, high   quality, uses 6x6 samples in 2D filtering, medium sharpening is applied (best for   up-scaling)
    FILTER_CUBIC_PLUS_SHARP , // ~0.1000 speed, high   quality, uses 6x6 samples in 2D filtering, high   sharpening is applied
    FILTER_WAIFU            , // ~0.0005 speed, super  quality however super slow, this filter is available only if 'SupportFilterWaifu' was called inside 'InitPre', it's used only for up-scaling
    FILTER_EASU             , //                high   quality, AMD Edge Adaptive Spatial Upsampling, this filter is available only for up-scaling
-   FILTER_BEST             , // automatically choose the best filter (currently FILTER_CUBIC_FAST_SHARP for down-scaling and FILTER_WAIFU for up-scaling)
+
+   FILTER_BEST             , // automatically choose the best filter (currently FILTER_WAIFU for up-scaling, FILTER_CUBIC_FAST_MED for down-scaling, FILTER_CUBIC_FAST_SHARP for mip-maps)
    FILTER_NO_STRETCH       , // does not perform any stretching, pixels out of range are either wrapped or clamped
    FILTER_NUM              , // number of filters
+
 #if EE_PRIVATE
-   FILTER_DOWN=FILTER_CUBIC_FAST_SHARP, // best filter used for down-scaling
+   FILTER_DOWN=FILTER_CUBIC_FAST_MED, // best filter for down-scaling
 #endif
+   FILTER_MIP=FILTER_CUBIC_FAST_SHARP, // best filter for mip-maps
 };
 /******************************************************************************/
 enum LOCK_MODE : Byte
@@ -321,7 +325,7 @@ struct Image // Image (Texture)
    Bool                     sRGB()C {return IsSRGB (_hw_type)          ;} // if  this is a sRGB image
    Bool                  isSByte()C {return IsSByte(_hw_type)          ;} // if  this is a signed byte/8-bit precision
 #if EE_PRIVATE
-   constexpr Bool     filterable()C {return hwTypeInfo().  filterable();}
+   constexpr Bool     filterable()C {return hwTypeInfo().filterable() || _mode==IMAGE_SHADOW_MAP;} // even though IMAGE_SHADOW_MAP is a depth map, it can be filtered
    Byte                  baseMip()C {return _base_mip;}
 #endif
 
@@ -329,15 +333,16 @@ struct Image // Image (Texture)
 
    // manage
 #if EE_PRIVATE
-   Bool createEx(Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int mip_maps, Byte samples=1, CPtr *data=null, Int base_mip=0);
+   Bool createEx  (Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int mip_maps, Byte samples=1, CPtr *data=null, Int base_mip=0);
+   Bool createHWfromSoft(C Image &soft, IMAGE_TYPE type, IMAGE_MODE mode, UInt flags=IC_CLAMP); // 'soft' must be software, its sizes have not been manipulated - 'adjustInfo' was not called, because we need correct 'size' 'hwSize'
 #endif
    Image& del(); // delete
 
-   Bool createTry    (Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int mip_maps=0, Bool alt_type_on_fail=true);                                                                           // create                 image, 'mip_maps'=number of mip-maps (0=autodetect), 'alt_type_on_fail'=if try using an alternative type if 'type' is not supported, false on fail
-   Bool create2DTry  (Int w, Int h,        IMAGE_TYPE type,                  Int mip_maps=0, Bool alt_type_on_fail=true) {return createTry(w, h, 1, type, IMAGE_2D  , mip_maps, alt_type_on_fail);} // create hardware 2D   texture, 'mip_maps'=number of mip-maps (0=autodetect), 'alt_type_on_fail'=if try using an alternative type if 'type' is not supported, false on fail
-   Bool create3DTry  (Int w, Int h, Int d, IMAGE_TYPE type,                  Int mip_maps=1, Bool alt_type_on_fail=true) {return createTry(w, h, d, type, IMAGE_3D  , mip_maps, alt_type_on_fail);} // create hardware 3D   texture, 'mip_maps'=number of mip-maps (0=autodetect), 'alt_type_on_fail'=if try using an alternative type if 'type' is not supported, false on fail
-   Bool createCubeTry(Int w,               IMAGE_TYPE type,                  Int mip_maps=1, Bool alt_type_on_fail=true) {return createTry(w, w, 1, type, IMAGE_CUBE, mip_maps, alt_type_on_fail);} // create hardware cube texture, 'mip_maps'=number of mip-maps (0=autodetect), 'alt_type_on_fail'=if try using an alternative type if 'type' is not supported, false on fail
-   Bool createSoftTry(Int w, Int h, Int d, IMAGE_TYPE type,                  Int mip_maps=1                            ) {return createTry(w, h, d, type, IMAGE_SOFT, mip_maps,            false);} // create software        image, 'mip_maps'=number of mip-maps (0=autodetect),                                                                                 false on fail
+   Bool create    (Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int mip_maps=0, Bool alt_type_on_fail=true);                                                                        // create                 image, 'mip_maps'=number of mip-maps (0=autodetect), 'alt_type_on_fail'=if try using an alternative type if 'type' is not supported, false on fail
+   Bool create2D  (Int w, Int h,        IMAGE_TYPE type,                  Int mip_maps=0, Bool alt_type_on_fail=true) {return create(w, h, 1, type, IMAGE_2D  , mip_maps, alt_type_on_fail);} // create hardware 2D   texture, 'mip_maps'=number of mip-maps (0=autodetect), 'alt_type_on_fail'=if try using an alternative type if 'type' is not supported, false on fail
+   Bool create3D  (Int w, Int h, Int d, IMAGE_TYPE type,                  Int mip_maps=1, Bool alt_type_on_fail=true) {return create(w, h, d, type, IMAGE_3D  , mip_maps, alt_type_on_fail);} // create hardware 3D   texture, 'mip_maps'=number of mip-maps (0=autodetect), 'alt_type_on_fail'=if try using an alternative type if 'type' is not supported, false on fail
+   Bool createCube(Int w,               IMAGE_TYPE type,                  Int mip_maps=1, Bool alt_type_on_fail=true) {return create(w, w, 1, type, IMAGE_CUBE, mip_maps, alt_type_on_fail);} // create hardware cube texture, 'mip_maps'=number of mip-maps (0=autodetect), 'alt_type_on_fail'=if try using an alternative type if 'type' is not supported, false on fail
+   Bool createSoft(Int w, Int h, Int d, IMAGE_TYPE type,                  Int mip_maps=1                            ) {return create(w, h, d, type, IMAGE_SOFT, mip_maps,            false);} // create software        image, 'mip_maps'=number of mip-maps (0=autodetect),                                                                                 false on fail
 
    Image& mustCreate    (Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int mip_maps=0, Bool alt_type_on_fail=true);                                                                            // create                 image, 'mip_maps'=number of mip-maps (0=autodetect), 'alt_type_on_fail'=if try using an alternative type if 'type' is not supported, Exit  on fail
    Image& mustCreate2D  (Int w, Int h,        IMAGE_TYPE type,                  Int mip_maps=0, Bool alt_type_on_fail=true) {return mustCreate(w, h, 1, type, IMAGE_2D  , mip_maps, alt_type_on_fail);} // create hardware 2D   texture, 'mip_maps'=number of mip-maps (0=autodetect), 'alt_type_on_fail'=if try using an alternative type if 'type' is not supported, Exit  on fail
@@ -345,11 +350,20 @@ struct Image // Image (Texture)
    Image& mustCreateCube(Int w,               IMAGE_TYPE type,                  Int mip_maps=1, Bool alt_type_on_fail=true) {return mustCreate(w, w, 1, type, IMAGE_CUBE, mip_maps, alt_type_on_fail);} // create hardware cube texture, 'mip_maps'=number of mip-maps (0=autodetect), 'alt_type_on_fail'=if try using an alternative type if 'type' is not supported, Exit  on fail
    Image& mustCreateSoft(Int w, Int h, Int d, IMAGE_TYPE type,                  Int mip_maps=1                            ) {return mustCreate(w, h, d, type, IMAGE_SOFT, mip_maps,            false);} // create software        image, 'mip_maps'=number of mip-maps (0=autodetect),                                                                                 Exit  on fail
 
-   Bool     copyTry(Image &dest, Int w=-1, Int h=-1, Int d=-1, Int type=-1, Int mode=-1, Int mip_maps=-1, FILTER_TYPE filter=FILTER_BEST, UInt flags=IC_CLAMP)C; // copy to 'dest', -1=keep original value, 'type'=IMAGE_TYPE, 'mode'=IMAGE_MODE (this method does not support IMAGE_3D), 'mip_maps'=number of mip-maps (0=autodetect), 'flags'=IMAGE_COPY_FLAG, false on fail
-   void mustCopy   (Image &dest, Int w=-1, Int h=-1, Int d=-1, Int type=-1, Int mode=-1, Int mip_maps=-1, FILTER_TYPE filter=FILTER_BEST, UInt flags=IC_CLAMP)C; // copy to 'dest', -1=keep original value, 'type'=IMAGE_TYPE, 'mode'=IMAGE_MODE (this method does not support IMAGE_3D), 'mip_maps'=number of mip-maps (0=autodetect), 'flags'=IMAGE_COPY_FLAG, Exit  on fail
+   Bool     copy(Image &dest, Int w=-1, Int h=-1, Int d=-1, Int type=-1, Int mode=-1, Int mip_maps=-1, FILTER_TYPE filter=FILTER_BEST, UInt flags=IC_CLAMP)C; // copy to 'dest', -1=keep original value, 'type'=IMAGE_TYPE, 'mode'=IMAGE_MODE (this method does not support IMAGE_3D), 'mip_maps'=number of mip-maps (0=autodetect), 'flags'=IMAGE_COPY_FLAG, false on fail
+   void mustCopy(Image &dest, Int w=-1, Int h=-1, Int d=-1, Int type=-1, Int mode=-1, Int mip_maps=-1, FILTER_TYPE filter=FILTER_BEST, UInt flags=IC_CLAMP)C; // copy to 'dest', -1=keep original value, 'type'=IMAGE_TYPE, 'mode'=IMAGE_MODE (this method does not support IMAGE_3D), 'mip_maps'=number of mip-maps (0=autodetect), 'flags'=IMAGE_COPY_FLAG, Exit  on fail
 
    // lock
 #if EE_PRIVATE
+   void lockSoft();
+   void lockedSetMipData(CPtr data, Int mip_map); // set data for 'mip_map' for all faces, assumes that 'data' is in HW alignment !! NEEDS 'D._lock' !!
+   Bool      setFaceData(CPtr data, Int data_pitch, Int mip_map=0, DIR_ENUM cube_face=DIR_RIGHT);
+#endif
+   Bool     lock    (LOCK_MODE lock=LOCK_READ_WRITE, Int mip_map=0, DIR_ENUM cube_face=DIR_RIGHT) ; //   lock image for editing specified 'mip_map', this needs to be called before manual setting/getting pixels/colors on hardware images (IMAGE_SOFT doesn't need locking), 'cube_face'=desired cube face (this is used only for IMAGE_CUBE modes)
+   Bool     lockRead(                                Int mip_map=0, DIR_ENUM cube_face=DIR_RIGHT)C; //   lock image for reading specified 'mip_map', this needs to be called before manual setting/getting pixels/colors on hardware images (IMAGE_SOFT doesn't need locking), 'cube_face'=desired cube face (this is used only for IMAGE_CUBE modes), this method has the same effect as calling "lock(LOCK_READ, mip_map, cube_face)", however unlike 'lock' method it has 'const' modifier and can be called on "const Image" objects
+   Image& unlock    (                                                                           ) ; // unlock image                                , this needs to be called after  manual setting/getting pixels/colors on hardware images (IMAGE_SOFT doesn't need locking), if you want the mip maps to be updated according to any change applied during the lock then you must call 'updateMipMaps' after 'unlock'
+ C Image& unlock    (                                                                           )C; // unlock image                                , this needs to be called after  manual setting/getting pixels/colors on hardware images (IMAGE_SOFT doesn't need locking), if you want the mip maps to be updated according to any change applied during the lock then you must call 'updateMipMaps' after 'unlock'
+
    Byte* softData()  {return _data_all;} // get software image data without locking the image
  C Byte* softData()C {return _data_all;} // get software image data without locking the image
    Byte* softData(Int mip_map, DIR_ENUM cube_face=DIR_RIGHT);                                                     // get software image data for 'mip_map' and 'cube_face' without locking the image
@@ -359,15 +373,6 @@ struct Image // Image (Texture)
    UInt  softPitch2  (Int mip_map)C; // get pitch2    of specified 'mip_map' = pitch  * blocksY
    Int   softFaceSize(Int mip_map)C; // get face size of specified 'mip_map' = pitch2 * depth
    Int   softMipSize (Int mip_map)C; // get mip  size of specified 'mip_map' = face   * faces
-
-   void lockSoft();
-   void lockedSetMipData(CPtr data, Int mip_map); // set data for 'mip_map' for all faces, assumes that 'data' is in HW alignment !! NEEDS 'D._lock' !!
-   Bool      setFaceData(CPtr data, Int data_pitch, Int mip_map=0, DIR_ENUM cube_face=DIR_RIGHT);
-#endif
-   Bool     lock    (LOCK_MODE lock=LOCK_READ_WRITE, Int mip_map=0, DIR_ENUM cube_face=DIR_RIGHT) ; //   lock image for editing specified 'mip_map', this needs to be called before manual setting/getting pixels/colors on hardware images (IMAGE_SOFT doesn't need locking), 'cube_face'=desired cube face (this is used only for IMAGE_CUBE modes)
-   Bool     lockRead(                                Int mip_map=0, DIR_ENUM cube_face=DIR_RIGHT)C; //   lock image for reading specified 'mip_map', this needs to be called before manual setting/getting pixels/colors on hardware images (IMAGE_SOFT doesn't need locking), 'cube_face'=desired cube face (this is used only for IMAGE_CUBE modes), this method has the same effect as calling "lock(LOCK_READ, mip_map, cube_face)", however unlike 'lock' method it has 'const' modifier and can be called on "const Image" objects
-   Image& unlock    (                                                                           ) ; // unlock image                                , this needs to be called after  manual setting/getting pixels/colors on hardware images (IMAGE_SOFT doesn't need locking), if you want the mip maps to be updated according to any change applied during the lock then you must call 'updateMipMaps' after 'unlock'
- C Image& unlock    (                                                                           )C; // unlock image                                , this needs to be called after  manual setting/getting pixels/colors on hardware images (IMAGE_SOFT doesn't need locking), if you want the mip maps to be updated according to any change applied during the lock then you must call 'updateMipMaps' after 'unlock'
 
 #if EE_PRIVATE
    void lockedBaseMip(Int base_mip); // !! NEEDS 'D._lock' !!
@@ -397,6 +402,7 @@ struct Image // Image (Texture)
    Flt pixelFLinear         (Flt x, Flt y, Bool clamp=true)C; // get pixel Flt with Linear            interpolation, image gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
    Flt pixelFCubicFast      (Flt x, Flt y, Bool clamp=true)C; // get pixel Flt with Cubic Fast        interpolation, image gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
    Flt pixelFCubicFastSmooth(Flt x, Flt y, Bool clamp=true)C; // get pixel Flt with Cubic Fast Smooth interpolation, image gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
+   Flt pixelFCubicFastMed   (Flt x, Flt y, Bool clamp=true)C; // get pixel Flt with Cubic Fast Med    interpolation, image gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
    Flt pixelFCubicFastSharp (Flt x, Flt y, Bool clamp=true)C; // get pixel Flt with Cubic Fast Sharp  interpolation, image gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
    Flt pixelFCubicPlus      (Flt x, Flt y, Bool clamp=true)C; // get pixel Flt with Cubic Plus        interpolation, image gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
    Flt pixelFCubicPlusSharp (Flt x, Flt y, Bool clamp=true)C; // get pixel Flt with Cubic Plus Sharp  interpolation, image gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
@@ -407,6 +413,7 @@ struct Image // Image (Texture)
    Vec4 colorLCubicFast      (Flt x, Flt y, Bool clamp=true, Bool alpha_weight=false)C; // get color Vec4 with Cubic Fast        interpolation, linear gamma (   gamma conversion), 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
    Vec4 colorSCubicFast      (Flt x, Flt y, Bool clamp=true, Bool alpha_weight=false)C; // get color Vec4 with Cubic Fast        interpolation, sRGB   gamma (   gamma conversion), 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
    Vec4 colorFCubicFastSmooth(Flt x, Flt y, Bool clamp=true, Bool alpha_weight=false)C; // get color Vec4 with Cubic Fast Smooth interpolation, image  gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
+   Vec4 colorFCubicFastMed   (Flt x, Flt y, Bool clamp=true, Bool alpha_weight=false)C; // get color Vec4 with Cubic Fast Med    interpolation, image  gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
    Vec4 colorFCubicFastSharp (Flt x, Flt y, Bool clamp=true, Bool alpha_weight=false)C; // get color Vec4 with Cubic Fast Sharp  interpolation, image  gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
    Vec4 colorFCubicPlus      (Flt x, Flt y, Bool clamp=true, Bool alpha_weight=false)C; // get color Vec4 with Cubic Plus        interpolation, image  gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
    Vec4 colorFCubicPlusSharp (Flt x, Flt y, Bool clamp=true, Bool alpha_weight=false)C; // get color Vec4 with Cubic Plus Sharp  interpolation, image  gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
@@ -426,6 +433,7 @@ struct Image // Image (Texture)
    Flt pixel3DFLinear         (Flt x, Flt y, Flt z, Bool clamp=true)C; // get 3D pixel Flt with Linear            interpolation, 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
    Flt pixel3DFCubicFast      (Flt x, Flt y, Flt z, Bool clamp=true)C; // get 3D pixel Flt with Cubic Fast        interpolation, 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
    Flt pixel3DFCubicFastSmooth(Flt x, Flt y, Flt z, Bool clamp=true)C; // get 3D pixel Flt with Cubic Fast Smooth interpolation, 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
+   Flt pixel3DFCubicFastMed   (Flt x, Flt y, Flt z, Bool clamp=true)C; // get 3D pixel Flt with Cubic Fast Med    interpolation, 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
    Flt pixel3DFCubicFastSharp (Flt x, Flt y, Flt z, Bool clamp=true)C; // get 3D pixel Flt with Cubic Fast Sharp  interpolation, 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
    Flt pixel3DFCubicPlus      (Flt x, Flt y, Flt z, Bool clamp=true)C; // get 3D pixel Flt with Cubic Plus        interpolation, 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
    Flt pixel3DFCubicPlusSharp (Flt x, Flt y, Flt z, Bool clamp=true)C; // get 3D pixel Flt with Cubic Plus Sharp  interpolation, 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
@@ -434,6 +442,7 @@ struct Image // Image (Texture)
    Vec4 color3DFLinear         (Flt x, Flt y, Flt z, Bool clamp=true, Bool alpha_weight=false)C; // get 3D color Vec4 with Linear            interpolation, 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
    Vec4 color3DFCubicFast      (Flt x, Flt y, Flt z, Bool clamp=true, Bool alpha_weight=false)C; // get 3D color Vec4 with Cubic Fast        interpolation, 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
    Vec4 color3DFCubicFastSmooth(Flt x, Flt y, Flt z, Bool clamp=true, Bool alpha_weight=false)C; // get 3D color Vec4 with Cubic Fast Smooth interpolation, 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
+   Vec4 color3DFCubicFastMed   (Flt x, Flt y, Flt z, Bool clamp=true, Bool alpha_weight=false)C; // get 3D color Vec4 with Cubic Fast Med    interpolation, 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
    Vec4 color3DFCubicFastSharp (Flt x, Flt y, Flt z, Bool clamp=true, Bool alpha_weight=false)C; // get 3D color Vec4 with Cubic Fast Sharp  interpolation, 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
    Vec4 color3DFCubicPlus      (Flt x, Flt y, Flt z, Bool clamp=true, Bool alpha_weight=false)C; // get 3D color Vec4 with Cubic Plus        interpolation, 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
    Vec4 color3DFCubicPlusSharp (Flt x, Flt y, Flt z, Bool clamp=true, Bool alpha_weight=false)C; // get 3D color Vec4 with Cubic Plus Sharp  interpolation, 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
@@ -446,6 +455,7 @@ struct Image // Image (Texture)
    Vec4 areaColorLCubicFast      (C Vec2 &pos, C Vec2 &size, Bool clamp=true, Bool alpha_weight=false)C; // get average color Vec4 of specified 'pos' position and 'size' coverage with Cubic Fast        interpolation, linear gamma (   gamma conversion), 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
    Vec4 areaColorFCubicFastSmooth(C Vec2 &pos, C Vec2 &size, Bool clamp=true, Bool alpha_weight=false)C; // get average color Vec4 of specified 'pos' position and 'size' coverage with Cubic Fast Smooth interpolation, image  gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
    Vec4 areaColorLCubicFastSmooth(C Vec2 &pos, C Vec2 &size, Bool clamp=true, Bool alpha_weight=false)C; // get average color Vec4 of specified 'pos' position and 'size' coverage with Cubic Fast Smooth interpolation, linear gamma (   gamma conversion), 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
+   Vec4 areaColorFCubicFastMed   (C Vec2 &pos, C Vec2 &size, Bool clamp=true, Bool alpha_weight=false)C; // get average color Vec4 of specified 'pos' position and 'size' coverage with Cubic Fast Med    interpolation, image  gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
    Vec4 areaColorFCubicFastSharp (C Vec2 &pos, C Vec2 &size, Bool clamp=true, Bool alpha_weight=false)C; // get average color Vec4 of specified 'pos' position and 'size' coverage with Cubic Fast Sharp  interpolation, image  gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
    Vec4 areaColorFCubicPlus      (C Vec2 &pos, C Vec2 &size, Bool clamp=true, Bool alpha_weight=false)C; // get average color Vec4 of specified 'pos' position and 'size' coverage with Cubic Plus        interpolation, image  gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
    Vec4 areaColorFCubicPlusSharp (C Vec2 &pos, C Vec2 &size, Bool clamp=true, Bool alpha_weight=false)C; // get average color Vec4 of specified 'pos' position and 'size' coverage with Cubic Plus Sharp  interpolation, image  gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
@@ -463,6 +473,8 @@ struct Image // Image (Texture)
    Image& mirrorX              (                                                                                                                                                                           ) ; // mirror    image horizontally
    Image& mirrorY              (                                                                                                                                                                           ) ; // mirror    image   vertically
    Image& mirrorXY             (                                                                                                                                                                           ) ; // mirror    image horizontally and vertically
+   Image& rotateL              (                                                                                                                                                                           ) ; // rotate    image left
+   Image& rotateR              (                                                                                                                                                                           ) ; // rotate    image right
    void   rotate               (  Image &dest, Flt angle,            FILTER_TYPE filter=FILTER_BEST, UInt flags=IC_CLAMP                                                                                   )C; // rotate image by 'angle'                    and store in 'dest'
    void   rotateScale          (  Image &dest, Flt angle, Flt scale, FILTER_TYPE filter=FILTER_BEST, UInt flags=IC_CLAMP                                                                                   )C; // rotate image by 'angle', scale by 'scale', and store in 'dest'
    Image& alphaFromKey         (             C Color &key=PURPLE                                                                                                                                           ) ; // transform to ((pixel color==key) ? (0, 0, 0, 0) : (r, g, b, 255))
@@ -470,8 +482,9 @@ struct Image // Image (Texture)
    Image& divRgbByAlpha        (                                                                                                                                                                           ) ; // transform to (r/a, g/a, b/a, a)
    Bool   stats                (               Vec4 *min=null, Vec4 *max=null, Vec4 *avg=null, Vec4 *median=null, Vec4 *mode=null, Vec *avg_alpha_weight=null, Vec *med_alpha_weight=null, C BoxI *box=null)C; // get image statistics               , such as: minimum, maximum, average, median and mode color values, 'box'=optional box in which perform the operation (use null for entire image), false on fail
    Bool   statsSat             (               Flt  *min=null, Flt  *max=null, Flt  *avg=null, Flt  *median=null, Flt  *mode=null, Flt *avg_alpha_weight=null, Flt *med_alpha_weight=null, C BoxI *box=null)C; // get image statistics for saturation, such as: minimum, maximum, average, median and mode       values, 'box'=optional box in which perform the operation (use null for entire image), false on fail
-   Bool   monochromatic        (                                                                                                                                                                           )C; // check if image is monochromatic (all RGB values are the same)
-   Bool   monochromaticRG      (                                                                                                                                                                           )C; // check if image is monochromatic (all RG  values are the same, Blue values are ignored)
+   Bool   needsAlpha           (                                                                                                                                                                           )C; // check if image is needs alpha channel (any A   value  is != 1)
+   Bool   monochromatic        (                                                                                                                                                                           )C; // check if image is monochromatic       (all RGB values are the same)
+   Bool   monochromaticRG      (                                                                                                                                                                           )C; // check if image is monochromatic       (all RG  values are the same, Blue values are ignored)
 #if EE_PRIVATE
    void   transform            (  Image &dest, C Matrix2 &matrix, FILTER_TYPE filter=FILTER_BEST, UInt flags=IC_CLAMP                                                                                      )C; // transform image by 'matrix' and store in 'dest'
    Bool   extractNonCompressedMipMapNoStretch(Image &dest, Int w, Int h, Int d, Int mip_map, DIR_ENUM cube_face=DIR_RIGHT, Bool clamp=true)C;
@@ -585,9 +598,9 @@ struct Image // Image (Texture)
    void drawVertical(C Color &color, C Color &color_add, C Rect &rect)C; // draw with texture coordinates in vertical mode
 
    // draw to fit best in given space, while preserving image proportions
-   void drawFit        (                                    C Rect &rect)C {return draw        (                  fit        (rect));}
-   void drawFit        (C Color &color, C Color &color_add, C Rect &rect)C {return draw        (color, color_add, fit        (rect));}
-   void drawFitVertical(C Color &color, C Color &color_add, C Rect &rect)C {return drawVertical(color, color_add, fitVertical(rect));}
+   void drawFit        (                                    C Rect &rect, FIT_MODE fit=FIT_FULL)C {return draw        (                  T.fit        (rect, fit));}
+   void drawFit        (C Color &color, C Color &color_add, C Rect &rect, FIT_MODE fit=FIT_FULL)C {return draw        (color, color_add, T.fit        (rect, fit));}
+   void drawFitVertical(C Color &color, C Color &color_add, C Rect &rect, FIT_MODE fit=FIT_FULL)C {return drawVertical(color, color_add, T.fitVertical(rect, fit));}
 
    // draw to fullscreen
    void drawFs(                                                FIT_MODE fit=FIT_FULL, Int filter=-1)C; // draw to fullscreen, 'filter'=custom filtering (FILTER_TYPE) for this parameter you can set any of the FILTER_TYPE enums or use -1 to let the engine decide on filtering (for example linear filtering will be used on Mobile platforms and better filtering on other platforms)
@@ -626,8 +639,8 @@ struct Image // Image (Texture)
    void draw3x3Vertical(C Color &color, C Color &color_add, C Rect &rect, Flt border_size, Flt tex_frac=0.25f)C; // 'color'=color that will be multiplied by the texture, 'color_add'=color that will be added to the texture using following formula "final_color = texture_color * color + color_add", 'rect'=screen rectangle at which the image will be drawn, 'border_size'=size of the border inside the screen 'rect' rectangle that will be drawn as image borders (this value should be less than rectangle dimensions), 'tex_frac'=fraction of the image texture that will be used for drawing the borders (this value should be in range of 0 .. 0.5), this function will draw with texture coordinates in vertical mode
 
    // draw with custom filtering
-   void drawFilter(                                    C Rect &rect, FILTER_TYPE filter=FILTER_BEST)C; // this method will draw the image with custom filtering which allows to achieve better quality than linear filtering, the pixel shader for better filters is very expensive, therefore use it only if performance is not critical and just for few images (for example displaying one image on the screen), this method supports only FILTER_NONE, FILTER_LINEAR, FILTER_CUBIC_FAST and FILTER_CUBIC_PLUS
-   void drawFilter(C Color &color, C Color &color_add, C Rect &rect, FILTER_TYPE filter=FILTER_BEST)C; // this method will draw the image with custom filtering which allows to achieve better quality than linear filtering, the pixel shader for better filters is very expensive, therefore use it only if performance is not critical and just for few images (for example displaying one image on the screen), this method supports only FILTER_NONE, FILTER_LINEAR, FILTER_CUBIC_FAST and FILTER_CUBIC_PLUS
+   void drawFilter(                                    C Rect &rect, FILTER_TYPE filter=FILTER_BEST)C; // this method will draw the image with custom filtering which allows to achieve better quality than linear filtering, the pixel shader for better filters is very expensive, therefore use it only if performance is not critical and just for few images (for example displaying one image on the screen), this method supports only FILTER_NONE, FILTER_LINEAR, FILTER_CUBIC_FAST, FILTER_CUBIC_PLUS, FILTER_EASU
+   void drawFilter(C Color &color, C Color &color_add, C Rect &rect, FILTER_TYPE filter=FILTER_BEST)C; // this method will draw the image with custom filtering which allows to achieve better quality than linear filtering, the pixel shader for better filters is very expensive, therefore use it only if performance is not critical and just for few images (for example displaying one image on the screen), this method supports only FILTER_NONE, FILTER_LINEAR, FILTER_CUBIC_FAST, FILTER_CUBIC_PLUS, FILTER_EASU
 
    // draw cube face
    void drawCubeFace(C Color &color, C Color &color_add, C Rect &rect, DIR_ENUM face)C;
@@ -656,58 +669,76 @@ struct Image // Image (Texture)
    Bool ImportBMPRaw( File &f   , Bool ico=false                           );   Bool ExportBMPRaw(File &f, Byte byte_pp, Bool ico=false)C;
 #endif
 
-   Bool       ImportTry(C Str  &name, Int type=-1, Int mode=-1, Int mip_maps=-1); // import BMP PNG JPG WEBP HEIF TGA TIF DDS PSD ICO HDR, 'type'=IMAGE_TYPE, 'mode'=IMAGE_MODE, 'mip_maps'=number of mip-maps (0=autodetect), -1=keep original value, false on fail
-   Image& mustImport   (C Str  &name, Int type=-1, Int mode=-1, Int mip_maps=-1); // import BMP PNG JPG WEBP HEIF TGA TIF DDS PSD ICO HDR, 'type'=IMAGE_TYPE, 'mode'=IMAGE_MODE, 'mip_maps'=number of mip-maps (0=autodetect), -1=keep original value, Exit  on fail
-   Bool       ImportTry(  File &f   , Int type=-1, Int mode=-1, Int mip_maps=-1); // import BMP PNG JPG WEBP HEIF TGA TIF DDS PSD ICO HDR, 'type'=IMAGE_TYPE, 'mode'=IMAGE_MODE, 'mip_maps'=number of mip-maps (0=autodetect), -1=keep original value, false on fail
-   Image& mustImport   (  File &f   , Int type=-1, Int mode=-1, Int mip_maps=-1); // import BMP PNG JPG WEBP HEIF TGA TIF DDS PSD ICO HDR, 'type'=IMAGE_TYPE, 'mode'=IMAGE_MODE, 'mip_maps'=number of mip-maps (0=autodetect), -1=keep original value, Exit  on fail
+   Bool       Import(C Str  &name, Int type=-1, Int mode=-1, Int mip_maps=-1); // import BMP PNG JPG JXL WEBP AVIF HEIF TGA TIF DDS PSD ICO HDR, 'type'=IMAGE_TYPE, 'mode'=IMAGE_MODE, 'mip_maps'=number of mip-maps (0=autodetect), -1=keep original value, false on fail
+   Image& mustImport(C Str  &name, Int type=-1, Int mode=-1, Int mip_maps=-1); // import BMP PNG JPG JXL WEBP AVIF HEIF TGA TIF DDS PSD ICO HDR, 'type'=IMAGE_TYPE, 'mode'=IMAGE_MODE, 'mip_maps'=number of mip-maps (0=autodetect), -1=keep original value, Exit  on fail
+   Bool       Import(  File &f   , Int type=-1, Int mode=-1, Int mip_maps=-1); // import BMP PNG JPG JXL WEBP AVIF HEIF TGA TIF DDS PSD ICO HDR, 'type'=IMAGE_TYPE, 'mode'=IMAGE_MODE, 'mip_maps'=number of mip-maps (0=autodetect), -1=keep original value, false on fail
+   Image& mustImport(  File &f   , Int type=-1, Int mode=-1, Int mip_maps=-1); // import BMP PNG JPG JXL WEBP AVIF HEIF TGA TIF DDS PSD ICO HDR, 'type'=IMAGE_TYPE, 'mode'=IMAGE_MODE, 'mip_maps'=number of mip-maps (0=autodetect), -1=keep original value, Exit  on fail
 
    Bool Export(C Str &name, Flt rgb_quality=-1, Flt alpha_quality=-1, Flt compression_level=-1, Int sub_sample=-1)C; // export according to extension, false on fail, 'rgb_quality'=color quality 0..1 (-1=default, 0=smallest size, 1=best quality), 'alpha_quality'=alpha quality 0..1 (-1=use 'rgb_quality', 0=smallest size, 1=best quality), 'compression_level'=0..1 (-1=default, 0=fast/biggest size, 1=slow/smallest size), 'sub_sample'=0..2 (chroma sub-sampling for RGB images, 0=none, 1=half, 2=quarter, -1=default)
 
-   Bool       ImportCubeTry(C Image &right, C Image &left, C Image &up, C Image &down, C Image &forward, C Image &back, Int type=-1, Bool soft=false, Int mip_maps=1, Bool resize_to_pow2=true, FILTER_TYPE filter=FILTER_BEST); // import                                               as cube texture, 'type'=IMAGE_TYPE (-1=keep original value), 'soft'=if use IMAGE_SOFT_CUBE or IMAGE_CUBE, false on fail
-   Bool       ImportCubeTry(C Str   &right, C Str   &left, C Str   &up, C Str   &down, C Str   &forward, C Str   &back, Int type=-1, Bool soft=false, Int mip_maps=1, Bool resize_to_pow2=true, FILTER_TYPE filter=FILTER_BEST); // import BMP PNG JPG WEBP HEIF TGA TIF DDS PSD ICO HDR as cube texture, 'type'=IMAGE_TYPE (-1=keep original value), 'soft'=if use IMAGE_SOFT_CUBE or IMAGE_CUBE, false on fail
-   Image& mustImportCube   (C Str   &right, C Str   &left, C Str   &up, C Str   &down, C Str   &forward, C Str   &back, Int type=-1, Bool soft=false, Int mip_maps=1, Bool resize_to_pow2=true, FILTER_TYPE filter=FILTER_BEST); // import BMP PNG JPG WEBP HEIF TGA TIF DDS PSD ICO HDR as cube texture, 'type'=IMAGE_TYPE (-1=keep original value), 'soft'=if use IMAGE_SOFT_CUBE or IMAGE_CUBE, Exit  on fail
+   Bool       ImportCube(C Image &right, C Image &left, C Image &up, C Image &down, C Image &forward, C Image &back, Int type=-1, Bool soft=false, Int mip_maps=1, Bool resize_to_pow2=true, FILTER_TYPE filter=FILTER_BEST); // import                                                        as cube texture, 'type'=IMAGE_TYPE (-1=keep original value), 'soft'=if use IMAGE_SOFT_CUBE or IMAGE_CUBE, false on fail
+   Bool       ImportCube(C Str   &right, C Str   &left, C Str   &up, C Str   &down, C Str   &forward, C Str   &back, Int type=-1, Bool soft=false, Int mip_maps=1, Bool resize_to_pow2=true, FILTER_TYPE filter=FILTER_BEST); // import BMP PNG JPG JXL WEBP AVIF HEIF TGA TIF DDS PSD ICO HDR as cube texture, 'type'=IMAGE_TYPE (-1=keep original value), 'soft'=if use IMAGE_SOFT_CUBE or IMAGE_CUBE, false on fail
+   Image& mustImportCube(C Str   &right, C Str   &left, C Str   &up, C Str   &down, C Str   &forward, C Str   &back, Int type=-1, Bool soft=false, Int mip_maps=1, Bool resize_to_pow2=true, FILTER_TYPE filter=FILTER_BEST); // import BMP PNG JPG JXL WEBP AVIF HEIF TGA TIF DDS PSD ICO HDR as cube texture, 'type'=IMAGE_TYPE (-1=keep original value), 'soft'=if use IMAGE_SOFT_CUBE or IMAGE_CUBE, Exit  on fail
 
-   Bool ImportBMP (C Str  &name                                          ) ; // import    BMP  from file, false on fail
-   Bool ImportBMP (  File &f                                             ) ; // import    BMP  from file, false on fail
-   Bool ExportBMP (C Str  &name                                          )C; // export as BMP  to   file, false on fail
-   Bool ExportBMP (  File &f                                             )C; // export as BMP  to   file, false on fail
-   Bool ImportPNG (C Str  &name                                          ) ; // import    PNG  from file, false on fail
-   Bool ImportPNG (  File &f                                             ) ; // import    PNG  from file, false on fail
-   Bool ExportPNG (C Str  &name, Flt compression_level=-1                )C; // export as PNG  to   file, false on fail, 'compression_level'=0..1 (-1=default, 0=fast/biggest size, 1=slow/smallest size)
-   Bool ExportPNG (  File &f   , Flt compression_level=-1                )C; // export as PNG  to   file, false on fail, 'compression_level'=0..1 (-1=default, 0=fast/biggest size, 1=slow/smallest size)
-   Bool ImportJPG (C Str  &name                                          ) ; // import    JPG  from file, false on fail
-   Bool ImportJPG (  File &f                                             ) ; // import    JPG  from file, false on fail
-   Bool ExportJPG (C Str  &name, Flt quality=-1, Int sub_sample=-1       )C; // export as JPG  to   file, false on fail, 'quality'=0..1 (-1=default, 0=smallest size, 1=best quality), 'sub_sample'=0..2 (chroma sub-sampling for RGB images, 0=none, 1=half, 2=quarter, -1=default)
-   Bool ExportJPG (  File &f   , Flt quality=-1, Int sub_sample=-1       )C; // export as JPG  to   file, false on fail, 'quality'=0..1 (-1=default, 0=smallest size, 1=best quality), 'sub_sample'=0..2 (chroma sub-sampling for RGB images, 0=none, 1=half, 2=quarter, -1=default)
-   Bool ImportWEBP(C Str  &name                                          ) ; // import    WEBP from file, false on fail
-   Bool ImportWEBP(  File &f                                             ) ; // import    WEBP from file, false on fail
-   Bool ExportWEBP(C Str  &name, Flt rgb_quality=-1, Flt alpha_quality=-1)C; // export as WEBP to   file, false on fail, 'rgb_quality'=color quality 0..1 (-1=default, 0=smallest size, 1=lossless), 'alpha_quality'=alpha quality 0..1 (-1=use 'rgb_quality', 0=smallest size, 1=lossless)
-   Bool ExportWEBP(  File &f   , Flt rgb_quality=-1, Flt alpha_quality=-1)C; // export as WEBP to   file, false on fail, 'rgb_quality'=color quality 0..1 (-1=default, 0=smallest size, 1=lossless), 'alpha_quality'=alpha quality 0..1 (-1=use 'rgb_quality', 0=smallest size, 1=lossless)
-   Bool ImportHEIF(C Str  &name                                          ) ; // import    HEIF from file, false on fail
-   Bool ImportHEIF(  File &f                                             ) ; // import    HEIF from file, false on fail
-   Bool ExportHEIF(C Str  &name, Flt quality=-1                          )C; // export as HEIF to   file, false on fail, 'quality'=0..1 (-1=default, 0=smallest size, 1=lossless)
-   Bool ExportHEIF(  File &f   , Flt quality=-1                          )C; // export as HEIF to   file, false on fail, 'quality'=0..1 (-1=default, 0=smallest size, 1=lossless)
-   Bool ImportTGA (C Str  &name                                          ) ; // import    TGA  from file, false on fail
-   Bool ImportTGA (  File &f                                             ) ; // import    TGA  from file, false on fail
-   Bool ExportTGA (C Str  &name                                          )C; // export as TGA  to   file, false on fail
-   Bool ExportTGA (  File &f                                             )C; // export as TGA  to   file, false on fail
-   Bool ImportTIF (C Str  &name                                          ) ; // import    TIF  from file, false on fail
-   Bool ImportTIF (  File &f                                             ) ; // import    TIF  from file, false on fail
-   Bool ExportTIF (C Str  &name, Flt compression_level=-1                )C; // export as TIF  to   file, false on fail, 'compression_level'=0..1 (-1=default, 0=fast/biggest size, 1=slow/smallest size)
-   Bool ExportTIF (  File &f   , Flt compression_level=-1                )C; // export as TIF  to   file, false on fail, 'compression_level'=0..1 (-1=default, 0=fast/biggest size, 1=slow/smallest size)
-   Bool ImportDDS (C Str  &name                                          ) ; // import    DDS  from file, false on fail
-   Bool ImportDDS (  File &f                                             ) ; // import    DDS  from file, false on fail
-   Bool ExportDDS (C Str  &name                                          )C; // export as DDS  to   file, false on fail
-   Bool ImportPSD (C Str  &name                                          ) ; // import    PSD  from file, false on fail
-   Bool ImportPSD (  File &f                                             ) ; // import    PSD  from file, false on fail
-   Bool ImportICO (C Str  &name                                          ) ; // import    ICO  from file, false on fail
-   Bool ImportICO (  File &f                                             ) ; // import    ICO  from file, false on fail
-   Bool ExportICO (C Str  &name                                          )C; // export as ICO  to   file, false on fail
-   Bool ExportICO (  File &f                                             )C; // export as ICO  to   file, false on fail
-   Bool ExportICNS(C Str  &name                                          )C; // export as ICNS to   file, false on fail
-   Bool ExportICNS(  File &f                                             )C; // export as ICNS to   file, false on fail
-   Bool ImportHDR (C Str  &name                                          ) ; // import    HDR  from file, false on fail
-   Bool ImportHDR (  File &f                                             ) ; // import    HDR  from file, false on fail
+   Bool ImportBMP (C Str  &name                                                                    ) ; // import    BMP  from file, false on fail
+   Bool ImportBMP (  File &f                                                                       ) ; // import    BMP  from file, false on fail
+   Bool ExportBMP (C Str  &name                                                                    )C; // export as BMP  to   file, false on fail
+   Bool ExportBMP (  File &f                                                                       )C; // export as BMP  to   file, false on fail
+   Bool ImportPNG (C Str  &name                                                                    ) ; // import    PNG  from file, false on fail
+   Bool ImportPNG (  File &f                                                                       ) ; // import    PNG  from file, false on fail
+   Bool ExportPNG (C Str  &name, Flt compression_level=-1                                          )C; // export as PNG  to   file, false on fail, 'compression_level'=0..1 (-1=default, 0=fast/biggest size, 1=slow/smallest size)
+   Bool ExportPNG (  File &f   , Flt compression_level=-1                                          )C; // export as PNG  to   file, false on fail, 'compression_level'=0..1 (-1=default, 0=fast/biggest size, 1=slow/smallest size)
+   Bool ImportJPG (C Str  &name                                                                    ) ; // import    JPG  from file, false on fail
+   Bool ImportJPG (  File &f                                                                       ) ; // import    JPG  from file, false on fail
+   Bool ExportJPG (C Str  &name, Flt quality=-1, Int sub_sample=-1                                 )C; // export as JPG  to   file, false on fail, 'quality'=0..1 (-1=default, 0=smallest size, 1=best quality), 'sub_sample'=0..2 (chroma sub-sampling for RGB images, 0=none, 1=half, 2=quarter, -1=default)
+   Bool ExportJPG (  File &f   , Flt quality=-1, Int sub_sample=-1                                 )C; // export as JPG  to   file, false on fail, 'quality'=0..1 (-1=default, 0=smallest size, 1=best quality), 'sub_sample'=0..2 (chroma sub-sampling for RGB images, 0=none, 1=half, 2=quarter, -1=default)
+
+   // supported only if 'SupportImportJXL' was called in 'InitPre'
+   Bool ImportJXL (C Str  &name                                                                    ) ; // import    JXL  from file, false on fail
+   Bool ImportJXL (  File &f                                                                       ) ; // import    JXL  from file, false on fail
+
+   // supported only if 'SupportExportJXL' was called in 'InitPre'
+   Bool ExportJXL (C Str  &name, Flt quality=-1, Flt compression_level=-1                          )C; // export as JXL  to   file, false on fail, 'quality'=0..1 (-1=default, 0=smallest size, 1=best quality), 'compression_level'=0..1 (-1=default, 0=fast/biggest size, 1=slow/smallest size)
+   Bool ExportJXL (  File &f   , Flt quality=-1, Flt compression_level=-1                          )C; // export as JXL  to   file, false on fail, 'quality'=0..1 (-1=default, 0=smallest size, 1=best quality), 'compression_level'=0..1 (-1=default, 0=fast/biggest size, 1=slow/smallest size)
+
+   Bool ImportWEBP(C Str  &name                                                                    ) ; // import    WEBP from file, false on fail
+   Bool ImportWEBP(  File &f                                                                       ) ; // import    WEBP from file, false on fail
+   Bool ExportWEBP(C Str  &name, Flt rgb_quality=-1, Flt alpha_quality=-1                          )C; // export as WEBP to   file, false on fail, 'rgb_quality'=color quality 0..1 (-1=default, 0=smallest size, 1=lossless), 'alpha_quality'=alpha quality 0..1 (-1=use 'rgb_quality', 0=smallest size, 1=lossless)
+   Bool ExportWEBP(  File &f   , Flt rgb_quality=-1, Flt alpha_quality=-1                          )C; // export as WEBP to   file, false on fail, 'rgb_quality'=color quality 0..1 (-1=default, 0=smallest size, 1=lossless), 'alpha_quality'=alpha quality 0..1 (-1=use 'rgb_quality', 0=smallest size, 1=lossless)
+
+   // supported only if 'SupportImportAVIF' was called in 'InitPre'
+   Bool ImportAVIF(C Str  &name                                                                    ) ; // import    AVIF from file, false on fail
+   Bool ImportAVIF(  File &f                                                                       ) ; // import    AVIF from file, false on fail
+
+   // supported only if 'SupportExportAVIF' was called in 'InitPre'
+   Bool ExportAVIF(C Str  &name, Flt rgb_quality=-1, Flt alpha_quality=-1, Flt compression_level=-1)C; // export as AVIF to   file, false on fail, 'rgb_quality'=color quality 0..1 (-1=default, 0=smallest size, 1=lossless), 'alpha_quality'=alpha quality 0..1 (-1=use 'rgb_quality', 0=smallest size, 1=lossless), 'compression_level'=0..1 (-1=default, 0=fast/biggest size, 1=slow/smallest size)
+   Bool ExportAVIF(  File &f   , Flt rgb_quality=-1, Flt alpha_quality=-1, Flt compression_level=-1)C; // export as AVIF to   file, false on fail, 'rgb_quality'=color quality 0..1 (-1=default, 0=smallest size, 1=lossless), 'alpha_quality'=alpha quality 0..1 (-1=use 'rgb_quality', 0=smallest size, 1=lossless), 'compression_level'=0..1 (-1=default, 0=fast/biggest size, 1=slow/smallest size)
+
+   Bool ImportHEIF(C Str  &name                                                                    ) ; // import    HEIF from file, false on fail
+   Bool ImportHEIF(  File &f                                                                       ) ; // import    HEIF from file, false on fail
+   Bool ExportHEIF(C Str  &name, Flt quality=-1                                                    )C; // export as HEIF to   file, false on fail, 'quality'=0..1 (-1=default, 0=smallest size, 1=lossless)
+   Bool ExportHEIF(  File &f   , Flt quality=-1                                                    )C; // export as HEIF to   file, false on fail, 'quality'=0..1 (-1=default, 0=smallest size, 1=lossless)
+   Bool ImportTGA (C Str  &name                                                                    ) ; // import    TGA  from file, false on fail
+   Bool ImportTGA (  File &f                                                                       ) ; // import    TGA  from file, false on fail
+   Bool ExportTGA (C Str  &name                                                                    )C; // export as TGA  to   file, false on fail
+   Bool ExportTGA (  File &f                                                                       )C; // export as TGA  to   file, false on fail
+   Bool ImportTIF (C Str  &name                                                                    ) ; // import    TIF  from file, false on fail
+   Bool ImportTIF (  File &f                                                                       ) ; // import    TIF  from file, false on fail
+   Bool ExportTIF (C Str  &name, Flt compression_level=-1                                          )C; // export as TIF  to   file, false on fail, 'compression_level'=0..1 (-1=default, 0=fast/biggest size, 1=slow/smallest size)
+   Bool ExportTIF (  File &f   , Flt compression_level=-1                                          )C; // export as TIF  to   file, false on fail, 'compression_level'=0..1 (-1=default, 0=fast/biggest size, 1=slow/smallest size)
+   Bool ImportDDS (C Str  &name                                                                    ) ; // import    DDS  from file, false on fail
+   Bool ImportDDS (  File &f                                                                       ) ; // import    DDS  from file, false on fail
+   Bool ExportDDS (C Str  &name                                                                    )C; // export as DDS  to   file, false on fail
+   Bool ImportPSD (C Str  &name                                                                    ) ; // import    PSD  from file, false on fail
+   Bool ImportPSD (  File &f                                                                       ) ; // import    PSD  from file, false on fail
+   Bool ImportICO (C Str  &name                                                                    ) ; // import    ICO  from file, false on fail
+   Bool ImportICO (  File &f                                                                       ) ; // import    ICO  from file, false on fail
+   Bool ExportICO (C Str  &name                                                                    )C; // export as ICO  to   file, false on fail
+   Bool ExportICO (  File &f                                                                       )C; // export as ICO  to   file, false on fail
+   Bool ExportICNS(C Str  &name                                                                    )C; // export as ICNS to   file, false on fail
+   Bool ExportICNS(  File &f                                                                       )C; // export as ICNS to   file, false on fail
+   Bool ImportHDR (C Str  &name                                                                    ) ; // import    HDR  from file, false on fail
+   Bool ImportHDR (  File &f                                                                       ) ; // import    HDR  from file, false on fail
 
             Image& operator=(C Image &src); // create from 'src' image using 'copy' method, Exit on fail
            ~Image();
@@ -722,14 +753,17 @@ struct Image // Image (Texture)
    Bool    setInfo  ();
    void  forceInfo  (Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int samples);
    void adjustInfo  (Int w, Int h, Int d, IMAGE_TYPE type);
+   void adjustType  (                     IMAGE_TYPE type);
    void  setPartial ();
    void  setGLParams();
 
-   Bool copySoft(Image   &dest, FILTER_TYPE filter=FILTER_BEST, UInt flags=IC_CLAMP, Int max_mip_maps=INT_MAX, Flt sharp_smooth=1.0f)C; // software             copy, 'flags'=IMAGE_COPY_FLAG, 'sharp_smooth'=factor affecting sharpness/smoothness (0..Inf, the closer to 0.0 then the sharper result, the bigger than 1.0 then the more blurry result, default=1.0)
-   void copyMs  (ImageRT &dest, Bool restore_rt, Bool multi_sample, C RectI *rect    =null                                          )C; // multi sample texture copy, 'multi_sample'=average samples when writing to single sample, or copy texture on a per sample basis, this is needed because multi-sampled textures can't be sampled smoothly in the shader, this assumes that both source and dest are of the same size
-   void copyMs  (ImageRT &dest, Bool restore_rt, Bool multi_sample, C Rect  &rect                                                   )C; // multi sample texture copy, 'multi_sample'=average samples when writing to single sample, or copy texture on a per sample basis, this is needed because multi-sampled textures can't be sampled smoothly in the shader, this assumes that both source and dest are of the same size
-   void copyHw  (ImageRT &dest, Bool restore_rt,                    C RectI *rect_src=null, C RectI *rect_dest=null                 )C; // hardware     texture copy
-   void copyHw  (ImageRT &dest, Bool restore_rt,                    C Rect  &rect                                                   )C; // hardware     texture copy
+   Bool copySoft (Image   &dest, FILTER_TYPE filter=FILTER_BEST, UInt flags=IC_CLAMP, Int max_mip_maps=INT_MAX, Flt sharp_smooth=1.0f)C; // software             copy, 'flags'=IMAGE_COPY_FLAG, 'sharp_smooth'=factor affecting sharpness/smoothness (0..Inf, the closer to 0.0 then the sharper result, the bigger than 1.0 then the more blurry result, default=1.0)
+   void copyMs   (ImageRT &dest, Bool restore_rt, Bool multi_sample, C RectI *rect    =null                                          )C; // multi sample texture copy, 'multi_sample'=average samples when writing to single sample, or copy texture on a per sample basis, this is needed because multi-sampled textures can't be sampled smoothly in the shader, this assumes that both source and dest are of the same size
+   void copyMs   (ImageRT &dest, Bool restore_rt, Bool multi_sample, C Rect  &rect                                                   )C; // multi sample texture copy, 'multi_sample'=average samples when writing to single sample, or copy texture on a per sample basis, this is needed because multi-sampled textures can't be sampled smoothly in the shader, this assumes that both source and dest are of the same size
+   void copyHw   (ImageRT &dest, Bool restore_rt,                    C RectI *rect_src=null, C RectI *rect_dest=null                 )C; // hardware     texture copy
+   void copyHw   (ImageRT &dest, Bool restore_rt,                    C Rect  &rect                                                   )C; // hardware     texture copy
+   void copyDepth(ImageRT &dest, Bool restore_rt,                    C RectI *rect_src=null, C RectI *rect_dest=null                 )C; //        depth texture copy
+   void copyDepth(ImageRT &dest, Bool restore_rt,                    C Rect  &rect                                                   )C; //        depth texture copy
 
    Bool capture(C ImageRT &src);
 #endif
@@ -771,6 +805,7 @@ private:
 };
 /******************************************************************************/
 DECLARE_CACHE(Image, Images, ImagePtr); // 'Images' cache storing 'Image' objects which can be accessed by 'ImagePtr' pointer
+extern const ImagePtr ImageNull;
 /******************************************************************************/
 struct ImageHeader
 {
@@ -798,6 +833,15 @@ struct ImageCompare
    Bool compare(C Image &a, C Image &b, Flt similar_dif=0.01f, Bool alpha_weight=false, Int a_mip=0, Flt skip_dif=1.0f); // compare 2 images, 'similar_dif'=limit used to determine that colors are similar, 'alpha_weight'=if use alpha channel as the weight, 'a_mip'=mip map of 'a' image used for comparison (based on this value, mip map of 'b' image will be selected to match the size of selected 'a' mip map), 'skip_dif'=if a single color difference exceeds this limit then skip remaining processing and return as soon as possible (value >=1 disables skipping), this function returns true on success and false on fail (if couldn't find matching mip map size between images, or if failed to lock the images)
 };
 /******************************************************************************/
+struct ImageThreadsClass : Threads
+{
+   ImageThreadsClass& init(); // initialize, call this at least once before any processing
+
+                 void process(Int elms, void func(IntPtr elm_index, Ptr        user, Int thread_index), Ptr        user) {process1(elms, func, user, INT_MAX);} // use all available threads, including this one
+   T1(USER_DATA) void process(Int elms, void func(IntPtr elm_index, USER_DATA &user, Int thread_index), USER_DATA &user) {process1(elms, func, user, INT_MAX);} // use all available threads, including this one
+}extern
+   ImageThreads;
+/******************************************************************************/
 IMAGE_TYPE BytesToImageType(Int byte_pp); // get IMAGE_TYPE needed to store 'byte_pp' amount of bytes per pixel, which is 1->IMAGE_I8, 2->IMAGE_I16, 3->IMAGE_I24, 4->IMAGE_I32, other->IMAGE_NONE
 
 IMAGE_TYPE ImageTypeIncludeRGB(IMAGE_TYPE type); // convert 'type' to the most similar IMAGE_TYPE that has RGB channels
@@ -813,24 +857,15 @@ IMAGE_TYPE ImageTypeHighPrec(IMAGE_TYPE type); // convert 'type' to the most sim
 
 IMAGE_TYPE ImageTypeUncompressed(IMAGE_TYPE type); // convert 'type' to the most similar IMAGE_TYPE that is not compressed
 
+IMAGE_TYPE ImageTypeForMode(IMAGE_TYPE type, IMAGE_MODE mode); // convert 'type' to the most similar IMAGE_TYPE that can be used for 'mode'
+
 DIR_ENUM DirToCubeFace(C Vec &dir                    ); // convert vector direction (doesn't need to be normalized) to cube face
 DIR_ENUM DirToCubeFace(C Vec &dir, Int res, Vec2 &tex); // convert vector direction (doesn't need to be normalized) to cube face and texture coordinates, 'res'=cube image resolution, 'tex'=image coordinates
 Vec      CubeFaceToDir(Flt x, Flt y, Int res, DIR_ENUM cube_face); // convert image coordinates, 'x,y'=image coordinates (0..res-1), 'res'=cube image resolution, 'cube_face'=image cube face, returned vector is not normalized, however its on a cube with radius=1 ("Abs(dir).max()=1")
-
+/******************************************************************************/
 #if EE_PRIVATE
 #define MAX_MIP_MAPS 32
-struct ImageThreadsClass : Threads
-{
-   ImageThreadsClass& init()
-   {
-      if(!created())createIfEmpty(false, Cpu.threads()-1, 0, "EE.Image #"); // -1 because we will do processing on the caller thread too
-      return T;
-   }
-                 void process(Int elms, void func(IntPtr elm_index, Ptr        user, Int thread_index), Ptr        user) {process1(elms, func, user, INT_MAX);} // use all available threads, including this one
-   T1(USER_DATA) void process(Int elms, void func(IntPtr elm_index, USER_DATA &user, Int thread_index), USER_DATA &user) {process1(elms, func, user, INT_MAX);} // use all available threads, including this one
-}extern ImageThreads;
-
-extern const ImagePtr ImageNull;
+INLINE Bool CheckMipNum(Int mips) {return InRange(mips, MAX_MIP_MAPS+1);} // +1 because this checks number of elements
 
 // pointers to class method
 typedef Flt  (Image::*PtrImagePixel    )(Flt x, Flt y,        Bool clamp)C;
@@ -849,14 +884,18 @@ IMAGE_MODE                 AsSoft           (IMAGE_MODE mode);
 Int                        ImageFaces       (IMAGE_MODE mode);
 Int                        PaddedWidth      (Int w, Int h,        Int mip, IMAGE_TYPE type);
 Int                        PaddedHeight     (Int w, Int h,        Int mip, IMAGE_TYPE type);
-Int                        ImagePitch       (Int w, Int h,        Int mip, IMAGE_TYPE type);
-Int                        ImageBlocksY     (Int w, Int h,        Int mip, IMAGE_TYPE type);
-Int                        ImagePitch2      (Int w, Int h,        Int mip, IMAGE_TYPE type);
-Int                        ImageFaceSize    (Int w, Int h, Int d, Int mip, IMAGE_TYPE type);
+UInt                       ImagePitch       (Int w, Int h,        Int mip, IMAGE_TYPE type);
+UInt                       ImageBlocksY     (Int w, Int h,        Int mip, IMAGE_TYPE type);
+UInt                       ImagePitch2      (Int w, Int h,        Int mip, IMAGE_TYPE type);
+ULong                      ImagePitch2L     (Int w, Int h,        Int mip, IMAGE_TYPE type);
+UInt                       ImageFaceSize    (Int w, Int h, Int d, Int mip, IMAGE_TYPE type);
+ULong                      ImageFaceSizeL   (Int w, Int h, Int d, Int mip, IMAGE_TYPE type);
 UInt                       ImageMipOffset   (Int w, Int h, Int d,          IMAGE_TYPE type, IMAGE_MODE mode, Int mip_maps, Int mip_map);
 UInt                       ImageSize        (Int w, Int h, Int d,          IMAGE_TYPE type, IMAGE_MODE mode, Int mip_maps);
+ULong                      ImageSizeL       (Int w, Int h, Int d,          IMAGE_TYPE type, IMAGE_MODE mode, Int mip_maps);
 GPU_API(DXGI_FORMAT, UInt) ImageTypeToFormat(Int type); // convert from IMAGE_TYPE to API_FORMAT
 IMAGE_TYPE                 ImageFormatToType(GPU_API(DXGI_FORMAT, UInt) format); // convert from API_FORMAT to IMAGE_TYPE
+Int                        TotalMipMaps     (Int w, Int h);
 Int                        TotalMipMaps     (Int w, Int h, Int d);
 
 IMAGE_TYPE ImageTypeOnFail(IMAGE_TYPE type);

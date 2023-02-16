@@ -441,7 +441,7 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
    int boneTabs()C
    {
       int v=bone_tabs();
-      if(v!=BONE_SCALE && Kb.alt())return BONE_ROT;
+      if(v!=BONE_SCALE && v!=BONE_DYNAMIC && Kb.alt())return BONE_ROT;
       if(v<0)v=BONE_MOVE;
       return v;
    }
@@ -530,6 +530,7 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
                      if(       lit)SetHighlight(Color( 0, 85, 85, 0));
 
                      if(!custom_matrix)matrix=transformMatrix(partOp(i));
+                     part.waitForStream();
                      part.draw(matrix, (custom_matrix && mesh_matrix_prev_ptr) ? *mesh_matrix_prev_ptr : matrix);
 
                      SetHighlight(TRANSPARENT);
@@ -640,9 +641,9 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
       if(vtxs() && !customDrawMatrix())
       {
          // points
-         const bool draw_skin=(mode()==SKIN || mode()==BONES && lit_bone>=0);
-         const byte bone=((lit_bone>=0) ? lit_bone : sel_bone)+VIRTUAL_ROOT_BONE;
-         const flt  r=0.0045;
+         const bool     draw_skin=(mode()==SKIN || mode()==BONES && lit_bone>=0);
+         const BoneType bone=((lit_bone>=0) ? lit_bone : sel_bone)+VIRTUAL_ROOT_BONE;
+         const flt      r=0.0045;
          D.depthLock(false);
        C MeshLod &lod=getDrawLod(); REPAD(p, lod)
          {
@@ -661,8 +662,8 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
                         int sum=0;
                         if(part.base.vtx.matrix() && part.base.vtx.blend())
                         {
-                         C VecB4 &m=part.base.vtx.matrix(i);
-                         C VecB4 &b=part.base.vtx.blend (i);
+                         C VtxBone &m=part.base.vtx.matrix(i);
+                         C VecB4   &b=part.base.vtx.blend (i);
                            REPA(m)if(m.c[i]==bone)sum+=b.c[i];
                         }
                         VI.dot(sum ? Lerp(BLUE, RED, Min(sum/255.0, 1)) : WHITE, pos, r);
@@ -830,16 +831,28 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
          D.depthLock(false);
          SetMatrix(trans.matrix);
          int  bone_tabs=boneTabs();
-         byte alpha=((mode()==SKIN && skin_tabs()==SKIN_SEL_BONE || mode()==BONES) ? 153 : 100);
+         byte mask =((mode()==BONES && bone_tabs==BONE_DYNAMIC) ? .BONE_DYNAMIC : 0);
          bool bone =(mode()==BONES && (bone_tabs==BONE_ADD || bone_tabs==BONE_MOVE || bone_tabs==BONE_ROT || bone_tabs==BONE_SCALE)
                   || mode()==SKIN),
               slot =(mode()==SLOTS && (slot_tabs()<0 || slot_tabs()==SLOT_MOVE || slot_tabs()==SLOT_ROT || slot_tabs()==SLOT_SCALE));
+         bool bone_shape=(mode()==BONES && T.bone_shape());
+         byte alpha=(bone_shape ? 50 : (mode()==SKIN && skin_tabs()==SKIN_SEL_BONE || mode()==BONES) ? 153 : 100);
          int  lit_bone=        T.lit_bone_vis      ,
               sel_bone=(bone ? T.sel_bone_vis : -1),
               sel_slot=(slot ? T.sel_slot     : -1);
-         if(mode()==BONES && bone_shape())FREPAO(skel.bones).shape.draw((sel_bone==i && lit_bone==i) ? LitSelColor : (sel_bone==i               ) ? SelColor : (lit_bone==i) ? LitColor : Color(0, 255, 255, alpha/3));else
-                                          FREPAO(skel.bones).      draw((sel_bone==i && lit_bone==i) ? LitSelColor : (sel_bone==i               ) ? SelColor : (lit_bone==i) ? LitColor : Color(0, 255, 255, alpha  ));
-         if(mode()==SLOTS                )FREPAO(skel.slots).      draw((sel_slot==i && lit_slot==i) ? LitSelColor : (sel_slot==i || lit_slot==i) ? SelColor :                            Color(255, 128, 0, 255), SkelSlotSize);
+         FREPA(skel.bones)
+         {
+          C SkelBone &bone=skel.bones[i];
+            Color col;
+            if(bone.flag&mask)col.set(255, 0, 0, (lit_bone==i) ? 255 : alpha);else
+            if(sel_bone==i && lit_bone==i)col=LitSelColor;else
+            if(sel_bone==i               )col=   SelColor;else
+            if(               lit_bone==i)col=   LitColor;else
+                                          col.set(0, 255, 255, alpha);
+            if(bone_shape)bone.shape.draw(col);
+            else          bone.      draw(col);
+         }
+         if(mode()==SLOTS)FREPAO(skel.slots).draw((sel_slot==i && lit_slot==i) ? LitSelColor : (sel_slot==i || lit_slot==i) ? SelColor : Color(255, 128, 0, 255), SkelSlotSize);
          if(InRange(sel_bone, skel.bones) && mode()==BONES && (bone_tabs==BONE_MOVE || bone_tabs==BONE_ROT || bone_tabs==BONE_SCALE)){Matrix m=skel.bones[sel_bone]; m.scaleOrn(SkelSlotSize); DrawMatrix(m, boneAxis());}
          if(InRange(sel_slot, skel.slots)                                                                                           ){Matrix m=skel.slots[sel_slot]; m.scaleOrn(SkelSlotSize); DrawMatrix(m, slot_axis );}
          // draw parent<->children line
@@ -1545,7 +1558,7 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
          v.New().create("Previous Object", PrevObj  , T).kbsc(KbSc(KB_PGUP, KBSC_CTRL_CMD|KBSC_REPEAT)).flag(MENU_HIDDEN|MENU_TOGGLABLE);
          v.New().create("Next Object"    , NextObj  , T).kbsc(KbSc(KB_PGDN, KBSC_CTRL_CMD|KBSC_REPEAT)).flag(MENU_HIDDEN|MENU_TOGGLABLE);
          v.New().create("Undo" , Undo, T).kbsc(KbSc(KB_Z, KBSC_CTRL_CMD|KBSC_REPEAT));
-         v.New().create("Redo" , Redo, T).kbsc(KbSc(KB_Y, KBSC_CTRL_CMD|KBSC_REPEAT)).kbsc2(KbSc(KB_Z, KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_REPEAT));
+         v.New().create("Redo" , Redo, T).kbsc(KbSc(KB_Y, KBSC_CTRL_CMD|KBSC_REPEAT)).kbsc1(KbSc(KB_Z, KBSC_CTRL_CMD|KBSC_SHIFT|KBSC_REPEAT));
          v.New().create("Undo2", Undo, T).kbsc(KbSc(KB_BACK, KBSC_ALT           |KBSC_REPEAT)).flag(MENU_HIDDEN); // keep those hidden because they occupy too much of visible space (besides on Windows Notepad they also work and are not listed)
          v.New().create("Redo2", Redo, T).kbsc(KbSc(KB_BACK, KBSC_ALT|KBSC_SHIFT|KBSC_REPEAT)).flag(MENU_HIDDEN); // keep those hidden because they occupy too much of visible space (besides on Windows Notepad they also work and are not listed)
          break;
@@ -2605,16 +2618,17 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
       {
          D.clip(gpc.clip);
 
-         Memt<Str> a, b, c;
+         StrEx s, bottom;
 
        C MeshLod &lod=getDrawLod();
-         if(VisibleQuads(lod))a.add(S+VisibleVtxs(lod)+" vtx"+CountS(VisibleVtxs(lod))+", "+VisibleTris     (lod)+" tri"+CountS(VisibleTris     (lod))+", "+VisibleQuads(lod)+" quad"+CountS(VisibleQuads(lod)));
-         else                 a.add(S+VisibleVtxs(lod)+" vtx"+CountS(VisibleVtxs(lod))+", "+VisibleTrisTotal(lod)+" tri"+CountS(VisibleTrisTotal(lod)));
-         int parts=lod.partsAfterJoinAll(true, true, false, MeshJoinAllTestVtxFlag, true); a.add(S+parts+" draw call"+CountS(parts));
-         int size=0; REP(mesh.lods())size+=VisibleSize(mesh.lod(i)); a.add(S+"Mesh size "+SizeBytes(size));
-         if(mode()==LOD)a.add(S+mesh.lods()+" LOD"+CountS(mesh.lods()));
+         if(VisibleQuads(lod))s.line()+=S+VisibleVtxs(lod)+" vtx"+CountS(VisibleVtxs(lod))+", "+VisibleTris     (lod)+" tri"+CountS(VisibleTris     (lod))+", "+VisibleQuads(lod)+" quad"+CountS(VisibleQuads(lod));
+         else                 s.line()+=S+VisibleVtxs(lod)+" vtx"+CountS(VisibleVtxs(lod))+", "+VisibleTrisTotal(lod)+" tri"+CountS(VisibleTrisTotal(lod));
+         int parts=lod.partsAfterJoinAll(true, true, false, MeshJoinAllTestVtxFlag, true); s.line()+=S+parts+" draw call"+CountS(parts);
+         int size=0; REP(mesh.lods())size+=VisibleSize(mesh.lod(i)); s.line()+=S+"Mesh size "+SizeBytes(size);
+         if(mode()==LOD)s.line()+=S+mesh.lods()+" LOD"+CountS(mesh.lods());
          if(mesh.is())
          {
+            bottom.color(WHITE);
             Str       s="Vertex Data: ";
             MESH_FLAG flag=(visibleLodSelection() ? VisibleFlag(lod) : VisibleFlag(mesh));
             if(flag&VTX_POS     )Add(s, "Position"); if(flag&VTX_HLP )Add(s, "Helper"); if(flag&VTX_NRM)Add(s, "Normal");
@@ -2623,17 +2637,27 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
             if(flag&VTX_COLOR   )Add(s, "Color");
             if(flag&VTX_MATERIAL)Add(s, "Material");
             if(flag&VTX_SKIN    )Add(s, "Skin");
-            c.add(s);
+            bottom.line()+=s;
          }
-         if(mode()==PHYS && phys)a.add(S+phys->parts.elms()+" physical body part"+CountS(phys->parts.elms()));
+         if(mode()==PHYS && phys)s.line()+=S+phys->parts.elms()+" physical body part"+CountS(phys->parts.elms());
          if(Skeleton *skel=getVisSkel())
          {
-            if(mode()==SLOTS)a.add(S+skel.slots.elms()+" slot"+CountS(skel.slots.elms()));
-            if(mode()==BONES)a.add(S+skel.bones.elms()+" bone"+CountS(skel.bones.elms()));
+            if(mode()==SLOTS)s.line()+=S+skel.slots.elms()+" slot"+CountS(skel.slots.elms());
+            if(mode()==BONES)
+            {
+               bool error=(skel.bones.elms()>0xFF); // #MeshVtxBoneHW
+               if(error)s.color(RED);
+               s.line()+=S+skel.bones.elms()+" bone"+CountS(skel.bones.elms());
+               if(error)
+               {
+                  s+=" (too many bones)";
+                  s.color(null);
+               }
+            }
             if(InRange(lit_bone_vis, skel.bones))
             {
              C SkelBone &bone=skel.bones[lit_bone_vis];
-               Str s=S+"Bone \""+bone.name+"\"";
+               s.line()+=S+"Bone \""+bone.name+"\"";
                s+=S+", Parent: "+(InRange(bone.parent, skel.bones) ? S+'"'+skel.bones[bone.parent].name+'"' : S+"none");
                s+=S+", Children: "+bone.children_num;
                if(bone.type)
@@ -2650,50 +2674,49 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
                   }
                   if(index || sub)
                   {
-                            s.space()+=      bone.type_index;
+                            s.space()+=S+    bone.type_index;
                      if(sub)s        +=S+':'+bone.type_sub;
                   }
                }
-               a.add(s);
             }
             if(InRange(lit_slot, skel.slots))
             {
              C SkelSlot &skel_slot=skel.slots[lit_slot];
-               Str s=S+"Slot \""+skel_slot.name+"\", Bone Parent: "+(InRange(skel_slot.bone, skel.bones) ? S+'"'+skel.bones[skel_slot.bone].name+'"' : S+"none");
+               s.line()+=S+"Slot \""+skel_slot.name+"\", Bone Parent: "+(InRange(skel_slot.bone, skel.bones) ? S+'"'+skel.bones[skel_slot.bone].name+'"' : S+"none");
                if(skel_slot.bone!=skel_slot.bone1)s+=S+", Bone Parent1: "+(InRange(skel_slot.bone1, skel.bones) ? S+'"'+skel.bones[skel_slot.bone1].name+'"' : S+"none");
                REPA(slot_meshes)if(slot_meshes[i].name==skel_slot.name){s+=S+", Scale: "+slot_meshes[i].scale; break;}
-               a.add(s);
             }
          }
-         if(show_cur_pos()){Str s="Cursor: "; if(has_cur_pos)s+=cur_pos.asText(4); a.add(s);}
+         if(show_cur_pos()){s.line()+="Cursor: "; if(has_cur_pos)s+=cur_pos.asText(4);}
          if(showMainBox())
          {
             Box box=mesh_box;
-            a.add(S+"Min     ("+box.min     +')');
-            a.add(S+"Max    ("+box.max     +')');
-            a.add(S+"Center ("+box.center()+')');
-            a.add(S+"Size    ("+box.size  ()+')');
+            s.line()+=S+"Min     ("+box.min     +')';
+            s.line()+=S+"Max    ("+box.max     +')';
+            s.line()+=S+"Center ("+box.center()+')';
+            s.line()+=S+"Size    ("+box.size  ()+')';
             if(mode()==TRANSFORM)
             {
+               s.color(YELLOW);
                box*=trans.matrix;
-               b.add(S+"Min     ("+box.min     +')');
-               b.add(S+"Max    ("+box.max     +')');
-               b.add(S+"Center ("+box.center()+')');
-               b.add(S+"Size    ("+box.size  ()+')');
+               s.line()+=S+"Min     ("+box.min     +')';
+               s.line()+=S+"Max    ("+box.max     +')';
+               s.line()+=S+"Center ("+box.center()+')';
+               s.line()+=S+"Size    ("+box.size  ()+')';
+               s.color(null);
             }
          }
-         if(a.elms() || b.elms() || c.elms())
+         if(s.is() || bottom.is())
          {
-            flt x=gpc.offset.x+0.01, y=gpc.offset.y-0.25;
+            Rect r=D.rectUI(); r.min.x=gpc.offset.x+0.01; r.max.y=gpc.offset.y-0.25; r.min.y=-rect().h()+gpc.offset.y;
             TextStyleParams ts(false); ts.size=0.045; ts.align.set(1, -1);
             D.clip();
-                             FREPA(a){D.text(ts, x, y, a[i]); y-=ts.size.y;}
-            ts.color=YELLOW; FREPA(b){D.text(ts, x, y, b[i]); y-=ts.size.y;}
-            if(c.elms())
+            D.text(ts, r, (cchar*)null, s.data(), s.elms());
+            if(bottom.elms())
             {
-               if(!Proj.visible())x+=Misc.rect().w();
-               y=-rect().h()+gpc.offset.y+ts.size.y*c.elms();
-               ts.color=WHITE; FREPA(c){D.text(ts, x, y, c[i]); y-=ts.size.y;}
+               if(!Proj.visible())r.min.x+=Misc.rect().w();
+               ts.align.y=1;
+               D.text(ts, r, (cchar*)null, bottom.data(), bottom.elms());
             }
          }
          if(showVtxSelCircle   ())vtxSelCircle   ().draw(LitColor, false);
@@ -2947,10 +2970,10 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
          {
             edit_time=Time.appTime();
             if(Ms.bp(0) || Ms.bp(1))time=min_time; // on first click don't change more than minimum
-            const byte   bone=sel_bone+1, parent=(mesh_skel ? mesh_skel.boneParent(sel_bone)+1 : 0);
-            const bool    add=Ms.b(1), // if adding weight
-                      instant=Kb.alt();
-            const byte adelta=(instant ? 255 : Min(Round(time*Lerp(32, 640-32, skin_brush.sspeed())), 255)); // 0..255
+            const BoneType bone=sel_bone+VIRTUAL_ROOT_BONE, parent=(mesh_skel ? mesh_skel.boneParent(sel_bone)+VIRTUAL_ROOT_BONE : 0);
+            const bool      add=Ms.b(1), // if adding weight
+                        instant=Kb.alt();
+            const byte   adelta=(instant ? 255 : Min(Round(time*Lerp(32, 640-32, skin_brush.sspeed())), 255)); // 0..255
             if(adelta)
             {
                int         delta=adelta*SignBool(add), // -255 .. 255
@@ -2987,8 +3010,8 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
                            d=Round(Lerp(delta, delta_soft, dist)); // distance=0 (center) we have 'delta', distance=1 (border) we have 'delta_soft'
                         }
 
-                        VecB4 &matrix=base.vtx.matrix(vtx.y);
-                        VecB4 &blend =base.vtx.blend (vtx.y);
+                        VtxBone &matrix=base.vtx.matrix(vtx.y);
+                        VecB4   &blend =base.vtx.blend (vtx.y);
                         IndexWeight skin[4]; Int skins=0;
                         if(add)skin[skins++].set(bone, 0); // when adding, reserve room for 'bone' as it's required to be present
                         int sum=0; // actual weight of bones other than 'bone'
@@ -3186,7 +3209,7 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
       {
          ObjEdit.mesh_undos.set("slotBone", true);
          SkelSlot &slot=ObjEdit.mesh_skel.slots[slot_i];
-         slot.bone1=(InRange(ObjEdit.lit_bone, ObjEdit.mesh_skel.bones) ? ObjEdit.lit_bone : 0xFF);
+         slot.bone1=(InRange(ObjEdit.lit_bone, ObjEdit.mesh_skel.bones) ? ObjEdit.lit_bone : BONE_NULL);
          if(!Kb.ctrlCmd())slot.bone=slot.bone1;
          ObjEdit.setChangedSkel(false);
       }
@@ -3227,7 +3250,7 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
                   mesh_undos.set("slotNew");
                   SkelSlot &slot=mesh_skel.slots.New();
                   SkelBone *bone=mesh_skel.bones.addr(lit_bone);
-                  slot.setParent(bone ? lit_bone : 0xFF);
+                  slot.setParent(bone ? lit_bone : BONE_NULL);
                   Str8 name; FREP(1000){name=S+"Slot "+i; if(!mesh_skel.findSlot(name))break;} Set(slot.name, bone ? bone.name : name);
                   if(!bone)
                   {
@@ -3349,7 +3372,7 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
       if(mesh_skel)
          if(C SkelBone *bone=mesh_skel.bones.addr(bone_i))
       {
-         Memt<byte, 256> remap;
+         MemtN<BoneType, 256> remap;
          mesh_undos.set("boneDel"); if(MeshChange *change=mesh_undos.getNextUndo())change.removeBone(bone.name); // use 'getNextUndo' instead of 'set' because that may return null
 cur_skel_to_saved_skel.removeBone(bone.name);
              edit_skel.removeBone(bone.name);
@@ -3372,14 +3395,11 @@ cur_skel_to_saved_skel.removeBone(bone.name);
       editor.setChangedSkel(false);
 
       int bone_index=editor.edit_skel.nodeToBoneDirect(editor.edit_skel.root);
-      if(editor.mesh_skel && InRange(bone_index, editor.mesh_skel.bones) && editor.mesh_skel.bones[bone_index].parent!=0xFF)bone_index=-1; // don't ask to delete if has a parent
+      if(editor.mesh_skel && InRange(bone_index, editor.mesh_skel.bones) && editor.mesh_skel.bones[bone_index].parent!=BONE_NULL)bone_index=-1; // don't ask to delete if has a parent
       if(bone_index>=0)
       {
-         bool used_bones[256]; if(InRange(bone_index, used_bones))
-         {
-            editor.mesh.setUsedBones(used_bones);
-            if(used_bones[bone_index])bone_index=-1; // don't ask to delete if used by mesh
-         }
+         MemtN<bool, 256> used_bones; editor.mesh.setUsedBones(used_bones);
+         if(InRange(bone_index, used_bones) && used_bones[bone_index])bone_index=-1; // don't ask to delete if used by mesh
       }
       if(bone_index>=0)
       {
@@ -3400,7 +3420,7 @@ cur_skel_to_saved_skel.removeBone(bone.name);
        C Skeleton &src=Proj.skel_mem;
 
          // check if can paste
-         if(src.bones.elms()+dest.bones.elms()+1>=256){Gui.msgBox(S, "Can't paste skeleton bones because the total number will exceed the 256 bone limit."); return;}
+         if(src.bones.elms()+dest.bones.elms()>BONE_NULL){Gui.msgBox(S, S+"Can't paste skeleton bones because the total number will exceed the "+BONE_NULL+" bone limit."); return;}
          REPA(src.bones)if(dest.findBoneI(src.bones[i].name)>=0){Gui.msgBox(S, S+"Can't paste skeleton bones because both source and target contain a bone with the same name \""+src.bones[i].name+"\". Skeleton Bone names must be unique."); return;}
 
          // paste
@@ -3506,24 +3526,24 @@ cur_skel_to_saved_skel.removeBone(bone.name);
          int       bone_i=(sel_bone>=0 ? sel_bone : lit_bone);
          SkelBone *bone  =mesh_skel.bones.addr(bone_i); if(!bone){/*Gui.msgBox(S, "No Bone Selected"); */return;}
          {
-            byte    bone_b=bone_i+VIRTUAL_ROOT_BONE;
-            bool    has=false;
-            Box     box;
-            Matrix3 bone_matrix=*bone;
-            Matrix  transform=bone_matrix/mesh_matrix; // bone in mesh space
-                    transform.inverse(); // inverse because we want to convert mesh vertexes relative to bone
+            BoneType bone_b=bone_i+VIRTUAL_ROOT_BONE;
+            bool     has=false;
+            Box      box;
+            Matrix3  bone_matrix=*bone;
+            Matrix   transform=bone_matrix/mesh_matrix; // bone in mesh space
+                     transform.inverse(); // inverse because we want to convert mesh vertexes relative to bone
             REPA(mesh.parts)
             {
                MeshPart &part=mesh.parts[i];
                if(!(part.part_flag&MSHP_HIDDEN))
                {
-                    MeshBase &base =part.base;
-                  if(C Vec   *pos  =base.vtx.pos   ())
-                  if(C VecB4 *mtrx =base.vtx.matrix())
-                  if(C VecB4 *blend=base.vtx.blend ())
+                       MeshBase &base =part.base;
+                  if(C Vec      *pos  =base.vtx.pos   ())
+                  if(C VtxBone  *mtrx =base.vtx.matrix())
+                  if(C VecB4    *blend=base.vtx.blend ())
                      REPA(base.vtx)
                   {
-                   //VecB4 m=mtrx[i], b=blend[i]; int weight=0; REPA(m)if(m.c[i]==bone_b)weight+=b.c[i]; if(weight>=128)
+                   //VtxBone m=mtrx[i]; VecB4 b=blend[i]; int weight=0; REPA(m)if(m.c[i]==bone_b)weight+=b.c[i]; if(weight>=128)
                      if(mtrx[i].x==bone_b) // if most significant bone is this one, check X because bones are always sorted by most significant first
                      {
                         Vec p=pos[i]*transform;
@@ -3575,10 +3595,10 @@ cur_skel_to_saved_skel.bones.del();
          mesh_undos.set("delLeafBones");
          bool changed=false;
 
-         Memt<byte, 256> remap;
-         bool used_bones[256]; mesh.setUsedBones(used_bones);
+         MemtN<BoneType, 256> remap;
+         MemtN<bool    , 256> used_bones; mesh.setUsedBones(used_bones);
          REPA(mesh_skel.bones) // go from the end, so if bone is removed, then we can process later its parent, without having that child anymore
-            if(InRange(i, used_bones) && !used_bones[i] && !mesh_skel.bones[i].children_num) // not used and don't have children
+            if((!InRange(i, used_bones) || !used_bones[i]) && !mesh_skel.bones[i].children_num) // not used and don't have children
          {
             if(MeshChange *change=mesh_undos.getNextUndo())change.removeBone(mesh_skel.bones[i].name);
   cur_skel_to_saved_skel.removeBone(mesh_skel.bones[i].name);
@@ -3587,7 +3607,9 @@ cur_skel_to_saved_skel.bones.del();
             {
                changed=true;
              //mesh.boneRemap(remap); not needed since we have to do full assignment anyway
-               bool used_bones2[256]; REP(Min(remap.elms(), Elms(used_bones)))used_bones2[remap[i]]=used_bones[i]; Swap(used_bones, used_bones2);
+               MemtN<bool, 256> used_bones1;
+               REP(Min(remap.elms(), used_bones.elms()))if(used_bones[i])used_bones1(remap[i])=true;
+               Swap(used_bones, used_bones1);
             }
          }
          if(changed)
@@ -3609,6 +3631,7 @@ cur_skel_to_saved_skel.bones.del();
       BONE_ADD,
       BONE_RENAME,
       BONE_PARENT,
+      BONE_DYNAMIC,
    }
    static cchar8 *bone_desc[]=
    {
@@ -3619,6 +3642,7 @@ cur_skel_to_saved_skel.bones.del();
       "+1",
       "Rename",
       "Set Parent",
+      "Dynamic",
    };
    enum BONE_MOVE_MODE
    {
@@ -3655,14 +3679,15 @@ cur_skel_to_saved_skel.bones.del();
    void createBones()
    {
       mode.tab(BONES)+=adjust_bone_orns.create();
-      mode.tab(BONES)+=bone_tabs.create(Rect_U(mode.tab(BONES).rect().down()-Vec2(0.16, 0.01), 0.73, 0.06), 0, bone_desc, Elms(bone_desc), true).func(BoneModeChanged, T);
-      bone_tabs.tab(BONE_MOVE  ).setText(S).setImage("Gui/Misc/move.img").desc(S+"Move bone\nSelect bone with LeftClick\nMove bone with RightClick\nHold Shift for more precision\nHold Ctrl to also move mirrored bone\n\nKeyboard Shortcut: Shift+F1");
-      bone_tabs.tab(BONE_ROT   ).setText(S).setImage("Gui/Misc/rotate.img").desc(S+"Rotate bone\nSelect bone with LeftClick\nRotate bone with RightClick\nHold Shift for more precision\nHold Ctrl to also rotate mirrored bone\n\nKeyboard Shortcut: Shift+F2");
-      bone_tabs.tab(BONE_SCALE ).setText(S).setImage("Gui/Misc/scale.img").desc(S+"Scale bone\nSelect bone with LeftClick\nScale bone with RightClick\nHold Shift for more precision\nHold Ctrl to also scale mirrored bone\nHold Alt to always scale sides\n\nKeyboard Shortcut: Shift+F3");
-      bone_tabs.tab(BONE_DEL   ).desc(S+"Delete bone\nKeyboard Shortcut: Shift+F4");
-      bone_tabs.tab(BONE_ADD   ).desc(S+"Create new bone\nSelect bone with LeftClick\nAdd bone with RightClick\nHaving some bone selected while creating a new bone will set it as its parent.\nOptionally hold "+Kb.ctrlCmdName()+" to set Bone origin at mouse position facing forward.\n\nKeyboard Shortcut: Shift+F5");
-      bone_tabs.tab(BONE_RENAME).desc(S+"Rename bone\nKeyboard Shortcut: Shift+F6");
-      bone_tabs.tab(BONE_PARENT).desc(S+"Set bone parent:\nClick on a child bone and drag it to a desired parent bone (or nothing) to set it as the parent.\n\nKeyboard Shortcut: Shift+F7");
+      mode.tab(BONES)+=bone_tabs.create(Rect_U(mode.tab(BONES).rect().down()-Vec2(0.16, 0.01), 0.9, 0.06), 0, bone_desc, Elms(bone_desc), true).func(BoneModeChanged, T);
+      bone_tabs.tab(BONE_MOVE   ).setText(S).setImage("Gui/Misc/move.img").desc(S+"Move bone\nSelect bone with LeftClick\nMove bone with RightClick\nHold Shift for more precision\nHold Ctrl to also move mirrored bone\n\nKeyboard Shortcut: Shift+F1");
+      bone_tabs.tab(BONE_ROT    ).setText(S).setImage("Gui/Misc/rotate.img").desc(S+"Rotate bone\nSelect bone with LeftClick\nRotate bone with RightClick\nHold Shift for more precision\nHold Ctrl to also rotate mirrored bone\n\nKeyboard Shortcut: Shift+F2");
+      bone_tabs.tab(BONE_SCALE  ).setText(S).setImage("Gui/Misc/scale.img").desc(S+"Scale bone\nSelect bone with LeftClick\nScale bone with RightClick\nHold Shift for more precision\nHold Ctrl to also scale mirrored bone\nHold Alt to always scale sides\n\nKeyboard Shortcut: Shift+F3");
+      bone_tabs.tab(BONE_DEL    ).desc(S+"Delete bone\nKeyboard Shortcut: Shift+F4");
+      bone_tabs.tab(BONE_ADD    ).desc(S+"Create new bone\nSelect bone with LeftClick\nAdd bone with RightClick\nHaving some bone selected while creating a new bone will set it as its parent.\nOptionally hold "+Kb.ctrlCmdName()+" to set Bone origin at mouse position facing forward.\n\nKeyboard Shortcut: Shift+F5");
+      bone_tabs.tab(BONE_RENAME ).desc(S+"Rename bone\nKeyboard Shortcut: Shift+F6");
+      bone_tabs.tab(BONE_PARENT ).desc(S+"Set bone parent:\nClick on a child bone and drag it to a desired parent bone (or nothing) to set it as the parent.\n\nKeyboard Shortcut: Shift+F7");
+      bone_tabs.tab(BONE_DYNAMIC).desc(S+"Select which bones should be simulated dynamically, such as cloth/hair, instead of being animated");
 
       bone_tabs.tab(BONE_MOVE)+=bone_move_tabs.create(Rect_U(bone_tabs.tab(BONE_MOVE).rect().down()-Vec2(0, 0.01), 0.28, 0.055), 0, bone_move_desc, Elms(bone_move_desc)).set(BONE_MOVE_END);
       bone_move_tabs.tab(BONE_MOVE_START).desc("Move only start of the bone");
@@ -3716,7 +3741,7 @@ cur_skel_to_saved_skel.bones.del();
       int bone=intptr(bone_index);
       if(ObjEdit.mesh_skel && InRange(bone, ObjEdit.mesh_skel.bones))
       {
-         Memt<byte, 256> remap;
+         MemtN<BoneType, 256> remap;
          ObjEdit.mesh_undos.set("boneParent", true);
          if(ObjEdit.mesh_skel.setBoneParent(bone, ObjEdit.lit_bone, remap))
          {
@@ -3793,6 +3818,13 @@ cur_skel_to_saved_skel.bones.del();
                if(InRange(lit_bone, mesh_skel.bones))Gui.drag(DragBonesBone, ptr(lit_bone), MT.touch(i));
             }break;
 
+            case BONE_DYNAMIC: if(MT.bp(i) && mesh_skel && InRange(lit_bone, mesh_skel.bones))
+            {
+               mesh_undos.set("boneDynamic", true);
+               mesh_skel.bones[lit_bone].flag^=.BONE_DYNAMIC;
+               setChangedSkel(false);
+            }break;
+
             case BONE_MOVE:
             case BONE_ROT:
             case BONE_SCALE:
@@ -3811,8 +3843,15 @@ cur_skel_to_saved_skel.bones.del();
                      REPA(mesh_skel.bones)if(i!=sel_bone && bone_name==BoneNeutralName(mesh_skel.bones[i].name))
                      {
                         bone_mirror=&mesh_skel.bones[mirror_bone=i];
-                        break;
+                        goto bone_mirror;
                      }
+                     if(bone.type)
+                     {
+                        int mirror_type_index=-bone.type_index-1;
+                        mirror_bone=mesh_skel.findBoneI(bone.type, mirror_type_index, bone.type_sub);
+                        bone_mirror=mesh_skel.bones.addr(mirror_bone);
+                     }
+                  bone_mirror:;
                   }
                   switch(bone_tabs)
                   {

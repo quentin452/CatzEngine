@@ -96,8 +96,8 @@ Bool Image::ImportDDS(File &f, Int type, Int mode, Int mip_maps)
          if(mode    < 0)mode    =IMAGE_SOFT; // always default to SOFT like all other file formats
          if(mip_maps< 0)mip_maps=1; // Max((Int)header.MipMapCount, ); loading mip maps from DDS is not yet supported
 
-         if(file_type==type && createTry(header.Width, header.Height, 1, file_type, IMAGE_MODE(mode), mip_maps, false)  // if conversion is not required, then try desired values
-         ||                    createTry(header.Width, header.Height, 1, file_type, IMAGE_SOFT      ,        1, false)) // otherwise import as soft
+         if(file_type==type && create(header.Width, header.Height, 1, file_type, IMAGE_MODE(mode), mip_maps, false)  // if conversion is not required, then try desired values
+         ||                    create(header.Width, header.Height, 1, file_type, IMAGE_SOFT      ,        1, false)) // otherwise import as soft
             if(lock(LOCK_WRITE))
          {
             Int pitch   =ImagePitch  (w(), h(), 0, hwType()), // use "w(), h()" instead of "hwW(), hwH()" because we want to read only valid pixels and zero others
@@ -118,7 +118,7 @@ Bool Image::ImportDDS(File &f, Int type, Int mode, Int mip_maps)
                if(f.ok())
                {
                   updateMipMaps();
-                  return copyTry(T, -1, -1, -1, type, mode, mip_maps);
+                  return copy(T, -1, -1, -1, type, mode, mip_maps);
                }
             }
          }
@@ -128,7 +128,7 @@ Bool Image::ImportDDS(File &f, Int type, Int mode, Int mip_maps)
 }
 Bool Image::ImportDDS(C Str &name, Int type, Int mode, Int mip_maps)
 {
-   File f; if(f.readTry(name))return ImportDDS(f, type, mode, mip_maps);
+   File f; if(f.read(name))return ImportDDS(f, type, mode, mip_maps);
    del(); return false;
 }
 Bool Image::ImportDDS(C Str  &name) {return ImportDDS(name, -1);}

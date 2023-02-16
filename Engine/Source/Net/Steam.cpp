@@ -417,7 +417,7 @@ Bool SteamWorks::userAvatar(ULong user_id, Image &image)C
       {
          UInt width=0, height=0;
          if(i->GetImageSize(image_id, &width, &height))
-         if(image.createSoftTry(width, height, 1, IMAGE_R8G8B8A8_SRGB))
+         if(image.createSoft(width, height, 1, IMAGE_R8G8B8A8_SRGB))
          if(i->GetImageRGBA(image_id, image.data(), image.memUsage()))
             return true;
       }

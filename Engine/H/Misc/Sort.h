@@ -43,6 +43,7 @@ Int Compare(C VecUS  &a, C VecUS  &b);
 Int Compare(C VecI4  &a, C VecI4  &b);
 Int Compare(C VecB4  &a, C VecB4  &b);
 Int Compare(C VecSB4 &a, C VecSB4 &b);
+Int Compare(C VecUS4 &a, C VecUS4 &b);
 Int Compare(C Color  &a, C Color  &b);
 Int Compare(C VecH2  &a, C VecH2  &b);
 Int Compare(C VecH   &a, C VecH   &b);

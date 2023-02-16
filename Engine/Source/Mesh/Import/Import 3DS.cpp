@@ -59,7 +59,7 @@ Bool Import3DS(C Str &name, Mesh *mesh, MemPtr<XMaterial> materials, MemPtr<Int>
       Node() {pivot.zero();}
    };
 
-   File f; if(f.readTry(name))
+   File f; if(f.read(name))
    {
       UInt       last_tex=0;
       Str8       last_name;

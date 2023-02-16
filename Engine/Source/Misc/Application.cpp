@@ -1,4 +1,4 @@
-/******************************************************************************/
+﻿/******************************************************************************/
 #include "stdafx.h"
 #if MAC
 #include "../Platforms/Mac/MyApplication.h"
@@ -80,6 +80,9 @@ Application::Application()
   _style_window=0;
 #endif
 #endif
+  _status_color=_nav_color=true;
+  _status=      SYSTEM_BAR_HIDDEN                      ; // must match #SystemBar
+  _nav   =IOS ? SYSTEM_BAR_OVERLAY : SYSTEM_BAR_VISIBLE; // must match #SystemBar
   _thread_id=GetThreadID();
   _back_text="Running in background";
 }
@@ -196,38 +199,85 @@ Application& Application::backgroundText(C Str &text)
    return T;
 }
 /******************************************************************************/
-Bool Application::getSystemBars(SYSTEM_BAR &status, SYSTEM_BAR &navigation)C
-{
 #if ANDROID
+void SetSystemBars()
+{
    JNI jni;
    if(jni && ActivityClass)
-   if(JMethodID systemBars=jni.staticFunc(ActivityClass, "systemBars", "()I"))
+   if(JMethodID systemBars=jni.staticFunc(ActivityClass, "systemBars", "(BBZZ)V"))
    {
-      UInt bars=jni->CallStaticIntMethod(ActivityClass, systemBars);
-      status    =SYSTEM_BAR( bars    &(1|2));
-      navigation=SYSTEM_BAR((bars>>2)&(1|2));
-      return true;
+      jni->CallStaticVoidMethod(ActivityClass, systemBars, jbyte(App.statusBar()), jbyte(App.navBar()), jboolean(App.statusBarColor()), jboolean(App.navBarColor()));
+      extern void AndroidResized(); AndroidResized(); // immediatelly request size check to call 'D.screenChanged' ASAP. This is so we can get latest 'D.rectUI' before waiting for Android/Java to process requests on other threads. For this we need #ImmediateInsets
    }
-#elif IOS
-   status    =SYSTEM_BAR_HIDDEN;
-   navigation=SYSTEM_BAR_HIDDEN;
-   return true;
-#endif
-   status=navigation=SYSTEM_BAR_HIDDEN;
-   return false;
 }
+#endif
 Application& Application::systemBars(SYSTEM_BAR status, SYSTEM_BAR navigation)
 {
 #if ANDROID
-   JNI jni;
-   if(jni && ActivityClass)
-   if(JMethodID systemBars=jni.staticFunc(ActivityClass, "systemBars", "(I)V"))
-      jni->CallStaticVoidMethod(ActivityClass, systemBars, jint(status|(navigation<<2)));
+   if(_status!=status || _nav!=navigation)
+   {
+     _status=status;
+     _nav   =navigation;
+      SetSystemBars();
+   }
+#else
+   statusBar(status);
+      navBar(navigation);
 #endif
    return T;
 }
-SYSTEM_BAR Application::statusBar()C {SYSTEM_BAR status, navigation; getSystemBars(status, navigation); return status    ;}   Application& Application::statusBar(SYSTEM_BAR bar) {SYSTEM_BAR status, navigation; if(getSystemBars(status, navigation))systemBars(bar   , navigation); return T;}
-SYSTEM_BAR Application::   navBar()C {SYSTEM_BAR status, navigation; getSystemBars(status, navigation); return navigation;}   Application& Application::   navBar(SYSTEM_BAR bar) {SYSTEM_BAR status, navigation; if(getSystemBars(status, navigation))systemBars(status, bar       ); return T;}
+Application& Application::statusBar(SYSTEM_BAR bar)
+{
+   if(_status!=bar)
+   {
+     _status=bar;
+   #if ANDROID
+      SetSystemBars();
+   #elif IOS
+      if(ViewController)[ViewController setNeedsStatusBarAppearanceUpdate];
+   #endif
+   }
+   return T;
+}
+Application& Application::navBar(SYSTEM_BAR bar)
+{
+   if(_nav!=bar)
+   {
+     _nav=bar;
+   #if ANDROID
+      SetSystemBars();
+   #elif IOS
+      if(ViewController){[ViewController setNeedsUpdateOfHomeIndicatorAutoHidden]; [ViewController setNeedsUpdateOfScreenEdgesDeferringSystemGestures];}
+   #endif
+   }
+   return T;
+}
+Application& Application::statusBarColor(Bool light)
+{
+   if(_status_color!=light)
+   {
+     _status_color=light;
+   #if ANDROID
+      SetSystemBars();
+   #elif IOS
+      if(ViewController)[ViewController setNeedsStatusBarAppearanceUpdate];
+   #endif
+   }
+   return T;
+}
+Application& Application::navBarColor(Bool light)
+{
+   if(_nav_color!=light)
+   {
+     _nav_color=light;
+   #if ANDROID
+      SetSystemBars();
+   #elif IOS
+      // unsupported
+   #endif
+   }
+   return T;
+}
 /******************************************************************************/
 #if WINDOWS || ANDROID
 Bool Application::minimized()C {return _minimized;}
@@ -442,7 +492,7 @@ Application& Application::icon(C Image &icon)
    if(XDisplay && window() && _NET_WM_ICON)
    {
       Image temp; C Image *src=(icon.is() ? &icon : null);
-      if(src && src->compressed())if(src->copyTry(temp, -1, -1, 1, IMAGE_B8G8R8A8_SRGB, IMAGE_SOFT, 1))src=&temp;else src=null;
+      if(src && src->compressed())if(src->copy(temp, -1, -1, 1, IMAGE_B8G8R8A8_SRGB, IMAGE_SOFT, 1))src=&temp;else src=null;
       if(src && src->is() && src->lockRead())
       {
          Memt<long> data; data.setNum(2+src->w()*src->h());
@@ -466,7 +516,7 @@ Application& Application::icon(C Image &icon)
    }else
    {
       // remember it so it will be set later
-      icon.copyTry(_icon, -1, -1, 1, IMAGE_B8G8R8A8_SRGB, IMAGE_SOFT, 1);
+      icon.copy(_icon, -1, -1, 1, IMAGE_B8G8R8A8_SRGB, IMAGE_SOFT, 1);
    }
 #endif
    return T;
@@ -646,6 +696,40 @@ void Application::close()
    if(quit)quit();else _close=true;
 }
 /******************************************************************************/
+void Application::pickPhoto(Int max_files)
+{
+   if(max_files>0)
+   {
+   #if ANDROID
+      if(Jni && ActivityClass && Activity)
+         if(JMethodID pickPhoto=Jni.func(ActivityClass, "pickPhoto", "(I)V"))
+            Jni->CallVoidMethod(Activity, pickPhoto, jint(max_files));
+   #elif IOS
+      if(ViewController)
+      {
+         if([PHPickerConfiguration class]) // if class was found, this is needed because PHPickerConfiguration is available on iOS 14.0+
+         {
+            PHPickerConfiguration *config=[[PHPickerConfiguration alloc] init];
+            config.selectionLimit=max_files;
+            config.filter=[PHPickerFilter imagesFilter];
+
+            PHPickerViewController *picker=[[PHPickerViewController alloc] initWithConfiguration:config];
+            [config release];
+            picker.delegate=GetAppDelegate();
+            [ViewController presentViewController:picker animated:YES completion:nil];
+         }else
+         {
+            UIImagePickerController *picker=[[UIImagePickerController alloc] init];
+            picker.delegate=GetAppDelegate();
+            picker.sourceType=UIImagePickerControllerSourceTypePhotoLibrary;
+
+            [ViewController presentViewController:picker animated:YES completion:nil];
+         }
+      }
+   #endif
+   }
+}
+/******************************************************************************/
 Bool Application::testInstance()
 {
    if(flag&APP_EXIT_IMMEDIATELY)return false;
@@ -779,7 +863,7 @@ void Application::showError(CChar *error)
          }
       #endif
       }
-      CChar *title=MLTC(u"Error", PL,u"Błąd", RU,u"Ошибка", PO,u"Erro", CN,u"错误");
+      CChar *title=TError();
 
    #if WINDOWS
       OutputDebugString(WChar(error)); OutputDebugStringA("\n"); // first write to console
@@ -1096,7 +1180,7 @@ void LoadEmbeddedPaks(Cipher *cipher)
 #elif MAC
    for(FileFind ff(App.exe()+"/Contents/Resources", "pak"); ff(); )Paks.add(ff.pathName(), cipher, false); // iterate all PAK files inside APP resources folder
 #elif LINUX
-   File f; if(f.readStdTry(App.exe()))for(Long next=f.size(); f.pos(next-2*4); )
+   File f; if(f.readStd(App.exe()))for(Long next=f.size(); f.pos(next-2*4); )
    {
       Long skip=f.getUInt(); // !! use Long and not UInt, because of "-skip" below, which would cause incorrect behavior
       UInt end =f.getUInt();
@@ -1120,7 +1204,7 @@ void LoadEmbeddedPaks(Cipher *cipher)
 
                   case CC4('I', 'C', 'O', 'N'):
                   {
-                     Image icon; if(icon.ImportTry(f, -1, IMAGE_SOFT, 1))if(icon.is())App.icon(icon);
+                     Image icon; if(icon.Import(f, -1, IMAGE_SOFT, 1))if(icon.is())App.icon(icon);
                   }break;
                }
                f.unlimit(total_size, applied_offset);

@@ -716,14 +716,17 @@ void WindowIO::update(C GuiPC &gpc)
                enter(f->name);
             }
          }else
-         if(list.cur>=0)REPA(Touches)if(Touches[i].guiObj()==&list && Touches[i].tapped())
+         if(list.cur>=0)REPA(Touches)
          {
-            if(File *f=list())
+            Touch &touch=Touches[i]; if(touch.guiObj()==&list && touch.tapped())
             {
-               textline.clear();
-               enter(f->name);
+               if(File *f=list())
+               {
+                  textline.clear();
+                  enter(f->name);
+               }
+               break;
             }
-            break;
          }
          if((Kb.k(KB_ENTER) || Kb.k(KB_NPENTER)) && Kb.k.first()){Kb.eatKey(); Ok();} // !! don't perform any operations on this object after 'Ok' !!
       }else
@@ -738,7 +741,7 @@ void WindowIO::update(C GuiPC &gpc)
          // enter directory because of the list (enter or double-click)
          if(list.cur>=0)
          {
-            REPA(Touches)if(Touches[i].guiObj()==&list && Touches[i].db()){touch_db=true; break;}
+            REPA(Touches){Touch &touch=Touches[i]; if(touch.guiObj()==&list && touch.db()){touch_db=true; break;}}
 
             if((Gui.kb()==&list && (Kb.k (KB_ENTER) || Kb.k(KB_NPENTER)) && Kb.k.first())
             || (Gui.ms()==&list &&  Ms.bd(0       )                                     )

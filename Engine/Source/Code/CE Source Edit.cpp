@@ -262,11 +262,11 @@ void Source::paste(C Str *text, Bool move_cur)
       Int start=cur.y;
       if(!text && ClipFullLine && Equal(c, ClipTemp, true))
       {
-         lines.NewAt(cur.y)=Replace(Replace(Replace(c, "\t", tab), '\r', '\0'), '\n', '\0');
+         lines.NewAt(cur.y)=Replace(Replace(c, "\t", tab), '\n', '\0');
          cur.y++;
       }else
       {
-         Memc<Str> ln=Split(Replace(Replace(c, "\t", tab), '\r', '\0'), '\n');
+         Memc<Str> ln=Split(Replace(c, "\t", tab), '\n');
          if(ln.elms())
          {
             exist(cur.x, cur.y);

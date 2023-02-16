@@ -123,9 +123,9 @@ struct ShaderParam // Shader Parameter
          #endif
 
 #if EE_PRIVATE
-   #define MIN_SHADER_PARAM_DATA_SIZE SIZE(Vec4)
+   #define MIN_SHADER_PARAM_DATA_SIZE SIZEI(Vec4)
 
-   ASSERT(MIN_SHADER_PARAM_DATA_SIZE>=SIZE(Vec4));
+   ASSERT(MIN_SHADER_PARAM_DATA_SIZE>=SIZEI(Vec4));
  C Flt & getFlt ()C {return *(Flt *)_data;}
  C Vec2& getVec2()C {return *(Vec2*)_data;}
  C Vec & getVec ()C {return *(Vec *)_data;}

@@ -156,7 +156,7 @@ class SaveTaskClass : ClosableWindow
       T  +=yes  .create(Rect_D(clientWidth()*2/7, -clientHeight()+0.04, 0.25, 0.065), "Yes").func(Yes, T);
       T  +=no   .create(Rect_D(clientWidth()*5/7, -clientHeight()+0.04, 0.25, 0.065), "No" ).func(No , T);
       T  +=name .create(Rect_D(clientWidth()/2, no.rect().max.y+0.03, clientWidth()-0.06, 0.065));
-      T  +=text .create(Rect(0, name.rect().max.y, clientWidth(), 0).extend(-0.01), "Would you like to save recorded tasks?"); text.auto_line=AUTO_LINE_SPACE_SPLIT;
+      T  +=text .create(Rect(0, name.rect().max.y, clientWidth(), 0).extend(-0.01), "Would you like to save recorded tasks?"); text.auto_line=true;
    }
    void display(TaskName &task_name)
    {
@@ -204,7 +204,7 @@ class ExecuteTaskClass : ClosableWindow
       Gui+=super.create(Rect_C(0, 0, 1, 0.30)).hide(); button[2].func(HideWindow, SCAST(Window, T)).show();
       T  +=yes  .create(Rect_D(clientWidth()*2/7, -clientHeight()+0.04, 0.25, 0.065), "Yes").func(Yes, T);
       T  +=no   .create(Rect_D(clientWidth()*5/7, -clientHeight()+0.04, 0.25, 0.065), "No" ).func(No , T);
-      T  +=text .create(Rect(0, yes.rect().max.y, clientWidth(), 0).extend(-0.01), "Are you sure you want to execute selected task?"); text.auto_line=AUTO_LINE_SPACE_SPLIT;
+      T  +=text .create(Rect(0, yes.rect().max.y, clientWidth(), 0).extend(-0.01), "Are you sure you want to execute selected task?"); text.auto_line=true;
    }
    void display(TaskName &task_name)
    {
@@ -272,7 +272,7 @@ class DeleteTaskClass : ClosableWindow
       Gui+=super.create(Rect_C(0, 0, 1, 0.35)).hide(); button[2].func(HideWindow, SCAST(Window, T)).show();
       T  +=yes  .create(Rect_D(clientWidth()*2/7, -clientHeight()+0.04, 0.25, 0.065), "Yes").func(Yes, T);
       T  +=no   .create(Rect_D(clientWidth()*5/7, -clientHeight()+0.04, 0.25, 0.065), "No" ).func(No , T);
-      T  +=text .create(Rect(0, yes.rect().max.y, clientWidth(), 0).extend(-0.01), "Are you sure you want to delete selected task?"); text.auto_line=AUTO_LINE_SPACE_SPLIT;
+      T  +=text .create(Rect(0, yes.rect().max.y, clientWidth(), 0).extend(-0.01), "Are you sure you want to delete selected task?"); text.auto_line=true;
    }
    void display(C TaskName &task_name)
    {

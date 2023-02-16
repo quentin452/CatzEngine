@@ -42,7 +42,7 @@ Ptr _Meml::NewAt(Int i)
 MemlNode* _Meml::add()
 {
    if(elms()>=INT_MAX)Exit("'Meml.add' size too big");
-   MemlNode *node=(MemlNode*)Alloc<Byte>(SIZE(MemlNode)+_elm_size);
+   MemlNode *node=(MemlNode*)Alloc<Byte>(SIZEU(MemlNode)+_elm_size);
    if(_last)_last->_next=node;else _first=node;
    node->_prev=_last;
    node->_next= null;
@@ -54,7 +54,7 @@ MemlNode* _Meml::add()
 MemlNode* _Meml::addZero()
 {
    if(elms()>=INT_MAX)Exit("'Meml.addZero' size too big");
-   MemlNode *node=(MemlNode*)AllocZero<Byte>(SIZE(MemlNode)+_elm_size);
+   MemlNode *node=(MemlNode*)AllocZero<Byte>(SIZEU(MemlNode)+_elm_size);
    if(_last)_last->_next=node;else _first=node;
    node->_prev=_last;
    node->_next= null;
@@ -67,7 +67,7 @@ MemlNode* _Meml::addBefore(MemlNode *x)
 {
    if(!x)return null;
    if(elms()>=INT_MAX)Exit("'Meml.addBefore' size too big");
-   MemlNode *node=(MemlNode*)Alloc<Byte>(SIZE(MemlNode)+_elm_size);
+   MemlNode *node=(MemlNode*)Alloc<Byte>(SIZEU(MemlNode)+_elm_size);
    if(x->_prev)x->_prev->_next=node;else _first=node;
    node->_next=x;
    node->_prev=x->_prev;
@@ -80,7 +80,7 @@ MemlNode* _Meml::addAfter(MemlNode *x)
 {
    if(!x)return null;
    if(elms()>=INT_MAX)Exit("'Meml.addAfter' size too big");
-   MemlNode *node=(MemlNode*)Alloc<Byte>(SIZE(MemlNode)+_elm_size);
+   MemlNode *node=(MemlNode*)Alloc<Byte>(SIZEU(MemlNode)+_elm_size);
    if(x->_next)x->_next->_prev=node;else _last=node;
    node->_prev=x;
    node->_next=x->_next;

@@ -100,10 +100,11 @@ enum MESH_FLAG : ULong // Mesh Flag
 };
 SET_ENUM_FLAGS(MESH_FLAG);
 /******************************************************************************/
-void SetSkin(C MemPtrN<IndexWeight, 256> &skin, VecB4 &matrix, VecB4 &blend, C Skeleton *skeleton); // set 'matrix' and 'blend' skinning values from 'skin' and 'skeleton' (optional)
+void SetSkin(C MemPtrN<IndexWeight, 256> &skin, VtxBone &matrix, VecB4 &blend, C Skeleton *skeleton); // set 'matrix' and 'blend' skinning values from 'skin' and 'skeleton' (optional)
 /******************************************************************************/
 #if EE_PRIVATE
-void FixMatrixWeight(VecB4 &matrix, VecB4 &blend);
+void FixMatrixWeight(VecB4  &matrix, VecB4 &blend);
+void FixMatrixWeight(VecUS4 &matrix, VecB4 &blend);
 
 struct VtxDup
 {
@@ -131,11 +132,13 @@ UInt EtqFlagSwap(UInt flag); // swap sides of ETQ_FLAG
 /******************************************************************************/
 struct VtxFull // Vertex containing all possible data
 {
-   Vec   pos, nrm, tan, bin, hlp;
-   Vec2  tex0, tex1, tex2, tex3;
-   Color color;
-   VecB4 material, matrix, blend;
-   Flt   size;
+   Vec     pos, nrm, tan, bin, hlp;
+   Vec2    tex0, tex1, tex2, tex3;
+   Color   color;
+   VecB4   material;
+   VtxBone matrix;
+   VecB4   blend;
+   Flt     size;
 
    void reset(); // reset vertex values, this sets all members to zero, except 'color' which is set to WHITE
 
@@ -154,45 +157,45 @@ struct VtxFull // Vertex containing all possible data
 /******************************************************************************/
 struct MeshVtxs // Mesh Vertexes
 {
-   Int    elms    ()C {return _elms    ;}                                                                                  // get number of vertexes
-   Vec  * pos     ()  {return _pos     ;}     Vec  & pos     (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _pos     [i];} // get i-th vertex position
- C Vec  * pos     ()C {return _pos     ;}   C Vec  & pos     (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _pos     [i];} // get i-th vertex position
-   Vec  * nrm     ()  {return _nrm     ;}     Vec  & nrm     (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _nrm     [i];} // get i-th vertex normal
- C Vec  * nrm     ()C {return _nrm     ;}   C Vec  & nrm     (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _nrm     [i];} // get i-th vertex normal
-   Vec  * tan     ()  {return _tan     ;}     Vec  & tan     (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _tan     [i];} // get i-th vertex tangent
- C Vec  * tan     ()C {return _tan     ;}   C Vec  & tan     (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _tan     [i];} // get i-th vertex tangent
-   Vec  * bin     ()  {return _bin     ;}     Vec  & bin     (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _bin     [i];} // get i-th vertex binormal
- C Vec  * bin     ()C {return _bin     ;}   C Vec  & bin     (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _bin     [i];} // get i-th vertex binormal
-   Vec  * hlp     ()  {return _hlp     ;}     Vec  & hlp     (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _hlp     [i];} // get i-th vertex helper
- C Vec  * hlp     ()C {return _hlp     ;}   C Vec  & hlp     (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _hlp     [i];} // get i-th vertex helper
-   Vec2 * tex0    ()  {return _tex0    ;}     Vec2 & tex0    (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _tex0    [i];} // get i-th vertex texture UV 0
- C Vec2 * tex0    ()C {return _tex0    ;}   C Vec2 & tex0    (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _tex0    [i];} // get i-th vertex texture UV 0
-   Vec2 * tex1    ()  {return _tex1    ;}     Vec2 & tex1    (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _tex1    [i];} // get i-th vertex texture UV 1
- C Vec2 * tex1    ()C {return _tex1    ;}   C Vec2 & tex1    (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _tex1    [i];} // get i-th vertex texture UV 1
-   Vec2 * tex2    ()  {return _tex2    ;}     Vec2 & tex2    (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _tex2    [i];} // get i-th vertex texture UV 2
- C Vec2 * tex2    ()C {return _tex2    ;}   C Vec2 & tex2    (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _tex2    [i];} // get i-th vertex texture UV 2
-   Vec2 * tex3    ()  {return _tex3    ;}     Vec2 & tex3    (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _tex3    [i];} // get i-th vertex texture UV 3
- C Vec2 * tex3    ()C {return _tex3    ;}   C Vec2 & tex3    (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _tex3    [i];} // get i-th vertex texture UV 3
-   Color* color   ()  {return _color   ;}     Color& color   (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _color   [i];} // get i-th vertex color
- C Color* color   ()C {return _color   ;}   C Color& color   (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _color   [i];} // get i-th vertex color
-   VecB4* material()  {return _material;}     VecB4& material(Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _material[i];} // get i-th vertex material blend
- C VecB4* material()C {return _material;}   C VecB4& material(Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _material[i];} // get i-th vertex material blend
-   VecB4* matrix  ()  {return _matrix  ;}     VecB4& matrix  (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _matrix  [i];} // get i-th vertex bone/matrix index , index maps to a specific bone of a skeleton, where 0=skeleton root bone, 1=skeleton bone #0, 2=skeleton bone #1, 3=skeleton bone #2, and so on, this can be summarized in the following : bone = (index ? skeleton.bone[index-1] : skeleton.root)
- C VecB4* matrix  ()C {return _matrix  ;}   C VecB4& matrix  (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _matrix  [i];} // get i-th vertex bone/matrix index , index maps to a specific bone of a skeleton, where 0=skeleton root bone, 1=skeleton bone #0, 2=skeleton bone #1, 3=skeleton bone #2, and so on, this can be summarized in the following : bone = (index ? skeleton.bone[index-1] : skeleton.root)
-   VecB4* blend   ()  {return _blend   ;}     VecB4& blend   (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _blend   [i];} // get i-th vertex bone/matrix weight, weight factor between corresponding matrix.xyzw bones, their sum must be equal to 255 !!
- C VecB4* blend   ()C {return _blend   ;}   C VecB4& blend   (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _blend   [i];} // get i-th vertex bone/matrix weight, weight factor between corresponding matrix.xyzw bones, their sum must be equal to 255 !!
-   Flt  * size    ()  {return _size    ;}     Flt  & size    (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _size    [i];} // get i-th vertex size
- C Flt  * size    ()C {return _size    ;}   C Flt  & size    (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _size    [i];} // get i-th vertex size
-   Byte * flag    ()  {return _flag    ;}     Byte & flag    (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _flag    [i];} // get i-th vertex flag
- C Byte * flag    ()C {return _flag    ;}   C Byte & flag    (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _flag    [i];} // get i-th vertex flag
-   Int  * dup     ()  {return _dup     ;}     Int  & dup     (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _dup     [i];} // get i-th vertex duplicate, index of identical vertex
- C Int  * dup     ()C {return _dup     ;}   C Int  & dup     (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _dup     [i];} // get i-th vertex duplicate, index of identical vertex
+   Int      elms    ()C {return _elms    ;}                                                                                  // get number of vertexes
+   Vec    * pos     ()  {return _pos     ;}     Vec    & pos     (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _pos     [i];} // get i-th vertex position
+ C Vec    * pos     ()C {return _pos     ;}   C Vec    & pos     (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _pos     [i];} // get i-th vertex position
+   Vec    * nrm     ()  {return _nrm     ;}     Vec    & nrm     (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _nrm     [i];} // get i-th vertex normal
+ C Vec    * nrm     ()C {return _nrm     ;}   C Vec    & nrm     (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _nrm     [i];} // get i-th vertex normal
+   Vec    * tan     ()  {return _tan     ;}     Vec    & tan     (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _tan     [i];} // get i-th vertex tangent
+ C Vec    * tan     ()C {return _tan     ;}   C Vec    & tan     (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _tan     [i];} // get i-th vertex tangent
+   Vec    * bin     ()  {return _bin     ;}     Vec    & bin     (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _bin     [i];} // get i-th vertex binormal
+ C Vec    * bin     ()C {return _bin     ;}   C Vec    & bin     (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _bin     [i];} // get i-th vertex binormal
+   Vec    * hlp     ()  {return _hlp     ;}     Vec    & hlp     (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _hlp     [i];} // get i-th vertex helper
+ C Vec    * hlp     ()C {return _hlp     ;}   C Vec    & hlp     (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _hlp     [i];} // get i-th vertex helper
+   Vec2   * tex0    ()  {return _tex0    ;}     Vec2   & tex0    (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _tex0    [i];} // get i-th vertex texture UV 0
+ C Vec2   * tex0    ()C {return _tex0    ;}   C Vec2   & tex0    (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _tex0    [i];} // get i-th vertex texture UV 0
+   Vec2   * tex1    ()  {return _tex1    ;}     Vec2   & tex1    (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _tex1    [i];} // get i-th vertex texture UV 1
+ C Vec2   * tex1    ()C {return _tex1    ;}   C Vec2   & tex1    (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _tex1    [i];} // get i-th vertex texture UV 1
+   Vec2   * tex2    ()  {return _tex2    ;}     Vec2   & tex2    (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _tex2    [i];} // get i-th vertex texture UV 2
+ C Vec2   * tex2    ()C {return _tex2    ;}   C Vec2   & tex2    (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _tex2    [i];} // get i-th vertex texture UV 2
+   Vec2   * tex3    ()  {return _tex3    ;}     Vec2   & tex3    (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _tex3    [i];} // get i-th vertex texture UV 3
+ C Vec2   * tex3    ()C {return _tex3    ;}   C Vec2   & tex3    (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _tex3    [i];} // get i-th vertex texture UV 3
+   Color  * color   ()  {return _color   ;}     Color  & color   (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _color   [i];} // get i-th vertex color
+ C Color  * color   ()C {return _color   ;}   C Color  & color   (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _color   [i];} // get i-th vertex color
+   VecB4  * material()  {return _material;}     VecB4  & material(Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _material[i];} // get i-th vertex material blend
+ C VecB4  * material()C {return _material;}   C VecB4  & material(Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _material[i];} // get i-th vertex material blend
+   VtxBone* matrix  ()  {return _matrix  ;}     VtxBone& matrix  (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _matrix  [i];} // get i-th vertex bone/matrix index , index maps to a specific bone of a skeleton, where 0=skeleton root bone, 1=skeleton bone #0, 2=skeleton bone #1, 3=skeleton bone #2, and so on, this can be summarized in the following : bone = (index ? skeleton.bone[index-1] : skeleton.root)
+ C VtxBone* matrix  ()C {return _matrix  ;}   C VtxBone& matrix  (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _matrix  [i];} // get i-th vertex bone/matrix index , index maps to a specific bone of a skeleton, where 0=skeleton root bone, 1=skeleton bone #0, 2=skeleton bone #1, 3=skeleton bone #2, and so on, this can be summarized in the following : bone = (index ? skeleton.bone[index-1] : skeleton.root)
+   VecB4  * blend   ()  {return _blend   ;}     VecB4  & blend   (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _blend   [i];} // get i-th vertex bone/matrix weight, weight factor between corresponding matrix.xyzw bones, their sum must be equal to 255 !!
+ C VecB4  * blend   ()C {return _blend   ;}   C VecB4  & blend   (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _blend   [i];} // get i-th vertex bone/matrix weight, weight factor between corresponding matrix.xyzw bones, their sum must be equal to 255 !!
+   Flt    * size    ()  {return _size    ;}     Flt    & size    (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _size    [i];} // get i-th vertex size
+ C Flt    * size    ()C {return _size    ;}   C Flt    & size    (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _size    [i];} // get i-th vertex size
+   Byte   * flag    ()  {return _flag    ;}     Byte   & flag    (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _flag    [i];} // get i-th vertex flag
+ C Byte   * flag    ()C {return _flag    ;}   C Byte   & flag    (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _flag    [i];} // get i-th vertex flag
+   Int    * dup     ()  {return _dup     ;}     Int    & dup     (Int i)  {DEBUG_RANGE_ASSERT(i, _elms); return _dup     [i];} // get i-th vertex duplicate, index of identical vertex
+ C Int    * dup     ()C {return _dup     ;}   C Int    & dup     (Int i)C {DEBUG_RANGE_ASSERT(i, _elms); return _dup     [i];} // get i-th vertex duplicate, index of identical vertex
 
    MeshVtxs() {}
 #if !EE_PRIVATE
 private:
 #endif
-   Int _elms; Vec *_pos, *_nrm, *_tan, *_bin, *_hlp; Vec2 *_tex0, *_tex1, *_tex2, *_tex3; Color *_color; VecB4 *_material, *_matrix, *_blend; Flt *_size; Byte *_flag; Int *_dup;
+   Int _elms; Vec *_pos, *_nrm, *_tan, *_bin, *_hlp; Vec2 *_tex0, *_tex1, *_tex2, *_tex3; Color *_color; VecB4 *_material; VtxBone *_matrix; VecB4 *_blend; Flt *_size; Byte *_flag; Int *_dup;
    NO_COPY_CONSTRUCTOR(MeshVtxs);
 };
 /******************************************************************************/
@@ -392,17 +395,17 @@ struct MeshBase // Mesh Base (the most low level software mesh, contains : Verte
 #endif
 
    // texture transform
-   MeshBase& texMove  (C Vec2 &move , Byte tex_index=0); // move   texture UV's
-   MeshBase& texScale (C Vec2 &scale, Byte tex_index=0); // scale  texture UV's
-   MeshBase& texRotate(  Flt   angle, Byte tex_index=0); // rotate texture UV's
+   MeshBase& texMove  (C Vec2 &move , Byte uv_index=0); // move   texture UV's
+   MeshBase& texScale (C Vec2 &scale, Byte uv_index=0); // scale  texture UV's
+   MeshBase& texRotate(  Flt   angle, Byte uv_index=0); // rotate texture UV's
 
    // texturize
-   MeshBase& texMap  (  Flt     scale=1, Byte tex_index=0); // map texture UV's according to vertex XY position and scale
-   MeshBase& texMapXZ(  Flt     scale=1, Byte tex_index=0); // map texture UV's according to vertex XZ position and scale
-   MeshBase& texMap  (C Matrix &matrix , Byte tex_index=0); // map texture UV's according to matrix
-   MeshBase& texMap  (C Plane  &plane  , Byte tex_index=0); // map texture UV's according to plane
-   MeshBase& texMap  (C Ball   &ball   , Byte tex_index=0); // map texture UV's according to ball
-   MeshBase& texMap  (C Tube   &tube   , Byte tex_index=0); // map texture UV's according to tube
+   MeshBase& texMap  (  Flt     scale=1, Byte uv_index=0); // map texture UV's according to vertex XY position and scale
+   MeshBase& texMapXZ(  Flt     scale=1, Byte uv_index=0); // map texture UV's according to vertex XZ position and scale
+   MeshBase& texMap  (C Matrix &matrix , Byte uv_index=0); // map texture UV's according to matrix
+   MeshBase& texMap  (C Plane  &plane  , Byte uv_index=0); // map texture UV's according to plane
+   MeshBase& texMap  (C Ball   &ball   , Byte uv_index=0); // map texture UV's according to ball
+   MeshBase& texMap  (C Tube   &tube   , Byte uv_index=0); // map texture UV's according to tube
 
    // operations
 #if EE_PRIVATE
@@ -420,9 +423,9 @@ struct MeshBase // Mesh Base (the most low level software mesh, contains : Verte
    MeshBase& subdivide    (                                              ); // smooth subdivide faces,  smoothing original vertexes
    MeshBase& subdivideEdge(Bool freeze_z=false, C CMemPtr<Bool> &is=null ); // smooth subdivide edges, 'is'=only selected edges
 
-   MeshBase&   boneRemap(C CMemPtr<Byte, 256> &old_to_new); // remap vertex bone/matrix indexes according to bone 'old_to_new' remap
-   void     setUsedBones(Bool (&bones)[256])C;
-   void includeUsedBones(Bool (&bones)[256])C;
+   MeshBase&   boneRemap(C CMemPtrN<BoneType, 256> &old_to_new); // remap vertex bone/matrix indexes according to bone 'old_to_new' remap
+   void     setUsedBones(   MemPtrN<Bool    , 256>  bones)C;
+   void includeUsedBones(   MemPtrN<Bool    , 256>  bones)C;
 
    MeshBase& setVtxAO(Flt strength, Flt bias, Flt max, Flt ray_length, Flt pos_eps=EPS, Int rays=1024, MESH_AO_FUNC func=MAF_FULL, Threads *threads=null); // calculate per-vertex ambient occlusion in vertex colors, 'strength'=0..1 AO strength, 'bias'=0..1, 'max'=AO limit 0..1, 'ray_length'=max ray distance to test, 'rays'=number of rays to use for AO calculation, 'func'=falloff function
 
@@ -441,8 +444,8 @@ struct MeshBase // Mesh Base (the most low level software mesh, contains : Verte
 #endif
 
    // fix
-   MeshBase& fixTexOffset  (Byte tex_index=0); // fix texture offset  , this reduces big texture coordinates to small ones increasing texturing quality on low precision video cards
-   MeshBase& fixTexWrapping(Byte tex_index=0); // fix texture wrapping, fixes texture coordinates created by spherical/tube mapping (this can add new vertexes to the mesh)
+   MeshBase& fixTexOffset  (Byte uv_index=0); // fix texture offset  , this reduces big texture coordinates to small ones increasing texturing quality on low precision video cards
+   MeshBase& fixTexWrapping(Byte uv_index=0); // fix texture wrapping, fixes texture coordinates created by spherical/tube mapping (this can add new vertexes to the mesh)
 
    // link
 #if EE_PRIVATE

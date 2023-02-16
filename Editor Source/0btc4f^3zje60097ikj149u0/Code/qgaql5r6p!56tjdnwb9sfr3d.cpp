@@ -83,13 +83,13 @@ const OS_VER InstallerPlatform[]=
 const COMPRESS_TYPE Compression=COMPRESS_LZMA;
 const int           CompressionLevel=9;
 /******************************************************************************/
-Str ServerPath(Str path, bool file=true) // !! this needs to be in sync with 'Patcher' class !!
+Str ServerPath(Str path, bool file=true) // !! THIS NEEDS TO BE IN SYNC WITH 'Patcher' CLASS !!
 {
    Str out; if(file){Str ext=GetExt(path); if(ext=="pl" || ext=="php" || ext=="old" || ext=="dat" || ext=="dll" || ext=="bat" || ext=="cmd")path+='_';} // these file formats can't be downloaded normally, because they're treated as scripts or some can be blocked by servers
    for(;;)
    {
       Str base=GetBase(path); if(!base.is())break;
-      out =S + (file ? "f-" : "d-") + CaseDown(base) + (out.is() ? '/' : '\0') + out;
+      out =S + (file ? "f-" : "d-") + CaseDown(base) + (out.is() ? "/" : null) + out;
       path=GetPath(path);
       file=false;
    }
@@ -137,8 +137,8 @@ class InstallerInfo
    void load(C Str &name)
    {
       reset();
-      FileInfo fi; if(fi.get       (name)){modify_time_utc=fi.modify_time_utc; size=fi.size; T.name=GetBase(name);} // set params only if file exists
-      File     f ; if(f .readStdTry(name)){f.pos(0); xxHash32=f.xxHash32(); f.pos(0); xxHash64=f.xxHash64();}
+      FileInfo fi; if(fi.get    (name)){modify_time_utc=fi.modify_time_utc; size=fi.size; T.name=GetBase(name);} // set params only if file exists
+      File     f ; if(f .readStd(name)){f.pos(0); xxHash32=f.xxHash32(); f.pos(0); xxHash64=f.xxHash64();}
       ver=FileVersion(name); if(Compare(ver, VecI4(0))<0)ver.zero(); // if ver<0 then reset to 0
    }
 }
@@ -458,7 +458,7 @@ class Uploader
             if(!uploader.io_load_files.elms() || uploader.highMemUsage()){locker.off(); Time.wait(1);}else
             {
                LoadFile load; Swap(load, uploader.io_load_files.last()); uploader.io_load_files.removeLast(); int call=uploader.call; locker.off();
-               File     src ; if(!src.readStdTry(load.src_path)){Gui.msgBox("Error", S+"Can't open file:\n\""+load.src_path+"\""); uploader.force_stop=true;}else
+               File     src ; if(!src.readStd(load.src_path)){Gui.msgBox("Error", S+"Can't open file:\n\""+load.src_path+"\""); uploader.force_stop=true;}else
                {
                   Loaded loaded; loaded.create(load, src);
                   SyncLocker locker_cmpr(uploader.cmpr_lock); if(call==uploader.call)Swap(uploader.cmpr_loaded_files.New(), loaded); // pass on further only if we're still in the same call
@@ -893,7 +893,7 @@ REPAO(installer).disabled( disabled);
       node.params.New().set("FtpDestFolder" ,  ftp_dir  ());
       node.params.New().set("HttpDestFolder", http_dir  ());
       node.params.New().set("SrcFolder"     ,  src      ());
-      FREPA(installer)node.params.New().set(Replace(tinstaller[i](), ' ', '\0'), installer[i]());
+      FREPA(installer)node.params.New().set(Replace(tinstaller[i].text, ' ', '\0'), installer[i]());
       node.params.New().set("Cipher"        , cipher    ());
       node.params.New().set("CipherKey"     , cipher_key());
       node.params.New().set("FtpConnections", connections());
@@ -915,7 +915,7 @@ REPAO(installer).disabled( disabled);
          if(XmlParam *p=node.findParam("CipherKey"     ))cipher_key.set(p.value);
          if(XmlParam *p=node.findParam("FtpConnections"))ftp_conn  .set(Mid(TextInt(p.value), 1, ftp_conn.menu.list.elms())-1);
          if(XmlParam *p=node.findParam("Installer"     )){OS_VER ver=OSGroup(); REPA(InstallerPlatform)if(InstallerPlatform[i]==ver){installer[i].set(p.value); break;}} // deprecated
-         FREPA(installer)if(XmlParam *p=node.findParam(Replace(tinstaller[i](), ' ', '\0')))installer[i].set(p.value);
+         FREPA(installer)if(XmlParam *p=node.findParam(Replace(tinstaller[i].text, ' ', '\0')))installer[i].set(p.value);
       }
    }
 }

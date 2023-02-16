@@ -16,8 +16,8 @@ namespace EE{
 static void EncodeChar(Str8 &text, Char8 c)
 {
    text+='%';
-   text+=Digits16[Byte(c)>>4];
-   text+=Digits16[Byte(c)&15];
+   text+=Digits16[Unsigned(c)>>4];
+   text+=Digits16[Unsigned(c)&15];
 }
 static Bool AppendUrlPath(Str8 &text, C Str8 &path)
 {
@@ -26,7 +26,7 @@ static Bool AppendUrlPath(Str8 &text, C Str8 &path)
    FREPA(path)
    {
       Char8 c=path[i];
-      if(U8(c)<=32 || c=='#' || c=='%' || U8(c)>=127)EncodeChar(text, c);else // these are the only symbols that need to be replaced with %XX hex code
+      if(Unsigned(c)<=32 || c=='#' || c=='%' || Unsigned(c)>=127)EncodeChar(text, c);else // these are the only symbols that need to be replaced with %XX hex code
       if(c=='\\') // use Unix style paths
       {
          text+='/';
@@ -44,7 +44,7 @@ static void AppendParam(Str8 &text, C TextParam &param)
    FREPA(name) // set name
    {
       Char8 c=name[i];
-      if(U8(c)<=32 || c=='#' || c=='%' || c=='=' || c=='&' || U8(c)>=127)EncodeChar(text, c); // these are the only symbols that need to be replaced with %XX hex code
+      if(Unsigned(c)<=32 || c=='#' || c=='%' || c=='=' || c=='&' || Unsigned(c)>=127)EncodeChar(text, c); // these are the only symbols that need to be replaced with %XX hex code
       else text+=c;
    }
    text+='=';
@@ -52,23 +52,47 @@ static void AppendParam(Str8 &text, C TextParam &param)
    FREPA(value) // set value
    {
       Char8 c=value[i];
-      if(U8(c)<=32 || c=='#' || c=='%' || c=='&' || c=='+' || U8(c)>=127)EncodeChar(text, c); // these are the only symbols that need to be replaced with %XX hex code
+      if(Unsigned(c)<=32 || c=='#' || c=='%' || c=='&' || c=='+' || Unsigned(c)>=127)EncodeChar(text, c); // these are the only symbols that need to be replaced with %XX hex code
       else text+=c;
    }
 }
-Str8 HTTPParam::Encode(C CMemPtr<HTTPParam> &params)
+static void AppendParamBin(Str8 &text, C TextParam &param) // don't convert 'param.value'
 {
-   Str8 s; FREPA(params)
+ C Str8 &name=UTF8(param.name);
+   FREPA(name) // set name
    {
-      if(i)s+='&';
-      AppendParam(s, params[i]);
+      Char8 c=name[i];
+      if(Unsigned(c)<=32 || c=='#' || c=='%' || c=='=' || c=='&' || Unsigned(c)>=127)EncodeChar(text, c); // these are the only symbols that need to be replaced with %XX hex code
+      else text+=c;
    }
-   return s;
+   text+='=';
+ C Str  &value=param.value;
+   FREPA(value) // set value
+   {
+      Char8 c=value[i];
+      if(Unsigned(c)<=32 || c=='#' || c=='%' || c=='&' || c=='+' || Unsigned(c)>=127)EncodeChar(text, c); // these are the only symbols that need to be replaced with %XX hex code
+      else text+=c;
+   }
+}
+static void AppendName(Str8 &text, C Str &name)
+{
+ C Str8 &name8=UTF8(name); FREPA(name8)
+   {
+      Char8 c=name8[i];
+      if(c=='"')text+="\\\"";else
+      if(Unsigned(c)>=32)text+=c;
+   }
+}
+static Str8 GetRange(C Download &down)
+{
+   if(down._size>0              )return S8+"bytes="+down._offset+'-'+(down._offset+down._size-1);
+   if(down._size && down._offset)return S8+"bytes="+down._offset+'-';
+                                 return S8;
 }
 static Str8 GetHeaders(C Str8 &url, CChar8 *request)
 {
-   CChar8 *name    =_SkipStartPath(_SkipStartPath(url, "http://"), "https://");
-   Str8    headers =S+request+" /"+GetStartNot(name)+" HTTP/1.1\r\nHost: "+_GetStart(name)+"\r\n";
+   CChar8 *name    =SkipHttp(url);
+   Str8    headers =S8+request+" /"+GetStartNot(name)+" HTTP/1.1\r\nHost: "+_GetStart(name)+"\r\n";
            headers+="Connection: close\r\n"; // connection will be closed after receiving all data
 #if WINDOWS
    headers+="User-Agent: " ENGINE_NAME " Windows\r\n";
@@ -83,6 +107,9 @@ static Str8 GetHeaders(C Str8 &url, CChar8 *request)
 #endif
    return headers;
 }
+static CChar8* FileSuffix   () {return "\r\n";}
+static Int     FileSuffixLen() {return 2;} // Length(FileSuffix())
+/******************************************************************************/
 #if WEB
 struct JSDownload
 {
@@ -337,30 +364,43 @@ static Bool DownloadFunc(Thread &thread) {return ((Download*)thread.user)->func(
       case DWNL_SENDING: sending:
       {
          // send message
-         Int left=_pre_send-_pos_send; if(left>0) // header
+         Int left=_send.length()-_send_pos; if(left>0)
          {
-         send_message:;
             if(_socket.flush(DOWNLOAD_WAIT_TIME))
             {
-               Int sent=send(_message.data()+_pos_send, left); if(sent<=0)return error();
-              _pos_send+=sent;
+               Int sent=send(_send()+_send_pos, left); if(sent<=0)return error();
+              _send_pos+=sent;
+               if(_send_pos>=_send.length()){_send_pos=0; _send.clear();} // reached the end
             }
          }else
+         if(InRange(_file_i, _files))
          {
-            Long file_left=_to_send-_sent; if(file_left>0) // file data
+            HTTPFile &file=_files[_file_i];
+            Long left=file.Send(); if(left>0) // file data
             {
                if(_socket.flush(DOWNLOAD_WAIT_TIME))
                {
-                  Int buf_left=Min(BUF_SIZE, file_left); if(!_post_file->get(data, buf_left))return error();
+                  Int buf_left=Min(BUF_SIZE, left); if(!file.getFast(data, buf_left))return error();
                   Int sent=send(data, buf_left); if(sent<=0)return error();
-                 _sent+=sent;
-                  if(!_post_file->skip(sent-buf_left))return error(); // go back to unsent data
+                                       _sent+=sent;
+                  if( file.send>=0)file.send-=sent; // adjust because 'file.pos' gets adjusted too, but only if manually specified, if not specified then keep as unlimited in case user will reuse this 'file' again by adjusting 'file.pos' only
+                  if(!file.skip(sent-buf_left))return error(); // go back to unsent data
                }
             }else
             {
-               left=_message.elms()-_pos_send; if(left>0)goto send_message; // footer
-               state(DWNL_DOWNLOAD); goto downloading;
+               if(InRange(++_file_i, _files)) // have next file
+               {
+                 _send =FileSuffix();        // end   previous
+                 _send+=fileHeader(_file_i); // start next
+                  goto sending;
+               }
+               goto footer;
             }
+         }else
+         {
+         footer:
+            if(_footer.is()){Swap(_send, _footer); goto sending;}
+            state(DWNL_DOWNLOAD); goto downloading;
          }
       }break;
 
@@ -387,14 +427,15 @@ static Bool DownloadFunc(Thread &thread) {return ((Download*)thread.user)->func(
                }
                if(hasAddrsHeader())
                {
-                  // example header = "HTTP/1.1 200 OK"
+                  //  example header= "HTTP/1.1 200 OK"
                   if(!Starts(_header, "HTTP/1.1", false, WHOLE_WORD_STRICT))return error();
+          C Int http_len=8; // Length("HTTP/1.1");
 
                   if(CChar8 *t=TextPos(_header, "Location:")) // check if it's a redirect (check this as first before all other data)
                   {
                      Int line =TextPosI(t, "\r\n");
                      if( line>=0)ConstCast(t)[line]=0;
-                     CChar8 *url=_SkipWhiteChars(t+9); // operate on 'url' before clearing the '_header'
+                     CChar8 *url=_SkipWhiteChars(t+9); // operate on 'url' before clearing the '_header'. Length("Location:")==9
                      if(!Is(url))return error(); // no path specified
                      if(StartsPath(url, "http://") || StartsPath(url, "https://")) // if this is a full path then just use it
                      {
@@ -411,30 +452,25 @@ static Bool DownloadFunc(Thread &thread) {return ((Download*)thread.user)->func(
                            FREPA(_url_full)if(_url_full[i]=='?'){_url_full.clip(i  ); break;} // first remove any parameters that were specified
                             REPA(_url_full)if(_url_full[i]=='/'){_url_full.clip(i+1); break;} // remove base name, but keep the tail slash
                            AppendUrlPath(_url_full, url);
-                        //_url_full =NormalizePath(_url_full); // this is not needed because the server will handle this properly
+                        //_url_full=NormalizePath(_url_full); // this is not needed because the server will handle this properly
                         }
                      }
                      FlagDisable(_flags, HAS_ADDRS_HEADER);
                     _header.clear();
-                    _socket.del(); // unsecure and delete the socket because we will need to reconnect to a different address
-                    _addrs.clear();
-                    _pos_send=0;
+                    _socket.del  (); // unsecure and delete the socket because we will need to reconnect to a different address
+                    _addrs .clear();
+                    _footer.clear();
+                    _send_pos=0;
 
-                     Str8 bytes,
-                          command=GetHeaders(_url_full, (_size==0) ? "HEAD" : "GET");
-
-                     if(_size>0         )bytes   =S+"bytes="+_offset+'-'+(_offset+_size-1);else
-                     if(_size && _offset)bytes   =S+"bytes="+_offset+'-';
-                     if(bytes.is()      )command+=S+"Range: "+bytes+"\r\n";
-                     command+="\r\n";
-                    _pre_send=command.length();
-                    _message.setNum(command.length());
-                     CopyFast(_message.data(), command(), command.length());
+                         _send =GetHeaders(_url_full, (_size==0) ? "HEAD" : "GET");
+                     Str8 bytes=GetRange  (T);
+                     if(  bytes.is())_send+=S8+"Range: "+bytes+"\r\n";
+                    _send+="\r\n";
                      state(DWNL_CONNECTING);
                      break;
                   }
 
-                 _code=TextInt(_header()+8+1); // 8=Length("HTTP/1.1")
+                 _code=TextInt(_header()+(http_len+1)); // +1 to skip space
                   // !! do not stop here if error code failed, instead continue downloading all data, and set DWNL_STATE at the end based on the code, as there may be some cases in which we want to process output even for error codes !!
 
                   Long content_length=-1; if(CChar8 *t=TextPos(_header, "Content-Length:"))content_length=TextLong(t+Length("Content-Length:"));
@@ -560,15 +596,28 @@ static Bool DownloadFunc(Thread &thread) {return ((Download*)thread.user)->func(
 }
 #endif
 /******************************************************************************/
+Str8 Download::fileHeader(Int i)C
+{
+ C HTTPFile &file=_files[i];
+   Str8 h=_file_header;
+   if(file.name.is())AppendName(h, file.name);else h+=i; // if name is empty then use index
+   h+="\"; filename=\""; // this is required too, without this, server will treat as if no file
+   if(file.name.is())AppendName(h, file.name);else h+=i; // if name is empty then use index
+   h+="\"\r\n";
+   h+=S8+"Content-Length: "+file.Send()+"\r\n";
+ //h+=S8+"Last-Modified: Thu, 24 Mar 2011 18:35:38 GMT\r\n"; modify time is always ignored, instead have to adjust modify time on PHP
+   h+="\r\n";
+   return h;
+}
+/******************************************************************************/
 void Download::zero()
 {
   _flags=_parse=0;
   _state=DWNL_NONE;
   _code=0;
-  _expected_size=_pre_send=_pos_send=0;
+  _expected_size=_send_pos=_file_i=0;
   _offset=_done=_size=_total_size=_sent=_to_send=_total_sent=_total_rcvd=0;
   _data=null;
-  _post_file=null;
   _event=null;
   _modif_time.zero();
 #if WEB
@@ -576,17 +625,19 @@ void Download::zero()
 #endif
 }
 
-Download::Download(                                                                                                             ) : _memb(64*1024) {zero();                                                                }
-Download::Download(C Str &url, C CMemPtr<HTTPParam> &params, File *post, Long max_post_size, Long offset, Long size, Bool paused) : _memb(64*1024) {zero(); create(url, params, post, max_post_size, offset, size, paused);}
+Download::Download(                                                                                                     ) : _memb(64*1024) {zero();                                                  }
+Download::Download(C Str &url, C CMemPtr<HTTPParam> &params, MemPtr<HTTPFile> files, Long offset, Long size, Bool paused) : _memb(64*1024) {zero(); create(url, params, files, offset, size, paused);}
 
 void Download::delPartial() // this deletes only members which can't be accessed on the main thread
 {
-  _socket  .del  ();
-  _memb    .del  ();
-  _addrs   .clear();
-  _message .clear();
-  _header  .clear();
-  _url_full.clear();
+  _socket     .del  ();
+  _memb       .del  ();
+  _addrs      .clear();
+  _url_full   .clear();
+  _send       .clear();
+  _footer     .clear();
+  _header     .clear();
+  _file_header.clear();
 }
 Download& Download::del(Int milliseconds)
 {
@@ -601,16 +652,30 @@ Download& Download::del(Int milliseconds)
    stop();
   _thread.del(milliseconds);
    delPartial();
+  _files.point(null);
   _url.clear();
    Free(_data);
    if(state())state(DWNL_NONE); // call here because 'zero' does not call this
    zero(); return T;
 }
-Download& Download::create(C Str &url, C CMemPtr<HTTPParam> &params, File *post, Long max_post_size, Long offset, Long size, Bool paused, Bool ignore_auth_result, SyncEvent *event)
+static CChar8 BoundaryChars[]= // without space
 {
-#if WEB
-   post=null; // not yet supported
-#endif
+   '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+   'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+   'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+   '(', ')', '+', '_', ',', '-', '.', '/', ':', '=', '?', '\'',
+};
+/* https://www.rfc-editor.org/rfc/rfc2046#section-5.1.1
+
+boundary := 0*69<bchars> bcharsnospace
+bchars := bcharsnospace / " "
+bcharsnospace := DIGIT / ALPHA / "'" / "(" / ")" / "+" / "_" / "," / "-" / "." / "/" / ":" / "=" / "?"
+*/
+Download& Download::create(C Str &url, C CMemPtr<HTTPParam> &params, MemPtr<HTTPFile> files, Long offset, Long size, Bool paused, Bool ignore_auth_result, SyncEvent *event)
+{
+   if(!files.elms()
+   || WEB)files.point(null); // TODO: sending files on WEB not yet supported
+
    del();
 
   _flags     =(ignore_auth_result ? AUTH_IGNORE : 0);
@@ -618,10 +683,12 @@ Download& Download::create(C Str &url, C CMemPtr<HTTPParam> &params, File *post,
   _offset    =offset;
   _size      =size;
   _total_size=-1; // unknown total size
-  _to_send   =(post ? ((max_post_size<0) ? post->left() : max_post_size) : 0);
-  _post_file =post;
+  _files     .point(files);
   _event     =event;
-   state     (DWNL_CONNECTING); // this must be set immediately, so that we mark this 'Download' as used
+   REPA(files)_to_send+=files[i].Send();
+
+   // once base params are set, set state
+   state(DWNL_CONNECTING); // this must be set before returning, so that we mark this 'Download' as used
 
    // set url full
    Bool url_has_params=AppendUrlPath(_url_full, UTF8(url)), has_post_params=false;
@@ -629,8 +696,11 @@ Download& Download::create(C Str &url, C CMemPtr<HTTPParam> &params, File *post,
    {
     C HTTPParam &param=params[i]; switch(param.type)
       {
-         case HTTP_POST: has_post_params=true; break;
-         case HTTP_GET :
+         case HTTP_POST:
+         case HTTP_POST_BIN:
+            has_post_params=true; break;
+
+         case HTTP_GET:
          {
            _url_full+=(url_has_params ? '&' : '?'); // first param must be started with '?', others with '&'
             url_has_params=true;
@@ -640,88 +710,95 @@ Download& Download::create(C Str &url, C CMemPtr<HTTPParam> &params, File *post,
    }
 
    // set message
-   Str8 prefix, suffix, boundary, bytes,
-        request=((_post_file || has_post_params) ? "POST" : (_size==0) ? "HEAD" : "GET"),
-        command=GetHeaders(_url_full, request);
-
-   if(_size>0         )bytes   =S+"bytes="+_offset+'-'+(_offset+_size-1);else
-   if(_size && _offset)bytes   =S+"bytes="+_offset+'-';
-   if(bytes.is()      )command+=S+"Range: "+bytes+"\r\n";
+   Str8 prefix,
+        request=((files || has_post_params) ? "POST" : (_size==0) ? "HEAD" : "GET");
+       _send   =GetHeaders(_url_full, request);
+   Str8 bytes  =GetRange  (T);
+   if(  bytes.is())_send+=S8+"Range: "+bytes+"\r\n";
 
    FREPA(params) // header params
    {
-    C HTTPParam &param=params[i]; if(param.type==HTTP_HEADER)command+=UTF8(param.name)+": "+UTF8(param.value)+"\r\n";
+    C HTTPParam &param=params[i]; if(param.type==HTTP_HEADER)_send+=UTF8(param.name)+": "+UTF8(param.value)+"\r\n";
    }
 
-   if(_post_file)
+   if(files)
    {
       // sub header
-      boundary="d5ubjyl0q4rwb8j4grz5vaxgnj2l1lpuh4ku"; boundary+=Random(); // 'boundary' must not be present in the file data !! otherwise the upload will fail
+      const Int boundary_len=70; Str8 boundary; boundary.reserve(boundary_len); REP(boundary_len)boundary+=Random.elm(BoundaryChars); // 'boundary' must not be present in the file data !! otherwise the upload will fail !! up to 70 characters - https://www.rfc-editor.org/rfc/rfc2046#section-5.1
 
       FREPA(params) // params
       {
-       C HTTPParam &param=params[i]; if(param.type==HTTP_POST)
+       C HTTPParam &param=params[i]; switch(param.type)
          {
-          C Str8 &name=UTF8(param.name), &value=UTF8(param.value);
-            prefix+=S+"--"+boundary+"\r\n";
-            prefix+="Content-Disposition: form-data; name=\"";
-            FREPA(name)
+            case HTTP_POST:
+            case HTTP_POST_BIN:
             {
-               Char8 c=name[i];
-               if(c=='"')prefix+="\\\"";else
-               if(c>=' ')prefix+=c;
-            }
-            prefix+="\"\r\n";
-            prefix+="Content-Type: form-data\r\n";
-            prefix+=S+"Content-Length: "+value.length()+"\r\n"; // data length
-            prefix+="\r\n";
-            prefix+=value;
-            prefix+="\r\n";
+               prefix+=S8+"--"+boundary+"\r\n";
+               prefix+="Content-Disposition: form-data; name=\"";
+               AppendName(prefix, param.name);
+               prefix+="\"\r\n";
+               prefix+="Content-Type: form-data\r\n";
+               if(param.type==HTTP_POST)
+               {
+                C Str8 &value=UTF8(param.value);
+                  prefix+=S8+"Content-Length: "+value.length()+"\r\n"; // data length
+                  prefix+="\r\n";
+                  prefix+=value;
+               }else
+               {
+                C Str &value=param.value;
+                  prefix+=S8+"Content-Length: "+value.length()+"\r\n"; // data length
+                  prefix+="\r\n";
+                  prefix+=value;
+               }
+               prefix+="\r\n";
+            }break;
          }
       }
 
-      prefix+=S+"--"+boundary+"\r\n";
-      prefix+="Content-Disposition: form-data; name=\"file\"; filename=\"file\"\r\n";
-      prefix+="Content-Type: application/octet-stream\r\n";
-      prefix+="Content-Transfer-Encoding: binary\r\n";
-      prefix+=S+"Content-Length: "+toSend()+"\r\n";
-      prefix+="\r\n";
+     _file_header =S8+"--"+boundary+"\r\n";
+     _file_header+="Content-Type: application/octet-stream\r\n";
+     _file_header+="Content-Transfer-Encoding: binary\r\n";
+     _file_header+="Content-Disposition: form-data; name=\"";
 
-      // data is here
+      // header/suffix for file #0 is already included in main _send/_footer
+      prefix+=fileHeader(0); // file #0 header is here
+      // file #0 data is here
 
-      suffix+="\r\n";
-      suffix+=S+"--"+boundary+"--\r\n";
+      // other files will have it added dynamically in the update loop
+         // file suffix is here
+         // file header is here
+         // file data   is here
+         Int start=1, file_headers=(files.elms()-start)*FileSuffixLen();
+         for(Int i=start; i<files.elms(); i++)file_headers+=fileHeader(i).length();
+
+     _footer+=FileSuffix(); // file suffix is here
+     _footer+=S8+"--"+boundary+"--\r\n";
 
       // now when 'prefix' and 'suffix' are ready, setup the main header
-      command+=S+"Content-Type: multipart/form-data; boundary="+boundary+"\r\n";
-      command+=S+"Content-Length: "+(prefix.length()+toSend()+suffix.length())+"\r\n";
-      command+="Cache-Control: no-cache\r\n";
+     _send+=S8+"Content-Type: multipart/form-data; boundary=\""+boundary+"\"\r\n";
+     _send+=S8+"Content-Length: "+(prefix.length()+toSend()+file_headers+_footer.length())+"\r\n";
+     _send+="Cache-Control: no-cache\r\n";
    }else
    if(has_post_params) // just POST params
    {
       Bool added=false;
       FREPA(params)
       {
-       C HTTPParam &param=params[i]; if(param.type==HTTP_POST)
+       C HTTPParam &param=params[i]; switch(param.type)
          {
-            if(added)prefix+='&';
-            AppendParam(prefix, param);
-            added=true;
+            case HTTP_POST    : if(added)prefix+='&'; AppendParam   (prefix, param); added=true; break;
+            case HTTP_POST_BIN: if(added)prefix+='&'; AppendParamBin(prefix, param); added=true; break;
          }
       }
-      command+="Content-type: application/x-www-form-urlencoded\r\n";
-      command+="Content-Transfer-Encoding: binary\r\n";
-      command+=S+"Content-Length: "+prefix.length()+"\r\n";
+     _send+="Content-type: application/x-www-form-urlencoded\r\n";
+     _send+="Content-Transfer-Encoding: binary\r\n";
+     _send+=S8+"Content-Length: "+prefix.length()+"\r\n";
    }
-   command+="\r\n";
-   command+=prefix;
+  _send+="\r\n";
+  _send+=prefix;
 
 #if !WEB
-  _pre_send=command.length();
-  _message.setNum(command.length()+suffix.length());
-   CopyFast(_message.data()                 , command(), command.length());
-   CopyFast(_message.data()+command.length(), suffix (), suffix .length());
-
    if(!_thread.create(DownloadFunc, this, 0, paused, "EE.Download"))error(); // thread as last
 #else
    // if we're running a game from "esenthel.com" then it cannot access files from "www.esenthel.com" and vice versa
@@ -740,11 +817,11 @@ Download& Download::create(C Str &url, C CMemPtr<HTTPParam> &params, File *post,
          if(         url_domain_has_www)         url_domain=SkipStart(         url_domain, "www.");
          if(url_domain==document_url_domain) // if the domain is the same, case insensitive
          {
-            if(document_url_domain_has_www)_url_full=S+"www."+_url_full;           // the document has    www, so we need to add    www prefix
+            if(document_url_domain_has_www)_url_full=S8+"www."+_url_full;          // the document has    www, so we need to add    www prefix
             else                           _url_full=SkipStart(_url_full, "www."); // the document has no www, so we need to remove www prefix
          }
       }
-      if(url_has_http)_url_full=S+"http://"+_url_full; // restore HTTP
+      if(url_has_http)_url_full=S8+"http://"+_url_full; // restore HTTP
    }
 
    JSDownload &js_download=JSDownloads.New();
@@ -786,7 +863,7 @@ Download& Download::create(C Str &url, C CMemPtr<HTTPParam> &params, File *post,
             user=null;
          }
       };
-  
+
       // error
       xhr.onerror=function http_onerror(e)
       {
@@ -799,7 +876,7 @@ Download& Download::create(C Str &url, C CMemPtr<HTTPParam> &params, File *post,
 
       // limit the number of redirections
       try{if(xhr.channel instanceof Ci.nsIHttpChannel)xhr.channel.redirectionLimit=0;}catch(ex){}
-  
+
       // send
       if(request!="POST")xhr.send(null);else
       {

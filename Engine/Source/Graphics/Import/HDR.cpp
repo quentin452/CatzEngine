@@ -10,7 +10,7 @@ static void GetLine(Str8 &line, File &f)
 	{
 		Char8 c; f>>c;
 		if(c=='\n' || !c)return;
-		line.alwaysAppend(c);
+		line+=c;
 	}
 }
 static void RGBEToRGB(C Byte (&rgbe)[4], Vec &rgb)
@@ -104,7 +104,7 @@ Bool Image::ImportHDR(File &f)
 					if(x.type && y.type)size.set(x.asInt(), y.asInt());
 				}
 			}
-			if(size.x>=0 && size.y>=0 && createSoftTry(size.x, size.y, 1, IMAGE_F32_3))
+			if(size.x>=0 && size.y>=0 && createSoft(size.x, size.y, 1, IMAGE_F32_3))
 			{
 				Memt<Byte> buffer;
 				FREPD(y, h())if(!ReadPixelsRLE(f, &pixF3(0, y), w(), buffer))goto error;
@@ -117,7 +117,7 @@ error:
 }
 Bool Image::ImportHDR(C Str &name)
 {
-   File f; if(f.readTry(name))return ImportHDR(f);
+   File f; if(f.read(name))return ImportHDR(f);
    del(); return false;
 }
 /******************************************************************************/

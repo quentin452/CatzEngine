@@ -31,10 +31,7 @@ ExportWindow Export;
             {
                if(C Elm *mesh_elm=Proj.findElm(elm->objData()->mesh_id, ELM_MESH))
                {
-                  Mesh mesh; if(Load(mesh, Proj.editPath(mesh_elm->id), Proj.game_path))
-                  {
-                     ok=ExportOBJ(name, mesh);
-                  }
+                  Mesh mesh; if(Proj.meshGet(mesh_elm->id, mesh))ok=ExportOBJ(name, mesh);
                }else Gui.msgBox(S, "Object doesn't have any Mesh");
             }break;
             
@@ -53,7 +50,7 @@ ExportWindow Export;
                Str src=Proj.basePath(*elm);
                if(GetExt(name)==ext)ok=FCopy(src, name);else
                {
-                  Image image; if(image.ImportTry(src))ok=image.Export(name);
+                  Image image; if(image.Import(src))ok=image.Export(name);
                }
             }break;
 
@@ -90,14 +87,14 @@ ExportWindow Export;
                   Game::MiniMap map; if(map.load(Proj.gamePath(elm_id)))
                   {
                      RectI images=ver->images.last(); REPA(ver->images)images|=ver->images[i];
-                     Image image, temp; if(image.createSoftTry(image_size*(images.w()+1), image_size*(images.h()+1), 1, IMAGE_R8G8B8A8_SRGB))
+                     Image image, temp; if(image.createSoft(image_size*(images.w()+1), image_size*(images.h()+1), 1, IMAGE_R8G8B8A8_SRGB))
                      {
                         image.clear();
                         for(int y=images.min.y; y<=images.max.y; y++)
                         for(int x=images.min.x; x<=images.max.x; x++)
                         {
-                           C Image &src=map(VecI2(x, y));
-                           if(src.is() && src.copyTry(temp, image_size, image_size, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1))
+                         C Image &src=map(VecI2(x, y));
+                           if(src.is() && src.copy(temp, image_size, image_size, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1))
                            {
                               int ox=(x-images.min.x  )*image_size,
                                   oy=(  images.max.y-y)*image_size;
@@ -128,18 +125,20 @@ ExportWindow Export;
 
             case ELM_IMAGE:
             {
-              ::File f; if(f.readTry(Proj.editPath(elm_id))) // set main extension
+              ::File f; if(f.read(Proj.editPath(elm_id))) // set main extension
                {
                   Image temp;
-                //if(!ext.is()){f.pos(0); if(temp.ImportWEBP(f))ext="webp";} ignore WEBP because it's not popular yet
-                  if(!ext.is()){f.pos(0); if(temp.ImportPNG (f))ext="png" ;}
-                  if(!ext.is()){f.pos(0); if(temp.ImportJPG (f))ext="jpg" ;}
+                  if(!ext.is()){f.resetOK().pos(0); if(temp.ImportWEBP(f))ext="webp";}
+                  if(!ext.is()){f.resetOK().pos(0); if(temp.ImportAVIF(f))ext="avif";}
+                  if(!ext.is()){f.resetOK().pos(0); if(temp.ImportJXL (f))ext="jxl" ;}
+                  if(!ext.is()){f.resetOK().pos(0); if(temp.ImportPNG (f))ext="png" ;}
+                  if(!ext.is()){f.resetOK().pos(0); if(temp.ImportJPG (f))ext="jpg" ;}
                }
-               supp_ext=ext+"|bmp|png|jpg|tga|tif|webp|ico|icns|img"; // add secondary extensions
+               supp_ext=ext+"|bmp|png|jpg|jxl|tga|tif|webp|avif|ico|icns|img"; // add secondary extensions
             }break;
 
             case ELM_PANEL_IMAGE:
-            case ELM_MINI_MAP   : supp_ext="bmp|png|jpg|tga|tif|webp|img"; break;
+            case ELM_MINI_MAP   : supp_ext="bmp|png|jpg|jxl|tga|tif|webp|avif|img"; break;
 
             case ELM_OBJ        : ext="obj"; break;
             case ELM_ANIM       : ext="anim"; break;
@@ -147,7 +146,7 @@ ExportWindow Export;
             case ELM_IMAGE_ATLAS: ext="atlas"; break;
             case ELM_SKEL       : ext="skel"; break;
             case ELM_PHYS_MTRL  : ext="physmtrl"; break;
-            case ELM_ICON       : ext="img"; supp_ext="bmp|png|jpg|tga|tif|webp|img"; break;
+            case ELM_ICON       : ext="img"; supp_ext="bmp|png|jpg|jxl|tga|tif|webp|avif|img"; break;
             case ELM_CODE       : supp_ext="txt|c|cpp|h|cs|cc|cxx|m|mm"; break;
 
             case ELM_SOUND: {SoundHeader sound; sound.load(Proj.gamePath(elm_id)); ext=CaseDown(sound.codecName());} break;

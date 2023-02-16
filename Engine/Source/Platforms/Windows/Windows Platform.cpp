@@ -667,8 +667,8 @@ ref struct FrameworkView sealed : IFrameworkView
    }
 
    // Input
-   void OnInputPaneHiding (InputPane^ sender, InputPaneVisibilityEventArgs^ args) {Kb._visible=false;}
-   void OnInputPaneShowing(InputPane^ sender, InputPaneVisibilityEventArgs^ args) {Kb._visible=true ; Kb._recti.setLD(DipsToPixelsI(sender->OccludedRect.X), DipsToPixelsI(sender->OccludedRect.Y), DipsToPixelsI(sender->OccludedRect.Width), DipsToPixelsI(sender->OccludedRect.Height));}
+   void OnInputPaneHiding (InputPane^ sender, InputPaneVisibilityEventArgs^ args) {Kb._visible=false; Kb.screenChanged();}
+   void OnInputPaneShowing(InputPane^ sender, InputPaneVisibilityEventArgs^ args) {Kb._visible=true ; Kb._recti.setLD(DipsToPixelsI(sender->OccludedRect.X), DipsToPixelsI(sender->OccludedRect.Y), DipsToPixelsI(sender->OccludedRect.Width), DipsToPixelsI(sender->OccludedRect.Height)); Kb.screenChanged();}
 
    void OnInputFocusRemoved(Windows::UI::Text::Core::CoreTextEditContext ^sender, Platform::Object ^args)
    {
@@ -841,6 +841,8 @@ void GamepadChange::process()
          // set callback after everything was set, in case it's called right away
          if(joypad._gamepad            )joypad._gamepad            ->UserChanged += ref new Windows::Foundation::TypedEventHandler<Windows::Gaming::Input::IGameController^, Windows::System::UserChangedEventArgs^>(FrameworkViewObj, &FrameworkView::OnGamepadUserChanged);else
          if(joypad._raw_game_controller)joypad._raw_game_controller->UserChanged += ref new Windows::Foundation::TypedEventHandler<Windows::Gaming::Input::IGameController^, Windows::System::UserChangedEventArgs^>(FrameworkViewObj, &FrameworkView::OnGamepadUserChanged);
+
+         if(auto func=App.joypad_changed)func(); // call at the end
       }
    }else
    {

@@ -26,8 +26,9 @@ const_mem_addr struct Text : GuiObj // Gui Text !! must be stored in constant me
 
    Flt  textWidthLine(                 )C; // get text width, this function assumes all text is in one line
    Int  textLines    (C Flt *width=null)C; // get number of lines when using 'width' space, use null to use current width
-   Flt  textHeight   (C Flt *width=null)C; // get text heigh      when using 'width' space, use null to use current width
+   Flt  textHeight   (C Flt *width=null)C; // get text height     when using 'width' space, use null to use current width
    Vec2 textSize     (                 )C; // get text size
+   Int  textIndex    (C Vec2 &screen_pos, TEXT_INDEX_MODE index_mode)C; // get index of character at 'screen_pos' screen position, returns "0 .. length"
 
    // main
    virtual void draw(C GuiPC &gpc)override; // draw object

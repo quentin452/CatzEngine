@@ -97,7 +97,7 @@ struct Include11 : ID3DInclude
          if(ShaderPath *parent=(pParentData ? (ShaderPath*)pParentData-1 : &root))
             path=NormalizePath(Str(parent->path).tailSlash(true)+path);
 
-      File f; if(f.readStdTry(path.tailSlash(true)+GetBase(pFileName)))
+      File f; if(f.readStd(path.tailSlash(true)+GetBase(pFileName)))
       {
          DYNAMIC_ASSERT(LoadEncoding(f)==ANSI, "File expected to be in ANSI encoding for performance reasons");
          Int   size=f.left();
@@ -134,7 +134,7 @@ struct Include12 : IDxcIncludeHandler
    {
       if(ppIncludeSource)
       {
-         File f; if(f.readTry(pFilename))
+         File f; if(f.read(pFilename))
          {
             UInt code_page;
             switch(LoadEncoding(f))
@@ -474,7 +474,7 @@ ShaderCompiler::Source::~Source()
 }
 Bool ShaderCompiler::Source::load()
 {
-   File f; if(!f.readTry(file_name))return false;
+   File f; if(!f.read(file_name))return false;
    ENCODING encoding=LoadEncoding(f);
    if(newCompiler())
    {
@@ -1360,6 +1360,8 @@ static void Convert(ShaderData &shader_data, ShaderCompiler::SubShader &sub, Int
 
          spvc_compiler_options_set_bool(options, SPVC_COMPILER_OPTION_FLATTEN_MULTIDIMENSIONAL_ARRAYS, SPVC_TRUE); // needed for "Arrays of arrays not supported before ESSL version 310. Try using --flatten-multidimensional-arrays or set options.flatten_multidimensional_arrays to true."
 
+       //spvc_compiler_options_set_bool(options, SPVC_COMPILER_OPTION_GLSL_ENABLE_ROW_MAJOR_LOAD_WORKAROUND, SPVC_FALSE); // needed for https://github.com/KhronosGroup/SPIRV-Cross/issues/2066
+
        //spvc_compiler_options_set_bool(options, SPVC_COMPILER_OPTION_GLSL_ENABLE_420PACK_EXTENSION, SPVC_FALSE);
       }break;
 
@@ -1671,7 +1673,7 @@ Bool ShaderCompiler::compileTry(Threads &threads)
    }
 
    if(!dest.is())return true;
-   File f; if(f.writeTry(dest))
+   File f; if(f.write(dest))
    {
       f.putUInt (CC4_SHDR); // CC4
       f.putByte (api     ); // API

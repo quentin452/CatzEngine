@@ -60,7 +60,7 @@ struct MainShaderClass
 
       *ImgSize ,
       *ImgClamp,
-      *RTSize  ,
+      *RTSize  =&Dummy,
       *Coords  =&Dummy,
       *Viewport=&Dummy,
       *AspectRatio,

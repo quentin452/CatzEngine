@@ -101,10 +101,10 @@ struct GamepadChange
             }
          }
 
-         joypad_id=NewJoypadID(joypad_id); // make sure it's not used yet !! set this before creating new 'Joypad' !!
       #if JOYPAD_THREAD
          SyncLocker lock(JoypadLock);
       #endif
+         joypad_id=NewJoypadID(joypad_id); // make sure it's not used yet !! set this before creating new 'Joypad' !!
          Bool added; Joypad &joypad=GetJoypad(joypad_id, added); if(added)
          {
             joypad._gamepad            =gamepad;
@@ -131,6 +131,8 @@ struct GamepadChange
                HSTRING display_name=null; raw_game_controller2->get_DisplayName(&display_name); joypad._name=WindowsGetStringRawBuffer(display_name, null);
             }
             joypad.setInfo(vendor_id, product_id);
+
+            if(auto func=App.joypad_changed)func(); // call at the end
          }
       }else
       {
@@ -226,6 +228,8 @@ static void JoypadAdded(void *inContext, IOReturn inResult, void *inSender, IOHI
             }
          }
          jp._elms=elms;
+
+         if(auto func=App.joypad_changed)func(); // call at the end
       }
    }
 }
@@ -1260,6 +1264,7 @@ void JoypadsClass::swapOrder(Int i, Int j)
       RemapSwap(ThreadInputs, i, j);
    #endif
      _data.swapOrder(         i, j); REPAO(_data)._joypad_index=i;
+      if(auto func=App.joypad_changed)func();
    }
 }
 void JoypadsClass::moveElm(Int elm, Int new_index)
@@ -1274,6 +1279,7 @@ void JoypadsClass::moveElm(Int elm, Int new_index)
       RemapMove(ThreadInputs, elm, new_index);
    #endif
      _data.moveElm(           elm, new_index); REPAO(_data)._joypad_index=i;
+      if(auto func=App.joypad_changed)func();
    }
 }
 /******************************************************************************/
@@ -1285,6 +1291,7 @@ void JoypadsClass::clear()
    {
 #endif
      _data.clear();
+      if(auto func=App.joypad_changed)func();
    }
 }
 void JoypadsClass::remove(Int i)
@@ -1295,6 +1302,7 @@ void JoypadsClass::remove(Int i)
    {
 #endif
      _data.remove(i, true);
+      if(auto func=App.joypad_changed)func();
    }
 }
 void JoypadsClass::remove(Joypad *joypad)
@@ -1468,8 +1476,10 @@ static BOOL CALLBACK EnumJoypads(const DIDEVICEINSTANCE *DIDevInst, void*)
 
             if(App.active())joypad.acquire(true);
          }
-         if(!joypad._dinput)Joypads.remove(joypad._joypad_index); // if failed to create it then remove it
          RELEASE(did);
+
+         if(joypad._dinput){if(auto func=App.joypad_changed)func();} // call at the end
+         else              Joypads.remove(joypad._joypad_index); // if failed to create it then remove it, this will already call 'App.joypad_changed'
       }
    }
    return DIENUM_CONTINUE;
@@ -1517,6 +1527,8 @@ void ListJoypads()
             {
                joypad._xinput=i;
                joypad._name  =S+"X Gamepad #"+(i+1);
+
+               if(auto func=App.joypad_changed)func(); // call at the end
             }
          }
       }
@@ -1753,7 +1765,7 @@ void ShutJoypads()
 #endif
 #endif
 
-   Joypads._data.del();
+   Joypads._data.del(); if(auto func=App.joypad_changed)func();
 
 #if MAC
    if(HidManager)

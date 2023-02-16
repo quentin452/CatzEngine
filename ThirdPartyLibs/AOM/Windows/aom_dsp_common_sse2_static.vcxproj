@@ -1,0 +1,305 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{8387E352-0C14-3124-B841-4EDEF6153BD8}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>aom_dsp_common_sse2_static</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Esenthel\ThirdPartyLibs\AOM\Windows\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">aom_dsp_common_sse2_static.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">aom_dsp_common_sse2_static</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Esenthel\ThirdPartyLibs\AOM\Windows\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">aom_dsp_common_sse2_static.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">aom_dsp_common_sse2_static</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Esenthel\ThirdPartyLibs\AOM\Windows\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">aom_dsp_common_sse2_static.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">aom_dsp_common_sse2_static</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Esenthel\ThirdPartyLibs\AOM\Windows\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">aom_dsp_common_sse2_static.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">aom_dsp_common_sse2_static</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Windows;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_WIN32_WINNT=0x0601;NOMINMAX;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;_WIN32_WINNT=0x0601;NOMINMAX;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Windows;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Windows;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Windows;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32_WINNT=0x0601;NOMINMAX;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32_WINNT=0x0601;NOMINMAX;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Windows;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Windows;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Windows;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32_WINNT=0x0601;NOMINMAX;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32_WINNT=0x0601;NOMINMAX;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Windows;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Windows;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Windows;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32_WINNT=0x0601;NOMINMAX;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32_WINNT=0x0601;NOMINMAX;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Windows;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Windows;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Esenthel/ThirdPartyLibs/AOM/lib/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Esenthel/ThirdPartyLibs/AOM/lib -BC:/Esenthel/ThirdPartyLibs/AOM/Windows --check-stamp-file C:/Esenthel/ThirdPartyLibs/AOM/Windows/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Esenthel\ThirdPartyLibs\AOM\Windows\CMakeFiles\3.24.0-rc2\CMakeCCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Windows\CMakeFiles\3.24.0-rc2\CMakeCXXCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Windows\CMakeFiles\3.24.0-rc2\CMakeRCCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Windows\CMakeFiles\3.24.0-rc2\CMakeSystem.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Windows\config\aom_config.asm.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Windows\config\aom_config.h.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\aom_dsp.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_mem\aom_mem.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_ports\aom_ports.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_scale\aom_scale.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_util\aom_util.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\av1.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_config.c.template;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_config_defaults.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_configure.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_experiment_deps.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_install.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_optimization.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\compiler_flags.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\compiler_tests.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\cpu.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\sanitizers.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\util.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\test\test.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\test\test_data_util.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCheckCompilerFlagCommonPatterns.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindCygwin.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindMsys.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPerl.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckFlagCommonConfig.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\ProcessorCount.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Esenthel\ThirdPartyLibs\AOM\Windows\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Esenthel/ThirdPartyLibs/AOM/lib/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Esenthel/ThirdPartyLibs/AOM/lib -BC:/Esenthel/ThirdPartyLibs/AOM/Windows --check-stamp-file C:/Esenthel/ThirdPartyLibs/AOM/Windows/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Esenthel\ThirdPartyLibs\AOM\Windows\CMakeFiles\3.24.0-rc2\CMakeCCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Windows\CMakeFiles\3.24.0-rc2\CMakeCXXCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Windows\CMakeFiles\3.24.0-rc2\CMakeRCCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Windows\CMakeFiles\3.24.0-rc2\CMakeSystem.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Windows\config\aom_config.asm.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Windows\config\aom_config.h.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\aom_dsp.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_mem\aom_mem.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_ports\aom_ports.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_scale\aom_scale.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_util\aom_util.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\av1.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_config.c.template;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_config_defaults.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_configure.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_experiment_deps.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_install.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_optimization.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\compiler_flags.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\compiler_tests.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\cpu.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\sanitizers.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\util.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\test\test.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\test\test_data_util.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCheckCompilerFlagCommonPatterns.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindCygwin.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindMsys.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPerl.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckFlagCommonConfig.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\ProcessorCount.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Esenthel\ThirdPartyLibs\AOM\Windows\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Esenthel/ThirdPartyLibs/AOM/lib/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Esenthel/ThirdPartyLibs/AOM/lib -BC:/Esenthel/ThirdPartyLibs/AOM/Windows --check-stamp-file C:/Esenthel/ThirdPartyLibs/AOM/Windows/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Esenthel\ThirdPartyLibs\AOM\Windows\CMakeFiles\3.24.0-rc2\CMakeCCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Windows\CMakeFiles\3.24.0-rc2\CMakeCXXCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Windows\CMakeFiles\3.24.0-rc2\CMakeRCCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Windows\CMakeFiles\3.24.0-rc2\CMakeSystem.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Windows\config\aom_config.asm.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Windows\config\aom_config.h.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\aom_dsp.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_mem\aom_mem.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_ports\aom_ports.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_scale\aom_scale.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_util\aom_util.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\av1.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_config.c.template;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_config_defaults.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_configure.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_experiment_deps.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_install.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_optimization.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\compiler_flags.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\compiler_tests.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\cpu.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\sanitizers.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\util.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\test\test.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\test\test_data_util.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCheckCompilerFlagCommonPatterns.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindCygwin.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindMsys.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPerl.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckFlagCommonConfig.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\ProcessorCount.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Esenthel\ThirdPartyLibs\AOM\Windows\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Esenthel/ThirdPartyLibs/AOM/lib/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Esenthel/ThirdPartyLibs/AOM/lib -BC:/Esenthel/ThirdPartyLibs/AOM/Windows --check-stamp-file C:/Esenthel/ThirdPartyLibs/AOM/Windows/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Esenthel\ThirdPartyLibs\AOM\Windows\CMakeFiles\3.24.0-rc2\CMakeCCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Windows\CMakeFiles\3.24.0-rc2\CMakeCXXCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Windows\CMakeFiles\3.24.0-rc2\CMakeRCCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Windows\CMakeFiles\3.24.0-rc2\CMakeSystem.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Windows\config\aom_config.asm.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Windows\config\aom_config.h.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\aom_dsp.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_mem\aom_mem.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_ports\aom_ports.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_scale\aom_scale.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_util\aom_util.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\av1.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_config.c.template;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_config_defaults.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_configure.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_experiment_deps.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_install.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_optimization.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\compiler_flags.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\compiler_tests.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\cpu.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\sanitizers.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\util.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\test\test.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\test\test_data_util.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCheckCompilerFlagCommonPatterns.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindCygwin.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindMsys.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPerl.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckFlagCommonConfig.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\ProcessorCount.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Esenthel\ThirdPartyLibs\AOM\Windows\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\aom_high_subpixel_8t_sse2.asm">
+    </None>
+    <None Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\aom_high_subpixel_bilinear_sse2.asm">
+    </None>
+    <None Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\aom_subpixel_8t_sse2.asm">
+    </None>
+    <None Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\aom_subpixel_bilinear_sse2.asm">
+    </None>
+    <None Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\highbd_intrapred_asm_sse2.asm">
+    </None>
+    <None Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\intrapred_asm_sse2.asm">
+    </None>
+    <None Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\inv_wht_sse2.asm">
+    </None>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\Windows\gen_src\aom_dsp_common_sse2_static_dummy.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="C:\Esenthel\ThirdPartyLibs\AOM\Windows\ZERO_CHECK.proj">
+      <Project>{15EFFE56-0405-3B88-BDD2-C54F97EAB7F6}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Esenthel\ThirdPartyLibs\AOM\Windows\aom_rtcd.vcxproj">
+      <Project>{EDEAC750-A822-32DC-ABBB-CB87CB71A91D}</Project>
+      <Name>aom_rtcd</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

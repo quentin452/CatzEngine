@@ -136,12 +136,12 @@ Bool WaterMtrl::load(File &f, CChar *path)
 }
 Bool WaterMtrl::save(C Str &name)C
 {
-   File f; if(f.writeTry(name)){if(save(f, _GetPath(name)) && f.flush())return true; f.del(); FDelFile(name);}
+   File f; if(f.write(name)){if(save(f, _GetPath(name)) && f.flush())return true; f.del(); FDelFile(name);}
    return false;
 }
 Bool WaterMtrl::load(C Str &name)
 {
-   File f; if(f.readTry(name))return load(f, _GetPath(name));
+   File f; if(f.read(name))return load(f, _GetPath(name));
    reset(); return false;
 }
 /******************************************************************************/
@@ -348,13 +348,18 @@ void WaterClass::begin(Vec2 specifcWaterOfsCol)
       }else
       {
          if(Lights.elms() && Lights[0].type==LIGHT_DIR)Lights[0].dir.set();else LightDir(Vec(0,-1,0), VecZero).set();
-         // we're going to draw water on top of existing RT, including refraction, so we need to have a color copy of what's underwater (background) for the refraction, also we want to do softing so we need to backup depth because we can't read and write to depth in the same time
-         Renderer._water_col.get(rt_desc.type(GetImageRTType(Renderer._col->type()))); // create RT for the copy
-         Renderer._col->copyHw(*Renderer._water_col, false, D.viewRect()); // copy
-         if(_shader_soft)
+         if(_shader_soft) // we're going to draw water on top of existing RT, including refraction, so we need to have a color copy of what's underwater (background) for the refraction, also we want to do softing so we need to backup depth because we can't read and write to depth in the same time
          {
+            Renderer._water_col.get(rt_desc.type(GetImageRTType(Renderer._col->type()))); // create RT for the copy
+            Renderer._col->copyHw(*Renderer._water_col, false, D.viewRect()); // copy
+
+         #if GL_ES // iOS (and possibly some Android devices) doesn't have IMAGERT_F32
+            Renderer._water_ds.getDS(rt_desc.size.x, rt_desc.size.y, 1, false);
+            Renderer._ds_1s->copyDepth(*Renderer._water_ds, false, D.viewRect());
+         #else
             Renderer._water_ds.get(rt_desc.type(IMAGERT_F32));
             Renderer._ds_1s->copyHw(*Renderer._water_ds, false, D.viewRect());
+         #endif
          }
          setImages(Renderer._water_col, Renderer._water_ds);
          Renderer.set(Renderer._col, Renderer._ds, true);
@@ -406,6 +411,9 @@ void WaterClass::end()
             if(FUNC_DEFAULT!=FUNC_LESS)D.depthFunc(FUNC_DEFAULT); D.depthUnlock(    );
          }
       }
+   #if DEPTH_FLUSH
+      Renderer._modified_depth=true;
+   #endif
    }
 }
 /******************************************************************************/

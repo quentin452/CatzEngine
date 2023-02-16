@@ -27,7 +27,7 @@ class ImportTerrainTask : Window
          flt  intensity;
       };
 
-      static int Compare(C Mtrl &a, C Mtrl &b); // we sort from higher to lower order, so swap 'a' 'b' order
+      static int CompareIntensity(C Mtrl &a, C Mtrl &b); // we sort from higher to lower order, so swap 'a' 'b' order
 
       Mtrl mtrl[8]; int mtrls;
 

@@ -1,25 +1,27 @@
 /******************************************************************************/
-enum BS_FLAG // Button State Flag
+enum BS_FLAG : Byte // Button State Flag
 {
-   BS_NONE    =   0, // none
-   BS_ON      =1<<0, // on
-   BS_PUSHED  =1<<1, // pushed
-   BS_RELEASED=1<<2, // released
-   BS_DOUBLE  =1<<3, // double clicked
-   BS_TAPPED  =1<<4, // tapped
+   BS_NONE      =   0, // none
+   BS_ON        =1<<0, // on
+   BS_PUSHED    =1<<1, // pushed
+   BS_RELEASED  =1<<2, // released
+   BS_DOUBLE    =1<<3, // double clicked
+   BS_TAPPED    =1<<4, // tapped
+   BS_LONG_PRESS=1<<5, // pressed for a long time without movement
 #if EE_PRIVATE
-   BS_REPEAT  =1<<5, // repeat push due to holding the button for a long time
-   BS_NOT_ON  =BS_PUSHED|BS_RELEASED|BS_DOUBLE|BS_TAPPED|BS_REPEAT,
+   BS_REPEAT    =1<<6, // repeat push due to holding the button for a long time
+   BS_NOT_ON    =BS_PUSHED|BS_RELEASED|BS_DOUBLE|BS_TAPPED|BS_REPEAT|BS_LONG_PRESS,
 #endif
 };
 SET_ENUM_FLAGS(BS_FLAG);
-inline Bool ButtonOn(BS_FLAG x) {return FlagOn(x, BS_ON      );} // if button is on
-inline Bool ButtonPd(BS_FLAG x) {return FlagOn(x, BS_PUSHED  );} // if button pushed
-inline Bool ButtonRs(BS_FLAG x) {return FlagOn(x, BS_RELEASED);} // if button released
-inline Bool ButtonDb(BS_FLAG x) {return FlagOn(x, BS_DOUBLE  );} // if button double clicked
-inline Bool ButtonTp(BS_FLAG x) {return FlagOn(x, BS_TAPPED  );} // if button tapped
+inline Bool ButtonOn(BS_FLAG x) {return FlagOn(x, BS_ON        );} // if button is on
+inline Bool ButtonPd(BS_FLAG x) {return FlagOn(x, BS_PUSHED    );} // if button pushed
+inline Bool ButtonRs(BS_FLAG x) {return FlagOn(x, BS_RELEASED  );} // if button released
+inline Bool ButtonDb(BS_FLAG x) {return FlagOn(x, BS_DOUBLE    );} // if button double clicked
+inline Bool ButtonTp(BS_FLAG x) {return FlagOn(x, BS_TAPPED    );} // if button tapped
+inline Bool ButtonLp(BS_FLAG x) {return FlagOn(x, BS_LONG_PRESS);} // if button pressed for a long time without movement
 #if EE_PRIVATE
-inline Bool ButtonRp(BS_FLAG x) {return FlagOn(x, BS_REPEAT  );} // if button repeat pushed
+inline Bool ButtonRp(BS_FLAG x) {return FlagOn(x, BS_REPEAT    );} // if button repeat pushed
 #endif
 /******************************************************************************/
 enum KB_KEY : Byte // Keyboard Keys

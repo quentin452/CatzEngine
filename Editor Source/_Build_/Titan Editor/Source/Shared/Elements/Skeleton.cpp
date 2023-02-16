@@ -101,7 +101,7 @@
          SkelBone &bone=skel.bones[i];
          SCAST(OrientP, bone)=node.orient_pos;
          Set(bone.name, TextInt(i));
-             bone.parent=(InRange(node.parent, skel.bones) ? node.parent : 0xFF);
+             bone.parent=(InRange(node.parent, skel.bones) ? node.parent : BONE_NULL);
       }
       skel.sortBones();
    }
@@ -320,7 +320,7 @@
    }
    bool EditSkeleton::load(C Str &name)
    {
-      File f; if(f.readTry(name))return load(f);
+      File f; if(f.read(name))return load(f);
       del(); return false;
    }
       bool EditSkeleton::Bone0::load(File &f)

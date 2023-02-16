@@ -687,7 +687,7 @@ Bool DecompressPVRTC(C Image &src, Image &dest, Int max_mip_maps)
 {
    if(src.hwType()==IMAGE_PVRTC1_2 || src.hwType()==IMAGE_PVRTC1_2_SRGB
    || src.hwType()==IMAGE_PVRTC1_4 || src.hwType()==IMAGE_PVRTC1_4_SRGB)
-   if(dest.is() || dest.createTry(src.w(), src.h(), src.d(), src.sRGB() ? IMAGE_R8G8B8A8_SRGB : IMAGE_R8G8B8A8, AsSoft(src.mode()), src.mipMaps())) // use 'IMAGE_R8G8B8A8' because 'pvrtcDecompress' operates on that format
+   if(dest.is() || dest.create(src.w(), src.h(), src.d(), src.sRGB() ? IMAGE_R8G8B8A8_SRGB : IMAGE_R8G8B8A8, AsSoft(src.mode()), src.mipMaps())) // use 'IMAGE_R8G8B8A8' because 'pvrtcDecompress' operates on that format
    if(dest.size3()==src.size3())
    {
       Byte  bits=((src.hwType()==IMAGE_PVRTC1_2 || src.hwType()==IMAGE_PVRTC1_2_SRGB) ? 2 : 4);
@@ -702,7 +702,7 @@ Bool DecompressPVRTC(C Image &src, Image &dest, Int max_mip_maps)
                           && PaddedWidth (dest.hwW(), dest.hwH(), mip, dest.hwType())==src_mip_hwW   // dest mip width  must be exactly the same as src mip width
                           && PaddedHeight(dest.hwW(), dest.hwH(), mip, dest.hwType())==src_mip_hwH); // dest mip height must be exactly the same as src mip height
          Image &target=(write_to_dest ? dest : temp);
-         if(!write_to_dest && !temp.createTry(src_mip_hwW, src_mip_hwH, Max(1, dest.d()>>mip), IMAGE_R8G8B8A8, IMAGE_SOFT, 1))return false;
+         if(!write_to_dest && !temp.create(src_mip_hwW, src_mip_hwH, Max(1, dest.d()>>mip), IMAGE_R8G8B8A8, IMAGE_SOFT, 1))return false;
          REPD(face, dest.faces()) // use 'dest.faces' (not 'target.faces' because it may be 1 for 'temp', and not 'src.faces' because we need to write all to dest)
          {
             if(                 ! src.lockRead(            mip, (DIR_ENUM)Min(face, src_faces1)))return false;

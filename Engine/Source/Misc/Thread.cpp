@@ -1299,25 +1299,49 @@ Int Threads::_cancel(Ptr data, void func(Ptr data, Ptr user, Int thread_index), 
    }
    return canceled;
 }
+Int Threads::cancel(C CMemPtr<Call> &calls)
+{
+   Int canceled=0; if(_calls.elms() && calls.elms())
+   {
+      SyncLocker locker(_lock_calls);
+      for(Int i=_calls.elms(); --i>=_calls_pos; ) // iterate all queued calls
+      {
+       C Call &call=_calls[i]; REPAD(j, calls)if(call==calls[j]) // if this call is present on the list to cancel
+         {
+           _calls.remove(i, _ordered); canceled++;
+            break;
+         }
+      }
+      if(canceled)
+      {
+         checkEnd();
+         if(_waiting)_queued_finished+=_waiting; // access '_waiting' only during lock !! if there's any thread waiting then notify of potential finish
+      }
+   }
+   return canceled;
+}
 /******************************************************************************/
 Threads& Threads::wait()
 {
 #if !SYNC_LOCK_SAFE
    if(_lock_calls.created())
 #endif
-   for(Bool not_added=true; ; )
    {
-    //if(callsLeft())goto wait; // this can be outside of 'locker', but in that case it must be checked before '_threads'. It can't be outside anymore because we need to modify '_waiting' during lock
-      { // braces to create scope for 'locker' !! we can modify '_waiting' only here !!
-         SyncLocker locker(_lock_calls);
-        _waiting+=not_added; not_added=false; // add this 'wait' call to the waiting list (if not yet added), have to do this here before checking '_threads[i].call' to make sure that thread processing function will already have this call's '_waiting' after processing the 'thread.call.call' because that one isn't covered by '_lock_calls' lock
-                                 if(callsLeft())goto wait;
-         REPA(_threads)if(_threads[i].call.is())goto wait;
-        _waiting--; // _waiting-=added; if haven't found then remove from the waiting list (if added)
-      }
-      break;
+     _lock_calls.on();
+     _waiting++; // !! can modify '_waiting' only under lock !! add this 'wait' call to the waiting list, have to do this here before checking '_threads[i].call' to make sure that thread processing function will already have this call's '_waiting' after processing the 'thread.call.call' because that one isn't covered by '_lock_calls' lock
+
+      goto check;
    wait:
-     _queued_finished.wait(); // wait when 'locker' is off !!
+     _lock_calls     .off ();
+     _queued_finished.wait(); // !! wait when lock is off !!
+     _lock_calls     .on  ();
+      goto check; // after waiting we have to check again
+   check:
+                              if(callsLeft())goto wait;
+      REPA(_threads)if(_threads[i].call.is())goto wait;
+
+     _waiting--; // !! can modify '_waiting' only under lock !!
+     _lock_calls.off();
    }
    return T;
 }
@@ -1326,18 +1350,22 @@ void Threads::_wait(void func(Ptr data, Ptr user, Int thread_index))
 #if !SYNC_LOCK_SAFE
    if(_lock_calls.created())
 #endif
-   for(Bool not_added=true; ; )
    {
-      { // braces to create scope for 'locker' !! we can modify '_waiting' only here !!
-         SyncLocker locker(_lock_calls);
-        _waiting+=not_added; not_added=false; // add this 'wait' call to the waiting list (if not yet added), have to do this here before checking '_threads[i].call' to make sure that thread processing function will already have this call's '_waiting' after processing the 'thread.call.call' because that one isn't covered by '_lock_calls' lock
-         for(Int i=_calls.elms(); --i>=_calls_pos; )if(  _calls[i].     func==func)goto wait;
-                                      REPA(_threads)if(_threads[i].call.func==func)goto wait;
-        _waiting--; // _waiting-=added; if haven't found then remove from the waiting list (if added)
-      }
-      break;
+     _lock_calls.on();
+     _waiting++; // !! can modify '_waiting' only under lock !! add this 'wait' call to the waiting list, have to do this here before checking '_threads[i].call' to make sure that thread processing function will already have this call's '_waiting' after processing the 'thread.call.call' because that one isn't covered by '_lock_calls' lock
+
+      goto check;
    wait:
-     _queued_finished.wait(); // wait when 'locker' is off !!
+     _lock_calls     .off ();
+     _queued_finished.wait(); // !! wait when lock is off !!
+     _lock_calls     .on  ();
+      goto check; // after waiting we have to check again
+   check:
+      for(Int i=_calls.elms(); --i>=_calls_pos; )if(  _calls[i].     func==func)goto wait;
+                                   REPA(_threads)if(_threads[i].call.func==func)goto wait;
+
+     _waiting--; // !! can modify '_waiting' only under lock !!
+     _lock_calls.off();
    }
 }
 void Threads::_wait(void func(Ptr data, Ptr user, Int thread_index), Ptr user)
@@ -1345,18 +1373,22 @@ void Threads::_wait(void func(Ptr data, Ptr user, Int thread_index), Ptr user)
 #if !SYNC_LOCK_SAFE
    if(_lock_calls.created())
 #endif
-   for(Bool not_added=true; ; )
    {
-      { // braces to create scope for 'locker' !! we can modify '_waiting' only here !!
-         SyncLocker locker(_lock_calls);
-        _waiting+=not_added; not_added=false; // add this 'wait' call to the waiting list (if not yet added), have to do this here before checking '_threads[i].call' to make sure that thread processing function will already have this call's '_waiting' after processing the 'thread.call.call' because that one isn't covered by '_lock_calls' lock
-         for(Int i=_calls.elms(); --i>=_calls_pos; )if(  _calls[i].     isFuncUser(func, user))goto wait;
-                                      REPA(_threads)if(_threads[i].call.isFuncUser(func, user))goto wait;
-        _waiting--; // _waiting-=added; if haven't found then remove from the waiting list (if added)
-      }
-      break;
+     _lock_calls.on();
+     _waiting++; // !! can modify '_waiting' only under lock !! add this 'wait' call to the waiting list, have to do this here before checking '_threads[i].call' to make sure that thread processing function will already have this call's '_waiting' after processing the 'thread.call.call' because that one isn't covered by '_lock_calls' lock
+
+      goto check;
    wait:
-     _queued_finished.wait(); // wait when 'locker' is off !!
+     _lock_calls     .off ();
+     _queued_finished.wait(); // !! wait when lock is off !!
+     _lock_calls     .on  ();
+      goto check; // after waiting we have to check again
+   check:
+      for(Int i=_calls.elms(); --i>=_calls_pos; )if(  _calls[i].     isFuncUser(func, user))goto wait;
+                                   REPA(_threads)if(_threads[i].call.isFuncUser(func, user))goto wait;
+
+     _waiting--; // !! can modify '_waiting' only under lock !!
+     _lock_calls.off();
    }
 }
 void Threads::_wait(Ptr data, void func(Ptr data, Ptr user, Int thread_index), Ptr user)
@@ -1366,19 +1398,49 @@ void Threads::_wait(Ptr data, void func(Ptr data, Ptr user, Int thread_index), P
 #endif
    {
       Call call(data, func, user);
-      for(Bool not_added=true; ; )
+     _lock_calls.on();
+     _waiting++; // !! can modify '_waiting' only under lock !! add this 'wait' call to the waiting list, have to do this here before checking '_threads[i].call' to make sure that thread processing function will already have this call's '_waiting' after processing the 'thread.call.call' because that one isn't covered by '_lock_calls' lock
+
+      goto check;
+   wait:
+     _lock_calls     .off ();
+     _queued_finished.wait(); // !! wait when lock is off !!
+     _lock_calls     .on  ();
+      goto check; // after waiting we have to check again
+   check:
+      for(Int i=_calls.elms(); --i>=_calls_pos; )if(  _calls[i]     ==call)goto wait;
+                                   REPA(_threads)if(_threads[i].call==call)goto wait;
+
+     _waiting--; // !! can modify '_waiting' only under lock !!
+     _lock_calls.off();
+   }
+}
+void Threads::wait(C CMemPtr<Call> &calls)
+{
+   if(calls.elms())
+#if !SYNC_LOCK_SAFE
+   if(_lock_calls.created())
+#endif
+   {
+     _lock_calls.on();
+     _waiting++; // !! can modify '_waiting' only under lock !! add this 'wait' call to the waiting list, have to do this here before checking '_threads[i].call' to make sure that thread processing function will already have this call's '_waiting' after processing the 'thread.call.call' because that one isn't covered by '_lock_calls' lock
+
+      REPA(calls)
       {
-         { // braces to create scope for 'locker' !! we can modify '_waiting' only here !!
-            SyncLocker locker(_lock_calls);
-           _waiting+=not_added; not_added=false; // add this 'wait' call to the waiting list (if not yet added), have to do this here before checking '_threads[i].call' to make sure that thread processing function will already have this call's '_waiting' after processing the 'thread.call.call' because that one isn't covered by '_lock_calls' lock
-            for(Int i=_calls.elms(); --i>=_calls_pos; )if(  _calls[i]     ==call)goto wait;
-                                         REPA(_threads)if(_threads[i].call==call)goto wait;
-           _waiting--; // _waiting-=added; if haven't found then remove from the waiting list (if added)
-         }
-         break;
+       C Call &call=calls[i];
+         goto check;
       wait:
-        _queued_finished.wait(); // wait when 'locker' is off !!
+        _lock_calls     .off ();
+        _queued_finished.wait(); // !! wait when lock is off !!
+        _lock_calls     .on  ();
+         goto check; // after waiting we have to check the same 'call' again
+      check:
+         for(Int i=_calls.elms(); --i>=_calls_pos; )if(  _calls[i]     ==call)goto wait;
+                                      REPA(_threads)if(_threads[i].call==call)goto wait;
       }
+
+     _waiting--; // !! can modify '_waiting' only under lock !!
+     _lock_calls.off();
    }
 }
 Threads& Threads::wait1()

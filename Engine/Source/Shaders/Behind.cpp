@@ -49,7 +49,7 @@ void VS
       vpos=Project(O.pos=TransformPos(vtx.pos()));
    }else
    {
-      VecU bone=vtx.bone();
+      VecU4 bone=vtx.bone();
                    O.nrm=TransformDir(vtx.nrm(), bone, vtx.weight());
       vpos=Project(O.pos=TransformPos(vtx.pos(), bone, vtx.weight()));
    }

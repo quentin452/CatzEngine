@@ -15,6 +15,7 @@ void TextLine::zero()
    show_find=false;
 
   _can_select=false;
+  _flag      = 0;
   _max_length=-1;
   _offset    = 0;
 
@@ -62,6 +63,7 @@ TextLine& TextLine::create(C TextLine &src)
          hint          =src. hint;
         _skin          =src._skin;
         _can_select    =src._can_select;
+        _flag          =src._flag;
         _max_length    =src._max_length;
         _offset        =src._offset;
         _func_immediate=src._func_immediate;
@@ -71,6 +73,7 @@ TextLine& TextLine::create(C TextLine &src)
         _edit          =src._edit;
          reset.create(src.reset)._parent=this;
          setTextInput();
+         if(Gui.kb()==this)Gui.hideTextMenu();
       }
    }
    return T;
@@ -89,6 +92,15 @@ void TextLine::setTextInput()C
 /******************************************************************************/
 Bool      TextLine::password(       )C {return             _edit.password   ;                           }
 TextLine& TextLine::password(Bool on)  {if(password()!=on){_edit.password=on; setTextInput();} return T;}
+
+Bool      TextLine::number(       )C {return    FlagOn(_flag, NUMBER);}
+TextLine& TextLine::number(Bool on)  {if(number()!=on){_flag^=NUMBER ; setTextInput();} return T;}
+
+Bool      TextLine::email(       )C {return   FlagOn(_flag, EMAIL);}
+TextLine& TextLine::email(Bool on)  {if(email()!=on){_flag^=EMAIL ; setTextInput();} return T;}
+
+Bool      TextLine::url(       )C {return FlagOn(_flag, URL);}
+TextLine& TextLine::url(Bool on)  {if(url()!=on){_flag^=URL ; setTextInput();} return T;}
 /******************************************************************************/
 TextLine& TextLine::maxLength(Int max_length)
 {
@@ -101,13 +113,19 @@ TextLine& TextLine::maxLength(Int max_length)
         _text.clip(     max_length);
          MIN(_edit.cur, max_length);
          MIN(_edit.sel, max_length);
+         if (_edit.sel==_edit.cur)
+         {
+           _edit.sel=-1;
+            if(Gui.kb()==this)Gui.hideTextMenu();
+         }
+         call();
          setTextInput();
       }
    }
    return T;
 }
 /******************************************************************************/
-void TextLine::adjustOffset()
+void TextLine::adjustOffset(Bool margin)
 {
    if(GuiSkin *skin=getSkin())
       if(TextStyle *text_style=skin->textline.text_style())
@@ -117,24 +135,25 @@ void TextLine::adjustOffset()
       if(!ts.font())ts.font(skin->font()); // adjust font in case it's empty and the custom skin has a different font than the 'Gui.skin'
    #endif
 
-      Flt x=ts.textWidth(displayText(), _edit.cur) + _offset + ts.size.x*TEXTLINE_OFFSET, w=clientWidth(), margin=ts.size.x*TEXTLINE_MARGIN;
-      if( x<   margin)_offset =Min(_offset-x+w*0.5f, 0.0f);else
-      if( x>=w-margin)_offset-=            x-w*0.5f;
+      Flt x=ts.textWidth(displayText(), _edit.cur) + _offset + ts.size.x*TEXTLINE_OFFSET, w=clientWidth(), margin_w=(margin ? ts.size.x*TEXTLINE_MARGIN : 0);
+      if( x<  margin_w)_offset=Min(_offset-x+w*0.5f, 0);else
+      if( x>w-margin_w)_offset=Min(_offset-x+w*0.5f, 0);
    }
 }
-Bool TextLine::cursorChanged(Int position)
+Bool TextLine::cursorChanged(Int position, Bool margin)
 {
    Clamp(position, 0, _text.length()); if(cursor()!=position)
    {
      _edit.cur=position;
-      adjustOffset();
+      adjustOffset(margin);
+      if(Gui.kb()==this)Gui.hideTextMenu();
       return true;
    }
    return false;
 }
-TextLine& TextLine::cursor(Int position)
+TextLine& TextLine::cursor(Int position, Bool margin)
 {
-   if(cursorChanged(position))setTextInput();
+   if(cursorChanged(position, margin))setTextInput();
    return T;
 }
 /******************************************************************************/
@@ -148,6 +167,7 @@ Bool TextLine::setChanged(C Str &text, SET_MODE mode)
       if(cursor()>t.length())cursorChanged(t.length());
 
       if(mode!=QUIET)call();
+      if(Gui.kb()==this)Gui.hideTextMenu();
       return true;
    }
    return false;
@@ -183,6 +203,7 @@ TextLine& TextLine::selectNone()
    {
      _edit.sel=-1;
       setTextInput();
+      if(Gui.kb()==this)Gui.hideTextMenu();
    }
    return T;
 }
@@ -198,6 +219,7 @@ TextLine& TextLine::selectAll()
      _edit.cur=_text.length();
    #endif
       setTextInput();
+      if(Gui.kb()==this)Gui.hideTextMenu();
    }
    return T;
 }
@@ -215,9 +237,81 @@ TextLine& TextLine::selectExtNot()
      _edit.cur=dot;
    #endif
       setTextInput();
+      if(Gui.kb()==this)Gui.hideTextMenu();
    }
    return T;
 }
+/******************************************************************************/
+TextLine& TextLine::cut()
+{
+   if(_edit.sel<0)
+   {
+      if(!_edit.password)ClipSet(T());
+      clear();
+   }else
+   {
+      Int min, max; MinMax(_edit.sel, _edit.cur, min, max);
+      Int len=max-min;
+      if(!_edit.password)ClipSet(Trim(T(), min, len));
+     _text.remove(min, len);
+     _edit.sel=-1;
+     _edit.cur=min;
+      adjustOffset();
+      call();
+      setTextInput();
+      if(Gui.kb()==this)Gui.hideTextMenu();
+   }
+   return T;
+}
+TextLine& TextLine::copy()
+{
+   if(!_edit.password)
+   if(_edit.sel<0)
+   {
+      ClipSet(T());
+   }else
+   {
+      Int min, max; MinMax(_edit.sel, _edit.cur, min, max);
+      ClipSet(Trim(T(), min, max-min));
+   }
+   return T;
+}
+TextLine& TextLine::paste()
+{
+   Bool changed=false;
+   if(_edit.sel>=0) // del selection
+   {
+      Int min, max; MinMax(_edit.sel, _edit.cur, min, max);
+      Int len=max-min;
+     _text.remove(min, len);
+     _edit.sel=-1;
+     _edit.cur=min;
+      changed=true;
+   }
+   Str paste=ClipGet(); if(paste.is())
+   {
+      if(_max_length>=0)
+      {
+         paste.clip(_max_length-_edit.cur); if(!paste.is())goto skip;
+        _text .clip(_max_length-paste.length());
+      }
+     _text.insert(_edit.cur, paste);
+     _edit.cur+=paste.length();
+      changed=true;
+   }
+skip:
+   if(changed)
+   {
+      adjustOffset();
+      call();
+      setTextInput();
+      if(Gui.kb()==this)Gui.hideTextMenu();
+   }
+   return T;
+}
+/******************************************************************************/
+Vec2 TextLine::overlayScreenPos ()C {return (Gui._overlay_textline==this) ? pos ()+Gui._overlay_textline_offset : screenPos ();}
+Rect TextLine::overlayScreenRect()C {return (Gui._overlay_textline==this) ? rect()+Gui._overlay_textline_offset : screenRect();}
 /******************************************************************************/
 TextLine& TextLine::rect(C Rect &rect)
 {
@@ -243,6 +337,60 @@ TextLine& TextLine::skin(C GuiSkinPtr &skin, Bool sub_objects)
    T._skin=skin;
    if(sub_objects)reset.skin=skin;
    return T;
+}
+/******************************************************************************/
+Flt TextLine::localTextPosX(Int index)C
+{
+   Flt pos=_offset;
+   if(GuiSkin *skin=getSkin())
+      if(TextStyle *text_style=skin->textline.text_style())
+   {
+      TextStyleParams ts=*text_style; ts.size=rect().h()*skin->textline.text_size;
+   #if DEFAULT_FONT_FROM_CUSTOM_SKIN
+      if(!ts.font())ts.font(skin->font()); // adjust font in case it's empty and the custom skin has a different font than the 'Gui.skin'
+   #endif
+      pos+=ts.size.x*TEXTLINE_OFFSET;
+      if(_text.is() && index>0)
+      {
+       C Str &text=displayText();
+         pos+=ts.textPos(text, index, 0, false).x;
+      }
+   }
+   return pos;
+}
+Vec2 TextLine::localTextPosX(Int index0, Int index1)C
+{
+   Flt pos=_offset;
+   if(GuiSkin *skin=getSkin())
+      if(TextStyle *text_style=skin->textline.text_style())
+   {
+      TextStyleParams ts=*text_style; ts.size=rect().h()*skin->textline.text_size;
+   #if DEFAULT_FONT_FROM_CUSTOM_SKIN
+      if(!ts.font())ts.font(skin->font()); // adjust font in case it's empty and the custom skin has a different font than the 'Gui.skin'
+   #endif
+      pos+=ts.size.x*TEXTLINE_OFFSET;
+      if(_text.is())
+      {
+       C Str &text=displayText();
+         return Vec2(pos+ts.textPos(text, index0, 0, false).x,
+                     pos+ts.textPos(text, index1, 0, false).x);
+      }
+   }
+   return pos;
+}
+Rect TextLine::localTextRect(Int index)C
+{
+   return Rect().setX(localTextPosX(index)).setY(-rect().h(), 0);
+}
+Rect TextLine::localTextRect(Int index0, Int index1)C
+{
+   Vec2 lx=localTextPosX(index0, index1); if(lx.x>lx.y)lx.swap();
+   return Rect().setX(lx.x, lx.y).setY(-rect().h(), 0);
+}
+Rect TextLine::localSelRect()C
+{
+   return (_edit.sel<0) ? localTextRect(           cursor())
+                        : localTextRect(_edit.sel, cursor());
 }
 /******************************************************************************/
 // MAIN
@@ -278,6 +426,7 @@ void TextLine::update(C GuiPC &gpc)
               _text.clip(     _max_length);
                MIN(_edit.cur, _max_length);
                MIN(_edit.sel, _max_length);
+               if (_edit.sel==_edit.cur)_edit.sel=-1;
             }
             call();
          }
@@ -285,11 +434,14 @@ void TextLine::update(C GuiPC &gpc)
       #if !ADJUST_OFFSET_ON_SEL // when offset is not adjusted on selection, then it's possible that cursor is outside of visible space, so when changing selection (clearing it) we should focus on the cursor
          || sel!=_edit.sel
       #endif
-         ){adjustOffset(); setTextInput();}
+         ){adjustOffset(); setTextInput(); Gui.hideTextMenu();}
       }
-    C Vec2   *touch_pos  =null;
-      BS_FLAG touch_state=BS_NONE; if(Gui.ms()==this && (Ms._button[0]&(BS_ON|BS_PUSHED))){touch_pos=&Ms.pos(); touch_state=Ms._button[0];} if(!touch_pos)REPA(Touches)if(Touches[i].guiObj()==this && (Touches[i]._state&(BS_ON|BS_PUSHED))){touch_pos=&Touches[i].pos(); touch_state=Touches[i]._state;}
-      if(_text.is() && touch_pos)
+    C Vec2   *mt_pos=null;
+      BS_FLAG mt_state;
+      Touch  *touch;
+      if(Gui.ms()==this && (Ms._button[0]&(BS_ON|BS_PUSHED))){mt_pos=&Ms.pos(); mt_state=Ms._button[0]; touch=null;}else
+      if(Gui.kb()==this)REPA(Touches){Touch &t=Touches[i]; if(t.guiObj()==this && (t.state()&(BS_ON|BS_PUSHED|BS_RELEASED|BS_TAPPED))){mt_pos=&t.pos(); mt_state=t._state; t.disableScroll(); touch=&t; break;}} // check touches only if we already have keyboard focus, so without focus we don't select but instead can scroll
+      if(mt_pos)
       {
          if(GuiSkin *skin=getSkin())
             if(TextStyle *text_style=skin->textline.text_style())
@@ -299,22 +451,28 @@ void TextLine::update(C GuiPC &gpc)
             if(!ts.font())ts.font(skin->font()); // adjust font in case it's empty and the custom skin has a different font than the 'Gui.skin'
          #endif
 
-            Int pos=ts.textIndex(displayText(), touch_pos->x - rect().min.x - ((Gui._overlay_textline==this) ? Gui._overlay_textline_offset.x : gpc.offset.x) - _offset - ts.size.x*TEXTLINE_OFFSET, (ButtonDb(touch_state) || _edit.overwrite) ? TEXT_INDEX_OVERWRITE : TEXT_INDEX_DEFAULT);
+          C Str &text=displayText();
+            Flt gpc_offset=((Gui._overlay_textline==this) ? Gui._overlay_textline_offset.x : gpc.offset.x);
+            Int pos=ts.textIndex(text, mt_pos->x - rect().min.x - gpc_offset - _offset - ts.size.x*TEXTLINE_OFFSET, (ButtonDb(mt_state) || _edit.overwrite) ? TEXT_INDEX_OVERWRITE : TEXT_INDEX_DEFAULT);
 
-            if(ButtonDb(touch_state))
+            if(ButtonDb(mt_state) && _text.is())
             {
-              _edit.cur=
-              _edit.sel=pos;
-               CHAR_TYPE type=CharType(_text[Min(pos, _text.length()-1)]);
-               for(; _edit.sel                && CharType(_text[_edit.sel-1])==type; _edit.sel--);
-               for(; _edit.cur<_text.length() && CharType(_text[_edit.cur  ])==type; _edit.cur++);
-               if (  _edit.sel==_edit.cur)_edit.sel=-1;
-              _can_select=false;
-               setTextInput();
+               if(password())selectAll();else
+               {
+                 _edit.cur=
+                 _edit.sel=pos;
+                  CHAR_TYPE type=CharType(_text[Min(pos, _text.length()-1)]);
+                  for(; _edit.sel                && CharType(_text[_edit.sel-1])==type; _edit.sel--);
+                  for(; _edit.cur<_text.length() && CharType(_text[_edit.cur  ])==type; _edit.cur++);
+                  if (  _edit.sel==_edit.cur)_edit.sel=-1;
+                 _can_select=false;
+                  setTextInput();
+               }
+               if(touch)Gui.showTextMenu();
             }else
             if(_can_select)
             {
-               if(ButtonPd(touch_state))
+               if(mt_state&(BS_PUSHED|BS_TAPPED|BS_LONG_PRESS)) // check BS_TAPPED|BS_LONG_PRESS too, because touches activate TextEdits only on BS_TAPPED|BS_LONG_PRESS (to allow for Touch-Scroll) and we want to set cursor in that case as well
                {
                   if(_edit.cur!=pos || _edit.sel>=0)
                   {
@@ -322,18 +480,41 @@ void TextLine::update(C GuiPC &gpc)
                     _edit.sel=-1;
                      setTextInput();
                   }
+                  if(touch && touch->longPress() && _edit.sel<0) // long press and no selection
+                  {
+                        DeviceVibrateShort(); // vibrate ASAP so user is notified quickly
+                        Gui.showTextMenu();
+                  }else Gui.hideTextMenu();
                }else
-               if(pos!=_edit.cur)
+               if(mt_state&BS_ON)
                {
-                  if(_edit.sel<0)_edit.sel=_edit.cur;
-                                 _edit.cur=pos;
-                  setTextInput();
-               }
+                  if(pos!=_edit.cur)
+                  {
+                     if(touch)DeviceVibrateShort(); // vibrate ASAP so user is notified quickly
+                     if(_edit.sel<   0)_edit.sel=_edit.cur;else
+                     if(_edit.sel==pos)_edit.sel=-1; // we're setting '_edit.cur' to 'pos' below, so if 'sel' is the same then clear it
+                                       _edit.cur=pos;
+                     setTextInput();
+                     Gui.hideTextMenu();
+                  }
 
-               // scroll offset
-               Flt x=ts.textWidth(displayText(), _edit.cur) + _offset + ts.size.x*TEXTLINE_OFFSET, w=clientWidth(), margin=ts.size.x*TEXTLINE_MARGIN;
-               if( x<   margin)_offset =Min(Time.d()*2+_offset,     0.0f);else
-               if( x>=w-margin)_offset-=Min(Time.d()*2        , x-w*0.5f);
+                  // scroll
+                  Flt w=clientWidth(), l=rect().min.x+gpc_offset, r=l+w; // text_rect
+                  MAX(l, gpc.clip.min.x); MIN(r, gpc.clip.max.x); // clipped_text_rect
+                  if(touch && touch->selecting()) // margin - touches may not reach screen border comfortably, so turn on scrolling with margin for them, but only after some movement to prevent instant scroll at start
+                  {
+                     Flt margin=ts.size.x;
+                     MAX(l, D.rectUI().min.x+margin);
+                     MIN(r, D.rectUI().max.x-margin);
+                  }
+                  // check <= instead of < in case we're at screen border
+                  if(mt_pos->x<=l)_offset=Min(0,     Time.d()* 2+_offset                          );else
+                  if(mt_pos->x>=r)_offset=Min(0, Max(Time.d()*-2+_offset, -ts.textWidth(text)+w/2));
+               }else
+               if(mt_state&BS_RELEASED) // released
+               {
+                  if(touch && _edit.sel>=0)Gui.showTextMenu(); // by touch and have some selection
+               }
             }
          }
       }else _can_select=true;

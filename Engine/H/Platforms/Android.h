@@ -130,6 +130,7 @@ extern Str            AndroidAppPath, AndroidAppDataPath, AndroidAppDataPublicPa
 extern Byte           KeySource;
 extern Int            AndroidSDK;
 extern AAssetManager *AssetManager;
+extern SyncLock       JavaLock;
 /******************************************************************************/
    #endif
 #endif

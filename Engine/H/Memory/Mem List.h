@@ -22,7 +22,7 @@
 /******************************************************************************/
 struct MemlNode // Memory List Node, single node of Memory List
 {
-   Ptr       data() {return ((Byte*)this)+SIZE(T);} // get pointer to elements data
+   Ptr       data() {return ((Byte*)this)+SIZE(T);} // get pointer to element data
    MemlNode* prev() {return _prev                ;} // get previous   element
    MemlNode* next() {return _next                ;} // get next       element
 
@@ -62,6 +62,8 @@ T1(TYPE) struct Meml : _Meml // List Based Container
 
    MemlNode* first()C; // get first element
    MemlNode* last ()C; // get last  element
+
+   TYPE& lastData() {return *(TYPE*)last()->data();}
 
    MemlNode* loopPrev(MemlNode *node)C {return node ? (node->prev() ? node->prev() : last ()) : null;} // get looped previous element, loopPrev(first())==last ()
    MemlNode* loopNext(MemlNode *node)C {return node ? (node->next() ? node->next() : first()) : null;} // get looped next     element, loopNext(last ())==first()

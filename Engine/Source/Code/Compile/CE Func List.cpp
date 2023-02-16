@@ -507,12 +507,12 @@ void Call::Param::set(Expr &expr, Compiler &compiler, Bool auto_map)
          if(expr.instance && expr.symbol.isArray() && expr.symbol && (expr.symbol->var_type==VAR_CHAR8 || expr.symbol->var_type==VAR_CHAR16)) // "text"
             if(expr[0]=='"' || (expr[1]=='"' && (expr[0]=='8' || expr[0]=='u' || expr[0]=='U' || expr[0]=='L'))) // "", 8"", u"", U"", L""
          {
-            Int        heap;
-            Memc<Char> text=expr.asText(compiler);
-            if(expr.symbol->var_type==VAR_CHAR16)heap=compiler.heapConstant(text.data(), text.elms()*SIZE(Char), 2);else
+            Int heap;
+            Str text=expr.asText(compiler);
+            if(expr.symbol->var_type==VAR_CHAR16)heap=compiler.heapConstant(text(), text.length()*SIZE(Char), 2);else
             {
-               Mems<Char8> text8; text8.setNum(text.elms()); FREPAO(text8)=Char16To8Fast(text[i]); // convert Str to Str8, we can assume that Str was already initialized
-               heap=compiler.heapConstant(text8.data(), text8.elms(), 1);
+               Str8 text8=text;
+               heap=compiler.heapConstant(text8(), text8.length(), 1);
             }
             setHeap(heap, 0, false);
             return;

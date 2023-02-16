@@ -132,7 +132,7 @@ class GuiView : Region
       }
       bool load(C Str &name)
       {
-         File f; if(f.readTry(name))return load(f, GetPath(name));
+         File f; if(f.read(name))return load(f, GetPath(name));
          del(); return false;
       }
    }
@@ -564,9 +564,16 @@ class GuiView : Region
       obj_edit[GO_CUSTOM].add("Name", MemberDesc(MEMBER(GuiCustom2, name)));
       obj_edit[GO_CUSTOM].add("Desc", MemberDesc(DATA_STR).setFunc(Desc, Desc));
 
+      static cchar8 *fit_text[]=
+      {
+         "NO"  , // 0
+         "FULL", // 1
+         "FILL", // 2
+      }; ASSERT(FIT_NONE==0 && FIT_FULL==1 && FIT_FILL==2);
+
       obj_edit[GO_IMAGE].add("Name"      , MemberDesc(MEMBER(GuiImage2, name     )));
       obj_edit[GO_IMAGE].add("Desc"      , MemberDesc(DATA_STR).setFunc(Desc, Desc));
-      obj_edit[GO_IMAGE].add("Fit"       , MemberDesc(MEMBER(GuiImage2, fit       )));
+      obj_edit[GO_IMAGE].add("Fit"       , MemberDesc(MEMBER(GuiImage2, fit       ))).setEnum(fit_text, Elms(fit_text));
       obj_edit[GO_IMAGE].add("Rect Color", MemberDesc(MEMBER(GuiImage2, rect_color))).setColor();
       obj_edit[GO_IMAGE].add("Color"     , MemberDesc(MEMBER(GuiImage2, color     ))).setColor();
       obj_edit[GO_IMAGE].add("Color Add" , MemberDesc(MEMBER(GuiImage2, color_add ))).setColor();

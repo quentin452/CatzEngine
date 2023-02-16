@@ -36,7 +36,7 @@ class IOFileData : IOFile
       if(!error)
       {
          FCreateDirs(GetPath(file_name));
-         File temp; if(temp.appendTry(temp_name))if(temp.pos()==offset)
+         File temp; if(temp.append(temp_name))if(temp.pos()==offset)
          {
             if(compressed){long pos=temp.pos();                if(Decompress(file_data, temp)){uncompressed_size=temp.pos()-pos; goto ok;}}
             else          {uncompressed_size=file_data.left(); if(file_data.copy(temp)       )                                   goto ok; }
@@ -75,7 +75,7 @@ again:
          SCAST(IOFile, fd)=IOToRead.lockedElm(0); // copy without removing
       }
       File file;
-      if(!file.readStdTry(fd.name))fd.error=true;else
+      if(!file.readStd(fd.name))fd.error=true;else
       if(fd.offset>file.size())fd.error=true;else
       if(!file.pos(fd.offset))fd.error=true;else
       {

@@ -711,9 +711,9 @@ MeshPart& MeshPart::heightmap(Bool heightmap, Int lod_index)
 /******************************************************************************/
 // TEXTURIZE
 /******************************************************************************/
-MeshPart& MeshPart::texMove  (C Vec2 &move , Byte tex_index) {base.texMove  (move , tex_index); render.texMove  (move , tex_index); return T;}
-MeshPart& MeshPart::texScale (C Vec2 &scale, Byte tex_index) {base.texScale (scale, tex_index); render.texScale (scale, tex_index); return T;}
-MeshPart& MeshPart::texRotate(  Flt   angle, Byte tex_index) {base.texRotate(angle, tex_index); render.texRotate(angle, tex_index); return T;}
+MeshPart& MeshPart::texMove  (C Vec2 &move , Byte uv_index) {base.texMove  (move , uv_index); render.texMove  (move , uv_index); return T;}
+MeshPart& MeshPart::texScale (C Vec2 &scale, Byte uv_index) {base.texScale (scale, uv_index); render.texScale (scale, uv_index); return T;}
+MeshPart& MeshPart::texRotate(  Flt   angle, Byte uv_index) {base.texRotate(angle, uv_index); render.texRotate(angle, uv_index); return T;}
 /******************************************************************************/
 // TRANSFORM
 /******************************************************************************/
@@ -790,17 +790,14 @@ MeshPart& MeshPart::animate(C AnimatedSkeleton &skel)
 /******************************************************************************/
 // OPERATIONS
 /******************************************************************************/
-MeshPart& MeshPart::boneRemap(C CMemPtr<Byte, 256> &old_to_new)
+MeshPart& MeshPart::boneRemap(C CMemPtrN<BoneType, 256> &old_to_new)
 {
    base  .boneRemap(old_to_new);
    render.boneRemap(old_to_new);
    return T;
 }
-void MeshPart::    setUsedBones(Bool (&bones)[256])C {Zero(bones); includeUsedBones(bones);}
-void MeshPart::includeUsedBones(Bool (&bones)[256])C
-{
-   if(base.is())base.includeUsedBones(bones);else render.includeUsedBones(bones);
-}
+void MeshPart::includeUsedBones(MemPtrN<Bool, 256> bones)C {if(base.is())base.includeUsedBones(bones);else render.includeUsedBones(bones);}
+void MeshPart::    setUsedBones(MemPtrN<Bool, 256> bones)C {bones.clear();    includeUsedBones(bones);}
 MeshPart& MeshPart::freeOpenGLESData() {render.freeOpenGLESData(); return T;}
 /******************************************************************************/
 MeshPart& MeshPart::setLeafAttachment(C Vec2 &tex)
@@ -820,7 +817,7 @@ MeshPart& MeshPart::setLeafAttachment(C CMemPtr<LeafAttachment> &attachments)
       SetLeafAttachment(base, attachments);
 
       if(render.is())setRender();
-      if(!base_is   )delBase();
+      if( !base_is  )delBase();
    }
    return T;
 }
@@ -832,7 +829,7 @@ MeshPart& MeshPart::setLeafAttachment(C Vec &pos)
    base.include(VTX_HLP); REPA(base.vtx)base.vtx.hlp(i)=pos;
 
    if(render.is())setRender();
-   if(!base_is   )delBase();
+   if( !base_is  )delBase();
    return T;
 }
 MeshPart& MeshPart::setRandomLeafColor(Flt variation)
@@ -843,7 +840,7 @@ MeshPart& MeshPart::setRandomLeafColor(Flt variation)
    SetRandomColor(base, variation);
 
    if(render.is())setRender();
-   if(!base_is   )delBase();
+   if( !base_is  )delBase();
    return T;
 }
 MeshPart& MeshPart::setRandomLeafBending()
@@ -854,7 +851,7 @@ MeshPart& MeshPart::setRandomLeafBending()
    SetRandomBend(base);
 
    if(render.is())setRender();
-   if(!base_is   )delBase();
+   if( !base_is  )delBase();
    return T;
 }
 MeshPart& MeshPart::setRandomLeafBending(Flt random_value)
@@ -865,7 +862,7 @@ MeshPart& MeshPart::setRandomLeafBending(Flt random_value)
    base.include(VTX_SIZE); REPA(base.vtx)base.vtx.size(i)=random_value;
 
    if(render.is())setRender();
-   if(!base_is   )delBase();
+   if( !base_is  )delBase();
    return T;
 }
 MeshPart& MeshPart::delRandomLeafBending() {exclude(VTX_SIZE); return T;}

@@ -109,6 +109,89 @@ static void UpdateMagnetometer(CLHeading *heading)
 {
    UpdateMagnetometer(newHeading);
 }
+/******************************************************************************/
+-(void)picker:(PHPickerViewController*)picker didFinishPicking:(NSArray<PHPickerResult*>*)results
+{
+   [picker dismissViewControllerAnimated:YES completion:nil];
+   [picker release];
+   if(auto receive=App.receive_file)
+      for(PHPickerResult *result in results)
+   {
+   #if 1
+      [result.itemProvider loadDataRepresentationForTypeIdentifier:@"public.data" completionHandler:^(NSData *data, NSError *error) // UTTypeData UTTypeImage
+      {  // this is not main thread
+         if(data)dispatch_async(dispatch_get_main_queue(),
+         ^{ // this is main thread
+            receive(NoTemp(File(data.bytes, data.length)));
+         });
+      }];
+   #else
+      [result.itemProvider loadObjectOfClass:[UIImage class] completionHandler:^(__kindof id<NSItemProviderReading> _Nullable object, NSError *_Nullable error)
+      {
+         if([object isKindOfClass:[UIImage class]])
+         {  // this is not main thread
+            UIImage *image=(UIImage*)object; if(CGImageRef cg_image=[image CGImage])
+            {
+            #if 0
+               Int w=RoundPos(image.size.width ),
+                   h=RoundPos(image.size.height);
+            #else
+               Int w=CGImageGetWidth (cg_image),
+                   h=CGImageGetHeight(cg_image);
+            #endif
+               Image img; if(img.createSoft(w, h, 1, IMAGE_R8G8B8A8_SRGB))if(CGColorSpaceRef color_space=CGColorSpaceCreateDeviceRGB())
+               {
+                  if(CGContextRef context=CGBitmapContextCreate(img.data(), img.w(), img.h(), 8, img.pitch(), color_space, kCGImageAlphaPremultipliedLast|kCGBitmapByteOrder32Big)) // kCGImageAlphaLast or kCGBitmapFloatComponents results in error on iOS
+                  {
+                     CGContextDrawImage(context, CGRectMake(0, 0, w, h), cg_image);
+                     CGContextRelease  (context);
+                     switch(image.imageOrientation)
+                     {
+                        case UIImageOrientationDown         : img.mirrorXY(); break;
+                        case UIImageOrientationUpMirrored   : img.mirrorX (); break;
+                        case UIImageOrientationDownMirrored : img.mirrorY (); break;
+                        case UIImageOrientationLeft         : img.rotateL (); break;
+                        case UIImageOrientationRight        : img.rotateR (); break;
+                        case UIImageOrientationLeftMirrored : img.rotateR ().mirrorX(); break; // TODO: optimize
+                        case UIImageOrientationRightMirrored: img.rotateL ().mirrorX(); break; // TODO: optimize
+                     }
+                     dispatch_async(dispatch_get_main_queue(),
+                     ^{ // this is main thread
+                        receive(ConstCast(img));
+                     });
+                  }
+                  CGColorSpaceRelease(color_space);
+               }
+             //CGImageRelease(cg_image); crashes
+            }
+          //[image release]; crashes
+         }
+      }];
+   #endif
+   }
+ //[results release]; crashes
+}
+-(void)imagePickerController:(UIImagePickerController*)picker didFinishPickingMediaWithInfo:(NSDictionary<UIImagePickerControllerInfoKey, id>*)info
+{
+   [picker dismissViewControllerAnimated:YES completion:nil];
+   [picker release];
+   if(auto receive=App.receive_file)
+   {
+   #if 1
+      if(NSURL *url=info[UIImagePickerControllerImageURL])
+      { // this is main thread
+         Str path=url.path;
+         File f; if(f.readStd(path))receive(f);
+      }
+   #else
+      if(UIImage *image=info[UIImagePickerControllerOriginalImage])
+      {
+         TODO
+      }
+   #endif
+   }
+ //[info release]; crashes
+}
 /******************************************************************************
 // FACEBOOK
 /******************************************************************************/

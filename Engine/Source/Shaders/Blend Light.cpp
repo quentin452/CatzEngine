@@ -143,8 +143,8 @@ void VS
       }
    }else
    {
-      VecU bone    =vtx.bone  ();
-      VecH weight_h=vtx.weight();
+      VecU4 bone    =vtx.bone  ();
+      VecH4 weight_h=vtx.weight();
                  view_pos     =TransformPos    (local_pos     , bone, vtx.weight());
       if(USE_VEL)view_pos_prev=TransformPosPrev(local_pos_prev, bone, vtx.weight());
 

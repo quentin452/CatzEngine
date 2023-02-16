@@ -135,7 +135,7 @@ MtrlBrushClass MtrlBrush;
          area.hmBuild();
       }
    }
-      int MtrlBrushClass::MtrlBlend::Compare(C MtrlBlend &a, C MtrlBlend &b) {return ::Compare(b.blend, a.blend);}
+   int MtrlBrushClass::CompareBlend(C MtrlBlend &a, C MtrlBlend &b) {return Compare(b.blend, a.blend);}
    void MtrlBrushClass::ReduceMaterial(Cell<Area> &cell, ptr user, int thread_index)
    {
       Area &area=cell();
@@ -161,7 +161,7 @@ MtrlBrushClass MtrlBrush;
                d*=Brush.speed;
 
                MtrlBlend mb[4]; Vec4 blend; hm.getMaterial(x, y, mb[0].mtrl, mb[1].mtrl, mb[2].mtrl, mb[3].mtrl, blend); REPAO(mb).blend=blend.c[i];
-               Sort(mb, Elms(mb), MtrlBlend::Compare);
+               Sort(mb, Elms(mb), CompareBlend);
 
                REPA(mb)if(i>=(MtrlBrush.max1() ? 1 : 2)) // go from the end, to process least significant first
                {

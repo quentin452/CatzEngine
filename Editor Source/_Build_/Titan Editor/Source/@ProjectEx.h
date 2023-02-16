@@ -442,7 +442,7 @@ public:
                   if( cur_reflection)cur_reflection->extractMipMap(image, -1, 0, GetCubeDir(i)); // extract from existing reflection map
                }
             }
-            reflection.ImportCubeTry(images[2], images[0], images[5], images[4], images[1], images[3], -1, true, 1, true);
+            reflection.ImportCube(images[2], images[0], images[5], images[4], images[1], images[3], -1, true, 1, true);
          }
       }else
       if(faces.elms()) // if at least one face is specified
@@ -452,7 +452,7 @@ public:
          {
             loaded=true;
             int res=NearestPow2(reflection.h());
-            reflection.copyTry(reflection, res, res, 1, -1, IMAGE_SOFT_CUBE, 1);
+            reflection.copy(reflection, res, res, 1, -1, IMAGE_SOFT_CUBE, 1);
          }
       }
       return !faces.elms() || loaded;
@@ -466,7 +466,7 @@ public:
          {
             if(includeTex(material.reflection_tex))
             {
-               reflection.copyTry(reflection, -1, -1, -1, IMAGE_BC1_SRGB, IMAGE_CUBE, 1);
+               reflection.copy(reflection, -1, -1, -1, IMAGE_BC1_SRGB, IMAGE_CUBE, 1);
                saveTex(reflection, material.reflection_tex);
             }
             Server.setTex(material.reflection_tex);
@@ -641,6 +641,7 @@ public:
    bool imageSet(C UID &elm_id, File &image, bool has_color, bool has_alpha);
    bool imageSet(C UID &elm_id, C Image &image);
    
+   bool meshGet(C UID &elm_id, Mesh &mesh);
    bool meshSet(C UID &elm_id, File &data);
    bool physSet(C UID &elm_id, File &data);
    bool skelSetSlots(C UID &elm_id, C CMemPtr<Edit::SkeletonSlot> &skel_slots);

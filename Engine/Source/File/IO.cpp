@@ -419,8 +419,8 @@ void FList(C Str &path, FILE_LIST_MODE func(C FileFind &ff, Ptr user), Ptr user)
 Bool FEqual(C Str &a, C Str &b, Cipher *a_cipher, Cipher *b_cipher)
 {
    File fa, fb;
-   if(fa.readTry(a, a_cipher)
-   && fb.readTry(b, b_cipher))return fa.equal(fb);
+   if(fa.read(a, a_cipher)
+   && fb.read(b, b_cipher))return fa.equal(fb);
    return false;
 }
 Bool FCopy(C Str &src, C Str &dest, FILE_OVERWRITE_MODE overwrite, Cipher *src_cipher, Cipher *dest_cipher, CChar *safe_overwrite_suffix)
@@ -429,7 +429,7 @@ Bool FCopy(C Str &src, C Str &dest, FILE_OVERWRITE_MODE overwrite, Cipher *src_c
    if(EqualPath(src, full_dest))return src_cipher==dest_cipher;
    if(overwrite!=FILE_OVERWRITE_NEVER || !FExistSystem(full_dest))
    {
-      File d, s; if(s.readTry(src, src_cipher))
+      File d, s; if(s.read(src, src_cipher))
       {
          // get source info
        C PakFile  *pf=null;
@@ -456,7 +456,7 @@ Bool FCopy(C Str &src, C Str &dest, FILE_OVERWRITE_MODE overwrite, Cipher *src_c
             if(!SafeOverwrite(s, full_dest, pf ? &pf->modify_time_utc : fi.type ? &fi.modify_time_utc : null, dest_cipher, safe_overwrite_suffix))return false;
          }else
          {
-            if(!d.writeTry(full_dest, dest_cipher) || !s.copy(d) || !d.flush())return false;
+            if(!d.write(full_dest, dest_cipher) || !s.copy(d) || !d.flush())return false;
             d.del(); // release handle so we can apply file params
 
             if(pf     )FTimeUTC(full_dest, pf->modify_time_utc);else
@@ -493,7 +493,7 @@ Bool FCopy(Pak &pak, C PakFile &src, C Str &dest, FILE_OVERWRITE_MODE overwrite,
          // check
          if(overwrite==FILE_OVERWRITE_DIFFERENT && FileInfo(src)==FileInfoSystem(dest))return true;
 
-         File s, d; if(!s.readTry(src, pak))ok=false;else
+         File s, d; if(!s.read(src, pak))ok=false;else
          {
          #if APPLE || LINUX
             if(src.flag&PF_STD_LINK)
@@ -506,7 +506,7 @@ Bool FCopy(Pak &pak, C PakFile &src, C Str &dest, FILE_OVERWRITE_MODE overwrite,
             {
                if(!SafeOverwrite(s, dest, &src.modify_time_utc, dest_cipher, safe_overwrite_suffix))return false;
             }else
-            if(!d.writeTry(dest, dest_cipher) || !s.copy(d) || !d.flush())ok=false;else
+            if(!d.write(dest, dest_cipher) || !s.copy(d) || !d.flush())ok=false;else
             {
                d.del(); // release handle so we can apply file params
                FTimeUTC(dest, src.modify_time_utc);
@@ -983,11 +983,8 @@ void GetDrives(MemPtr<Drive> drives)
          case DRIVE_REMOVABLE: d.type=DRIVE_USB      ; break;
          default             : d.type=DRIVE_UNDEFINED; break;
       }
-      if(i>=2) // skip "A:" and "B:" floppy drives because querying their 'GetVolumeInformation' may be slow (even few seconds), don't remove this, as there can be computers without the floppy drives, but the drivers can still be installed
-      {
-         wchar_t name[MAX_LONG_PATH+1]; name[0]=0; GetVolumeInformation(d.path, name, Elms(name), null, null, null, null, 0);
-          d.name=name;
-      }
+      wchar_t name[MAX_LONG_PATH+1]; name[0]=0; GetVolumeInformation(d.path, name, Elms(name), null, null, null, null, 0);
+       d.name=name;
    }
 #elif WINDOWS_NEW
    // TODO: WINDOWS_NEW 'GetDrives'
@@ -1090,7 +1087,7 @@ Bool SafeOverwrite(File &src, C Str &dest, C DateTime *modify_time_utc, Cipher *
       Bool locked=false;
       Str  temp=dest+suffix;
       if(rws && !suffix.is()){rws->enterWrite(); locked=true;} // if there's no suffix then it means we're writing directly to the target, so write lock needs to be enabled at start
-      File f; if(f.writeTry(temp, dest_cipher))
+      File f; if(f.write(temp, dest_cipher))
       {
          ok=(src.copy(f) && f.flush());
          f.del(); // release file handle so we can set file time/params and rename/remove if needed

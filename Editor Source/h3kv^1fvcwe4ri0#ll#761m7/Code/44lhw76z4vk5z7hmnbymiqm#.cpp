@@ -83,7 +83,7 @@ class ImageAtlasEditor : PropWin
          {
             ElmImageAtlas.Img &img=data.images[i]; if(!img.removed)if(Elm *elm=Proj.findElm(img.id))
             {
-               images.New().ImportTry((elm.type==ELM_IMAGE) ? Proj.editPath(*elm) : Proj.gamePath(*elm), -1, IMAGE_SOFT, 1); // use edit path for ELM_IMAGE and game path for ELM_ICON
+               images.New().Import((elm.type==ELM_IMAGE) ? Proj.editPath(*elm) : Proj.gamePath(*elm), -1, IMAGE_SOFT, 1); // use edit path for ELM_IMAGE and game path for ELM_ICON
                source.New().set(&images.last(), elm.name);
             }
          }

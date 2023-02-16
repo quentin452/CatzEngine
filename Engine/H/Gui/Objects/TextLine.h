@@ -14,8 +14,11 @@ const_mem_addr struct TextLine : GuiObj // Gui TextLine !! must be stored in con
 
    // get / set
    Bool  password  ()C;                        TextLine& password (  Bool on                             );    // get/set password mode, in password mode text characters will be displayed as '*' (the character can be changed using 'Gui.passwordChar' method), password mode additionally prevents copying text to the clipboard
+   Bool  number    ()C;                        TextLine& number   (  Bool on                             );    // get/set number   mode
+   Bool  email     ()C;                        TextLine& email    (  Bool on                             );    // get/set email    mode
+   Bool  url       ()C;                        TextLine& url      (  Bool on                             );    // get/set url      mode
    Int   maxLength ()C {return _max_length;}   TextLine& maxLength(  Int  max_length                     );    // get/set maximum allowed text length (-1=no limit), default=-1
-   Int   cursor    ()C {return _edit.cur  ;}   TextLine& cursor   (  Int  position                       );    // get/set cursor position
+   Int   cursor    ()C {return _edit.cur  ;}   TextLine& cursor   (  Int  position, Bool margin=true     );    // get/set cursor position
  C Str&  operator()()C {return _text      ;}   TextLine& set      (C Str &text, SET_MODE mode=SET_DEFAULT);    // get/set text
                                                TextLine& clear    (             SET_MODE mode=SET_DEFAULT);    // clear   text
    Flt   offset    ()C {return _offset    ;}                                                                   // get     horizontal offset currently used for displaying text
@@ -34,10 +37,17 @@ const_mem_addr struct TextLine : GuiObj // Gui TextLine !! must be stored in con
    virtual TextLine& rect(C Rect &rect )override;   C Rect& rect()C {return super::rect();} // set/get rectangle
    virtual TextLine& move(C Vec2 &delta)override;                                           // move by delta
 
+   Vec2 overlayScreenPos ()C; // get absolute position  on the screen, if this TextLine is covered by Screen Keyboard, then it's drawn as overlay, this function will return position  of that overlay
+   Rect overlayScreenRect()C; // get absolute rectangle on the screen, if this TextLine is covered by Screen Keyboard, then it's drawn as overlay, this function will return rectangle of that overlay
+
    // operations
    TextLine& selectNone  (); // select no  text
    TextLine& selectAll   (); // select all text
    TextLine& selectExtNot(); // select all but extension
+
+   TextLine& cut  (); // perform operation "cut"
+   TextLine& copy (); // perform operation "copy"
+   TextLine& paste(); // perform operation "paste"
 
    // main
    virtual GuiObj* test  (C GuiPC &gpc, C Vec2 &pos, GuiObj* &mouse_wheel)override; // test if 'pos' screen position intersects with the object, by returning pointer to object or its children upon intersection and null in case no intersection, 'mouse_wheel' may be modified upon intersection either to the object or its children or null
@@ -45,16 +55,31 @@ const_mem_addr struct TextLine : GuiObj // Gui TextLine !! must be stored in con
    virtual void    draw  (C GuiPC &gpc)override; // draw   object
 
 #if EE_PRIVATE
-   void  adjustOffset() ;
    Bool     showClear()C;
-   Flt    clientWidth()C;
+   Flt   clientWidth ()C;
+   Flt   clientHeight()C {return rect().h();}
+   Vec2  clientSize  ()C {return Vec2(clientWidth(), clientHeight());}
  C Str&   displayText()C; // returns "***" when in password mode, Warning: this is not thread-safe
    void          zero() ;
    void          call() ;
    void   createReset() ;
    Bool    setChanged(C Str &text, SET_MODE mode=SET_DEFAULT);
-   Bool cursorChanged(Int position);
+   void  adjustOffset(              Bool margin=true);
+   Bool cursorChanged(Int position, Bool margin=true);
    void  setTextInput()C;
+
+   Flt  localTextPosX(Int index             )C;
+   Vec2 localTextPosX(Int index0, Int index1)C; // x=index0 PosX, y=index1 PosX
+   Rect localTextRect(Int index             )C;
+   Rect localTextRect(Int index0, Int index1)C;
+   Rect localSelRect (                      )C;
+
+   enum
+   {
+      NUMBER=1<<0,
+      EMAIL =1<<1,
+      URL   =1<<2,
+   };
 #endif
 
   ~TextLine() {del();}
@@ -64,6 +89,7 @@ const_mem_addr struct TextLine : GuiObj // Gui TextLine !! must be stored in con
 private:
 #endif
    Bool       _can_select, _func_immediate;
+   Byte       _flag;
    Int        _max_length;
    Flt        _offset;
    Str        _text;

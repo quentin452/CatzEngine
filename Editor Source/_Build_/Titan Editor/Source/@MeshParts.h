@@ -63,6 +63,7 @@ public:
    static void CopyMem();
    static void NewLod();
    static void Merge();
+   static void SetNameFromMtrl();
 
    MemberDesc md_vtxs, md_tris;
    Memx<Part> data;

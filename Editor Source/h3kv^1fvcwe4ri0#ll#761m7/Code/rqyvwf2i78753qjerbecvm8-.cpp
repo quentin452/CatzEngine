@@ -365,7 +365,7 @@ class Area : BlendObject
    {
       Delete(hm);
       ReadLock rl(WorldAreaSync);
-      File f; if(f.readTry(name))for(ChunkReader cr(f); File *f=cr(); )
+      File f; if(f.read(name))for(ChunkReader cr(f); File *f=cr(); )
       {
          if(cr.name()=="Heightmap")switch(cr.ver())
          {
@@ -432,7 +432,7 @@ class Area : BlendObject
    void loadGame(C Str &name)
    {
       ReadLock rl(WorldAreaSync);
-      File f; if(f.readTry(name))for(ChunkReader cr(f); File *f=cr(); )
+      File f; if(f.read(name))for(ChunkReader cr(f); File *f=cr(); )
       {
          if(cr.name()=="Heightmap")if(hm)switch(cr.ver())
          {

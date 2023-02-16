@@ -24,12 +24,16 @@ struct Touch // Single Touch on a Touch-Screen
    Bool    db         ()C {return ButtonDb(_state)  ;} // if double clicked
    Bool    tapped     ()C {return ButtonTp(_state)  ;} // if tapped, tapping is a single quick push and release without any movement, this can be true at the moment of the release with the condition that there was no movement and the touch life was very short
    Bool    tappedFirst()C {return tapped() && _first;} // if tapped which was caused by first click of a double-click, double-clicks generate two taps, you can use this method to detect only the first one
+   Bool    longPress  ()C {return ButtonLp(_state)  ;} // if this touch is pressed for a long time without movement
 
-   Dbl startTime()C {return                    _start_time ;} // time of when the touch has started, obtained using "Time.appTime()"
-   Flt life     ()C {return Flt(Time.appTime()-_start_time);} // how long the touch is active
+   Dbl startTime()C {return _start_time;} // time when the touch has started, obtained using "Time.appTime()"
+   Flt life     ()C {return _life      ;} // how  long the touch is  active
+#if EE_PRIVATE
+   Flt Life     ()C {return Flt(Time.appTime()-_start_time);} // how long the touch is active
+#endif
 
    Bool selecting()C {return _selecting;} // if enough                     movement occurred since the touch start to consider it selecting
-   Bool dragging ()C {return _dragging ;} // if enough time has passed and movement occurred since the touch start to consider it dragging
+   Bool  dragging()C {return  _dragging;} // if enough time has passed and movement occurred since the touch start to consider it dragging
    Bool scrolling()C {return _scrolling;} // if this touch is currently being used to scroll a Region
 
    GuiObj* guiObj(           )C {return _gui_obj;} // get gui object at touch position when the touch was started
@@ -52,6 +56,7 @@ private:
    Byte             _axis_moved;
    BS_FLAG          _state;
    UInt             _id;
+   Flt              _life;
    Dbl              _start_time;
    VecI2            _pixeli, _delta_pixeli_clp;
    Vec2             _start_pos, _prev_pos, _pos, _sm_pos, _delta, _abs_delta, _vel;

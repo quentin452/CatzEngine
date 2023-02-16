@@ -1246,38 +1246,33 @@ void KeyboardClass::update()
 #if ANDROID
    if(InputTextIs)
    {
-      Int enters=0; // enter workaround
+      Bool reset=false;
+      Int  enters=0; // enter workaround
       {
          SyncLocker locker(InputTextLock);
-         if(Gui.kb())switch(Gui.kb()->type())
+         if(Gui.kb())
          {
-            default:
+            Bool remove_enters=Gui.kb()->isTextLine(); // some soft keyboards (GBoard) may generate enter keys as characters, this is a workaround for that, it will remove for 'TextLine'. For 'TextBox' not needed because we allow enters there as characters
+            REPA(InputTextData.text)
             {
-               // no need to apply Enter fix for 'TextBox', because we allow enters there as characters
-               ScreenKeyboard::Set(InputTextData.text);
-               ScreenKeyboard::Set(InputTextData.cur.y, InputTextData.cur.x);
-            }break;
-
-            case GO_TEXTLINE:
-            {
-               // some soft keyboards (GBoard) may generate enter keys as characters, this is a workaround for that
+               Char c=InputTextData.text[i];
+               if(!Safe(c)
+               || c=='\n' && remove_enters)
                {
-                  REPA(InputTextData.text)if(InputTextData.text[i]=='\n')
-                  {
-                     enters++; // increase enter counter
-                     InputTextData.text.remove(i); // remove this character
-                     if(InputTextData.cur.x>i)InputTextData.cur.x--; // adjust cursor
-                     if(InputTextData.cur.y>i)InputTextData.cur.y--; // adjust cursor
-                  }
+                  reset=true;
+                  if(c=='\n')enters++; // increase enter counter
+                  InputTextData.text.remove(i); // remove this character
+                  if(InputTextData.cur.x>i)InputTextData.cur.x--; // adjust cursor
+                  if(InputTextData.cur.y>i)InputTextData.cur.y--; // adjust cursor
                }
-               if(ScreenKeyboard::Set(InputTextData.text) || !enters) // adjust cursor only if we've changed some text or didn't process the enter workaround (this is to avoid when pressing just enter key, changes the cursor position on GBoard)
-                  ScreenKeyboard::Set(InputTextData.cur.y, InputTextData.cur.x);
-            }break;
+            }
+            if(ScreenKeyboard::Set(InputTextData.text) || !enters) // adjust cursor only if we've changed some text or didn't process the enter workaround (this is to avoid when pressing just enter key, changes the cursor position on GBoard)
+               ScreenKeyboard::Set(InputTextData.cur.y, InputTextData.cur.x);
          }
         _key_buffer_len=0; // this is a workaround for a bug in Google/Samsung Keyboard (but not SwiftKey) when Backspace key is triggered even though it shouldn't, when tapping Back key on the soft keyboard (when last character is space, or sometimes when just typed something), in that case 2 Back's are processed (one from EditText Java_com_esenthel_Native_text and one AINPUT_EVENT_TYPE_KEY), this code removes all queued keys to remove KB_BACK
          InputTextIs=false;
       }
-      if(enters) // call after we got out of sync lock in case this method would trigger 'Java_com_esenthel_Native_text' and introduce some sort of deadlock
+      if(reset) // call after we got out of sync lock in case this method would trigger 'Java_com_esenthel_Native_text' and introduce some sort of deadlock
       {
          REP(enters)queue(KB_ENTER, u'\n');
          resetTextInput();
@@ -1325,7 +1320,7 @@ void KeyboardKey::eat()C
       Kb.k.k=KB_NONE;
    }
 }
-void KeyboardClass::eat(Char8 c) {eat(Char8To16Fast(c));}
+void KeyboardClass::eat(Char8 c) {eat(Char8To16(c));}
 void KeyboardClass::eat(Char  c)
 {
    if(T.k(c) && c)
@@ -1477,18 +1472,27 @@ Bool KeyboardClass::rect(Rect &rect)C
    }
    return false;
 }
+void KeyboardClass::screenChanged() {if(screen_changed)screen_changed(); Gui.updateTextMenu();}
+void KeyboardClass::set(C RectI &rect)
+{
+   if(_recti!=rect)
+   {
+     _recti=rect;
+      screenChanged();
+   }
+}
 void ScreenKeyboard::set()
 {
    text=null;
    start=end=0;
    max_length=-1;
-   pass=multi_line=false;
+   multi_line=pass=number=email=url=false;
 
    if(Gui.kb())switch(Gui.kb()->type())
    {
       case GO_TEXTBOX:
       {
-         TextBox &tb=Gui.kb()->asTextBox();
+       C TextBox &tb=Gui.kb()->asTextBox();
          text =&tb();
          end  = tb.cursor();
          start=((tb._edit.sel<0) ? tb.cursor() : tb._edit.sel);
@@ -1498,11 +1502,14 @@ void ScreenKeyboard::set()
 
       case GO_TEXTLINE:
       {
-         TextLine &tl=Gui.kb()->asTextLine();
-         text =&tl();
-         pass = tl.password();
-         end  = tl.cursor  ();
-         start=((tl._edit.sel<0) ? tl.cursor() : tl._edit.sel);
+       C TextLine &tl=Gui.kb()->asTextLine();
+         text  = &tl();
+         pass  =  tl.password();
+         number=  tl.number  ();
+         email =  tl.email   ();
+         url   =  tl.url     ();
+         end   =  tl.cursor  ();
+         start =((tl._edit.sel<0) ? tl.cursor() : tl._edit.sel);
          max_length=tl.maxLength();
       }break;
    }
@@ -1545,9 +1552,13 @@ Bool ScreenKeyboard::Set(Int cur, Int sel)
    }
    return false;
 }
+#if ANDROID
+static jint SKMode(C ScreenKeyboard &sk) {return (sk.pass) | (sk.number<<1) | (sk.email<<2) | (sk.url<<3);}
+static Bool KBWantVisible;
+#endif
 void KeyboardClass::setVisible()
 {
-   Bool visible=(Gui.kb() && (Gui.kb()->isTextLine() || Gui.kb()->isTextBox()));
+   Bool visible=(Gui.kb() && Gui.kb()->isTextEdit());
 #if WINDOWS_OLD
    imm(visible); // here ignore 'hardware'
 #endif
@@ -1564,7 +1575,10 @@ void KeyboardClass::setVisible()
       {
          if(TextEditContext)
          {
-            TextEditContext->InputScope=(sk.pass ? Windows::UI::Text::Core::CoreTextInputScope::Password : Windows::UI::Text::Core::CoreTextInputScope::Text);
+            TextEditContext->InputScope=(sk.url    ?                                                                           Windows::UI::Text::Core::CoreTextInputScope::Url
+                                       : sk.email  ?                                                                           Windows::UI::Text::Core::CoreTextInputScope::EmailAddress
+                                       : sk.number ? (sk.pass ? Windows::UI::Text::Core::CoreTextInputScope::PasswordNumeric : Windows::UI::Text::Core::CoreTextInputScope::Number)
+                                                   : (sk.pass ? Windows::UI::Text::Core::CoreTextInputScope::Password        : Windows::UI::Text::Core::CoreTextInputScope::Text  ));
             TextEditContext->NotifyFocusEnter();
          }
          input_pane->TryShow();
@@ -1577,19 +1591,29 @@ void KeyboardClass::setVisible()
 #elif ANDROID
    if(Jni && ActivityClass && Activity)
    {
-      if(_visible=visible) // TODO: Warning: Android API doesn't have a notification when keyboard is visible, so always force what we want, but _visible might remain true even when keyboard got closed
+      if(visible)
       {
-         if(JMethodID editText=Jni.func(ActivityClass, "editText", "(Ljava/lang/String;IIZ)V"))
+         KBWantVisible=true;
+         if(JMethodID editText=Jni.func(ActivityClass, "editText", "(Ljava/lang/String;III)V"))
          if(JString t=JString(Jni, sk.text ? *sk.text : S))
-            Jni->CallVoidMethod(Activity, editText, t(), jint(sk.start), jint(sk.end), jboolean(sk.pass));
+            Jni->CallVoidMethod(Activity, editText, t(), jint(sk.start), jint(sk.end), SKMode(sk));
       }else
+      if(KBWantVisible)
       {
+         KBWantVisible=false;
          if(JMethodID editTextHide=Jni.func(ActivityClass, "editTextHide", "()V"))
             Jni->CallVoidMethod(Activity, editTextHide);
       }
    }
 #elif IOS
-   if(EAGLView *view=GetUIView())[view keyboardVisible:visible];
+   if(EAGLView *view=GetUIView())
+   {
+      if(visible)
+      {
+       //view.keyboardType=(sk.url ? UIKeyboardTypeURL : sk.email ? UIKeyboardTypeEmailAddress : sk.number ? UIKeyboardTypeNumberPad : UIKeyboardTypeDefault);
+      }
+      [view keyboardVisible:visible];
+   }
 #elif SWITCH
    NS::KeyboardVisible(visible ? &sk : null);
 #endif
@@ -1598,13 +1622,19 @@ void KeyboardClass::setVisible()
 void KeyboardClass::resetTextInput()
 {
 #if WINDOWS_NEW || ANDROID || SWITCH
+#if ANDROID
+   if(KBWantVisible) // on Android check 'KBWantVisible' because '_visible' might be changed at a later stage due to JAVA threads, so immiediately after requesting screen keyboard, '_visible' might still be false, but we already want to change it
+#else
    if(_visible)
+#endif
    {
       ScreenKeyboard sk; sk.set();
    #if WINDOWS_NEW
       if(TextEditContext)
       {
-         TextEditContext->InputScope=(sk.pass ? Windows::UI::Text::Core::CoreTextInputScope::Password : Windows::UI::Text::Core::CoreTextInputScope::Text);
+         TextEditContext->InputScope=(sk.email  ?                                                                           Windows::UI::Text::Core::CoreTextInputScope::EmailAddress
+                                    : sk.number ? (sk.pass ? Windows::UI::Text::Core::CoreTextInputScope::PasswordNumeric : Windows::UI::Text::Core::CoreTextInputScope::Number)
+                                                : (sk.pass ? Windows::UI::Text::Core::CoreTextInputScope::Password        : Windows::UI::Text::Core::CoreTextInputScope::Text  ));
          Windows::UI::Text::Core::CoreTextRange modify_range, selection;
          modify_range.StartCaretPosition=0;
          modify_range.  EndCaretPosition=INT_MAX;
@@ -1613,9 +1643,9 @@ void KeyboardClass::resetTextInput()
       }
    #elif ANDROID
       if(Jni && ActivityClass && Activity)
-      if(JMethodID editTextSet=Jni.func(ActivityClass, "editTextSet", "(Ljava/lang/String;IIZ)V"))
+      if(JMethodID editTextSet=Jni.func(ActivityClass, "editTextSet", "(Ljava/lang/String;III)V"))
       if(JString t=JString(Jni, sk.text ? *sk.text : S))
-         Jni->CallVoidMethod(Activity, editTextSet, t(), jint(sk.start), jint(sk.end), jboolean(sk.pass));
+         Jni->CallVoidMethod(Activity, editTextSet, t(), jint(sk.start), jint(sk.end), SKMode(sk));
    #elif SWITCH
       NS::KeyboardSet(sk);
    #endif

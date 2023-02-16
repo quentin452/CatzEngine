@@ -21,13 +21,13 @@ struct BitmapInfoHeader
 /******************************************************************************/
 Bool Image::ImportBMPRaw(File &f, Bool ico)
 {
-   BitmapInfoHeader bmih; f>>bmih;
-   if(Unaligned(bmih.planes)==1)
+   BitmapInfoHeader bmih;
+   if(f.getFast(bmih) && Unaligned(bmih.planes)==1)
       if(Unaligned(bmih.bitCount)==8 || Unaligned(bmih.bitCount)==16 || Unaligned(bmih.bitCount)==24 || Unaligned(bmih.bitCount)==32)
    {
       if(ico)Unaligned(bmih.height, Unaligned(bmih.height)/2); // ICO files have height 2x bigger
       MemtN<Color, 256> palette; if(Unaligned(bmih.bitCount)==8){f.getN(palette.setNum(256).data(), 256); REPA(palette)Swap(palette[i].r, palette[i].b); if(ico)REPAO(palette).a=(i ? 255 : 0);} // load palette, setup alpha for ICO
-      if(createSoftTry(Unaligned(bmih.width), Unaligned(bmih.height), 1, (Unaligned(bmih.bitCount)==16) ? IMAGE_R8G8B8_SRGB : (Unaligned(bmih.bitCount)==24) ? IMAGE_R8G8B8_SRGB : (Unaligned(bmih.bitCount)==32) ? IMAGE_R8G8B8A8_SRGB : ico ? IMAGE_R8G8B8A8_SRGB : IMAGE_R8G8B8_SRGB)) // ICO has alpha channel, BMP uses BGRA order, we could use IMAGE_B8G8R8A8_SRGB, however it's an engine private type and can't be saved
+      if(createSoft(Unaligned(bmih.width), Unaligned(bmih.height), 1, (Unaligned(bmih.bitCount)==16) ? IMAGE_R8G8B8_SRGB : (Unaligned(bmih.bitCount)==24) ? IMAGE_R8G8B8_SRGB : (Unaligned(bmih.bitCount)==32) ? IMAGE_R8G8B8A8_SRGB : ico ? IMAGE_R8G8B8A8_SRGB : IMAGE_R8G8B8_SRGB)) // ICO has alpha channel, BMP uses BGRA order, we could use IMAGE_B8G8R8A8_SRGB, however it's an engine private type and can't be saved
       {
          Int zeros=Ceil4(pitch())-pitch();
          REPD(y, T.h())
@@ -60,13 +60,12 @@ Bool Image::ImportBMPRaw(File &f, Bool ico)
 }
 Bool Image::ImportBMP(File &f)
 {
-   BitmapFileHeader bmfh; f>>bmfh;
-   if(Unaligned(bmfh.type)==0x4D42)return ImportBMPRaw(f);
+   BitmapFileHeader bmfh; if(f.getFast(bmfh) && Unaligned(bmfh.type)==0x4D42)return ImportBMPRaw(f);
    del(); return false;
 }
 Bool Image::ImportBMP(C Str &name)
 {
-   File f; if(f.readTry(name))return ImportBMP(f);
+   File f; if(f.read(name))return ImportBMP(f);
    del(); return false;
 }
 /******************************************************************************/
@@ -132,7 +131,7 @@ Bool Image::ExportBMP(File &f)C
  C ImageTypeInfo &type_info=typeInfo(); // use 'T.type' to have precise information about source type
    IMAGE_TYPE     type=(type_info.a ? IMAGE_B8G8R8A8_SRGB : IMAGE_B8G8R8_SRGB); // BMP uses BGRA
    if(src->cube      ())if(temp.fromCube(*src ,             type               ))src=&temp;else return false;
-   if(src->compressed())if(src->copyTry ( temp, -1, -1, -1, type, IMAGE_SOFT, 1))src=&temp;else return false;
+   if(src->compressed())if(src->copy    ( temp, -1, -1, -1, type, IMAGE_SOFT, 1))src=&temp;else return false;
 
    Bool ok=false;
    if(src->lockRead())
@@ -154,7 +153,7 @@ Bool Image::ExportBMP(File &f)C
 }
 Bool Image::ExportBMP(C Str &name)C
 {
-   File f; if(f.writeTry(name)){if(ExportBMP(f) && f.flush())return true; f.del(); FDelFile(name);}
+   File f; if(f.write(name)){if(ExportBMP(f) && f.flush())return true; f.del(); FDelFile(name);}
    return false;
 }
 /******************************************************************************/

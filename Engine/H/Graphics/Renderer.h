@@ -234,6 +234,11 @@ struct RendererClass // handles rendering
    static void needDepthTest();
    INLINE void wantDepthRead() {needDepthTest();} // works always the same as 'needDepthTest' on WEB
    INLINE void needDepthRead() {       setDS(0);} // never supported on WEB
+#elif DEPTH_FLUSH
+   INLINE void setDSLookup  () {}
+   INLINE void needDepthTest() {}
+          void needDepthRead();
+   INLINE void wantDepthRead() {needDepthRead();}
 #else
    INLINE void setDSLookup  () {}
    INLINE void needDepthTest() {}
@@ -295,7 +300,7 @@ private:
    RENDER_TYPE           _type, _cur_type;
    RENDER_MODE           _mode;
    ALPHA_MODE            _mesh_blend_alpha;
-   Bool                  _has_glow, _forward_prec, _mirror, _mirror_want, _mirror_shadows, _first_pass, _palette_mode, _eye_adapt_scale_cur, _t_measure, _set_depth_needed, _get_target, _stereo, _mesh_early_z, _mesh_shader_vel, _temporal_use, _temporal_reset;
+   Bool                  _has_glow, _forward_prec, _mirror, _mirror_want, _mirror_shadows, _first_pass, _palette_mode, _eye_adapt_scale_cur, _t_measure, _set_depth_needed, _get_target, _stereo, _mesh_early_z, _mesh_shader_vel, _temporal_use, _temporal_reset, _modified_depth;
    Byte                  _has, _opaque_mode_index, _mesh_stencil_value, _mesh_stencil_mode, _outline, _clear;
    Int                   _eye, _eye_num, _mirror_priority, _mirror_resolution, _mesh_variation_1;
    UInt                  _frst_light_offset, _blst_light_offset, _mesh_draw_mask;

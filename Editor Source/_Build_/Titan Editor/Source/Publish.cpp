@@ -889,7 +889,7 @@ void SetPublishFiles(Memb<PakFileData> &files, Memc<ImageGenerate> &generate, Me
                PakFileData &pfd=files.New();
                pfd.name    =S+"Edit/"+EncodeFileName(elm.id);
                pfd.data.set(           Proj.editPath(elm.id));
-               pfd.compress_mode=((elm.type==ELM_IMAGE) ? COMPRESS_DISABLE : COMPRESS_ENABLE); // in Edit folder images are stored using JPG/PNG/WEBP
+               pfd.compress_mode=((elm.type==ELM_IMAGE) ? COMPRESS_DISABLE : COMPRESS_ENABLE); // in Edit folder images are stored using JPG/JXL/PNG/WEBP/AVIF
             }
             if(ElmGame(elm.type))
             {
@@ -1139,7 +1139,7 @@ void DrawPublish()
       {
          case ELM_IMAGE:
          {
-            Image image; if(image.ImportTry(src))if(EditToGameImage(image, image, pow2, true, alpha_lum, ElmImage::COMPRESSED, mode, mip_maps, has_color, has_alpha, ignore_alpha, env, size, &type)) // sRGB is ignored here because we force custom type
+            Image image; if(image.Import(src))if(EditToGameImage(image, image, pow2, true, alpha_lum, ElmImage::COMPRESSED, mode, mip_maps, has_color, has_alpha, ignore_alpha, env, size, &type)) // sRGB is ignored here because we force custom type
             {
                File f; if(image.save(f.writeMem())){f.pos(0); SafeOverwrite(f, dest, &time);} // save using specified time
             }
@@ -1153,7 +1153,7 @@ void DrawPublish()
                {
                   Image &image=atlas.images[i];
                   VecI2   size=image.size(), old=size; if(pvrtc)size=CeilPow2(size.max()); // image must be square for PVRTC. Unlike for regular textures, for atlases it's better to use 'CeilPow2', to make sure we don't make textures much smaller than original.
-                  if(image.copyTry(image, size.x, size.y, -1, type, mode, mip_maps, FILTER_BEST, (clamp?IC_CLAMP:IC_WRAP)|IC_ALPHA_WEIGHT))
+                  if(image.copy(image, size.x, size.y, -1, type, mode, mip_maps, FILTER_BEST, (clamp?IC_CLAMP:IC_WRAP)|IC_ALPHA_WEIGHT))
                   {
                   #if 0 // don't do any adjustments because we may want to detect image proportions based on 'trimmed_size' (Esenthel RTS does that)
                      if(size!=old) // if size is different then adjust the parts
@@ -1189,7 +1189,7 @@ void DrawPublish()
             PanelImage panel_image; if(panel_image.load(src))
             {
                VecI2 size=panel_image.image.size(); if(pvrtc)size=CeilPow2(size.max()); // image must be square for PVRTC. Unlike for regular textures, for panel images it's better to use 'CeilPow2', to make sure we don't make textures much smaller than original.
-               panel_image.image.copyTry(panel_image.image, size.x, size.y, -1, type, -1, -1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT);
+               panel_image.image.copy(panel_image.image, size.x, size.y, -1, type, -1, -1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT);
                File f; if(panel_image.save(f.writeMem())){f.pos(0); SafeOverwrite(f, dest, &time);} // save using specified time
             }
          }break;
@@ -1198,7 +1198,7 @@ void DrawPublish()
          {
             if(skip) // just copy
             {
-               File f; if(f.readTry(src))SafeOverwrite(f, dest, &time);
+               File f; if(f.read(src))SafeOverwrite(f, dest, &time);
             }else
             if(C ImagePtr &image=src)
             {
@@ -1221,9 +1221,9 @@ void DrawPublish()
                {
                   if(mip_maps<0)mip_maps=((s->mipMaps()==1) ? 1 : 0); // source will have now only one mip-map so we can't use "-1", auto-detect instead
                   if(mode    <0)mode    =s->mode();                   // source will now be as IMAGE_SOFT      so we can't use "-1", auto-detect instead
-                  if(s->copyTry(temp, -1, -1, -1, ImageTypeExcludeAlpha(ImageTypeUncompressed(s->type())), IMAGE_SOFT, 1))s=&temp;
+                  if(s->copy(temp, -1, -1, -1, ImageTypeExcludeAlpha(ImageTypeUncompressed(s->type())), IMAGE_SOFT, 1))s=&temp;
                }
-               if(s->copyTry(temp, size.x, size.y, size.z, type, mode, mip_maps, FILTER_BEST, (clamp?IC_CLAMP:IC_WRAP)))
+               if(s->copy(temp, size.x, size.y, size.z, type, mode, mip_maps, FILTER_BEST, (clamp?IC_CLAMP:IC_WRAP)))
                {
                   File f; if(temp.save(f.writeMem())){f.pos(0); SafeOverwrite(f, dest, &time);} // save using specified time
                }

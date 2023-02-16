@@ -18,16 +18,16 @@ struct ICONDIRENTRY
 Bool Image::ImportICO(File &f)
 {
    Long    pos=f.pos(); // remember current position in case we're not at the start
-   ICONDIR dir; f>>dir;
-   if(!dir.reserved && dir.images<=256 && (dir.type==1 || dir.type==2))
+   ICONDIR dir;
+   if(f.getFast(dir) && !dir.reserved && dir.images<=256 && (dir.type==1 || dir.type==2))
    {
       Bool ico=(dir.type==1), cur=(dir.type==2);
       Int  best_x, best_y, best_col;
       UInt best_offset=0, best_size, end=0;
       REP(dir.images)
       {
-         ICONDIRENTRY entry; f>>entry;
-         if(entry.size>=f.size() || entry.offset>f.size() || entry.reserved)goto error;
+         ICONDIRENTRY entry;
+         if(!f.getFast(entry) || entry.size>=f.size() || entry.offset>f.size() || entry.reserved)goto error;
          Int x=(entry.width  ? entry.width  : 256),
              y=(entry.height ? entry.height : 256),
              col=(ico ? entry.hot_y : entry.colors ? entry.colors : 256);
@@ -52,7 +52,7 @@ error:;
 }
 Bool Image::ImportICO(C Str &name)
 {
-   File f; if(f.readTry(name))return ImportICO(f);
+   File f; if(f.read(name))return ImportICO(f);
    del(); return false;
 }
 /******************************************************************************/
@@ -79,7 +79,7 @@ Bool Image::ExportICO(File &f)C
          VecI2 size=src->size();
          if(size.x>48)size=size*48/size.x;
          if(size.y>48)size=size*48/size.y;
-         Image xp; if(src->copyTry(xp, Max(1, size.x), Max(1, size.y), 1, IMAGE_B8G8R8A8_SRGB, IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT)) // ICO uses BGRA
+         Image xp; if(src->copy(xp, Max(1, size.x), Max(1, size.y), 1, IMAGE_B8G8R8A8_SRGB, IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT)) // ICO uses BGRA
          {
             if(xp.ExportBMPRaw(mip.data.writeMem(), 4, true))
             {
@@ -91,10 +91,10 @@ Bool Image::ExportICO(File &f)C
          if(full_size_included)
          {
             VecI2 size=src->size()/2; if(size.max()<16)break;
-            if(src->copyTry(temp, Max(1, size.x), Max(1, size.y), 1, ImageTypeUncompressed(src->type()), IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT))src=&temp;else break;
+            if(src->copy(temp, Max(1, size.x), Max(1, size.y), 1, ImageTypeUncompressed(src->type()), IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT))src=&temp;else break;
          }
 #if 0 // fix for Steam, after export, open in VS and save as
-   if(src->copyTry(temp, -1, -1, 1, IMAGE_B8G8R8A8_SRGB, IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT)) // ICO uses BGRA
+   if(src->copy(temp, -1, -1, 1, IMAGE_B8G8R8A8_SRGB, IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT)) // ICO uses BGRA
    {
       src=&temp; if(src->ExportBMPRaw(mip.data.writeMem(), 4, true)){mip.size=src->size(); full_size_included=true; continue;}
    }
@@ -130,7 +130,7 @@ Bool Image::ExportICO(File &f)C
 }
 Bool Image::ExportICO(C Str &name)C
 {
-   File f; if(f.writeTry(name)){if(ExportICO(f) && f.flush())return true; f.del(); FDelFile(name);}
+   File f; if(f.write(name)){if(ExportICO(f) && f.flush())return true; f.del(); FDelFile(name);}
    return false;
 }
 /******************************************************************************/
@@ -319,7 +319,7 @@ Bool Image::ExportICNS(File &f)C // ICNS stores data using RLE, PNG or JPEG 2000
    // - setting up 16,32,64 size as PNG will make it look corrupt (maybe it's related to 'icp*' instead of 'ic0*' however those were tried too and failed)
    Int size=Mid((Int)NearestPow2(src->size().avgI()), 16, 512);
    if(size==64)size=128; // because 64 size can't be used as PNG, it has to be done as RLE, and there it is processed as 48, which will be very low res, so use 128 as the max in that case
-   if(src->w()!=size || src->h()!=size)if(src->copyTry(temp, size, size, 1, ImageTypeUncompressed(src->type()), IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT))src=&temp;else return false;
+   if(src->w()!=size || src->h()!=size)if(src->copy(temp, size, size, 1, ImageTypeUncompressed(src->type()), IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT))src=&temp;else return false;
    MipAlpha mips[3]; // up to 3 mip-maps, providing mip-maps with Engine high quality filtering allows the OS to use them instead of its own filtering
    FREPA(mips)
    {
@@ -327,7 +327,7 @@ Bool Image::ExportICNS(File &f)C // ICNS stores data using RLE, PNG or JPEG 2000
       if(i)
       {
          Int s=src->w()/2; if(s<16)break;
-         if(src->copyTry(temp, s, s, 1, ImageTypeUncompressed(src->type()), IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT))src=&temp;else break;
+         if(src->copy(temp, s, s, 1, ImageTypeUncompressed(src->type()), IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT))src=&temp;else break;
       }
       if(src->w()<=64) // RLE
       {
@@ -335,7 +335,7 @@ Bool Image::ExportICNS(File &f)C // ICNS stores data using RLE, PNG or JPEG 2000
        C Image *s=src;
          Image  rle; 
          if((s->hwType()!=IMAGE_R8G8B8A8 && s->hwType()!=IMAGE_R8G8B8A8_SRGB) || s->w()!=size || s->size()!=s->hwSize()) // 'ICNSEncodeRLE24' requires IMAGE_R8G8B8A8_SRGB without any hw padding
-            if(s->copyTry(rle, size, size, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT))s=&rle;else continue;
+            if(s->copy(rle, size, size, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT))s=&rle;else continue;
          if(s->lockRead())
          {
             mip.png=false;
@@ -417,7 +417,7 @@ Bool Image::ExportICNS(File &f)C // ICNS stores data using RLE, PNG or JPEG 2000
 }
 Bool Image::ExportICNS(C Str &name)C
 {
-   File f; if(f.writeTry(name)){if(ExportICNS(f) && f.flush())return true; f.del(); FDelFile(name);}
+   File f; if(f.write(name)){if(ExportICNS(f) && f.flush())return true; f.del(); FDelFile(name);}
    return false;
 }
 /******************************************************************************/

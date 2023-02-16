@@ -90,7 +90,7 @@ Bool Image::ImportTIF(File &f)
             case 3: if(photometric==PHOTOMETRIC_RGB)if(bits==8)type=IMAGE_R8G8B8_SRGB  ; break;
             case 4: if(photometric==PHOTOMETRIC_RGB)if(bits==8)type=IMAGE_R8G8B8A8_SRGB; break;
          }
-         if(type && createSoftTry(w, h, 1, type))
+         if(type && createSoft(w, h, 1, type))
          {
             if(compression==COMPRESSION_NONE)
             {
@@ -119,12 +119,12 @@ Bool Image::ImportTIF(File &f)
          }
       }
       if(!ok)
-         if(createSoftTry(w, h, 1, IMAGE_R8G8B8A8_SRGB))
+         if(createSoft(w, h, 1, IMAGE_R8G8B8A8_SRGB))
             if(TIFFReadRGBAImageOriented(tif, w, h, (uint32*)data(), ORIENTATION_TOPLEFT, 0))
       {
          ok=true;
          if(photometric!=PHOTOMETRIC_PALETTE) // keep palette as RGBA
-            if(samples==1 || samples==3)ok=copyTry(T, -1, -1, -1, (samples==1) ? IMAGE_L8_SRGB : IMAGE_R8G8B8_SRGB);
+            if(samples==1 || samples==3)ok=copy(T, -1, -1, -1, (samples==1) ? IMAGE_L8_SRGB : IMAGE_R8G8B8_SRGB);
       }
       TIFFClose(tif);
       f.pos(tf.end); // set position at the end of the read data, we have to do this because file pointer may not necessary be at the end, also don't use just 'f.size' in case there is some data after TIFF
@@ -140,7 +140,7 @@ Bool Image::ExportTIF(File &f, Flt compression_level)C
    Image  temp;
  C Image *src=this;
    if(src->cube      ())if(temp.fromCube(*src                                                                ))src=&temp;else return false;
-   if(src->compressed())if(src->copyTry ( temp, -1, -1, -1, ImageTypeUncompressed(src->type()), IMAGE_SOFT, 1))src=&temp;else return false;
+   if(src->compressed())if(src->copy    ( temp, -1, -1, -1, ImageTypeUncompressed(src->type()), IMAGE_SOFT, 1))src=&temp;else return false;
 
    Bool ok=false;
    if(src->lockRead())
@@ -215,12 +215,12 @@ Bool Image::ExportTIF(File &f, Flt compression_level)C
 /******************************************************************************/
 Bool Image::ExportTIF(C Str &name, Flt compression_level)C
 {
-   File f; if(f.writeTry(name)){if(ExportTIF(f, compression_level) && f.flush())return true; f.del(); FDelFile(name);}
+   File f; if(f.write(name)){if(ExportTIF(f, compression_level) && f.flush())return true; f.del(); FDelFile(name);}
    return false;
 }
 Bool Image::ImportTIF(C Str &name)
 {
-   File f; if(f.readTry(name))return ImportTIF(f);
+   File f; if(f.read(name))return ImportTIF(f);
    del(); return false;
 }
 /******************************************************************************/

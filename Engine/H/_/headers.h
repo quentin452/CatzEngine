@@ -324,6 +324,7 @@
       #elif IOS
          #define IFT_ETHER 0x06 // iOS does not have this in headers
          #include <UIKit/UIKit.h>
+         #include <PhotosUI/PhotosUI.h>
          #include <QuartzCore/QuartzCore.h>
          #include <CoreMotion/CoreMotion.h>
          #include <CoreLocation/CoreLocation.h>
@@ -592,6 +593,7 @@
          #define NDEBUG // specify Release config for PhysX
       #endif
       #define PX_PHYSX_STATIC_LIB
+      #define PX_GENERATE_META_DATA // will fix "#include <ciso646>" error
       #include "../../../ThirdPartyLibs/PhysX/physx/include/PxPhysicsAPI.h"
       #include "../../../ThirdPartyLibs/PhysX/physx/source/geomutils/src/mesh/GuMeshData.h"     // needed for PX_MESH_VERSION
       #include "../../../ThirdPartyLibs/PhysX/physx/source/geomutils/src/convex/GuConvexMesh.h" // needed for PX_CONVEX_VERSION

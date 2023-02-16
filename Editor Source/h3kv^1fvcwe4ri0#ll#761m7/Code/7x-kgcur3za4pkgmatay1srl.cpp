@@ -1035,7 +1035,7 @@ class EditMaterial
    }
    bool load(C Str &name)
    {
-      File f; if(f.readTry(name))return load(f);
+      File f; if(f.read(name))return load(f);
       reset(); return false;
    }
 }

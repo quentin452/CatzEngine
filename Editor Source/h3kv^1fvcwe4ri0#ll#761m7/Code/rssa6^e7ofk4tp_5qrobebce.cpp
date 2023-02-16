@@ -474,6 +474,7 @@ class EditObject : EditParams
    void copyTo(Edit.ObjData &obj, bool include_removed_params)C
    {
       obj.elm_obj_class_id=type;
+      obj.         base_id=base.id();
       obj.          access=access;
       obj.            path=path;
       obj.params.clear();
@@ -779,7 +780,7 @@ class EditObject : EditParams
    }
    bool load(C Str &name)
    {
-      File f; if(f.readTry(name))return load(f, GetPath(name));
+      File f; if(f.read(name))return load(f, GetPath(name));
       del(); return false;
    }
 }

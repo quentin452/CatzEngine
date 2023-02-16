@@ -210,9 +210,9 @@ class ConvertToDeAtlasClass : PropWin
 
          // create textures
          Image base_0, base_1, base_2; Proj.createBaseTextures(base_0, base_1, base_2, first);
-         IMAGE_TYPE ct; ImageProps(base_0, &first.base_0_tex, &ct, MTRL_BASE_0, first.tex_quality); if(Proj.includeTex(first.base_0_tex)){base_0.copyTry(base_0, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP); Proj.saveTex(base_0, first.base_0_tex);} Server.setTex(first.base_0_tex);
-                        ImageProps(base_1, &first.base_1_tex, &ct, MTRL_BASE_1                   ); if(Proj.includeTex(first.base_1_tex)){base_1.copyTry(base_1, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP); Proj.saveTex(base_1, first.base_1_tex);} Server.setTex(first.base_1_tex);
-                        ImageProps(base_2, &first.base_2_tex, &ct, MTRL_BASE_2                   ); if(Proj.includeTex(first.base_2_tex)){base_2.copyTry(base_2, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP); Proj.saveTex(base_2, first.base_2_tex);} Server.setTex(first.base_2_tex);
+         IMAGE_TYPE ct; ImageProps(base_0, &first.base_0_tex, &ct, MTRL_BASE_0, first.tex_quality); if(Proj.includeTex(first.base_0_tex)){base_0.copy(base_0, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP); Proj.saveTex(base_0, first.base_0_tex);} Server.setTex(first.base_0_tex);
+                        ImageProps(base_1, &first.base_1_tex, &ct, MTRL_BASE_1                   ); if(Proj.includeTex(first.base_1_tex)){base_1.copy(base_1, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP); Proj.saveTex(base_1, first.base_1_tex);} Server.setTex(first.base_1_tex);
+                        ImageProps(base_2, &first.base_2_tex, &ct, MTRL_BASE_2                   ); if(Proj.includeTex(first.base_2_tex)){base_2.copy(base_2, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP); Proj.saveTex(base_2, first.base_2_tex);} Server.setTex(first.base_2_tex);
 
          // adjust all materials
          Memc<IDReplace> mtrl_replace;
@@ -241,7 +241,7 @@ class ConvertToDeAtlasClass : PropWin
             mtrl_replace.New().set(elm_mtrl.id, de_atlas.id);
          }
 
-         mtrl_replace.sort(IDReplace.Compare);
+         mtrl_replace.sort(Compare);
          convertMeshes(mtrl_replace, crop);
          Proj.setList();
       }

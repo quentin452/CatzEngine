@@ -1,0 +1,89 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32616.157
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CMakePredefinedTargets", "CMakePredefinedTargets", "{D2976B92-5BB8-3B84-B032-0AE8233A4B58}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ext", "ext", "{75C4B05B-3430-3943-BA47-8695F493AF79}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "avif", "avif", "{D571B3B6-85F1-3ECC-892D-A0B19BBAF800}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ALL_BUILD", "ALL_BUILD.vcxproj", "{8CF5D0C2-34F4-3B1C-AF14-FDE7E0894701}"
+	ProjectSection(ProjectDependencies) = postProject
+		{C0893DA8-46ED-3DB0-AE3D-F9C6733F68C1} = {C0893DA8-46ED-3DB0-AE3D-F9C6733F68C1}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "INSTALL", "INSTALL.vcxproj", "{79D97A86-22F4-3726-87C6-DE028F81F51A}"
+	ProjectSection(ProjectDependencies) = postProject
+		{8CF5D0C2-34F4-3B1C-AF14-FDE7E0894701} = {8CF5D0C2-34F4-3B1C-AF14-FDE7E0894701}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "avif", "avif.vcxproj", "{C0893DA8-46ED-3DB0-AE3D-F9C6733F68C1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Android-arm64-v8a = Debug|Android-arm64-v8a
+		Debug|ARM64 = Debug|ARM64
+		MinSizeRel|Android-arm64-v8a = MinSizeRel|Android-arm64-v8a
+		MinSizeRel|ARM64 = MinSizeRel|ARM64
+		Release|Android-arm64-v8a = Release|Android-arm64-v8a
+		Release|ARM64 = Release|ARM64
+		RelWithDebInfo|Android-arm64-v8a = RelWithDebInfo|Android-arm64-v8a
+		RelWithDebInfo|ARM64 = RelWithDebInfo|ARM64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8CF5D0C2-34F4-3B1C-AF14-FDE7E0894701}.Debug|Android-arm64-v8a.ActiveCfg = Debug|Android-arm64-v8a
+		{8CF5D0C2-34F4-3B1C-AF14-FDE7E0894701}.Debug|Android-arm64-v8a.Build.0 = Debug|Android-arm64-v8a
+		{8CF5D0C2-34F4-3B1C-AF14-FDE7E0894701}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{8CF5D0C2-34F4-3B1C-AF14-FDE7E0894701}.Debug|ARM64.Build.0 = Debug|ARM64
+		{8CF5D0C2-34F4-3B1C-AF14-FDE7E0894701}.MinSizeRel|Android-arm64-v8a.ActiveCfg = MinSizeRel|Android-arm64-v8a
+		{8CF5D0C2-34F4-3B1C-AF14-FDE7E0894701}.MinSizeRel|Android-arm64-v8a.Build.0 = MinSizeRel|Android-arm64-v8a
+		{8CF5D0C2-34F4-3B1C-AF14-FDE7E0894701}.MinSizeRel|ARM64.ActiveCfg = MinSizeRel|ARM64
+		{8CF5D0C2-34F4-3B1C-AF14-FDE7E0894701}.MinSizeRel|ARM64.Build.0 = MinSizeRel|ARM64
+		{8CF5D0C2-34F4-3B1C-AF14-FDE7E0894701}.Release|Android-arm64-v8a.ActiveCfg = Release|Android-arm64-v8a
+		{8CF5D0C2-34F4-3B1C-AF14-FDE7E0894701}.Release|Android-arm64-v8a.Build.0 = Release|Android-arm64-v8a
+		{8CF5D0C2-34F4-3B1C-AF14-FDE7E0894701}.Release|ARM64.ActiveCfg = Release|ARM64
+		{8CF5D0C2-34F4-3B1C-AF14-FDE7E0894701}.Release|ARM64.Build.0 = Release|ARM64
+		{8CF5D0C2-34F4-3B1C-AF14-FDE7E0894701}.RelWithDebInfo|Android-arm64-v8a.ActiveCfg = RelWithDebInfo|Android-arm64-v8a
+		{8CF5D0C2-34F4-3B1C-AF14-FDE7E0894701}.RelWithDebInfo|Android-arm64-v8a.Build.0 = RelWithDebInfo|Android-arm64-v8a
+		{8CF5D0C2-34F4-3B1C-AF14-FDE7E0894701}.RelWithDebInfo|ARM64.ActiveCfg = RelWithDebInfo|ARM64
+		{8CF5D0C2-34F4-3B1C-AF14-FDE7E0894701}.RelWithDebInfo|ARM64.Build.0 = RelWithDebInfo|ARM64
+		{79D97A86-22F4-3726-87C6-DE028F81F51A}.Debug|Android-arm64-v8a.ActiveCfg = Debug|Android-arm64-v8a
+		{79D97A86-22F4-3726-87C6-DE028F81F51A}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{79D97A86-22F4-3726-87C6-DE028F81F51A}.MinSizeRel|Android-arm64-v8a.ActiveCfg = MinSizeRel|Android-arm64-v8a
+		{79D97A86-22F4-3726-87C6-DE028F81F51A}.MinSizeRel|ARM64.ActiveCfg = MinSizeRel|ARM64
+		{79D97A86-22F4-3726-87C6-DE028F81F51A}.Release|Android-arm64-v8a.ActiveCfg = Release|Android-arm64-v8a
+		{79D97A86-22F4-3726-87C6-DE028F81F51A}.Release|ARM64.ActiveCfg = Release|ARM64
+		{79D97A86-22F4-3726-87C6-DE028F81F51A}.RelWithDebInfo|Android-arm64-v8a.ActiveCfg = RelWithDebInfo|Android-arm64-v8a
+		{79D97A86-22F4-3726-87C6-DE028F81F51A}.RelWithDebInfo|ARM64.ActiveCfg = RelWithDebInfo|ARM64
+		{C0893DA8-46ED-3DB0-AE3D-F9C6733F68C1}.Debug|Android-arm64-v8a.ActiveCfg = Debug|Android-arm64-v8a
+		{C0893DA8-46ED-3DB0-AE3D-F9C6733F68C1}.Debug|Android-arm64-v8a.Build.0 = Debug|Android-arm64-v8a
+		{C0893DA8-46ED-3DB0-AE3D-F9C6733F68C1}.Debug|ARM64.ActiveCfg = Debug|ARM64
+		{C0893DA8-46ED-3DB0-AE3D-F9C6733F68C1}.Debug|ARM64.Build.0 = Debug|ARM64
+		{C0893DA8-46ED-3DB0-AE3D-F9C6733F68C1}.MinSizeRel|Android-arm64-v8a.ActiveCfg = MinSizeRel|Android-arm64-v8a
+		{C0893DA8-46ED-3DB0-AE3D-F9C6733F68C1}.MinSizeRel|Android-arm64-v8a.Build.0 = MinSizeRel|Android-arm64-v8a
+		{C0893DA8-46ED-3DB0-AE3D-F9C6733F68C1}.MinSizeRel|ARM64.ActiveCfg = MinSizeRel|ARM64
+		{C0893DA8-46ED-3DB0-AE3D-F9C6733F68C1}.MinSizeRel|ARM64.Build.0 = MinSizeRel|ARM64
+		{C0893DA8-46ED-3DB0-AE3D-F9C6733F68C1}.Release|Android-arm64-v8a.ActiveCfg = Release|Android-arm64-v8a
+		{C0893DA8-46ED-3DB0-AE3D-F9C6733F68C1}.Release|Android-arm64-v8a.Build.0 = Release|Android-arm64-v8a
+		{C0893DA8-46ED-3DB0-AE3D-F9C6733F68C1}.Release|ARM64.ActiveCfg = Release|ARM64
+		{C0893DA8-46ED-3DB0-AE3D-F9C6733F68C1}.Release|ARM64.Build.0 = Release|ARM64
+		{C0893DA8-46ED-3DB0-AE3D-F9C6733F68C1}.RelWithDebInfo|Android-arm64-v8a.ActiveCfg = RelWithDebInfo|Android-arm64-v8a
+		{C0893DA8-46ED-3DB0-AE3D-F9C6733F68C1}.RelWithDebInfo|Android-arm64-v8a.Build.0 = RelWithDebInfo|Android-arm64-v8a
+		{C0893DA8-46ED-3DB0-AE3D-F9C6733F68C1}.RelWithDebInfo|ARM64.ActiveCfg = RelWithDebInfo|ARM64
+		{C0893DA8-46ED-3DB0-AE3D-F9C6733F68C1}.RelWithDebInfo|ARM64.Build.0 = RelWithDebInfo|ARM64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{D571B3B6-85F1-3ECC-892D-A0B19BBAF800} = {75C4B05B-3430-3943-BA47-8695F493AF79}
+		{8CF5D0C2-34F4-3B1C-AF14-FDE7E0894701} = {D2976B92-5BB8-3B84-B032-0AE8233A4B58}
+		{79D97A86-22F4-3726-87C6-DE028F81F51A} = {D2976B92-5BB8-3B84-B032-0AE8233A4B58}
+		{C0893DA8-46ED-3DB0-AE3D-F9C6733F68C1} = {D571B3B6-85F1-3ECC-892D-A0B19BBAF800}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A7A2C613-E84E-37C6-9C2C-BA1877315D58}
+	EndGlobalSection
+EndGlobal

@@ -1886,10 +1886,10 @@ Bool _OldDecompress(File &src, File &dest, Bool memory, DataCallback *callback)
 /******************************************************************************/
 Bool Compressable(C Str &ext)
 {
-   if(ext=="jpg" || ext=="jpeg" || ext=="png"  || ext=="webp" || ext=="heif" || ext=="heic" || ext=="bpg" || ext=="flif" // image
-   || ext=="mp3" || ext=="wma"  || ext=="ogg"  || ext=="flac" || ext=="m4a"  || ext=="opus" || ext=="weba" // sound
-   || ext=="avi" || ext=="mpg"  || ext=="mpeg" || ext=="mp4"  || ext=="m4v"  || ext=="mkv" || ext=="wmv" || ext=="rmvb" || ext=="divx" || ext=="ogm" || ext=="ogv" || ext=="theora" || ext=="webm" || ext=="vob" || ext=="flv" // video
- /*|| ext=="zip"*/ || ext=="rar"  || ext=="7z"   || ext=="gz"   || ext=="bz2" || ext=="tgz" || ext=="tbz" || ext=="xz" // archives (skip "zip" because compressing it CAN reduce sizes, "tar" itself is not compressed)
+   if(ext=="jpg" || ext=="jpeg" || ext=="jxr" || ext=="jxl" || ext=="png" || ext=="webp" || ext=="avif" || ext=="heif" || ext=="heic" // image
+   || ext=="mp3" || ext=="ogg" || ext=="opus" || ext=="flac" || ext=="m4a" || ext=="weba" || ext=="wma" // sound
+   || ext=="mpg" || ext=="mpeg" || ext=="mp4" || ext=="m4v" || ext=="mkv" || ext=="webm" || ext=="avi" || ext=="wmv" || ext=="rmvb" || ext=="divx" || ext=="ogm" || ext=="ogv" || ext=="theora" || ext=="vob" || ext=="flv" // video
+ /*|| ext=="zip"*/ || ext=="rar" || ext=="7z" || ext=="gz" || ext=="bz2" || ext=="tgz" || ext=="tbz" || ext=="xz" // archives (skip "zip" because compressing it CAN reduce sizes, "tar" itself is not compressed)
    )return false;
     return true;
 }
@@ -2003,7 +2003,7 @@ UInt CompressionMemUsage(COMPRESS_TYPE type, Int compression_level, Long uncompr
    #endif
 
    #if SUPPORT_BROTLI
-      case COMPRESS_BROTLI: return ;
+      case COMPRESS_BROTLI: return ; https://github.com/google/brotli/issues/389
    #endif
 
    #if SUPPORT_LZHAM
@@ -2072,7 +2072,7 @@ UInt DecompressionMemUsage(COMPRESS_TYPE type, Int compression_level, Long uncom
    #endif
 
    #if SUPPORT_BROTLI
-      case COMPRESS_BROTLI: return ;
+      case COMPRESS_BROTLI: return ; https://github.com/google/brotli/issues/389
    #endif
 
    #if SUPPORT_LZHAM

@@ -207,6 +207,7 @@ struct DisplayClass : DisplayState, DisplayDraw // Display Control
 #endif
                                                                    C Rect&            rect              ()C {return _rect             ;} // get     full screen rectangle Rect(-w(), -h(), w(), h())
                                                                    C Rect&            rectUI            ()C {return _rect_ui          ;} // get     full screen rectangle that's safe for UI placement, normally it's equal to 'rect' however it may be smaller due to system controls, rounded corners, notch, etc.
+                                                                     Rect             rectUIKB          ()C;                             // get     full screen rectangle that's safe for UI placement, excluding Screen Keyboard
    DisplayClass& exclusive        (Bool             exclusive   );   Bool             exclusive         ()C {return _exclusive        ;} // get/set if fullscreen mode should be exclusive (true/false                         , default=            false                             ), this affects only Windows DirectX fullscreen mode, exclusive offers better performance, non-exclusive offers faster Alt+Tab switching
    DisplayClass& colorSpace       (COLOR_SPACE      color_space );   COLOR_SPACE      colorSpace        ()C {return _color_space      ;} // get/set if App should be color managed         (COLOR_SPACE                        , default= COLOR_SPACE_NONE                             ), if enabled then Application will convert colors from specified color space into monitor color space, based on selected monitor color profile in the Operating System. If there's no monitor color profile selected in the Operating System, then this option will have no effect. Using COLOR_SPACE_NONE disables color management, while other modes enable it. Warning: enabling color management reduces performance.
    DisplayClass& density          (Flt              density     );   Flt              density           ()C;                             // get/set Rendering Pixel Density                (0..2                               , default=                1                             ), density affects the number of pixels used during rendering, density=2 makes the rendering use 2x bigger render targets (super sampling) but slower performance, density=0.5 makes the rendering use 2x smaller render targets making the result more blurry but with faster performance, the change is NOT instant, avoid calling real-time
@@ -660,6 +661,7 @@ private:
    static void finish        ();
           void screenChanged (Flt old_width, Flt old_height);
           void   sizeChanged ();
+          void setRectUI     ();
           void validateCoords(Int eye=-1);
           void fadeUpdate    ();
           void fadeDraw      ();
@@ -739,6 +741,8 @@ inline DisplayClass &Display=D; // 'Display' alias ('Display' can be used the sa
       void unlock();
    }extern
       MainContext;
+
+   Ptr GetCurrentContext();
 
    extern UInt FBO, VAO;
    #if IOS

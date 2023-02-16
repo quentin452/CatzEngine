@@ -32,9 +32,9 @@ static void SaveVersions(File &f, C CMemPtr<FileVersion> &versions)
    f.cmpUIntV(0);
    versions.saveRaw(f);
 }
-static Bool          LoadVersions(C Str &name,    MemPtr<FileVersion>  versions, Bool latest_only=false) {File f; if(f.readStdTry(name))return LoadVersions(f, versions, latest_only); if(versions.resizable())versions.clear();else REPAO(versions).zero(); return false;}
-static Bool          SaveVersions(C Str &name, C CMemPtr<FileVersion> &versions                        ) {File f; if(f.writeTry  (name)){      SaveVersions(f, versions             ); return true;} return false;}
-static Bool SafeOverwriteVersions(C Str &name, C CMemPtr<FileVersion> &versions                        ) {File f;    f.writeMem  (    );       SaveVersions(f, versions             ); f.pos(0); return SafeOverwrite(f, name);}
+static Bool          LoadVersions(C Str &name,    MemPtr<FileVersion>  versions, Bool latest_only=false) {File f; if(f.readStd (name))return LoadVersions(f, versions, latest_only); if(versions.resizable())versions.clear();else REPAO(versions).zero(); return false;}
+static Bool          SaveVersions(C Str &name, C CMemPtr<FileVersion> &versions                        ) {File f; if(f.write   (name)){      SaveVersions(f, versions             ); return true;} return false;}
+static Bool SafeOverwriteVersions(C Str &name, C CMemPtr<FileVersion> &versions                        ) {File f;    f.writeMem(    );       SaveVersions(f, versions             ); f.pos(0); return SafeOverwrite(f, name);}
 /******************************************************************************/
 static Str VersionFolder(C Str &name) // get the name of the folder which will contain all versions of the 'name' file, "C:/Folder/file.ext" -> "C:/Folder/Version/file.ext"
 {
@@ -51,11 +51,11 @@ static Str VersionName(C Str &name, C DateTime &date_time) // get the name of th
 /******************************************************************************/
 static Bool ReadVersion(File &f, C Str &name, C DateTime &date_time) // open the 'f' file for reading of the 'date_time' version of the 'name' file
 {
-   return f.readStdTry(VersionName(name, date_time));
+   return f.readStd(VersionName(name, date_time));
 }
 static Bool WriteVersion(File &f, C Str &name, C DateTime &date_time) // open the 'f' file for writing of the 'date_time' version of the 'name' file
 {
-   return f.writeTry(VersionName(name, date_time));
+   return f.write(VersionName(name, date_time));
 }
 static Bool SaveVersion(File &f, C Str &name, C DateTime &date_time) // save 'f' file contents as the 'date_time' version of the 'name' file
 {
@@ -78,7 +78,7 @@ Bool GetVersion(File &f, C Str &name, C DateTime &time, Bool treat_base_as_lates
       FileVersion version;
       if(LoadVersions(VersionIndex(name), version, true)) // load info only about latest version
          if(version.time==time) // if that's it
-            return f.readStdTry(name); // read base file
+            return f.readStd(name); // read base file
    }
    return ReadVersion(f, name, time);
 }

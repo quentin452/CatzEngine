@@ -202,17 +202,15 @@ Bool IndSave(File &f, C Int *ind, Int inds, Int elms)
 }
 Bool IndLoad(File &f, Int *ind, Int inds)
 {
-   Int        bytes=f.getByte()/8,
-              size=inds*bytes;
-   Ptr        data=ind;
-   Memt<Byte> temp; if(bytes!=4)data=temp.setNum(size).data();
-   f.getFast(data, size);
-   switch(bytes)
+   Int bits =f.getByte(),
+       bytes=bits/8,
+       size =inds*bytes;
+   switch(bits)
    {
-      case  4: break;
-      case  3: Copy24To32(ind, data, inds); break;
-      case  2: Copy16To32(ind, data, inds); break;
-      case  1: Copy8To32 (ind, data, inds); break;
+      case  8: f.getFast(ind, size); Copy8To32 (ind, ind, inds); break;
+      case 16: f.getFast(ind, size); Copy16To32(ind, ind, inds); break;
+      case 24: f.getFast(ind, size); Copy24To32(ind, ind, inds); break;
+      case 32: f.getFast(ind, size); break;
       default: return false;
    }
    return f.ok();

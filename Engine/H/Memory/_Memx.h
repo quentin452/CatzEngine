@@ -15,7 +15,9 @@ struct _Memx // Block Based Extended Container Base - Do not use this class, use
 
    Ptr   absElm  (Int i)C {return (Byte*)_abs  [i]+SIZE(UInt);}
    Ptr validElm  (Int i)C {return absElm(_valid[i]);}
-   Ptr addr      (Int i)C {return InRange(i, T) ? T[i] : null;}
+   Ptr addr      (Int i)C {return InRange(i, T) ?     T[i] : null;}
+   Ptr addrFirst (     )C {return elms   (    ) ? first( ) : null;}
+   Ptr addrLast  (     )C {return elms   (    ) ?  last( ) : null;}
    Ptr operator[](Int i)C {return validElm(i);}
    Ptr first     (     )C {return validElm(0);}
    Ptr last      (     )C {return validElm(validElms()-1);}

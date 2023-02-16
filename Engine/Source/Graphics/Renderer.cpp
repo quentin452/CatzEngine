@@ -746,15 +746,6 @@ RendererClass& RendererClass::operator()(void (&render)())
 
       prepare(); MEASURE(_t_prepare[1])
       opaque (); MEASURE(_t_opaque [1])
-   #if GL && TILE_BASED_GPU && !WEB // we need to make sure that depth RT is flushed to depth texture on tile-based deferred renderers, this is because on those devices the RT's (including depth buffer) are stored in fast on-chip memory and to be able to read from them, we need to flush them to the texture memory. This is done after reading opaque's and before we may read from the depth buffer. No need to do on WEB because there we can never read from depth while writing to it.
-      if(canReadDepth())
-         if(D.edgeDetect() || D.particlesSoft() || Sky.wantDepth() || Clouds.wantDepth() || Fog.draw || Water._under_mtrl/* || Sun.wantDepth()*/) // here we need to check only effects that may read from depth without changing any RT's, because on any RT change the depth is flushed. Sun doesn't bind DS to FBO when drawing rays. TODO: we wouldn't need to do this if all shaders reading from the depth would use gl_LastFragDepth - https://www.khronos.org/registry/OpenGL/extensions/ARM/ARM_shader_framebuffer_fetch_depth_stencil.txt
-      { // unbinding will force the flush (calling just 'glFlush' was not enough)
-         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT  , GL_RENDERBUFFER, 0);
-         glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, 0);
-        _cur_ds=null; _cur_ds_id=0;
-      }
-   #endif
       overlay(); MEASURE(_t_overlay[1])
 
       // set background sky pixels not drawn by foreground object meshes (everything at the end of depth buffer), this needs to be done before 'blend' because fur may set depth buffer without setting velocities, and before water surface
@@ -1397,6 +1388,9 @@ void RendererClass::opaque()
        //resolveDepth(); was already called for the main light
       }break;
    }
+#if DEPTH_FLUSH
+  _modified_depth=true;
+#endif
 }
 void RendererClass::resolveDepth()
 {
@@ -2401,6 +2395,7 @@ void RendererClass::postProcess()
 
          case FILTER_CUBIC_FAST       :
          case FILTER_CUBIC_FAST_SMOOTH:
+         case FILTER_CUBIC_FAST_MED   :
          case FILTER_CUBIC_FAST_SHARP :
             pixels=2+1; // 2 for filtering + 1 for borders
             Sh.imgSize(*_col); shader=Sh.DrawTexCubicFastF[alpha][dither]; // this doesn't need to check for "_col->highPrecision" because resizing and cubic filtering generates smooth values

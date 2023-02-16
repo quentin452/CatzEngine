@@ -240,6 +240,8 @@
             <linkerLibFileItem>../../ThirdPartyLibs/PhysX/physx/bin/linux.clang/release/libPhysXPvdSDK_static_64.a</linkerLibFileItem>
             <linkerLibFileItem>../../ThirdPartyLibs/PhysX/physx/bin/linux.clang/release/libPhysXVehicle_static_64.a</linkerLibFileItem>
             <linkerLibFileItem>../../ThirdPartyLibs/PhysX/physx/bin/linux.clang/release/libPhysXCommon_static_64.a</linkerLibFileItem>
+            <linkerLibFileItem>../../ThirdPartyLibs/AVIF/Linux/libavif.a</linkerLibFileItem>
+            <linkerLibFileItem>../../ThirdPartyLibs/AOM/Linux/libaom.a</linkerLibFileItem>
             <linkerLibLibItem>X11</linkerLibLibItem>
             <linkerLibLibItem>Xmu</linkerLibLibItem>
             <linkerLibLibItem>Xxf86vm</linkerLibLibItem>
@@ -491,6 +493,8 @@
             <linkerLibFileItem>../../ThirdPartyLibs/PhysX/physx/bin/linux.clang/release/libPhysXPvdSDK_static_64.a</linkerLibFileItem>
             <linkerLibFileItem>../../ThirdPartyLibs/PhysX/physx/bin/linux.clang/release/libPhysXVehicle_static_64.a</linkerLibFileItem>
             <linkerLibFileItem>../../ThirdPartyLibs/PhysX/physx/bin/linux.clang/release/libPhysXCommon_static_64.a</linkerLibFileItem>
+            <linkerLibFileItem>../../ThirdPartyLibs/AVIF/Linux/libavif.a</linkerLibFileItem>
+            <linkerLibFileItem>../../ThirdPartyLibs/AOM/Linux/libaom.a</linkerLibFileItem>
             <linkerLibLibItem>X11</linkerLibLibItem>
             <linkerLibLibItem>Xmu</linkerLibLibItem>
             <linkerLibLibItem>Xxf86vm</linkerLibLibItem>

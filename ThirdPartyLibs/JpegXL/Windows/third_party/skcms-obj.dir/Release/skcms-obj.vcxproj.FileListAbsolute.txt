@@ -1,0 +1,1 @@
+C:\Esenthel\ThirdPartyLibs\JpegXL\Windows\third_party\skcms-obj.dir\Release\skcms-obj.lib

@@ -399,17 +399,17 @@ MeshLod& MeshLod::splitFloor(Flt y, Int i)
 /******************************************************************************/
 // TEXTURE TRANSFORM
 /******************************************************************************/
-MeshLod& MeshLod::texMove  (C Vec2 &move , Byte tex_index) {REPAO(parts).texMove  (move , tex_index); return T;}
-MeshLod& MeshLod::texScale (C Vec2 &scale, Byte tex_index) {REPAO(parts).texScale (scale, tex_index); return T;}
-MeshLod& MeshLod::texRotate(  Flt   angle, Byte tex_index) {REPAO(parts).texRotate(angle, tex_index); return T;}
+MeshLod& MeshLod::texMove  (C Vec2 &move , Byte uv_index) {REPAO(parts).texMove  (move , uv_index); return T;}
+MeshLod& MeshLod::texScale (C Vec2 &scale, Byte uv_index) {REPAO(parts).texScale (scale, uv_index); return T;}
+MeshLod& MeshLod::texRotate(  Flt   angle, Byte uv_index) {REPAO(parts).texRotate(angle, uv_index); return T;}
 /******************************************************************************/
 // TEXTURIZE
 /******************************************************************************/
-MeshLod& MeshLod::texMap(  Flt     scale , Byte tex_index) {REPAO(parts).base.texMap(scale , tex_index); return T;}
-MeshLod& MeshLod::texMap(C Matrix &matrix, Byte tex_index) {REPAO(parts).base.texMap(matrix, tex_index); return T;}
-MeshLod& MeshLod::texMap(C Plane  &plane , Byte tex_index) {REPAO(parts).base.texMap(plane , tex_index); return T;}
-MeshLod& MeshLod::texMap(C Ball   &ball  , Byte tex_index) {REPAO(parts).base.texMap(ball  , tex_index); return T;}
-MeshLod& MeshLod::texMap(C Tube   &tube  , Byte tex_index) {REPAO(parts).base.texMap(tube  , tex_index); return T;}
+MeshLod& MeshLod::texMap(  Flt     scale , Byte uv_index) {REPAO(parts).base.texMap(scale , uv_index); return T;}
+MeshLod& MeshLod::texMap(C Matrix &matrix, Byte uv_index) {REPAO(parts).base.texMap(matrix, uv_index); return T;}
+MeshLod& MeshLod::texMap(C Plane  &plane , Byte uv_index) {REPAO(parts).base.texMap(plane , uv_index); return T;}
+MeshLod& MeshLod::texMap(C Ball   &ball  , Byte uv_index) {REPAO(parts).base.texMap(ball  , uv_index); return T;}
+MeshLod& MeshLod::texMap(C Tube   &tube  , Byte uv_index) {REPAO(parts).base.texMap(tube  , uv_index); return T;}
 /******************************************************************************/
 // TRANSFORM
 /******************************************************************************/
@@ -500,7 +500,7 @@ MeshLod& MeshLod::weldVtxValues(MESH_FLAG flag, Flt pos_eps, Flt nrm_cos, Flt re
             Flt weight=vn.weight;
             if(flag&VTX_POS     )         parts[vn.index.y].base.vtx.pos     (vn.index.x)*=weight;
           //if(flag&VTX_MATERIAL)         parts[vn.index.y].base.vtx.material(vn.index.x)*=weight; VecB4 !! sum must be equal to 255 !!
-          //if(flag&VTX_MATRIX  )         parts[vn.index.y].base.vtx.matrix  (vn.index.x)*=weight; VecB4
+          //if(flag&VTX_MATRIX  )         parts[vn.index.y].base.vtx.matrix  (vn.index.x)*=weight; VtxBone
           //if(flag&VTX_BLEND   )         parts[vn.index.y].base.vtx.blend   (vn.index.x)*=weight; VecB4 !! sum must be equal to 255 !!
             if(flag&VTX_NRM     )         parts[vn.index.y].base.vtx.nrm     (vn.index.x)*=weight;
             if(flag&VTX_TAN     )         parts[vn.index.y].base.vtx.tan     (vn.index.x)*=weight;
@@ -525,7 +525,7 @@ MeshLod& MeshLod::weldVtxValues(MESH_FLAG flag, Flt pos_eps, Flt nrm_cos, Flt re
                                  vd.weight                                      +=weight;
             if(flag&VTX_POS     )parts[vd.index.y].base.vtx.pos     (vd.index.x)+=weight*parts[vn.index.y].base.vtx.pos     (vn.index.x);
           //if(flag&VTX_MATERIAL)parts[vd.index.y].base.vtx.material(vd.index.x)+=weight*parts[vn.index.y].base.vtx.material(vn.index.x); VecB4 !! sum must be equal to 255 !!
-          //if(flag&VTX_MATRIX  )parts[vd.index.y].base.vtx.matrix  (vd.index.x)+=weight*parts[vn.index.y].base.vtx.matrix  (vn.index.x); VecB4
+          //if(flag&VTX_MATRIX  )parts[vd.index.y].base.vtx.matrix  (vd.index.x)+=weight*parts[vn.index.y].base.vtx.matrix  (vn.index.x); VtxBone
           //if(flag&VTX_BLEND   )parts[vd.index.y].base.vtx.blend   (vd.index.x)+=weight*parts[vn.index.y].base.vtx.blend   (vn.index.x); VecB4 !! sum must be equal to 255 !!
             if(flag&VTX_NRM     )parts[vd.index.y].base.vtx.nrm     (vd.index.x)+=weight*parts[vn.index.y].base.vtx.nrm     (vn.index.x);
             if(flag&VTX_TAN     )parts[vd.index.y].base.vtx.tan     (vd.index.x)+=weight*parts[vn.index.y].base.vtx.tan     (vn.index.x);
@@ -549,7 +549,7 @@ MeshLod& MeshLod::weldVtxValues(MESH_FLAG flag, Flt pos_eps, Flt nrm_cos, Flt re
             weight=1/weight;
             if(flag&VTX_POS     )parts[vn.index.y].base.vtx.pos     (vn.index.x)*=weight;
           //if(flag&VTX_MATERIAL)parts[vn.index.y].base.vtx.material(vn.index.x)*=weight; VecB4 !! sum must be equal to 255 !!
-          //if(flag&VTX_MATRIX  )parts[vn.index.y].base.vtx.matrix  (vn.index.x)*=weight; VecB4
+          //if(flag&VTX_MATRIX  )parts[vn.index.y].base.vtx.matrix  (vn.index.x)*=weight; VtxBone
           //if(flag&VTX_BLEND   )parts[vn.index.y].base.vtx.blend   (vn.index.x)*=weight; VecB4 !! sum must be equal to 255 !!
             if(flag&VTX_NRM     )parts[vn.index.y].base.vtx.nrm     (vn.index.x).normalize();
             if(flag&VTX_TAN     )parts[vn.index.y].base.vtx.tan     (vn.index.x).normalize();
@@ -598,9 +598,9 @@ MeshLod& MeshLod::explodeVtxs(                ) {REPAO(parts).base.explodeVtxs( 
 MeshLod& MeshLod::tesselate  (Flt weld_pos_eps) {REPAO(parts).base.tesselate  (weld_pos_eps); return T;}
 MeshLod& MeshLod::subdivide  (                ) {REPAO(parts).base.subdivide  (            ); return T;}
 
-MeshLod& MeshLod::boneRemap(C CMemPtr<Byte, 256> &old_to_new)  {REPAO(parts).boneRemap  (old_to_new); return T;}
-void     MeshLod::includeUsedBones(Bool (&bones)[256]       )C {REPAO(parts).includeUsedBones(bones);}
-void     MeshLod::    setUsedBones(Bool (&bones)[256]       )C {Zero(bones); includeUsedBones(bones);}
+MeshLod& MeshLod::       boneRemap(C CMemPtrN<BoneType, 256> &old_to_new)  {  REPAO(parts).boneRemap  (old_to_new); return T;}
+void     MeshLod::includeUsedBones(   MemPtrN<Bool    , 256>  bones     )C {  REPAO(parts).includeUsedBones(bones);}
+void     MeshLod::    setUsedBones(   MemPtrN<Bool    , 256>  bones     )C {bones.clear(); includeUsedBones(bones);}
 
 MeshLod& MeshLod::freeOpenGLESData() {REPAO(parts).freeOpenGLESData(); return T;}
 
@@ -608,8 +608,8 @@ Bool MeshLod::waitForStream()C {Bool ok=true; REPA(parts)ok&=parts[i].waitForStr
 /******************************************************************************/
 // FIX
 /******************************************************************************/
-MeshLod& MeshLod::fixTexOffset  (Byte tex_index) {REPA(T)parts[i].base.fixTexOffset  (tex_index); return T;}
-MeshLod& MeshLod::fixTexWrapping(Byte tex_index) {REPA(T)parts[i].base.fixTexWrapping(tex_index); return T;}
+MeshLod& MeshLod::fixTexOffset  (Byte uv_index) {REPA(T)parts[i].base.fixTexOffset  (uv_index); return T;}
+MeshLod& MeshLod::fixTexWrapping(Byte uv_index) {REPA(T)parts[i].base.fixTexWrapping(uv_index); return T;}
 /******************************************************************************/
 // CONVERT
 /******************************************************************************/

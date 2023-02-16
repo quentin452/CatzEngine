@@ -160,7 +160,7 @@ enum ELM_OFFSET // offset applied for element ID when creating sub-elements for 
    ELM_OFFSET_NUM   ,
 }
 
-bool ElmCompressable(ELM_TYPE type) {return type==ELM_MESH || type==ELM_SKEL || type==ELM_PHYS || type==ELM_ANIM || type==ELM_FILE || type==ELM_FONT || type==ELM_PANEL_IMAGE || type==ELM_SOUND || type==ELM_GUI || type==ELM_IMAGE_ATLAS;} // if element file should be compressed before sending to server (don't compress ELM_IMAGE because it's already stored as JPG/PNG/WEBP), for 'ElmSendBoth' then only game version will be compressed, and edit will not (so it can be synchronized per-member on the server) !! don't change this for existing elements because this defines how element files are stored on the server (compressed or not) !!
+bool ElmCompressable(ELM_TYPE type) {return type==ELM_MESH || type==ELM_SKEL || type==ELM_PHYS || type==ELM_ANIM || type==ELM_FILE || type==ELM_FONT || type==ELM_PANEL_IMAGE || type==ELM_SOUND || type==ELM_GUI || type==ELM_IMAGE_ATLAS;} // if element file should be compressed before sending to server (don't compress ELM_IMAGE because it's already stored as JPG/JXL/PNG/WEBP/AVIF), for 'ElmSendBoth' then only game version will be compressed, and edit will not (so it can be synchronized per-member on the server) !! don't change this for existing elements because this defines how element files are stored on the server (compressed or not) !!
 bool ElmHasFile     (ELM_TYPE type) {return type==ELM_MESH || type==ELM_MTRL || type==ELM_SKEL || type==ELM_PHYS || type==ELM_ANIM || type==ELM_IMAGE || type==ELM_ICON || type==ELM_OBJ || type==ELM_ENUM || type==ELM_FILE || type==ELM_FONT || type==ELM_PANEL_IMAGE || type==ELM_GUI || type==ELM_SOUND || type==ELM_VIDEO || type==ELM_OBJ_CLASS || type==ELM_TEXT_STYLE || type==ELM_PANEL || type==ELM_GUI_SKIN || type==ELM_WATER_MTRL || type==ELM_PHYS_MTRL || type==ELM_ENV || type==ELM_ICON_SETTS || type==ELM_IMAGE_ATLAS/* || type==ELM_CODE*/;} // if element has a file, because ELM_CODE is synchronized manually, then it's not included here
 bool ElmFileInShort (ELM_TYPE type) {return type==ELM_ENUM || type==ELM_FONT || type==ELM_PANEL_IMAGE || type==ELM_OBJ  || type==ELM_MTRL || type==ELM_TEXT_STYLE || type==ELM_PANEL || type==ELM_GUI_SKIN || type==ELM_OBJ_CLASS || type==ELM_WATER_MTRL || type==ELM_PHYS_MTRL || type==ELM_ENV || type==ELM_ICON_SETTS/* || type==ELM_CODE*/;} // if include file data in CS_SET_ELM_SHORT, because ELM_CODE is synchronized manually, then it's not included here
 bool ElmEdit        (ELM_TYPE type) {return type==ELM_MESH || type==ELM_MTRL || type==ELM_SKEL || type==ELM_OBJ  || type==ELM_ENUM || type==ELM_FONT || type==ELM_PANEL_IMAGE || type==ELM_IMAGE || type==ELM_OBJ_CLASS || type==ELM_TEXT_STYLE || type==ELM_PANEL || type==ELM_GUI_SKIN || type==ELM_WATER_MTRL || type==ELM_PHYS_MTRL || type==ELM_ENV || type==ELM_ICON_SETTS;} // if element file is stored in the "edit" folder
@@ -269,7 +269,7 @@ class ElmData // !! IMPORTANT: all classes extending 'ElmData' must override 'un
        C TextNode &n=nodes[i];
          if(n.name=="Version"    )n.getValue(ver.ver );else
          if(n.name=="SrcFile"    )n.getValue(src_file);else
-         if(n.name=="SrcFileTime")src_file_time=n.asText();
+         if(n.name=="SrcFileTime")src_file_time.text(n);
       }
    }
 
@@ -583,10 +583,10 @@ class ElmMesh : ElmData
          if(n.name=="PhysBody"     )n.getValue   (phys_id      );else
          if(n.name=="Body"         )n.getValue   (body_id      );else
          if(n.name=="DrawGroup"    )n.getValue   (draw_group_id);else
-         if(n.name=="FileTime"     )      file_time=n.asText();else
-         if(n.name=="BodyTime"     )      body_time=n.asText();else
-         if(n.name=="DrawGroupTime")draw_group_time=n.asText();else
-         if(n.name=="PoseTime"     ) transform_time=n.asText();else
+         if(n.name=="FileTime"     )      file_time.text(n);else
+         if(n.name=="BodyTime"     )      body_time.text(n);else
+         if(n.name=="DrawGroupTime")draw_group_time.text(n);else
+         if(n.name=="PoseTime"     ) transform_time.text(n);else
          if(n.name=="Materials"    )
          {
             FREPA(n.nodes) // get in order
@@ -1021,7 +1021,7 @@ class ElmSkel : ElmData
        C TextNode &n=nodes[i];
          if(n.name=="Pose"    )n.getValueRaw(transform);else
          if(n.name=="Mesh"    )n.getValue   (mesh_id  );else
-         if(n.name=="FileTime")file_time=n.asText();
+         if(n.name=="FileTime")file_time.text(n);
       }
    }
 }
@@ -1132,9 +1132,9 @@ class ElmPhys : ElmData
          if(n.name=="Density"     )n.getValueRaw(density  );else
          if(n.name=="Mesh"        )n.getValue   (mesh_id  );else
          if(n.name=="Material"    )n.getValue   (mtrl_id  );else
-         if(n.name=="FileTime"    )   file_time=n.asText();else
-         if(n.name=="MaterialTime")   mtrl_time=n.asText();else
-         if(n.name=="DensityTime" )density_time=n.asText();
+         if(n.name=="FileTime"    )   file_time.text(n);else
+         if(n.name=="MaterialTime")   mtrl_time.text(n);else
+         if(n.name=="DensityTime" )density_time.text(n);
       }
    }
 }
@@ -1353,8 +1353,8 @@ class ElmAnim : ElmData
                                    nodes.New().set   ("Linear"            , linear());
       if(rootMove()               )nodes.New().setRaw("RootMove"          , root_move);
       if(rootRot ()               )nodes.New().setRaw("RootRot"           , root_rot );
-      if(flag&ROOT_DEL_POS        )nodes.New().set   ("RootDelPos"        , FlagAll(flag, ROOT_DEL_POS) ? S : S+(FlagOn(flag, ROOT_DEL_POS_X) ? 'X' : '\0')+(FlagOn(flag, ROOT_DEL_POS_Y) ? 'Y' : '\0')+(FlagOn(flag, ROOT_DEL_POS_Z) ? 'Z' : '\0'));
-      if(flag&ROOT_DEL_ROT        )nodes.New().set   ("RootDelRot"        , FlagAll(flag, ROOT_DEL_ROT) ? S : S+(FlagOn(flag, ROOT_DEL_ROT_X) ? 'X' : '\0')+(FlagOn(flag, ROOT_DEL_ROT_Y) ? 'Y' : '\0')+(FlagOn(flag, ROOT_DEL_ROT_Z) ? 'Z' : '\0'));
+      if(flag&ROOT_DEL_POS        )nodes.New().set   ("RootDelPos"        , FlagAll(flag, ROOT_DEL_POS) ? S : S+(FlagOn(flag, ROOT_DEL_POS_X) ? "X" : null)+(FlagOn(flag, ROOT_DEL_POS_Y) ? "Y" : null)+(FlagOn(flag, ROOT_DEL_POS_Z) ? "Z" : null));
+      if(flag&ROOT_DEL_ROT        )nodes.New().set   ("RootDelRot"        , FlagAll(flag, ROOT_DEL_ROT) ? S : S+(FlagOn(flag, ROOT_DEL_ROT_X) ? "X" : null)+(FlagOn(flag, ROOT_DEL_ROT_Y) ? "Y" : null)+(FlagOn(flag, ROOT_DEL_ROT_Z) ? "Z" : null));
       if(flag&ROOT_SMOOTH_ROT     )nodes.New().set   ("RootSmoothRot"     );
       if(flag&ROOT_SMOOTH_POS     )nodes.New().set   ("RootSmoothPos"     );
       if(fps>0                    )nodes.New().set   ("FPS"               , fps);
@@ -1380,10 +1380,10 @@ class ElmAnim : ElmData
          if(n.name=="RootSmoothPos"     )FlagSet(flag, ROOT_SMOOTH_POS, n.asBool1());else
          if(n.name=="FPS"               )        fps=n.asFlt ();else
          if(n.name=="ImportedFileParams")imported_file_params=n.asText();else
-         if(n.name=="LoopTime"          )  loop_time=n.asText();else
-         if(n.name=="LinearTime"        )linear_time=n.asText();else
-         if(n.name=="SkeletonTime"      )  skel_time=n.asText();else
-         if(n.name=="FileTime"          )  file_time=n.asText();else
+         if(n.name=="LoopTime"          )  loop_time.text(n);else
+         if(n.name=="LinearTime"        )linear_time.text(n);else
+         if(n.name=="SkeletonTime"      )  skel_time.text(n);else
+         if(n.name=="FileTime"          )  file_time.text(n);else
          if(n.name=="RootDelPos"        )
          {
             if(        !n.value.is()         )FlagEnable(flag, ROOT_DEL_POS);else
@@ -1623,14 +1623,14 @@ class ElmWorld : ElmData
          if(n.name=="CellSize"           )n.getValueRaw(cell_size);else
          if(n.name=="CellHeight"         )n.getValueRaw(cell_h   );else
          if(n.name=="Environment"        )n.getValue   (env_id   );else
-         if(n.name=="HeightmapResolutionTime")   hm_res_time=n.asText();else
-         if(n.name=="ControllerRadiusTime"   )   ctrl_r_time=n.asText();else
-         if(n.name=="ControllerHeightTime"   )   ctrl_h_time=n.asText();else
-         if(n.name=="MaxClimbTime"           )max_climb_time=n.asText();else
-         if(n.name=="MaxSlopeTime"           )max_slope_time=n.asText();else
-         if(n.name=="CellSizeTime"           )cell_size_time=n.asText();else
-         if(n.name=="CellHeightTime"         )   cell_h_time=n.asText();else
-         if(n.name=="EnvironmentTime"        )      env_time=n.asText();
+         if(n.name=="HeightmapResolutionTime")   hm_res_time.text(n);else
+         if(n.name=="ControllerRadiusTime"   )   ctrl_r_time.text(n);else
+         if(n.name=="ControllerHeightTime"   )   ctrl_h_time.text(n);else
+         if(n.name=="MaxClimbTime"           )max_climb_time.text(n);else
+         if(n.name=="MaxSlopeTime"           )max_slope_time.text(n);else
+         if(n.name=="CellSizeTime"           )cell_size_time.text(n);else
+         if(n.name=="CellHeightTime"         )   cell_h_time.text(n);else
+         if(n.name=="EnvironmentTime"        )      env_time.text(n);
       }
    }
 }
@@ -1895,15 +1895,15 @@ class ElmImage : ElmData
          if(n.name=="AlphaFromLum")alphaLum(n.asBool1());else
          if(n.name=="HasColor"    )hasColor(n.asBool1());else
          if(n.name=="HasAlpha"    )hasAlpha(n.asBool1());else
-         if(n.name=="MipMapsTime"     ) mip_maps_time=n.value;else
-         if(n.name=="Pow2Time"        )     pow2_time=n.value;else
-         if(n.name=="sRGBTime"        )     srgb_time=n.value;else
-         if(n.name=="EnvironmentTime" )      env_time=n.value;else
-         if(n.name=="AlphaFromLumTime")alpha_lum_time=n.value;else
-         if(n.name=="TypeTime"        )     type_time=n.value;else
-         if(n.name=="ModeTime"        )     mode_time=n.value;else
-         if(n.name=="SizeTime"        )     size_time=n.value;else
-         if(n.name=="FileTime"        )     file_time=n.value;
+         if(n.name=="MipMapsTime"     ) mip_maps_time.text(n);else
+         if(n.name=="Pow2Time"        )     pow2_time.text(n);else
+         if(n.name=="sRGBTime"        )     srgb_time.text(n);else
+         if(n.name=="EnvironmentTime" )      env_time.text(n);else
+         if(n.name=="AlphaFromLumTime")alpha_lum_time.text(n);else
+         if(n.name=="TypeTime"        )     type_time.text(n);else
+         if(n.name=="ModeTime"        )     mode_time.text(n);else
+         if(n.name=="SizeTime"        )     size_time.text(n);else
+         if(n.name=="FileTime"        )     file_time.text(n);
       }
    }
 }
@@ -1921,13 +1921,13 @@ class ElmImageAtlas : ElmData
       UID       id=UIDZero;
       TimeStamp removed_time;
 
-      static int Compare(C Img &img, C UID &id) {return .Compare(img.id, id);}
-
       bool equal(C Img &src)C {return removed_time==src.removed_time;}
       bool newer(C Img &src)C {return removed_time> src.removed_time;}
 
       bool undo(C Img &src) {return Undo(removed_time, src.removed_time, removed, src.removed);}
    }
+   static int CompareID(C Img &img, C UID &id) {return Compare(img.id, id);}
+
    byte      flag=MIP_MAPS|COMPRESS;
    Memc<Img> images;
    TimeStamp file_time, mip_maps_time, compress_time;
@@ -1936,8 +1936,8 @@ class ElmImageAtlas : ElmData
    bool compress()C {return FlagOn(flag, COMPRESS);}   void compress(bool on) {FlagSet(flag, COMPRESS, on);}
 
  C Img* find(C UID &id)C {return ConstCast(T).find(id);}
-   Img* find(C UID &id)  {       return images.binaryFind  (id,    Img.Compare);}
-   Img&  get(C UID &id)  {int i; return images.binarySearch(id, i, Img.Compare) ? images[i] : images.NewAt(i);}
+   Img* find(C UID &id)  {       return images.binaryFind  (id,    CompareID);}
+   Img&  get(C UID &id)  {int i; return images.binarySearch(id, i, CompareID) ? images[i] : images.NewAt(i);}
 
    // operations
    virtual void newData()override {super.newData(); file_time++; mip_maps_time++; compress_time++;}
@@ -2072,9 +2072,9 @@ class ElmImageAtlas : ElmData
        C TextNode &n=nodes[i];
          if(n.name=="MipMaps"     )mipMaps (n.asBool1());else
          if(n.name=="Compress"    )compress(n.asBool1());else
-         if(n.name=="MipMapsTime" )mip_maps_time=n.value;else
-         if(n.name=="CompressTime")compress_time=n.value;else
-         if(n.name=="FileTime"    )    file_time=n.value;else
+         if(n.name=="MipMapsTime" )mip_maps_time.text(n);else
+         if(n.name=="CompressTime")compress_time.text(n);else
+         if(n.name=="FileTime"    )    file_time.text(n);else
          if(n.name=="Images"      )FREPA(n.nodes) // get in order
          {
           C TextNode &src=n.nodes[i]; UID id; if(id.fromText(src.name) && id.valid())
@@ -2083,8 +2083,8 @@ class ElmImageAtlas : ElmData
                REPA(src.nodes)
                {
                 C TextNode &n=src.nodes[i];
-                  if(n.name=="Removed"    )dest.removed     =n.asBool1();else
-                  if(n.name=="RemovedTime")dest.removed_time=n.asText ();
+                  if(n.name=="Removed"    )dest.removed=n.asBool1();else
+                  if(n.name=="RemovedTime")dest.removed_time.text(n);
                }
             }
          }
@@ -2283,12 +2283,12 @@ class ElmIcon : ElmData
          if(n.name=="AnimationPosition")n.getValueRaw(        anim_pos);else
          if(n.name=="HasColor"         )hasColor(n.asBool1());else
          if(n.name=="HasAlpha"         )hasAlpha(n.asBool1());else
-         if(n.name=="IconSettingsTime"     )icon_settings_time=n.asText();else
-         if(n.name=="ObjectTime"           )          obj_time=n.asText();else
-         if(n.name=="FileTime"             )         file_time=n.asText();else
-         if(n.name=="AnimationTime"        )      anim_id_time=n.asText();else
-         if(n.name=="AnimationPositionTime")     anim_pos_time=n.asText();else
-         if(n.name=="VariationTime"        )    variation_time=n.asText();
+         if(n.name=="IconSettingsTime"     )icon_settings_time.text(n);else
+         if(n.name=="ObjectTime"           )          obj_time.text(n);else
+         if(n.name=="FileTime"             )         file_time.text(n);else
+         if(n.name=="AnimationTime"        )      anim_id_time.text(n);else
+         if(n.name=="AnimationPositionTime")     anim_pos_time.text(n);else
+         if(n.name=="VariationTime"        )    variation_time.text(n);
       }
    }
 }
@@ -2631,7 +2631,7 @@ class ElmGui : ElmData
       REPA(nodes)
       {
        C TextNode &n=nodes[i];
-         if(n.name=="FileTime")file_time=n.asText();
+         if(n.name=="FileTime")file_time.text(n);
       }
    }
 }
@@ -2705,7 +2705,7 @@ class ElmSound : ElmData
       REPA(nodes)
       {
        C TextNode &n=nodes[i];
-         if(n.name=="FileTime")file_time=n.asText();
+         if(n.name=="FileTime")file_time.text(n);
       }
    }
 }
@@ -2779,7 +2779,7 @@ class ElmVideo : ElmData
       REPA(nodes)
       {
        C TextNode &n=nodes[i];
-         if(n.name=="FileTime")file_time=n.asText();
+         if(n.name=="FileTime")file_time.text(n);
       }
    }
 }
@@ -2853,7 +2853,7 @@ class ElmFile : ElmData
       REPA(nodes)
       {
        C TextNode &n=nodes[i];
-         if(n.name=="FileTime")file_time=n.asText();
+         if(n.name=="FileTime")file_time.text(n);
       }
    }
 }
@@ -3790,9 +3790,9 @@ class ElmApp : ElmData
             {
              C TextNode &ms=n.nodes[i];
                if(ms.name=="PublisherID"      )ms_publisher_id.fromCanonical(ms.asText());else
-               if(ms.name=="PublisherIDTime"  )ms_publisher_id_time         =ms.asText() ;else
+               if(ms.name=="PublisherIDTime"  )ms_publisher_id_time    .text(ms);else
                if(ms.name=="PublisherName"    )ms.getValue                  (ms_publisher_name);else
-               if(ms.name=="PublisherNameTime")ms_publisher_name_time       =ms.asText();
+               if(ms.name=="PublisherNameTime")ms_publisher_name_time  .text(ms);
             }
          }else
          if(n.name=="XboxLive")
@@ -3801,11 +3801,11 @@ class ElmApp : ElmData
             {
              C TextNode &xbl=n.nodes[i];
                if(xbl.name=="Program"    )xbl_program           =(Edit.XBOX_LIVE)xbl.asInt();else
-               if(xbl.name=="ProgramTime")xbl_program_time      =xbl.asText() ;else
+               if(xbl.name=="ProgramTime")xbl_program_time .text(xbl);else
                if(xbl.name=="TitleID"    )xbl.getValue          (xbl_title_id);else
-               if(xbl.name=="TitleIDTime")xbl_title_id_time     =xbl.asText() ;else
+               if(xbl.name=="TitleIDTime")xbl_title_id_time.text(xbl);else
                if(xbl.name=="SCID"       )xbl_scid.fromCanonical(xbl.asText());else
-               if(xbl.name=="SCIDTime"   )xbl_scid_time         =xbl.asText();
+               if(xbl.name=="SCIDTime"   )xbl_scid_time    .text(xbl);
             }
          }else
          if(n.name=="Nintendo")
@@ -3813,14 +3813,14 @@ class ElmApp : ElmData
             REPA(n.nodes)
             {
              C TextNode &nintendo=n.nodes[i];
-               if(nintendo.name=="InitialCode"      )nintendo.getValue           (nintendo_initial_code);else
-               if(nintendo.name=="InitialCodeTime"  )nintendo_initial_code_time  =nintendo.asText();else
-               if(nintendo.name=="AppID"            )nintendo.getValue           (nintendo_app_id);else
-               if(nintendo.name=="AppIDTime"        )nintendo_app_id_time        =nintendo.asText();else
-               if(nintendo.name=="PublisherName"    )nintendo.getValue           (nintendo_publisher_name);else
-               if(nintendo.name=="PublisherNameTime")nintendo_publisher_name_time=nintendo.asText();else
-               if(nintendo.name=="LegalInfo"        )nintendo.getValue           (nintendo_legal_info);else
-               if(nintendo.name=="LegalInfoTime"    )nintendo_legal_info_time    =nintendo.asText();
+               if(nintendo.name=="InitialCode"      )nintendo.getValue                (nintendo_initial_code);else
+               if(nintendo.name=="InitialCodeTime"  )nintendo_initial_code_time  .text(nintendo);else
+               if(nintendo.name=="AppID"            )nintendo.getValue                (nintendo_app_id);else
+               if(nintendo.name=="AppIDTime"        )nintendo_app_id_time        .text(nintendo);else
+               if(nintendo.name=="PublisherName"    )nintendo.getValue                (nintendo_publisher_name);else
+               if(nintendo.name=="PublisherNameTime")nintendo_publisher_name_time.text(nintendo);else
+               if(nintendo.name=="LegalInfo"        )nintendo.getValue                (nintendo_legal_info);else
+               if(nintendo.name=="LegalInfoTime"    )nintendo_legal_info_time    .text(nintendo);
             }
          }else
          if(n.name=="FacebookAppID")n.getValue(fb_app_id);else
@@ -3831,8 +3831,8 @@ class ElmApp : ElmData
              C TextNode &am=n.nodes[i];
                if(am.name=="AppIDiOS"       )am.getValue(am_app_id_ios   );else
                if(am.name=="AppIDGoogle"    )am.getValue(am_app_id_google);else
-               if(am.name=="AppIDiOSTime"   )am_app_id_ios_time   =am.asText();else
-               if(am.name=="AppIDGoogleTime")am_app_id_google_time=am.asText();
+               if(am.name=="AppIDiOSTime"   )am_app_id_ios_time   .text(am);else
+               if(am.name=="AppIDGoogleTime")am_app_id_google_time.text(am);
             }
          }else
          if(n.name=="Chartboost"                  )
@@ -3844,56 +3844,56 @@ class ElmApp : ElmData
                if(cb.name=="AppSignatureiOS"       )cb.getValue(cb_app_signature_ios   );else
                if(cb.name=="AppIDGoogle"           )cb.getValue(cb_app_id_google       );else
                if(cb.name=="AppSignatureGoogle"    )cb.getValue(cb_app_signature_google);else
-               if(cb.name=="AppIDiOSTime"          )cb_app_id_ios_time          =cb.asText();else
-               if(cb.name=="AppSignatureiOSTime"   )cb_app_signature_ios_time   =cb.asText();else
-               if(cb.name=="AppIDGoogleTime"       )cb_app_id_google_time       =cb.asText();else
-               if(cb.name=="AppSignatureGoogleTime")cb_app_signature_google_time=cb.asText();
+               if(cb.name=="AppIDiOSTime"          )cb_app_id_ios_time          .text(cb);else
+               if(cb.name=="AppSignatureiOSTime"   )cb_app_signature_ios_time   .text(cb);else
+               if(cb.name=="AppIDGoogleTime"       )cb_app_id_google_time       .text(cb);else
+               if(cb.name=="AppSignatureGoogleTime")cb_app_signature_google_time.text(cb);
             }
          }else
-         if(n.name=="BuildTime"   )build_time=n.asText();else
-         if(n.name=="PackageTime" )package_time=n.asText();else
-         if(n.name=="SaveSizeTime")save_size_time=n.asText();else
+         if(n.name=="BuildTime"   )build_time.text(n);else
+         if(n.name=="PackageTime" )package_time.text(n);else
+         if(n.name=="SaveSizeTime")save_size_time.text(n);else
 
-         if(n.name=="IconTime"            )icon_time=n.asText();else
-         if(n.name=="NotificationIconTime")notification_icon_time=n.asText();else
-         if(n.name=="SplashPortraitTime"  )image_portrait_time=n.asText();else
-         if(n.name=="SplashLandscapeTime" )image_landscape_time=n.asText();else
-         if(n.name=="GuiSkinTime"         )gui_skin_time=n.asText();else
+         if(n.name=="IconTime"            )icon_time.text(n);else
+         if(n.name=="NotificationIconTime")notification_icon_time.text(n);else
+         if(n.name=="SplashPortraitTime"  )image_portrait_time.text(n);else
+         if(n.name=="SplashLandscapeTime" )image_landscape_time.text(n);else
+         if(n.name=="GuiSkinTime"         )gui_skin_time.text(n);else
 
-         if(n.name=="EmbedEngineDataTime"   )embed_engine_data_time  =n.asText();else
-         if(n.name=="PublishProjectDataTime")publish_proj_data_time  =n.asText();else
-         if(n.name=="PublishDataAsPAKTime"  )publish_data_as_pak_time=n.asText();else
-         if(n.name=="PublishPhysXDLLTime"   )publish_physx_dll_time  =n.asText();else
-         if(n.name=="PublishSteamDLLTime"   )publish_steam_dll_time  =n.asText();else
-         if(n.name=="PublishOpenVRDLLTime"  )publish_open_vr_dll_time=n.asText();else
+         if(n.name=="EmbedEngineDataTime"   )embed_engine_data_time.text(n);else
+         if(n.name=="PublishProjectDataTime")publish_proj_data_time.text(n);else
+         if(n.name=="PublishDataAsPAKTime"  )publish_data_as_pak_time.text(n);else
+         if(n.name=="PublishPhysXDLLTime"   )publish_physx_dll_time.text(n);else
+         if(n.name=="PublishSteamDLLTime"   )publish_steam_dll_time.text(n);else
+         if(n.name=="PublishOpenVRDLLTime"  )publish_open_vr_dll_time.text(n);else
 
-         if(n.name=="IncludePathsWindowsTime"     )dirs_windows_time=n.asText();else
-         if(n.name=="IncludePathsMacTime"         )dirs_mac_time=n.asText();else
-         if(n.name=="IncludePathsLinuxTime"       )dirs_linux_time=n.asText();else
-         if(n.name=="IncludePathsAndroidTime"     )dirs_android_time=n.asText();else
-         if(n.name=="IncludePathsiOSTime"         )dirs_ios_time=n.asText();else
-         if(n.name=="IncludePathsNintendoTime"    )dirs_nintendo_time=n.asText();else
-         if(n.name=="IncludeHeadersWindowsTime"   )headers_windows_time=n.asText();else
-         if(n.name=="IncludeHeadersMacTime"       )headers_mac_time=n.asText();else
-         if(n.name=="IncludeHeadersLinuxTime"     )headers_linux_time=n.asText();else
-         if(n.name=="IncludeHeadersAndroidTime"   )headers_android_time=n.asText();else
-         if(n.name=="IncludeHeadersiOSTime"       )headers_ios_time=n.asText();else
-         if(n.name=="IncludeHeadersNintendoTime"  )headers_nintendo_time=n.asText();else
-         if(n.name=="IncludeLibrariesWindowsTime" )libs_windows_time=n.asText();else
-         if(n.name=="IncludeLibrariesMacTime"     )libs_mac_time=n.asText();else
-         if(n.name=="IncludeLibrariesLinuxTime"   )libs_linux_time=n.asText();else
-         if(n.name=="IncludeLibrariesAndroidTime" )libs_android_time=n.asText();else
-         if(n.name=="IncludeLibrariesiOSTime"     )libs_ios_time=n.asText();else
-         if(n.name=="IncludeLibrariesNintendoTime")libs_nintendo_time=n.asText();else
+         if(n.name=="IncludePathsWindowsTime"     )dirs_windows_time.text(n);else
+         if(n.name=="IncludePathsMacTime"         )dirs_mac_time.text(n);else
+         if(n.name=="IncludePathsLinuxTime"       )dirs_linux_time.text(n);else
+         if(n.name=="IncludePathsAndroidTime"     )dirs_android_time.text(n);else
+         if(n.name=="IncludePathsiOSTime"         )dirs_ios_time.text(n);else
+         if(n.name=="IncludePathsNintendoTime"    )dirs_nintendo_time.text(n);else
+         if(n.name=="IncludeHeadersWindowsTime"   )headers_windows_time.text(n);else
+         if(n.name=="IncludeHeadersMacTime"       )headers_mac_time.text(n);else
+         if(n.name=="IncludeHeadersLinuxTime"     )headers_linux_time.text(n);else
+         if(n.name=="IncludeHeadersAndroidTime"   )headers_android_time.text(n);else
+         if(n.name=="IncludeHeadersiOSTime"       )headers_ios_time.text(n);else
+         if(n.name=="IncludeHeadersNintendoTime"  )headers_nintendo_time.text(n);else
+         if(n.name=="IncludeLibrariesWindowsTime" )libs_windows_time.text(n);else
+         if(n.name=="IncludeLibrariesMacTime"     )libs_mac_time.text(n);else
+         if(n.name=="IncludeLibrariesLinuxTime"   )libs_linux_time.text(n);else
+         if(n.name=="IncludeLibrariesAndroidTime" )libs_android_time.text(n);else
+         if(n.name=="IncludeLibrariesiOSTime"     )libs_ios_time.text(n);else
+         if(n.name=="IncludeLibrariesNintendoTime")libs_nintendo_time.text(n);else
 
-         if(n.name=="StorageTime"              )storage_time=n.asText();else
-         if(n.name=="SupportedOrientationsTime")supported_orientations_time=n.asText();else
-         if(n.name=="SupportedLanguagesTime"   )supported_languages_time   =n.asText();else
-         if(n.name=="LocationUsageReasonTime"  )location_usage_reason_time =n.asText();else
-         if(n.name=="PlayAssetDeliveryTime"    )play_asset_delivery_time   =n.asText();else
-         if(n.name=="AndroidLicenseKeyTime"    )android_license_key_time   =n.asText();else
+         if(n.name=="StorageTime"              )storage_time.text(n);else
+         if(n.name=="SupportedOrientationsTime")supported_orientations_time.text(n);else
+         if(n.name=="SupportedLanguagesTime"   )supported_languages_time.text(n);else
+         if(n.name=="LocationUsageReasonTime"  )location_usage_reason_time.text(n);else
+         if(n.name=="PlayAssetDeliveryTime"    )play_asset_delivery_time.text(n);else
+         if(n.name=="AndroidLicenseKeyTime"    )android_license_key_time.text(n);else
 
-         if(n.name=="FacebookAppIDTime")fb_app_id_time=n.asText();
+         if(n.name=="FacebookAppIDTime")fb_app_id_time.text(n);
       }
    }
 }
@@ -3984,10 +3984,10 @@ class ElmMiniMap : ElmData
          if(n.name=="ImageSize"        )n.getValue(image_size);else
          if(n.name=="World"            )n.getValue(world_id);else
          if(n.name=="Environment"      )n.getValue(  env_id);else
-         if(n.name=="AreasPerImageTime")areas_per_image_time=n.asText();else
-         if(n.name=="ImageSizeTime"    )     image_size_time=n.asText();else
-         if(n.name=="WorldTime"        )          world_time=n.asText();else
-         if(n.name=="EnvironmentTime"  )            env_time=n.asText();
+         if(n.name=="AreasPerImageTime")areas_per_image_time.text(n);else
+         if(n.name=="ImageSizeTime"    )     image_size_time.text(n);else
+         if(n.name=="WorldTime"        )          world_time.text(n);else
+         if(n.name=="EnvironmentTime"  )            env_time.text(n);
       }
    }
 }
@@ -4417,10 +4417,10 @@ class Elm
          if(n.name=="Removed"      )removed      (n.asBool1());else
          if(n.name=="Publish"      )publish      (n.asBool1());else
          if(n.name=="PublishMobile")publishMobile(n.asBool1());else
-         if(n.name=="NameTime"     )name_time    =n.asText () ;else
-         if(n.name=="ParentTime"   )parent_time  =n.asText () ;else
-         if(n.name=="RemovedTime"  )removed_time =n.asText () ;else
-         if(n.name=="PublishTime"  )publish_time =n.asText () ;else
+         if(n.name=="NameTime"     )name_time   .text(n);else
+         if(n.name=="ParentTime"   )parent_time .text(n);else
+         if(n.name=="RemovedTime"  )removed_time.text(n);else
+         if(n.name=="PublishTime"  )publish_time.text(n);else
          if(n.name=="Data"         )data_node    =&n; // remember for later, because to load data, first we must know the type
       }
       if(!type){error=S+"Element \""+node.name+"\" has no type"; return false;}

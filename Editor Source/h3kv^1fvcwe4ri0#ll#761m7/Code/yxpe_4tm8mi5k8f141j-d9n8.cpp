@@ -57,8 +57,8 @@ class AdjustBoneOrns : PropWin
              force_nose_forward=true,
              force_jaw_forward=true,
              force_breast_forward=true,
-             force_spine_up=false,
-             force_neck_up=false,
+             force_spine_up=true,
+             force_neck_up=true,
              force_head_up=true,
              force_toe_forward=true,
              add_shoulder=false,
@@ -99,7 +99,7 @@ class AdjustBoneOrns : PropWin
       flt dist=0;
       int bone_i=ObjEdit.mesh.boneFind(bone.name); if(bone_i>=0)
       {
-         bone_i++;
+         bone_i+=VIRTUAL_ROOT_BONE;
          // convert from world space to original mesh matrix
          Vec pos=bone.pos/ObjEdit.mesh_matrix,
              dir=bone.dir/ObjEdit.mesh_matrix.orn(); dir/=dir.length2(); // warning: this will be scaled (not normalized), we have to inverse scale, to convert back from mesh space to world space
@@ -109,8 +109,8 @@ class AdjustBoneOrns : PropWin
             MeshBase &base=lod.parts[i].base;
             if(base.vtx.pos() && base.vtx.matrix() && base.vtx.blend())REPA(base.vtx)
             {
-             C VecB4 &matrix=base.vtx.matrix(i),
-                     &blend =base.vtx.blend (i);
+             C VtxBone &matrix=base.vtx.matrix(i);
+             C VecB4   &blend =base.vtx.blend (i);
                if(matrix.x==bone_i && blend.x>0
                || matrix.y==bone_i && blend.y>0
                || matrix.z==bone_i && blend.z>0
@@ -151,14 +151,14 @@ class AdjustBoneOrns : PropWin
          {
             SkelBone &bone  =skel.bones[i];
           C SkelBone *parent=skel.bones.addr(bone.parent);
-            if(bone.type==BONE_UPPER_ARM && bone.type_sub==0 && (!parent || parent.type!=BONE_SHOULDER) && skel.bones.elms()<255)
+            if(bone.type==BONE_UPPER_ARM && bone.type_sub==0 && (!parent || parent.type!=BONE_SHOULDER) && skel.bones.elms()+1<=BONE_NULL)
             {
                added_bone=true;
                int bi=skel.bones.elms();
                SkelBone &new_bone=skel.bones.New(), &bone=skel.bones[i]; // !! have to access 'bone' again because it memory address changed
                new_bone.parent=bone.parent; bone.parent=bi;
                Set(new_bone.name, UniqueName(skel, S+"Shoulder"+((bone.type_index>=0) ? 'R' : 'L')
-                                                               +(bone.type_index>0 ? TextInt(bone.type_index) : bone.type_index<-1 ? TextInt(-bone.type_index-1) : S)));
+                                                               +((bone.type_index> 0) ? TextInt(bone.type_index) : bone.type_index<-1 ? TextInt(-bone.type_index-1) : S)));
                new_bone.type=BONE_SHOULDER;
                Vec from=bone.pos; from.x*=shoulder_frac;
                new_bone.setFromTo(from, bone.pos);

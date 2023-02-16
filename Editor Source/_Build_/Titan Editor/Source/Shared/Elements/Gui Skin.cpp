@@ -1835,7 +1835,7 @@
    }
    bool EditGuiSkin::load(C Str &name)
    {
-      File f; if(f.readTry(name))return load(f);
+      File f; if(f.read(name))return load(f);
       reset(); return false;
    }
 EditGuiSkin::Button::Button() : normal_id(UIDZero), pushed_id(UIDZero), disabled_id(UIDZero), pushed_disabled_id(UIDZero), text_style_id(UIDZero) {}

@@ -42,10 +42,11 @@ inline Bool Str ::save(File &f)C {f.putStr(T); return f.ok();}
 inline Bool Str8::load(File &f)  {f.getStr(T); return f.ok();}
 inline Bool Str ::load(File &f)  {f.getStr(T); return f.ok();}
 /******************************************************************************/
-inline   TextNode*           FindNode (MemPtr<TextNode> nodes, C Str &name, Int i)  {return ConstCast(  CFindNode (nodes, name, i));}
-inline C XmlParam*  XmlNode::findParam(C Str &name, Int i                        )C {return ConstCast(T).findParam(       name, i) ;}
-inline C TextNode* TextNode::findNode (C Str &name, Int i                        )C {return ConstCast(T).findNode (       name, i) ;}
-inline C TextNode* TextData::findNode (C Str &name, Int i                        )C {return ConstCast(T).findNode (       name, i) ;}
+inline   TextParam*           FindParam(MemPtr<TextParam> params, C Str &name, Int i)  {return ConstCast(  CFindParam(params, name, i));}
+inline   TextNode *           FindNode (MemPtr<TextNode >  nodes, C Str &name, Int i)  {return ConstCast(  CFindNode ( nodes, name, i));}
+inline C XmlParam *  XmlNode::findParam(C Str &name, Int i                          )C {return ConstCast(T).findParam(        name, i) ;}
+inline C TextNode * TextNode::findNode (C Str &name, Int i                          )C {return ConstCast(T).findNode (        name, i) ;}
+inline C TextNode * TextData::findNode (C Str &name, Int i                          )C {return ConstCast(T).findNode (        name, i) ;}
 /******************************************************************************/
 inline C TextParam* FileParams::findParam(C Str &name)C {return ConstCast(T).findParam(name);}
 /******************************************************************************/
@@ -66,6 +67,26 @@ inline C Param* Object::findParam(C Str8 &name)C {return ConstCast(T).findParam(
 inline C Param* Object::findParam(C Str  &name)C {return ConstCast(T).findParam(name  );}
 inline C Param& Object:: getParam(C Str  &name)C {return ConstCast(T). getParam(name  );}
 /******************************************************************************/
+extern Bool  _ImportJXL (Image &image, File &f);
+extern Bool (*ImportJXL)(Image &image, File &f);
+inline void   SupportImportJXL() {ImportJXL=_ImportJXL;}
+
+extern Bool  _ExportJXL (C Image &image, File &f, Flt quality, Flt compression_level);
+extern Bool (*ExportJXL)(C Image &image, File &f, Flt quality, Flt compression_level);
+inline void   SupportExportJXL() {ExportJXL=_ExportJXL;}
+
+inline void   SupportJXL() {SupportImportJXL(); SupportExportJXL();}
+
+extern Bool  _ImportAVIF (Image &image, File &f);
+extern Bool (*ImportAVIF)(Image &image, File &f);
+inline void   SupportImportAVIF() {ImportAVIF=_ImportAVIF;}
+
+extern Bool  _ExportAVIF (C Image &image, File &f, Flt rgb_quality, Flt alpha_quality, Flt compression_level);
+extern Bool (*ExportAVIF)(C Image &image, File &f, Flt rgb_quality, Flt alpha_quality, Flt compression_level);
+inline void   SupportExportAVIF() {ExportAVIF=_ExportAVIF;}
+
+inline void   SupportAVIF() {SupportImportAVIF(); SupportExportAVIF();}
+
 extern Bool  _CompressBC67 (C Image &src, Image &dest);
 extern Bool (*CompressBC67)(C Image &src, Image &dest);
 inline void   SupportCompressBC() {CompressBC67=_CompressBC67;}
@@ -82,7 +103,7 @@ extern Bool  _CompressPVRTC (C Image &src, Image &dest, Int quality=-1);
 extern Bool (*CompressPVRTC)(C Image &src, Image &dest, Int quality   );
 inline void   SupportCompressPVRTC() {if(WINDOWS_OLD || MAC || LINUX)CompressPVRTC=_CompressPVRTC;}
 
-inline void SupportCompressAll() {SupportCompressBC(); SupportCompressETC(); SupportCompressASTC(); SupportCompressPVRTC();}
+inline void SupportCompressAll() {SupportCompressBC(); SupportCompressETC(); SupportCompressASTC(); SupportCompressPVRTC(); SupportJXL(); SupportAVIF();}
 
 extern Bool  _ResizeWaifu (C Image &src, Image &dest, UInt flags);
 extern Bool (*ResizeWaifu)(C Image &src, Image &dest, UInt flags);
@@ -450,7 +471,7 @@ T1(TYPE)  Bool  Mems<TYPE>::_load   (File &f)  {setNum(f.getInt(      )); FREPA(
 
 T1(TYPE)  Mems<TYPE>::~Mems(            )          {del();}
 T1(TYPE)  Mems<TYPE>:: Mems(            )          {_data=null; _elms=0;}
-T1(TYPE)  Mems<TYPE>:: Mems(  Int   elms)          {MAX(elms, 0); Alloc(_data, elms); _elms=elms; if(ClassFunc<TYPE>::HasNew())FREPA(T)new(&T[i])TYPE;} // create new elements, create as the last step
+T1(TYPE)  Mems<TYPE>:: Mems(  Int   elms)          {Alloc(_data, _elms=Max(elms, 0)); if(ClassFunc<TYPE>::HasNew())FREPA(T)new(&T[i])TYPE;}
 T1(TYPE)  Mems<TYPE>:: Mems(C Mems  &src) : Mems() {T=src;}
 T1(TYPE)  Mems<TYPE>:: Mems(  Mems &&src) : Mems() {Swap(T, src);}
 /******************************************************************************/
@@ -1063,19 +1084,23 @@ T1(TYPE)  UIntPtr  Memx<TYPE>::  memUsage()C {return super::  memUsage();}
 
 T1(TYPE)  TYPE&  Memx<TYPE>::    absElm(Int i) {return *(TYPE*)super::    absElm(i);}
 T1(TYPE)  TYPE&  Memx<TYPE>::  validElm(Int i) {return *(TYPE*)super::  validElm(i);}
-T1(TYPE)  TYPE*  Memx<TYPE>::      addr(Int i) {return  (TYPE*)super::      addr(i);}
+T1(TYPE)  TYPE*  Memx<TYPE>:: addr     (Int i) {return  (TYPE*)super:: addr     (i);}
+T1(TYPE)  TYPE*  Memx<TYPE>:: addrFirst(     ) {return  (TYPE*)super:: addrFirst( );}
+T1(TYPE)  TYPE*  Memx<TYPE>:: addrLast (     ) {return  (TYPE*)super:: addrLast ( );}
 T1(TYPE)  TYPE&  Memx<TYPE>::operator[](Int i) {return *(TYPE*)super::operator[](i);}
 T1(TYPE)  TYPE&  Memx<TYPE>::     first(     ) {return *(TYPE*)super::     first( );}
 T1(TYPE)  TYPE&  Memx<TYPE>::      last(     ) {return *(TYPE*)super::      last( );}
 T1(TYPE)  TYPE&  Memx<TYPE>::     New  (     ) {return *(TYPE*)super::     New  ( );}
 T1(TYPE)  TYPE&  Memx<TYPE>::     NewAt(Int i) {return *(TYPE*)super::     NewAt(i);}
 
-T1(TYPE)  C TYPE&  Memx<TYPE>::    absElm(Int i)C {return ConstCast(T).  absElm(i);}
-T1(TYPE)  C TYPE&  Memx<TYPE>::  validElm(Int i)C {return ConstCast(T).validElm(i);}
-T1(TYPE)  C TYPE*  Memx<TYPE>::      addr(Int i)C {return ConstCast(T).    addr(i);}
-T1(TYPE)  C TYPE&  Memx<TYPE>::operator[](Int i)C {return ConstCast(T)         [i];}
-T1(TYPE)  C TYPE&  Memx<TYPE>::     first(     )C {return ConstCast(T).   first( );}
-T1(TYPE)  C TYPE&  Memx<TYPE>::      last(     )C {return ConstCast(T).    last( );}
+T1(TYPE)  C TYPE&  Memx<TYPE>::    absElm(Int i)C {return ConstCast(T).   absElm(i);}
+T1(TYPE)  C TYPE&  Memx<TYPE>::  validElm(Int i)C {return ConstCast(T). validElm(i);}
+T1(TYPE)  C TYPE*  Memx<TYPE>:: addr     (Int i)C {return ConstCast(T).addr     (i);}
+T1(TYPE)  C TYPE*  Memx<TYPE>:: addrFirst(     )C {return ConstCast(T).addrFirst( );}
+T1(TYPE)  C TYPE*  Memx<TYPE>:: addrLast (     )C {return ConstCast(T).addrLast ( );}
+T1(TYPE)  C TYPE&  Memx<TYPE>::operator[](Int i)C {return ConstCast(T)          [i];}
+T1(TYPE)  C TYPE&  Memx<TYPE>::     first(     )C {return ConstCast(T).    first( );}
+T1(TYPE)  C TYPE&  Memx<TYPE>::      last(     )C {return ConstCast(T).     last( );}
 
 T1(TYPE)  Int   Memx<TYPE>::validToAbsIndex(  Int valid)C {return super::validToAbsIndex(valid);}
 T1(TYPE)  Int   Memx<TYPE>::absToValidIndex(  Int   abs)C {return super::absToValidIndex(abs  );}
@@ -1792,6 +1817,7 @@ T1(TYPE)  UID     Cache<TYPE>::id      (C TYPE *data             )C {return supe
 T1(TYPE)  Int     Cache<TYPE>::ptrCount(C TYPE *data             )C {return super::ptrCount(data       );}
 #if EE_PRIVATE
 T1(TYPE)  Bool    Cache<TYPE>::has     (C TYPE *data             )C {return super::has     (data       );}
+T1(TYPE)  Bool    Cache<TYPE>::has     (C Str  &file, CChar *path)C {return super::has     (file, path );}
 #endif
 T1(TYPE)  Bool    Cache<TYPE>::contains(C TYPE *data             )C {return super::contains(data       );}
 T1(TYPE)  Bool    Cache<TYPE>::dummy   (C TYPE *data             )C {return super::dummy   (data       );}
@@ -2196,6 +2222,7 @@ namespace Edit
    T1(TYPE) C TYPE& Unaligned(              C TYPE &src) {return src;}
    T1(TYPE)   void  Unaligned(TYPE   &dest, C TYPE &src) {  dest=src;}
    T1(TYPE)   void _Unaligned(Byte   &dest, C TYPE &src) {  dest=src;}
+   T1(TYPE)   void _Unaligned(Short  &dest, C TYPE &src) {  dest=src;}
    T1(TYPE)   void _Unaligned(UShort &dest, C TYPE &src) {  dest=src;}
    T1(TYPE)   void _Unaligned(Int    &dest, C TYPE &src) {  dest=src;}
    T1(TYPE)   void _Unaligned(UInt   &dest, C TYPE &src) {  dest=src;}
@@ -2203,6 +2230,7 @@ namespace Edit
    T1(TYPE)   TYPE  Unaligned(              C TYPE &src) {if(SIZE(TYPE)==1)return src;else{TYPE temp; CopyFast(Ptr(&temp), CPtr(&src), SIZE(TYPE)); return temp;}} // !! these functions must casted to 'Ptr', because without it, compiler may try to inline the 'memcpy' when it detects that both params are of the same type and in that case it will assume that they are memory aligned and crash will occur !!
    T1(TYPE)   void  Unaligned(TYPE   &dest, C TYPE &src) {if(SIZE(TYPE)==1)  dest=src;else{           CopyFast(Ptr(&dest), CPtr(&src), SIZE(TYPE));             }} // !! these functions must casted to 'Ptr', because without it, compiler may try to inline the 'memcpy' when it detects that both params are of the same type and in that case it will assume that they are memory aligned and crash will occur !!
    T1(TYPE)   void _Unaligned(Byte   &dest, C TYPE &src) {                   dest=Unaligned(src) ;                                                               }
+   T1(TYPE)   void _Unaligned(Short  &dest, C TYPE &src) {Unaligned(dest, (Short )Unaligned(src));                                                               }
    T1(TYPE)   void _Unaligned(UShort &dest, C TYPE &src) {Unaligned(dest, (UShort)Unaligned(src));                                                               }
    T1(TYPE)   void _Unaligned(Int    &dest, C TYPE &src) {Unaligned(dest, (Int   )Unaligned(src));                                                               }
    T1(TYPE)   void _Unaligned(UInt   &dest, C TYPE &src) {Unaligned(dest, (UInt  )Unaligned(src));                                                               }

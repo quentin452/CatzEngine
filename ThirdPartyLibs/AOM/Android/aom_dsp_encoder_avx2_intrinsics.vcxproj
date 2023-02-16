@@ -1,0 +1,550 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Android-arm64-v8a">
+      <Configuration>Debug</Configuration>
+      <Platform>Android-arm64-v8a</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|ARM64">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|Android-arm64-v8a">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>Android-arm64-v8a</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Android-arm64-v8a">
+      <Configuration>Release</Configuration>
+      <Platform>Android-arm64-v8a</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM64">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|ARM64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|Android-arm64-v8a">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>Android-arm64-v8a</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|ARM64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{C320C3C4-6F11-3394-B179-3F866EBC919A}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsSDKDesktopARM64Support>true</WindowsSDKDesktopARM64Support>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+    <Platform>ARM64</Platform>
+    <ProjectName>aom_dsp_encoder_avx2_intrinsics</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Android-arm64-v8a'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Android-arm64-v8a'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|ARM64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Android-arm64-v8a'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|ARM64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Android-arm64-v8a'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">aom_dsp_encoder_avx2_intrinsics.dir\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">aom_dsp_encoder_avx2_intrinsics.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">aom_dsp_encoder_avx2_intrinsics</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Android-arm64-v8a'">aom_dsp_encoder_avx2_intrinsics</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">.lib</TargetExt>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|Android-arm64-v8a'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">aom_dsp_encoder_avx2_intrinsics.dir\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">aom_dsp_encoder_avx2_intrinsics.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">aom_dsp_encoder_avx2_intrinsics</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Android-arm64-v8a'">aom_dsp_encoder_avx2_intrinsics</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">.lib</TargetExt>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|Android-arm64-v8a'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|ARM64'">aom_dsp_encoder_avx2_intrinsics.dir\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|ARM64'">aom_dsp_encoder_avx2_intrinsics.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|ARM64'">aom_dsp_encoder_avx2_intrinsics</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Android-arm64-v8a'">aom_dsp_encoder_avx2_intrinsics</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|ARM64'">.lib</TargetExt>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Android-arm64-v8a'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|ARM64'">aom_dsp_encoder_avx2_intrinsics.dir\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|ARM64'">aom_dsp_encoder_avx2_intrinsics.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|ARM64'">aom_dsp_encoder_avx2_intrinsics</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Android-arm64-v8a'">aom_dsp_encoder_avx2_intrinsics</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|ARM64'">.lib</TargetExt>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Android-arm64-v8a'">.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Android;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_WIN32_WINNT=0x0601;NOMINMAX;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;_WIN32_WINNT=0x0601;NOMINMAX;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Android;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Android;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:ARM64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Android-arm64-v8a'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Android;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_WIN32_WINNT=0x0601;NOMINMAX;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;_WIN32_WINNT=0x0601;NOMINMAX;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Android;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Android;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:ARM64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Android;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32_WINNT=0x0601;NOMINMAX;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32_WINNT=0x0601;NOMINMAX;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Android;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Android;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:ARM64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Android-arm64-v8a'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Android;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32_WINNT=0x0601;NOMINMAX;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32_WINNT=0x0601;NOMINMAX;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Android;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Android;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:ARM64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|ARM64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Android;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32_WINNT=0x0601;NOMINMAX;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32_WINNT=0x0601;NOMINMAX;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Android;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Android;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:ARM64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Android-arm64-v8a'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Android;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32_WINNT=0x0601;NOMINMAX;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32_WINNT=0x0601;NOMINMAX;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Android;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Android;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:ARM64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|ARM64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Android;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32_WINNT=0x0601;NOMINMAX;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32_WINNT=0x0601;NOMINMAX;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Android;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Android;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:ARM64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Android-arm64-v8a'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Android;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <ExceptionHandling>
+      </ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32_WINNT=0x0601;NOMINMAX;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_WIN32_WINNT=0x0601;NOMINMAX;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Android;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\AOM\lib;C:\Esenthel\ThirdPartyLibs\AOM\Android;C:\Esenthel\ThirdPartyLibs\AOM\lib\apps;C:\Esenthel\ThirdPartyLibs\AOM\lib\common;C:\Esenthel\ThirdPartyLibs\AOM\lib\examples;C:\Esenthel\ThirdPartyLibs\AOM\lib\stats;C:\Esenthel\ThirdPartyLibs\AOM\lib\third_party\libyuv\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:ARM64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">Building Custom Rule C:/Esenthel/ThirdPartyLibs/AOM/lib/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Android-arm64-v8a'">Building Custom Rule C:/Esenthel/ThirdPartyLibs/AOM/lib/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Esenthel/ThirdPartyLibs/AOM/lib -BC:/Esenthel/ThirdPartyLibs/AOM/Android --check-stamp-file C:/Esenthel/ThirdPartyLibs/AOM/Android/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Android-arm64-v8a'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Esenthel/ThirdPartyLibs/AOM/lib -BC:/Esenthel/ThirdPartyLibs/AOM/Android --check-stamp-file C:/Esenthel/ThirdPartyLibs/AOM/Android/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeCCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeCXXCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeRCCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeSystem.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\config\aom_config.asm.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\config\aom_config.h.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\aom_dsp.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_mem\aom_mem.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_ports\aom_ports.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_scale\aom_scale.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_util\aom_util.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\av1.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_config.c.template;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_config_defaults.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_configure.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_experiment_deps.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_install.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_optimization.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\compiler_flags.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\compiler_tests.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\cpu.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\sanitizers.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\util.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\test\test.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\test\test_data_util.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCheckCompilerFlagCommonPatterns.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindCygwin.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindMsys.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPerl.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckFlagCommonConfig.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\ProcessorCount.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Android-arm64-v8a'">C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeCCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeCXXCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeRCCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeSystem.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\config\aom_config.asm.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\config\aom_config.h.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\aom_dsp.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_mem\aom_mem.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_ports\aom_ports.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_scale\aom_scale.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_util\aom_util.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\av1.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_config.c.template;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_config_defaults.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_configure.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_experiment_deps.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_install.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_optimization.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\compiler_flags.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\compiler_tests.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\cpu.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\sanitizers.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\util.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\test\test.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\test\test_data_util.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCheckCompilerFlagCommonPatterns.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindCygwin.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindMsys.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPerl.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckFlagCommonConfig.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\ProcessorCount.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\generate.stamp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Android-arm64-v8a'">C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|Android-arm64-v8a'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">Building Custom Rule C:/Esenthel/ThirdPartyLibs/AOM/lib/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Android-arm64-v8a'">Building Custom Rule C:/Esenthel/ThirdPartyLibs/AOM/lib/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Esenthel/ThirdPartyLibs/AOM/lib -BC:/Esenthel/ThirdPartyLibs/AOM/Android --check-stamp-file C:/Esenthel/ThirdPartyLibs/AOM/Android/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Android-arm64-v8a'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Esenthel/ThirdPartyLibs/AOM/lib -BC:/Esenthel/ThirdPartyLibs/AOM/Android --check-stamp-file C:/Esenthel/ThirdPartyLibs/AOM/Android/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeCCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeCXXCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeRCCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeSystem.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\config\aom_config.asm.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\config\aom_config.h.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\aom_dsp.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_mem\aom_mem.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_ports\aom_ports.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_scale\aom_scale.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_util\aom_util.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\av1.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_config.c.template;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_config_defaults.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_configure.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_experiment_deps.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_install.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_optimization.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\compiler_flags.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\compiler_tests.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\cpu.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\sanitizers.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\util.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\test\test.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\test\test_data_util.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCheckCompilerFlagCommonPatterns.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindCygwin.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindMsys.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPerl.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckFlagCommonConfig.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\ProcessorCount.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Android-arm64-v8a'">C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeCCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeCXXCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeRCCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeSystem.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\config\aom_config.asm.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\config\aom_config.h.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\aom_dsp.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_mem\aom_mem.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_ports\aom_ports.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_scale\aom_scale.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_util\aom_util.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\av1.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_config.c.template;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_config_defaults.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_configure.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_experiment_deps.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_install.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_optimization.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\compiler_flags.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\compiler_tests.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\cpu.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\sanitizers.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\util.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\test\test.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\test\test_data_util.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCheckCompilerFlagCommonPatterns.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindCygwin.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindMsys.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPerl.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckFlagCommonConfig.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\ProcessorCount.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\generate.stamp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Android-arm64-v8a'">C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|Android-arm64-v8a'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|ARM64'">Building Custom Rule C:/Esenthel/ThirdPartyLibs/AOM/lib/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Android-arm64-v8a'">Building Custom Rule C:/Esenthel/ThirdPartyLibs/AOM/lib/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|ARM64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Esenthel/ThirdPartyLibs/AOM/lib -BC:/Esenthel/ThirdPartyLibs/AOM/Android --check-stamp-file C:/Esenthel/ThirdPartyLibs/AOM/Android/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Android-arm64-v8a'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Esenthel/ThirdPartyLibs/AOM/lib -BC:/Esenthel/ThirdPartyLibs/AOM/Android --check-stamp-file C:/Esenthel/ThirdPartyLibs/AOM/Android/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|ARM64'">C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeCCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeCXXCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeRCCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeSystem.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\config\aom_config.asm.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\config\aom_config.h.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\aom_dsp.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_mem\aom_mem.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_ports\aom_ports.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_scale\aom_scale.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_util\aom_util.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\av1.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_config.c.template;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_config_defaults.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_configure.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_experiment_deps.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_install.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_optimization.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\compiler_flags.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\compiler_tests.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\cpu.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\sanitizers.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\util.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\test\test.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\test\test_data_util.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCheckCompilerFlagCommonPatterns.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindCygwin.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindMsys.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPerl.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckFlagCommonConfig.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\ProcessorCount.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Android-arm64-v8a'">C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeCCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeCXXCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeRCCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeSystem.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\config\aom_config.asm.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\config\aom_config.h.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\aom_dsp.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_mem\aom_mem.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_ports\aom_ports.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_scale\aom_scale.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_util\aom_util.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\av1.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_config.c.template;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_config_defaults.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_configure.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_experiment_deps.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_install.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_optimization.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\compiler_flags.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\compiler_tests.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\cpu.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\sanitizers.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\util.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\test\test.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\test\test_data_util.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCheckCompilerFlagCommonPatterns.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindCygwin.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindMsys.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPerl.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckFlagCommonConfig.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\ProcessorCount.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|ARM64'">C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\generate.stamp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Android-arm64-v8a'">C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|ARM64'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|Android-arm64-v8a'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|ARM64'">Building Custom Rule C:/Esenthel/ThirdPartyLibs/AOM/lib/CMakeLists.txt</Message>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Android-arm64-v8a'">Building Custom Rule C:/Esenthel/ThirdPartyLibs/AOM/lib/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|ARM64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Esenthel/ThirdPartyLibs/AOM/lib -BC:/Esenthel/ThirdPartyLibs/AOM/Android --check-stamp-file C:/Esenthel/ThirdPartyLibs/AOM/Android/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Android-arm64-v8a'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Esenthel/ThirdPartyLibs/AOM/lib -BC:/Esenthel/ThirdPartyLibs/AOM/Android --check-stamp-file C:/Esenthel/ThirdPartyLibs/AOM/Android/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|ARM64'">C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeCCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeCXXCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeRCCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeSystem.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\config\aom_config.asm.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\config\aom_config.h.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\aom_dsp.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_mem\aom_mem.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_ports\aom_ports.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_scale\aom_scale.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_util\aom_util.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\av1.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_config.c.template;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_config_defaults.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_configure.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_experiment_deps.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_install.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_optimization.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\compiler_flags.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\compiler_tests.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\cpu.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\sanitizers.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\util.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\test\test.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\test\test_data_util.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCheckCompilerFlagCommonPatterns.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindCygwin.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindMsys.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPerl.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckFlagCommonConfig.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\ProcessorCount.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Android-arm64-v8a'">C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeCCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeCXXCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeRCCompiler.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\3.24.0-rc2\CMakeSystem.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\config\aom_config.asm.cmake;C:\Esenthel\ThirdPartyLibs\AOM\Android\config\aom_config.h.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\aom_dsp.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_mem\aom_mem.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_ports\aom_ports.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_scale\aom_scale.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_util\aom_util.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\av1.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_config.c.template;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_config_defaults.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_configure.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_experiment_deps.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_install.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\aom_optimization.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\compiler_flags.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\compiler_tests.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\cpu.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\sanitizers.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\util.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\test\test.cmake;C:\Esenthel\ThirdPartyLibs\AOM\lib\test\test_data_util.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCheckCompilerFlagCommonPatterns.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindCygwin.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindGit.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindMsys.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPerl.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckFlagCommonConfig.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Platform\WindowsPaths.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\ProcessorCount.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|ARM64'">C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\generate.stamp</Outputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Android-arm64-v8a'">C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|ARM64'">false</LinkObjects>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|Android-arm64-v8a'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\flow_estimation\x86\corner_match_avx2.c" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\avg_intrin_avx2.c" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\masked_sad_intrin_avx2.c" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\subtract_avx2.c" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\highbd_quantize_intrin_avx2.c" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\adaptive_quantize_avx2.c" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\highbd_adaptive_quantize_avx2.c" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\quantize_avx2.c" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\sad4d_avx2.c" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\sad_avx2.c" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\highbd_sad_avx2.c" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\sad_impl_avx2.c" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\variance_avx2.c" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\sse_avx2.c" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\variance_impl_avx2.c" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\obmc_sad_avx2.c" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\obmc_variance_avx2.c" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\blk_sse_sum_avx2.c" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\sum_squares_avx2.c" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\highbd_variance_avx2.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="C:\Esenthel\ThirdPartyLibs\AOM\Android\ZERO_CHECK.proj">
+      <Project>{CF93AC22-EFE7-3776-B810-5AAA75EDDC21}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+    <ProjectReference Include="C:\Esenthel\ThirdPartyLibs\AOM\Android\aom_rtcd.vcxproj">
+      <Project>{E80EDDF7-A067-3F2E-86A6-09D61556DA16}</Project>
+      <Name>aom_rtcd</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

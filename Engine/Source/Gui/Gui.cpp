@@ -30,6 +30,7 @@ struct MsgBox : Dialog
       Gui+=super::create(title, text, Memt<Str>().add("OK"), text_style).level(65536);
       buttons[0].func(Close, T, false); // can't be immediate because we might delete this object inside callback
       if(Gui.window_fade){super::hide(); fadeIn();}
+      activate();
       return T;
    }
    virtual MsgBox& hide() {Gui.addFuncCall(Del, T); return T;} // schedule deletion
@@ -47,6 +48,7 @@ GUI::GUI() : default_skin(3649875776, 1074192063, 580730756, 799774185), _deskto
    desc_delay=0.3f;
    resize_radius=0.022f;
    click_sound_id.zero();
+   text_menu_height=0.08f;
 
    draw_keyboard_highlight=DrawKeyboardHighlight;
    draw_description       =DrawDescription;
@@ -56,10 +58,11 @@ GUI::GUI() : default_skin(3649875776, 1074192063, 580730756, 799774185), _deskto
    window_fade_out_speed=6;
    window_fade_scale    =0.85f;
 
-   dialog_padd         =0.03f;
-   dialog_button_height=0.06f;
-   dialog_button_padd  =dialog_button_height*2;
-   dialog_button_margin=dialog_button_height;
+   dialog_padd           =0.03f;
+   dialog_button_height  =0.06f;
+   dialog_button_padd    =dialog_button_height*2;
+   dialog_button_margin  =dialog_button_height;
+   dialog_button_margin_y=dialog_button_height*0.3f;
 
   _window_buttons_right=!OSMac(); // check for 'OSMac' instead of 'MAC' so it can be detected on WEB too, check for Mac instead of Apple, because iOS is also Apple, but since it's touchscreen based, prefer right side because most people are right-handed and it's easier to have the buttons on the right side
   _drag_want=_dragging=false;
@@ -125,6 +128,167 @@ void GUI::setText()
 {
    REPAO(_desktops).setText();
 }
+/******************************************************************************/
+struct TextMenuTab : Tab
+{
+   virtual TextMenuTab& activate()override {return T;} // ignore, because we cannot activate/change keyboard focus, because that would hide the screen keyboard
+};
+struct TextMenuTabs : Tabs
+{
+   virtual void draw(C GuiPC &gpc)override
+   {
+   #if 0 // shadow
+      D.clip(gpc.clip);
+      Rect r=rect()+gpc.offset;
+      D.drawShadow(128, r, 0.01f);
+   #endif
+      ShaderParam *sp; Vec col; D.textBackgroundReset(sp, col); // text menu may be drawn with different style/colors/theme, so reset auto text background
+      super::draw(gpc);
+      D.textBackgroundSet(sp, col); // restore what was set originally
+   }
+};
+static TextMenuTabs TextMenu;
+
+Bool GUI::visibleTextMenu()C {return TextMenu.visible();}
+void GUI::   hideTextMenu()  {  Gui-=TextMenu.hide   ();} // also hide so we can do fast check in 'visibleTextMenu'
+static void TextSelectAll(Ptr user)
+{
+   Gui.hideTextMenu();
+   if(GuiObj *go=Gui.kb())switch(go->type())
+   {
+      case GO_TEXTLINE: if(go->asTextLine().selectAll().cursor()<=0)return; break; // if have no selection then return and don't show menu
+      case GO_TEXTBOX : if(go->asTextBox ().selectAll().cursor()<=0)return; break; // if have no selection then return and don't show menu
+   }
+   Gui.showTextMenu();
+}
+static void TextCut(Ptr user)
+{
+   Gui.hideTextMenu();
+   if(GuiObj *go=Gui.kb())switch(go->type())
+   {
+      case GO_TEXTLINE: go->asTextLine().cut(); break;
+      case GO_TEXTBOX : go->asTextBox ().cut(); break;
+   }
+}
+static void TextCopy(Ptr user)
+{
+   Gui.hideTextMenu();
+   if(GuiObj *go=Gui.kb())switch(go->type())
+   {
+      case GO_TEXTLINE: go->asTextLine().copy(); break;
+      case GO_TEXTBOX : go->asTextBox ().copy(); break;
+   }
+}
+static void TextPaste(Ptr user)
+{
+   Gui.hideTextMenu();
+   if(GuiObj *go=Gui.kb())switch(go->type())
+   {
+      case GO_TEXTLINE: go->asTextLine().paste(); break;
+      case GO_TEXTBOX : go->asTextBox ().paste(); break;
+   }
+}
+
+void GUI::showTextMenu()
+{
+   if(GuiObj *go=Gui.kb())if(go->isTextEdit())
+   {
+      Rect rect;
+      Bool sel, any, pass;
+      switch(go->type())
+      {
+         case GO_TEXTLINE:
+         {
+            TextLine &tl=go->asTextLine();
+            sel =(tl._edit.sel>=0);
+            any = tl().is();
+            pass= tl.password();
+            rect= tl.localSelRect(); rect.clampFull(Rect_LU(0, 0, tl.clientWidth(), tl.clientHeight())); rect+=tl.overlayScreenPos();
+         }break;
+
+         case GO_TEXTBOX:
+         {
+            TextBox &tb=go->asTextBox();
+            sel =(tb._edit.sel>=0);
+            any = tb().is();
+            pass=false;
+            rect=tb.localSelRect(); rect.clampFull(Rect_LU(0, 0, tb.clientWidth(), tb.clientHeight())); rect+=tb.screenPos();
+         }break;
+      }
+      Node<MenuElm> n;
+      if(sel)
+      {
+         if(pass)n.New().create("Delete", TextCut);else
+         {
+            n.New().create("Cut" , TextCut);
+            n.New().create("Copy", TextCopy);
+         }
+      }else
+      if(any)n.New().create("Select All", TextSelectAll);
+             n.New().create("Paste"     , TextPaste);
+
+      Vec2 size(0, text_menu_height);
+      rect.extendY(0.01f);
+
+   #if 1
+      TextMenu._tabs.replaceClass<TextMenuTab>();
+      TextMenu.create((CChar**)null, n.children.elms(), false).skin(Gui.text_menu_skin).baseLevel(GBL_MENU); // for now disable 'auto_size' because we don't want changing tab text below calling resize
+      FREPA(TextMenu)
+      {
+         Tab &tab=TextMenu.tab(i);
+         MenuElm &m=n.children[i];
+         tab.Button::setText(m.name); // don't call Tab.setText because that will resize Tabs
+         tab.func(m._func1);
+         size.x+=tab.textWidth(&size.y, true);
+      }
+      size.x+=(TextMenu.tabs()+1)*size.y/2; // spacing around elements
+      // posAround
+      Rect screen=D.rectUIKB();
+      rect.clampFull(screen); // clip so we can detect position at screen center even if selection rectangle extends far away outside screen on one side
+const Flt align=0;
+      Flt pos_x=Lerp(rect.min.x, rect.max.x-size.x, LerpR(1.0f, -1.0f, align));
+      Clamp(pos_x, screen.min.x, screen.max.x-size.x); // have to clip again
+
+      Rect_LD above(pos_x, rect.max.y, size.x, size.y); // rect above 'rect'
+      Rect_LU below(pos_x, rect.min.y, size.x, size.y); // rect below 'rect'
+      Flt   h_above=(above&screen).h(), // visible menu height when using 'above'
+            h_below=(below&screen).h(); // visible menu height when using 'below'
+      const Bool prefer_up=true;
+      if(h_above>h_below+(prefer_up ? -EPS : EPS))
+      {
+         rect=above;
+         if(rect.max.y>screen.max.y)rect.moveY(screen.max.y-rect.max.y);
+         if(TextMenu.tabs()==1)TextMenu.tab(0).subType(BUTTON_TYPE_TAB_TOP);else
+         if(TextMenu.tabs()> 1)
+         {
+            TextMenu.tab(                0).subType(BUTTON_TYPE_TAB_TOP_LEFT );
+            TextMenu.tab(TextMenu.tabs()-1).subType(BUTTON_TYPE_TAB_TOP_RIGHT);
+         }
+      }else
+      {
+         rect=below;
+         if(rect.min.y<screen.min.y)rect.moveY(screen.min.y-rect.min.y);
+         if(TextMenu.tabs()==1)TextMenu.tab(0).subType(BUTTON_TYPE_TAB_BOTTOM);else
+         if(TextMenu.tabs()> 1)
+         {
+            TextMenu.tab(                0).subType(BUTTON_TYPE_TAB_BOTTOM_LEFT );
+            TextMenu.tab(TextMenu.tabs()-1).subType(BUTTON_TYPE_TAB_BOTTOM_RIGHT);
+         }
+      }
+      Gui+=TextMenu.rect(rect, 0, true);
+   #else
+      TextMenu.create(n).skin(Gui.text_menu_skin); TextMenu.list.cur_mode=LCM_MOUSE;
+      if(GuiSkin *skin=TextMenu.getSkin())
+         if(C PanelPtr &panel=skin->menu.normal)
+      {
+         Rect margin; panel->outerMargin(TextMenu.rect(), margin);
+         rect.extendY(Max(margin.min.y, margin.max.y)); // use Max because we don't know yet if we'll place above or below
+      }
+      Gui+=TextMenu.posAround(rect, 0, true).show();
+   #endif
+   }
+}
+void GUI::updateTextMenu() {if(visibleTextMenu())showTextMenu();}
 /******************************************************************************/
 GuiObj* GUI::objAtPos(C Vec2 &pos)C
 {
@@ -369,15 +533,44 @@ void GUI::update()
    SyncLocker locker(_lock);
 
    // test
-  _overlay_textline=overlayTextLine(_overlay_textline_offset);
-  _wheel           =null;
-  _ms_lit          =((Ms.detected() && Ms.visible() && Ms._on_client && desktop()) ? desktop()->test(Ms.pos(), _wheel) : null); // don't set 'msLit' if mouse is not detected or hidden or on another window (do checks if mouse was focused on other window but now moves onto our window, and with buttons pressed in case for drag and drop detection and we would want to highlight the target gui object at which we're gonna drop the files)
+   auto ovr_tl=overlayTextLine(_overlay_textline_offset); if(ovr_tl!=_overlay_textline) // TODO: we could also check offset "|| (ovr_tl && ovr_tl_ofs!=_overlay_textline_offset)"
+   {
+     _overlay_textline=ovr_tl;
+      updateTextMenu();
+   }
+
+  _wheel =null;
+  _ms_lit=((Ms.detected() && Ms.visible() && Ms._on_client && desktop()) ? desktop()->test(Ms.pos(), _wheel) : null); // don't set 'msLit' if mouse is not detected or hidden or on another window (do checks if mouse was focused on other window but now moves onto our window, and with buttons pressed in case for drag and drop detection and we would want to highlight the target gui object at which we're gonna drop the files)
    BS_FLAG ms_button=BS_NONE; REPA(Ms._button)ms_button|=Ms._button[i];
    if(!(ms_button&(BS_ON|BS_RELEASED)))_ms=_ms_src=msLit();
    if(App.active())
    {
-      if((ms_button&BS_PUSHED) && msLit())msLit()->activate();
-      REPA(Touches)if(Touches[i].pd())if(GuiObj *go=Touches[i].guiObj())go->activate();
+      if(Ms.bp(0) && msLit())msLit()->activate();
+      REPA(Touches)
+      {
+       C Touch &touch=Touches[i]; BS_FLAG state=touch._state;
+         if(touch.scrolling()) // we might want to scroll
+         {
+            if(state&(BS_RELEASED|BS_TAPPED|BS_LONG_PRESS)) // potential activation
+               if(GuiObj *go=touch.guiObj())
+            {
+               BS_FLAG mask;
+               switch(go->type())
+               {
+                  case GO_TEXTLINE:
+                  case GO_TEXTBOX :
+                           mask=BS_TAPPED|BS_LONG_PRESS; break; // activate TextEdits only on Tap/LongPress, in case we just want to Touch-Scroll, because their activation will show soft keyboard
+                  default: mask=BS_RELEASED            ; break; // others activate on release. This is important for Buttons to don't show keyboard focus, and especially for Comboboxes so when they're pushed, they don't get unpushed when touch BS_PUSHED (because if Combobox is pushed, and we activate Combobox on BS_PUSHED then any visible Menu disappears, which causes Combobox to get unpushed since its Menu is now hidden)
+               }
+               if(state&mask)go->activate();
+            }
+         }else
+         {
+            if(state&BS_PUSHED)
+               if(GuiObj *go=touch.guiObj())
+                  go->activate();
+         }
+      }
       if(Kb.k(KB_TAB))if(Switch())Kb.eatKey();
    }
   _window_lit=&msLit()->first(GO_WINDOW)->asWindow();
@@ -552,6 +745,8 @@ void GUI::del()
 void GUI::create()
 {
    if(LogInit)LogN("GUI.create");
+
+   AddEmojiPak(DESKTOP ? "Emoji/BC7.pak" : "Emoji/ETC2.pak"); // !! NEED TO LOAD BEFORE LOADING ANY FONTS !!
 
    if(D.created()) // needed for APP_ALLOW_NO_GPU/APP_ALLOW_NO_XDISPLAY
       if(skin=default_skin)

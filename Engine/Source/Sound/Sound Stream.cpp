@@ -1618,7 +1618,7 @@ Bool SoundStream::open(C Str &name)
    if(name.is())
    {
       // here can try to load from cache
-      return _f.readTry(name); // try from file on disk
+      return _f.read(name); // try from file on disk
    }
    return false;
 }

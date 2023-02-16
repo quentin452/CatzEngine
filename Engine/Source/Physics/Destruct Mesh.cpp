@@ -225,7 +225,7 @@ Bool DestructMesh::Part::load(File &f)
 }
 Bool DestructMesh::save(C Str &name)
 {
-   File f; if(f.writeTry(name))
+   File f; if(f.write(name))
    {
       f.putUInt (CC4_DSTR);
       f.cmpUIntV(0); // version
@@ -239,7 +239,7 @@ Bool DestructMesh::save(C Str &name)
 }
 Bool DestructMesh::load(C Str &name)
 {
-   File f; if(f.readTry(name) && f.getUInt()==CC4_DSTR)switch(f.decUIntV())
+   File f; if(f.read(name) && f.getUInt()==CC4_DSTR)switch(f.decUIntV())
    {
       case 0:
       {

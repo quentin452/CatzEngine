@@ -9,10 +9,11 @@
       <?php
       function LogN($text) {error_log($text."\n", 3, "log.txt");}
 
-      $error    =$_FILES["file"]["error"   ]; // if error occurred during file receiving
-      $file_size=$_FILES["file"]["size"    ]; // file size
-      $temp_name=$_FILES["file"]["tmp_name"]; // temporary file name
-      $file_name="Uploads/file";              // desired   file name
+      $file_id  ="<here enter your HTTPFile.name>";
+      $error    =$_FILES[$file_id]["error"   ]; // if error occurred during file receiving
+      $file_size=$_FILES[$file_id]["size"    ]; // file size
+      $temp_name=$_FILES[$file_id]["tmp_name"]; // temporary file name
+      $file_name="Uploads/file";                // desired   file name
 
       if($error>0) // if any error occurred
       {
@@ -46,24 +47,33 @@ enum DWNL_STATE : Byte // Download States
 /******************************************************************************/
 enum HTTP_TYPE : Byte // HTTP Parameter Type
 {
-   HTTP_GET   , // get    parameter
-   HTTP_POST  , // post   parameter
-   HTTP_HEADER, // header parameter
+   HTTP_GET     , // get    parameter
+   HTTP_POST    , // post   parameter
+   HTTP_POST_BIN, // post   parameter treated as binary data, where every 'TextParam.value' Char is treated as 1 Byte
+   HTTP_HEADER  , // header parameter
 };
 struct HTTPParam : TextParam // optional parameter that can be passed to the 'Download'
 {
    HTTP_TYPE type=HTTP_GET; // parameter type
 
    HTTPParam& set(C Str &name, C Str &value, HTTP_TYPE type=HTTP_GET) {super::set(name, value); T.type=type; return T;}
+};
+struct HTTPFile : File
+{
+   Str  name   ; // file name, must be unique, cannot be empty (if not set then file index will be used)
+   Long send=-1; // number of bytes to send, -1=all remaining. This value might get modified during upload
 
-   static Str8 Encode(C CMemPtr<HTTPParam> &params); // encode 'params' array into string
+   HTTPFile& del() {super::del(); name.del(); send=-1; return T;}
+#if EE_PRIVATE
+   Long Send()C {return send>=0 ? send : left();} // get data size left to send
+#endif
 };
 /******************************************************************************/
 const_mem_addr struct Download // File Downloader !! must be stored in constant memory address !!
 {
    // manage
-   Download& del   (  Int  milliseconds=-1                                                                                                                                                                                    ); // wait 'milliseconds' time for thread to exit and delete (<0 = infinite wait)
-   Download& create(C Str &url, C CMemPtr<HTTPParam> &params=null, const_mem_addr File *post=null, Long max_post_size=-1, Long offset=0, Long size=-1, Bool paused=false, Bool ignore_auth_result=false, SyncEvent *event=null); // download 'url' file, 'params'=optional parameters that you can pass if the 'url' is a php script, 'post'=data to be sent to the specified address (if this is null then HTTP GET is used, otherwise HTTP POST is used, 'post' File must point to a constant memory address as that pointer will be used until the data has been fully sent), 'max_post_size'=number of bytes to send (-1=all remaining), 'offset'=offset position of the file data to download, use this for example if you wish to resume previous download by starting from 'offset' position, 'size'=number of bytes to download (-1=all remaining), warning: some servers don't support manual specifying 'offset' and 'size', 'paused'=if create paused, 'ignore_auth_result'=if ignore authorization results and continue even when they failed, 'event'=event to signal when 'Download.state' changes
+   Download& del   (  Int  milliseconds=-1                                                                                                                                                          ); // wait 'milliseconds' time for thread to exit and delete (<0 = infinite wait)
+   Download& create(C Str &url, C CMemPtr<HTTPParam> &params=null, MemPtr<HTTPFile> files=null, Long offset=0, Long size=-1, Bool paused=false, Bool ignore_auth_result=false, SyncEvent *event=null); // download 'url' file, 'params'=optional parameters that you can pass if the 'url' is a php script, 'files'=data to be sent to the specified address ('files' must point to a constant memory address as that pointer will be used until the data has been fully sent, data is sent from current file position and not from the start), 'offset'=offset position of the file data to download, use this for example if you wish to resume previous download by starting from 'offset' position, 'size'=number of bytes to download (-1=all remaining), warning: some servers don't support manual specifying 'offset' and 'size', 'paused'=if create paused, 'ignore_auth_result'=if ignore authorization results and continue even when they failed, 'event'=event to signal when 'Download.state' changes
 
    // operations
    Download& pause (                   ); // pause  downloading
@@ -72,6 +82,7 @@ const_mem_addr struct Download // File Downloader !! must be stored in constant 
    Download& wait  (Int milliseconds=-1); // wait for the download thread to exit (<0 = infinite wait)
 
    // get
+   Bool       is              ()C {return _state!=DWNL_NONE      ;} // get if created
    DWNL_STATE state           ()C {return _state                 ;} // get download state
    UShort     code            ()C {return _code                  ;} // get HTTP status code, or 0 if unavailable
    Ptr        data            ()C {return _data                  ;} // get downloaded data            , this will be valid only in DWNL_DONE state
@@ -97,13 +108,14 @@ const_mem_addr struct Download // File Downloader !! must be stored in constant 
    void zero      ();
    Bool func      ();
    void delPartial();
-   Bool error     (); // !! this is not thread-safe !! set DWNL_ERROR state, you can signal that an error has encountered for example when invalid data downloaded, always returns false
+   Bool error     (); // !! THIS IS NOT THREAD-SAFE !! set DWNL_ERROR state, you can signal that an error has encountered for example when invalid data downloaded, always returns false
    void state     (DWNL_STATE state);
+   Str8 fileHeader(Int i)C; // !! CAN'T USE AFTER i-th FILE UPLOAD STARTED, BECAUSE 'file.Send' WILL BE DIFFERENT !!
 #endif
 
            ~Download() {del();}
             Download();
-   explicit Download(C Str &url, C CMemPtr<HTTPParam> &params=null, const_mem_addr File *post=null, Long max_post_size=-1, Long offset=0, Long size=-1, Bool paused=false);
+   explicit Download(C Str &url, C CMemPtr<HTTPParam> &params=null, MemPtr<HTTPFile> files=null, Long offset=0, Long size=-1, Bool paused=false);
 
 #if !EE_PRIVATE
 private:
@@ -126,24 +138,23 @@ private:
    Bool chunked       ()C {return FlagOn(_flags, CHUNKED);}
    Bool hasAddrsHeader()C {return FlagOn(_flags, HAS_ADDRS_HEADER);}
 #endif
-   Byte           _flags, _parse;
-   DWNL_STATE     _state;
-   UShort         _code;
-   Int            _expected_size, _pre_send, _pos_send;
-   Long           _offset, _done, _size, _total_size, _sent, _to_send, _total_sent, _total_rcvd;
-   Ptr            _data;
-   File          *_post_file;
-   SyncEvent     *_event;
-   DateTime       _modif_time;
-   Str8           _url_full, _header;
-   Str            _url;
-   Thread         _thread;
-   SecureSocket   _socket;
-   Memb<Byte>     _memb;
-   Mems<Byte>     _message;
-   Mems<SockAddr> _addrs;
+   Byte             _flags, _parse;
+   DWNL_STATE       _state;
+   UShort           _code;
+   Int              _expected_size, _send_pos, _file_i;
+   Long             _offset, _done, _size, _total_size, _sent, _to_send, _total_sent, _total_rcvd;
+   Ptr              _data;
+   MemPtr<HTTPFile> _files;
+   SyncEvent       *_event;
+   DateTime         _modif_time;
+   Str8             _url_full, _send, _footer, _header, _file_header;
+   Str              _url;
+   Thread           _thread;
+   SecureSocket     _socket;
+   Memb<Byte>       _memb;
+   Mems<SockAddr>   _addrs;
 #if WEB
-   Ptr            _js_download;
+   Ptr              _js_download;
 #endif
 
    NO_COPY_CONSTRUCTOR(Download);

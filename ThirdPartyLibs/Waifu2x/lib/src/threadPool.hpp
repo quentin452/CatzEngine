@@ -37,7 +37,9 @@
 #endif
 
 typedef   PLATFORM(  signed __int32,  int32_t)   I32,    Int;
+typedef   PLATFORM(unsigned __int32, uint32_t)   U32,   UInt;
 typedef   PLATFORM(  signed __int64,  int64_t)   I64,   Long;
+typedef   PLATFORM(unsigned __int64, uint64_t)   U64,  ULong;
 typedef                       void              *Ptr        ;
 
 #if X64

@@ -188,6 +188,7 @@ const_mem_addr struct GuiObj // Gui Object interface inherited by all Gui Object
    Bool isTextLine()C {return is(GO_TEXTLINE);}
    Bool isViewport()C {return is(GO_VIEWPORT);}
    Bool isWindow  ()C {return is(GO_WINDOW  );}
+   Bool isTextEdit()C {return isTextLine() || isTextBox();}
 
    // convert
    Button   & asButton  () {return ( Button   &)T;}   C Button   & asButton  ()C {return ( Button   &)T;} // return as Button   (you may use this only if type()==GO_BUTTON  )

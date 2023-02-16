@@ -3,6 +3,7 @@
 namespace EE{
 /******************************************************************************/
 Orient & Orient ::operator+=(C Orient  &orn) {dir+=orn.dir; perp+=orn.perp;               return T;}
+OrientD& OrientD::operator+=(C OrientD &orn) {dir+=orn.dir; perp+=orn.perp;               return T;}
 OrientP& OrientP::operator+=(C OrientP &orn) {dir+=orn.dir; perp+=orn.perp; pos+=orn.pos; return T;}
 OrientM& OrientM::operator+=(C OrientM &orn) {dir+=orn.dir; perp+=orn.perp; pos+=orn.pos; return T;}
 /******************************************************************************/

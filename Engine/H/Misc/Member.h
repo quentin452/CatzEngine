@@ -145,6 +145,7 @@ struct MemberDesc // Member Description - Description of a Member in a C++ class
                         MemberDesc& set(VecB     &member       ) {return setDefault(DATA_VECU     , member);}
                         MemberDesc& set(VecUS    &member       ) {return setDefault(DATA_VECU     , member);}
                         MemberDesc& set(VecB4    &member       ) {return setDefault(DATA_VECU4    , member);}
+                        MemberDesc& set(VecUS4   &member       ) {return setDefault(DATA_VECU4    , member);}
                         MemberDesc& set(Color    &member       ) {return setDefault(DATA_COLOR    , member);}
                         MemberDesc& set(Image    &member       ) {return setDefault(DATA_IMAGE    , member);}
                         MemberDesc& set(Image*   &member       ) {return setDefault(DATA_IMAGE_PTR, member);}

@@ -10,8 +10,6 @@
 		0B9F062B16CD7C6D006A0106 /* Engine Mac.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0B9F062A16CD7C6D006A0106 /* Engine Mac.a */; };
 		0B80B0021238567700C08944 /* Engine iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0B80B0011238567700C08944 /* Engine iOS.a */; };
 		3725F1F125237F1300E1ED89 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3725F1F025237F1300E1ED89 /* StoreKit.framework */; };
-		37307DB821AFDF81009ABBF9 /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37307DB721AFDF80009ABBF9 /* WebKit.framework */; };
-		37307DBA21AFDF88009ABBF9 /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 37307DB921AFDF87009ABBF9 /* Security.framework */; };
 		0B9F061B16CD7B80006A0106 /* Icon.icns in Resources */ = {isa = PBXBuildFile; fileRef = 0B9F060816CD7B80006A0106 /* Icon.icns */; };
 		0B9F062416CD7B80006A0106 /* iOS.xib in Resources */ = {isa = PBXBuildFile; fileRef = 0B9F060C16CD7B80006A0106 /* iOS.xib */; };
 		0B9F062816CD7C2B006A0106 /* Engine.pak in Resources */ = {isa = PBXBuildFile; fileRef = 0B9F062516CD7C21006A0106 /* Engine.pak */; };
@@ -264,8 +262,6 @@
 		0B80B0011238567700C08944 /* Engine iOS.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "Engine iOS.a"; path = "../../../Editor/Bin/Engine iOS.a"; sourceTree = "<absolute>"; };
 		0B987D3C12385BE500071DE8 /* Engine iOS Simulator.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "Engine iOS Simulator.a"; path = "../../../Editor/Bin/Engine iOS Simulator.a"; sourceTree = "<absolute>"; };
 		3725F1F025237F1300E1ED89 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
-		37307DB721AFDF80009ABBF9 /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = System/Library/Frameworks/WebKit.framework; sourceTree = SDKROOT; };
-		37307DB921AFDF87009ABBF9 /* Security.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Security.framework; path = System/Library/Frameworks/Security.framework; sourceTree = SDKROOT; };
 		0B9F062516CD7C21006A0106 /* Engine.pak */ = {isa = PBXFileReference; lastKnownFileType = file; name = Engine.pak; path = "../../../Editor/Bin/Mobile/Engine.pak"; sourceTree = "<absolute>"; };
 		0B9F062516CD7C22006A0106 /* Project.pak */ = {isa = PBXFileReference; lastKnownFileType = file; name = Project.pak; path = Assets/Project.pak; sourceTree = "<group>"; };
 		3790A50C22A3DE7F003F81E2 /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = Assets/Images.xcassets; sourceTree = "<group>"; };
@@ -407,8 +403,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				3725F1F125237F1300E1ED89 /* StoreKit.framework in Frameworks */,
-				37307DBA21AFDF88009ABBF9 /* Security.framework in Frameworks */,
-				37307DB821AFDF81009ABBF9 /* WebKit.framework in Frameworks */,
 				0B80B0021238567700C08944 /* Engine iOS.a in Frameworks */,
 /* ESENTHEL IOS FRAMEWORKS */
 			);
@@ -468,8 +462,6 @@
 			isa = PBXGroup;
 			children = (
 				3725F1F025237F1300E1ED89 /* StoreKit.framework */,
-				37307DB921AFDF87009ABBF9 /* Security.framework */,
-				37307DB721AFDF80009ABBF9 /* WebKit.framework */,
 				0B9F062A16CD7C6D006A0106 /* Engine Mac.a */,
 				0B80B0011238567700C08944 /* Engine iOS.a */,
 				0B987D3C12385BE500071DE8 /* Engine iOS Simulator.a */,
@@ -1040,6 +1032,10 @@
 					"-liodbc",
 					"-liconv",
 				);
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 
@@ -1076,6 +1072,10 @@
 					"-liodbc",
 					"-liconv",
 				);
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+
+				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 
@@ -1100,23 +1100,34 @@
 				OTHER_LDFLAGS = (
 					"-framework QuartzCore",
 					"-framework UIKit",
-					"-framework Foundation",
-					"-framework EventKit",
-					"-framework EventKitUI",
-					"-framework CoreMedia",
+					"-framework PhotosUI",
+					"-framework WebKit",
 					"-framework CoreMotion",
 					"-framework CoreLocation",
-					"-framework CoreGraphics",
-					"-framework CoreTelephony",
+					"-framework GameController",
+					"-weak_framework CoreHaptics", // requires iOS 13.0
 					"-framework AudioToolbox",
-					"-framework AVFoundation",
-					"-framework SystemConfiguration",
-					"-framework MessageUI",
-					"-framework AdSupport",
 					"-framework OpenGLES",
 					"-framework OpenAL",
 					"-lz",
-					"-ObjC", // needed by Facebook
+
+					// needed by Chartboost
+					"-framework AVFoundation",
+					"-framework CoreGraphics",
+					"-framework Security",
+
+					// needed by AdMob
+					"-framework AdSupport",
+					"-framework SystemConfiguration",
+					"-framework EventKit",
+					"-framework EventKitUI",
+					"-framework MessageUI",
+					"-framework CoreTelephony",
+					"-framework CoreMedia",
+				);
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1144,23 +1155,34 @@
 				OTHER_LDFLAGS = (
 					"-framework QuartzCore",
 					"-framework UIKit",
-					"-framework Foundation",
-					"-framework EventKit",
-					"-framework EventKitUI",
-					"-framework CoreMedia",
+					"-framework PhotosUI",
+					"-framework WebKit",
 					"-framework CoreMotion",
 					"-framework CoreLocation",
-					"-framework CoreGraphics",
-					"-framework CoreTelephony",
+					"-framework GameController",
+					"-weak_framework CoreHaptics", // requires iOS 13.0
 					"-framework AudioToolbox",
-					"-framework AVFoundation",
-					"-framework SystemConfiguration",
-					"-framework MessageUI",
-					"-framework AdSupport",
 					"-framework OpenGLES",
 					"-framework OpenAL",
 					"-lz",
-					"-ObjC", // needed by Facebook
+
+					// needed by Chartboost
+					"-framework AVFoundation",
+					"-framework CoreGraphics",
+					"-framework Security",
+
+					// needed by AdMob
+					"-framework AdSupport",
+					"-framework SystemConfiguration",
+					"-framework EventKit",
+					"-framework EventKitUI",
+					"-framework MessageUI",
+					"-framework CoreTelephony",
+					"-framework CoreMedia",
+				);
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+
 				);
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1191,7 +1213,7 @@
 				GCC_WARN_ABOUT_INVALID_OFFSETOF_MACRO = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-
+/* ESENTHEL INCLUDE DIRS */
 				);
 				FRAMEWORK_SEARCH_PATHS = (
 "\"../../../Editor/Bin/\"",
@@ -1236,7 +1258,7 @@
 				GCC_WARN_ABOUT_INVALID_OFFSETOF_MACRO = NO;
 				HEADER_SEARCH_PATHS = (
 					"$(inherited)",
-
+/* ESENTHEL INCLUDE DIRS */
 				);
 				FRAMEWORK_SEARCH_PATHS = (
 "\"../../../Editor/Bin/\"",

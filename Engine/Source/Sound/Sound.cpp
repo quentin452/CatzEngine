@@ -412,7 +412,7 @@ void _Sound::setBufferData(Byte *buffer, Int size) // no extra care needed
       {
          if(_loop && (raw_pos<0 || raw_pos>=raw_size)        )raw_pos=Mod(raw_pos, raw_size);     // adjust 'raw_pos' if it got out of range
          if(          raw_pos<0                              )clear  =-raw_pos              ;else // if data position is before the available data then clear
-         if(                       raw_pos>=raw_size && !kill)kill   =2                     ;     // if data position is after  the available data then kill
+         if(                       raw_pos>=raw_size && !kill)kill   =buffers()             ;     // if data position is after  the available data then kill
       }
       if(kill)clear=size; // if killing then clear
 
@@ -424,7 +424,7 @@ void _Sound::setBufferData(Byte *buffer, Int size) // no extra care needed
       {
          set=size; if(raw_size>=0)MIN(set, raw_size-raw_pos); // at once process only up to the allowed data range if specified
          set=(stream.pos(raw_pos) ? stream.set(buffer, set) : 0);
-         if(set<=0)kill=2;
+         if(set<=0)kill=buffers();
       }
       buffer +=set;
       raw_pos+=set;

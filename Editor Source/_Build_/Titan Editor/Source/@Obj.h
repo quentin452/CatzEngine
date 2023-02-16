@@ -59,8 +59,9 @@ class Obj : ObjData
    void scaleYBy(flt f);
    void scaleZBy(flt f);
 
-   void randomRot();
-   void  resetRot();
+   void randomRot  ();
+   void randomRot90();
+   void  resetRot  ();
 
    void alignGrid();
    void alignTerrain(bool force, cptr undo_type=WorldUndo::ObjType);

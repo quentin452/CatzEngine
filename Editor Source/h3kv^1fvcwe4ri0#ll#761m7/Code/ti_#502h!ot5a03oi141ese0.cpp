@@ -4,10 +4,9 @@ class IDReplace
    UID from, to;
 
    void set(C UID &from, C UID &to) {T.from=from; T.to=to;}
-
-   static int Compare(C IDReplace &a, C IDReplace &b) {return .Compare(a.from, b.from);}
-   static int Compare(C IDReplace &a, C UID       &b) {return .Compare(a.from, b     );}
 }
+int Compare(C IDReplace &a, C IDReplace &b) {return Compare(a.from, b.from);}
+int Compare(C IDReplace &a, C UID       &b) {return Compare(a.from, b     );}
 /******************************************************************************/
 class MergeSimilarMaterials : PropWin
 {
@@ -129,7 +128,7 @@ class MergeSimilarMaterials : PropWin
          for(int i=1; i<src.elms(); i++)MSM.replace.New().set(src[i].elm_id, src[0].elm_id);
          if(MSM.data.elms())MSM.data.New(); FREPA(src)MSM.data.New().id=src[i].elm_id;
       }
-      MSM.replace.sort(IDReplace.Compare);
+      MSM.replace.sort(Compare);
       MSM.list.setData(MSM.data);
    }
    void display(C MemPtr<UID> &elm_ids)
@@ -145,7 +144,7 @@ class MergeSimilarMaterials : PropWin
             if(i)replace.New().set(mtrl_ids[i], mtrl_ids[0]);
             data.New().id=mtrl_ids[i];
          }
-         replace.sort(IDReplace.Compare);
+         replace.sort(Compare);
          list.setData(data);
          activate();
       }
@@ -258,7 +257,7 @@ class MergeSimilarMaterials : PropWin
 MergeSimilarMaterials MSM;
 Memc<IDReplace> ReplaceIDs;
 State           IDReplaceState(UpdateIDReplace, DrawIDReplace, InitIDReplace, ShutIDReplace);
-C IDReplace*    ReplaceID(C UID &src, Memc<IDReplace> &replace=ReplaceIDs) {return src.valid() ? replace.binaryFind(src, IDReplace.Compare) : null;}
+C IDReplace*    ReplaceID(C UID &src, Memc<IDReplace> &replace=ReplaceIDs) {return src.valid() ? replace.binaryFind(src, Compare) : null;}
 /******************************************************************************/
 bool ThreadIDReplace(Thread &thread)
 {

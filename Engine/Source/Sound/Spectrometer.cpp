@@ -80,7 +80,7 @@ Spectrometer& Spectrometer::create(Int resolution)
    #endif
    Int rows=(window_length_ms ? DivCeil(buffer_length_ms, window_length_ms) : 0); // we need enough rows to fit entire sound buffer
        rows+=2; // because we're doing interpolation, then we need more (1 for linear, 2 for cubic)
-  _image.createSoftTry(resolution, rows, 1, IMAGE_F32); _image.clear();
+  _image.createSoft(resolution, rows, 1, IMAGE_F32); _image.clear();
    return T;
 }
 /******************************************************************************/

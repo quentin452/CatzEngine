@@ -29,9 +29,11 @@ static void SaveEncoding(File &f, ENCODING encoding)
    }
 }
 /******************************************************************************/
-void      FileText::zero    () {indent=INDENT_TABS; depth=0; _code=ANSI;}
+void      FileText::zero    () {indent=INDENT_TABS; depth=0; _code=ANSI; _get=_put='\0';}
 FileText& FileText::del     () {_f.del(); zero(); return T;}
           FileText::FileText() {zero();}
+
+Bool FileText::end()C {return _f.end() && !_get;}
 
 FileText& FileText::writeMem(ENCODING encoding, Cipher *cipher)
 {
@@ -43,7 +45,7 @@ FileText& FileText::writeMem(ENCODING encoding, Cipher *cipher)
 Bool FileText::write(C Str &name, ENCODING encoding, Cipher *cipher)
 {
    del();
-   if(_f.writeTry(name, cipher))
+   if(_f.write(name, cipher))
    {
       SaveEncoding(_f, T._code=encoding);
       return true;
@@ -53,8 +55,8 @@ Bool FileText::write(C Str &name, ENCODING encoding, Cipher *cipher)
 Bool FileText::append(C Str &name, ENCODING encoding, Cipher *cipher)
 {
    del();
-   if(_f.readStdTry(name, cipher))if(_f.size())encoding=LoadEncoding(_f); // take encoding from the file if it has some data
-   if(_f. appendTry(name, cipher))
+   if(_f.readStd(name, cipher))if(_f.size())encoding=LoadEncoding(_f); // take encoding from the file if it has some data
+   if(_f. append(name, cipher))
    {
       SaveEncoding(_f, T._code=encoding);
       return true;
@@ -64,7 +66,7 @@ Bool FileText::append(C Str &name, ENCODING encoding, Cipher *cipher)
 Bool FileText::read(C Str &name, Cipher *cipher)
 {
    del();
-   if(_f.readTry(name, cipher))
+   if(_f.read(name, cipher))
    {
      _code=LoadEncoding(_f);
       return true;
@@ -74,7 +76,7 @@ Bool FileText::read(C Str &name, Cipher *cipher)
 Bool FileText::read(C UID &id, Cipher *cipher)
 {
    del();
-   if(_f.readTry(id, cipher))
+   if(_f.read(id, cipher))
    {
      _code=LoadEncoding(_f);
       return true;
@@ -84,7 +86,7 @@ Bool FileText::read(C UID &id, Cipher *cipher)
 Bool FileText::read(C Str &name, Pak &pak)
 {
    del();
-   if(_f.readTry(name, pak))
+   if(_f.read(name, pak))
    {
      _code=LoadEncoding(_f);
       return true;
@@ -94,7 +96,7 @@ Bool FileText::read(C Str &name, Pak &pak)
 Bool FileText::read(C UID &id, Pak &pak)
 {
    del();
-   if(_f.readTry(id, pak))
+   if(_f.read(id, pak))
    {
      _code=LoadEncoding(_f);
       return true;
@@ -106,7 +108,7 @@ FileText& FileText::readMem(CPtr data, Int size, Int encoding, Cipher *cipher)
    del();
   _f.readMem(data, size, cipher);
   _code=LoadEncoding(_f); // load encoding always to skip potential BOM
-   if(encoding>=0)_code=(ENCODING)encoding; // override encoding if it was specified
+   if(!_code && encoding>=0)_code=(ENCODING)encoding; // override encoding if it was specified
    return T;
 }
 FileText& FileText::readMem(C Str &data)
@@ -115,6 +117,11 @@ FileText& FileText::readMem(C Str &data)
   _f.readMem(data(), data.length()*SIZE(Char));
   _code=UTF_16;
    return T;
+}
+/******************************************************************************/
+Long FileText::charsLeft()C
+{
+   return (_code==UTF_16) ? _f.left()/SIZEI(Char) : _f.left();
 }
 /******************************************************************************/
 FileText& FileText::startLine()
@@ -126,11 +133,11 @@ FileText& FileText::endLine()
 {
    switch(_code)
    {
-      case ANSI       :
-      case UTF_8      :
-      case UTF_8_NAKED: _f.putByte(0x0A); break;
+      case ANSI       : _f.putByte  (  0x0A); break;
+      case UTF_16     : _f.putUShort(0x000A); break;
 
-      case UTF_16: _f.putUShort(0x000A); break;
+      case UTF_8      :
+      case UTF_8_NAKED: _f.putByte(0x0A); _put='\0'; break; // MULTI1 must be in range 0xDC00..0xDFFF, but here we have '\n' so just clear any '_put'
    }
    return T;
 }
@@ -138,12 +145,13 @@ FileText& FileText::putChar(Char8 c)
 {
    switch(_code)
    {
-      case ANSI  : _f.putByte  (              c ); break;
-      case UTF_16: _f.putUShort(Char8To16Fast(c)); break; // we can assume that Str was already initialized
+      case ANSI  : _f.putByte  (          c ); break;
+      case UTF_16: _f.putUShort(Char8To16(c)); break;
 
       case UTF_8      :
       case UTF_8_NAKED:
       {
+        _put='\0'; // MULTI1 must be in range 0xDC00..0xDFFF, but here we have Char8 that will never convert to that range, so just clear any '_put'
          U8 u=c;
          if(u<=0x7F)_f.putByte (u);
          else       _f.putMulti(Byte(0xC0 | (u>>6)), Byte(0x80 | (u&0x3F)));
@@ -155,12 +163,22 @@ FileText& FileText::putChar(Char c)
 {
    switch(_code)
    {
-      case ANSI  : _f.putByte  (Char16To8Fast(c)); break; // we can assume that Str was already initialized
-      case UTF_16: _f.putUShort(              c ); break;
+      case ANSI  : _f.putByte  (Char16To8(c)); break;
+      case UTF_16: _f.putUShort(          c ); break;
 
       case UTF_8      :
       case UTF_8_NAKED:
       {
+         if(_put) // check if we have MULTI0
+         {
+            if(c>=0xDC00 && c<=0xDFFF) // MULTI1 must be in range 0xDC00..0xDFFF
+            {
+               U32 u=(((Unsigned(_put)-0xD800)<<10)|(Unsigned(c)-0xDC00))+0x10000; // decode U16 c c1 -> U32 u
+              _f.putMulti(Byte(0xF0 | (u>>18)), Byte(0x80 | ((u>>12)&0x3F)), Byte(0x80 | ((u>>6)&0x3F)), Byte(0x80 | (u&0x3F)));
+            }
+           _put='\0'; break;
+         }
+         if(c>=0xD800 && c<=0xDBFF){_put=c; break;} // MULTI0, needs to have MULTI1 so put to buffer and writer later
          U16 u=c;
          if(u<=0x07F)_f.putByte (u);else
          if(u<=0x7FF)_f.putMulti(Byte(0xC0 | (u>> 6)), Byte(0x80 | ( u    &0x3F)));else
@@ -184,8 +202,10 @@ FileText& FileText::putText(C Str &text)
          FREPA(text)putChar(text[i]);
       #else // faster
                Char8  temp[65536];
-         const Int    temp_elms=Elms(temp)-2; // use size -2 because we may be writing 3 characters in one step
-         for(Int i=0, temp_pos=0; ; )
+         const Int    temp_elms=Elms(temp)-3; // use size -3 because we may be writing 4 characters in one step
+         Int i=0, temp_pos=0;
+         if(_put && text.is())putChar(text()[i++]); // check if we have MULTI0, then save MULTI1 manually, () avoids range checks
+         for(;;)
          {
             Bool end=(i>=text.length());
             if(  end || !InRange(temp_pos, temp_elms)) // if finished, or there's no more room in the buffer
@@ -195,8 +215,20 @@ FileText& FileText::putText(C Str &text)
             }
             U16 c=text()[i++]; // () avoids range checks
             if(c<=0x07F) temp[temp_pos++]=c;else
-            if(c<=0x7FF){temp[temp_pos++]=(0xC0 | (c>> 6)); temp[temp_pos++]=(0x80 | ( c    &0x3F));}else
-                        {temp[temp_pos++]=(0xE0 | (c>>12)); temp[temp_pos++]=(0x80 | ((c>>6)&0x3F)); temp[temp_pos++]=(0x80 | (c&0x3F));}
+            if(c<=0x7FF){temp[temp_pos++]=(0xC0 | (c>>6)); temp[temp_pos++]=(0x80 | (c&0x3F));}else
+         #if 1 // since we operate on Char we must treat it as UTF-16, there 0xD800..0xDBFF are used to encode 2 Chars
+            if(c>=0xD800 && c<=0xDBFF) // MULTI0
+            {
+            /* U32 -> 2x U16 formula:
+               u-=0x10000;
+               c0=0xD800+(u>>10  ); MULTI0
+               c1=0xDC00+(u&0x3FF); MULTI1 */
+               U16 c1=text[i++];
+               U32 u=(((c-0xD800)<<10)|(c1-0xDC00))+0x10000; // decode U16 c c1 -> U32 u
+               temp[temp_pos++]=(0xF0 | (u>>18)); temp[temp_pos++]=(0x80 | ((u>>12)&0x3F)); temp[temp_pos++]=(0x80 | ((u>>6)&0x3F)); temp[temp_pos++]=(0x80 | (u&0x3F));
+            }else
+         #endif
+              {temp[temp_pos++]=(0xE0 | (c>>12)); temp[temp_pos++]=(0x80 | ((c>>6)&0x3F)); temp[temp_pos++]=(0x80 | (c&0x3F));}
          }
       #endif
       }break;
@@ -212,7 +244,7 @@ Char FileText::getChar()
 {
    switch(_code)
    {
-      default    : return 0;
+      default    : error: return 0;
       case UTF_16: return _f.getUShort();
 
       case ANSI:
@@ -227,39 +259,51 @@ Char FileText::getChar()
            _f.skip(-1); // otherwise, go back the extra byte that we've read, because we want to get only 1 char at this time
          }
       #endif
-         return Char8To16Fast(c[0]); // we can assume that Str was already initialized
+         return Char8To16(c[0]);
       }break;
 
       case UTF_8      :
       case UTF_8_NAKED:
       {
+         if(_get){Char c=_get; _get='\0'; return c;}
+
          Byte b0=_f.getByte();
-         if(b0&(1<<7))
+         if(!(b0&(1<<7)))return b0; // this handles NUL
+         if(!(b0&(1<<6)))goto error; // bit 6 should be always on, here don't skip back, so we can always advance at least 1 char
+
+         const Bool skip_back=false; // if character is invalid, then revert reading it, skip back, so other codes can process it
+         Char c;
+         Byte b1=_f.getByte(); if((b1&((1<<7)|(1<<6)))!=(1<<7)){if(skip_back)_f.skip(-1); goto error;} b1&=0x3F; // bit 7 should be always on, bit 6 always off, this handles NUL
+         if(!(b0&(1<<5)))
          {
-            Byte b1=(_f.getByte()&0x3F);
-            if((b0&(1<<6)) && (b0&(1<<5)))
-            {
-               Byte b2=(_f.getByte()&0x3F);
-               if(b0&(1<<4))
-               {
-                  Byte b3=(_f.getByte()&0x3F);
-                  b0&=0x07;
-                  UInt u=(b3|(b2<<6)|(b1<<12)|(b0<<18));
-                  return (u<=0xFFFF) ? u : '?';
-               }else
-               {
-                  b0&=0x0F;
-                  return b2|(b1<<6)|(b0<<12);
-               }
-            }else
-            {
-               b0&=0x1F;
-               return b1|(b0<<6);
-            }
+            b0&=0x1F;
+            c=(b1|(b0<<6));
          }else
          {
-            return b0;
+            Byte b2=_f.getByte(); if((b2&((1<<7)|(1<<6)))!=(1<<7)){if(skip_back)_f.skip(-1); goto error;} b2&=0x3F; // bit 7 should be always on, bit 6 always off, this handles NUL
+            if(!(b0&(1<<4)))
+            {
+               b0&=0x0F;
+               c=(b2|(b1<<6)|(b0<<12));
+            }else
+            {
+               Byte b3=_f.getByte(); if((b3&((1<<7)|(1<<6)))!=(1<<7)){if(skip_back)_f.skip(-1); goto error;} b3&=0x3F; // bit 7 should be always on, bit 6 always off, this handles NUL
+               if(!(b0&(1<<3)))
+               {
+                  b0&=0x07;
+                  UInt u=(b3|(b2<<6)|(b1<<12)|(b0<<18));
+                  // since we return Char, then we must convert 'u' to UTF-16 - https://en.wikipedia.org/wiki/UTF-16#Description
+                  if(u<=  0xFFFF)c=u;else // if(u<=0xD7FF || u>=0xE000 && u<=0xFFFF)c=u; ranges U+0000 to U+D7FF and U+E000 to U+FFFF are represented natively
+                  if(u<=0x10FFFF)
+                  {
+                      u-=0x10000;
+                       c= 0xD800+(u>>10  ); // MULTI0
+                    _get= 0xDC00+(u&0x3FF); // MULTI1
+                  }else c='?'; // unsupported
+               }else c='?'; // unsupported
+            }
          }
+         return c;
       }break;
    }
 }
@@ -278,7 +322,7 @@ FileText& FileText::fullLine(Str &s)
    {
       Char c=getChar();
       if(  c=='\n')break;
-      if(U16(c)>=32 || c=='\t')s+=c;
+      if(Safe(c))s+=c;
    }
    return T;
 }
@@ -289,10 +333,10 @@ FileText& FileText::getLine(Str &s)
    {
       Char c=getChar();
       if(  c=='\n')break;
-      if(U16(c)>=32 || c=='\t')
+      if(Safe(c))
       {
-         if(c!=' ' && c!='\t')start=false;
-         if(!start)s+=c;
+         if(!WhiteChar(c))start=false;
+         if(!start       )s+=c;
       }
    }
    return T;
@@ -304,10 +348,10 @@ FileText& FileText::getLine(Str8 &s)
    {
       Char c=getChar();
       if(  c=='\n')break;
-      if(U16(c)>=32 || c=='\t')
+      if(Safe(c))
       {
-         if(c!=' ' && c!='\t')start=false;
-         if(!start)s+=c;
+         if(!WhiteChar(c))start=false;
+         if(!start       )s+=c;
       }
    }
    return T;
@@ -315,29 +359,29 @@ FileText& FileText::getLine(Str8 &s)
 FileText& FileText::getAll(Str &s)
 {
    s.clear();
-   Int chars=((_code==UTF_16) ? _f.left()/SIZEI(Char) : _f.left()); if(chars>0)
+   Int chars=charsLeft(); if(chars>0)
    {
       s.reserve(chars); switch(_code)
       {
          case UTF_16:
          {
-            s._length=_f.getReturnSize(s._d.data(), chars*SIZEI(Char))/SIZEI(Char); if(s.length()!=chars)_f._ok=false;
+            s._length=_f.getReturnSize(s._d.data(), chars*SIZEI(Char))/SIZEI(Char); if(s.length()!=chars)_f.error();
       #if WINDOWS
          utf_16:
       #endif
             Int length=s.length(); CChar *t=s();
             FREP(length)
             {
-               Char c=t[i]; if(!(U16(c)>=32 || c=='\t' || c=='\n')) // found invalid char
+               Char c=t[i]; if(!Safe(c)) // found invalid char
                {
                   Str temp; temp.reserve(length);
                   CopyFastN(temp._d.data(), t, i); temp._length+=i; // copy everything up to this point
                #if 0 // simple iteration (slower)
-                  for(; ++i<length; ){Char c=t[i]; if(U16(c)>=32 || c=='\t' || c=='\n')temp._d[temp._length++]=c;}
+                  for(; ++i<length; ){Char c=t[i]; if(Safe(c))temp._d[temp._length++]=c;}
                #else // batched copying
                   Int last_ok=i+1; for(; ++i<length; )
                   {
-                     Char c=t[i]; if(!(U16(c)>=32 || c=='\t' || c=='\n'))
+                     Char c=t[i]; if(!Safe(c))
                      {
                         Int copy=i-last_ok; CopyFastN(temp._d.data()+temp._length, t+last_ok, copy); temp._length+=copy;
                         last_ok=i+1;
@@ -354,12 +398,12 @@ FileText& FileText::getAll(Str &s)
          case ANSI:
          {
             Str8 s8; s8.reserve(chars);
-            Int length=s8._length=_f.getReturnSize(s8._d.data(), chars); if(length!=chars)_f._ok=false;
+            Int length=s8._length=_f.getReturnSize(s8._d.data(), chars); if(length!=chars)_f.error();
             Char *t=s._d.data(); CChar8 *t8=s8();
             FREP(length)
             {
                Char8 c=t8[i];
-               if(U8(c)>=32 || c=='\t' || c=='\n')
+               if(Safe(c))
                {
                #if WINDOWS // Code Pages are used on Windows
                   if(c&0x80) // this may be a 2-character multi-byte wide char
@@ -368,7 +412,7 @@ FileText& FileText::getAll(Str &s)
                      goto utf_16; // we've converted to 16-bit so process as UTF-16
                   }
                #endif
-                 *t++=Char8To16Fast(c); // we can assume that Str was already initialized
+                 *t++=Char8To16(c);
                }
             }
             s._length=t-s._d.data();
@@ -380,7 +424,7 @@ FileText& FileText::getAll(Str &s)
             for(; !end(); )
             {
                Char c=getChar();
-               if(U16(c)>=32 || c=='\t' || c=='\n')*t++=c;
+               if(Safe(c))*t++=c;
             }
             s._length=t-s._d.data();
          }break;
@@ -392,6 +436,7 @@ FileText& FileText::getAll(Str &s)
 FileText& FileText::rewind()
 {
    depth=0;
+  _get=_put='\0';
   _f.pos(0);
    LoadEncoding(_f); // we already know the encoding, but we need to skip the byte order mark at start, don't set it to '_code' because 'UTF_8_NAKED' may had been used
    return T;
@@ -399,6 +444,7 @@ FileText& FileText::rewind()
 Bool FileText::copy(File &dest)
 {
    depth=0;
+  _get=_put='\0';
    if(!_f.pos(0))return false;
    return _f.copy(dest);
 }
@@ -450,8 +496,8 @@ C Str& FileTextEx::getWord()
    {
       Char c=getChar();
       if( !c)break;
-      if(  c=='\t' || c=='\n' || c==' ')if(start)continue;else break;
-      if(U16(c)>32)
+      if(WhiteChar(c))if(start)continue;else break;
+      if(Safe     (c))
       {
          start=false;
          text+=c;
@@ -472,7 +518,7 @@ C Str& FileTextEx::getName()
          {
             Char c=getChar();
             if( !c || c=='\n' || c=='"')break;
-            if(U16(c)>=32 || c=='\t')text+=c;
+            if(Safe(c))text+=c;
          }
          break;
       }

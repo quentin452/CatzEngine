@@ -10,8 +10,8 @@ Memx<ImportTerrainTask> ImportTerrainTasks;
       void ImportTerrainClass::GuiImage2::Load(C Str &name, GuiImage2 &img) {img.load(name);}
              void ImportTerrainClass::GuiImage2::load(C Str &name)
       {
-         image_sw.ImportTry(name, mono ? IMAGE_F32 : IMAGE_R8G8B8A8, IMAGE_SOFT, 1);
-         image_sw.copyTry(image_hw, 128, 128, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_2D, 1, FILTER_LINEAR, IC_CLAMP|IC_IGNORE_GAMMA); // we need sRGB preview, so ignore gamma always
+         image_sw.Import(name, mono ? IMAGE_F32 : IMAGE_R8G8B8A8, IMAGE_SOFT, 1);
+         image_sw.copy  (image_hw, 128, 128, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_2D, 1, FILTER_LINEAR, IC_CLAMP|IC_IGNORE_GAMMA); // we need sRGB preview, so ignore gamma always
       }
       ::ImportTerrainClass::GuiImage2& ImportTerrainClass::GuiImage2::create(C Rect &rect, bool mono)
       {
@@ -235,9 +235,9 @@ Memx<ImportTerrainTask> ImportTerrainTasks;
       if(!area_rect.validY())Swap(area_rect.min.y, area_rect.max.y);
       area_xy=area_rect.min;
 
-      if(height_do=(it.height()>=0))it.height_image.image_sw.copyTry(height_image);
-      if(  mtrl_do=(it.mtrl  ()>=0))it.  mtrl_image.image_sw.copyTry(  mtrl_image);
-      if( color_do=(it.color ()>=0))it. color_image.image_sw.copyTry( color_image);
+      if(height_do=(it.height()>=0))it.height_image.image_sw.copy(height_image);
+      if(  mtrl_do=(it.mtrl  ()>=0))it.  mtrl_image.image_sw.copy(  mtrl_image);
+      if( color_do=(it.color ()>=0))it. color_image.image_sw.copy( color_image);
 
       height_mode=it.height_mode();
         mtrl_mode=it.  mtrl_mode();
@@ -256,7 +256,7 @@ Memx<ImportTerrainTask> ImportTerrainTasks;
       world_id  =WorldEdit.elm_id;
       world_ver =Proj.worldVerRequire(world_id);
    }
-      int ImportTerrainTask::MaterialIntensities::Compare(C Mtrl &a, C Mtrl &b) {return ::Compare(b.intensity, a.intensity);}
+      int ImportTerrainTask::MaterialIntensities::CompareIntensity(C Mtrl &a, C Mtrl &b) {return Compare(b.intensity, a.intensity);}
       void ImportTerrainTask::MaterialIntensities::set(int i, byte &index, flt &intensity)
       {
          if(InRange(i, mtrls))
@@ -277,7 +277,7 @@ Memx<ImportTerrainTask> ImportTerrainTasks;
             if(InRange(mtrls, mtrl)){Mtrl &m=mtrl[mtrls++]; m.index=index; m.intensity=intensity;} // add new one
          }
       }
-      void ImportTerrainTask::MaterialIntensities::sort() {Sort(mtrl, mtrls, Compare);}
+      void ImportTerrainTask::MaterialIntensities::sort() {Sort(mtrl, mtrls, CompareIntensity);}
    void ImportTerrainTask::import(Heightmap &hm)
    {
       if(AreaVer *area_ver=world_ver->areas.get(area_xy))

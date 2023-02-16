@@ -156,7 +156,7 @@ Bool Image::ImportTGA(File &f, Int type, Int mode, Int mip_maps)
    if(mip_maps<0)mip_maps=1;
 
 	TGA tga;
-   TgaHeader header; f>>header;
+   TgaHeader header; if(!f.getFast(header))return false;
 
    Bool compressed, map;
    switch(Unaligned(header.ImageType))
@@ -172,9 +172,9 @@ Bool Image::ImportTGA(File &f, Int type, Int mode, Int mip_maps)
       default: return false;
    }
 
-   if( Unaligned(header.ImageWidth)==0  ||  Unaligned(header.ImageHeight  )==0)return false;
+   if( Unaligned(header.ImageWidth)==0  ||  Unaligned(header.ImageHeight  )== 0)return false;
    if( Unaligned(header.PixelDepth)!=8  &&  Unaligned(header.PixelDepth   )!=15 && Unaligned(header.PixelDepth)!=16 && Unaligned(header.PixelDepth)!=24 && Unaligned(header.PixelDepth)!=32)return false;
-   if( Unaligned(header.CmapType  )!=0  &&  Unaligned(header.CmapType     )!=1 )return false; // only 0 and 1 types are supported
+   if( Unaligned(header.CmapType  )!=0  &&  Unaligned(header.CmapType     )!= 1)return false; // only 0 and 1 types are supported
    if( Unaligned(header.CmapType  )     &&  Unaligned(header.CmapEntrySize)!=24)return false; // if color map exists but entry is not 24-bit
    if((Unaligned(header.CmapType  )!=0) !=  map                                )return false; // if color map existence is different than map type
    if((Unaligned(header.CmapType  )!=0) != (Unaligned(header.CmapLength   )!=0))return false; // if color map existence is different than map length
@@ -197,7 +197,7 @@ Bool Image::ImportTGA(File &f, Int type, Int mode, Int mip_maps)
    }
 
    Bool convert=ImageTI[type].compressed;
-   if(createTry(Unaligned(header.ImageWidth), Unaligned(header.ImageHeight), 1, convert ? IMAGE_B8G8R8A8_SRGB : IMAGE_TYPE(type), convert ? IMAGE_SOFT : IMAGE_MODE(mode), convert ? 1 : mip_maps)) // TGA uses BGRA order
+   if(create(Unaligned(header.ImageWidth), Unaligned(header.ImageHeight), 1, convert ? IMAGE_B8G8R8A8_SRGB : IMAGE_TYPE(type), convert ? IMAGE_SOFT : IMAGE_MODE(mode), convert ? 1 : mip_maps)) // TGA uses BGRA order
    if(lock(LOCK_WRITE))
    {
       Byte rleLeftover=255;
@@ -214,7 +214,7 @@ Bool Image::ImportTGA(File &f, Int type, Int mode, Int mip_maps)
       if(f.ok())
       {
          updateMipMaps();
-         return copyTry(T, -1, -1, -1, type, mode, mip_maps);
+         return copy(T, -1, -1, -1, type, mode, mip_maps);
       }
    }
    del(); return false;
@@ -225,7 +225,7 @@ Bool Image::ExportTGA(File &f)C
    Image  temp;
  C Image *src=this;
    if(src->cube      ())if(temp.fromCube(*src ,             IMAGE_B8G8R8A8_SRGB               ))src=&temp;else return false;
-   if(src->compressed())if(src->copyTry ( temp, -1, -1, -1, IMAGE_B8G8R8A8_SRGB, IMAGE_SOFT, 1))src=&temp;else return false; // TGA uses BGRA
+   if(src->compressed())if(src->copy    ( temp, -1, -1, -1, IMAGE_B8G8R8A8_SRGB, IMAGE_SOFT, 1))src=&temp;else return false; // TGA uses BGRA
 
    Bool ok=false;
    if(src->lockRead())
@@ -275,12 +275,12 @@ Bool Image::ImportTGA(  File &f   ) {return ImportTGA(f   , -1);}
 Bool Image::ImportTGA(C Str  &name) {return ImportTGA(name, -1);}
 Bool Image::ExportTGA(C Str  &name)C
 {
-   File f; if(f.writeTry(name)){if(ExportTGA(f) && f.flush())return true; f.del(); FDelFile(name);}
+   File f; if(f.write(name)){if(ExportTGA(f) && f.flush())return true; f.del(); FDelFile(name);}
    return false;
 }
 Bool Image::ImportTGA(C Str &name, Int type, Int mode, Int mip_maps)
 {
-   File f; if(f.readTry(name))return ImportTGA(f, type, mode, mip_maps);
+   File f; if(f.read(name))return ImportTGA(f, type, mode, mip_maps);
    del(); return false;
 }
 /******************************************************************************/

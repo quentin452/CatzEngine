@@ -6,6 +6,12 @@ namespace EE{
 /******************************************************************************/
 ImageThreadsClass ImageThreads;
 /******************************************************************************/
+ImageThreadsClass& ImageThreadsClass::init()
+{
+   if(!created())createIfEmpty(false, Cpu.threads()-1, 0, "EE.Image #"); // -1 because we will do processing on the caller thread too
+   return T;
+}
+/******************************************************************************/
 static Bool Decompress(Image &image, IMAGE_TYPE &type, IMAGE_MODE &mode, Int &mip_maps) // returns if image exists
 {
    type    =image.type   ();
@@ -13,19 +19,19 @@ static Bool Decompress(Image &image, IMAGE_TYPE &type, IMAGE_MODE &mode, Int &mi
    mip_maps=image.mipMaps();
    if(image.is())
    {
-      if(image.compressed())return image.copyTry(image, -1, -1, -1, ImageTypeUncompressed(type), AsSoft(image.mode()), 1);
+      if(image.compressed())return image.copy(image, -1, -1, -1, ImageTypeUncompressed(type), AsSoft(image.mode()), 1);
       return true;
    }
    return false;
 }
 static void Compress(Image &image, IMAGE_TYPE type, IMAGE_MODE mode, Int mip_maps)
 {
-   image.copyTry(image, -1, -1, -1, type, mode, mip_maps);
+   image.copy(image, -1, -1, -1, type, mode, mip_maps);
 }
 /******************************************************************************/
 Bool Image::extractNonCompressedMipMapNoStretch(Image &dest, Int w, Int h, Int d, Int mip_map, DIR_ENUM cube_face, Bool clamp)C // assumes &T!=&dest
 {
-   if(dest.createTry(w, h, d, T.hwType(), IMAGE_SOFT, 1, false))
+   if(dest.create(w, h, d, T.hwType(), IMAGE_SOFT, 1, false))
    {
       if(!   T.lockRead(mip_map, cube_face))return false;
     //if(!dest.lock    (LOCK_WRITE        ))return false; not needed for SOFT
@@ -40,7 +46,7 @@ Bool Image::extractNonCompressedMipMapNoStretch(Image &dest, Int w, Int h, Int d
 }
 static Bool ExtractMipMap(C Image &src, Image &dest, Int mip_map, DIR_ENUM cube_face) // assumes &T!=&dest
 {
-   if(dest.createTry(Max(1, src.w()>>mip_map), Max(1, src.h()>>mip_map), Max(1, src.d()>>mip_map), src.hwType(), IMAGE_SOFT, 1, false))
+   if(dest.create(Max(1, src.w()>>mip_map), Max(1, src.h()>>mip_map), Max(1, src.d()>>mip_map), src.hwType(), IMAGE_SOFT, 1, false))
    {
       if(! src.lockRead(mip_map, cube_face))return false;
     //if(!dest.lock    (LOCK_WRITE        ))return false; not needed for SOFT
@@ -61,7 +67,7 @@ Bool Image::extractMipMap(Image &dest, Int type, Int mip_map, DIR_ENUM cube_face
       if(ExtractMipMap(T, img, mip_map, cube_face)) // extract
       {
          if(&img!=&dest)Swap(dest, img); // swap if needed
-         if(type>IMAGE_NONE && !dest.copyTry(dest, -1, -1, -1, type, -1, -1, filter, flags))return false; // apply conversion if needed
+         if(type>IMAGE_NONE && !dest.copy(dest, -1, -1, -1, type, -1, -1, filter, flags))return false; // apply conversion if needed
          return true;
       }
    }
@@ -77,7 +83,7 @@ Bool Image::injectMipMap(C Image &src, Int mip_map, DIR_ENUM cube_face, FILTER_T
       Image  temp;
       Int w=Max(1, T.w()>>mip_map), h=Max(1, T.h()>>mip_map), d=Max(1, T.d()>>mip_map);
       if(s->w()!=w || s->h()!=h || s->d()!=d || s->hwType()!=hwType() || s==this)
-         if(s->copyTry(temp, w, h, d, hwType(), IMAGE_SOFT, 1, filter, flags|IC_NO_ALT_TYPE))s=&temp;else return false; // resize to mip size, need IC_NO_ALT_TYPE to use target type
+         if(s->copy(temp, w, h, d, hwType(), IMAGE_SOFT, 1, filter, flags|IC_NO_ALT_TYPE))s=&temp;else return false; // resize to mip size, need IC_NO_ALT_TYPE to use target type
       if(lock(LOCK_WRITE, mip_map, cube_face))
       {
          if(s->lockRead())
@@ -165,11 +171,11 @@ void Image::bumpToNormal(Image &dest, Flt scale, Bool high_precision)C
 {
  C Image *src=this;
    Image temp;
-   if(compressed())if(copyTry(temp, -1, -1, 1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))src=&temp;else return;
+   if(compressed())if(copy(temp, -1, -1, 1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))src=&temp;else return;
    if(src->lockRead())
    {
       Image normal;
-      if(   normal.createTry(src->w(), src->h(), 1, high_precision ? IMAGE_F32_3 : IMAGE_R8G8B8, IMAGE_SOFT, 1) && normal.lock(LOCK_WRITE))
+      if(   normal.create(src->w(), src->h(), 1, high_precision ? IMAGE_F32_3 : IMAGE_R8G8B8, IMAGE_SOFT, 1) && normal.lock(LOCK_WRITE))
       {
          high_precision=(normal.hwType()==IMAGE_F32_3); // verify in case it was created as different type
          Bool src_hp= src->highPrecision(),
@@ -346,13 +352,13 @@ void Image::crop3D(Image &dest, Int x, Int y, Int z, Int w, Int h, Int d, C Vec4
 
  C Image *src=this;
    Image  temp;
-   if(compressed())if(copyTry(temp, -1, -1, -1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))src=&temp;else return;
+   if(compressed())if(copy(temp, -1, -1, -1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))src=&temp;else return;
 
    if(src->lockRead())
    {
       Int   mip_maps=((mipMaps()>1) ? 0 : 1);
       Image temp;
-      if(   temp.createTry(w, h, d, src->type(), src->mode(), mip_maps) && temp.lock(LOCK_WRITE))
+      if(   temp.create(w, h, d, src->type(), src->mode(), mip_maps) && temp.lock(LOCK_WRITE))
       {
          if(src->bytePP()<=4)
          {
@@ -373,7 +379,7 @@ void Image::crop3D(Image &dest, Int x, Int y, Int z, Int w, Int h, Int d, C Vec4
          }
 
          temp.unlock().updateMipMaps();
-         temp.copyTry(temp, -1, -1, -1, T.type(), T.mode(), mip_maps);
+         temp.copy(temp, -1, -1, -1, T.type(), T.mode(), mip_maps);
          Swap(dest, temp);
       }
       src->unlock();
@@ -402,7 +408,7 @@ Image& Image::cropTransparent(Bool border)
 {
  C Image *src=this;
    Image  temp;
-   if(compressed())if(copyTry(temp, -1, -1, -1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))src=&temp;else return T;
+   if(compressed())if(copy(temp, -1, -1, -1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))src=&temp;else return T;
 
    if(src->lockRead())
    { // inclusive
@@ -463,7 +469,7 @@ Image& Image::resize(Int w, Int h, FILTER_TYPE filter, UInt flags)
 {
    MAX(w, 1);
    MAX(h, 1);
-   if(is() && (w!=T.w() || h!=T.h()))copyTry(T, w, h, -1, -1, -1, -1, filter, flags);
+   if(is() && (w!=T.w() || h!=T.h()))copy(T, w, h, -1, -1, -1, -1, filter, flags);
    return T;
 }
 /******************************************************************************/
@@ -472,7 +478,7 @@ Image& Image::resize3D(Int w, Int h, Int d, FILTER_TYPE filter, UInt flags)
    MAX(w, 1);
    MAX(h, 1);
    MAX(d, 1);
-   if(is() && (w!=T.w() || h!=T.h() || d!=T.d()))copyTry(T, w, h, d, -1, -1, -1, filter, flags);
+   if(is() && (w!=T.w() || h!=T.h() || d!=T.d()))copy(T, w, h, d, -1, -1, -1, filter, flags);
    return T;
 }
 /******************************************************************************/
@@ -485,11 +491,11 @@ Image& Image::mirrorX()
     C Image *src=this;
       Image  temp;
       if(compressed())
-         if(copyTry(temp, -1, -1, -1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))src=&temp;else return T;
+         if(copy(temp, -1, -1, -1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))src=&temp;else return T;
       if(src->lockRead())
       {
          Bool  ok=false;
-         Image mirror; if(mirror.createTry(src->w(), src->h(), src->d(), src->type(), src->mode(), src->mipMaps()))
+         Image mirror; if(mirror.create(src->w(), src->h(), src->d(), src->type(), src->mode(), src->mipMaps()))
             if(mirror.lock(LOCK_WRITE))
          {
             if(mirror.highPrecision())
@@ -504,7 +510,7 @@ Image& Image::mirrorX()
                REPD(x, mirror.w())mirror.color3D(x, y, z, src->color3D(mirror.w()-1-x, y, z));
             }
             mirror.unlock().updateMipMaps();
-            ok=mirror.copyTry(mirror, w(), h(), d(), type(), mode(), mipMaps());
+            ok=mirror.copy(mirror, w(), h(), d(), type(), mode(), mipMaps());
          }
          src->unlock();
          if(ok)Swap(T, mirror);
@@ -520,11 +526,11 @@ Image& Image::mirrorY()
     C Image *src=this;
       Image  temp;
       if(compressed())
-         if(copyTry(temp, -1, -1, -1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))src=&temp;else return T;
+         if(copy(temp, -1, -1, -1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))src=&temp;else return T;
       if(src->lockRead())
       {
          Bool  ok=false;
-         Image mirror; if(mirror.createTry(src->w(), src->h(), src->d(), src->type(), src->mode(), src->mipMaps()))
+         Image mirror; if(mirror.create(src->w(), src->h(), src->d(), src->type(), src->mode(), src->mipMaps()))
             if(mirror.lock(LOCK_WRITE))
          {
             if(mirror.highPrecision())
@@ -539,7 +545,7 @@ Image& Image::mirrorY()
                REPD(x, mirror.w())mirror.color3D(x, y, z, src->color3D(x, mirror.h()-1-y, z));
             }
             mirror.unlock().updateMipMaps();
-            ok=mirror.copyTry(mirror, w(), h(), d(), type(), mode(), mipMaps());
+            ok=mirror.copy(mirror, w(), h(), d(), type(), mode(), mipMaps());
          }
          src->unlock();
          if(ok)Swap(T, mirror);
@@ -555,11 +561,11 @@ Image& Image::mirrorXY()
     C Image *src=this;
       Image  temp;
       if(compressed())
-         if(copyTry(temp, -1, -1, -1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))src=&temp;else return T;
+         if(copy(temp, -1, -1, -1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))src=&temp;else return T;
       if(src->lockRead())
       {
          Bool  ok=false;
-         Image mirror; if(mirror.createTry(src->w(), src->h(), src->d(), src->type(), src->mode(), src->mipMaps()))
+         Image mirror; if(mirror.create(src->w(), src->h(), src->d(), src->type(), src->mode(), src->mipMaps()))
             if(mirror.lock(LOCK_WRITE))
          {
             if(mirror.highPrecision())
@@ -574,10 +580,79 @@ Image& Image::mirrorXY()
                REPD(x, mirror.w())mirror.color3D(x, y, z, src->color3D(mirror.w()-1-x, mirror.h()-1-y, z));
             }
             mirror.unlock().updateMipMaps();
-            ok=mirror.copyTry(mirror, w(), h(), d(), type(), mode(), mipMaps());
+            ok=mirror.copy(mirror, w(), h(), d(), type(), mode(), mipMaps());
          }
          src->unlock();
          if(ok)Swap(T, mirror);
+      }
+   }
+   return T;
+}
+/******************************************************************************/
+Image& Image::rotateL()
+{
+   if(is())
+   {
+    C Image *src=this;
+      Image  temp;
+      if(compressed())
+         if(copy(temp, -1, -1, -1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))src=&temp;else return T;
+      if(src->lockRead())
+      {
+         Bool  ok=false;
+         Image rot; if(rot.create(src->h(), src->w(), src->d(), src->type(), src->mode(), src->mipMaps()))
+            if(rot.lock(LOCK_WRITE))
+         {
+            if(rot.highPrecision())
+            {
+               REPD(z, rot.d())
+               REPD(y, rot.h())
+               REPD(x, rot.w())rot.color3DF(x, y, z, src->color3DF(src->w()-1-y, x, z));
+            }else
+            {
+               REPD(z, rot.d())
+               REPD(y, rot.h())
+               REPD(x, rot.w())rot.color3D(x, y, z, src->color3D(src->w()-1-y, x, z));
+            }
+            rot.unlock().updateMipMaps();
+            ok=rot.copy(rot, h(), w(), d(), type(), mode(), mipMaps());
+         }
+         src->unlock();
+         if(ok)Swap(T, rot);
+      }
+   }
+   return T;
+}
+Image& Image::rotateR()
+{
+   if(is())
+   {
+    C Image *src=this;
+      Image  temp;
+      if(compressed())
+         if(copy(temp, -1, -1, -1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))src=&temp;else return T;
+      if(src->lockRead())
+      {
+         Bool  ok=false;
+         Image rot; if(rot.create(src->h(), src->w(), src->d(), src->type(), src->mode(), src->mipMaps()))
+            if(rot.lock(LOCK_WRITE))
+         {
+            if(rot.highPrecision())
+            {
+               REPD(z, rot.d())
+               REPD(y, rot.h())
+               REPD(x, rot.w())rot.color3DF(x, y, z, src->color3DF(y, src->h()-1-x, z));
+            }else
+            {
+               REPD(z, rot.d())
+               REPD(y, rot.h())
+               REPD(x, rot.w())rot.color3D(x, y, z, src->color3D(y, src->h()-1-x, z));
+            }
+            rot.unlock().updateMipMaps();
+            ok=rot.copy(rot, h(), w(), d(), type(), mode(), mipMaps());
+         }
+         src->unlock();
+         if(ok)Swap(T, rot);
       }
    }
    return T;
@@ -590,7 +665,7 @@ void Image::transform(Image &dest, C Matrix2 &matrix, FILTER_TYPE filter, UInt f
     C Image *src=this;
       Image  temp;
       if(compressed())
-         if(copyTry(temp, -1, -1, -1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))src=&temp;else return;
+         if(copy(temp, -1, -1, -1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))src=&temp;else return;
       if(src->lockRead())
       {
          Vec2 corner[2*2];
@@ -602,7 +677,7 @@ void Image::transform(Image &dest, C Matrix2 &matrix, FILTER_TYPE filter, UInt f
          Rect rect; rect.from(corner, Elms(corner));
 
          Image &work=((src==&dest) ? temp : dest);
-         if(work.createTry(Round(rect.w()), Round(rect.h()), src->d(), src->type(), src->mode(), src->mipMaps()))
+         if(work.create(Round(rect.w()), Round(rect.h()), src->d(), src->type(), src->mode(), src->mipMaps()))
             if(work.lock(LOCK_WRITE))
          {
             Vec2 area_size=1/matrix.scale();
@@ -769,7 +844,7 @@ Image& Image::divRgbByAlpha()
 /******************************************************************************/
 Image& Image::downSample(FILTER_TYPE filter, UInt flags)
 {
-   if(w()>1 || h()>1 || d()>1)copyTry(T, Max(1, w()>>1), Max(1, h()>>1), Max(1, d()>>1), -1, -1, -1, filter, flags);
+   if(w()>1 || h()>1 || d()>1)copy(T, Max(1, w()>>1), Max(1, h()>>1), Max(1, d()>>1), -1, -1, -1, filter, flags);
    return T;
 }
 /******************************************************************************
@@ -1622,13 +1697,13 @@ struct BlurContext
 /******************************************************************************/
 Bool Image::averageX(Image &dest, Int range, Bool clamp)C
 {
-   if(range<=0 || w()<=1)return copyTry(dest);
+   if(range<=0 || w()<=1)return copy(dest);
    IMAGE_TYPE type    =T.type   ();
    IMAGE_MODE mode    =T.mode   ();
    Int        mip_maps=T.mipMaps();
- C Image *src=this; Image temp; if(src->compressed())if(src->copyTry(temp, -1, -1, -1, ImageTypeUncompressed(type), IMAGE_SOFT, 1))src=&temp;else return false;
+ C Image *src=this; Image temp; if(src->compressed())if(src->copy(temp, -1, -1, -1, ImageTypeUncompressed(type), IMAGE_SOFT, 1))src=&temp;else return false;
    Image &work=((src==&dest) ? temp : dest); // this makes &work!=src
-   if(!work.createTry(src->w(), src->h(), src->d(), src->type(), src->mode(), src->mipMaps()))return false; // use 'src.mode' and 'src.mipMaps' because if(src.compressed) then we will get IMAGE_SOFT 1 (what we want, because we will compress below in 'copyTry'), and if not compressed then we will create the target as what we want the dest to be
+   if(!work.create  (src->w(), src->h(), src->d(), src->type(), src->mode(), src->mipMaps()))return false; // use 'src.mode' and 'src.mipMaps' because if(src.compressed) then we will get IMAGE_SOFT 1 (what we want, because we will compress below in 'copy'), and if not compressed then we will create the target as what we want the dest to be
    if(!src->lockRead())return false;
    if(!work.lock    (LOCK_WRITE)){src->unlock(); return false;}
 
@@ -1637,17 +1712,17 @@ Bool Image::averageX(Image &dest, Int range, Bool clamp)C
    UInt flags=(clamp?IC_CLAMP:IC_WRAP);
    work.unlock().updateMipMaps(FILTER_BEST, flags); src->unlock();
    if(work.type()==type && work.mode()==mode && work.mipMaps()==mip_maps){if(&work!=&dest)Swap(work, dest); return true;} // if we have desired type mode and mip maps, then all we need is to Swap if needed, remember that after Swap we should operate on 'dest' and not 'work'
-   return work.copyTry(dest, -1, -1, -1, type, mode, mip_maps, FILTER_BEST, flags);
+   return work.copy(dest, -1, -1, -1, type, mode, mip_maps, FILTER_BEST, flags);
 }
 Bool Image::averageY(Image &dest, Int range, Bool clamp)C
 {
-   if(range<=0 || h()<=1)return copyTry(dest);
+   if(range<=0 || h()<=1)return copy(dest);
    IMAGE_TYPE type    =T.type   ();
    IMAGE_MODE mode    =T.mode   ();
    Int        mip_maps=T.mipMaps();
- C Image *src=this; Image temp; if(src->compressed())if(src->copyTry(temp, -1, -1, -1, ImageTypeUncompressed(type), IMAGE_SOFT, 1))src=&temp;else return false;
+ C Image *src=this; Image temp; if(src->compressed())if(src->copy(temp, -1, -1, -1, ImageTypeUncompressed(type), IMAGE_SOFT, 1))src=&temp;else return false;
    Image &work=((src==&dest) ? temp : dest); // this makes &work!=src
-   if(!work.createTry(src->w(), src->h(), src->d(), src->type(), src->mode(), src->mipMaps()))return false; // use 'src.mode' and 'src.mipMaps' because if(src.compressed) then we will get IMAGE_SOFT 1 (what we want, because we will compress below in 'copyTry'), and if not compressed then we will create the target as what we want the dest to be
+   if(!work.create  (src->w(), src->h(), src->d(), src->type(), src->mode(), src->mipMaps()))return false; // use 'src.mode' and 'src.mipMaps' because if(src.compressed) then we will get IMAGE_SOFT 1 (what we want, because we will compress below in 'copy'), and if not compressed then we will create the target as what we want the dest to be
    if(!src->lockRead())return false;
    if(!work.lock    (LOCK_WRITE)){src->unlock(); return false;}
 
@@ -1656,17 +1731,17 @@ Bool Image::averageY(Image &dest, Int range, Bool clamp)C
    UInt flags=(clamp?IC_CLAMP:IC_WRAP);
    work.unlock().updateMipMaps(FILTER_BEST, flags); src->unlock();
    if(work.type()==type && work.mode()==mode && work.mipMaps()==mip_maps){if(&work!=&dest)Swap(work, dest); return true;} // if we have desired type mode and mip maps, then all we need is to Swap if needed, remember that after Swap we should operate on 'dest' and not 'work'
-   return work.copyTry(dest, -1, -1, -1, type, mode, mip_maps, FILTER_BEST, flags);
+   return work.copy(dest, -1, -1, -1, type, mode, mip_maps, FILTER_BEST, flags);
 }
 Bool Image::averageZ(Image &dest, Int range, Bool clamp)C
 {
-   if(range<=0 || d()<=1)return copyTry(dest);
+   if(range<=0 || d()<=1)return copy(dest);
    IMAGE_TYPE type    =T.type   ();
    IMAGE_MODE mode    =T.mode   ();
    Int        mip_maps=T.mipMaps();
- C Image *src=this; Image temp; if(src->compressed())if(src->copyTry(temp, -1, -1, -1, ImageTypeUncompressed(type), IMAGE_SOFT, 1))src=&temp;else return false;
+ C Image *src=this; Image temp; if(src->compressed())if(src->copy(temp, -1, -1, -1, ImageTypeUncompressed(type), IMAGE_SOFT, 1))src=&temp;else return false;
    Image &work=((src==&dest) ? temp : dest); // this makes &work!=src
-   if(!work.createTry(src->w(), src->h(), src->d(), src->type(), src->mode(), src->mipMaps()))return false; // use 'src.mode' and 'src.mipMaps' because if(src.compressed) then we will get IMAGE_SOFT 1 (what we want, because we will compress below in 'copyTry'), and if not compressed then we will create the target as what we want the dest to be
+   if(!work.create  (src->w(), src->h(), src->d(), src->type(), src->mode(), src->mipMaps()))return false; // use 'src.mode' and 'src.mipMaps' because if(src.compressed) then we will get IMAGE_SOFT 1 (what we want, because we will compress below in 'copy'), and if not compressed then we will create the target as what we want the dest to be
    if(!src->lockRead())return false;
    if(!work.lock    (LOCK_WRITE)){src->unlock(); return false;}
 
@@ -1675,18 +1750,18 @@ Bool Image::averageZ(Image &dest, Int range, Bool clamp)C
    UInt flags=(clamp?IC_CLAMP:IC_WRAP);
    work.unlock().updateMipMaps(FILTER_BEST, flags); src->unlock();
    if(work.type()==type && work.mode()==mode && work.mipMaps()==mip_maps){if(&work!=&dest)Swap(work, dest); return true;} // if we have desired type mode and mip maps, then all we need is to Swap if needed, remember that after Swap we should operate on 'dest' and not 'work'
-   return work.copyTry(dest, -1, -1, -1, type, mode, mip_maps, FILTER_BEST, flags);
+   return work.copy(dest, -1, -1, -1, type, mode, mip_maps, FILTER_BEST, flags);
 }
 /******************************************************************************/
 Bool Image::blurX(Image &dest, Flt range, Bool clamp)C
 {
-   if(range<=0 || w()<=1)return copyTry(dest);
+   if(range<=0 || w()<=1)return copy(dest);
    IMAGE_TYPE type    =T.type   ();
    IMAGE_MODE mode    =T.mode   ();
    Int        mip_maps=T.mipMaps();
- C Image *src=this; Image temp; if(src->compressed())if(src->copyTry(temp, -1, -1, -1, ImageTypeUncompressed(type), IMAGE_SOFT, 1))src=&temp;else return false;
+ C Image *src=this; Image temp; if(src->compressed())if(src->copy(temp, -1, -1, -1, ImageTypeUncompressed(type), IMAGE_SOFT, 1))src=&temp;else return false;
    Image &work=((src==&dest) ? temp : dest); // this makes &work!=src
-   if(!work.createTry(src->w(), src->h(), src->d(), src->type(), src->mode(), src->mipMaps()))return false; // use 'src.mode' and 'src.mipMaps' because if(src.compressed) then we will get IMAGE_SOFT 1 (what we want, because we will compress below in 'copyTry'), and if not compressed then we will create the target as what we want the dest to be
+   if(!work.create  (src->w(), src->h(), src->d(), src->type(), src->mode(), src->mipMaps()))return false; // use 'src.mode' and 'src.mipMaps' because if(src.compressed) then we will get IMAGE_SOFT 1 (what we want, because we will compress below in 'copy'), and if not compressed then we will create the target as what we want the dest to be
    if(!src->lockRead())return false;
    if(!work.lock    (LOCK_WRITE)){src->unlock(); return false;}
 
@@ -1695,17 +1770,17 @@ Bool Image::blurX(Image &dest, Flt range, Bool clamp)C
    UInt flags=(clamp?IC_CLAMP:IC_WRAP);
    work.unlock().updateMipMaps(FILTER_BEST, flags); src->unlock();
    if(work.type()==type && work.mode()==mode && work.mipMaps()==mip_maps){if(&work!=&dest)Swap(work, dest); return true;} // if we have desired type mode and mip maps, then all we need is to Swap if needed, remember that after Swap we should operate on 'dest' and not 'work'
-   return work.copyTry(dest, -1, -1, -1, type, mode, mip_maps, FILTER_BEST, flags);
+   return work.copy(dest, -1, -1, -1, type, mode, mip_maps, FILTER_BEST, flags);
 }
 Bool Image::blurY(Image &dest, Flt range, Bool clamp)C
 {
-   if(range<=0 || h()<=1)return copyTry(dest);
+   if(range<=0 || h()<=1)return copy(dest);
    IMAGE_TYPE type    =T.type   ();
    IMAGE_MODE mode    =T.mode   ();
    Int        mip_maps=T.mipMaps();
- C Image *src=this; Image temp; if(src->compressed())if(src->copyTry(temp, -1, -1, -1, ImageTypeUncompressed(type), IMAGE_SOFT, 1))src=&temp;else return false;
+ C Image *src=this; Image temp; if(src->compressed())if(src->copy(temp, -1, -1, -1, ImageTypeUncompressed(type), IMAGE_SOFT, 1))src=&temp;else return false;
    Image &work=((src==&dest) ? temp : dest); // this makes &work!=src
-   if(!work.createTry(src->w(), src->h(), src->d(), src->type(), src->mode(), src->mipMaps()))return false; // use 'src.mode' and 'src.mipMaps' because if(src.compressed) then we will get IMAGE_SOFT 1 (what we want, because we will compress below in 'copyTry'), and if not compressed then we will create the target as what we want the dest to be
+   if(!work.create  (src->w(), src->h(), src->d(), src->type(), src->mode(), src->mipMaps()))return false; // use 'src.mode' and 'src.mipMaps' because if(src.compressed) then we will get IMAGE_SOFT 1 (what we want, because we will compress below in 'copy'), and if not compressed then we will create the target as what we want the dest to be
    if(!src->lockRead())return false;
    if(!work.lock    (LOCK_WRITE)){src->unlock(); return false;}
 
@@ -1714,17 +1789,17 @@ Bool Image::blurY(Image &dest, Flt range, Bool clamp)C
    UInt flags=(clamp?IC_CLAMP:IC_WRAP);
    work.unlock().updateMipMaps(FILTER_BEST, flags); src->unlock();
    if(work.type()==type && work.mode()==mode && work.mipMaps()==mip_maps){if(&work!=&dest)Swap(work, dest); return true;} // if we have desired type mode and mip maps, then all we need is to Swap if needed, remember that after Swap we should operate on 'dest' and not 'work'
-   return work.copyTry(dest, -1, -1, -1, type, mode, mip_maps, FILTER_BEST, flags);
+   return work.copy(dest, -1, -1, -1, type, mode, mip_maps, FILTER_BEST, flags);
 }
 Bool Image::blurZ(Image &dest, Flt range, Bool clamp)C
 {
-   if(range<=0 || d()<=1)return copyTry(dest);
+   if(range<=0 || d()<=1)return copy(dest);
    IMAGE_TYPE type    =T.type   ();
    IMAGE_MODE mode    =T.mode   ();
    Int        mip_maps=T.mipMaps();
- C Image *src=this; Image temp; if(src->compressed())if(src->copyTry(temp, -1, -1, -1, ImageTypeUncompressed(type), IMAGE_SOFT, 1))src=&temp;else return false;
+ C Image *src=this; Image temp; if(src->compressed())if(src->copy(temp, -1, -1, -1, ImageTypeUncompressed(type), IMAGE_SOFT, 1))src=&temp;else return false;
    Image &work=((src==&dest) ? temp : dest); // this makes &work!=src
-   if(!work.createTry(src->w(), src->h(), src->d(), src->type(), src->mode(), src->mipMaps()))return false; // use 'src.mode' and 'src.mipMaps' because if(src.compressed) then we will get IMAGE_SOFT 1 (what we want, because we will compress below in 'copyTry'), and if not compressed then we will create the target as what we want the dest to be
+   if(!work.create  (src->w(), src->h(), src->d(), src->type(), src->mode(), src->mipMaps()))return false; // use 'src.mode' and 'src.mipMaps' because if(src.compressed) then we will get IMAGE_SOFT 1 (what we want, because we will compress below in 'copy'), and if not compressed then we will create the target as what we want the dest to be
    if(!src->lockRead())return false;
    if(!work.lock    (LOCK_WRITE)){src->unlock(); return false;}
 
@@ -1733,7 +1808,7 @@ Bool Image::blurZ(Image &dest, Flt range, Bool clamp)C
    UInt flags=(clamp?IC_CLAMP:IC_WRAP);
    work.unlock().updateMipMaps(FILTER_BEST, flags); src->unlock();
    if(work.type()==type && work.mode()==mode && work.mipMaps()==mip_maps){if(&work!=&dest)Swap(work, dest); return true;} // if we have desired type mode and mip maps, then all we need is to Swap if needed, remember that after Swap we should operate on 'dest' and not 'work'
-   return work.copyTry(dest, -1, -1, -1, type, mode, mip_maps, FILTER_BEST, flags);
+   return work.copy(dest, -1, -1, -1, type, mode, mip_maps, FILTER_BEST, flags);
 }
 /******************************************************************************/
 Image& Image::average(             C VecI &range, Bool clamp) {average(T, range, clamp); return T;}
@@ -1741,16 +1816,16 @@ Bool   Image::average(Image &dest, C VecI &range, Bool clamp)C
 {
    Bool blur[]={range.x>0 && w()>1, range.y>0 && h()>1, range.z>0 && d()>1};
    Int  blurs =blur[0]+blur[1]+blur[2];
-   if( !blurs)return copyTry(dest);
+   if( !blurs)return copy(dest);
    IMAGE_TYPE type    =T.type   ();
    IMAGE_MODE mode    =T.mode   ();
    Int        mip_maps=T.mipMaps();
- C Image     *src=this; Image temp; if(src->compressed())if(src->copyTry(temp, -1, -1, -1, ImageTypeUncompressed(type), IMAGE_SOFT, 1))src=&temp;else return false;
+ C Image     *src=this; Image temp; if(src->compressed())if(src->copy(temp, -1, -1, -1, ImageTypeUncompressed(type), IMAGE_SOFT, 1))src=&temp;else return false;
    BlurContext bc(*src, clamp);
    if(src==&dest) // this also means !T.compressed && 'temp' is empty
    {
-      if(blurs&1)temp.createTry    (w(), h(), d(), type, mode, mip_maps); // we will end up in 'temp' so create 'temp' as target mode and mip maps
-      else       temp.createSoftTry(w(), h(), d(), type,              1); // we will end up in 'dest' so create 'temp' as SOFT
+      if(blurs&1)temp.create    (w(), h(), d(), type, mode, mip_maps); // we will end up in 'temp' so create 'temp' as target mode and mip maps
+      else       temp.createSoft(w(), h(), d(), type,              1); // we will end up in 'dest' so create 'temp' as SOFT
       if(!temp.is())return false;
       bc.dest=&temp;
       if(!temp.lock(LOCK_WRITE     ))return false;
@@ -1759,13 +1834,13 @@ Bool   Image::average(Image &dest, C VecI &range, Bool clamp)C
    }else
    if(src==&temp) // this also means T.compressed && 'temp' is created
    {
-      if(!dest.createSoftTry(w(), h(), d(), ImageTypeUncompressed(type), 1))return false; // always create as soft, because T.compressed so we will have to compress it anyway
+      if(!dest.createSoft(w(), h(), d(), ImageTypeUncompressed(type), 1))return false; // always create as soft, because T.compressed so we will have to compress it anyway
       bc.dest=&dest;
       // no need to lock, because src==temp (which is SOFT) and dest is SOFT
    }else // src!=&dest && src!=&temp && !T.compressed
    {
-      if(           !dest.createTry    (w(), h(), d(), type, mode, mip_maps))return false; // we will end up in 'dest' so create it as target mode and mip maps
-      if(blurs>1 && !temp.createSoftTry(w(), h(), d(), type,              1))return false; // create temp as SOFT
+      if(           !dest.create    (w(), h(), d(), type, mode, mip_maps))return false; // we will end up in 'dest' so create it as target mode and mip maps
+      if(blurs>1 && !temp.createSoft(w(), h(), d(), type,              1))return false; // create temp as SOFT
       bc.dest=((blurs&1) ? &dest : &temp);
       if(!src->lockRead()      )return false;
       if(!dest.lock(LOCK_WRITE))return false;
@@ -1793,23 +1868,23 @@ Bool   Image::average(Image &dest, C VecI &range, Bool clamp)C
    UInt flags=(clamp?IC_CLAMP:IC_WRAP);
    img.updateMipMaps(FILTER_BEST, flags);
    if(img.type()==type && img.mode()==mode && img.mipMaps()==mip_maps){if(&img!=&dest)Swap(img, dest); return true;} // if we have desired type mode and mip maps, then all we need is to Swap if needed, remember that after Swap we should operate on 'dest' and not 'img'
-   return img.copyTry(dest, -1, -1, -1, type, mode, mip_maps, FILTER_BEST, flags);
+   return img.copy(dest, -1, -1, -1, type, mode, mip_maps, FILTER_BEST, flags);
 }
 Image& Image::blur(             C Vec &range, Bool clamp) {blur(T, range, clamp); return T;}
 Bool   Image::blur(Image &dest, C Vec &range, Bool clamp)C
 {
    Bool blur[]={range.x>0 && w()>1, range.y>0 && h()>1, range.z>0 && d()>1};
    Int  blurs =blur[0]+blur[1]+blur[2];
-   if( !blurs)return copyTry(dest);
+   if( !blurs)return copy(dest);
    IMAGE_TYPE type    =T.type   ();
    IMAGE_MODE mode    =T.mode   ();
    Int        mip_maps=T.mipMaps();
- C Image     *src=this; Image temp; if(src->compressed())if(src->copyTry(temp, -1, -1, -1, ImageTypeUncompressed(type), IMAGE_SOFT, 1))src=&temp;else return false;
+ C Image     *src=this; Image temp; if(src->compressed())if(src->copy(temp, -1, -1, -1, ImageTypeUncompressed(type), IMAGE_SOFT, 1))src=&temp;else return false;
    BlurContext bc(*src, clamp);
    if(src==&dest) // this also means !T.compressed && 'temp' is empty
    {
-      if(blurs&1)temp.createTry    (w(), h(), d(), type, mode, mip_maps); // we will end up in 'temp' so create 'temp' as target mode and mip maps
-      else       temp.createSoftTry(w(), h(), d(), type,              1); // we will end up in 'dest' so create 'temp' as SOFT
+      if(blurs&1)temp.create    (w(), h(), d(), type, mode, mip_maps); // we will end up in 'temp' so create 'temp' as target mode and mip maps
+      else       temp.createSoft(w(), h(), d(), type,              1); // we will end up in 'dest' so create 'temp' as SOFT
       if(!temp.is())return false;
       bc.dest=&temp;
       if(!temp.lock(LOCK_WRITE     ))return false;
@@ -1818,13 +1893,13 @@ Bool   Image::blur(Image &dest, C Vec &range, Bool clamp)C
    }else
    if(src==&temp) // this also means T.compressed && 'temp' is created
    {
-      if(!dest.createSoftTry(w(), h(), d(), ImageTypeUncompressed(type), 1))return false; // always create as soft, because T.compressed so we will have to compress it anyway
+      if(!dest.createSoft(w(), h(), d(), ImageTypeUncompressed(type), 1))return false; // always create as soft, because T.compressed so we will have to compress it anyway
       bc.dest=&dest;
       // no need to lock, because src==temp (which is SOFT) and dest is SOFT
    }else // src!=&dest && src!=&temp && !T.compressed
    {
-      if(           !dest.createTry    (w(), h(), d(), type, mode, mip_maps))return false; // we will end up in 'dest' so create it as target mode and mip maps
-      if(blurs>1 && !temp.createSoftTry(w(), h(), d(), type,              1))return false; // create temp as SOFT
+      if(           !dest.create    (w(), h(), d(), type, mode, mip_maps))return false; // we will end up in 'dest' so create it as target mode and mip maps
+      if(blurs>1 && !temp.createSoft(w(), h(), d(), type,              1))return false; // create temp as SOFT
       bc.dest=((blurs&1) ? &dest : &temp);
       if(!src->lockRead()      )return false;
       if(!dest.lock(LOCK_WRITE))return false;
@@ -1852,7 +1927,7 @@ Bool   Image::blur(Image &dest, C Vec &range, Bool clamp)C
    UInt flags=(clamp?IC_CLAMP:IC_WRAP);
    img.updateMipMaps(FILTER_BEST, flags);
    if(img.type()==type && img.mode()==mode && img.mipMaps()==mip_maps){if(&img!=&dest)Swap(img, dest); return true;} // if we have desired type mode and mip maps, then all we need is to Swap if needed, remember that after Swap we should operate on 'dest' and not 'img'
-   return img.copyTry(dest, -1, -1, -1, type, mode, mip_maps, FILTER_BEST, flags);
+   return img.copy(dest, -1, -1, -1, type, mode, mip_maps, FILTER_BEST, flags);
 }
 /******************************************************************************/
 Image& Image::sharpen(Flt power, C Vec &range, Bool clamp, Bool blur)
@@ -2132,7 +2207,7 @@ Bool Image::stats(Vec4 *min, Vec4 *max, Vec4 *avg, Vec4 *med, Vec4 *mod, Vec *av
    {
     C Image *src=this; Image temp;
       if(compressed())
-         if(copyTry(temp, -1, -1, -1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))src=&temp;else goto error;
+         if(copy(temp, -1, -1, -1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))src=&temp;else goto error;
       if(src->lockRead())
       {
          VecD4 sum=0, sum_alpha_weight=0;
@@ -2266,7 +2341,7 @@ Bool Image::statsSat(Flt *min, Flt *max, Flt *avg, Flt *med, Flt *mod, Flt *avg_
    {
     C Image *src=this; Image temp;
       if(compressed())
-         if(copyTry(temp, -1, -1, -1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))src=&temp;else goto error;
+         if(copy(temp, -1, -1, -1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))src=&temp;else goto error;
       if(src->lockRead())
       {
          Dbl   sum=0, sum_alpha=0; VecD2 sum_alpha_weight=0;
@@ -2360,6 +2435,27 @@ error:
    return false;
 }
 /******************************************************************************/
+Bool Image::needsAlpha()C
+{
+   if(!typeInfo().a)return false;
+   Bool  extract=compressed(); IMAGE_TYPE type=ImageTypeUncompressed(T.type());
+   Image temp; C Image *src=(extract ? &temp : this);
+   REPD(face, faces()) // 'faces' and not 'src.faces' because that could be empty
+   {
+      int src_face=face; if(extract)if(extractMipMap(temp, type, 0, DIR_ENUM(face)))src_face=0;else return true; // error
+      if( src->lockRead(0, DIR_ENUM(src_face)))
+      {
+         REPD(z, src->ld())
+         REPD(y, src->lh())
+         REPD(x, src->lw())
+         {
+            Vec4 c=src->color3DF(x, y, z); if(!Equal(c.w, 1, 1.5f/255)){src->unlock(); return true;} // 1.5 instead of 0.5 because compressed texture formats may be imprecise (BC7..)
+         }
+         src->unlock();
+      }
+   }
+   return false;
+}
 Bool Image::monochromatic()C
 {
  C ImageTypeInfo &type_info=typeInfo();
@@ -2494,7 +2590,7 @@ Image& Image::transparentToNeighbor(Bool clamp, Flt step)
 #if 1 // new method
    if(!typeInfo().a)return T;//true;
    Int    mips=TotalMipMaps(w(), h(), d()); if(mips<=1)return T;//true;
-   Image *src =this, temp; if(!src->highPrecision() || src->compressed())if(src->copyTry(temp, -1, -1, -1, IMAGE_F32_4, IMAGE_SOFT, 1, FILTER_BEST, IC_IGNORE_GAMMA))src=&temp;else return T;//false; // first we have to copy to IMAGE_F32_4 to make sure we have floating point, so that downsizing will not use ALPHA_LIMIT, this is absolutely critical
+   Image *src =this, temp; if(!src->highPrecision() || src->compressed())if(src->copy(temp, -1, -1, -1, IMAGE_F32_4, IMAGE_SOFT, 1, FILTER_BEST, IC_IGNORE_GAMMA))src=&temp;else return T;//false; // first we have to copy to IMAGE_F32_4 to make sure we have floating point, so that downsizing will not use ALPHA_LIMIT, this is absolutely critical
    Bool   ok  =false;
    if(src->lock())
    {
@@ -2504,7 +2600,7 @@ Image& Image::transparentToNeighbor(Bool clamp, Flt step)
       FREPA(mip)
       {
          size>>=1;
-         if(!s->copyTry(mip[i], size.x, size.y, size.z, IMAGE_F32_4, IMAGE_SOFT, 1, FILTER_CUBIC_FAST_SMOOTH, (clamp?IC_CLAMP:IC_WRAP)|IC_ALPHA_WEIGHT|IC_NO_ALPHA_LIMIT|IC_IGNORE_GAMMA))goto error; // we need a non-sharpening filter and one that spreads in all directions (more than 2x2 samples), need to use IC_NO_ALPHA_LIMIT or else it won't work well
+         if(!s->copy(mip[i], size.x, size.y, size.z, IMAGE_F32_4, IMAGE_SOFT, 1, FILTER_CUBIC_FAST_SMOOTH, (clamp?IC_CLAMP:IC_WRAP)|IC_ALPHA_WEIGHT|IC_NO_ALPHA_LIMIT|IC_IGNORE_GAMMA))goto error; // we need a non-sharpening filter and one that spreads in all directions (more than 2x2 samples), need to use IC_NO_ALPHA_LIMIT or else it won't work well
          s=&mip[i];
       }
 
@@ -2535,7 +2631,7 @@ Image& Image::transparentToNeighbor(Bool clamp, Flt step)
       if(ok)
       {
          src->updateMipMaps(FILTER_BEST, (clamp?IC_CLAMP:IC_WRAP)|IC_ALPHA_WEIGHT);
-         ok=src->copyTry(T, -1, -1, -1, type(), mode(), mipMaps(), FILTER_BEST, (clamp?IC_CLAMP:IC_WRAP)|IC_ALPHA_WEIGHT|IC_IGNORE_GAMMA);
+         ok=src->copy(T, -1, -1, -1, type(), mode(), mipMaps(), FILTER_BEST, (clamp?IC_CLAMP:IC_WRAP)|IC_ALPHA_WEIGHT|IC_IGNORE_GAMMA);
       }
    }
    return T;//ok;
@@ -2605,11 +2701,11 @@ Image& Image::transparentToNeighbor(Bool clamp, Flt step)
 Image& Image::transparentForFiltering(Bool clamp, Flt intensity)
 {
  C Image *src=this; Image temp;
-   if(compressed())if(copyTry(temp, -1, -1, -1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))src=&temp;else return T;
+   if(compressed())if(copy(temp, -1, -1, -1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))src=&temp;else return T;
    if(src->lockRead())
    {
       Bool ok=false;
-      Image dest; if(dest.createTry(src->w(), src->h(), src->d(), src->type(), src->mode(), src->mipMaps()) && dest.lock(LOCK_WRITE))
+      Image dest; if(dest.create(src->w(), src->h(), src->d(), src->type(), src->mode(), src->mipMaps()) && dest.lock(LOCK_WRITE))
       {
          intensity/=9*2; // 9 neighbors, and half
          const Flt scale=2;
@@ -2678,7 +2774,7 @@ Bool Image::getSameColorNeighbors(Int x, Int y, MemPtr<VecI2> pixels, Bool diago
    {
     C Image *src=this;
       Image  temp;
-      if(compressed()){if(!copyTry(temp, -1, -1, -1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))return false; src=&temp;}
+      if(compressed()){if(!copy(temp, -1, -1, -1, ImageTypeUncompressed(type()), IMAGE_SOFT, 1))return false; src=&temp;}
       if(src->lockRead())
       {
          const Int moves=(diagonal ? 8 : 4);
@@ -2760,7 +2856,7 @@ Image& Image::createShadow(C Image &src, Int blur, Flt shadow_opacity, Flt shado
    Int padd=blur+border_padd;
 
  C Image *s=&src;
-   Image decompressed; if(s->compressed())if(s->copyTry(decompressed, -1, -1, -1, ImageTypeUncompressed(s->type()), IMAGE_SOFT, 1))s=&decompressed;else return T;
+   Image decompressed; if(s->compressed())if(s->copy(decompressed, -1, -1, -1, ImageTypeUncompressed(s->type()), IMAGE_SOFT, 1))s=&decompressed;else return T;
    Image temp(s->w()+padd*2, s->h()+padd*2, 1, IMAGE_A8, IMAGE_SOFT, 1);
 
    // copy
@@ -2825,7 +2921,7 @@ Image& Image::applyShadow(C Image &shadow, C Color &shadow_color, C VecI2 &offse
          }
          shadow.unlock();
       }
-      temp.copyTry(temp, -1, -1, -1, IMAGE_TYPE(image_type), mode, mip_maps);
+      temp.copy(temp, -1, -1, -1, IMAGE_TYPE(image_type), mode, mip_maps);
       Swap(T, temp);
    }
    return T;
@@ -2931,9 +3027,9 @@ void Image::normalToBump(Image &dest, Bool high_quality)
       if(lockRead())
       {
          Image delta, bump, temp;
-         if(delta.createTry(_x, _y, 1, IMAGE_F32_2, IMAGE_SOFT, 1))
-         if(bump .createTry(_x, _y, 1, IMAGE_F32_2, IMAGE_SOFT, 1))
-         if(temp .createTry(_x, _y, 1, IMAGE_F32  , IMAGE_SOFT, 1))
+         if(delta.create(_x, _y, 1, IMAGE_F32_2, IMAGE_SOFT, 1))
+         if(bump .create(_x, _y, 1, IMAGE_F32_2, IMAGE_SOFT, 1))
+         if(temp .create(_x, _y, 1, IMAGE_F32  , IMAGE_SOFT, 1))
          {
             // set bump delta's from normals
             Bool rescale=(bytePP()<=4); // rescale imprecisions of integer types resulting in 128/255 != 0.5
@@ -3000,7 +3096,7 @@ void Image::normalToBump(Image &dest, Bool high_quality)
             }
 
             // create destination
-            if(dest.createTry(_x, _y, 1, IMAGE_L8, mode()))
+            if(dest.create(_x, _y, 1, IMAGE_L8, mode()))
             if(dest.lock())
             {
                REPD(y, _y)
@@ -3015,7 +3111,7 @@ void Image::normalToBump(Image &dest, Bool high_quality)
       if(lockRead())
       {
          Image bump;
-         if(   bump.createTry(_x, _y, 1, IMAGE_F32_2, IMAGE_SOFT, 1))
+         if(   bump.create(_x, _y, 1, IMAGE_F32_2, IMAGE_SOFT, 1))
          {
             Bool rescale=(bytePP()<=4); // rescale imprecisions of integer types resulting in 128/255 != 0.5
             Int  mx     =(T._x>>1), // middle x
@@ -3348,7 +3444,7 @@ Bool Image::blurCubeMipMaps()
       if(!waitForStream())return false; // since we'll access 'softData' without locking, make sure stream is finished
       Threads *threads=&ImageThreads.init();
       Image *img=this, temp;
-      if(img->mode()!=IMAGE_SOFT_CUBE || img->compressed())if(img->copyTry(temp, -1, -1, -1, ImageTypeUncompressed(img->type()), IMAGE_SOFT_CUBE))img=&temp;else return false;
+      if(img->mode()!=IMAGE_SOFT_CUBE || img->compressed())if(img->copy(temp, -1, -1, -1, ImageTypeUncompressed(img->type()), IMAGE_SOFT_CUBE))img=&temp;else return false;
       Flt last=0;
       for(Int i=1; i<img->mipMaps(); i++)
       {
@@ -3356,7 +3452,7 @@ Bool Image::blurCubeMipMaps()
          BlurCube(*img, i-1, *img, i, angle-last*0.5f, threads); // make angle range smaller by a factor of angle from last step to approximately match results if 0th mip was always used as the source (which would be very slow)
          last=angle;
       }
-      if(img!=this && !img->copyTry(T, -1, -1, -1, type(), mode()))return false; // convert to original type and mode
+      if(img!=this && !img->copy(T, -1, -1, -1, type(), mode()))return false; // convert to original type and mode
    }
    return true;
 }
@@ -3574,7 +3670,7 @@ HICON CreateIcon(C Image &image, C VecI2 *cursor_hot_spot)
 {
    HICON icon=null;
    Image temp; C Image *src=&image;
-   if(src->compressed())if(src->copyTry(temp, -1, -1, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1))src=&temp;else src=null;
+   if(src->compressed())if(src->copy(temp, -1, -1, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1))src=&temp;else src=null;
    if(src && src->lockRead())
    {
       BITMAPV5HEADER bi; Zero(bi);

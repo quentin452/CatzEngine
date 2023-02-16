@@ -941,14 +941,14 @@ BUFFER_END
 Vec  TransformPos(Vec  pos, UInt mtrx=0) {return Transform (pos, ViewMatrix[mtrx]);}
 VecH TransformDir(VecH dir, UInt mtrx=0) {return Transform3(dir, ViewMatrix[mtrx]);}
 
-Vec  TransformPos(Vec  pos, VecU bone, Vec  weight) {return weight.x*Transform (pos, ViewMatrix[bone.x]) + weight.y*Transform (pos, ViewMatrix[bone.y]) + weight.z*Transform (pos, ViewMatrix[bone.z]);}
-VecH TransformDir(VecH dir, VecU bone, VecH weight) {return weight.x*Transform3(dir, ViewMatrix[bone.x]) + weight.y*Transform3(dir, ViewMatrix[bone.y]) + weight.z*Transform3(dir, ViewMatrix[bone.z]);} // no need HP for dirs
-
 Vec  TransformPosPrev(Vec  pos, UInt mtrx=0) {return Transform (pos, ViewMatrixPrev[mtrx]);}
 VecH TransformDirPrev(VecH dir, UInt mtrx=0) {return Transform3(dir, ViewMatrixPrev[mtrx]);}
 
-Vec  TransformPosPrev(Vec  pos, VecU bone, Vec  weight) {return weight.x*Transform (pos, ViewMatrixPrev[bone.x]) + weight.y*Transform (pos, ViewMatrixPrev[bone.y]) + weight.z*Transform (pos, ViewMatrixPrev[bone.z]);}
-VecH TransformDirPrev(VecH dir, VecU bone, VecH weight) {return weight.x*Transform3(dir, ViewMatrixPrev[bone.x]) + weight.y*Transform3(dir, ViewMatrixPrev[bone.y]) + weight.z*Transform3(dir, ViewMatrixPrev[bone.z]);} // no need HP for dirs
+Vec  TransformPos(Vec  pos, VecU4 bone, Vec4  weight) {return weight.x*Transform (pos, ViewMatrix[bone.x]) + weight.y*Transform (pos, ViewMatrix[bone.y]) + weight.z*Transform (pos, ViewMatrix[bone.z]) + weight.w*Transform (pos, ViewMatrix[bone.w]);}
+VecH TransformDir(VecH dir, VecU4 bone, VecH4 weight) {return weight.x*Transform3(dir, ViewMatrix[bone.x]) + weight.y*Transform3(dir, ViewMatrix[bone.y]) + weight.z*Transform3(dir, ViewMatrix[bone.z]) + weight.w*Transform3(dir, ViewMatrix[bone.w]);} // no need HP for dirs
+
+Vec  TransformPosPrev(Vec  pos, VecU4 bone, Vec4  weight) {return weight.x*Transform (pos, ViewMatrixPrev[bone.x]) + weight.y*Transform (pos, ViewMatrixPrev[bone.y]) + weight.z*Transform (pos, ViewMatrixPrev[bone.z]) + weight.w*Transform (pos, ViewMatrixPrev[bone.w]);}
+VecH TransformDirPrev(VecH dir, VecU4 bone, VecH4 weight) {return weight.x*Transform3(dir, ViewMatrixPrev[bone.x]) + weight.y*Transform3(dir, ViewMatrixPrev[bone.y]) + weight.z*Transform3(dir, ViewMatrixPrev[bone.z]) + weight.w*Transform3(dir, ViewMatrixPrev[bone.w]);} // no need HP for dirs
 
 Vec ViewMatrixX  (UInt mtrx=0) {return ViewMatrix[mtrx][0];}
 Vec ViewMatrixY  (UInt mtrx=0) {return ViewMatrix[mtrx][1];}
@@ -1000,8 +1000,8 @@ VecH TransformDir(VecH dir, UInt mtrx)
                Dot(dir, ViewMatrix[mtrx+2].xyz));
 }
 
-Vec  TransformPos(Vec  pos, VecU bone, Vec  weight) {return weight.x*TransformPos(pos, bone.x) + weight.y*TransformPos(pos, bone.y) + weight.z*TransformPos(pos, bone.z);}
-VecH TransformDir(VecH dir, VecU bone, VecH weight) {return weight.x*TransformDir(dir, bone.x) + weight.y*TransformDir(dir, bone.y) + weight.z*TransformDir(dir, bone.z);} // no need HP for dirs
+Vec  TransformPos(Vec  pos, VecU4 bone, Vec4  weight) {return weight.x*TransformPos(pos, bone.x) + weight.y*TransformPos(pos, bone.y) + weight.z*TransformPos(pos, bone.z) + weight.w*TransformPos(pos, bone.w);}
+VecH TransformDir(VecH dir, VecU4 bone, VecH4 weight) {return weight.x*TransformDir(dir, bone.x) + weight.y*TransformDir(dir, bone.y) + weight.z*TransformDir(dir, bone.z) + weight.w*TransformDir(dir, bone.w);} // no need HP for dirs
 
 // -
 
@@ -1033,8 +1033,8 @@ VecH TransformDirPrev(VecH dir, UInt mtrx)
                Dot(dir, ViewMatrixPrev[mtrx+2].xyz));
 }
 
-Vec  TransformPosPrev(Vec  pos, VecU bone, Vec  weight) {return weight.x*TransformPosPrev(pos, bone.x) + weight.y*TransformPosPrev(pos, bone.y) + weight.z*TransformPosPrev(pos, bone.z);}
-VecH TransformDirPrev(VecH dir, VecU bone, VecH weight) {return weight.x*TransformDirPrev(dir, bone.x) + weight.y*TransformDirPrev(dir, bone.y) + weight.z*TransformDirPrev(dir, bone.z);} // no need HP for dirs
+Vec  TransformPosPrev(Vec  pos, VecU4 bone, Vec4  weight) {return weight.x*TransformPosPrev(pos, bone.x) + weight.y*TransformPosPrev(pos, bone.y) + weight.z*TransformPosPrev(pos, bone.z) + weight.w*TransformPosPrev(pos, bone.w);}
+VecH TransformDirPrev(VecH dir, VecU4 bone, VecH4 weight) {return weight.x*TransformDirPrev(dir, bone.x) + weight.y*TransformDirPrev(dir, bone.y) + weight.z*TransformDirPrev(dir, bone.z) + weight.w*TransformDirPrev(dir, bone.w);} // no need HP for dirs
 
 // -
 
@@ -1405,11 +1405,11 @@ struct VtxInput // Vertex Input, use this class to access vertex data in vertex 
    Vec2  uv2      (                                        ) {return                                     _uv2                              ;} // tex coords 2
    Vec2  uv3      (                                        ) {return                                     _uv3                              ;} // tex coords 3
 #if GL
-   VecU  bone     (                                        ) {return VtxSkinning ? VecU(_bone.xyz) : VecU(0, 0, 0)                         ;} // bone matrix indexes
+   VecU4 bone     (                                        ) {return VtxSkinning ? VecU4(_bone) : VecU4(0, 0, 0, 0)                        ;} // bone matrix indexes
 #else
-   VecU  bone     (                                        ) {return VtxSkinning ?      _bone.xyz  : VecU(0, 0, 0)                         ;} // bone matrix indexes
+   VecU4 bone     (                                        ) {return VtxSkinning ?       _bone  : VecU4(0, 0, 0, 0)                        ;} // bone matrix indexes
 #endif
-   Vec   weight   (                                        ) {return _weight.xyz                                                           ;} // bone matrix weights
+   Vec4  weight   (                                        ) {return _weight                                                               ;} // bone matrix weights
    VecH4 material (                                        ) {return _material                                                             ;} // material    weights
    VecH  material3(                                        ) {return _material.xyz                                                         ;} // material    weights
    Half  size     (                                        ) {return _size                                                                 ;} // point size
@@ -1729,6 +1729,7 @@ void BendGrass(Vec local_pos, inout Vec view_pos, UInt mtrx=0, Bool prev=false)
 
       Flt len2 =Length2(delta),
           blend=Min(len2, Sqr(local_pos.y*2)); // minimize with vertical position
+        //blend=Min(Sqrt(len2), local_pos.y*2); alternative formula: looks more stiff at the bottom, but tops don't bend so much, maybe could use a mix of both formulas, but that would be slow
       Vec2 bend=GetGrassBend(prev ? ObjWorldPosPrev(mtrx) : ObjWorldPos(mtrx), prev)*blend;
 
       if(!prev)

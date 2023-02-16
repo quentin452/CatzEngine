@@ -77,20 +77,21 @@ struct TRIS
 };
 struct MESH_BONE
 {
-   Byte  parent;
-   NODE *node;
+   BoneType parent;
+   NODE    *node;
 
-   MESH_BONE() {parent=0xFF; node=null;}
+   MESH_BONE() {parent=BONE_NULL; node=null;}
 };
 struct MESH
 {
-   Byte            has_nrm, has_color, tex_coords;
+   Bool            has_nrm, has_color;
+   Byte            uvs;
    Int             brush;
    Memc<VRT      > vrt  ;
    Memc<TRIS     > tris ;
    Memc<MESH_BONE> bones;
 
-   MESH() {has_nrm=has_color=false; tex_coords=0;}
+   MESH() {has_nrm=has_color=false; uvs=0;}
 };
 struct KEYS
 {
@@ -103,7 +104,7 @@ struct NODE
 {
    Str        name;
    Bool       bone;
-   Byte       bone_index;
+   BoneType   bone_index;
    Matrix     local_matrix, global_matrix;
    NODE      *parent;
    Memc<MESH> meshes;
@@ -112,7 +113,7 @@ struct NODE
    Memc<ANIM> anims ;
    Memx<NODE> nodes ; // use 'Memx' because nodes are referencing each other using 'parent'
 
-   NODE() {bone=false; bone_index=0xFF; local_matrix.identity(); global_matrix.identity(); parent=null;}
+   NODE() {bone=false; bone_index=BONE_NULL; local_matrix.identity(); global_matrix.identity(); parent=null;}
 };
 /******************************************************************************/
 static Str8 GetStr(File &f)
@@ -162,9 +163,9 @@ static void ImportB3DNode(File &f, Chunk &c, Memx<NODE> &nodes, NODE *parent, Te
             {
                c.size+=f.pos();
                Int flags, tex_coord_sets, tex_coord_set_size; f>>flags>>tex_coord_sets>>tex_coord_set_size;
-               mesh.has_nrm   =FlagOn(flags, 1);
-               mesh.has_color =FlagOn(flags, 2);
-               mesh.tex_coords=tex_coord_sets;
+               mesh.has_nrm  =FlagOn(flags, 1);
+               mesh.has_color=FlagOn(flags, 2);
+               mesh.uvs      =tex_coord_sets;
                for(; !f.end() && c.size>f.pos(); )
                {
                   VRT &v=mesh.vrt.New();
@@ -223,7 +224,7 @@ static void ImportB3DNode(File &f, Chunk &c, Memx<NODE> &nodes, NODE *parent, Te
    }
 }
 /******************************************************************************/
-static void ProcessBones(Memx<NODE> &nodes, Byte parent_index, MESH *last_mesh)
+static void ProcessBones(Memx<NODE> &nodes, BoneType parent_index, MESH *last_mesh)
 {
    FREPA(nodes)
    {
@@ -241,7 +242,7 @@ static void ProcessBones(Memx<NODE> &nodes, Byte parent_index, MESH *last_mesh)
    }
 }
 /******************************************************************************/
-static void ProcessNodes(Memx<NODE> &nodes, Memc<MeshPart> &parts, MemPtr<Int> part_material_index, Memc<TEXS> &texs, Memc<BRUS> &brus, Skeleton &skeleton, MemtN<Byte, 256> &old_to_new)
+static void ProcessNodes(Memx<NODE> &nodes, Memc<MeshPart> &parts, MemPtr<Int> part_material_index, Memc<TEXS> &texs, Memc<BRUS> &brus, Skeleton &skeleton, MemtN<BoneType, 256> &old_to_new)
 {
    FREPA(nodes)
    {
@@ -255,13 +256,13 @@ static void ProcessNodes(Memx<NODE> &nodes, Memc<MeshPart> &parts, MemPtr<Int> p
             {
                MeshPart &part=parts.New(); Set(part.name, node.name); if(part_material_index)part_material_index.add(tris.brush);
                MeshBase &mshb=part .base;
-               mshb.create(mesh.vrt.elms(), 0, tris.ind.elms(), 0, (mesh.has_nrm?VTX_NRM:MESH_NONE) | ((mesh.tex_coords>=1)?VTX_TEX0:MESH_NONE) | ((mesh.tex_coords>=2)?VTX_TEX1:MESH_NONE) | (mesh.bones.elms()?VTX_SKIN:MESH_NONE));
+               mshb.create(mesh.vrt.elms(), 0, tris.ind.elms(), 0, (mesh.has_nrm?VTX_NRM:MESH_NONE) | ((mesh.uvs>=1)?VTX_TEX0:MESH_NONE) | ((mesh.uvs>=2)?VTX_TEX1:MESH_NONE) | (mesh.bones.elms()?VTX_SKIN:MESH_NONE));
 
                // vertexes
-                                     REPA(mesh.vrt)mshb.vtx.pos (i)=mesh.vrt[i].pos*node.global_matrix ;
-               if(mesh.has_nrm      )REPA(mesh.vrt)mshb.vtx.nrm (i)=mesh.vrt[i].nrm*            matrix3;
-               if(mesh.tex_coords>=1)REPA(mesh.vrt)mshb.vtx.tex0(i)=mesh.vrt[i].tex[0];
-               if(mesh.tex_coords>=2)REPA(mesh.vrt)mshb.vtx.tex1(i)=mesh.vrt[i].tex[1];
+                               REPA(mesh.vrt)mshb.vtx.pos (i)=mesh.vrt[i].pos*node.global_matrix ;
+               if(mesh.has_nrm)REPA(mesh.vrt)mshb.vtx.nrm (i)=mesh.vrt[i].nrm*            matrix3;
+               if(mesh.uvs>=1 )REPA(mesh.vrt)mshb.vtx.tex0(i)=mesh.vrt[i].tex[0];
+               if(mesh.uvs>=2 )REPA(mesh.vrt)mshb.vtx.tex1(i)=mesh.vrt[i].tex[1];
                if(mesh.bones.elms() )
                {
                   REPA(mesh.bones)
@@ -324,7 +325,7 @@ static void CreateAnimation(C Memc<MESH_BONE> &mesh_bone, Skeleton &skeleton, XA
       AnimBone &abon=    anim.bones[i];
       SkelBone &sbon=skeleton.bones[i];
       
-      Bool    parent=(sbon.parent!=0xFF);
+      Bool    parent=(sbon.parent!=BONE_NULL);
       Matrix3 parent_matrix_inv; if(parent)skeleton.bones[sbon.parent].inverse(parent_matrix_inv);
 
       abon.set(sbon.name);
@@ -455,7 +456,7 @@ Bool ImportB3D(C Str &name, Mesh *mesh, Skeleton *skeleton, XAnimation *animatio
    Memc<BRUS> brus;
    Memx<NODE> node;
 
-   File f; if(f.readTry(name))
+   File f; if(f.read(name))
    {
       Chunk c; f>>c; if(c.equal("BB3D"))
       {
@@ -502,8 +503,8 @@ Bool ImportB3D(C Str &name, Mesh *mesh, Skeleton *skeleton, XAnimation *animatio
          Skeleton temp, *skel=(skeleton ? skeleton : (mesh || animation) ? &temp : null); // if skel not specified, but we want mesh or animation, then we have to process it
          if(skel)
          {
-            MemtN<Byte, 256> old_to_new;
-            ProcessBones  (node, 0xFF, null);
+            MemtN<BoneType, 256> old_to_new;
+            ProcessBones  (node, BONE_NULL, null);
             CreateSkeleton(node, *skel, animation);
             skel->sortBones(old_to_new).setBoneTypes(); if(VIRTUAL_ROOT_BONE)REPAO(old_to_new)++;
             if(animation)animation->anim.setBoneTypeIndexesFromSkeleton(*skel);

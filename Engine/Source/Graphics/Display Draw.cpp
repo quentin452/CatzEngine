@@ -551,6 +551,33 @@ void Image::drawTile(C Color &color, C Color &color_add, C Rect &rect, Flt tex_s
    VI.end();
 }
 /******************************************************************************/
+void Image::drawTileRotate(C Color& color, C Color& color_add, C Vec2& center, C Vec2& size, Flt tex_scale, Flt angle, C Vec2* rotation_center_uv)C
+{
+    VI.color(color);
+    VI.color1(color_add);
+    VI.image(this);
+    VI.wrap();
+    VI.setType(VI_2D_TEX, VI_STRIP | VI_SP_COL);
+    if (Vtx2DTex* v = (Vtx2DTex*)VI.addVtx(4))
+    {
+        Vec2 c = (rotation_center_uv ? *rotation_center_uv : 0.5f);
+        c.x *= size.x;
+        c.y *= -size.y;
+        Matrix2P m; m.orn().setRotate(angle); m.pos = center - c * m.orn();
+        v[0].pos.set(0, 0) *= m;
+        v[1].pos.set(size.x, 0) *= m;
+        v[2].pos.set(0, -size.y) *= m;
+        v[3].pos.set(size.x, -size.y) *= m;
+        Flt w = size.x * tex_scale,
+            h = size.y * tex_scale * aspect();
+        v[0].tex.set(0, 0);
+        v[1].tex.set(w, 0);
+        v[2].tex.set(0, h);
+        v[3].tex.set(w, h);
+    }
+    VI.end();
+}
+/******************************************************************************/
 void Image::drawBorder(C Rect &rect, Flt border, Flt tex_scale, Flt tex_offset, Bool wrap_mode)C
 {
    VI.image  (this);

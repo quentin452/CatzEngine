@@ -617,6 +617,9 @@ struct Image // Image (Texture)
    void drawRotate(                                    C Vec2 &center, C Vec2 &size, Flt angle, C Vec2 *rotation_center_uv=null)C; // 'rotation_center_uv'=optional rotation center in range 0..1
    void drawRotate(C Color &color, C Color &color_add, C Vec2 &center, C Vec2 &size, Flt angle, C Vec2 *rotation_center_uv=null)C; // 'rotation_center_uv'=optional rotation center in range 0..1
 
+   // draw image as rotated tiled background, 'tex_scale'=texture coordinates scaling, 'rotation_center_uv'=optional rotation center in range 0..1
+   void drawTileRotate(C Color& color, C Color& color_add, C Vec2& center, C Vec2& size, Flt tex_scale, Flt angle, C Vec2* rotation_center_uv = null)C;
+
    // draw masked
    void drawMask         (C Color &color, C Color &color_add, C Rect &rect, C Image &mask, C Rect &mask_rect)C; // draw image using 'mask', final result is calculated as: this*           mask   *color+color_add
    void drawMaskNoFilter (C Color &color, C Color &color_add, C Rect &rect, C Image &mask, C Rect &mask_rect)C; // draw image using 'mask', final result is calculated as: this*           mask   *color+color_add, uses FILTER_NONE for this, but FILTER_LINEAR for 'mask'

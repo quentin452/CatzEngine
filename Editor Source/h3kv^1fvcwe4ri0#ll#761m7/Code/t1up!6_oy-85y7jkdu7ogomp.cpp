@@ -41,7 +41,7 @@ void SetLicenseKey(C Str &key)
 }
 void SaveLicenseKey(C Str &license_key)
 {
-   File f; if(f.writeTry(SettingsPath+"data", &LicenseCipher))
+   File f; if(f.write(SettingsPath+"data", &LicenseCipher))
    {
       f.cmpUIntV(0); // version
       char8 key[29]; REPAO(key)=license_key[i];
@@ -51,7 +51,7 @@ void SaveLicenseKey(C Str &license_key)
 Str LoadLicenseKey()
 {
    char8 key[29+1]; Zero(key);
-   File f; if(f.readStdTry(SettingsPath+"data", &LicenseCipher))switch(f.decUIntV())
+   File f; if(f.readStd(SettingsPath+"data", &LicenseCipher))switch(f.decUIntV())
    {
       case 0:
       {

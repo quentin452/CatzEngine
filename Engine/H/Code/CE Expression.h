@@ -93,17 +93,17 @@ struct Expr : BStr
    Bool  basicType    () {return symbol.basicType();}
    Expr* firstInstance();
 
-   Bool       asBool (Compiler &compiler);
-   Int        asInt  (Compiler &compiler);
-   UInt       asUInt (Compiler &compiler);
-   Long       asLong (Compiler &compiler);
-   ULong      asULong(Compiler &compiler);
-   Flt        asFlt  (Compiler &compiler);
-   Dbl        asDbl  (Compiler &compiler);
-   Char       asChar (Compiler &compiler);
-   Char8      asChar8(Compiler &compiler) {return Char16To8Fast(asChar(compiler));} // we can assume that Str was already initialized
-   Memc<Char> asText (Compiler &compiler); // don't operate on Str to allow '\0' characters inside
-   U64        asRaw  (Compiler &compiler); // use U64 to fit all types of variables
+   Bool  asBool (Compiler &compiler);
+   Int   asInt  (Compiler &compiler);
+   UInt  asUInt (Compiler &compiler);
+   Long  asLong (Compiler &compiler);
+   ULong asULong(Compiler &compiler);
+   Flt   asFlt  (Compiler &compiler);
+   Dbl   asDbl  (Compiler &compiler);
+   Char  asChar (Compiler &compiler);
+   Char8 asChar8(Compiler &compiler) {return Char16To8(asChar(compiler));}
+   Str   asText (Compiler &compiler); // may have '\0' characters inside
+   U64   asRaw  (Compiler &compiler); // use U64 to fit all types of variables
 
    Expr& setOperator(CChar   *op    ); // will be set as 'borrowed'
    Expr& setBasic   (VAR_TYPE type  );

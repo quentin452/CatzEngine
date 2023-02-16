@@ -310,6 +310,7 @@ enum APPLY_MODE
    APPLY_SUB,
    APPLY_SUB_RGB,
    APPLY_GAMMA,
+   APPLY_GAMMA_LUM,
    APPLY_BRIGHTNESS,
    APPLY_BRIGHTNESS_LUM,
    APPLY_AVG,
@@ -322,6 +323,8 @@ enum APPLY_MODE
    APPLY_MASK_ADD,
    APPLY_METAL,
    APPLY_SCALE,
+   APPLY_SCALE_XY,
+   APPLY_SCALE_ANGLE,
    APPLY_FIRE,
    APPLY_SKIP,
 };
@@ -687,7 +690,7 @@ enum VIEW_MODE
 /******************************************************************************/
 // CONSTANTS
 /******************************************************************************/
-const int  APP_BUILD        =72;
+const int  APP_BUILD        =73;
 const int           ForceInstaller=-2, // -2=disable and don't update, -1=disable, 0=auto, 1=enable (this is used only in Debug)
                     HeightBrushNoiseRes=256,
                     MtrlBrushSlots=14,
@@ -712,8 +715,8 @@ const int           ForceInstaller=-2, // -2=disable and don't update, -1=disabl
                     MeshSplitMinVtxs=12000, // min number of vertexes in a mesh to split it
                     MeshSplitMinSize=4;
 const uint          NewElmTime=1;
-const uint ProjectVersion     =98, // !! increase this by one if any of engine/editor asset formats have changed !!
-           ClientServerVersion=98;
+const uint ProjectVersion     =99, // !! increase this by one if any of engine/editor asset formats have changed !!
+           ClientServerVersion=99;
 const int           ServerNetworkCompressionLevel=9           , ClientNetworkCompressionLevel=9            , ProjectPackageCompressionLevel=9;
 /******************************************************************************/
 // TYPEDEFS
@@ -962,6 +965,7 @@ ASSERT(OBJ_ACCESS_CUSTOM==0 && OBJ_ACCESS_TERRAIN==1 && OBJ_ACCESS_GRASS==2 && O
 /******************************************************************************/
 #include "Auto.h"
 #include "Editor Update.h"
+#include "Editors/Code@0.h"
 #include "Editors/Mini Map.h"
 #include "Editors/Object/Mesh.h"
 #include "Editors/World/Area@0.h"
@@ -1005,5 +1009,6 @@ ASSERT(OBJ_ACCESS_CUSTOM==0 && OBJ_ACCESS_TERRAIN==1 && OBJ_ACCESS_GRASS==2 && O
 #include "Game/Game.inline.h"
 #include "Gui/Gui.inline.h"
 #include "Project@0.inline.h"
+#include "Shared/Constants.inline.h"
 #include "Shared/Functions.inline.h"
 /******************************************************************************/

@@ -106,7 +106,7 @@ Bool Ragdoll::createTry(C AnimatedSkeleton &anim_skel, Flt scale, Flt density, B
             Shape &s =shapes.New(); s=ShapeBone(from, to, width);
             Bone  &rb=_bones.New(); Set(rb.name, sbon.name);
             rb.skel_bone  =i;
-            rb.rbon_parent=0xFF;
+            rb.rbon_parent=BONE_NULL;
             if(!rb.actor.createTry(s*T._scale, density, &VecZero, kinematic))return false;
          }else
          {
@@ -129,8 +129,8 @@ Bool Ragdoll::createTry(C AnimatedSkeleton &anim_skel, Flt scale, Flt density, B
        C SkelBone &sb=skel.bones[rb.skel_bone];
          if(i) // skip the main bone
          {
-            Byte skel_bone_parent =sb.parent;
-            if(  skel_bone_parent!=0xFF) // if has a parent
+            BoneType skel_bone_parent =sb.parent;
+            if(      skel_bone_parent!=BONE_NULL) // if has a parent
             {
                Int rbone =findBoneIndexFromSkelBone(skel_bone_parent); // find ragdoll bone assigned to skeleton parent bone
                if( rbone>=0)rb.rbon_parent=rbone;                      // if exists, then set as ragdoll parent
@@ -155,9 +155,9 @@ Bool Ragdoll::createTry(C AnimatedSkeleton &anim_skel, Flt scale, Flt density, B
          {
                 Bone &rb=     bone (i);
           C SkelBone &sb=skel.bones[rb.skel_bone];
-            Byte      rbon_parent=((rb.rbon_parent==0xFF) ? 0 : rb.rbon_parent); // if doesn't have a parent then use the main bone
+            BoneType  rbon_parent=((rb.rbon_parent==BONE_NULL) ? 0 : rb.rbon_parent); // if doesn't have a parent then use the main bone
 
-          //if(rbon_parent!=0xFF)
+          //if(rbon_parent!=BONE_NULL)
             {
                Bone     &rp=    _bones[   rbon_parent];
              C SkelBone &sp=skel.bones[rp.skel_bone  ];
@@ -261,12 +261,12 @@ Ragdoll& Ragdoll::toSkel(AnimatedSkeleton &anim_skel)
       REPA(_resets)anim_skel.bones[_resets[i]].clear();
    #if 0
       {
-         Byte      sbone    =_resets[i];
+         BoneType  sbone    =_resets[i];
          Orient   &bone_orn = anim_skel.bone(sbone).orn;
          SkelBone &skel_bone=      skel.bone(sbone);
-         Byte      sparent  =      skel_bone.parent;
-         if(sparent==0xFF)bone_orn=GetAnimOrient(skel_bone);
-         else             bone_orn=GetAnimOrient(skel_bone, &skel.bone(sparent));
+         BoneType  sparent  =      skel_bone.parent;
+         if(sparent==BONE_NULL)bone_orn=GetAnimOrient(skel_bone);
+         else                  bone_orn=GetAnimOrient(skel_bone, &skel.bone(sparent));
       }
    #endif
 
@@ -276,7 +276,7 @@ Ragdoll& Ragdoll::toSkel(AnimatedSkeleton &anim_skel)
       for(Int i=1; i<bones(); i++) // skip the main bone (zero) because it's set in the reset
       {
          Bone         &rbon     =     bone(i);
-         Byte          sbone    =     rbon.skel_bone,
+         BoneType      sbone    =     rbon.skel_bone,
                        rparent  =     rbon.rbon_parent;
          AnimSkelBone &asbon    =anim_skel.bones[sbone];
            C SkelBone &skel_bone=     skel.bones[sbone];
@@ -301,18 +301,18 @@ Ragdoll& Ragdoll::toSkelBlend(AnimatedSkeleton &anim_skel, Flt blend)
       // reset the orientation of non-ragdoll bones (and main) for default pose (the one from default Skeleton)
       REPA(_resets)
       {
-         Byte          sbone    =_resets[i];
+         BoneType      sbone    =_resets[i];
          AnimSkelBone &asbon    = anim_skel.bones[sbone];
            C SkelBone &skel_bone=      skel.bones[sbone];
-         Byte          sparent  = skel_bone.parent;
+         BoneType      sparent  = skel_bone.parent;
 
                           asbon.orn*=blend1;
                           asbon.pos*=blend1;
                        #if HAS_ANIM_SKEL_ROT
                           asbon.rot*=blend1;
                         #endif
-         if(sparent==0xFF)asbon.orn+=blend*GetAnimOrient(skel_bone);
-         else             asbon.orn+=blend*GetAnimOrient(skel_bone, &skel.bones[sparent]);
+         if(sparent==BONE_NULL)asbon.orn+=blend*GetAnimOrient(skel_bone);
+         else                  asbon.orn+=blend*GetAnimOrient(skel_bone, &skel.bones[sparent]);
       }
 
       // set bone oriantation according to actors
@@ -321,7 +321,7 @@ Ragdoll& Ragdoll::toSkelBlend(AnimatedSkeleton &anim_skel, Flt blend)
       for(Int i=1; i<bones(); i++) // skip the main bone (zero) because it's set in the reset
       {
          Bone         &rbon     =     bone(i);
-         Byte          sbone    =     rbon.skel_bone,
+         BoneType      sbone    =     rbon.skel_bone,
                        rparent  =     rbon.rbon_parent;
          AnimSkelBone &asbon    =anim_skel.bones[sbone];
            C SkelBone &skel_bone=     skel.bones[sbone];
@@ -396,7 +396,7 @@ Ragdoll::Bone* Ragdoll::findBone (CChar8 *name) {Int      i=findBoneI(name); ret
          Int   Ragdoll:: getBoneI(CChar8 *name) {Int      i=findBoneI(name); if(i<0)Exit(S+"Bone \""+name+"\" not found in Ragdoll."); return i;}
 Ragdoll::Bone& Ragdoll:: getBone (CChar8 *name) {return bone(getBoneI(name));}
 /******************************************************************************/
-Int Ragdoll::findBoneIndexFromSkelBone(Byte skel_bone_index)C
+Int Ragdoll::findBoneIndexFromSkelBone(BoneType skel_bone_index)C
 {
    if(bones())
    {
@@ -407,13 +407,13 @@ Int Ragdoll::findBoneIndexFromSkelBone(Byte skel_bone_index)C
             REPA(T)if(bone(i).skel_bone==skel_bone_index)return i;
          }
             skel_bone_index=_skel->bones[skel_bone_index].parent;
-         if(skel_bone_index==0xFF)break;
+         if(skel_bone_index==BONE_NULL)break;
       }
       return 0;
    }
    return -1;
 }
-Int Ragdoll::findBoneIndexFromVtxMatrix(Byte matrix_index)C
+Int Ragdoll::findBoneIndexFromVtxMatrix(BoneType matrix_index)C
 {
    return findBoneIndexFromSkelBone(matrix_index-1);
 }

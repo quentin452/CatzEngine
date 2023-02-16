@@ -198,7 +198,7 @@ ImageEditor ImageEdit;
    {
       gui_image.image=((data() && data()->mode==IMAGE_SOFT) ? &image_2d : game_image); REPAO(cube_faces).image=gui_image.image;
       image_2d.del();
-      if(gui_image.image==&image_2d && game_image)game_image->copyTry(image_2d, -1, -1, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_2D);
+      if(gui_image.image==&image_2d && game_image)game_image->copy(image_2d, -1, -1, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_2D);
    }
    void ImageEditor::setInfo()
    {
@@ -248,7 +248,7 @@ ImageEditor ImageEdit;
          if(ElmImage *data=T.data())
          {
             data->newVer();
-            if(!edit_image.is())edit_image.ImportTry(Proj.editPath(*elm));
+            if(!edit_image.is())edit_image.Import(Proj.editPath(*elm));
             if( game_image)EditToGameImage(edit_image, *game_image, *data);
             make2D();
          }

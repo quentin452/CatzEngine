@@ -20,6 +20,12 @@ Rect& Rect::operator&=(C Rect &r)
    if(r.min.y>min.y)min.y=r.min.y; if(r.max.y<max.y)max.y=r.max.y;
    return T;
 }
+Rect& Rect::clampFull(C Rect &r)
+{
+   Clamp(min.x, r.min.x, r.max.x); Clamp(min.y, r.min.y, r.max.y);
+   Clamp(max.x, r.min.x, r.max.x); Clamp(max.y, r.min.y, r.max.y);
+   return T;
+}
 Rect& Rect::operator&=(C RectI &r)
 {
    if(r.min.x>min.x)min.x=r.min.x; if(r.max.x<max.x)max.x=r.max.x;
@@ -771,17 +777,43 @@ Flt DeltaY(C Rect &a, C Rect &b)
 /******************************************************************************/
 Rect Fit(Flt src_aspect, C Rect &dest_rect, FIT_MODE fit)
 {
-   Rect r=dest_rect; Bool mx=(r.min.x>r.max.x); if(mx)Swap(r.min.x, r.max.x); Flt w=r.w();
-                     Bool my=(r.min.y>r.max.y); if(my)Swap(r.min.y, r.max.y); Flt h=r.h(), dest_aspect=w/h;
+   FIT_MODE f=(fit&FIT_MASK);
 
-   if(fit==FIT_FULL)fit=((src_aspect>dest_aspect) ? FIT_WIDTH : FIT_HEIGHT);else
-   if(fit==FIT_FILL)fit=((src_aspect<dest_aspect) ? FIT_WIDTH : FIT_HEIGHT);
+   if(f==FIT_NONE)return dest_rect;
 
-   if(fit==FIT_WIDTH){Flt size=w/src_aspect, d=(size-h)*0.5f; r.extendY(d);}
-   else              {Flt size=h*src_aspect, d=(size-w)*0.5f; r.extendX(d);}
+   Rect r=dest_rect; Bool mx=(r.min.x>r.max.x); if(mx)r.swapX(); Flt w=r.w();
+                     Bool my=(r.min.y>r.max.y); if(my)r.swapY(); Flt h=r.h(), dest_aspect=w/h;
 
-   if(mx)Swap(r.min.x, r.max.x);
-   if(my)Swap(r.min.y, r.max.y);
+   switch(f)
+   {
+      case FIT_FULL: if(src_aspect>dest_aspect)goto fit_width; goto fit_height;
+      case FIT_FILL: if(src_aspect<dest_aspect)goto fit_width; goto fit_height;
+
+      case FIT_WIDTH: fit_width:
+      {
+         Flt size=w/src_aspect, d=h-size;
+         switch(fit&(FIT_UP|FIT_DOWN))
+         {
+            default      : r.extendY(d*-0.5f); break; // center
+            case FIT_UP  : r.min.y+=d; break;
+            case FIT_DOWN: r.max.y-=d; break;
+         }
+      }break;
+
+      default: fit_height:
+      {
+         Flt size=h*src_aspect, d=w-size;
+         switch(fit&(FIT_LEFT|FIT_RIGHT))
+         {
+            default       : r.extendX(d*-0.5f); break; // center
+            case FIT_LEFT : r.max.x-=d; break;
+            case FIT_RIGHT: r.min.x+=d; break;
+         }
+      }break;
+   }
+
+   if(mx)r.swapX();
+   if(my)r.swapY();
    
    return r;
 }

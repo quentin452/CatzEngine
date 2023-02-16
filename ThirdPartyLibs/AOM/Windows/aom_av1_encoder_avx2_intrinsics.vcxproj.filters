@@ -1,0 +1,63 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\encoder\x86\av1_quantize_avx2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\encoder\x86\error_intrin_avx2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\encoder\x86\av1_fwd_txfm2d_avx2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\encoder\x86\highbd_fwd_txfm_avx2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\encoder\x86\wedge_utils_avx2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\encoder\x86\encodetxb_avx2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\encoder\x86\rdopt_avx2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\encoder\x86\av1_k_means_avx2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\encoder\x86\temporal_filter_avx2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\encoder\x86\pickrst_avx2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\encoder\x86\cnn_avx2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\encoder\x86\av1_highbd_quantize_avx2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\encoder\x86\highbd_block_error_intrin_avx2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\encoder\x86\highbd_temporal_filter_avx2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\encoder\x86\av1_fwd_txfm_avx2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{18934A30-BB89-380C-804E-29EDD78FFBDB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{717B8D52-B115-3C96-AB4A-ACDCFB794AB1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

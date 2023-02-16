@@ -125,7 +125,6 @@ class CodeView : Region, Edit::CodeEditorInterface
 
    void cleanAll();
 
-   static int Compare(C Enum::Elm &a, C Enum::Elm &b);
    void makeAuto(bool publish=false);
 
    void codeDo(Edit::BUILD_MODE mode);

@@ -433,7 +433,7 @@ void ClientSendSetElmShort(Connection &conn, Elm &elm, C Project &proj)
    File f; f.writeMem().putByte(CS_SET_ELM_SHORT); elm.compressData(f);
    if(ElmFileInShort(elm.type))
    {
-      File data; if(data.readTry(proj.basePath(elm)))data.copy(f);
+      File data; if(data.read(proj.basePath(elm)))data.copy(f);
    }
    f.pos(0); conn.send(f, -1, false);
 }
@@ -447,7 +447,7 @@ void ServerWriteSetElmShort(File &f, Elm &elm, C Project &proj)
    f.putByte(CS_SET_ELM_SHORT)<<proj.id; elm.compressData(f);
    if(ElmFileInShort(elm.type))
    {
-      File data; if(data.readTry(proj.basePath(elm)))data.copy(f);
+      File data; if(data.read(proj.basePath(elm)))data.copy(f);
    }
 }
 bool ClientRecvSetElmShort(File &f, Elm &elm, File &data, UID &proj_id)
@@ -473,11 +473,11 @@ void ClientWriteSetElmLong(File &elm_file, File &data_file, Elm &elm, Project &p
    {
       if(ElmSendBoth(elm.type))
       {
-         File data; data.readTry(proj.editPath(elm)); elm_file.cmpUIntV(data.size()); data.copy(elm_file); // if sending both, then store edit in the 'elm_file', because we will keep 'elm_file' uncompressed, and only 'data_file' compressed for 'ElmCompressable'
-                 if(data.readTry(proj.gamePath(elm)))data.copy(data_file);
+         File data; data.read(proj.editPath(elm)); elm_file.cmpUIntV(data.size()); data.copy(elm_file); // if sending both, then store edit in the 'elm_file', because we will keep 'elm_file' uncompressed, and only 'data_file' compressed for 'ElmCompressable'
+                 if(data.read(proj.gamePath(elm)))data.copy(data_file);
       }else
       {
-         File data; if(data.readTry(proj.basePath(elm)))data.copy(data_file);
+         File data; if(data.read(proj.basePath(elm)))data.copy(data_file);
       }
       compress=ElmCompressable(elm.type); // actual compression will be done in secondary thread
    }
@@ -506,11 +506,11 @@ void ServerWriteSetElmLong(File &f, Elm &elm, C Project &proj)
    {
       if(ElmSendBoth(elm.type))
       {
-         File data; data.readTry(proj.editPath(elm)); f.cmpUIntV(data.size()); data.copy(f);
-                 if(data.readTry(proj.gamePath(elm)))data.copy(f);
+         File data; data.read(proj.editPath(elm)); f.cmpUIntV(data.size()); data.copy(f);
+                 if(data.read(proj.gamePath(elm)))data.copy(f);
       }else
       {
-         File data; if(data.readTry(proj.basePath(elm)))data.copy(f);
+         File data; if(data.read(proj.basePath(elm)))data.copy(f);
       }
    }
 }
@@ -540,11 +540,11 @@ void ClientWriteSetElmFull(File &elm_file, File &data_file, Elm &elm, Project &p
    {
       if(ElmSendBoth(elm.type))
       {
-         File data; data.readTry(proj.editPath(elm)); elm_file.cmpUIntV(data.size()); data.copy(elm_file);
-                 if(data.readTry(proj.gamePath(elm)))data.copy(data_file);
+         File data; data.read(proj.editPath(elm)); elm_file.cmpUIntV(data.size()); data.copy(elm_file);
+                 if(data.read(proj.gamePath(elm)))data.copy(data_file);
       }else
       {
-         File data; if(data.readTry(proj.basePath(elm)))data.copy(data_file);
+         File data; if(data.read(proj.basePath(elm)))data.copy(data_file);
       }
       compress=ElmCompressable(elm.type); // actual compression will be done in secondary thread
    }
@@ -572,11 +572,11 @@ void ServerWriteSetElmFull(File &f, Elm &elm, C Project &proj)
    {
       if(ElmSendBoth(elm.type))
       {
-         File data; data.readTry(proj.editPath(elm)); f.cmpUIntV(data.size()); data.copy(f);
-                 if(data.readTry(proj.gamePath(elm)))data.copy(f);
+         File data; data.read(proj.editPath(elm)); f.cmpUIntV(data.size()); data.copy(f);
+                 if(data.read(proj.gamePath(elm)))data.copy(f);
       }else
       {
-         File data; if(data.readTry(proj.basePath(elm)))data.copy(f);
+         File data; if(data.read(proj.basePath(elm)))data.copy(f);
       }
    }
 }
@@ -977,13 +977,13 @@ class ElmTypeVer
 
    bool save(File &f)C {f<<id<<type<<ver; return f.ok();}
    bool load(File &f)  {f>>id>>type>>ver; return f.ok();}
-
-   static int Compare(C ElmTypeVer &a, C ElmTypeVer &b ) {return .Compare(a.id, b.id);}
-   static int Compare(C ElmTypeVer &a, C UID        &id) {return .Compare(a.id,   id);}
 }
+int Compare(C ElmTypeVer &a, C ElmTypeVer &b ) {return Compare(a.id, b.id);}
+int Compare(C ElmTypeVer &a, C UID        &id) {return Compare(a.id,   id);}
+
 void ClientSendGetCodeVer(Connection &conn, Memc<ElmTypeVer> &elms)
 {
-   elms.sort(ElmTypeVer.Compare); // sort on the client so server can access using binary search
+   elms.sort(Compare); // sort on the client so server can access using binary search
    File f; f.writeMem().putByte(CS_GET_CODE_VER); elms.save(f); f.pos(0); conn.send(f, -1, false);
 }
 bool ServerRecvGetCodeVer(File &f, Memc<ElmTypeVer> &elms)

@@ -50,9 +50,9 @@ struct MeshRender // Mesh Renderable (Hardware: contains Vertexes + Triangles)
    void scaleMove(C Vec &scale, C Vec &move=VecZero);
 
    // texture transform
-   void texMove  (C Vec2 &move , Byte tex_index=0);
-   void texScale (C Vec2 &scale, Byte tex_index=0);
-   void texRotate(  Flt   angle, Byte tex_index=0);
+   void texMove  (C Vec2 &move , Byte uv_index=0);
+   void texScale (C Vec2 &scale, Byte uv_index=0);
+   void texRotate(  Flt   angle, Byte uv_index=0);
 
    // operations
  C Byte* vtxLockedData(                              )C {return _vb.lockedData(    );} //    get vertex data if it's already locked, null on fail
@@ -70,9 +70,9 @@ struct MeshRender // Mesh Renderable (Hardware: contains Vertexes + Triangles)
    Int  triIndSize     ()C {return indBit16() ? SIZE(U16)*3 : SIZE(U32)*3;} // get triangle indexes size
    Bool storageCompress()C {return FlagOn(_storage, MSHR_COMPRESS);}
 
-   void        boneRemap(C CMemPtr<Byte, 256> &old_to_new); // remap vertex bone/matrix indexes according to bone 'old_to_new' remap
-   void     setUsedBones(Bool (&bones)[256])C;
-   void includeUsedBones(Bool (&bones)[256])C;
+   void        boneRemap(C CMemPtrN<BoneType, 256> &old_to_new); // remap vertex bone/matrix indexes according to bone 'old_to_new' remap
+   void     setUsedBones(   MemPtrN<Bool    , 256>  bones)C;
+   void includeUsedBones(   MemPtrN<Bool    , 256>  bones)C;
 
    // draw
 #if DX11

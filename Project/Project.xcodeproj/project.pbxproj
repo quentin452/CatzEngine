@@ -295,6 +295,7 @@
 				OTHER_LDFLAGS = (
 					"-framework QuartzCore",
 					"-framework UIKit",
+					"-framework PhotosUI",
 					"-framework WebKit",
 					"-framework CoreMotion",
 					"-framework CoreLocation",
@@ -349,6 +350,7 @@
 				OTHER_LDFLAGS = (
 					"-framework QuartzCore",
 					"-framework UIKit",
+					"-framework PhotosUI",
 					"-framework WebKit",
 					"-framework CoreMotion",
 					"-framework CoreLocation",

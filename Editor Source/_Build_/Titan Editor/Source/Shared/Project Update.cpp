@@ -17,7 +17,7 @@
       // load
       File f, temp, *src=&f;
 
-      if(!f.readTry(path)){ErrorLoad(path); goto error;}
+      if(!f.read(path)){ErrorLoad(path); goto error;}
       if(IsServer)
       {
          if(!Decompress(*src, temp, true)){ErrorLoad(path); goto error;}
@@ -33,7 +33,7 @@
          if(!UpdateMtrlBase1Tex(img, img)){Error("Can't convert texture"); goto error;}
       }else
       {
-         if(!img.copyTry(img, -1, -1, -1, ImageTypeExcludeSRGB(img.type()))){Error("Can't convert texture"); goto error;}
+         if(!img.copy(img, -1, -1, -1, ImageTypeExcludeSRGB(img.type()))){Error("Can't convert texture"); goto error;}
       }
 
       // save

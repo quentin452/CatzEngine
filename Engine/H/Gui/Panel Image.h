@@ -136,6 +136,8 @@ struct PanelImage
  C Rect& defaultInnerPadding    (                            )C {return _inner_padding;} // get default inner padding
    Vec2  defaultInnerPaddingSize(                            )C;                         // get default inner padding size
 
+   UInt memUsage()C {return image.memUsage();} // get memory usage
+
    // draw
    void draw(                                    C Rect &rect)C; // draw at specified 'rect' screen rectangle
    void draw(C Color &color, C Color &color_add, C Rect &rect)C; // draw at specified 'rect' screen rectangle with custom colors

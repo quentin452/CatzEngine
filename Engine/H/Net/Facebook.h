@@ -42,9 +42,9 @@ struct Facebook
    };
 
 #if EE_PRIVATE
-   // !! these enums must be equal to "EsenthelActivity.java" !!
+   // !! THESE ENUMS MUST BE EQUAL TO "EsenthelActivity.java" !!
 #endif
-   enum RESULT
+   enum RESULT : Byte
    {
       POST_ERROR  , // there was an error while trying to post
       POST_CANCEL , // user canceled posting

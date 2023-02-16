@@ -480,6 +480,14 @@ Int Compare(C VecSB4 &v0, C VecSB4 &v1)
    if(Int c=Compare(v0.w, v1.w))return c;
    return 0;
 }
+Int Compare(C VecUS4 &v0, C VecUS4 &v1)
+{
+   if(Int c=Compare(v0.x, v1.x))return c;
+   if(Int c=Compare(v0.y, v1.y))return c;
+   if(Int c=Compare(v0.z, v1.z))return c;
+   if(Int c=Compare(v0.w, v1.w))return c;
+   return 0;
+}
 Int Compare(C Color &c0, C Color &c1)
 {
    if(Int c=Compare(c0.r, c1.r))return c;

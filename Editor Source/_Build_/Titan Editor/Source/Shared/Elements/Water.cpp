@@ -106,7 +106,7 @@
    bool LakeBase::load(C Str &name)
    {
       ReadLock rl(WorldAreaSync);
-      File f; if(f.readTry(name))return load(f); return false;
+      File f; if(f.read(name))return load(f); return false;
    }
       void RiverBase::Vtx::set(flt radius, C Vec &pos) {T.radius=radius; T.pos=pos;}
    bool RiverBase::equal(C RiverBase &src)C {return removed_time==src.removed_time && smooth_time==src.smooth_time && depth_time==src.depth_time && uv_scale_time==src.uv_scale_time && material_time==src.material_time && vtx_edge_time==src.vtx_edge_time;}
@@ -204,7 +204,7 @@
    bool RiverBase::load(C Str &name)
    {
       ReadLock rl(WorldAreaSync);
-      File f; if(f.readTry(name))return load(f); return false;
+      File f; if(f.read(name))return load(f); return false;
    }
    void Lake::setMesh(C Project &proj)
    {

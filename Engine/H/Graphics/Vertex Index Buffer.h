@@ -95,7 +95,9 @@ struct Vtx3DFull
    Vec4  tan; // tan.xyz=tangent, tan.w=binormal direction (should be -1 or +1)
    Vec2  tex0, tex1, tex2, tex3;
    Color color;
-   VecB4 material, matrix, blend;
+   VecB4 material;
+   VecB4 matrix; // #MeshVtxBoneHW
+   VecB4 blend;
    Flt   size;
 
    void setNrmTan(C Vec &nrm, C Vec &tan            ) {T.nrm=nrm; T.tan.set(tan,                                 +1.0f        );} // set normal tangent binormal from 'normal' 'tangent'           , this method is faster, use it when you don't use mirroring in uv mapping or you don't use binormal in the shader at all

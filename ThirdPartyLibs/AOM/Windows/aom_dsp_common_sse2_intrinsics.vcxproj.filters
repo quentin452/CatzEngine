@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\aom_convolve_copy_sse2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\aom_subpixel_8t_intrin_sse2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\aom_asm_stubs.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\fft_sse2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\highbd_intrapred_sse2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\intrapred_sse2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\loopfilter_sse2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\highbd_convolve_sse2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\highbd_loopfilter_sse2.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\convolve.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\convolve_sse2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\intrapred_x86.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\lpf_common_sse2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\mem_sse2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\transpose_sse2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\txfm_common_sse2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\sum_squares_sse2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\bitdepth_conversion_sse2.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{18934A30-BB89-380C-804E-29EDD78FFBDB}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{717B8D52-B115-3C96-AB4A-ACDCFB794AB1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

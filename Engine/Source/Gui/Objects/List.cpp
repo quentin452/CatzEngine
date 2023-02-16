@@ -801,17 +801,18 @@ Flt _List::columnHeight ()C {return zoom()*columnHeightRel()+columnHeightBase();
 Flt _List::columnPadding()C {return zoom()*0.01f;}
 Flt _List::textSize     ()C {return _height_ez*textSizeRel()+    textSizeBase();}
 
-_List& _List::columnsHidden(  Bool  hidden                             ) {                                              if(T._columns_hidden!=hidden                                                   ){T._columns_hidden=hidden    ;                                                setRects();} return T;}
-_List& _List:: columnHeight(  Flt   base, Flt relative                 ) {MAX(base  , 0);             MAX(relative, 0); if(T. _column_base  !=base || T._column_rel!=relative                          ){T. _column_base  =base      ; T._column_rel=relative;                        setRects();} return T;}
-_List& _List::    elmHeight(  Flt   height                             ) {MAX(height, 0);                               if(T.    _elm_height!=height                                                   ){T.    _elm_height=height    ;   _height_ez =_elm_height*_zoom;               setRects();} return T;}
-_List& _List::     textSize(  Flt   base, Flt relative                 ) {MAX(base  , 0);             MAX(relative, 0); if(T.   _text_base  !=base || T.  _text_rel!=relative                          ){T.   _text_base  =base      ; T. _text_rel =relative;                        setRects();} return T;}
-_List& _List::    imageSize(C Vec2 &base, Flt relative, C Rect &padding) {Vec2 b=Max(base, Vec2Zero); MAX(relative, 0); if(T.  _image_base  !=b    || T. _image_rel!=relative || T._image_padd!=padding){T.  _image_base  =b         ; T._image_rel =relative; T._image_padd=padding; setRects();} return T;}
-_List& _List::     zoom    (  Flt   zoom                               ) {Clamp(zoom, zoom_min, zoom_max);              if(T._zoom!=zoom                                                               ){T.        _zoom  =zoom      ;   _height_ez =_elm_height*_zoom;               setRects();} return T;}
-_List& _List::     zoomStep(  Flt   step                               ) {_zoom_step=step; return T;}
-_List& _List::     drawMode(  LIST_DRAW_MODE mode                      ) {                                              if(T._draw_mode!=mode                                                          ){T.     _draw_mode=mode      ;                                                setRects();} return T;}
-_List& _List::   horizontal(  Bool           horizontal                ) {                                              if(T._horizontal!=horizontal                                                   ){T.    _horizontal=horizontal;                                                setRects();} return T;}
-_List& _List::     vertical(  Bool           vertical                  ) {return horizontal(!vertical);}
-_List& _List::    focusable(  Bool           on                        ) {if(T._focusable!=on){_focusable=on; if(!on)kbClear();} return T;}
+Bool   _List::columnsVisible()C {return !_columns_hidden && _columns.elms();}
+_List& _List::columnsHidden (  Bool  hidden                             ) {                                              if(T._columns_hidden!=hidden                                                   ){T._columns_hidden=hidden    ;                                                setRects();} return T;}
+_List& _List::columnHeight  (  Flt   base, Flt relative                 ) {MAX(base  , 0);             MAX(relative, 0); if(T. _column_base  !=base || T._column_rel!=relative                          ){T. _column_base  =base      ; T._column_rel=relative;                        setRects();} return T;}
+_List& _List::   elmHeight  (  Flt   height                             ) {MAX(height, 0);                               if(T.    _elm_height!=height                                                   ){T.    _elm_height=height    ;   _height_ez =_elm_height*_zoom;               setRects();} return T;}
+_List& _List::    textSize  (  Flt   base, Flt relative                 ) {MAX(base  , 0);             MAX(relative, 0); if(T.   _text_base  !=base || T.  _text_rel!=relative                          ){T.   _text_base  =base      ; T. _text_rel =relative;                        setRects();} return T;}
+_List& _List::   imageSize  (C Vec2 &base, Flt relative, C Rect &padding) {Vec2 b=Max(base, Vec2Zero); MAX(relative, 0); if(T.  _image_base  !=b    || T. _image_rel!=relative || T._image_padd!=padding){T.  _image_base  =b         ; T._image_rel =relative; T._image_padd=padding; setRects();} return T;}
+_List& _List::    zoom      (  Flt   zoom                               ) {Clamp(zoom, zoom_min, zoom_max);              if(T._zoom!=zoom                                                               ){T.        _zoom  =zoom      ;   _height_ez =_elm_height*_zoom;               setRects();} return T;}
+_List& _List::    zoomStep  (  Flt   step                               ) {_zoom_step=step; return T;}
+_List& _List::    drawMode  (  LIST_DRAW_MODE mode                      ) {                                              if(T._draw_mode!=mode                                                          ){T.     _draw_mode=mode      ;                                                setRects();} return T;}
+_List& _List::  horizontal  (  Bool           horizontal                ) {                                              if(T._horizontal!=horizontal                                                   ){T.    _horizontal=horizontal;                                                setRects();} return T;}
+_List& _List::    vertical  (  Bool           vertical                  ) {return horizontal(!vertical);}
+_List& _List::   focusable  (  Bool           on                        ) {if(T._focusable!=on){_focusable=on; if(!on)kbClear();} return T;}
 /******************************************************************************/
 Ptr _List::visToData(Int visible)C
 {
@@ -1817,10 +1818,10 @@ void _List::update(C GuiPC &gpc)
             if(Kb.ctrlCmd() && _parent && _parent->isRegion())
             {
                Region &region=_parent->asRegion();
-               if(Kb.b(KB_UP   )){Kb.eat(KB_UP   ); region.slidebar[1].button[1].push();}
-               if(Kb.b(KB_DOWN )){Kb.eat(KB_DOWN ); region.slidebar[1].button[2].push();}
-               if(Kb.b(KB_LEFT )){Kb.eat(KB_LEFT ); region.slidebar[0].button[1].push();}
-               if(Kb.b(KB_RIGHT)){Kb.eat(KB_RIGHT); region.slidebar[0].button[2].push();}
+               if(Kb.b(KB_UP   )){Kb.eat(KB_UP   ); region.scrollUp   ();}
+               if(Kb.b(KB_DOWN )){Kb.eat(KB_DOWN ); region.scrollDown ();}
+               if(Kb.b(KB_LEFT )){Kb.eat(KB_LEFT ); region.scrollLeft ();}
+               if(Kb.b(KB_RIGHT)){Kb.eat(KB_RIGHT); region.scrollRight();}
             }
 
             // quick search

@@ -1,4 +1,5 @@
 /******************************************************************************/
+int Compare(C Enum.Elm &a, C Enum.Elm &b) {return Compare(a.name, b.name, true);}
 class EEItem
 {
    bool         opened=false;
@@ -298,7 +299,6 @@ class CodeView : Region, Edit.CodeEditorInterface
       FDelDirs(ProjectsPath.tailSlash(true)+ProjectsPublishPath);
    }
 
-   static int Compare(C Enum.Elm &a, C Enum.Elm &b) {return .Compare(a.name, b.name, true);}
    void makeAuto(bool publish=false)
    {
       if(Proj.valid())
@@ -646,7 +646,7 @@ class AppPropsEditor : PropWin
             VecI2 size=image->size();
             if(size.x>256)size=size*256/size.x;
             if(size.y>256)size=size*256/size.y;
-            image->copyTry(image_2d, Max(size.x, 1), Max(size.y, 1), 1, ImageTypeUncompressed(image->type()), IMAGE_2D, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT);
+            image->copy(image_2d, Max(size.x, 1), Max(size.y, 1), 1, ImageTypeUncompressed(image->type()), IMAGE_2D, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT);
             image=&image_2d;
          }
          remove.visible(id.valid());
@@ -664,7 +664,7 @@ class AppPropsEditor : PropWin
       {
          T.md=md;
          T.md_time=md_time;
-         parent+=super.create(rect); fit=true;
+         parent+=super.create(rect); fit=FIT_FULL;
          parent+=remove.create(Rect_RU(rect.ru(), 0.045, 0.045)).func(Remove, T); remove.image="Gui/close.img";
          return T;
       }

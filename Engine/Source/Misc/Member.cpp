@@ -194,19 +194,21 @@ Bool MemberDesc::asBool(CPtr data)C
             }break;
             case DATA_VECU4: switch(size)
             {
-               case SIZE(VecB4): return ((VecB4*)data)->any();
+               case SIZE(VecB4 ): return ((VecB4 *)data)->any();
+               case SIZE(VecUS4): return ((VecUS4*)data)->any();
             }break;
 
             case DATA_COLOR: switch(size)
             {
-               case SIZE(VecB ): return ((VecB *)data)->any();
-               case SIZE(VecB4): return ((VecB4*)data)->any();
-               case SIZE(VecH ): return ((VecH *)data)->any();
-               case SIZE(VecH4): return ((VecH4*)data)->any();
-               case SIZE(Vec  ): return ((Vec  *)data)->any();
-               case SIZE(VecD ): return ((VecD *)data)->any();
-               case SIZE(Vec4 ): return ((Vec4 *)data)->any();
-               case SIZE(VecD4): return ((VecD4*)data)->any();
+               case SIZE(VecB  ): return ((VecB  *)data)->any();
+               case SIZE(VecB4 ): return ((VecB4 *)data)->any();
+               case SIZE(VecH  ): return ((VecH  *)data)->any();
+               case SIZE(VecH4 ): return ((VecH4 *)data)->any();
+               case SIZE(Vec   ): return ((Vec   *)data)->any();
+               case SIZE(VecD  ): return ((VecD  *)data)->any();
+               case SIZE(Vec4  ): return ((Vec4  *)data)->any();
+               case SIZE(VecD4 ): return ((VecD4 *)data)->any();
+             //case SIZE(VecUS4): return ((VecUS4*)data)->any();
             }break;
 
             case DATA_KBSC:
@@ -319,7 +321,8 @@ void MemberDesc::fromBool(Ptr data, Bool value)
 
             case DATA_VECU4: switch(size)
             {
-               case SIZE(VecB4): *(VecB4*)data=value; break;
+               case SIZE(VecB4 ): *(VecB4 *)data=value; break;
+               case SIZE(VecUS4): *(VecUS4*)data=value; break;
             }break;
 
             case DATA_COLOR: switch(size)
@@ -437,7 +440,8 @@ Int MemberDesc::asInt(CPtr data)C
             }break;
             case DATA_VECU4: switch(size)
             {
-               case SIZE(VecB4): return (*(VecB4*)data).x;
+               case SIZE(VecB4 ): return (*(VecB4 *)data).x;
+               case SIZE(VecUS4): return (*(VecUS4*)data).x;
             }break;
 
             case DATA_COLOR: switch(size)
@@ -558,7 +562,8 @@ Int MemberDesc::asEnum(CPtr data)C
             }break;
             case DATA_VECU4: switch(size)
             {
-               case SIZE(VecB4): return (*(VecB4*)data).x;
+               case SIZE(VecB4 ): return (*(VecB4 *)data).x;
+               case SIZE(VecUS4): return (*(VecUS4*)data).x;
             }break;
 
             case DATA_COLOR: switch(size)
@@ -683,7 +688,8 @@ void MemberDesc::fromInt(Ptr data, Int value)
 
             case DATA_VECU4: switch(size)
             {
-               case SIZE(VecB4): *(VecB4*)data=value; break;
+               case SIZE(VecB4 ): *(VecB4 *)data=value; break;
+               case SIZE(VecUS4): *(VecUS4*)data=value; break;
             }break;
 
             case DATA_COLOR: switch(size)
@@ -801,7 +807,8 @@ void MemberDesc::fromUInt(Ptr data, UInt value)
 
             case DATA_VECU4: switch(size)
             {
-               case SIZE(VecB4): *(VecB4*)data=value; break;
+               case SIZE(VecB4 ): *(VecB4 *)data=value; break;
+               case SIZE(VecUS4): *(VecUS4*)data=value; break;
             }break;
 
             case DATA_COLOR: switch(size)
@@ -919,7 +926,8 @@ Long MemberDesc::asLong(CPtr data)C
             }break;
             case DATA_VECU4: switch(size)
             {
-               case SIZE(VecB4): return (*(VecB4*)data).x;
+               case SIZE(VecB4 ): return (*(VecB4 *)data).x;
+               case SIZE(VecUS4): return (*(VecUS4*)data).x;
             }break;
 
             case DATA_COLOR: switch(size)
@@ -1043,7 +1051,8 @@ void MemberDesc::fromLong(Ptr data, Long value)
 
             case DATA_VECU4: switch(size)
             {
-               case SIZE(VecB4): *(VecB4*)data=value; break;
+               case SIZE(VecB4 ): *(VecB4 *)data=value; break;
+               case SIZE(VecUS4): *(VecUS4*)data=value; break;
             }break;
 
             case DATA_COLOR: switch(size)
@@ -1161,7 +1170,8 @@ void MemberDesc::fromULong(Ptr data, ULong value)
 
             case DATA_VECU4: switch(size)
             {
-               case SIZE(VecB4): *(VecB4*)data=value; break;
+               case SIZE(VecB4 ): *(VecB4 *)data=value; break;
+               case SIZE(VecUS4): *(VecUS4*)data=value; break;
             }break;
 
             case DATA_COLOR: switch(size)
@@ -1279,7 +1289,8 @@ Flt MemberDesc::asFlt(CPtr data)C
             }break;
             case DATA_VECU4: switch(size)
             {
-               case SIZE(VecB4): return (*(VecB4*)data).x;
+               case SIZE(VecB4 ): return (*(VecB4 *)data).x;
+               case SIZE(VecUS4): return (*(VecUS4*)data).x;
             }break;
 
             case DATA_COLOR: switch(size)
@@ -1404,7 +1415,8 @@ void MemberDesc::fromFlt(Ptr data, Flt value)
 
             case DATA_VECU4: switch(size)
             {
-               case SIZE(VecB4): *(VecB4*)data=Round(value); break;
+               case SIZE(VecB4 ): *(VecB4 *)data=Round(value); break;
+               case SIZE(VecUS4): *(VecUS4*)data=Round(value); break;
             }break;
 
             case DATA_COLOR: switch(size)
@@ -1522,7 +1534,8 @@ Dbl MemberDesc::asDbl(CPtr data)C
             }break;
             case DATA_VECU4: switch(size)
             {
-               case SIZE(VecB4): return (*(VecB4*)data).x;
+               case SIZE(VecB4 ): return (*(VecB4 *)data).x;
+               case SIZE(VecUS4): return (*(VecUS4*)data).x;
             }break;
 
             case DATA_COLOR: switch(size)
@@ -1647,7 +1660,8 @@ void MemberDesc::fromDbl(Ptr data, Dbl value)
 
             case DATA_VECU4: switch(size)
             {
-               case SIZE(VecB4): *(VecB4*)data=Round(value); break;
+               case SIZE(VecB4 ): *(VecB4 *)data=Round(value); break;
+               case SIZE(VecUS4): *(VecUS4*)data=Round(value); break;
             }break;
 
             case DATA_COLOR: switch(size)
@@ -1765,7 +1779,8 @@ Vec2 MemberDesc::asVec2(CPtr data)C
             }break;
             case DATA_VECU4: switch(size)
             {
-               case SIZE(VecB4): return (*(VecB4*)data).xy;
+               case SIZE(VecB4 ): return (*(VecB4 *)data).xy;
+               case SIZE(VecUS4): return (*(VecUS4*)data).xy;
             }break;
 
             case DATA_COLOR: switch(size)
@@ -1890,7 +1905,8 @@ void MemberDesc::fromVec2(Ptr data, C Vec2 &value)
 
             case DATA_VECU4: switch(size)
             {
-               case SIZE(VecB4): ((VecB4*)data)->set(Round(value.x), Round(value.y), 0, 0); break;
+               case SIZE(VecB4 ): ((VecB4 *)data)->set(Round(value.x), Round(value.y), 0, 0); break;
+               case SIZE(VecUS4): ((VecUS4*)data)->set(Round(value.x), Round(value.y), 0, 0); break;
             }break;
 
             case DATA_COLOR: switch(size)
@@ -2008,7 +2024,8 @@ VecD2 MemberDesc::asVecD2(CPtr data)C
             }break;
             case DATA_VECU4: switch(size)
             {
-               case SIZE(VecB4): return (*(VecB4*)data).xy;
+               case SIZE(VecB4 ): return (*(VecB4 *)data).xy;
+               case SIZE(VecUS4): return (*(VecUS4*)data).xy;
             }break;
 
             case DATA_COLOR: switch(size)
@@ -2085,7 +2102,8 @@ Vec4 MemberDesc::asColor(CPtr data)C
             }break;
             case DATA_VECU4: switch(size)
             {
-               case SIZE(VecB4): return Vec4(*(VecB4*)data)/255.0f;
+               case SIZE(VecB4 ): return Vec4(*(VecB4 *)data)/255.0f;
+               case SIZE(VecUS4): return Vec4(*(VecUS4*)data)/255.0f;
             }break;
 
             case DATA_COLOR: switch(size)
@@ -2151,7 +2169,8 @@ void MemberDesc::fromColor(Ptr data, C Vec4 &color)
 
             case DATA_VECU4: switch(size)
             {
-               case SIZE(VecB4): ((VecB4*)data)->set(FltToByte(color.x), FltToByte(color.y), FltToByte(color.z), FltToByte(color.w)); break;
+               case SIZE(VecB4 ): ((VecB4 *)data)->set(FltToByte(color.x), FltToByte(color.y), FltToByte(color.z), FltToByte(color.w)); break;
+               case SIZE(VecUS4): ((VecUS4*)data)->set(FltToByte(color.x), FltToByte(color.y), FltToByte(color.z), FltToByte(color.w)); break;
             }break;
 
             case DATA_COLOR: switch(size)
@@ -2267,7 +2286,8 @@ Str MemberDesc::asText(CPtr data, Int precision)C
             }break;
             case DATA_VECU4: switch(size)
             {
-               case SIZE(VecB4): return Str()=*(VecB4*)data;
+               case SIZE(VecB4 ): return Str()=*(VecB4 *)data;
+               case SIZE(VecUS4): return Str()=*(VecUS4*)data;
             }break;
 
             case DATA_COLOR: switch(size)
@@ -2408,7 +2428,8 @@ void MemberDesc::fromText(Ptr data, C Str &text)
 
             case DATA_VECU4: switch(size)
             {
-               case SIZE(VecB4): *(VecB4*)data=TextVecB4(text); break;
+               case SIZE(VecB4 ): *(VecB4 *)data=TextVecB4 (text); break;
+               case SIZE(VecUS4): *(VecUS4*)data=TextVecUS4(text); break;
             }break;
 
             case DATA_COLOR: switch(size)
@@ -2532,7 +2553,8 @@ UID MemberDesc::asUID(CPtr data)C
             }break;
             case DATA_VECU4: switch(size)
             {
-               case SIZE(VecB4): return UID(((VecB4*)data)->u, 0, 0, 0);
+               case SIZE(VecB4 ): return UID(((VecB4*)data)->u, 0, 0, 0);
+               case SIZE(VecUS4): return UID(((VecUS4*)data)->x, ((VecUS4*)data)->y, ((VecUS4*)data)->z, ((VecUS4*)data)->w);
             }break;
 
             case DATA_COLOR: switch(size)
@@ -2652,7 +2674,8 @@ void MemberDesc::fromUID(Ptr data, C UID &value)
 
             case DATA_VECU4: switch(size)
             {
-               case SIZE(VecB4): ((VecB4*)data)->u=value.i[0]; break;
+               case SIZE(VecB4 ): ((VecB4 *)data)->u=value.i[0]; break;
+               case SIZE(VecUS4): ((VecUS4*)data)->set(value.i[0], value.i[1], value.i[2], value.i[3]); break;
             }break;
 
             case DATA_COLOR: switch(size)
@@ -2853,7 +2876,8 @@ Int MemberDesc::compare(CPtr obj0, CPtr obj1)C
 
          case DATA_VECU4: switch(size)
          {
-            case SIZE(VecB4): return Compare(*(VecB4*)d0, *(VecB4*)d1);
+            case SIZE(VecB4 ): return Compare(*(VecB4 *)d0, *(VecB4 *)d1);
+            case SIZE(VecUS4): return Compare(*(VecUS4*)d0, *(VecUS4*)d1);
          }break;
 
          case DATA_DATE_TIME:

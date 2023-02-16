@@ -74,7 +74,7 @@
    }
    bool EditPhysMtrl::load(C Str &name)
    {
-      File f; if(f.readTry(name))return load(f);
+      File f; if(f.read(name))return load(f);
       reset(); return false;
    }
 EditPhysMtrl::EditPhysMtrl() : friction_static(1), friction_dynamic(1), bounciness(0.2f), density(1), damping(0.05f), adamping(0.05f), friction_mode(PhysMtrl::MODE_AVG), bounciness_mode(PhysMtrl::MODE_AVG) {}

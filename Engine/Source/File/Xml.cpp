@@ -235,13 +235,15 @@ Bool DecodeTextReal(CChar* &src, Dbl &real)
 }
 #endif
 /******************************************************************************/
-#define  ERROR       '\1' // avoid '\0' because that one means end of file and success
 #define  QUOTE_BEGIN '`'
 #define  QUOTE_END   '`'
 #define BINARY_BEGIN '<'
 #define BINARY_END   '>'
 #define BINARY_ZERO  '?' // optimization to store UInt(0) as only one character
 #define BINARY_TRIM   0  // because binary data comes from Str and will be loaded into Str, then it will always be aligned to 2 bytes (size of wide Char), this will enable optimizations to reduce the binary size, however it works on assumption that this data will be loaded into Str, if in the future that would be changed, then binary data length may not be preserved
+#define    RAW_BEGIN '\1' // used only when receiving data from server, assumes data is saved per-byte (not per-char)
+#define    RAW_END   '\1'
+#define  ERROR       '\2' // avoid '\0' because that one means end of file and success
 
 static Bool SimpleChar    (Char c) {return CharType(c)==CHART_CHAR || c=='-' || c=='.';} // allow - and . for storing negative numbers and floats without the quotes
 static Bool SimpleCharJSON(Char c) {return CharType(c)==CHART_CHAR || c=='-' || c=='.';} // JSON treats both - and . as simple chars to allow storing numbers - http://json.org/
@@ -263,8 +265,9 @@ static TEXT_TYPE TextType(C Str &t)
          if(Unsigned(c)>=32 && Unsigned(c)<127 // ASCII characters (32 is ' ', 127 is DEL)
        //|| c=='\0' even though '\0' can be encoded in TEXT_QUOTE, it will always use 2 characters, so prefer TEXT_BINARY, because this character can occur frequently when encoding raw memory of 0.0f value
          || c=='\n' || c=='\t'
-         || CharFlagFast(c)&(CHARF_ALPHA|CHARF_SPACE|CHARF_SIGN|CHARF_SIGN2)
-         )simple=false;else return TEXT_BINARY;
+         || CharFlagFast(c)&(CHARF_ALPHA|CHARF_SPACE|CHARF_NBSP|CHARF_SIGN|CHARF_UNDER|CHARF_SIGN2)
+         )simple=false;else
+            return TEXT_BINARY;
       }
    }
    return simple ? TEXT_SIMPLE : TEXT_QUOTE;
@@ -286,7 +289,7 @@ static void SaveText(FileText &f, C Str &t)
           //case '\t': f.putChar('~').putChar('t'); break; // we can encode tab below normally instead
             case '`' : f.putChar('~').putChar('`'); break;
             case '~' : f.putChar('~').putChar('~'); break;
-            default  : if(Unsigned(c)>=32 || c=='\t' || c=='\n')f.putChar(c); break; // '\n' here is supported as well, but prefer as "~n"
+            default  : if(Safe(c)  )f.putChar( c ); break; // '\n' here is allowed, but prefer as "~n"
          }
          f.putChar(QUOTE_END);
       }break;
@@ -326,12 +329,12 @@ static void SaveTextJSON(FileText &f, C Str &t)
    f.putChar('"');
    FREPA(t)switch(Char c=t()[i]) // () avoids range check
    {
-      case '\0': f.putChar('\\').putChar('0'); break;
-      case '\n': f.putChar('\\').putChar('n'); break;
-    //case '\t': f.putChar('\\').putChar('t'); break; // we can encode tab below normally instead
-      case '"' : f.putChar('\\').putChar('"'); break;
+      case '\0': f.putChar('\\').putChar('0' ); break;
+      case '\n': f.putChar('\\').putChar('n' ); break;
+    //case '\t': f.putChar('\\').putChar('t' ); break; // we can encode tab below normally instead
+      case '"' : f.putChar('\\').putChar('"' ); break;
       case '\\': f.putChar('\\').putChar('\\'); break;
-      default  : if(Unsigned(c)>=32 || c=='\t')f.putChar(c); break;
+      default  : if(Safe(c) && c!='\n')f.putChar(c); break; // '\n' here is NOT allowed
    }
    f.putChar('"');
 }
@@ -357,7 +360,7 @@ static Char LoadText(FileText &f, Str &t, Char c)
          for(;;)
          {
             c=f.getChar();
-            if(SimpleChar(c))t.alwaysAppend(c); // valid name char
+            if(SimpleChar(c))t+=c; // valid name char
                else break;
          }
       }break;
@@ -372,16 +375,21 @@ static Char LoadText(FileText &f, Str &t, Char c)
             {
                switch(c=f.getChar())
                {
-                  case '0': t.alwaysAppend('\0'); break;
-                  case 'n': t.alwaysAppend('\n'); break;
-                  case 't': t.alwaysAppend('\t'); break; // just in case it was written as special char
-                  case '`': t.alwaysAppend('`' ); break;
-                  case '~': t.alwaysAppend('~' ); break;
+                  case '0': t+='\0'; break;
+                  case 'n': t+='\n'; break;
+                  case 't': t+='\t'; break; // just in case it was written as special char
+                  case '`': t+='`' ; break;
+                  case '~': t+='~' ; break;
                   default : return ERROR; // invalid char
                }
             }else
-            if(Unsigned(c)>=32 || c=='\t' || c=='\n')t.alwaysAppend(c);else // valid char, '\n' here is supported as well, but prefer as "~n"
-            if(c!='\r')return ERROR; // skip '\r'
+         #if 1 // don't allow special characters
+            if( Safe(c))t+=c;else     //   valid char, '\n' here is allowed
+            if(!Skip(c))return ERROR; // invalid char
+         #else // allow all characters
+            if(f.ok())t+=c; // add all possible characters because this data can be received from server and we need exact match
+            else      return ERROR;
+         #endif
          }
          c=f.getChar(); // read next char after the name, so we're at the same situation as with the "simple name" case
       }break;
@@ -398,8 +406,8 @@ static Char LoadText(FileText &f, Str &t, Char c)
             if(c==BINARY_ZERO)
             {
                if(src_elms!=0)return ERROR; // BINARY_ZERO can occur only at the start of a chunk
-               t.alwaysAppend(Char(0));
-               t.alwaysAppend(Char(0));
+               t+=Char(0);
+               t+=Char(0);
                continue;
             }
          #endif
@@ -409,8 +417,8 @@ static Char LoadText(FileText &f, Str &t, Char c)
             {
                if(DecodeText(src, src_elms, out))
                {
-                  t.alwaysAppend(Char(out&0xFFFF));
-                  t.alwaysAppend(Char(out>>   16));
+                  t+=Char(out&0xFFFF);
+                  t+=Char(out>>   16);
                }else return ERROR; // invalid input (this also handles '\0' chars)
                src_elms=0; // clear buffer
             }
@@ -419,11 +427,29 @@ static Char LoadText(FileText &f, Str &t, Char c)
          {
             if(DecodeText(src, src_elms, out)) // process leftovers
             {
-                              t.alwaysAppend(Char(out&0xFFFF)); // 1..3 chars correspond to 2 bytes
-               if(src_elms>=4)t.alwaysAppend(Char(out>>16   )); // 4    chars correspond to 3 bytes
+                              t+=Char(out&0xFFFF); // 1..3 chars correspond to 2 bytes
+               if(src_elms>=4)t+=Char(out>>16   ); // 4    chars correspond to 3 bytes
             }else return ERROR; // invalid input (this also handles '\0' chars)
          }
          c=f.getChar(); // read next char after the name, so we're at the same situation as with the "simple name" case
+      }break;
+
+      case RAW_BEGIN:
+      {
+         UInt size; f._f.decUIntV(size); if(f.ok())
+         {
+            Int  max_size=Min(f._f.left(), INT_MAX); // what we can still read
+            Bool ok=(size<=max_size); if(!ok)size=max_size;
+            if(size>0)
+            {
+               t.reserve(size);
+               f._f.get (t._d.data(),              size);
+               Copy8To16(t._d.data(), t._d.data(), size); // expand 8-bit binary data to 16-bit characters
+               t._d[t._length=size]='\0';
+            }
+            if(ok && f.ok() && f.getChar()==RAW_END)return f.getChar();
+         }
+         return ERROR;
       }break;
    }
    return c;
@@ -440,22 +466,22 @@ static Char LoadTextJSON(FileText &f, Str &t, Char c)
          if(c=='\\') // special char
          {
             c=f.getChar();
-            if(c=='0' )t.alwaysAppend('\0');else
-            if(c=='n' )t.alwaysAppend('\n');else
-            if(c=='t' )t.alwaysAppend('\t');else // just in case
-            if(c=='"' )t.alwaysAppend('"' );else
-            if(c=='\\')t.alwaysAppend('\\');else
+            if(c=='0' )t+='\0';else
+            if(c=='n' )t+='\n';else
+            if(c=='t' )t+='\t';else // just in case
+            if(c=='"' )t+='"' ;else
+            if(c=='\\')t+='\\';else
             if(c=='u' || c=='U')
             {
                Byte a=CharInt(f.getChar());
                Byte b=CharInt(f.getChar());
                Byte c=CharInt(f.getChar());
                Byte d=CharInt(f.getChar());
-               t.alwaysAppend(Char((a<<12)|(b<<8)|(c<<4)|d));
+               t+=Char((a<<12)|(b<<8)|(c<<4)|d);
             }else continue; // invalid char, just skip it
          }else
-         if(Unsigned(c)>=32 || c=='\t')t.alwaysAppend(c);else // valid char
-            return c; // skip '\r', invalid char (return this one)
+         if( Safe(c) && c!='\n')t+=c;else //   valid char, '\n' here is NOT allowed
+         if(!Skip(c)           )return c; // invalid char (return it)
       }
       c=f.getChar(); // read next char after the string, so we're at the same situation as with the "simple name" case
    }else // simple name
@@ -464,28 +490,28 @@ static Char LoadTextJSON(FileText &f, Str &t, Char c)
       for(;;)
       {
          c=f.getChar();
-         if(SimpleCharJSON(c))t.alwaysAppend(c);else // valid name char
-         if(c!='\r')break; // skip '\r'
+         if(SimpleCharJSON(c))t+=c;else // valid name char
+         if(!Skip(c))break;
       }
    }
    return c;
 }
 /******************************************************************************/
-static Bool     YAMLNameStart(Char c) {return c>' ' && c!='-';}
-static Bool     YAMLName     (Char c) {return c>' ' && c!=':';}
+static Bool     YAMLNameStart(Char c) {return Unsigned(c)>' ' && c!='-' && Safe(c);}
+static Bool     YAMLName     (Char c) {return Unsigned(c)>' ' && c!=':' && Safe(c);}
 static Char LoadYAMLName     (FileText &f, Str &t, Char c)
 {
    t=c; // we've already read the first character
    for(;;)
    {
       c=f.getChar();
-      if(YAMLName(c))t.alwaysAppend(c);else // valid name char
-      if(c!='\r')break;
+      if(YAMLName(c))t+=c;else // valid name char
+      if(   !Skip(c))break;
    }
    return c;
 }
-static Bool     YAMLValueStart(Char c) {return c> ' ';}
-static Bool     YAMLValue     (Char c) {return c>=' ';}
+static Bool     YAMLValueStart(Char c) {return Unsigned(c)> ' ' && Safe(c);}
+static Bool     YAMLValue     (Char c) {return Unsigned(c)>=' ' && Safe(c);}
 static Char LoadYAMLValue     (FileText &f, Str &t, Char c)
 {
    if(c=='"') // string
@@ -499,27 +525,26 @@ static Char LoadYAMLValue     (FileText &f, Str &t, Char c)
          if(c=='\\') // special char
          {
             c=f.getChar();
-            if(c=='0' )t.alwaysAppend('\0');else
-            if(c=='n' )t.alwaysAppend('\n');else
-            if(c=='t' )t.alwaysAppend('\t');else // just in case
-            if(c=='"' )t.alwaysAppend('"' );else
-            if(c=='\\')t.alwaysAppend('\\');else
+            if(c=='0' )t+='\0';else
+            if(c=='n' )t+='\n';else
+            if(c=='t' )t+='\t';else // just in case
+            if(c=='"' )t+='"' ;else
+            if(c=='\\')t+='\\';else
             if(c=='u' || c=='U')
             {
                Byte a=CharInt(f.getChar());
                Byte b=CharInt(f.getChar());
                Byte c=CharInt(f.getChar());
                Byte d=CharInt(f.getChar());
-               t.alwaysAppend(Char((a<<12)|(b<<8)|(c<<4)|d));
-            }else
-               continue; // invalid char, just skip it
+               t+=Char((a<<12)|(b<<8)|(c<<4)|d);
+            }else continue; // invalid char, just skip it
          }else
-         if(Unsigned(c)>=32 || c=='\t')t.alwaysAppend(c);else // valid char
          if(c=='\n')
          {
-            t.space(); for(;;){c=f.getChar(); if(c!=' ' && c!='\r')goto process;}
+            t.space(); for(;;){c=f.getChar(); if(c!=' ' && !Skip(c))goto process;}
          }else
-         if(c!='\r')return c; // skip '\r', invalid char (return this one)
+         if( Safe(c))t+=c;else //   valid char
+         if(!Skip(c))return c; // invalid char (return it)
       }
       c=f.getChar(); // read next char after the string, so we're at the same situation as with the "simple name" case
    }else
@@ -533,32 +558,32 @@ static Char LoadYAMLValue     (FileText &f, Str &t, Char c)
          if(c=='\'')
          {
             c=f.getChar();
-            if(c=='\'')t.alwaysAppend('\'');else
+            if(c=='\'')t+='\'';else
                return c;
          }else
        /*if(c=='\\') // special char
          {
             c=f.getChar();
-            if(c=='0' )t.alwaysAppend('\0');else
-            if(c=='n' )t.alwaysAppend('\n');else
-            if(c=='t' )t.alwaysAppend('\t');else // just in case
-            if(c=='"' )t.alwaysAppend('"' );else
-            if(c=='\\')t.alwaysAppend('\\');else
+            if(c=='0' )t+='\0';else
+            if(c=='n' )t+='\n';else
+            if(c=='t' )t+='\t';else // just in case
+            if(c=='"' )t+='"' ;else
+            if(c=='\\')t+='\\';else
             if(c=='u' || c=='U')
             {
                Byte a=CharInt(f.getChar());
                Byte b=CharInt(f.getChar());
                Byte c=CharInt(f.getChar());
                Byte d=CharInt(f.getChar());
-               t.alwaysAppend(Char((a<<12)|(b<<8)|(c<<4)|d));
+               t+=Char((a<<12)|(b<<8)|(c<<4)|d);
             }else continue; // invalid char, just skip it
          }else*/
-         if(Unsigned(c)>=32 || c=='\t')t.alwaysAppend(c);else // valid char
          if(c=='\n')
          {
-            t.space(); for(;;){c=f.getChar(); if(c!=' ' && c!='\r')goto process2;}
+            t.space(); for(;;){c=f.getChar(); if(c!=' ' && !Skip(c))goto process2;}
          }else
-         if(c!='\r')return c; // skip '\r', invalid char (return this one)
+         if( Safe(c))t+=c;else //   valid char
+         if(!Skip(c))return c; // invalid char (return it)
       }
       c=f.getChar(); // read next char after the string, so we're at the same situation as with the "simple name" case
    }else // simple name
@@ -567,8 +592,8 @@ static Char LoadYAMLValue     (FileText &f, Str &t, Char c)
       for(;;)
       {
          c=f.getChar();
-         if(YAMLValue(c))t.alwaysAppend(c);else // valid name char
-         if(c!='\r')break;
+         if(YAMLValue(c))t+=c;else // valid name char
+         if(    !Skip(c))break;
       }
    }
    return c;
@@ -579,7 +604,7 @@ static Char LoadYAMLInlineValue(FileText &f, Str &t, Char c, Char end)
    for(;;)
    {
       c=f.getChar();
-      if(YAMLValue(c) && c!=',' && c!=end)t.alwaysAppend(c);else // valid name char
+      if(YAMLValue(c) && c!=',' && c!=end)t+=c;else // valid name char
          break;
    }
    return c;
@@ -607,6 +632,17 @@ TextParam& TextParam::setValuePacked(C Vec  &value) {T.value=_TextPacked(value);
 TextParam& TextParam::setValuePacked(C Vec4 &value) {T.value=_TextPacked(value); return T;}
 #endif
 /******************************************************************************/
+C TextParam* CFindParam(C CMemPtr<TextParam> &params, C Str &name, Int i)
+{
+   if(InRange(i, params))FREPAD(n, params) // process in order
+   {
+    C TextParam &param=params[n]; if(param.name==name)
+      {
+         if(i==0)return &param; i--;
+      }
+   }
+   return null;
+}
 C TextNode* CFindNode(C CMemPtr<TextNode> &nodes, C Str &name, Int i)
 {
    if(InRange(i, nodes))FREPAD(n, nodes) // process in order
@@ -814,7 +850,7 @@ Char TextNode::load(FileText &f, Bool just_values, Char c)
       {
          for(c=f.getChar(); ; )
          {
-            if(SimpleChar(c) || c==QUOTE_BEGIN || c==BINARY_BEGIN)c=nodes.New().load(f, false, c);else
+            if(SimpleChar(c) || c==QUOTE_BEGIN || c==BINARY_BEGIN || c==RAW_BEGIN)c=nodes.New().load(f, false, c);else
             if( WhiteChar(c)){c=f.getChar();       }else
             if(c=='}'       ){c=f.getChar(); break;}else
                              {c=      ERROR; break;}
@@ -824,13 +860,13 @@ Char TextNode::load(FileText &f, Bool just_values, Char c)
       {
          for(c=f.getChar(); ; )
          {
-            if(SimpleChar(c) || c==QUOTE_BEGIN || c==BINARY_BEGIN || c=='{' || c=='[')c=nodes.New().load(f, true, c);else
+            if(SimpleChar(c) || c==QUOTE_BEGIN || c==BINARY_BEGIN || c==RAW_BEGIN || c=='{' || c=='[')c=nodes.New().load(f, true, c);else
             if( WhiteChar(c)){c=f.getChar();       }else
             if(c==']'       ){c=f.getChar(); break;}else
                              {c=      ERROR; break;}
          }
       }else
-      if(SimpleChar(c) || c==QUOTE_BEGIN || c==BINARY_BEGIN) // value
+      if(SimpleChar(c) || c==QUOTE_BEGIN || c==BINARY_BEGIN || c==RAW_BEGIN) // value
          c=LoadText(f, value, c);
    }
    return c;
@@ -869,26 +905,26 @@ Char TextNode::loadYAML(FileText &f, Bool just_values, Char c, const Int node_sp
 {
    if(just_values)goto just_values;
    c=LoadYAMLName(f, name, c);
-   for(; c==' ' || c=='\r'; c=f.getChar()); // skip spaces after name
+   for(; c==' ' || Skip(c); c=f.getChar()); // skip spaces after name
    if(c==':') // has value specified
    {
-      for(c=f.getChar(); c==' ' || c=='\r'; c=f.getChar()); // skip spaces after ':'
+      for(c=f.getChar(); c==' ' || Skip(c); c=f.getChar()); // skip spaces after ':'
       if(c=='{') // inline children
          for(;;)
       {
          c=f.getChar();
       process_a:
-         if(c==' ' || c=='\n' || c=='\r'){}else
+         if(c==' ' || c=='\n' || Skip(c)){}else
          if(c==','                      )nodes.New();else
          if(c=='}'                      ){c=f.getChar(); break;}else
          if(YAMLNameStart(c))
          {
             TextNode &child=nodes.New();
             c=LoadYAMLName(f, child.name, c);
-            for(; c==' ' || c=='\r'; c=f.getChar()); // skip spaces after name
+            for(; c==' ' || Skip(c); c=f.getChar()); // skip spaces after name
             if(c==':') // has value specified
             {
-               for(c=f.getChar(); c==' ' || c=='\r'; c=f.getChar()); // skip spaces after ':'
+               for(c=f.getChar(); c==' ' || Skip(c); c=f.getChar()); // skip spaces after ':'
                if(YAMLValueStart(c))c=LoadYAMLInlineValue(f, child.value, c, '}');
             }
             if(c==',')c=' '; // eat this
@@ -901,7 +937,7 @@ Char TextNode::loadYAML(FileText &f, Bool just_values, Char c, const Int node_sp
       {
          c=f.getChar();
       process_b:
-         if(c==' ' || c=='\n' || c=='\r'){}else
+         if(c==' ' || c=='\n' || Skip(c)){}else
          if(c==',')nodes.New();else
          if(c==']'){c=f.getChar(); break;}else
          if(YAMLValueStart(c))
@@ -923,7 +959,7 @@ Char TextNode::loadYAML(FileText &f, Bool just_values, Char c, const Int node_sp
             if(c==' ' ){cur_spaces++;               c=f.getChar();}else
             if(c=='\n'){cur_spaces=0;               c=f.getChar();}else
             if(c=='#' ){cur_spaces=0; f.skipLine(); c=f.getChar();}else // comment
-            if(c=='\r'){                            c=f.getChar();}else
+            if(Skip(c)){                            c=f.getChar();}else
             if(YAMLNameStart(c))
             {
                if(cur_spaces>node_spaces)
@@ -971,7 +1007,7 @@ Bool TextData::load(FileText &f)
    clear();
    for(Char c=f.getChar(); ; )
    {
-      if(SimpleChar(c) || c==QUOTE_BEGIN || c==BINARY_BEGIN)c=nodes.New().load(f, false, c);else
+      if(SimpleChar(c) || c==QUOTE_BEGIN || c==BINARY_BEGIN || c==RAW_BEGIN)c=nodes.New().load(f, false, c);else
       if( WhiteChar(c))c=f.getChar();else
       if(!c)return true ;else // don't check for 'f.ok' because methods stop on null char and not on 'f.end'
             return false;
@@ -998,7 +1034,7 @@ Bool TextData::loadYAML(FileText &f)
       if(c=='\n'){spaces=0;               c=f.getChar();}else
       if(c=='#' ){spaces=0; f.skipLine(); c=f.getChar();}else // comment
       if(c=='-' ){spaces=0; f.skipLine(); c=f.getChar();}else
-      if(c=='\r'){                        c=f.getChar();}else
+      if(Skip(c)){                        c=f.getChar();}else
       if(YAMLNameStart(c))c=nodes.New().loadYAML(f, false, c, spaces, spaces);else
       if(!c)return true ;else // don't check for 'f.ok' because methods stop on null char and not on 'f.end'
             return false;
@@ -1168,7 +1204,7 @@ static Bool LoadXmlValue(FileText &f, Str &value)
          value=DecodeXmlString(value);
          return true;
       }
-      if(Unsigned(c)>=32 || c=='\t')value+=c;
+      if(Safe(c) && c!='\n')value+=c;
    }
 }
 static Char LoadXmlData(FileText &f, Str &data, Char c)
@@ -1177,7 +1213,7 @@ static Char LoadXmlData(FileText &f, Str &data, Char c)
    for(;;)
    {
       c=f.getChar(); if(!c || WhiteChar(c) || c=='<')break;
-      if(Unsigned(c)>=32 || c=='\t' || c=='\n')data+=c;
+      if(Safe(c))data+=c;
    }
    data=DecodeXmlString(data);
    return c;
@@ -1491,7 +1527,7 @@ static void SaveTextFileParams(FileText &f, C Str &t, Bool param_name)
        //case '\t': f.putChar('?').putChar('t'); break; // we can encode tab below normally instead
          case '"' : f.putChar('?').putChar('"'); break;
          case '?' : f.putChar('?').putChar('?'); break;
-         default  : if(Unsigned(c)>=32 || c=='\t' || c=='\n')f.putChar(c); break; // '\n' here is supported as well, but prefer as "?n"
+         default  : if(Safe(c)  )f.putChar( c ); break; // '\n' here is allowed, but prefer as "?n"
       }
       f.putChar('"');
       return;
@@ -1506,7 +1542,7 @@ static Char LoadTextFileParams(FileText &f, Str &t, Char c, Bool param_name)
       for(;;)
       {
          c=f.getChar();
-         if(SimpleCharFileParams(c, param_name))t.alwaysAppend(c); // valid name char
+         if(SimpleCharFileParams(c, param_name))t+=c; // valid name char
             else break;
       }
    }else
@@ -1520,16 +1556,16 @@ static Char LoadTextFileParams(FileText &f, Str &t, Char c, Bool param_name)
          {
             switch(c=f.getChar())
             {
-               case '0': t.alwaysAppend('\0'); break;
-               case 'n': t.alwaysAppend('\n'); break;
-               case 't': t.alwaysAppend('\t'); break; // just in case it was written as special char
-               case '"': t.alwaysAppend('"' ); break;
-               case '?': t.alwaysAppend('?' ); break;
+               case '0': t+='\0'; break;
+               case 'n': t+='\n'; break;
+               case 't': t+='\t'; break; // just in case it was written as special char
+               case '"': t+='"' ; break;
+               case '?': t+='?' ; break;
                default : return ERROR; // invalid char
             }
          }else
-         if(Unsigned(c)>=32 || c=='\t' || c=='\n')t.alwaysAppend(c);else // valid char, '\n' here is supported as well, but prefer as "?n"
-         if(c!='\r')return ERROR; // skip '\r'
+         if( Safe(c))t+=c;else     //   valid char, '\n' here is allowed
+         if(!Skip(c))return ERROR; // invalid char
       }
       c=f.getChar(); // read next char after the name, so we're at the same situation as with the "simple name" case
    }
@@ -1599,7 +1635,7 @@ static Char Load(FileParams &fp, FileText &f, Char c) // !! does not call 'clear
    skip_empty:
       c=f.getChar();
    next:
-      if(c==' ' || c=='\t' || c=='\r' || c=='\n')goto skip_empty;
+      if(WhiteChar(c))goto skip_empty;
       if(c=='>')c=SkipSpace(f, f.getChar());else
       if(c)
       {
@@ -1659,6 +1695,229 @@ Mems<FileParams> FileParams::Decode(C Str &str)
 Str FileParams::Merge(C Str &a, C Str &b)
 {
    return a.is() ? b.is() ? a+'\n'+b : a : b;
+}
+/******************************************************************************/
+// TEXT META
+/******************************************************************************/
+void TextMeta::operator+=(Char c)
+{
+   if(!elms() || last().data.nodes.elms())New(); // create new element if don't have any, or last ends with meta data
+   last().text+=c;
+}
+void TextMeta::operator+=(C Str &s)
+{
+   if(!elms() || last().data.nodes.elms())New(); // create new element if don't have any, or last ends with meta data
+   last().text+=s;
+}
+/******************************************************************************/
+enum TM_TYPE : Char8
+{
+   END      = 0,
+   NAME     = 1, // Str8 Safe chars only
+   CHILD    = 2,
+ //TAB      = 9, '\t'
+ //LINE     =10, '\n'
+   VALUE    =14, // Str8 Safe chars only
+   VALUE_UID=15, //    UID
+   VALUE_U1 =16, //    Byte
+   VALUE_I1 =17, // -  Byte
+   VALUE_U2 =18, //    UShort
+   VALUE_I2 =19, // -  UShort
+   VALUE_U3 =20, //  3xByte
+   VALUE_I3 =21, // -3xByte
+   VALUE_U4 =22, //    UInt
+   VALUE_I4 =23, // -  UInt
+   VALUE_U5 =24, //  5xByte
+   VALUE_I5 =25, // -5xByte
+   VALUE_U6 =26, //  6xByte
+   VALUE_I6 =27, // -6xByte
+   VALUE_U7 =28, //  7xByte
+   VALUE_I7 =29, // -7xByte
+   VALUE_U8 =30, //    ULong
+   VALUE_I8 =31, // -  ULong
+};
+/******************************************************************************/
+static Bool IsValue(Char c)
+{
+   return c>=VALUE && c<=VALUE_I8;
+}
+static TM_TYPE BytesToType(Byte bytes, Bool neg) // assumes bytes 1..8
+{
+   DEBUG_ASSERT(bytes>=1 && bytes<=8, "BytesToType");
+ //if(bytes>8)return END; MAX(bytes, 1); safety checks
+   return TM_TYPE((VALUE_U1-2)+bytes*2+neg);
+}
+static Int TypeToBytes(TM_TYPE type, bool &neg)
+{
+   Byte   bytes2=type-(VALUE_U1-2);
+      neg=bytes2&1;
+   return bytes2/2;
+}
+static Int Left(C Str &s, Int si) {return s.length()-si;}
+/******************************************************************************/
+static void Save(C Str &text, Str &s)
+{
+   FREPA(text)
+   {
+      Char c=text[i];
+      if(Safe(c))s+=c;
+   }
+}
+static Int Load(Str &text, C Str &s, Int si)
+{
+   for(; si<s.length(); si++)
+   {
+      Char c=s[si];
+      if(Safe(c))text+=c;else break;
+   }
+   return si;
+}
+/******************************************************************************/
+static void Save(C Str &text, Str &s, Bool name)
+{
+   if(!name) // value
+   {
+      Char c=text.first();
+      Bool neg=(c=='-'); // negative number
+      if(neg || (c>='0' && c<='9')) // possible number
+      {
+         CalcValue cv; TextValue(text, cv, false); if(cv.type==CVAL_INT) // got a number
+         {
+            Char8 temp[256]; CChar8 *i;
+            if(neg)i=TextInt(       cv.i, temp);
+            else   i=TextInt((ULong)cv.i, temp);
+            if(Equal(i, text, true)) // text->number->text == text, conversion gives exact same results
+            {
+               ULong   u    =(neg ? -cv.i-1 : cv.i); // absolute
+               Byte    bytes=Max(1, ByteHi(u)); // how many bytes needed 1..8
+               TM_TYPE type =BytesToType(bytes, neg);
+               s+=Char(type); FREP(bytes)s+=Char(((Byte*)&u)[i]);
+               return;
+            }
+         }
+      }
+      if(text.length()==UIDFileNameLen)
+      {
+         UID id; if(id.fromFileName(text) && Equal(_EncodeFileName(id), text, true))
+         {
+            Int bytes=SIZE(UID);
+            s+=Char(VALUE_UID); FREP(bytes)s+=Char(id.b[i]);
+            return;
+         }
+      }
+   }
+   s+=Char(name ? NAME : VALUE);
+   Save(text, s);
+}
+static Int Load(Str &text, C Str &s, Int si, Char c)
+{
+   switch(c)
+   {
+      case NAME:
+      case VALUE:
+         return Load(text, s, si);
+
+      case VALUE_UID:
+      {
+         Int bytes=SIZE(UID); if(bytes<=Left(s, si))
+         {
+            UID  id; Copy16To8(&id, s()+si, bytes); // FREPD(j, bytes)id.b[j]=s[si+j];
+            text=id.asFileName();
+            return si+bytes;
+         }
+      }break;
+
+      case VALUE_U1:
+      case VALUE_I1:
+      case VALUE_U2:
+      case VALUE_I2:
+      case VALUE_U3:
+      case VALUE_I3:
+      case VALUE_U4:
+      case VALUE_I4:
+      case VALUE_U5:
+      case VALUE_I5:
+      case VALUE_U6:
+      case VALUE_I6:
+      case VALUE_U7:
+      case VALUE_I7:
+      case VALUE_U8:
+      case VALUE_I8:
+      {
+         Bool neg; Int bytes=TypeToBytes(TM_TYPE(c), neg); if(bytes<=Left(s, si))
+         {
+            ULong u=0; Copy16To8(&u, s()+si, bytes); // FREPD(j, bytes)((Byte*)&u)[j]=s[si+j];
+            if(neg)text=-Long(u)-1;
+            else   text=      u   ;
+            return si+bytes;
+         }
+      }break;
+   }
+   return -1;
+}
+/******************************************************************************/
+static void Save(C TextNode &node, Str &s)
+{
+                        Save(node.name , s, true);
+   if(node.value.is  ())Save(node.value, s, false);
+   if(node.nodes.elms())
+   {
+      s+=Char(CHILD);
+      FREPA(node.nodes)Save(node.nodes[i], s);
+      s+=Char(END);
+   }
+}
+static Int Load(Memc<TextNode> &nodes, C Str &s, Int si)
+{
+   Char c=s[si++];
+check:
+   if(c==NAME)
+   {
+      TextNode &node=nodes.New();
+      si=Load(node.name, s, si, c); if(!InRange(si, s))return -1; c=s[si++];
+      if(IsValue(c))
+      {
+         si=Load(node.value, s, si, c); if(!InRange(si, s))return -1; c=s[si++];
+      }
+      if(c==CHILD)
+      {
+                                     if(!InRange(si, s))return -1;
+         si=Load(node.nodes, s, si); if(!InRange(si, s))return -1; c=s[si++];
+      }
+      goto check;
+   }else
+   if(c==END)return si;
+   return -1;
+}
+/******************************************************************************/
+void TextMetaElm::save(Str &s)C
+{
+   s.appendUTF8Safe(text); // cannot add unsafe characters so they don't get mixed up with TM_TYPE
+   if(data.nodes.elms())
+   {
+      FREPA(data.nodes)Save(data.nodes[i], s);
+      s+=Char(END);
+   }
+}
+Str  TextMeta::save(        )C {Str s; save(s); return s;}
+void TextMeta::save(  Str &s)C {FREPAO(T).save(s);}
+Bool TextMeta::load(C Str &s)
+{
+   clear();
+   if(s.is())
+   {
+      Int si=0;
+   next:
+      TextMetaElm &elm=New();
+      CChar *src=s()+si; si+=elm.text.fromUTF8Safe(src)-src;
+      if(InRange(si, s))
+      {
+         si=Load(elm.data.nodes, s, si);
+         if(InRange(si, s))goto next;
+         if(si<0)return false;
+      }
+   }
+   return true;
 }
 /******************************************************************************/
 }

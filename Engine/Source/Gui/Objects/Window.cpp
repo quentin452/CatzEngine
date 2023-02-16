@@ -598,7 +598,7 @@ void Window::draw(C GuiPC &gpc)
       Bool  active=T.active(), transparent=(finalAlpha()<1-EPS_COL8_1);
       GuiPC gpc_this(gpc, T); // first calculate the GuiPC for children which sets the offset per pixel aligned exactly at client rect top left corner
       Vec2  aligned_offset=gpc_this.offset-_crect.lu(); // now based on that offset calculate the offset for the Window, which is just as 'gpc.offset' however compatible with 'gpc_this'
-      Rect  r=rect()+aligned_offset, ext_rect;
+      Rect  r=rect()+aligned_offset, fx_rect;
 
       if(ripple || transparent)
       {
@@ -607,8 +607,8 @@ void Window::draw(C GuiPC &gpc)
          if(ripple)D.clearCol();else // clear entire screen for ripple as it may use various tex coordinates basing on the ripple intensity
          { // clear only the screen part that we're going to use
             ALPHA_MODE alpha=D.alpha(ALPHA_NONE);
-            extendedRect(ext_rect); ext_rect+=aligned_offset;
-            Sh.clear(Vec4Zero, &Rect(ext_rect).extend(D.pixelToScreenSize())); // extend by 1 pixel to avoid tex filtering issues
+            extendedRect(fx_rect); fx_rect+=aligned_offset; fx_rect&=D.rect(); // clip to screen rectangle to avoid artifacts on screen border due to UV clamping, when drawing window that extends over screen rectangle, normally it tries to draw entire rectangle of the window but since it can be outside the screen then it will not be available and UV coordinates get clamped to the same pixels from the border resulting in artifacts
+            Sh.clear(Vec4Zero, &Rect(fx_rect).extend(D.pixelToScreenSize())); // extend by 1 pixel to avoid tex filtering issues
             D .alpha(alpha);
          }
       }else
@@ -691,8 +691,8 @@ void Window::draw(C GuiPC &gpc)
          {
             Color      color=ColorMul(finalAlpha()); // set all 4 channels to final alpha
             ALPHA_MODE alpha=D.alpha(ALPHA_MERGE);
-            if(Equal(Gui.window_fade_scale, 1))Sh .draw    (*rt, color, TRANSPARENT, &ext_rect);
-            else                               rt->drawPart(     color, TRANSPARENT, Rect_C(ext_rect.center(), ext_rect.size()*Lerp(Mid(Gui.window_fade_scale, 0.0f, 2.0f), 1.0f, fadeAlpha())), D.screenToUV(ext_rect));
+            if(Equal(Gui.window_fade_scale, 1))Sh .draw    (*rt, color, TRANSPARENT, &fx_rect);
+            else                               rt->drawPart(     color, TRANSPARENT, Rect_C(fx_rect.center(), fx_rect.size()*Lerp(Mid(Gui.window_fade_scale, 0.0f, 2.0f), 1.0f, fadeAlpha())), D.screenToUV(fx_rect));
             D.alpha(alpha);
          }
       }
@@ -816,11 +816,15 @@ Bool Window::load(File &f, CChar *path)
 void ClosableWindow::update(C GuiPC &gpc)
 {
    super::update(gpc);
-   if(Gui.window()==this && button[2].func()) // this is the active window and close button has a function assigned
+   if(button[2].func()) // close button has a function assigned
    {
-      if((Kb.kf(KB_ESC) && !Kb.k.ctrlCmd() && !Kb.k.shift()) || Kb.kf(KB_NAV_BACK) || (Ms.bp(2) && contains(Gui.ms()) && !Gui.menu()->contains(Gui.ms())))
+      if(Gui.window()==this && ((Kb.kf(KB_ESC) && !Kb.k.ctrlCmd() && !Kb.k.shift()) || Kb.kf(KB_NAV_BACK))) // this is the active window and key pressed
       {
-         Kb.eatKey(); Ms.eat(2); button[2].push(); // use "button.push" to trigger calling custom function assigned to that button
+         Kb.eatKey(); button[2].push(); // use "button.push" to trigger calling custom function assigned to that button
+      }else
+      if(Ms.bp(2) && contains(Gui.ms()) && !Gui.menu()->contains(Gui.ms()))
+      {
+         Ms.eat(2); button[2].push(); // use "button.push" to trigger calling custom function assigned to that button
       }
    }
 }
@@ -864,16 +868,16 @@ void ModalWindow::draw(C GuiPC &gpc)
 /******************************************************************************/
 Dialog& Dialog::autoSize()
 {
-   Flt button_w=Gui.dialog_button_padd*buttons.elms(); if(buttons.elms())button_w+=Gui.dialog_button_margin*(buttons.elms()-1);
-   FREPA(buttons)button_w+=buttons[i].textWidth(&Gui.dialog_button_height);
+   Flt usable_w=Min(D.rect().max.x-Gui.dialog_padd, D.rectUI().max.x)
+               -Max(D.rect().min.x+Gui.dialog_padd, D.rectUI().min.x);
 
    Flt text_w=0, text_h=0;
    if(text.hasData())
    if(C TextStyle *ts=text.getTextStyle())
    if(Flt line_h=ts->lineHeight())
    {
-      const Flt desired_aspect=2.5f, min_w=line_h*17, max_w=D.rectUI().w()-Gui.dialog_padd*2; // min_w gives some tolerable minimum width based on a single line height
-            Int lines=ts->textLines(text.text, text.extra.data(), text.extra.elms(), max_w, text.auto_line, &text_w);
+      const Flt desired_aspect=2.5f, min_w=line_h*17; // min_w gives some tolerable minimum width based on a single line height
+            Int lines=ts->textLines(text.text, text.extra.data(), text.extra.elms(), usable_w, text.auto_line, &text_w);
       text_h=line_h*lines;
       if(text_w>min_w)
       {
@@ -881,7 +885,7 @@ Dialog& Dialog::autoSize()
          REP(3) // 3 attempts
          {
             Flt multiplier=Sqrt(desired_aspect/aspect), // need to apply 'Sqrt' because this affects both width and height
-                test_w=Mid(text_w*multiplier, min_w, max_w);
+                test_w=Mid(text_w*multiplier, min_w, usable_w);
             Int test_lines=ts->textLines(text.text, text.extra.data(), text.extra.elms(), test_w, text.auto_line, &test_w);
             Flt test_h=line_h*test_lines,
                 test_aspect=test_w/test_h;
@@ -895,19 +899,45 @@ Dialog& Dialog::autoSize()
       }
    }
 
-   Flt  max_w=Max(button_w, text_w);
-   Vec2 size(Gui.dialog_padd+max_w+Gui.dialog_padd, Gui.dialog_padd+text_h+Gui.dialog_padd+Gui.dialog_button_height+Gui.dialog_padd);
-   rect(Rect_C(Vec2Zero, size+defaultInnerPaddingSize()));
-   text.rect(Rect_U(size.x/2, -Gui.dialog_padd, text_w, text_h));
-
-   Flt x=(size.x-button_w)/2, y=text.rect().min.y-Gui.dialog_padd;
+   Flt  button_w=0;
+   Rect button_rect; button_rect.min.x=0; button_rect.setY(-Gui.dialog_button_height, 0);
    FREPA(buttons)
    {
       Button &button=buttons[i];
-      Flt w=button.textWidth(&Gui.dialog_button_height)+Gui.dialog_button_padd;
-      button.rect(Rect_LU(x, y, w, Gui.dialog_button_height));
-      x+=w+Gui.dialog_button_margin;
+      Flt   w=button.textWidth(&Gui.dialog_button_height)+Gui.dialog_button_padd;
+         button_rect.max.x=button_rect.min.x+w;
+      if(button_rect.max.x>usable_w && i) // exceeds available space and not first
+      {  // go to next line
+         Flt y=button_rect.min.y-Gui.dialog_button_margin_y;
+         button_rect.set(0, y-Gui.dialog_button_height, w, y);
+      }
+      button.rect(button_rect);
+      MAX(button_w, button_rect.max.x);
+      button_rect.min.x=button_rect.max.x+Gui.dialog_button_margin;
    }
+
+   Flt  max_w=Max(button_w, text_w);
+   Vec2 size(Gui.dialog_padd+max_w+Gui.dialog_padd, Gui.dialog_padd+text_h+Gui.dialog_padd-button_rect.min.y+Gui.dialog_padd);
+   rect(Rect_C(Vec2Zero, size+defaultInnerPaddingSize()));
+   text.rect(Rect_U(size.x/2, -Gui.dialog_padd, text_w, text_h));
+
+   Vec2 move((size.x-button_w)/2, text.rect().min.y-Gui.dialog_padd);
+   REPAO(buttons).move(move);
+   return T;
+}
+Dialog& Dialog::extendX(Flt e)
+{
+   Vec2 d(e, 0);
+            text .move(d);
+   REPAO(buttons).move(d);
+   rect(Rect(rect()).extendX(e));
+   return T;
+}
+Dialog& Dialog::separateTextButtons(Flt space)
+{
+   Vec2 d(0, -space);
+   REPAO(buttons).move(d);
+   rect(Rect(rect()).extendY(space/2));
    return T;
 }
 Dialog& Dialog::set(C Str &title, C Str &text, C CMemPtr<Str> &buttons, C TextStylePtr &text_style)
@@ -925,6 +955,10 @@ Dialog& Dialog::create(C Str &title, C Str &text, C CMemPtr<Str> &buttons, C Tex
    super::create();
    return set(title, text, buttons, text_style);
 }
+GuiObj* Dialog::test   (C GuiPC &gpc, C Vec2 &pos, GuiObj* &mouse_wheel) {return modal ? super::test   (gpc, pos, mouse_wheel) : Window::test   (gpc, pos, mouse_wheel);}
+void    Dialog::nearest(C GuiPC &gpc, GuiObjNearest &gon               ) {return modal ? super::nearest(gpc, gon             ) : Window::nearest(gpc, gon             );}
+void    Dialog::update (C GuiPC &gpc                                   ) {return modal ? super::update (gpc                  ) : Window::update (gpc                  );}
+void    Dialog::draw   (C GuiPC &gpc                                   ) {return modal ? super::draw   (gpc                  ) : Window::draw   (gpc                  );}
 /******************************************************************************/
 }
 /******************************************************************************/

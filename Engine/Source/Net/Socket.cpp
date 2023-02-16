@@ -606,7 +606,7 @@ Str SockAddr::asText()C
 }
 Bool SockAddr::fromText(C Str8 &ip_port)
 {
-   if(CChar8 *addr=_SkipStartPath(_SkipStartPath(ip_port, "http://"), "https://"))
+   if(CChar8 *addr=SkipHttp(ip_port))
    {
       if(*addr=='[') // try IPv6
       {

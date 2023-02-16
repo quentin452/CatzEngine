@@ -115,17 +115,17 @@ struct Mesh : MeshLod // Mesh (array of Mesh LODs)
 #endif
 
    // texture transform
-   Mesh& texMove  (C Vec2 &move , Byte tex_index=0); // move   texture UV's
-   Mesh& texScale (C Vec2 &scale, Byte tex_index=0); // scale  texture UV's
-   Mesh& texRotate(  Flt   angle, Byte tex_index=0); // rotate texture UV's
+   Mesh& texMove  (C Vec2 &move , Byte uv_index=0); // move   texture UV's
+   Mesh& texScale (C Vec2 &scale, Byte uv_index=0); // scale  texture UV's
+   Mesh& texRotate(  Flt   angle, Byte uv_index=0); // rotate texture UV's
 
 #if EE_PRIVATE
    // texturize
-   Mesh& texMap(  Flt     scale=1, Byte tex_index=0); // map texture UV's according to vertex XY position and scale
-   Mesh& texMap(C Matrix &matrix , Byte tex_index=0); // map texture UV's according to matrix
-   Mesh& texMap(C Plane  &plane  , Byte tex_index=0); // map texture UV's according to plane
-   Mesh& texMap(C Ball   &ball   , Byte tex_index=0); // map texture UV's according to ball
-   Mesh& texMap(C Tube   &tube   , Byte tex_index=0); // map texture UV's according to tube
+   Mesh& texMap(  Flt     scale=1, Byte uv_index=0); // map texture UV's according to vertex XY position and scale
+   Mesh& texMap(C Matrix &matrix , Byte uv_index=0); // map texture UV's according to matrix
+   Mesh& texMap(C Plane  &plane  , Byte uv_index=0); // map texture UV's according to plane
+   Mesh& texMap(C Ball   &ball   , Byte uv_index=0); // map texture UV's according to ball
+   Mesh& texMap(C Tube   &tube   , Byte uv_index=0); // map texture UV's according to tube
 #endif
 
    // operations
@@ -141,10 +141,10 @@ struct Mesh : MeshLod // Mesh (array of Mesh LODs)
    Mesh& tesselate(Flt weld_pos_eps=EPS); // smooth subdivide faces, preserving original vertexes, 'weld_pos_eps'=epsilon used for final vertex position welding
    Mesh& subdivide(                    ); // smooth subdivide faces,  smoothing original vertexes
 
-   Int   boneFind (CChar8 *bone_name                                      )C; // find bone by its name and return its index, -1 on fail
-   Mesh& boneRemap(C CMemPtr<Byte, 256> &old_to_new, Bool remap_names=true) ; // remap vertex bone/matrix indexes according to bone 'old_to_new' remap, 'remap_names'=if remap the bone names as well
-   void      setUsedBones(Bool (&bones)[256])C;
-   void  includeUsedBones(Bool (&bones)[256])C;
+   Int          boneFind (CChar8 *bone_name                                           )C; // find bone by its name and return its index, -1 on fail
+   Mesh&        boneRemap(C CMemPtrN<BoneType, 256> &old_to_new, Bool remap_names=true) ; // remap vertex bone/matrix indexes according to bone 'old_to_new' remap, 'remap_names'=if remap the bone names as well
+   void      setUsedBones(   MemPtrN<Bool    , 256>  bones)C;
+   void  includeUsedBones(   MemPtrN<Bool    , 256>  bones)C;
 
    Mesh& setVtxAO(Flt strength, Flt bias, Flt max, Flt ray_length, Flt pos_eps=EPS, Int rays=1024, MESH_AO_FUNC func=MAF_FULL, Threads *threads=null); // calculate per-vertex ambient occlusion in vertex colors, 'strength'=0..1 AO strength, 'bias'=0..1, 'max'=AO limit 0..1, 'ray_length'=max ray distance to test, 'rays'=number of rays to use for AO calculation, 'func'=falloff function
 
@@ -164,8 +164,8 @@ struct Mesh : MeshLod // Mesh (array of Mesh LODs)
    Mesh& variationInclude(C Mesh &src                 );                                         // include variation names from 'src' if they don't exist in this mesh yet, this does not setup existing mesh part variation materials
 
    // fix
-   Mesh& fixTexOffset  (Byte tex_index=0); // fix texture offset  , this reduces big texture coordinates to small ones increasing texturing quality on low precision video cards
-   Mesh& fixTexWrapping(Byte tex_index=0); // fix texture wrapping, fixes texture coordinates created by spherical/tube mapping (this can add new vertexes to the mesh)
+   Mesh& fixTexOffset  (Byte uv_index=0); // fix texture offset  , this reduces big texture coordinates to small ones increasing texturing quality on low precision video cards
+   Mesh& fixTexWrapping(Byte uv_index=0); // fix texture wrapping, fixes texture coordinates created by spherical/tube mapping (this can add new vertexes to the mesh)
 
    // convert
    Mesh& edgeToDepth(Bool tex_align =true       ); // edges to depth (extrude 2D edges to 3D faces)

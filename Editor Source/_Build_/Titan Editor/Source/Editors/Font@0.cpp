@@ -96,7 +96,7 @@ FontEditor FontEdit;
    void FontEditor::create()
    {
       add("System Font"    , MemberDesc(MEMBER(Params, font           )).setTextToDataFunc(ParamsFont      ));
-      add("Size"           , MemberDesc(MEMBER(Params, size           )).setTextToDataFunc(ParamsSize      )).range(8, 128).desc("Image Resolution");
+      add("Size"           , MemberDesc(MEMBER(Params, size           )).setTextToDataFunc(ParamsSize      )).range(8, 255).desc("Image Resolution");
       add("Scale"          , MemberDesc(MEMBER(Params, scale          )).setTextToDataFunc(ParamsScale     )).range(0.5f, 2.0f).mouseEditMode(PROP_MOUSE_EDIT_SCALAR).mouseEditSpeed(0.25f).desc("This will scale the original source Font, however the destination area size to store the Font remains the same.\nWhich means if you set the scale too big, then Font may not fit into the destination, and may get clipped.\nThis is useful for Fonts that have very small or very big characters.");
       add("Clear Type"     , MemberDesc(MEMBER(Params, clear_type     )).setTextToDataFunc(ParamsClearType ));
       add("Software"       , MemberDesc(MEMBER(Params, software       )).setTextToDataFunc(ParamsSoftware  )).desc("Create Font in Software mode, which will allow faster software processing (drawing in software mode), however drawing using the GPU will not be allowed");

@@ -146,9 +146,9 @@ void FixMatrixWeight(VecB4 &matrix, VecB4 &blend)
    // merge duplicates (can happen due to bone remap)
    for(Int i=3; ; )
    {
-      if(Int b=blend.c[i])
+      if(auto b=blend.c[i])
       {
-         Int m=matrix.c[i]; REPD(j, i)if(matrix.c[j]==m) // if same matrix, no need to check if this one has blend
+         auto m=matrix.c[i]; REPD(j, i)if(matrix.c[j]==m) // if same matrix, no need to check if this one has blend
          {
             blend .c[j]+=b; // merge into element closer to the start (because they should be sorted by weight)
             blend .c[i] =0; // clear
@@ -177,7 +177,44 @@ void FixMatrixWeight(VecB4 &matrix, VecB4 &blend)
       }
    }
 }
-void SetSkin(C MemPtrN<IndexWeight, 256> &skin, VecB4 &matrix, VecB4 &blend, C Skeleton *skeleton)
+void FixMatrixWeight(VecUS4 &matrix, VecB4 &blend)
+{
+   // merge duplicates (can happen due to bone remap)
+   for(Int i=3; ; )
+   {
+      if(auto b=blend.c[i])
+      {
+         auto m=matrix.c[i]; REPD(j, i)if(matrix.c[j]==m) // if same matrix, no need to check if this one has blend
+         {
+            blend .c[j]+=b; // merge into element closer to the start (because they should be sorted by weight)
+            blend .c[i] =0; // clear
+            matrix.c[i] =0; // clear
+            break;
+         }
+      }
+      if(i<=1)break; // no need to process #0 because inside the loop we compare it against previous elements only
+      i--;
+   }
+   // sort
+   REP(4-1) // 4 components -1 because we compare against next one below
+   {
+   again:
+      if(blend.c[i]<blend.c[i+1]) // weight order is wrong
+      {
+         Swap(blend .c[i], blend .c[i+1]);
+         Swap(matrix.c[i], matrix.c[i+1]);
+         if(i<2){i++; goto again;} // check again pair from previous step
+      }else
+      if(blend .c[i]==blend .c[i+1]) // if have same weight
+      if(matrix.c[i]< matrix.c[i+1]) // matrix order is wrong #SkinMatrixOrder
+      {
+         Swap(matrix.c[i], matrix.c[i+1]);
+         if(i<2){i++; goto again;} // check again pair from previous step
+      }
+   }
+}
+/******************************************************************************/
+void SetSkin(C MemPtrN<IndexWeight, 256> &skin, VtxBone &matrix, VecB4 &blend, C Skeleton *skeleton)
 {
    const Int max_bone_influence=4; // only 4 bones are supported
 
@@ -210,7 +247,7 @@ void SetSkin(C MemPtrN<IndexWeight, 256> &skin, VecB4 &matrix, VecB4 &blend, C S
       for(Int i=temp.elms()-1; i>=max_bone_influence; i--) // iterate all weights that would get removed
    {
       Int bone=temp[i].index-VIRTUAL_ROOT_BONE,
-          min_distance=0xFF+1,
+          min_distance=BONE_NULL+1,
           closest=0;
       REPD(j, i) // get all closest bones
       {
@@ -687,6 +724,15 @@ MeshBase& MeshBase::create(Int vtxs, Int edges, Int tris, Int quads, MESH_FLAG f
 /******************************************************************************/
 T1(TYPE) static void Set(C Byte* &v, Int i, TYPE *data, MESH_FLAG flag) {if(data)data[i]=*(TYPE*)v; if(flag)v+=SIZE(TYPE);}
 
+static INLINE void BoneSet(C Byte* &v, Int i, VtxBone *data, MESH_FLAG flag)
+{
+#if 1 // #MeshVtxBoneHW
+   if(data)data[i]=*(VecB4*)v; if(flag)v+=SIZE(VecB4);
+#else
+   Set(v, i, data, flag);
+#endif
+}
+
 Bool MeshBase::createVtx(C VtxBuf &vb, MESH_FLAG flag, UInt storage, /*MeshRender::BoneSplit *bone_split, Int bone_splits, */MESH_FLAG flag_and)
 {
    exclude(VTX_ALL);
@@ -708,7 +754,7 @@ Bool MeshBase::createVtx(C VtxBuf &vb, MESH_FLAG flag, UInt storage, /*MeshRende
             Set(v, i, vtx.tex1    (), flag&VTX_TEX1    );
             Set(v, i, vtx.tex2    (), flag&VTX_TEX2    );
             Set(v, i, vtx.tex3    (), flag&VTX_TEX3    );
-            Set(v, i, vtx.matrix  (), flag&VTX_MATRIX  );
+        BoneSet(v, i, vtx.matrix  (), flag&VTX_MATRIX  );
             Set(v, i, vtx.blend   (), flag&VTX_BLEND   );
             Set(v, i, vtx.size    (), flag&VTX_SIZE    );
             Set(v, i, vtx.material(), flag&VTX_MATERIAL);
@@ -727,7 +773,7 @@ Bool MeshBase::createVtx(C VtxBuf &vb, MESH_FLAG flag, UInt storage, /*MeshRende
             Set(v, i, vtx.tex1    (), flag&VTX_TEX1    );
             Set(v, i, vtx.tex2    (), flag&VTX_TEX2    );
             Set(v, i, vtx.tex3    (), flag&VTX_TEX3    );
-            Set(v, i, vtx.matrix  (), flag&VTX_MATRIX  );
+        BoneSet(v, i, vtx.matrix  (), flag&VTX_MATRIX  );
             Set(v, i, vtx.blend   (), flag&VTX_BLEND   );
             Set(v, i, vtx.size    (), flag&VTX_SIZE    );
             Set(v, i, vtx.material(), flag&VTX_MATERIAL);
@@ -737,7 +783,7 @@ Bool MeshBase::createVtx(C VtxBuf &vb, MESH_FLAG flag, UInt storage, /*MeshRende
       vb.unlock();
 
       /*// restore real bone matrix indexes
-      if((storage&MSHR_BONE_SPLIT) && bone_split)if(VecB4 *matrix=vtx.matrix())FREP(bone_splits)
+      if((storage&MSHR_BONE_SPLIT) && bone_split)if(VtxBone *matrix=vtx.matrix())FREP(bone_splits)
       {
        C MeshRender::BoneSplit &split=bone_split[i];
          FREP(split.vtxs)
@@ -905,36 +951,36 @@ MeshBase& MeshBase::create(C MeshBase *src[], Int elms, MESH_FLAG flag_and, Bool
    flag&=flag_and&(~(VTX_DUP|ADJ_ALL)); if(set_face_id_from_part_index)flag|=ID_ALL;
    temp.create(vtxs, edges, tris, quads, flag);
 
-   Vec   *vtx_pos     =temp.vtx.pos     ();
-   Vec   *vtx_nrm     =temp.vtx.nrm     ();
-   Vec   *vtx_tan     =temp.vtx.tan     ();
-   Vec   *vtx_bin     =temp.vtx.bin     ();
-   Vec   *vtx_hlp     =temp.vtx.hlp     ();
-   Vec2  *vtx_tex0    =temp.vtx.tex0    ();
-   Vec2  *vtx_tex1    =temp.vtx.tex1    ();
-   Vec2  *vtx_tex2    =temp.vtx.tex2    ();
-   Vec2  *vtx_tex3    =temp.vtx.tex3    ();
-   VecB4 *vtx_matrix  =temp.vtx.matrix  ();
-   VecB4 *vtx_blend   =temp.vtx.blend   ();
-   Flt   *vtx_size    =temp.vtx.size    ();
-   VecB4 *vtx_material=temp.vtx.material();
-   Color *vtx_color   =temp.vtx.color   ();
-   Byte  *vtx_flag    =temp.vtx.flag    ();
+   Vec     *vtx_pos     =temp.vtx.pos     ();
+   Vec     *vtx_nrm     =temp.vtx.nrm     ();
+   Vec     *vtx_tan     =temp.vtx.tan     ();
+   Vec     *vtx_bin     =temp.vtx.bin     ();
+   Vec     *vtx_hlp     =temp.vtx.hlp     ();
+   Vec2    *vtx_tex0    =temp.vtx.tex0    ();
+   Vec2    *vtx_tex1    =temp.vtx.tex1    ();
+   Vec2    *vtx_tex2    =temp.vtx.tex2    ();
+   Vec2    *vtx_tex3    =temp.vtx.tex3    ();
+   VtxBone *vtx_matrix  =temp.vtx.matrix  ();
+   VecB4   *vtx_blend   =temp.vtx.blend   ();
+   Flt     *vtx_size    =temp.vtx.size    ();
+   VecB4   *vtx_material=temp.vtx.material();
+   Color   *vtx_color   =temp.vtx.color   ();
+   Byte    *vtx_flag    =temp.vtx.flag    ();
 
-   VecI2 *edge_ind =temp.edge.ind ();
-   Vec   *edge_nrm =temp.edge.nrm ();
-   Byte  *edge_flag=temp.edge.flag();
-   Int   *edge_id  =temp.edge.id  ();
+   VecI2   *edge_ind =temp.edge.ind ();
+   Vec     *edge_nrm =temp.edge.nrm ();
+   Byte    *edge_flag=temp.edge.flag();
+   Int     *edge_id  =temp.edge.id  ();
 
-   VecI  *tri_ind =temp.tri.ind ();
-   Vec   *tri_nrm =temp.tri.nrm ();
-   Byte  *tri_flag=temp.tri.flag();
-   Int   *tri_id  =temp.tri.id  ();
+   VecI    *tri_ind =temp.tri.ind ();
+   Vec     *tri_nrm =temp.tri.nrm ();
+   Byte    *tri_flag=temp.tri.flag();
+   Int     *tri_id  =temp.tri.id  ();
 
-   VecI4 *quad_ind =temp.quad.ind ();
-   Vec   *quad_nrm =temp.quad.nrm ();
-   Byte  *quad_flag=temp.quad.flag();
-   Int   *quad_id  =temp.quad.id  ();
+   VecI4   *quad_ind =temp.quad.ind ();
+   Vec     *quad_nrm =temp.quad.nrm ();
+   Byte    *quad_flag=temp.quad.flag();
+   Int     *quad_id  =temp.quad.id  ();
 
    // vertexes
    FREP(elms)if(C MeshBase *mesh=src[i])if(Int vtxs=mesh->vtxs())

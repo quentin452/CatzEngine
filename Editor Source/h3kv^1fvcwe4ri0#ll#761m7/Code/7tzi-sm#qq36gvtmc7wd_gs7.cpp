@@ -441,7 +441,7 @@ void WorldView.editObj()
       }
 
       Vec2 delta=0;
-      bool touch_edit=(obj_op()==OP_MOVE || obj_op()==OP_SCALE || obj_op()==OP_ROT || obj_op()==OP_SEPARATE || obj_op()==OP_MOVE_Y || obj_op()==OP_ROT_Y || obj_op()==OP_ROT_GROUP);
+      bool touch_edit=(obj_op()==OP_MOVE || obj_op()==OP_SCALE || obj_op()==OP_SCALE_ALL || obj_op()==OP_ROT || obj_op()==OP_SEPARATE || obj_op()==OP_MOVE_Y || obj_op()==OP_ROT_Y || obj_op()==OP_ROT_GROUP);
       bool view_on=(cur.onViewport() && Ms.b(1)); if(view_on){delta=Ms.d(); Ms.freeze();} if(touch_edit)REPA(cur_touch)if(cur_touch[i].onViewport() && cur_touch[i].on()){view_on=true; if(Touch *touch=cur_touch[i].touch())delta+=touch.ad();}
       if(  view_on && op!=OP_INS) // edit objects matrix
       {
@@ -535,6 +535,13 @@ void WorldView.editObj()
                   Matrix matrix=obj.matrix;
                   switch(op)
                   {
+                     case OP_SCALE_ALL:
+                     {
+                        flt scale=ScaleFactor(delta.sum()*multiplier);
+                        matrix.pos-=center; matrix*=scale;
+                        matrix.pos+=center;
+                     }break;
+
                      case OP_SEPARATE:
                      {
                         Vec2 d=matrix.pos.xz()-center.xz(); d*=ScaleFactor(delta.sum()*multiplier);

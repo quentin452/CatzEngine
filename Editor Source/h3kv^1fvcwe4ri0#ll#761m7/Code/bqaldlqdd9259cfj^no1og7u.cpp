@@ -125,7 +125,7 @@ class TextureDownsize : Viewport4Region
                   VecI2 lv=LodAndVariationWithMostMaterialUses(*normal_mesh, normal_mtrl);
                 C Mesh &mesh=(interval ? downsized_mesh : *normal_mesh); if(InRange(lv.x, mesh.lods()))
                   {
-                   C MeshLod &lod=mesh.lod(lv.x);
+                   C MeshLod &lod=mesh.lod(lv.x); lod.waitForStream();
                      SetVariation(lv.y); lod.draw(MatrixIdentity);
                      SetVariation();
                   }
@@ -470,7 +470,7 @@ class TextureDownsize : Viewport4Region
       wire.del(); cam_spherical.hide(); cam_lock.pos(cam_spherical.pos()); cam_tabs.hide();
       T+=mode      .create(ModeName, Elms(ModeName)).valid(true).set(OBJECT).func(ModeChanged, T);
       T+=light_dir .create(Rect_LU(ctrls.rect().ld(), 0.05, 0.05)).setImage(Proj.icon_env).focusable(false).desc("Set Vertical Light Direction\nKeyboard Shortcut: Alt+L"); light_dir.mode=BUTTON_TOGGLE;
-      T+=mtrl_image.create().hide(); mtrl_image.fit=true; mtrl_image.alpha_mode=ALPHA_NONE;
+      T+=mtrl_image.create().hide(); mtrl_image.fit=FIT_FULL; mtrl_image.alpha_mode=ALPHA_NONE;
       T+=region    .create().removeSlideBars().skin(&TransparentSkin).hide(); region.kb_lit=false;
 
       prop_ts.reset(); prop_ts.align.set(1, 0); prop_ts.size=0.053;
@@ -494,14 +494,14 @@ class TextureDownsize : Viewport4Region
       menu.New().create("Next S"         , NextS     , T, true).kbsc(KbSc(KB_DOT  , KBSC_SHIFT|KBSC_REPEAT));
       menu.New().create("Apply"          , Apply     , T).kbsc(KbSc(KB_ENTER));
       int kbsc=menu.children.elms();
-      menu.New().create("Dec Global"     , Dec       , props[0]).kbsc(KbSc(Kb.qwerty(KB_4))).kbsc2(KbSc(KB_9));
-      menu.New().create("Inc Global"     , Inc       , props[0]).kbsc(KbSc(Kb.qwerty(KB_5))).kbsc2(KbSc(KB_0));
-      menu.New().create("Dec Base 0"     , Dec       , props[1]).kbsc(KbSc(Kb.qwerty(KB_R))).kbsc2(KbSc(KB_SUB));
-      menu.New().create("Inc Base 0"     , Inc       , props[1]).kbsc(KbSc(Kb.qwerty(KB_T))).kbsc2(KbSc(KB_EQUAL));
-      menu.New().create("Dec Base 1"     , Dec       , props[2]).kbsc(KbSc(Kb.qwerty(KB_F))).kbsc2(KbSc(KB_LBR));
-      menu.New().create("Inc Base 1"     , Inc       , props[2]).kbsc(KbSc(Kb.qwerty(KB_G))).kbsc2(KbSc(KB_RBR));
-      menu.New().create("Dec Base 2"     , Dec       , props[3]).kbsc(KbSc(Kb.qwerty(KB_V))).kbsc2(KbSc(KB_SEMI));
-      menu.New().create("Inc Base 2"     , Inc       , props[3]).kbsc(KbSc(Kb.qwerty(KB_B))).kbsc2(KbSc(KB_APO));
+      menu.New().create("Dec Global"     , Dec       , props[0]).kbsc(KbSc(Kb.qwerty(KB_4))).kbsc1(KbSc(KB_9));
+      menu.New().create("Inc Global"     , Inc       , props[0]).kbsc(KbSc(Kb.qwerty(KB_5))).kbsc1(KbSc(KB_0));
+      menu.New().create("Dec Base 0"     , Dec       , props[1]).kbsc(KbSc(Kb.qwerty(KB_R))).kbsc1(KbSc(KB_SUB));
+      menu.New().create("Inc Base 0"     , Inc       , props[1]).kbsc(KbSc(Kb.qwerty(KB_T))).kbsc1(KbSc(KB_EQUAL));
+      menu.New().create("Dec Base 1"     , Dec       , props[2]).kbsc(KbSc(Kb.qwerty(KB_F))).kbsc1(KbSc(KB_LBR));
+      menu.New().create("Inc Base 1"     , Inc       , props[2]).kbsc(KbSc(Kb.qwerty(KB_G))).kbsc1(KbSc(KB_RBR));
+      menu.New().create("Dec Base 2"     , Dec       , props[3]).kbsc(KbSc(Kb.qwerty(KB_V))).kbsc1(KbSc(KB_SEMI));
+      menu.New().create("Inc Base 2"     , Inc       , props[3]).kbsc(KbSc(Kb.qwerty(KB_B))).kbsc1(KbSc(KB_APO));
       menu.New().create("Dec Emissive"   , Dec       , props[4]).kbsc(KbSc(Kb.qwerty(KB_N)));
       menu.New().create("Inc Emissive"   , Inc       , props[4]).kbsc(KbSc(Kb.qwerty(KB_M)));
       Gui+=T.menu.create(menu);
@@ -509,7 +509,7 @@ class TextureDownsize : Viewport4Region
       REPD(p, 5)REP(2)
       {
          MenuElm &elm=menu.children[kbsc+p*2+i];
-         Str      desc=S+(i ? "Increase" : "Decrease")+"\nKeyboard Shortcut: "+elm.kbsc().asText(); if(elm.kbsc2().is())desc.space()+=elm.kbsc2().asText();
+         Str      desc=S+(i ? "Increase" : "Decrease")+"\nKeyboard Shortcut: "+elm.kbsc().asText(); if(elm.kbsc1().is())desc.space()+=elm.kbsc1().asText();
          region+=downsize[p][i].create(props[p].button.rect()+Vec2(prop_h+i*props[p].button.rect().w(), 0)).setImage(i ? "Gui/arrow_right_big.img" : "Gui/arrow_left_big.img").func(i ? Inc : Dec, props[p]).focusable(false);
                  downsize[p][i].desc(desc);
                  downsize[p][i].mode=BUTTON_IMMEDIATE;
@@ -556,13 +556,14 @@ class TextureDownsize : Viewport4Region
       different=false;
       Settings *settings=curSettings();
       int d;
+      FILTER_TYPE filter=FILTER_MIP; // use the same filter that's used for generating mip-maps, it will allow to do a fast copy by reusing existing mip-maps from source
 
       // base0
       d=((settings && normal_mtrl && normal_mtrl->base_0) ? settings.base0() : 0);
       different|=(d!=0);
       if(d>0)
       {
-         normal_mtrl->base_0->copyTry(downsized_base[0], Max(1, normal_mtrl->base_0->w()>>d), Max(1, normal_mtrl->base_0->h()>>d), -1, -1, -1, normal_mtrl->base_0->mipMaps()-d, FILTER_BEST, IC_WRAP);
+         normal_mtrl->base_0->copy(downsized_base[0], Max(1, normal_mtrl->base_0->w()>>d), Max(1, normal_mtrl->base_0->h()>>d), -1, -1, -1, normal_mtrl->base_0->mipMaps()-d, filter, IC_WRAP);
       }else downsized_base[0].del();
 
       // base1
@@ -570,7 +571,7 @@ class TextureDownsize : Viewport4Region
       different|=(d!=0);
       if(d>0)
       {
-         normal_mtrl->base_1->copyTry(downsized_base[1], Max(1, normal_mtrl->base_1->w()>>d), Max(1, normal_mtrl->base_1->h()>>d), -1, -1, -1, normal_mtrl->base_1->mipMaps()-d, FILTER_BEST, IC_WRAP);
+         normal_mtrl->base_1->copy(downsized_base[1], Max(1, normal_mtrl->base_1->w()>>d), Max(1, normal_mtrl->base_1->h()>>d), -1, -1, -1, normal_mtrl->base_1->mipMaps()-d, filter, IC_WRAP);
       }else downsized_base[1].del();
 
       // base2
@@ -578,7 +579,7 @@ class TextureDownsize : Viewport4Region
       different|=(d!=0);
       if(d>0)
       {
-         normal_mtrl->base_2->copyTry(downsized_base[2], Max(1, normal_mtrl->base_2->w()>>d), Max(1, normal_mtrl->base_2->h()>>d), -1, -1, -1, normal_mtrl->base_2->mipMaps()-d, FILTER_BEST, IC_WRAP);
+         normal_mtrl->base_2->copy(downsized_base[2], Max(1, normal_mtrl->base_2->w()>>d), Max(1, normal_mtrl->base_2->h()>>d), -1, -1, -1, normal_mtrl->base_2->mipMaps()-d, filter, IC_WRAP);
       }else downsized_base[2].del();
 
       // emissive
@@ -586,7 +587,7 @@ class TextureDownsize : Viewport4Region
       different|=(d!=0);
       if(d>0)
       {
-         normal_mtrl->emissive_map->copyTry(downsized_emis, Max(1, normal_mtrl->emissive_map->w()>>d), Max(1, normal_mtrl->emissive_map->h()>>d), -1, -1, -1, normal_mtrl->emissive_map->mipMaps()-d, FILTER_BEST, IC_WRAP);
+         normal_mtrl->emissive_map->copy(downsized_emis, Max(1, normal_mtrl->emissive_map->w()>>d), Max(1, normal_mtrl->emissive_map->h()>>d), -1, -1, -1, normal_mtrl->emissive_map->mipMaps()-d, filter, IC_WRAP);
       }else downsized_emis.del();
 
       int    size_original=0, size_downsized=0;

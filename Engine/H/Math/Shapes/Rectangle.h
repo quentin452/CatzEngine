@@ -6,11 +6,21 @@
 /******************************************************************************/
 enum FIT_MODE : Byte // Fit Mode, these modes specify fitting while preserving original proportions
 {
-   FIT_FULL  , // fit width and height to fit  the entire source
-   FIT_FILL  , // fit width and height to fill the entire destination
-   FIT_WIDTH , // fit width
-   FIT_HEIGHT, // fit height
+   FIT_NONE   , // no  fit
+   FIT_FULL   , // fit width and height to fit  the entire source
+   FIT_FILL   , // fit width and height to fill the entire destination
+   FIT_WIDTH  , // fit width
+   FIT_HEIGHT , // fit height
+
+   FIT_LEFT = 8, // align left
+   FIT_RIGHT=16, // align right
+   FIT_DOWN =32, // align down
+   FIT_UP   =64, // align up
+
+   FIT_FULL_UP=FIT_FULL|FIT_UP,
+   FIT_MASK=7,
 };
+SET_ENUM_FLAGS(FIT_MODE);
 /******************************************************************************/
 struct Rect // Rectangle Shape
 {
@@ -131,6 +141,7 @@ struct Rect // Rectangle Shape
    Rect& include   (C Rect &r                ); // extend   rectangle to include rectangle
    Rect& clampX    (  Flt   min, Flt max     ); // clamp    rectangle to intersect min..max X range
    Rect& clampY    (  Flt   min, Flt max     ); // clamp    rectangle to intersect min..max Y range
+   Rect& clampFull (C Rect &r                ); // clamp    rectangle to intersect 'r' fully
    Rect& moveX     (  Flt   dx               ); // move     rectangle X's by 'dx'
    Rect& moveY     (  Flt   dy               ); // move     rectangle Y's by 'dy'
    Rect& mulX      (  Flt   x                ); // multiply rectangle X's by 'x'

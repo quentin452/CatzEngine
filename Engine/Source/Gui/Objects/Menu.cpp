@@ -58,7 +58,7 @@ void MenuElm::zero()
   _func_immediate=false;
   _func_user     =null;
   _func          =null;
-  _func2         =null;
+  _func1         =null;
   _menu          =null;
 }
 MenuElm::MenuElm() {zero();}
@@ -102,31 +102,31 @@ MenuElm& MenuElm::create(C MenuElm &src, Menu *parent)
       T._func_immediate=src._func_immediate;
       T._func_user     =src._func_user;
       T._func          =src._func;
-      T._func2         =src._func2;
+      T._func1         =src._func1;
       T._desc          =src._desc;
       T._kbsc          =src._kbsc;
-      T._kbsc2         =src._kbsc2;
+      T._kbsc1         =src._kbsc1;
    }
    return T;
 }
 /******************************************************************************/
 MenuElm& MenuElm::flag   (  Byte  flag) {T._flag =flag; return T;}
 MenuElm& MenuElm::kbsc   (C KbSc &kbsc) {T._kbsc =kbsc; return T;}
-MenuElm& MenuElm::kbsc2  (C KbSc &kbsc) {T._kbsc2=kbsc; return T;}
+MenuElm& MenuElm::kbsc1  (C KbSc &kbsc) {T._kbsc1=kbsc; return T;}
 MenuElm& MenuElm::desc   (C Str  &desc) {T._desc =desc; return T;}
 MenuElm& MenuElm::setOn  (  Bool  on  ) {T. on   =on  ; return T;}
 MenuElm& MenuElm::display(C Str  &name) {if(name.is())display_name=name; return T;}
-MenuElm& MenuElm::func   (void (*func)(        ),           Bool immediate) {T._func=func; T._func2=null; T._func_user=null; T._func_immediate=immediate; return T;} // clear the other function as only one function type should be available at a time
-MenuElm& MenuElm::func   (void (*func)(Ptr user), Ptr user, Bool immediate) {T._func=null; T._func2=func; T._func_user=user; T._func_immediate=immediate; return T;} // clear the other function as only one function type should be available at a time
+MenuElm& MenuElm::func   (void (*func)(        ),           Bool immediate) {T._func=func; T._func1=null; T._func_user=null; T._func_immediate=immediate; return T;} // clear the other function as only one function type should be available at a time
+MenuElm& MenuElm::func   (void (*func)(Ptr user), Ptr user, Bool immediate) {T._func=null; T._func1=func; T._func_user=user; T._func_immediate=immediate; return T;} // clear the other function as only one function type should be available at a time
 void     MenuElm::call   ()
 {
    if(_func )if(_func_immediate)_func (          );else Gui.addFuncCall(_func             );
-   if(_func2)if(_func_immediate)_func2(_func_user);else Gui.addFuncCall(_func2, _func_user);
+   if(_func1)if(_func_immediate)_func1(_func_user);else Gui.addFuncCall(_func1, _func_user);
 }
 /******************************************************************************/
 Bool MenuElm::pushable()
 {
-   return (flag()&MENU_TOGGLABLE) || _func || _func2;
+   return (flag()&MENU_TOGGLABLE) || _func || _func1;
 }
 void MenuElm::push()
 {
@@ -317,7 +317,7 @@ Menu& Menu::setData(C Node<MenuElm> &node)
    Bool children   =false, togglable=false;
    Flt  width_name =0,
         width_kbsc =0,
-        width_kbsc2=0;
+        width_kbsc1=0;
    GuiSkin   *skin      =list.getSkin();
    TextStyle *text_style=(skin ? skin->list.text_style() : null); TextStyleParams ts(text_style, false); ts.size=list.textSize();
 #if DEFAULT_FONT_FROM_CUSTOM_SKIN
@@ -346,7 +346,7 @@ Menu& Menu::setData(C Node<MenuElm> &node)
          togglable|=FlagOn(elm.flag(), MENU_TOGGLABLE);
                              MAX(width_name , ts.textWidth(elm.display_name    ));
          if(elm.kbsc ().is())MAX(width_kbsc , ts.textWidth(elm.kbsc ().asText()));
-         if(elm.kbsc2().is())MAX(width_kbsc2, ts.textWidth(elm.kbsc2().asText()));
+         if(elm.kbsc1().is())MAX(width_kbsc1, ts.textWidth(elm.kbsc1().asText()));
       }
    }
 
@@ -355,17 +355,17 @@ Menu& Menu::setData(C Node<MenuElm> &node)
       ListColumn(MEMBER(MenuElm,  on          ), 0.05f, "on"   ), // 0
       ListColumn(MEMBER(MenuElm,  display_name), 0.00f, "name" ), // 1
       ListColumn(MEMBER(MenuElm, _kbsc        ), 0.00f, "kbsc" ), // 2
-      ListColumn(MEMBER(MenuElm, _kbsc2       ), 0.00f, "kbsc2"), // 3
+      ListColumn(MEMBER(MenuElm, _kbsc1       ), 0.00f, "kbsc1"), // 3
       ListColumn(MEMBER(MenuElm, _menu        ), 0.05f, "menu" ), // 4
-   }; ASSERT(MENU_COLUMN_CHECK==0 && MENU_COLUMN_NAME==1 && MENU_COLUMN_KBSC==2 && MENU_COLUMN_KBSC2==3 && MENU_COLUMN_SUB==4 && MENU_COLUMN_NUM==5);
+   }; ASSERT(MENU_COLUMN_CHECK==0 && MENU_COLUMN_NAME==1 && MENU_COLUMN_KBSC==2 && MENU_COLUMN_KBSC1==3 && MENU_COLUMN_SUB==4 && MENU_COLUMN_NUM==5);
    columns[MENU_COLUMN_CHECK].md.type=DATA_CHECK;
    columns[MENU_COLUMN_CHECK].sort=&MenuElmFlag; // use 'sort' to point to '_flag' so we can access 'MENU_TOGGLABLE' in 'DataGuiImage'
-   columns[MENU_COLUMN_NAME ].width  =width_name +ts.size.x*(0.5f+((width_kbsc || width_kbsc2) ? 0.5f : 0));
+   columns[MENU_COLUMN_NAME ].width  =width_name +ts.size.x*(0.5f+((width_kbsc || width_kbsc1) ? 0.5f : 0));
    columns[MENU_COLUMN_KBSC ].width  =width_kbsc +ts.size.x* 0.5f;
-   columns[MENU_COLUMN_KBSC2].width  =width_kbsc2+ts.size.x*(0.5f+(               width_kbsc   ? 0.5f : 0)); // keyboard shortcuts are right-aligned, so we need to add space to kbsc2 (on the right) if kbsc (on the left) exists
+   columns[MENU_COLUMN_KBSC1].width  =width_kbsc1+ts.size.x*(0.5f+(               width_kbsc   ? 0.5f : 0)); // keyboard shortcuts are right-aligned, so we need to add space to kbsc1 (on the right) if kbsc (on the left) exists
    columns[MENU_COLUMN_CHECK].visible(togglable     );
    columns[MENU_COLUMN_KBSC ].visible(width_kbsc !=0);
-   columns[MENU_COLUMN_KBSC2].visible(width_kbsc2!=0);
+   columns[MENU_COLUMN_KBSC1].visible(width_kbsc1!=0);
    columns[MENU_COLUMN_SUB  ].visible(children   !=0);
 
    disabled(node.disabled);
@@ -434,10 +434,10 @@ Menu& Menu::move(C Vec2 &delta)
 Menu& Menu::moveClamp(C Vec2 &delta)
 {
    Vec2 d=delta;
-   if(rect().max.x+d.x> D.w())d.x= D.w()-rect().max.x;
-   if(rect().min.y+d.y<-D.h())d.y=-D.h()-rect().min.y;
-   if(rect().min.x+d.x<-D.w())d.x=-D.w()-rect().min.x;
-   if(rect().max.y+d.y> D.h())d.y= D.h()-rect().max.y;
+   if(rect().max.x+d.x>D.rectUI().max.x)d.x=D.rectUI().max.x-rect().max.x;
+   if(rect().min.y+d.y<D.rectUI().min.y)d.y=D.rectUI().min.y-rect().min.y;
+   if(rect().min.x+d.x<D.rectUI().min.x)d.x=D.rectUI().min.x-rect().min.x;
+   if(rect().max.y+d.y>D.rectUI().max.y)d.y=D.rectUI().max.y-rect().max.y;
    return move(d);
 }
 Menu& Menu::pos  (C Vec2 &pos) {return moveClamp(pos-T.pos  ());}
@@ -449,15 +449,16 @@ Menu& Menu::posD (C Vec2 &pos) {return moveClamp(pos-T.posD ());}
 Menu& Menu::posU (C Vec2 &pos) {return moveClamp(pos-T.posU ());}
 Menu& Menu::posC (C Vec2 &pos) {return moveClamp(pos-T.posC ());}
 
-Menu& Menu::posAround(C Rect &rect, Flt align)
+Menu& Menu::posAround(C Rect &rect, Flt align, Bool prefer_up)
 {
-   Vec2 size=T.size(),
-        pos =rect.ld(); pos.x+=Lerp(rect.w()-size.x+paddingR(), -paddingL(), LerpR(-1.0f, 1.0f, align));
-   Rect screen_rect(0, -D.h(), 0, D.h()); // only Y are needed
-   Flt  h_below=(Rect_LU(0, pos.y         , 0, size.y)&screen_rect).h(), // visible height when below the 'rect'
-        h_above=(Rect_LD(0, pos.y+rect.h(), 0, size.y)&screen_rect).h(); // visible height when above the 'rect'
-
-   return T.pos((h_above>h_below+EPS) ? pos+Vec2(0, rect.h()+size.y) : pos); // select position according to which visible height is bigger, use EPS to more often place the Menu below
+   Vec2 size=T.size();
+   Flt  pos_x=Lerp(rect.min.x-paddingL(), rect.max.x-size.x+paddingR(), LerpR(1.0f, -1.0f, align));
+   Rect screen=D.rectUIKB();
+   Rect_LD above(pos_x, rect.max.y, size.x, size.y); // rect above 'rect'
+   Rect_LU below(pos_x, rect.min.y, size.x, size.y); // rect below 'rect'
+   Flt   h_above=(above&screen).h(), // visible menu height when using 'above'
+         h_below=(below&screen).h(); // visible menu height when using 'below'
+   return pos(((h_above>h_below+(prefer_up ? -EPS : EPS)) ? SCAST(Rect, above) : SCAST(Rect, below)).lu()); // select position according to which visible height is bigger, use EPS to more often place the Menu above/below
 }
 void Menu::clientSize(C Vec2 &size)
 {
@@ -542,10 +543,10 @@ void Menu::checkKeyboardShortcuts()
             e.push();
               push(i);
          }else
-         if(e._kbsc2.pd())
+         if(e._kbsc1.pd())
          {
             DEBUG_BYTE_LOCK(_used);
-            e._kbsc2.eat();
+            e._kbsc1.eat();
             e.push();
               push(i);
          }
@@ -595,30 +596,30 @@ void Menu::update(C GuiPC &gpc)
          {
             // scroll (priority: 1 - touch hold, 2 - mouse hover with previous mouse action, 3 - current element)
           C Vec2 *pos=null;
-            REPA(Touches)if(Touches[i].on() && Gui.menu()->contains(Touches[i].guiObj())                    ){pos=&Touches[i].pos(); break;}
-                                    if(!pos && Gui.menu()->contains(Gui       .ms    ()) && !list._kb_action){pos=&Ms        .pos();       }
+            REPA(Touches){Touch &touch=Touches[i]; if(touch.on() && Gui.menu()->contains(touch.guiObj())                    ){pos=&touch.pos(); break;}}
+                                                   if(!pos       && Gui.menu()->contains(Gui  .ms    ()) && !list._kb_action){pos=&Ms   .pos();       }
             if(pos) // use detection basing on the 'pos' screen position
             {
-               Flt margin=Max(0.0f, D.h()-paddingT()-list.elmHeight()*1.0f); // use max 0 to don't go to lower half of the screen
+               Flt margin=Max(0.0f, D.rectUI().max.y-paddingT()-list.elmHeight()*1.0f); // use max 0 to don't go to lower half of the screen
                if(pos->y>=margin) // top of the screen
                {
-                  Flt d=D.h()-rect().max.y; if(d<0)T.move(Vec2(0, Max(d, -ScrollSpeed(T))));
+                  Flt d=D.rectUI().max.y-rect().max.y; if(d<0)T.move(Vec2(0, Max(d, -ScrollSpeed(T))));
                }else
                if(pos->y<=-margin) // bottom of the screen
                {
-                  Flt d=-D.h()-rect().min.y; if(d>0)T.move(Vec2(0, Min(d, ScrollSpeed(T))));
+                  Flt d=D.rectUI().min.y-rect().min.y; if(d>0)T.move(Vec2(0, Min(d, ScrollSpeed(T))));
                }
             }else // use detection basing on the 'list.cur'
             if(InRange(list.cur, list.visibleElms()))
             {
                Flt y=list.visToLocalY(list.cur)+gpc_this.offset.y,
-                   d=D.h()-(y+paddingT());
+                   d=D.rectUI().max.y-(y+paddingT());
                if( d<0) // top of the screen (check this before bottom of the screen)
                {
                   T.move(Vec2(0, Max(d, -ScrollSpeed(T))));
                }else
                {
-                  d=-D.h()-(y-list.elmHeight()-paddingB());
+                  d=D.rectUI().min.y-(y-list.elmHeight()-paddingB());
                   if(d>0) // bottom of the screen
                   {
                      T.move(Vec2(0, Min(d, ScrollSpeed(T))));
@@ -628,7 +629,7 @@ void Menu::update(C GuiPC &gpc)
 
             // input
             Bool  enter_only=Kb.k(KB_RIGHT), by_touch=false;
-          C Vec2 *rs_pos    =null; if(Ms.br(0) && Gui.menu()->contains(Gui.ms()))rs_pos=&Ms.pos(); REPA(Touches)if(Touches[i].rs() && Gui.menu()->contains(Touches[i].guiObj())){rs_pos=&Touches[i].pos(); by_touch=true;} // release pos
+          C Vec2 *rs_pos    =null; if(Ms.br(0) && Gui.menu()->contains(Gui.ms()))rs_pos=&Ms.pos();else REPA(Touches){Touch &touch=Touches[i]; if(touch.rs() && Gui.menu()->contains(touch.guiObj())){rs_pos=&touch.pos(); by_touch=true; break;}} // release pos
             if(rs_pos || enter_only || ((Kb.k(KB_ENTER) || Kb.k(KB_NPENTER)) && Kb.k.first()))
             {
                Bool entered=false;
@@ -727,7 +728,7 @@ void Menu::update(C GuiPC &gpc)
                {
                   if(visible)
                   {
-                     Flt  w=menu->rect().w(), r=D.w()-_crect.max.x+EPS, l=_crect.min.x-(-D.w()); // visible space on the right/left
+                     Flt  w=menu->rect().w(), r=D.rectUI().max.x-_crect.max.x+EPS, l=_crect.min.x-D.rectUI().min.x; // visible space on the right/left
                      Vec2 pos((r>=w || r>=l) // put on right side if there's enough space to fit all, or right side has more visible space
                             ? _crect.max.x : _crect.min.x-w, rect().max.y+list.visToLocalY(list.absToVis(i)));
                      menu->pos (pos); // first use 'pos' to use clamping

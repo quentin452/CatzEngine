@@ -127,7 +127,7 @@ class SynchronizerClass
       {
          SyncLockerEx locker(lock); if(set_tex.elms())
          {
-            UID tex_id=set_tex[0]; set_tex.remove(0, true); File tex_data; if(tex_data.readTry(tex_path+EncodeFileName(tex_id))) // texture can be read on secondary thread because each texture file is written only once (name stands for texture hash, so it will never be overwritten with different data)
+            UID tex_id=set_tex[0]; set_tex.remove(0, true); File tex_data; if(tex_data.read(tex_path+EncodeFileName(tex_id))) // texture can be read on secondary thread because each texture file is written only once (name stands for texture hash, so it will never be overwritten with different data)
             {
                compressing=true; locker.off();
                File cmd; if(ClientWriteSetTexture(cmd.writeMem(), tex_id, tex_data))
@@ -582,7 +582,7 @@ class SynchronizerClass
                VecI2 image_xy=mms.set_image.last(); mms.set_image.removeLast();
                if(mms.local_ver)
                {
-                  File  image_data; image_data.readTry(Proj.gamePath(mini_map_id).tailSlash(true)+image_xy);
+                  File  image_data; image_data.read(Proj.gamePath(mini_map_id).tailSlash(true)+image_xy);
                   ElmFile elm_file; elm_file.compress=true;
                   ClientWriteSetMiniMapImage(elm_file.elm.writeMem(), elm_file.data.writeMem(), mini_map_id, image_xy, mms.local_ver.time, image_data);
                   {SyncLocker locker(lock); Swap(elm_file, set_elm_full_file.New());} // !! WARNING: here is 'set_elm_full_file', but we can use it !!

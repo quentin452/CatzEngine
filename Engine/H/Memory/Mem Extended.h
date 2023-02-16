@@ -36,6 +36,10 @@ T1(TYPE) struct Memx : _Memx // Block Based Extended Container
  C TYPE& validElm  (Int i)C; // get i-th  valid    element
    TYPE* addr      (Int i) ; // get i-th  valid    element address, null is returned if index is out of range
  C TYPE* addr      (Int i)C; // get i-th  valid    element address, null is returned if index is out of range
+   TYPE* addrFirst (     ) ; // get first valid    element address, null is returned there are no elements
+ C TYPE* addrFirst (     )C; // get first valid    element address, null is returned there are no elements
+   TYPE* addrLast  (     ) ; // get last  valid    element address, null is returned there are no elements
+ C TYPE* addrLast  (     )C; // get last  valid    element address, null is returned there are no elements
    TYPE& operator[](Int i) ; // get i-th  valid    element
  C TYPE& operator[](Int i)C; // get i-th  valid    element
    TYPE& first     (     ) ; // get first valid    element

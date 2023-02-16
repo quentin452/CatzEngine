@@ -11,8 +11,8 @@ class ImportTerrainClass : ClosableWindow
       static void Load(C Str &name, GuiImage2 &img) {img.load(name);}
              void load(C Str &name)
       {
-         image_sw.ImportTry(name, mono ? IMAGE_F32 : IMAGE_R8G8B8A8, IMAGE_SOFT, 1);
-         image_sw.copyTry(image_hw, 128, 128, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_2D, 1, FILTER_LINEAR, IC_CLAMP|IC_IGNORE_GAMMA); // we need sRGB preview, so ignore gamma always
+         image_sw.Import(name, mono ? IMAGE_F32 : IMAGE_R8G8B8A8, IMAGE_SOFT, 1);
+         image_sw.copy  (image_hw, 128, 128, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_2D, 1, FILTER_LINEAR, IC_CLAMP|IC_IGNORE_GAMMA); // we need sRGB preview, so ignore gamma always
       }
 
       GuiImage2& create(C Rect &rect, bool mono=false)
@@ -280,9 +280,9 @@ class ImportTerrainTask : Window
       if(!area_rect.validY())Swap(area_rect.min.y, area_rect.max.y);
       area_xy=area_rect.min;
 
-      if(height_do=(it.height()>=0))it.height_image.image_sw.copyTry(height_image);
-      if(  mtrl_do=(it.mtrl  ()>=0))it.  mtrl_image.image_sw.copyTry(  mtrl_image);
-      if( color_do=(it.color ()>=0))it. color_image.image_sw.copyTry( color_image);
+      if(height_do=(it.height()>=0))it.height_image.image_sw.copy(height_image);
+      if(  mtrl_do=(it.mtrl  ()>=0))it.  mtrl_image.image_sw.copy(  mtrl_image);
+      if( color_do=(it.color ()>=0))it. color_image.image_sw.copy( color_image);
 
       height_mode=it.height_mode();
         mtrl_mode=it.  mtrl_mode();
@@ -311,7 +311,7 @@ class ImportTerrainTask : Window
          flt  intensity;
       }
 
-      static int Compare(C Mtrl &a, C Mtrl &b) {return .Compare(b.intensity, a.intensity);} // we sort from higher to lower order, so swap 'a' 'b' order
+      static int CompareIntensity(C Mtrl &a, C Mtrl &b) {return Compare(b.intensity, a.intensity);} // we sort from higher to lower order, so swap 'a' 'b' order
 
       Mtrl mtrl[8]; int mtrls=0;
 
@@ -335,7 +335,7 @@ class ImportTerrainTask : Window
             if(InRange(mtrls, mtrl)){Mtrl &m=mtrl[mtrls++]; m.index=index; m.intensity=intensity;} // add new one
          }
       }
-      void sort() {Sort(mtrl, mtrls, Compare);}
+      void sort() {Sort(mtrl, mtrls, CompareIntensity);}
    }
    void import(Heightmap &hm)
    {

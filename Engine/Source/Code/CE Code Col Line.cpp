@@ -294,8 +294,8 @@ void Parse(Memc<CodeLine> &lines)
 /******************************************************************************/
 Bool OverwriteOnChange(File &src, C Str &dest, Bool *changed)
 {
-   File f; if(f.readStdTry(dest)){src.pos(0); if(src.equal(f)){if(changed)*changed=false; return true;}} if(changed)*changed=true;
-   if(!f.writeTry(dest)){FCreateDirs(_GetPath(dest)); if(!f.writeTry(dest))return false;} src.pos(0); return src.copy(f) && f.flush();
+   File f; if(f.readStd(dest)){src.pos(0); if(src.equal(f)){if(changed)*changed=false; return true;}} if(changed)*changed=true;
+   if(!f.write(dest)){FCreateDirs(_GetPath(dest)); if(!f.write(dest))return false;} src.pos(0); return src.copy(f) && f.flush();
 }
 Bool OverwriteOnChange(FileText &src, C Str &dest, Bool *changed)
 {

@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\blend_a64_hmask_sse4.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\blend_a64_mask_sse4.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\blend_a64_vmask_sse4.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\intrapred_sse4.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\blend_mask_sse4.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\intrapred_utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{854C30F8-4A03-31BE-932B-B95597843CE0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{FA0D4B5A-40CC-360D-B316-1A2849B8BA5A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

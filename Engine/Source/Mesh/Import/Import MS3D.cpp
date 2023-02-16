@@ -53,7 +53,7 @@ static void FromMatrix(Matrix &m, float a[3][4])
    a[0][2]=m.z  .x; a[1][2]=m.z  .y; a[2][2]=m.z  .z;
    a[0][3]=m.pos.x; a[1][3]=m.pos.y; a[2][3]=m.pos.z;
 }
-static void SetSkin(VecB4 &matrix, VecB4 &blend, msModel &ms3d, ms3d_vertex_t &vertex, MemtN<Byte, 256> &old_to_new, Skeleton *skeleton)
+static void SetSkin(VtxBone &matrix, VecB4 &blend, msModel &ms3d, ms3d_vertex_t &vertex, MemtN<BoneType, 256> &old_to_new, Skeleton *skeleton)
 {
    int indices[4], weights[4]; ms3d.FillJointIndicesAndWeights(&vertex, indices, weights);
 
@@ -75,7 +75,7 @@ static void CreateSkeleton(Skeleton &skeleton, msModel &ms3d, Int bones, XAnimat
       ms3d_joint_t &joint=*ms3d.GetJoint(i);
       SkelBone     &sbon =skeleton.bones[i];
       Set(sbon.name, joint.name);
-          sbon.parent=(InRange(joint.parentIndex, bones) ? joint.parentIndex : 0xFF);
+          sbon.parent=(InRange(joint.parentIndex, bones) ? joint.parentIndex : BONE_NULL);
 
       Matrix m; ToMatrix(m, joint.matGlobalSkeleton);
 
@@ -96,7 +96,7 @@ static void CreateSkeleton(Skeleton &skeleton, msModel &ms3d, Int bones, XAnimat
       {
        C SkelBone     &sbon        =skeleton.bones[i];
          AnimBone     &abon        =anim    .bones[i];
-         Bool          parent      =(sbon.parent!=0xFF);
+         Bool          parent      =(sbon.parent!=BONE_NULL);
          Matrix3       parent_matrix_inv; if(parent)skeleton.bones[sbon.parent].inverse(parent_matrix_inv);
          ms3d_joint_t &joint       =         *ms3d.GetJoint(                i)        ,
                       *joint_parent=(parent ? ms3d.GetJoint(joint.parentIndex) : null);
@@ -246,7 +246,7 @@ Bool ImportMS3D(C Str &name, Mesh *mesh, Skeleton *skeleton, XAnimation *animati
       }
 
       // skeleton
-      MemtN<Byte, 256> old_to_new;
+      MemtN<BoneType, 256> old_to_new;
       Skeleton temp, *skel=(skeleton ? skeleton : (mesh || animation) ? &temp : null); // if skel not specified, but we want mesh or animation, then we have to process it
       if(skel){CreateSkeleton(*skel, ms3d, bones, animation); skel->sortBones(old_to_new); if(VIRTUAL_ROOT_BONE)REPAO(old_to_new)++;} // 'sortBones' must be called before 'SetSkin'
 

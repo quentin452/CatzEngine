@@ -1,0 +1,45 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\common\x86\av1_inv_txfm_ssse3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\common\x86\cdef_block_ssse3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\common\x86\cfl_ssse3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\common\x86\jnt_convolve_ssse3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\common\x86\resize_ssse3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\common\x86\highbd_convolve_2d_ssse3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\common\x86\highbd_wiener_convolve_ssse3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\common\x86\reconinter_ssse3.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\common\x86\av1_inv_txfm_ssse3.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{854C30F8-4A03-31BE-932B-B95597843CE0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{FA0D4B5A-40CC-360D-B316-1A2849B8BA5A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

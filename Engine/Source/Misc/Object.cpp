@@ -491,12 +491,12 @@ Bool Object::load(File &f, CChar *path)
 /******************************************************************************/
 Bool Object::save(C Str &name)C
 {
-   File f; if(f.writeTry(name)){if(save(f, _GetPath(name)) && f.flush())return true; f.del(); FDelFile(name);}
+   File f; if(f.write(name)){if(save(f, _GetPath(name)) && f.flush())return true; f.del(); FDelFile(name);}
    return false;
 }
 Bool Object::load(C Str &name)
 {
-   File f; if(f.readTry(name))return load(f, _GetPath(name));
+   File f; if(f.read(name))return load(f, _GetPath(name));
    del(); return false;
 }
 /******************************************************************************/

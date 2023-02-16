@@ -1,6 +1,6 @@
 /******************************************************************************/
-const uint ProjectVersion     =98, // !! increase this by one if any of engine/editor asset formats have changed !!
-           ClientServerVersion=98; // !! client/server version (client will fail if tries to connect to server compiled with different version), increase this by one if any of engine resource formats have changed or if the network protocol has changed or if editor classes formats have changed !!
+const uint ProjectVersion     =99, // !! increase this by one if any of engine/editor asset formats have changed !!
+           ClientServerVersion=99; // !! client/server version (client will fail if tries to connect to server compiled with different version), increase this by one if any of engine resource formats have changed or if the network protocol has changed or if editor classes formats have changed !!
 const Str  ClientServerString =ENGINE_NAME " Editor";
 /******************************************************************************/
 const cchar8       *WorldVerSuffix     ="\\Data",
@@ -91,7 +91,6 @@ const cchar8 *ElmNameMesh="mesh",
 const MESH_FLAG EditMeshFlagAnd=~(VTX_DUP|EDGE_ALL|FACE_NRM|ADJ_ALL|VTX_TAN_BIN), // TanBin are not needed in Edit because they're always re-created if needed
                 GameMeshFlagAnd=~(VTX_DUP|EDGE_ALL|FACE_NRM|ADJ_ALL);
 
-const    ImagePtr    ImageNull;
 const MaterialPtr MaterialNull;
 
 bool          IsServer=false;
@@ -200,31 +199,35 @@ class TimeStamp // TODO: Warning: this is a 32-bit value and will overflow at so
    static const long Start=63524217600, // 63524217600 is the number of seconds at 1st Jan 2013 (approximate time of the first application version)
                      Unix =62167219200; // 62167219200 is the number of seconds at 1st Jan 1970
 
+   static TimeStamp UTC() {return DateTime().getUTC();}
+
    uint u=0;
 
-   bool is()C {return u!=0;} // if was set
+   inline bool is()C {return u!=0;} // if was set
 
-   uint text()C {return u;} // this method is used when saving to text, it can be replaced in the future to something like "Str text()C {return ..;}"
+   inline uint text(             )C {return      u;} // this method is used when  saving to   text, it can be replaced in the future to something like "Str text()C {return ..;}"
+          void text(C Str      &t)  {u=TextUInt(t);} // this method is used when loading from text, it can be replaced in the future
+          void text(C TextNode &n)  {text(n.value);}
 
-   TimeStamp& operator--(   ) {u--; return T;}
-   TimeStamp& operator--(int) {u--; return T;}
-   TimeStamp& operator++(   ) {u++; return T;}
-   TimeStamp& operator++(int) {u++; return T;}
+   inline TimeStamp& operator--(   ) {u--; return T;}
+   inline TimeStamp& operator--(int) {u--; return T;}
+   inline TimeStamp& operator++(   ) {u++; return T;}
+   inline TimeStamp& operator++(int) {u++; return T;}
 
-   TimeStamp& zero  () {u=0;                   return T;}
-   TimeStamp& getUTC() {T=DateTime().getUTC(); return T;} // set to current time
-   TimeStamp& now   () {uint prev=u; getUTC(); if(u<=prev)u=prev+1; return T;} // set to current time and make sure that it's newer than the previous time
+   inline TimeStamp& zero  () {u=0;                   return T;}
+          TimeStamp& getUTC() {T=DateTime().getUTC(); return T;} // set to current time
+          TimeStamp& now   () {uint prev=u; getUTC(); if(u<=prev)u=prev+1; return T;} // set to current time and make sure that it's newer than the previous time
 
    TimeStamp& fromUnix(long u) {T=u+(Unix-Start); return T;}
 
    bool old(C TimeStamp &now=TimeStamp().getUTC())C {return T<now;} // if this timestamp is older than 'now'
 
-   bool operator==(C TimeStamp &t)C {return u==t.u;} // if equal
-   bool operator!=(C TimeStamp &t)C {return u!=t.u;} // if not equal
-   bool operator>=(C TimeStamp &t)C {return u>=t.u;} // if greater or equal
-   bool operator<=(C TimeStamp &t)C {return u<=t.u;} // if smaller or equal
-   bool operator> (C TimeStamp &t)C {return u> t.u;} // if greater
-   bool operator< (C TimeStamp &t)C {return u< t.u;} // if smaller
+   inline bool operator==(C TimeStamp &t)C {return u==t.u;} // if equal
+   inline bool operator!=(C TimeStamp &t)C {return u!=t.u;} // if not equal
+   inline bool operator>=(C TimeStamp &t)C {return u>=t.u;} // if greater or equal
+   inline bool operator<=(C TimeStamp &t)C {return u<=t.u;} // if smaller or equal
+   inline bool operator> (C TimeStamp &t)C {return u> t.u;} // if greater
+   inline bool operator< (C TimeStamp &t)C {return u< t.u;} // if smaller
 
    TimeStamp& operator+=(int i) {T=long(T.u)+long(i); return T;}
    TimeStamp& operator-=(int i) {T=long(T.u)-long(i); return T;}
@@ -234,16 +237,18 @@ class TimeStamp // TODO: Warning: this is a 32-bit value and will overflow at so
 
    long operator-(C TimeStamp &t)C {return long(u)-long(t.u);}
 
-   DateTime asDateTime()C {return DateTime().fromSeconds(u+Start);}
+            DateTime asDateTime()C {return DateTime().fromSeconds(u+Start);}
+   operator DateTime           ()C {return asDateTime();}
 
-   TimeStamp(   int      i ) {T.u=Max(i, 0);}
-   TimeStamp(  uint      u ) {T.u=u;}
-   TimeStamp(  long      l ) {T.u=Mid(l, (long)0, (long)UINT_MAX);}
-   TimeStamp(C DateTime &dt) {T=dt.seconds()-Start;}
-   TimeStamp(C Str      &t ) {T.u=TextUInt(t);} // this method is used when loading from text, it can be replaced in the future
+   long age()C {return UTC()-T;}
 
-   static int Compare(C TimeStamp &a, C TimeStamp &b) {return .Compare(a.u, b.u);}
+   TimeStamp(   int      i ) : u(Max(i, 0)) {}
+   TimeStamp(  uint      u ) : u(u) {}
+   TimeStamp(  long      l ) : u(Mid(                 l, (long)0, (long)UINT_MAX)) {}
+   TimeStamp(C DateTime &dt) : u(Mid(dt.seconds()-Start, (long)0, (long)UINT_MAX)) {}
 }
+int Compare(C TimeStamp &a, C TimeStamp &b) {return Compare(a.u, b.u);}
+
 TimeStamp Min(C TimeStamp &a, C TimeStamp &b) {return a<=b ? a : b;}
 TimeStamp Max(C TimeStamp &a, C TimeStamp &b) {return a>=b ? a : b;}
 /******************************************************************************/
@@ -381,7 +386,7 @@ class Chunks
    bool load(C Str &name, ReadWriteSync &rws)
    {
       ReadLock rl(rws);
-      File f; if(f.readTry(name))return load(f);
+      File f; if(f.read(name))return load(f);
       del(); return false;
    }
    bool save(C Str &name, ReadWriteSync &rws) // warning: this sorts 'chunks' and changes memory addresses for each element
@@ -407,9 +412,9 @@ class MtrlImages
       {
          super.del(); return clearParams();
       }
-      bool createTry(C VecI2 &size, IMAGE_TYPE type)
+      bool create(C VecI2 &size, IMAGE_TYPE type)
       {
-         clearParams(); return super.createSoftTry(size.x, size.y, 1, type);
+         clearParams(); return super.createSoft(size.x, size.y, 1, type);
       }
       ImageResize& resize(C VecI2 &size)
       {
@@ -432,7 +437,7 @@ class MtrlImages
       }
       void apply()
       {
-         copyTry(T, (size.x>0) ? size.x : -1, (size.y>0) ? size.y : -1, -1, -1, -1, -1, InRange(filter, FILTER_NUM) ? FILTER_TYPE(filter) : FILTER_BEST, (clamp ? IC_CLAMP : IC_WRAP)|(alpha_weight ? IC_ALPHA_WEIGHT : 0)|(keep_edges ? IC_KEEP_EDGES : 0));
+         copy(T, (size.x>0) ? size.x : -1, (size.y>0) ? size.y : -1, -1, -1, -1, -1, InRange(filter, FILTER_NUM) ? FILTER_TYPE(filter) : FILTER_BEST, (clamp ? IC_CLAMP : IC_WRAP)|(alpha_weight ? IC_ALPHA_WEIGHT : 0)|(keep_edges ? IC_KEEP_EDGES : 0));
       }
       operator ImageSource()C {return ImageSource(T, size, filter, clamp);}
    }
@@ -450,13 +455,13 @@ class MtrlImages
    /*bool create(C VecI2 &size)
    {
       del();
-      return color .createTry(size, IMAGE_R8G8B8_SRGB)
-          && alpha .createTry(size, IMAGE_I8)
-          && bump  .createTry(size, IMAGE_I8)
-          && normal.createTry(size, IMAGE_R8G8B8)
-          && smooth.createTry(size, IMAGE_I8)
-          && metal .createTry(size, IMAGE_I8)
-          && glow  .createTry(size, IMAGE_I8);
+      return color .create(size, IMAGE_R8G8B8_SRGB)
+          && alpha .create(size, IMAGE_I8)
+          && bump  .create(size, IMAGE_I8)
+          && normal.create(size, IMAGE_R8G8B8)
+          && smooth.create(size, IMAGE_I8)
+          && metal .create(size, IMAGE_I8)
+          && glow  .create(size, IMAGE_I8);
    }
    void clear()
    {
@@ -500,7 +505,7 @@ class MtrlImages
       if(image.is())
       {
          RectI rect=Round(frac*(Vec2)image.size());
-         Image temp; if(temp.createSoftTry(rect.w(), rect.h(), 1, ImageTypeUncompressed(image.type()))) // crop manually because we need to use Mod
+         Image temp; if(temp.createSoft(rect.w(), rect.h(), 1, ImageTypeUncompressed(image.type()))) // crop manually because we need to use Mod
          {
             if(image.lockRead())
             {
@@ -639,7 +644,7 @@ class MtrlImages
    {
       if(!alpha.is() && color.typeInfo().a) // if we have no alpha map but it's possible it's in color
       { // set alpha from color
-         color.copyTry(alpha, -1, -1, -1, IMAGE_A8, IMAGE_SOFT, 1);
+         color.copy(alpha, -1, -1, -1, IMAGE_A8, IMAGE_SOFT, 1);
          if(alpha.size.x<=0)alpha.size.x=color.size.x; // if alpha size not specified then use from color
          if(alpha.size.y<=0)alpha.size.y=color.size.y;
       }
@@ -657,7 +662,7 @@ class MtrlImages
          }
          alpha.unlock();
          if(min_alpha>=254 && min_lum>=254)alpha.del();else
-         alpha.copyTry(alpha, -1, -1, -1, (min_alpha>=254 && min_lum<254) ? IMAGE_L8 : IMAGE_A8, IMAGE_SOFT, 1); // alpha channel is almost fully white -> use luminance as alpha
+         alpha.copy(alpha, -1, -1, -1, (min_alpha>=254 && min_lum<254) ? IMAGE_L8 : IMAGE_A8, IMAGE_SOFT, 1); // alpha channel is almost fully white -> use luminance as alpha
       }
    }*/
 }

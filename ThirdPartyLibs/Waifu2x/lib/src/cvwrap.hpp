@@ -89,14 +89,14 @@ struct W2Size
 };
 
 template<typename T> T * W2Mat::ptr(int yi)
-{
-    int off = 0;
-    int elem_size = CV_ELEM_SIZE(this->type);
+{ // ESENTHEL CHANGED
+   int elem_size = CV_ELEM_SIZE(this->type);
+	char *data = this->data;
 
-    off += (yi+view_top) * data_byte_width;
-    off += view_left * elem_size;
+    data += (unsigned long long)(yi+view_top) * data_byte_width;
+    data += view_left * elem_size;
 
-    return (T*)(data + off);
+    return (T*)data;
 }
 
 }

@@ -137,7 +137,7 @@ struct SectionParams
       if(src.depth_noise.is())
       {
          Randomizer random(UIDZero);
-         noise_map.createSoftTry(w/super_sample, h/super_sample, 1, IMAGE_F32);
+         noise_map.createSoft(w/super_sample, h/super_sample, 1, IMAGE_F32);
          REPD(y, noise_map.h())
          REPD(x, noise_map.w())noise_map.pixF(x, y)=random.f();
          noise_map.blur(src.depth_noise.blur, src.depth_noise.blur_clamp);
@@ -151,7 +151,7 @@ struct SectionParams
       if(src.color_noise.is())
       {
          Randomizer random(UIDZero);
-         noise_map.createSoftTry(w/super_sample, h/super_sample, 1, IMAGE_F32);
+         noise_map.createSoft(w/super_sample, h/super_sample, 1, IMAGE_F32);
          REPD(y, noise_map.h())
          REPD(x, noise_map.w())noise_map.pixF(x, y)=random.f();
          noise_map.blur(src.color_noise.blur, src.color_noise.blur_clamp);
@@ -166,7 +166,7 @@ struct SectionParams
       if(overlay=src.depth_overlay)
       {
          if(overlay->compressed() || src.depth_overlay_params.blur)
-            if(overlay->copyTry(overlay_image, -1, -1, -1, overlay->typeInfo().a ? IMAGE_F32_4 : IMAGE_F32, IMAGE_SOFT, 1, FILTER_BEST, IC_IGNORE_GAMMA))overlay=&overlay_image;else overlay=null;
+            if(overlay->copy(overlay_image, -1, -1, -1, overlay->typeInfo().a ? IMAGE_F32_4 : IMAGE_F32, IMAGE_SOFT, 1, FILTER_BEST, IC_IGNORE_GAMMA))overlay=&overlay_image;else overlay=null;
          if(overlay)
          {
             overlay_image.blur(src.depth_overlay_params.blur, src.depth_overlay_params.blur_clamp); // this will blur only if 'src.depth_overlay_params.blur' in which case the "overlay==&overlay_image"
@@ -184,7 +184,7 @@ struct SectionParams
       if(overlay=src.color_overlay)
       {
          if(overlay->compressed() || src.color_overlay_params.blur)
-            if(overlay->copyTry(overlay_image, -1, -1, -1, ImageTypeUncompressed(overlay->type()), IMAGE_SOFT, 1))overlay=&overlay_image;else overlay=null;
+            if(overlay->copy(overlay_image, -1, -1, -1, ImageTypeUncompressed(overlay->type()), IMAGE_SOFT, 1))overlay=&overlay_image;else overlay=null;
          if(overlay)
          {
             overlay_image.blur(src.color_overlay_params.blur, src.color_overlay_params.blur_clamp); // this will blur only if 'src.color_overlay_params.blur' in which case the "overlay==&overlay_image"
@@ -200,7 +200,7 @@ struct SectionParams
    {
       if(reflection=src.reflection)
       {
-         if(reflection->compressed() || reflection->cube())if(reflection->copyTry(reflection_image, -1, -1, -1, ImageTypeUncompressed(reflection->type()), IMAGE_SOFT, 1))reflection=&reflection_image;else reflection=null;
+         if(reflection->compressed() || reflection->cube())if(reflection->copy(reflection_image, -1, -1, -1, ImageTypeUncompressed(reflection->type()), IMAGE_SOFT, 1))reflection=&reflection_image;else reflection=null;
          if(reflection)
          {
             reflection->lockRead();
@@ -542,7 +542,7 @@ struct PanelImageCreate
       {
          REPA(temp_images)if(temp_images[i].src==image){image=&temp_images[i].soft; goto found;} // goto found and lock it, because it's always unlocked in the codes below
          ImageSrc &temp=temp_images.New(); temp.src=image;
-         if(image->copyTry(temp.soft, -1, -1, -1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1))image=&temp.soft;else image=null;
+         if(image->copy(temp.soft, -1, -1, -1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1))image=&temp.soft;else image=null;
       }
    found:
       return (image && image->lockRead()) ? image : null;
@@ -559,9 +559,9 @@ struct PanelImageCreate
    }
    Bool create()
    {
-      if(image    .createSoftTry(resolution*params.width, resolution*params.height, 1, IMAGE_R8G8B8A8_SRGB)
-      && depth_map.createSoftTry(image.w(), image.h(), 1, IMAGE_F32  )
-      &&  dist_map.createSoftTry(image.w(), image.h(), 1, IMAGE_F32_4))
+      if(image    .createSoft(resolution*params.width, resolution*params.height, 1, IMAGE_R8G8B8A8_SRGB)
+      && depth_map.createSoft(image.w(), image.h(), 1, IMAGE_F32  )
+      &&  dist_map.createSoft(image.w(), image.h(), 1, IMAGE_F32_4))
       {
          REPA(params.lights)
          {
@@ -1001,7 +1001,7 @@ struct PanelImageCreate
    }
    void afterDepth()
    {
-      if(depth_map_ptr)depth_map.copyTry(*depth_map_ptr); // store a copy for the user
+      if(depth_map_ptr)depth_map.copy(*depth_map_ptr); // store a copy for the user
          depth_map.bumpToNormal(normal_map, resolution, true); // !! need high precision because later we're using 'normal_map.pixF3' !!
 
       REPA(sps)
@@ -2471,12 +2471,12 @@ error:
 }
 Bool PanelImage::save(C Str &name)C
 {
-   File f; if(f.writeTry(name)){if(save(f) && f.flush())return true; f.del(); FDelFile(name);}
+   File f; if(f.write(name)){if(save(f) && f.flush())return true; f.del(); FDelFile(name);}
    return false;
 }
 Bool PanelImage::load(C Str &name)
 {
-   File f; if(f.readTry(name))return load(f);
+   File f; if(f.read(name))return load(f);
    del(); return false;
 }
 /******************************************************************************/

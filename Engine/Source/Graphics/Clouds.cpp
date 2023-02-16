@@ -463,7 +463,7 @@ void VolumetricCloud::createEx      (Int width, Int height, Int depth, Flt frequ
 {
    del();
    if(width>0 && height>0 && depth>0)
-      if(_image.create3DTry(height, width, depth, IMAGE_R8G8, 1))
+      if(_image.create3D(height, width, depth, IMAGE_R8G8, 1))
    {
      _image.clear();
      _object=object;

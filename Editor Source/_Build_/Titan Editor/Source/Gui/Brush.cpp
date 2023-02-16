@@ -88,8 +88,8 @@ parent+=slope_window.create(Rect_RD(rect().ld()-Vec2(0.03f, 0), 0.22f, 0.13f), "
    void BrushClass::setImage(C Str &name)
    {
       image_name=name;
-      image_hw.ImportTry(name,       -1, IMAGE_2D);
-      image_sw.ImportTry(name, IMAGE_L8, IMAGE_SOFT, 1);
+      image_hw.Import(name,       -1, IMAGE_2D);
+      image_sw.Import(name, IMAGE_L8, IMAGE_SOFT, 1);
       SetPath(image_io, name);
    }
    void BrushClass::setChildWindows()

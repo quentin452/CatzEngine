@@ -180,7 +180,7 @@ class Project
    void createWorldPaths(C UID &world_id);
    void createMiniMapPaths(C UID &mini_map_id);
 
-   bool loadImages(Image &image, TextParam *image_resize, C Str &src, bool srgb=true, bool clamp=false, C Color &background=TRANSPARENT, C Image *color=null, C TextParam *color_resize=null, C Image *smooth=null, C TextParam *smooth_resize=null, C Image *bump=null, C TextParam *bump_resize=null)C;
+   bool loadImages(Image &image, TextParam *image_resize, C Str &src, bool srgb=true, bool clamp=true, C Color &background=TRANSPARENT, C Image *color=null, C TextParam *color_resize=null, C Image *smooth=null, C TextParam *smooth_resize=null, C Image *bump=null, C TextParam *bump_resize=null)C;
 
    void savedGame(Elm &elm, C Str &name);
    void savedGame(Elm &elm             );

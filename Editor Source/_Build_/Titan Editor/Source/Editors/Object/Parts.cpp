@@ -185,6 +185,17 @@
          ObjEdit.setChangedMesh(true, false);
       }
    }
+   void MeshParts::SetNameFromMtrl()
+   {
+      ObjEdit.mesh_undos.set("rename");
+      MeshLod &lod=ObjEdit.getLod();
+      REPA(ObjEdit.mesh_parts.list.sel)if(MeshPart *part=lod.parts.addr(ObjEdit.mesh_parts.list.sel[i]))
+      {
+         Str name; if(C MaterialPtr &mtrl=part->material())if(C Elm *elm=Proj.findElm(mtrl.id()))name=elm->name;
+         Set(part->name, name);
+      }
+      ObjEdit.setChangedMesh(true, false);
+   }
    Rect MeshParts::sizeLimit()C 
 {
       Rect r;
@@ -253,15 +264,16 @@
          }
          hide&=(ObjEdit.mesh.variations()>1);
          Node<MenuElm> node;
-         if(list.sel.elms()==1)node.New().create("Rename"           , Rename   ).desc("Rename part");
-         if(remove            )node.New().create("Remove"           , Remove   ).desc("Mark selected parts as removed, these parts won't be available in the game");
-         if(restore           )node.New().create("Restore"          , Restore  ).desc("Unmark selected parts as removed");
-         if(hide              )node.New().create("Hide in Variation", Hide     ).desc("Mesh Part will be hidden in current variation.\nThis works by clearing the material to null.");
-                               node.New().create("Focus Camera"     , Focus    ).desc("Focus camera on selected parts");
-                               node.New().create("Copy Here"        , Duplicate).desc("Duplicated selected parts");
-                               node.New().create("Copy to Memory"   , CopyMem  ).desc("Copy selected parts into memory which can be later copied using \"New\" option");
-                               node.New().create("Move to New LOD"  , NewLod   ).desc("Move selected parts into a new LOD");
-         if(list.sel.elms()> 1)node.New().create("Merge"            , Merge    ).desc("Merge selected parts together");
+         if(list.sel.elms()==1)node.New().create("Rename"                , Rename         ).desc("Rename part");
+         if(remove            )node.New().create("Remove"                , Remove         ).desc("Mark selected parts as removed, these parts won't be available in the game");
+         if(restore           )node.New().create("Restore"               , Restore        ).desc("Unmark selected parts as removed");
+         if(hide              )node.New().create("Hide in Variation"     , Hide           ).desc("Mesh Part will be hidden in current variation.\nThis works by clearing the material to null.");
+                               node.New().create("Focus Camera"          , Focus          ).desc("Focus camera on selected parts");
+                               node.New().create("Copy Here"             , Duplicate      ).desc("Duplicated selected parts");
+                               node.New().create("Copy to Memory"        , CopyMem        ).desc("Copy selected parts into memory which can be later copied using \"New\" option");
+                               node.New().create("Move to New LOD"       , NewLod         ).desc("Move selected parts into a new LOD");
+         if(list.sel.elms()> 1)node.New().create("Merge"                 , Merge          ).desc("Merge selected parts together");
+                               node.New().create("Set Name from Material", SetNameFromMtrl).desc("Set Mesh Part name from Material name");
                                node++;                                   
                                node.New().create("Erase"            , Erase    ).desc("Completely erase selected parts from the Mesh");
          Gui+=menu.create(node).posRU(pos); menu.activate();

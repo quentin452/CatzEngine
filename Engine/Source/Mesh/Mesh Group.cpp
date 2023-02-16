@@ -122,14 +122,14 @@ MeshGroup& MeshGroup::joinAll(Bool test_material, Bool test_draw_group, Bool tes
 /******************************************************************************/
 // TEXTURIZE
 /******************************************************************************/
-MeshGroup& MeshGroup::texMap   (  Flt     scale , Byte tex_index) {REPAO(meshes).texMap   (scale , tex_index); return T;}
-MeshGroup& MeshGroup::texMap   (C Matrix &matrix, Byte tex_index) {REPAO(meshes).texMap   (matrix, tex_index); return T;}
-MeshGroup& MeshGroup::texMap   (C Plane  &plane , Byte tex_index) {REPAO(meshes).texMap   (plane , tex_index); return T;}
-MeshGroup& MeshGroup::texMap   (C Ball   &ball  , Byte tex_index) {REPAO(meshes).texMap   (ball  , tex_index); return T;}
-MeshGroup& MeshGroup::texMap   (C Tube   &tube  , Byte tex_index) {REPAO(meshes).texMap   (tube  , tex_index); return T;}
-MeshGroup& MeshGroup::texMove  (C Vec2   &move  , Byte tex_index) {REPAO(meshes).texMove  (move  , tex_index); return T;}
-MeshGroup& MeshGroup::texScale (C Vec2   &scale , Byte tex_index) {REPAO(meshes).texScale (scale , tex_index); return T;}
-MeshGroup& MeshGroup::texRotate(  Flt     angle , Byte tex_index) {REPAO(meshes).texRotate(angle , tex_index); return T;}
+MeshGroup& MeshGroup::texMap   (  Flt     scale , Byte uv_index) {REPAO(meshes).texMap   (scale , uv_index); return T;}
+MeshGroup& MeshGroup::texMap   (C Matrix &matrix, Byte uv_index) {REPAO(meshes).texMap   (matrix, uv_index); return T;}
+MeshGroup& MeshGroup::texMap   (C Plane  &plane , Byte uv_index) {REPAO(meshes).texMap   (plane , uv_index); return T;}
+MeshGroup& MeshGroup::texMap   (C Ball   &ball  , Byte uv_index) {REPAO(meshes).texMap   (ball  , uv_index); return T;}
+MeshGroup& MeshGroup::texMap   (C Tube   &tube  , Byte uv_index) {REPAO(meshes).texMap   (tube  , uv_index); return T;}
+MeshGroup& MeshGroup::texMove  (C Vec2   &move  , Byte uv_index) {REPAO(meshes).texMove  (move  , uv_index); return T;}
+MeshGroup& MeshGroup::texScale (C Vec2   &scale , Byte uv_index) {REPAO(meshes).texScale (scale , uv_index); return T;}
+MeshGroup& MeshGroup::texRotate(  Flt     angle , Byte uv_index) {REPAO(meshes).texRotate(angle , uv_index); return T;}
 /******************************************************************************/
 // TRANSFORM
 /******************************************************************************/
@@ -229,7 +229,7 @@ MeshGroup& MeshGroup::weldVtxValues(MESH_FLAG flag, Flt pos_eps, Flt nrm_cos, Fl
             Flt weight=vn.weight;
             if(flag&VTX_POS     )         meshes[vn.index.z].parts[vn.index.y].base.vtx.pos     (vn.index.x)*=weight;
           //if(flag&VTX_MATERIAL)         meshes[vn.index.z].parts[vn.index.y].base.vtx.material(vn.index.x)*=weight; VecB4 !! sum must be equal to 255 !!
-          //if(flag&VTX_MATRIX  )         meshes[vn.index.z].parts[vn.index.y].base.vtx.matrix  (vn.index.x)*=weight; VecB4
+          //if(flag&VTX_MATRIX  )         meshes[vn.index.z].parts[vn.index.y].base.vtx.matrix  (vn.index.x)*=weight; VtxBone
           //if(flag&VTX_BLEND   )         meshes[vn.index.z].parts[vn.index.y].base.vtx.blend   (vn.index.x)*=weight; VecB4 !! sum must be equal to 255 !!
             if(flag&VTX_NRM     )         meshes[vn.index.z].parts[vn.index.y].base.vtx.nrm     (vn.index.x)*=weight;
             if(flag&VTX_TAN     )         meshes[vn.index.z].parts[vn.index.y].base.vtx.tan     (vn.index.x)*=weight;
@@ -254,7 +254,7 @@ MeshGroup& MeshGroup::weldVtxValues(MESH_FLAG flag, Flt pos_eps, Flt nrm_cos, Fl
                                  vd.weight                                                         +=weight;
             if(flag&VTX_POS     )meshes[vd.index.z].parts[vd.index.y].base.vtx.pos     (vd.index.x)+=weight*meshes[vn.index.z].parts[vn.index.y].base.vtx.pos     (vn.index.x);
           //if(flag&VTX_MATERIAL)meshes[vd.index.z].parts[vd.index.y].base.vtx.material(vd.index.x)+=weight*meshes[vn.index.z].parts[vn.index.y].base.vtx.material(vn.index.x); VecB4 !! sum must be equal to 255 !!
-          //if(flag&VTX_MATRIX  )meshes[vd.index.z].parts[vd.index.y].base.vtx.matrix  (vd.index.x)+=weight*meshes[vn.index.z].parts[vn.index.y].base.vtx.matrix  (vn.index.x); VecB4
+          //if(flag&VTX_MATRIX  )meshes[vd.index.z].parts[vd.index.y].base.vtx.matrix  (vd.index.x)+=weight*meshes[vn.index.z].parts[vn.index.y].base.vtx.matrix  (vn.index.x); VtxBone
           //if(flag&VTX_BLEND   )meshes[vd.index.z].parts[vd.index.y].base.vtx.blend   (vd.index.x)+=weight*meshes[vn.index.z].parts[vn.index.y].base.vtx.blend   (vn.index.x); VecB4 !! sum must be equal to 255 !!
             if(flag&VTX_NRM     )meshes[vd.index.z].parts[vd.index.y].base.vtx.nrm     (vd.index.x)+=weight*meshes[vn.index.z].parts[vn.index.y].base.vtx.nrm     (vn.index.x);
             if(flag&VTX_TAN     )meshes[vd.index.z].parts[vd.index.y].base.vtx.tan     (vd.index.x)+=weight*meshes[vn.index.z].parts[vn.index.y].base.vtx.tan     (vn.index.x);
@@ -278,7 +278,7 @@ MeshGroup& MeshGroup::weldVtxValues(MESH_FLAG flag, Flt pos_eps, Flt nrm_cos, Fl
             weight=1/weight;
             if(flag&VTX_POS     )meshes[vn.index.z].parts[vn.index.y].base.vtx.pos     (vn.index.x)*=weight;
           //if(flag&VTX_MATERIAL)meshes[vn.index.z].parts[vn.index.y].base.vtx.material(vn.index.x)*=weight; VecB4 !! sum must be equal to 255 !!
-          //if(flag&VTX_MATRIX  )meshes[vn.index.z].parts[vn.index.y].base.vtx.matrix  (vn.index.x)*=weight; VecB4
+          //if(flag&VTX_MATRIX  )meshes[vn.index.z].parts[vn.index.y].base.vtx.matrix  (vn.index.x)*=weight; VtxBone
           //if(flag&VTX_BLEND   )meshes[vn.index.z].parts[vn.index.y].base.vtx.blend   (vn.index.x)*=weight; VecB4 !! sum must be equal to 255 !!
             if(flag&VTX_NRM     )meshes[vn.index.z].parts[vn.index.y].base.vtx.nrm     (vn.index.x).normalize();
             if(flag&VTX_TAN     )meshes[vn.index.z].parts[vn.index.y].base.vtx.tan     (vn.index.x).normalize();
@@ -330,8 +330,8 @@ MeshGroup& MeshGroup::quadToTri(Flt cos) {REPAO(meshes).quadToTri(cos); return T
 /******************************************************************************/
 // FIX
 /******************************************************************************/
-MeshGroup& MeshGroup::fixTexWrapping(Byte tex_index) {REPAO(meshes).fixTexWrapping(tex_index); return T;}
-MeshGroup& MeshGroup::fixTexOffset  (Byte tex_index) {REPAO(meshes).fixTexOffset  (tex_index); return T;}
+MeshGroup& MeshGroup::fixTexWrapping(Byte uv_index) {REPAO(meshes).fixTexWrapping(uv_index); return T;}
+MeshGroup& MeshGroup::fixTexOffset  (Byte uv_index) {REPAO(meshes).fixTexOffset  (uv_index); return T;}
 /******************************************************************************/
 // ADD/REMOVE
 /******************************************************************************/

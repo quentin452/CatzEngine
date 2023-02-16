@@ -627,7 +627,7 @@
          if(!image_id.valid())return null;
          REPA(images)if(images[i].id==image_id)return images[i].image_ptr();
          Src &src=images.New(); src.id=image_id;
-         if(!fast && src.image.ImportTry(proj.editPath(image_id)))src.image_ptr=&src.image;
+         if(!fast && src.image.Import(proj.editPath(image_id)))src.image_ptr=&src.image;
          if(!src.image_ptr)src.image_ptr=proj.gamePath(image_id);
          return src.image_ptr();
       }
@@ -654,7 +654,7 @@
       IMAGE_TYPE type=panel_image.image.type(); if(base.compressed)ImageProps(panel_image.image, null, &type);
       Image *src=&panel_image.image;
       if(soft){Swap(*soft, *src); src=soft;}
-      src->copyTry(panel_image.image, -1, -1, -1, type, IMAGE_2D, base.mip_maps ? 0 : 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT);
+      src->copy(panel_image.image, -1, -1, -1, type, IMAGE_2D, base.mip_maps ? 0 : 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT);
    }
    bool EditPanelImage::save(File &f)C
    {
@@ -678,7 +678,7 @@
    }
    bool EditPanelImage::load(C Str &name)
    {
-      File f; if(f.readTry(name))return load(f);
+      File f; if(f.read(name))return load(f);
       reset(); return false;
    }
 EditPanelImage::Section::Section() : depth_overlay_id(UIDZero), color_overlay_id(UIDZero), reflection_id(UIDZero) {}

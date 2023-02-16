@@ -10,9 +10,9 @@ static void ChangedButton(ComboBox &cb)
 {
    if(cb.Button::operator()())
    {
-      Bool touch=false; REPA(Touches)if(Touches[i].pd() && Touches[i].guiObj()==&cb){touch=true; break;} cb.menu.setSize(touch);
+      Bool touch=false; REPA(Touches){Touch &t=Touches[i]; if((t.state()&(BS_PUSHED|BS_RELEASED)) && t.guiObj()==&cb){touch=true; break;}} cb.menu.setSize(touch); // can be pushed with BS_PUSHED or BS_RELEASED depending on 't.scrolling'
       cb.menu.list.cur=-1;
-      if(0 && D.smallSize())cb.menu.posC(0);else cb.menu.posAround(cb.screenRect(), cb.menu_align);
+      cb.menu.posAround(cb.screenRect(), cb.menu_align);
       cb.menu.activate();
    }else
    {

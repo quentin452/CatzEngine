@@ -46,6 +46,7 @@ struct Panel
    // get
    void extendedRect           (C Rect &rect, Rect &extended)C; // get rectangle containing panel drawn at 'rect' rectangle
    void innerPadding           (C Rect &rect, Rect &padding )C;
+   void outerMargin            (C Rect &rect, Rect &margin  )C;
    void defaultInnerPadding    (              Rect &padding )C;
    Vec2 defaultInnerPaddingSize(                            )C;
 #if EE_PRIVATE

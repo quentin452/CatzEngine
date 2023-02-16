@@ -1,0 +1,494 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{3ADE8035-651F-33BB-A0A7-F98A885627E8}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.19041.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>jxl_dec-obj</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">jxl_dec-obj.dir\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">jxl_dec-obj.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">jxl_dec-obj</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">jxl_dec-obj.dir\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">jxl_dec-obj.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">jxl_dec-obj</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">jxl_dec-obj.dir\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">jxl_dec-obj.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">jxl_dec-obj</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">jxl_dec-obj.dir\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">jxl_dec-obj.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">jxl_dec-obj</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\JpegXL\lib;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\include;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\brotli\c\include;C:\Esenthel\ThirdPartyLibs\JpegXL\Windows\lib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;JPEGXL_ENABLE_SKCMS=1;JPEGXL_BUNDLE_SKCMS=1;JPEGXL_ENABLE_TRANSCODE_JPEG=0;JPEGXL_ENABLE_BOXES=0;JPEGXL_MAJOR_VERSION=0;JPEGXL_MINOR_VERSION=8;JPEGXL_PATCH_VERSION=0;JXL_INTERNAL_LIBRARY_BUILD;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;JPEGXL_ENABLE_SKCMS=1;JPEGXL_BUNDLE_SKCMS=1;JPEGXL_ENABLE_TRANSCODE_JPEG=0;JPEGXL_ENABLE_BOXES=0;JPEGXL_MAJOR_VERSION=0;JPEGXL_MINOR_VERSION=8;JPEGXL_PATCH_VERSION=0;JXL_INTERNAL_LIBRARY_BUILD;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\JpegXL\lib;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\include;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\brotli\c\include;C:\Esenthel\ThirdPartyLibs\JpegXL\Windows\lib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\JpegXL\lib;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\include;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\brotli\c\include;C:\Esenthel\ThirdPartyLibs\JpegXL\Windows\lib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\JpegXL\lib;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\include;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\brotli\c\include;C:\Esenthel\ThirdPartyLibs\JpegXL\Windows\lib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;JXL_STATIC_DEFINE;JPEGXL_ENABLE_SKCMS=1;JPEGXL_BUNDLE_SKCMS=1;JPEGXL_ENABLE_TRANSCODE_JPEG=0;JPEGXL_ENABLE_BOXES=0;JPEGXL_MAJOR_VERSION=0;JPEGXL_MINOR_VERSION=8;JPEGXL_PATCH_VERSION=0;JXL_INTERNAL_LIBRARY_BUILD;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;JXL_STATIC_DEFINE;JPEGXL_ENABLE_SKCMS=1;JPEGXL_BUNDLE_SKCMS=1;JPEGXL_ENABLE_TRANSCODE_JPEG=0;JPEGXL_ENABLE_BOXES=0;JPEGXL_MAJOR_VERSION=0;JPEGXL_MINOR_VERSION=8;JPEGXL_PATCH_VERSION=0;JXL_INTERNAL_LIBRARY_BUILD;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\JpegXL\lib;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\include;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\brotli\c\include;C:\Esenthel\ThirdPartyLibs\JpegXL\Windows\lib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\JpegXL\lib;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\include;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\brotli\c\include;C:\Esenthel\ThirdPartyLibs\JpegXL\Windows\lib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\JpegXL\lib;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\include;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\brotli\c\include;C:\Esenthel\ThirdPartyLibs\JpegXL\Windows\lib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;JPEGXL_ENABLE_SKCMS=1;JPEGXL_BUNDLE_SKCMS=1;JPEGXL_ENABLE_TRANSCODE_JPEG=0;JPEGXL_ENABLE_BOXES=0;JPEGXL_MAJOR_VERSION=0;JPEGXL_MINOR_VERSION=8;JPEGXL_PATCH_VERSION=0;JXL_INTERNAL_LIBRARY_BUILD;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;JPEGXL_ENABLE_SKCMS=1;JPEGXL_BUNDLE_SKCMS=1;JPEGXL_ENABLE_TRANSCODE_JPEG=0;JPEGXL_ENABLE_BOXES=0;JPEGXL_MAJOR_VERSION=0;JPEGXL_MINOR_VERSION=8;JPEGXL_PATCH_VERSION=0;JXL_INTERNAL_LIBRARY_BUILD;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\JpegXL\lib;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\include;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\brotli\c\include;C:\Esenthel\ThirdPartyLibs\JpegXL\Windows\lib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\JpegXL\lib;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\include;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\brotli\c\include;C:\Esenthel\ThirdPartyLibs\JpegXL\Windows\lib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\JpegXL\lib;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\include;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\brotli\c\include;C:\Esenthel\ThirdPartyLibs\JpegXL\Windows\lib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;JPEGXL_ENABLE_SKCMS=1;JPEGXL_BUNDLE_SKCMS=1;JPEGXL_ENABLE_TRANSCODE_JPEG=0;JPEGXL_ENABLE_BOXES=0;JPEGXL_MAJOR_VERSION=0;JPEGXL_MINOR_VERSION=8;JPEGXL_PATCH_VERSION=0;JXL_INTERNAL_LIBRARY_BUILD;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;JPEGXL_ENABLE_SKCMS=1;JPEGXL_BUNDLE_SKCMS=1;JPEGXL_ENABLE_TRANSCODE_JPEG=0;JPEGXL_ENABLE_BOXES=0;JPEGXL_MAJOR_VERSION=0;JPEGXL_MINOR_VERSION=8;JPEGXL_PATCH_VERSION=0;JXL_INTERNAL_LIBRARY_BUILD;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\JpegXL\lib;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\include;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\brotli\c\include;C:\Esenthel\ThirdPartyLibs\JpegXL\Windows\lib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\JpegXL\lib;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\include;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\brotli\c\include;C:\Esenthel\ThirdPartyLibs\JpegXL\Windows\lib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Esenthel/ThirdPartyLibs/JpegXL/lib/lib/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Esenthel/ThirdPartyLibs/JpegXL/lib -BC:/Esenthel/ThirdPartyLibs/JpegXL/Windows --check-stamp-file C:/Esenthel/ThirdPartyLibs/JpegXL/Windows/lib/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl.cmake;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\libjxl.pc.in;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\version.h.in;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl_profiler.cmake;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl_threads.cmake;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\threads\libjxl_threads.pc.in;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindJPEG.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\GenerateExportHeader.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\SelectLibraryConfigurations.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\exportheader.cmake.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Esenthel\ThirdPartyLibs\JpegXL\Windows\lib\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Esenthel/ThirdPartyLibs/JpegXL/lib/lib/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Esenthel/ThirdPartyLibs/JpegXL/lib -BC:/Esenthel/ThirdPartyLibs/JpegXL/Windows --check-stamp-file C:/Esenthel/ThirdPartyLibs/JpegXL/Windows/lib/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl.cmake;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\libjxl.pc.in;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\version.h.in;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl_profiler.cmake;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl_threads.cmake;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\threads\libjxl_threads.pc.in;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindJPEG.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\GenerateExportHeader.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\SelectLibraryConfigurations.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\exportheader.cmake.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Esenthel\ThirdPartyLibs\JpegXL\Windows\lib\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Esenthel/ThirdPartyLibs/JpegXL/lib/lib/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Esenthel/ThirdPartyLibs/JpegXL/lib -BC:/Esenthel/ThirdPartyLibs/JpegXL/Windows --check-stamp-file C:/Esenthel/ThirdPartyLibs/JpegXL/Windows/lib/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl.cmake;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\libjxl.pc.in;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\version.h.in;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl_profiler.cmake;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl_threads.cmake;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\threads\libjxl_threads.pc.in;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindJPEG.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\GenerateExportHeader.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\SelectLibraryConfigurations.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\exportheader.cmake.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Esenthel\ThirdPartyLibs\JpegXL\Windows\lib\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Esenthel/ThirdPartyLibs/JpegXL/lib/lib/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Esenthel/ThirdPartyLibs/JpegXL/lib -BC:/Esenthel/ThirdPartyLibs/JpegXL/Windows --check-stamp-file C:/Esenthel/ThirdPartyLibs/JpegXL/Windows/lib/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl.cmake;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\libjxl.pc.in;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\version.h.in;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl_profiler.cmake;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl_threads.cmake;C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\threads\libjxl_threads.pc.in;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckIncludeFile.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckLibraryExists.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindJPEG.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageHandleStandardArgs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindPackageMessage.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\FindThreads.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\GenerateExportHeader.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckCompilerFlag.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\SelectLibraryConfigurations.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\exportheader.cmake.in;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Esenthel\ThirdPartyLibs\JpegXL\Windows\lib\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\ac_context.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\ac_strategy.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\ac_strategy.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\alpha.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\alpha.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\ans_common.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\ans_common.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\ans_params.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\aux_out.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\aux_out.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\aux_out_fwd.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\base\arch_macros.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\base\bits.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\base\byte_order.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\base\cache_aligned.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\base\cache_aligned.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\base\compiler_specific.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\base\data_parallel.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\base\data_parallel.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\base\file_io.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\base\iaca.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\base\os_macros.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\base\override.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\base\padded_bytes.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\base\padded_bytes.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\base\printf_macros.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\base\profiler.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\base\random.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\base\random.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\base\sanitizer_definitions.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\base\scope_guard.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\base\span.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\base\status.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\base\thread_pool_internal.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\blending.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\blending.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\chroma_from_luma.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\chroma_from_luma.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\codec_in_out.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\coeff_order.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\coeff_order.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\coeff_order_fwd.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\color_encoding_internal.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\color_encoding_internal.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\color_management.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\color_management.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\common.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\compressed_dc.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\compressed_dc.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\convolve-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\convolve.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\convolve_separable5.cc" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\convolve_separable7.cc" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\convolve_slow.cc" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\convolve_symmetric3.cc" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\convolve_symmetric5.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dct-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dct_block-inl.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dct_scales.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dct_scales.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dct_util.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_ans.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_ans.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_bit_reader.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_cache.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_cache.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_context_map.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_context_map.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_external_image.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_external_image.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_frame.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_frame.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_group.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_group.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_group_border.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_group_border.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_huffman.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_huffman.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_modular.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_modular.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_noise.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_noise.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_patch_dictionary.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_patch_dictionary.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_tone_mapping-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_transforms-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_xyb-inl.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_xyb.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\dec_xyb.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\decode.cc" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\enc_bit_writer.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\enc_bit_writer.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\entropy_coder.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\entropy_coder.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\epf.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\epf.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\exif.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\fast_dct-inl.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\fast_dct.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\fast_dct.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\fast_dct128-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\fast_dct16-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\fast_dct256-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\fast_dct32-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\fast_dct64-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\fast_dct8-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\fast_math-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\field_encodings.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\fields.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\fields.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\frame_header.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\frame_header.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\gauss_blur.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\gauss_blur.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\headers.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\headers.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\huffman_table.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\huffman_table.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\icc_codec.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\icc_codec.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\icc_codec_common.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\icc_codec_common.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\image.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\image.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\image_bundle.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\image_bundle.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\image_metadata.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\image_metadata.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\image_ops.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\jxl_inspection.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\lehmer_code.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\linalg.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\loop_filter.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\loop_filter.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\luminance.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\luminance.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\memory_manager_internal.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\memory_manager_internal.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\modular\encoding\context_predict.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\modular\encoding\dec_ma.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\modular\encoding\dec_ma.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\modular\encoding\encoding.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\modular\encoding\encoding.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\modular\encoding\ma_common.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\modular\modular_image.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\modular\modular_image.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\modular\options.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\modular\transform\palette.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\modular\transform\rct.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\modular\transform\rct.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\modular\transform\squeeze.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\modular\transform\squeeze.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\modular\transform\transform.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\modular\transform\transform.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\noise.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\opsin_params.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\opsin_params.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\passes_state.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\passes_state.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\patch_dictionary_internal.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\quant_weights.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\quant_weights.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\quantizer-inl.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\quantizer.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\quantizer.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\rational_polynomial-inl.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\low_memory_render_pipeline.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\low_memory_render_pipeline.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\render_pipeline.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\render_pipeline.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\render_pipeline_stage.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\simple_render_pipeline.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\simple_render_pipeline.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_blending.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_blending.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_chroma_upsampling.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_chroma_upsampling.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_epf.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_epf.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_from_linear.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_from_linear.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_gaborish.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_gaborish.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_noise.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_noise.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_patches.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_patches.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_splines.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_splines.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_spot.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_spot.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_to_linear.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_to_linear.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_tone_mapping.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_tone_mapping.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_upsampling.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_upsampling.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_write.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_write.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_xyb.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_xyb.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_ycbcr.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\stage_ycbcr.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\render_pipeline\test_render_pipeline_stages.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\sanitizers.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\simd_util-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\size_constraints.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\splines.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\splines.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\toc.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\toc.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\transfer_functions-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\transpose-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\jxl\xorshift128plus-inl.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows\ZERO_CHECK.proj">
+      <Project>{EDDC9B87-02B2-3FDE-857A-5A7259B4D8F2}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

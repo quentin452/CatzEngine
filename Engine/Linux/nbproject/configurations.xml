@@ -362,24 +362,28 @@
       </logicalFolder>
       <logicalFolder name="Graphics" displayName="Graphics" projectFiles="true">
         <logicalFolder name="Import" displayName="Import" projectFiles="true">
+          <itemPath>../Source/Graphics/Import/ASTC Compress.cpp</itemPath>
           <itemPath>../Source/Graphics/Import/ASTC.cpp</itemPath>
-          <itemPath>../Source/Graphics/Import/ASTC_Compress.cpp</itemPath>
+          <itemPath>../Source/Graphics/Import/AVIF Compress.cpp</itemPath>
+          <itemPath>../Source/Graphics/Import/AVIF.cpp</itemPath>
+          <itemPath>../Source/Graphics/Import/BC Compress.cpp</itemPath>
           <itemPath>../Source/Graphics/Import/BC.cpp</itemPath>
           <itemPath>../Source/Graphics/Import/BC.h</itemPath>
-          <itemPath>../Source/Graphics/Import/BC_Compress.cpp</itemPath>
           <itemPath>../Source/Graphics/Import/BMP.cpp</itemPath>
           <itemPath>../Source/Graphics/Import/DDS.cpp</itemPath>
+          <itemPath>../Source/Graphics/Import/ETC Compress.cpp</itemPath>
           <itemPath>../Source/Graphics/Import/ETC.cpp</itemPath>
           <itemPath>../Source/Graphics/Import/ETC.h</itemPath>
-          <itemPath>../Source/Graphics/Import/ETC_Compress.cpp</itemPath>
           <itemPath>../Source/Graphics/Import/HDR.cpp</itemPath>
           <itemPath>../Source/Graphics/Import/HEIF.cpp</itemPath>
           <itemPath>../Source/Graphics/Import/ICO.cpp</itemPath>
+          <itemPath>../Source/Graphics/Import/JPEG XL Compress.cpp</itemPath>
+          <itemPath>../Source/Graphics/Import/JPEG XL.cpp</itemPath>
           <itemPath>../Source/Graphics/Import/JPEG.cpp</itemPath>
           <itemPath>../Source/Graphics/Import/PNG.cpp</itemPath>
           <itemPath>../Source/Graphics/Import/PSD.cpp</itemPath>
+          <itemPath>../Source/Graphics/Import/PVRTC Compress.cpp</itemPath>
           <itemPath>../Source/Graphics/Import/PVRTC.cpp</itemPath>
-          <itemPath>../Source/Graphics/Import/PVRTC_Compress.cpp</itemPath>
           <itemPath>../Source/Graphics/Import/TGA.cpp</itemPath>
           <itemPath>../Source/Graphics/Import/TIF.cpp</itemPath>
           <itemPath>../Source/Graphics/Import/WEBP.cpp</itemPath>
@@ -397,12 +401,12 @@
         <itemPath>../Source/Graphics/Fog.cpp</itemPath>
         <itemPath>../Source/Graphics/Fur.cpp</itemPath>
         <itemPath>../Source/Graphics/Image Atlas.cpp</itemPath>
+        <itemPath>../Source/Graphics/Image Filter Waifu.cpp</itemPath>
         <itemPath>../Source/Graphics/Image IO.cpp</itemPath>
         <itemPath>../Source/Graphics/Image Operations.cpp</itemPath>
         <itemPath>../Source/Graphics/Image Pixel.cpp</itemPath>
         <itemPath>../Source/Graphics/Image RT.cpp</itemPath>
         <itemPath>../Source/Graphics/Image.cpp</itemPath>
-        <itemPath>../Source/Graphics/ImageFilterWaifu.cpp</itemPath>
         <itemPath>../Source/Graphics/Light.cpp</itemPath>
         <itemPath>../Source/Graphics/Material.cpp</itemPath>
         <itemPath>../Source/Graphics/Particle.cpp</itemPath>
@@ -651,7 +655,7 @@
         <itemPath>../Source/Sound/Sound Stream.cpp</itemPath>
         <itemPath>../Source/Sound/Sound.cpp</itemPath>
         <itemPath>../Source/Sound/Spectrometer.cpp</itemPath>
-        <itemPath>../Source/Sound/VorbisEncoder.cpp</itemPath>
+        <itemPath>../Source/Sound/Vorbis Encoder.cpp</itemPath>
       </logicalFolder>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -1437,6 +1441,11 @@
       </item>
       <item path="../Source/Graphics/Image Atlas.cpp" ex="false" tool="1" flavor2="0">
       </item>
+      <item path="../Source/Graphics/Image Filter Waifu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="../Source/Graphics/Image IO.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Graphics/Image Operations.cpp"
@@ -1450,14 +1459,21 @@
       </item>
       <item path="../Source/Graphics/Image.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../Source/Graphics/ImageFilterWaifu.cpp"
+      <item path="../Source/Graphics/Import/ASTC Compress.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
       <item path="../Source/Graphics/Import/ASTC.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../Source/Graphics/Import/ASTC_Compress.cpp"
+      <item path="../Source/Graphics/Import/AVIF Compress.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../Source/Graphics/Import/AVIF.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../Source/Graphics/Import/BC Compress.cpp"
             ex="false"
             tool="1"
             flavor2="0">
@@ -1466,23 +1482,18 @@
       </item>
       <item path="../Source/Graphics/Import/BC.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../Source/Graphics/Import/BC_Compress.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
       <item path="../Source/Graphics/Import/BMP.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Graphics/Import/DDS.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../Source/Graphics/Import/ETC.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../Source/Graphics/Import/ETC.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../Source/Graphics/Import/ETC_Compress.cpp"
+      <item path="../Source/Graphics/Import/ETC Compress.cpp"
             ex="false"
             tool="1"
             flavor2="0">
+      </item>
+      <item path="../Source/Graphics/Import/ETC.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../Source/Graphics/Import/ETC.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../Source/Graphics/Import/HDR.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -1490,18 +1501,28 @@
       </item>
       <item path="../Source/Graphics/Import/ICO.cpp" ex="false" tool="1" flavor2="0">
       </item>
+      <item path="../Source/Graphics/Import/JPEG XL Compress.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../Source/Graphics/Import/JPEG XL.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="../Source/Graphics/Import/JPEG.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Graphics/Import/PNG.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Graphics/Import/PSD.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../Source/Graphics/Import/PVRTC.cpp"
+      <item path="../Source/Graphics/Import/PVRTC Compress.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../Source/Graphics/Import/PVRTC_Compress.cpp"
+      <item path="../Source/Graphics/Import/PVRTC.cpp"
             ex="false"
             tool="1"
             flavor2="0">
@@ -2070,7 +2091,7 @@
       </item>
       <item path="../Source/Sound/Spectrometer.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../Source/Sound/VorbisEncoder.cpp" ex="false" tool="1" flavor2="0">
+      <item path="../Source/Sound/Vorbis Encoder.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../stdafx.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -2854,6 +2875,11 @@
       </item>
       <item path="../Source/Graphics/Image Atlas.cpp" ex="false" tool="1" flavor2="0">
       </item>
+      <item path="../Source/Graphics/Image Filter Waifu.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="../Source/Graphics/Image IO.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Graphics/Image Operations.cpp"
@@ -2867,14 +2893,21 @@
       </item>
       <item path="../Source/Graphics/Image.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../Source/Graphics/ImageFilterWaifu.cpp"
+      <item path="../Source/Graphics/Import/ASTC Compress.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
       <item path="../Source/Graphics/Import/ASTC.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../Source/Graphics/Import/ASTC_Compress.cpp"
+      <item path="../Source/Graphics/Import/AVIF Compress.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../Source/Graphics/Import/AVIF.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../Source/Graphics/Import/BC Compress.cpp"
             ex="false"
             tool="1"
             flavor2="0">
@@ -2883,23 +2916,18 @@
       </item>
       <item path="../Source/Graphics/Import/BC.h" ex="false" tool="3" flavor2="0">
       </item>
-      <item path="../Source/Graphics/Import/BC_Compress.cpp"
-            ex="false"
-            tool="1"
-            flavor2="0">
-      </item>
       <item path="../Source/Graphics/Import/BMP.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Graphics/Import/DDS.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../Source/Graphics/Import/ETC.cpp" ex="false" tool="1" flavor2="0">
-      </item>
-      <item path="../Source/Graphics/Import/ETC.h" ex="false" tool="3" flavor2="0">
-      </item>
-      <item path="../Source/Graphics/Import/ETC_Compress.cpp"
+      <item path="../Source/Graphics/Import/ETC Compress.cpp"
             ex="false"
             tool="1"
             flavor2="0">
+      </item>
+      <item path="../Source/Graphics/Import/ETC.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../Source/Graphics/Import/ETC.h" ex="false" tool="3" flavor2="0">
       </item>
       <item path="../Source/Graphics/Import/HDR.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -2907,18 +2935,28 @@
       </item>
       <item path="../Source/Graphics/Import/ICO.cpp" ex="false" tool="1" flavor2="0">
       </item>
+      <item path="../Source/Graphics/Import/JPEG XL Compress.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
+      <item path="../Source/Graphics/Import/JPEG XL.cpp"
+            ex="false"
+            tool="1"
+            flavor2="0">
+      </item>
       <item path="../Source/Graphics/Import/JPEG.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Graphics/Import/PNG.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Graphics/Import/PSD.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../Source/Graphics/Import/PVRTC.cpp"
+      <item path="../Source/Graphics/Import/PVRTC Compress.cpp"
             ex="false"
             tool="1"
             flavor2="0">
       </item>
-      <item path="../Source/Graphics/Import/PVRTC_Compress.cpp"
+      <item path="../Source/Graphics/Import/PVRTC.cpp"
             ex="false"
             tool="1"
             flavor2="0">
@@ -3487,7 +3525,7 @@
       </item>
       <item path="../Source/Sound/Spectrometer.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../Source/Sound/VorbisEncoder.cpp" ex="false" tool="1" flavor2="0">
+      <item path="../Source/Sound/Vorbis Encoder.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../stdafx.cpp" ex="false" tool="1" flavor2="0">
       </item>

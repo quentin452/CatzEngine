@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\aom_dsp_rtcd.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_scale\aom_scale_rtcd.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\common\av1_rtcd.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\AOM\Android\config\aom_dsp_rtcd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\AOM\Android\config\aom_scale_rtcd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\AOM\Android\config\av1_rtcd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\0766f55f583a2bbd53af028e61f1ffba\aom_dsp_rtcd.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\0766f55f583a2bbd53af028e61f1ffba\aom_scale_rtcd.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Esenthel\ThirdPartyLibs\AOM\Android\CMakeFiles\0766f55f583a2bbd53af028e61f1ffba\av1_rtcd.h.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\aom_dsp_rtcd_defs.pl" />
+    <None Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_scale\aom_scale_rtcd.pl" />
+    <None Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\common\av1_rtcd_defs.pl" />
+    <None Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\build\cmake\rtcd.pl" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{82F11C6C-9A1D-3E4D-A60D-35698AF8BA5B}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{854C30F8-4A03-31BE-932B-B95597843CE0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{FA0D4B5A-40CC-360D-B316-1A2849B8BA5A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

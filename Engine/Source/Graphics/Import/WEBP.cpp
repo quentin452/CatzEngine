@@ -18,41 +18,48 @@ Bool Image::ImportWEBP(File &f)
 #if SUPPORT_WEBP
    if(f.getUInt()==CC4('R','I','F','F'))
    {
-      UInt size; f>>size;
-      if(f.left()>=size
-      && f.getUInt()==CC4('W','E','B','P'))
+      UInt size;
+      if(f.getFast(size)
+      && f.left()>=size
+      && f.getUInt()==CC4('W','E','B','P')
+      && f.skip(-12))
       {
-         WebPDecoderConfig            config;
-         WebPDecBuffer         *const output_buffer=&config.output;
-         WebPBitstreamFeatures *const bitstream    =&config.input;
+         size+=8; // we have to add 8 for the RIFF+size data
+         Memt<Byte> temp;
+         Ptr        data;
+         if(f._type==FILE_MEM)data=f.memFast();else
+         {
+            data=temp.setNumDiscard(size).data();
+            if(!f.getFast(data, size))goto error;
+         }
+         WebPDecoderConfig         config;
          if(WebPInitDecoderConfig(&config))
          {
-            //config.options.use_threads=1; made no difference in performance
-            Memt<Byte> temp; temp.setNum(size+8); // we have to add 8 for the RIFF+size data
-            if(f.skip(-12) && f.getFast(temp.data(), temp.elms()))
-               if(WebPGetFeatures(temp.data(), temp.elms(), bitstream)==VP8_STATUS_OK)
+          //config.options.use_threads=1; made no difference in performance
+            if(WebPGetFeatures((uint8_t*)data, size, &config.input)==VP8_STATUS_OK)
             {
                IMAGE_TYPE type;
-               if(bitstream->has_alpha)
+               if(config.input.has_alpha)
                {
-                  type                     =IMAGE_R8G8B8A8_SRGB;
-                  output_buffer->colorspace=MODE_RGBA;
+                  type                    =IMAGE_R8G8B8A8_SRGB;
+                  config.output.colorspace=MODE_RGBA;
                }else
                {
-                  type                     =IMAGE_R8G8B8_SRGB;
-                  output_buffer->colorspace=MODE_RGB;
+                  type                    =IMAGE_R8G8B8_SRGB;
+                  config.output.colorspace=MODE_RGB;
                }
-               if(createSoftTry(bitstream->width, bitstream->height, 1, type))
+               if(createSoft(config.input.width, config.input.height, 1, type))
                {
-                  output_buffer->is_external_memory=true;
-                  output_buffer->u.RGBA.stride=pitch ();
-                  output_buffer->u.RGBA.size  =pitch2();
-                  output_buffer->u.RGBA.rgba  =data  ();
-                  if(WebPDecode(temp.data(), temp.elms(), &config)==VP8_STATUS_OK)ok=true;
+                  config.output.is_external_memory=true;
+                  config.output.u.RGBA.stride=T.pitch ();
+                  config.output.u.RGBA.size  =T.pitch2();
+                  config.output.u.RGBA.rgba  =T.data  ();
+                  if(WebPDecode((uint8_t*)data, size, &config)==VP8_STATUS_OK)ok=true;
                }
             }
-            WebPFreeDecBuffer(output_buffer);
+            WebPFreeDecBuffer(&config.output);
          }
+      error:;
       }
    }
 #endif
@@ -61,7 +68,7 @@ Bool Image::ImportWEBP(File &f)
 Bool Image::ImportWEBP(C Str &name)
 {
 #if SUPPORT_WEBP
-   File f; if(f.readTry(name))return ImportWEBP(f);
+   File f; if(f.read(name))return ImportWEBP(f);
 #endif
    del(); return false;
 }
@@ -80,7 +87,7 @@ Bool Image::ExportWEBP(File &f, Flt rgb_quality, Flt alpha_quality)C
  C Image *src=this;
    Image  temp;
    if(src->cube  ()                                                      )if(temp.fromCube(*src ,             IMAGE_B8G8R8A8_SRGB               ))src=&temp;else return false;
-   if(src->hwType()!=IMAGE_B8G8R8A8 && src->hwType()!=IMAGE_B8G8R8A8_SRGB)if(src->copyTry ( temp, -1, -1, -1, IMAGE_B8G8R8A8_SRGB, IMAGE_SOFT, 1))src=&temp;else return false; // WEBP uses BGRA
+   if(src->hwType()!=IMAGE_B8G8R8A8 && src->hwType()!=IMAGE_B8G8R8A8_SRGB)if(src->copy    ( temp, -1, -1, -1, IMAGE_B8G8R8A8_SRGB, IMAGE_SOFT, 1))src=&temp;else return false; // WEBP uses BGRA
 
    if(src->w()<=WEBP_MAX_DIMENSION
    && src->h()<=WEBP_MAX_DIMENSION)
@@ -91,22 +98,24 @@ Bool Image::ExportWEBP(File &f, Flt rgb_quality, Flt alpha_quality)C
       if(WebPPictureInit(&picture)
       && WebPConfigInit (&config))
       {
-         Int q=RoundPos(rgb_quality*100);
+         Flt q=rgb_quality*100;
          if( q<  0)q=100;else // default to 100=lossless
          if( q>100)q=100;
 
-         Int aq=RoundPos(alpha_quality*100);
+         Flt aq=alpha_quality*100;
          if( aq<  0)aq=  q;else // default to 'q'=rgb_quality
          if( aq>100)aq=100;
 
        //config .pass         =10; // very little difference, not sure if better or worse
-       //config .method       =6; // this affects only lossy, 5 and 6 are supposed to be better quality, however they actually made image lose detail
-       //config .thread_level =2; // 1=no performance difference, >=1 actually makes the compression to fail
+       //config .method       =6; // don't turn this on, because for lossless it can be too slow for camera photographs (91s for 4K x 2K photo, default method=4 is 7.5s), for lossy it's not as slow, it makes file smaller but at lower quality so just skip too
+         config .thread_level =1; // 0=disabled, 1=no performance difference, >1 makes the compression to fail
        //config .near_lossless=; // made things much worse
-         config .lossless     =(q>=100);
+         config .lossless     =(q>=100-EPS);
          config .      quality= q;
          config .alpha_quality=aq;
          config .exact        =true;
+         config .use_sharp_yuv=true; // if enabled then introduces plenty of blurry artifacts for pixel-art rescaled x4 NearestNeighbor, however using 'autofilter=1' fixes the problem
+         config .autofilter   =1; // enable because of 'use_sharp_yuv'
          picture.width        =src->w();
          picture.height       =src->h();
       #if 1 // RGBA
@@ -115,11 +124,11 @@ Bool Image::ExportWEBP(File &f, Flt rgb_quality, Flt alpha_quality)C
          picture.argb_stride  =src->pitch()/src->bytePP(); // in pixel units
       #else // YUVA, this didn't improve the quality, we could use it mainly if we had the source already in YUV format
          Image Y, U, V, A;
-         Y.createSoftTry(src->w(), src->h(), 1, IMAGE_L8);
-         U.createSoftTry(src->w(), src->h(), 1, IMAGE_L8);
-         V.createSoftTry(src->w(), src->h(), 1, IMAGE_L8);
+         Y.createSoft(src->w(), src->h(), 1, IMAGE_L8);
+         U.createSoft(src->w(), src->h(), 1, IMAGE_L8);
+         V.createSoft(src->w(), src->h(), 1, IMAGE_L8);
          if(src->typeInfo().a)
-            if(src->copyTry(A, -1, -1, -1, IMAGE_A8, IMAGE_SOFT, 1))
+            if(src->copy(A, -1, -1, -1, IMAGE_A8, IMAGE_SOFT, 1))
          {
             picture.a       =(uint8_t*)A.data();
             picture.a_stride=A.pitch()/A.bytePP(); // in pixel units
@@ -154,7 +163,7 @@ Bool Image::ExportWEBP(File &f, Flt rgb_quality, Flt alpha_quality)C
 Bool Image::ExportWEBP(C Str &name, Flt rgb_quality, Flt alpha_quality)C
 {
 #if SUPPORT_WEBP
-   File f; if(f.writeTry(name)){if(ExportWEBP(f, rgb_quality, alpha_quality) && f.flush())return true; f.del(); FDelFile(name);}
+   File f; if(f.write(name)){if(ExportWEBP(f, rgb_quality, alpha_quality) && f.flush())return true; f.del(); FDelFile(name);}
 #endif
    return false;
 }

@@ -672,7 +672,7 @@ Str ConsoleProcess::get()
                if(size==MultiByteToWideChar(CP_ACP, 0, _data(), length, WChar(s._d.data()), s._d.elms()))s._d[s._length=size]='\0';else s.clear();
             }
          }
-        _data.clear()+=last; // restore what was removed
+        _data.clear(); if(last)_data+=last; // restore what was removed
          return s;
       }else
    #endif
@@ -693,7 +693,7 @@ Str ConsoleProcess::get()
             if((_data[_data.length()-2]&0xF0)==0xE0)skip=2; // 1110xxxx, available, missing
             REP(skip){temp[i]=_data.last(); _data.removeLast();}
          }
-         Str str=FromUTF8(_data); _data.clear(); FREP(skip)_data+=temp[i]; return str;
+         Str str=FromUTF8(_data); _data.clear(); FREP(skip)if(temp[i])_data+=temp[i]; return str;
       }
    }
    return S;

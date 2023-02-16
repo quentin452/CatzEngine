@@ -952,7 +952,7 @@ void ObjView::meshDisableLQLODs()
 }
 void ObjView::meshSkinFull()
 {
-   const byte bone=sel_bone+1;
+   const BoneType bone=sel_bone+VIRTUAL_ROOT_BONE;
    bool changed=false;
    MeshLod &lod=getLod();
    mesh_undos.set("skinFull");
@@ -973,7 +973,7 @@ void ObjView::meshSkinFull()
 }
 void ObjView::meshSkinFullP()
 {
-   const byte bone=sel_bone+1, bone_parent=(mesh_skel ? mesh_skel->boneParent(sel_bone) : -1)+1;
+   const BoneType bone=sel_bone+VIRTUAL_ROOT_BONE, bone_parent=(mesh_skel ? mesh_skel->boneParent(sel_bone) : -1)+VIRTUAL_ROOT_BONE;
    bool changed=false;
    MeshLod &lod=getLod();
    mesh_undos.set("skinFull");
@@ -994,7 +994,7 @@ void ObjView::meshSkinFullP()
 }
 void ObjView::meshSkinFullU()
 {
-   const byte bone=sel_bone+1;
+   const BoneType bone=sel_bone+VIRTUAL_ROOT_BONE;
    bool changed=false;
    MeshLod &lod=getLod();
    mesh_undos.set("skinFullU");
@@ -1005,8 +1005,8 @@ void ObjView::meshSkinFullU()
       bool part_changed=false;
       if(base.vtx.matrix() && base.vtx.blend())REPA(base.vtx)
       {
-         VecB4 &matrix=base.vtx.matrix(i);
-         VecB4 &blend =base.vtx.blend (i);
+         VtxBone &matrix=base.vtx.matrix(i);
+         VecB4   &blend =base.vtx.blend (i);
          REPA(matrix)if(matrix.c[i]==bone && blend.c[i]>0)
          {
             IndexWeight skin[]=
@@ -1028,7 +1028,7 @@ void ObjView::meshSkinFullU()
 }
 void ObjView::meshSkinAuto()
 {
-   const byte bone=sel_bone+1;
+   const BoneType bone=sel_bone+VIRTUAL_ROOT_BONE;
    bool changed=false;
    MeshLod &lod=getLod();
    mesh_undos.set("skinAuto");
@@ -1039,8 +1039,8 @@ void ObjView::meshSkinAuto()
       bool part_changed=false;
       if(base.vtx.pos())REPA(base.vtx)
       {
-         VecB4 matrix;
-         VecB4 blend ;
+         VtxBone matrix;
+         VecB4   blend ;
          mesh_skel->getSkin(base.vtx.pos(i)*mesh_matrix, blend, matrix);
          if(sel_bone<0 || matrix.x==bone || matrix.y==bone || matrix.z==bone || matrix.w==bone)
          {

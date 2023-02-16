@@ -49,7 +49,7 @@ Bool ImageAtlas::create(C CMemPtr<Source> &images, IMAGE_TYPE image_type, Int mi
       if(Image *src=image.image())if(src->is())
       {
          ia.original_size.set(src->w(), src->h());
-         if( src->compressed()){Image &image_temp=image_decompressed.New(); if(!src->copyTry(image_temp, -1, -1, -1, -1, IMAGE_SOFT, 1))goto error; src=&image_temp;}
+         if( src->compressed()){Image &image_temp=image_decompressed.New(); if(!src->copy(image_temp, -1, -1, -1, -1, IMAGE_SOFT, 1))goto error; src=&image_temp;}
          if(!src->lock(LOCK_READ))goto error;
          RectI opaque; // this is inclusive
          if(!trim_transparent)opaque.set(0, 0, src->w()-1, src->h()-1);else
@@ -72,7 +72,7 @@ Bool ImageAtlas::create(C CMemPtr<Source> &images, IMAGE_TYPE image_type, Int mi
 
    // write parts to images
    T.parts .setNum(ias        .elms());
-   T.images.setNum(image_sizes.elms()); REPA(T.images)if(T.images[i].createTry(image_sizes[i].x, image_sizes[i].y, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1))T.images[i].clear();else goto error;
+   T.images.setNum(image_sizes.elms()); REPA(T.images)if(T.images[i].create(image_sizes[i].x, image_sizes[i].y, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1))T.images[i].clear();else goto error;
    REPA(ias)
    {
     C RectIndex    &pack=packed[i];
@@ -115,7 +115,7 @@ Bool ImageAtlas::create(C CMemPtr<Source> &images, IMAGE_TYPE image_type, Int mi
    {
       Image &image=T.images[i];
       if(transparent_to_neighbors)image.transparentToNeighbor();
-      if(!image.copyTry(image, -1, -1, -1, image_type, IMAGE_2D, mip_maps, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT))goto error;
+      if(!image.copy(image, -1, -1, -1, image_type, IMAGE_2D, mip_maps, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT))goto error;
    }
 
    // success
@@ -136,10 +136,10 @@ Bool ImageAtlas::extract(Int part_index, Image &dest, Bool soft)C
     C Part &part=parts[part_index];
       if(C Image *src=images.addr(part.image_index))
       {
-         Image temp; if(src->compressed())if(src->copyTry(temp, -1, -1, -1, ImageTypeUncompressed(src->type()), IMAGE_SOFT, 1))src=&temp;else return false;
+         Image temp; if(src->compressed())if(src->copy(temp, -1, -1, -1, ImageTypeUncompressed(src->type()), IMAGE_SOFT, 1))src=&temp;else return false;
          if(src->lockRead())
          {
-            if(dest.createTry(part.original_size.x, part.original_size.y, 1, src->type(), soft ? IMAGE_SOFT : IMAGE_2D, 1)) // at this time, 'src.type' is already uncompressed
+            if(dest.create(part.original_size.x, part.original_size.y, 1, src->type(), soft ? IMAGE_SOFT : IMAGE_2D, 1)) // at this time, 'src.type' is already uncompressed
             {
                if(dest.lock(LOCK_WRITE))
                {
@@ -250,12 +250,12 @@ Bool ImageAtlas::load(File &f)
 }
 Bool ImageAtlas::save(C Str &name)C
 {
-   File f; if(f.writeTry(name)){if(save(f) && f.flush())return true; f.del(); FDelFile(name);}
+   File f; if(f.write(name)){if(save(f) && f.flush())return true; f.del(); FDelFile(name);}
    return false;
 }
 Bool ImageAtlas::load(C Str &name)
 {
-   File f; if(f.readTry(name))return load(f);
+   File f; if(f.read(name))return load(f);
    del(); return false;
 }
 void ImageAtlas::operator=(C Str &name) {if(!load(name))Exit(S+"Can't load ImageAtlas \""+name+ "\".");}

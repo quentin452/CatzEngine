@@ -118,7 +118,7 @@ class LakeBase
    bool load(C Str &name)
    {
       ReadLock rl(WorldAreaSync);
-      File f; if(f.readTry(name))return load(f); return false;
+      File f; if(f.read(name))return load(f); return false;
    }
 }
 /******************************************************************************/
@@ -246,7 +246,7 @@ class RiverBase
    bool load(C Str &name)
    {
       ReadLock rl(WorldAreaSync);
-      File f; if(f.readTry(name))return load(f); return false;
+      File f; if(f.read(name))return load(f); return false;
    }
 }
 /******************************************************************************/

@@ -1,0 +1,1197 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		07B0607353F948638FF21FC6 /* ZERO_CHECK */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = FED717AAF016415AADAA18A0 /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */;
+			buildPhases = (
+				A351C5E7ECA619C7BB9DACB6 /* Generate CMakeFiles/ZERO_CHECK */,
+			);
+			dependencies = (
+			);
+			name = ZERO_CHECK;
+			productName = ZERO_CHECK;
+		};
+		673B2D53B8CC43DDAD0F5CB7 /* ALL_BUILD */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 70B7E5B25831487FBEBD65B9 /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */;
+			buildPhases = (
+				3886156F4ADB20FA4EE64828 /* Generate CMakeFiles/ALL_BUILD */,
+			);
+			dependencies = (
+				9405B13EEF4240EF979030E2 /* PBXTargetDependency */,
+				132660B31D3B49D18EADA798 /* PBXTargetDependency */,
+			);
+			name = ALL_BUILD;
+			productName = ALL_BUILD;
+		};
+		6900F59E4B8F4CBC8A5A6F14 /* install */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 10DBCFFC3E5D45DD8C5D3090 /* Build configuration list for PBXAggregateTarget "install" */;
+			buildPhases = (
+				93426DA6A4AC2C2AC9CE883C /* CMake PostBuild Rules */,
+			);
+			dependencies = (
+				4292AF16BAEF4CF5A1D95EB0 /* PBXTargetDependency */,
+			);
+			name = install;
+			productName = install;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		00540ADAF779412CA1065035 /* rawdata.c in Sources */ = {isa = PBXBuildFile; fileRef = 104D150496004314A2A613FF /* rawdata.c */; };
+		00EE6C78F9504550B53F6363 /* alpha.c in Sources */ = {isa = PBXBuildFile; fileRef = B1BCAF98C67942C9A91E1070 /* alpha.c */; };
+		263C20671D0F47558A3630FB /* exif.c in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B3408A5940FBAC08B217 /* exif.c */; };
+		47B2346FF6F046819781FCC8 /* mem.c in Sources */ = {isa = PBXBuildFile; fileRef = 4288985834824E97A890ACFE /* mem.c */; };
+		4C5A8EC770A24C719CC130E5 /* write.c in Sources */ = {isa = PBXBuildFile; fileRef = 10D362794A744FB09961746E /* write.c */; };
+		638A6661197945CA824CC5E6 /* diag.c in Sources */ = {isa = PBXBuildFile; fileRef = FD7710E90B1A483A8F24ABD1 /* diag.c */; };
+		6921066EE5F345DB92044911 /* reformat_libsharpyuv.c in Sources */ = {isa = PBXBuildFile; fileRef = C144E68A9F8D44FBA0B83C24 /* reformat_libsharpyuv.c */; };
+		6C6EB9A9071C4BF5830F147B /* scale.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CD4B7F3C8E64BDFAF51A9CE /* scale.c */; };
+		772ED94F1CEB40B680DA2BD0 /* colr.c in Sources */ = {isa = PBXBuildFile; fileRef = 8E5F8E0BCE244B6BBE1D9C8B /* colr.c */; };
+		7F5ABB8BDAB4408E82A96E61 /* read.c in Sources */ = {isa = PBXBuildFile; fileRef = 74385C8BDB5B4FBD8E41F3F0 /* read.c */; };
+		81131182D52F439E92D45F73 /* stream.c in Sources */ = {isa = PBXBuildFile; fileRef = F8D18AFAB5C84A8E87B7D420 /* stream.c */; };
+		96E930A281604D29B914D601 /* obu.c in Sources */ = {isa = PBXBuildFile; fileRef = 15F550D50DE54A7180353A0E /* obu.c */; };
+		AA0DEC9541DE4C65957C951B /* codec_aom.c in Sources */ = {isa = PBXBuildFile; fileRef = 8D4F31835FD44B7380261E6E /* codec_aom.c */; };
+		AF77655BA235489EA04E000B /* avif.c in Sources */ = {isa = PBXBuildFile; fileRef = 7527A68023A94C2196058A6A /* avif.c */; };
+		B66FD410295CBB9C00F1CFE5 /* alpha.c in Sources */ = {isa = PBXBuildFile; fileRef = B1BCAF98C67942C9A91E1070 /* alpha.c */; };
+		B66FD411295CBB9C00F1CFE5 /* avif.c in Sources */ = {isa = PBXBuildFile; fileRef = 7527A68023A94C2196058A6A /* avif.c */; };
+		B66FD412295CBB9C00F1CFE5 /* codec_aom.c in Sources */ = {isa = PBXBuildFile; fileRef = 8D4F31835FD44B7380261E6E /* codec_aom.c */; };
+		B66FD413295CBB9C00F1CFE5 /* colr.c in Sources */ = {isa = PBXBuildFile; fileRef = 8E5F8E0BCE244B6BBE1D9C8B /* colr.c */; };
+		B66FD414295CBB9C00F1CFE5 /* diag.c in Sources */ = {isa = PBXBuildFile; fileRef = FD7710E90B1A483A8F24ABD1 /* diag.c */; };
+		B66FD415295CBB9C00F1CFE5 /* exif.c in Sources */ = {isa = PBXBuildFile; fileRef = C4D3B3408A5940FBAC08B217 /* exif.c */; };
+		B66FD416295CBB9C00F1CFE5 /* io.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C0B7FBEB9CF4759B2721C46 /* io.c */; };
+		B66FD417295CBB9C00F1CFE5 /* mem.c in Sources */ = {isa = PBXBuildFile; fileRef = 4288985834824E97A890ACFE /* mem.c */; };
+		B66FD418295CBB9C00F1CFE5 /* obu.c in Sources */ = {isa = PBXBuildFile; fileRef = 15F550D50DE54A7180353A0E /* obu.c */; };
+		B66FD419295CBB9C00F1CFE5 /* rawdata.c in Sources */ = {isa = PBXBuildFile; fileRef = 104D150496004314A2A613FF /* rawdata.c */; };
+		B66FD41A295CBB9C00F1CFE5 /* read.c in Sources */ = {isa = PBXBuildFile; fileRef = 74385C8BDB5B4FBD8E41F3F0 /* read.c */; };
+		B66FD41B295CBB9C00F1CFE5 /* reformat.c in Sources */ = {isa = PBXBuildFile; fileRef = 66E450E11E6B4B6B952DFFCC /* reformat.c */; };
+		B66FD41C295CBB9C00F1CFE5 /* reformat_libsharpyuv.c in Sources */ = {isa = PBXBuildFile; fileRef = C144E68A9F8D44FBA0B83C24 /* reformat_libsharpyuv.c */; };
+		B66FD41D295CBB9C00F1CFE5 /* reformat_libyuv.c in Sources */ = {isa = PBXBuildFile; fileRef = B33555FBB5854BE7A3D61A02 /* reformat_libyuv.c */; };
+		B66FD41E295CBB9C00F1CFE5 /* scale.c in Sources */ = {isa = PBXBuildFile; fileRef = 4CD4B7F3C8E64BDFAF51A9CE /* scale.c */; };
+		B66FD41F295CBB9C00F1CFE5 /* stream.c in Sources */ = {isa = PBXBuildFile; fileRef = F8D18AFAB5C84A8E87B7D420 /* stream.c */; };
+		B66FD420295CBB9C00F1CFE5 /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 9C1559514F51407C9918EF2C /* utils.c */; };
+		B66FD421295CBB9C00F1CFE5 /* write.c in Sources */ = {isa = PBXBuildFile; fileRef = 10D362794A744FB09961746E /* write.c */; };
+		BB2DC63D32DA470B8AE805DC /* reformat.c in Sources */ = {isa = PBXBuildFile; fileRef = 66E450E11E6B4B6B952DFFCC /* reformat.c */; };
+		BF43D80DCAC54B4F86F1E28D /* io.c in Sources */ = {isa = PBXBuildFile; fileRef = 4C0B7FBEB9CF4759B2721C46 /* io.c */; };
+		E2D9A6ED062646979EF2B6EC /* reformat_libyuv.c in Sources */ = {isa = PBXBuildFile; fileRef = B33555FBB5854BE7A3D61A02 /* reformat_libyuv.c */; };
+		E4D0C6A70BD7458A9E97B2FA /* utils.c in Sources */ = {isa = PBXBuildFile; fileRef = 9C1559514F51407C9918EF2C /* utils.c */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		3166A71F0D4E4C01B7EB370F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 21CA08F6CB0C4A2198C468C9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 673B2D53B8CC43DDAD0F5CB7;
+			remoteInfo = ALL_BUILD;
+		};
+		86F0AB8716C34B37850CA482 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 21CA08F6CB0C4A2198C468C9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 07B0607353F948638FF21FC6;
+			remoteInfo = ZERO_CHECK;
+		};
+		977BCC7826204AD288E2B9B5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 21CA08F6CB0C4A2198C468C9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 13C871B161654E1B9694FA22;
+			remoteInfo = avif;
+		};
+		A7D4274CC406431D8E162566 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 21CA08F6CB0C4A2198C468C9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 07B0607353F948638FF21FC6;
+			remoteInfo = ZERO_CHECK;
+		};
+		B66FD40E295CBB9C00F1CFE5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 21CA08F6CB0C4A2198C468C9 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 07B0607353F948638FF21FC6;
+			remoteInfo = ZERO_CHECK;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		104D150496004314A2A613FF /* rawdata.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = rawdata.c; path = src/rawdata.c; sourceTree = SOURCE_ROOT; };
+		10D362794A744FB09961746E /* write.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = write.c; path = src/write.c; sourceTree = SOURCE_ROOT; };
+		15F550D50DE54A7180353A0E /* obu.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = obu.c; path = src/obu.c; sourceTree = SOURCE_ROOT; };
+		422C8F4ED71043CF827476C6 /* CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		4288985834824E97A890ACFE /* mem.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = mem.c; path = src/mem.c; sourceTree = SOURCE_ROOT; };
+		4C0B7FBEB9CF4759B2721C46 /* io.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = io.c; path = src/io.c; sourceTree = SOURCE_ROOT; };
+		4CD4B7F3C8E64BDFAF51A9CE /* scale.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = scale.c; path = src/scale.c; sourceTree = SOURCE_ROOT; };
+		5CE23F71633F4E1ABF79FC75 /* libavif.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libavif.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		66E450E11E6B4B6B952DFFCC /* reformat.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = reformat.c; path = src/reformat.c; sourceTree = SOURCE_ROOT; };
+		74385C8BDB5B4FBD8E41F3F0 /* read.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = read.c; path = src/read.c; sourceTree = SOURCE_ROOT; };
+		7527A68023A94C2196058A6A /* avif.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = avif.c; path = src/avif.c; sourceTree = SOURCE_ROOT; };
+		8D4F31835FD44B7380261E6E /* codec_aom.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = codec_aom.c; path = src/codec_aom.c; sourceTree = SOURCE_ROOT; };
+		8E5F8E0BCE244B6BBE1D9C8B /* colr.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = colr.c; path = src/colr.c; sourceTree = SOURCE_ROOT; };
+		9C1559514F51407C9918EF2C /* utils.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = utils.c; path = src/utils.c; sourceTree = SOURCE_ROOT; };
+		B1BCAF98C67942C9A91E1070 /* alpha.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = alpha.c; path = src/alpha.c; sourceTree = SOURCE_ROOT; };
+		B33555FBB5854BE7A3D61A02 /* reformat_libyuv.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = reformat_libyuv.c; path = src/reformat_libyuv.c; sourceTree = SOURCE_ROOT; };
+		B66FD428295CBB9C00F1CFE5 /* libavif-iOS.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libavif-iOS.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C144E68A9F8D44FBA0B83C24 /* reformat_libsharpyuv.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = reformat_libsharpyuv.c; path = src/reformat_libsharpyuv.c; sourceTree = SOURCE_ROOT; };
+		C4D3B3408A5940FBAC08B217 /* exif.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = exif.c; path = src/exif.c; sourceTree = SOURCE_ROOT; };
+		D6094824E28144158C58BCFC /* CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		F8D18AFAB5C84A8E87B7D420 /* stream.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = stream.c; path = src/stream.c; sourceTree = SOURCE_ROOT; };
+		FD7710E90B1A483A8F24ABD1 /* diag.c */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.c; fileEncoding = 4; name = diag.c; path = src/diag.c; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		B66FD422295CBB9C00F1CFE5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		DE70C156316747BA84A84A52 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		19D49A61F2C541C08547E790 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		421C49B8D110438B87CD85F2 /* ALL_BUILD */ = {
+			isa = PBXGroup;
+			children = (
+				50A542FAF70E4FAFB8BFBBED /* CMake Rules */,
+				D6094824E28144158C58BCFC /* CMakeLists.txt */,
+			);
+			name = ALL_BUILD;
+			sourceTree = "<group>";
+		};
+		50A542FAF70E4FAFB8BFBBED /* CMake Rules */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "CMake Rules";
+			sourceTree = "<group>";
+		};
+		65979E8700204D3BB05D4A83 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				B1BCAF98C67942C9A91E1070 /* alpha.c */,
+				7527A68023A94C2196058A6A /* avif.c */,
+				8D4F31835FD44B7380261E6E /* codec_aom.c */,
+				8E5F8E0BCE244B6BBE1D9C8B /* colr.c */,
+				FD7710E90B1A483A8F24ABD1 /* diag.c */,
+				C4D3B3408A5940FBAC08B217 /* exif.c */,
+				4C0B7FBEB9CF4759B2721C46 /* io.c */,
+				4288985834824E97A890ACFE /* mem.c */,
+				15F550D50DE54A7180353A0E /* obu.c */,
+				104D150496004314A2A613FF /* rawdata.c */,
+				74385C8BDB5B4FBD8E41F3F0 /* read.c */,
+				66E450E11E6B4B6B952DFFCC /* reformat.c */,
+				C144E68A9F8D44FBA0B83C24 /* reformat_libsharpyuv.c */,
+				B33555FBB5854BE7A3D61A02 /* reformat_libyuv.c */,
+				4CD4B7F3C8E64BDFAF51A9CE /* scale.c */,
+				F8D18AFAB5C84A8E87B7D420 /* stream.c */,
+				9C1559514F51407C9918EF2C /* utils.c */,
+				10D362794A744FB09961746E /* write.c */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		892BF702737D4D648A84F180 = {
+			isa = PBXGroup;
+			children = (
+				CAA752E17E24415281772E85 /* avif */,
+				421C49B8D110438B87CD85F2 /* ALL_BUILD */,
+				A862955AF41844CCB259497C /* Products */,
+				19D49A61F2C541C08547E790 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		A862955AF41844CCB259497C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				5CE23F71633F4E1ABF79FC75 /* libavif.a */,
+				B66FD428295CBB9C00F1CFE5 /* libavif-iOS.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		CAA752E17E24415281772E85 /* avif */ = {
+			isa = PBXGroup;
+			children = (
+				65979E8700204D3BB05D4A83 /* Source Files */,
+				422C8F4ED71043CF827476C6 /* CMakeLists.txt */,
+			);
+			name = avif;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		13C871B161654E1B9694FA22 /* avif */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A5CD4B10AF2043AE88B52DA2 /* Build configuration list for PBXNativeTarget "avif" */;
+			buildPhases = (
+				F1410283E3BD4D5181DAFD24 /* Sources */,
+				DE70C156316747BA84A84A52 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				06E17B2A25CD4FE78E7E5D80 /* PBXTargetDependency */,
+			);
+			name = avif;
+			productName = avif;
+			productReference = 5CE23F71633F4E1ABF79FC75 /* libavif.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		B66FD40C295CBB9C00F1CFE5 /* iOS */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B66FD423295CBB9C00F1CFE5 /* Build configuration list for PBXNativeTarget "iOS" */;
+			buildPhases = (
+				B66FD40F295CBB9C00F1CFE5 /* Sources */,
+				B66FD422295CBB9C00F1CFE5 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B66FD40D295CBB9C00F1CFE5 /* PBXTargetDependency */,
+			);
+			name = iOS;
+			productName = avif;
+			productReference = B66FD428295CBB9C00F1CFE5 /* libavif-iOS.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		21CA08F6CB0C4A2198C468C9 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 1400;
+			};
+			buildConfigurationList = 81F9C0E27CEA43AA8EE02905 /* Build configuration list for PBXProject "libavif" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 892BF702737D4D648A84F180;
+			projectDirPath = /Applications/Esenthel/ThirdPartyLibs/AVIF/lib;
+			projectRoot = "";
+			targets = (
+				673B2D53B8CC43DDAD0F5CB7 /* ALL_BUILD */,
+				07B0607353F948638FF21FC6 /* ZERO_CHECK */,
+				13C871B161654E1B9694FA22 /* avif */,
+				B66FD40C295CBB9C00F1CFE5 /* iOS */,
+				6900F59E4B8F4CBC8A5A6F14 /* install */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		3886156F4ADB20FA4EE64828 /* Generate CMakeFiles/ALL_BUILD */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Generate CMakeFiles/ALL_BUILD";
+			outputPaths = (
+				/Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/CMakeFiles/ALL_BUILD,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nif test \"$CONFIGURATION\" = \"Debug\"; then :\n  cd /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac\n  echo Build\\ all\\ projects\nfi\nif test \"$CONFIGURATION\" = \"Release\"; then :\n  cd /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac\n  echo Build\\ all\\ projects\nfi\nif test \"$CONFIGURATION\" = \"MinSizeRel\"; then :\n  cd /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac\n  echo Build\\ all\\ projects\nfi\nif test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :\n  cd /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac\n  echo Build\\ all\\ projects\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		93426DA6A4AC2C2AC9CE883C /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nif test \"$CONFIGURATION\" = \"Debug\"; then :\n  cd /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac\n  /Applications/CMake.app/Contents/bin/cmake -DBUILD_TYPE=$CONFIGURATION$EFFECTIVE_PLATFORM_NAME -P cmake_install.cmake\nfi\nif test \"$CONFIGURATION\" = \"Release\"; then :\n  cd /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac\n  /Applications/CMake.app/Contents/bin/cmake -DBUILD_TYPE=$CONFIGURATION$EFFECTIVE_PLATFORM_NAME -P cmake_install.cmake\nfi\nif test \"$CONFIGURATION\" = \"MinSizeRel\"; then :\n  cd /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac\n  /Applications/CMake.app/Contents/bin/cmake -DBUILD_TYPE=$CONFIGURATION$EFFECTIVE_PLATFORM_NAME -P cmake_install.cmake\nfi\nif test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :\n  cd /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac\n  /Applications/CMake.app/Contents/bin/cmake -DBUILD_TYPE=$CONFIGURATION$EFFECTIVE_PLATFORM_NAME -P cmake_install.cmake\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		A351C5E7ECA619C7BB9DACB6 /* Generate CMakeFiles/ZERO_CHECK */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Generate CMakeFiles/ZERO_CHECK";
+			outputPaths = (
+				/Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/CMakeFiles/ZERO_CHECK,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -e\nif test \"$CONFIGURATION\" = \"Debug\"; then :\n  cd /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac\n  make -f /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/CMakeScripts/ReRunCMake.make\nfi\nif test \"$CONFIGURATION\" = \"Release\"; then :\n  cd /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac\n  make -f /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/CMakeScripts/ReRunCMake.make\nfi\nif test \"$CONFIGURATION\" = \"MinSizeRel\"; then :\n  cd /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac\n  make -f /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/CMakeScripts/ReRunCMake.make\nfi\nif test \"$CONFIGURATION\" = \"RelWithDebInfo\"; then :\n  cd /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac\n  make -f /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/CMakeScripts/ReRunCMake.make\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		B66FD40F295CBB9C00F1CFE5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B66FD410295CBB9C00F1CFE5 /* alpha.c in Sources */,
+				B66FD411295CBB9C00F1CFE5 /* avif.c in Sources */,
+				B66FD412295CBB9C00F1CFE5 /* codec_aom.c in Sources */,
+				B66FD413295CBB9C00F1CFE5 /* colr.c in Sources */,
+				B66FD414295CBB9C00F1CFE5 /* diag.c in Sources */,
+				B66FD415295CBB9C00F1CFE5 /* exif.c in Sources */,
+				B66FD416295CBB9C00F1CFE5 /* io.c in Sources */,
+				B66FD417295CBB9C00F1CFE5 /* mem.c in Sources */,
+				B66FD418295CBB9C00F1CFE5 /* obu.c in Sources */,
+				B66FD419295CBB9C00F1CFE5 /* rawdata.c in Sources */,
+				B66FD41A295CBB9C00F1CFE5 /* read.c in Sources */,
+				B66FD41B295CBB9C00F1CFE5 /* reformat.c in Sources */,
+				B66FD41C295CBB9C00F1CFE5 /* reformat_libsharpyuv.c in Sources */,
+				B66FD41D295CBB9C00F1CFE5 /* reformat_libyuv.c in Sources */,
+				B66FD41E295CBB9C00F1CFE5 /* scale.c in Sources */,
+				B66FD41F295CBB9C00F1CFE5 /* stream.c in Sources */,
+				B66FD420295CBB9C00F1CFE5 /* utils.c in Sources */,
+				B66FD421295CBB9C00F1CFE5 /* write.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F1410283E3BD4D5181DAFD24 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				00EE6C78F9504550B53F6363 /* alpha.c in Sources */,
+				AF77655BA235489EA04E000B /* avif.c in Sources */,
+				AA0DEC9541DE4C65957C951B /* codec_aom.c in Sources */,
+				772ED94F1CEB40B680DA2BD0 /* colr.c in Sources */,
+				638A6661197945CA824CC5E6 /* diag.c in Sources */,
+				263C20671D0F47558A3630FB /* exif.c in Sources */,
+				BF43D80DCAC54B4F86F1E28D /* io.c in Sources */,
+				47B2346FF6F046819781FCC8 /* mem.c in Sources */,
+				96E930A281604D29B914D601 /* obu.c in Sources */,
+				00540ADAF779412CA1065035 /* rawdata.c in Sources */,
+				7F5ABB8BDAB4408E82A96E61 /* read.c in Sources */,
+				BB2DC63D32DA470B8AE805DC /* reformat.c in Sources */,
+				6921066EE5F345DB92044911 /* reformat_libsharpyuv.c in Sources */,
+				E2D9A6ED062646979EF2B6EC /* reformat_libyuv.c in Sources */,
+				6C6EB9A9071C4BF5830F147B /* scale.c in Sources */,
+				81131182D52F439E92D45F73 /* stream.c in Sources */,
+				E4D0C6A70BD7458A9E97B2FA /* utils.c in Sources */,
+				4C5A8EC770A24C719CC130E5 /* write.c in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		06E17B2A25CD4FE78E7E5D80 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 07B0607353F948638FF21FC6 /* ZERO_CHECK */;
+			targetProxy = A7D4274CC406431D8E162566 /* PBXContainerItemProxy */;
+		};
+		132660B31D3B49D18EADA798 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 07B0607353F948638FF21FC6 /* ZERO_CHECK */;
+			targetProxy = 86F0AB8716C34B37850CA482 /* PBXContainerItemProxy */;
+		};
+		4292AF16BAEF4CF5A1D95EB0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 673B2D53B8CC43DDAD0F5CB7 /* ALL_BUILD */;
+			targetProxy = 3166A71F0D4E4C01B7EB370F /* PBXContainerItemProxy */;
+		};
+		9405B13EEF4240EF979030E2 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 13C871B161654E1B9694FA22 /* avif */;
+			targetProxy = 977BCC7826204AD288E2B9B5 /* PBXContainerItemProxy */;
+		};
+		B66FD40D295CBB9C00F1CFE5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 07B0607353F948638FF21FC6 /* ZERO_CHECK */;
+			targetProxy = B66FD40E295CBB9C00F1CFE5 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		04387F6AFD2F4032870B990B /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk;
+				SYMROOT = /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/build;
+			};
+			name = MinSizeRel;
+		};
+		07E17639804E40959E68B35C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " $(inherited)";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = Debug;
+		};
+		08C7B313BD89450E9DBB30F3 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " $(inherited)";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = RelWithDebInfo;
+		};
+		0F86CC380569417B88DD11BC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/Debug;
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"'AVIF_CODEC_AOM=1'",
+					"'AVIF_CODEC_AOM_ENCODE=1'",
+					"'AVIF_CODEC_AOM_DECODE=1'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					/Applications/Esenthel/ThirdPartyLibs/AVIF/lib/include,
+					/Applications/Esenthel/ThirdPartyLibs/AOM/lib,
+					"$(inherited)",
+				);
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				OTHER_CFLAGS = (
+					"-fvisibility=hidden",
+					"-Wall",
+					"-Wextra",
+					"-Wshorten-64-to-32",
+					"'-std=gnu99'",
+					"$(inherited)",
+				);
+				OTHER_LIBTOOLFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = avif;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/build/avif.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = Debug;
+		};
+		266E8702F03247BE9EFC1934 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " $(inherited)";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = MinSizeRel;
+		};
+		2B9FD09EC4DE4569A0A2E9C5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " $(inherited)";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = Release;
+		};
+		3807C5D89A7A4266A77CD293 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk;
+				SYMROOT = /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/build;
+			};
+			name = Debug;
+		};
+		3E53CB3534C64F0586F9DBA2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/Release;
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"'AVIF_CODEC_AOM=1'",
+					"'AVIF_CODEC_AOM_ENCODE=1'",
+					"'AVIF_CODEC_AOM_DECODE=1'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					/Applications/Esenthel/ThirdPartyLibs/AVIF/lib/include,
+					/Applications/Esenthel/ThirdPartyLibs/AOM/lib,
+					"$(inherited)",
+				);
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-fvisibility=hidden",
+					"-Wall",
+					"-Wextra",
+					"-Wshorten-64-to-32",
+					"'-std=gnu99'",
+					"$(inherited)",
+				);
+				OTHER_LIBTOOLFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = avif;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/build/avif.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = Release;
+		};
+		4906804FB3F94A189E7028B3 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk;
+				SYMROOT = /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/build;
+			};
+			name = RelWithDebInfo;
+		};
+		4DE6D41E6CA1427199202A73 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " $(inherited)";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = RelWithDebInfo;
+		};
+		53C5608BD8B449B8B15D38B3 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/RelWithDebInfo;
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"'AVIF_CODEC_AOM=1'",
+					"'AVIF_CODEC_AOM_ENCODE=1'",
+					"'AVIF_CODEC_AOM_DECODE=1'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					/Applications/Esenthel/ThirdPartyLibs/AVIF/lib/include,
+					/Applications/Esenthel/ThirdPartyLibs/AOM/lib,
+					"$(inherited)",
+				);
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-fvisibility=hidden",
+					"-Wall",
+					"-Wextra",
+					"-Wshorten-64-to-32",
+					"'-std=gnu99'",
+					"$(inherited)",
+				);
+				OTHER_LIBTOOLFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = avif;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/build/avif.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = RelWithDebInfo;
+		};
+		71598EBD66A5425EA777B19B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " $(inherited)";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = Debug;
+		};
+		75E45F8CA32644DEB98ED984 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " $(inherited)";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = MinSizeRel;
+		};
+		9998BF9EAABE4840BDF57507 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " $(inherited)";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = MinSizeRel;
+		};
+		AE28B9565951480D8E93B9A9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " $(inherited)";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = Release;
+		};
+		B66FD424295CBB9C00F1CFE5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/Debug;
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"'AVIF_CODEC_AOM=1'",
+					"'AVIF_CODEC_AOM_ENCODE=1'",
+					"'AVIF_CODEC_AOM_DECODE=1'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					/Applications/Esenthel/ThirdPartyLibs/AVIF/lib/include,
+					/Applications/Esenthel/ThirdPartyLibs/AOM/lib,
+					"$(inherited)",
+				);
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				OTHER_CFLAGS = (
+					"-fvisibility=hidden",
+					"-Wall",
+					"-Wextra",
+					"-Wshorten-64-to-32",
+					"'-std=gnu99'",
+					"$(inherited)",
+				);
+				OTHER_LIBTOOLFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "avif-iOS";
+				SDKROOT = iphoneos;
+				SECTORDER_FLAGS = "";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				TARGET_TEMP_DIR = "/Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/build/avif.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = Debug;
+		};
+		B66FD425295CBB9C00F1CFE5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/Release;
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"'AVIF_CODEC_AOM=1'",
+					"'AVIF_CODEC_AOM_ENCODE=1'",
+					"'AVIF_CODEC_AOM_DECODE=1'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					/Applications/Esenthel/ThirdPartyLibs/AVIF/lib/include,
+					/Applications/Esenthel/ThirdPartyLibs/AOM/lib,
+					"$(inherited)",
+				);
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-fvisibility=hidden",
+					"-Wall",
+					"-Wextra",
+					"-Wshorten-64-to-32",
+					"'-std=gnu99'",
+					"$(inherited)",
+				);
+				OTHER_LIBTOOLFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "avif-iOS";
+				SDKROOT = iphoneos;
+				SECTORDER_FLAGS = "";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				TARGET_TEMP_DIR = "/Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/build/avif.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = Release;
+		};
+		B66FD426295CBB9C00F1CFE5 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/MinSizeRel;
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"'AVIF_CODEC_AOM=1'",
+					"'AVIF_CODEC_AOM_ENCODE=1'",
+					"'AVIF_CODEC_AOM_DECODE=1'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					/Applications/Esenthel/ThirdPartyLibs/AVIF/lib/include,
+					/Applications/Esenthel/ThirdPartyLibs/AOM/lib,
+					"$(inherited)",
+				);
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-fvisibility=hidden",
+					"-Wall",
+					"-Wextra",
+					"-Wshorten-64-to-32",
+					"'-std=gnu99'",
+					"$(inherited)",
+				);
+				OTHER_LIBTOOLFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "avif-iOS";
+				SDKROOT = iphoneos;
+				SECTORDER_FLAGS = "";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				TARGET_TEMP_DIR = "/Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/build/avif.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = MinSizeRel;
+		};
+		B66FD427295CBB9C00F1CFE5 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/RelWithDebInfo;
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"'AVIF_CODEC_AOM=1'",
+					"'AVIF_CODEC_AOM_ENCODE=1'",
+					"'AVIF_CODEC_AOM_DECODE=1'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					/Applications/Esenthel/ThirdPartyLibs/AVIF/lib/include,
+					/Applications/Esenthel/ThirdPartyLibs/AOM/lib,
+					"$(inherited)",
+				);
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-fvisibility=hidden",
+					"-Wall",
+					"-Wextra",
+					"-Wshorten-64-to-32",
+					"'-std=gnu99'",
+					"$(inherited)",
+				);
+				OTHER_LIBTOOLFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = "avif-iOS";
+				SDKROOT = iphoneos;
+				SECTORDER_FLAGS = "";
+				SUPPORTED_PLATFORMS = "iphonesimulator iphoneos";
+				TARGET_TEMP_DIR = "/Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/build/avif.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = RelWithDebInfo;
+		};
+		CE8A36BFFC3E4A219A81201E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH_ACTUAL)";
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.3.sdk;
+				SYMROOT = /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/build;
+			};
+			name = Release;
+		};
+		DD1F19BCD27E4CF7822F4A72 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " $(inherited)";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = Release;
+		};
+		E48CDAF485E246B5805B91F2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " $(inherited)";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = Debug;
+		};
+		EF1705A33CA04B35AE97D109 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				COMBINE_HIDPI_IMAGES = YES;
+				CONFIGURATION_BUILD_DIR = /Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/MinSizeRel;
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"'AVIF_CODEC_AOM=1'",
+					"'AVIF_CODEC_AOM_ENCODE=1'",
+					"'AVIF_CODEC_AOM_DECODE=1'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					/Applications/Esenthel/ThirdPartyLibs/AVIF/lib/include,
+					/Applications/Esenthel/ThirdPartyLibs/AOM/lib,
+					"$(inherited)",
+				);
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-fvisibility=hidden",
+					"-Wall",
+					"-Wextra",
+					"-Wshorten-64-to-32",
+					"'-std=gnu99'",
+					"$(inherited)",
+				);
+				OTHER_LIBTOOLFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = avif;
+				SECTORDER_FLAGS = "";
+				TARGET_TEMP_DIR = "/Applications/Esenthel/ThirdPartyLibs/AVIF/Mac/build/avif.build/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = MinSizeRel;
+		};
+		F6BB7F5F4EE64654915C2749 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " $(inherited)";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = "$(inherited)";
+			};
+			name = RelWithDebInfo;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		10DBCFFC3E5D45DD8C5D3090 /* Build configuration list for PBXAggregateTarget "install" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				71598EBD66A5425EA777B19B /* Debug */,
+				2B9FD09EC4DE4569A0A2E9C5 /* Release */,
+				266E8702F03247BE9EFC1934 /* MinSizeRel */,
+				F6BB7F5F4EE64654915C2749 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		70B7E5B25831487FBEBD65B9 /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E48CDAF485E246B5805B91F2 /* Debug */,
+				AE28B9565951480D8E93B9A9 /* Release */,
+				9998BF9EAABE4840BDF57507 /* MinSizeRel */,
+				08C7B313BD89450E9DBB30F3 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		81F9C0E27CEA43AA8EE02905 /* Build configuration list for PBXProject "libavif" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				3807C5D89A7A4266A77CD293 /* Debug */,
+				CE8A36BFFC3E4A219A81201E /* Release */,
+				04387F6AFD2F4032870B990B /* MinSizeRel */,
+				4906804FB3F94A189E7028B3 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A5CD4B10AF2043AE88B52DA2 /* Build configuration list for PBXNativeTarget "avif" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0F86CC380569417B88DD11BC /* Debug */,
+				3E53CB3534C64F0586F9DBA2 /* Release */,
+				EF1705A33CA04B35AE97D109 /* MinSizeRel */,
+				53C5608BD8B449B8B15D38B3 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B66FD423295CBB9C00F1CFE5 /* Build configuration list for PBXNativeTarget "iOS" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B66FD424295CBB9C00F1CFE5 /* Debug */,
+				B66FD425295CBB9C00F1CFE5 /* Release */,
+				B66FD426295CBB9C00F1CFE5 /* MinSizeRel */,
+				B66FD427295CBB9C00F1CFE5 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		FED717AAF016415AADAA18A0 /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				07E17639804E40959E68B35C /* Debug */,
+				DD1F19BCD27E4CF7822F4A72 /* Release */,
+				75E45F8CA32644DEB98ED984 /* MinSizeRel */,
+				4DE6D41E6CA1427199202A73 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 21CA08F6CB0C4A2198C468C9 /* Project object */;
+}

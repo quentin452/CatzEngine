@@ -14,7 +14,7 @@ class ChatMessage // a single message in a chat box
       Rect_LU rect(box_top_left+Vec2(0, -y_min), box_width, height);
       rect.draw(background);
       rect.min.x+=margin;
-      D.text(ts, rect, text, AUTO_LINE_SPACE);
+      D.text(ts, rect, text, null, 0, true);
    }
 }
 /******************************************************************************/
@@ -54,7 +54,7 @@ class ChatMessages : GuiCustom
       flt line_height=ts.lineHeight();
       FREPA(messages)
       {
-         flt h=ts.textLines(messages[i].text, width, AUTO_LINE_SPACE)*line_height;
+         flt h=ts.textLines(messages[i].text, width, true)*line_height;
 
          messages[i].height=h  ;
          messages[i].y_min =y  ;

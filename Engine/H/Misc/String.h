@@ -41,6 +41,7 @@ struct Str // Text String (16-bit per character)
    // operations
    Str& del       (                   ); // clear stored data and free helper memory
    Str& clear     (                   ); // clear stored data
+   Str& erase     (                   ); // clear stored data and zero helper memory, this can be used to protect private data
    Str& insert    (Int i,   Char c    ); // insert 'c'    at 'i' string position
    Str& insert    (Int i, C Str &text ); // insert 'text' at 'i' string position
    Str& remove    (Int i,   Int  num=1); // remove      'num' characters starting from 'i-th'
@@ -67,7 +68,9 @@ struct Str // Text String (16-bit per character)
    Str(NSString   *s);   Str& operator=(NSString   *s);   Str& operator+=(NSString   *s);   Str operator+(NSString   *s)C;
    Str(CFStringRef s);   Str& operator=(CFStringRef s);   Str& operator+=(CFStringRef s);   Str operator+(CFStringRef s)C;
 #endif
-   void alwaysAppend(Char c);
+   void appendUnicode (UInt u);
+   void appendUTF8Safe(C Str &text);
+   CChar* fromUTF8Safe(CChar *text);
    explicit Str(C Str8 &s, UInt extra_length);
    explicit Str(C Str  &s, UInt extra_length);
 #endif
@@ -107,6 +110,7 @@ struct Str // Text String (16-bit per character)
    Str(C VecI4  &v);   Str& operator=(C VecI4  &v);   Str& operator+=(C VecI4  &v);   Str operator+(C VecI4  &v)C;
    Str(C VecB4  &v);   Str& operator=(C VecB4  &v);   Str& operator+=(C VecB4  &v);   Str operator+(C VecB4  &v)C;
    Str(C VecSB4 &v);   Str& operator=(C VecSB4 &v);   Str& operator+=(C VecSB4 &v);   Str operator+(C VecSB4 &v)C;
+   Str(C VecUS4 &v);   Str& operator=(C VecUS4 &v);   Str& operator+=(C VecUS4 &v);   Str operator+(C VecUS4 &v)C;
    Str(C BStr   &s);   Str& operator=(C BStr   &s);   Str& operator+=(C BStr   &s);   Str operator+(C BStr   &s)C;
 
    T1(TYPE) Str(TYPE i, ENABLE_IF_ENUM(TYPE, Ptr ) dummy=null)       : Str(ENUM_TYPE(TYPE)(i)) {}
@@ -202,6 +206,7 @@ inline Str&& operator+(Str &&a, C VecD4  &b) {return RValue(a+=b);}
 inline Str&& operator+(Str &&a, C VecI4  &b) {return RValue(a+=b);}
 inline Str&& operator+(Str &&a, C VecB4  &b) {return RValue(a+=b);}
 inline Str&& operator+(Str &&a, C VecSB4 &b) {return RValue(a+=b);}
+inline Str&& operator+(Str &&a, C VecUS4 &b) {return RValue(a+=b);}
 inline Str&& operator+(Str &&a, C BStr   &b) {return RValue(a+=b);}
 T1(TYPE) ENABLE_IF_ENUM(TYPE, Str&&) operator+(Str &&a, TYPE b) {return RValue(a+=ENUM_TYPE(TYPE)(b));}
 /******************************************************************************/

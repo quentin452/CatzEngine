@@ -163,8 +163,8 @@ void VS
       }
    }else
    {
-      VecU bone    =vtx.bone  ();
-      VecH weight_h=vtx.weight();
+      VecU4 bone    =vtx.bone  ();
+      VecH4 weight_h=vtx.weight();
       pos=TransformPos(pos, bone, vtx.weight());
 
    #if   BUMP_MODE> SBUMP_FLAT

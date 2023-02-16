@@ -1,0 +1,9 @@
+# CMake generation dependency list for this directory.
+C:/Esenthel/ThirdPartyLibs/JpegXL/lib/cmake/FindAtomics.cmake
+C:/Esenthel/ThirdPartyLibs/JpegXL/lib/third_party/highway/CMakeLists.txt
+C:/Program Files/CMake/share/cmake-3.24/Modules/CTest.cmake
+C:/Program Files/CMake/share/cmake-3.24/Modules/CTestUseLaunchers.cmake
+C:/Program Files/CMake/share/cmake-3.24/Modules/CheckCXXSourceCompiles.cmake
+C:/Program Files/CMake/share/cmake-3.24/Modules/CheckPIESupported.cmake
+C:/Program Files/CMake/share/cmake-3.24/Modules/GNUInstallDirs.cmake
+C:/Program Files/CMake/share/cmake-3.24/Modules/Internal/CheckLinkerFlag.cmake

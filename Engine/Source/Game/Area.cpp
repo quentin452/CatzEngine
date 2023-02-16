@@ -50,7 +50,7 @@ void AreaPath2D::del()
 }
 void AreaPath2D::create(Int size)
 {
-  _map.createSoftTry(size, size, 1, IMAGE_I8);
+  _map.createSoft(size, size, 1, IMAGE_I8);
   _map.clear();
    group();
 }
@@ -326,7 +326,7 @@ Bool AreaPath2D::load(File &f)
          Byte path[32][32]; // [y][x]
          f>>path>>_groups;
          if(_neighbor._loadRaw(f))
-         if(_map.createSoftTry(32, 32, 1, IMAGE_I8))
+         if(_map.createSoft(32, 32, 1, IMAGE_I8))
          {
             REPD(y, _map.h())
             REPD(x, _map.w())_map.pixB(x, y)=path[y][x];
@@ -350,6 +350,8 @@ Area::Data::Data(Area &area)
    T._path_mesh=null;
    T._path2D   =null;
    T._path_node_offset=0;
+   terrain_objs_box.zero();
+   foliage_objs_box.zero();
 }
 Bool Area::Data::save(File &f)
 {

@@ -592,13 +592,13 @@ class StoreClass : ClosableWindow
             file_done       .writeMem();
          }
 
-         if(ValidURL(file))down.create(file, null, null, -1, file_done.size());else
+         if(ValidURL(file))down.create(file, null, null, file_done.size());else
          {
             Memt<HTTPParam> params;
             AppStore.setUserParams(params, "get_item_file");
             params.New().set("i"   , S+item_id);
             params.New().set("file",   file+(temp ? "@new" : ""));
-            down.create(EsenthelStoreURL, params, null, -1, file_done.size());
+            down.create(EsenthelStoreURL, params, null, file_done.size());
          }
       }
 
@@ -813,7 +813,7 @@ class StoreClass : ClosableWindow
    {
       bool      chunked=false;
       Download  down;
-      File      src;
+      HTTPFile  src;
       Progress  progress;
       TextBlack ts;
       Text      text;
@@ -870,8 +870,9 @@ class StoreClass : ClosableWindow
             if(src.left()<=EsenthelStoreFileChunkSize)mode=3;else // last
                mode=2; // middle
             params.New().set("item_file_mode", S+mode);
-         }
-         down.create(EsenthelStoreURL, params, &src, chunked ? Min(EsenthelStoreFileChunkSize, src.left()) : -1);
+               src.send=Min(EsenthelStoreFileChunkSize, src.left());
+         }else src.send=-1;
+         down.create(EsenthelStoreURL, params, src);
       }
       bool visible()C {return progress.visible();}
       void visible(bool on)
@@ -896,7 +897,7 @@ class StoreClass : ClosableWindow
       {
          super.create();
          T.hoverable=hoverable;
-         fit=true;
+         fit=FIT_FULL;
          return T;
       }
 
@@ -1642,7 +1643,7 @@ class StoreClass : ClosableWindow
                if(itemCanUploadFile(*item, file_file))
                {
                   names.remove(i--, true);
-                  File src; if(src.readStdTry(name))
+                  File src; if(src.readStd(name))
                   {
                      if(src.size()<=EsenthelStoreMaxFileSize)
                      {
@@ -1652,7 +1653,7 @@ class StoreClass : ClosableWindow
                         upload.item_file=file_file;
                         upload.chunked=(src.size()>EsenthelStoreFileChunked);
                         item_files_region+=upload.cancel.create("Cancel").func(Upload.Cancel, upload);
-                        Swap(src, upload.src);
+                        Swap(src, SCAST(File, upload.src));
                         setUserParams(upload.params, "add_item_file");
                                       upload.params.New().set("i"             , cur_item);
                                       upload.params.New().set("item_file_file", file_file);
@@ -1670,11 +1671,11 @@ class StoreClass : ClosableWindow
                Str name=names[i], ext=GetExt(name);
                if(ExtType(ext)==EXT_IMAGE)
                {
-                  Image temp; if(temp.ImportTry(name))
+                  Image temp; if(temp.Import(name))
                   {
                      File src;
                      if(ext=="jpeg")ext="jpg";
-                     if(ext=="jpg" || ext=="png")src.readStdTry(name);else
+                     if(ext=="jpg" || ext=="png")src.readStd(name);else
                      {
                         src.writeMem(); if(HasAlpha(temp)){temp.ExportPNG(src); ext="png";}else{temp.ExportJPG(src, 0.8); ext="jpg";}
                         src.pos(0);
@@ -1685,9 +1686,9 @@ class StoreClass : ClosableWindow
                         upload.create(mode.tab(1), cur_item, "Icon");
                         upload.dest=&item_icon;
                         upload.set =ext;
-                        Swap(src, upload.src);
+                        Swap(src, SCAST(File, upload.src));
                         Memt<HTTPParam> params; setUserParams(params, "set_item_icon"); params.New().set("i", S+cur_item); params.New().set("item_icon", ext);
-                        upload.down.create(EsenthelStoreURL, params, &upload.src);
+                        upload.down.create(EsenthelStoreURL, params, upload.src);
                      }else Gui.msgBox(S, S+"File size "+SizeBytes(src.size())+" exceeds "+SizeBytes(EsenthelStoreMaxIconSize)+" limit");
                   }else Gui.msgBox(S, S+"Couldn't import image \""+name+"\"");
                   break;
@@ -1702,11 +1703,11 @@ class StoreClass : ClosableWindow
                Str name=names[i], ext=GetExt(name);
                if(ExtType(ext)==EXT_IMAGE)
                {
-                  Image temp; if(temp.ImportTry(name, IMAGE_R8G8B8_SRGB)) // ignore alpha channel
+                  Image temp; if(temp.Import(name, IMAGE_R8G8B8_SRGB)) // ignore alpha channel
                   {
                      File src;
                      if(ext=="jpeg")ext="jpg";
-                     if(ext=="jpg")src.readStdTry(name);else
+                     if(ext=="jpg")src.readStd(name);else
                      {
                                   src.writeMem(); temp.ExportJPG(src, 0.8); ext="jpg";
                         File png; png.writeMem(); temp.ExportPNG(png); if(png.size()<src.size()){Swap(png, src); ext="png";}
@@ -1719,9 +1720,9 @@ class StoreClass : ClosableWindow
                         upload.index=image_index;
                         upload.dest =&item_images[image_index];
                         upload.set  =ext;
-                        Swap(src, upload.src);
+                        Swap(src, SCAST(File, upload.src));
                         Memt<HTTPParam> params; setUserParams(params, "set_item_image"); params.New().set("i", S+cur_item); params.New().set("item_image_index", S+image_index); params.New().set("item_image_status", ext);
-                        upload.down.create(EsenthelStoreURL, params, &upload.src);
+                        upload.down.create(EsenthelStoreURL, params, upload.src);
                      }else Gui.msgBox(S, S+"File size "+SizeBytes(src.size())+" exceeds "+SizeBytes(EsenthelStoreMaxImageSize)+" limit");
                   }else Gui.msgBox(S, S+"Couldn't import image \""+name+"\"");
                   break;

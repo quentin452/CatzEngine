@@ -10,7 +10,7 @@ namespace Edit{
 /******************************************************************************/
 Bool CodeEditor::saveSymbols(C Str &file)
 {
-   File f; if(f.writeTry(file))
+   File f; if(f.write(file))
    {
       f.putUInt (CC4_CDES);
       f.cmpUIntV(CDES_VER); // version
@@ -34,7 +34,7 @@ Bool CodeEditor::saveSymbols(C Str &file)
 /******************************************************************************/
 Bool CodeEditor::loadSymbols(C Str &file, Bool all)
 {
-   File f; if(f.readTry(file))if(f.getUInt()==CC4_CDES)if(f.decUIntV()==CDES_VER) // version
+   File f; if(f.read(file))if(f.getUInt()==CC4_CDES)if(f.decUIntV()==CDES_VER) // version
    {
       StrLibrary sl; if(sl.load(f))
       {

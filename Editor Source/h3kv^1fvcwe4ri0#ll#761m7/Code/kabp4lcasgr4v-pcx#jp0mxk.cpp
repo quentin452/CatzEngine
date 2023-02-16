@@ -33,7 +33,7 @@ class EE1WorldSettings : Game.WorldSettings
       return T;
    }
 
-   bool load(C Str  &name) {File f; if(f.readStdTry(name))return load(f); reset(); return false;}
+   bool load(C Str  &name) {File f; if(f.readStd(name))return load(f); reset(); return false;}
    bool load(  File &f   )
    {
       switch(f.decUIntV()) // version
@@ -858,7 +858,7 @@ bool ImportFunc(Thread &thread) // 'ObjType' must be initialized because loading
                {
                   if(thread.wantStop())return false;
                   VecI2 xy=TextVecI2(ff.name);
-                  File f; if(f.readStdTry(ff.pathName()))
+                  File f; if(f.readStd(ff.pathName()))
                   {
                      Heightmap h;
                      Memt<Game.Area.Data.AreaObj> objs; // !! Warning: this should actually be Edit.Obj !! however we'd need 'Object.loadData' method which is hidden, and 'AreaObj' provides same save/load functionality as 'Edit.Obj'
@@ -921,7 +921,7 @@ bool ImportFunc(Thread &thread) // 'ObjType' must be initialized because loading
                Pak global;
                if(global.load(MakeFullPath(edit+"Global/Waypoints.pak", FILE_DATA)))FREPA(global)if(global.file(i).data_size) // waypoints
                {
-                  EE1EditWaypoint src; File f; if(f.readTry(global.file(i), global))if(src.load(f, global.file(i).name))
+                  EE1EditWaypoint src; File f; if(f.read(global.file(i), global))if(src.load(f, global.file(i).name))
                   {
                       EditWaypoint edit; edit.create(src, src.name); Save(edit, Proj.editWaypointPath(elm.id, src.id));
                      Game.Waypoint game; edit.copyTo(game         ); Save(game, Proj.gameWaypointPath(elm.id, src.id));
@@ -930,7 +930,7 @@ bool ImportFunc(Thread &thread) // 'ObjType' must be initialized because loading
                }
                if(global.load(MakeFullPath(edit+"Global/Lakes.pak", FILE_DATA)))FREPA(global)if(global.file(i).data_size) // lakes
                {
-                  EE1EditLake src; File f; if(f.readTry(global.file(i), global))if(src.load(f, global.file(i).name))
+                  EE1EditLake src; File f; if(f.read(global.file(i), global))if(src.load(f, global.file(i).name))
                   {
                      Lake lake; lake.setDepth(src.depth); Swap(lake.polys, src.polys); lake.polys_time.getUTC();
                      Save(lake, Proj.editLakePath(elm.id, src.id));
@@ -939,7 +939,7 @@ bool ImportFunc(Thread &thread) // 'ObjType' must be initialized because loading
                }
                if(global.load(MakeFullPath(edit+"Global/Rivers.pak", FILE_DATA)))FREPA(global)if(global.file(i).data_size) // rivers
                {
-                  EE1EditRiver src; File f; if(f.readTry(global.file(i), global))if(src.load(f, global.file(i).name))
+                  EE1EditRiver src; File f; if(f.read(global.file(i), global))if(src.load(f, global.file(i).name))
                   {
                      River river; river.setDepth(src.depth); FREPA(src.vtxs)river.vtxs.New().set(src.vtxs[i].radius, src.vtxs[i].pos); Swap(river.edges, src.edges); river.vtx_edge_time.getUTC();
                      Save(river, Proj.editRiverPath(elm.id, src.id));

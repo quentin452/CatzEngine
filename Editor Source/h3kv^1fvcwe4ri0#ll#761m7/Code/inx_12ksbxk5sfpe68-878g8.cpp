@@ -46,7 +46,7 @@ bool SaveSettings(C Str &name="Server Settings")
 }
 bool LoadSettings(C Str &name="Server Settings")
 {
-   File f; if(f.readStdTry(name, &SettingsCipher))return LoadSettings(f);
+   File f; if(f.readStd(name, &SettingsCipher))return LoadSettings(f);
    return false;
 }
 /******************************************************************************/

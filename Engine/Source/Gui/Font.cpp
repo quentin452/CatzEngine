@@ -59,12 +59,12 @@ UInt Font::memUsage()C
    UInt   size=0; REPA(_images)size+=_images[i].memUsage();
    return size;
 }
-Bool Font:: hasChar (Char8 c)C {UInt index=_char_to_font[U8 (c)]; return InRange(index, _chrs) ?       true         : false;}
-Bool Font:: hasChar (Char  c)C {UInt index=_wide_to_font[U16(c)]; return InRange(index, _chrs) ?       true         : false;}
-Int  Font::charIndex(Char8 c)C {UInt index=_char_to_font[U8 (c)]; return InRange(index, _chrs) ?       index        :    -1;}
-Int  Font::charIndex(Char  c)C {UInt index=_wide_to_font[U16(c)]; return InRange(index, _chrs) ?       index        :    -1;}
-Int  Font::charWidth(Char  c)C {UInt index=_wide_to_font[U16(c)]; return InRange(index, _chrs) ? _chrs[index].width :     0;}
-Int  Font::charWidth(Char8 c)C {UInt index=_char_to_font[U8 (c)]; return InRange(index, _chrs) ? _chrs[index].width :     0;}
+Bool Font:: hasChar (Char8 c)C {UInt index=_char_to_font[Unsigned(c)]; return InRange(index, _chrs) && _chrs[index].chr==Char8To16(c);} // check character in case it's remapped to '?'
+Bool Font:: hasChar (Char  c)C {UInt index=_wide_to_font[Unsigned(c)]; return InRange(index, _chrs) && _chrs[index].chr==          c ;} // check character in case it's remapped to '?'
+Int  Font::charIndex(Char8 c)C {UInt index=_char_to_font[Unsigned(c)]; return InRange(index, _chrs) ?        index        :    -1;}
+Int  Font::charIndex(Char  c)C {UInt index=_wide_to_font[Unsigned(c)]; return InRange(index, _chrs) ?        index        :    -1;}
+Int  Font::charWidth(Char  c)C {UInt index=_wide_to_font[Unsigned(c)]; return InRange(index, _chrs) ?  _chrs[index].width : (SUPPORT_EMOJI && c) ? height() : 0;}
+Int  Font::charWidth(Char8 c)C {UInt index=_char_to_font[Unsigned(c)]; return InRange(index, _chrs) ?  _chrs[index].width : (SUPPORT_EMOJI && c) ? height() : 0;}
 /******************************************************************************/
 Int Font::charWidth(Char8 c0, Char8 c1, SPACING_MODE spacing)C
 {
@@ -96,6 +96,7 @@ Int Font::charWidth(Char8 c0, Char8 c1, SPACING_MODE spacing)C
             }
             return width;
          }
+         if(SUPPORT_EMOJI && c0)return height();
       } // here on purpose no break, to fall down and return 0
       default: return 0;
    }
@@ -130,6 +131,7 @@ Int Font::charWidth(Char c0, Char c1, SPACING_MODE spacing)C
             }
             return width;
          }
+         if(SUPPORT_EMOJI && c0)return height();
       } // here on purpose no break, to fall down and return 0
       default: return 0;
    }
@@ -150,7 +152,7 @@ Int Font::textWidth(Int &spacings, SPACING_MODE spacing, CChar8 *text, Int max_l
             spcs++;
          combining:
             Char8 next=*++text;
-            if(CharFlagFast(next)&CHARF_COMBINING)goto combining;
+            if(CharFlagFast(next)&CHARF_SKIP)goto combining;
             width+=charWidth(c, next, spacing);
             c=next; goto next;
          }
@@ -166,7 +168,7 @@ Int Font::textWidth(Int &spacings, SPACING_MODE spacing, CChar8 *text, Int max_l
             if(!--max_length){/*if(spacing!=SPACING_CONST)*/width+=charWidth(c);}else // for the last character we need to process only its width and ignore the spacing between the next one
             {
                Char8 next=*++text;
-               if(CharFlagFast(next)&CHARF_COMBINING)goto combining1;
+               if(CharFlagFast(next)&CHARF_SKIP)goto combining1;
                width+=charWidth(c, next, spacing);
                c=next; goto next1;
             }
@@ -185,7 +187,7 @@ Int Font::textWidth(Int &spacings, SPACING_MODE spacing, CChar8 *text, Int max_l
             spcs++;
          combining2:
             Char8 next=*++text;
-            if(CharFlagFast(next)&CHARF_COMBINING)goto combining2;
+            if(CharFlagFast(next)&CHARF_SKIP)goto combining2;
             c=next; goto next2;
          }
       }else
@@ -200,7 +202,7 @@ Int Font::textWidth(Int &spacings, SPACING_MODE spacing, CChar8 *text, Int max_l
             if(--max_length)
             {
                Char8 next=*++text;
-               if(CharFlagFast(next)&CHARF_COMBINING)goto combining3;
+               if(CharFlagFast(next)&CHARF_SKIP)goto combining3;
                c=next; goto next3;
             }
          }
@@ -223,7 +225,7 @@ Int Font::textWidth(Int &spacings, SPACING_MODE spacing, CChar *text, Int max_le
             spcs++;
          combining:
             Char next=*++text;
-            if(CharFlagFast(next)&CHARF_COMBINING)goto combining;
+            if(CharFlagFast(next)&CHARF_SKIP)goto combining;
             width+=charWidth(c, next, spacing);
             c=next; goto next;
          }
@@ -239,7 +241,7 @@ Int Font::textWidth(Int &spacings, SPACING_MODE spacing, CChar *text, Int max_le
             if(!--max_length){/*if(spacing!=SPACING_CONST)*/width+=charWidth(c);}else // for the last character we need to process only its width and ignore the spacing between the next one
             {
                Char next=*++text;
-               if(CharFlagFast(next)&CHARF_COMBINING)goto combining1;
+               if(CharFlagFast(next)&CHARF_SKIP)goto combining1;
                width+=charWidth(c, next, spacing);
                c=next; goto next1;
             }
@@ -258,7 +260,7 @@ Int Font::textWidth(Int &spacings, SPACING_MODE spacing, CChar *text, Int max_le
             spcs++;
          combining2:
             Char next=*++text;
-            if(CharFlagFast(next)&CHARF_COMBINING)goto combining2;
+            if(CharFlagFast(next)&CHARF_SKIP)goto combining2;
             c=next; goto next2;
          }
       }else
@@ -273,7 +275,7 @@ Int Font::textWidth(Int &spacings, SPACING_MODE spacing, CChar *text, Int max_le
             if(--max_length)
             {
                Char next=*++text;
-               if(CharFlagFast(next)&CHARF_COMBINING)goto combining3;
+               if(CharFlagFast(next)&CHARF_SKIP)goto combining3;
                c=next; goto next3;
             }
          }
@@ -314,7 +316,7 @@ Bool Font::imageType(IMAGE_TYPE type)
          mip_maps=1; // PVRTC has too low quality to enable mip-maps
       }
       if(image.type()!=type || image.w()!=w || image.h()!=h || image.mipMaps()!=mip_maps) // if change is needed
-         if(image.copyTry(image, w, h, -1, type, -1, mip_maps))changed=true;
+         if(image.copy(image, w, h, -1, type, -1, mip_maps))changed=true;
    }
    return changed;
 }
@@ -323,7 +325,7 @@ void Font::toSoft()
    REPA(_images)
    {
       Image &image=_images[i];
-      image.copyTry(image, -1, -1, -1, ImageTypeUncompressed(image.type()), IMAGE_SOFT);
+      image.copy(image, -1, -1, -1, ImageTypeUncompressed(image.type()), IMAGE_SOFT);
    }
 }
 Font& Font::replace(Char src, Char dest, Bool permanent)
@@ -352,9 +354,9 @@ Font& Font::replace(Char src, Char dest, Bool permanent)
          }
       }else
       {
-         Char8 c=Char16To8Fast(src); if(Char8To16Fast(c)!=src)c=0; // take 8-bit char, set zero if there's no 1:1 mapping, we can assume that Str was already initialized
-         if(c  )_char_to_font[U8 (c  )]=dest_i;
-         if(src)_wide_to_font[U16(src)]=dest_i;
+         Char8 c=Char16To8(src); if(Char8To16(c)!=src)c=0; // take 8-bit char, set zero if there's no 1:1 mapping
+         if(c  )_char_to_font[Unsigned(c  )]=dest_i;
+         if(src)_wide_to_font[Unsigned(src)]=dest_i;
       }
    }
    return T;
@@ -364,34 +366,52 @@ void Font::setRemap()
 {
    SetMem(_char_to_font, 0xFF, SIZE(_char_to_font));
    SetMem(_wide_to_font, 0xFF, SIZE(_wide_to_font));
-   Int invalid[5]={-1, -1, -1, -1, -1}, space=-1;
+   Int invalid[6]={-1, -1, -1, -1, -1, -1}, space=-1;
    REPA(_chrs)if(Char w=_chrs[i].chr)
    {
-      Char8 c=Char16To8Fast(w); if(Char8To16Fast(c)!=w)c=0; // take 8-bit char, set zero if there's no 1:1 mapping, we can assume that Str was already initialized
-      if(c)_char_to_font[U8 (c)]=i;
-      if(w)_wide_to_font[U16(w)]=i;
+      Char8 c=Char16To8(w); if(Char8To16(c)!=w)c=0; // take 8-bit char, set zero if there's no 1:1 mapping
+      if(c)_char_to_font[Unsigned(c)]=i;
+      if(w)_wide_to_font[Unsigned(w)]=i;
       switch(w)
       {
-         case u'�': invalid[0]=i; break;
-         case  '?': invalid[1]=i; break;
-         case  '*': invalid[2]=i; break;
-         case  '#': invalid[3]=i; break;
-         case  '.': invalid[4]=i; break;
+         case u'⍰': invalid[0]=i; break;
+         case u'�': invalid[1]=i; break;
+         case  '?': invalid[2]=i; break;
+         case  '*': invalid[3]=i; break;
+         case  '#': invalid[4]=i; break;
+         case  '.': invalid[5]=i; break;
          case  ' ': space     =i; break;
       }
    }
 
-   // set all characters which were not found, to be displayed as based on 'invalid'
+   // set all characters which were not found, to be displayed as 'invalid'
    FREPA(invalid)
    {
       Int inv=invalid[i]; if(inv>=0)
       {
-         REPA(_char_to_font)if(_char_to_font[i]==0xFFFF && i)_char_to_font[i]=inv;
-         REPA(_wide_to_font)if(_wide_to_font[i]==0xFFFF && i)_wide_to_font[i]=inv;
+               Bool      allow[ELMS(_wide_to_font)];
+         const Bool test_allow=(SUPPORT_EMOJI && EmojiPak); if(test_allow)
+         {
+            SetMem(allow, true); // allow all by default
+            REPA(*EmojiPak)
+            {
+             C PakFile &pf=EmojiPak->file(i);
+               Char c=*pf.name; // get first character of emoji
+               allow[Unsigned(c)]=false; ASSERT(Elms(allow)==USHORT_MAX+1); // if we have emoji starting with that character, then disable replacing character to 'invalid' and just use that emoji
+            }
+         }
+
+         // never replace '\0' (start from 1) and CHARF_MULTI0 (because that one needs to be processed in special way) (however when SUPPORT_EMOJI is disabled, then replace CHARF_MULTI0 as well, because without SUPPORT_EMOJI their width would be 0)
+         UShort invalid=inv;
+         Int multi0=Min(SUPPORT_EMOJI ? 0xD800 : 0xDC00, Elms(_wide_to_font));
+         for(Int i=     1; i<Elms(_char_to_font); i++)if(_char_to_font[i]==0xFFFF                             )_char_to_font[i]=invalid;
+         for(Int i=     1; i<multi0             ; i++)if(_wide_to_font[i]==0xFFFF && (!test_allow || allow[i]))_wide_to_font[i]=invalid;
+         for(Int i=0xDC00; i<Elms(_wide_to_font); i++)if(_wide_to_font[i]==0xFFFF && (!test_allow || allow[i]))_wide_to_font[i]=invalid;
+
          break; // stop on first found
       }
    }
-   if(space>=0)_wide_to_font[U16(Nbsp)]=space; // draw NBSP as space
+   if(space>=0)_wide_to_font[Unsigned(Nbsp)]=space; // draw NBSP as space
 }
 /******************************************************************************/
 // FONT IO
@@ -452,11 +472,11 @@ static Bool Adjust(Font &font, Int layout) // #FontImageLayout
       if(font._sub_pixel)
       {
          // sub pixel have RGBA layout, just make sure we have correct sRGB
-         if(!image.copyTry(image, -1, -1, -1, (FONT_SRGB_SUB_PIXEL ? ImageTypeIncludeSRGB : ImageTypeExcludeSRGB)(image.type())))return false;
+         if(!image.copy(image, -1, -1, -1, (FONT_SRGB_SUB_PIXEL ? ImageTypeIncludeSRGB : ImageTypeExcludeSRGB)(image.type())))return false;
       }else
       {
-         Image dest; if(!dest.createTry(image.w(), image.h(), 1, FONT_IMAGE_TYPE, image.mode(), image.mipMaps()))return false;
-         Image temp; C Image *src=&image; if(image.compressed())if(image.copyTry(temp, -1, -1, -1, ImageTypeUncompressed(image.type()), IMAGE_SOFT, 1))src=&temp;else return false;
+         Image dest; if(!dest.create(image.w(), image.h(), 1, FONT_IMAGE_TYPE, image.mode(), image.mipMaps()))return false;
+         Image temp; C Image *src=&image; if(image.compressed())if(image.copy(temp, -1, -1, -1, ImageTypeUncompressed(image.type()), IMAGE_SOFT, 1))src=&temp;else return false;
          if(!src->lockRead())return false;
          if(!dest.lock(LOCK_WRITE)){src->unlock(); return false;}
          REPD(y, dest.h())
@@ -583,12 +603,12 @@ error:
 }
 Bool Font::save(C Str &name)C
 {
-   File f; if(f.writeTry(name)){if(save(f) && f.flush())return true; f.del(); FDelFile(name);}
+   File f; if(f.write(name)){if(save(f) && f.flush())return true; f.del(); FDelFile(name);}
    return false;
 }
 Bool Font::load(C Str &name)
 {
-   File f; if(f.readTry(name))return load(f);
+   File f; if(f.read(name))return load(f);
    del(); return false;
 }
 void Font::operator=(C UID &id  ) {T=_EncodeFileName(id);}
@@ -878,7 +898,7 @@ struct SystemFontDrawContext
    }
    Bool create(Int w, Int h, FontCreateBase &base)
    {
-      if(image.createSoftTry(w, h, 1, IMAGE_R8G8B8A8))
+      if(image.createSoft(w, h, 1, IMAGE_R8G8B8A8))
       {
          T.base=&base;
       #if USE_FREE_TYPE
@@ -910,7 +930,7 @@ struct SystemFontDrawContext
             }
          }
       #elif MAC
-         if(bitmap_image.createSoftTry(w, h, 1, IMAGE_R8G8B8A8))
+         if(bitmap_image.createSoft(w, h, 1, IMAGE_R8G8B8A8))
          {
             unsigned char *image_data=bitmap_image.data();
             bitmap=[[NSBitmapImageRep alloc] initWithBitmapDataPlanes:&image_data
@@ -1082,10 +1102,10 @@ struct FontCreate : FontCreateBase
       {
          Char c=src.characters[i];
          ASSERT(SPECIAL_CHARS==3); // skip SPECIAL_CHARS, they will be manually inserted later
-         if(c!=' '
-         && c!=FullWidthSpace
-         && c!='\t'
-         && c!=Nbsp // no need to add nbsp because it's always drawn as space
+         if(c!=' '            // always added automatically
+         && c!=FullWidthSpace // always added automatically
+         && c!='\t'           // always added automatically
+         && c!=Nbsp           // always drawn as space
          && !Contains(chars, c) // don't add same characters multiple times
          )chars+=c;
       }
@@ -1139,7 +1159,7 @@ struct FontCreate : FontCreateBase
 
       // set char image
       Image &img=fc.image;
-      if(img.createSoftTry(fc.size.x, fc.size.y, 1, imageTypeTemp()))
+      if(img.createSoft(fc.size.x, fc.size.y, 1, imageTypeTemp()))
       {
          // copy
          Bool clear_shadow=(shadow_opacity<=0);
@@ -1365,14 +1385,11 @@ void DisplayDraw::textDepth(Bool use, Flt depth)
 {
    if(D._text_depth=use)Sh.FontDepth->set(depth);
 }
-/******************************************************************************/
-// MAIN
-/******************************************************************************/
-void ShutFont()
-{
-   TextStyles.del();
-   Fonts     .del();
-}
+void DisplayDraw::textBackgroundAuto (                            ) {Sh.FontLum=GetShaderParam("FontLum");}
+void DisplayDraw::textBackgroundReset(ShaderParam *&sp,   Vec &col) {sp=Sh.FontLum; textBackgroundAuto(); col=Sh.FontLum->getVec();}
+void DisplayDraw::textBackgroundSet  (ShaderParam * sp, C Vec &col) {SPSet("FontLum", col   ); Sh.FontLum=sp;}
+void DisplayDraw::textBackgroundBlack(                            ) {SPSet("FontLum", Vec(1)); Sh.FontLum=&Sh.Dummy;} // set dummy to disable changing
+void DisplayDraw::textBackgroundWhite(                            ) {SPSet("FontLum", Vec(0)); Sh.FontLum=&Sh.Dummy;} // set dummy to disable changing
 /******************************************************************************/
 }
 /******************************************************************************/

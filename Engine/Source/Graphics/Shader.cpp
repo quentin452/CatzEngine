@@ -86,7 +86,7 @@ Bool VerifyPrecompiledShaderCache(C Str &name)
 {
    Pak pak; if(pak.load(name))
    {
-      File f; if(f.readTry("Data", pak) && ShaderCacheLoadHeader(f))return true;
+      File f; if(f.read("Data", pak) && ShaderCacheLoadHeader(f))return true;
    }
    return false;
 }
@@ -127,7 +127,7 @@ struct PrecompiledShaderCacheClass
    {
       if(pak.load(name))
       {
-         File f; if(f.readTry("Data", pak) && ShaderCacheLoad(f))return true;
+         File f; if(f.read("Data", pak) && ShaderCacheLoad(f))return true;
          LogN("Precompiled ShaderCache is outdated. Please regenerate it using \"Precompile Shaders\" tool, located inside \"Editor Source\\Tools\".");
          pak.del();
       }
@@ -147,7 +147,7 @@ struct ShaderCacheClass
       if(is())
       {
          Str name=T.name();
-         File f; if(f.writeTry(name))
+         File f; if(f.write(name))
          {
             if(ShaderCacheSave(f) && f.flush())return true;
             f.del(); FDelFile(name);
@@ -159,7 +159,7 @@ struct ShaderCacheClass
    {
       if(is())
       {
-         File f; if(f.readStdTry(name()))return ShaderCacheLoad(f);
+         File f; if(f.readStd(name()))return ShaderCacheLoad(f);
       }
       return false;
    }
@@ -1571,7 +1571,7 @@ UInt ShaderGL::compile(MemPtr<ShaderSubGL> vs_array, MemPtr<ShaderSubGL> ps_arra
    // load from cache
    if(PrecompiledShaderCache.is())
    {
-      File f; if(f.readTry(ShaderFiles.name(shader)+ShaderSeparator+T.name, PrecompiledShaderCache.pak))
+      File f; if(f.read(ShaderFiles.name(shader)+ShaderSeparator+T.name, PrecompiledShaderCache.pak))
       {
          if(prog=CreateProgramFromBinary(f))return prog;
       #if SWITCH // if there's Precompiled ShaderCache, but failed to create, then report this, it could happen due to updated Nintendo SDK
@@ -1583,7 +1583,7 @@ UInt ShaderGL::compile(MemPtr<ShaderSubGL> vs_array, MemPtr<ShaderSubGL> ps_arra
    if(ShaderCache.is())
    {
       shader_cache_name=ShaderCache.path+ShaderFiles.name(shader)+ShaderSeparator+T.name;
-      File f; if(f.readStdTry(shader_cache_name))
+      File f; if(f.readStd(shader_cache_name))
       {
          if(prog=CreateProgramFromBinary(f))return prog;
          f.del(); FDelFile(shader_cache_name); // if failed to create, then assume file data is outdated and delete it
@@ -1630,13 +1630,13 @@ UInt ComputeShaderGL::compile(MemPtr<ShaderSubGL> cs_array, ShaderFile *shader, 
    // load from cache
    if(PrecompiledShaderCache.is())
    {
-      File f; if(f.readTry(ShaderFiles.name(shader)+ComputeShaderSeparator+T.name, PrecompiledShaderCache.pak))if(prog=CreateProgramFromBinary(f))return prog;
+      File f; if(f.read(ShaderFiles.name(shader)+ComputeShaderSeparator+T.name, PrecompiledShaderCache.pak))if(prog=CreateProgramFromBinary(f))return prog;
    }
    Str shader_cache_name; // this name will be used for loading from cache, and if failed to load, then save to cache
    if(ShaderCache.is())
    {
       shader_cache_name=ShaderCache.path+ShaderFiles.name(shader)+ComputeShaderSeparator+T.name;
-      File f; if(f.readStdTry(shader_cache_name))
+      File f; if(f.readStd(shader_cache_name))
       {
          if(prog=CreateProgramFromBinary(f))return prog;
          f.del(); FDelFile(shader_cache_name); // if failed to create, then assume file data is outdated and delete it
@@ -2296,7 +2296,7 @@ Bool ShaderFile::load(C Str &name)
    del();
 
    Str8 temp_str;
-   File f; if(f.readTry(Sh.path+name) && f.getUInt()==CC4_SHDR && f.getByte()==GPU_API(API_DX, API_GL))switch(f.decUIntV()) // version
+   File f; if(f.read(Sh.path+name) && f.getUInt()==CC4_SHDR && f.getByte()==GPU_API(API_DX, API_GL))switch(f.decUIntV()) // version
    {
       case 0:
       {

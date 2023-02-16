@@ -248,7 +248,7 @@ void DrawMiniMap()
             {
                image.crop(image, border, border, res, res);
                if(downsample)image.downSample();
-               image.copyTry(image, -1, -1, -1, IMAGE_BC1_SRGB, IMAGE_2D, 1);
+               image.copy(image, -1, -1, -1, IMAGE_BC1_SRGB, IMAGE_2D, 1);
                image.save(Proj.gamePath(MiniMapEdit.elm_id).tailSlash(true)+image_pos);
                if(MiniMapVer *ver=T.ver())
                {

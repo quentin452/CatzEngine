@@ -53,13 +53,13 @@ MeshBase& MeshBase::animate(C MemPtrN<Matrix, 256> &matrixes)
 {
    if(matrixes.elms())
    {
-      Vec   *pos  =vtx.pos   (),
-            *nrm  =vtx.nrm   (),
-            *tan  =vtx.tan   (),
-            *bin  =vtx.bin   (),
-            *hlp  =vtx.hlp   (), v;
-    C VecB4 *blend=vtx.blend (),
-            *mtrx =vtx.matrix();
+      Vec     *pos  =vtx.pos   (),
+              *nrm  =vtx.nrm   (),
+              *tan  =vtx.tan   (),
+              *bin  =vtx.bin   (),
+              *hlp  =vtx.hlp   (), v;
+    C VecB4   *blend=vtx.blend ();
+    C VtxBone *mtrx =vtx.matrix();
 
       if(blend && mtrx)REPA(vtx)
       {
@@ -81,13 +81,13 @@ MeshBase& MeshBase::animate(C MemPtrN<MatrixM, 256> &matrixes)
 {
    if(matrixes.elms())
    {
-      Vec   *pos  =vtx.pos   (),
-            *nrm  =vtx.nrm   (),
-            *tan  =vtx.tan   (),
-            *bin  =vtx.bin   (),
-            *hlp  =vtx.hlp   (), v;
-    C VecB4 *blend=vtx.blend (),
-            *mtrx =vtx.matrix();
+      Vec     *pos  =vtx.pos   (),
+              *nrm  =vtx.nrm   (),
+              *tan  =vtx.tan   (),
+              *bin  =vtx.bin   (),
+              *hlp  =vtx.hlp   (), v;
+    C VecB4   *blend=vtx.blend ();
+    C VtxBone *mtrx =vtx.matrix();
 
       if(blend && mtrx)REPA(vtx)
       {

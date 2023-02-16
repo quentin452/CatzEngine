@@ -33,7 +33,7 @@ struct PlatformStore // class allowing to communicate with Platform Store
    enum RESULT : Byte
    {
    #if EE_PRIVATE
-      // !! These enums must be equal to "EsenthelActivity.java" !!
+      // !! THESE ENUMS MUST BE EQUAL TO "EsenthelActivity.java" !!
    #endif
       PURCHASED          , // item was purchased successfully, 'purchases' container will now     include it
       CONSUMED           , // item was consumed  successfully, 'purchases' container will now not include it
@@ -53,7 +53,7 @@ struct PlatformStore // class allowing to communicate with Platform Store
    enum LICENSE_TEST_RESULT : Byte
    {
    #if EE_PRIVATE
-      // !! These enums must be equal to "EsenthelActivity.java" !!
+      // !! THESE ENUMS MUST BE EQUAL TO "EsenthelActivity.java" !!
    #endif
       LTR_NONE   , // no license test was requested
       LTR_WAITING, // waiting for result

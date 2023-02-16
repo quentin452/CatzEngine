@@ -7,10 +7,11 @@
    Use 'Location*' functions to access device world location.
 
 /******************************************************************************/
-#define        LongPressTime 0.55f // amount of time to consider any                   button press a long   press
+#define        LongPressTime 0.35f // amount of time to consider any                   button press a long   press
 #define      DoubleClickTime 0.25f // amount of time to consider Keyboard/Mouse/Joypad button press a double click
 #define TouchDoubleClickTime 0.33f // amount of time to consider Touch                        press a double click
 #if EE_PRIVATE
+#define  TapTime 0.25f
 #define DragTime 0.15f
 #define  FirstRepeatPressTime 0.21f // amount of time wait until triggering a first repeat press
 #define       RepeatPressTime 0.05f // amount of time wait until triggering a       repeat press
@@ -152,6 +153,7 @@ enum INPUT_TYPE : Byte // Input Device Type
    INPUT_KEYBOARD, // Keyboard
    INPUT_MOUSE   , // Mouse
    INPUT_JOYPAD  , // Joypad
+   INPUT_TOUCH   , // Touch
 };
 struct Input
 {
@@ -225,5 +227,6 @@ void UpdateLocation(                  Bool gps, JNI &jni);
 void UpdateLocation(                            JNI &jni);
 #endif
 #endif
-void DeviceVibrate(Flt intensity, Flt duration); // set device vibration, 'intensity'=how strong 0..1, 'duration'=how long (in seconds)
+void DeviceVibrate     (Flt intensity, Flt duration); // set device vibration, 'intensity'=how strong 0..1, 'duration'=how long (in seconds)
+void DeviceVibrateShort(                           ); // perform a short vibration, that can be used as acknowledgment to the user that touch action has been performed
 /******************************************************************************/

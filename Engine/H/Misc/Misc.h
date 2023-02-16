@@ -203,6 +203,7 @@ UInt Shr(UInt x, Int i); // safe "x>>i", works ok on negative 'i', and 'i' great
 UInt Rol(UInt x, Int i); // safe "x ROL i" (Rotate Left ), works ok on negative 'i', and 'i' greater than 32
 UInt Ror(UInt x, Int i); // safe "x ROR i" (Rotate Right), works ok on negative 'i', and 'i' greater than 32
 
+Str SizeText (Long size, Char dot='.'); // return size               as text in a shortened version, example: SizeText (1024) -> "1.0K"  , SizeText (1024*1024) ->   "1.0M"  , SizeText (1024*1024*1024) ->       "1.0G"
 Str SizeBytes(Long size, Char dot=','); // return size in      Bytes as text in a shortened version, example: SizeBytes(1024) -> "1,0 KB", SizeBytes(1024*1024) ->   "1,0 MB", SizeBytes(1024*1024*1024) ->       "1,0 GB"
 Str SizeKB   (Long size, Char dot=','); // return size in Kilo-Bytes as text in a shortened version, example: SizeKB   (1024) -> "1,0 KB", SizeKB   (1024*1024) -> "1 024 KB", SizeKB   (1024*1024*1024) -> "1 048 576 KB"
 Str SizeMB   (Long size, Char dot=','); // return size in Mega-Bytes as text in a shortened version, example: SizeMB   (1024) -> "0,0 MB", SizeMB   (1024*1024) ->   "1,0 MB", SizeMB   (1024*1024*1024) ->     "1 024 MB"
@@ -275,6 +276,14 @@ VecI4 FileVersion(C Str &name); // get EXE/DLL/APK file version, (-1, 0, 0, 0) o
 Bool ValidEmail     (C Str &email); // test if 'email' is in correct email       format - "user@domain.com"
 Bool ValidURL       (C Str &url  ); // test if 'url'   is in correct url         format - "http://domain.com"
 Bool ValidLicenseKey(C Str &key  ); // test if 'key'   is in correct license key format - "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX"
+
+Str ShortEmail(C Str &email); // will remove all '.' from gmail addresses                            , example "test.email@gmail.com"       -> "testemail@gmail.com"
+Str  BaseEmail(C Str &email); // will remove all '.' from gmail addresses and "+*" from all addresses, example "test.email+extra@gmail.com" -> "testemail@gmail.com"
+
+CChar * SkipHttpWww(CChar  *url); // skip any "http://", "https://", "www." from url, example "http://www.domain.com" ->     "domain.com"
+CChar8* SkipHttpWww(CChar8 *url); // skip any "http://", "https://", "www." from url, example "http://www.domain.com" ->     "domain.com"
+CChar * SkipHttp   (CChar  *url); // skip any "http://", "https://"         from url, example "http://www.domain.com" -> "www.domain.com"
+CChar8* SkipHttp   (CChar8 *url); // skip any "http://", "https://"         from url, example "http://www.domain.com" -> "www.domain.com"
 
 Str         CString(C Str &str); // get string as if it would be stored for the C++ language (preceeding '\' and '"' characters with '\'                                ), for example:         CString("abc"def\ghi"     ) -> ("abc\"def\\ghi")
 Str       XmlString(C Str &str); // get string as if it would be stored for the XML text     (replacing   & -> &amp;   < -> &lt;   > -> &gt;   ' -> &apos;   " -> &quot;), for example:       XmlString("abc"def\ghi"     ) -> ("abc&quot;def\ghi")
@@ -398,7 +407,7 @@ enum EXTENSION_TYPE // Extension Type
 };
 EXTENSION_TYPE ExtType(C Str &ext); // get extension type from given extension name, Sample Usage : ExtType("bmp") -> EXT_IMAGE
 
-#define SUPPORTED_IMAGE_EXT "bmp|png|jpg|jpeg|webp|heif|tga|tif|tiff|dds|psd|ico|cur|hdr|img"
+#define SUPPORTED_IMAGE_EXT "bmp|png|jpg|jpeg|jxl|webp|avif|heif|tga|tif|tiff|dds|psd|ico|cur|hdr|img"
 #define SUPPORTED_SOUND_EXT "wav|flac|ogg|opus|weba|webm|mp3|mp4|m4a"
 #define SUPPORTED_MESH_EXT  "fbx|dae|ase|obj|3ds|b3d|ms3d|psk|mesh"
 /******************************************************************************/

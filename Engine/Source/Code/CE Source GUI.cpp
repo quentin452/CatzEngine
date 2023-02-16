@@ -185,8 +185,8 @@ void Source::update(C GuiPC &gpc)
 
    super::update(gpc);
 
-   if(slidebar[1].button[1]()
-   || slidebar[1].button[2]())
+   if(slidebar[1].button[SB_LEFT_UP   ]()
+   || slidebar[1].button[SB_RIGHT_DOWN]())
       if(!isCurVisible())
    {
       forceCreateNextUndo(); clearSuggestions(); sel=-1;
@@ -197,8 +197,8 @@ void Source::update(C GuiPC &gpc)
 
    if(hasKbFocus())
    {
-      if(Kb.ctrlCmd() && !Kb.alt() && Kb.b(KB_UP  ))slidebar[1].button[1].push(); // scroll up
-      if(Kb.ctrlCmd() && !Kb.alt() && Kb.b(KB_DOWN))slidebar[1].button[2].push(); // scroll down
+      if(Kb.ctrlCmd() && !Kb.alt() && Kb.b(KB_UP  ))scrollUp  ();
+      if(Kb.ctrlCmd() && !Kb.alt() && Kb.b(KB_DOWN))scrollDown();
 
       for(; Kb.k.any() && !Kb.k.winCtrl(); Kb.nextKey())
       {
@@ -702,8 +702,8 @@ void Source::update(C GuiPC &gpc)
    }else
    if(Gui.kb()==&suggestions_textline)
    {
-      if(Kb.ctrlCmd() && Kb.b(KB_UP  ))slidebar[1].button[1].push();else // scroll up
-      if(Kb.ctrlCmd() && Kb.b(KB_DOWN))slidebar[1].button[2].push();else // scroll down
+      if(Kb.ctrlCmd() && Kb.b(KB_UP  ))scrollUp  ();else // scroll up
+      if(Kb.ctrlCmd() && Kb.b(KB_DOWN))scrollDown();else // scroll down
       if(Kb.k(KB_ESC) || Kb.k(KB_NAV_BACK)){clearSuggestions(); Kb.eatKey();}else // hide suggestions
       if(Kb.k(KB_ENTER)){autoComplete(); Kb.eatKey();}else
       if(Kb.k(KB_PGUP))setSuggestion(suggestions_list.cur-Trunc(suggestions_region.slidebar[1].length()/CE.ts.lineHeight()));else
@@ -770,8 +770,8 @@ void Source::update(C GuiPC &gpc)
          }else
          if(MT.b(i, 0) && sel_temp.x>=0 && (!Overwrite || Ms.selecting())) // for Overwrite, require some mouse movement, because there initial position is calculated based on 'Trunc', but target using 'Round'
          {
-            if(MT.pos(i).y>=_crect.max.y)slidebar[1].button[1].push();else
-            if(MT.pos(i).y<=_crect.min.y)slidebar[1].button[2].push();
+            if(MT.pos(i).y>=_crect.max.y)scrollUp  ();else
+            if(MT.pos(i).y<=_crect.min.y)scrollDown();
             cur.set(Round(c.x), Trunc(c.y));
             curClip();
             sel=sel_temp;
@@ -800,17 +800,17 @@ void Source::update(C GuiPC &gpc)
          delBack();
       }
    }
-   REPA(Touches)if(Touches[i].guiObj()==&suggestions_list && Touches[i].rs())
+   REPA(Touches)
    {
-      autoComplete();
+      Touch &touch=Touches[i]; if(touch.guiObj()==&suggestions_list && touch.rs()){autoComplete(); break;}
    }
 
    if(CE.view_mode() && contains(Gui.kb()))
    {
-      if(Kb.b(KB_LEFT ))slidebar[0].button[1].push();
-      if(Kb.b(KB_RIGHT))slidebar[0].button[2].push();
-      if(Kb.b(KB_UP   ))slidebar[1].button[1].push();
-      if(Kb.b(KB_DOWN ))slidebar[1].button[2].push();
+      if(Kb.b(KB_LEFT ))scrollLeft ();
+      if(Kb.b(KB_RIGHT))scrollRight();
+      if(Kb.b(KB_UP   ))scrollUp   ();
+      if(Kb.b(KB_DOWN ))scrollDown ();
       if(Kb.k(KB_PGUP ))scrollY  (-slidebar[1].length());
       if(Kb.k(KB_PGDN ))scrollY  ( slidebar[1].length());
       if(Kb.k(KB_HOME ))scrollToY (0);
@@ -1179,7 +1179,7 @@ void Source::draw(C GuiPC &gpc)
 
                                  Flt     ext=0.01f;
                                  Rect_LU r(fp.x, suggestions_region.visible() ? pos.y-size.y-ext : fp.y-CE.ts.lineHeight()-ext, w, 0); if(r.max.x>=_crect.max.x)r-=Vec2(r.max.x-_crect.max.x, 0);
-                                 Int     lines=CE.ts_small.textLines((CChar*)null, sx.data(), sx.elms(), r.w(), true); r.min.y=r.max.y-lines*CE.ts_small.lineHeight();
+                                 r.min.y=r.max.y-CE.ts_small.textHeight((CChar*)null, sx.data(), sx.elms(), r.w(), true);
                                  Rect(r).extend(ext).draw(WHITE);
                                  Rect(r).extend(ext).draw(Color(0, 0, 0, 112), false);
                                  D.text(CE.ts_small, r, (CChar*)null, sx.data(), sx.elms(), true);
@@ -1265,7 +1265,7 @@ void Source::draw(C GuiPC &gpc)
 
             Flt     space=D.pixelToScreenSize().x*24;
             Rect_LU r(pos+Vec2(size.x+space, 0), w, 0); if(r.max.x>=D.w())r-=Vec2(r.max.x-pos.x+space, 0); if(r.min.x<rect().min.x)r+=Vec2(pos.x+size.x+space-r.min.x, 0);
-            Int     lines=CE.ts_small.textLines((CChar*)null, sx.data(), sx.elms(), r.w(), true); r.min.y=r.max.y-lines*CE.ts_small.lineHeight();
+            r.min.y=r.max.y-CE.ts_small.textHeight((CChar*)null, sx.data(), sx.elms(), r.w(), true);
 
             if(Gui.skin)
             {
@@ -1347,8 +1347,7 @@ void Source::draw(C GuiPC &gpc)
                     max_x=pos.x+clientWidth()-0.1f,
                     max_y=Ms.pos().y-0.15f;
 
-               Int  lines=CE.ts.textLines(cl.text, cl.extra.data(), cl.extra.elms(), max_x-min_x, true);
-               Flt  min_y=max_y-lines*CE.ts.lineHeight();
+               Flt  min_y=max_y-CE.ts.textHeight(cl.text, cl.extra.data(), cl.extra.elms(), max_x-min_x, true);
                Rect rect (min_x, min_y, max_x, max_y);
                if(rect.min.y-0.05f<=pos.y-clientHeight())rect+=Vec2(0, rect.h() + 0.15f*2);
                Rect rect_e=rect; rect_e.extend(0.02f);

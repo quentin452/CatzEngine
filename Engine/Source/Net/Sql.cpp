@@ -1740,8 +1740,8 @@ static int SQLiteOpen(sqlite3_vfs *pVfs, const char *zName, sqlite3_file *pFile,
    CTOR(f);
    f.pMethods=&SQLiteIO;
    Str name=FromUTF8(zName);
-   if((flags&SQLITE_OPEN_READONLY) ? f.file.  readTry(name, SQLiteCipher)
-                                   : f.file.appendTry(name, SQLiteCipher))return SQLITE_OK;
+   if((flags&SQLITE_OPEN_READONLY) ? f.file.  read(name, SQLiteCipher)
+                                   : f.file.append(name, SQLiteCipher))return SQLITE_OK;
    return SQLITE_CANTOPEN; // 'SQLiteClose' will be called upon 'SQLITE_CANTOPEN'
 }
 static int SQLiteDelete(sqlite3_vfs *pVfs, const char *zPath, int dirSync)

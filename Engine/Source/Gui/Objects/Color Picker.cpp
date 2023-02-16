@@ -127,13 +127,14 @@ void ColorPicker::SatLum::update(C GuiPC &gpc)
 {
    if(gpc.visible && gpc.enabled && visible() && enabled())
    {
-    C Vec2 *pos=null; if(Gui.ms()==this && Ms.b(0))pos=&Ms.pos(); if(!pos)REPA(Touches)if(Touches[i].guiObj()==this && Touches[i].on())pos=&Touches[i].pos();
-      if(   pos)
+    C Vec2 *pos; if(Gui.ms()==this && Ms.b(0))
       {
+         pos=&Ms.pos();
+      set:
          ColorPicker &cp  =*(ColorPicker*)user;
          Rect         rect=T.rect()+gpc.offset;
          cp.setHSB(Vec(cp._hsb.x, LerpRS(rect.min.x, rect.max.x, pos->x), LerpRS(rect.min.y, rect.max.y, pos->y)));
-      }
+      }else REPA(Touches){Touch &touch=Touches[i]; if(touch.guiObj()==this && touch.on()){pos=&touch.pos(); goto set;}}
    }
 }
 void ColorPicker::SatLum::draw(C GuiPC &gpc)
@@ -179,13 +180,14 @@ void ColorPicker::Hue::update(C GuiPC &gpc)
 {
    if(gpc.visible && gpc.enabled && visible() && enabled())
    {
-    C Vec2 *pos=null; if(Gui.ms()==this && Ms.b(0))pos=&Ms.pos(); if(!pos)REPA(Touches)if(Touches[i].guiObj()==this && Touches[i].on())pos=&Touches[i].pos();
-      if(   pos)
+    C Vec2 *pos; if(Gui.ms()==this && Ms.b(0))
       {
+         pos=&Ms.pos();
+      set:
          ColorPicker &cp  =*(ColorPicker*)user;
          Rect         rect=T.rect()+gpc.offset;
          cp.setHSB(Vec(LerpRS(rect.min.y, rect.max.y, pos->y), cp._hsb.y, cp._hsb.z));
-      }
+      }else REPA(Touches){Touch &touch=Touches[i]; if(touch.guiObj()==this && touch.on()){pos=&touch.pos(); goto set;}}
    }
 }
 void ColorPicker::Hue::draw(C GuiPC &gpc)
@@ -225,13 +227,14 @@ void ColorPicker::Colors::update(C GuiPC &gpc)
 {
    if(gpc.visible && gpc.enabled && visible() && enabled())
    {
-    C Vec2 *pos=null; if(Gui.ms()==this && Ms.b(0))pos=&Ms.pos(); if(!pos)REPA(Touches)if(Touches[i].guiObj()==this && Touches[i].on())pos=&Touches[i].pos();
-      if(   pos)
+    C Vec2 *pos; if(Gui.ms()==this && Ms.b(0))
       {
+         pos=&Ms.pos();
+      set:
          ColorPicker &cp  =*(ColorPicker*)user;
          Rect         rect=T.rect()+gpc.offset;
          if(Cuts(*pos, Rect(rect.min.x, rect.min.y, rect.max.x, rect.centerY())))cp.set(cp._old);
-      }
+      }else REPA(Touches){Touch &touch=Touches[i]; if(touch.guiObj()==this && touch.on()){pos=&touch.pos(); goto set;}}
    }
 }
 void ColorPicker::Colors::draw(C GuiPC &gpc)

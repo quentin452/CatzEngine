@@ -121,7 +121,7 @@ Bool ReceiptPrinter::end(C Str &document_name)
 /******************************************************************************/
 void ReceiptPrinter::lineHeight(Byte height)
 {
-   data+='\x1B'; data+='3'; data.alwaysAppend(height);
+   data+='\x1B'; data+='3'; data+=Char8(height);
 }
 void ReceiptPrinter::lineHeight()
 {
@@ -135,11 +135,11 @@ void ReceiptPrinter::codePage(Byte cp)
       code_page=cp;
    #if 1
       data+="\x1Bt";
-      data.alwaysAppend(cp);
+      data+=Char8(cp);
    #else
       data+="\x1C\x7D\x26";
-      data.alwaysAppend(cp&0xFF);
-      data.alwaysAppend(cp>>8);
+      data+=Char8(cp&0xFF);
+      data+=Char8(cp>>8);
    #endif
    }
 }
@@ -175,18 +175,18 @@ void ReceiptPrinter::operator+=(C Str8 &text)
 /******************************************************************************/
 void ReceiptPrinter::justify(Int j)
 {
-   data+="\x1B\x61"; data.alwaysAppend(Sign(j)+1); // -1..1 -> 0..2
+   data+="\x1B\x61"; data+=Char8(Sign(j)+1); // -1..1 -> 0..2
 }
 /******************************************************************************/
 // BAR CODE
 /******************************************************************************/
 void ReceiptPrinter::barcodeWidth(Byte width)
 {
-   data+="\x1D\x77"; data.alwaysAppend(width);
+   data+="\x1D\x77"; data+=Char8(width);
 }
 void ReceiptPrinter::barcodeHeight(Byte height)
 {
-   data+="\x1D\x68"; data.alwaysAppend(height);
+   data+="\x1D\x68"; data+=Char8(height);
 }
 void ReceiptPrinter::barcode39(C Str8 &code)
 {
@@ -194,7 +194,7 @@ void ReceiptPrinter::barcode39(C Str8 &code)
    {
       data+="\x1D\x6B\x04";
       data+=code;
-      data.alwaysAppend('\0');
+      data+='\0';
     //data+='\n'; this shouldn't be done as barcodes automatically end line
    }
 }
@@ -204,7 +204,7 @@ void ReceiptPrinter::barcode93(C Str8 &code)
    {
       data+="\x1D\x6B\x07";
       data+=code;
-      data.alwaysAppend('\0');
+      data+='\0';
     //data+='\n'; this shouldn't be done as barcodes automatically end line
    }
 }
@@ -214,7 +214,7 @@ void ReceiptPrinter::barcode128(C Str8 &code)
    {
       data+="\x1D\x6B\x08";
       data+=code;
-      data.alwaysAppend('\0');
+      data+='\0';
     //data+='\n'; this shouldn't be done as barcodes automatically end line
    }
 }
@@ -227,7 +227,7 @@ static inline Bool SRGBToBit(C Vec4 &c)
 }
 Bool ReceiptPrinter::operator+=(C Image &img)
 {
-   Image tmp; C Image *src=&img; if(img.compressed())if(img.copyTry(tmp, -1, -1, -1, ImageTypeUncompressed(img.type()), IMAGE_SOFT, 1))src=&tmp;else return false;
+   Image tmp; C Image *src=&img; if(img.compressed())if(img.copy(tmp, -1, -1, -1, ImageTypeUncompressed(img.type()), IMAGE_SOFT, 1))src=&tmp;else return false;
    if(src->lockRead())
    {
    #if 1
@@ -242,11 +242,11 @@ Bool ReceiptPrinter::operator+=(C Image &img)
       for(Int y_ofs=0; y_ofs<src->lh(); y_ofs+=max_h)
       {
          Int h=Min(src->lh()-y_ofs, max_h), y_end=y_ofs+h;
-         data+="\x1D\x76\x30"; data.alwaysAppend(0);
-         data.alwaysAppend(w&0xFF);
-         data.alwaysAppend(w>>8  );
-         data.alwaysAppend(h&0xFF);
-         data.alwaysAppend(h>>8  );
+         data+="\x1D\x76\x30"; data+='\0';
+         data+=Char8(w&0xFF);
+         data+=Char8(w>>8  );
+         data+=Char8(h&0xFF);
+         data+=Char8(h>>8  );
          for(Int y=y_ofs; y<y_end    ; y++)
          for(Int x=    0; x<src->lw();    )
          {
@@ -255,7 +255,7 @@ Bool ReceiptPrinter::operator+=(C Image &img)
                if(SRGBToBit(src->colorS(x, y)))b|=(1<<i);
                x++;
             }
-            data.alwaysAppend(b);
+            data+=Char8(b);
          }
       }
       if(multiple)lineHeight();
@@ -265,14 +265,14 @@ Bool ReceiptPrinter::operator+=(C Image &img)
       lineHeight(0); // have to set zero line height to avoid any padding between line chunks
       for(Int y=0; y<src->lh(); y+=24)
       {
-         data+="\x1B\x2A"; data.alwaysAppend(33);
-         data.alwaysAppend(src->lw()&0xFF);
-         data.alwaysAppend(src->lw()>>8  );
+         data+="\x1B\x2A"; data+=Char8(33);
+         data+=Char8(src->lw()&0xFF);
+         data+=Char8(src->lw()>>8  );
          FREPD(x, src->lw())
          FREPD(sy, 3)
          {
             Byte b=0; FREP(8)if(SRGBToBit(src->colorS(x, y+7-i + sy*8)))b|=(1<<i);
-            data.alwaysAppend(b);
+            data+=Char8(b);
          }
          data+='\n';
       }
@@ -288,9 +288,9 @@ Bool ReceiptPrinter::openCashDrawer()
 {
    const Int pin=0, on_ms=120, off_ms=240;
    Str8 data="\x1Bp";
-   data.alwaysAppend(48+pin);
-   data.alwaysAppend( on_ms/2);
-   data.alwaysAppend(off_ms/2);
+   data+=Char8(48+pin);
+   data+=Char8( on_ms/2);
+   data+=Char8(off_ms/2);
    return send(data);
 }
 /******************************************************************************
@@ -303,7 +303,7 @@ void ReceiptPrinter::test()
          //Str8 data="\x1D\x49";
          //Str8 data="\x1D\x72";
          Str8 data="\x10\x04";
-         data.alwaysAppend(i);
+         data+=Char8(i);
          send(data);
       }
       int z=0;
@@ -395,7 +395,7 @@ void LabelPrinter::text(C VecI2 &pos, C Str &text)
 }
 Bool LabelPrinter::image(C VecI2 &pos, C Image &img)
 {
-   Image tmp; C Image *src=&img; if(img.compressed())if(img.copyTry(tmp, -1, -1, -1, ImageTypeUncompressed(img.type()), IMAGE_SOFT, 1))src=&tmp;else return false;
+   Image tmp; C Image *src=&img; if(img.compressed())if(img.copy(tmp, -1, -1, -1, ImageTypeUncompressed(img.type()), IMAGE_SOFT, 1))src=&tmp;else return false;
    if(src->lockRead())
    {
       const Int w=DivCeil8(src->lw()), h=src->lh();
@@ -415,7 +415,7 @@ Bool LabelPrinter::image(C VecI2 &pos, C Image &img)
             if(SRGBToBit(src->colorS(x, y)))b|=(1<<i);
             x++;
          }
-         data.alwaysAppend(b);
+         data+=Char8(b);
       }
       src->unlock();
       return true;

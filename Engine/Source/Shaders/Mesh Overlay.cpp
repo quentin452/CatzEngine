@@ -47,7 +47,7 @@ void VS
       vpos=Project(TransformPos(vtx.pos()));
    }else
    {
-      VecU bone=vtx.bone();
+      VecU4 bone=vtx.bone();
 
    #if NORMALS
       D.mtrx[1]=Normalize(TransformDir(OverlayParams.mtrx[1], bone, vtx.weight()));

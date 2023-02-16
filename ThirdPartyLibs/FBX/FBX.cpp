@@ -50,7 +50,8 @@ struct FBX
       FbxNode    *node=null;
       Bool        dummy=false, bone=false, mesh=false, has_skin=false,
                   has_bones=false; // if this or any children is a bone
-      Str         full_name, ee_name;
+      Str         full_name;
+      Str8        ee_name;
       MatrixD     local, global;
       Int         bone_index=-1, // points to the bone index in the skeleton
           nearest_bone_index=-1, // this points to the nearest bone index in the skeleton (for example, if this node doesn't have a corresponding bone in the skeleton, then it will point to the bone index of one of its parents, but NOT children)
@@ -111,7 +112,7 @@ struct FBX
       }*/
       void adjustBoneIndex(Int bone_index)
       {
-         if(bone_index>=0xFF)bone_index=-1;
+         if(bone_index>=BONE_NULL)bone_index=-1;
           T.bone_index=bone_index;
          if(bone_index<0)bone=false; // if we're clearing bone index, then it means we don't want this as a bone
       }
@@ -206,10 +207,11 @@ struct FBX
                FREPA (nodes)
                {
                   Node &node=nodes[i];
-                  node.ee_name=node.full_name=FromUTF8(node.node->GetName());
+                  node.  ee_name=node.node->GetName();
+                  node.full_name=FromUTF8(node.ee_name);
 
                   // type
-                  if(i || node.full_name!="RootNode") // all FBX have a dummy "RootNode" at 0 index, always ignore it because there's a limit of 255 bones
+                  if(i || node.full_name!="RootNode") // all FBX have a dummy "RootNode" at 0 index, always ignore it because there's a limited number of bones
                   {
                      if(FbxNodeAttribute *attrib=node.node->GetNodeAttribute()) // this will be null for the identity "RootNode", but can also be null for some animations
                         switch(attrib->GetAttributeType())
@@ -249,73 +251,29 @@ struct FBX
          }
       }
    }
-   void makeBoneNamesUnique()
-   {
-      FREPA(nodes)
-      {
-         Node &node=nodes[i]; if(node.bone)
-         {
-            if(!node.ee_name.is())node.ee_name="Root"; // we don't allow empty names because 'findBone' methods may skip searching if the name parameter is empty
-         again:
-            REPD(j, i)
-            {
-             C Node &test=nodes[j]; if(test.bone && node.ee_name==test.ee_name)
-               {
-                  Int  index=1;
-                  Char separator='#';
-                  REPA(node.ee_name)if(node.ee_name[i]==separator) // find if this name already has a separator
-                     {index=TextInt(node.ee_name()+i+1)+1; node.ee_name.clip(i); break;} // get the index value, increase by one, and remove the separator
-                  node.ee_name+=separator;
-                  node.ee_name+=index;
-                  goto again;
-               }
-            }
-         }
-      }
-   }
    void shortenBoneNames(C MemPtr<Str> &start)
    {
       REPA(nodes)
       {
          Node &node=nodes[i]; if(node.bone)
          {
-            Str &name=node.ee_name;
+            Str8 &name=node.ee_name;
             REPA(start)name=SkipStart(name, start[i]);
          }
       }
    }
-   void shortenBoneNames()
+   void processBoneNames()
    {
-      Int max_name_length=MEMBER_ELMS(SkelBone, name)-1, name_length=0;
-      REPA(nodes)
+      MemtN<Str8, 256> bone_names;
+      FREPA(nodes)
       {
-       C Node &node=nodes[i]; if(node.bone)MAX(name_length, node.ee_name.length());
+         Node &node=nodes[i]; if(node.bone)Swap(bone_names.New(), node.ee_name);
       }
-      if(name_length>max_name_length) // if name length exceeds allowed limit, then shorten names by removing the shared start
+      ProcessBoneNames(bone_names);
+      Int j=0;
+      FREPA(nodes)
       {
-         REPA(nodes)
-         {
-          C Node &node_i=nodes[i]; if(node_i.bone)
-            {
-             C Str &name_i=node_i.ee_name;
-               REPD(j, i)
-               {
-                C Node &node_j=nodes[j]; if(node_j.bone)
-                  {
-                   C Str &name_j=node_j.ee_name;
-                     FREPA(name_i)if(name_i[i]!=name_j[i]){MIN(name_length, i); break;}
-                  }
-               }
-            }
-         }
-         REPA(nodes)
-         {
-            Str &name=nodes[i].ee_name;
-            if(name_length)name.remove(0, name_length+(name[name_length]==' ')); // if this name has a space after shared start, then remove that space too
-            // even after removing shared start, bone name can still be too long
-            if(name.length()>max_name_length)name.clip(max_name_length-1-2); // leave room for 1 char separator + 2 char index
-         }
-         makeBoneNamesUnique(); // we've changed names, so we need to make sure that they are unique
+         Node &node=nodes[i]; if(node.bone)Swap(node.ee_name, bone_names[j++]);
       }
    }
    void setNodesAsBoneFromSkin()
@@ -525,18 +483,18 @@ struct FBX
          REPA(duplicate_name)if(duplicate_name[i])materials[i].name+=S+'\\'+(ULong)engine_mtrl_to_fbx_mtrl[i]->GetUniqueID(); // append the name with materials Unique ID
       }
    }
-   void boneRemap(C MemPtrN<Byte, 256> &old_to_new)
+   void boneRemap(C CMemPtrN<BoneType, 256> &old_to_new)
    {
       REPA(nodes)
       {
-         Node &node=nodes[i]; node.adjustBoneIndex(InRange(node.bone_index, old_to_new) ? old_to_new[node.bone_index] : 0xFF);
+         Node &node=nodes[i]; node.adjustBoneIndex(InRange(node.bone_index, old_to_new) ? old_to_new[node.bone_index] : BONE_NULL);
       }
    }
    void set(Skeleton *skeleton, XSkeleton *xskeleton)
    {
       if(skeleton)
       {
-         MemtN<Byte, 256> old_to_new;
+         MemtN<BoneType, 256> old_to_new;
 
          // create bones
          FREPA(nodes)
@@ -697,7 +655,8 @@ struct FBX
                   // skin
                   MemtN< Matrix, 256       > bone_matrix;
                   Memc < Memc<IndexWeight> > vtx_skin;
-                  VecB4                      vtx_matrix=0, vtx_blend(255, 0, 0, 0); // !! sum must be equal to 255 !! defaults used for vertexes with no skin specified
+                  VtxBone                    vtx_matrix=0;
+                  VecB4                      vtx_blend(255, 0, 0, 0); // !! sum must be equal to 255 !! defaults used for vertexes with no skin specified
                   Bool                       force_skin=false, animate=false;
                   if(skeleton && skeleton->bones.elms())
                   {
@@ -1122,17 +1081,17 @@ struct FBX
                         #endif
                            SkelBone &sbon=skeleton->bones[node.bone_index];
                            AnimBone &abon=xanim.anim.bones.New(); abon.set(sbon.name);
-                           MatrixD3  parent_matrix_inv; if(sbon.parent!=0xFF)skeleton->bones[sbon.parent].inverse(parent_matrix_inv);
+                           MatrixD3  parent_matrix_inv; if(sbon.parent!=BONE_NULL)skeleton->bones[sbon.parent].inverse(parent_matrix_inv);
 
                            // orientation
                            MatrixD3 local_to_world; animated_node_ancestor->local.orn().inverseNonOrthogonal(local_to_world); local_to_world*=animated_node_ancestor->global.orn(); // GetTransform(animated_node_ancestor->local.orn(), animated_node_ancestor->global.orn());
-                           MatrixD3 local_node_to_local_bone; if(sbon.parent!=0xFF)local_to_world.mul(parent_matrix_inv, local_node_to_local_bone);else local_node_to_local_bone=local_to_world; // after we convert to world space with 'local_to_world', we then convert it to bone in its parent space
+                           MatrixD3 local_node_to_local_bone; if(sbon.parent!=BONE_NULL)local_to_world.mul(parent_matrix_inv, local_node_to_local_bone);else local_node_to_local_bone=local_to_world; // after we convert to world space with 'local_to_world', we then convert it to bone in its parent space
 
                            // position
                            MatrixD pos_matrix;
                            if(Node *parent=animated_node_ancestor->parent)pos_matrix=parent->global;else pos_matrix.identity();
                                                                           pos_matrix.moveBack(sbon.pos);
-                           if(sbon.parent!=0xFF                          )pos_matrix*=parent_matrix_inv;
+                           if(sbon.parent!=BONE_NULL                     )pos_matrix*=parent_matrix_inv;
 
                            abon.orns  .setNum(  rot_times.elms());
                            abon.poss  .setNum(  pos_times.elms());
@@ -1168,7 +1127,7 @@ struct FBX
                                  anim.z=anim_matrix.x;
                               #if 0
                                  anim*=local_to_world; // convert to world space
-                                 if(sbon.parent!=0xFF)anim*=parent_matrix_inv; // convert to local space (relative to skeleton parent bone)
+                                 if(sbon.parent!=BONE_NULL)anim*=parent_matrix_inv; // convert to local space (relative to skeleton parent bone)
                               #else // optimized
                                  anim*=local_node_to_local_bone; // convert from local node to local bone space
                               #endif
@@ -1184,7 +1143,7 @@ struct FBX
                               #if 0
                                  if(Node *parent=animated_node_ancestor->parent)p*=parent->global; // convert to world space (here we don't use 'local_to_world' because that includes this node orientation, but node position is independent on its orientation)
                                                                                 p-=sbon.pos; // set as world space delta from bone
-                                 if(sbon.parent!=0xFF                          )p*=parent_matrix_inv; // convert to local space (relative to skeleton parent bone)
+                                 if(sbon.parent!=BONE_NULL                     )p*=parent_matrix_inv; // convert to local space (relative to skeleton parent bone)
                               #else // optimized
                                  p*=pos_matrix;
                               #endif
@@ -1295,8 +1254,7 @@ Bool _ImportFBX(C Str &name, Mesh *mesh, Skeleton *skeleton, MemPtr<XAnimation> 
             fbx.ignoreBones(ignore);
          #endif
           //Memc<Str> shorten; shorten.add(); fbx.shortenBoneNames(shorten);
-            fbx.makeBoneNamesUnique();
-            fbx.shortenBoneNames();
+            fbx.processBoneNames();
             fbx.set(skel, xskeleton);
             fbx.set(mesh, skel, part_material_index);
             fbx.set(skel, animations);

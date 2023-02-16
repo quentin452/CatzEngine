@@ -66,7 +66,7 @@ class RemovePaneClass : ClosableWindow
       Gui+=super.create(Rect_C(0, 0, 1, 0.35)).hide(); button[2].func(HideWindow, SCAST(Window, T)).show();
       T  +=yes  .create(Rect_D(clientWidth()*2/7, -clientHeight()+0.04, 0.25, 0.065), "Yes").func(Yes, T);
       T  +=no   .create(Rect_D(clientWidth()*5/7, -clientHeight()+0.04, 0.25, 0.065), "No" ).func(No , T);
-      T  +=text .create(Rect(0, yes.rect().max.y, clientWidth(), 0).extend(-0.01), "Are you sure you want to remove this pane?"); text.auto_line=AUTO_LINE_SPACE_SPLIT;
+      T  +=text .create(Rect(0, yes.rect().max.y, clientWidth(), 0).extend(-0.01), "Are you sure you want to remove this pane?"); text.auto_line=true;
    }
    void display(C UID &pane_id)
    {
@@ -147,7 +147,7 @@ class ReplaceFileClass : ClosableWindow
       Gui+=super.create(Rect_C(0, 0, 1, 0.35)).hide(); button[2].func(HideWindow, SCAST(Window, T)).show();
       T  +=yes  .create(Rect_D(clientWidth()*2/7, -clientHeight()+0.04, 0.25, 0.065), "Yes").func(Yes, T);
       T  +=no   .create(Rect_D(clientWidth()*5/7, -clientHeight()+0.04, 0.25, 0.065), "No" ).func(No , T);
-      T  +=text .create(Rect(0, yes.rect().max.y, clientWidth(), 0).extend(-0.01), "Are you sure you want to copy and replace destination with selected items?"); text.auto_line=AUTO_LINE_SPACE_SPLIT;
+      T  +=text .create(Rect(0, yes.rect().max.y, clientWidth(), 0).extend(-0.01), "Are you sure you want to copy and replace destination with selected items?"); text.auto_line=true;
    }
    void display()
    {
@@ -237,7 +237,7 @@ class DeleteFileClass : ClosableWindow
       Gui+=super.create(Rect_C(0, 0, 1, 0.35)).hide(); button[2].func(HideWindow, SCAST(Window, T)).show();
       T  +=yes  .create(Rect_D(clientWidth()*2/7, -clientHeight()+0.04, 0.25, 0.065), "Yes").func(Yes, T);
       T  +=no   .create(Rect_D(clientWidth()*5/7, -clientHeight()+0.04, 0.25, 0.065), "No" ).func(No , T);
-      T  +=text .create(Rect(0, yes.rect().max.y, clientWidth(), 0).extend(-0.01), "Are you sure you want to move selected items to the Recycle Bin?"); text.auto_line=AUTO_LINE_SPACE_SPLIT;
+      T  +=text .create(Rect(0, yes.rect().max.y, clientWidth(), 0).extend(-0.01), "Are you sure you want to move selected items to the Recycle Bin?"); text.auto_line=true;
    }
    void display()
    {

@@ -47,17 +47,17 @@ struct MeshGroup // Mesh Group (array of Meshes)
    MeshGroup& scaleMove(C Vec &scale, C Vec &move); // scale and move MeshGroup
 
    // texture transform
-   MeshGroup& texMove  (C Vec2 &move , Byte tex_index=0); // move   texture UV's
-   MeshGroup& texScale (C Vec2 &scale, Byte tex_index=0); // scale  texture UV's
-   MeshGroup& texRotate(  Flt   angle, Byte tex_index=0); // rotate texture UV's
+   MeshGroup& texMove  (C Vec2 &move , Byte uv_index=0); // move   texture UV's
+   MeshGroup& texScale (C Vec2 &scale, Byte uv_index=0); // scale  texture UV's
+   MeshGroup& texRotate(  Flt   angle, Byte uv_index=0); // rotate texture UV's
 
 #if EE_PRIVATE
    // texturize
-   MeshGroup& texMap(  Flt     scale=1, Byte tex_index=0); // map texture UV's according to vertex XY position and scale
-   MeshGroup& texMap(C Matrix &matrix , Byte tex_index=0); // map texture UV's according to matrix
-   MeshGroup& texMap(C Plane  &plane  , Byte tex_index=0); // map texture UV's according to plane
-   MeshGroup& texMap(C Ball   &ball   , Byte tex_index=0); // map texture UV's according to ball
-   MeshGroup& texMap(C Tube   &tube   , Byte tex_index=0); // map texture UV's according to tube
+   MeshGroup& texMap(  Flt     scale=1, Byte uv_index=0); // map texture UV's according to vertex XY position and scale
+   MeshGroup& texMap(C Matrix &matrix , Byte uv_index=0); // map texture UV's according to matrix
+   MeshGroup& texMap(C Plane  &plane  , Byte uv_index=0); // map texture UV's according to plane
+   MeshGroup& texMap(C Ball   &ball   , Byte uv_index=0); // map texture UV's according to ball
+   MeshGroup& texMap(C Tube   &tube   , Byte uv_index=0); // map texture UV's according to tube
 #endif
 
    // set
@@ -86,8 +86,8 @@ struct MeshGroup // Mesh Group (array of Meshes)
 
 #if EE_PRIVATE
    // fix
-   MeshGroup& fixTexWrapping(Byte tex_index=0); // fix texture wrapping, fixes texture coordinates created by spherical/tube mapping
-   MeshGroup& fixTexOffset  (Byte tex_index=0); // fix texture offset  , tries to reduce big texture coordinates to small ones
+   MeshGroup& fixTexWrapping(Byte uv_index=0); // fix texture wrapping, fixes texture coordinates created by spherical/tube mapping
+   MeshGroup& fixTexOffset  (Byte uv_index=0); // fix texture offset  , tries to reduce big texture coordinates to small ones
 #endif
 
    // add / remove

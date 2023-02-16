@@ -322,7 +322,7 @@ void VtxFormat::create(MESH_FLAG flag, UInt compress)
                                      Set(ve[i++], ofs, DXGI_FORMAT_R32G32_FLOAT   , "UV"          , 2); if(flag&VTX_TEX2    )ofs+=SIZE(Vec2 );
                                      Set(ve[i++], ofs, DXGI_FORMAT_R32G32_FLOAT   , "UV"          , 3); if(flag&VTX_TEX3    )ofs+=SIZE(Vec2 );}
 
-                                     Set(ve[i++], ofs, DXGI_FORMAT_R8G8B8A8_UINT  , "BLENDINDICES", 0); if(flag&VTX_MATRIX  )ofs+=SIZE(VecB4);
+                                     Set(ve[i++], ofs, DXGI_FORMAT_R8G8B8A8_UINT  , "BLENDINDICES", 0); if(flag&VTX_MATRIX  )ofs+=SIZE(VecB4); // #MeshVtxBoneHW
                                      Set(ve[i++], ofs, DXGI_FORMAT_R8G8B8A8_UNORM , "BLENDWEIGHT" , 0); if(flag&VTX_BLEND   )ofs+=SIZE(VecB4);
                                      Set(ve[i++], ofs, DXGI_FORMAT_R32_FLOAT      , "PSIZE"       , 0); if(flag&VTX_SIZE    )ofs+=SIZE(Flt  );
                                      Set(ve[i++], ofs, DXGI_FORMAT_R8G8B8A8_UNORM , "COLOR"       , 0); if(flag&VTX_MATERIAL)ofs+=SIZE(VecB4);
@@ -356,7 +356,7 @@ void VtxFormat::create(MESH_FLAG flag, UInt compress)
                                      if(flag&VTX_TEX2    ){ve.New().set(GL_VTX_TEX2    , 2, GL_FLOAT        , false, ofs); ofs+=SIZE(Vec2 );}
                                      if(flag&VTX_TEX3    ){ve.New().set(GL_VTX_TEX3    , 2, GL_FLOAT        , false, ofs); ofs+=SIZE(Vec2 );}}
 
-                                     if(flag&VTX_MATRIX  ){ve.New().set(GL_VTX_BONE    , 4, GL_UNSIGNED_BYTE, false, ofs); ofs+=SIZE(VecB4);}
+                                     if(flag&VTX_MATRIX  ){ve.New().set(GL_VTX_BONE    , 4, GL_UNSIGNED_BYTE, false, ofs); ofs+=SIZE(VecB4);} // #MeshVtxBoneHW
                                      if(flag&VTX_BLEND   ){ve.New().set(GL_VTX_WEIGHT  , 4, GL_UNSIGNED_BYTE, true , ofs); ofs+=SIZE(VecB4);}
                                      if(flag&VTX_SIZE    ){ve.New().set(GL_VTX_SIZE    , 1, GL_FLOAT        , false, ofs); ofs+=SIZE(Flt  );}
                                      if(flag&VTX_MATERIAL){ve.New().set(GL_VTX_MATERIAL, 4, GL_UNSIGNED_BYTE, true , ofs); ofs+=SIZE(VecB4);}
@@ -554,7 +554,7 @@ Bool VtxBuf::create(Int vertexes, MESH_FLAG flag, UInt compress, Bool dynamic)
                                      if(flag&VTX_TEX2    )size+=SIZE(Vec2 );
                                      if(flag&VTX_TEX3    )size+=SIZE(Vec2 );}
 
-                                     if(flag&VTX_MATRIX  )size+=SIZE(VecB4);
+                                     if(flag&VTX_MATRIX  )size+=SIZE(VecB4); // #MeshVtxBoneHW
                                      if(flag&VTX_BLEND   )size+=SIZE(VecB4);
                                      if(flag&VTX_SIZE    )size+=SIZE(Flt  );
                                      if(flag&VTX_MATERIAL)size+=SIZE(VecB4);
@@ -1406,7 +1406,7 @@ void VtxIndBuf::create()
          {"UV"          , 2, DXGI_FORMAT_R32G32_FLOAT      , 0, OFFSET(Vtx3DFull, tex2    ), D3D11_INPUT_PER_VERTEX_DATA, 0},
          {"UV"          , 3, DXGI_FORMAT_R32G32_FLOAT      , 0, OFFSET(Vtx3DFull, tex3    ), D3D11_INPUT_PER_VERTEX_DATA, 0},
          {"PSIZE"       , 0, DXGI_FORMAT_R32_FLOAT         , 0, OFFSET(Vtx3DFull, size    ), D3D11_INPUT_PER_VERTEX_DATA, 0},
-         {"BLENDINDICES", 0, DXGI_FORMAT_R8G8B8A8_UINT     , 0, OFFSET(Vtx3DFull, matrix  ), D3D11_INPUT_PER_VERTEX_DATA, 0},
+         {"BLENDINDICES", 0, DXGI_FORMAT_R8G8B8A8_UINT     , 0, OFFSET(Vtx3DFull, matrix  ), D3D11_INPUT_PER_VERTEX_DATA, 0}, // #MeshVtxBoneHW
          {"BLENDWEIGHT" , 0, DXGI_FORMAT_R8G8B8A8_UNORM    , 0, OFFSET(Vtx3DFull, blend   ), D3D11_INPUT_PER_VERTEX_DATA, 0},
          {"COLOR"       , 0, DXGI_FORMAT_R8G8B8A8_UNORM    , 0, OFFSET(Vtx3DFull, material), D3D11_INPUT_PER_VERTEX_DATA, 0},
          {"COLOR"       , 1, DXGI_FORMAT_R8G8B8A8_UNORM    , 0, OFFSET(Vtx3DFull, color   ), D3D11_INPUT_PER_VERTEX_DATA, 0},
@@ -1533,7 +1533,7 @@ void VtxIndBuf::create()
       ve.New().set(GL_VTX_TEX3    , 2, GL_FLOAT        , false, OFFSET(Vtx3DFull, tex3    ));
       ve.New().set(GL_VTX_COLOR   , 4, GL_UNSIGNED_BYTE, true , OFFSET(Vtx3DFull, color   ));
       ve.New().set(GL_VTX_MATERIAL, 4, GL_UNSIGNED_BYTE, true , OFFSET(Vtx3DFull, material));
-      ve.New().set(GL_VTX_BONE    , 4, GL_UNSIGNED_BYTE, false, OFFSET(Vtx3DFull, matrix  ));
+      ve.New().set(GL_VTX_BONE    , 4, GL_UNSIGNED_BYTE, false, OFFSET(Vtx3DFull, matrix  )); // #MeshVtxBoneHW
       ve.New().set(GL_VTX_WEIGHT  , 4, GL_UNSIGNED_BYTE, true , OFFSET(Vtx3DFull, blend   ));
       ve.New().set(GL_VTX_SIZE    , 1, GL_FLOAT        , false, OFFSET(Vtx3DFull, size    ));
      _vf3D_full.create(ve); ve.clear();

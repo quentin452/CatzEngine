@@ -257,8 +257,9 @@ class Obj : ObjData
    void scaleYBy(flt f) {setUndo(); matrix.y    *=f; setChanged(true);}
    void scaleZBy(flt f) {setUndo(); matrix.z    *=f; setChanged(true);}
 
-   void randomRot() {setUndo(); matrix.rotateYL(Random.f(PI2));        setChanged(true);}
-   void  resetRot() {setUndo(); matrix.orn().setScale(matrix.scale()); setChanged(true);}
+   void randomRot  () {setUndo(); matrix.rotateYL(Random.f(PI2));        setChanged(true);}
+   void randomRot90() {setUndo(); matrix.rotateYL(Random(4)*PI_2);       setChanged(true);}
+   void  resetRot  () {setUndo(); matrix.orn().setScale(matrix.scale()); setChanged(true);}
 
    void alignGrid()
    {
@@ -542,8 +543,9 @@ void ObjAlignTer () {WorldEdit.obj_pos.apply(); REPAO(Selection).alignTerrain(tr
 void ObjAlignNrm () {WorldEdit.obj_pos.apply(); REPAO(Selection).alignNormal (    ); WorldEdit.objTransChanged();}
 void ObjAlignGrid() {WorldEdit.obj_pos.apply(); REPA (Selection){Obj &obj=Selection[i]; bool ground=obj.onGround(); obj.alignGrid(); if(ground && WorldEdit.obj_hm_align())obj.alignTerrain(false); if(ground && WorldEdit.hm_align_nrm)obj.alignNormal();} WorldEdit.objTransChanged();}
 
-void ObjRandomRot() {REPAO(Selection).randomRot(); WorldEdit.objTransChanged();}
-void ObjResetRot () {REPAO(Selection). resetRot(); WorldEdit.objTransChanged();}
+void ObjRandomRot  () {REPAO(Selection).randomRot  (); WorldEdit.objTransChanged();}
+void ObjRandomRot90() {REPAO(Selection).randomRot90(); WorldEdit.objTransChanged();}
+void ObjResetRot   () {REPAO(Selection). resetRot  (); WorldEdit.objTransChanged();}
 
 void ObjRotX() {Matrix3 m; m.setRotateX(PI_2); REPA(Selection){Obj &obj=Selection[i]; obj.moveTo(obj.matrix.orn()*m);} WorldEdit.objTransChanged();}
 void ObjRotY() {Matrix3 m; m.setRotateY(PI_2); REPA(Selection){Obj &obj=Selection[i]; obj.moveTo(obj.matrix.orn()*m);} WorldEdit.objTransChanged();}

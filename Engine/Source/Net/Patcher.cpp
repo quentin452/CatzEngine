@@ -247,13 +247,13 @@ DWNL_STATE Patcher::indexState()
 }
 C Pak* Patcher::index() {return (indexState()==DWNL_DONE) ? &_pak : null;}
 /******************************************************************************/
-static Str ServerPath(Str path, bool file=true) // !! this needs to be in sync with "Uploader" tool !!
+static Str ServerPath(Str path, bool file=true) // !! THIS NEEDS TO BE IN SYNC WITH "Uploader" TOOL !!
 {
    Str out; if(file){Str ext=GetExt(path); if(ext=="pl" || ext=="php" || ext=="old" || ext=="dat" || ext=="dll" || ext=="bat" || ext=="cmd")path+='_';} // these file formats can't be downloaded normally, because they're treated as scripts or some can be blocked by servers
    for(;;)
    {
       Str base=GetBase(path); if(!base.is())break;
-      out =S + (file ? "f-" : "d-") + CaseDown(base) + (out.is() ? '/' : '\0') + out;
+      out =S + (file ? "f-" : "d-") + CaseDown(base) + (out.is() ? "/" : null) + out;
       path=GetPath(path);
       file=false;
    }
@@ -300,7 +300,7 @@ static Bool PatcherUpdate  (Thread &thread) {((Patcher*)thread.user)->update(); 
             {
                download.index=_to_download.pop(); locker.off();
             #if 1 // direct download
-               download.create(_http+CaseDown(_name)+'/'+ServerPath(_pak.fullName(download.index)), null, null, -1, 0, -1, false, false, &_event); // start downloading
+               download.create(_http+CaseDown(_name)+'/'+ServerPath(_pak.fullName(download.index)), null, null, 0, -1, false, false, &_event); // start downloading
             #else // through PHP (had problems when tried accessing 6 downloads at the same time)
                Memt<TextParam> params; params.New().set("file", ServerPath(_pak.fullName(download.index)));
                download.create(_http+CaseDown(_name)+".download.php", params, null, -1, 0, -1, false, false, &_event); // start downloading

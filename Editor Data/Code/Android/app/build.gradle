@@ -6,7 +6,7 @@ android {
 	defaultConfig {
 		applicationId "com.esenthel.project"
 		minSdkVersion MSBUILD_MIN_SDK_VERSION
-		targetSdkVersion 30
+		targetSdkVersion 31
 	}
 	signingConfigs {
 		release {
@@ -44,6 +44,7 @@ android {
 
 dependencies {
 	implementation fileTree(dir: "libs", include: ["*.jar"])
+   implementation "androidx.core:core:1.8.0" // needed for androidx.core.view.ViewCompat
 }
 
 buildDir = MSBUILD_ANDROID_GRADLE_BUILD_OUTPUT_DIR

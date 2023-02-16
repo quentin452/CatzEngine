@@ -3,6 +3,8 @@
 
 #define USE_STD WINDOWS // 'iswalpha' on Apple/Linux supports only ASCII, on Android it works on more characters but not the same as on Windows, we need consistent results across all platforms, so use 'iswalpha' on Windows, and 'Alphas' on other platforms (which was pre-computed from 'iswalpha' on Windows)
 
+#define NUL_CHAR 1 // allow appending NUL char
+
 namespace EE{
 /******************************************************************************/
 static Int StrSize(Int new_size, Int old_size)
@@ -57,9 +59,6 @@ const Str  S;
 const Str8 S8;
 
 const Char8 Digits16[]={'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
-
-Char  _Char8To16[  256];
-Char8 _Char16To8[65536];
 
 static U16 CharOrder8 [  256],
            CharOrder16[65536];
@@ -169,26 +168,21 @@ UInt CharFlagFast(Char  a, Char  b) {return CharFlagFast(a)|CharFlagFast(b);}
 
 INLINE Char  CaseDownFast(Char  c) {return _CaseDown[Unsigned(c)];}
 INLINE Char  CaseUpFast  (Char  c) {return _CaseUp  [Unsigned(c)];}
-INLINE Char8 CaseDownFast(Char8 c) {return  Char16To8Fast(CaseDownFast(Char8To16Fast(c)));}
-INLINE Char8 CaseUpFast  (Char8 c) {return  Char16To8Fast(CaseUpFast  (Char8To16Fast(c)));}
+INLINE Char8 CaseDownFast(Char8 c) {return  Char16To8(CaseDownFast(Char8To16(c)));}
+INLINE Char8 CaseUpFast  (Char8 c) {return  Char16To8(CaseUpFast  (Char8To16(c)));}
 
 CHAR_TYPE CharTypeFast(Char c) // don't INLINE because it's not a simple function
 {
    UInt f=CharFlagFast(c);
-   if(  f&(CHARF_ALPHA|CHARF_DIG|CHARF_UNDER))return CHART_CHAR ; // check this first in case '_' is both CHARF_UNDER and CHARF_SIGN
-   if(  f& CHARF_SPACE                       )return CHART_SPACE;
-   if(  f& CHARF_SIGN                        )return CHART_SIGN ;
-                                              return CHART_NONE ;
+   if(  f&(CHARF_ALPHA|CHARF_DIG|CHARF_UNDER|CHARF_NBSP))return CHART_CHAR ; // check this first in case '_' is both CHARF_UNDER and CHARF_SIGN, and Nbsp is both CHARF_NBSP and CHARF_SPACE
+   if(  f& CHARF_SPACE                                  )return CHART_SPACE;
+   if(  f& CHARF_SIGN                                   )return CHART_SIGN ;
+                                                         return CHART_NONE ;
 }
-INLINE CHAR_TYPE CharTypeFast(Char8 c) {return CharTypeFast(Char8To16Fast(c));}
+INLINE CHAR_TYPE CharTypeFast(Char8 c) {return CharTypeFast(Char8To16(c));}
 
 INLINE Bool IsDigit(CChar8 c) {return c>='0' && c<='9';}
 INLINE Bool IsDigit(CChar  c) {return c>='0' && c<='9';}
-
-INLINE Bool EqualCSFast(Char8 a, Char8 b) {return a==b;}
-INLINE Bool EqualCSFast(Char8 a, Char  b) {return Char8To16Fast(a)==b;}
-INLINE Bool EqualCSFast(Char  a, Char8 b) {return a==Char8To16Fast(b);}
-INLINE Bool EqualCSFast(Char  a, Char  b) {return a==b;}
 
 INLINE Bool EqualCIFast(Char8 a, Char8 b) {return CharOrderFast(a)==CharOrderFast(b);}
 INLINE Bool EqualCIFast(Char8 a, Char  b) {return CharOrderFast(a)==CharOrderFast(b);}
@@ -200,9 +194,6 @@ INLINE Bool CharWholeWord(Char8 c, WHOLE_WORD mask) {return FlagOn(CharFlagFast(
 /******************************************************************************/
 Int CharOrder(Char8 c) {I(); return CharOrderFast(c);}
 Int CharOrder(Char  c) {I(); return CharOrderFast(c);}
-
-Char  Char8To16(Char8 c) {I(); return Char8To16Fast(c);}
-Char8 Char16To8(Char  c) {I(); return Char16To8Fast(c);}
 
 UInt CharFlag(Char  c) {I(); return CharFlagFast(c);}
 UInt CharFlag(Char8 c) {I(); return CharFlagFast(c);}
@@ -224,7 +215,7 @@ Bool WhiteChar(Char c)
       case '\n':
       case '\r':
       case FullWidthSpace:
-      case Nbsp:
+    //case Nbsp: this should not be included because we need to treat this as regular character
          return true;
       default: return false;
    }
@@ -245,11 +236,6 @@ Int Compare(Char8 a, Char  b, Bool case_sensitive) {return case_sensitive ? Comp
 Int Compare(Char  a, Char8 b, Bool case_sensitive) {return case_sensitive ? CompareCS(a, b) : CompareCI(a, b);}
 Int Compare(Char  a, Char  b, Bool case_sensitive) {return case_sensitive ? CompareCS(a, b) : CompareCI(a, b);}
 
-Bool EqualCS(Char8 a, Char8 b) {I(); return EqualCSFast(a, b);}
-Bool EqualCS(Char8 a, Char  b) {I(); return EqualCSFast(a, b);}
-Bool EqualCS(Char  a, Char8 b) {I(); return EqualCSFast(a, b);}
-Bool EqualCS(Char  a, Char  b) {I(); return EqualCSFast(a, b);}
-
 Bool EqualCI(Char8 a, Char8 b) {I(); return EqualCIFast(a, b);}
 Bool EqualCI(Char8 a, Char  b) {I(); return EqualCIFast(a, b);}
 Bool EqualCI(Char  a, Char8 b) {I(); return EqualCIFast(a, b);}
@@ -259,6 +245,16 @@ Bool Equal(Char8 a, Char8 b, Bool case_sensitive) {return case_sensitive ? Equal
 Bool Equal(Char8 a, Char  b, Bool case_sensitive) {return case_sensitive ? EqualCS(a, b) : EqualCI(a, b);}
 Bool Equal(Char  a, Char8 b, Bool case_sensitive) {return case_sensitive ? EqualCS(a, b) : EqualCI(a, b);}
 Bool Equal(Char  a, Char  b, Bool case_sensitive) {return case_sensitive ? EqualCS(a, b) : EqualCI(a, b);}
+
+Bool Safe(Char c)
+{
+   return (Unsigned(c)>=32 && Unsigned(c)<0xFE00) || c=='\n' || c=='\t' || Unsigned(c)>0xFE0F; // 0xFE00..0xFE0F useless character occurring in emojis causing "?" https://en.wikipedia.org/wiki/Variation_Selectors_(Unicode_block)
+}
+Bool Skip(Char c)
+{
+   return c=='\r'
+       || (Unsigned(c)>=0xFE00 && Unsigned(c)<=0xFE0F); // 0xFE00..0xFE0F useless character occurring in emojis causing "?" https://en.wikipedia.org/wiki/Variation_Selectors_(Unicode_block)
+}
 
 Int CharInt(Char c)
 {
@@ -302,6 +298,8 @@ Bool HasUnicode(CChar  *t) {if(t)for(; *t; )if(HasUnicode(*t++))return true; ret
 Bool HasUnicode(CChar8 *t) {if(t)for(; *t; )if(HasUnicode(*t++))return true; return false;}
 Bool HasUnicode(C Str  &s) {FREPA(s)        if(HasUnicode(s[i]))return true; return false;} // keep this function to allow having '\0' chars in the middle
 Bool HasUnicode(C Str8 &s) {FREPA(s)        if(HasUnicode(s[i]))return true; return false;} // keep this function to allow having '\0' chars in the middle
+Bool HasWide   (CChar  *t) {if(t)for(; *t; )if(HasWide   (*t++))return true; return false;}
+Bool HasWide   (C Str  &s) {FREPA(s)        if(HasWide   (s[i]))return true; return false;} // keep this function to allow having '\0' chars in the middle
 /******************************************************************************/
 Char8* Set(Char8 *dest, CChar8 *src, Int dest_elms)
 {
@@ -318,7 +316,7 @@ Char8* Set(Char8 *dest, CChar *src, Int dest_elms)
    Char8 *ret=dest;
    if(dest && dest_elms>0)
    {
-      if(src)for(I(); --dest_elms && *src; )*dest++=Char16To8Fast(*src++);
+      if(src)for(; --dest_elms && *src; )*dest++=Char16To8(*src++);
      *dest='\0';
    }
    return ret;
@@ -328,7 +326,7 @@ Char* Set(Char *dest, CChar8 *src, Int dest_elms)
    Char *ret=dest;
    if(dest && dest_elms>0)
    {
-      if(src)for(I(); --dest_elms && *src; )*dest++=Char8To16Fast(*src++);
+      if(src)for(; --dest_elms && *src; )*dest++=Char8To16(*src++);
      *dest='\0';
    }
    return ret;
@@ -348,7 +346,7 @@ Char8* _Set(Char8 *dest, C wchar_t *src, Int dest_elms)
    Char8 *ret=dest;
    if(dest && dest_elms>0)
    {
-      if(src)for(I(); --dest_elms && *src; )*dest++=Char16To8Fast(*src++);
+      if(src)for(; --dest_elms && *src; )*dest++=Char16To8(*src++);
      *dest='\0';
    }
    return ret;
@@ -424,7 +422,7 @@ Char* Append(Char *dest, CChar8 *src, Int dest_elms)
       dest     +=length;
       if(dest_elms>1 && src)
       {
-         for(I(); --dest_elms && *src; )*dest++=Char8To16Fast(*src++);
+         for(; --dest_elms && *src; )*dest++=Char8To16(*src++);
          *dest='\0';
       }
    }
@@ -440,7 +438,7 @@ Char8* Append(Char8 *dest, CChar *src, Int dest_elms)
       dest     +=length;
       if(dest_elms>1 && src)
       {
-         for(I(); --dest_elms && *src; )*dest++=Char16To8Fast(*src++);
+         for(; --dest_elms && *src; )*dest++=Char16To8(*src++);
          *dest='\0';
       }
    }
@@ -493,17 +491,16 @@ Int Compare(CChar8 *a, CChar *b, Bool case_sensitive)
 {
    if(a && b)
    {
-      I();
       if(case_sensitive)
          for(; ; a++, b++)
       {
-         auto a_order=Unsigned(Char8To16Fast(*a)),
-              b_order=Unsigned(              *b );
+         auto a_order=Unsigned(Char8To16(*a)),
+              b_order=Unsigned(          *b );
          if(a_order<b_order)return -1;
          if(a_order>b_order)return +1;
          if(!*a            )return  0;
       }else
-         for(; ; a++, b++)
+         for(I(); ; a++, b++)
       {
          Int a_order=CharOrderFast(*a),
              b_order=CharOrderFast(*b);
@@ -520,17 +517,16 @@ Int Compare(CChar *a, CChar8 *b, Bool case_sensitive)
 {
    if(a && b)
    {
-      I();
       if(case_sensitive)
          for(; ; a++, b++)
       {
-         auto a_order=Unsigned(              *a ),
-              b_order=Unsigned(Char8To16Fast(*b));
+         auto a_order=Unsigned(          *a ),
+              b_order=Unsigned(Char8To16(*b));
          if(a_order<b_order)return -1;
          if(a_order>b_order)return +1;
          if(!*a            )return  0;
       }else
-         for(; ; a++, b++)
+         for(I(); ; a++, b++)
       {
          Int a_order=CharOrderFast(*a),
              b_order=CharOrderFast(*b);
@@ -628,12 +624,11 @@ Int ComparePath(CChar *a, CChar8 *b, Bool case_sensitive)
 {
    if(a && b)
    {
-      I();
       if(case_sensitive)
          for(; ; a++, b++)
       {
-         auto a_order=Unsigned(             (*a)),
-              b_order=Unsigned(Char8To16Fast(*b));
+         auto a_order=Unsigned(         (*a)),
+              b_order=Unsigned(Char8To16(*b));
          if(  a_order!=b_order)
          {
             Bool as=IsSlash(a[0]),
@@ -653,7 +648,7 @@ Int ComparePath(CChar *a, CChar8 *b, Bool case_sensitive)
          }
          if(!*a)return 0;
       }else
-         for(; ; a++, b++)
+         for(I(); ; a++, b++)
       {
          Int a_order=CharOrderFast(*a),
              b_order=CharOrderFast(*b);
@@ -683,12 +678,11 @@ Int ComparePath(CChar8 *a, CChar *b, Bool case_sensitive)
 {
    if(a && b)
    {
-      I();
       if(case_sensitive)
          for(; ; a++, b++)
       {
-         auto a_order=Unsigned(Char8To16Fast(*a)),
-              b_order=Unsigned(             (*b));
+         auto a_order=Unsigned(Char8To16(*a)),
+              b_order=Unsigned(         (*b));
          if(  a_order!=b_order)
          {
             Bool as=IsSlash(a[0]),
@@ -708,7 +702,7 @@ Int ComparePath(CChar8 *a, CChar *b, Bool case_sensitive)
          }
          if(!*a)return 0;
       }else
-         for(; ; a++, b++)
+         for(I(); ; a++, b++)
       {
          Int a_order=CharOrderFast(*a),
              b_order=CharOrderFast(*b);
@@ -1033,7 +1027,7 @@ Bool Starts(CChar8 *t, CChar8 *start, Bool case_sensitive, WHOLE_WORD whole_word
             if(whole_word && CharWholeWord(last_start, whole_word))return !CharWholeWord(t[0], whole_word);
             return true;
          }
-         if(!EqualCSFast(*t, *start))return false; last_start=*start;
+         if(!EqualCS(*t, *start))return false; last_start=*start;
       }else
          for(; ; t++, start++)
       {
@@ -1062,7 +1056,7 @@ Bool Starts(CChar *t, CChar8 *start, Bool case_sensitive, WHOLE_WORD whole_word)
             if(whole_word && CharWholeWord(last_start, whole_word))return !CharWholeWord(t[0], whole_word);
             return true;
          }
-         if(!EqualCSFast(*t, *start))return false; last_start=*start;
+         if(!EqualCS(*t, *start))return false; last_start=*start;
       }else
          for(; ; t++, start++)
       {
@@ -1091,7 +1085,7 @@ Bool Starts(CChar8 *t, CChar *start, Bool case_sensitive, WHOLE_WORD whole_word)
             if(whole_word && CharWholeWord(last_start, whole_word))return !CharWholeWord(t[0], whole_word);
             return true;
          }
-         if(!EqualCSFast(*t, *start))return false; last_start=*start;
+         if(!EqualCS(*t, *start))return false; last_start=*start;
       }else
          for(; ; t++, start++)
       {
@@ -1120,7 +1114,7 @@ Bool Starts(CChar *t, CChar *start, Bool case_sensitive, WHOLE_WORD whole_word)
             if(whole_word && CharWholeWord(last_start, whole_word))return !CharWholeWord(t[0], whole_word);
             return true;
          }
-         if(!EqualCSFast(*t, *start))return false; last_start=*start;
+         if(!EqualCS(*t, *start))return false; last_start=*start;
       }else
          for(; ; t++, start++)
       {
@@ -1154,13 +1148,13 @@ Bool StartsSkipSpace(CChar *t, CChar *start, Int &match_length, Bool case_sensit
          }
          last_start=*start;
          Char c=*t;
-         if(!EqualCSFast(c, last_start))
+         if(!EqualCS(c, last_start))
          {
             if(c==' ')for(t++; ; t++)
             {
                c=*t;
                if(c==' ')continue;
-               if(!EqualCSFast(c, last_start)
+               if(!EqualCS(c, last_start)
                || CharWholeWord(last_t, whole_word_sub) && CharWholeWord(c, whole_word_sub))break; // if both are chars, then we can't merge
                goto next_cs;
             }
@@ -1312,14 +1306,14 @@ Bool StartsPath(CChar *t, CChar *start)
    return false;
 }
 /****************************************************************************/
-Bool Contains(C Str8 &src, Char8 c) {                                                 FREPA(src)if(src()[i]==c)return true; return false;} // keep this function to allow having '\0' chars in the middle, () avoids range check
-Bool Contains(C Str  &src, Char  c) {                                                 FREPA(src)if(src()[i]==c)return true; return false;} // keep this function to allow having '\0' chars in the middle, () avoids range check
-Bool Contains(C Str  &src, Char8 c) {Char  a=Char8To16Fast(c);                        FREPA(src)if(src()[i]==a)return true; return false;} // keep this function to allow having '\0' chars in the middle, () avoids range check, we can assume that Str was already initialized
-Bool Contains(C Str8 &src, Char  c) {Char8 a=Char16To8Fast(c); if(Char8To16Fast(a)==c)FREPA(src)if(src()[i]==a)return true; return false;} // keep this function to allow having '\0' chars in the middle, () avoids range check, we can assume that Str was already initialized, 'Char16To8Fast' may not support all characters, so we have to check if it's a direct mapping in both ways
-Bool Contains(CChar8 *src, Char8 c) {                                                 if(src)for(;;){Char8 s=*src++; if(!s)break; if(s==c)return true;} return false;} // break before checking to prevent returning true for '\0' chars
-Bool Contains(CChar  *src, Char  c) {                                                 if(src)for(;;){Char  s=*src++; if(!s)break; if(s==c)return true;} return false;} // break before checking to prevent returning true for '\0' chars
-Bool Contains(CChar  *src, Char8 c) {Char  a=Char8To16Fast(c);                        if(src)for(;;){Char  s=*src++; if(!s)break; if(s==a)return true;} return false;} // break before checking to prevent returning true for '\0' chars, we can assume that Str was already initialized
-Bool Contains(CChar8 *src, Char  c) {Char8 a=Char16To8Fast(c); if(Char8To16Fast(a)==c)if(src)for(;;){Char8 s=*src++; if(!s)break; if(s==a)return true;} return false;} // break before checking to prevent returning true for '\0' chars, we can assume that Str was already initialized, 'Char16To8Fast' may not support all characters, so we have to check if it's a direct mapping in both ways
+Bool Contains(C Str8 &src, Char8 c) {                                         FREPA(src)if(src()[i]==c)return true; return false;} // keep this function to allow having '\0' chars in the middle, () avoids range check
+Bool Contains(C Str  &src, Char  c) {                                         FREPA(src)if(src()[i]==c)return true; return false;} // keep this function to allow having '\0' chars in the middle, () avoids range check
+Bool Contains(C Str  &src, Char8 c) {Char  a=Char8To16(c);                    FREPA(src)if(src()[i]==a)return true; return false;} // keep this function to allow having '\0' chars in the middle, () avoids range check
+Bool Contains(C Str8 &src, Char  c) {Char8 a=Char16To8(c); if(Char8To16(a)==c)FREPA(src)if(src()[i]==a)return true; return false;} // keep this function to allow having '\0' chars in the middle, () avoids range check, 'Char16To8' may not support all characters, so we have to check if it's a direct mapping in both ways
+Bool Contains(CChar8 *src, Char8 c) {                                         if(src)for(;;){Char8 s=*src++; if(!s)break; if(s==c)return true;} return false;} // break before checking to prevent returning true for '\0' chars
+Bool Contains(CChar  *src, Char  c) {                                         if(src)for(;;){Char  s=*src++; if(!s)break; if(s==c)return true;} return false;} // break before checking to prevent returning true for '\0' chars
+Bool Contains(CChar  *src, Char8 c) {Char  a=Char8To16(c);                    if(src)for(;;){Char  s=*src++; if(!s)break; if(s==a)return true;} return false;} // break before checking to prevent returning true for '\0' chars
+Bool Contains(CChar8 *src, Char  c) {Char8 a=Char16To8(c); if(Char8To16(a)==c)if(src)for(;;){Char8 s=*src++; if(!s)break; if(s==a)return true;} return false;} // break before checking to prevent returning true for '\0' chars, 'Char16To8' may not support all characters, so we have to check if it's a direct mapping in both ways
 /****************************************************************************/
 Bool Contains(CChar8 *src, CChar8 *t, Bool case_sensitive, WHOLE_WORD whole_word)
 {
@@ -1750,7 +1744,8 @@ Str Replace(C Str &text, Char from, Char to)
    Str s; s.reserve(text.length()); FREPA(text)
    {
       Char c=text()[i]; // () avoids range checks
-      s+=((c==from) ? to : c);
+      if(c!=from)s+=c ;else
+      if(to     )s+=to;
    }
    return s;
 }
@@ -1822,6 +1817,30 @@ void Split(MemPtr<Str> splits, C Str &string, Char separator)
    }
 }
 Memc<Str> Split(C Str &string, Char separator) {Memc<Str> splits; Split(splits, string, separator); return splits;}
+/******************************************************************************/
+void SplitURLParams(MemPtr<TextParam> params, C Str &url)
+{
+   params.clear();
+   FREPA(url)if(url[i]=='?')
+   {
+   next_param:
+      TextParam &param=params.New();
+      for(;;)
+      {
+         if(++i>=url.length())return;
+         Char c=url[i];
+         if(c=='=')for(;;) // value
+         {
+            if(++i>=url.length())return;
+            Char c=url[i];
+            if(c=='&')goto next_param;
+            param.value+=c;
+         }
+         if(c=='&')goto next_param;
+         param.name+=c;
+      }
+   }
+}
 /******************************************************************************/
 void Tokenize(MemPtr<Str> tokens, C Str &string)
 {
@@ -2013,58 +2032,176 @@ Str FromUTF8(CChar8 *text)
    Str out;
    if(text)for(;;)
    {
+   /* First   Last     Byte 0   Byte 1   Byte 2   Byte 3   Codes
+      U+0000  U+007F   0xxxxxxx                            128
+      U+0080  U+07FF   110xxxxx 10xxxxxx                   1920
+      U+0800  U+FFFF   1110xxxx 10xxxxxx 10xxxxxx          61440
+      U+10000 U+10FFFF 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx 1048576 */
+
       Char c;
-      Byte b0=(*text++);
-      if(b0&(1<<7))
+      Byte b0=*text;
+      if(!(b0&(1<<7)))
       {
-         Byte b1=((*text++)&0x3F);
-         if((b0&(1<<6)) && (b0&(1<<5)))
-         {
-            Byte b2=((*text++)&0x3F);
-            if(b0&(1<<4))
-            {
-               Byte b3=((*text++)&0x3F);
-               b0&=0x07;
-               UInt u=(b3|(b2<<6)|(b1<<12)|(b0<<18));
-               c=((u<=0xFFFF) ? u : '?');
-            }else
-            {
-               b0&=0x0F;
-               c=(b2|(b1<<6)|(b0<<12));
-            }
-         }else
+         if(!b0)break; // NUL
+         text++;
+         c=b0;
+      }else
+      {
+         text++; // always advance at least 1 byte even if result will be invalid, to self correct
+         if(!(b0&(1<<6)))break; // bit 6 should be always on
+
+         Byte b1=*text; if((b1&((1<<7)|(1<<6)))!=(1<<7))break; b1&=0x3F; text++; // bit 7 should be always on, bit 6 always off, this handles NUL. Advance after checking if char is valid, so we don't skip past NUL
+         if(!(b0&(1<<5)))
          {
             b0&=0x1F;
             c=(b1|(b0<<6));
+         }else
+         {
+            Byte b2=*text; if((b2&((1<<7)|(1<<6)))!=(1<<7))break; b2&=0x3F; text++; // bit 7 should be always on, bit 6 always off, this handles NUL. Advance after checking if char is valid, so we don't skip past NUL
+            if(!(b0&(1<<4)))
+            {
+               b0&=0x0F;
+               c=(b2|(b1<<6)|(b0<<12));
+            }else
+            {
+               Byte b3=*text; if((b3&((1<<7)|(1<<6)))!=(1<<7))break; b3&=0x3F; text++; // bit 7 should be always on, bit 6 always off, this handles NUL. Advance after checking if char is valid, so we don't skip past NUL
+               if(!(b0&(1<<3)))
+               {
+                  b0&=0x07;
+                  UInt u=(b3|(b2<<6)|(b1<<12)|(b0<<18));
+                  // since we return Char, then we must convert 'u' to UTF-16 - https://en.wikipedia.org/wiki/UTF-16#Description
+                  if(u<=  0xFFFF)c=u;else // if(u<=0xD7FF || u>=0xE000 && u<=0xFFFF)c=u; ranges U+0000 to U+D7FF and U+E000 to U+FFFF are represented natively
+                  if(u<=0x10FFFF)
+                  {
+                     u-=0x10000;
+                     out+=Char(0xD800+(u>>10  )); // MULTI0
+                        c=     0xDC00+(u&0x3FF) ; // MULTI1
+                  }else c='?'; // unsupported
+               }else c='?'; // unsupported
+            }
          }
-      }else
-      {
-         c=b0;
-      }
 
-      if(c)out+=c;else break;
+         if(!c)break; // NUL
+      }
+      out+=c;
    }
    return out;
+}
+CChar* Str::fromUTF8Safe(CChar *text) // returns pointer where it stopped reading (end or unsafe char)
+{
+   clear();
+   if(text)for(;;)
+   {
+      Char c;
+      Byte b0=*text;
+      if(!(b0&(1<<7)))
+      {
+         if(!Safe(b0))break; // Safe/NUL
+         text++;
+         c=b0;
+      }else
+      {
+         text++; // always advance at least 1 byte even if result will be invalid, to self correct
+         if(!(b0&(1<<6)))break; // bit 6 should be always on
+
+         Byte b1=*text; if((b1&((1<<7)|(1<<6)))!=(1<<7))break; b1&=0x3F; text++; // bit 7 should be always on, bit 6 always off, this handles Safe/NUL. Advance after checking if char is valid, so we don't skip past NUL
+         if(!(b0&(1<<5)))
+         {
+            b0&=0x1F;
+            c=(b1|(b0<<6));
+         }else
+         {
+            Byte b2=*text; if((b2&((1<<7)|(1<<6)))!=(1<<7))break; b2&=0x3F; text++; // bit 7 should be always on, bit 6 always off, this handles Safe/NUL. Advance after checking if char is valid, so we don't skip past NUL
+            if(!(b0&(1<<4)))
+            {
+               b0&=0x0F;
+               c=(b2|(b1<<6)|(b0<<12));
+            }else
+            {
+               Byte b3=*text; if((b3&((1<<7)|(1<<6)))!=(1<<7))break; b3&=0x3F; text++; // bit 7 should be always on, bit 6 always off, this handles Safe/NUL. Advance after checking if char is valid, so we don't skip past NUL
+               if(!(b0&(1<<3)))
+               {
+                  b0&=0x07;
+                  UInt u=(b3|(b2<<6)|(b1<<12)|(b0<<18));
+                  // since we return Char, then we must convert 'u' to UTF-16 - https://en.wikipedia.org/wiki/UTF-16#Description
+                  if(u<=  0xFFFF)c=u;else // if(u<=0xD7FF || u>=0xE000 && u<=0xFFFF)c=u; ranges U+0000 to U+D7FF and U+E000 to U+FFFF are represented natively
+                  if(u<=0x10FFFF)
+                  {
+                     u-=0x10000;
+                     T+=Char(0xD800+(u>>10  )); // MULTI0
+                     c =     0xDC00+(u&0x3FF) ; // MULTI1
+                  }else c='?'; // unsupported
+               }else c='?'; // unsupported
+            }
+         }
+
+         if(!Safe(c))break; // Safe/NUL
+      }
+      T+=c;
+   }
+   return text;
+}
+void Str::appendUnicode(UInt u)
+{
+   if(u<=  0xFFFF)T+=Char(u);else
+   if(u<=0x10FFFF)
+   {
+      u-=0x10000;
+      T+=Char(0xD800+(u>>10  )); // MULTI0
+      T+=Char(0xDC00+(u&0x3FF)); // MULTI1
+   }//else unsupported
 }
 Str8 UTF8(C Str &text)
 {
    Str8 out; out.reserve(text.length());
    FREPA(text)
    {
-      Char c=text[i];
-
-      if(c<=0x7F)out+=Char8(c);else
+      auto c=Unsigned(text[i]);
+      if(c<=0x07F) out+=Char8(c);else
+      if(c<=0x7FF){out+=Char8(0xC0 | (c>>6)); out+=Char8(0x80 | (c&0x3F));}else
+   #if 1 // since we operate on Char we must treat it as UTF-16, there 0xD800..0xDBFF are used to encode 2 Chars
+      if(c>=0xD800 && c<=0xDBFF) // MULTI0
       {
-         if(c<=0x7FF)
-         {
-            out+=Char8(0xC0 | (c>>6)); out+=Char8(0x80 | (c&0x3F));
-         }else
-         {
-            out+=Char8(0xE0 | (c>>12)); out+=Char8(0x80 | ((c>>6)&0x3F)); out+=Char8(0x80 | (c&0x3F));
-         }
+      /* U32 -> 2x U16 formula:
+         u-=0x10000;
+         c0=0xD800+(u>>10  ); MULTI0
+         c1=0xDC00+(u&0x3FF); MULTI1 */
+         auto c1=Unsigned(text[++i]);
+         U32 u=(((c-0xD800)<<10)|(c1-0xDC00))+0x10000; // decode U16 c c1 -> U32 u
+         out+=Char8(0xF0 | (u>>18)); out+=Char8(0x80 | ((u>>12)&0x3F)); out+=Char8(0x80 | ((u>>6)&0x3F)); out+=Char8(0x80 | (u&0x3F));
+      }else
+   #endif
+      {
+         out+=Char8(0xE0 | (c>>12)); out+=Char8(0x80 | ((c>>6)&0x3F)); out+=Char8(0x80 | (c&0x3F));
       }
    }
    return out;
+}
+void Str::appendUTF8Safe(C Str &text) // this ignores unsafe characters
+{
+   reserveAdd(text.length());
+   FREPA(text)
+   {
+      auto c=Unsigned(text[i]);
+      if(Safe(c)) // ignore unsafe characters
+      if(c<=0x07F) T+=Char(c);else
+      if(c<=0x7FF){T+=Char(0xC0 | (c>>6)); T+=Char(0x80 | (c&0x3F));}else
+   #if 1 // since we operate on Char we must treat it as UTF-16, there 0xD800..0xDBFF are used to encode 2 Chars
+      if(c>=0xD800 && c<=0xDBFF) // MULTI0
+      {
+      /* U32 -> 2x U16 formula:
+         u-=0x10000;
+         c0=0xD800+(u>>10  ); MULTI0
+         c1=0xDC00+(u&0x3FF); MULTI1 */
+         auto c1=Unsigned(text[++i]);
+         U32 u=(((c-0xD800)<<10)|(c1-0xDC00))+0x10000; // decode U16 c c1 -> U32 u
+         T+=Char(0xF0 | (u>>18)); T+=Char(0x80 | ((u>>12)&0x3F)); T+=Char(0x80 | ((u>>6)&0x3F)); T+=Char(0x80 | (u&0x3F));
+      }else
+   #endif
+      {
+         T+=Char(0xE0 | (c>>12)); T+=Char(0x80 | ((c>>6)&0x3F)); T+=Char(0x80 | (c&0x3F));
+      }
+   }
 }
 Str8 MultiByte(Int code_page, C Str &text)
 {
@@ -2848,6 +2985,8 @@ VecB4  TextVecB4 (CChar8 *t) {CalcValue x, y, z, w; TextValue(_SkipWhiteCharsCom
 VecB4  TextVecB4 (CChar  *t) {CalcValue x, y, z, w; TextValue(_SkipWhiteCharsComma(TextValue(_SkipWhiteCharsComma(TextValue(_SkipWhiteCharsComma(TextValue(t, x)), y)), z)), w); return VecB4 (x.asInt(), y.asInt(), z.asInt(), w.asInt());}
 VecSB4 TextVecSB4(CChar8 *t) {CalcValue x, y, z, w; TextValue(_SkipWhiteCharsComma(TextValue(_SkipWhiteCharsComma(TextValue(_SkipWhiteCharsComma(TextValue(t, x)), y)), z)), w); return VecSB4(x.asInt(), y.asInt(), z.asInt(), w.asInt());}
 VecSB4 TextVecSB4(CChar  *t) {CalcValue x, y, z, w; TextValue(_SkipWhiteCharsComma(TextValue(_SkipWhiteCharsComma(TextValue(_SkipWhiteCharsComma(TextValue(t, x)), y)), z)), w); return VecSB4(x.asInt(), y.asInt(), z.asInt(), w.asInt());}
+VecUS4 TextVecUS4(CChar8 *t) {CalcValue x, y, z, w; TextValue(_SkipWhiteCharsComma(TextValue(_SkipWhiteCharsComma(TextValue(_SkipWhiteCharsComma(TextValue(t, x)), y)), z)), w); return VecUS4(x.asInt(), y.asInt(), z.asInt(), w.asInt());}
+VecUS4 TextVecUS4(CChar  *t) {CalcValue x, y, z, w; TextValue(_SkipWhiteCharsComma(TextValue(_SkipWhiteCharsComma(TextValue(_SkipWhiteCharsComma(TextValue(t, x)), y)), z)), w); return VecUS4(x.asInt(), y.asInt(), z.asInt(), w.asInt());}
 Color  TextColor (CChar8 *t) {CalcValue x, y, z, w; TextValue(_SkipWhiteCharsComma(TextValue(_SkipWhiteCharsComma(TextValue(_SkipWhiteCharsComma(TextValue(t, x)), y)), z)), w); return Color (x.asInt(), y.asInt(), z.asInt(), w.asInt());}
 Color  TextColor (CChar  *t) {CalcValue x, y, z, w; TextValue(_SkipWhiteCharsComma(TextValue(_SkipWhiteCharsComma(TextValue(_SkipWhiteCharsComma(TextValue(t, x)), y)), z)), w); return Color (x.asInt(), y.asInt(), z.asInt(), w.asInt());}
 #else // if only one value is provided, then use it for all components, similar to constructors
@@ -2885,6 +3024,8 @@ VecB4  TextVecB4 (CChar8 *t) {if(!t)return 0; CalcValue x, y, z, w; t=_SkipWhite
 VecB4  TextVecB4 (CChar  *t) {if(!t)return 0; CalcValue x, y, z, w; t=_SkipWhiteChars(TextValue(t, x)); if(*t!=',')return x.asInt(); TextValue(_SkipWhiteCharsComma(TextValue(_SkipWhiteCharsComma(TextValue(t+1, y)), z)), w); return VecB4 (x.asInt(), y.asInt(), z.asInt(), w.asInt());}
 VecSB4 TextVecSB4(CChar8 *t) {if(!t)return 0; CalcValue x, y, z, w; t=_SkipWhiteChars(TextValue(t, x)); if(*t!=',')return x.asInt(); TextValue(_SkipWhiteCharsComma(TextValue(_SkipWhiteCharsComma(TextValue(t+1, y)), z)), w); return VecSB4(x.asInt(), y.asInt(), z.asInt(), w.asInt());}
 VecSB4 TextVecSB4(CChar  *t) {if(!t)return 0; CalcValue x, y, z, w; t=_SkipWhiteChars(TextValue(t, x)); if(*t!=',')return x.asInt(); TextValue(_SkipWhiteCharsComma(TextValue(_SkipWhiteCharsComma(TextValue(t+1, y)), z)), w); return VecSB4(x.asInt(), y.asInt(), z.asInt(), w.asInt());}
+VecUS4 TextVecUS4(CChar8 *t) {if(!t)return 0; CalcValue x, y, z, w; t=_SkipWhiteChars(TextValue(t, x)); if(*t!=',')return x.asInt(); TextValue(_SkipWhiteCharsComma(TextValue(_SkipWhiteCharsComma(TextValue(t+1, y)), z)), w); return VecUS4(x.asInt(), y.asInt(), z.asInt(), w.asInt());}
+VecUS4 TextVecUS4(CChar  *t) {if(!t)return 0; CalcValue x, y, z, w; t=_SkipWhiteChars(TextValue(t, x)); if(*t!=',')return x.asInt(); TextValue(_SkipWhiteCharsComma(TextValue(_SkipWhiteCharsComma(TextValue(t+1, y)), z)), w); return VecUS4(x.asInt(), y.asInt(), z.asInt(), w.asInt());}
 Color  TextColor (CChar8 *t) {if(!t)return 0; CalcValue x, y, z, w; t=_SkipWhiteChars(TextValue(t, x)); if(*t!=',')return x.asInt(); TextValue(_SkipWhiteCharsComma(TextValue(_SkipWhiteCharsComma(TextValue(t+1, y)), z)), w); return Color (x.asInt(), y.asInt(), z.asInt(), w.asInt());}
 Color  TextColor (CChar  *t) {if(!t)return 0; CalcValue x, y, z, w; t=_SkipWhiteChars(TextValue(t, x)); if(*t!=',')return x.asInt(); TextValue(_SkipWhiteCharsComma(TextValue(_SkipWhiteCharsComma(TextValue(t+1, y)), z)), w); return Color (x.asInt(), y.asInt(), z.asInt(), w.asInt());}
 #endif
@@ -2915,28 +3056,35 @@ end:
 /******************************************************************************/
 Str8::Str8(            ) {   _length=         0 ;}
 Str ::Str (            ) {   _length=         0 ;}
+#if NUL_CHAR
+Str8::Str8(Char8   c   ) {   _length=         1 ; _d.setNum(         2); _d[0]=          c ; _d[1]='\0';}
+Str ::Str (Char    c   ) {   _length=         1 ; _d.setNum(         2); _d[0]=          c ; _d[1]='\0';}
+Str8::Str8(Char    c   ) {   _length=         1 ; _d.setNum(         2); _d[0]=Char16To8(c); _d[1]='\0';}
+Str ::Str (Char8   c   ) {   _length=         1 ; _d.setNum(         2); _d[0]=Char8To16(c); _d[1]='\0';}
+#else
 Str8::Str8(Char8   c   ) {if(_length=  (c!='\0')){_d.setNum(length()+1); _d[0]=          c ; _d[1]='\0';       }}
 Str ::Str (Char    c   ) {if(_length=  (c!='\0')){_d.setNum(length()+1); _d[0]=          c ; _d[1]='\0';       }}
 Str8::Str8(Char    c   ) {if(_length=  (c!='\0')){_d.setNum(length()+1); _d[0]=Char16To8(c); _d[1]='\0';       }}
 Str ::Str (Char8   c   ) {if(_length=  (c!='\0')){_d.setNum(length()+1); _d[0]=Char8To16(c); _d[1]='\0';       }}
-Str8::Str8(CChar8 *t   ) {if(_length=  Length(t)){_d.setNum(length()+1); CopyFastN(_d.data(),   t,  _d.elms());}}
-Str ::Str (CChar  *t   ) {if(_length=  Length(t)){_d.setNum(length()+1); CopyFastN(_d.data(),   t,  _d.elms());}}
-Str8::Str8(CChar  *t   ) {if(_length=  Length(t)){_d.setNum(length()+1); Set      (_d.data(),   t,  _d.elms());}}
-Str8::Str8(C wchar_t *t) {if(_length=  Length(t)){_d.setNum(length()+1);_Set      (_d.data(),   t,  _d.elms());}}
-Str ::Str (C wchar_t *t) {if(_length=  Length(t)){_d.setNum(length()+1);_Set      (_d.data(),   t,  _d.elms());}}
-Str ::Str (CChar8 *t   ) {if(_length=  Length(t)){_d.setNum(length()+1); Set      (_d.data(),   t,  _d.elms());}}
-Str8::Str8(C Str8 &s   ) {if(_length=s.length( )){_d.setNum(length()+1); CopyFastN(_d.data(), s(),  _d.elms());}}
-Str ::Str (C Str  &s   ) {if(_length=s.length( )){_d.setNum(length()+1); CopyFastN(_d.data(), s(),  _d.elms());}}
-Str8::Str8(C Str  &s   ) {if(_length=s.length( )){_d.setNum(length()+1); I(); FREPA(    _d  )_d[i]=Char16To8Fast(s()[i]);                   }} // don't use 'Set' to allow copying '\0' chars in the middle
-Str ::Str (C Str8 &s   ) {if(_length=s.length( )){_d.setNum(length()+1); I(); FREPA(    _d  )_d[i]=Char8To16Fast(s()[i]);                   }} // don't use 'Set' to allow copying '\0' chars in the middle
-Str8::Str8(C BStr &s   ) {if(_length=s.length( )){_d.setNum(length()+1); I(); FREP (length())_d[i]=Char16To8Fast(s()[i]); _d[length()]='\0';}} // don't use 'Set' to allow copying '\0' chars in the middle, borrowed string may not be null-terminated, use () to avoid range checks
-Str ::Str (C BStr &s   ) {if(_length=s.length( )){_d.setNum(length()+1); CopyFastN(_d.data(), s(), length()  );           _d[length()]='\0';}} // don't use 'Set' to allow copying '\0' chars in the middle, borrowed string may not be null-terminated
+#endif
+Str8::Str8(CChar8 *t   ) {if(_length=  Length(t)){_d.setNum(length()+1); CopyFastN(_d.data(),   t, _d.elms());}}
+Str ::Str (CChar  *t   ) {if(_length=  Length(t)){_d.setNum(length()+1); CopyFastN(_d.data(),   t, _d.elms());}}
+Str8::Str8(CChar  *t   ) {if(_length=  Length(t)){_d.setNum(length()+1); Set      (_d.data(),   t, _d.elms());}}
+Str8::Str8(C wchar_t *t) {if(_length=  Length(t)){_d.setNum(length()+1);_Set      (_d.data(),   t, _d.elms());}}
+Str ::Str (C wchar_t *t) {if(_length=  Length(t)){_d.setNum(length()+1);_Set      (_d.data(),   t, _d.elms());}}
+Str ::Str (CChar8 *t   ) {if(_length=  Length(t)){_d.setNum(length()+1); Set      (_d.data(),   t, _d.elms());}}
+Str8::Str8(C Str8 &s   ) {if(_length=s.length( )){_d.setNum(length()+1); CopyFastN(_d.data(), s(), _d.elms());}}
+Str ::Str (C Str  &s   ) {if(_length=s.length( )){_d.setNum(length()+1); CopyFastN(_d.data(), s(), _d.elms());}}
+Str8::Str8(C Str  &s   ) {if(_length=s.length( )){_d.setNum(length()+1); Copy16To8(_d.data(), s(), _d.elms());}}
+Str ::Str (C Str8 &s   ) {if(_length=s.length( )){_d.setNum(length()+1); Copy8To16(_d.data(), s(), _d.elms());}}
+Str8::Str8(C BStr &s   ) {if(_length=s.length( )){_d.setNum(length()+1); Copy16To8(_d.data(), s(),  length()); _d[length()]='\0';}} // borrowed string may not be null-terminated
+Str ::Str (C BStr &s   ) {if(_length=s.length( )){_d.setNum(length()+1); CopyFastN(_d.data(), s(),  length()); _d[length()]='\0';}} // borrowed string may not be null-terminated
 Str8::Str8(Bool    b   ) {   _length=         1 ; _d.setNum(         2); _d[0]=(b ? '1' : '0'); _d[1]='\0';}
 Str ::Str (Bool    b   ) {   _length=         1 ; _d.setNum(         2); _d[0]=(b ? '1' : '0'); _d[1]='\0';}
 
-Str8::Str8(C Str8 &s, UInt extra_length) {_length=s.length(); if(Int size=NewStrSize(length(), extra_length)){_d.setNum(size); CopyFastN(_d.data(), s(), length());            _d[length()]='\0';}} // always set NUL manually because 's' can be null
-Str ::Str (C Str  &s, UInt extra_length) {_length=s.length(); if(Int size=NewStrSize(length(), extra_length)){_d.setNum(size); CopyFastN(_d.data(), s(), length());            _d[length()]='\0';}} // always set NUL manually because 's' can be null
-Str ::Str (C Str8 &s, UInt extra_length) {_length=s.length(); if(Int size=NewStrSize(length(), extra_length)){_d.setNum(size); I(); FREP(length())_d[i]=Char8To16Fast(s()[i]); _d[length()]='\0';}} // always set NUL manually because 's' can be null, don't use 'Set' to allow copying '\0' chars in the middle, use () to avoid range checks
+Str8::Str8(C Str8 &s, UInt extra_length) {_length=s.length(); if(Int size=NewStrSize(length(), extra_length)){_d.setNum(size); CopyFastN(_d.data(), s(), length()); _d[length()]='\0';}} // always set NUL manually because 's' can be null
+Str ::Str (C Str  &s, UInt extra_length) {_length=s.length(); if(Int size=NewStrSize(length(), extra_length)){_d.setNum(size); CopyFastN(_d.data(), s(), length()); _d[length()]='\0';}} // always set NUL manually because 's' can be null
+Str ::Str (C Str8 &s, UInt extra_length) {_length=s.length(); if(Int size=NewStrSize(length(), extra_length)){_d.setNum(size); Copy8To16(_d.data(), s(), length()); _d[length()]='\0';}} // always set NUL manually because 's' can be null
 
 Str8::Str8(SByte i) : Str8(TextInt(    Int(i), NoTemp(TempChar8<256>()).c)) {}
 Str ::Str (SByte i) : Str (TextInt(    Int(i), NoTemp(TempChar8<256>()).c)) {}
@@ -2991,6 +3139,8 @@ Str8::Str8(C VecB4  &v) : Str8() {T=v;}
 Str ::Str (C VecB4  &v) : Str () {T=v;}
 Str8::Str8(C VecSB4 &v) : Str8() {T=v;}
 Str ::Str (C VecSB4 &v) : Str () {T=v;}
+Str8::Str8(C VecUS4 &v) : Str8() {T=v;}
+Str ::Str (C VecUS4 &v) : Str () {T=v;}
 /******************************************************************************/
 Char8 Str8::operator[](Int i)C {return InRange(i, T) ? _d[i] : '\0';}
 Char  Str ::operator[](Int i)C {return InRange(i, T) ? _d[i] : '\0';}
@@ -3001,6 +3151,9 @@ Str & Str ::del() {_d.del(); _length=0; return T;}
 Str8& Str8::clear() {if(_d.elms())_d[0]='\0'; _length=0; return T;}
 Str & Str ::clear() {if(_d.elms())_d[0]='\0'; _length=0; return T;}
 
+Str8& Str8::erase() {ZeroFast(_d.data(), _d.memUsage()); _length=0; return T;}
+Str & Str ::erase() {ZeroFast(_d.data(), _d.memUsage()); _length=0; return T;}
+
 Str8& Str8::space() {if(is() && !WhiteChar(last()))T+=' '; return T;}
 Str & Str ::space() {if(is() && !WhiteChar(last()))T+=' '; return T;}
 
@@ -3009,7 +3162,9 @@ Str & Str ::line() {if(is() && last()!='\n')T+='\n'; return T;}
 
 Str8& Str8::insert(Int i, Char8 c)
 {
+#if !NUL_CHAR
    if(c)
+#endif
    {
       Clamp(i, 0, length());
       Int size=StrSizeAdd(length(), 1); if(size>_d.elms())
@@ -3030,7 +3185,9 @@ Str8& Str8::insert(Int i, Char8 c)
 }
 Str& Str::insert(Int i, Char c)
 {
+#if !NUL_CHAR
    if(c)
+#endif
    {
       Clamp(i, 0, length());
       Int size=StrSizeAdd(length(), 1); if(size>_d.elms())
@@ -3190,20 +3347,28 @@ Str & Str ::replace(Char  src, Char  dest) {if(src && src!=dest)REPA(T)if(_d[i]=
 
 Str8& Str8::setChar(Int i, Char8 c)
 {
+#if !NUL_CHAR
    if(c)
    {
+#endif
       if(InRange(i, T))_d[i]=c;else
-      if(i==length()  )alwaysAppend(c);
+      if(i==length()  )T+=c;
+#if !NUL_CHAR
    }else clip(i);
+#endif
    return T;
 }
 Str& Str::setChar(Int i, Char c)
 {
+#if !NUL_CHAR
    if(c)
    {
+#endif
       if(InRange(i, T))_d[i]=c;else
-      if(i==length()  )alwaysAppend(c);
+      if(i==length()  )T+=c;
+#if !NUL_CHAR
    }else clip(i);
+#endif
    return T;
 }
 
@@ -3309,7 +3474,7 @@ Str8& Str8::operator=(C Str &s)
 {
    if(!s.is())clear();else
    {
-      Int l=(_length=s.length())+1; _d.minNumDiscard(l); I(); FREP(l)_d[i]=Char16To8Fast(s()[i]); // don't use 'Set' to allow copying '\0' chars in the middle
+      Int l=(_length=s.length())+1; _d.minNumDiscard(l); Copy16To8(_d.data(), s(), l);
    }
    return T;
 }
@@ -3317,7 +3482,7 @@ Str& Str::operator=(C Str8 &s)
 {
    if(!s.is())clear();else
    {
-      Int l=(_length=s.length())+1; _d.minNumDiscard(l); I(); FREP(l)_d[i]=Char8To16Fast(s()[i]); // don't use 'Set' to allow copying '\0' chars in the middle
+      Int l=(_length=s.length())+1; _d.minNumDiscard(l); Copy8To16(_d.data(), s(), l);
    }
    return T;
 }
@@ -3333,7 +3498,9 @@ Str& Str::operator=(C Str &s)
 /******************************************************************************/
 Str8& Str8::operator=(Char8 c)
 {
+#if !NUL_CHAR
    if(!c)clear();else
+#endif
    {
      _d.minNumDiscard(2);
      _d[0]  =c;
@@ -3344,7 +3511,9 @@ Str8& Str8::operator=(Char8 c)
 }
 Str8& Str8::operator=(Char c)
 {
+#if !NUL_CHAR
    if(!c)clear();else
+#endif
    {
      _d.minNumDiscard(2);
      _d[0]  =Char16To8(c);
@@ -3355,7 +3524,9 @@ Str8& Str8::operator=(Char c)
 }
 Str& Str::operator=(Char8 c)
 {
+#if !NUL_CHAR
    if(!c)clear();else
+#endif
    {
      _d.minNumDiscard(2);
      _d[0]  =Char8To16(c);
@@ -3366,7 +3537,9 @@ Str& Str::operator=(Char8 c)
 }
 Str& Str::operator=(Char c)
 {
+#if !NUL_CHAR
    if(!c)clear();else
+#endif
    {
      _d.minNumDiscard(2);
      _d[0]  =c;
@@ -3381,7 +3554,7 @@ Str8& Str8::operator=(C BStr &s)
    if(!s.is())clear();else
    {
      _d.minNumDiscard((_length=s.length())+1);
-      I(); FREPA(T)_d[i]=Char16To8Fast(s()[i]); // don't use 'Set' to allow copying '\0' chars in the middle and because 'BStr' may not end with '\0', () to avoid range checks
+      Copy16To8(_d.data(), s(), length()); // 'BStr' may not end with '\0'
       /*if(_d.elms())*/_d[length()]='\0'; // "if" not needed since we already know 's.is'
    }
    return T;
@@ -3529,7 +3702,7 @@ Str8& Str8::operator+=(C Str &s)
    if(s.is())
    {
       Reserve(T, s.length());
-      I(); FREP(s.length()+1)_d[length()+i]=Char16To8Fast(s()[i]); // don't use 'Set' to allow copying '\0' chars in the middle - Set(_d.data()+length(), s(), s.length()+1)
+      Copy16To8(_d.data()+length(), s(), s.length()+1);
      _length+=s.length();
    }
    return T;
@@ -3539,7 +3712,7 @@ Str& Str::operator+=(C Str8 &s)
    if(s.is())
    {
       Reserve(T, s.length());
-      I(); FREP(s.length()+1)_d[length()+i]=Char8To16Fast(s()[i]); // don't use 'Set' to allow copying '\0' chars in the middle - Set(_d.data()+length(), s(), s.length()+1)
+      Copy8To16(_d.data()+length(), s(), s.length()+1);
      _length+=s.length();
    }
    return T;
@@ -3547,7 +3720,9 @@ Str& Str::operator+=(C Str8 &s)
 /******************************************************************************/
 Str8& Str8::operator+=(Char8 c)
 {
+#if !NUL_CHAR
    if(c)
+#endif
    {
       Reserve(T, 1);
      _d[_length++]=c;
@@ -3557,7 +3732,9 @@ Str8& Str8::operator+=(Char8 c)
 }
 Str8& Str8::operator+=(Char c)
 {
+#if !NUL_CHAR
    if(c)
+#endif
    {
       Reserve(T, 1);
      _d[_length++]=Char16To8(c);
@@ -3567,7 +3744,9 @@ Str8& Str8::operator+=(Char c)
 }
 Str& Str::operator+=(Char8 c)
 {
+#if !NUL_CHAR
    if(c)
+#endif
    {
       Reserve(T, 1);
      _d[_length++]=Char8To16(c);
@@ -3577,7 +3756,9 @@ Str& Str::operator+=(Char8 c)
 }
 Str& Str::operator+=(Char c)
 {
+#if !NUL_CHAR
    if(c)
+#endif
    {
       Reserve(T, 1);
      _d[_length++]=c;
@@ -3586,25 +3767,12 @@ Str& Str::operator+=(Char c)
    return T;
 }
 /******************************************************************************/
-void Str8::alwaysAppend(Char8 c)
-{
-   Reserve(T, 1);
-  _d[_length++]=c;
-  _d[_length  ]='\0';
-}
-void Str::alwaysAppend(Char c)
-{
-   Reserve(T, 1);
-  _d[_length++]=c;
-  _d[_length  ]='\0';
-}
-/******************************************************************************/
 Str8& Str8::operator+=(C BStr &s)
 {
    if(s.is())
    {
       Reserve(T, s.length());
-      I(); FREPA(s)_d[length()+i]=Char16To8Fast(s()[i]); // () to avoid range checks
+      Copy16To8(_d.data()+length(), s(), s.length());
      _length+=s.length();
       /*if(_d.elms())*/_d[length()]='\0'; // "if" not needed since we already know 's.is'
    }
@@ -3707,6 +3875,8 @@ Str8& Str8::operator =(C VecB4  &v) {Char8 temp[256]; T =TextInt(v.x, temp); T+=
 Str8& Str8::operator+=(C VecB4  &v) {Char8 temp[256]; T+=TextInt(v.x, temp); T+=", "; T+=TextInt(v.y, temp); T+=", "; T+=TextInt(v.z, temp); T+=", "; T+=TextInt(v.w, temp); return T;}
 Str8& Str8::operator =(C VecSB4 &v) {Char8 temp[256]; T =TextInt(v.x, temp); T+=", "; T+=TextInt(v.y, temp); T+=", "; T+=TextInt(v.z, temp); T+=", "; T+=TextInt(v.w, temp); return T;}
 Str8& Str8::operator+=(C VecSB4 &v) {Char8 temp[256]; T+=TextInt(v.x, temp); T+=", "; T+=TextInt(v.y, temp); T+=", "; T+=TextInt(v.z, temp); T+=", "; T+=TextInt(v.w, temp); return T;}
+Str8& Str8::operator =(C VecUS4 &v) {Char8 temp[256]; T =TextInt(v.x, temp); T+=", "; T+=TextInt(v.y, temp); T+=", "; T+=TextInt(v.z, temp); T+=", "; T+=TextInt(v.w, temp); return T;}
+Str8& Str8::operator+=(C VecUS4 &v) {Char8 temp[256]; T+=TextInt(v.x, temp); T+=", "; T+=TextInt(v.y, temp); T+=", "; T+=TextInt(v.z, temp); T+=", "; T+=TextInt(v.w, temp); return T;}
 
 Str& Str::operator =(C Vec2   &v) {Char8 temp[256]; T =TextFlt(v.x, temp); T+=", "; T+=TextFlt(v.y, temp); return T;}
 Str& Str::operator+=(C Vec2   &v) {Char8 temp[256]; T+=TextFlt(v.x, temp); T+=", "; T+=TextFlt(v.y, temp); return T;}
@@ -3742,6 +3912,8 @@ Str& Str::operator =(C VecB4  &v) {Char8 temp[256]; T =TextInt(v.x, temp); T+=",
 Str& Str::operator+=(C VecB4  &v) {Char8 temp[256]; T+=TextInt(v.x, temp); T+=", "; T+=TextInt(v.y, temp); T+=", "; T+=TextInt(v.z, temp); T+=", "; T+=TextInt(v.w, temp); return T;}
 Str& Str::operator =(C VecSB4 &v) {Char8 temp[256]; T =TextInt(v.x, temp); T+=", "; T+=TextInt(v.y, temp); T+=", "; T+=TextInt(v.z, temp); T+=", "; T+=TextInt(v.w, temp); return T;}
 Str& Str::operator+=(C VecSB4 &v) {Char8 temp[256]; T+=TextInt(v.x, temp); T+=", "; T+=TextInt(v.y, temp); T+=", "; T+=TextInt(v.z, temp); T+=", "; T+=TextInt(v.w, temp); return T;}
+Str& Str::operator =(C VecUS4 &v) {Char8 temp[256]; T =TextInt(v.x, temp); T+=", "; T+=TextInt(v.y, temp); T+=", "; T+=TextInt(v.z, temp); T+=", "; T+=TextInt(v.w, temp); return T;}
+Str& Str::operator+=(C VecUS4 &v) {Char8 temp[256]; T+=TextInt(v.x, temp); T+=", "; T+=TextInt(v.y, temp); T+=", "; T+=TextInt(v.z, temp); T+=", "; T+=TextInt(v.w, temp); return T;}
 /******************************************************************************/
 Str8 Str8::operator+(CChar8 *t)C
 {
@@ -3856,6 +4028,8 @@ Str8 Str8::operator+(C VecB4  &v)C {return RValue(Str8(T, 4*  BYTEC + 3*COMMA)+=
 Str  Str ::operator+(C VecB4  &v)C {return RValue(Str (T, 4*  BYTEC + 3*COMMA)+=v);}
 Str8 Str8::operator+(C VecSB4 &v)C {return RValue(Str8(T, 4* SBYTEC + 3*COMMA)+=v);}
 Str  Str ::operator+(C VecSB4 &v)C {return RValue(Str (T, 4* SBYTEC + 3*COMMA)+=v);}
+Str8 Str8::operator+(C VecUS4 &v)C {return RValue(Str8(T, 4*USHORTC + 3*COMMA)+=v);}
+Str  Str ::operator+(C VecUS4 &v)C {return RValue(Str (T, 4*USHORTC + 3*COMMA)+=v);}
 /******************************************************************************/
 // STRING LIBRARY
 /******************************************************************************/
@@ -3903,16 +4077,16 @@ void StrLibrary::create(C CMemPtr<Str> &strings, Bool case_sensitive, Bool paths
 
    REPA(cleaned)
    {
-      if(HasUnicode(cleaned[i]))_size+=SIZE(Char )*(cleaned[i].length()+1);
-      else                      _size+=SIZE(Char8)*(cleaned[i].length()+1);
+      if(HasWide(cleaned[i]))_size+=SIZE(Char )*(cleaned[i].length()+1);
+      else                   _size+=SIZE(Char8)*(cleaned[i].length()+1);
    }
   _elms=cleaned.elms();
    alloc();
    UInt data_pos=0;
    FREPA(cleaned) // go from start
    {
-      if(HasUnicode(cleaned[i])){Set((Char *)(_data+data_pos), cleaned[i], cleaned[i].length()+1); _index[i]=data_pos^SIGN_BIT; data_pos+=SIZE(Char )*(cleaned[i].length()+1);}
-      else                      {Set((Char8*)(_data+data_pos), cleaned[i], cleaned[i].length()+1); _index[i]=data_pos         ; data_pos+=SIZE(Char8)*(cleaned[i].length()+1);}
+      if(HasWide(cleaned[i])){Set((Char *)(_data+data_pos), cleaned[i], cleaned[i].length()+1); _index[i]=data_pos^SIGN_BIT; data_pos+=SIZE(Char )*(cleaned[i].length()+1);}
+      else                   {Set((Char8*)(_data+data_pos), cleaned[i], cleaned[i].length()+1); _index[i]=data_pos         ; data_pos+=SIZE(Char8)*(cleaned[i].length()+1);}
    }
 }
 StrLibrary::StrLibrary(                                                        )                {Zero(T);}
@@ -4032,11 +4206,11 @@ BStr& BStr::extend(Int l) {if(!_custom)_length+=l; return T;}
 
 Bool BStr::operator==(CChar   c)C {return _length==1 && _d[0]==          c ;}
 Bool BStr::operator==(CChar8  c)C {return _length==1 && _d[0]==Char8To16(c);}
-Bool BStr::operator==(CChar  *t)C {if(t){     FREP(_length)if(_d[i]!=              *t++ )return false; return *t=='\0';} return _length==0;}
-Bool BStr::operator==(CChar8 *t)C {if(t){I(); FREP(_length)if(_d[i]!=Char8To16Fast(*t++))return false; return *t=='\0';} return _length==0;}
-Bool BStr::operator==(C Str  &s)C {if(_length!=s.length())return false;      FREP(_length)if(_d[i]!=              s()[i] )return false; return true;}
-Bool BStr::operator==(C Str8 &s)C {if(_length!=s.length())return false; I(); FREP(_length)if(_d[i]!=Char8To16Fast(s()[i]))return false; return true;}
-Bool BStr::operator==(C BStr &s)C {if(_length!=s.length())return false;      FREP(_length)if(_d[i]!=              s()[i] )return false; return true;}
+Bool BStr::operator==(CChar  *t)C {if(t){FREP(_length)if(_d[i]!=          *t++ )return false; return *t=='\0';} return _length==0;}
+Bool BStr::operator==(CChar8 *t)C {if(t){FREP(_length)if(_d[i]!=Char8To16(*t++))return false; return *t=='\0';} return _length==0;}
+Bool BStr::operator==(C Str  &s)C {if(_length!=s.length())return false; FREP(_length)if(_d[i]!=          s()[i] )return false; return true;}
+Bool BStr::operator==(C Str8 &s)C {if(_length!=s.length())return false; FREP(_length)if(_d[i]!=Char8To16(s()[i]))return false; return true;}
+Bool BStr::operator==(C BStr &s)C {if(_length!=s.length())return false; FREP(_length)if(_d[i]!=          s()[i] )return false; return true;}
 
 BStr& BStr::operator=(C BStr &src)
 {
@@ -4104,26 +4278,26 @@ static void InitStr()
 #endif
 
    // Char 8<->16 conversions
+#if 0
+   SetMem(_Char16To8, '?', SIZE(_Char16To8));
+   REP(256)
    {
-      SetMem(_Char16To8, '?', SIZE(_Char16To8));
-      REP(256)
-      {
-         Char8 c=i;
-      #if WINDOWS
-         wchar_t w;
-         MultiByteToWideChar(CP_ACP, 0, &c, 1, &w, 1);
-         // many 'c' characters can point to the same 'w', however we need "Char16To8(Char8To16(c))==c", so the characters that get repeated, we need to store them as original, these are:
-         if(w=='?'             // occurs in Chinese Traditional
-         || Unsigned(w)==12539 // occurs in Japanese
-         )w=c;
-        _Char8To16[Unsigned(c)]=w;
-        _Char16To8[Unsigned(w)]=c;
-      #else // on other platforms accented characters use UTF8 (one accented character may use multiple chars, so single char of value >=128 does not have a code page like on Windows), just use direct copy, this is needed for 'CreateShortcut' Linux version where UTF8 is saved using 'Str'
-        _Char8To16[Unsigned(c)]=c;
-        _Char16To8[Unsigned(c)]=c;
-      #endif
-      }
+      Char8 c=i;
+   #if WINDOWS
+      wchar_t w;
+      MultiByteToWideChar(CP_ACP, 0, &c, 1, &w, 1);
+      // many 'c' characters can point to the same 'w', however we need "Char16To8(Char8To16(c))==c", so the characters that get repeated, we need to store them as original, these are:
+      if(w=='?'             // occurs in Chinese Traditional
+      || Unsigned(w)==12539 // occurs in Japanese
+      )w=c;
+     _Char8To16[Unsigned(c)]=w;
+     _Char16To8[Unsigned(w)]=c;
+   #else // on other platforms accented characters use UTF8 (one accented character may use multiple chars, so single char of value >=128 does not have a code page like on Windows), just use direct copy, this is needed for 'CreateShortcut' Linux version where UTF8 is saved using 'Str'
+     _Char8To16[Unsigned(c)]=c;
+     _Char16To8[Unsigned(c)]=c;
+   #endif
    }
+#endif
 
    // Case Up/Down
    {
@@ -4254,7 +4428,7 @@ static void InitStr()
       for(Int i=1; i<Elms(CharOrder16); i++)if(!CharOrder16[i])CharOrder16[i]=o++; // if the character doesn't have order set, then set (skip 0 '\0')
 
       // Char8
-      REPAO(CharOrder8)=CharOrderFast(Char8To16Fast(i));
+      REPAO(CharOrder8)=CharOrderFast(Char8To16(i)); // !! CAN'T USE "CharOrderFast(Char8(i))" BECAUSE THAT GETS 'CharOrder8' WHICH WE'RE SETTING NOW !!
    }
 
    // Char Flag
@@ -4262,17 +4436,21 @@ static void InitStr()
       // set custom
    #define SET(c, f) _CharFlag[Unsigned(c)]|=f;
                                  SET(' '           , CHARF_SPACE);
-                                 SET(Nbsp          , CHARF_SPACE);
                                  SET(FullWidthSpace, CHARF_SPACE);
                                  SET('\t'          , CHARF_SPACE);
+                                 SET(Nbsp          , CHARF_SPACE|CHARF_NBSP);
                                  SET('_'           , CHARF_UNDER);
                                  SET('0'           , CHARF_DIG2|CHARF_DIG10|CHARF_DIG16);
                                  SET('1'           , CHARF_DIG2|CHARF_DIG10|CHARF_DIG16);
       for(Int i='2'; i<='9'; i++)SET(i             ,            CHARF_DIG10|CHARF_DIG16);
       for(Int i='a'; i<='f'; i++)SET(i             ,                        CHARF_DIG16);
       for(Int i='A'; i<='F'; i++)SET(i             ,                        CHARF_DIG16);
-           REP(Elms(Combining)-1)SET(Combining[i]  , CHARF_COMBINING); // -1 to skip null char
            REP(Elms(Stack    )-1)SET(Stack    [i]  , CHARF_STACK    ); // -1 to skip null char
+           REP(Elms(Combining)-1)SET(Combining[i]  , CHARF_COMBINING); // -1 to skip null char
+   #if 1 // since we use Char 16-bit UTF we need to mark special chars as multi - https://en.wikipedia.org/wiki/UTF-16#Description
+      for(Int i=0xD800; i<=0xDBFF; i++)SET(i       , CHARF_MULTI0   );
+      for(Int i=0xDC00; i<=0xDFFF; i++)SET(i       , CHARF_MULTI1   );
+   #endif
    #undef  SET
 
       // set sign
@@ -4432,7 +4610,7 @@ Font& Font::removeAccent(Bool permanent)
 #if APPLE
 static Bool HasUnicode(NSString *str)
 {
-   if(str)REP([str length])if(Unsigned([str characterAtIndex:i])>=128)return true;
+   if(str)REP([str length])if(Unsigned([str characterAtIndex:i])>127)return true;
    return false;
 }
 /******************************************************************************/

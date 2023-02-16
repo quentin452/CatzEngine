@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\Windows\gen_src\aom_av1_encoder_sse2_static_dummy.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\encoder\x86\dct_sse2.asm" />
+    <None Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\av1\encoder\x86\error_sse2.asm" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{717B8D52-B115-3C96-AB4A-ACDCFB794AB1}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

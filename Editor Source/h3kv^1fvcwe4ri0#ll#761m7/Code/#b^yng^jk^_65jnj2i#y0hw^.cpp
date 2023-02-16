@@ -39,7 +39,7 @@ class CompareProjects : PropWin
             {
                image_id=list_elm.id;
                Str name=(list_elm.path.is() ? list_elm.path : path+EncodeFileName(image_id));
-               File f; if(pak.totalFiles())f.readTry(name, pak);else f.readTry(name);
+               File f; if(pak.totalFiles())f.read(name, pak);else f.read(name);
                image.load(f);
             }
 
@@ -182,7 +182,7 @@ class CompareProjects : PropWin
          }else switch(result)
          {
             case LOAD_NEWER : Gui.msgBox(S, S+"Project \""+proj.name+"\" requires newer engine version."); return;
-            case LOAD_ERROR : Gui.msgBox(S, S+"Project \""+proj.name+"\" failed to load."+(error.is() ? '\n' : '\0')+error); return;
+            case LOAD_ERROR : Gui.msgBox(S, S+"Project \""+proj.name+"\" failed to load."+(error.is() ? "\n" : null)+error); return;
             case LOAD_LOCKED: Gui.msgBox(S, S+"Project \""+proj.name+"\" is locked."); return;
          }
       }

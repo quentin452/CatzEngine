@@ -1,0 +1,12 @@
+# CMake generation dependency list for this directory.
+C:/Esenthel/ThirdPartyLibs/JpegXL/lib/third_party/CMakeLists.txt
+C:/Esenthel/ThirdPartyLibs/JpegXL/lib/third_party/brotli/LICENSE
+C:/Esenthel/ThirdPartyLibs/JpegXL/lib/third_party/highway/LICENSE
+C:/Esenthel/ThirdPartyLibs/JpegXL/lib/third_party/skcms.cmake
+C:/Esenthel/ThirdPartyLibs/JpegXL/lib/third_party/skcms/LICENSE
+C:/Program Files/CMake/share/cmake-3.24/Modules/CheckCXXCompilerFlag.cmake
+C:/Program Files/CMake/share/cmake-3.24/Modules/FindPNG.cmake
+C:/Program Files/CMake/share/cmake-3.24/Modules/FindPackageHandleStandardArgs.cmake
+C:/Program Files/CMake/share/cmake-3.24/Modules/FindPackageMessage.cmake
+C:/Program Files/CMake/share/cmake-3.24/Modules/FindZLIB.cmake
+C:/Program Files/CMake/share/cmake-3.24/Modules/SelectLibraryConfigurations.cmake

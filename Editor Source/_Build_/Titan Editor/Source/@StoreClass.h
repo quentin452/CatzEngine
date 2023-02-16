@@ -243,7 +243,7 @@ public:
    {
       bool      chunked;
       Download  down;
-      File      src;
+      HTTPFile  src;
       Progress  progress;
       TextBlack ts;
       Text      text;

@@ -54,19 +54,22 @@ inline void MinMax (  Dbl    a, Dbl  b  , Dbl   &min, Dbl   &max) {if(a<b){min=a
        Bool MinMax (C VecD4 *v, Int  num, VecD4 &min, VecD4 &max);
 
 // get absolute value
-constexpr Int   Abs(  Int    x) {return (x>=0) ? x : -x;}
-constexpr Long  Abs(  Long   x) {return (x>=0) ? x : -x;}
-constexpr Flt   Abs(  Flt    x) {return (x>=0) ? x : -x;}
-constexpr Dbl   Abs(  Dbl    x) {return (x>=0) ? x : -x;}
-inline    Vec2  Abs(C Vec2  &v) {return Vec2 (Abs(v.x), Abs(v.y)                    );}
-inline    VecD2 Abs(C VecD2 &v) {return VecD2(Abs(v.x), Abs(v.y)                    );}
-inline    VecI2 Abs(C VecI2 &v) {return VecI2(Abs(v.x), Abs(v.y)                    );}
-inline    Vec   Abs(C Vec   &v) {return Vec  (Abs(v.x), Abs(v.y), Abs(v.z)          );}
-inline    VecD  Abs(C VecD  &v) {return VecD (Abs(v.x), Abs(v.y), Abs(v.z)          );}
-inline    VecI  Abs(C VecI  &v) {return VecI (Abs(v.x), Abs(v.y), Abs(v.z)          );}
-inline    Vec4  Abs(C Vec4  &v) {return Vec4 (Abs(v.x), Abs(v.y), Abs(v.z), Abs(v.w));}
-inline    VecD4 Abs(C VecD4 &v) {return VecD4(Abs(v.x), Abs(v.y), Abs(v.z), Abs(v.w));}
-inline    VecI4 Abs(C VecI4 &v) {return VecI4(Abs(v.x), Abs(v.y), Abs(v.z), Abs(v.w));}
+constexpr Int   Abs(  Int     x) {return (x>=0) ? x : -x;}
+constexpr Long  Abs(  Long    x) {return (x>=0) ? x : -x;}
+constexpr Flt   Abs(  Flt     x) {return (x>=0) ? x : -x;}
+constexpr Dbl   Abs(  Dbl     x) {return (x>=0) ? x : -x;}
+inline    Vec2  Abs(C Vec2   &v) {return Vec2 (Abs(v.x), Abs(v.y)                    );}
+inline    VecD2 Abs(C VecD2  &v) {return VecD2(Abs(v.x), Abs(v.y)                    );}
+inline    VecI2 Abs(C VecI2  &v) {return VecI2(Abs(v.x), Abs(v.y)                    );}
+inline    VecB2 Abs(C VecSB2 &v) {return VecB2(Abs(v.x), Abs(v.y)                    );}
+inline    Vec   Abs(C Vec    &v) {return Vec  (Abs(v.x), Abs(v.y), Abs(v.z)          );}
+inline    VecD  Abs(C VecD   &v) {return VecD (Abs(v.x), Abs(v.y), Abs(v.z)          );}
+inline    VecI  Abs(C VecI   &v) {return VecI (Abs(v.x), Abs(v.y), Abs(v.z)          );}
+inline    VecB  Abs(C VecSB  &v) {return VecB (Abs(v.x), Abs(v.y), Abs(v.z)          );}
+inline    Vec4  Abs(C Vec4   &v) {return Vec4 (Abs(v.x), Abs(v.y), Abs(v.z), Abs(v.w));}
+inline    VecD4 Abs(C VecD4  &v) {return VecD4(Abs(v.x), Abs(v.y), Abs(v.z), Abs(v.w));}
+inline    VecI4 Abs(C VecI4  &v) {return VecI4(Abs(v.x), Abs(v.y), Abs(v.z), Abs(v.w));}
+inline    VecB4 Abs(C VecSB4 &v) {return VecB4(Abs(v.x), Abs(v.y), Abs(v.z), Abs(v.w));}
 
 // make absolute value
 inline void ABS(Int  &x) {if(x<0)x=-x;}              // works as "x=Abs(x);"
@@ -597,6 +600,9 @@ inline Flt  U2ToFlt(Byte u) {return u/3.0f                  ;} // 0..3 -> 0..1
 
 inline UInt FltToU10(Flt  f) {return Mid(RoundPos(f*1023), 0, 1023);} // 0..1    -> 0..1023, it's okay to clamp after converting to int for small values
 inline Flt  U10ToFlt(UInt u) {return u/1023.0f                     ;} // 0..1023 -> 0..1
+
+inline UInt FltToU12(Flt  f) {return RoundPos(Sat(f)*4095);} // 0..1    -> 0..4095
+inline Flt  U12ToFlt(UInt u) {return u/4095.0f            ;} // 0..4095 -> 0..1
 
 inline Flt  ShortToSFlt (Short s) {return         (s<=-32767) ? -1 : s/32767.0f;} // -32767..32767 -> -1..1
 inline Short SFltToShort(Flt   f) {return RoundPos(Mid(f, -1.0f, 1.0f)*32767)  ;} // -1..1 -> -32767..32767

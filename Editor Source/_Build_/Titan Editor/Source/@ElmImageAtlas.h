@@ -13,8 +13,6 @@ class ElmImageAtlas : ElmData
       UID       id;
       TimeStamp removed_time;
 
-      static int Compare(C Img &img, C UID &id);
-
       bool equal(C Img &src)C;
       bool newer(C Img &src)C;
 
@@ -23,6 +21,8 @@ class ElmImageAtlas : ElmData
 public:
    Img();
    };
+   static int CompareID(C Img &img, C UID &id);
+
    byte      flag;
    Memc<Img> images;
    TimeStamp file_time, mip_maps_time, compress_time;

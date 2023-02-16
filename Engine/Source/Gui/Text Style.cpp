@@ -7,6 +7,43 @@ namespace EE{
 static const Color DefaultSelectionColor(51, 153, 255, 64);
 DEFINE_CACHE(TextStyle, TextStyles, TextStylePtr, "Text Style");
 /******************************************************************************/
+#if SUPPORT_EMOJI
+struct EmojiKey
+{
+   union
+   {
+      UInt u;
+      Char c[2];
+   };
+
+      EmojiKey() {}
+      EmojiKey(Char c) {u=c;}
+   void append(Char c) {T.c[1]=c;}
+};
+struct Emoji
+{
+   ImagePtr img;
+};
+static Int  Compare(C EmojiKey &a, C EmojiKey &b) {return Compare(a.u, b.u);}
+static Bool Create (Emoji &emoji, C EmojiKey &key, Ptr user)
+{
+   Char name[3];
+   name[0]=key.c[0];
+   name[1]=key.c[1];
+   name[2]='\0';
+   if(EmojiPak && EmojiPak->find(name, false))emoji.img=name; // load only if in 'EmojiPak', in that case require
+   return true; // always succeed to avoid loading again and again the same emoji on fail, in that case just have null image
+}
+static Map<EmojiKey, Emoji> Emojis(Compare, Create);
+static inline C ImagePtr& FindEmoji(C EmojiKey &key)
+{
+ C Emoji *emoji=Emojis.get(key);
+ //if(emoji) always succeeds so can skip "if"
+      return emoji->img;
+   return ImageNull;
+}
+#endif
+/******************************************************************************/
 static Bool Separatable(Char c)
 {
    return Unsigned(c)>=3585; // starting from Thai, Korean=0x1100, see 'LanguageSpecific', careful this range also includes German 'ẞ'
@@ -322,8 +359,8 @@ struct TextSrc
 
    void fix() {if(!t16 && !t8)t16=u"";} // don't allow null so we can assume "t8 || t16" in 'c' 'n', prefer 't16' to avoid 'Char8To16Fast'
 
-   Char c()C {return t8 ? Char8To16Fast(*  t8) : *  t16;} // assumes that Str was already initialized and "t8 || t16"
-   Char n()  {return t8 ? Char8To16Fast(*++t8) : *++t16;} // assumes that Str was already initialized and "t8 || t16"
+   Char c()C {return t8 ? Char8To16(*  t8) : *  t16;} // assumes that "t8 || t16"
+   Char n()  {return t8 ? Char8To16(*++t8) : *++t16;} // assumes that "t8 || t16"
 
    void operator+=(Int i) {if(t8)t8+=i;else t16+=i;} // assumes that "t8 || t16"
    void operator-=(Int i) {if(t8)t8-=i;else t16-=i;} // assumes that "t8 || t16"
@@ -482,7 +519,7 @@ struct TextProcessor
          combining:
             Char n=text.n();
             if(!--max_length)goto end; // check after advancing 'text' pointer
-            if(CharFlagFast(n)&CHARF_COMBINING)goto combining;
+            if(CharFlagFast(n)&CHARF_SKIP)goto combining;
 
             chr=n; goto loop;
          }
@@ -643,7 +680,7 @@ struct TextProcessor
          {
          combining:
             Char n=text.n();
-            if(CharFlagFast(n)&CHARF_COMBINING){chars++; goto combining;}
+            if(CharFlagFast(n)&CHARF_SKIP){chars++; goto combining;}
 
             chr=n; goto loop;
          }
@@ -821,7 +858,7 @@ struct TextProcessor
             Int chars=1;
          combining:
             Char n=text.n();
-            if(CharFlagFast(n)&CHARF_COMBINING){chars++; goto combining;}
+            if(CharFlagFast(n)&CHARF_SKIP){chars++; goto combining;}
             offset+=chars;
             // 'text' and 'offset' are now after ('chr' and combined)
 
@@ -1029,7 +1066,7 @@ struct TextProcessor
                Int chars=1;
             combining:
                Char n=text.n();
-               if(CharFlagFast(n)&CHARF_COMBINING){chars++; goto combining;}
+               if(CharFlagFast(n)&CHARF_SKIP){chars++; goto combining;}
                offset+=chars;
                // 'text' and 'offset' are now after ('chr' and combined)
 
@@ -1274,7 +1311,7 @@ struct TextDrawerHW : TextDrawer
 
       if(max_length)
       {
-         Char chr=text.c();
+         Char n, chr=text.c();
       loop:
          if(!chr)
          {
@@ -1300,6 +1337,7 @@ struct TextDrawerHW : TextDrawer
                   {
                      VI.flush();
                      VI.shader(null);
+                     // TODO: this should handle adjusting/restoring D.alpha for sub_pixel, however that would introduce overhead
 
                      Flt w=size.y*image->aspect();
                      if(cur==offset){cur_x=pos.x; cur_w=w;}
@@ -1327,6 +1365,7 @@ struct TextDrawerHW : TextDrawer
                   {
                      VI.flush();
                      VI.shader(null);
+                     // TODO: this should handle adjusting/restoring D.alpha for sub_pixel, however that would introduce overhead
 
                      processPanel(text, data, datas, max_length);
 
@@ -1379,9 +1418,12 @@ struct TextDrawerHW : TextDrawer
 
                   // combining
                   if(!--max_length)goto end; // !! THIS CAN CHECK BEFORE ADVANCING 'text' AS LONG AS WE'RE NOT GOING TO USE IT AFTERWARD !!
-                  Char n=text.n();
-                  UInt flag=CharFlagFast(n); if(flag&CHARF_COMBINING)
+                  n=text.n();
+                  UInt flag=CharFlagFast(n); if(flag&(CHARF_COMBINING|(SUPPORT_EMOJI?0:CHARF_MULTI1))) // without SUPPORT_EMOJI also check CHARF_MULTI1
                   {
+                  #if !SUPPORT_EMOJI
+                     if(flag&CHARF_MULTI1)goto skip_multi1;
+                  #endif
                      chr_pos.x+=xsize_2*fc.width ; // after 'chr_pos' was pixel aligned, move by half of the character width to put it at centerX of 'chr' character
                      chr_pos.y+=ysize  *fc.offset; // reset Y pos
                      Bool skipped_bottom_shadow_padding=false;
@@ -1422,13 +1464,62 @@ struct TextDrawerHW : TextDrawer
                   chr=n; goto loop;
                }
             }
+         #if SUPPORT_EMOJI
+            // if character not present in font, try to find emoji
+            EmojiKey key(chr);
+            if(CharFlagFast(chr)&CHARF_MULTI0) // first check if it's multi-char
+            {
+               if(!--max_length)goto end; // !! THIS CAN CHECK BEFORE ADVANCING 'text' AS LONG AS WE'RE NOT GOING TO USE IT AFTERWARD !!
+               n=text.n(); // this should be CHARF_MULTI1
+
+               // update positions
+               if(cur==offset){cur_x=pos.x; cur_w=xsize*charWidth(chr);}
+               if(sel==offset){sel_x=pos.x;}
+                       offset++;
+
+               if(!n)goto end; // safety check
+               key.append(n);
+            }
+            Flt w=xsize*charWidth(chr);
+            if(C ImagePtr &image=FindEmoji(key))
+            {
+               VI.flush();
+               VI.shader(null);
+               // TODO: this should handle adjusting/restoring D.alpha for sub_pixel, however that would introduce overhead
+
+               image->draw(Rect_LU(spacingConst() ? pos.x+space_2-w/2 : pos.x, pos.y, w, size.y));
+
+               VI.shader(shader);
+             //VI.color (color); not needed, 'image->draw' doesn't change it
+            }else
+            {
+               font_index=font->_wide_to_font[Unsigned('\1')]; if(InRange(font_index, font->_chrs)) // if haven't found emoji, try drawing as invalid/unknown
+               {
+                C Font::Chr &fc=font->_chrs[font_index];
+                  Vec2 chr_pos=pos;
+                  if(spacingConst())chr_pos.x+=space_2-xsize_2*                 fc.width  ; // move back by half of the character width
+                  else              chr_pos.x+=    w/2-xsize_2*                 fc.width  ; // adjust here because we have spacing based on square size
+                                    chr_pos.x+=                 font_offset.x             ;
+                                    chr_pos.y+=        ysize  *(font_offset_i_y-fc.offset);
+                  if(style.pixel_align)D.alignScreenXToPixel(chr_pos.x);
+
+                  Rect_LU rect(chr_pos, xsize*fc.width_padd, ysize*fc.height_padd);
+                  VI.imageConditional(&font->_images[fc.image], *shader_image);
+                  if(sub_pixel)VI.imagePart(rect, fc.tex);
+                  else         VI.font     (rect, fc.tex);
+               }
+            }
+         #endif
          }
 
       skip_combining:
          if(!--max_length)goto end; // !! THIS CAN CHECK BEFORE ADVANCING 'text' AS LONG AS WE'RE NOT GOING TO USE IT AFTERWARD !!
-         Char n=text.n();
-         if(CharFlagFast(n)&CHARF_COMBINING)
+         n=text.n();
+         if(CharFlagFast(n)&CHARF_SKIP)
          {
+      #if !SUPPORT_EMOJI
+         skip_multi1:
+      #endif
             // update positions
             if(cur==offset){cur_x=pos.x; cur_w=xsize*charWidth(chr);}
             if(sel==offset){sel_x=pos.x;}
@@ -1754,7 +1845,7 @@ struct TextDrawerSoft : TextDrawer
 
       if(max_length)
       {
-         Char chr=text.c();
+         Char n, chr=text.c();
       loop:
          if(!chr)
          {
@@ -1836,9 +1927,12 @@ struct TextDrawerSoft : TextDrawer
 
                   // combining
                   if(!--max_length)goto end; // !! THIS CAN CHECK BEFORE ADVANCING 'text' AS LONG AS WE'RE NOT GOING TO USE IT AFTERWARD !!
-                  Char n=text.n();
-                  UInt flag=CharFlagFast(n); if(flag&CHARF_COMBINING)
+                  n=text.n();
+                  UInt flag=CharFlagFast(n); if(flag&(CHARF_COMBINING|(SUPPORT_EMOJI?0:CHARF_MULTI1))) // without SUPPORT_EMOJI also check CHARF_MULTI1
                   {
+                  #if !SUPPORT_EMOJI
+                     if(flag&CHARF_MULTI1)goto skip_combining;
+                  #endif
                      chr_pos.x+=xsize_2*fc.width ; // after 'chr_pos' was pixel aligned, move by half of the character width to put it at centerX of 'chr' character
                      chr_pos.y+=ysize  *fc.offset; // reset Y pos
                      Bool skipped_bottom_shadow_padding=false;
@@ -1872,12 +1966,15 @@ struct TextDrawerSoft : TextDrawer
                   chr=n; goto loop;
                }
             }
+         #if SUPPORT_EMOJI
+            // FIXME #TextSoft
+         #endif
          }
 
       skip_combining:
          if(!--max_length)goto end; // !! THIS CAN CHECK BEFORE ADVANCING 'text' AS LONG AS WE'RE NOT GOING TO USE IT AFTERWARD !!
-         Char n=text.n();
-         if(CharFlagFast(n)&CHARF_COMBINING)goto skip_combining;
+         n=text.n();
+         if(CharFlagFast(n)&CHARF_SKIP)goto skip_combining;
          chr=n; goto loop;
       }
    end:
@@ -2063,13 +2160,13 @@ Int TextStyleParams::textIndex(CChar8 *text, Flt x, TEXT_INDEX_MODE index_mode)C
          pos=Trunc(x);
       #if 0 // fast
          Clamp(pos, 0, Length(text));
-      #else // CHARF_COMBINING
+      #else // CHARF_SKIP
          CChar8 *start=text; for(Int base_chars=0; ; base_chars++)
          {
             Char8 c=*text; if(!c || base_chars>=pos){pos=text-start; break;}
          skip:
             Char8 next=*++text;
-            if(CharFlagFast(next)&CHARF_COMBINING)goto skip;
+            if(CharFlagFast(next)&CHARF_SKIP)goto skip;
          }
       #endif
       }else
@@ -2079,7 +2176,7 @@ Int TextStyleParams::textIndex(CChar8 *text, Flt x, TEXT_INDEX_MODE index_mode)C
          CChar8 *start=text;
       skip1:
          Char8 next=*++text;
-         if(CharFlagFast(next)&CHARF_COMBINING)goto skip1;
+         if(CharFlagFast(next)&CHARF_SKIP)goto skip1;
          Flt w=font->charWidth(c, next, spacing)*xsize;
          if(x<((index_mode==TEXT_INDEX_DEFAULT) ? w/2 : (index_mode==TEXT_INDEX_OVERWRITE) ? w+space_2 : xsize*font->charWidth(c)))break; // for TEXT_INDEX_FIT make sure that the 'c' fully fits
          x-=w+space;
@@ -2101,13 +2198,13 @@ Int TextStyleParams::textIndex(CChar *text, Flt x, TEXT_INDEX_MODE index_mode)C
          pos=Trunc(x);
       #if 0 // fast
          Clamp(pos, 0, Length(text));
-      #else // CHARF_COMBINING
+      #else // CHARF_SKIP
          CChar *start=text; for(Int base_chars=0; ; base_chars++)
          {
             Char c=*text; if(!c || base_chars>=pos){pos=text-start; break;}
          skip:
             Char next=*++text;
-            if(CharFlagFast(next)&CHARF_COMBINING)goto skip;
+            if(CharFlagFast(next)&CHARF_SKIP)goto skip;
          }
       #endif
       }else
@@ -2117,7 +2214,7 @@ Int TextStyleParams::textIndex(CChar *text, Flt x, TEXT_INDEX_MODE index_mode)C
          CChar *start=text;
       skip1:
          Char next=*++text;
-         if(CharFlagFast(next)&CHARF_COMBINING)goto skip1;
+         if(CharFlagFast(next)&CHARF_SKIP)goto skip1;
          Flt w=font->charWidth(c, next, spacing)*xsize;
          if(x<((index_mode==TEXT_INDEX_DEFAULT) ? w/2 : (index_mode==TEXT_INDEX_OVERWRITE) ? w+space_2 : xsize*font->charWidth(c)))break; // for TEXT_INDEX_FIT make sure that the 'c' fully fits
          x-=w+space;
@@ -2181,6 +2278,61 @@ Int TextStyleParams::textIndex(CChar *text, C StrData *data, Int datas, Flt x, F
    }
 //end:
    eol=false; return 0;
+}
+Int TextStyleParams::textIndexAlign(CChar *text, C StrData *data, Int datas, Flt x, Flt y, TEXT_INDEX_MODE index_mode, C Vec2 &size, Bool auto_line, Bool clamp, Bool &eol)C
+{
+   Flt width=size.x;
+   TextDrawer tp; if(tp.initSplit(T, width))
+   {
+      tp.initDraw(T);
+
+      Bool align_x=!Equal(align.x, 1);
+      if(  align_x)
+      {
+         Flt p_x=size.x*(align.x*-0.5f+0.5f);
+         x-=p_x;
+      }
+      Flt h=lineHeight();
+      Int lines=-1; // unknown
+      if(!Equal(align.y, -1))
+      {
+         lines=textLines(text, data, datas, size.x, auto_line); // here use 'size.x' instead of 'width' because 'width' got adjusted
+         Flt p_y=Lerp(-size.y+(lines-1)*h, 0, align.y*-0.5f+0.5f) + T.size.y*tp.y_align_mul;
+          y-=p_y;
+      }
+      Int line;
+      if(clamp)line=Max(Trunc(-y/h), 0);
+      else    {line=    Floor(-y/h); if(line<0 || (lines>=0 && line>=lines))goto end;} // if line is out of range, >= check only if 'lines' are known, yes this must check "line>=" and not "line>"
+           lines=0;
+      Int offset=0;
+      TextSrc ts=(text ? text : u""); // same as ts.fix();
+      TextSplit split;
+   next:
+      Bool next=tp.splitNext(split, T, width, auto_line, ts, data, datas, offset);
+      if( !next && clamp // last line
+      ||   line==lines)
+      {
+         Flt ax=x;
+         if(align_x)
+         {
+            Flt total_width=tp.width(split);
+            ax-=total_width*tp.x_align_mul;
+            if(!clamp && ax>total_width)goto end;
+         }
+         if(!clamp && ax<0)goto end;
+         Int i=tp.textIndex(T, ax, index_mode, split.text, split.data, split.datas, split.font, split.panel);
+         split.fixLength();
+         if(eol=(i>=split.length)) // yes this must check ">=" and not ">"
+         {
+            if(!clamp)goto end;
+            i=split.length;
+         }
+         return i+split.offset;
+      }
+      if(next){lines++; goto next;}
+   }
+end:
+   eol=false; return -1;
 }
 /******************************************************************************/
 Vec2 TextStyleParams::textPos(CChar *text, Int index, Flt width, Bool auto_line)C
@@ -2271,10 +2423,10 @@ Int TextStyleParams::textLines(CChar *text, C StrData *data, Int datas, Flt widt
    }
    return lines;
 }
-Int TextStyleParams::textLines(CChar *text, Flt width, Bool auto_line, Flt *actual_width)C
-{
-   return textLines(text, null, 0, width, auto_line, actual_width);
-}
+Int TextStyleParams::textLines (CChar  *text,                             Flt width, Bool auto_line, Flt *actual_width)C {return              textLines(text, null,     0, width, auto_line, actual_width);}
+Flt TextStyleParams::textHeight(CChar  *text,                             Flt width, Bool auto_line, Flt *actual_width)C {return lineHeight()*textLines(text,              width, auto_line, actual_width);}
+Flt TextStyleParams::textHeight(CChar  *text, C StrData *data, Int datas, Flt width, Bool auto_line, Flt *actual_width)C {return lineHeight()*textLines(text, data, datas, width, auto_line, actual_width);}
+Flt TextStyleParams::textHeight(CChar8 *text, C StrData *data, Int datas, Flt width, Bool auto_line, Flt *actual_width)C {return lineHeight()*textLines(text, data, datas, width, auto_line, actual_width);}
 /******************************************************************************/
 TextStyleParams& TextStyleParams::resetColors(Bool gui)
 {
@@ -2534,18 +2686,30 @@ Bool TextStyle::load(File &f, CChar *path)
 
 Bool TextStyle::save(C Str &name)C
 {
-   File f; if(f.writeTry(name)){if(save(f, _GetPath(name)) && f.flush())return true; f.del(); FDelFile(name);}
+   File f; if(f.write(name)){if(save(f, _GetPath(name)) && f.flush())return true; f.del(); FDelFile(name);}
    return false;
 }
 Bool TextStyle::load(C Str &name)
 {
-   File f; if(f.readTry(name))return load(f, _GetPath(name));
+   File f; if(f.read(name))return load(f, _GetPath(name));
    reset(); return false;
 }
 void TextStyle::operator=(C Str &name)
 {
    if(!load(name))Exit(MLT(S+"Can't load Text Style \""         +name+"\"",
                        PL,S+u"Nie można wczytać stylu tekstu \""+name+"\""));
+}
+/******************************************************************************/
+// MAIN
+/******************************************************************************/
+void ShutFont()
+{
+#if SUPPORT_EMOJI
+   EmojiPak=null;
+   Emojis    .del();
+#endif
+   TextStyles.del();
+   Fonts     .del();
 }
 /******************************************************************************/
 }

@@ -93,12 +93,12 @@ Bool WorldSettings::load(File &f, CChar *path)
 }
 Bool WorldSettings::save(C Str &name)C
 {
-   File f; if(f.writeTry(name)){if(save(f, _GetPath(name)) && f.flush())return true; f.del(); FDelFile(name);}
+   File f; if(f.write(name)){if(save(f, _GetPath(name)) && f.flush())return true; f.del(); FDelFile(name);}
    return false;
 }
 Bool WorldSettings::load(C Str &name)
 {
-   File f; if(f.readTry(name))return load(f, _GetPath(name));
+   File f; if(f.read(name))return load(f, _GetPath(name));
    reset(); return false;
 }
 /******************************************************************************/
@@ -254,7 +254,7 @@ Bool WorldManager::NewTry(C Str &world_name)
       // load settings
       {
         _settings.reset();
-         File f; if(!f.readTry(dataPath()+"Settings") || !_settings.load(f))goto error;
+         File f; if(!f.read(dataPath()+"Settings") || !_settings.load(f))goto error;
          setRanges(); // after loading settings we need to update the ranges, because they're dependent on world area size
       }
 
@@ -482,7 +482,7 @@ void WorldManager::areaCache(Area &area, Bool inc_progress, File &file_area)
 {
    if(area.state()==AREA_UNLOADED)
    {
-      if(file_area.readTry(dataPath()+"Area/"+area.xz(), area_cipher))
+      if(file_area.read(dataPath()+"Area/"+area.xz(), area_cipher))
       {
          Area::Data *data; _area_data(data, area).load(file_area); // first create
          area._data= data; // then set (this is important for multi-threading, we need to have fully valid 'Area::Data' object before setting pointer to it)
@@ -505,7 +505,7 @@ void WorldManager::areaLoad(Area &area, Bool active, File &file_area)
       // load area data
       if(area.state()==AREA_UNLOADED)
       {
-         if(file_area.readTry(dataPath()+"Area/"+area.xz(), area_cipher))_area_data(area._data, area).load(file_area);
+         if(file_area.read(dataPath()+"Area/"+area.xz(), area_cipher))_area_data(area._data, area).load(file_area);
       }
 
 #if DEBUG
@@ -1134,7 +1134,7 @@ Bool WorldManager::save(File &f)
 }
 Bool WorldManager::save(C Str &save_name, Bool (*save)(File &f), Cipher *cipher)
 {
-   File f; if(f.writeTry(save_name, cipher))
+   File f; if(f.write(save_name, cipher))
    {
       if(T.save(f))
       if(!save || save(f))
@@ -1176,7 +1176,7 @@ error:;
 }
 Bool WorldManager::load(C Str &save_name, Bool (*load)(File &f), Cipher *cipher)
 {
-   File f; if(f.readTry(save_name, cipher))if(T.load(f))if(!load || load(f))return true;
+   File f; if(f.read(save_name, cipher))if(T.load(f))if(!load || load(f))return true;
    del(); return false;
 }
 /******************************************************************************/

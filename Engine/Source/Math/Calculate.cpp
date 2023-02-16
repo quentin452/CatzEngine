@@ -1463,6 +1463,34 @@ static Bool CGaussian(CalcValue &x)
    x.type=CVAL_REAL; return true;
 }
 /******************************************************************************/
+static Bool CCeilPow2(CalcValue &x)
+{
+   switch(x.type)
+   {
+      case CVAL_INT : x.i=CeilPow2(       x.i ); return true;
+      case CVAL_REAL: x.i=CeilPow2(RoundL(x.r)); x.type=CVAL_INT; return true;
+      default       : return false;
+   }   
+}
+static Bool CNearestPow2(CalcValue &x)
+{
+   switch(x.type)
+   {
+      case CVAL_INT : x.i=NearestPow2(       x.i ); return true;
+      case CVAL_REAL: x.i=NearestPow2(RoundL(x.r)); x.type=CVAL_INT; return true;
+      default       : return false;
+   }   
+}
+static Bool CFloorPow2(CalcValue &x)
+{
+   switch(x.type)
+   {
+      case CVAL_INT : x.i=FloorPow2(       x.i ); return true;
+      case CVAL_REAL: x.i=FloorPow2(RoundL(x.r)); x.type=CVAL_INT; return true;
+      default       : return false;
+   }   
+}
+/******************************************************************************/
 static struct CalcOpInfo
 {
    Byte    priority, args;
@@ -1548,6 +1576,9 @@ static struct CalcFuncInfo
    {2, "AlignRound"      , (Ptr)CAlignR          },
    {2, "AlignFloor"      , (Ptr)CAlignF          },
    {2, "AlignCeil"       , (Ptr)CAlignC          },
+   {1, "CeilPow2"        , (Ptr)CCeilPow2        },
+   {1, "NearestPow2"     , (Ptr)CNearestPow2     },
+   {1, "FloorPow2"       , (Ptr)CFloorPow2       },
    {1, "Ln"              , (Ptr)CLn              },
    {1, "Log2"            , (Ptr)CLog2            },
    {2, "Log"             , (Ptr)CLog             },

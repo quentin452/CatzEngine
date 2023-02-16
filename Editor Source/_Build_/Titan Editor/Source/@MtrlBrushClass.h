@@ -33,9 +33,8 @@ class MtrlBrushClass : Window
    {
       MaterialPtr mtrl;
       flt         blend;
-      
-      static int Compare(C MtrlBlend &a, C MtrlBlend &b); // compare in reverse order to list those with highest blend first
    };
+   static int CompareBlend(C MtrlBlend &a, C MtrlBlend &b);                  // compare in reverse order to list those with highest blend first
    static void ReduceMaterial(Cell<Area> &cell, ptr user, int thread_index);
 
    static void DragMtrl(ptr slot_index, GuiObj *go, C Vec2 &screen_pos);

@@ -13,9 +13,6 @@ class ElmTypeVer
 
    bool save(File &f)C;
    bool load(File &f); 
-
-   static int Compare(C ElmTypeVer &a, C ElmTypeVer &b );
-   static int Compare(C ElmTypeVer &a, C UID        &id);
 };
 /******************************************************************************/
 /******************************************************************************/

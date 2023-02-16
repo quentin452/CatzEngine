@@ -279,7 +279,7 @@ void Find::ResultRegion::update(C GuiPC &gpc)
 {
    super::update(gpc);
 
-   Bool sel=(Gui.ms()==&list && Ms.bp(0)); REPA(Touches)if(Touches[i].guiObj()==&list && Touches[i].rs())sel=true;
+   Bool sel=(Gui.ms()==&list && Ms.bp(0)); REPA(Touches){Touch &touch=Touches[i]; if(touch.guiObj()==&list && touch.rs()){sel=true; break;}}
    if(  sel)
       if(Result *result=list())
    {

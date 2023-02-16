@@ -24,6 +24,11 @@ const_mem_addr struct Region : GuiObj // Gui Region !! must be stored in constan
    Region& scrollFitY(Flt min, Flt max, Bool immediate=false) {slidebar[1].scrollFit(min, max, immediate); return T;} // vertical scroll to fit min..max range
    Region& scrollEndY(                  Bool immediate=false) {slidebar[1].scrollEnd(          immediate); return T;} // vertical scroll to end
 
+   Region& scrollLeft () {slidebar[0].scrollLeftUp   (); return T;}
+   Region& scrollRight() {slidebar[0].scrollRightDown(); return T;}
+   Region& scrollUp   () {slidebar[1].scrollLeftUp   (); return T;}
+   Region& scrollDown () {slidebar[1].scrollRightDown(); return T;}
+
    Region& scrollTo(C GuiObj &child, Bool immediate=false); // scroll to 'child' object (if 'child' is not a child of this region then this function does nothing)
 
    // operations

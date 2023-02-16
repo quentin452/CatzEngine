@@ -1031,9 +1031,9 @@ void DrawProject()
             case ELM_GUI        : {if(ElmGui        *data=elm.       guiData())data->newData(); GuiObjs       go; go   .save(gamePath(elm)); savedGame(elm); Server.setElmFull(elm.id);} break; // currently gui doesn't have edit version
             case ELM_IMAGE_ATLAS: {if(ElmImageAtlas *data=elm.imageAtlasData())data->newData(); ImageAtlas atlas; atlas.save(gamePath(elm)); savedGame(elm); Server.setElmFull(elm.id);} break; // save empty game atlas
 
-            case ELM_SOUND: {if(ElmData *data=elm.Data())data->newData(); File f; f.writeTry(gamePath(elm)); f.del(); savedGame(elm); Server.setElmFull(elm.id);} break;
-            case ELM_VIDEO: {if(ElmData *data=elm.Data())data->newData(); File f; f.writeTry(gamePath(elm)); f.del(); savedGame(elm); Server.setElmFull(elm.id);} break;
-            case ELM_FILE : {if(ElmData *data=elm.Data())data->newData(); File f; f.writeTry(gamePath(elm)); f.del(); savedGame(elm); Server.setElmFull(elm.id);} break;
+            case ELM_SOUND: {if(ElmData *data=elm.Data())data->newData(); File f; f.write(gamePath(elm)); f.del(); savedGame(elm); Server.setElmFull(elm.id);} break;
+            case ELM_VIDEO: {if(ElmData *data=elm.Data())data->newData(); File f; f.write(gamePath(elm)); f.del(); savedGame(elm); Server.setElmFull(elm.id);} break;
+            case ELM_FILE : {if(ElmData *data=elm.Data())data->newData(); File f; f.write(gamePath(elm)); f.del(); savedGame(elm); Server.setElmFull(elm.id);} break;
 
             case ELM_MINI_MAP:
             {
@@ -2297,7 +2297,7 @@ void DrawProject()
       {
          if(includeTex(material.base_0_tex))
          {
-            base_0.copyTry(base_0, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);
+            base_0.copy(base_0, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);
             saveTex(base_0, material.base_0_tex);
          }
          Server.setTex(material.base_0_tex);
@@ -2310,7 +2310,7 @@ void DrawProject()
       {
          if(includeTex(material.base_1_tex))
          {
-            base_1.copyTry(base_1, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);
+            base_1.copy(base_1, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);
             saveTex(base_1, material.base_1_tex);
          }
          Server.setTex(material.base_1_tex);
@@ -2323,7 +2323,7 @@ void DrawProject()
       {
          if(includeTex(material.base_2_tex))
          {
-            base_2.copyTry(base_2, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);
+            base_2.copy(base_2, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);
             saveTex(base_2, material.base_2_tex);
          }
          Server.setTex(material.base_2_tex);
@@ -2346,7 +2346,7 @@ void DrawProject()
       {
          if(includeTex(material.base_0_tex))
          {
-            base_0.copyTry(base_0, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);
+            base_0.copy(base_0, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);
             saveTex(base_0, material.base_0_tex);
          }
          Server.setTex(material.base_0_tex);
@@ -2359,7 +2359,7 @@ void DrawProject()
       {
          if(includeTex(material.base_1_tex))
          {
-            base_1.copyTry(base_1, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);
+            base_1.copy(base_1, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);
             saveTex(base_1, material.base_1_tex);
          }
          Server.setTex(material.base_1_tex);
@@ -2372,7 +2372,7 @@ void DrawProject()
       {
          if(includeTex(material.base_2_tex))
          {
-            base_2.copyTry(base_2, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);
+            base_2.copy(base_2, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);
             saveTex(base_2, material.base_2_tex);
          }
          Server.setTex(material.base_2_tex);
@@ -2408,7 +2408,7 @@ void DrawProject()
          {
             if(includeTex(material.detail_tex))
             {
-               detail.copyTry(detail, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);
+               detail.copy(detail, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);
                saveTex(detail, material.detail_tex);
             }
             Server.setTex(material.detail_tex);
@@ -2418,7 +2418,7 @@ void DrawProject()
    }
    TEX_FLAG ProjectEx::mtrlCreateMacroTexture(EditMaterial &material)
    {
-      Image macro; if(loadImages(macro, null, material.macro_map, true)) // proceed only if loaded ok
+      Image macro; if(loadImages(macro, null, material.macro_map, true, false)) // proceed only if loaded ok
       {
          macro.resize(NearestPow2(macro.w()), NearestPow2(macro.h()), FILTER_BEST, IC_WRAP);
          IMAGE_TYPE ct; ImageProps(macro, &material.macro_tex, &ct, MTRL_MACRO); material.macro_map_time.getUTC(); // in order for 'macro_tex' to sync, 'macro_map_time' time must be changed
@@ -2427,7 +2427,7 @@ void DrawProject()
             if(includeTex(material.macro_tex))
             {
                SetFullAlpha(macro, ct);
-               macro.copyTry(macro, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);
+               macro.copy(macro, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);
                saveTex(macro, material.macro_tex);
             }
             Server.setTex(material.macro_tex);
@@ -2438,7 +2438,7 @@ void DrawProject()
    }
    TEX_FLAG ProjectEx::mtrlCreateEmissiveTexture(EditMaterial &material)
    {
-      Image emissive; if(loadImages(emissive, null, material.emissive_map, true)) // proceed only if loaded ok
+      Image emissive; if(loadImages(emissive, null, material.emissive_map, true, false)) // proceed only if loaded ok
       {
          emissive.resize(NearestPow2(emissive.w()), NearestPow2(emissive.h()));
          IMAGE_TYPE ct; ImageProps(emissive, &material.emissive_tex, &ct, MTRL_EMISSIVE); material.emissive_map_time.getUTC(); // in order for 'emissive_tex' to sync, 'emissive_map_time' time must be changed
@@ -2447,7 +2447,7 @@ void DrawProject()
             if(includeTex(material.emissive_tex))
             {
                SetFullAlpha(emissive, ct);
-               emissive.copyTry(emissive, -1, -1, -1, ct, IMAGE_2D, 0);
+               emissive.copy(emissive, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);
                saveTex(emissive, material.emissive_tex);
             }
             Server.setTex(material.emissive_tex);
@@ -2782,7 +2782,7 @@ void DrawProject()
       Mesh edit; Memt<Vec2> vtxs;
       REPA(elm_ids)
       if(Elm *obj =findElm(elm_ids[i]      ))if(ElmObj  * obj_data=obj -> objData())
-      if(Elm *mesh=findElm(obj_data->mesh_id))if(ElmMesh *mesh_data=mesh->meshData())if(mesh_data->canHaveCustomTransform() && mesh_data->box.valid() && Load(edit, editPath(*mesh), game_path))
+      if(Elm *mesh=findElm(obj_data->mesh_id))if(ElmMesh *mesh_data=mesh->meshData())if(mesh_data->canHaveCustomTransform() && mesh_data->box.valid() && meshGet(mesh->id, edit))
       {
          Matrix matrix=mesh_data->transform();
        C MeshLod &lod=edit; vtxs.reserve(lod.vtxs()); REPA(lod)
@@ -2894,13 +2894,13 @@ void DrawProject()
             if(new_bone_i<0)goto full_difference; // bone not found = full difference
           C SkelBone &new_bone=new_skel.bones[new_bone_i];
 
-            if( Dot  (old_bone.dir , new_bone.dir )<0.9999f            // orientation was changed
-            ||  Dot  (old_bone.perp, new_bone.perp)<0.9999f
-            || !Equal(old_bone.pos , new_bone.pos )                   // position    was changed
-            ||       (old_bone.parent==0xFF)!=(new_bone.parent==0xFF) // one has parent, but the other one doesn't
+            if( Dot  (old_bone.dir , new_bone.dir )<EPS_COS                     // orientation was changed
+            ||  Dot  (old_bone.perp, new_bone.perp)<EPS_COS
+            || !Equal(old_bone.pos , new_bone.pos )                             // position    was changed
+            ||       (old_bone.parent==BONE_NULL)!=(new_bone.parent==BONE_NULL) // one has parent, but the other one doesn't
             )goto full_difference; // full difference
 
-            if(old_bone.parent!=0xFF /*&& new_bone.parent!=0xFF - we've already checked if one has parent, but the other one doesn't*/) // if both have parents
+            if(old_bone.parent!=BONE_NULL /*&& new_bone.parent!=BONE_NULL - we've already checked if one has parent, but the other one doesn't*/) // if both have parents
             {
                if(!InRange(new_bone.parent, bone_weights))goto full_difference; // can't access new parent
              C Mems<IndexWeight> &new_parent=bone_weights[new_bone.parent];
@@ -3016,7 +3016,7 @@ void DrawProject()
                if(ElmObj *src_obj_data=src->objData())
                if(ElmObj *dup_obj_data=dup.objData())
             {
-               File f; if(f.readTry(editPath(*src)))SafeOverwrite(f, editPath(dup)); // copy obj edit file
+               File f; if(f.read(editPath(*src)))SafeOverwrite(f, editPath(dup)); // copy obj edit file
                if(Elm *src_mesh=findElm(src_obj_data->mesh_id)) // get source mesh
                {
                   if(Elm *dup_mesh=getObjMeshElm(dup.id, false, false)) // grab the duplicated mesh, but don't send to the server yet
@@ -3024,7 +3024,7 @@ void DrawProject()
                      flushElm(src_mesh->id); // flush it first
                      dup_obj_data->mesh_id=dup_mesh->id;
                      dup_mesh->copyParams(*src_mesh, false); // copy params
-                     if(f.readTry(editPath(*src_mesh)) && SafeOverwrite(f, editPath(*dup_mesh)))SavedMesh(editPath(*dup_mesh)); // copy mesh edit file
+                     if(f.read(editPath(*src_mesh)) && SafeOverwrite(f, editPath(*dup_mesh)))SavedMesh(editPath(*dup_mesh)); // copy mesh edit file
                      if(ElmMesh *src_mesh_data=src_mesh->meshData())
                      if(ElmMesh *dup_mesh_data=dup_mesh->meshData())
                      {
@@ -3036,8 +3036,8 @@ void DrawProject()
                               flushElm(src_skel->id); // flush it first
                               dup_skel->copyParams(*src_skel, false); // copy params
                               dup_skel->skelData()->mesh_id=dup_mesh->id; // this will get cleared in 'copyParams', so reassign again
-                              if(f.readTry(editPath(*src_skel)) && SafeOverwrite(f, editPath(*dup_skel))) SavedEditSkel(editPath(*dup_skel)); // copy skel edit file
-                              if(f.readTry(gamePath(*src_skel)) && SafeOverwrite(f, gamePath(*dup_skel))){SavedSkel    (gamePath(*dup_skel)); savedGame(*dup_skel);} // copy skel game file
+                              if(f.read(editPath(*src_skel)) && SafeOverwrite(f, editPath(*dup_skel))) SavedEditSkel(editPath(*dup_skel)); // copy skel edit file
+                              if(f.read(gamePath(*src_skel)) && SafeOverwrite(f, gamePath(*dup_skel))){SavedSkel    (gamePath(*dup_skel)); savedGame(*dup_skel);} // copy skel game file
                               Server.setElmFull(dup_skel->id); // send skel to server
                            }
                         }
@@ -3048,8 +3048,8 @@ void DrawProject()
                               flushElm(src_phys->id); // flush it first
                               dup_phys->copyParams(*src_phys, false); // copy params
                               dup_phys->physData()->mesh_id=dup_mesh->id; // this will get cleared in 'copyParams', so reassign again
-                              if(f.readTry(editPath(*src_phys)) && SafeOverwrite(f, editPath(*dup_phys))) SavedEditPhys(editPath(*dup_phys)); // copy phys edit file
-                              if(f.readTry(gamePath(*src_phys)) && SafeOverwrite(f, gamePath(*dup_phys))){SavedPhys    (gamePath(*dup_phys)); savedGame(*dup_phys);} // copy phys game file
+                              if(f.read(editPath(*src_phys)) && SafeOverwrite(f, editPath(*dup_phys))) SavedEditPhys(editPath(*dup_phys)); // copy phys edit file
+                              if(f.read(gamePath(*src_phys)) && SafeOverwrite(f, gamePath(*dup_phys))){SavedPhys    (gamePath(*dup_phys)); savedGame(*dup_phys);} // copy phys game file
                               Server.setElmFull(dup_phys->id); // send phys to server
                            }
                         }
@@ -3085,8 +3085,8 @@ void DrawProject()
             case ELM_VIDEO      :
             case ELM_FILE       :
             {
-               File f; if(f.readTry(editPath(*src)))   SafeOverwrite(f, editPath(dup));
-                       if(f.readTry(gamePath(*src)))if(SafeOverwrite(f, gamePath(dup)))savedGame(dup);
+               File f; if(f.read(editPath(*src)))   SafeOverwrite(f, editPath(dup));
+                       if(f.read(gamePath(*src)))if(SafeOverwrite(f, gamePath(dup)))savedGame(dup);
             }break;
          }
          Server.setElmFull(dup.id);
@@ -4891,7 +4891,7 @@ void DrawProject()
       {
          case ELM_FILE :
          case ELM_SOUND:
-         case ELM_VIDEO: return f.readTry(gamePath(elm->id));
+         case ELM_VIDEO: return f.read(gamePath(elm->id));
       }
       return false;
    }
@@ -4922,7 +4922,7 @@ void DrawProject()
    }
    bool ProjectEx::imageGet(C UID &elm_id, Image &image)
    {
-      if(Elm *elm=findElm(elm_id, ELM_IMAGE))return image.ImportTry(editPath(elm_id));
+      if(Elm *elm=findElm(elm_id, ELM_IMAGE))return image.Import(editPath(elm_id));
       image.del(); return false;
    }
    bool ProjectEx::imageSet(C UID &elm_id, File &image, bool has_color, bool has_alpha)
@@ -4954,6 +4954,23 @@ void DrawProject()
          }
       }
       return false;
+   }
+   bool ProjectEx::meshGet(C UID &elm_id, Mesh &mesh)
+   {
+      Elm *elm=findElm(elm_id);
+      if(elm)if(ElmObj  * obj_data=elm-> objData())elm=getObjMeshElm(elm->id); // if this is an object then get its mesh
+      if(elm)if(ElmMesh *mesh_data=elm->meshData()) // mesh
+      {
+         if(elm==ObjEdit.mesh_elm)
+         {
+            mesh=ObjEdit.mesh;
+            return true;
+         }else
+         {
+            if(Load(mesh, editPath(elm->id), game_path))return true;
+         }
+      }
+      mesh.del(); return false;
    }
    bool ProjectEx::meshSet(C UID &elm_id, File &data)
    {

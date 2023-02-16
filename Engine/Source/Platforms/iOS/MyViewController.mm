@@ -28,9 +28,10 @@ namespace EE
    }
    return UIInterfaceOrientationMaskAll; // if not available then support all orientations
 }
--(BOOL)prefersStatusBarHidden         {return YES;}
--(BOOL)prefersHomeIndicatorAutoHidden {return NO ;} // YES=completely hides after few seconds, but reappears after any touch, always ignores 'preferredScreenEdgesDeferringSystemGestures' (better to use NO because for games with YES the bar will always appear when touching and be very bright, NO makes it still visible but allows dimming with 'preferredScreenEdgesDeferringSystemGestures')
--(UIRectEdge)preferredScreenEdgesDeferringSystemGestures {return UIRectEdgeAll;} // used only if 'prefersHomeIndicatorAutoHidden'=NO, dims the home indicator and requires double swipe up to activate
+-(UIStatusBarStyle)preferredStatusBarStyle                     {return  App.statusBarColor() ? UIStatusBarStyleLightContent : UIStatusBarStyleDarkContent;}
+-(BOOL            )prefersStatusBarHidden                      {return  App.statusBar     ()==SYSTEM_BAR_HIDDEN;}
+-(BOOL            )prefersHomeIndicatorAutoHidden              {return  App.navBar        ()==SYSTEM_BAR_HIDDEN;} // YES=completely hides after few seconds, but reappears after any touch, always ignores 'preferredScreenEdgesDeferringSystemGestures' (better to use NO because for games with YES the bar will always appear when touching and be very bright, NO makes it still visible but allows dimming with 'preferredScreenEdgesDeferringSystemGestures')
+-(UIRectEdge      )preferredScreenEdgesDeferringSystemGestures {return (App.navBar        ()==SYSTEM_BAR_VISIBLE) ? UIRectEdgeNone : UIRectEdgeAll;} // used only if 'prefersHomeIndicatorAutoHidden'=NO, UIRectEdgeAll=dims the home indicator and requires double swipe up to activate
 /******************************************************************************/
 @end
 /******************************************************************************/

@@ -97,7 +97,7 @@ Bool MouseCursorHW::create(C Image &image, C VecI2 &hot_spot)
    if(XDisplay)
    {
       Image temp; C Image *src=&image;
-      if(src->compressed())if(src->copyTry(temp, -1, -1, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1))src=&temp;else src=null;
+      if(src->compressed())if(src->copy(temp, -1, -1, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1))src=&temp;else src=null;
       if(src && src->lockRead())
       {
          if(XcursorImage *image=XcursorImageCreate(src->w(), src->h()))
@@ -555,7 +555,7 @@ void MouseClass::_push(Byte b) // !! assumes 'b' is in range !!
    if(!(_button[b]&BS_ON))
    {
      _button[b]|=BS_PUSHED|BS_ON;
-      if(_cur==b && _first && Time.appTime()<=_start_time+DoubleClickTime+Time.ad())
+      if(_cur==b && _first && life()<=DoubleClickTime+Time.ad())
       {
         _button[b]|=BS_DOUBLE;
         _first=false;
@@ -577,7 +577,7 @@ void MouseClass::_release(Byte b) // !! assumes 'b' is in range !!
    {
       FlagDisable(_button[b], BS_ON      );
       FlagEnable (_button[b], BS_RELEASED);
-      if(!selecting() && life()<=0.25f+Time.ad())_button[b]|=BS_TAPPED;
+      if(!selecting() && life()<=TapTime+Time.ad())_button[b]|=BS_TAPPED;
       Inputs.New().set(false, INPUT_MOUSE, b);
    }
 }

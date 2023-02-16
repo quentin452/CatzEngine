@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows\CMakeFiles\d97400158887a854f4b1fe6d60d8c0ea\RUN_TESTS_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{C5FC485A-473A-3C8B-96BB-EF4A1D3EFA11}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -1,7 +1,7 @@
 /******************************************************************************/
 const_mem_addr struct GuiImage : GuiObj // Gui Image !! must be stored in constant memory address !!
 {
-   Bool       fit       ; // if maintain proportions of the image, default=false
+   FIT_MODE   fit       ; // if maintain proportions of the image, default=FIT_NONE
    ALPHA_MODE alpha_mode; // alpha blending mode                 , default=ALPHA_BLEND
    Color      rect_color, // rectangle color                     , default=Gui.borderColor
               color     , // image     color                     , default=WHITE

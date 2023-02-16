@@ -22,6 +22,7 @@ struct VecD4;
 struct VecI4;
 struct VecB4;
 struct VecSB4;
+struct VecUS4;
 
 struct Plane2;
 struct Plane;
@@ -210,8 +211,10 @@ struct Pak;
 struct PakSet;
 struct PakProgress;
 struct PakInPlace;
+struct PakPostHeader;
 struct PakNode;
 struct PakFileData;
+struct TextParam;
 struct TextNode;
 struct TextData;
 struct XmlNode;

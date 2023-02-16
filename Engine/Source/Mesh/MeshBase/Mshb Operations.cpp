@@ -148,7 +148,7 @@ MeshBase& MeshBase::weldVtxValues(MESH_FLAG flag, Flt pos_eps, Flt nrm_cos, Flt 
             Flt weight=vtx_weight[i];
             if(flag&VTX_POS     )vtx.pos     (i)*=weight;
           //if(flag&VTX_MATERIAL)vtx.material(i)*=weight; VecB4 !! sum must be equal to 255 !!
-          //if(flag&VTX_MATRIX  )vtx.matrix  (i)*=weight; VecB4
+          //if(flag&VTX_MATRIX  )vtx.matrix  (i)*=weight; VtxBone
           //if(flag&VTX_BLEND   )vtx.blend   (i)*=weight; VecB4 !! sum must be equal to 255 !!
             if(flag&VTX_NRM     )vtx.nrm     (i)*=weight;
             if(flag&VTX_TAN     )vtx.tan     (i)*=weight;
@@ -172,7 +172,7 @@ MeshBase& MeshBase::weldVtxValues(MESH_FLAG flag, Flt pos_eps, Flt nrm_cos, Flt 
                                  vtx_weight  [d]+=weight;
             if(flag&VTX_POS     )vtx.pos     (d)+=weight*vtx.pos     (i);
           //if(flag&VTX_MATERIAL)vtx.material(d)+=weight*vtx.material(i); VecB4 !! sum must be equal to 255 !!
-          //if(flag&VTX_MATRIX  )vtx.matrix  (d)+=weight*vtx.matrix  (i); VecB4
+          //if(flag&VTX_MATRIX  )vtx.matrix  (d)+=weight*vtx.matrix  (i); VtxBone
           //if(flag&VTX_BLEND   )vtx.blend   (d)+=weight*vtx.blend   (i); VecB4 !! sum must be equal to 255 !!
             if(flag&VTX_NRM     )vtx.nrm     (d)+=weight*vtx.nrm     (i);
             if(flag&VTX_TAN     )vtx.tan     (d)+=weight*vtx.tan     (i);
@@ -196,7 +196,7 @@ MeshBase& MeshBase::weldVtxValues(MESH_FLAG flag, Flt pos_eps, Flt nrm_cos, Flt 
             weight=1/weight;
             if(flag&VTX_POS     )vtx.pos     (i)*=weight;
           //if(flag&VTX_MATERIAL)vtx.material(i)*=weight; VecB4 !! sum must be equal to 255 !!
-          //if(flag&VTX_MATRIX  )vtx.matrix  (i)*=weight; VecB4
+          //if(flag&VTX_MATRIX  )vtx.matrix  (i)*=weight; VtxBone
           //if(flag&VTX_BLEND   )vtx.blend   (i)*=weight; VecB4 !! sum must be equal to 255 !!
             if(flag&VTX_NRM     )vtx.nrm     (i).normalize();
             if(flag&VTX_TAN     )vtx.tan     (i).normalize();
@@ -674,18 +674,18 @@ MeshBase& MeshBase::tesselate(Flt weld_pos_eps)
            *tex3_src=temp.vtx.tex3(),
            *tex3_dst=temp.vtx.tex3();
 
-      VecB4 *mtrx_src=temp.vtx.matrix  (),
-            *mtrx_dst=temp.vtx.matrix  ();
-      VecB4 *blnd_src=temp.vtx.blend   (),
-            *blnd_dst=temp.vtx.blend   ();
-      Flt   *size_src=temp.vtx.size    (),
-            *size_dst=temp.vtx.size    ();
-      VecB4 *mtrl_src=temp.vtx.material(),
-            *mtrl_dst=temp.vtx.material();
-      Color * col_src=temp.vtx.color   (),
-            * col_dst=temp.vtx.color   ();
-      Byte  *flag_src=temp.vtx.flag    (),
-            *flag_dst=temp.vtx.flag    ();
+      VtxBone *mtrx_src=temp.vtx.matrix  (),
+              *mtrx_dst=temp.vtx.matrix  ();
+      VecB4   *blnd_src=temp.vtx.blend   (),
+              *blnd_dst=temp.vtx.blend   ();
+      Flt     *size_src=temp.vtx.size    (),
+              *size_dst=temp.vtx.size    ();
+      VecB4   *mtrl_src=temp.vtx.material(),
+              *mtrl_dst=temp.vtx.material();
+      Color   * col_src=temp.vtx.color   (),
+              * col_dst=temp.vtx.color   ();
+      Byte    *flag_src=temp.vtx.flag    (),
+              *flag_dst=temp.vtx.flag    ();
 
       VecI  *tri_src   =     tri .ind    (),
             *tri_dst   =temp.tri .ind    (),
@@ -861,8 +861,8 @@ MeshBase& MeshBase::tesselate(Flt weld_pos_eps)
          }
          if(mtrx_dst && blnd_dst)
          {
-            VecB4 m0=mtrx_src[ind.x], m1=mtrx_src[ind.y], m2=mtrx_src[ind.z];
-            VecB4 b0=blnd_src[ind.x], b1=blnd_src[ind.y], b2=blnd_src[ind.z];
+            VtxBone m0=mtrx_src[ind.x], m1=mtrx_src[ind.y], m2=mtrx_src[ind.z];
+            VecB4   b0=blnd_src[ind.x], b1=blnd_src[ind.y], b2=blnd_src[ind.z];
 
             REP(4)skin.New().set(m0.c[i], b0.c[i]);
             REP(4)skin.New().set(m1.c[i], b1.c[i]);
@@ -1064,8 +1064,8 @@ MeshBase& MeshBase::tesselate(Flt weld_pos_eps)
          }
          if(mtrx_dst && blnd_dst)
          {
-            VecB4 m0=mtrx_src[ind.x], m1=mtrx_src[ind.y], m2=mtrx_src[ind.z], m3=mtrx_src[ind.w];
-            VecB4 b0=blnd_src[ind.x], b1=blnd_src[ind.y], b2=blnd_src[ind.z], b3=blnd_src[ind.w];
+            VtxBone m0=mtrx_src[ind.x], m1=mtrx_src[ind.y], m2=mtrx_src[ind.z], m3=mtrx_src[ind.w];
+            VecB4   b0=blnd_src[ind.x], b1=blnd_src[ind.y], b2=blnd_src[ind.z], b3=blnd_src[ind.w];
 
             REP(4)skin.New().set(m0.c[i], b0.c[i]);
             REP(4)skin.New().set(m1.c[i], b1.c[i]);
@@ -1385,18 +1385,18 @@ MeshBase& MeshBase::subdivide()
         *tex3_src=temp.vtx.tex3(),
         *tex3_dst=temp.vtx.tex3();
 
-   VecB4 *mtrx_src=temp.vtx.matrix  (),
-         *mtrx_dst=temp.vtx.matrix  ();
-   VecB4 *blnd_src=temp.vtx.blend   (),
-         *blnd_dst=temp.vtx.blend   ();
-   Flt   *size_src=temp.vtx.size    (),
-         *size_dst=temp.vtx.size    ();
-   VecB4 *mtrl_src=temp.vtx.material(),
-         *mtrl_dst=temp.vtx.material();
-   Color * col_src=temp.vtx.color   (),
-         * col_dst=temp.vtx.color   ();
-   Byte  *flag_src=temp.vtx.flag    (),
-         *flag_dst=temp.vtx.flag    ();
+   VtxBone *mtrx_src=temp.vtx.matrix  (),
+           *mtrx_dst=temp.vtx.matrix  ();
+   VecB4   *blnd_src=temp.vtx.blend   (),
+           *blnd_dst=temp.vtx.blend   ();
+   Flt     *size_src=temp.vtx.size    (),
+           *size_dst=temp.vtx.size    ();
+   VecB4   *mtrl_src=temp.vtx.material(),
+           *mtrl_dst=temp.vtx.material();
+   Color   * col_src=temp.vtx.color   (),
+           * col_dst=temp.vtx.color   ();
+   Byte    *flag_src=temp.vtx.flag    (),
+           *flag_dst=temp.vtx.flag    ();
 
    VecI2 *edg_src=     edge.ind    (),
          *edg_adj=     edge.adjFace();
@@ -2043,9 +2043,9 @@ MeshBase& MeshBase::extr(Flt length)
    Swap(T, temp); return T;
 }
 /******************************************************************************/
-static void BoneRemap(VecB4 &matrix, C CMemPtr<Byte, 256> &old_to_new, VecB4 *blend=null)
+static void BoneRemap(VecB4 &matrix, C CMemPtrN<BoneType, 256> &old_to_new, VecB4 *blend=null)
 {
-   REPA(matrix.c)
+   REPA(matrix)
    {
       Byte &m=matrix.c[i];
    #if VIRTUAL_ROOT_BONE
@@ -2053,8 +2053,8 @@ static void BoneRemap(VecB4 &matrix, C CMemPtr<Byte, 256> &old_to_new, VecB4 *bl
       {
          if(InRange(m-1, old_to_new))
          {
-            m=old_to_new[m-1];
-            if(m==0xFF)m=0;else m++;
+            BoneType n=old_to_new[m-1];
+            m=((n>=0xFF) ? 0 : n+1);
          }else
          {
             m=0;
@@ -2063,8 +2063,8 @@ static void BoneRemap(VecB4 &matrix, C CMemPtr<Byte, 256> &old_to_new, VecB4 *bl
    #else
       if(InRange(m, old_to_new))
       {
-         m=old_to_new[m];
-         if(m==0xFF)m=0;
+         BoneType n=old_to_new[m];
+         m=((n>=0xFF) ? 0 : n);
       }else
       {
          m=0;
@@ -2073,12 +2073,43 @@ static void BoneRemap(VecB4 &matrix, C CMemPtr<Byte, 256> &old_to_new, VecB4 *bl
    }
    if(blend)FixMatrixWeight(matrix, *blend);
 }
-MeshBase& MeshBase::boneRemap(C CMemPtr<Byte, 256> &old_to_new)
+static void BoneRemap(VecUS4 &matrix, C CMemPtrN<BoneType, 256> &old_to_new, VecB4 *blend=null)
 {
-   if(VecB4 *matrix=vtx.matrix()){VecB4 *blend=vtx.blend(); REP(vtxs())BoneRemap(matrix[i], old_to_new, blend ? &blend[i] : null);}
+   REPA(matrix)
+   {
+      UShort &m=matrix.c[i];
+   #if VIRTUAL_ROOT_BONE
+      if(m)
+      {
+         if(InRange(m-1, old_to_new))
+         {
+            BoneType n=old_to_new[m-1];
+            m=((n>=0xFFFF) ? 0 : n+1);
+         }else
+         {
+            m=0;
+         }
+      }
+   #else
+      if(InRange(m, old_to_new))
+      {
+         BoneType n=old_to_new[m];
+         m=((n>=0xFFFF) ? 0 : n);
+      }else
+      {
+         m=0;
+      }
+   #endif
+   }
+   if(blend)FixMatrixWeight(matrix, *blend);
+}
+/******************************************************************************/
+MeshBase& MeshBase::boneRemap(C CMemPtrN<BoneType, 256> &old_to_new)
+{
+   if(VtxBone *matrix=vtx.matrix()){VecB4 *blend=vtx.blend(); REP(vtxs())BoneRemap(matrix[i], old_to_new, blend ? &blend[i] : null);}
    return T;
 }
-void MeshRender::boneRemap(C CMemPtr<Byte, 256> &old_to_new)
+void MeshRender::boneRemap(C CMemPtrN<BoneType, 256> &old_to_new)
 {
    Int matrix_ofs =vtxOfs(VTX_MATRIX);
    if( matrix_ofs>=0)if(Byte *vtx=vtxLock())
@@ -2087,41 +2118,39 @@ void MeshRender::boneRemap(C CMemPtr<Byte, 256> &old_to_new)
       Byte *vtx_matrix=vtx+matrix_ofs, *vtx_blend=((blend_ofs>=0) ? vtx+blend_ofs : null);
       REP(vtxs())
       {
-         BoneRemap(*(VecB4*)vtx_matrix, old_to_new, (VecB4*)vtx_blend);
+         BoneRemap(*(VecB4*)vtx_matrix, old_to_new, (VecB4*)vtx_blend); // #MeshVtxBoneHW
                       vtx_matrix+=vtxSize();
          if(vtx_blend)vtx_blend +=vtxSize();
       }
       vtxUnlock();
    }
 }
-void MeshBase  ::setUsedBones(Bool (&bones)[256])C {Zero(bones); includeUsedBones(bones);}
-void MeshRender::setUsedBones(Bool (&bones)[256])C {Zero(bones); includeUsedBones(bones);}
-
-void MeshBase::includeUsedBones(Bool (&bones)[256])C
+void MeshBase::includeUsedBones(MemPtrN<Bool, 256> bones)C
 {
-   if(C VecB4 *matrix=vtx.matrix())
+   if(C VtxBone *matrix=vtx.matrix())
    {
     C VecB4 *blend=vtx.blend(); // this is optional
       REP(vtxs())
       {
-         VecB4 m=matrix[i], b; if(blend)b=blend[i];
-         REPA(m.c)
+       C auto &m=matrix[i];
+         VecB4 b; if(blend)b=blend[i];
+         REPA(m)
          {
-            Byte bone=m.c[i];
+            auto bone=m.c[i];
          #if VIRTUAL_ROOT_BONE
             if(bone)
             {
                bone--;
-               if(blend ? b.c[i] : true)bones[bone]=true;
+               if(blend ? b.c[i] : true)bones(bone)=true;
             }
          #else
-            if(blend ? b.c[i] : true)bones[bone]=true;
+            if(blend ? b.c[i] : true)bones(bone)=true;
          #endif
          }
       }
    }
 }
-void MeshRender::includeUsedBones(Bool (&bones)[256])C
+void MeshRender::includeUsedBones(MemPtrN<Bool, 256> bones)C
 {
    Int matrix_ofs =vtxOfs(VTX_MATRIX);
    if( matrix_ofs>=0)if(C Byte *vtx=vtxLockRead())
@@ -2135,11 +2164,11 @@ void MeshRender::includeUsedBones(Bool (&bones)[256])C
          {
             REP(4) // 4 bytes in VecB4
             {
-               Byte bone=split.split_to_real[vtx_matrix[i]];
+               Byte bone=split.split_to_real[vtx_matrix[i]]; // #MeshVtxBoneHW
                if(  bone)
                {
                   bone--;
-                  if(vtx_blend ? vtx_blend[i] : true)bones[bone]=true;
+                  if(vtx_blend ? vtx_blend[i] : true)bones(bone)=true;
                }
             }
                          vtx_matrix+=vtxSize();
@@ -2150,15 +2179,15 @@ void MeshRender::includeUsedBones(Bool (&bones)[256])C
       {
          REP(4) // 4 bytes in VecB4
          {
-            Byte bone=vtx_matrix[i];
+            auto bone=vtx_matrix[i]; // #MeshVtxBoneHW
          #if VIRTUAL_ROOT_BONE
             if(bone)
             {
                bone--;
-               if(vtx_blend ? vtx_blend[i] : true)bones[bone]=true;
+               if(vtx_blend ? vtx_blend[i] : true)bones(bone)=true;
             }
          #else
-            if(vtx_blend ? vtx_blend[i] : true)bones[bone]=true;
+            if(vtx_blend ? vtx_blend[i] : true)bones(bone)=true;
          #endif
          }
                       vtx_matrix+=vtxSize();
@@ -2167,6 +2196,8 @@ void MeshRender::includeUsedBones(Bool (&bones)[256])C
       vtxUnlock();
    }
 }
+void MeshBase  ::setUsedBones(MemPtrN<Bool, 256> bones)C {bones.clear(); includeUsedBones(bones);}
+void MeshRender::setUsedBones(MemPtrN<Bool, 256> bones)C {bones.clear(); includeUsedBones(bones);}
 /******************************************************************************/
 }
 /******************************************************************************/

@@ -10,7 +10,7 @@ class MtrlImages
 
       ImageResize& clearParams();
       ImageResize& del();
-      bool createTry(C VecI2 &size, IMAGE_TYPE type);
+      bool create(C VecI2 &size, IMAGE_TYPE type);
       ImageResize& resize(C VecI2 &size);
       ImageResize& setFrom(C TextParam &param);
       void apply();
@@ -27,13 +27,13 @@ public:
    /*bool create(C VecI2 &size)
    {
       del();
-      return color .createTry(size, IMAGE_R8G8B8_SRGB)
-          && alpha .createTry(size, IMAGE_I8)
-          && bump  .createTry(size, IMAGE_I8)
-          && normal.createTry(size, IMAGE_R8G8B8)
-          && smooth.createTry(size, IMAGE_I8)
-          && metal .createTry(size, IMAGE_I8)
-          && glow  .createTry(size, IMAGE_I8);
+      return color .create(size, IMAGE_R8G8B8_SRGB)
+          && alpha .create(size, IMAGE_I8)
+          && bump  .create(size, IMAGE_I8)
+          && normal.create(size, IMAGE_R8G8B8)
+          && smooth.create(size, IMAGE_I8)
+          && metal .create(size, IMAGE_I8)
+          && glow  .create(size, IMAGE_I8);
    }
    void clear()
    {
@@ -77,7 +77,7 @@ public:
       if(image.is())
       {
          RectI rect=Round(frac*(Vec2)image.size());
-         Image temp; if(temp.createSoftTry(rect.w(), rect.h(), 1, ImageTypeUncompressed(image.type()))) // crop manually because we need to use Mod
+         Image temp; if(temp.createSoft(rect.w(), rect.h(), 1, ImageTypeUncompressed(image.type()))) // crop manually because we need to use Mod
          {
             if(image.lockRead())
             {
@@ -132,7 +132,7 @@ public:
    {
       if(!alpha.is() && color.typeInfo().a) // if we have no alpha map but it's possible it's in color
       { // set alpha from color
-         color.copyTry(alpha, -1, -1, -1, IMAGE_A8, IMAGE_SOFT, 1);
+         color.copy(alpha, -1, -1, -1, IMAGE_A8, IMAGE_SOFT, 1);
          if(alpha.size.x<=0)alpha.size.x=color.size.x; // if alpha size not specified then use from color
          if(alpha.size.y<=0)alpha.size.y=color.size.y;
       }
@@ -150,7 +150,7 @@ public:
          }
          alpha.unlock();
          if(min_alpha>=254 && min_lum>=254)alpha.del();else
-         alpha.copyTry(alpha, -1, -1, -1, (min_alpha>=254 && min_lum<254) ? IMAGE_L8 : IMAGE_A8, IMAGE_SOFT, 1); // alpha channel is almost fully white -> use luminance as alpha
+         alpha.copy(alpha, -1, -1, -1, (min_alpha>=254 && min_lum<254) ? IMAGE_L8 : IMAGE_A8, IMAGE_SOFT, 1); // alpha channel is almost fully white -> use luminance as alpha
       }
    }*/
 

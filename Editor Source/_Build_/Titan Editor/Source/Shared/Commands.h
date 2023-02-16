@@ -128,6 +128,8 @@ void ServerSendSetMiniMapImage(Connection &conn, C UID &mini_map_id, C VecI2 &im
 bool ClientRecvSetMiniMapImage(File &f, UID &mini_map_id, VecI2 &image_xy, TimeStamp &image_time, File &image_data, UID &proj_id);
 void ClientWriteSetMiniMapImage(File &elm, File &data, C UID &mini_map_id, C VecI2 &image_xy, C TimeStamp &image_time, File &image_data);
 bool ServerRecvSetMiniMapImage(File &f, UID &mini_map_id, VecI2 &image_xy, TimeStamp &image_time, bool &image_is, File &cmpr_image_data);
+int Compare(C ElmTypeVer &a, C ElmTypeVer &b );
+int Compare(C ElmTypeVer &a, C UID        &id);
 void ClientSendGetCodeVer(Connection &conn, Memc<ElmTypeVer> &elms);
 bool ServerRecvGetCodeVer(File &f, Memc<ElmTypeVer> &elms);
 void ServerSendSetCodeData(Connection &conn, C Memc<ElmCodeData> &elms, C UID &proj_id);

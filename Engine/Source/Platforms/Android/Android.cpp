@@ -23,7 +23,7 @@
 
    'KeyCharacterMapGet' does not convert meta to accents, what we would need are accented characters to be used with 'getDeadChar'.
       However NDK input does not provide COMBINING_ACCENT and COMBINING_ACCENT_MASK for key codes.
-      I still need to use 'KeyCharacterMap' instead of converting buttons to characters, because on Swiftkey Android 2.3 pressing '(' results in 'k' character, and 'KeyCharacterMap' fixes that.
+      I still need to use 'KeyCharacterMap' instead of converting buttons to characters, because on SwiftKey Android 2.3 pressing '(' results in 'k' character, and 'KeyCharacterMap' fixes that.
 
    Type Signature Java Type
    Z              boolean
@@ -81,6 +81,7 @@ static JavaVM        *JVM;
        android_app   *AndroidApp;
        Str8           AndroidPackageName;
        Str            AndroidAppPath, AndroidAppDataPath, AndroidAppDataPublicPath, AndroidAppCachePath, AndroidPublicPath, AndroidSDCardPath;
+       SyncLock       JavaLock;
 static KB_KEY         KeyMap[256];
 static Byte           JoyMap[256];
 static Bool           Initialized, // !! This may be set to true when app is restarted (without previous crashing) !!
@@ -459,7 +460,7 @@ static int32_t InputCallback(android_app *app, AInputEvent *event)
 
             if(KeyCharacterMap)
             {
-               FlagDisable(meta, Int(AMETA_CTRL_ON|AMETA_CTRL_LEFT_ON|AMETA_CTRL_RIGHT_ON)); // disable CTRL in meta because if it would be present then 'chr' would be zero, we can't remove LALT yet because Swiftkey Android 2.3 relies on it
+               FlagDisable(meta, Int(AMETA_CTRL_ON|AMETA_CTRL_LEFT_ON|AMETA_CTRL_RIGHT_ON)); // disable CTRL in meta because if it would be present then 'chr' would be zero, we can't remove LALT yet because SwiftKey Android 2.3 relies on it
                chr=Jni->CallIntMethod(KeyCharacterMap, KeyCharacterMapGet, jint(code), jint(meta));
                if(!chr && (meta&AMETA_ALT_LEFT_ON))
                {
@@ -512,71 +513,75 @@ static void SetMAD(Vec2 &mad, Flt min, Flt max) // convert from min..max -> 0..1
 }
 static void DeviceRemoved(Ptr device_id_ptr) {UInt device_id=UIntPtr(device_id_ptr); REPA(Joypads)if(Joypads[i].id()==device_id){Joypads.remove(i); break;}}
 static void DeviceAdded  (Ptr device_id_ptr) {UInt device_id=UIntPtr(device_id_ptr); Bool added; Joypad &joypad=GetJoypad(device_id, added); if(added)
-   if(Jni)
-      if(JClass InputDevice="android/view/InputDevice")
-         if(JMethodID getDevice=Jni.staticFunc(InputDevice, "getDevice", "(I)Landroid/view/InputDevice;"))
-            if(JObject device=Jni->CallStaticObjectMethod(InputDevice, getDevice, jint(device_id)))
    {
-                        if(JMethodID getName     =Jni.func(InputDevice, "getName"     , "()Ljava/lang/String;"))if(JString name=Jni->CallObjectMethod(device, getName))joypad._name=name.str();
-      Int  vendor_id=0; if(JMethodID getVendorId =Jni.func(InputDevice, "getVendorId" , "()I"                 )) vendor_id=Jni->CallIntMethod(device, getVendorId );
-      Int product_id=0; if(JMethodID getProductId=Jni.func(InputDevice, "getProductId", "()I"                 ))product_id=Jni->CallIntMethod(device, getProductId);
-
-      if(JMethodID DeviceHasAxis=Jni.staticFunc(ActivityClass, "DeviceHasAxis", "(Landroid/view/InputDevice;I)Z"))
-      if(JMethodID DeviceMinAxis=Jni.staticFunc(ActivityClass, "DeviceMinAxis", "(Landroid/view/InputDevice;I)F"))
-      if(JMethodID DeviceMaxAxis=Jni.staticFunc(ActivityClass, "DeviceMaxAxis", "(Landroid/view/InputDevice;I)F"))
+      if(Jni)
+         if(JClass InputDevice="android/view/InputDevice")
+            if(JMethodID getDevice=Jni.staticFunc(InputDevice, "getDevice", "(I)Landroid/view/InputDevice;"))
+               if(JObject device=Jni->CallStaticObjectMethod(InputDevice, getDevice, jint(device_id)))
       {
-      #define HAS(axis) (Jni->CallStaticBooleanMethod(ActivityClass, DeviceHasAxis, device(), jint(axis)))
-      #define MIN(axis) (Jni->CallStaticFloatMethod  (ActivityClass, DeviceMinAxis, device(), jint(axis)))
-      #define MAX(axis) (Jni->CallStaticFloatMethod  (ActivityClass, DeviceMaxAxis, device(), jint(axis)))
+                           if(JMethodID getName     =Jni.func(InputDevice, "getName"     , "()Ljava/lang/String;"))if(JString name=Jni->CallObjectMethod(device, getName))joypad._name=name.str();
+         Int  vendor_id=0; if(JMethodID getVendorId =Jni.func(InputDevice, "getVendorId" , "()I"                 )) vendor_id=Jni->CallIntMethod(device, getVendorId );
+         Int product_id=0; if(JMethodID getProductId=Jni.func(InputDevice, "getProductId", "()I"                 ))product_id=Jni->CallIntMethod(device, getProductId);
 
-         { // stick right
-            // Xbox Elite Wireless Controller Series 2, Sony, Nintendo Switch Pro Controller, have X=AMOTION_EVENT_AXIS_Z, Y=AMOTION_EVENT_AXIS_RZ. Samsung EI-GP20 has AMOTION_EVENT_AXIS_RX, AMOTION_EVENT_AXIS_RY
-            Byte has[2], has_i=0, check[]={AMOTION_EVENT_AXIS_Z, AMOTION_EVENT_AXIS_RZ, AMOTION_EVENT_AXIS_RX, AMOTION_EVENT_AXIS_RY}; // order important (potential X first, Y next). Prefer AMOTION_EVENT_AXIS_Z/AMOTION_EVENT_AXIS_RZ because they're supported by popular gamepads and also they're mentioned in header for right stick
-            FREPA(check)if(HAS(check[i]))
-            {
-               has[has_i]=check[i]; if(++has_i==2) // found 2 axes
-               {
-                  joypad._axis_stick_r_x=has[0];
-                  joypad._axis_stick_r_y=has[1];
-                  break;
-               }
-            }
-         }
-
-         // triggers
+         if(JMethodID DeviceHasAxis=Jni.staticFunc(ActivityClass, "DeviceHasAxis", "(Landroid/view/InputDevice;I)Z"))
+         if(JMethodID DeviceMinAxis=Jni.staticFunc(ActivityClass, "DeviceMinAxis", "(Landroid/view/InputDevice;I)F"))
+         if(JMethodID DeviceMaxAxis=Jni.staticFunc(ActivityClass, "DeviceMaxAxis", "(Landroid/view/InputDevice;I)F"))
          {
-            // Xbox Elite Wireless Controller Series 2 uses AMOTION_EVENT_AXIS_BRAKE+AMOTION_EVENT_AXIS_GAS, Sony uses AMOTION_EVENT_AXIS_RX, AMOTION_EVENT_AXIS_RY
-            Byte has[2], has_i=0, check[]={AMOTION_EVENT_AXIS_BRAKE, AMOTION_EVENT_AXIS_GAS, AMOTION_EVENT_AXIS_LTRIGGER, AMOTION_EVENT_AXIS_RTRIGGER, AMOTION_EVENT_AXIS_RX, AMOTION_EVENT_AXIS_RY}; // order important (potential X first, Y next).
-            FREPA(check)
-            {
-               Byte axis=check[i]; if(axis!=joypad._axis_stick_r_x && axis!=joypad._axis_stick_r_y && HAS(axis))
+         #define HAS(axis) (Jni->CallStaticBooleanMethod(ActivityClass, DeviceHasAxis, device(), jint(axis)))
+         #define MIN(axis) (Jni->CallStaticFloatMethod  (ActivityClass, DeviceMinAxis, device(), jint(axis)))
+         #define MAX(axis) (Jni->CallStaticFloatMethod  (ActivityClass, DeviceMaxAxis, device(), jint(axis)))
+
+            { // stick right
+               // Xbox Elite Wireless Controller Series 2, Sony, Nintendo Switch Pro Controller, have X=AMOTION_EVENT_AXIS_Z, Y=AMOTION_EVENT_AXIS_RZ. Samsung EI-GP20 has AMOTION_EVENT_AXIS_RX, AMOTION_EVENT_AXIS_RY
+               Byte has[2], has_i=0, check[]={AMOTION_EVENT_AXIS_Z, AMOTION_EVENT_AXIS_RZ, AMOTION_EVENT_AXIS_RX, AMOTION_EVENT_AXIS_RY}; // order important (potential X first, Y next). Prefer AMOTION_EVENT_AXIS_Z/AMOTION_EVENT_AXIS_RZ because they're supported by popular gamepads and also they're mentioned in header for right stick
+               FREPA(check)if(HAS(check[i]))
                {
-                  has[has_i]=axis; if(++has_i==2) // found 2 axes
+                  has[has_i]=check[i]; if(++has_i==2) // found 2 axes
                   {
-                     joypad._axis_trigger_l=has[0];
-                     joypad._axis_trigger_r=has[1];
+                     joypad._axis_stick_r_x=has[0];
+                     joypad._axis_stick_r_y=has[1];
                      break;
                   }
                }
             }
-         }
 
-         joypad.setInfo(vendor_id, product_id);
-         if(joypad._axis_trigger_l!=0xFF) // has trigger axis
-         {
-            SetMAD(joypad._axis_trigger_mad[0], MIN(joypad._axis_trigger_l), MAX(joypad._axis_trigger_l)); // this is needed because Sony has triggers in range -1..1
-            REPA(joypad._remap)if(joypad._remap[i]==JB_L2)joypad._remap[i]=254; // use 254 as out of range to disable auto-convert
-         }
-         if(joypad._axis_trigger_r!=0xFF) // has trigger axis
-         {
-            SetMAD(joypad._axis_trigger_mad[1], MIN(joypad._axis_trigger_r), MAX(joypad._axis_trigger_r)); // this is needed because Sony has triggers in range -1..1
-            REPA(joypad._remap)if(joypad._remap[i]==JB_R2)joypad._remap[i]=254; // use 254 as out of range to disable auto-convert
-         }
+            // triggers
+            {
+               // Xbox Elite Wireless Controller Series 2 uses AMOTION_EVENT_AXIS_BRAKE+AMOTION_EVENT_AXIS_GAS, Sony uses AMOTION_EVENT_AXIS_RX, AMOTION_EVENT_AXIS_RY
+               Byte has[2], has_i=0, check[]={AMOTION_EVENT_AXIS_BRAKE, AMOTION_EVENT_AXIS_GAS, AMOTION_EVENT_AXIS_LTRIGGER, AMOTION_EVENT_AXIS_RTRIGGER, AMOTION_EVENT_AXIS_RX, AMOTION_EVENT_AXIS_RY}; // order important (potential X first, Y next).
+               FREPA(check)
+               {
+                  Byte axis=check[i]; if(axis!=joypad._axis_stick_r_x && axis!=joypad._axis_stick_r_y && HAS(axis))
+                  {
+                     has[has_i]=axis; if(++has_i==2) // found 2 axes
+                     {
+                        joypad._axis_trigger_l=has[0];
+                        joypad._axis_trigger_r=has[1];
+                        break;
+                     }
+                  }
+               }
+            }
 
-      #undef HAS
-      #undef MIN
-      #undef MAX
+            joypad.setInfo(vendor_id, product_id);
+            if(joypad._axis_trigger_l!=0xFF) // has trigger axis
+            {
+               SetMAD(joypad._axis_trigger_mad[0], MIN(joypad._axis_trigger_l), MAX(joypad._axis_trigger_l)); // this is needed because Sony has triggers in range -1..1
+               REPA(joypad._remap)if(joypad._remap[i]==JB_L2)joypad._remap[i]=254; // use 254 as out of range to disable auto-convert
+            }
+            if(joypad._axis_trigger_r!=0xFF) // has trigger axis
+            {
+               SetMAD(joypad._axis_trigger_mad[1], MIN(joypad._axis_trigger_r), MAX(joypad._axis_trigger_r)); // this is needed because Sony has triggers in range -1..1
+               REPA(joypad._remap)if(joypad._remap[i]==JB_R2)joypad._remap[i]=254; // use 254 as out of range to disable auto-convert
+            }
+
+         #undef HAS
+         #undef MIN
+         #undef MAX
+         }
       }
+
+      if(auto func=App.joypad_changed)func(); // call at the end
    }
 }
 /******************************************************************************/
@@ -643,6 +648,7 @@ static void CmdCallback(android_app *app, int32_t cmd)
             {
                D.androidOpen();
             }
+            extern void SetSystemBars(); SetSystemBars(); // always reapply system bars on window create (in case initial theme/style is different) and recreate (because it gets reverted) to make sure Android adjusted to what we want
          }
       }break;
 
@@ -1354,6 +1360,12 @@ void LoadAndroidAssetPacks(Int asset_packs, Cipher *cipher)
    }
 }
 /******************************************************************************/
+void AndroidResized()
+{
+   Rect rect_ui =D.rectUI(); D.setRectUI();
+   if(  rect_ui!=D.rectUI()) D.screenChanged(D.w(), D.h());
+}
+/******************************************************************************/
 } // namespace EE
 /******************************************************************************/
 extern "C"
@@ -1361,16 +1373,22 @@ extern "C"
 
 JNIEXPORT void JNICALL Java_com_esenthel_Native_connected(JNIEnv *env, jclass clazz, jboolean supports_items, jboolean supports_subs);
 JNIEXPORT void JNICALL Java_com_esenthel_Native_location (JNIEnv *env, jclass clazz, jboolean gps, jobject location) {JNI jni(env); UpdateLocation(location, gps!=0, jni);}
-JNIEXPORT void JNICALL Java_com_esenthel_Native_resized  (JNIEnv *env, jclass clazz, jint w, jint h, jint visible_x, jint visible_y, jint visible_w, jint visible_h)
+
+JNIEXPORT void JNICALL Java_com_esenthel_Native_resized(JNIEnv *env, jclass clazz) {App.includeFuncCall(AndroidResized);} // !! this is called on a secondary thread !!
+
+static Memc<Int> Files;
+static void ProcessFiles()
 {
-   Int l_size=visible_x,
-       t_size=visible_y,
-       r_size=w-(visible_x+visible_w),
-       b_size=h-(visible_y+visible_h), max_size=Max(l_size, r_size, t_size, b_size);
-   if(b_size>=max_size)Kb._recti.set(       0, h-b_size,      w,      h);else // bottom size is the biggest
-   if(t_size>=max_size)Kb._recti.set(       0,        0,      w, t_size);else // top    size is the biggest
-   if(l_size>=max_size)Kb._recti.set(       0,        0, l_size,      h);else // left   size is the biggest
-                       Kb._recti.set(w-r_size,        0,      w,      h);     // right  size is the biggest
+   SyncLocker locker(JavaLock);
+   auto receive=App.receive_file; File f; FREPA(Files)if(f.readFD(Files[i]) && receive)receive(f); Files.clear(); // !! PROCESS IN ORDER, MUST CALL 'readFD' FOR ALL 'Files' EVEN IF 'receive'==null TO CLOSE THEM !!
+}
+JNIEXPORT void JNICALL Java_com_esenthel_Native_drop(JNIEnv *env, jclass clazz, jint fd)
+{
+   fd=dup(fd); if(fd>=0)
+   {
+      {SyncLocker locker(JavaLock); Files.add(fd);}
+      App.includeFuncCall(ProcessFiles);
+   }
 }
 
 JNIEXPORT void JNICALL Java_com_esenthel_Native_deviceAdded  (JNIEnv *env, jclass clazz, jint device_id) {App._callbacks.add(DeviceAdded  , Ptr(device_id));} // may be called on a secondary thread

@@ -1,0 +1,27 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\AOM\Android\gen_src\aom_dsp_encoder_sse2_static_dummy.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\sad4d_sse2.asm" />
+    <None Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\sad_sse2.asm" />
+    <None Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\subpel_variance_sse2.asm" />
+    <None Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\subtract_sse2.asm" />
+    <None Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\highbd_sad4d_sse2.asm" />
+    <None Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\highbd_sad_sse2.asm" />
+    <None Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\highbd_subpel_variance_impl_sse2.asm" />
+    <None Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\highbd_variance_impl_sse2.asm" />
+    <None Include="C:\Esenthel\ThirdPartyLibs\AOM\lib\aom_dsp\x86\ssim_sse2_x86_64.asm" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{FA0D4B5A-40CC-360D-B316-1A2849B8BA5A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

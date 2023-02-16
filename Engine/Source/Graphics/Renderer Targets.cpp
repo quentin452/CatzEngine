@@ -382,6 +382,19 @@ void RendererClass::setDS(UInt ds_txtr_id)
    }
 }
 void RendererClass::needDepthTest() {setDS(R._cur_ds_ids[NO_DEPTH_READ]);}
+#elif DEPTH_FLUSH
+void RendererClass::needDepthRead()
+{
+   if(_modified_depth)
+   {
+     _modified_depth=false;
+      if(_cur_ds_id) // this means there's current "_cur_ds && _cur_ds->_txtr" DS is readable (we don't need this for other cases)
+      {  // re-apply will force the flush (calling just 'glFlush' was not enough)
+         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT  , GL_TEXTURE_2D, _cur_ds_id, 0);
+         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, _cur_ds_id, 0);
+      }
+   }
+}
 #endif
 #undef R
 #define DEBUG_DISCARD 0
@@ -435,6 +448,16 @@ void RendererClass::set(ImageRT *t0, ImageRT *t1, ImageRT *t2, ImageRT *t3, Imag
       change_0 =!EqualRT(_cur[0], t0);
       change_ds=!EqualDS(_cur_ds, set_ds, _cur_ds_id);
    }
+#if DEPTH_FLUSH
+   if(_modified_depth && depth_read_mode!=NO_DEPTH_READ) // if depth was modified and want to read it
+   {
+      _modified_depth=false;
+      if(_cur_ds_id) // if actually have some depth texture
+      {
+         change_ds=true; // force re-apply will force the flush (calling just 'glFlush' was not enough)
+      }
+   }
+#endif
 
    if(main_fbo!=was_main_fbo || change_0 || change_ds || !EqualTxtr(_cur[1], t1) || !EqualTxtr(_cur[2], t2) || !EqualTxtr(_cur[3], t3))
    {
@@ -489,6 +512,9 @@ void RendererClass::set(ImageRT *t0, ImageRT *t1, ImageRT *t2, ImageRT *t3, Imag
                glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT  , GL_RENDERBUFFER,                          set_ds->_rb    );
                glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, set_ds->hwTypeInfo().s ? set_ds->_rb : 0);
             }
+         #if DEPTH_FLUSH
+           _modified_depth=false; // changing RTs flushed depth
+         #endif
          }
 
       #if IOS // on iOS there's only one FBO, so we can safely apply only changed RT's, otherwise we need to always set all of them
@@ -657,7 +683,7 @@ Bool RendererClass::capture(Image &image, Int w, Int h, Int type, Int mode, Int 
          image.unlock();
       }
 
-      if(image.copyTry(image, w, h, 1, type, mode, mip_maps))
+      if(image.copy(image, w, h, 1, type, mode, mip_maps))
       {
          if(alpha && image.typeInfo().a && image.lock()) // set alpha from depth
          {
@@ -709,7 +735,7 @@ Bool RendererClass::screenShot(C Str &name, Bool alpha)
    }else
    if(temp.capture(*_ptr_main)) // no alpha
    {
-      if(temp.typeInfo().a)temp.copyTry(temp, -1, -1, -1, IMAGE_R8G8B8_SRGB, IMAGE_SOFT, 1); // if captured image has alpha channel then let's remove it
+      if(temp.typeInfo().a)temp.copy(temp, -1, -1, -1, IMAGE_R8G8B8_SRGB, IMAGE_SOFT, 1); // if captured image has alpha channel then let's remove it
       return temp.Export(name);
    }
    return false;

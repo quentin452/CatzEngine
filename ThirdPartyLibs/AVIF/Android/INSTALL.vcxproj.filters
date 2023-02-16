@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Esenthel\ThirdPartyLibs\AVIF\Android\CMakeFiles\a0f83ee6727cd05954e1eb8a92a5b02e\INSTALL_force.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{4C29D2E9-9118-377A-9A0D-57D92D4E74CA}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

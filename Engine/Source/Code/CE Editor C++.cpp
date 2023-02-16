@@ -1016,12 +1016,14 @@ static Bool CreateEngineEmbedPak(C Str &src, C Str &dest, Bool use_cipher, Bool 
       FREPA(*src_pak)Add(files, *src_pak, src_pak->file(i)); // add all files
    }else // 2D only
    {
-      // add folders to preserve modification times
+      // !! ADD FOLDERS TO PRESERVE MODIFICATION TIMES !!
+      Add    (files, *src_pak, src_pak->find("Emoji"));
+      Add    (files, *src_pak, src_pak->find("Gui"));
       Add    (files, *src_pak, src_pak->find("Shader"));
       Add    (files, *src_pak, src_pak->find("Shader/4"));
       Add    (files, *src_pak, src_pak->find("Shader/GL"));
       Add    (files, *src_pak, src_pak->find("Shader/GL SPIR-V"));
-      Add    (files, *src_pak, src_pak->find("Gui"));
+
       AddFile(files, *src_pak, src_pak->find("Shader/4/Early Z"));
       AddFile(files, *src_pak, src_pak->find("Shader/4/Main"));
       AddFile(files, *src_pak, src_pak->find("Shader/4/Position"));
@@ -1032,6 +1034,7 @@ static Bool CreateEngineEmbedPak(C Str &src, C Str &dest, Bool use_cipher, Bool 
       AddFile(files, *src_pak, src_pak->find("Shader/GL SPIR-V/Main"));
       AddFile(files, *src_pak, src_pak->find("Shader/GL SPIR-V/Position"));
       
+      AddChildren(files, *src_pak, src_pak->find("Emoji"));
       AddChildren(files, *src_pak, src_pak->find("Gui"));
       FREP(src_pak->rootFiles())AddFile(files, *src_pak, src_pak->file(i)); // add all root files (gui files)
    }
@@ -1074,7 +1077,7 @@ static void DelExcept(C Str &path, CChar8 *allowed[], Int allowed_elms)
 }
 static void Optimize(Image &image)
 {
-   Vec4 min; if(image.stats(&min))if(min.w>=1-1.5f/255)image.copyTry(image, -1, -1, -1, IMAGE_R8G8B8_SRGB); // if image has no alpha, then remove it, because it will reduce PNG size
+   Vec4 min; if(image.stats(&min))if(min.w>=1-1.5f/255)image.copy(image, -1, -1, -1, IMAGE_R8G8B8_SRGB); // if image has no alpha, then remove it, because it will reduce PNG size
    if(image.typeInfo().a) // if image has alpha, then zero pixels without alpha to further improve compression
       REPD(y, image.h())
       REPD(x, image.w())
@@ -1086,8 +1089,8 @@ static void Optimize(Image &image)
 static Bool GetIcon(Image &image, DateTime &modify_time_utc)
 {
    image.del(); modify_time_utc.zero();
-   if(C ImagePtr &app_icon=CE.cei().appIcon()){app_icon->copyTry(image, -1, -1, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT); modify_time_utc=FileInfo(app_icon.name()).modify_time_utc;}
-   if(!image.is()){image.ImportTry("Code/Icon.ico", -1, IMAGE_SOFT, 1); modify_time_utc=FileInfo("Code/Icon.ico").modify_time_utc;}
+   if(C ImagePtr &app_icon=CE.cei().appIcon()){app_icon->copy(image, -1, -1, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT); modify_time_utc=FileInfo(app_icon.name()).modify_time_utc;}
+   if(!image.is()){image.Import("Code/Icon.ico", -1, IMAGE_SOFT, 1); modify_time_utc=FileInfo("Code/Icon.ico").modify_time_utc;}
    if( image.is())
    {
       if(!modify_time_utc.valid())modify_time_utc.getUTC();
@@ -1098,8 +1101,8 @@ static Bool GetIcon(Image &image, DateTime &modify_time_utc)
 }
 static void GetImages(Image &portrait, DateTime &portrait_time, Image &landscape, DateTime &landscape_time)
 {
-    portrait_time.zero(); if(C ImagePtr &app_portrait =CE.cei().appImagePortrait ()){app_portrait ->copyTry(portrait , -1, -1, -1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT);  portrait_time=FileInfo(app_portrait .name()).modify_time_utc; Optimize( portrait);} if(! portrait_time.valid()) portrait_time.getUTC();
-   landscape_time.zero(); if(C ImagePtr &app_landscape=CE.cei().appImageLandscape()){app_landscape->copyTry(landscape, -1, -1, -1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT); landscape_time=FileInfo(app_landscape.name()).modify_time_utc; Optimize(landscape);} if(!landscape_time.valid())landscape_time.getUTC();
+    portrait_time.zero(); if(C ImagePtr &app_portrait =CE.cei().appImagePortrait ()){app_portrait ->copy(portrait , -1, -1, -1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT);  portrait_time=FileInfo(app_portrait .name()).modify_time_utc; Optimize( portrait);} if(! portrait_time.valid()) portrait_time.getUTC();
+   landscape_time.zero(); if(C ImagePtr &app_landscape=CE.cei().appImageLandscape()){app_landscape->copy(landscape, -1, -1, -1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT); landscape_time=FileInfo(app_landscape.name()).modify_time_utc; Optimize(landscape);} if(!landscape_time.valid())landscape_time.getUTC();
 }
 static void GetNotificationIcon(Image &image, DateTime &modify_time_utc, C Image &icon, DateTime &icon_time)
 {
@@ -1124,12 +1127,12 @@ static Bool ImageResize(C Image &src, Image &dest, Int x, Int y, FIT_MODE fit)
                          : size_x.y<=y) // if after scaling with size_x, height fits
       {
          Int image_type=((y>size_x.y && !src.typeInfo().a) ? ImageTypeIncludeAlpha(src.type()) : -1);
-         ok=src.copyTry(dest, size_x.x, size_x.y, -1, image_type, IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT);
+         ok=src.copy(dest, size_x.x, size_x.y, -1, image_type, IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT);
          Int d=size_x.y-y; dest.crop(dest, 0, d/2, dest.w(), y);
       }else
       {
          Int image_type=((x>size_y.x && !src.typeInfo().a) ? ImageTypeIncludeAlpha(src.type()) : -1);
-         ok=src.copyTry(dest, size_y.x, size_y.y, -1, image_type, IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT);
+         ok=src.copy(dest, size_y.x, size_y.y, -1, image_type, IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT);
          Int d=size_y.x-x; dest.crop(dest, d/2, 0, x, dest.h());
       }
    }
@@ -1173,21 +1176,21 @@ struct ImageConvert
          VecI2 size=src->size();
          if(_clamp.x>0 && size.x>_clamp.x)size.set(_clamp.x, Max(1, DivRound(size.y*_clamp.x, size.x)));
          if(_clamp.y>0 && size.y>_clamp.y)size.set(Max(1, DivRound(size.x*_clamp.y, size.y)), _clamp.y);
-         if(src->copyTry(temp, size.x, size.y, -1, -1, IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT))src=&temp;else return;
+         if(src->copy(temp, size.x, size.y, -1, -1, IMAGE_SOFT, 1, FILTER_BEST, IC_CLAMP|IC_ALPHA_WEIGHT))src=&temp;else return;
       }
       if(_crop.x>0 && _crop.y>0)
       {
-         if(!src->typeInfo().a && (_crop.x>src->w() || _crop.y>src->h()))if(src->copyTry(temp, -1, -1, -1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1))src=&temp;else return; // if we're cropping to a bigger size, then make sure that alpha channel is present, so pixels can be set to transparent color
+         if(!src->typeInfo().a && (_crop.x>src->w() || _crop.y>src->h()))if(src->copy(temp, -1, -1, -1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1))src=&temp;else return; // if we're cropping to a bigger size, then make sure that alpha channel is present, so pixels can be set to transparent color
          src->crop(temp, (src->w()-_crop.x)/2, (src->h()-_crop.y)/2, _crop.x, _crop.y); src=&temp;
       }
       if(_square && src->size().allDifferent())
       {
-         if(!src->typeInfo().a)if(src->copyTry(temp, -1, -1, -1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1))src=&temp;else return; // if we're cropping to a bigger size, then make sure that alpha channel is present, so pixels can be set to transparent color
+         if(!src->typeInfo().a)if(src->copy(temp, -1, -1, -1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1))src=&temp;else return; // if we're cropping to a bigger size, then make sure that alpha channel is present, so pixels can be set to transparent color
          Int size=src->size().max(); src->crop(temp, (src->w()-size)/2, (src->h()-size)/2, size, size); src=&temp;
       }
       if(remove_alpha && src->typeInfo().a)
       {
-         Image temp1; if(temp1.createSoftTry(src->w(), src->h(), 1, IMAGE_R8G8B8_SRGB))
+         Image temp1; if(temp1.createSoft(src->w(), src->h(), 1, IMAGE_R8G8B8_SRGB))
          {
             REPD(y, src->h())
             REPD(x, src->w())
@@ -1302,7 +1305,7 @@ Bool CodeEditor::generateVSProj(Int version)
             dt=(landscape.is() ? landscape_time : portrait_time); if(CompareFile(FileInfoSystem(build_path+rel).modify_time_utc, dt))convert.New().set(build_path+rel, landscape.is() ? landscape : portrait, dt).resizeFill(620, 300);
          }else // use empty
          {
-            dt.zero(); dt.day=1; dt.month=1; dt.year=2000; if(CompareFile(FileInfoSystem(build_path+rel).modify_time_utc, dt)){empty.createSoftTry(620, 300, 1, IMAGE_R8G8B8A8_SRGB); empty.zero(); convert.New().set(build_path+rel, empty, dt);}
+            dt.zero(); dt.day=1; dt.month=1; dt.year=2000; if(CompareFile(FileInfoSystem(build_path+rel).modify_time_utc, dt)){empty.createSoft(620, 300, 1, IMAGE_R8G8B8A8_SRGB); empty.zero(); convert.New().set(build_path+rel, empty, dt);}
          }
       }
 
@@ -1590,11 +1593,11 @@ Bool CodeEditor::generateVSProj(Int version)
             {
                XmlNode &sub=node.nodes[i]; if(sub.name=="Media")if(XmlParam *include=sub.findParam("Include"))if(include->value=="Engine.pak")
                {
-                  include->value=bin_path_rel+"Universal\\Engine.pak"; goto found_engine_pak2;
+                  include->value=bin_path_rel+"Universal\\Engine.pak"; goto found_engine_pak_f;
                }
             }
          }
-      found_engine_pak2:
+      found_engine_pak_f:
 
          // project name
          for(Int i=0; XmlNode *prop=proj->findNode("PropertyGroup", i); i++)
@@ -1645,7 +1648,7 @@ Bool CodeEditor::generateVSProj(Int version)
                Int len=TextPosI(dest()+pos, ';'); if(len<0)len=dest.length()-pos;
                Str lib; FREP(len)lib+=dest[pos+i];
                dest.remove(pos, len+1);
-               Char8 quote=(Contains(lib, "Android") ? '\0' : '"'); // compile for Android will fail if "" is present
+               CChar8 *quote=(Contains(lib, "Android") ? null : "\""); // compile for Android will fail if "" is present
                dest.insert(0, S+quote+bin_path_rel+lib+quote+";");
             }
             Memc<Str> *libs=&libs_win;
@@ -1823,7 +1826,7 @@ Bool CodeEditor::generateXcodeProj()
    Str str, add; Int pos;
    U64 file_id=0xEEC0C0A000000000;
    Node<BuildFileElm> tree;
-   Memc<XcodeFile   > mac_assets, ios_images, mac_frameworks, ios_frameworks, mac_dylibs;
+   Memc<XcodeFile   > mac_assets, ios_assets, ios_images, mac_frameworks, ios_frameworks, mac_dylibs;
    FileText src; if(!src.read("Code/Apple/project.pbxproj"))return ErrorRead("Code/Apple/project.pbxproj"); src.getAll(str);
 
    build_project_file=build_path+"Project.xcodeproj";
@@ -1839,11 +1842,20 @@ Bool CodeEditor::generateXcodeProj()
              dirs_ios=GetFiles(cei().appDirsiOS());
 
    // embed engine data
-   if(cei().appEmbedEngineData())
+   Int embed_engine=cei().appEmbedEngineData();
+   if( embed_engine) // Mac
    {
-      mac_assets.New().name="Assets/EngineEmbed.pak";
       if(!CreateEngineEmbedPak(S, build_path+"Assets/EngineEmbed.pak", true))return false;
+      mac_assets.New().name="Assets/EngineEmbed.pak";
    }
+   // iOS
+   if(embed_engine==1) // 2D only
+   {
+      FCreateDirs(build_path+"Assets/EmbedMobile");
+      Str src=bin_path+"Mobile/Engine.pak", dest=build_path+"Assets/EmbedMobile/Engine.pak";
+      if(!CreateEngineEmbedPak(src, dest, false))return false;
+         ios_assets.New().name="Assets/EmbedMobile/Engine.pak"; 
+   }else ios_assets.New().name=   bin_path+"Mobile/Engine.pak";
 
    // app data
    Bool exists; if(!CreateAppPak(build_path+"Assets/App.pak", exists))return false;
@@ -1894,7 +1906,7 @@ Bool CodeEditor::generateXcodeProj()
             {
                auto size=sizes[i];
                Str  name=S+size.x+'x'+size.y+".png", full=build_path+"Assets/Images.xcassets/AppIcon.appiconset/"+name;
-               if(CompareFile(FileInfoSystem(full).modify_time_utc, icon_time))convert.New().set(full, icon, icon_time).resize(size.x, size.y);
+               if(CompareFile(FileInfoSystem(full).modify_time_utc, icon_time))convert.New().set(full, icon, icon_time).resize(size.x, size.y).removeAlpha();
             }
          }
 
@@ -2045,7 +2057,6 @@ Bool CodeEditor::generateXcodeProj()
    str=Replace(str, "path = \"Engine Mac.a\""          , UnixPath(S+"path = \""+bin_path+"Engine Mac.a\""          ));
    str=Replace(str, "path = \"Engine iOS.a\""          , UnixPath(S+"path = \""+bin_path+"Engine iOS.a\""          ));
    str=Replace(str, "path = \"Engine iOS Simulator.a\"", UnixPath(S+"path = \""+bin_path+"Engine iOS Simulator.a\""));
-   str=Replace(str, "path = \"Engine.pak\""            , UnixPath(S+"path = \""+bin_path+"Mobile/Engine.pak\""     ));
    str=Replace(str, "/* ESENTHEL FRAMEWORK DIRS */"    , S+'"'+CString(S+'"'+UnixPath(bin_path)+'"')+"\",");
    str=Replace(str, "/* ESENTHEL LIBRARY DIRS */"      , S+'"'+CString(S+'"'+UnixPath(bin_path)+'"')+"\",");
    str=Replace(str, "PRODUCT_BUNDLE_IDENTIFIER = \"\";", S+"PRODUCT_BUNDLE_IDENTIFIER = \""+CString(app_package       )+"\";");
@@ -2114,6 +2125,13 @@ Bool CodeEditor::generateXcodeProj()
       file.build=file_id++;
       add+=S+"\t\t"+XcodeID(file.file)+" /* "+file.name+" */ = {isa = PBXFileReference; lastKnownFileType = file; name = \""+CString(GetBase(file.name))+"\"; path = \""+CString(UnixPath(file.name))+"\"; sourceTree = \"<group>\"; };\n";
    }
+   REPA(ios_assets)
+   {
+      XcodeFile &file=ios_assets[i];
+      file.file =file_id++;
+      file.build=file_id++;
+      add+=S+"\t\t"+XcodeID(file.file)+" /* "+file.name+" */ = {isa = PBXFileReference; lastKnownFileType = file; name = \""+CString(GetBase(file.name))+"\"; path = \""+CString(UnixPath(file.name))+"\"; sourceTree = \"<group>\"; };\n";
+   }
    REPA(ios_images)
    {
       XcodeFile &file=ios_images[i];
@@ -2156,6 +2174,11 @@ Bool CodeEditor::generateXcodeProj()
       XcodeFile &file=mac_assets[i];
       add+=S+"\t\t"+XcodeID(file.build)+" /* Mac: "+file.name+" */ = {isa = PBXBuildFile; fileRef = "+XcodeID(file.file)+" /* "+file.name+" */; };\n";
    }
+   REPA(ios_assets)
+   {
+      XcodeFile &file=ios_assets[i];
+      add+=S+"\t\t"+XcodeID(file.build)+" /* iOS: "+file.name+" */ = {isa = PBXBuildFile; fileRef = "+XcodeID(file.file)+" /* "+file.name+" */; };\n";
+   }
    REPA(ios_images)
    {
       XcodeFile &file=ios_images[i];
@@ -2185,13 +2208,13 @@ Bool CodeEditor::generateXcodeProj()
    REPA(mac_frameworks)
    {
       XcodeFile &file=mac_frameworks[i];
-//            0B9F062816CD7C2B006A0106 /* Engine.pak in Resources */,
+//            0B9F062816CD7C2B006A0106 /* FileName.ext in Resources */,
       add+=S+"\t\t\t\t"+XcodeID(file.build)+" /* "+file.name+" */,\n";
    }
    REPA(mac_dylibs)
    {
       XcodeFile &file=mac_dylibs[i];
-//            0B9F062816CD7C2B006A0106 /* Engine.pak in Resources */,
+//            0B9F062816CD7C2B006A0106 /* FileName.ext in Resources */,
       add+=S+"\t\t\t\t"+XcodeID(file.build)+" /* "+file.name+" */,\n";
    }
    str.insert(pos, add);
@@ -2201,7 +2224,7 @@ Bool CodeEditor::generateXcodeProj()
    REPA(ios_frameworks)
    {
       XcodeFile &file=ios_frameworks[i];
-//            0B9F062816CD7C2B006A0106 /* Engine.pak in Resources */,
+//            0B9F062816CD7C2B006A0106 /* FileName.ext in Resources */,
       add+=S+"\t\t\t\t"+XcodeID(file.build)+" /* "+file.name+" */,\n";
    }
    str.insert(pos, add);
@@ -2211,19 +2234,19 @@ Bool CodeEditor::generateXcodeProj()
    REPA(mac_frameworks)
    {
       XcodeFile &file=mac_frameworks[i];
-//            0B9F062816CD7C2B006A0106 /* Engine.pak in Resources */,
+//            0B9F062816CD7C2B006A0106 /* FileName.ext in Resources */,
       add+=S+"\t\t\t\t"+XcodeID(file.file)+" /* "+file.name+" */,\n";
    }
    REPA(mac_dylibs)
    {
       XcodeFile &file=mac_dylibs[i];
-//            0B9F062816CD7C2B006A0106 /* Engine.pak in Resources */,
+//            0B9F062816CD7C2B006A0106 /* FileName.ext in Resources */,
       add+=S+"\t\t\t\t"+XcodeID(file.file)+" /* "+file.name+" */,\n";
    }
    REPA(ios_frameworks)
    {
       XcodeFile &file=ios_frameworks[i];
-//            0B9F062816CD7C2B006A0106 /* Engine.pak in Resources */,
+//            0B9F062816CD7C2B006A0106 /* FileName.ext in Resources */,
       add+=S+"\t\t\t\t"+XcodeID(file.file)+" /* "+file.name+" */,\n";
    }
    str.insert(pos, add);
@@ -2234,7 +2257,7 @@ Bool CodeEditor::generateXcodeProj()
    REPA(mac_dylibs)
    {
       XcodeFile &file=mac_dylibs[i];
-//            0B9F062816CD7C2B006A0106 /* Engine.pak in Resources */,
+//            0B9F062816CD7C2B006A0106 /* FileName.ext in Resources */,
       add+=S+"\t\t\t\t"+XcodeID(file.copy)+" /* "+file.name+" */,\n";
    }
    str.insert(pos, add);
@@ -2269,6 +2292,11 @@ Bool CodeEditor::generateXcodeProj()
       XcodeFile &file=mac_assets[i];
       add+=S+"\t\t\t\t"+XcodeID(file.file)+" /* "+file.name+" */,\n";
    }
+   REPA(ios_assets)
+   {
+      XcodeFile &file=ios_assets[i];
+      add+=S+"\t\t\t\t"+XcodeID(file.file)+" /* "+file.name+" */,\n";
+   }
    REPA(ios_images)
    {
       XcodeFile &file=ios_images[i];
@@ -2282,18 +2310,25 @@ Bool CodeEditor::generateXcodeProj()
    {
       XcodeFile &file=mac_assets[i];
 // Sample:
-//            0B9F062816CD7C2B006A0106 /* Engine.pak in Resources */,
+//            0B9F062816CD7C2B006A0106 /* FileName.ext in Resources */,
       add+=S+"\t\t\t\t"+XcodeID(file.build)+" /* "+file.name+" */,\n";
    }
    str.insert(pos, add);
 
    if(!GetXcodeProjTextPos(str, pos, "/* ESENTHEL IOS EMBED */"))return false;
    add.clear();
+   REPA(ios_assets)
+   {
+      XcodeFile &file=ios_assets[i];
+// Sample:
+//            0B9F062816CD7C2B006A0106 /* FileName.ext in Resources */,
+      add+=S+"\t\t\t\t"+XcodeID(file.build)+" /* "+file.name+" */,\n";
+   }
    REPA(ios_images)
    {
       XcodeFile &file=ios_images[i];
 // Sample:
-//            0B9F062816CD7C2B006A0106 /* Engine.pak in Resources */,
+//            0B9F062816CD7C2B006A0106 /* FileName.ext in Resources */,
       add+=S+"\t\t\t\t"+XcodeID(file.build)+" /* "+file.name+" */,\n";
    }
    str.insert(pos, add);
@@ -2547,9 +2582,17 @@ Bool CodeEditor::generateAndroidProj()
    Memc<Str> extract=modules;
    if(asset_packs>=0)
    {
-      extract.add("play-core-native-sdk");
+      // #PlayAssetDelivery - also modify "Esenthel\Project\Android\app\build.gradle"
+
+    /*extract.add("play-core-native-sdk");
       deps.add(S+"implementation files('"+UnixPath(GetRelativePath(dest_path+"app", dest_libs+"play-core-native-sdk/playcore.aar"))+"')");
-      deps.add(  "implementation('com.google.android.play:integrity:1.0.0')"); // needed by "play-core-native-sdk" - https://developer.android.com/guide/playcore/asset-delivery/integrate-native#setup-play-core-native
+      deps.add(  "implementation('com.google.android.play:integrity:1.0.0')"); // needed by "play-core-native-sdk" - https://developer.android.com/guide/playcore/asset-delivery/integrate-native#setup-play-core-native */
+
+      deps.add("implementation 'com.google.android.play:app-update:2.0.0'");
+      deps.add("implementation 'com.google.android.play:asset-delivery:2.0.0'");
+      deps.add("implementation 'com.google.android.play:integrity:1.0.1'");
+      deps.add("implementation 'com.google.android.play:review:2.0.0'");
+	   deps.add("implementation 'com.google.android.gms:play-services-tasks:18.0.2'");
    }
    FREPA(extract) // process in order
    {

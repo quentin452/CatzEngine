@@ -164,7 +164,7 @@ void MeshBase::splitBone(MeshBase &dest, Int bone, MESH_FLAG flag_and)
 {
    if(this!=&dest)
    {
-      if(C VecB4 *matrix=vtx.matrix())
+      if(C VtxBone *matrix=vtx.matrix())
       {
        C Int *p;
          Bool is;
@@ -174,7 +174,8 @@ void MeshBase::splitBone(MeshBase &dest, Int bone, MESH_FLAG flag_and)
          quad_is  .setNum(quads());
 
          // create copy
-         REPA(vtx )vtx_bone[i]=(matrix[i].c[0]-1==bone);
+         bone+=VIRTUAL_ROOT_BONE;
+         REPA(vtx )vtx_bone[i]=(matrix[i].c[0]==bone);
          REPA(tri ){is=false; p=tri .ind(i).c; REPD(j, 3)if(vtx_bone[p[j]]){is=true; break;}  tri_is[i]=is;}
          REPA(quad){is=false; p=quad.ind(i).c; REPD(j, 4)if(vtx_bone[p[j]]){is=true; break;} quad_is[i]=is;}
 

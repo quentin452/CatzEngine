@@ -13,6 +13,7 @@ import android.app.Service;
 import android.app.TaskStackBuilder;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnShowListener;
@@ -29,6 +30,7 @@ import android.database.Cursor;
 import android.database.MatrixCursor;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
@@ -73,6 +75,7 @@ import android.view.ViewGroup;
 import android.view.ViewGroup.MarginLayoutParams;
 import android.view.ViewTreeObserver;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.webkit.MimeTypeMap;
 import android.widget.EditText;
@@ -82,6 +85,12 @@ import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
+
 /*CHARTBOOST*\
 import com.chartboost.sdk.*;
 import com.chartboost.sdk.Model.CBError.CBImpressionError;
@@ -155,44 +164,47 @@ public class EsenthelActivity extends NativeActivity
    }
 
    // !! these must be equal to 'AWAKE_MODE' !!
-   public static final int AWAKE_OFF   =0;
-   public static final int AWAKE_SYSTEM=1;
-   public static final int AWAKE_SCREEN=2;
+   public static final byte AWAKE_OFF   =0;
+   public static final byte AWAKE_SYSTEM=1;
+   public static final byte AWAKE_SCREEN=2;
 
    // !! these must be equal to 'SYSTEM_BAR' !!
-   public static final int SYSTEM_BAR_HIDDEN =0;
-   public static final int SYSTEM_BAR_OVERLAY=1;
-   public static final int SYSTEM_BAR_VISIBLE=2;
+   public static final byte SYSTEM_BAR_HIDDEN =0;
+   public static final byte SYSTEM_BAR_OVERLAY=1;
+   public static final byte SYSTEM_BAR_VISIBLE=2;
 
    // !! these must be equal to 'PlatformStore.RESULT' !!
-   public static final int RES_OK                 =-1; // this is not a 'PlatformStore.RESULT' but a temp value
-   public static final int RES_PURCHASED          =0;
-   public static final int RES_CONSUMED           =1;
-   public static final int RES_REFUND             =2;
-   public static final int RES_WAITING            =3;
-   public static final int RES_USER_CANCELED      =4;
-   public static final int RES_SERVICE_CANCELED   =5;
-   public static final int RES_SERVICE_UNAVAILABLE=6;
-   public static final int RES_ITEM_UNAVAILABLE   =7;
-   public static final int RES_ALREADY_OWNED      =8;
-   public static final int RES_NOT_OWNED          =9;
-   public static final int RES_VERIFICATION_FAIL  =10;
-   public static final int RES_UNKNOWN            =11;
-   public static final int RES_REFRESHED_ITEMS    =12;
-   public static final int RES_REFRESHED_PURCHASES=13;
+   public static final byte RES_OK                 =-1; // this is not a 'PlatformStore.RESULT' but a temp value
+   public static final byte RES_PURCHASED          =0;
+   public static final byte RES_CONSUMED           =1;
+   public static final byte RES_REFUND             =2;
+   public static final byte RES_WAITING            =3;
+   public static final byte RES_USER_CANCELED      =4;
+   public static final byte RES_SERVICE_CANCELED   =5;
+   public static final byte RES_SERVICE_UNAVAILABLE=6;
+   public static final byte RES_ITEM_UNAVAILABLE   =7;
+   public static final byte RES_ALREADY_OWNED      =8;
+   public static final byte RES_NOT_OWNED          =9;
+   public static final byte RES_VERIFICATION_FAIL  =10;
+   public static final byte RES_UNKNOWN            =11;
+   public static final byte RES_REFRESHED_ITEMS    =12;
+   public static final byte RES_REFRESHED_PURCHASES=13;
 
    // !! these must be equal to 'PlatformStore.LICENSE_TEST_RESULT' !!
-   public static final int LTR_NONE   =0;
-   public static final int LTR_WAITING=1;
-   public static final int LTR_OK     =2;
-   public static final int LTR_FAIL   =3;
-   public static final int LTR_RETRY  =4;
-   public static final int LTR_ERROR  =5;
+   public static final byte LTR_NONE   =0;
+   public static final byte LTR_WAITING=1;
+   public static final byte LTR_OK     =2;
+   public static final byte LTR_FAIL   =3;
+   public static final byte LTR_RETRY  =4;
+   public static final byte LTR_ERROR  =5;
 
    // !! these must be equal to 'Facebook.RESULT' !!
-   public static final int POST_ERROR=0;
-   public static final int POST_CANCEL=1;
-   public static final int POST_SUCCESS=2;
+   public static final byte POST_ERROR=0;
+   public static final byte POST_CANCEL=1;
+   public static final byte POST_SUCCESS=2;
+
+   public static final byte REQUEST_CODE_IAB=0;
+   public static final byte REQUEST_CODE_FILE_PICKER=1;
 
    // variables
    static EsenthelActivity     activity;
@@ -382,17 +394,17 @@ public class EsenthelActivity extends NativeActivity
       startService(new Intent(this, DetectForceKill.class)); // start service that detects force kill
 
       // detect showing nav bar by the user manually in order to hide it automatically
-      if(system_bars<0)system_bars=systemBarsActual(); // when starting  , get what we have
-      else             systemBars(system_bars);        // when restarting, set what last requested (this can happen when opening app when it was closed using 'SysWindow.minimize')
       Window window=activity.getWindow(); if(window!=null)
       {
+         if(Build.VERSION.SDK_INT>=28)window.getAttributes().layoutInDisplayCutoutMode=WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES; // allow drawing into cutout areas
          View view=window.getDecorView(); if(view!=null)
          {
-            view.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener()
+            /* Auto-hide bars after user revealed them - this is not needed because View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY and BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE do the same
+				view.setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener()
             {
                @Override public void onSystemUiVisibilityChange(int visibility)
                {
-                  if((system_bars>>2)==SYSTEM_BAR_HIDDEN && (visibility&View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)==0) // if want to hide, but user disabled
+                  if(navBar()==SYSTEM_BAR_HIDDEN && (visibility&View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)==0) // if want to hide, but user disabled
                   {
                      handler.postDelayed(new Runnable()
                      {
@@ -400,27 +412,27 @@ public class EsenthelActivity extends NativeActivity
                      }, 2000); // after 2 seconds
                   }
                }
-            });
+            });*/
             View root_view=view.getRootView(); if(root_view!=null)
             {
                global_layout_listener=new ViewTreeObserver.OnGlobalLayoutListener()
                {
                   @Override public void onGlobalLayout()
                   {
-                   /*int status    = system_bars    &(1|2);
-                     int navigation=(system_bars>>2)&(1|2);
-
-                     int     statusBarHeight=0; if(status    ==SYSTEM_BAR_OVERLAY)    statusBarHeight=statusBarHeight();
-                     int navigationBarHeight=0; if(navigation==SYSTEM_BAR_OVERLAY)navigationBarHeight=   navBarHeight();*/
-
-                     View view=getWindow().getDecorView();
-                     Rect visible=new Rect(); view.getWindowVisibleDisplayFrame(visible); // in screen coordinates
-                     int[] screen_pos=new int[2]; view.getLocationOnScreen(screen_pos); // in screen coordinates
-                     int w=view.getWidth(), h=view.getHeight();
-                     com.esenthel.Native.resized(w, h, visible.left-screen_pos[0], visible.top-screen_pos[1], visible.width(), visible.height());
+                     com.esenthel.Native.resized();
                   }
                };
                root_view.getViewTreeObserver().addOnGlobalLayoutListener(global_layout_listener);
+
+             /*use 'OnGlobalLayoutListener' because this is out of sync (values are outdated)
+               root_view.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener()
+               {
+                  @Override public WindowInsets onApplyWindowInsets(View v, WindowInsets insets)
+                  {
+                     //WindowInsetsCompat insets_compat=WindowInsetsCompat.toWindowInsetsCompat(insets, v);
+                     return v.onApplyWindowInsets(insets);
+                  }
+               });*/
             }
          }
       }
@@ -465,9 +477,9 @@ public class EsenthelActivity extends NativeActivity
    /*FACEBOOK*\
       if(callbackManager!=null)callbackManager.onActivityResult(requestCode, resultCode, data);
    /*FACEBOOK*/
-      /*switch(requestCode)
+      switch(requestCode)
       {
-         case REQUEST_CODE_IAB:
+         /*case REQUEST_CODE_IAB:
          {
             int    responseCode=-1;
             long   date=0;
@@ -500,9 +512,37 @@ public class EsenthelActivity extends NativeActivity
           //log("responseCode:"+responseCode+", resultCode:"+resultCode+", result:"+result);
 
             com.esenthel.Native.purchased(result, sku, custom_data, token, date);
+         }break;*/
+
+         case REQUEST_CODE_FILE_PICKER:
+         {
+            if(resultCode==RESULT_OK && data!=null)
+            {
+               ContentResolver resolver=getContentResolver(); if(resolver!=null)
+               {
+                  android.content.ClipData clipData=data.getClipData();
+                  if(clipData!=null)for(int i=0; i<clipData.getItemCount(); i++)
+                  {
+                     android.content.ClipData.Item item=clipData.getItemAt(i); if(item!=null)
+                     {
+                        Uri uri=item.getUri(); if(uri!=null)try
+                        {
+                           ParcelFileDescriptor pfd=resolver.openFileDescriptor(uri, "r"); if(pfd!=null){com.esenthel.Native.drop(pfd.getFd()); pfd.close();} // must be closed manually
+                        }catch(Exception e){}
+                     }
+                  }else
+                  {
+                     Uri uri=data.getData(); if(uri!=null)try
+                     {
+                        ParcelFileDescriptor pfd=resolver.openFileDescriptor(uri, "r"); if(pfd!=null){com.esenthel.Native.drop(pfd.getFd()); pfd.close();} // must be closed manually
+                     }catch(Exception e){}
+                  }
+               }
+            }
          }break;
-      }*/
+      }
    }
+
    @Override public final void onConfigurationChanged(Configuration newConfig)
    {
       super.onConfigurationChanged(newConfig);
@@ -704,7 +744,7 @@ public class EsenthelActivity extends NativeActivity
             if(!FileProvider.pathOK(path) // without this check 'run' will return true even if later accessing path will fail
             || !file        .exists(    ))return false; // or file doesn't exist
             String mime=GetMime(GetExt(path)); if(!Is(mime))mime="*/*";
-            intent.setDataAndType((Build.VERSION.SDK_INT>=Build.VERSION_CODES.N) ? FileProvider.getUriForPath(path) : Uri.fromFile(file), mime); // file provider needed starting Android Nougat, don't use below, as it may not work on older versions
+            intent.setDataAndType((Build.VERSION.SDK_INT>=24) ? FileProvider.getUriForPath(path) : Uri.fromFile(file), mime); // file provider needed starting Android Nougat, don't use below, as it may not work on older versions
             intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION|Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
          }else // HTTP, HTTPS, FTP, etc
          {
@@ -767,9 +807,7 @@ public class EsenthelActivity extends NativeActivity
       return (res_id>0) ? getResources().getDimensionPixelSize(res_id) : 0;
    }
 
-   static int system_bars=-1;
-   public static final int systemBars      () {return system_bars;} // what requested by code
-   public static final int systemBarsActual()                       // what we actually have
+   /*public static final int systemBarsActual() // what we actually have
    {
       int result=0; if(activity!=null)
       {
@@ -777,52 +815,66 @@ public class EsenthelActivity extends NativeActivity
          {
             View view=window.getDecorView(); if(view!=null)
             {
-               int v=view.getSystemUiVisibility(), status, nav;
-               if((window.getAttributes().flags&WindowManager.LayoutParams.FLAG_FULLSCREEN)!=0 // have to check this too
-               || (v&View.SYSTEM_UI_FLAG_FULLSCREEN            )!=0)status=SYSTEM_BAR_HIDDEN ;else
-               if((v&View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN     )!=0)status=SYSTEM_BAR_OVERLAY;else
-                                                                    status=SYSTEM_BAR_VISIBLE;
-               if((v&View.SYSTEM_UI_FLAG_HIDE_NAVIGATION       )!=0)nav   =SYSTEM_BAR_HIDDEN ;else
-               if((v&View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION)!=0)nav   =SYSTEM_BAR_OVERLAY;else
-                                                                    nav   =SYSTEM_BAR_VISIBLE;
+					int  v=view.getSystemUiVisibility(), w=window.getAttributes().flags;
+					byte status, nav;
+               if((v&View.SYSTEM_UI_FLAG_FULLSCREEN                    )!=0
+               || (w&WindowManager.LayoutParams.FLAG_FULLSCREEN        )!=0)status=SYSTEM_BAR_HIDDEN ;else // have to check this too
+               if((w&WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)!=0)status=SYSTEM_BAR_OVERLAY;else
+                                                                            status=SYSTEM_BAR_VISIBLE;
+
+               if((v&View.SYSTEM_UI_FLAG_HIDE_NAVIGATION                   )!=0)nav=SYSTEM_BAR_HIDDEN ;else
+               if((w&WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)!=0)nav=SYSTEM_BAR_OVERLAY;else
+                                                                                nav=SYSTEM_BAR_VISIBLE;
                result=(status|(nav<<2));
             }
          }
       }
       return result;
-   }
-   public static final void systemBars(final int bars)
+   }*/
+	static byte status_bar=SYSTEM_BAR_HIDDEN, nav_bar=SYSTEM_BAR_VISIBLE; // must match #SystemBar
+   public static final void systemBars(byte status, byte nav, boolean status_color, boolean nav_color)
    {
-      system_bars=bars;
+		status_bar=status;
+		   nav_bar=nav;
       if(activity!=null)activity.runOnUiThread(new Runnable()
       {
          @Override public final void run()
          {
             Window window=activity.getWindow(); if(window!=null)
             {
-               int status=(bars&(1|2)), nav=((bars>>2)&(1|2)), v=0;
+               int v=View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY, w=0;
+               switch(status)
+               {
+                  case SYSTEM_BAR_HIDDEN : v|=View.SYSTEM_UI_FLAG_FULLSCREEN; w|=WindowManager.LayoutParams.FLAG_FULLSCREEN; break;
+                  case SYSTEM_BAR_OVERLAY: w|=WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS; break;
+               }
+               switch(nav)
+               {
+                  case SYSTEM_BAR_HIDDEN : v|=View.SYSTEM_UI_FLAG_HIDE_NAVIGATION; break;
+                  case SYSTEM_BAR_OVERLAY: w|=WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION; break;
+               }
+					if(!status_color){v|=View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR    ; if(status==SYSTEM_BAR_OVERLAY)w|=WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;} // this is for dark status bar on light background, can change color only with SYSTEM_BAR_OVERLAY & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS, however this forces FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS for both status and nav
+					if(!   nav_color){v|=View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR; if(nav   ==SYSTEM_BAR_OVERLAY)w|=WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;} // this is for dark nav    bar on light background, can change color only with SYSTEM_BAR_OVERLAY & FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS, however this forces FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS for both status and nav
+
+               View view=window.getDecorView(); if(view!=null)view.setSystemUiVisibility(v);
+               window.setFlags(w, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS|WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION|WindowManager.LayoutParams.FLAG_FULLSCREEN|WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+
+               /* Alternative:
+               int w=0;
                View view=window.getDecorView(); if(view!=null)
                {
-                  switch(status)
+                  WindowInsetsControllerCompat wic=WindowCompat.getInsetsController(window, view); if(wic!=null)
                   {
-                     case SYSTEM_BAR_HIDDEN : v|=View.SYSTEM_UI_FLAG_FULLSCREEN; break;
-                     case SYSTEM_BAR_OVERLAY: v|=View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN; break;
+                     wic.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE);
+                     if(status==SYSTEM_BAR_HIDDEN)wic.hide(WindowInsetsCompat.Type.    statusBars());else wic.show(WindowInsetsCompat.Type.    statusBars());
+                     if(nav   ==SYSTEM_BAR_HIDDEN)wic.hide(WindowInsetsCompat.Type.navigationBars());else wic.show(WindowInsetsCompat.Type.navigationBars());
                   }
-                  switch(nav)
-                  {
-                     case SYSTEM_BAR_HIDDEN : v|=View.SYSTEM_UI_FLAG_HIDE_NAVIGATION|View.SYSTEM_UI_FLAG_IMMERSIVE|View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION; break; // use SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION so when user swipes to show nav bar manually, the view won't be resized because it will be temporarily as we post 'handler.postDelayed' to hide it later
-                     case SYSTEM_BAR_OVERLAY: v|=View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION; break;
-                  }
-                  view.setSystemUiVisibility(v);
-                  view.setFitsSystemWindows(true);
                }
-               v=0;
-               if(status==SYSTEM_BAR_HIDDEN )v|=WindowManager.LayoutParams.FLAG_FULLSCREEN|WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-               if(status==SYSTEM_BAR_OVERLAY)v|=WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS|WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
-               if(nav   ==SYSTEM_BAR_OVERLAY)v|=WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
-             //if(status==SYSTEM_BAR_VISIBLE && nav==SYSTEM_BAR_VISIBLE){} currently this will cause window resize when keyboard is shown, WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN this helped however caused window to be extended underneath the status bar
-
-               window.setFlags(v, WindowManager.LayoutParams.FLAG_FULLSCREEN|WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS|WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION|WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN);
+               if(status==SYSTEM_BAR_OVERLAY)w|=WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS;
+               if(nav   ==SYSTEM_BAR_OVERLAY)w|=WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION;
+					need to update for status_color, nav_color
+               window.setFlags(w, WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS|WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION);
+               */
             }
          }
       });
@@ -834,6 +886,61 @@ public class EsenthelActivity extends NativeActivity
    public final int resH() {return getWindowManager().getDefaultDisplay().getHeight();}
    public final float refreshRate() {return getWindowManager().getDefaultDisplay().getRefreshRate();}
    public final long screen() {Point size=new Point(); getWindowManager().getDefaultDisplay().getRealSize(size); return size.x | (((long)size.y)<<32);}
+
+   public final void getRects()
+   {
+    /*int     statusBarHeight=0; if(status    ==SYSTEM_BAR_OVERLAY)    statusBarHeight=statusBarHeight();
+      int navigationBarHeight=0; if(navigation==SYSTEM_BAR_OVERLAY)navigationBarHeight=   navBarHeight();*/
+
+      Window window=getWindow(); if(window!=null)
+      {
+         View view=window.getDecorView(); if(view!=null)
+         {
+            int l, t, r, b, kb_h=0;
+          // insets are opposite of extends, they extend rectangle inwards
+          //WindowInsets       insets       =view      .getRootWindowInsets(    ); WindowInsetsCompat insets_compat=WindowInsetsCompat.toWindowInsetsCompat(insets, view);
+            WindowInsetsCompat insets_compat=ViewCompat.getRootWindowInsets(view); // use compat because 'View.getRootWindowInsets' is >=23 API, and 'WindowInsets.isVisible' is >=30 API
+            if(insets_compat!=null)
+            {
+               int ime=WindowInsetsCompat.Type.ime(), nav=WindowInsetsCompat.Type.navigationBars(), status=WindowInsetsCompat.Type.statusBars(), cutout=WindowInsetsCompat.Type.displayCutout(), caption=WindowInsetsCompat.Type.captionBar();
+               int v=caption|cutout; // this is without Screen Keyboard (ime). Also without status, nav, because of #ImmediateInsets and because:
+               // 'getInsets' is buggy for 'status', in landscape mode, status=SYSTEM_BAR_VISIBLE, nav=SYSTEM_BAR_HIDDEN, it may not include status bar, so force it if we know it's visible
+               // 'getInsets' is buggy for 'nav'   , it might be included even if it's hidden ("insets_compat.isVisible(nav)" can be true), so check it only if not hidden
+               androidx.core.graphics.Insets ins=insets_compat.getInsets(v);
+               l=ins.left; t=ins.top; r=ins.right; b=ins.bottom;
+
+               v=0; // #ImmediateInsets, force setting as visible by using 'getInsetsIgnoringVisibility' if we know they're visible. This is so we can get latest 'D.rectUI' before waiting for Android/Java to process requests on other threads.
+               if(status_bar!=SYSTEM_BAR_HIDDEN)v|=status;
+               if(   nav_bar!=SYSTEM_BAR_HIDDEN)v|=nav   ;
+               if(v!=0)
+               {
+                  ins=insets_compat.getInsetsIgnoringVisibility(v);
+                  if(ins.left  >l)l=ins.left  ;
+                  if(ins.right >r)r=ins.right ;
+                  if(ins.top   >t)t=ins.top   ;
+                  if(ins.bottom>b)b=ins.bottom;
+               }
+             //if(insets_compat.isVisible(ime)) // Kb.visible, check not needed because zeros will be returned below
+               {
+                  ins=insets_compat.getInsets(ime);
+                  kb_h=ins.bottom; // TODO: this assumes screen keyboard is at the bottom
+               }
+            }else
+            {
+               Rect  visible =new Rect(); view.getWindowVisibleDisplayFrame(visible ); // in screen coordinates
+               int[] view_pos=new int[2]; view.getLocationOnScreen         (view_pos); // in screen coordinates
+               int   view_w=view.getWidth(), view_h=view.getHeight(); // same as D.res
+               int   view_r=view_pos[0]+view_w, view_b=view_pos[1]+view_h;
+             //log("r.top:"+visible.top+", r.bottom:"+visible.bottom+", r.w:"+visible.width()+", r.h:"+visible.height()+", view_pos.x:"+view_pos[0]+", view_pos.y:"+view_pos[1]+", view_w:"+view_w+", view_h:"+view_h);
+               l=visible.left-view_pos[0];
+               t=visible.top -view_pos[1];
+               r=view_r-visible.right;
+               b=view_b-visible.bottom;
+            }
+            com.esenthel.Native.setRects(l, t, r, b, kb_h);
+         }
+      }
+   }
 
    public static final void vibrate(int intensity, int milliseconds) // intensity=0..255
    {
@@ -858,28 +965,35 @@ public class EsenthelActivity extends NativeActivity
       }
       return super.dispatchKeyEvent(event);
    }
-   public final void editTextSetDo(String text, int start, int end, boolean password)
+   public final void editTextSetDo(String text, int start, int end, int mode)
    {
       if(edit_text!=null)
       {
+         boolean password=((mode&1)!=0),
+                   number=((mode&2)!=0),
+                    email=((mode&4)!=0),
+                      url=((mode&8)!=0);
          edit_text.removeTextChangedListener(text_watcher);
          edit_text.setText(text);
          edit_text.setSelection(start, end);
-         edit_text.setInputType(password ? InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_MULTI_LINE|InputType.TYPE_TEXT_VARIATION_PASSWORD : InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_MULTI_LINE); // TYPE_TEXT_FLAG_MULTI_LINE prevents from Enter making the keyboard disappear (on Google and Samsung keyboards)
+         edit_text.setInputType(url   ?             InputType.TYPE_TEXT_VARIATION_URI          |InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_MULTI_LINE
+                             :  email ?             InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS|InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_MULTI_LINE
+                             : number ? (password ? InputType.   TYPE_NUMBER_VARIATION_PASSWORD|InputType.TYPE_CLASS_NUMBER                                   : InputType.TYPE_CLASS_NUMBER                                  )
+                                      : (password ? InputType.     TYPE_TEXT_VARIATION_PASSWORD|InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_MULTI_LINE : InputType.TYPE_CLASS_TEXT|InputType.TYPE_TEXT_FLAG_MULTI_LINE)); // TYPE_TEXT_FLAG_MULTI_LINE prevents from Enter making the keyboard disappear (on Google and Samsung keyboards)
          edit_text.addTextChangedListener(text_watcher);
       }
    }
-   public final void editTextSet(final String text, final int start, final int end, final boolean password)
+   public final void editTextSet(final String text, final int start, final int end, final int mode)
    {
       runOnUiThread(new Runnable()
       {
          @Override public final void run()
          {
-            editTextSetDo(text, start, end, password);
+            editTextSetDo(text, start, end, mode);
          }
       });
    }
-   public final void editText(final String text, final int start, final int end, final boolean password)
+   public final void editText(final String text, final int start, final int end, final int mode)
    {
       runOnUiThread(new Runnable()
       {
@@ -906,13 +1020,13 @@ public class EsenthelActivity extends NativeActivity
                   @Override public final void     onTextChanged(CharSequence s, int start, int before, int count) {}
                };
 
-               FrameLayout.LayoutParams layout=new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT, FrameLayout.LayoutParams.WRAP_CONTENT);
+               FrameLayout.LayoutParams layout=new FrameLayout.LayoutParams(0, 0); // force zero size instead of something like WRAP_CONTENT because if entering many lines in text, it would cause weird offsets in views and touch inputs
                edit_text=new EditText(activity);
                edit_text.setLayoutParams(layout);
                edit_text.setImeOptions(edit_text.getImeOptions()|EditorInfo.IME_FLAG_NO_FULLSCREEN);
                activity.addContentView(edit_text, layout);
             }
-            editTextSetDo(text, start, end, password);
+            editTextSetDo(text, start, end, mode);
             edit_text.setVisibility(View.VISIBLE);
             edit_text.bringToFront();
             edit_text.requestFocus();
@@ -1012,18 +1126,18 @@ public class EsenthelActivity extends NativeActivity
    /******************************************************************************/
 /*ADMOB*\
    // !! these must be equal to 'AdMobClass.BANNER_TYPE' !!
-   public static final int AD_BANNER          =0;
-   public static final int AD_MEDIUM_RECTANGLE=1;
-   public static final int AD_FULL_BANNER     =2;
-   public static final int AD_LEADERBOARD     =3;
-   public static final int AD_SMART_BANNER    =4;
-   public static final int AD_INTERSTITIAL    =5;
+   public static final byte AD_BANNER          =0;
+   public static final byte AD_MEDIUM_RECTANGLE=1;
+   public static final byte AD_FULL_BANNER     =2;
+   public static final byte AD_LEADERBOARD     =3;
+   public static final byte AD_SMART_BANNER    =4;
+   public static final byte AD_INTERSTITIAL    =5;
 
    // !! these must be equal to 'AdMobClass.STATE' !!
-   public static final int AD_NONE   =0;
-   public static final int AD_LOADING=1;
-   public static final int AD_DONE   =2;
-   public static final int AD_ERROR  =3;
+   public static final byte AD_NONE   =0;
+   public static final byte AD_LOADING=1;
+   public static final byte AD_DONE   =2;
+   public static final byte AD_ERROR  =3;
 
    static AdRequest      ad_request;
           AdView         ad_view;
@@ -1032,7 +1146,7 @@ public class EsenthelActivity extends NativeActivity
                          inters_show=false; // if show interstitial once it's loaded
    static String         banner_id, // id of the banner       ad, null for none
                          inters_id; // id of the interstitial ad, null for none
-   static int            banner_type=AD_BANNER, // banner type
+   static byte           banner_type=AD_BANNER, // banner type
                          banner_x=0, banner_y=1; // banner position, -1..1
           InterstitialAd interstitial;
           PopupWindow    popup_window;
@@ -1261,8 +1375,6 @@ public class EsenthelActivity extends NativeActivity
    public static final String RESPONSE_INAPP_PURCHASE_DATA_LIST = "INAPP_PURCHASE_DATA_LIST";
    public static final String RESPONSE_INAPP_SIGNATURE_LIST = "INAPP_DATA_SIGNATURE_LIST";
    public static final String INAPP_CONTINUATION_TOKEN = "INAPP_CONTINUATION_TOKEN";
-
-   public static final int REQUEST_CODE_IAB=0;
 
    // Billing response codes
    public static final int BILLING_RESPONSE_RESULT_OK = 0;
@@ -1632,17 +1744,17 @@ public class EsenthelActivity extends NativeActivity
    /******************************************************************************/
 /*CHARTBOOST*\
    // !! these must be equal to 'ChartboostClass.RESULT' !!
-   public static final int INTERSTITIAL_LOADED   =0;
-   public static final int INTERSTITIAL_LOAD_FAIL=1;
-   public static final int INTERSTITIAL_DISPLAYED=2;
-   public static final int INTERSTITIAL_CLOSED   =3;
-   public static final int INTERSTITIAL_CLICKED  =4;
-   public static final int REWARDED_VIDEO_LOADED   =5;
-   public static final int REWARDED_VIDEO_LOAD_FAIL=6;
-   public static final int REWARDED_VIDEO_DISPLAYED=7;
-   public static final int REWARDED_VIDEO_CLOSED   =8;
-   public static final int REWARDED_VIDEO_COMPLETED=9;
-   public static final int REWARDED_VIDEO_CLICKED  =10;
+   public static final byte INTERSTITIAL_LOADED   =0;
+   public static final byte INTERSTITIAL_LOAD_FAIL=1;
+   public static final byte INTERSTITIAL_DISPLAYED=2;
+   public static final byte INTERSTITIAL_CLOSED   =3;
+   public static final byte INTERSTITIAL_CLICKED  =4;
+   public static final byte REWARDED_VIDEO_LOADED   =5;
+   public static final byte REWARDED_VIDEO_LOAD_FAIL=6;
+   public static final byte REWARDED_VIDEO_DISPLAYED=7;
+   public static final byte REWARDED_VIDEO_CLOSED   =8;
+   public static final byte REWARDED_VIDEO_COMPLETED=9;
+   public static final byte REWARDED_VIDEO_CLICKED  =10;
 
    public static final boolean chartboostVisible() {return Chartboost.isAnyViewVisible();}
 
@@ -1689,7 +1801,7 @@ public class EsenthelActivity extends NativeActivity
    }
    public static final String            NOTIFICATION_CHANNEL_ID="BackgroundService";
    public static final String            NOTIFICATION_ID        ="NotificationID";
-   public static final int    BACKGROUND_NOTIFICATION_ID        =-1; // must not be 0 because 'startForeground' does not accept 0, use -1 because 0..+ are used by custom Notifications !! if this is changed then adjust 'Application.backgroundText' !!
+   public static final byte   BACKGROUND_NOTIFICATION_ID        =-1; // must not be 0 because 'startForeground' does not accept 0, use -1 because 0..+ are used by custom Notifications !! if this is changed then adjust 'Application.backgroundText' !!
    public static final void initNotification()
    {
       if(Build.VERSION.SDK_INT>=26)
@@ -1782,6 +1894,18 @@ public class EsenthelActivity extends NativeActivity
          stopService(background_intent);
          background_intent=null;
       }
+   }
+
+   /******************************************************************************/
+   // PHOTO PICKER
+   /******************************************************************************/
+   public final void pickPhoto(int max)
+   {
+      Intent i=new Intent(Intent.ACTION_OPEN_DOCUMENT);
+      i.addCategory(Intent.CATEGORY_OPENABLE);
+      i.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, max>1);
+      i.setType("image/*");
+      startActivityForResult(i, REQUEST_CODE_FILE_PICKER);
    }
 }
 /******************************************************************************/

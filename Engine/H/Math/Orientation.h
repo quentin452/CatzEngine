@@ -87,6 +87,7 @@ struct OrientD // Orientation (double precision)
         perp;                               // perpendicular to direction (y - up     )
    VecD cross()C {return Cross(perp, dir);} // cross                      (x - right  )
 
+   OrientD& operator+=(C OrientD  &o);
    OrientD& operator*=(  Dbl       f);
    OrientD& operator*=(C VecD     &v);
    OrientD& operator*=(C MatrixD3 &m) {return mul(m);}

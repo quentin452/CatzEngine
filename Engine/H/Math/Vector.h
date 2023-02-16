@@ -20,6 +20,10 @@
    Use 'VecSB'  to handle 3D vectors, SByte type
    Use 'VecSB4' to handle 4D vectors, SByte type
 
+   Use 'VecUS2' to handle 2D vectors, UShort type
+   Use 'VecUS'  to handle 3D vectors, UShort type
+   Use 'VecUS4' to handle 4D vectors, UShort type
+
 /******************************************************************************/
 #define SIGN_BIT 0x80000000 // Float Sign Bit
 
@@ -1079,6 +1083,7 @@ struct Vec4 // Vector 4D
    CONVERSION Vec4(C VecI4  &v);
    CONVERSION Vec4(C VecB4  &v);
    CONVERSION Vec4(C VecSB4 &v);
+   CONVERSION Vec4(C VecUS4 &v);
 };extern Vec4
    const Vec4Zero; // Vec4(0, 0, 0, 0)
 /******************************************************************************/
@@ -1207,6 +1212,7 @@ struct VecD4 // Vector 4D (double precision)
    CONVERSION VecD4(C VecI4  &v);
    CONVERSION VecD4(C VecB4  &v);
    CONVERSION VecD4(C VecSB4 &v);
+   CONVERSION VecD4(C VecUS4 &v);
 };extern VecD4
    const VecD4Zero; // VecD4(0, 0, 0, 0)
 /******************************************************************************/
@@ -1407,7 +1413,8 @@ struct VecB4 // Vector 4D (Byte)
               VecB4() {}
               VecB4(Byte i                        ) {set(i         );}
               VecB4(Byte x, Byte y, Byte z, Byte w) {set(x, y, z, w);}
-   CONVERSION VecB4(C VecI4 &v);
+   CONVERSION VecB4(C VecI4  &v);
+   CONVERSION VecB4(C VecUS4 &v);
 };
 /******************************************************************************/
 struct VecSB4 // Vector 4D (SByte)
@@ -1573,6 +1580,68 @@ struct VecUS // Vector 3D (Unsigned Short)
               VecUS(C VecUS2 &xy      , UShort z) {set( xy , z);}
    CONVERSION VecUS(C VecB   &v);
    CONVERSION VecUS(C VecI   &v);
+};
+struct VecUS4 // Vector 4D (Unsigned Short)
+{
+   union
+   {
+      struct{UShort x, y, z, w;};
+      struct{UShort c[4]      ;}; // component
+      struct{VecUS2 xy  , zw  ;};
+      struct{VecUS  xyz       ;};
+   };
+
+   VecUS4& zero(                                      ) {x=y=z=w=0;                  return T;}
+   VecUS4& set (UShort u                              ) {x=y=z=w=u;                  return T;}
+   VecUS4& set (UShort x, UShort y, UShort z, UShort w) {T.x=x; T.y=y; T.z=z; T.w=w; return T;}
+
+#if EE_PRIVATE
+   VecUS4& remap   (C         Int  *map) {if(map){x=map[x]; y=map[y]; z=map[z]; w=map[w];} return T;} // remap if map is provided
+   VecUS4& remapAll(C CMemPtr<Int> &map) {x=(InRange(x, map) ? map[x] : -1); y=(InRange(y, map) ? map[y] : -1); z=(InRange(z, map) ? map[z] : -1); w=(InRange(w, map) ? map[w] : -1); return T;} // remap all components
+   VecUS4& remapFit(C CMemPtr<Int> &map) {if(InRange(x, map))x=map[x];       if(InRange(y, map))y=map[y];       if(InRange(z, map))z=map[z];       if(InRange(w, map))w=map[w];       return T;} // remap     components which are in range of the remap array
+#endif
+
+   VecUS4& operator+=(Int i) {x+=i; y+=i; z+=i; w+=i; return T;}
+   VecUS4& operator-=(Int i) {x-=i; y-=i; z-=i; w-=i; return T;}
+   VecUS4& operator*=(Int i) {x*=i; y*=i; z*=i; w*=i; return T;}
+   VecUS4& operator/=(Int i) {x/=i; y/=i; z/=i; w/=i; return T;}
+   VecUS4& operator%=(Int i) {x%=i; y%=i; z%=i; w%=i; return T;}
+
+   Bool operator==(C VecUS4 &v)C;
+   Bool operator!=(C VecUS4 &v)C;
+   Bool operator==(C VecB4  &v)C;
+   Bool operator!=(C VecB4  &v)C;
+   Bool operator==(C VecI4  &v)C;
+   Bool operator!=(C VecI4  &v)C;
+
+   friend VecUS4 operator+ (C VecUS4 &v, Int i) {return VecUS4(v.x+i, v.y+i, v.z+i, v.w+i);}
+   friend VecUS4 operator- (C VecUS4 &v, Int i) {return VecUS4(v.x-i, v.y-i, v.z-i, v.w-i);}
+   friend VecUS4 operator* (C VecUS4 &v, Int i) {return VecUS4(v.x*i, v.y*i, v.z*i, v.w*i);}
+   friend VecUS4 operator/ (C VecUS4 &v, Int i) {return VecUS4(v.x/i, v.y/i, v.z/i, v.w/i);}
+   friend VecUS4 operator% (C VecUS4 &v, Int i) {return VecUS4(v.x%i, v.y%i, v.z%i, v.w%i);}
+
+   friend Vec4 operator+ (C VecUS4 &v, Flt f) {return Vec4(v.x+f, v.y+f, v.z+f, v.w+f);}
+   friend Vec4 operator- (C VecUS4 &v, Flt f) {return Vec4(v.x-f, v.y-f, v.z-f, v.w-f);}
+   friend Vec4 operator* (C VecUS4 &v, Flt f) {return Vec4(v.x*f, v.y*f, v.z*f, v.w*f);}
+   friend Vec4 operator/ (C VecUS4 &v, Flt f) {return Vec4(v.x/f, v.y/f, v.z/f, v.w/f);}
+
+   friend VecUS4 operator+ (Int i, C VecUS4 &v) {return VecUS4(i+v.x, i+v.y, i+v.z, i+v.w);}
+   friend VecUS4 operator- (Int i, C VecUS4 &v) {return VecUS4(i-v.x, i-v.y, i-v.z, i-v.w);}
+   friend VecUS4 operator* (Int i, C VecUS4 &v) {return VecUS4(i*v.x, i*v.y, i*v.z, i*v.w);}
+   friend VecUS4 operator/ (Int i, C VecUS4 &v) {return VecUS4(i/v.x, i/v.y, i/v.z, i/v.w);}
+
+   friend Vec4 operator+ (Flt f, C VecUS4 &v) {return Vec4(f+v.x, f+v.y, f+v.z, f+v.w);}
+   friend Vec4 operator- (Flt f, C VecUS4 &v) {return Vec4(f-v.x, f-v.y, f-v.z, f-v.w);}
+   friend Vec4 operator* (Flt f, C VecUS4 &v) {return Vec4(f*v.x, f*v.y, f*v.z, f*v.w);}
+   friend Vec4 operator/ (Flt f, C VecUS4 &v) {return Vec4(f/v.x, f/v.y, f/v.z, f/v.w);}
+
+   Bool any()C {return x || y || z || w;} // if any component is non-zero
+
+              VecUS4() {}
+              VecUS4(UShort u                              ) {set(u         );}
+              VecUS4(UShort x, UShort y, UShort z, UShort w) {set(x, y, z, w);}
+   CONVERSION VecUS4(C VecB4 &v);
+   CONVERSION VecUS4(C VecI4 &v);
 };
 /******************************************************************************/
 struct VecH2 // Vector 2D (Half)
@@ -2032,8 +2101,13 @@ struct VecI4 // Vector 4D (integer)
    VecI4& operator %=(C VecI4  &v) {x%=v.x; y%=v.y; z%=v.z; w%=v.w; return T;}
    VecI4& operator<<=(  Int     i) {x<<= i; y<<= i; z<<= i; w<<= i; return T;}
    VecI4& operator>>=(  Int     i) {x>>= i; y>>= i; z>>= i; w>>= i; return T;}
-   Bool   operator ==(C VecI4  &v)C{return x==v.x && y==v.y && z==v.z && w==v.w;}
-   Bool   operator !=(C VecI4  &v)C{return x!=v.x || y!=v.y || z!=v.z || w!=v.w;}
+
+   Bool operator ==(C VecI4  &v)C {return x==v.x && y==v.y && z==v.z && w==v.w;}
+   Bool operator !=(C VecI4  &v)C {return x!=v.x || y!=v.y || z!=v.z || w!=v.w;}
+   Bool operator ==(C VecB4  &v)C {return x==v.x && y==v.y && z==v.z && w==v.w;}
+   Bool operator !=(C VecB4  &v)C {return x!=v.x || y!=v.y || z!=v.z || w!=v.w;}
+   Bool operator ==(C VecUS4 &v)C {return x==v.x && y==v.y && z==v.z && w==v.w;}
+   Bool operator !=(C VecUS4 &v)C {return x!=v.x || y!=v.y || z!=v.z || w!=v.w;}
 
    friend VecI4 operator+ (C VecI4 &v, Int i) {return VecI4(v.x+i, v.y+i, v.z+i, v.w+i);}
    friend VecI4 operator- (C VecI4 &v, Int i) {return VecI4(v.x-i, v.y-i, v.z-i, v.w-i);}
@@ -2156,6 +2230,7 @@ struct VecI4 // Vector 4D (integer)
               VecI4(C VecI2  &xy , C VecI2 &zw ) {set(xy      , zw      );}
    CONVERSION VecI4(C VecB4  &v                ) {set(v.x, v.y, v.z, v.w);}
    CONVERSION VecI4(C VecSB4 &v                ) {set(v.x, v.y, v.z, v.w);}
+   CONVERSION VecI4(C VecUS4 &v                ) {set(v.x, v.y, v.z, v.w);}
 };extern VecI4
    const VecI4Zero; // VecI4(0, 0, 0, 0)
 /******************************************************************************/
@@ -2287,11 +2362,14 @@ inline VecSB2::VecSB2(C VecI2  &v) {set(v.x, v.y          );}
 inline VecB  ::VecB  (C VecI   &v) {set(v.x, v.y, v.z     );}
 inline VecSB ::VecSB (C VecI   &v) {set(v.x, v.y, v.z     );}
 inline VecB4 ::VecB4 (C VecI4  &v) {set(v.x, v.y, v.z, v.w);}
+inline VecB4 ::VecB4 (C VecUS4 &v) {set(v.x, v.y, v.z, v.w);}
 inline VecSB4::VecSB4(C VecI4  &v) {set(v.x, v.y, v.z, v.w);}
 inline VecUS2::VecUS2(C VecB2  &v) {set(v.x, v.y          );}
 inline VecUS2::VecUS2(C VecI2  &v) {set(v.x, v.y          );}
 inline VecUS ::VecUS (C VecB   &v) {set(v.x, v.y, v.z     );}
 inline VecUS ::VecUS (C VecI   &v) {set(v.x, v.y, v.z     );}
+inline VecUS4::VecUS4(C VecB4  &v) {set(v.x, v.y, v.z, v.w);}
+inline VecUS4::VecUS4(C VecI4  &v) {set(v.x, v.y, v.z, v.w);}
 inline Vec2  ::Vec2  (C VecH2  &v) {set(v.x, v.y          );}
 inline Vec2  ::Vec2  (C VecD2  &v) {set(v.x, v.y          );}
 inline Vec2  ::Vec2  (C VecI2  &v) {set(v.x, v.y          );}
@@ -2319,11 +2397,13 @@ inline Vec4  ::Vec4  (C VecD4  &v) {set(v.x, v.y, v.z, v.w);}
 inline Vec4  ::Vec4  (C VecI4  &v) {set(v.x, v.y, v.z, v.w);}
 inline Vec4  ::Vec4  (C VecB4  &v) {set(v.x, v.y, v.z, v.w);}
 inline Vec4  ::Vec4  (C VecSB4 &v) {set(v.x, v.y, v.z, v.w);}
+inline Vec4  ::Vec4  (C VecUS4 &v) {set(v.x, v.y, v.z, v.w);}
 inline VecD4 ::VecD4 (C VecH4  &v) {set(v.x, v.y, v.z, v.w);}
 inline VecD4 ::VecD4 (C Vec4   &v) {set(v.x, v.y, v.z, v.w);}
 inline VecD4 ::VecD4 (C VecI4  &v) {set(v.x, v.y, v.z, v.w);}
 inline VecD4 ::VecD4 (C VecB4  &v) {set(v.x, v.y, v.z, v.w);}
 inline VecD4 ::VecD4 (C VecSB4 &v) {set(v.x, v.y, v.z, v.w);}
+inline VecD4 ::VecD4 (C VecUS4 &v) {set(v.x, v.y, v.z, v.w);}
 
 inline Vec  Vec2 :: xy0()C {return Vec (x, y, 0);}
 inline Vec  Vec2 :: x0y()C {return Vec (x, 0, y);}
@@ -2351,6 +2431,13 @@ inline Bool VecUS::operator==(C VecB  &v)C {return x==v.x && y==v.y && z==v.z;}
 inline Bool VecUS::operator!=(C VecB  &v)C {return x!=v.x || y!=v.y || z!=v.z;}
 inline Bool VecUS::operator==(C VecI  &v)C {return x==v.x && y==v.y && z==v.z;}
 inline Bool VecUS::operator!=(C VecI  &v)C {return x!=v.x || y!=v.y || z!=v.z;}
+
+inline Bool VecUS4::operator==(C VecUS4 &v)C {return x==v.x && y==v.y && z==v.z && w==v.w;}
+inline Bool VecUS4::operator!=(C VecUS4 &v)C {return x!=v.x || y!=v.y || z!=v.z || w!=v.w;}
+inline Bool VecUS4::operator==(C VecB4  &v)C {return x==v.x && y==v.y && z==v.z && w==v.w;}
+inline Bool VecUS4::operator!=(C VecB4  &v)C {return x!=v.x || y!=v.y || z!=v.z || w!=v.w;}
+inline Bool VecUS4::operator==(C VecI4  &v)C {return x==v.x && y==v.y && z==v.z && w==v.w;}
+inline Bool VecUS4::operator!=(C VecI4  &v)C {return x!=v.x || y!=v.y || z!=v.z || w!=v.w;}
 
 inline Vec2& Vec2::operator+=(C VecD2 &v) {x+=v.x; y+=v.y; return T;}
 inline Vec2& Vec2::operator-=(C VecD2 &v) {x-=v.x; y-=v.y; return T;}
@@ -2622,6 +2709,7 @@ Int Compare(C VecUS  &v0, C VecUS  &v1);
 Int Compare(C VecI4  &v0, C VecI4  &v1);
 Int Compare(C VecB4  &v0, C VecB4  &v1);
 Int Compare(C VecSB4 &v0, C VecSB4 &v1);
+Int Compare(C VecUS4 &v0, C VecUS4 &v1);
 Int Compare(C Color  &c0, C Color  &c1);
 Int Compare(C VecH2  &v0, C VecH2  &v1);
 Int Compare(C VecH   &v0, C VecH   &v1);
@@ -2809,4 +2897,5 @@ constexpr Int Elms(C VecD4  &v) {return 4;}
 constexpr Int Elms(C VecI4  &v) {return 4;}
 constexpr Int Elms(C VecB4  &v) {return 4;}
 constexpr Int Elms(C VecSB4 &v) {return 4;}
+constexpr Int Elms(C VecUS4 &v) {return 4;}
 /******************************************************************************/

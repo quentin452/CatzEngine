@@ -373,8 +373,8 @@ static void CMYKToRGB(Dbl c, Dbl m, Dbl y, Dbl k, Int &r, Int &g, Int &b)
 /******************************************************************************/
 Bool PSD::ReadHeader(File &f, HEADER_INFO& header_info)
 {
-   HEADER header; f>>header;
-   if(header.Signature[0]=='8' && header.Signature[1]=='B' && header.Signature[2]=='P' && header.Signature[3]=='S')
+   HEADER header;
+   if(f.getFast(header) && header.Signature[0]=='8' && header.Signature[1]=='B' && header.Signature[2]=='P' && header.Signature[3]=='S')
    {
       Int ver=Calculate(header.Version, SIZE(header.Version));
       if( ver==1)
@@ -705,7 +705,7 @@ Bool PSD::ProccessBuffer(Byte *pData, Image &dest)
          case 1: // Grayscale
          case 8: // Duotone
          {
-            if(dest.createSoftTry(nWidth, nHeight, 1, (header_info.nBitsPerPixel==32) ? IMAGE_I32 : (header_info.nBitsPerPixel==24) ? IMAGE_I24 : (header_info.nBitsPerPixel==16) ? IMAGE_I16 : IMAGE_L8_SRGB))
+            if(dest.createSoft(nWidth, nHeight, 1, (header_info.nBitsPerPixel==32) ? IMAGE_I32 : (header_info.nBitsPerPixel==24) ? IMAGE_I24 : (header_info.nBitsPerPixel==16) ? IMAGE_I16 : IMAGE_L8_SRGB))
             {
                for(; nCounter<nTotalBytes; nCounter+=header_info.nChannels*bytesPerPixelPerChannel)
                {
@@ -721,7 +721,7 @@ Bool PSD::ProccessBuffer(Byte *pData, Image &dest)
          {
             // pData holds the indices of loop through the palette and set the correct RGB, 8bpp are supported
             if(colour_mode_data.ColourData && colour_mode_data.nLength==768 && mnColourCount>0)
-            if(dest.createSoftTry(nWidth, nHeight, 1, IMAGE_R8G8B8_SRGB))
+            if(dest.createSoft(nWidth, nHeight, 1, IMAGE_R8G8B8_SRGB))
             {
                for(; nCounter<nTotalBytes; ++nCounter)
                {
@@ -739,7 +739,7 @@ Bool PSD::ProccessBuffer(Byte *pData, Image &dest)
 
          case 3: // RGB(A), there can be more than 4 channels !!
          {
-            if(dest.createSoftTry(nWidth, nHeight, 1, (header_info.nChannels>=4) ? IMAGE_R8G8B8A8_SRGB : IMAGE_R8G8B8_SRGB))
+            if(dest.createSoft(nWidth, nHeight, 1, (header_info.nChannels>=4) ? IMAGE_R8G8B8A8_SRGB : IMAGE_R8G8B8_SRGB))
             {
                for(; nCounter<nTotalBytes; nCounter=nCounter + header_info.nChannels * bytesPerPixelPerChannel)
                {
@@ -764,7 +764,7 @@ Bool PSD::ProccessBuffer(Byte *pData, Image &dest)
 
          case 4: // CMYK
          {
-            if(dest.createSoftTry(nWidth, nHeight, 1, IMAGE_R8G8B8_SRGB))
+            if(dest.createSoft(nWidth, nHeight, 1, IMAGE_R8G8B8_SRGB))
             {
                for(; nCounter<nTotalBytes; nCounter+=header_info.nChannels*bytesPerPixelPerChannel)
                {
@@ -784,7 +784,7 @@ Bool PSD::ProccessBuffer(Byte *pData, Image &dest)
          case 7: // Multichannel
          {
             if(header_info.nChannels==1) // for now support just one channel
-            if(dest.createSoftTry(nWidth, nHeight, 1, IMAGE_L8_SRGB))
+            if(dest.createSoft(nWidth, nHeight, 1, IMAGE_L8_SRGB))
             {
                for(; nCounter<nTotalBytes; nCounter+=header_info.nChannels*bytesPerPixelPerChannel)
                {
@@ -798,7 +798,7 @@ Bool PSD::ProccessBuffer(Byte *pData, Image &dest)
 
          case 9: // LAB
          {
-            if(dest.createSoftTry(nWidth, nHeight, 1, (header_info.nChannels==4) ? IMAGE_R8G8B8A8_SRGB : IMAGE_R8G8B8_SRGB))
+            if(dest.createSoft(nWidth, nHeight, 1, (header_info.nChannels==4) ? IMAGE_R8G8B8A8_SRGB : IMAGE_R8G8B8_SRGB))
             {
                Dbl L_coef=max_value/100.0,
                    a_coef=max_value/256.0,
@@ -1013,7 +1013,7 @@ Bool Image::ImportPSD(File &f)
 Bool Image::ImportPSD(C Str &name)
 {
 #if SUPPORT_PSD
-   File f; if(f.readTry(name))return ImportPSD(f);
+   File f; if(f.read(name))return ImportPSD(f);
 #endif
    del(); return false;
 }

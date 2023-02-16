@@ -4,7 +4,7 @@ namespace EE{
 /******************************************************************************/
 void GuiImage::zero()
 {
-   fit=false;
+   fit=FIT_NONE;
    alpha_mode=ALPHA_BLEND;
    rect_color.zero();
    color    =WHITE;
@@ -57,13 +57,22 @@ void GuiImage::draw(C GuiPC &gpc)
       if(Cuts(rect, gpc.clip))
       {
          D.alignScreenToPixel(rect);
-         D.clip(gpc.clip);
          if(image)
          {
-            ALPHA_MODE alpha=D.alpha(alpha_mode); if(fit)image->drawFit(color, color_add, rect);else image->draw(color, color_add, rect);
-                             D.alpha(alpha     );
+            ALPHA_MODE alpha=D.alpha(alpha_mode);
+            switch(fit&FIT_MASK)
+            {
+               case FIT_NONE: D.clip(gpc.clip     ); image->draw   (color, color_add, rect     ); break;
+               case FIT_FULL: D.clip(gpc.clip     ); image->drawFit(color, color_add, rect, fit); break;
+               default      : D.clip(gpc.clip&rect); image->drawFit(color, color_add, rect, fit); break;
+            }
+            D.alpha(alpha);
          }
-         if(rect_color.a)rect.draw(rect_color, false);
+         if(rect_color.a)
+         {
+            D.clip(gpc.clip);
+            rect.draw(rect_color, false);
+         }
       }
    }
 }

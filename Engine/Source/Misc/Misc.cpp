@@ -697,37 +697,51 @@ void IDGenerator::Return(UInt id) // return ID so it can be re-used later
    }
 }
 /******************************************************************************/
-static CChar8 *SizeSuffix[]={"", " KB", " MB", " GB", " TB", " PB", " EB", " ZB"};
+static CChar8 *SizeSuffix []={"",  "K" ,  "M" ,  "G" ,  "T" ,  "P" ,  "E" ,  "Z" };
+static CChar8 *SizeSuffixB[]={"", " KB", " MB", " GB", " TB", " PB", " EB", " ZB"};
+Str SizeText(Long size, Char dot)
+{
+   const Int f=10;
+   Str s; if(size<0){s='-'; CHS(size);}
+   size*=f;
+   Int i=0; for(; i<Elms(SizeSuffix)-1 && size>=1000*f; i++, size/=1000); // check for "1000*f" instead of "1024*f", because we want to avoid displaying things like "1 001 M"
+   s+=TextInt(size/f, -1, 3); if(size<100*f && i && dot){s+=dot; s+=size%10;} s+=SizeSuffix[i];
+   return s;
+}
 Str SizeBytes(Long size, Char dot)
 {
    const Int f=10;
+   Str s; if(size<0){s='-'; CHS(size);}
    size*=f;
-   Int i=0; for(; i<Elms(SizeSuffix)-1 && size>=1000*f; i++, size>>=10); // check for "1000*f" instead of "1024*f", because we want to avoid displaying things like "1 001 MB"
-   Str s=TextInt(size/f, -1, 3); if(size<100*f && i && dot){s+=dot; s+=size%10;} s+=SizeSuffix[i];
+   Int i=0; for(; i<Elms(SizeSuffixB)-1 && size>=1000*f; i++, size>>=10); // check for "1000*f" instead of "1024*f", because we want to avoid displaying things like "1 001 MB"
+   s+=TextInt(size/f, -1, 3); if(size<100*f && i && dot){s+=dot; s+=size%10;} s+=SizeSuffixB[i];
    return s;
 }
 Str SizeKB(Long size, Char dot)
 {
    const Int f=10;
+   Str s; if(size<0){s='-'; CHS(size);}
    size*=f;
    Int i=1; size>>=10*i;
-   Str s=TextInt(size/f, -1, 3); if(size<100*f && i && dot){s+=','; s+=size%10;} s+=SizeSuffix[i];
+   s+=TextInt(size/f, -1, 3); if(size<100*f && i && dot){s+=','; s+=size%10;} s+=SizeSuffixB[i];
    return s;
 }
 Str SizeMB(Long size, Char dot)
 {
    const Int f=10;
+   Str s; if(size<0){s='-'; CHS(size);}
    size*=f;
    Int i=2; size>>=10*i;
-   Str s=TextInt(size/f, -1, 3); if(size<100*f && i && dot){s+=','; s+=size%10;} s+=SizeSuffix[i];
+   s+=TextInt(size/f, -1, 3); if(size<100*f && i && dot){s+=','; s+=size%10;} s+=SizeSuffixB[i];
    return s;
 }
 Str SizeGB(Long size, Char dot)
 {
    const Int f=10;
+   Str s; if(size<0){s='-'; CHS(size);}
    size*=f;
    Int i=3; size>>=10*i;
-   Str s=TextInt(size/f, -1, 3); if(size<100*f && i && dot){s+=','; s+=size%10;} s+=SizeSuffix[i];
+   s+=TextInt(size/f, -1, 3); if(size<100*f && i && dot){s+=','; s+=size%10;} s+=SizeSuffixB[i];
    return s;
 }
 /******************************************************************************/
@@ -1110,10 +1124,13 @@ Bool ClipSet(C Str &text)
    return true;
 #endif
 }
+static void Clean(Str &s)
+{
+   REPA(s)if(!Safe(s()[i]))s.remove(i);
+}
 Str ClipGet()
 {
    Str s;
-   const Bool fix_new_line=true;
 #if WINDOWS_OLD
    if(IsClipboardFormatAvailable(CF_UNICODETEXT) && OpenClipboard(null))
    {
@@ -1121,7 +1138,7 @@ Str ClipGet()
       {
          s=(Char*)GlobalLock  (hData);
                   GlobalUnlock(hData);
-         if(fix_new_line)s.replace('\r', '\0');
+         Clean(s);
       }
       CloseClipboard();
    }
@@ -1166,16 +1183,19 @@ Str ClipGet()
          if(status==Windows::Foundation::AsyncStatus::Completed)
          {
             s=op->GetResults()->Data();
+            Clean(s);
          }
          event.on();
       });
       App.wait(event);
-      if(fix_new_line)s.replace('\r', '\0');
    }
 #elif MAC
    #if 1
-      if(NSPasteboard *pasteboard=[NSPasteboard generalPasteboard])
-         return [pasteboard stringForType:NSPasteboardTypeString]; // don't release this as it will crash
+      if(NSPasteboard *pasteboard=[NSPasteboard generalPasteboard]) // don't release this as it will crash
+      {
+         s=[pasteboard stringForType:NSPasteboardTypeString];
+         Clean(s);
+      }
    #else // this does not properly support new lines (when accessed from Xcode for example)
       Bool found=false;
       PasteboardSynchronize(Pasteboard);
@@ -1195,7 +1215,7 @@ Str ClipGet()
                CFDataRef flavorData; PasteboardCopyItemFlavorData(Pasteboard, itemID, flavorType, &flavorData);
                CFIndex   flavorDataSize=CFDataGetLength(flavorData);
                Char     *src           =(Char*)CFDataGetBytePtr(flavorData);
-               REP(flavorDataSize/SIZE(Char))s+=*src++;
+               REP(flavorDataSize/SIZE(Char))s+=*src++; Clean(s);
                if(flavorData)CFRelease(flavorData);
             }
          }
@@ -1229,12 +1249,19 @@ Str ClipGet()
       unsigned long  items=0;
       unsigned long  overflow=0;
       unsigned char *data=null;
-      if(!XGetWindowProperty(XDisplay, owner, selection, 0, INT_MAX/4, false, UTF8_STRING, &type, &format, &items, &overflow, &data))
-         if(type==UTF8_STRING)s=FromUTF8((char*)data);
+      if(!XGetWindowProperty(XDisplay, owner, selection, 0, INT_MAX/4, false, UTF8_STRING, &type, &format, &items, &overflow, &data))if(type==UTF8_STRING)
+      {
+         s=FromUTF8((char*)data);
+         Clean(s);
+      }
       if(data)XFree(data);
    }
 #elif IOS
-   if(UIPasteboard *pasteboard=[UIPasteboard generalPasteboard])return pasteboard.string;
+   if(UIPasteboard *pasteboard=[UIPasteboard generalPasteboard])
+   {
+      s=pasteboard.string;
+      Clean(s);
+   }
 #elif ANDROID
    JNI jni;
    if( jni && ClipboardManager) // system clipboard supported
@@ -1242,7 +1269,11 @@ Str ClipGet()
    #if 1
       if(JMethodID getText=jni.func(ClipboardManagerClass, "getText", "()Ljava/lang/CharSequence;"))
       if(JString text=JString(jni, jni->CallObjectMethod(ClipboardManager, getText)))
-         return text.str();
+      {
+         s=text.str();
+         Clean(s);
+         goto end;
+      }
    #else
       if(JClass ClipDataClass=JClass(jni, "android/content/ClipData"))
       if(JMethodID getPrimaryClip=jni.func(ClipboardManagerClass, "getPrimaryClip", "()Landroid/content/ClipData;"))
@@ -1252,10 +1283,15 @@ Str ClipGet()
       if(JClass ClipDataItemClass=JClass(jni, ClipDataItem))
       if(JMethodID getText=jni.func(ClipDataItemClass, "getText", "()Ljava/lang/CharSequence;"))
       if(JString text=JString(jni, jni->CallObjectMethod(ClipDataItem, getText)))
-         return text.str();
+      {
+         s=text.str();
+         Clean(s);
+         goto end;
+      }
    #endif
    }
    return Clipboard;
+end:
 #else
 	return Clipboard;
 #endif
@@ -1741,18 +1777,25 @@ LANG_TYPE OSLanguage()
    return LANG_NONE;
 }
 /******************************************************************************/
-Str LanguageSpecific(LANG_TYPE lang)
+Str LanguageSpecific(LANG_TYPE lang) // https://en.wikipedia.org/wiki/Wikipedia:Language_recognition_chart
 {
    switch(lang)
    {
-      case PL        : return u"ĄĆĘŁŃÓŚŻŹąćęłńóśżź";
-      case DE        : return u"äÄëËöÖüÜßẞ";
-      case FR        : return u"àÀáÁâÂãÃäÄåÅæÆçÇèÈéÉêÊëËìÌíÍîÎïÏðÐñÑòÒóÓôÔõÕöÖøØùÙúÚûÛüÜýÝ";
-      case RU        : return u"аАбБвВгГдДеЕёЁжЖзЗиИйЙкКлЛмМнНоОпПрРсСтТуУфФхХцЦчЧшШщЩъЪыЫьЬэЭюЮяЯ";
-      case PO        : return u"áÁàÀâÂãÃçÇéÉêÊíÍóÓõÕôÔúÚ";
-      case SP        : return u"áÁéÉíÍóÓúÚüÜñÑ¿¡";
-      case LANG_GREEK: return u"αΑβΒγΓδΔεΕζΖηΗθΘιΙκΚλΛμΜνΝξΞοΟπΠρΡσΣτΤυΥφΦχΧψΨωΩ";
-      case LANG_THAI : return u"กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรฤลฦวศษสหฬอฮฯะัาำิีึืฺุู฿เแโใไๅๆ็่้๊๋์ํ๎๏๐๑๒๓๔๕๖๗๘๙๚๛"; // https://en.wikipedia.org/wiki/Thai_alphabet#Unicode
+      case PL             : return u"ĄąĆćĘęŁłŃńÓóŚśŻżŹź";
+      case DE             : return u"ÄäËëÖöÜüẞß";
+      case FR             : return u"ÀàÁáÂâÃãÄäÅåÆæÇçÈèÉéÊêËëÌìÍíÎîÏïÐðÑñÒòÓóÔôÕõÖöØøÙùÚúÛûÜüÝý";
+      case RU             : return u"АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНнОоПпРрСсТтУуФфХхЦцЧчШшЩщЪъЫыЬьЭэЮюЯя";
+      case PO             : return u"ÁáÀàÂâÃãÇçÉéÊêÍíÓóÕõÔôÚú";
+      case SP             : return u"ÁáÉéÍíÓóÚúÜüÑñ¿¡";
+      case LANG_GREEK     : return u"ΑαΒβΓγΔδΕεΖζΗηΘθΙιΚκΛλΜμΝνΞξΟοΠπΡρΣσςΤτΥυΦφΧχΨψΩωΆάΈέΉήΊίΌόΎύΏώΐΰΪϊΫϋ";
+      case LANG_THAI      : return u"กขฃคฅฆงจฉชซฌญฎฏฐฑฒณดตถทธนบปผฝพฟภมยรฤลฦวศษสหฬอฮฯะัาำิีึืฺุู฿เแโใไๅๆ็่้๊๋์ํ๎๏๐๑๒๓๔๕๖๗๘๙๚๛"; // https://en.wikipedia.org/wiki/Thai_alphabet#Unicode
+      case LANG_VIETNAMESE: return u"ĂăÂâĐđÊêÔôƠơƯư"
+                                   u"AaĂăÂâEeÊêIiOoÔôƠơUuƯưYy"
+                                   u"ÁáẮắẤấÉéẾếÍíÓóỐốỚớÚúỨứÝý"
+                                   u"ÀàẰằẦầÈèỀềÌìÒòỒồỜờÙùỪừỲỳ"
+                                   u"ẢảẲẳẨẩẺẻỂểỈỉỎỏỔổỞởỦủỬửỶỷ"
+                                   u"ÃãẴẵẪẫẼẽỄễĨĩÕõỖỗỠỡŨũỮữỸỹ"
+                                   u"ẠạẶặẬậẸẹỆệỊịỌọỘộỢợỤụỰựỴỵ";
 
       case CN:
       {
@@ -2207,11 +2250,11 @@ Bool AssociateFileType(Str extension, Str application_path, Str application_id, 
 /******************************************************************************/
 EXTENSION_TYPE ExtType(C Str &ext)
 {
-   if(ext=="txt" || ext=="xml" || ext=="htm"  || ext=="html" || ext=="php" || ext=="cpp"  || ext=="c"    || ext=="h"    || ext=="java" || ext=="cs"  || ext=="m"   || ext=="mm"   || ext=="cxx"  || ext=="cc"   || ext=="mk"                                                           )return EXT_TEXT;
-   if(ext=="bmp" || ext=="jpg" || ext=="jpeg" || ext=="png"  || ext=="tga" || ext=="tif"  || ext=="tiff" || ext=="dds"  || ext=="psd"  || ext=="gif" || ext=="ico" || ext=="cur"  || ext=="icns" || ext=="webp" || ext=="heif" || ext=="heic" || ext=="bpg" || ext=="exr" || ext=="hdr")return EXT_IMAGE;
-   if(ext=="mp3" || ext=="ogg" || ext=="wma"  || ext=="wav"  || ext=="m4a" || ext=="flac" || ext=="opus" || ext=="weba"                                                                                                                                                                )return EXT_SOUND;
-   if(ext=="3ds" || ext=="ase" || ext=="obj"  || ext=="ms3d" || ext=="b3d" || ext=="dae"  || ext=="fbx"  || ext=="psk"  || ext=="psa"  || ext=="bvh"                                                                                                                                   )return EXT_MESH;
-   if(ext=="avi" || ext=="mpg" || ext=="mpeg" || ext=="mp4"  || ext=="m4v" || ext=="mkv"  || ext=="wmv"  || ext=="rmvb" || ext=="divx" || ext=="ogm" || ext=="ogv" || ext=="webm" || ext=="vob"  || ext=="flv"  || ext=="theora"                                                       )return EXT_VIDEO;
+   if(ext=="txt" || ext=="xml" || ext=="htm" || ext=="html" || ext=="php" || ext=="cpp" || ext=="c" || ext=="h" || ext=="java" || ext=="cs" || ext=="m" || ext=="mm" || ext=="cxx" || ext=="cc" || ext=="mk"                                                                                                   )return EXT_TEXT;
+   if(ext=="bmp" || ext=="jpg" || ext=="jpeg" || ext=="jxr" || ext=="jxl" || ext=="png" || ext=="webp" || ext=="avif" || ext=="tga" || ext=="tif" || ext=="tiff" || ext=="dds" || ext=="psd" || ext=="gif" || ext=="cur" || ext=="ico" || ext=="icns" || ext=="heif" || ext=="heic" || ext=="exr" || ext=="hdr")return EXT_IMAGE;
+   if(ext=="mp3" || ext=="ogg" || ext=="opus" || ext=="wav" || ext=="flac" || ext=="m4a" || ext=="weba" || ext=="wma"                                                                                                                                                                                          )return EXT_SOUND;
+   if(ext=="fbx" || ext=="obj" || ext=="dae" || ext=="xps" || ext=="3ds" || ext=="ase" || ext=="ms3d" || ext=="b3d" || ext=="psk" || ext=="psa" || ext=="bvh"                                                                                                                                                  )return EXT_MESH;
+   if(ext=="mpg" || ext=="mpeg" || ext=="mp4" || ext=="m4v" || ext=="mkv" || ext=="webm" || ext=="avi" || ext=="wmv" || ext=="rmvb" || ext=="divx" || ext=="ogm" || ext=="ogv" || ext=="theora" || ext=="vob" || ext=="flv"                                                                                    )return EXT_VIDEO;
 
    // Engine formats
    if(ext=="img" )return EXT_IMAGE;
@@ -2685,7 +2728,7 @@ Str CleanFileName(C Str &name)
       case '<' :
       case '>' :
       case '|' : break;
-      default  : if(U16(c)>31)temp+=c; break;
+      default  : if(Unsigned(c)>31)temp+=c; break;
    }
    temp.removeOuterWhiteChars(); // on Windows names can't end with spaces (but they can start with spaces), on Windows names can start with spaces (but remove them anyway, because it's a non-standard naming convention to start with a space)
    REPA(temp)if(temp[i]!='.' && temp[i]!=' ')return temp; // on Windows name must contain at least one character which is not space or dot (".", "..", ". .", "......", ". . ." - all of these are invalid names)
@@ -2696,8 +2739,12 @@ Str CleanFileName(C Str &name)
 static const     Char8 CleanFileNameArray[]={'!', '#', '^', '-', '_', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'};
 static const     Byte  CleanFileNameIndex[]={255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 255, 1, 255, 255, 255, 255, 255, 255, 255, 255, 255, 3, 255, 255, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 255, 255, 255, 255, 255, 255, 255, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 255, 255, 255, 2, 4, 255, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255}; ASSERT(Elms(CleanFileNameIndex)==256);
 static constexpr Int   CleanFileNameElms   =Elms(CleanFileNameArray);
+
+static const     Char8 CleanFileName64Array[]={'!', '#', '$', '%', '&', '\'', '(', ')', '+', ',', '-', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', ';', '=', '@', '[', ']', '^', '_', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', '{', '}', '~'};
+static const     Byte  CleanFileName64Index[]={255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 0, 255, 1, 2, 3, 4, 5, 6, 7, 255, 8, 9, 10, 255, 255, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 255, 21, 255, 22, 255, 255, 23, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 24, 255, 25, 26, 27, 255, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 255, 55, 56, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255, 255}; ASSERT(Elms(CleanFileName64Index)==256);
+static constexpr Int   CleanFileName64Elms   =Elms(CleanFileName64Array);
 /******************************************************************************
-static Int CompareChar(C Char8 &a, C Char8 &b) {return EE::Compare(a, b);}
+static Int CompareChar(C Char8 &a, C Char8 &b) {return EE::Compare(a, b, true);}
 void MakeCleanFileNameArray()
 {
    Str s;
@@ -2705,7 +2752,7 @@ void MakeCleanFileNameArray()
    s+="!#^-_";
    for(Int i='a'; i<='z'; i++)s+=Char8(i);
    for(Int i='0'; i<='9'; i++)s+=Char8(i);
-#else // 57 chars
+#else // 57 chars, this is enough to store 11-chars per 8-bytes
    for(Int i='a'; i<='z'; i++)s+=Char8(i);
    for(Int i='0'; i<='9'; i++)s+=Char8(i);
    s+=" `~!@#$%^&*()_-+=[]{};'\\:\"|,./<>?";
@@ -2723,7 +2770,8 @@ void MakeCleanFileNameArray()
 }
 void Test()
 {
-   REPA(CleanFileNameArray)DEBUG_ASSERT(CleanFileNameIndex[(Byte)CleanFileNameArray[i]]==i, "err");
+   REPA(CleanFileNameArray  )DEBUG_ASSERT(CleanFileNameIndex  [(Byte)CleanFileNameArray  [i]]==i, "err");
+   REPA(CleanFileName64Array)DEBUG_ASSERT(CleanFileName64Index[(Byte)CleanFileName64Array[i]]==i, "err");
 }
 /******************************************************************************/
 CChar* _EncodeFileName(C UID &id, Char (&name)[24+1]) // 24 chars needed + NUL terminate
@@ -2765,13 +2813,13 @@ Str  EncodeFileName(           CPtr src, Int size) {Str dest; EncodeFileName(des
 void EncodeFileName(Str &dest, CPtr src, Int size)
 {
    dest.clear();
-   if(Byte *s=(Byte*)src)if(size>0)
+   if(C Byte *s=(Byte*)src)if(size>0)
    {
       dest.reserve(DivCeil4(size)*6); // 6 chars per 4 bytes
       UInt u, max;
       REP(UInt(size)/4)
       {
-         for(u=*(UInt*)s, max=UINT_MAX; ; ){dest.alwaysAppend(CleanFileNameArray[u%CleanFileNameElms]); max/=CleanFileNameElms; if(!max)break; u/=CleanFileNameElms;}
+         for(u=*(UInt*)s, max=UINT_MAX; ; ){dest+=CleanFileNameArray[u%CleanFileNameElms]; max/=CleanFileNameElms; if(!max)break; u/=CleanFileNameElms;}
          s+=4;
       }
       switch(size&3)
@@ -2781,10 +2829,46 @@ void EncodeFileName(Str &dest, CPtr src, Int size)
          case  3: u=*(U16*)s|(s[2]<<16); max=0xFFFFFF; break;
          default: goto end;
       }
-      for(;;){dest.alwaysAppend(CleanFileNameArray[u%CleanFileNameElms]); max/=CleanFileNameElms; if(!max)break; u/=CleanFileNameElms;}
+      for(;;){dest+=CleanFileNameArray[u%CleanFileNameElms]; max/=CleanFileNameElms; if(!max)break; u/=CleanFileNameElms;}
    end:;
    }
 }
+/******************************************************************************
+Str  EncodeFileName64(             CPtr src , Int size); // encode 'src' binary data of 'size' size, into        string which can be used as a file name
+void EncodeFileName64(  Str &dest, CPtr src , Int size); // encode 'src' binary data of 'size' size, into 'dest' string which can be used as a file name
+
+T1(TYPE) Str  EncodeFileName64(             C TYPE &elm) {return EncodeFileName64(      &elm, SIZE(elm));}
+T1(TYPE) void EncodeFileName64(  Str &dest, C TYPE &elm) {return EncodeFileName64(dest, &elm, SIZE(elm));}
+
+Str  EncodeFileName64(           CPtr src, Int size) {Str dest; EncodeFileName64(dest, src, size); return dest;}
+void EncodeFileName64(Str &dest, CPtr src, Int size)
+{
+   dest.clear();
+   if(C Byte *s=(Byte*)src)if(size>0)
+   {
+      dest.reserve(DivCeil8(size)*11); // 11 chars per 8 bytes
+      ULong u, max;
+      REP(ULong(size)/SIZE(ULong))
+      {
+         for(u=*(ULong*)s, max=ULONG_MAX; ; ){dest+=CleanFileName64Array[u%CleanFileName64Elms]; max/=CleanFileName64Elms; if(!max)break; u/=CleanFileName64Elms;}
+         s+=SIZE(ULong);
+      }
+      switch(size&7)
+      {
+         case  1: u=*      s                                        ; max=0x000000000000FF; break;
+         case  2: u=*(U16*)s                                        ; max=0x0000000000FFFF; break;
+         case  3: u=*(U16*)s|(s[2]<<16)                             ; max=0x00000000FFFFFF; break;
+         case  4: u=*(U32*)s                                        ; max=0x000000FFFFFFFF; break;
+         case  5: u=*(U32*)s|(U64(s[4])<<32)                        ; max=0x0000FFFFFFFFFF; break;
+         case  6: u=*(U32*)s|(U64(*(U16*)(s+4))<<32)                ; max=0x00FFFFFFFFFFFF; break;
+         case  7: u=*(U32*)s|(U64(*(U16*)(s+4))<<32)|(U64(s[6])<<48); max=0xFFFFFFFFFFFFFF; break;
+         default: goto end;
+      }
+      for(;;){dest+=CleanFileName64Array[u%CleanFileName64Elms]; max/=CleanFileName64Elms; if(!max)break; u/=CleanFileName64Elms;}
+   end:;
+   }
+}
+/******************************************************************************/
 Bool DecodeFileName(C Str &src, Ptr dest, Int size)
 {
    if(Byte *d=(Byte*)dest)if(size>0)
@@ -2864,19 +2948,38 @@ Bool DecodeRaw(C Str &src, Ptr dest, Int size)
 /******************************************************************************/
 Bool ValidEmail(C Str &email) // "user@domain.xxx"
 {
-   if(    email.length() >=5  // 1@3.5
-   && U16(email.first ())>32  // not space, tab, new line, ..
-   && U16(email.last  ())>32) // not space, tab, new line, ..
+   if(email.length()>=5)FREPA(email) // 1@3.5
    {
-      Int at =TextPosI(email, '@');
-      if( at>=1 && TextPosI(email()+at+1, '@')<0) // if found '@' at 1 or higher position and there's no other '@' after
+      Char c=email()[i]; if(c=='@') // domain
       {
-         Int dot =TextPosI(email()+at+1, '.');
-         if( dot>=1) // if found '.' at 1 or higher position
-            if(email.length()>at+2+dot) // if there's something after the dot
-               return true;
+         if(i // local cannot be empty
+         && InRange(++i, email)) // domain cannot be empty
+         {
+            c=email()[i]; if(c!='.')for(;;) // domain cannot start with '.'
+            {
+               if(Unsigned(c)<32
+               || c=='@'
+               || !InRange(++i, email))goto error;
+               c=email()[i];
+               if(c=='.')
+               {
+                  if(InRange(++i, email))for(;;) // need to have something after first '.'
+                  {
+                     c=email()[i];
+                     if(Unsigned(c)<32
+                     || c=='@')goto error;
+                     if(!InRange(++i, email))return true;
+                     c=email()[i];
+                  }
+                  goto error;
+               }
+            }
+         }
+         goto error;
       }
+      if(Unsigned(c)<32)goto error; // local
    }
+error:
    return false;
 }
 Bool ValidURL(C Str &url) // "http://domain.com"
@@ -2911,6 +3014,36 @@ Bool ValidLicenseKey(C Str &key) // "XXXXX-XXXXX-XXXXX-XXXXX-XXXXX" 5*5X + 4*-
    }
    return true;
 }
+/******************************************************************************/
+Str ShortEmail(C Str &email)
+{
+   if(Ends(email, "@gmail.com"))
+   {
+      const Int gmail_len=10;
+      Str e; e.reserve(email.length());
+      for(Int len=email.length()-gmail_len, i=0; i<len; i++)
+      {
+         Char c=email()[i]; if(c!='.')e+=c;
+      }
+      e+="@gmail.com";
+      return e;
+   }
+   return email;
+}
+Str BaseEmail(C Str &email)
+{
+   Str e=ShortEmail(email);
+   Int plus=TextPosI(e, '+'); if(plus>=0)
+   {
+      Int at=TextPosI(e()+plus, '@'); if(at>=0)e.remove(plus, at);
+   }
+   return e;
+}
+/******************************************************************************/
+CChar * SkipHttp   (CChar  *url) {return            _SkipStart(_SkipStart(url, "http://"), "https://")         ;}
+CChar8* SkipHttp   (CChar8 *url) {return            _SkipStart(_SkipStart(url, "http://"), "https://")         ;}
+CChar * SkipHttpWww(CChar  *url) {return _SkipStart(_SkipStart(_SkipStart(url, "http://"), "https://"), "www.");}
+CChar8* SkipHttpWww(CChar8 *url) {return _SkipStart(_SkipStart(_SkipStart(url, "http://"), "https://"), "www.");}
 /******************************************************************************/
 #if WINDOWS_OLD
 static Bool HasDeviceInfo=false;
@@ -3415,7 +3548,7 @@ VecI4 FileVersion(C Str &name)
 {
    if(GetExt(name)=="apk")
    {
-      Memt<ZipFile> files; File f; if(f.readTry(name) && ParseZip(f, files))REPA(files)
+      Memt<ZipFile> files; File f; if(f.read(name) && ParseZip(f, files))REPA(files)
       {
        C ZipFile &file=files[i]; if(file.name=="AndroidManifest.xml")
          {
@@ -3557,7 +3690,7 @@ struct QChar
    
    ushort  unicode()C {return _;}
    ushort& unicode()  {return (ushort&)_;} ASSERT(SIZE(Char)==SIZE(ushort));
-   Char8   toAscii()C {return Char16To8Fast(_);} // we can assume that Str was already initialized
+   Char8   toAscii()C {return Char16To8(_);}
 
    bool operator==(C QChar &c)C {return _==c._;}
    bool operator!=(C QChar &c)C {return _!=c._;}
@@ -4311,7 +4444,7 @@ error:;
 }
 Bool ParseExe(C Str &name, MemPtr<ExeSection> sections)
 {
-   File f; if(f.readTry(name))return ParseExe(f, sections);
+   File f; if(f.read(name))return ParseExe(f, sections);
    sections.clear(); return false;
 }
   Int         FindSectionNameI  (C CMemPtr<ExeSection> &sections, CChar8 *name  ) {REPA(sections)if(Equal(sections[i].name, name, true))return i; return -1;}
@@ -4578,7 +4711,7 @@ struct Country
    {"UA", "UKR", "Ukraine"},
    {"AE", "ARE", "United Arab Emirates"},
    {"GB", "GBR", "United Kingdom"},
-   {"US", "USA", "United States"},
+   {"US", "USA", "United States of America"}, // include "America" so searching country names with it can find it
    {"UY", "URY", "Uruguay"},
    {"UZ", "UZB", "Uzbekistan"},
    {"VU", "VUT", "Vanuatu"},

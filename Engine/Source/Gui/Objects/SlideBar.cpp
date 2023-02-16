@@ -103,6 +103,35 @@ SlideBar& SlideBar::create(C SlideBar &src)
    return T;
 }
 /******************************************************************************/
+SlideBar& SlideBar::func(void (*func)(Ptr), Ptr user, Bool immediate)
+{
+   T._func          =func;
+   T._func_user     =user;
+   T._func_immediate=immediate;
+   return T;
+}
+void SlideBar::call()
+{
+   if(_func)
+   {
+      if(_func_immediate)
+      {
+         DEBUG_BYTE_LOCK(_used); _func(_func_user);
+      }else Gui.addFuncCall(_func, _func_user);
+   }
+}
+/******************************************************************************/
+SlideBar& SlideBar::focusable(Bool on) {if(_focusable!=on){_focusable=on; if(!on)kbClear();} return T;}
+/******************************************************************************/
+SlideBar& SlideBar::desc(C Str &desc)
+{
+   super   ::desc(desc);
+   button[0].desc(desc);
+   button[1].desc(desc);
+   button[2].desc(desc);
+   return T;
+}
+/******************************************************************************/
 void SlideBar::setButtonRect()
 {
    if(!App.closed()) // this may be called after app has closed, in which case the Gui Skin pointers are invalid which may cause crash
@@ -133,60 +162,6 @@ void SlideBar::setButtonRect()
       button[SB_RIGHT_DOWN].rect(Rect(rect().max.x-button_w*button[SB_RIGHT_DOWN].visible(), rect().min.y                                      , rect().max.x                                      , rect().min.y+button_h*button[SB_RIGHT_DOWN].visible())); button[SB_RIGHT_DOWN]._vertical=_vertical;
    }
 }
-/******************************************************************************/
-SlideBar& SlideBar::setLengths(Flt length, Flt length_total)
-{
-   if(is()) // don't enable '_usable' when deleted
-   {
-      MAX(length      , 0);
-      MAX(length_total, 0);
-      T._length      =length;
-      T._length_total=length_total;
-      T._usable      =(length+EPS<length_total);
-      if(_scroll)_scroll_to=Max(0, Min(_scroll_to, maxOffset())); // adjust current scrolling if any
-      return setOffset(_offset, false);
-   }
-   return T;
-}
-SlideBar& SlideBar::set(Flt frac, SET_MODE mode)
-{
-   return setOffset(Sat(frac)*maxOffset(), true, mode);
-}
-SlideBar& SlideBar::offset(Flt offset, SET_MODE mode)
-{
-   return setOffset(offset, true, mode);
-}
-Flt SlideBar::operator()  ()C {Flt d=maxOffset(); return d ? _offset/d : 0;}
-Flt SlideBar::wantedOffset()C {return _scroll ? _scroll_to : _offset;}
-/******************************************************************************/
-SlideBar& SlideBar::func(void (*func)(Ptr), Ptr user, Bool immediate)
-{
-   T._func          =func;
-   T._func_user     =user;
-   T._func_immediate=immediate;
-   return T;
-}
-void SlideBar::call()
-{
-   if(_func)
-   {
-      if(_func_immediate)
-      {
-         DEBUG_BYTE_LOCK(_used); _func(_func_user);
-      }else Gui.addFuncCall(_func, _func_user);
-   }
-}
-/******************************************************************************/
-SlideBar& SlideBar::focusable(Bool on) {if(_focusable!=on){_focusable=on; if(!on)kbClear();} return T;}
-/******************************************************************************/
-SlideBar& SlideBar::desc(C Str &desc)
-{
-   super   ::desc(desc);
-   button[0].desc(desc);
-   button[1].desc(desc);
-   button[2].desc(desc);
-   return T;
-}
 SlideBar& SlideBar::rect(C Rect &rect)
 {
    if(T.rect()!=rect)
@@ -214,14 +189,39 @@ SlideBar& SlideBar::move(C Vec2 &delta)
    return T;
 }
 /******************************************************************************/
-Flt SlideBar::scrollDelta()C
+SlideBar& SlideBar::setLengths(Flt length, Flt length_total)
 {
-   return _scroll ? _scroll_to-_offset : 0;
+   if(is()) // don't enable '_usable' when deleted
+   {
+      MAX(length      , 0);
+      MAX(length_total, 0);
+      T._length      =length;
+      T._length_total=length_total;
+      T._usable      =(length+EPS<length_total);
+      if(_scroll)_scroll_to=Max(0, Min(_scroll_to, maxOffset())); // adjust current scrolling if any
+      return offset(_offset, SET_DEFAULT, SCROLL_ABS);
+   }
+   return T;
 }
-SlideBar& SlideBar::setOffset(Flt offset, Bool stop, SET_MODE mode)
+Flt SlideBar::operator()  ()C {Flt d=maxOffset(); return (d>0) ? _offset/d : 0;}
+Flt SlideBar::wantedOffset()C {return _scroll ? _scroll_to         : _offset;}
+Flt SlideBar::scrollDelta ()C {return _scroll ? _scroll_to-_offset :       0;}
+
+SlideBar& SlideBar::offset(Flt offset, SET_MODE mode, SCROLL scroll)
 {
-   if(stop)_scroll=false;
-   offset=Max(0, Min(offset, maxOffset()));
+   if(_usable)
+   {
+      if(_scroll)switch(scroll)
+      {
+         case SCROLL_STOP: _scroll=false; break;
+         case SCROLL_REL : Flt delta=offset-_offset; _scroll_to=Max(0, Min(_scroll_to+delta, maxOffset())); break;
+      }
+      offset=Max(0, Min(offset, maxOffset()));
+   }else
+   {
+     _scroll=false;
+      offset=0; // if not usable then scrolling will be disabled and small offsets below EPS may not get cleared to 0, in that case force precise 0 in case some codes do comparison against 0 value, and stop any scroll
+   }
    if(T._offset!=offset)
    {
       T._offset=offset;
@@ -230,12 +230,12 @@ SlideBar& SlideBar::setOffset(Flt offset, Bool stop, SET_MODE mode)
    setButtonRect();
    return T;
 }
+SlideBar& SlideBar::set(Flt frac, SET_MODE mode, SCROLL scroll) {return offset(Sat(frac)*maxOffset(), mode, scroll);}
 SlideBar& SlideBar::scroll(Flt delta, Bool immediate)
 {
    if(immediate)
    {
-      if(_scroll)_scroll_to=Max(0, Min(_scroll_to+delta, maxOffset())); // adjust current scrolling if any
-      setOffset(_offset+delta, false); // adjust current offset but without stopping
+      offset(_offset+delta, SET_DEFAULT, SCROLL_REL); // adjust current offset but without stopping
    }else
    {
       if(_scroll)_scroll_to+=delta        ; // if currently scrolling
@@ -249,16 +249,18 @@ SlideBar& SlideBar::scrollTo(Flt pos, Bool immediate)
    Flt min=Max(0, Min(pos,   maxOffset())         ); if(min<_offset){_scroll=true ; _scroll_to=min    ;}else
   {Flt max=Max(0, Min(pos, lengthTotal())-length()); if(max>_offset){_scroll=true ; _scroll_to=max    ;}else
                                                                     {_scroll=false; _scroll_to=_offset;}}
-   return immediate ? setOffset(_scroll_to) : T;
+   return immediate ? offset(_scroll_to) : T;
 }
 SlideBar& SlideBar::scrollFit(Flt min, Flt max, Bool immediate)
 {
    min=Max(0, Min(min         , maxOffset())); if(min<_offset){_scroll=true ; _scroll_to=min    ;}else
   {max=Max(0, Min(max-length(), min        )); if(max>_offset){_scroll=true ; _scroll_to=max    ;}else
                                                               {_scroll=false; _scroll_to=_offset;}}
-   return immediate ? setOffset(_scroll_to) : T;
+   return immediate ? offset(_scroll_to) : T;
 }
 SlideBar& SlideBar::scrollEnd(Bool immediate) {return scrollTo(lengthTotal(), immediate);}
+SlideBar& SlideBar::scrollLeftUp   () {if(button[SB_LEFT_UP   ].is())button[SB_LEFT_UP   ].push();else offset(_offset-Time.ad()*_scroll_button); return T;}
+SlideBar& SlideBar::scrollRightDown() {if(button[SB_RIGHT_DOWN].is())button[SB_RIGHT_DOWN].push();else offset(_offset+Time.ad()*_scroll_button); return T;}
 SlideBar& SlideBar::scrollOptions(Flt relative, Flt base, Bool immediate, Flt button_speed)
 {
    T._scroll_mul      =Max(0, relative);
@@ -346,12 +348,12 @@ void SlideBar::update(C GuiPC &gpc)
       {
          if(_vertical)
          {
-            if(Kb.b(KB_UP  ))button[SB_LEFT_UP   ].push();
-            if(Kb.b(KB_DOWN))button[SB_RIGHT_DOWN].push();
+            if(Kb.b(KB_UP  ))scrollLeftUp   ();
+            if(Kb.b(KB_DOWN))scrollRightDown();
          }else
          {
-            if(Kb.b(KB_LEFT ))button[SB_LEFT_UP   ].push();
-            if(Kb.b(KB_RIGHT))button[SB_RIGHT_DOWN].push();
+            if(Kb.b(KB_LEFT ))scrollLeftUp   ();
+            if(Kb.b(KB_RIGHT))scrollRightDown();
          }
          scroll_discrete+=Kb.k(KB_PGDN);
          scroll_discrete-=Kb.k(KB_PGUP);
@@ -374,17 +376,17 @@ void SlideBar::update(C GuiPC &gpc)
          }
          if(button[SB_LEFT_UP   ]())d-=Time.ad()*_scroll_button;
          if(button[SB_RIGHT_DOWN]())d+=Time.ad()*_scroll_button;
-         setOffset(_offset+d);
+         offset(_offset+d);
       }
 
       // scroll
       if( scroll_discrete || scroll_smooth)scroll((scroll_discrete+scroll_smooth)*(_scroll_mul*length()+_scroll_add), _scroll_immediate);
       if(_scroll                          )
       {
-         if(_scroll_immediate || Equal(_scroll_to, _offset, 0.001f))setOffset(_scroll_to);else
+         if(_scroll_immediate || Equal(_scroll_to, _offset, 0.001f))offset(_scroll_to);else
          {
             Flt offset=T._offset; AdjustValTime(offset, _scroll_to, 0.0001f, Time.ad());
-            setOffset(offset, false);
+            T.offset(offset, SET_DEFAULT, SCROLL_ABS);
          }
       }
    }

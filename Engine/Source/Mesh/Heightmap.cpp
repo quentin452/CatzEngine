@@ -281,10 +281,10 @@ Heightmap& Heightmap::create(C Heightmap &src)
 {
    if(this!=&src)
    {
-      src._height    .copyTry(_height    );
-      src._color     .copyTry(_color     , -1, -1, -1, IMAGE_R8G8B8_SRGB);
-      src._mtrl_index.copyTry(_mtrl_index);
-      src._mtrl_blend.copyTry(_mtrl_blend, -1, -1, -1, IMAGE_R8G8B8A8);
+      src._height    .copy(_height    );
+      src._color     .copy(_color     , -1, -1, -1, IMAGE_R8G8B8_SRGB);
+      src._mtrl_index.copy(_mtrl_index);
+      src._mtrl_blend.copy(_mtrl_blend, -1, -1, -1, IMAGE_R8G8B8A8);
 
      _materials=src._materials;
    }
@@ -388,7 +388,7 @@ void Heightmap::color(Int x, Int y, C Color &color)
    {
       if(!_color.is() && (color.r!=255 || color.g!=255 || color.b!=255)) // create if doesn't exist yet but is needed
       {
-        _color.createSoftTry(_height.w(), _height.h(), 1, IMAGE_R8G8B8_SRGB);
+        _color.createSoft(_height.w(), _height.h(), 1, IMAGE_R8G8B8_SRGB);
          REPD(y, _color.h())
          REPD(x, _color.w())_color.pixB3(x, y)=255;
       }
@@ -401,7 +401,7 @@ void Heightmap::colorF(Int x, Int y, C Vec &color)
    {
       if(!_color.is() && (color.x!=1 || color.y!=1 || color.z!=1)) // create if doesn't exist yet but is needed
       {
-        _color.createSoftTry(_height.w(), _height.h(), 1, IMAGE_F32_3_SRGB);
+        _color.createSoft(_height.w(), _height.h(), 1, IMAGE_F32_3_SRGB);
          REPD(y, _color.h())
          REPD(x, _color.w())_color.pixF3(x, y)=1;
       }
@@ -1736,7 +1736,7 @@ NOINLINE Bool Heightmap::buildEx2(Mesh &mesh, Int quality, UInt flag, BuildMemSo
 
    // downsample
    REP(quality)builder.downSampleMaterials(res, 1<<i);
-   Image color; if(T._color.is()){T._color.copyTry(color); REP(quality)color.resize(color.w()/2+1, color.h()/2+1, FILTER_LINEAR, IC_CLAMP|IC_KEEP_EDGES);}
+   Image color; if(T._color.is()){T._color.copy(color); REP(quality)color.resize(color.w()/2+1, color.h()/2+1, FILTER_LINEAR, IC_CLAMP|IC_KEEP_EDGES);}
 
    // set LOD levels
    mesh.setLods(Max(1, Min(LODS, BitHi(Unsigned(res1)))-quality)); // BitHi(2)->1 (1 lod), BitHi(4)->2 (2 lods), BitHi(8)->3 (3 lods)
@@ -2080,18 +2080,18 @@ void Heightmap::resize(Int res)
 static Bool SaveAs(C Image &image, File &f, IMAGE_TYPE type)
 {
    if(!image.is() || image.type()==type)return image.saveData(f);
-   Image temp; if(image.copyTry(temp, -1, -1, -1, type))return temp.saveData(f);
+   Image temp; if(image.copy(temp, -1, -1, -1, type))return temp.saveData(f);
    return false;
 }
 static Bool LoadOldAs(Image &image, File &f, IMAGE_TYPE type) // !! uses old '_loadData' !!
 {
    if(!image._loadData(f))return false;
-   if( image.is() && image.type()!=type)if(!image.copyTry(image, -1, -1, -1, type))return false;
+   if( image.is() && image.type()!=type)if(!image.copy(image, -1, -1, -1, type))return false;
    return true;
 }
 static Bool AddEmptyAlpha(Image &image)
 {
-   if(image.copyTry(image, -1, -1, -1, IMAGE_R8G8B8A8, IMAGE_SOFT, 1))if(image.lock())
+   if(image.copy(image, -1, -1, -1, IMAGE_R8G8B8A8, IMAGE_SOFT, 1))if(image.lock())
    {
       REPD(y, image.lh())
       REPD(x, image.lw())image.pixC(x, y).a=0;

@@ -5,9 +5,6 @@ class IDReplace
    UID from, to;
 
    void set(C UID &from, C UID &to);
-
-   static int Compare(C IDReplace &a, C IDReplace &b);
-   static int Compare(C IDReplace &a, C UID       &b);
 };
 /******************************************************************************/
 /******************************************************************************/

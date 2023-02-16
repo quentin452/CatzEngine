@@ -513,12 +513,12 @@ class ConvertToAtlasClass : PropWin
 
          EditMaterial edit; edit.create(atlas);
          Proj.createBaseTextures(atlas.base_0, atlas.base_1, atlas.base_2, edit);
-         Proj.loadImages(atlas.emissive_img, null, edit.emissive_map, true);
+         Proj.loadImages(atlas.emissive_img, null, edit.emissive_map, true, false);
          // copy images only if 'Importer.includeTex' which means this texture was encountered for the first time, don't check for 'Proj.includeTex' because with it we would have to also save the textures, which are done automatically in 'Proj.newMtrl'
-         IMAGE_TYPE ct; ImageProps(atlas.base_0      , &atlas.  base_0_id, &ct, MTRL_BASE_0, edit.tex_quality); if(Importer.includeTex(atlas.  base_0_id))                                       atlas.      base_0.copyTry(atlas.      base_0, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);
-                        ImageProps(atlas.base_1      , &atlas.  base_1_id, &ct, MTRL_BASE_1                  ); if(Importer.includeTex(atlas.  base_1_id))                                       atlas.      base_1.copyTry(atlas.      base_1, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);
-                        ImageProps(atlas.base_2      , &atlas.  base_2_id, &ct, MTRL_BASE_2                  ); if(Importer.includeTex(atlas.  base_2_id))                                       atlas.      base_2.copyTry(atlas.      base_2, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);
-                        ImageProps(atlas.emissive_img, &atlas.emissive_id, &ct, MTRL_EMISSIVE                ); if(Importer.includeTex(atlas.emissive_id)){SetFullAlpha(atlas.emissive_img, ct); atlas.emissive_img.copyTry(atlas.emissive_img, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);}
+         IMAGE_TYPE ct; ImageProps(atlas.base_0      , &atlas.  base_0_id, &ct, MTRL_BASE_0, edit.tex_quality); if(Importer.includeTex(atlas.  base_0_id))                                       atlas.      base_0.copy(atlas.      base_0, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);
+                        ImageProps(atlas.base_1      , &atlas.  base_1_id, &ct, MTRL_BASE_1                  ); if(Importer.includeTex(atlas.  base_1_id))                                       atlas.      base_1.copy(atlas.      base_1, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);
+                        ImageProps(atlas.base_2      , &atlas.  base_2_id, &ct, MTRL_BASE_2                  ); if(Importer.includeTex(atlas.  base_2_id))                                       atlas.      base_2.copy(atlas.      base_2, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);
+                        ImageProps(atlas.emissive_img, &atlas.emissive_id, &ct, MTRL_EMISSIVE                ); if(Importer.includeTex(atlas.emissive_id)){SetFullAlpha(atlas.emissive_img, ct); atlas.emissive_img.copy(atlas.emissive_img, -1, -1, -1, ct, IMAGE_2D, 0, FILTER_BEST, IC_WRAP);}
 
          UID atlas_id=Proj.newMtrl(atlas, parent_id).id;
          Server.setElmFull(atlas_id);

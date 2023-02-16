@@ -5,7 +5,7 @@
 #define USE_VEL 1
 #define FACTOR (-0.7) // prevents complete darkness at the bottom layers, gives ambient=0.3, it will match the 'size' version
 /******************************************************************************/
-VecH GetBoneFurVel(VecU bone, VecH weight) {return weight.x*FurVel[bone.x] + weight.y*FurVel[bone.y] + weight.z*FurVel[bone.z];}
+VecH GetBoneFurVel(VecU4 bone, VecH4 weight) {return weight.x*FurVel[bone.x] + weight.y*FurVel[bone.y] + weight.z*FurVel[bone.z] + weight.w*FurVel[bone.w];}
 /******************************************************************************/
 // SKIN, SIZE, DIFFUSE
 /******************************************************************************/
@@ -51,7 +51,7 @@ void Base_VS
       }
    }else
    {
-      VecU bone=vtx.bone();
+      VecU4 bone=vtx.bone();
                  view_pos     =TransformPos    (vtx.pos(), bone, vtx.weight());
       if(USE_VEL)view_pos_prev=TransformPosPrev(vtx.pos(), bone, vtx.weight());
                     O.nrm     =TransformDir    (vtx.nrm(), bone, vtx.weight());
@@ -121,7 +121,7 @@ void Soft_VS
       nrm=TransformDir(nrm);
    }else
    {
-      VecU bone=vtx.bone();
+      VecU4 bone=vtx.bone();
       pos =TransformPos (pos, bone, vtx.weight());
       nrm+=GetBoneFurVel(     bone, vtx.weight()); nrm=Normalize(nrm);
       nrm =TransformDir (nrm, bone, vtx.weight());

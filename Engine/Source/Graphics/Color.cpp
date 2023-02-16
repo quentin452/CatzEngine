@@ -575,7 +575,7 @@ struct WinColorTransform
       profile.cbDataSize  =dest_color_space.length()*SIZE(Char);
       if(dest_profile=OpenColorProfileW(&profile, PROFILE_READ, FILE_SHARE_READ, OPEN_EXISTING))
       {
-         File f; if(f.readTry(ColorSpaceFileName(src_color_space)))
+         File f; if(f.read(ColorSpaceFileName(src_color_space)))
          {
             Memt<Byte> data; data.setNum(f.size()); if(f.getFast(data.data(), data.elms()))
             {
@@ -654,7 +654,7 @@ struct QCMSColorTransform
             case COLOR_SPACE_SRGB: qcms_src=qcms_profile_sRGB(); break;
             default              :
             {
-               File f; if(f.readTry(ColorSpaceFileName(src_color_space)))
+               File f; if(f.read(ColorSpaceFileName(src_color_space)))
                {
                   Memt<Byte> data; data.setNum(f.size()); if(f.getFast(data.data(), data.elms()))qcms_src=qcms_profile_from_memory(data.data(), data.elms());
                }
@@ -698,9 +698,9 @@ Bool SetColorLUT(COLOR_SPACE src_color_space, C Str &dest_color_space, Image &lu
          // here we can't use any sRGB format (or store using 'color3DS' to image) to get a free conversion to dest, because if for example 'res' is 2 (from black to white) then results still have to be converted to linear space to get perceptual smoothness
          const Int res=64;
          Bool prec16=(Renderer._main.precision()>=IMAGE_PRECISION_16); // can ignore dither because we always set at least 10-bits
-         if(!(prec16 && lut.create3DTry(res, res, res, IMAGE_F16_3      , 1, false)))
-         if(!(prec16 && lut.create3DTry(res, res, res, IMAGE_F16_4      , 1, false)))
-         if(!(          lut.create3DTry(res, res, res, IMAGE_R10G10B10A2, 1       )))
+         if(!(prec16 && lut.create3D(res, res, res, IMAGE_F16_3      , 1, false)))
+         if(!(prec16 && lut.create3D(res, res, res, IMAGE_F16_4      , 1, false)))
+         if(!(          lut.create3D(res, res, res, IMAGE_R10G10B10A2, 1       )))
             return false;
 
          if(lut.lock(LOCK_WRITE))

@@ -16,7 +16,7 @@ struct Ragdoll // Physical Ragdoll, set of Bone Actors linked with Joints
    #if !EE_PRIVATE
    private:
    #endif
-      Byte skel_bone, rbon_parent;
+      BoneType skel_bone, rbon_parent;
    };
 
    // manage
@@ -61,8 +61,8 @@ struct Ragdoll // Physical Ragdoll, set of Bone Actors linked with Joints
    Int    getBoneI(CChar8 *name); // get  ragdoll bone index, Exit on fail
    Bone&  getBone (CChar8 *name); // get  ragdoll bone      , Exit on fail
 
-   Int findBoneIndexFromSkelBone (Byte skel_bone_index)C; // find ragdoll bone index, from skeleton bone index, -1 on fail
-   Int findBoneIndexFromVtxMatrix(Byte    matrix_index)C; // find ragdoll bone index, from vertex matrix index, -1 on fail
+   Int findBoneIndexFromSkelBone (BoneType skel_bone_index)C; // find ragdoll bone index, from skeleton bone index, -1 on fail
+   Int findBoneIndexFromVtxMatrix(BoneType    matrix_index)C; // find ragdoll bone index, from vertex matrix index, -1 on fail
 
    // draw
    void draw(C Color &color=WHITE)C; // this can be optionally called outside of Render function
@@ -81,12 +81,12 @@ struct Ragdoll // Physical Ragdoll, set of Bone Actors linked with Joints
 #if !EE_PRIVATE
 private:
 #endif
-   Flt         _scale ;
- C Skeleton   *_skel  ;
-   Mems<Bone > _bones ;
-   Memc<Int  > _resets;
-   Memc<Joint> _joints;
-   Aggregate   _aggr  ;
+   Flt            _scale ;
+ C Skeleton      *_skel  ;
+   Mems<Bone    > _bones ;
+   Memc<BoneType> _resets;
+   Memc<Joint   > _joints;
+   Aggregate      _aggr  ;
 };
 /******************************************************************************/
 inline Int Elms(C Ragdoll &ragdoll) {return ragdoll.bones();}

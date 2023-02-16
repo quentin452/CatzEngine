@@ -323,7 +323,7 @@ Vec HmNormalAvg(C Heightmap &hm, flt area_size, C VecI2 &area_xy, C Matrix &matr
    {
       Delete(hm);
       ReadLock rl(WorldAreaSync);
-      File f; if(f.readTry(name))for(ChunkReader cr(f); File *f=cr(); )
+      File f; if(f.read(name))for(ChunkReader cr(f); File *f=cr(); )
       {
          if(cr.name()=="Heightmap")switch(cr.ver())
          {
@@ -390,7 +390,7 @@ Vec HmNormalAvg(C Heightmap &hm, flt area_size, C VecI2 &area_xy, C Matrix &matr
    void Area::loadGame(C Str &name)
    {
       ReadLock rl(WorldAreaSync);
-      File f; if(f.readTry(name))for(ChunkReader cr(f); File *f=cr(); )
+      File f; if(f.read(name))for(ChunkReader cr(f); File *f=cr(); )
       {
          if(cr.name()=="Heightmap")if(hm)switch(cr.ver())
          {

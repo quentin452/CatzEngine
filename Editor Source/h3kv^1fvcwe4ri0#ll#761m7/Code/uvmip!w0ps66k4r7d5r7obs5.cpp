@@ -8,7 +8,7 @@ class StoreFiles : InternetCache
       if(!initialized)
       {
          initialized=true;
-         create("Bin/Store.dat", &WorkerThreads, null, COMPRESS_LZ4, 2);
+         create("Bin/Store.dat", &WorkerThreads, null, COMPRESS_LZ4);
       }
    }
    ImagePtr getImage(C Str &url)

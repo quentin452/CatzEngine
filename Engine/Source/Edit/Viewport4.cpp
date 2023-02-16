@@ -82,7 +82,7 @@ void Viewport4::Cube::update(C GuiPC &gpc)
    super::update(gpc);
    if(view && v4)
    {
-      Touch *touch=null; REPA(Touches)if(Touches[i].guiObj()==this){touch=&Touches[i]; break;}
+      Touch *touch=null; REPA(Touches){Touch &t=Touches[i]; if(t.guiObj()==this){touch=&t; break;}}
       if(touch || Gui.ms()==this)
       {
          Bool possible_drag=(touch ? touch->life()>=DragTime+Time.ad() || touch->selecting() : Ms.life()>=DragTime+Time.ad()),
@@ -183,7 +183,7 @@ void Viewport4::Zoom::update(C GuiPC &gpc)
    zoom=0;
    if(gpc.enabled)
    {
-      if(Gui.ms()==this && Ms.b(0)){zoom-=Ms.d().y; Ms.freeze();} REPA(Touches)if(Touches[i].guiObj()==this && Touches[i].on())zoom-=Touches[i].ad().y*2.0f;
+      if(Gui.ms()==this && Ms.b(0)){zoom-=Ms.d().y; Ms.freeze();} REPA(Touches){Touch &touch=Touches[i]; if(touch.guiObj()==this && touch.on())zoom-=touch.ad().y*2.0f;}
       if(zoom && v4 && view)
       {
          Flt scale=ScaleFactor(zoom);
@@ -233,7 +233,7 @@ void Viewport4::DPad::update(C GuiPC &gpc)
    axis   =0;
    if(gpc.enabled)
    {
-      C Vec2 *pos=null; if(Gui.ms()==this && Ms.b(0))pos=&Ms.pos(); REPA(Touches)if(Touches[i].guiObj()==this && Touches[i].on()){pos=&Touches[i].pos(); break;}
+    C Vec2 *pos=null; if(Gui.ms()==this && Ms.b(0))pos=&Ms.pos();else REPA(Touches){Touch &touch=Touches[i]; if(touch.guiObj()==this && touch.on()){pos=&touch.pos(); break;}}
       if(pos)
       {
          Circle inner(rect().h()*0.5f*DPAD_INNER, rect().center()+gpc.offset);
@@ -260,7 +260,7 @@ void Viewport4::DPadY::update(C GuiPC &gpc)
    dir=0;
    if(gpc.enabled)
    {
-      C Vec2 *pos=null; if(Gui.ms()==this && Ms.b(0))pos=&Ms.pos(); REPA(Touches)if(Touches[i].guiObj()==this && Touches[i].on()){pos=&Touches[i].pos(); break;}
+    C Vec2 *pos=null; if(Gui.ms()==this && Ms.b(0))pos=&Ms.pos();else REPA(Touches){Touch &touch=Touches[i]; if(touch.guiObj()==this && touch.on()){pos=&touch.pos(); break;}}
       if(pos)
       {
          dir=Sign(pos->y-(rect().centerY()+gpc.offset.y));
@@ -321,7 +321,7 @@ void Viewport4::APad::update(C GuiPC &gpc)
    touched=false;
    if(gpc.enabled)
    {
-      C Vec2 *pos=null; Bool pushed=false; if(Gui.ms()==this && Ms.b(0)){pos=&Ms.pos(); pushed=Ms.bp(0);} REPA(Touches)if(Touches[i].guiObj()==this && Touches[i].on()){pos=&Touches[i].pos(); pushed=Touches[i].pd(); break;}
+    C Vec2 *pos=null; Bool pushed=false; if(Gui.ms()==this && Ms.b(0)){pos=&Ms.pos(); pushed=Ms.bp(0);}else REPA(Touches){Touch &touch=Touches[i]; if(touch.guiObj()==this && touch.on()){pos=&touch.pos(); pushed=touch.pd(); break;}}
       if(pos)
       {
          touched=true; cur=*pos-(rect().center()+gpc.offset); if(pushed)start=cur;
@@ -339,7 +339,7 @@ void Viewport4::APadY::update(C GuiPC &gpc)
    touched=false;
    if(gpc.enabled)
    {
-      C Vec2 *pos=null; Bool pushed=false; if(Gui.ms()==this && Ms.b(0)){pos=&Ms.pos(); pushed=Ms.bp(0);} REPA(Touches)if(Touches[i].guiObj()==this && Touches[i].on()){pos=&Touches[i].pos(); pushed=Touches[i].pd(); break;}
+    C Vec2 *pos=null; Bool pushed=false; if(Gui.ms()==this && Ms.b(0)){pos=&Ms.pos(); pushed=Ms.bp(0);}else REPA(Touches){Touch &touch=Touches[i]; if(touch.guiObj()==this && touch.on()){pos=&touch.pos(); pushed=touch.pd(); break;}}
       if(pos)
       {
          touched=true; cur=pos->y-(rect().centerY()+gpc.offset.y); if(pushed)start=cur;
@@ -401,7 +401,7 @@ void Viewport4::Drag::update(C GuiPC &gpc)
 {
    if(gpc.enabled)
    {
-      Vec2 delta(0,0); if(Gui.ms()==this && Ms.b(0)){delta-=Ms.d(); Ms.freeze();} REPA(Touches)if(Touches[i].guiObj()==this && Touches[i].on())delta-=Touches[i].ad()*2.0f;
+      Vec2 delta(0,0); if(Gui.ms()==this && Ms.b(0)){delta-=Ms.d(); Ms.freeze();} REPA(Touches){Touch &touch=Touches[i]; if(touch.guiObj()==this && touch.on())delta-=touch.ad()*2.0f;}
       if(  delta.any())
       {
          delta*=v4->moveScale(*view, false);
@@ -417,7 +417,7 @@ void Viewport4::DragY::update(C GuiPC &gpc)
 {
    if(gpc.enabled)
    {
-      Flt delta=0; if(Gui.ms()==this && Ms.b(0)){delta-=Ms.d().y; Ms.freeze();} REPA(Touches)if(Touches[i].guiObj()==this && Touches[i].on())delta-=Touches[i].ad().y*2.0f;
+      Flt delta=0; if(Gui.ms()==this && Ms.b(0)){delta-=Ms.d().y; Ms.freeze();} REPA(Touches){Touch &touch=Touches[i]; if(touch.guiObj()==this && touch.on())delta-=touch.ad().y*2.0f;}
       if( delta)
       {
          Vec move=(AdjustToGround(*v4) ? Vec(0,1,0) : AdjustToCamera(*v4) ? view->camera.matrix.z : view->camera.matrix.y)*(v4->moveScale(*view, false)*delta);
@@ -470,8 +470,8 @@ void Viewport4::Arrows::update(C GuiPC &gpc)
    Zero(arrow_pushed);
    if(gpc.visible && visible() && v4 && view)
    {
-                   if(           Gui.ms()==this &&         Ms.b (0)){Vec2 pos=        Ms.pos()-gpc.offset; REPA(arrow_rect)if(Cuts(pos, arrow_rect[i])){arrow_pushed[i]=true; break;}}
-      REPA(Touches)if(Touches[i].guiObj()==this && Touches[i].on( )){Vec2 pos=Touches[i].pos()-gpc.offset; REPA(arrow_rect)if(Cuts(pos, arrow_rect[i])){arrow_pushed[i]=true; break;}}
+                                             if(      Gui.ms()==this &&    Ms.b (0)){Vec2 pos=   Ms.pos()-gpc.offset; REPA(arrow_rect)if(Cuts(pos, arrow_rect[i])){arrow_pushed[i]=true; break;}}
+      REPA(Touches){Touch &touch=Touches[i]; if(touch.guiObj()==this && touch.on( )){Vec2 pos=touch.pos()-gpc.offset; REPA(arrow_rect)if(Cuts(pos, arrow_rect[i])){arrow_pushed[i]=true; break;}}}
       Vec move=0;
       if(AdjustToGround(*v4))
       {

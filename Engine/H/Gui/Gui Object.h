@@ -236,7 +236,8 @@ const_mem_addr struct GuiObj // Gui Object interface inherited by all Gui Object
 
    Vec2       clientOffset()C; // get client offset (from position to client position)
    Vec2       clientSize  ()C; // get client size
-   Rect  localClientRect  ()C; // get client rectangle in local  space - this is with having Vec2(0, 0) as top left corner, except Desktop which has Vec2(-D.w(), D.h())
+   Rect  localClientRect  ()C; // get client rectangle in local  space - this is with having Vec2(0, 0) as top left corner, except Desktop which has D.rect  ().lu()
+   Rect  localClientRectUI()C; // get client rectangle in local  space - this is with having Vec2(0, 0) as top left corner, except Desktop which has D.rectUI().lu()
    Vec2 screenClientPos   ()C; // get client position  in screen space
    Rect screenClientRect  ()C; // get client rectangle in screen space
 

@@ -130,8 +130,9 @@ extern const Char8 Digits16[]; // '0', '1', '2', '3', '4', '5', '6', '7', '8', '
 INLINE UInt CharFlagFast(Char  c) {return _CharFlag    [Unsigned (c)];}
 INLINE UInt CharFlagFast(Char8 c) {return  CharFlagFast(Char8To16(c));}
 
-Bool Safe(Char c); // if character is     safe
-Bool Skip(Char c); // if character can be skipped
+Bool Safe(Char8 c); // if character is     safe
+Bool Safe(Char  c); // if character is     safe
+Bool Skip(Char  c); // if character can be skipped
 
 Int CharInt(Char c); // get character as integer, '0'->0, '1'->1, .., 'a/A'->10, 'b/B'->11, .., ?->-1
 

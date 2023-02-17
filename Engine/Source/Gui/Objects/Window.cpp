@@ -156,7 +156,7 @@ static Rect ResizedRect(C Rect &src, C Rect &dest, UInt mask)
 }
 static Rect MaximizedRect(C Window &window)
 {
-   if(GuiObj *parent=window.parent())return parent->localClientRect();
+   if(GuiObj *parent=window.parent())return parent->localClientRectUI();
    return D.rectUI();
 }
 Bool    Window::maximized()C {return InsideEps(ResizedRect(rect(), MaximizedRect(T), resize_mask), rect());}
@@ -496,7 +496,7 @@ void Window::update(C GuiPC &gpc)
    {
       if(gpc.enabled)
       {
-         Bool have_client_rect=false; Rect client_rect; if(parent()){have_client_rect=true; client_rect=parent()->localClientRect();}
+         Bool have_client_rect=false; Rect client_rect; if(parent()){have_client_rect=true; client_rect=parent()->localClientRectUI();}
          if(Gui.ms()==this)
          {
             if(Ms.b(0) && _resize)
@@ -816,13 +816,14 @@ Bool Window::load(File &f, CChar *path)
 void ClosableWindow::update(C GuiPC &gpc)
 {
    super::update(gpc);
-   if(button[2].func()) // close button has a function assigned
+   if(Gui.window()==this)
+      if(button[2].func()) // close button has a function assigned
    {
-      if(Gui.window()==this && ((Kb.kf(KB_ESC) && !Kb.k.ctrlCmd() && !Kb.k.shift()) || Kb.kf(KB_NAV_BACK))) // this is the active window and key pressed
+      if((Kb.kf(KB_ESC) && !Kb.k.ctrlCmd() && !Kb.k.shift()) || Kb.kf(KB_NAV_BACK)) // this is the active window and key pressed
       {
          Kb.eatKey(); button[2].push(); // use "button.push" to trigger calling custom function assigned to that button
       }else
-      if(Ms.bp(2) && contains(Gui.ms()) && !Gui.menu()->contains(Gui.ms()))
+      if(Ms.bp(2) && !Gui.menu()->contains(Gui.ms()))
       {
          Ms.eat(2); button[2].push(); // use "button.push" to trigger calling custom function assigned to that button
       }

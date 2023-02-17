@@ -1268,9 +1268,12 @@ Str ClipGet()
    {
    #if 1
       if(JMethodID getText=jni.func(ClipboardManagerClass, "getText", "()Ljava/lang/CharSequence;"))
-      if(JString text=JString(jni, jni->CallObjectMethod(ClipboardManager, getText)))
+      if(JObject text=JObject(jni, jni->CallObjectMethod(ClipboardManager, getText)))
+      if(JClass CharSequence=JClass(jni, "java/lang/CharSequence"))
+      if(JMethodID toString=jni.func(CharSequence, "toString", "()Ljava/lang/String;"))
+      if(JString str=JString(jni, jni->CallObjectMethod(text, toString)))
       {
-         s=text.str();
+         s=str.str();
          Clean(s);
          goto end;
       }

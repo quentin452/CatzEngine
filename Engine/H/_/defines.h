@@ -28,6 +28,8 @@
 // HELPER MACROS
 /******************************************************************************/
 #define SIZE(  x)                   UIntPtr(sizeof(x))               // get raw size of C++ element in bytes
+#define SIZEI( x)                       Int(sizeof(x))               // get raw size of C++ element in bytes as   'Int' type
+#define SIZEU( x)                      UInt(sizeof(x))               // get raw size of C++ element in bytes as  'UInt' type
 #define SIZEL( x)                      Long(sizeof(x))               // get raw size of C++ element in bytes as  'Long' type
 #define SIZEUL(x)                     ULong(sizeof(x))               // get raw size of C++ element in bytes as 'ULong' type
 #define MEMBER(     Class, member)        (((Class*)null)-> member)  // null based Class::member, this macro is used to obtain member information by many other macros/functions
@@ -233,9 +235,6 @@ ASSERT(SIZE(Char8)==1); // size of Char8 must be 1 byte
    #define MAX_UTF_PATH  2048
 
    #define DEPTH_FLUSH (GL && TILE_BASED_GPU && !WEB) // some GPUs store RTs (including depth buffer) on fast on-chip memory and to be able to read from them, we need to flush them to the texture memory first. No need to do on WEB because there we can never read from depth while writing to it.
-
-   #define SIZEI(x)  Int(SIZE(x)) // get size of element
-   #define SIZEU(x) UInt(SIZE(x)) // get size of element
 
    #if LINUX
       #define FIND_ATOM(x) x=XInternAtom(XDisplay, #x, true ) // null on fail

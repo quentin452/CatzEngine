@@ -628,6 +628,21 @@ Rect GuiObj::localClientRect()C
    }
    return RectZero;
 }
+Rect GuiObj::localClientRectUI()C
+{
+ C GuiObj *go=this;
+   for(; go; )
+   {
+      if(go->isTab ())go=go->parent();else
+      if(go->isTabs())go=go->parent();else break;
+   }
+   if(go)switch(go->type())
+   {
+      case GO_DESKTOP: return D.rectUI();
+      default        : return Rect_LU(Vec2Zero, go->clientSize());
+   }
+   return RectZero;
+}
 CChar*  GuiObj::typeName()C {return GuiObjTypeName(type());}
 GuiObj& GuiObj::baseLevel(Int level) {if(_base_level!=level){_base_level=level; validateLevel();} return T;}
 /******************************************************************************/

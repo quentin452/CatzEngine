@@ -1,0 +1,314 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{CC51BAE5-B805-3E4E-9A38-7A6E85716126}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.22000.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>hwy</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\third_party\highway\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">hwy.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">hwy</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\third_party\highway\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">hwy.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">hwy</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\third_party\highway\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">hwy.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">hwy</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.lib</TargetExt>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\third_party\highway\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">hwy.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">hwy</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;HWY_STATIC_DEFINE;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;HWY_STATIC_DEFINE;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;HWY_STATIC_DEFINE;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;HWY_STATIC_DEFINE;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;HWY_STATIC_DEFINE;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;HWY_STATIC_DEFINE;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /bigobj</AdditionalOptions>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <UseFullPaths>false</UseFullPaths>
+      <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;HWY_STATIC_DEFINE;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;HWY_STATIC_DEFINE;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Lib>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/Esenthel/ThirdPartyLibs/JpegXL/lib/third_party/highway/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Esenthel/ThirdPartyLibs/JpegXL/lib "-BC:/Esenthel/ThirdPartyLibs/JpegXL/Windows UWP" --check-stamp-file "C:/Esenthel/ThirdPartyLibs/JpegXL/Windows UWP/third_party/highway/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Esenthel\ThirdPartyLibs\JpegXL\lib\cmake\FindAtomics.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CTest.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CTestUseLaunchers.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckPIESupported.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckLinkerFlag.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\third_party\highway\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/Esenthel/ThirdPartyLibs/JpegXL/lib/third_party/highway/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Esenthel/ThirdPartyLibs/JpegXL/lib "-BC:/Esenthel/ThirdPartyLibs/JpegXL/Windows UWP" --check-stamp-file "C:/Esenthel/ThirdPartyLibs/JpegXL/Windows UWP/third_party/highway/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Esenthel\ThirdPartyLibs\JpegXL\lib\cmake\FindAtomics.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CTest.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CTestUseLaunchers.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckPIESupported.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckLinkerFlag.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\third_party\highway\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/Esenthel/ThirdPartyLibs/JpegXL/lib/third_party/highway/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Esenthel/ThirdPartyLibs/JpegXL/lib "-BC:/Esenthel/ThirdPartyLibs/JpegXL/Windows UWP" --check-stamp-file "C:/Esenthel/ThirdPartyLibs/JpegXL/Windows UWP/third_party/highway/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Esenthel\ThirdPartyLibs\JpegXL\lib\cmake\FindAtomics.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CTest.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CTestUseLaunchers.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckPIESupported.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckLinkerFlag.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\third_party\highway\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/Esenthel/ThirdPartyLibs/JpegXL/lib/third_party/highway/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/Esenthel/ThirdPartyLibs/JpegXL/lib "-BC:/Esenthel/ThirdPartyLibs/JpegXL/Windows UWP" --check-stamp-file "C:/Esenthel/ThirdPartyLibs/JpegXL/Windows UWP/third_party/highway/CMakeFiles/generate.stamp"
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Esenthel\ThirdPartyLibs\JpegXL\lib\cmake\FindAtomics.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CTest.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CTestUseLaunchers.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckCXXSourceCompiles.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\CheckPIESupported.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\GNUInstallDirs.cmake;C:\Program Files\CMake\share\cmake-3.24\Modules\Internal\CheckLinkerFlag.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\third_party\highway\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\aligned_allocator.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\aligned_allocator.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\base.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\cache_control.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\detect_compiler_arch.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\detect_targets.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\foreach_target.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\highway.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\highway_export.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\nanobenchmark.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\nanobenchmark.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\ops\arm_neon-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\ops\arm_sve-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\ops\emu128-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\ops\generic_ops-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\ops\rvv-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\ops\scalar-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\ops\set_macros-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\ops\shared-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\ops\wasm_128-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\ops\x86_128-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\ops\x86_256-inl.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\ops\x86_512-inl.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\per_target.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\per_target.h" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\print-inl.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\print.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\print.h" />
+    <ClCompile Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\targets.cc" />
+    <ClInclude Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\third_party\highway\hwy\targets.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\ZERO_CHECK.proj">
+      <Project>{B14A7248-067A-3525-ADE5-2FF5EB652A92}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

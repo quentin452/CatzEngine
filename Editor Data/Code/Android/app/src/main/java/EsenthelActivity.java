@@ -1026,10 +1026,10 @@ public class EsenthelActivity extends NativeActivity
                edit_text.setImeOptions(edit_text.getImeOptions()|EditorInfo.IME_FLAG_NO_FULLSCREEN);
                activity.addContentView(edit_text, layout);
             }
-            editTextSetDo(text, start, end, mode);
             edit_text.setVisibility(View.VISIBLE);
             edit_text.bringToFront();
-            edit_text.requestFocus();
+            edit_text.requestFocus(); // !! THIS WILL CHANGE CURSOR POSITION TO THE END !!
+            editTextSetDo(text, start, end, mode); // !! CALL AFTER 'requestFocus' !!
 
             InputMethodManager imm=(InputMethodManager)activity.getSystemService(Context.INPUT_METHOD_SERVICE);
             imm.showSoftInput(edit_text, 0); // use 0 instead of 'SHOW_FORCED' because that one will keep keyboard visible even when app is hidden using the Home button

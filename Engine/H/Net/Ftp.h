@@ -15,17 +15,18 @@ struct Ftp // File Transfer Protocol, Ftp supports only one command/transfer at 
    Bool logIn (C Str8 &host, C Str8 &user, C Str8 &password, Bool ignore_auth_result=false); //    connect to   FTP, false on fail, connection will use secure mode if 'host' starts with "ftps://", 'ignore_auth_result'=if ignore authorization results and continue even when they failed
 
    // get / set
-   Bool is        (                             )C {return _socket.is();} // if  connected to the FTP
-   Long progress  (                             )C {return _progress   ;} // get transfer progress (in bytes)
-   Long total     (                             )C {return _total      ;} // get transfer total    (in bytes, -1=unknown)
-   Bool noop      (                             ); // send empty message to keep up the connection, false on fail
-   Long fileSize  (C Str &file                  ); // get    file size                            , -1    on fail
-   Bool fileTime  (C Str &file,   DateTime &dt  ); // get    file modification time               , false on fail
-   Bool rename    (C Str &src , C Str      &dest); // rename file/directory                       , false on fail
-   Bool removeFile(C Str &file                  ); // remove file                                 , false on fail
-   Bool removeDir (C Str &dir                   ); // remove empty   directory                    , false on fail
-   Bool createDir (C Str &dir                   ); // create empty   directory                    , false on fail
-   Bool changeDir (C Str &dir                   ); // change current directory                    , false on fail
+   Bool is         (                             )C {return _socket.is();} // if  connected to the FTP
+   Long progress   (                             )C {return _progress   ;} // get transfer progress (in bytes)
+   Long total      (                             )C {return _total      ;} // get transfer total    (in bytes, -1=unknown)
+   Bool noop       (                             ); // send empty message to keep up the connection, false on fail
+   Long    fileSize(C Str &file                  ); // get    file size                            , -1    on fail
+   Bool    fileTime(C Str &file,   DateTime &dt  ); // get    file modification time               , false on fail
+   Bool setFileTime(C Str &file, C DateTime &dt  ); // set    file modification time               , false on fail
+   Bool rename     (C Str &src , C Str      &dest); // rename file/directory                       , false on fail
+   Bool removeFile (C Str &file                  ); // remove file                                 , false on fail
+   Bool removeDir  (C Str &dir                   ); // remove empty   directory                    , false on fail
+   Bool createDir  (C Str &dir                   ); // create empty   directory                    , false on fail
+   Bool changeDir  (C Str &dir                   ); // change current directory                    , false on fail
 
    // io, if following functions will be called in a secondary thread, then you may not perform any operations on the given 'File', until the methods return
    Bool  download(C Str  &src ,   File &dest, Long offset=0, Bool passive=true, Cipher * src_cipher=null); // download 'src' file from FTP to 'dest' file       , 'passive'=transfer mode, false on fail, 'dest' file should be already opened for writing mode (either to   disk or memory)

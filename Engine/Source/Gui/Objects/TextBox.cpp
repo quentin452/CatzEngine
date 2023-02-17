@@ -721,11 +721,13 @@ void TextBox::draw(C GuiPC &gpc)
                     active=(Gui.kb()==this && enabled);
                if(T().is() || active || hint.is())
                {
-                C Color *text_color; // never null
-                  if(enabled)text_color=&skin->textline.  normal_text_color;
-                  else       text_color=&skin->textline.disabled_text_color;
+                  TextStyleParams ts=*text_style;
 
-                  TextStyleParams ts=*text_style; ts.align.set(1, -1); ts.color=ColorMul(ts.color, *text_color);
+                C Color *text_color; // never null
+                  if(enabled){text_color=&skin->textline.  normal_text_color; ts.image_color.a=255;}
+                  else       {text_color=&skin->textline.disabled_text_color; ts.image_color.a=128;}
+
+                  ts.align.set(1, -1); ts.color=ColorMul(ts.color, *text_color);
                #if DEFAULT_FONT_FROM_CUSTOM_SKIN
                   if(!ts.font())ts.font(skin->font()); // adjust font in case it's empty and the custom skin has a different font than the 'Gui.skin'
                #endif

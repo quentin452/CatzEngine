@@ -547,7 +547,7 @@ void TextLine::draw(C GuiPC &gpc)
             {
                Rect clip_rect=rect; clip_rect.max.x=clip_rect.min.x+clientWidth(); D.clip(clip_rect&gpc.clip);
 
-               TextStyleParams ts=*text_style; ts.size=rect.h()*skin->textline.text_size; ts.align.set(1, 0); ts.color=ColorMul(ts.color, *text_color);
+               TextStyleParams ts=*text_style; ts.size=rect.h()*skin->textline.text_size; ts.align.set(1, 0); ts.color=ColorMul(ts.color, *text_color); ts.image_color.a=(enabled ? 255 : 128);
             #if DEFAULT_FONT_FROM_CUSTOM_SKIN
                if(!ts.font())ts.font(skin->font()); // adjust font in case it's empty and the custom skin has a different font than the 'Gui.skin'
             #endif

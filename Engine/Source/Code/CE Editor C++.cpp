@@ -8,6 +8,7 @@ static Int Compare(C Edit::CodeEditor::BuildFile &a, C Edit::CodeEditor::BuildFi
 namespace Edit{
 /******************************************************************************/
 #define MERGE_HEADERS 0 // this made almost no difference on an SSD Disk
+#define ANDROID_ADAPTIVE_ICON 1
 /******************************************************************************/
 // TODO: VSRun doesn't include build configuration, Debug/Release, DX10+/GL, 32/64bit
   void CodeEditor::VS     (C Str &command,   Bool console,   Bool hidden              ) {if(console ? !build_process.create(devenv_path, command, hidden) : !Run(devenv_path, command, hidden))Error(S+"Error launching:\n\""+devenv_path+'"');}
@@ -987,7 +988,7 @@ static void AddFile    (Memb<PakFileData> &files,           C PaksFile *pf) {if(
 static void Add        (Memb<PakFileData> &files, Pak &pak, C PakFile  *pf) {if(pf)Add    (files,      pak, *pf      );}
 static void AddChildren(Memb<PakFileData> &files,           C PaksFile *pf) {if(pf)FREP(pf->children_num)AddFile(files,     &Paks.file(pf->children_offset+i));}
 static void AddChildren(Memb<PakFileData> &files, Pak &pak, C PakFile  *pf) {if(pf)FREP(pf->children_num)AddFile(files, pak, pak .file(pf->children_offset+i));}
-static Bool CreateEngineEmbedPak(C Str &src, C Str &dest, Bool use_cipher, Bool *changed=null)
+static Bool CreateEngineEmbedPak(C Str &src, C Str &dest, Bool use_cipher, EXE_TYPE exe_type, Bool *changed=null)
 {
    if(changed)*changed=false;
 
@@ -1011,53 +1012,60 @@ static Bool CreateEngineEmbedPak(C Str &src, C Str &dest, Bool use_cipher, Bool 
    }
    if(!src_pak)return Error("Can't find \"Engine.pak\"");
 
+   Bool dx=(exe_type==EXE_EXE || exe_type==EXE_DLL || exe_type==EXE_LIB || exe_type==EXE_UWP),
+        gl=!dx;
+
    if(CE.cei().appEmbedEngineData()>1) // full
    {
       FREPA(*src_pak)Add(files, *src_pak, src_pak->file(i)); // add all files
    }else // 2D only
    {
       // !! ADD FOLDERS TO PRESERVE MODIFICATION TIMES !!
-      Add    (files, *src_pak, src_pak->find("Emoji"));
-      Add    (files, *src_pak, src_pak->find("Gui"));
-      Add    (files, *src_pak, src_pak->find("Shader"));
-      Add    (files, *src_pak, src_pak->find("Shader/4"));
-      Add    (files, *src_pak, src_pak->find("Shader/GL"));
-      Add    (files, *src_pak, src_pak->find("Shader/GL SPIR-V"));
-
-      AddFile(files, *src_pak, src_pak->find("Shader/4/Early Z"));
-      AddFile(files, *src_pak, src_pak->find("Shader/4/Main"));
-      AddFile(files, *src_pak, src_pak->find("Shader/4/Position"));
-      AddFile(files, *src_pak, src_pak->find("Shader/GL/Early Z"));
-      AddFile(files, *src_pak, src_pak->find("Shader/GL/Main"));
-      AddFile(files, *src_pak, src_pak->find("Shader/GL/Position"));
-      AddFile(files, *src_pak, src_pak->find("Shader/GL SPIR-V/Early Z"));
-      AddFile(files, *src_pak, src_pak->find("Shader/GL SPIR-V/Main"));
-      AddFile(files, *src_pak, src_pak->find("Shader/GL SPIR-V/Position"));
-      
+      Add        (files, *src_pak, src_pak->find("Emoji"));
       AddChildren(files, *src_pak, src_pak->find("Emoji"));
+      Add        (files, *src_pak, src_pak->find("Gui"));
       AddChildren(files, *src_pak, src_pak->find("Gui"));
+      Add        (files, *src_pak, src_pak->find("Shader"));
+      if(dx)
+      {
+         Add    (files, *src_pak, src_pak->find("Shader/4"));
+         AddFile(files, *src_pak, src_pak->find("Shader/4/Early Z"));
+         AddFile(files, *src_pak, src_pak->find("Shader/4/Main"));
+         AddFile(files, *src_pak, src_pak->find("Shader/4/Position"));
+      }
+      if(gl)
+      {
+         Add    (files, *src_pak, src_pak->find("Shader/GL"));
+         AddFile(files, *src_pak, src_pak->find("Shader/GL/Early Z"));
+         AddFile(files, *src_pak, src_pak->find("Shader/GL/Main"));
+         AddFile(files, *src_pak, src_pak->find("Shader/GL/Position"));
+         Add    (files, *src_pak, src_pak->find("Shader/GL SPIR-V"));
+         AddFile(files, *src_pak, src_pak->find("Shader/GL SPIR-V/Early Z"));
+         AddFile(files, *src_pak, src_pak->find("Shader/GL SPIR-V/Main"));
+         AddFile(files, *src_pak, src_pak->find("Shader/GL SPIR-V/Position"));
+      }
       FREP(src_pak->rootFiles())AddFile(files, *src_pak, src_pak->file(i)); // add all root files (gui files)
    }
 
    Cipher *cipher=(use_cipher ? CE.cei().appEmbedCipher() : null);
-   if(CompareFile(FileInfoSystem(dest).modify_time_utc, CE.cei().appEmbedSettingsTime(CE.build_exe_type))>0 && PakEqual(files, dest, cipher))return true; // if existing Pak time is newer than settings (compression/encryption) and Pak is what we want, then use it
+   if(CompareFile(FileInfoSystem(dest).modify_time_utc, CE.cei().appEmbedSettingsTime(exe_type))>0 && PakEqual(files, dest, cipher))return true; // if existing Pak time is newer than settings (compression/encryption) and Pak is what we want, then use it
    if(changed)*changed=true;
-   if(!PakCreate(files, dest, 0, cipher, CE.cei().appEmbedCompress(CE.build_exe_type), CE.cei().appEmbedCompressLevel(CE.build_exe_type)))return Error("Can't create Embedded Engine Pak");
+   if(!PakCreate(files, dest, 0, cipher, CE.cei().appEmbedCompress(exe_type), CE.cei().appEmbedCompressLevel(exe_type)))return Error("Can't create Embedded Engine Pak");
    return true;
 }
-static Bool CreateAppPak(C Str &name, Bool &exists, Bool *changed=null)
+static Bool CreateAppPak(C Str &name, Bool &exists, EXE_TYPE exe_type, Bool *changed=null)
 {
    Bool ok=false;
    exists=false;
    if(changed)*changed=false;
 
-   Memb<PakFileData> files; CE.cei().appSpecificFiles(files, CE.build_exe_type);
+   Memb<PakFileData> files; CE.cei().appSpecificFiles(files, exe_type);
    if(files.elms())
    {
       exists=true;
       Cipher *cipher=CE.cei().appEmbedCipher();
-      if(CompareFile(FileInfoSystem(name).modify_time_utc, CE.cei().appEmbedSettingsTime(CE.build_exe_type))>0 && PakEqual(files, name, cipher))ok=true; // if existing Pak time is newer than settings (compression/encryption) and Pak is what we want, then use it
-      else {if(changed)*changed=true; ok=PakCreate(files, name, 0, cipher, CE.cei().appEmbedCompress(CE.build_exe_type), CE.cei().appEmbedCompressLevel(CE.build_exe_type));}
+      if(CompareFile(FileInfoSystem(name).modify_time_utc, CE.cei().appEmbedSettingsTime(exe_type))>0 && PakEqual(files, name, cipher))ok=true; // if existing Pak time is newer than settings (compression/encryption) and Pak is what we want, then use it
+      else {if(changed)*changed=true; ok=PakCreate(files, name, 0, cipher, CE.cei().appEmbedCompress(exe_type), CE.cei().appEmbedCompressLevel(exe_type));}
    }else
    {
       ok=true;
@@ -1258,14 +1266,14 @@ Bool CodeEditor::generateVSProj(Int version)
    // embed engine data, generate always because it may be used by WINDOWS_OLD
    if(cei().appEmbedEngineData())
    {
-      Bool changed; if(!CreateEngineEmbedPak(S, build_path+"Assets/EngineEmbed.pak", true, &changed))return false;
+      Bool changed; if(!CreateEngineEmbedPak(S, build_path+"Assets/EngineEmbed.pak", true, EXE_EXE, &changed))return false; // used only on WINDOWS_OLD
       resource_rc.putLine(S+(resource_id++)+" PAK         \"EngineEmbed.pak\"");
       resource_changed|=changed;
    }
 
    // app data, generate always because it may be used by WINDOWS_OLD
    {
-      Bool exists, changed; if(!CreateAppPak(build_path+"Assets/App.pak", exists, &changed))return false;
+      Bool exists, changed; if(!CreateAppPak(build_path+"Assets/App.pak", exists, EXE_EXE, &changed))return false; // used only on WINDOWS_OLD
       if(exists)resource_rc.putLine(S+(resource_id++)+" PAK         \"App.pak\"");
       resource_changed|=changed;
    }
@@ -1452,7 +1460,7 @@ Bool CodeEditor::generateVSProj(Int version)
       Str src=bin_path+"Mobile/Engine.pak", dest=data+"Engine.pak";
       if(cei().appEmbedEngineData()==1) // 2D only
       {
-         if(!CreateEngineEmbedPak(src, dest, false))return false;
+         if(!CreateEngineEmbedPak(src, dest, false, EXE_NS))return false;
       }else
          if(!CopyFile(src, dest))return false;
 
@@ -1697,6 +1705,18 @@ Bool CodeEditor::generateVSProj(Int version)
             prop->getNode("AndroidExtraGradleArgs").data.add(Contains(condition->value, "Debug", false, WHOLE_WORD_STRICT) ? "bundleDebug" : "bundleRelease"); // enable bundle generation !! WILL BE IGNORED IF APK IS UP TO DATE !!
          }*/
 
+         // Android MinSDK
+         Int min_sdk=0;
+         if(ANDROID_ADAPTIVE_ICON)min_sdk=26;
+         if(min_sdk)
+         for(Int i=0; XmlNode *prop=proj->findNode("PropertyGroup", i); i++)
+            if(C XmlParam *condition=prop->findParam("Condition"))
+               if(Contains(condition->value, "Android", false, WHOLE_WORD_STRICT))
+         {
+            Str &s=prop->getNode("AndroidMinSdkVersion").data.setNum(1).first();
+            s=Max(min_sdk, TextInt(s));
+         }
+
          // Platform toolset #VisualStudio
          CChar8 *platform_toolset=null, *platform_toolset_xp=null;
          if(version==10) platform_toolset=platform_toolset_xp="v100";else
@@ -1845,7 +1865,7 @@ Bool CodeEditor::generateXcodeProj()
    Int embed_engine=cei().appEmbedEngineData();
    if( embed_engine) // Mac
    {
-      if(!CreateEngineEmbedPak(S, build_path+"Assets/EngineEmbed.pak", true))return false;
+      if(!CreateEngineEmbedPak(S, build_path+"Assets/EngineEmbed.pak", true, EXE_MAC))return false;
       mac_assets.New().name="Assets/EngineEmbed.pak";
    }
    // iOS
@@ -1853,12 +1873,12 @@ Bool CodeEditor::generateXcodeProj()
    {
       FCreateDirs(build_path+"Assets/EmbedMobile");
       Str src=bin_path+"Mobile/Engine.pak", dest=build_path+"Assets/EmbedMobile/Engine.pak";
-      if(!CreateEngineEmbedPak(src, dest, false))return false;
+      if(!CreateEngineEmbedPak(src, dest, false, EXE_IOS))return false;
          ios_assets.New().name="Assets/EmbedMobile/Engine.pak"; 
    }else ios_assets.New().name=   bin_path+"Mobile/Engine.pak";
 
    // app data
-   Bool exists; if(!CreateAppPak(build_path+"Assets/App.pak", exists))return false;
+   Bool exists; if(!CreateAppPak(build_path+"Assets/App.pak", exists, EXE_MAC))return false;
    if(  exists)mac_assets.New().name="Assets/App.pak";
 
    // Steam
@@ -2406,7 +2426,7 @@ Bool CodeEditor::generateAndroidProj()
       Str src=bin_path+"Mobile/Engine.pak", dest=assets+"Engine.pak";
       if(cei().appEmbedEngineData()==1) // 2D only
       {
-         if(!CreateEngineEmbedPak(src, dest, false))return false;
+         if(!CreateEngineEmbedPak(src, dest, false, EXE_APK))return false;
       }else
          if(!CopyFile(src, dest))return false;
    }
@@ -2453,19 +2473,47 @@ Bool CodeEditor::generateAndroidProj()
       Str name;
 
       // list images starting from the smallest
-      name=res+"drawable-ldpi/icon.png"  ; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize( 36,  36);
-      name=res+"drawable-mdpi/icon.png"  ; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize( 48,  48);
-      name=res+"drawable-hdpi/icon.png"  ; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize( 72,  72);
-      name=res+"drawable-xhdpi/icon.png" ; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize( 96,  96);
-      name=res+"drawable-xxhdpi/icon.png"; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize(144, 144);
+      if(ANDROID_ADAPTIVE_ICON)
+      {
+      #if 0
+         name=res+"mipmap-ldpi/icon_f.png"   ; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize( 81,  81);
+         name=res+"mipmap-mdpi/icon_f.png"   ; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize(108, 108);
+         name=res+"mipmap-hdpi/icon_f.png"   ; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize(162, 162);
+         name=res+"mipmap-xhdpi/icon_f.png"  ; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize(216, 216);
+         name=res+"mipmap-xxhdpi/icon_f.png" ; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize(324, 324);
+       //name=res+"mipmap-xxxhdpi/icon_f.png"; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize(432, 432);
+      #else
+         name=res+"mipmap-ldpi/icon_f.png"   ; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize( 54,  54).crop( 81,  81);
+         name=res+"mipmap-mdpi/icon_f.png"   ; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize( 72,  72).crop(108, 108);
+         name=res+"mipmap-hdpi/icon_f.png"   ; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize(108, 108).crop(162, 162);
+         name=res+"mipmap-xhdpi/icon_f.png"  ; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize(144, 144).crop(216, 216);
+         name=res+"mipmap-xxhdpi/icon_f.png" ; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize(216, 216).crop(324, 324);
+       //name=res+"mipmap-xxxhdpi/icon_f.png"; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize(288, 288).crop(432, 432);
+      #endif
+
+         XmlData xml;
+         XmlNode &node=xml.nodes.New().setName("adaptive-icon");
+         node.params.New().set("xmlns:android", "http://schemas.android.com/apk/res/android");
+       //XmlNode &background=node.nodes.New().setName("background"); background.params.New().set("android:drawable", "@mipmap/icon_b");
+         XmlNode &foreground=node.nodes.New().setName("foreground"); foreground.params.New().set("android:drawable", "@mipmap/icon_f");
+         if(!OverwriteOnChangeLoud(xml, dest_path+"app/src/main/res/mipmap/icon.xml"))return false;
+      }
+      // classic icons AND also needed for notification 'setLargeIcon' in Java
+      name=res+"drawable-ldpi/icon.png"   ; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize( 36,  36);
+      name=res+"drawable-mdpi/icon.png"   ; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize( 48,  48);
+      name=res+"drawable-hdpi/icon.png"   ; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize( 72,  72);
+      name=res+"drawable-xhdpi/icon.png"  ; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize( 96,  96);
+      name=res+"drawable-xxhdpi/icon.png" ; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize(144, 144);
+    //name=res+"drawable-xxxhdpi/icon.png"; if(CompareFile(FileInfoSystem(name).modify_time_utc, icon_time))convert.New().set(name, icon, icon_time).resize(192, 192);
 
       // https://developer.android.com/guide/practices/ui_guidelines/icon_design_status_bar.html
       GetNotificationIcon(notification_icon, notification_icon_time, icon, icon_time);
-      name=res+"drawable-ldpi/notification.png"  ; if(CompareFile(FileInfoSystem(name).modify_time_utc, notification_icon_time))convert.New().set(name, notification_icon, notification_icon_time).resize(18, 18);
-      name=res+"drawable-mdpi/notification.png"  ; if(CompareFile(FileInfoSystem(name).modify_time_utc, notification_icon_time))convert.New().set(name, notification_icon, notification_icon_time).resize(24, 24);
-      name=res+"drawable-hdpi/notification.png"  ; if(CompareFile(FileInfoSystem(name).modify_time_utc, notification_icon_time))convert.New().set(name, notification_icon, notification_icon_time).resize(36, 36);
-      name=res+"drawable-xhdpi/notification.png" ; if(CompareFile(FileInfoSystem(name).modify_time_utc, notification_icon_time))convert.New().set(name, notification_icon, notification_icon_time).resize(48, 48);
-      name=res+"drawable-xxhdpi/notification.png"; if(CompareFile(FileInfoSystem(name).modify_time_utc, notification_icon_time))convert.New().set(name, notification_icon, notification_icon_time).resize(72, 72);
+      name=res+"drawable-ldpi/notification.png"   ; if(CompareFile(FileInfoSystem(name).modify_time_utc, notification_icon_time))convert.New().set(name, notification_icon, notification_icon_time).resize(18, 18);
+      name=res+"drawable-mdpi/notification.png"   ; if(CompareFile(FileInfoSystem(name).modify_time_utc, notification_icon_time))convert.New().set(name, notification_icon, notification_icon_time).resize(24, 24);
+      name=res+"drawable-hdpi/notification.png"   ; if(CompareFile(FileInfoSystem(name).modify_time_utc, notification_icon_time))convert.New().set(name, notification_icon, notification_icon_time).resize(36, 36);
+      name=res+"drawable-xhdpi/notification.png"  ; if(CompareFile(FileInfoSystem(name).modify_time_utc, notification_icon_time))convert.New().set(name, notification_icon, notification_icon_time).resize(48, 48);
+      name=res+"drawable-xxhdpi/notification.png" ; if(CompareFile(FileInfoSystem(name).modify_time_utc, notification_icon_time))convert.New().set(name, notification_icon, notification_icon_time).resize(72, 72);
+    //name=res+"drawable-xxxhdpi/notification.png"; if(CompareFile(FileInfoSystem(name).modify_time_utc, notification_icon_time))convert.New().set(name, notification_icon, notification_icon_time).resize(96, 96);
 
       convert.reverseOrder(); // start working from the biggest ones because they take the most time, yes this is correct
       MultiThreadedCall(convert, ImageConvert::Func);
@@ -2489,7 +2537,7 @@ Bool CodeEditor::generateAndroidProj()
       manifest->getParam("android:installLocation").value=((cei().appPreferredStorage()==STORAGE_EXTERNAL) ? "preferExternal" : (cei().appPreferredStorage()==STORAGE_AUTO) ? "auto" : "internalOnly");
       XmlNode &application=manifest->getNode("application");
       {
-         if(icon.is())application.getParam("android:icon" ).value="@drawable/icon";
+         if(icon.is())application.getParam("android:icon" ).value=(ANDROID_ADAPTIVE_ICON ? "@mipmap/icon" : "@drawable/icon");
                       application.getParam("android:label").value=cstr_app_name;
 
          // iterate activities
@@ -2507,12 +2555,12 @@ Bool CodeEditor::generateAndroidProj()
                      Bool landscape=FlagOn(flag, DIRF_X),
                           portrait =FlagOn(flag, DIRF_Y);
                      CChar8    *orn=null;
-                     if( flag==(DIRF_X|DIRF_UP)  )orn="sensor"         ;else // up/left/right no down
+                     if( flag==(DIRF_X|DIRF_UP)  )orn="user"           ;else // up/left/right no down, use instead of "sensor" because that one ignores "auto-rotate" option
                      if((flag&DIRF_X)==DIRF_RIGHT)orn="landscape"      ;else // only one horizontal
                      if((flag&DIRF_Y)==DIRF_UP   )orn="portrait"       ;else // only one vertical
                      if( landscape && !portrait  )orn="sensorLandscape";else
                      if(!landscape &&  portrait  )orn="sensorPortrait" ;else
-                                                  orn="fullSensor"     ;
+                                                  orn="fullUser"       ; // use instead of "fullSensor" because that one ignores "auto-rotate" option
                      node.getParam("android:screenOrientation").value=orn;
                   }
                }
@@ -2999,10 +3047,10 @@ Bool CodeEditor::generateLinuxMakeProj()
    if(cei().appEmbedEngineData())
    {
       BuildEmbed &be=build_embed.New().set(CC4('P', 'A', 'K', 0), build_path+"Assets/EngineEmbed.pak");
-      if(!CreateEngineEmbedPak(S, be.path, true))return false;
+      if(!CreateEngineEmbedPak(S, be.path, true, EXE_LINUX))return false;
    }
    Str  app_pak_path=build_path+"Assets/App.pak";
-   Bool exists; if(!CreateAppPak(app_pak_path, exists))return false;
+   Bool exists; if(!CreateAppPak(app_pak_path, exists, EXE_LINUX))return false;
    if(  exists)build_embed.New().set(CC4('P', 'A', 'K', 0), app_pak_path);
 
    // we need to recreate the exe everytime in case we're embedding app resources manually

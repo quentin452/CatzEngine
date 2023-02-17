@@ -2742,6 +2742,12 @@
     <Library Include="..\ThirdPartyLibs\AOM\Windows\Release\aom.lib">
       <Filter>H\_\Libs\64</Filter>
     </Library>
+    <Library Include="..\ThirdPartyLibs\JpegXL\Windows UWP\lib\Release\jxl-static.lib">
+      <Filter>H\_\Libs\64\Universal</Filter>
+    </Library>
+    <Library Include="..\ThirdPartyLibs\JpegXL\Windows UWP\lib\Release\jxl_threads-static.lib">
+      <Filter>H\_\Libs\64\Universal</Filter>
+    </Library>
   </ItemGroup>
   <ItemGroup>
     <Object Include="..\ThirdPartyLibs\LZMA\Android\obj\local\arm64-v8a\objs\lzma\__\__\lzma\C\LzmaDec.o">

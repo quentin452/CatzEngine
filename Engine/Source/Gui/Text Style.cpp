@@ -275,6 +275,18 @@ StrEx& StrEx::space()
    }
    return T;
 }
+StrEx& StrEx::nbsp()
+{
+   REPA(T)
+   {
+      StrData &d=T[i]; switch(d.type)
+      {
+         case StrData::TEXT : if(d.text.is()){if(!WhiteChar(d.text.last()))ins: T+=Nbsp; return T;} break; // process only if not empty
+         case StrData::IMAGE: goto ins;
+      }
+   }
+   return T;
+}
 StrEx& StrEx::line()
 {
    REPA(T)
@@ -1344,10 +1356,10 @@ struct TextDrawerHW : TextDrawer
                      Flt x=pos.x;
                      if(spacingConst()){Flt o=Max(w, space); pos.x+=o      ; x+=(o-w)/2;}
                      else              {                     pos.x+=w+space;}
-                     image->draw(Rect_LU(x, pos.y, w, size.y));
+                     image->draw(style.image_color, TRANSPARENT, Rect_LU(x, pos.y, w, size.y));
 
                      VI.shader(shader);
-                   //VI.color (color); not needed, 'image->draw' doesn't change it
+                     VI.color (color);
                   }else
                   {
                      if(cur==offset){cur_x=pos.x; cur_w=size.y/2;}
@@ -1487,10 +1499,10 @@ struct TextDrawerHW : TextDrawer
                VI.shader(null);
                // TODO: this should handle adjusting/restoring D.alpha for sub_pixel, however that would introduce overhead
 
-               image->draw(Rect_LU(spacingConst() ? pos.x+space_2-w/2 : pos.x, pos.y, w, size.y));
+               image->draw(style.image_color, TRANSPARENT, Rect_LU(spacingConst() ? pos.x+space_2-w/2 : pos.x, pos.y, w, size.y));
 
                VI.shader(shader);
-             //VI.color (color); not needed, 'image->draw' doesn't change it
+               VI.color (color);
             }else
             {
                font_index=font->_wide_to_font[Unsigned('\1')]; if(InRange(font_index, font->_chrs)) // if haven't found emoji, try drawing as invalid/unknown
@@ -2434,18 +2446,20 @@ TextStyleParams& TextStyleParams::resetColors(Bool gui)
    if(GuiSkin *skin=Gui.skin())
       if(TextStyle *text_style=(gui ? skin->text.text_style() : skin->text_style()))
    {
-      shadow   =text_style->shadow;
-      shade    =text_style->shade;
-      color    =text_style->color;
-      selection=text_style->selection;
+      shadow     =text_style->shadow;
+      shade      =text_style->shade;
+      color      =text_style->color;
+      image_color=text_style->image_color;
+      selection  =text_style->selection;
       return T;
    }
 
    // otherwise set defaults
-   shadow   =255;
-   shade    =DefaultShade;
-   color    =WHITE;
-   selection=DefaultSelectionColor;
+   shadow     =255;
+   shade      =DefaultShade;
+   color      =WHITE;
+   image_color=WHITE;
+   selection  =DefaultSelectionColor;
    return T;
 }
 TextStyleParams& TextStyleParams::reset(Bool gui)
@@ -2460,13 +2474,14 @@ TextStyleParams& TextStyleParams::reset(Bool gui)
    align.set(0    , 0    );
    size .set(0.08f, 0.08f);
    space.set(0.06f, 1    );
-   spacing  =SPACING_NICE;
-   shadow   =255;
-   shade    =DefaultShade;
-   color    =WHITE;
-   selection=DefaultSelectionColor;
-  _font     =null; // keep as null to always use the current value of 'Gui.skin.font'
-   edit     =null;
+   spacing    =SPACING_NICE;
+   shadow     =255;
+   shade      =DefaultShade;
+   color      =WHITE;
+   image_color=WHITE;
+   selection  =DefaultSelectionColor;
+  _font       =null; // keep as null to always use the current value of 'Gui.skin.font'
+   edit       =null;
    return T;
 }
 /******************************************************************************/

@@ -102,8 +102,8 @@ struct TextParam
    TextParam& clear() {name.clear(); value.clear(); return T;}
    TextParam& del  () {name.del  (); value.del  (); return T;}
 
-   Bool operator==(C TextParam &tp)C {return name==tp.name && value==tp.value;}
-   Bool operator!=(C TextParam &tp)C {return name!=tp.name || value!=tp.value;}
+   Bool operator==(C TextParam &tp)C {return name==tp.name &&  Equal(value, tp.value, true);}
+   Bool operator!=(C TextParam &tp)C {return name!=tp.name || !Equal(value, tp.value, true);}
 
             TextParam() {}
    explicit TextParam(C Str &name, C Str &value=S) {set(name, value);}
@@ -240,9 +240,9 @@ struct XmlData // Xml Data
   TextParam*  FindParam(   MemPtr<TextParam>  params, C Str &name, Int i=0); // find i-th param which name is equal to 'name', null on fail (if not found)
 C TextParam* CFindParam(C CMemPtr<TextParam> &params, C Str &name, Int i=0); // find i-th param which name is equal to 'name', null on fail (if not found)
 
-  TextNode*  FindNode(   MemPtr<TextNode>  nodes, C Str &name, Int i=0); // find i-th node which name is equal to 'name', null on fail (if not found)
-C TextNode* CFindNode(C CMemPtr<TextNode> &nodes, C Str &name, Int i=0); // find i-th node which name is equal to 'name', null on fail (if not found)
-  TextNode&   GetNode(   MemPtr<TextNode>  nodes, C Str &name         ); // get       node which name is equal to 'name', New  on fail (if not found)
+  TextNode*  FindNode(   MemPtr<TextNode>  nodes, C Str &name, Int i=0                           ); // find i-th node which name is equal to 'name', null on fail (if not found)
+C TextNode* CFindNode(C CMemPtr<TextNode> &nodes, C Str &name, Int i=0, Bool case_sensitive=false); // find i-th node which name is equal to 'name', null on fail (if not found)
+  TextNode&   GetNode(   MemPtr<TextNode>  nodes, C Str &name                                    ); // get       node which name is equal to 'name', New  on fail (if not found)
 
 XmlNode* FindNode(MemPtr<XmlNode> nodes, C Str &name, Int i=0); // find i-th node which name is equal to 'name', null on fail (if not found)
 XmlNode&  GetNode(MemPtr<XmlNode> nodes, C Str &name         ); // get       node which name is equal to 'name', New  on fail (if not found)
@@ -289,8 +289,9 @@ struct TextMeta : Memc<TextMetaElm> // text mixed with meta data
    void operator+=(  Char c);
    void operator+=(C Str &s);
 
-   Str  save(        )C;
-   void save(  Str &s)C;
-   Bool load(C Str &s);
+   Str  save(         )C;
+   void save(  Str  &s)C;
+   Bool load(C Str  &s);
+   Bool load(C Str8 &s);
 };
 /******************************************************************************/

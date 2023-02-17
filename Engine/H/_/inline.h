@@ -113,6 +113,9 @@ inline void   SupportFilterWaifu() {ResizeWaifu=_ResizeWaifu;}
 /******************************************************************************/
 inline Char * TextPos(Char  *src, Char  c) {return ConstCast(TextPos((CChar *)src, c));}
 inline Char8* TextPos(Char8 *src, Char8 c) {return ConstCast(TextPos((CChar8*)src, c));}
+
+inline void      Split(MemPtr<Str> splits, C Str &string, Char8 separator) {return Split(splits, string, Char8To16(separator));}
+inline Memc<Str> Split(                    C Str &string, Char8 separator) {return Split(        string, Char8To16(separator));}
 /******************************************************************************/
 // MATH
 /******************************************************************************/

@@ -1,0 +1,253 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Esenthel\ThirdPartyLibs\JpegXL\lib\lib\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\ac_strategy.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\alpha.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\ans_common.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\aux_out.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\cache_aligned.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\data_parallel.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\padded_bytes.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\random.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\blending.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\chroma_from_luma.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\coeff_order.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\color_encoding_internal.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\color_management.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\compressed_dc.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\convolve_separable5.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\convolve_separable7.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\convolve_slow.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\convolve_symmetric3.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\convolve_symmetric5.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\dct_scales.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\dec_ans.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\dec_cache.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\dec_context_map.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\dec_external_image.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\dec_frame.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\dec_group.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\dec_group_border.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\dec_huffman.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\dec_modular.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\dec_noise.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\dec_patch_dictionary.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\dec_xyb.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\decode.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\enc_bit_writer.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\entropy_coder.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\epf.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\fast_dct.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\fields.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\frame_header.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\gauss_blur.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\headers.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\huffman_table.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\icc_codec.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\icc_codec_common.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\image.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\image_bundle.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\image_metadata.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\loop_filter.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\luminance.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\memory_manager_internal.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\dec_ma.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\encoding.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\modular_image.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\rct.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\squeeze.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\transform.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\opsin_params.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\passes_state.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\quant_weights.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\quantizer.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\low_memory_render_pipeline.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\render_pipeline.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\simple_render_pipeline.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\stage_blending.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\stage_chroma_upsampling.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\stage_epf.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\stage_from_linear.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\stage_gaborish.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\stage_noise.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\stage_patches.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\stage_splines.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\stage_spot.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\stage_to_linear.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\stage_tone_mapping.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\stage_upsampling.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\stage_write.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\stage_xyb.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\stage_ycbcr.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\splines.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+    <Object Include="C:\Esenthel\ThirdPartyLibs\JpegXL\Windows UWP\lib\jxl_dec-obj.dir\$(Configuration)\toc.obj">
+      <Filter>Object Libraries</Filter>
+    </Object>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Object Libraries">
+      <UniqueIdentifier>{80857DA8-5E4D-398C-ABB8-CAA08A393FEE}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

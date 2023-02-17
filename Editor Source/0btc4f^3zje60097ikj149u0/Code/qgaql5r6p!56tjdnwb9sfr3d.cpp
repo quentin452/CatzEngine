@@ -432,7 +432,15 @@ class Uploader
    SyncLock                    cmpr_lock;
    Memc<Loaded>                cmpr_loaded_files;
    Mems<const_mem_addr Thread> cmpr_threads;
-   
+
+   class ModifyTime
+   {
+      Str  name;
+      long time;
+      
+      void set(C Str &name, C DateTime &date) {T.name=name; T.time=date.seconds1970();}
+   }
+   Memc<ModifyTime> modify_time;
    Memc<Str> rename_files, remove_files, remove_dirs;
 
    int connections()C {return ftp_conn()+1;}
@@ -577,6 +585,7 @@ REPAO(installer).disabled( disabled);
       {SyncLocker locker(ftp_lock); ftp_download_files.clear(); ftp_downloaded_files.clear(); ftp_create_dirs.clear(); ftp_upload_files.clear(); ftp_files_to_upload=0; ftp_size_to_upload=ftp_size_uploaded=0;}
 
       disabled(false);
+      modify_time .clear();
       rename_files.clear();
       remove_files.clear();
       remove_dirs .clear();
@@ -720,11 +729,11 @@ REPAO(installer).disabled( disabled);
 
                // installer compressed
                file_ftp_path=installer_cmpr_path[i]+new_suffix;
-               io_load_files.New().set(installer[i](), file_ftp_path, null, installer_local.size, true , LoadFile.COMPRESS_FULL); rename_files.add(file_ftp_path);
+               io_load_files.New().set(installer[i](), file_ftp_path, null, installer_local.size, true , LoadFile.COMPRESS_FULL); modify_time.New().set(file_ftp_path, installer_local.modify_time_utc); rename_files.add(file_ftp_path);
 
                // installer decompressed
                file_ftp_path=installer_dcmp_path[i]+new_suffix;
-               io_load_files.New().set(installer[i](), file_ftp_path, null, installer_local.size, false, LoadFile.COMPRESS_NO  ); rename_files.add(file_ftp_path);
+               io_load_files.New().set(installer[i](), file_ftp_path, null, installer_local.size, false, LoadFile.COMPRESS_NO  ); modify_time.New().set(file_ftp_path, installer_local.modify_time_utc); rename_files.add(file_ftp_path);
                
                if(InstallerPlatform[i]==OS_ANDROID && Compare(installer_local.ver, installer_server[i].ver)<=0)Gui.msgBox("Warning", "Android installer file is different, but its Build Version is not newer - Android OS may refuse to update the app.");
             }else // remove
@@ -769,55 +778,62 @@ REPAO(installer).disabled( disabled);
    /*Str PHPDownloadScript()
    {
       Str s;
-      s+="<?php\r\n";
-      s+="$file=$_GET['file'];\r\n";
-      s+="$file=str_replace('\\\\','/',$file); // use unix style paths\r\n";
-      s+="if($file[0]!='/' && $file[1]!=':' && strpos($file,'../')===false && strpos($file,'//')===false) // does not start with root/drive and does not contain relative paths or urls like http://\r\n";
-      s+="{\r\n";
-      s+="\t$file=basename(__FILE__,'.download.php').'/'.$file;\r\n";
-      s+="\tif(is_readable($file))\r\n";
-      s+="\t{\r\n";
-      s+="\t\theader('Content-Description: File Transfer');\r\n";
-      s+="\t\theader('Content-Type: application/octet-stream');\r\n";
-      s+="\t\theader('Content-Transfer-Encoding: binary');\r\n";
-      s+="\t\theader('Expires: 0');\r\n";
-      s+="\t\theader('Cache-Control: must-revalidate, no-transform');\r\n";
-      s+="\t\theader('Pragma: public');\r\n";
-      s+="\t\theader('Content-Length: '.filesize($file));\r\n";
-      s+="\t\tob_clean();\r\n";
-      s+="\t\tflush();\r\n";
-      s+="\t\treadfile($file);\r\n";
-      s+="\t\texit;\r\n";
-      s+="\t}\r\n";
-      s+="}\r\n";
-      s+="?>\r\n";
+      s+="<?php\n";
+      s+="$file=$_GET['file'];\n";
+      s+="$file=str_replace('\\\\','/',$file); // use unix style paths\n";
+      s+="if($file[0]!='/' && $file[1]!=':' && strpos($file,'../')===false && strpos($file,'//')===false) // does not start with root/drive and does not contain relative paths or urls like http://\n";
+      s+="{\n";
+      s+="\t$file=basename(__FILE__,'.download.php').'/'.$file;\n";
+      s+="\tif(is_readable($file))\n";
+      s+="\t{\n";
+      s+="\t\theader('Content-Description: File Transfer');\n";
+      s+="\t\theader('Content-Type: application/octet-stream');\n";
+      s+="\t\theader('Content-Transfer-Encoding: binary');\n";
+      s+="\t\theader('Expires: 0');\n";
+      s+="\t\theader('Cache-Control: must-revalidate, no-transform');\n";
+      s+="\t\theader('Pragma: public');\n";
+      s+="\t\theader('Content-Length: '.filesize($file));\n";
+      s+="\t\tob_clean();\n";
+      s+="\t\tflush();\n";
+      s+="\t\treadfile($file);\n";
+      s+="\t\texit;\n";
+      s+="\t}\n";
+      s+="}\n";
+      s+="?>\n";
       return s;
    }*/
    Str PHPUpdateScript()
    {
       Str s;
-      s+="<?php\r\n";
-      s+="function ren($src, $dest) {if(!rename($src, $dest))echo(\"Error renaming \".$src.\" file.<br/>\");}\r\n";
-      s+="function exist  ($name) {return file_exists($name);}\r\n";
-      s+="function delFile($name) {if(exist($name))unlink($name);}\r\n";
-      s+="function delDir ($name) {if(exist($name))rmdir ($name);}\r\n";
+      s+="<?php\n";
+      s+="function ren     ($src, $dest) {if(!rename($src, $dest))echo(\"Error renaming \".$src.\" file.<br/>\");}\n";
+      s+="function FTime  ($name, $time) {if(!touch($name, $time))echo(\"Error SetModifyTime \".$name.\" file.<br/>\");}\n";
+      s+="function exist  ($name) {return file_exists($name);}\n";
+      s+="function delFile($name) {if(exist($name))unlink($name);}\n";
+      s+="function delDir ($name) {if(exist($name))rmdir ($name);}\n";
+      FREPA(modify_time)
+      {
+       C ModifyTime &mt=modify_time[i];
+         Str name=Replace(SkipStartPath(mt.name, ftp_dir()), '\\', '/');
+         s+=S+"FTime(\""+name+"\", "+mt.time+");\n";
+      }
       FREPA(remove_files) // !! first remove old files, so folders will be empty for removal AND new installer is not accidentally deleted for case insensitive platforms !! (new installer problem is: old installer name "installer", new installer name "Installer", if we insert new first, it will rename "Installer@new" to "Installer" and then trying to delete the old "installer" on case insensitive servers would delete the new, because of that delete first)
       {
          Str name=Replace(SkipStartPath(remove_files[i], ftp_dir()), '\\', '/');
-         s+=S+"delFile(\""+name+"\");\r\n";
+         s+=S+"delFile(\""+name+"\");\n";
       }
       FREPA(rename_files) // now rename
       {
          Str src=Replace(SkipStartPath(rename_files[i], ftp_dir()), '\\', '/'), dest=SkipEnd(src, new_suffix);
-         s+=S+"ren(\""+src+"\", \""+dest+"\");\r\n";
+         s+=S+"ren(\""+src+"\", \""+dest+"\");\n";
       }
       FREPA(remove_dirs) // now remove empty folders
       {
          Str name=Replace(SkipStartPath(remove_dirs[i], ftp_dir()), '\\', '/');
-         s+=S+"delDir(\""+name+"\");\r\n";
+         s+=S+"delDir(\""+name+"\");\n";
       }
-      s+=S+"unlink(\""+CaseDown(GetBase(ftp_name()))+".update.php\");\r\n"; // remove PHP script
-      s+="?>\r\n";
+      s+=S+"unlink(\""+CaseDown(GetBase(ftp_name()))+".update.php\");\n"; // remove PHP script
+      s+="?>\n";
       s+="Update Finished!";
       return s;
    }

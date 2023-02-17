@@ -246,7 +246,7 @@ UpdateWindowClass UpdateWindow;
 /******************************************************************************/
 bool UpdateDo()
 {
-   Physics.del(); // del physics and unload DLL's
+   // <- unload DLL's here
 
    bool inside=StartsPath(App.exe(), Updater.path);
    Str  old=App.exe(); // remember old app name

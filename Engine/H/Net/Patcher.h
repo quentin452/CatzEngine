@@ -71,11 +71,12 @@ const_mem_addr struct Patcher // class for automatic downloading file updates fr
     C InstallerInfo*   installerInfo     (); // get access to installer information (this will return a valid pointer only if 'installerInfoState' is equal to DWNL_DONE), null on fail
 
       // installer
-      Patcher& downloadInstaller            (); // initialize downloading of the installer, downloading will begin on secondary thread
-      DWNL_STATE       installerState       (); // get state  of installer download, once it's equal to DWNL_DONE you can access it
-      Int              installerDownloadDone(); // get number of completed bytes for installer download
-      Int              installerDownloadSize(); // get number of total     bytes for installer download
-      File*            installer            (); // get access to installer file data (this will return a valid pointer only if 'installerState' is equal to DWNL_DONE), null on fail
+      Patcher& downloadInstaller             (); // initialize downloading of the installer, downloading will begin on secondary thread
+      DWNL_STATE       installerState        (); // get state  of installer download, once it's equal to DWNL_DONE you can access it
+      Int              installerDownloadDone ()C {return _inst_download.done         ();} // get number of completed bytes          for installer download
+      Int              installerDownloadSize ()C {return _inst_download.size         ();} // get number of total     bytes          for installer download
+    C DateTime&        installerModifyTimeUTC()C {return _inst_download.modifyTimeUTC();} // get modification time in UTC time zone for installer download
+      File*            installer             (); // get access to installer file data (this will return a valid pointer only if 'installerState' is equal to DWNL_DONE), null on fail
 
       // index
       Patcher& downloadIndex     (); // initialize downloading of the index (list of all current files on the server), downloading will begin on secondary thread

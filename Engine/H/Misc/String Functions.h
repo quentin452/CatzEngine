@@ -184,8 +184,12 @@ Str8 Trim(C Str8 &text, Int pos, Int length); // trim string by removing start a
 Str CaseDown(C Str &t); // return case down version of the string, Sample Usage: CaseDown("AbCdEFG") -> "abcdefg"
 Str CaseUp  (C Str &t); // return case up   version of the string, Sample Usage: CaseUp  ("AbCdEFG") -> "ABCDEFG"
 
-void      Split(MemPtr<Str> splits, C Str &string, Char separator); // split 'string' into an array of strings separated by 'separator', Sample Usage: Split("123:45::6:", ':') -> {"123", "45", "", "6", ""}
-Memc<Str> Split(                    C Str &string, Char separator); // split 'string' into an array of strings separated by 'separator', Sample Usage: Split("123:45::6:", ':') -> {"123", "45", "", "6", ""}
+void       Split(MemPtr<Str > splits, C Str  &string, Char  separator); // split 'string' into an array of strings separated by 'separator', Sample Usage: Split("123:45::6:", ':') -> {"123", "45", "", "6", ""}
+void       Split(MemPtr<Str > splits, C Str  &string, Char8 separator); // split 'string' into an array of strings separated by 'separator', Sample Usage: Split("123:45::6:", ':') -> {"123", "45", "", "6", ""}
+void       Split(MemPtr<Str8> splits, C Str8 &string, Char8 separator); // split 'string' into an array of strings separated by 'separator', Sample Usage: Split("123:45::6:", ':') -> {"123", "45", "", "6", ""}
+Memc<Str > Split(                     C Str  &string, Char  separator); // split 'string' into an array of strings separated by 'separator', Sample Usage: Split("123:45::6:", ':') -> {"123", "45", "", "6", ""}
+Memc<Str > Split(                     C Str  &string, Char8 separator); // split 'string' into an array of strings separated by 'separator', Sample Usage: Split("123:45::6:", ':') -> {"123", "45", "", "6", ""}
+Memc<Str8> Split(                     C Str8 &string, Char8 separator); // split 'string' into an array of strings separated by 'separator', Sample Usage: Split("123:45::6:", ':') -> {"123", "45", "", "6", ""}
 
 void SplitURLParams(MemPtr<TextParam> params, C Str &url); // split 'url' parameters into 'params'. Example: SplitURLParams("http://domain.com?param=1&other=2") -> {{name="param", value="1"}, {name="other", value="2"}}
 

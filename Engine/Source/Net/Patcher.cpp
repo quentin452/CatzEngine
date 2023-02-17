@@ -198,7 +198,10 @@ DWNL_STATE Patcher::installerState()
       #endif
          {
            _inst.pos(0);
-           _inst_available=true; _inst_download.del(); return DWNL_DONE;
+           _inst_available=true;
+            Long done=_inst_download. done(), size=_inst_download. size(); DateTime modify=_inst_download.modifyTimeUTC(); _inst_download.del();
+                      _inst_download._done=done;   _inst_download._size=size; _inst_download._modif_time=modify; // restore these in case we still want to access them
+            return DWNL_DONE;
          }
       #if AUTO_INSTALLER_INFO
          // if installer data doesn't match info, then one of possibilities is that data is OK but info outdated, so clear it
@@ -209,9 +212,7 @@ DWNL_STATE Patcher::installerState()
    }
    return state;
 }
-Int   Patcher::installerDownloadDone() {return _inst_download.done();}
-Int   Patcher::installerDownloadSize() {return _inst_download.size();}
-File* Patcher::installer            () {return (installerState()==DWNL_DONE) ? &_inst : null;}
+File* Patcher::installer() {return (installerState()==DWNL_DONE) ? &_inst : null;}
 /******************************************************************************/
 Patcher& Patcher::downloadIndex()
 {

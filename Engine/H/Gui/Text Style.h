@@ -130,6 +130,7 @@ struct StrEx : Mems<StrData> // Extended String, which can hold: Text, Images, C
    StrEx& panelImage(C PanelImagePtr &panel, C ImagePtr &image); // add image inside a panel, same as "T.panel(panel); T+=image; T.panel(null);"
 
    StrEx& space(); // add a space if string isn't empty and does not end with a new line or space
+   StrEx& nbsp (); // add a nbsp  if string isn't empty and does not end with a new line or space
    StrEx& line (); // add a line  if string isn't empty and does not end with a new line
 
    // io
@@ -143,7 +144,8 @@ struct TextStyleParams // Text Style Params
    Bool         pixel_align; // pixel alignment           , default=true (if enabled then every character will be aligned per pixel, you can disable this if you'd like to have smooth movement on the screen at the cost of slightly more blurriness of the text)
    Byte         shadow     , // shadow              0..255, default=255
                 shade      ; // shade               0..255, default=230
-   Color        color      , // color                     , default=WHITE
+   Color        color      , //       color               , default=WHITE
+                image_color, // image color               , default=WHITE
                 selection  ; // selection background color, default=(51, 153, 255, 64)
    Vec2         align      , // aligning                  , default=(0   , 0   )
                 size       , // size                      , default=(0.08, 0.08)

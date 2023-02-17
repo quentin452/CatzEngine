@@ -1,7 +1,7 @@
 ![Logo](https://esenthel.com/site/images/logo/GitHub%20Image.jpg)
 
 ### About
-Titan Engine developed by Esenthel is The Most Powerful, Free and Open Source Game Engine in the World.<br/>
+Titan Engine developed by Esenthel is The Most Powerful Open Source Game Engine in the World.<br/>
 Titan strives to be pure perfection!<br/>
 Official version available at: https://github.com/Esenthel/EsenthelEngine<br/>
 Official website: https://esenthel.com<br/>
@@ -20,13 +20,17 @@ To continue its development, Esenthel needs your support:
 ```
 COPYRIGHT
 Titan Engine created by Grzegorz Slazinski, all rights reserved.
-You can use it for free to create games and applications.
-This License is non-exclusive, non-transferable, worldwide and royalty-free - you don't have to
-share the income that you make from your games/apps made with Titan Engine.
+You can use it to create games and applications.
+This License is non-exclusive, non-transferable and worldwide.
 You can create unlimited number of games/apps using Titan Engine.
 You can redistribute Titan Engine source code.
 You can make changes to Titan Engine source code.
 You don't have to make code changes public, but it would be great if you could.
+There's a 5% royalty fee - calculated from the total amount of game/app sales (excluding refunds),
+and not from the amount that online digital store has transferred to you.
+Example: when selling on Steam, Valve share is 30%, Esenthel share is 5%, Your share is 65%.
+Payments have to be sent within 1 month of receiving money from digital store, to:
+Esenthel PayPal esenthel@hotmail.com or Esenthel Bank Account (please contact for details).
 
 ATTRIBUTION
 You don't have to show Titan Logo or mention the Engine anywhere in your game/app,

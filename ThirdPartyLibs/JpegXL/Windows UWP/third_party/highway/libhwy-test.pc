@@ -1,0 +1,11 @@
+prefix=C:/Program Files (x86)/LIBJXL
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libhwy-test
+Description: Efficient and performance-portable SIMD wrapper, test helpers.
+Requires: gtest
+Version: 1.0.2
+Libs: -L${libdir} -lhwy_test
+Cflags: -I${includedir}

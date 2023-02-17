@@ -246,6 +246,10 @@ Bool Equal(Char8 a, Char  b, Bool case_sensitive) {return case_sensitive ? Equal
 Bool Equal(Char  a, Char8 b, Bool case_sensitive) {return case_sensitive ? EqualCS(a, b) : EqualCI(a, b);}
 Bool Equal(Char  a, Char  b, Bool case_sensitive) {return case_sensitive ? EqualCS(a, b) : EqualCI(a, b);}
 
+Bool Safe(Char8 c)
+{
+   return Unsigned(c)>=32 || c=='\n' || c=='\t';
+}
 Bool Safe(Char c)
 {
    return (Unsigned(c)>=32 && Unsigned(c)<0xFE00) || c=='\n' || c=='\t' || Unsigned(c)>0xFE0F; // 0xFE00..0xFE0F useless character occurring in emojis causing "?" https://en.wikipedia.org/wiki/Variation_Selectors_(Unicode_block)
@@ -1816,7 +1820,17 @@ void Split(MemPtr<Str> splits, C Str &string, Char separator)
       if(  c==separator)splits.New();else splits.last()+=c;
    }
 }
-Memc<Str> Split(C Str &string, Char separator) {Memc<Str> splits; Split(splits, string, separator); return splits;}
+void Split(MemPtr<Str8> splits, C Str8 &string, Char8 separator)
+{
+   splits.clear().New();
+   FREPA(string)
+   {
+      Char8 c=string[i];
+      if(   c==separator)splits.New();else splits.last()+=c;
+   }
+}
+Memc<Str > Split(C Str  &string, Char  separator) {Memc<Str > splits; Split(splits, string, separator); return splits;}
+Memc<Str8> Split(C Str8 &string, Char8 separator) {Memc<Str8> splits; Split(splits, string, separator); return splits;}
 /******************************************************************************/
 void SplitURLParams(MemPtr<TextParam> params, C Str &url)
 {
@@ -2096,7 +2110,61 @@ CChar* Str::fromUTF8Safe(CChar *text) // returns pointer where it stopped readin
       Byte b0=*text;
       if(!(b0&(1<<7)))
       {
-         if(!Safe(b0))break; // Safe/NUL
+         if(!Safe((Char8)b0))break; // Safe/NUL
+         text++;
+         c=b0;
+      }else
+      {
+         text++; // always advance at least 1 byte even if result will be invalid, to self correct
+         if(!(b0&(1<<6)))break; // bit 6 should be always on
+
+         Byte b1=*text; if((b1&((1<<7)|(1<<6)))!=(1<<7))break; b1&=0x3F; text++; // bit 7 should be always on, bit 6 always off, this handles Safe/NUL. Advance after checking if char is valid, so we don't skip past NUL
+         if(!(b0&(1<<5)))
+         {
+            b0&=0x1F;
+            c=(b1|(b0<<6));
+         }else
+         {
+            Byte b2=*text; if((b2&((1<<7)|(1<<6)))!=(1<<7))break; b2&=0x3F; text++; // bit 7 should be always on, bit 6 always off, this handles Safe/NUL. Advance after checking if char is valid, so we don't skip past NUL
+            if(!(b0&(1<<4)))
+            {
+               b0&=0x0F;
+               c=(b2|(b1<<6)|(b0<<12));
+            }else
+            {
+               Byte b3=*text; if((b3&((1<<7)|(1<<6)))!=(1<<7))break; b3&=0x3F; text++; // bit 7 should be always on, bit 6 always off, this handles Safe/NUL. Advance after checking if char is valid, so we don't skip past NUL
+               if(!(b0&(1<<3)))
+               {
+                  b0&=0x07;
+                  UInt u=(b3|(b2<<6)|(b1<<12)|(b0<<18));
+                  // since we return Char, then we must convert 'u' to UTF-16 - https://en.wikipedia.org/wiki/UTF-16#Description
+                  if(u<=  0xFFFF)c=u;else // if(u<=0xD7FF || u>=0xE000 && u<=0xFFFF)c=u; ranges U+0000 to U+D7FF and U+E000 to U+FFFF are represented natively
+                  if(u<=0x10FFFF)
+                  {
+                     u-=0x10000;
+                     T+=Char(0xD800+(u>>10  )); // MULTI0
+                     c =     0xDC00+(u&0x3FF) ; // MULTI1
+                  }else c='?'; // unsupported
+               }else c='?'; // unsupported
+            }
+         }
+
+         if(!Safe(c))break; // Safe/NUL
+      }
+      T+=c;
+   }
+   return text;
+}
+CChar8* Str::fromUTF8Safe(CChar8 *text) // returns pointer where it stopped reading (end or unsafe char)
+{
+   clear();
+   if(text)for(;;)
+   {
+      Char c;
+      Byte b0=*text;
+      if(!(b0&(1<<7)))
+      {
+         if(!Safe((Char8)b0))break; // Safe/NUL
          text++;
          c=b0;
       }else
@@ -2183,7 +2251,7 @@ void Str::appendUTF8Safe(C Str &text) // this ignores unsafe characters
    FREPA(text)
    {
       auto c=Unsigned(text[i]);
-      if(Safe(c)) // ignore unsafe characters
+      if(Safe((Char)c)) // ignore unsafe characters
       if(c<=0x07F) T+=Char(c);else
       if(c<=0x7FF){T+=Char(0xC0 | (c>>6)); T+=Char(0x80 | (c&0x3F));}else
    #if 1 // since we operate on Char we must treat it as UTF-16, there 0xD800..0xDBFF are used to encode 2 Chars

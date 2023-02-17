@@ -1,6 +1,7 @@
 ﻿/******************************************************************************/
 #include "stdafx.h"
 namespace EE{
+#define TEXTDATA_NAMELESS_SUB  1 // if allow saving/loading {} without name if it's empty
 #define XML_NODE_DATA_SUB_NODE 1 // if keep 'XmlNode.data' as a sub-node when converting it to 'TextNode'
 #define FILE_PARAMS_INLINE     1 // if store simple children inline
 /******************************************************************************/
@@ -643,11 +644,11 @@ C TextParam* CFindParam(C CMemPtr<TextParam> &params, C Str &name, Int i)
    }
    return null;
 }
-C TextNode* CFindNode(C CMemPtr<TextNode> &nodes, C Str &name, Int i)
+C TextNode* CFindNode(C CMemPtr<TextNode> &nodes, C Str &name, Int i, Bool case_sensitive)
 {
    if(InRange(i, nodes))FREPAD(n, nodes) // process in order
    {
-    C TextNode &node=nodes[n]; if(node.name==name)
+    C TextNode &node=nodes[n]; if(Equal(node.name, name, case_sensitive))
       {
          if(i==0)return &node; i--;
       }
@@ -740,9 +741,20 @@ static Bool HasChildren(C Memc<TextNode> &nodes)
 /******************************************************************************/
 Bool TextNode::save(FileText &f, Bool just_values)C
 {
+   Bool has_children;
    if(!just_values)
    {
-      f.startLine(); SaveText(f, name);
+      f.startLine();
+      if(TEXTDATA_NAMELESS_SUB && !name.is() && nodes.elms()) // allow nameless sub, it's nameless, has sub
+      {
+         if(EmptyNames(nodes))
+         {
+            if(has_children=HasChildren(nodes))f.depth++;
+            goto nameless_sub_values;
+         }
+         goto nameless_sub;
+      }
+      SaveText(f, name);
    }
    if(value.is() || nodes.elms())
    {
@@ -750,9 +762,11 @@ Bool TextNode::save(FileText &f, Bool just_values)C
       if(!nodes.elms())SaveText(f, value);else // just 'value' is present (save this only when there are no nodes, because they have the priority)
       if(EmptyNames(nodes)) // store just the values
       {
-         Bool has_children=HasChildren(nodes);
-         if(  has_children)f.endLine().startLine().depth++;else
-         if(  just_values )f.endLine().startLine();
+            has_children=HasChildren(nodes);
+         if(has_children)f.endLine().startLine().depth++;else
+         if(just_values )f.endLine().startLine();
+
+      nameless_sub_values:
          f.putChar('[');
          Bool after_elm=false;
          FREPA(nodes)
@@ -772,7 +786,9 @@ Bool TextNode::save(FileText &f, Bool just_values)C
          f.putChar(']');
       }else
       {
-         f.endLine().startLine().putChar('{').endLine(); f.depth++;
+         f.endLine().startLine();
+      nameless_sub:
+         f.putChar('{').endLine(); f.depth++;
          FREPA(nodes)if(!nodes[i].save(f, false))return false;
          f.depth--; f.startLine().putChar('}');
       }
@@ -851,6 +867,7 @@ Char TextNode::load(FileText &f, Bool just_values, Char c)
          for(c=f.getChar(); ; )
          {
             if(SimpleChar(c) || c==QUOTE_BEGIN || c==BINARY_BEGIN || c==RAW_BEGIN)c=nodes.New().load(f, false, c);else
+            if(TEXTDATA_NAMELESS_SUB && (c=='{' || c=='[')                       )c=nodes.New().load(f, true , c);else
             if( WhiteChar(c)){c=f.getChar();       }else
             if(c=='}'       ){c=f.getChar(); break;}else
                              {c=      ERROR; break;}
@@ -1008,6 +1025,7 @@ Bool TextData::load(FileText &f)
    for(Char c=f.getChar(); ; )
    {
       if(SimpleChar(c) || c==QUOTE_BEGIN || c==BINARY_BEGIN || c==RAW_BEGIN)c=nodes.New().load(f, false, c);else
+      if(TEXTDATA_NAMELESS_SUB && (c=='{' || c=='[')                       )c=nodes.New().load(f, true , c);else
       if( WhiteChar(c))c=f.getChar();else
       if(!c)return true ;else // don't check for 'f.ok' because methods stop on null char and not on 'f.end'
             return false;
@@ -1753,7 +1771,8 @@ static Int TypeToBytes(TM_TYPE type, bool &neg)
       neg=bytes2&1;
    return bytes2/2;
 }
-static Int Left(C Str &s, Int si) {return s.length()-si;}
+static Int Left(C Str  &s, Int si) {return s.length()-si;}
+static Int Left(C Str8 &s, Int si) {return s.length()-si;}
 /******************************************************************************/
 static void Save(C Str &text, Str &s)
 {
@@ -1768,6 +1787,15 @@ static Int Load(Str &text, C Str &s, Int si)
    for(; si<s.length(); si++)
    {
       Char c=s[si];
+      if(Safe(c))text+=c;else break;
+   }
+   return si;
+}
+static Int Load(Str &text, C Str8 &s, Int si)
+{
+   for(; si<s.length(); si++)
+   {
+      Char8 c=s[si];
       if(Safe(c))text+=c;else break;
    }
    return si;
@@ -1855,6 +1883,52 @@ static Int Load(Str &text, C Str &s, Int si, Char c)
    }
    return -1;
 }
+static Int Load(Str &text, C Str8 &s, Int si, Char c)
+{
+   switch(c)
+   {
+      case NAME:
+      case VALUE:
+         return Load(text, s, si);
+
+      case VALUE_UID:
+      {
+         Int bytes=SIZE(UID); if(bytes<=Left(s, si))
+         {
+            UID  id; CopyFast(&id, s()+si, bytes); // FREPD(j, bytes)id.b[j]=s[si+j];
+            text=id.asFileName();
+            return si+bytes;
+         }
+      }break;
+
+      case VALUE_U1:
+      case VALUE_I1:
+      case VALUE_U2:
+      case VALUE_I2:
+      case VALUE_U3:
+      case VALUE_I3:
+      case VALUE_U4:
+      case VALUE_I4:
+      case VALUE_U5:
+      case VALUE_I5:
+      case VALUE_U6:
+      case VALUE_I6:
+      case VALUE_U7:
+      case VALUE_I7:
+      case VALUE_U8:
+      case VALUE_I8:
+      {
+         Bool neg; Int bytes=TypeToBytes(TM_TYPE(c), neg); if(bytes<=Left(s, si))
+         {
+            ULong u=0; CopyFast(&u, s()+si, bytes); // FREPD(j, bytes)((Byte*)&u)[j]=s[si+j];
+            if(neg)text=-Long(u)-1;
+            else   text=      u   ;
+            return si+bytes;
+         }
+      }break;
+   }
+   return -1;
+}
 /******************************************************************************/
 static void Save(C TextNode &node, Str &s)
 {
@@ -1870,6 +1944,28 @@ static void Save(C TextNode &node, Str &s)
 static Int Load(Memc<TextNode> &nodes, C Str &s, Int si)
 {
    Char c=s[si++];
+check:
+   if(c==NAME)
+   {
+      TextNode &node=nodes.New();
+      si=Load(node.name, s, si, c); if(!InRange(si, s))return -1; c=s[si++];
+      if(IsValue(c))
+      {
+         si=Load(node.value, s, si, c); if(!InRange(si, s))return -1; c=s[si++];
+      }
+      if(c==CHILD)
+      {
+                                     if(!InRange(si, s))return -1;
+         si=Load(node.nodes, s, si); if(!InRange(si, s))return -1; c=s[si++];
+      }
+      goto check;
+   }else
+   if(c==END)return si;
+   return -1;
+}
+static Int Load(Memc<TextNode> &nodes, C Str8 &s, Int si)
+{
+   Char8 c=s[si++];
 check:
    if(c==NAME)
    {
@@ -1910,6 +2006,24 @@ Bool TextMeta::load(C Str &s)
    next:
       TextMetaElm &elm=New();
       CChar *src=s()+si; si+=elm.text.fromUTF8Safe(src)-src;
+      if(InRange(si, s))
+      {
+         si=Load(elm.data.nodes, s, si);
+         if(InRange(si, s))goto next;
+         if(si<0)return false;
+      }
+   }
+   return true;
+}
+Bool TextMeta::load(C Str8 &s)
+{
+   clear();
+   if(s.is())
+   {
+      Int si=0;
+   next:
+      TextMetaElm &elm=New();
+      CChar8 *src=s()+si; si+=elm.text.fromUTF8Safe(src)-src;
       if(InRange(si, s))
       {
          si=Load(elm.data.nodes, s, si);

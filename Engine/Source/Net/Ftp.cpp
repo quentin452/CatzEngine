@@ -277,6 +277,11 @@ Bool Ftp::fileTime(C Str &file, DateTime &dt)
    }
    dt.zero(); return false;
 }
+Bool Ftp::setFileTime(C Str &file, C DateTime &dt)
+{
+   if(is())return command(S8+"MFMT "+TextInt(dt.year, 4)+TextInt(dt.month, 2)+TextInt(dt.day, 2)+TextInt(dt.hour, 2)+TextInt(dt.minute, 2)+TextInt(dt.second, 2)+' '+UnixPathUTF8(file)).first()=='2';
+           return false;
+}
 Bool Ftp::rename(C Str &src, C Str &dest)
 {
    if(is())

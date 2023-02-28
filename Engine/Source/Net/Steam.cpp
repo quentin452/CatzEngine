@@ -46,12 +46,30 @@ static struct SteamCallbacks // !! do not remove this !!
    STEAM_CALLBACK(SteamCallbacks, PersonaStateChange           ,            PersonaStateChange_t, m_PersonaStateChange           );
    STEAM_CALLBACK(SteamCallbacks, AvatarImageLoaded            ,             AvatarImageLoaded_t, m_AvatarImageLoaded            );
    STEAM_CALLBACK(SteamCallbacks, GameOverlayActivated         ,          GameOverlayActivated_t, m_GameOverlayActivated         );
+   STEAM_CALLBACK(SteamCallbacks, LobbyCreated                 ,                  LobbyCreated_t, m_LobbyCreated);
+   STEAM_CALLBACK(SteamCallbacks, LobbyEnter                   ,                    LobbyEnter_t, m_LobbyEnter);
+   STEAM_CALLBACK(SteamCallbacks, LobbyInvite                  ,                   LobbyInvite_t, m_LobbyInvite);
+   STEAM_CALLBACK(SteamCallbacks, GameLobbyJoinRequested       ,        GameLobbyJoinRequested_t, m_GameLobbyJoinRequested);
+   STEAM_CALLBACK(SteamCallbacks, LobbyChatUpdate              ,               LobbyChatUpdate_t, m_LobbyChatUpdate);
+   STEAM_CALLBACK(SteamCallbacks, LobbyChatMsg                 ,                  LobbyChatMsg_t, m_LobbyChatMsg);
+   STEAM_CALLBACK(SteamCallbacks, LobbyDataUpdate              ,               LobbyDataUpdate_t, m_LobbyDataUpdate);
+   STEAM_CALLBACK(SteamCallbacks, P2PSessionRequest            ,             P2PSessionRequest_t, m_P2PSessionRequest);
+   STEAM_CALLBACK(SteamCallbacks, CreateItemResult             ,              CreateItemResult_t, m_CreateItemResult);
 
    SteamCallbacks() : // this will register the callbacks using Steam API, using callbacks requires 'SteamUpdate' to be called
       m_MicroTxnAuthorizationResponse(this, &SteamCallbacks::MicroTxnAuthorizationResponse),
       m_PersonaStateChange           (this, &SteamCallbacks::PersonaStateChange           ),
       m_AvatarImageLoaded            (this, &SteamCallbacks::AvatarImageLoaded            ),
-      m_GameOverlayActivated         (this, &SteamCallbacks::GameOverlayActivated         )
+      m_GameOverlayActivated         (this, &SteamCallbacks::GameOverlayActivated         ),
+      m_LobbyCreated                 (this, &SteamCallbacks::LobbyCreated),
+      m_LobbyEnter                   (this, &SteamCallbacks::LobbyEnter),
+      m_LobbyInvite                  (this, &SteamCallbacks::LobbyInvite),
+      m_GameLobbyJoinRequested       (this, &SteamCallbacks::GameLobbyJoinRequested),
+      m_LobbyChatUpdate              (this, &SteamCallbacks::LobbyChatUpdate),
+      m_LobbyChatMsg                 (this, &SteamCallbacks::LobbyChatMsg),
+      m_LobbyDataUpdate              (this, &SteamCallbacks::LobbyDataUpdate),
+      m_P2PSessionRequest            (this, &SteamCallbacks::P2PSessionRequest),
+      m_CreateItemResult             (this, &SteamCallbacks::CreateItemResult)
    {}
 }SC;
 
@@ -101,6 +119,52 @@ void SteamCallbacks::GameOverlayActivated(GameOverlayActivated_t *data)
 {
    if(data)Steam._overlay_visible=data->m_bActive;
 }
+
+void SteamCallbacks::LobbyCreated(LobbyCreated_t* data)
+{
+    if (auto callback = Steam.OnLobbyCreated)callback((SteamWorks::E_LOBBYRESULT)data->m_eResult, data->m_ulSteamIDLobby);
+}
+
+void SteamCallbacks::LobbyEnter(LobbyEnter_t* data)
+{
+    if (auto callback = Steam.OnLobbyEntered)callback(data->m_ulSteamIDLobby, data->m_rgfChatPermissions, data->m_bLocked, data->m_EChatRoomEnterResponse);
+}
+
+void SteamCallbacks::LobbyInvite(LobbyInvite_t* data)
+{
+    if (auto callback = Steam.OnLobbyInvite)callback(data->m_ulSteamIDUser, data->m_ulSteamIDLobby, data->m_ulGameID);
+}
+
+void SteamCallbacks::GameLobbyJoinRequested(GameLobbyJoinRequested_t* data)
+{
+    if (auto callback = Steam.OnLobbyJoined)callback(data->m_steamIDLobby.ConvertToUint64(), data->m_steamIDFriend.ConvertToUint64());
+}
+
+void SteamCallbacks::LobbyChatUpdate(LobbyChatUpdate_t* data)
+{
+    if (auto callback = Steam.OnLobbyChatUpdate)callback(data->m_ulSteamIDLobby, data->m_ulSteamIDUserChanged, data->m_ulSteamIDMakingChange, data->m_rgfChatMemberStateChange);
+}
+
+void SteamCallbacks::LobbyChatMsg(LobbyChatMsg_t* data)
+{
+    if (auto callback = Steam.OnLobbyChatMsg)callback(data->m_ulSteamIDLobby, data->m_ulSteamIDUser, data->m_eChatEntryType, data->m_iChatID);
+}
+
+void SteamCallbacks::LobbyDataUpdate(LobbyDataUpdate_t* data)
+{
+    if (auto callback = Steam.OnLobbyDataUpdate)callback(data->m_ulSteamIDLobby, data->m_ulSteamIDMember, data->m_bSuccess);
+}
+
+void SteamCallbacks::P2PSessionRequest(P2PSessionRequest_t* data)
+{
+    if (auto callback = Steam.OnP2PSessionRequest)callback(data->m_steamIDRemote.ConvertToUint64());
+}
+
+void SteamCallbacks::CreateItemResult(CreateItemResult_t* data)
+{
+    if (auto callback = Steam.OnSteamWorkshopItemReceived)callback((SteamWorks::E_WORKSHOPRESULT)data->m_eResult, data->m_nPublishedFileId, data->m_bUserNeedsToAcceptWorkshopLegalAgreement);
+}
+
 #endif
 SteamWorks Steam;
 /******************************************************************************/

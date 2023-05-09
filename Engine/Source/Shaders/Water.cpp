@@ -283,6 +283,12 @@ void Surface_PS
 
  //Vec world_pos=Transform(ball_surface_pos, CamMatrix);
  //Vec world_pos=Transform3(cam_pos+start*eye_dir, CamMatrix); this one treats ball.pos=(0,0,0)
+
+   Vec  inPos=ball_surface_pos;
+   Half inPlaneDist=0;
+
+   Vec2 uv_col=0;
+   Vec4 uv_nrm=0;
 #endif
    VecH nrm_flat; // #MaterialTextureLayoutWater
 #if DUAL_NORMAL
@@ -294,7 +300,11 @@ void Surface_PS
    nrm_flat.xy+=inWaveN.xy;
 #endif
    nrm_flat.z=CalcZ(nrm_flat.xy);
+#if BALL
+   Vec nrm=Normalize(Vec(TransformTP(nrm_flat.xzy, CamMatrix))); // convert to view space, convert to HP before Normalize
+#else
    Vec nrm=Normalize(Vec(TransformDir(nrm_flat.xzy))); // convert to view space, convert to HP before Normalize
+#endif
 
    VecH4 water_col;
    water_col.rgb=RTex(Col, uv_col).rgb*WaterMaterial.color;

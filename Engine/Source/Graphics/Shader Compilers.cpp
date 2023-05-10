@@ -738,8 +738,9 @@ static void Compile(API api, SC_FLAG flag=SC_NONE)
    src.New("Ocean", "Surface_VS", "Surface_PS")("LIGHT", 0, "SHADOW", 0, "SOFT", 0)("REFLECT_ENV", 0, "REFLECT_MIRROR", 0, "REFRACT", 0).extra("WAVES", 1, "RIVER", 0, "BALL", 0);
 
    REPD(flat , 2)
+   REPD(conservative_depth, 2)
    REPD(gl_es, (api==API_GL) ? 2 : 1) // GL ES doesn't support NOPERSP
-      src.New("Ball" , "Surface_VS", "Surface_PS")("LIGHT", 0, "SHADOW", 0, "SOFT", 0)("REFLECT_ENV", 0, "REFLECT_MIRROR", 0, "REFRACT", 0)("FLAT", flat)("GL_ES", gl_es).extra("WAVES", 0, "RIVER", 0, "BALL", 1);
+      src.New("Ball" , "Surface_VS", "Surface_PS")("LIGHT", 0, "SHADOW", 0, "SOFT", 0)("REFLECT_ENV", 0, "REFLECT_MIRROR", 0, "REFRACT", 0)("FLAT", flat, "CONSERVATIVE_DEPTH", conservative_depth)("GL_ES", gl_es).extra("WAVES", 0, "RIVER", 0, "BALL", 1).conservativeDepth(conservative_depth);
 
    REPD(refract, 2)
    {
@@ -755,8 +756,9 @@ static void Compile(API api, SC_FLAG flag=SC_NONE)
             src.New("Ocean", "Surface_VS", "Surface_PS")("LIGHT", 1, "SHADOW", shadow_maps, "SOFT", soft)("REFLECT_ENV", reflect_env, "REFLECT_MIRROR", reflect_mirror, "REFRACT", refract, "GATHER", gather).extra("WAVES", 1, "RIVER", 0, "BALL", 0).gather(gather);
 
             REPD(flat , 2)
+            REPD(conservative_depth, 2)
             REPD(gl_es, (api==API_GL) ? 2 : 1) // GL ES doesn't support NOPERSP
-               src.New("Ball" , "Surface_VS", "Surface_PS")("LIGHT", 1, "SHADOW", shadow_maps, "SOFT", soft)("REFLECT_ENV", reflect_env, "REFLECT_MIRROR", reflect_mirror, "REFRACT", refract, "GATHER", gather)("FLAT", flat)("GL_ES", gl_es).extra("WAVES", 0, "RIVER", 0, "BALL", 1).gather(gather);
+               src.New("Ball" , "Surface_VS", "Surface_PS")("LIGHT", 1, "SHADOW", shadow_maps, "SOFT", soft)("REFLECT_ENV", reflect_env, "REFLECT_MIRROR", reflect_mirror, "REFRACT", refract, "GATHER", gather)("FLAT", flat, "CONSERVATIVE_DEPTH", conservative_depth)("GL_ES", gl_es).extra("WAVES", 0, "RIVER", 0, "BALL", 1).gather(gather).conservativeDepth(conservative_depth);
          }
          REPD(set_depth, 2)
             src.New("Apply", "DrawUVPosXY_VS", "Apply_PS")("SET_DEPTH", set_depth)("REFLECT_ENV", reflect_env, "REFLECT_MIRROR", reflect_mirror, "REFRACT", refract, "GATHER", gather).gather(gather);

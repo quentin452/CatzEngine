@@ -5391,10 +5391,6 @@ void Image::gatherS(Vec4 *colors, Int *x_offset, Int x_offsets, Int *y_offset, I
    }
 }
 /******************************************************************************/
-static Bool NeedMultiChannel(IMAGE_TYPE src, IMAGE_TYPE dest)
-{
-   return ImageTI[src].channels>1 || src!=dest;
-}
 void CopyNoStretch(C Image &src, Image &dest, Bool clamp, Bool ignore_gamma) // assumes 'src', 'dest' are locked and non-compressed
 {
    Bool high_precision=(src.highPrecision() && dest.highPrecision()); // high precision requires FP

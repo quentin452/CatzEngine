@@ -970,6 +970,10 @@ Bool CanCompress(IMAGE_TYPE dest)
          return CompressASTC!=null;
    }
 }
+Bool NeedMultiChannel(IMAGE_TYPE src, IMAGE_TYPE dest)
+{
+   return ImageTI[src].channels>1 || src!=dest;
+}
 /******************************************************************************/
 #if GL
 UInt SourceGLFormat(IMAGE_TYPE type)

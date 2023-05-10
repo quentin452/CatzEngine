@@ -939,6 +939,7 @@ Bool IgnoreGamma(UInt flags, IMAGE_TYPE src, IMAGE_TYPE dest);
 Bool CanDoRawCopy(IMAGE_TYPE src, IMAGE_TYPE dest, Bool ignore_gamma=false);
 Bool CanDoRawCopy(C Image   &src, C Image   &dest, Bool ignore_gamma=false);
 Bool CanCompress (IMAGE_TYPE dest);
+Bool NeedMultiChannel(IMAGE_TYPE src, IMAGE_TYPE dest);
 Bool CompatibleLock(LOCK_MODE cur, LOCK_MODE lock); // if 'lock' is okay to be applied when 'cur' is already applied
 Flt  ImagePixelF(CPtr data, IMAGE_TYPE hw_type);
 Flt  ImagePixelL(CPtr data, IMAGE_TYPE hw_type);

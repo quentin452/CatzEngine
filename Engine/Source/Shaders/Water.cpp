@@ -329,18 +329,18 @@ void Surface_PS
 
    Vec  inPos=ball_surface_pos;
    Half inPlaneDist=0;
-
-   Vec2 xy;
-   xy.x=Dot(rel_ball_surface_pos, WaterBallX);
-   xy.y=Dot(rel_ball_surface_pos, WaterBallY);
-
-   Vec2 uv_col=xy/100;
+   Vec2 uv_col;
    Vec4 uv_nrm;
-   uv_nrm.xy= xy/100;
-   uv_nrm.zw=-xy/100;
-   //uv_col   =(WaterOfsCol+uv)*WaterMaterial.scale_color ; // it's better to scale 'WaterOfsCol' too
-   //uv_nrm.xy=(WaterOfsNrm+uv)*WaterMaterial.scale_normal;
-   //uv_nrm.zw=(WaterOfsNrm-uv)*WaterMaterial.scale_normal;
+
+   {
+      Vec2 uv;
+      uv.x=Dot(rel_ball_surface_pos, WaterBallX);
+      uv.y=Dot(rel_ball_surface_pos, WaterBallY);
+
+      uv_col   =(WaterOfsCol+uv)*WaterMaterial.scale_color ; // it's better to scale 'WaterOfsCol' too
+      uv_nrm.xy=(WaterOfsNrm+uv)*WaterMaterial.scale_normal;
+      uv_nrm.zw=(WaterOfsNrm-uv)*WaterMaterial.scale_normal;
+   }
 #endif
 
    VecH nrm_flat; // #MaterialTextureLayoutWater
@@ -372,7 +372,10 @@ void Surface_PS
       O_nrm.xyz=nrm*0.5+0.5; // -1..1 -> 0..1
    #endif
 #else
+
+#if !(BALL && !FLAT && GL_ES)
    Vec2 uv     =PixelToUV(pixel);
+#endif
    Vec2 refract=nrm_flat.xy*Viewport.size; // TODO: this could be improved
 #if !BALL
    Vec  eye_dir=Normalize(inPos);

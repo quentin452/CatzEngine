@@ -184,6 +184,7 @@ void MulRGBH(Image &image, flt red, flt yellow, flt green, flt cyan, flt blue, f
 void MulRGBHS(Image &image, flt red, flt yellow, flt green, flt cyan, flt blue, flt purple, C BoxI &box);
 void GammaSat(Image &image, flt gamma, C BoxI &box, bool photo=false);
 void MulAddSat(Image &image, flt mul, flt add, C BoxI &box, bool photo=false);
+void MinSat(Image &image, flt min, C BoxI &box, bool photo=false);
 void MulSatH(Image &image, flt red, flt yellow, flt green, flt cyan, flt blue, flt purple, bool sat, bool photo, C BoxI &box);
 flt HueDelta(flt a, flt b);
 Vec2  LerpToMad(flt from, flt to);

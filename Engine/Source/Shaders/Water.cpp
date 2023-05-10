@@ -353,9 +353,9 @@ void Surface_PS
       uv_nrm.zw=(WaterOfsNrm-uv)*WaterMaterial.scale_normal;
 
    #if WAVES
-    //ball_surface_pos  +=tex_mtrx[2]*WavePS(uv) ; // don't move up and down because if camera is facing forward when standing on flat water, then it won't change Z values and won't change depth and won't show waves
-    //ball_surface_pos.z+=        Abs(WavePS(uv)); // too strong at viewport corners. use Abs to always move forward, because if moving back sometimes then it won't show any waves
-      ball_surface_pos  +=eye_dir*Abs(WavePS(uv)); // best                          . use Abs to always move forward, because if moving back sometimes then it won't show any waves
+    //ball_surface_pos  +=tex_mtrx[2]*WavePS(uv)*WaterMaterial.wave_scale ; // don't move up and down because if camera is facing forward when standing on flat water, then it won't change Z values and won't change depth and won't show waves
+    //ball_surface_pos.z+=        Abs(WavePS(uv)*WaterMaterial.wave_scale); // too strong at viewport corners. use Abs to always move forward, because if moving back sometimes then it won't show any waves
+      ball_surface_pos  +=eye_dir*Abs(WavePS(uv)*WaterMaterial.wave_scale); // best                          . use Abs to always move forward, because if moving back sometimes then it won't show any waves
    #endif
    }
 

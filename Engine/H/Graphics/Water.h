@@ -75,7 +75,7 @@ struct WaterClass : WaterMtrl // Main water control
    PlaneM plane                ; // water plane                  ,           , default=(pos(0,0,0), normal(0,1,0))
 
    WaterClass& reflectionRenderer(RENDER_TYPE type);   RENDER_TYPE reflectionRenderer()C {return _reflect_renderer;} // set/get Renderer used for rendering the reflaction , default=RT_DEFERRED
-   WaterClass& max1Light         (Bool          on);   Bool        max1Light         ()C {return _max_1_light     ;} // set/get if use only up to 1 light for water surface, default=true (this greatly increases water rendering performance, however allows only 1 directional light affecting water surface), this affects only RT_DEFERRED renderer, all other renderers are always limited to only 1 directional light
+   WaterClass& max1Light         (Bool          on);   Bool        max1Light         ()C {return _max_1_light     ;} // set/get if use only up to 1 light for water surface, default=true (this greatly increases water rendering performance, however allows only 1 directional light affecting water surface), this affects only RT_DEFERRED renderer, all other renderers are always limited to only 1 directional light. If this is disabled then some water material parameters are taken from global 'Water' instead of per water mesh material.
 
    WaterClass& update(C Vec2 &vel); // update wave movement, 'vel'=velocity
 

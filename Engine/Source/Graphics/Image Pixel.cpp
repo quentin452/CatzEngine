@@ -501,6 +501,71 @@ void Image::pixel3DF(Int x, Int y, Int z, Flt pixel)
       SetPixelF(data() + x*bytePP() + y*pitch() + z*pitch2(), hwType(), pixel);
 }
 /******************************************************************************/
+static void SetPixelL(Byte *data, IMAGE_TYPE type, Flt pixel)
+{
+   switch(type)
+   {
+      case IMAGE_F32  : (*(Flt *)data)=pixel; break;
+      case IMAGE_F32_2: (*(Vec2*)data)=pixel; break;
+      case IMAGE_F32_3: (*(Vec *)data)=pixel; break;
+      case IMAGE_F32_4: (*(Vec4*)data)=pixel; break;
+
+      case IMAGE_F32_3_SRGB: (*(Vec *)data)=LinearToSRGB(pixel); break;
+      case IMAGE_F32_4_SRGB: (*(Vec4*)data)=LinearToSRGB(pixel); break;
+
+      case IMAGE_F16  : {U16 *d=(U16*)data; d[0]=               Half(pixel).data;} break;
+      case IMAGE_F16_2: {U16 *d=(U16*)data; d[0]=d[1]=          Half(pixel).data;} break;
+      case IMAGE_F16_3: {U16 *d=(U16*)data; d[0]=d[1]=d[2]=     Half(pixel).data;} break;
+      case IMAGE_F16_4: {U16 *d=(U16*)data; d[0]=d[1]=d[2]=d[3]=Half(pixel).data;} break;
+
+      case IMAGE_B8G8R8A8:
+      case IMAGE_R8G8B8A8:
+                                {VecB4 &v=*(VecB4*)data; v.x=v.y=v.z=FltToByte(pixel); v.w=255;} break;
+
+      case IMAGE_B8G8R8A8_SRGB:
+      case IMAGE_R8G8B8A8_SRGB:
+                                {VecB4 &v=*(VecB4*)data; v.x=v.y=v.z=LinearToByteSRGB(pixel); v.w=255;} break;
+
+      case IMAGE_B8G8R8:
+      case IMAGE_R8G8B8:
+                                {VecB  &v=*(VecB *)data; v.x=v.y=v.z=FltToByte(pixel);} break;
+
+      case IMAGE_B8G8R8_SRGB:
+      case IMAGE_R8G8B8_SRGB:
+                                {VecB  &v=*(VecB *)data; v.x=v.y=v.z=LinearToByteSRGB(pixel);} break;
+
+      case IMAGE_R8G8:          {VecB2 &v=*(VecB2*)data; v.x=v.y=FltToByte(pixel);} break;
+
+      case IMAGE_R8_SIGN      : {SByte  &v=*(SByte *)data; v  =        SFltToSByte(pixel);         } break;
+      case IMAGE_R8G8_SIGN    : {VecSB2 &v=*(VecSB2*)data; v.x=v.y=    SFltToSByte(pixel);         } break;
+      case IMAGE_R8G8B8A8_SIGN: {VecSB4 &v=*(VecSB4*)data; v.x=v.y=v.z=SFltToSByte(pixel); v.w=127;} break;
+
+      case IMAGE_R10G10B10A2: {UInt v=FltToU10(pixel); (*(UInt*)data)=v|(v<<10)|(v<<20)|(3<<30);} break;
+
+      case IMAGE_R8 :
+      case IMAGE_A8 :
+      case IMAGE_L8 :
+      case IMAGE_I8 : (*(U8 *)data)=FltToByte  (    pixel             ); break; // it's okay   to clamp int for small  values
+      case IMAGE_I16: (*(U16*)data)=RoundU     (Sat(pixel)*0x0000FFFFu); break; // it's better to clamp flt for bigger values
+      case IMAGE_I32: (*(U32*)data)=RoundUClamp(Sat(pixel)*0xFFFFFFFFu); break; // it's better to clamp flt for bigger values
+      case IMAGE_I24: {  U32  c    =RoundU     (Sat(pixel)*0x00FFFFFFu); (*(U16*)data)=c; data[2]=(c>>16);} break; // it's better to clamp flt for bigger values
+ 
+      case IMAGE_L8_SRGB: (*(U8*)data)=LinearToByteSRGB(pixel); break;
+
+      case IMAGE_R11G11B10F: SetR11G11B10F(data, pixel); break;
+   }
+}
+void Image::pixelL(Int x, Int y, Flt pixel)
+{
+   if(InRange(x, lw()) && InRange(y, lh())) // no need to check for "&& data()" because being "InRange(lockSize())" already guarantees 'data' being available
+      SetPixelL(data() + x*bytePP() + y*pitch(), hwType(), pixel);
+}
+void Image::pixel3DL(Int x, Int y, Int z, Flt pixel)
+{
+   if(InRange(x, lw()) && InRange(y, lh()) && InRange(z, ld())) // no need to check for "&& data()" because being "InRange(lockSize())" already guarantees 'data' being available
+      SetPixelL(data() + x*bytePP() + y*pitch() + z*pitch2(), hwType(), pixel);
+}
+/******************************************************************************/
 static Color DecompressPixel(C Image &image, Int x, Int y)
 {
    Int   x3=x&3, y3=y&3;
@@ -734,7 +799,7 @@ Flt ImagePixelL(CPtr data, IMAGE_TYPE hw_type)
 
       case IMAGE_B8G8R8_SRGB  :
       case IMAGE_B8G8R8A8_SRGB:
-         return SRGBToLinear(((VecB4*)data)->z/Flt(0xFF));
+         return ByteSRGBToLinear(((VecB4*)data)->z);
 
       case IMAGE_R8      :
       case IMAGE_R8G8    :
@@ -750,7 +815,7 @@ Flt ImagePixelL(CPtr data, IMAGE_TYPE hw_type)
       case IMAGE_R8G8B8A8_SRGB:
       case IMAGE_L8_SRGB:
       case IMAGE_L8A8_SRGB:
-         return SRGBToLinear((*(U8*)data)/Flt(0x000000FFu));
+         return ByteSRGBToLinear(*(U8*)data);
 
       // 16
       case IMAGE_D16: if(GL)return (*(U16*)data)/Flt(0x0000FFFFu)*2-1; // !! else fall through no break on purpose !!
@@ -784,6 +849,126 @@ Flt ImagePixelL(CPtr data, IMAGE_TYPE hw_type)
       case IMAGE_B5G5R5A1: return (((*(U16*)data)>>10)&0x1F)/31.0f;
       case IMAGE_B5G6R5  : return (((*(U16*)data)>>11)&0x1F)/31.0f;
    }
+   return 0;
+}
+static inline Flt GetPixelL(C Byte *data, C Image &image, Bool _2d, Int x, Int y, Int z=0)
+{
+   switch(image.hwType())
+   {
+      case IMAGE_F32  :
+      case IMAGE_F32_2:
+      case IMAGE_F32_3:
+      case IMAGE_F32_4:
+         return *(Flt*)data;
+
+      case IMAGE_F32_3_SRGB:
+      case IMAGE_F32_4_SRGB:
+         return SRGBToLinear(*(Flt*)data);
+
+      case IMAGE_F16  :
+      case IMAGE_F16_2:
+      case IMAGE_F16_3:
+      case IMAGE_F16_4:
+         return *(Half*)data;
+
+      case IMAGE_B8G8R8  :
+      case IMAGE_B8G8R8A8:
+         return ((VecB4*)data)->z/Flt(0xFF);
+
+      case IMAGE_B8G8R8_SRGB  :
+      case IMAGE_B8G8R8A8_SRGB:
+         return ByteSRGBToLinear(((VecB4*)data)->z);
+
+      case IMAGE_R8      :
+      case IMAGE_R8G8    :
+      case IMAGE_R8G8B8  :
+      case IMAGE_R8G8B8A8:
+      case IMAGE_A8      :
+      case IMAGE_L8      :
+      case IMAGE_L8A8    :
+      case IMAGE_I8      :
+         return (*(U8*)data)/Flt(0x000000FFu);
+
+      case IMAGE_R8G8B8_SRGB:
+      case IMAGE_R8G8B8A8_SRGB:
+      case IMAGE_L8_SRGB:
+      case IMAGE_L8A8_SRGB:
+         return ByteSRGBToLinear(*(U8*)data);
+
+      // 16
+      case IMAGE_D16: if(GL)return (*(U16*)data)/Flt(0x0000FFFFu)*2-1; // !! else fall through no break on purpose !!
+      case IMAGE_I16:
+         return (*(U16*)data)/Flt(0x0000FFFFu);
+
+      // 32
+      case IMAGE_D32     :
+      case IMAGE_D32S8X24:       return GL ? (*(Flt*)data)*2-1 : *(Flt*)data;
+    //case IMAGE_D32I    : if(GL)return (*(U32*)data)/Dbl(0xFFFFFFFFu)*2-1; // !! else fall through no break on purpose !!
+      case IMAGE_I32     :
+         return (*(U32*)data)/Dbl(0xFFFFFFFFu); // Dbl required to get best precision
+
+      // 24
+      case IMAGE_D24S8:
+      case IMAGE_D24X8: if(GL)return (*(U16*)(data+1) | (data[3]<<16))/Flt(0x00FFFFFFu)*2-1; // !! else fall through no break on purpose !!
+      case IMAGE_I24  :
+         return (*(U16*)data | (data[2]<<16))/Flt(0x00FFFFFFu); // here Dbl is not required, this was tested
+
+      case IMAGE_R10G10B10A2: return U10ToFlt((*(UInt*)data)&0x3FF);
+
+      case IMAGE_R11G11B10F: return GetR11G11B10F(data).x;
+
+      case IMAGE_R8_SIGN      :
+      case IMAGE_R8G8_SIGN    :
+      case IMAGE_R8G8B8A8_SIGN:
+         return SByteToSFlt(*(SByte*)data);
+
+      case IMAGE_B4G4R4A4: return (((*(U16*)data)>> 8)&0x0F)/15.0f;
+      case IMAGE_B5G5R5A1: return (((*(U16*)data)>>10)&0x1F)/31.0f;
+      case IMAGE_B5G6R5  : return (((*(U16*)data)>>11)&0x1F)/31.0f;
+
+      case IMAGE_BC6: return DecompressPixelBC6(image.data() + (x>>2)*16 + (y>>2)*image.pitch() + (_2d ? 0 : z*image.pitch2()), x&3, y&3).x;
+
+      case IMAGE_BC4_SIGN: return SByteToSFlt(DecompressPixelBC4S(image.data() + (x>>2)* 8 + (y>>2)*image.pitch() + (_2d ? 0 : z*image.pitch2()), x&3, y&3));
+      case IMAGE_BC5_SIGN: return SByteToSFlt(DecompressPixelBC4S(image.data() + (x>>2)*16 + (y>>2)*image.pitch() + (_2d ? 0 : z*image.pitch2()), x&3, y&3)); // can use 'DecompressPixelBC4S' because BC5 is made of 2xBC4
+
+      case IMAGE_ETC2_R_SIGN : return SByteToSFlt(DecompressPixelETC2RS(image.data() + (x>>2)* 8 + (y>>2)*image.pitch() + (_2d ? 0 : z*image.pitch2()), x&3, y&3));
+      case IMAGE_ETC2_RG_SIGN: return SByteToSFlt(DecompressPixelETC2RS(image.data() + (x>>2)*16 + (y>>2)*image.pitch() + (_2d ? 0 : z*image.pitch2()), x&3, y&3)); // can use 'DecompressPixelETC2RS' because ETC2_RG is made of 2xETC2_R
+
+      case IMAGE_BC1       :
+      case IMAGE_BC2       :
+      case IMAGE_BC3       :
+      case IMAGE_BC4       :
+      case IMAGE_BC5       :
+      case IMAGE_BC7       :
+      case IMAGE_ETC1      :
+      case IMAGE_ETC2_R    :
+      case IMAGE_ETC2_RG   :
+      case IMAGE_ETC2_RGB  :
+      case IMAGE_ETC2_RGBA1:
+      case IMAGE_ETC2_RGBA :
+         return ByteToFlt((_2d ? DecompressPixel(image, x, y) : DecompressPixel(image, x, y, z)).r);
+
+      case IMAGE_BC1_SRGB       :
+      case IMAGE_BC2_SRGB       :
+      case IMAGE_BC3_SRGB       :
+      case IMAGE_BC7_SRGB       :
+      case IMAGE_ETC2_RGB_SRGB  :
+      case IMAGE_ETC2_RGBA1_SRGB:
+      case IMAGE_ETC2_RGBA_SRGB :
+         return ByteSRGBToLinear((_2d ? DecompressPixel(image, x, y) : DecompressPixel(image, x, y, z)).r);
+   }
+   return 0;
+}
+Flt Image::pixelL(Int x, Int y)C
+{
+   if(InRange(x, lw()) && InRange(y, lh())) // no need to check for "&& data()" because being "InRange(lockSize())" already guarantees 'data' being available
+      return GetPixelL(data() + x*bytePP() + y*pitch(), T, true, x, y);
+   return 0;
+}
+Flt Image::pixel3DL(Int x, Int y, Int z)C
+{
+   if(InRange(x, lw()) && InRange(y, lh()) && InRange(z, ld())) // no need to check for "&& data()" because being "InRange(lockSize())" already guarantees 'data' being available
+      return GetPixelL(data() + x*bytePP() + y*pitch() + z*pitch2(), T, false, x, y, z);
    return 0;
 }
 /******************************************************************************/

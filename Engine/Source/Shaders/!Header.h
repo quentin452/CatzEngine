@@ -178,6 +178,8 @@ Bool IsClearCoat  (Flt value          ) {return IsPSM(value, PSM_CLEAR_COAT );}
    #define DEPTH_SMALLER(x, y) ((x)> (y))
    #define DEPTH_INC(x, y)     ((x)-=(y))
    #define DEPTH_DEC(x, y)     ((x)+=(y))
+   #define DEPTH_GE            SV_DepthLessEqual
+   #define DEPTH_LE            SV_DepthGreaterEqual
    #define TexDepthRawMin(uv)  TexMax(Depth, uv).x
    #define TexDepthRawMax(uv)  TexMin(Depth, uv).x
 #else
@@ -190,6 +192,8 @@ Bool IsClearCoat  (Flt value          ) {return IsPSM(value, PSM_CLEAR_COAT );}
    #define DEPTH_SMALLER(x, y) ((x)< (y))
    #define DEPTH_INC(x, y)     ((x)+=(y))
    #define DEPTH_DEC(x, y)     ((x)-=(y))
+   #define DEPTH_GE            SV_DepthGreaterEqual
+   #define DEPTH_LE            SV_DepthLessEqual
    #define TexDepthRawMin(uv)  TexMin(Depth, uv).x
    #define TexDepthRawMax(uv)  TexMax(Depth, uv).x
 #endif

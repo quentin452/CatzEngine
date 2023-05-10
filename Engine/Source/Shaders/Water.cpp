@@ -281,15 +281,33 @@ void Surface_PS
    Vec ball_surface_pos=start*eye_dir; // view space position on ball surface
    depth=DelinearizeDepth(ball_surface_pos.z);
 
- //Vec world_pos=Transform(ball_surface_pos, CamMatrix);
- //Vec world_pos=Transform3(cam_pos+start*eye_dir, CamMatrix); this one treats ball.pos=(0,0,0)
+   Vec rel_ball_surface_pos=ball_surface_pos+cam_pos; // view space position on ball surface relative to ball center. -radius..radius
+   MatrixH3 tex_mtrx;
+   tex_mtrx[2]=Normalize(rel_ball_surface_pos); // view space ball surface normal
+   tex_mtrx[0]=Normalize(PointOnPlane(WaterBallX, tex_mtrx[2])); // tangent
+   tex_mtrx[1]=Cross(tex_mtrx[2], tex_mtrx[0]); // binormal
+
+ //Vec world_pos=Transform (    ball_surface_pos, CamMatrix);
+ //Vec world_pos=Transform3(rel_ball_surface_pos, CamMatrix); this one treats ball.pos=(0,0,0)
+ //O_col=1; O_col.xyz=Frac(world_pos.xyz/10); return; // test coords
+ //O_col=1; O_col.xyz=Normalize(rel_ball_surface_pos); return; // test normal
 
    Vec  inPos=ball_surface_pos;
    Half inPlaneDist=0;
 
-   Vec2 uv_col=0;
-   Vec4 uv_nrm=0;
+   Vec2 xy;
+   xy.x=Dot(rel_ball_surface_pos, WaterBallX);
+   xy.y=Dot(rel_ball_surface_pos, WaterBallY);
+
+   Vec2 uv_col=xy/100;
+   Vec4 uv_nrm;
+   uv_nrm.xy= xy/100;
+   uv_nrm.zw=-xy/100;
+   //uv_col   =(WaterOfsCol+uv)*WaterMaterial.scale_color ; // it's better to scale 'WaterOfsCol' too
+   //uv_nrm.xy=(WaterOfsNrm+uv)*WaterMaterial.scale_normal;
+   //uv_nrm.zw=(WaterOfsNrm-uv)*WaterMaterial.scale_normal;
 #endif
+
    VecH nrm_flat; // #MaterialTextureLayoutWater
 #if DUAL_NORMAL
    nrm_flat.xy=(RTex(Nrm, uv_nrm.xy).xy - RTex(Nrm, uv_nrm.zw).xy + RTex(Nrm, uv_nrm1.xy).xy - RTex(Nrm, uv_nrm1.zw).xy)*(WaterMaterial.normal/4); // Avg(RTex(Nrm, uv_nrm.xy).xy, -RTex(Nrm, uv_nrm.zw).xy, RTex(Nrm, uv_nrm1.xy).xy, -RTex(Nrm, uv_nrm1.zw).xy)*WaterMaterial.normal; normals from mirrored tex coordinates must be subtracted
@@ -301,7 +319,7 @@ void Surface_PS
 #endif
    nrm_flat.z=CalcZ(nrm_flat.xy);
 #if BALL
-   Vec nrm=Normalize(Vec(TransformTP(nrm_flat.xzy, CamMatrix))); // convert to view space, convert to HP before Normalize
+   Vec nrm=Normalize(Vec(Transform(nrm_flat, tex_mtrx))); // convert to HP before Normalize
 #else
    Vec nrm=Normalize(Vec(TransformDir(nrm_flat.xzy))); // convert to view space, convert to HP before Normalize
 #endif

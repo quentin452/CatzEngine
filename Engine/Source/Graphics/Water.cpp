@@ -486,6 +486,7 @@ void WaterClass::drawSurfaces()
          Renderer.mode(RM_WATER); Renderer._render();
       }
 
+      // !! DRAW THIS LAST BECAUSE IT MIGHT USE CUSTOM DRAW MATRIX !! but those above need identity
       if(WaterBalls.elms())
       {
          Water.begin();
@@ -719,7 +720,7 @@ void WaterBall::drawDo()C
       //REPS(Renderer._eye, Renderer._eye_num) this is already under loop
       {
          //Renderer.setEyeViewportCam();
-         WS.WaterBallPosRadius->set(Vec4(Vec(Cam.matrix.pos-pos)*CamMatrixInv.orn(), r)); if(!flat)SetFastMatrix(matrix); // set these after 'setEyeViewportCam'. position that we set is for camera relative to ball. because shader assumes ball is at Vec(0,0,0) and the position that we specify is camera position relative to ball in view space
+         WS.WaterBallPosRadius->set(Vec4(Vec(CamMatrix.pos-pos)*CamMatrixInv.orn(), r)); if(!flat)SetFastMatrix(matrix); // set these after 'setEyeViewportCam'. position that we set is for camera relative to ball. because shader assumes ball is at Vec(0,0,0) and the position that we specify is camera position relative to ball in view space
          if(flat)
          {
             Rect rect; if(toScreenRect(rect))if(!Renderer._stereo || ToEyeRect(rect))shader->draw(&rect);

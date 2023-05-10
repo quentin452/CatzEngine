@@ -522,6 +522,8 @@ struct WaterShader
       *WaterPlanePos,
       *WaterPlaneNrm,
       *WaterBallPosRadius,
+      *WaterBallX,
+      *WaterBallY,
       *WaterFlow,
       *WaterReflectMulAdd=&Sh.Dummy,
       *WaterClamp;

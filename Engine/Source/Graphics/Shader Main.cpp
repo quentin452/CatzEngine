@@ -1060,6 +1060,8 @@ void WaterShader::load()
       WaterPlanePos          =GetShaderParam("WaterPlanePos");
       WaterPlaneNrm          =GetShaderParam("WaterPlaneNrm");
       WaterBallPosRadius     =GetShaderParam("WaterBallPosRadius");
+      WaterBallX             =GetShaderParam("WaterBallX");
+      WaterBallY             =GetShaderParam("WaterBallY");
       WaterFlow              =GetShaderParam("WaterFlow");
       WaterReflectMulAdd     =GetShaderParam("WaterReflectMulAdd");
       WaterClamp             =GetShaderParam("WaterClamp");

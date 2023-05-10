@@ -939,6 +939,7 @@ Bool CanDoRawCopy(C Image   &src, C Image   &dest, Bool ignore_gamma=false);
 Bool CanCompress (IMAGE_TYPE dest);
 Bool CompatibleLock(LOCK_MODE cur, LOCK_MODE lock); // if 'lock' is okay to be applied when 'cur' is already applied
 Flt  ImagePixelF(CPtr data, IMAGE_TYPE hw_type);
+Flt  ImagePixelL(CPtr data, IMAGE_TYPE hw_type);
 Vec4 ImageColorF(CPtr data, IMAGE_TYPE hw_type);
 Vec4 ImageColorL(CPtr data, IMAGE_TYPE hw_type);
 void CopyNoStretch(C Image &src, Image &dest, Bool clamp, Bool ignore_gamma=false); // assumes 'src,dest' are locked and non-compressed

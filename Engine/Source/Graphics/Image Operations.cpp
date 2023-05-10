@@ -903,7 +903,7 @@ Image& Image::downSampleNormal()
 #define BLUR_CUBE_LINEAR_GAMMA 1 // this is for PBR rendering, so use linear to be more physically accurate
 struct BlurCube
 {
-   Bool     linear;
+   Bool     linear, multi_channel;
    DIR_ENUM face;
    Int      src_res, dest_res, src_face_size, src_pitch, src_mip;
    Flt      diag_angle_cos_min, cos_min, angle, ball_r, ball_r2;
@@ -1079,8 +1079,9 @@ struct BlurCube
                   Flt a=Acos(cos), w=Weight(a/angle);
                   // FIXME mul 'w' by texel area size
                   CPtr src_data_x=src_data + x*src.bytePP();
-                  col   +=w*(BLUR_CUBE_LINEAR_GAMMA ? ImageColorL : ImageColorF)(src_data_x, src.hwType());
-                  weight+=w;
+                  if(multi_channel)col   +=w*(BLUR_CUBE_LINEAR_GAMMA ? ImageColorL : ImageColorF)(src_data_x, src.hwType());
+                  else             col.x +=w*(BLUR_CUBE_LINEAR_GAMMA ? ImagePixelL : ImagePixelF)(src_data_x, src.hwType());
+                                   weight+=w;
                }
             }
          }
@@ -1185,8 +1186,9 @@ struct BlurCube
                            Flt a=Acos(cos), w=Weight(a/angle);
                            // FIXME mul 'w' by texel area size
                            CPtr src_data_x=src_data + x*src.bytePP();
-                           col   +=w*(BLUR_CUBE_LINEAR_GAMMA ? ImageColorL : ImageColorF)(src_data_x, src.hwType());
-                           weight+=w;
+                           if(multi_channel)col   +=w*(BLUR_CUBE_LINEAR_GAMMA ? ImageColorL : ImageColorF)(src_data_x, src.hwType());
+                           else             col.x +=w*(BLUR_CUBE_LINEAR_GAMMA ? ImagePixelL : ImagePixelF)(src_data_x, src.hwType());
+                                            weight+=w;
                         }
                      }
                   }
@@ -1235,7 +1237,11 @@ struct BlurCube
                goto check;
             }
          }
-         if(weight)col/=weight;else
+         if(weight)
+         {
+            if(multi_channel)col  /=weight;
+            else             col.x/=weight;
+         }else
          {
             SyncLocker locker(lock);
             LOCK_MODE lock_mode; Int lock_mip_map; DIR_ENUM lock_cube_face; Int lock_count=src.lockCount(); if(lock_count) // if 'src' is already locked ('src' can be 'dest') then we have to unlock it first (check 'lockCount' instead of 'lockMode', in case 'lockMode' is not set for SOFT)
@@ -1247,19 +1253,33 @@ struct BlurCube
             }
             if(src.lockRead(src_mip, face))
             {
-               Vec2 tex;
-               if(linear)tex.set(     dir_f    .x *src_DirToCubeFacePixel_mul  +src_DirToCubeFacePixel_add  , -     dir_f    .y *src_DirToCubeFacePixel_mul  +src_DirToCubeFacePixel_add  );
-             //else      tex.set(     dir_angle.x *src_AngleToCubeFacePixel_mul+src_AngleToCubeFacePixel_add, -     dir_angle.y *src_AngleToCubeFacePixel_mul+src_AngleToCubeFacePixel_add);
-               else      tex.set(Atan(dir_f    .x)*src_AngleToCubeFacePixel_mul+src_AngleToCubeFacePixel_add, -Atan(dir_f    .y)*src_AngleToCubeFacePixel_mul+src_AngleToCubeFacePixel_add);
+               Vec2 pix;
+               if(linear)pix.set(     dir_f    .x *src_DirToCubeFacePixel_mul  +src_DirToCubeFacePixel_add  , -     dir_f    .y *src_DirToCubeFacePixel_mul  +src_DirToCubeFacePixel_add  );
+             //else      pix.set(     dir_angle.x *src_AngleToCubeFacePixel_mul+src_AngleToCubeFacePixel_add, -     dir_angle.y *src_AngleToCubeFacePixel_mul+src_AngleToCubeFacePixel_add);
+               else      pix.set(Atan(dir_f    .x)*src_AngleToCubeFacePixel_mul+src_AngleToCubeFacePixel_add, -Atan(dir_f    .y)*src_AngleToCubeFacePixel_mul+src_AngleToCubeFacePixel_add);
 
-               if(BLUR_CUBE_LINEAR_GAMMA)col=src.areaColorLLinear(tex, src_area_size);
-               else                      col=src.areaColorFLinear(tex, src_area_size);
+               if(multi_channel)
+               {
+                  if(BLUR_CUBE_LINEAR_GAMMA)col=src.areaColorLLinear(pix, src_area_size);
+                  else                      col=src.areaColorFLinear(pix, src_area_size);
+               }else
+               {
+                  if(BLUR_CUBE_LINEAR_GAMMA)col.x=src.pixelLLinear(pix.x, pix.y);
+                  else                      col.x=src.pixelFLinear(pix.x, pix.y);
+               }
                src.unlock();
             }
             REP(lock_count)ConstCast(src).lock(lock_mode, lock_mip_map, lock_cube_face); // restore lock
          }
-         if(BLUR_CUBE_LINEAR_GAMMA)dest.colorL(x, y, col);
-         else                      dest.colorF(x, y, col);
+         if(multi_channel)
+         {
+            if(BLUR_CUBE_LINEAR_GAMMA)dest.colorL(x, y, col);
+            else                      dest.colorF(x, y, col);
+         }else
+         {
+            if(BLUR_CUBE_LINEAR_GAMMA)dest.pixelL(x, y, col.x);
+            else                      dest.pixelF(x, y, col.x);
+         }
       }
    }
 
@@ -1275,6 +1295,7 @@ struct BlurCube
          src_res      =Max(1,  src.w()>> src_mip);
         dest_res      =Max(1, dest.w()>>dest_mip);
          src_area_size=Flt(src_res)/dest_res;
+         multi_channel=NeedMultiChannel(src.type(), dest.type());
          // calculate max angle between face direction vector and a point belonging to that face - this will be furthest point, so !Vec(1,1,1) is used and face direction Vec(0,0,1)
          const Flt diag_angle=AcosFast(SQRT3_3), //Flt a=AbsAngleBetween(!Vec(1,1,1), Vec(0,0,1)); AbsAngleBetween(Vec(SQRT3_3, SQRT3_3, SQRT3_3), Vec(0,0,1)); Acos(Dot(Vec(SQRT3_3, SQRT3_3, SQRT3_3), Vec(0,0,1)));
                    diag_angle_ext=diag_angle+angle;

@@ -1934,6 +1934,30 @@ Flt Image::pixelFLinear(Flt x, Flt y, Bool clamp)C
    }
    return 0;
 }
+Flt Image::pixelLLinear(Flt x, Flt y, Bool clamp)C
+{
+   if(lw() && lh())
+   {
+      Int xo[2]; xo[0]=Floor(x); x-=xo[0];
+      Int yo[2]; yo[0]=Floor(y); y-=yo[0];
+      if(clamp)
+      {
+         xo[1]=xo[0]+1; if(xo[1]<0)xo[0]=xo[1]=0;else if(xo[0]>=lw())xo[0]=xo[1]=lw()-1;else if(xo[0]<0)xo[0]=0;else if(xo[1]>=lw())xo[1]=lw()-1;
+         yo[1]=yo[0]+1; if(yo[1]<0)yo[0]=yo[1]=0;else if(yo[0]>=lh())yo[0]=yo[1]=lh()-1;else if(yo[0]<0)yo[0]=0;else if(yo[1]>=lh())yo[1]=lh()-1;
+      }else
+      {
+         xo[0]=Mod(xo[0], lw()); xo[1]=(xo[0]+1)%lw();
+         yo[0]=Mod(yo[0], lh()); yo[1]=(yo[0]+1)%lh();
+      }
+      Flt p[2][2]; gatherL(&p[0][0], xo, Elms(xo), yo, Elms(yo)); // [y][x]
+
+      return p[0][0]*(1-x)*(1-y)
+            +p[0][1]*(  x)*(1-y)
+            +p[1][0]*(1-x)*(  y)
+            +p[1][1]*(  x)*(  y);
+   }
+   return 0;
+}
 /******************************************************************************/
 Flt Image::pixel3DFLinear(Flt x, Flt y, Flt z, Bool clamp)C
 {
@@ -4449,6 +4473,89 @@ void Image::gather(Flt *pixels, Int *x_offset, Int x_offsets, Int *y_offset, Int
       {
          FREPD(y, y_offsets)
          FREPD(x, x_offsets)*pixels++=pixelF(x_offset[x], y_offset[y]);
+      }break;
+   }
+}
+/******************************************************************************/
+void Image::gatherL(Flt *pixels, Int *x_offset, Int x_offsets, Int *y_offset, Int y_offsets)C
+{
+   RangeAssertX(x_offset, x_offsets, T);
+   RangeAssertY(y_offset, y_offsets, T);
+   switch(hwType())
+   {
+      case IMAGE_F32: FREPD(y, y_offsets)
+      {
+       C Flt *pixel=(Flt*)(data()+y_offset[y]*pitch());
+         FREPD(x, x_offsets)*pixels++=pixel[x_offset[x]];
+      }break;
+
+      case IMAGE_R8:
+      case IMAGE_A8:
+      case IMAGE_L8:
+      case IMAGE_I8: FREPD(y, y_offsets)
+      {
+       C Byte *pixel=data()+y_offset[y]*pitch();
+         FREPD(x, x_offsets)*pixels++=pixel[x_offset[x]]/Flt(0xFFu);
+      }break;
+
+      case IMAGE_L8_SRGB: FREPD(y, y_offsets)
+      {
+       C Byte *pixel=data()+y_offset[y]*pitch();
+         FREPD(x, x_offsets)*pixels++=ByteSRGBToLinear(pixel[x_offset[x]]);
+      }break;
+
+      case IMAGE_I16: FREPD(y, y_offsets)
+      {
+       C U16 *pixel=(U16*)(data()+y_offset[y]*pitch());
+         FREPD(x, x_offsets)*pixels++=pixel[x_offset[x]]/Flt(0xFFFFu);
+      }break;
+
+      case IMAGE_I32: FREPD(y, y_offsets)
+      {
+       C U32 *pixel=(U32*)(data()+y_offset[y]*pitch());
+         FREPD(x, x_offsets)*pixels++=pixel[x_offset[x]]/Dbl(0xFFFFFFFFu); // Dbl required to get best precision
+      }break;
+
+      case IMAGE_B8G8R8A8: FREPD(y, y_offsets)
+      {
+       C Color *color=(Color*)(data()+y_offset[y]*pitch());
+         FREPD(x, x_offsets){C Color &src=color[x_offset[x]]; *pixels++=ByteToFlt(src.b);}
+      }break;
+
+      case IMAGE_B8G8R8A8_SRGB: FREPD(y, y_offsets)
+      {
+       C Color *color=(Color*)(data()+y_offset[y]*pitch());
+         FREPD(x, x_offsets){C Color &src=color[x_offset[x]]; *pixels++=ByteSRGBToLinear(src.b);}
+      }break;
+
+      case IMAGE_R8G8B8A8: FREPD(y, y_offsets)
+      {
+       C Color *color=(Color*)(data()+y_offset[y]*pitch());
+         FREPD(x, x_offsets){C Color &src=color[x_offset[x]]; *pixels++=ByteToFlt(src.r);}
+      }break;
+
+      case IMAGE_R8G8B8A8_SRGB: FREPD(y, y_offsets)
+      {
+       C Color *color=(Color*)(data()+y_offset[y]*pitch());
+         FREPD(x, x_offsets){C Color &src=color[x_offset[x]]; *pixels++=ByteSRGBToLinear(src.r);}
+      }break;
+
+      case IMAGE_R8G8B8: FREPD(y, y_offsets)
+      {
+       C VecB *color=(VecB*)(data()+y_offset[y]*pitch());
+         FREPD(x, x_offsets){C VecB &src=color[x_offset[x]]; *pixels++=ByteToFlt(src.x);}
+      }break;
+
+      case IMAGE_R8G8B8_SRGB: FREPD(y, y_offsets)
+      {
+       C VecB *color=(VecB*)(data()+y_offset[y]*pitch());
+         FREPD(x, x_offsets){C VecB &src=color[x_offset[x]]; *pixels++=ByteSRGBToLinear(src.x);}
+      }break;
+
+      default:
+      {
+         FREPD(y, y_offsets)
+         FREPD(x, x_offsets)*pixels++=pixelL(x_offset[x], y_offset[y]);
       }break;
    }
 }

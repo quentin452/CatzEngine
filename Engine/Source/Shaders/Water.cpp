@@ -77,10 +77,15 @@ This code calculates lighting by taking samples along the view ray, which is ref
 #endif
 #define DUAL_NORMAL 0
 /******************************************************************************/
-Half Wave(Vec2 world_pos)
+Half WaveVS(Vec2 uv)
 {
-   return Avg(RTexLod(Ext, (WaterOfsBump+world_pos)*WaterMaterial.scale_bump).x,  // it's better to scale 'WaterOfsBump' too #MaterialTextureLayoutWater
-              RTexLod(Ext, (WaterOfsBump-world_pos)*WaterMaterial.scale_bump).x); // it's better to scale 'WaterOfsBump' too
+   return Avg(RTexLod(Ext, (WaterOfsBump+uv)*WaterMaterial.scale_bump).x,  // it's better to scale 'WaterOfsBump' too #MaterialTextureLayoutWater
+              RTexLod(Ext, (WaterOfsBump-uv)*WaterMaterial.scale_bump).x); // it's better to scale 'WaterOfsBump' too
+}
+Half WavePS(Vec2 uv)
+{
+   return Avg(RTex(Ext, (WaterOfsBump+uv)*WaterMaterial.scale_bump).x,  // it's better to scale 'WaterOfsBump' too #MaterialTextureLayoutWater
+              RTex(Ext, (WaterOfsBump-uv)*WaterMaterial.scale_bump).x); // it's better to scale 'WaterOfsBump' too
 }
 /******************************************************************************/
 #if BALL
@@ -208,9 +213,9 @@ void Surface_VS
  //dist_scale=Sat( 6/dist      )*WaterMaterial.wave_scale;
 
    #define DERIVATIVE 0.125
-   Half wave  =Wave(uv),
-        wave_r=Wave(uv+Vec2(DERIVATIVE, 0)),
-        wave_f=Wave(uv+Vec2(0, DERIVATIVE));
+   Half wave  =WaveVS(uv),
+        wave_r=WaveVS(uv+Vec2(DERIVATIVE, 0)),
+        wave_f=WaveVS(uv+Vec2(0, DERIVATIVE));
 
    outWaveN.x=wave-wave_r;
    outWaveN.y=wave-wave_f;
@@ -323,7 +328,6 @@ void Surface_PS
    if(d<=0 || end<=start || start<=0)discard;
 
    Vec ball_surface_pos=start*eye_dir; // view space position on ball surface
-   depth=DelinearizeDepth(ball_surface_pos.z);
 
    Vec rel_ball_surface_pos=ball_surface_pos+cam_pos; // view space position on ball surface relative to ball center. -radius..radius
    MatrixH3 tex_mtrx;
@@ -336,8 +340,6 @@ void Surface_PS
  //O_col=1; O_col.xyz=Frac(world_pos.xyz/10); return; // test coords
  //O_col=1; O_col.xyz=Normalize(rel_ball_surface_pos); return; // test normal
 
-   Vec  inPos=ball_surface_pos;
-   Half inPlaneDist=0;
    Vec2 uv_col;
    Vec4 uv_nrm;
 
@@ -349,7 +351,18 @@ void Surface_PS
       uv_col   =(WaterOfsCol+uv)*WaterMaterial.scale_color ; // it's better to scale 'WaterOfsCol' too
       uv_nrm.xy=(WaterOfsNrm+uv)*WaterMaterial.scale_normal;
       uv_nrm.zw=(WaterOfsNrm-uv)*WaterMaterial.scale_normal;
+
+   #if WAVES
+    //ball_surface_pos  +=tex_mtrx[2]*WavePS(uv) ; // don't move up and down because if camera is facing forward when standing on flat water, then it won't change Z values and won't change depth and won't show waves
+    //ball_surface_pos.z+=        Abs(WavePS(uv)); // too strong at viewport corners. use Abs to always move forward, because if moving back sometimes then it won't show any waves
+      ball_surface_pos  +=eye_dir*Abs(WavePS(uv)); // best                          . use Abs to always move forward, because if moving back sometimes then it won't show any waves
+   #endif
    }
+
+   depth=DelinearizeDepth(ball_surface_pos.z);
+   Vec  inPos=ball_surface_pos;
+   Half inPlaneDist=0;
+   VecH inWaveN=0;
 #endif
 
    VecH nrm_flat; // #MaterialTextureLayoutWater

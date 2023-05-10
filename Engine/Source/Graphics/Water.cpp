@@ -699,6 +699,7 @@ void WaterBall::draw()C
       }
       if(dist<eps) // under surface
       {
+         Water.under(PlaneM(pos+delta*r, delta), *material);
       }
    }
 }
@@ -724,9 +725,9 @@ void WaterBall::drawDo()C
 
       material->set();
 
-      //REPS(Renderer._eye, Renderer._eye_num) this is already under loop
+    //REPS(Renderer._eye, Renderer._eye_num) this is already under loop
       {
-         //Renderer.setEyeViewportCam();
+       //Renderer.setEyeViewportCam();
          WS.WaterBallPosRadius->set(Vec4(Vec(CamMatrix.pos-pos)*CamMatrixInv.orn(), r)); if(!flat)SetFastMatrix(matrix); // set these after 'setEyeViewportCam'. position that we set is for camera relative to ball. because shader assumes ball is at Vec(0,0,0) and the position that we specify is camera position relative to ball in view space
          WS.WaterBallX->set(_uv_plane.x*CamMatrixInv.orn());
          WS.WaterBallY->set(_uv_plane.y*CamMatrixInv.orn());

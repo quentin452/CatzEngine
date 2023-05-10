@@ -129,6 +129,41 @@ void Surface_VS
 )
 {
    Vec world_pos=vtx.pos(), view_pos;
+   /*if(BALL)
+   {
+      Vec dir=Normalize(Vec(FracToPosXY(world_pos.xy), 1));
+      Vec pos   =WaterBallPosRadius.xyz;
+      Flt radius=WaterBallPosRadius.w;
+
+      Flt b=-Dot(pos, dir);
+      Flt c=Length2(pos)-Sqr(radius);
+      Flt d=b*b-c;
+      if(d<=0) // no intersection
+      {
+         //view_pos=pos;
+         Vec line_pos=0;
+         Vec line_dir=dir;
+         Vec ball_pos=pos;
+
+         Vec p=PointOnPlane(line_pos, ball_pos, line_dir);
+         Flt s=Dist        (p       , ball_pos          );
+         if(s>radius)
+         {
+            Flt new_dist=Max(0, radius+radius-s);
+            p=(p-ball_pos)*(new_dist/s)+ball_pos;
+            line_dir=Normalize(p);
+            s=new_dist;
+         }
+         s=CosSin(s/radius)*radius;
+         view_pos=p+s*line_dir;
+      }else
+      {
+         Flt start=-b-Sqrt(d);
+         view_pos=start*dir;
+      }
+      //view_pos=1000*dir;
+      world_pos=Transform(view_pos, CamMatrix);
+   }else*/
    if(WAVES)
    {
       world_pos.y=world_pos.y*WaterYMulAdd.x + WaterYMulAdd.y;

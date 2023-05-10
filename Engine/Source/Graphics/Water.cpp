@@ -686,12 +686,19 @@ void WaterBall::draw()C
    {
       Flt eps=D.viewFromActual()+WATER_TRANSITION;
       Vec delta=CamMatrix.pos-pos;
-      Flt dist=delta.length()-r;
-      if( dist>0  )WaterBalls.add(&T); // above surface
-      if( dist<eps) // under surface
+      Flt delta_len=delta.normalize();
+      Flt dist=delta_len-r;
+      if( dist>0) // above surface
       {
-         delta.normalize();
-         Water.under(PlaneM(pos+delta*r, delta), *material);
+         if(Dot(delta, _uv_plane.z)<0.9f) // if new direction (from ball pos to camera pos) is much different than last saved, then recalc uv plane. this value is smallest that doesn't introduce too much stretching
+         {
+            Vec up=PointOnPlane(_uv_plane.y, delta); if(up.normalize()<=EPS)up=PerpN(delta); // try to preserve up
+            ConstCast(_uv_plane).setDir(delta, up);
+         }
+         WaterBalls.add(&T);
+      }
+      if(dist<eps) // under surface
+      {
       }
    }
 }
@@ -721,6 +728,8 @@ void WaterBall::drawDo()C
       {
          //Renderer.setEyeViewportCam();
          WS.WaterBallPosRadius->set(Vec4(Vec(CamMatrix.pos-pos)*CamMatrixInv.orn(), r)); if(!flat)SetFastMatrix(matrix); // set these after 'setEyeViewportCam'. position that we set is for camera relative to ball. because shader assumes ball is at Vec(0,0,0) and the position that we specify is camera position relative to ball in view space
+         WS.WaterBallX->set(_uv_plane.x*CamMatrixInv.orn());
+         WS.WaterBallY->set(_uv_plane.y*CamMatrixInv.orn());
          if(flat)
          {
             Rect rect; if(toScreenRect(rect))if(!Renderer._stereo || ToEyeRect(rect))shader->draw(&rect);

@@ -168,6 +168,11 @@ struct WaterBall : BallM // BallM.r = water ball radius, BallM.pos = world-space
    void drawDo()C;
    Bool toScreenRect(Rect &rect)C {return ToFullScreenRect(T, rect);}
 #endif
+
+   WaterBall() {_uv_plane.zero();}
+
+private:
+   Matrix3 _uv_plane;
 };
 #if EE_PRIVATE
 extern Memc<C WaterBall*> WaterBalls;

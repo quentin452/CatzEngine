@@ -59,7 +59,7 @@ This code calculates lighting by taking samples along the view ray, which is ref
    D.text(0,0.8f,S+min/max+' '+max);
 }
 /******************************************************************************/
-// LIGHT, SHADOW, SOFT, REFLECT_ENV, REFLECT_MIRROR, GATHER, WAVES, RIVER, BALL
+// LIGHT, SHADOW, SOFT, REFLECT_ENV, REFLECT_MIRROR, GATHER, WAVES, RIVER, BALL, FLAT, CONSERVATIVE_DEPTH
 // Col, Nrm, Ext = water material textures
 // ImgXF = background underwater depth
 // these must be the same as "Apply" shader - Img1=reflection (2D image), Img2=background underwater
@@ -90,9 +90,13 @@ void Surface_VS(VtxInput vtx,
 #endif
 
 #if FLAT
-   NOPERSP out Vec4 pixel:POSITION
+   NOPERSP  out Vec4 pixel:POSITION
 #else
-           out Vec4 pixel:POSITION
+   #if CONSERVATIVE_DEPTH
+      centroid out Vec4 pixel:POSITION // centroid needed for DEPTH_GE
+   #else
+               out Vec4 pixel:POSITION
+   #endif
 #endif
 )
 {
@@ -260,12 +264,17 @@ void Surface_PS
    #endif
 
    #if FLAT
-      NOPERSP PIXEL
+      NOPERSP PIXEL,
+      out Flt depth:DEPTH
    #else
-              PIXEL
+      #if CONSERVATIVE_DEPTH
+         centroid PIXEL, // centroid needed for DEPTH_GE
+         out Flt depth:DEPTH_GE
+      #else
+         PIXEL,
+         out Flt depth:DEPTH
+      #endif
    #endif
-
- , out Flt depth:DEPTH
 
 #else // BALL
 

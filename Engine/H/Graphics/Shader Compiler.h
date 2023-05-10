@@ -149,12 +149,14 @@ struct ShaderCompiler
       API  api    ()C;
       Bool compute()C {return sub[ST_CS].is();} // if this is a compute shader
 
-      Shader& multiSample  (       ) {MAX(model, SM_4_1);    return T;} // SM_4_1 needed for 'SV_SampleIndex'
-      Shader& multiSample  (Bool on) {if(on)multiSample();   return T;} // SM_4_1 needed for 'SV_SampleIndex'
-      Shader& gather       (       ) {MAX(model, SM_4_1);    return T;} // SM_4_1 needed for Texture Gather
-      Shader& gather       (Bool on) {if(on)gather();        return T;} // SM_4_1 needed for Texture Gather
-      Shader& gatherChannel(       ) {MAX(model, SM_5  );    return T;} // SM_5   needed for Texture Gather per-channel
-      Shader& gatherChannel(Bool on) {if(on)gatherChannel(); return T;} // SM_5   needed for Texture Gather per-channel
+      Shader& multiSample      (       ) {MAX(model, SM_4_1);        return T;} // SM_4_1 needed for 'SV_SampleIndex'
+      Shader& multiSample      (Bool on) {if(on)multiSample();       return T;} // SM_4_1 needed for 'SV_SampleIndex'
+      Shader& gather           (       ) {MAX(model, SM_4_1);        return T;} // SM_4_1 needed for Texture Gather
+      Shader& gather           (Bool on) {if(on)gather();            return T;} // SM_4_1 needed for Texture Gather
+      Shader& gatherChannel    (       ) {MAX(model, SM_5  );        return T;} // SM_5   needed for Texture Gather per-channel
+      Shader& gatherChannel    (Bool on) {if(on)gatherChannel();     return T;} // SM_5   needed for Texture Gather per-channel
+      Shader& conservativeDepth(       ) {MAX(model, SM_5  );        return T;} // SM_5   needed for Conservative Depth (DEPTH_GE/DEPTH_LE)
+      Shader& conservativeDepth(Bool on) {if(on)conservativeDepth(); return T;} // SM_5   needed for Conservative Depth (DEPTH_GE/DEPTH_LE)
 
       Shader& operator()(C Str &n0, C Str &v0                                                                                            ) {params.New().set(n0, v0);                                                                                                         return T;}
       Shader& operator()(C Str &n0, C Str &v0,  C Str &n1, C Str &v1                                                                     ) {params.New().set(n0, v0); params.New().set(n1, v1);                                                                               return T;}

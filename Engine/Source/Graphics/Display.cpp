@@ -611,6 +611,16 @@ Bool DisplayClass::gatherChannelAvailable()C
    return shaderModel()>=SM_GL_4; // 4.0+ GL required
 #endif
 }
+Bool DisplayClass::conservativeDepthAvailable()C
+{
+#if DX11
+   return shaderModel()>=SM_5;
+#elif GL_ES
+   return false;
+#elif GL
+   return shaderModel()>=SM_GL_4_2; // 4.2+ GL required
+#endif
+}
 Bool DisplayClass::computeAvailable()C
 {
 #if DX11
@@ -2236,6 +2246,7 @@ void DisplayClass::getCaps()
    }*/
 #elif GL
  //CChar8 *ext=(CChar8*)glGetString(GL_EXTENSIONS);
+      //_conservative_depth=ContainsAny(ext, "GL_EXT_conservative_depth GL_ARB_conservative_depth", false, WHOLE_WORD_STRICT);
         _max_tex_size    =2048; glGetIntegerv(GL_MAX_TEXTURE_SIZE          , &_max_tex_size    );
    GLint aniso           =  16; glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY, & aniso           ); _max_tex_filter =Mid(aniso         , 1, 255);
  //GLint max_vtx_attrib  =   0; glGetIntegerv(GL_MAX_VERTEX_ATTRIBS        , & max_vtx_attrib  ); _max_vtx_attribs=Mid(max_vtx_attrib, 0, 255);

@@ -670,16 +670,17 @@ private:
    static VecI2 glVer();
    static Ptr   glGetProcAddress(CChar8 *name);
 #endif
-   Bool gatherAvailable          ()C;
-   Bool gatherChannelAvailable   ()C;
-   Bool packHalf2x16Available    ()C;
-   Bool computeAvailable         ()C;
-   Bool filterMinMaxAvailable    ()C;
-   Bool independentBlendAvailable()C;
-   Bool deferredUnavailable      ()C;
-   Bool deferredMSUnavailable    ()C;
-   Bool SpirVAvailable           ()C;
-   Bool canSwapSRGB              ()C;
+   Bool gatherAvailable           ()C;
+   Bool gatherChannelAvailable    ()C;
+   Bool conservativeDepthAvailable()C;
+   Bool packHalf2x16Available     ()C;
+   Bool computeAvailable          ()C;
+   Bool filterMinMaxAvailable     ()C;
+   Bool independentBlendAvailable ()C;
+   Bool deferredUnavailable       ()C;
+   Bool deferredMSUnavailable     ()C;
+   Bool SpirVAvailable            ()C;
+   Bool canSwapSRGB               ()C;
 
 #if WINDOWS_OLD
    Monitor* getMonitor(HMONITOR hmonitor);

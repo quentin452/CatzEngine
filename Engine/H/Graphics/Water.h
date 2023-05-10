@@ -63,7 +63,7 @@ DECLARE_CACHE(WaterMtrl, WaterMtrls, WaterMtrlPtr); // Water Material Cache
 extern const WaterMtrl   *WaterMtrlLast; // Last set Water Material
 extern       WaterMtrlPtr WaterMtrlNull;
 
-#define WATER_TRANSITION 0.1f // transition between above and under surface
+#define WATER_TRANSITION 0.1f // transition between above and under surface. this is in meters, this value is added on top of water surfaces. So underwater effect starts fading from water_surface+water_up*WATER_TRANSITION (intensity=0) to water_surface (intensity=1)
 #endif
 /******************************************************************************/
 struct WaterClass : WaterMtrl // Main water control

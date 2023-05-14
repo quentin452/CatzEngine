@@ -323,8 +323,12 @@ struct DisplayClass : DisplayState, DisplayDraw // Display Control
    DisplayClass& nightShadeColorS(C Vec &srgb_color);     Vec  nightShadeColorS()C;                      // set/get Night Shade color sRGB   Gamma (0..1, default=0), the change is instant, you can call it real-time, setting color to 0 disables Night Shade effect
 
    // Environment
-   DisplayClass& envColor(C Vec      &color); C Vec     & envColor()C {return _env_color;} // set/get Environment color (0..1, default=1), the change is         instant, you can call it real-time
-   DisplayClass& envMap  (C ImagePtr &cube ); C ImagePtr& envMap  ()C {return _env_map  ;} // set/get Environment map                    , the change may not be instant, avoid   calling real-time, default=ImagePtr().get("Img/Environment.img"), images passed to this method must be created with IC_ENV_CUBE flag enabled in the 'Image.copy*' functions or have "Environment" mode selected in the "Engine Editor \ Image Editor"
+   DisplayClass& envColor (C Vec      &color ); C Vec     & envColor ()C {return _env_color ;} // set/get Environment color  (0..1, default=1), the change is         instant, you can call it real-time
+   DisplayClass& envMap   (C ImagePtr &cube  ); C ImagePtr& envMap   ()C {return _env_map   ;} // set/get Environment map                     , the change may not be instant, avoid   calling real-time, default=ImagePtr().get("Img/Environment.img"), images passed to this method must be created with IC_ENV_CUBE flag enabled in the 'Image.copy*' functions or have "Environment" mode selected in the "Engine Editor \ Image Editor"
+   DisplayClass& envMatrix(C Matrix3  &matrix); C Matrix3 & envMatrix()C {return _env_matrix;} // set/get Environment matrix                  , the change is         instant, you can call it real-time
+#if EE_PRIVATE
+   void envMatrixSet()C;
+#endif
 
    // Shadowing
    DisplayClass& shadowMode         (SHADOW_MODE mode    );   SHADOW_MODE shadowMode         ()C {return _shd_mode      ;} // set/get Shadow Mode                                  (SHADOW_MODE         , default=SHADOW_MAP (SHADOW_NONE for Mobile)), the change is instant, you can call it real-time
@@ -615,6 +619,7 @@ private:
    Vec               _amb_color_l, _ns_color_l, _env_color, _eye_adapt_weight;
    Vec2              _view_center, _view_fov_tan_gui, _view_fov_tan_full;
    Rect              _rect, _rect_ui, _view_rect, _view_eye_rect[2];
+   Matrix3           _env_matrix;
    Viewport          _view_main, _view_active;
    Str8              _device_name;
    ImagePtr          _color_palette[2], _env_map;

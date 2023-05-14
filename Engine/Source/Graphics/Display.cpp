@@ -964,6 +964,7 @@ DisplayClass::DisplayClass() : _monitors(Compare, null, null, 4)
 //_ns_color_l.zero();
 
   _env_color=1;
+  _env_matrix.identity();
 
 //_vol_light=false;
 //_vol_add  =false;
@@ -3412,8 +3413,10 @@ Vec           DisplayClass::nightShadeColorS(                 )C {return LinearT
 DisplayClass& DisplayClass::nightShadeColorS(C Vec &srgb_color)  {return nightShadeColorL(SRGBToLinear(srgb_color));}
 DisplayClass& DisplayClass::nightShadeColorL(C Vec & lin_color)  {Vec c(Max(lin_color.x, 0), Max(lin_color.y, 0), Max(lin_color.z, 0)); if(_ns_color_l!=c){_ns_color_l=c; ambientSet();} return T;}
 /******************************************************************************/
-DisplayClass& DisplayClass::envColor(C Vec      &color) {if(_env_color!=color)                    Sh.EnvColor->set( _env_color=color  );                                                                                          return T;}
-DisplayClass& DisplayClass::envMap  (C ImagePtr &cube ) {if(_env_map  !=cube ){Bool was=_env_map; Sh.Env     ->set((_env_map  =cube)()); if(cube)Sh.EnvMipMaps->setConditional(cube->mipMaps()-1); if(was!=_env_map)setShader();} return T;} // if changed map presence then reset shader
+DisplayClass& DisplayClass::envColor (C Vec      &color ) {if(_env_color!=color)                    Sh.EnvColor->set( _env_color =color  );                                                                                          return T;}
+DisplayClass& DisplayClass::envMap   (C ImagePtr &cube  ) {if(_env_map  !=cube ){Bool was=_env_map; Sh.Env     ->set((_env_map   =cube)()); if(cube)Sh.EnvMipMaps->setConditional(cube->mipMaps()-1); if(was!=_env_map)setShader();} return T;} // if changed map presence then reset shader
+DisplayClass& DisplayClass::envMatrix(C Matrix3  &matrix) {                                                           _env_matrix=matrix  ; envMatrixSet();                                                                          return T;}
+void          DisplayClass::envMatrixSet()C {Sh.EnvMatrix->set(ActiveCam.matrix.orn()*D.envMatrix());} // first convert from view space by camera matrix to world space, then by env matrix
 /******************************************************************************/
 Flt           DisplayClass::motionRes   (                 )C {return   ByteScaleToFlt(_mtn_res);}
 DisplayClass& DisplayClass::motionRes   (Flt         scale)  {Byte res=FltToByteScale(scale); if(res!=_mtn_res){_mtn_res=res; Renderer.rtClean();}                                                         return T;}

@@ -439,17 +439,18 @@ BUFFER_I(Color, SBI_COLOR)
 BUFFER_END
 /******************************************************************************/
 BUFFER_I(Frame, SBI_FRAME) // once per-frame
-   Vec4  ClipPlane=Vec4(0, 0, 0, 1); // clipping plane
-   Vec4  BendFactor                ; // factors used for grass/leaf bending calculation
-   Vec4  BendFactorPrev            ; // factors used for grass/leaf bending calculation (for previous frame)
-   VecI2 NoiseOffset               ; // per-frame texture noise offset
-   Vec2  GrassRangeMulAdd          ; // factors used for grass opacity calculation
-   Flt   TesselationDensity        ; // tesselation density
-   Bool  FirstPass=true            ; // if first pass (apply Material Emissive and Light from Glow)
-   VecH  AmbientNSColor            ; // ambient combined with night shade
-   Half  AspectRatio               ; // converts UV to Screen aspect ratio
-   VecH  EnvColor                  ; // environment map color
-   Half  EnvMipMaps                ; // environment map mip-maps
+   Vec4    ClipPlane=Vec4(0, 0, 0, 1); // clipping plane
+   Vec4    BendFactor                ; // factors used for grass/leaf bending calculation
+   Vec4    BendFactorPrev            ; // factors used for grass/leaf bending calculation (for previous frame)
+   VecI2   NoiseOffset               ; // per-frame texture noise offset
+   Vec2    GrassRangeMulAdd          ; // factors used for grass opacity calculation
+   Flt     TesselationDensity        ; // tesselation density
+   Bool    FirstPass=true            ; // if first pass (apply Material Emissive and Light from Glow)
+   VecH    AmbientNSColor            ; // ambient combined with night shade
+   Half    AspectRatio               ; // converts UV to Screen aspect ratio
+   VecH    EnvColor                  ; // environment map color
+   Half    EnvMipMaps                ; // environment map mip-maps
+   Matrix3 EnvMatrix                 ; // environment map matrix
 BUFFER_END
 
 BUFFER_I(Camera, SBI_CAMERA) // this gets changed when drawing shadow maps
@@ -2265,7 +2266,7 @@ VecH ReflectEnv(Half rough, Half reflectivity, VecH reflect_col, Half NdotV, Boo
 }
 Vec ReflectDir(Vec eye_dir, Vec nrm) // High Precision needed for high resolution texture coordinates
 {
-   return Transform3(reflect(eye_dir, nrm), CamMatrix);
+   return Transform(reflect(eye_dir, nrm), EnvMatrix);
 }
 VecH ReflectTex(Vec reflect_dir, Half rough)
 {

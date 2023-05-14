@@ -115,6 +115,7 @@ struct MainShaderClass
       *NightShadeColor    =&Dummy,
       *EnvColor           =&Dummy,
       *EnvMipMaps         =&Dummy,
+      *EnvMatrix          =&Dummy,
 
       *HdrBrightness=&Dummy,
       *HdrExp       =&Dummy,

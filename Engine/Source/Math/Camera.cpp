@@ -152,6 +152,7 @@ void ActiveCamChanged()
 {
    ActiveCamZ=Dot(ActiveCam.matrix.pos, ActiveCam.matrix.z);
    SetEyeMatrix(); SetCam(ActiveCam.matrix, ActiveCam._matrix_prev); Frustum.set();
+   D.envMatrixSet();
 }
 void Camera::set()C // this should be called only outside of 'Renderer' rendering
 {

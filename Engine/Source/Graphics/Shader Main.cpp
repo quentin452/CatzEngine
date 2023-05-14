@@ -537,6 +537,7 @@ void MainShaderClass::getTechniques()
 
    EnvColor           =GetShaderParam    ("EnvColor"           ); EnvColor->set(D.envColor());
    EnvMipMaps         =GetShaderParam    ("EnvMipMaps"         ); if(D.envMap())EnvMipMaps->set(D.envMap()->mipMaps()-1);
+   EnvMatrix          =GetShaderParam    ("EnvMatrix"          ); // set in 'ActiveCamChanged'
    FirstPass          =GetShaderParamBool("FirstPass"          );
    NoiseOffset        =GetShaderParamInt ("NoiseOffset"        );
    NightShadeColor    =GetShaderParam    ("NightShadeColor"    ); // set in 'D.ambientSet()'

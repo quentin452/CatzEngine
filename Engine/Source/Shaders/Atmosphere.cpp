@@ -160,9 +160,13 @@ VecH4 RayMarchScattering(Vec pos,
       Scattering(height, rayleigh_scattering, mie_scattering, extinction);
 
    #if 1
-      Flt sun_zenith_angle_cos=Dot(sun, sample_pos)/height; // Dot(sun, sample_pos/height)
-      Flt x=sun_zenith_angle_cos*0.5+0.5;
-      Flt sun_transmittance=SmoothCube(x); // !! IF CHANGING FORMULA THEN ALSO CHANGE ON CPU #AtmosphereFormula !!
+      Flt sun_zenith_angle_cos=Dot(sun, sample_pos)/height; // Dot(sun, sample_pos/height) -1..1
+
+      // !! IF CHANGING FORMULA THEN ALSO CHANGE #AtmosphereFormula !!
+    //Flt x=sun_zenith_angle_cos*0.5+0.5;
+      Flt mul=0.6; Flt x=Max(0, sun_zenith_angle_cos*mul+(1-mul)); // mul=0.5 (balance) .. 1.0 (more night). x=0..1
+      Flt sun_transmittance=SmoothCube(x);
+
       Vec scattering=(rayleigh_scattering*rayleigh_phase + mie_scattering*mie_phase)*sun_transmittance;
    #else
       Vec  up=sample_pos/height;

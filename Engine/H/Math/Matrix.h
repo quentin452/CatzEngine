@@ -152,6 +152,11 @@ struct Matrix3 // Matrix 3x3 (orientation + scale)
 
    Matrix3& rotateXLOrthoNormalized(Flt cos, Flt sin); // rotate matrix by its x vector (x-axis rotation in local space), this method works like 'rotateXLOrthoNormalized(Flt angle)' however it accepts 'Cos' and 'Sin' of 'angle'
 
+   Matrix3& rotateToYKeepX(C Vec &y); // rotate matrix to Y direction, try to preserve existing X direction, 'y' must be normalized
+   Matrix3& rotateToYKeepZ(C Vec &y); // rotate matrix to Y direction, try to preserve existing Z direction, 'y' must be normalized
+   Matrix3& rotateToZKeepX(C Vec &z); // rotate matrix to Z direction, try to preserve existing X direction, 'z' must be normalized
+   Matrix3& rotateToZKeepY(C Vec &z); // rotate matrix to Z direction, try to preserve existing Y direction, 'z' must be normalized
+
    Matrix3& mirrorX(             ); // mirror matrix in X axis
    Matrix3& mirrorY(             ); // mirror matrix in Y axis
    Matrix3& mirrorZ(             ); // mirror matrix in Z axis

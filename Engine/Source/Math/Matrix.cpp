@@ -1974,6 +1974,35 @@ MatrixD3& MatrixD3::rotateZLOrthoNormalized(Dbl angle)
    return T;
 }
 /******************************************************************************/
+Matrix3& Matrix3::rotateToYKeepX(C Vec &y)
+{
+   T.y=y;
+   x=PointOnPlane(x, y); if(x.normalize()<=EPS)x=PerpN(y); // try to preserve x
+   z=Cross(x, y);
+   return T;
+}
+Matrix3& Matrix3::rotateToYKeepZ(C Vec &y)
+{
+   T.y=y;
+   z=PointOnPlane(z, y); if(z.normalize()<=EPS)z=PerpN(y); // try to preserve z
+   x=Cross(y, z);
+   return T;
+}
+Matrix3& Matrix3::rotateToZKeepX(C Vec &z)
+{
+   T.z=z;
+   x=PointOnPlane(x, z); if(x.normalize()<=EPS)x=PerpN(z); // try to preserve x
+   y=Cross(z, x);
+   return T;
+}
+Matrix3& Matrix3::rotateToZKeepY(C Vec &z)
+{
+   T.z=z;
+   y=PointOnPlane(y, z); if(y.normalize()<=EPS)y=PerpN(z); // try to preserve y
+   x=Cross(y, z);
+   return T;
+}
+/******************************************************************************/
 Matrix2& Matrix2::zero()
 {
    x.zero();

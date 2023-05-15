@@ -691,10 +691,7 @@ void WaterBall::draw()C
       if( dist>0) // above surface
       {
          if(Dot(delta, _uv_plane.z)<0.9f) // if new direction (from ball pos to camera pos) is much different than last saved, then recalc uv plane. this value is smallest that doesn't introduce too much stretching
-         {
-            Vec up=PointOnPlane(_uv_plane.y, delta); if(up.normalize()<=EPS)up=PerpN(delta); // try to preserve up
-            ConstCast(_uv_plane).setDir(delta, up);
-         }
+            ConstCast(_uv_plane).rotateToZKeepY(delta); // try to preserve up
          WaterBalls.add(&T);
       }
       if(dist<eps) // under surface

@@ -645,32 +645,33 @@ INLINE Shader* GetReplaceAlpha() {Shader* &s=Sh.ReplaceAlpha; if(SLOW_SHADER_LOA
 void RendererClass::cleanup()
 {
    FlagDisable(_has, HAS_CLEAR_COAT|HAS_FUR); // !! DO NOT CLEAR 'HAS_GLOW' and '_has_glow' because this is called also for reflections, but if reflections have glow, then it means final result should have glow too !!
-//_final     =null   ; do not clear '_final' because this is called also for reflections, after which we still need '_final'
-  _ds        .clear();
-//_ds_1s     .clear(); do not clear '_ds_1s' because 'setDepthForDebugDrawing' may be called after rendering finishes, also 'capture' makes use of it
+//_final        =null   ; do not clear '_final' because this is called also for reflections, after which we still need '_final'
+  _ds           .clear();
+//_ds_1s        .clear(); do not clear '_ds_1s' because 'setDepthForDebugDrawing' may be called after rendering finishes, also 'capture' makes use of it
    if(!_get_target)_col.clear();
-  _nrm       .clear();
-  _ext       .clear();
-  _vel       .clear();
-  _alpha     .clear();
-  _lum       .clear();
-  _lum_1s    .clear();
-  _spec      .clear();
-  _spec_1s   .clear();
-  _shd_1s    .clear();
-  _shd_ms    .clear();
-  _water_col .clear();
-  _water_nrm .clear();
-  _water_ds  .clear();
-  _water_lum .clear();
-  _water_spec.clear();
-  _vol       .clear();
-  _ao        .clear();
-  _mirror_rt .clear();
-  _outline_rt.clear();
-   Lights     .clear();
-   Atmospheres.clear();
-   WaterBalls .clear();
+  _nrm          .clear();
+  _ext          .clear();
+  _vel          .clear();
+  _alpha        .clear();
+  _lum          .clear();
+  _lum_1s       .clear();
+  _spec         .clear();
+  _spec_1s      .clear();
+  _shd_1s       .clear();
+  _shd_ms       .clear();
+  _water_col    .clear();
+  _water_nrm    .clear();
+  _water_refract.clear();
+  _water_ds     .clear();
+  _water_lum    .clear();
+  _water_spec   .clear();
+  _vol          .clear();
+  _ao           .clear();
+  _mirror_rt    .clear();
+  _outline_rt   .clear();
+   Lights       .clear();
+   Atmospheres  .clear();
+   WaterBalls   .clear();
    ClearInstances();
 }
 void RendererClass::cleanup1()
@@ -1677,7 +1678,8 @@ void RendererClass::light()
       if(_spec!=_spec_1s && (/*(_has&HAS_FUR) ||*/ stage==RS_LIGHT || stage==RS_LIGHT_AO)){set(_spec_1s, null, true); D.alpha(ALPHA_ADD);                                                                             Sh.draw(*_spec);} // need to apply multi-sampled spec to 1-sample for         show light stage
             src    .clear();
            _nrm    .clear();
-   //_water_nrm    .clear(); we may still need it for refraction
+   //_water_nrm    .clear(); we may still need it for reflection/environment
+   //_water_refract.clear(); we may still need it for refraction
            _ext    .clear();
            _lum    .clear(); // '_lum' will not be used after this point, however '_lum_1s' may be for rendering fur or showing light stage
            _spec   .clear();
@@ -1719,10 +1721,11 @@ Bool RendererClass::waterPostLight()
 
       Water.set();
       Water.setImages(src, _water_ds);
-      Sh.Img[0]->set(_water_nrm ); // 'Img0' required by shader 'GetNormal', 'GetNormalMS' functions
-      Sh.Img[3]->set(_water_col );
-      Sh.Img[4]->set(_water_lum );
-      Sh.Img[5]->set(_water_spec);
+      Sh.Img  [0]->set(_water_nrm    ); // 'Img0' required by shader 'GetNormal', 'GetNormalMS' functions
+      Sh.Img  [3]->set(_water_col    );
+      Sh.Img  [4]->set(_water_lum    );
+      Sh.Img  [5]->set(_water_spec   );
+      Sh.ImgXY[0]->set(_water_refract);
       Shader *shader=WS.Apply[depth_test][Water._shader_reflect_env][Water._shader_reflect_mirror][refract]; // we need to output depth only if we need it for depth testing
       REPS(_eye, _eye_num)
       {
@@ -1758,12 +1761,13 @@ Bool RendererClass::waterPostLight()
          case RS_WATER_LIGHT : if(show(_water_lum, true                  ))return true; break;
       }
    }
-  _water_col .clear();
-  _water_nrm .clear();
-  _water_ds  .clear();
-  _water_lum .clear();
-  _water_spec.clear();
-  _mirror_rt .clear();
+  _water_col    .clear();
+  _water_nrm    .clear();
+  _water_refract.clear();
+  _water_ds     .clear();
+  _water_lum    .clear();
+  _water_spec   .clear();
+  _mirror_rt    .clear();
    return false;
 }
 void RendererClass::emissive()

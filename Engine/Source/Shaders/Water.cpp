@@ -299,9 +299,10 @@ void Surface_PS
 
 #endif // BALL
 
- , out VecH4 O_col:TARGET0
+ , out VecH4 O_col    :TARGET0
 #if !LIGHT
- , out VecH  O_nrm:TARGET1
+ , out VecH  O_nrm    :TARGET1
+ , out VecH2 O_refract:TARGET2
 #endif
 ) // #RTOutput
 {
@@ -385,6 +386,8 @@ void Surface_PS
    water_col.rgb=RTex(Col, uv_col).rgb*WaterMaterial.color;
    water_col.a  =0;
 
+   Vec2 refract=nrm_flat.xy*Viewport.size; // TODO: this could be improved
+
 #if !LIGHT
    O_col=water_col;
 
@@ -393,12 +396,13 @@ void Surface_PS
    #else
       O_nrm.xyz=nrm*0.5+0.5; // -1..1 -> 0..1
    #endif
+
+   O_refract=refract;
 #else
 
 #if !(BALL && !FLAT && GL_ES)
    Vec2 uv     =PixelToUV(pixel);
 #endif
-   Vec2 refract=nrm_flat.xy*Viewport.size; // TODO: this could be improved
 #if !BALL
    Vec  eye_dir=Normalize(inPos);
 #endif
@@ -514,11 +518,10 @@ VecH4 Apply_PS(NOPERSP Vec2 uv   :UV,
       Vec eye_dir=Normalize(pos);
 
       VecH4 water_col; water_col.rgb=Img3[pix].rgb; water_col.a=0; // water surface color
-      VecH  lum =   Img4  [pix]; // water surface light
-      VecH  spec=   Img5  [pix]; // water surface light specular
-      Vec   nrm =GetNormal(pix).xyz; // water surface normals
-      Vec   nrm_flat=TransformTP(nrm, (Matrix3)GetViewMatrix()).xzy;
-      Vec2  refract=nrm_flat.xy*Viewport.size; // TODO: this could be improved
+      VecH  lum    =   Img4  [pix]; // water surface light
+      VecH  spec   =   Img5  [pix]; // water surface light specular
+      Vec   nrm    =GetNormal(pix).xyz; // water surface normals
+      Vec2  refract=   ImgXY [pix];
 
       water_col.rgb*=lum;
       WaterReflectColor(spec, nrm, eye_dir, uv, refract, DistPointPlane(pos, WaterPlanePos, WaterPlaneNrm));

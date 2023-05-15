@@ -329,7 +329,7 @@ private:
    ImageRTPtr            _h0, _h1, _q0, _q1, // <- these members are to be used only temporarily
                          _col, _ds, _ds_1s, _nrm, _ext, _vel, _alpha,
                          _lum, _lum_1s, _spec, _spec_1s, _shd_1s, _shd_ms,
-                         _water_col, _water_nrm, _water_ds, _water_lum, _water_spec,
+                         _water_col, _water_nrm, _water_refract, _water_ds, _water_lum, _water_spec,
                          _vol, _ao, _fade, _back, _back_ds, _mirror_rt, _outline_rt;
    Memx<ImageRTC>        _rts;
    Map<CPtr, Context>    _ctxs;

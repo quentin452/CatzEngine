@@ -322,9 +322,10 @@ void WaterClass::begin()
       if(_use_secondary_rt)
       {
         _swapped_ds=false;
-         Renderer._water_col.get  (rt_desc.type(                                  IMAGERT_SRGB)); // here Alpha is unused
-         Renderer._water_nrm.get  (rt_desc.type(D.signedNrmRT() ? IMAGERT_RGB_S : IMAGERT_RGB )); // here Alpha is unused
-         Renderer._water_ds .getDS(Renderer._col->w(), Renderer._col->h(), 1, false);
+         Renderer._water_col    .get  (rt_desc.type(                                  IMAGERT_SRGB )); // here Alpha is unused
+         Renderer._water_nrm    .get  (rt_desc.type(D.signedNrmRT() ? IMAGERT_RGB_S : IMAGERT_RGB  )); // here Alpha is unused
+         Renderer._water_refract.get  (rt_desc.type(                                  IMAGERT_TWO_S)); // here Alpha is unused
+         Renderer._water_ds     .getDS(Renderer._col->w(), Renderer._col->h(), 1, false);
 
          if(Renderer.stage)switch(Renderer.stage)
          {
@@ -338,12 +339,12 @@ void WaterClass::begin()
             Renderer.set(null, Renderer._water_ds, true);
             D.depthLock  (true); D.depthFunc(FUNC_ALWAYS ); D.stencil(STENCIL_ALWAYS_SET, 0); shader->draw();
             D.depthUnlock(    ); D.depthFunc(FUNC_DEFAULT); D.stencil(STENCIL_NONE         );
-          //Renderer.set(Renderer._water_col, Renderer._water_nrm, null, null, Renderer._water_ds, true); don't set, instead swap first and set later
+          //Renderer.set(Renderer._water_col, Renderer._water_nrm, Renderer._water_refract, null, Renderer._water_ds, true); don't set, instead swap first and set later
            _swapped_ds=Renderer.swapDS1S(Renderer._water_ds); // try to swap DS to put existing stencil values into '_water_ds' because we will write water depths onto '_water_ds' and we want to use it later instead of '_ds_1s' so we want all stencil values to be kept
-            Renderer.set(Renderer._water_col, Renderer._water_nrm, null, null, Renderer._water_ds, true);
+            Renderer.set(Renderer._water_col, Renderer._water_nrm, Renderer._water_refract, null, Renderer._water_ds, true);
          }else // if we can't copy then just clear it
          {
-            Renderer.set(Renderer._water_col, Renderer._water_nrm, null, null, Renderer._water_ds, true);
+            Renderer.set(Renderer._water_col, Renderer._water_nrm, Renderer._water_refract, null, Renderer._water_ds, true);
             D.clearDS();
          }
       }else

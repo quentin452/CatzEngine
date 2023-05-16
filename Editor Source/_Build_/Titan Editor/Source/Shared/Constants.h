@@ -24,16 +24,6 @@ extern const flt           StateFadeTime,
                     VtxDupPosEps, 
                     DefaultFOV,
                     PreviewFOV;
-extern const bool          MiscOnTop,
-                    CodeMenuOnTop,
-                    ModeTabsAlwaysVisible,
-                    RequireAllCodeMatchForSync,
-                    TolerantSecondaryServer, // will ignore DeviceID when getting confirmation from secondary authentication server
-                    SupportBC7        , // if support BC7 compression
-                    UWPBC7           , // if support BC7 compression for UWP TODO: enable this once DX12 support has been added (because DX11 is limited to FeatureLevel 10.0 on Xbox and doesn't support BC6/7)
-                    WebBC7           , // if support BC7 compression for Web TODO: enable this once browsers start supporting BC7
-                    ImportRemovedElms, 
-                    RenameAnimBonesOnSkelChange;
 extern const MESH_FLAG     MeshJoinAllTestVtxFlag;
 extern const Edit::Material::TEX_QUALITY MinMtrlTexQualityBase0    , // minimum texture compression quality for Material Base0  Texture (RGBA              ) #MaterialTextureLayout      , set to LOW    because can be maximized based on 'ElmMaterial.tex_quality/EditMaterial.tex_quality'
                                 MinMtrlTexQualityBase1   , // minimum texture compression quality for Material Base1  Texture (NxNy              ) #MaterialTextureLayout      , set to HIGH   because normals need this (without this, they get very blocky due to low quality)

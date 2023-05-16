@@ -28,16 +28,7 @@ const flt       StateFadeTime=0.2f,
                 VtxDupPosEps=0.0002f, 
                 DefaultFOV=DegToRad(70),
                 PreviewFOV=DegToRad(50);
-const bool      MiscOnTop=false,
-                CodeMenuOnTop=false,
-                ModeTabsAlwaysVisible=false,
-                RequireAllCodeMatchForSync=true,
-                TolerantSecondaryServer=false, // will ignore DeviceID when getting confirmation from secondary authentication server
-                SupportBC7       =true , // if support BC7 compression
-                UWPBC7           =false, // if support BC7 compression for UWP TODO: enable this once DX12 support has been added (because DX11 is limited to FeatureLevel 10.0 on Xbox and doesn't support BC6/7)
-                WebBC7           =false, // if support BC7 compression for Web TODO: enable this once browsers start supporting BC7
-                ImportRemovedElms=false, 
-                RenameAnimBonesOnSkelChange=true; // See also: FIND_ANIM_BY_NAME_ONLY in the Engine
+                                         // See also: FIND_ANIM_BY_NAME_ONLY in the Engine
                                         // min size of mesh box (in meters) to split it
 const MESH_FLAG MeshJoinAllTestVtxFlag=VTX_HLP|VTX_SIZE; // this is because of "Leaf" shader which works differently depending on existence of these components, testing for color/skin is not needed because parts that don't have them will have default values set (WHITE color, 0-bone/matrix)
 

@@ -691,6 +691,8 @@ enum VIEW_MODE
 // CONSTANTS
 /******************************************************************************/
 const int  APP_BUILD        =73;
+const bool EMBED_ENGINE_DATA=(true && !WINDOWS_NEW && !MOBILE && !WEB);
+const bool FastTerrainPhys=true;
 const int           ForceInstaller=-2, // -2=disable and don't update, -1=disable, 0=auto, 1=enable (this is used only in Debug)
                     HeightBrushNoiseRes=256,
                     MtrlBrushSlots=14,
@@ -714,7 +716,18 @@ const int           ForceInstaller=-2, // -2=disable and don't update, -1=disabl
                     MeshSplitMaxSteps=3,    // max steps of splitting a mesh
                     MeshSplitMinVtxs=12000, // min number of vertexes in a mesh to split it
                     MeshSplitMinSize=4;
+const bool          MiscOnTop=false,
+                    CodeMenuOnTop=false,
+                    ModeTabsAlwaysVisible=false,
+                    RequireAllCodeMatchForSync=true,
+                    TolerantSecondaryServer=false, // will ignore DeviceID when getting confirmation from secondary authentication server
+                    SupportBC7       =true , // if support BC7 compression
+                    UWPBC7           =false, // if support BC7 compression for UWP TODO: enable this once DX12 support has been added (because DX11 is limited to FeatureLevel 10.0 on Xbox and doesn't support BC6/7)
+                    WebBC7           =false, // if support BC7 compression for Web TODO: enable this once browsers start supporting BC7
+                    ImportRemovedElms=false, 
+                    RenameAnimBonesOnSkelChange=true;
 const uint          NewElmTime=1;
+const bool PUBLISH          =true;
 const uint ProjectVersion     =99, // !! increase this by one if any of engine/editor asset formats have changed !!
            ClientServerVersion=99;
 const int           ServerNetworkCompressionLevel=9           , ClientNetworkCompressionLevel=9            , ProjectPackageCompressionLevel=9;

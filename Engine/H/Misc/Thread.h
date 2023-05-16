@@ -377,6 +377,7 @@ const_mem_addr struct Thread // Thread !! must be stored in constant memory addr
    void pause     (                   ); // pause  thread, 'func' will no longer be called until the thread is resumed
    void resume    (                   ); // resume thread from paused state
    void priority  (Int priority       ); // set    thread priority, 'priority'=-3..3
+   void mask      (ULong mask         ); // set    CPU HW Threads on which this thread is allowed to run (every bit specifies different HW Thread)
    void kill      (                   ); // kill   thread, immediately shut down the thread, usage of this method is not recommended because it may cause memory leaks
    Bool wait      (Int milliseconds=-1); // wait   until the thread finishes processing (<0 = infinite wait), false on timeout
 

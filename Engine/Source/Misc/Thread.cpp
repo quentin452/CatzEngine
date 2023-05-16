@@ -751,6 +751,20 @@ void Thread::priority(Int priority)
    #endif
    }
 }
+void Thread::mask(ULong mask)
+{
+   if(active())
+   {
+   #if WINDOWS
+      SetThreadAffinityMask(_handle, mask);
+   #else
+      cpu_set_t cpuset;
+                             CPU_ZERO(  &cpuset);
+      FREP(64)if(mask&(1<<i))CPU_SET(i, &cpuset);
+      pthread_setaffinity_np(_handle, SIZE(cpuset), &cpuset);
+   #endif
+   }
+}
 void Thread::kill()
 {
    if(created())

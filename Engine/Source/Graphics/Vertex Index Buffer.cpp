@@ -411,7 +411,7 @@ Bool VtxBuf::createRaw(Int memory_size, Bool dynamic, CPtr data)
 {
 #if 0 // we can't do this here, because 'createRaw' does not set any info about 'vtxs', 'vtxSize' or 'memUsage', and in 'VI._vb' those params always change, instead these checks are in 'createNum'
    if(memUsage()==memory_size && T._dynamic==dynamic && !_lock_count) // if the buffer is already created and matches what we want
-      if(!data || setFrom(data, memory_size))return true; // if 'setFrom' failed then try creating new below
+      if(!data /*|| setFrom(data, memory_size)*/)return true; // if 'setFrom' failed then try creating new below !! actually don't use 'setFrom' because it's much faster to create brand new buffer without having to do locks !!
 #endif
 
    if(memory_size<=0){del(); return !memory_size;}
@@ -460,7 +460,7 @@ Bool VtxBuf::createRaw(Int memory_size, Bool dynamic, CPtr data)
 Bool IndBuf::create(Int indexes, Bool bit16, Bool dynamic, CPtr data)
 {
    if(T._ind_num==indexes && T.bit16()==bit16 && T._dynamic==dynamic && !_lock_count) // if the buffer is already created and matches what we want
-      if(!data || setFrom(data))return true; // if 'setFrom' failed then try creating new below
+      if(!data /*|| setFrom(data)*/)return true; // if 'setFrom' failed then try creating new below !! actually don't use 'setFrom' because it's much faster to create brand new buffer without having to do locks !!
 
    if(indexes<=0){del(); return !indexes;}
 
@@ -517,7 +517,7 @@ Bool IndBuf::create(Int indexes, Bool bit16, Bool dynamic, CPtr data)
 Bool VtxBuf::createNum(Int vtx_size, Int vtx_num, Bool dynamic, CPtr data)
 {
    if(vtxSize()==vtx_size && vtxs()==vtx_num && T._dynamic==dynamic && !_lock_count) // if the buffer is already created and matches what we want
-      if(!data || setFrom(data, memUsage()))return true; // if 'setFrom' failed then try creating new below
+      if(!data /*|| setFrom(data, memUsage())*/)return true; // if 'setFrom' failed then try creating new below !! actually don't use 'setFrom' because it's much faster to create brand new buffer without having to do locks !!
 
    if(createRaw(vtx_size*vtx_num, dynamic, data))
    {
@@ -527,7 +527,7 @@ Bool VtxBuf::createNum(Int vtx_size, Int vtx_num, Bool dynamic, CPtr data)
    }
    return false;
 }
-Bool VtxBuf::create(Int vertexes, MESH_FLAG flag, UInt compress, Bool dynamic)
+Int VtxSize(MESH_FLAG flag, UInt compress)
 {
    Int size=0;
                                      if(flag&VTX_POS     )size+=SIZE(Vec  );
@@ -560,8 +560,11 @@ Bool VtxBuf::create(Int vertexes, MESH_FLAG flag, UInt compress, Bool dynamic)
                                      if(flag&VTX_MATERIAL)size+=SIZE(VecB4);
                                      if(flag&VTX_COLOR   )size+=SIZE(Color);
                                      if(flag&VTX_FACE_ID )size+=SIZE(VecB4);
-
-   return createNum(size, vertexes, dynamic);
+   return size;
+}
+Bool VtxBuf::create(Int vertexes, MESH_FLAG flag, UInt compress, Bool dynamic)
+{
+   return createNum(VtxSize(flag, compress), vertexes, dynamic);
 }
 /******************************************************************************/
 Bool VtxBuf::create(C VtxBuf &src, Int dynamic)

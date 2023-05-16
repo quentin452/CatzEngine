@@ -89,6 +89,18 @@ CPU::CPU()
    #elif WINDOWS_NEW
       SYSTEM_INFO sys_info; GetSystemInfo(&sys_info); _threads=sys_info.dwNumberOfProcessors;
    #endif
+
+   DWORD size=0; GetLogicalProcessorInformationEx(RelationProcessorCore, nullptr, &size); if(size)
+   {
+      Memt<Byte> data; data.setNum(size);
+      if(GetLogicalProcessorInformationEx(RelationProcessorCore, (SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)data.data(), &size))
+         for(UInt offset=0; offset<size; )
+         {
+            SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX *info=(SYSTEM_LOGICAL_PROCESSOR_INFORMATION_EX*)(data.data()+offset);
+            offset+=info->Size;
+           _cores++;
+         }
+   }
 #elif LINUX
   _threads=sysconf(_SC_NPROCESSORS_CONF);
 #elif APPLE
@@ -235,6 +247,7 @@ CPU::CPU()
 #endif
 
    MAX(_threads, 1);
+   if(!_cores)_cores=_threads;
    set();
 }
 /******************************************************************************/

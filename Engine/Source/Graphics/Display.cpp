@@ -1703,7 +1703,9 @@ void DisplayClass::androidOpen()
 {
 #if ANDROID
    SyncLocker locker(_lock);
-   App._thread_id=GetThreadID(); // !! adjust the thread ID here, because it will be a different value !!
+                                              App._thread_id       =GetThreadID(); // !! adjust the thread ID here, because it will be a different value !!
+   auto thread_priority=App._thread_priority; App._thread_priority^=1; App.threadPriority(thread_priority); // reset priority for main thread
+   auto thread_mask    =App._thread_mask    ; App._thread_mask    ^=1; App.threadMask    (thread_mask    ); // reset mask     for main thread
    androidClose();
    if(GLDisplay && MainContext.context)
    {

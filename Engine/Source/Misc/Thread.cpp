@@ -714,6 +714,7 @@ void Thread::resume()
    #endif
    }
 }
+/******************************************************************************/
 #if HAS_THREADS && !WINDOWS
 #if SWITCH
    #define PRIORITY_POLICY SCHED_OTHER // SCHED_RR undefined
@@ -733,38 +734,74 @@ bool Update () {if(Kb.bp(KB_ESC))return false; return true;}
 void Draw   () {D.clear(AZURE); Str s; int max=0; REPA(v)MAX(max, v[i]); FREPA(v){if(i)s+=", "; s+=Flt(v[i])/max;} D.text(0, 0, s);}
 */
 #endif
+static void _SetThreadPriority(PLATFORM(HANDLE, pthread_t) handle, Int priority)
+{
+#if HAS_THREADS
+   #if WINDOWS
+      ASSERT(THREAD_PRIORITY_LOWEST==-2 && THREAD_PRIORITY_HIGHEST==2);
+      SetThreadPriority(handle, (priority<-2) ? THREAD_PRIORITY_IDLE : (priority>2) ? THREAD_PRIORITY_TIME_CRITICAL : priority);
+   #else
+      //LogN(S+PriorityBase+' '+(PriorityBase+PriorityRange));
+      sched_param param; param.sched_priority=PriorityBase+PriorityRange*(priority+3)/6; // div by 6 because "priority==3" should give max
+      pthread_setschedparam(handle, PRIORITY_POLICY, &param);
+   #endif
+#endif
+}
+Application& Application::threadPriority(Int priority)
+{
+   Clamp(priority, -3, 3);
+  _thread_priority=priority;
+#if WINDOWS
+   if(HANDLE thread_handle=OpenThread(THREAD_SET_INFORMATION, false, _thread_id))
+   {
+     _SetThreadPriority(thread_handle, priority);
+      CloseHandle      (thread_handle);
+   }
+#else
+  _SetThreadPriority((pthread_t)_thread_id, priority);
+#endif
+   return T;
+}
 void Thread::priority(Int priority)
 {
    Clamp(priority, -3, 3);
    if(active() && T._priority!=priority)
    {
       T._priority=priority;
-   #if HAS_THREADS
-      #if WINDOWS
-         ASSERT(THREAD_PRIORITY_LOWEST==-2 && THREAD_PRIORITY_HIGHEST==2);
-         SetThreadPriority(_handle, (priority<-2) ? THREAD_PRIORITY_IDLE : (priority>2) ? THREAD_PRIORITY_TIME_CRITICAL : priority);
-      #else
-       //LogN(S+PriorityBase+' '+(PriorityBase+PriorityRange));
-         sched_param param; param.sched_priority=PriorityBase+PriorityRange*(priority+3)/6; // div by 6 because "priority==3" should give max
-         pthread_setschedparam(_handle, PRIORITY_POLICY, &param);
-      #endif
-   #endif
+     _SetThreadPriority(_handle, priority);
    }
+}
+/******************************************************************************/
+static void SetThreadMask(PLATFORM(HANDLE, pthread_t) handle, ULong mask)
+{
+#if WINDOWS
+   SetThreadAffinityMask(handle, mask);
+#else
+   cpu_set_t cpuset;
+                          CPU_ZERO(  &cpuset);
+   FREP(64)if(mask&(1<<i))CPU_SET(i, &cpuset);
+   pthread_setaffinity_np(handle, SIZE(cpuset), &cpuset);
+#endif
+}
+Application& Application::threadMask(ULong mask)
+{
+  _thread_mask=mask;
+#if WINDOWS
+   if(HANDLE thread_handle=OpenThread(THREAD_SET_INFORMATION|THREAD_QUERY_INFORMATION, false, _thread_id))
+   {
+      SetThreadMask(thread_handle, mask);
+      CloseHandle  (thread_handle);
+   }
+#else
+   SetThreadMask((pthread_t)_thread_id, mask);
+#endif
+   return T;
 }
 void Thread::mask(ULong mask)
 {
-   if(active())
-   {
-   #if WINDOWS
-      SetThreadAffinityMask(_handle, mask);
-   #else
-      cpu_set_t cpuset;
-                             CPU_ZERO(  &cpuset);
-      FREP(64)if(mask&(1<<i))CPU_SET(i, &cpuset);
-      pthread_setaffinity_np(_handle, SIZE(cpuset), &cpuset);
-   #endif
-   }
+   if(active())SetThreadMask(_handle, mask);
 }
+/******************************************************************************/
 void Thread::kill()
 {
    if(created())
@@ -1024,6 +1061,7 @@ Threads& Threads::activeThreads(Int active)
 }
 Int      Threads::priority(            )C {return _threads.elms() ? _threads[0].priority() : 0;}
 Threads& Threads::priority(Int priority)  {REPAO( _threads).priority(priority); return T;}
+Threads& Threads::mask    (ULong mask  )  {REPAO( _threads).mask    (mask    ); return T;}
 /******************************************************************************/
 // !! 'elm_index' MUST BE 'IntPtr' and not 'Int' because we're casting to '_func' of 'Ptr' type !!
 void Threads::_process(Int elms, void func(IntPtr elm_index, Ptr user, Int thread_index), Ptr user, Int max_threads, Bool allow_processing_on_this_thread)

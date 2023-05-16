@@ -621,6 +621,7 @@ const_mem_addr struct Threads // Worker Threads, allow to process data on multip
    Int      threads1()C {return _threads.elms()+1;}              // get     how many threads were created for this object + 1, use this method when allocating per-thread data to be used for 'process1' methods
    Int activeThreads()C;   Threads& activeThreads(Int active  ); // get/set how many threads should be active (remaining threads will be paused)
    Int      priority()C;   Threads& priority     (Int priority); // get/set threads priority, 'priority'=-3..3
+                           Threads& mask         (ULong mask  ); //     set CPU HW Threads on which Threads is allowed to run (every bit specifies different HW Thread)
 
   ~Threads() {del();}
    Threads();

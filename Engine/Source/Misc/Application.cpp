@@ -59,6 +59,7 @@ Application::Application()
    low_memory=null;
    notification=null;
   _active=_initialized=_minimized=_maximized=_close=_closed=_del_self_at_exit=_elevated=_back_full=false;
+  _thread_priority=0;
 #if WINDOWS_NEW
   _waiting=false;
 #endif
@@ -80,6 +81,7 @@ Application::Application()
   _style_window=0;
 #endif
 #endif
+  _thread_mask=~0;
   _status_color=_nav_color=true;
   _status=      SYSTEM_BAR_HIDDEN                      ; // must match #SystemBar
   _nav   =IOS ? SYSTEM_BAR_OVERLAY : SYSTEM_BAR_VISIBLE; // must match #SystemBar

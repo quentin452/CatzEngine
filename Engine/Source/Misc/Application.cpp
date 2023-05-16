@@ -1253,7 +1253,7 @@ Bool Application::create0()
    }
 #endif
 
-   T._thread_id   =GetThreadID(); // !! adjust the thread ID here, because on WINDOWS_NEW it will be a different value !!
+   T._thread_id   =GetThreadID(); // !! adjust the thread ID here, because on WINDOWS_NEW it will be a different value !! no need to reset 'threadPriority' 'threadMask' because 'InitPre' was not yet called
    T._elevated    =GetProcessElevation();
    T._process_id  =PLATFORM(GetCurrentProcessId(), getpid());
    T._desktop_size=D.screen();

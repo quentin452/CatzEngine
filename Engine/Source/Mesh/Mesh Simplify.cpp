@@ -7,6 +7,7 @@
 #define TEST_ORIGINAL_POS 1 // if test original position against the new triangle (or if false, test the new position against the old triangle)
 #define DEBUG_CHECK_REFS  0 // if perform debug checks that the references have been properly adjusted
 #define PROFILE           0 // if perform profiling, measuring which functions take how much time to complete
+#define MEM_LINK          1
 
 #define VTX_NORMAL_QM 2.0f // value of 2 was chosen based on test results (it gave better quality)
 #define VTX_BORDER_QM 1.0f
@@ -201,6 +202,10 @@ T1(TYPE) struct MemLink : Memc<MemLinkElm<TYPE>>
   ~MemLink() {del();}
    MemLink() {zero();}
 
+   Bool is()C {return _first>=0;}
+
+   Int validElms()C;
+
    TYPE& operator[](Int i)  {return super::operator[](i).data;}
  C TYPE& operator[](Int i)C {return super::operator[](i).data;}
 
@@ -235,6 +240,11 @@ T1(TYPE) void           MemLink<TYPE>::zero () {_first=_last=-1;}
 T1(TYPE) MemLink<TYPE>& MemLink<TYPE>::clear() {super::clear(); zero(); return T;}
 T1(TYPE) MemLink<TYPE>& MemLink<TYPE>::del  () {super::del  (); zero(); return T;}
 
+T1(TYPE) Int MemLink<TYPE>::validElms()C
+{
+   Int    valid=is(); REP(absElms())if(absFull(i).prev>=0)valid++;
+   return valid;
+}
 T1(TYPE) Int MemLink<TYPE>::absToValidIndex(Int abs)C
 {
    if(InRange(abs, absElms()))
@@ -622,7 +632,11 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
    MESH_FLAG          test_flag; // this is set based on the max tolerance parameters to the simplify function
    Flt                max_uv2, max_color, max_material, max_normal;
    Box                box;
+#if MEM_LINK
+   MemLink<Triangle > tris;
+#else
    Memx<Triangle    > tris;
+#endif
    Memc<Vertex      > vtxs;
    Memc<Ref         > refs;
    Memc<VtxDupMap   > vtx_dups;
@@ -1085,7 +1099,39 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       PROF(RESET_ERROR);
       Real error_min=tri.error_min=Min(tri.edge_error[0], tri.edge_error[1], tri.edge_error[2]);
       // reposition this triangle in the 'tris' list to preserve order by 'error_min'
-   #if 1 // binary search
+   #if MEM_LINK
+      MemLinkElm<Triangle> &_tri=(MemLinkElm<Triangle>&)tri; ASSERT(OFFSET(MemLinkElm<Triangle>, data)==0);
+      Int abs=valid; // for MEM_LINK this is actually absolute index
+
+      Int                   cur_abs=abs;
+      MemLinkElm<Triangle> *cur    =&_tri;
+   next:
+      Int cur_next=cur->next; if(cur_next>=0)
+      {
+         MemLinkElm<Triangle> &test=tris.absFull(cur_next);
+         if(error_min<test.data.error_min)
+         {
+            cur_abs= cur_next;
+            cur    =&test;
+            goto next;
+         }
+      }
+      if(cur_abs!=abs)tris.moveAfter(abs, cur_abs);else
+      {
+      prev:
+         Int cur_prev=cur->prev; if(cur_prev>=0)
+         {
+            MemLinkElm<Triangle> &test=tris.absFull(cur_prev);
+            if(error_min>test.data.error_min)
+            {
+               cur_abs= cur_prev;
+               cur    =&test;
+               goto prev;
+            }
+         }
+         if(cur_abs!=abs)tris.moveBefore(abs, cur_abs);
+      }
+   #elif 1 // binary search
       Int l=0, r=tris.elms()-1;
 
       if(InRange(valid-1, tris) && tris[valid-1].error_min>=error_min)l=valid; // left  ok
@@ -1201,7 +1247,11 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
             tri.edge_error[0]=calculateError(tri.ind.c[0], tri.ind.c[1], mid_pos);
             tri.edge_error[1]=calculateError(tri.ind.c[1], tri.ind.c[2], mid_pos);
             tri.edge_error[2]=calculateError(tri.ind.c[2], tri.ind.c[0], mid_pos);
+         #if MEM_LINK
+            resetError(tri, ref.tri_abs);
+         #else
             resetError(tri, tris.absToValidIndex(ref.tri_abs));
+         #endif
             refs.add(Ref(ref)); // !! add as temp variable, because 'add' can cause 'ref' mem address to be invalid
          }
       }
@@ -1415,6 +1465,9 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
    void checkRefs()C
    {
       REPAD(t, tris)
+      #if MEM_LINK
+         if(tris.absIndexIsValid(t))
+      #endif
       {
        C Triangle &tri=tris[t]; REPAD(v, tri.ind)
          {
@@ -1423,7 +1476,8 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
             REP(vtx.tri_num)
             {
              C Ref      &ref=refs[vtx.ref_start+i];
-             C Triangle &vtx_tri=tris.absElm(ref.tri_abs); if(tris.absToValidIndex(ref.tri_abs)<0)Exit("vtx tri doesn't exist");
+               if(              !tris.absIndexIsValid(ref.tri_abs))Exit("vtx tri doesn't exist");
+             C Triangle &vtx_tri=tris.absElm         (ref.tri_abs);
                if(&tri==&vtx_tri)has=true;
             }
             if(!has)Exit("vtx doesn't have tri");
@@ -1512,8 +1566,14 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       refs.setNum(tris.elms()*3);
       REPAD(t, tris)
       {
+      #if MEM_LINK
+         auto     &_tri=tris.absFull(t); _tri.prev=t; // store "original absolute index" in 'prev'
+         Triangle & tri=_tri.data;
+         Int        tri_abs=t;
+      #else
          Triangle &tri=tris[t];
          Int       tri_abs=tris.validToAbsIndex(t);
+      #endif
          REPAD(v, tri.ind)
          {
             Vertex &vtx=vtxs[tri.ind.c[v]];
@@ -1535,6 +1595,11 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
          tri.error_min=Min(tri.edge_error[0], tri.edge_error[1], tri.edge_error[2]);
       }
       tris.sort(CompareError); // tris are now sorted from highest to lowest error
+   #if MEM_LINK
+      REPA(tris)tris.absFull(tris.absFull(i).prev).next=i; // create remap prev "original absolute index" -> next "sorted absolute index"
+      REPA(refs){Ref &ref=refs[i]; ref.tri_abs=tris.absFull(ref.tri_abs).next;} // remap to new indexes
+      tris.resetLinks();
+   #endif
    }
 
    void simplify(Flt intensity, Flt max_distance, Flt max_uv, Flt max_color, Flt max_material, Flt max_skin, Flt max_normal, Bool keep_border, MESH_SIMPLIFY mode, Flt pos_eps)
@@ -1566,7 +1631,11 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
 
       // main iteration loop
       Vec mid_pos;
+   #if MEM_LINK
+      for(; tris.is(); )
+   #else
       for(; tris.elms(); )
+   #endif
       {
          Triangle &tri=tris.last(); if(tri.error_min>max_error || stop())break; // tris are sorted by their error, so if we've reached the one above the limit, then stop
 
@@ -1625,7 +1694,14 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
             {
                Triangle *tri=middle_tris[i]->tri;
                visible_tris-=tri->visible;
+            #if MEM_LINK
+               #if !ADJUST_REFS
+                  tri->exists=false;
+               #endif
+               tris.disconnectData(tri);
+            #else
                tris.removeData(tri, true);
+            #endif
             }
             edge_vtx0.pos=mid_pos;
             edge_vtx0.eat(edge_vtx1);
@@ -1654,7 +1730,11 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
          if(tri.edge_error[i]<FLT_MAX) // this was the min, and if the min was doable, then
          {
             tri.edge_error[i]=FLT_MAX; // set it as not-doable
+         #if MEM_LINK
+            resetError(tri, tris._last); // re-position it in the 'tris' list based on new 'error_min'
+         #else
             resetError(tri, tris.elms()-1); // re-position it in the 'tris' list based on new 'error_min'
+         #endif
          }
       }
    }
@@ -1662,7 +1742,8 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
    void store(MeshBase &mesh, MESH_FLAG flag_and=MESH_ALL)
    {
       MESH_FLAG flags=MESH_NONE; REPA(tris)flags|=tris[i].flag; flags&=flag_and;
-      mesh.create(tris.elms()*3, 0, tris.elms(), 0, flags&(VTX_ALL&~(VTX_TAN_BIN|VTX_DUP)));
+      Int tri_num=tris.validElms();
+      mesh.create(tri_num*3, 0, tri_num, 0, flags&(VTX_ALL&~(VTX_TAN_BIN|VTX_DUP)));
       Int tri_index=0;
    #if 0
       REPA(tris)
@@ -1699,6 +1780,9 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       MemtN<PartInfo, 256> part_infos;
 
       REPA(tris)
+      #if MEM_LINK
+         if(tris.absIndexIsValid(i))
+      #endif
       {
        C Triangle &tri =tris[i];
          PartInfo &part=part_infos(tri.part);

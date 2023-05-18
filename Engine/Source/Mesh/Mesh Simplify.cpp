@@ -389,7 +389,7 @@ T1(TYPE) Bool MemLink<TYPE>::validate()C
          goto next;
       }else if(_last!=cur_i)return false;
    }
-   return valid()==validElms();
+   return valid==validElms();
 }
 T1(TYPE) void MemLink<TYPE>::validateExit()C
 {

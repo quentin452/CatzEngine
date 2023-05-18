@@ -7,7 +7,7 @@
 #define TEST_ORIGINAL_POS 1 // if test original position against the new triangle (or if false, test the new position against the old triangle)
 #define DEBUG_CHECK_REFS  0 // if perform debug checks that the references have been properly adjusted
 #define PROFILE           0 // if perform profiling, measuring which functions take how much time to complete
-#define MEM_LINK          1
+#define MEM_LINK          0 // disable because it's slower, due to linear search
 
 #define VTX_NORMAL_QM 2.0f // value of 2 was chosen based on test results (it gave better quality)
 #define VTX_BORDER_QM 1.0f
@@ -1134,16 +1134,16 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       PROF(RESET_ERROR);
       Real error_min=tri.error_min=Min(tri.edge_error[0], tri.edge_error[1], tri.edge_error[2]);
       // reposition this triangle in the 'tris' list to preserve order by 'error_min'
-   #if MEM_LINK
+   #if MEM_LINK // linear search
       MemLinkElm<Triangle> &_tri=(MemLinkElm<Triangle>&)tri; ASSERT(OFFSET(MemLinkElm<Triangle>, data)==0);
       Int abs=valid; // for MEM_LINK this is actually absolute index
 
       Int                   cur_abs=abs;
-      MemLinkElm<Triangle> *cur    =&_tri;
+    C MemLinkElm<Triangle> *cur    =&_tri;
    next:
       Int cur_next=cur->next; if(cur_next>=0)
       {
-         MemLinkElm<Triangle> &test=tris.absFull(cur_next);
+       C MemLinkElm<Triangle> &test=tris.absFull(cur_next);
          if(error_min<test.data.error_min)
          {
             cur_abs= cur_next;
@@ -1156,7 +1156,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       prev:
          Int cur_prev=cur->prev; if(cur_prev>=0)
          {
-            MemLinkElm<Triangle> &test=tris.absFull(cur_prev);
+          C MemLinkElm<Triangle> &test=tris.absFull(cur_prev);
             if(error_min>test.data.error_min)
             {
                cur_abs= cur_prev;
@@ -1216,7 +1216,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
             if(InRange(i, tris) && InRange(i+1, tris))
                DEBUG_ASSERT(CompareError(tris[i], tris[i+1])<=0, "simplify tris order");
       #endif
-   #else // iterative method
+   #else // linear search
       Int target=valid;
       for(;;)
       {

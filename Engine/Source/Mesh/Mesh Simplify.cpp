@@ -453,7 +453,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
 
    Bool               keep_border;
    MESH_SIMPLIFY      mode;
-   Int                processed_tris, max_skin, visible_tris=0;
+   Int                max_skin, visible_tris=0;
    MESH_FLAG          test_flag; // this is set based on the max tolerance parameters to the simplify function
    Flt                max_uv2, max_color, max_material, max_normal;
    Box                box;
@@ -920,11 +920,10 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       Real error_min=tri.error_min=Min(tri.edge_error[0], tri.edge_error[1], tri.edge_error[2]);
       // reposition this triangle in the 'tris' list to preserve order by 'error_min'
    #if 1 // binary search
-      Int elms=Min(tris.elms(), processed_tris), // we can ignore moving to the right of what we've already processed
-          l=0, r=elms-1;
+      Int l=0, r=tris.elms()-1;
 
-      if(InRange(valid-1, elms) && tris[valid-1].error_min>=error_min)l=valid; // left  ok
-      if(InRange(valid+1, elms) && tris[valid+1].error_min<=error_min)r=valid; // right ok
+      if(InRange(valid-1, tris) && tris[valid-1].error_min>=error_min)l=valid; // left  ok
+      if(InRange(valid+1, tris) && tris[valid+1].error_min<=error_min)r=valid; // right ok
       if(l>=r)return;
       for(; l<=r; )
       {
@@ -948,13 +947,13 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       #if 0 // check sort order
          for(Int i=l-4, to=l+4; i<to; i++)
             if(InRange(i, elms) && InRange(i+1, elms))
-               DDEBUG_ASSERT(CompareError(tris[i], tris[i+1])<=0, "ok");
+               DEBUG_ASSERT(CompareError(tris[i], tris[i+1])<=0, "simplify tris order");
       #endif
    #else // iterative method
       Int target=valid;
-      for(Int range=Min(tris.elms(), processed_tris); ; ) // we can ignore moving to the right of what we've already processed
+      for(;;)
       {
-         Int next_i=target+1; if(!InRange(next_i, range))break;
+         Int next_i=target+1; if(!InRange(next_i, tris))break;
        C Triangle &next=tris[next_i]; if(next.error_min<=error_min)break; // if OK then stop
          target=next_i;
       }
@@ -1401,12 +1400,9 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
 
       // main iteration loop
       Vec mid_pos;
-      REPA(tris)
-         if(InRange(i, tris)) // check in case it got deleted
+      for(; tris.elms(); )
       {
-         processed_tris=i;
-      again:
-         Triangle &tri=tris[i]; if(tri.error_min>max_error || stop())break; // tris are sorted by their error, so if we've reached the one above the limit, then stop
+         Triangle &tri=tris.last(); if(tri.error_min>max_error || stop())break; // tris are sorted by their error, so if we've reached the one above the limit, then stop
 
          Int i=MinI(tri.edge_error[0], tri.edge_error[1], tri.edge_error[2]);
          Int edge_vtx0i=tri.ind.c[ i     ]; Vertex &edge_vtx0=vtxs[edge_vtx0i];
@@ -1492,8 +1488,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
          if(tri.edge_error[i]<FLT_MAX) // this was the min, and if the min was doable, then
          {
             tri.edge_error[i]=FLT_MAX; // set it as not-doable
-            resetError(tri, processed_tris); // re-position it in the 'tris' list based on new 'error_min'
-            goto again; // try again with the same index
+            resetError(tri, tris.elms()-1); // re-position it in the 'tris' list based on new 'error_min'
          }
       }
    }

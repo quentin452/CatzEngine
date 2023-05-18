@@ -1741,7 +1741,13 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
 
    void store(MeshBase &mesh, MESH_FLAG flag_and=MESH_ALL)
    {
-      MESH_FLAG flags=MESH_NONE; REPA(tris)flags|=tris[i].flag; flags&=flag_and;
+      MESH_FLAG flags=MESH_NONE;
+      REPA(tris)
+      #if MEM_LINK
+         if(tris.absIndexIsValid(i))
+      #endif
+         flags|=tris[i].flag;
+      flags&=flag_and;
       Int tri_num=tris.validElms();
       mesh.create(tri_num*3, 0, tri_num, 0, flags&(VTX_ALL&~(VTX_TAN_BIN|VTX_DUP)));
       Int tri_index=0;

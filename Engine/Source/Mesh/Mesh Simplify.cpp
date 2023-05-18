@@ -239,10 +239,11 @@ T1(TYPE) struct MemLink : Memc<MemLinkElm<TYPE>>
    Bool validate()C;
    void validateExit()C;
 };
+/******************************************************************************/
 T1(TYPE) void           MemLink<TYPE>::zero () {_first=_last=-1;}
 T1(TYPE) MemLink<TYPE>& MemLink<TYPE>::clear() {super::clear(); zero(); return T;}
 T1(TYPE) MemLink<TYPE>& MemLink<TYPE>::del  () {super::del  (); zero(); return T;}
-
+/******************************************************************************/
 T1(TYPE) Int MemLink<TYPE>::validElms()C
 {
    Int    valid=is(); REP(absElms())if(absFull(i).prev>=0)valid++;
@@ -269,6 +270,7 @@ T1(TYPE) Bool MemLink<TYPE>::absIndexIsValid(Int abs)C
    }
    return false;
 }
+/******************************************************************************/
 T1(TYPE) void MemLink<TYPE>::disconnectAbs(Int abs)
 {
    if(InRange(abs, absElms()))
@@ -288,6 +290,7 @@ T1(TYPE) void MemLink<TYPE>::disconnectData(C TYPE *data)
 {
    disconnectAbs(absIndex(data));
 }
+/******************************************************************************/
 T1(TYPE) void MemLink<TYPE>::moveAfter(Int src_abs, Int dest_abs)
 {
    if(InRange( src_abs, absElms())
@@ -336,6 +339,7 @@ T1(TYPE) void MemLink<TYPE>::moveBefore(Int src_abs, Int dest_abs)
       }
    }
 }
+/******************************************************************************/
 T1(TYPE) TYPE& MemLink<TYPE>::New()
 {
    UInt l=super::addNum(1);
@@ -347,6 +351,7 @@ T1(TYPE) TYPE& MemLink<TYPE>::New()
   _last=l;
    return end.data;
 }
+/******************************************************************************/
 T1(TYPE) void MemLink<TYPE>::resetLinks()
 {
    if(elms())
@@ -363,6 +368,7 @@ T1(TYPE) void MemLink<TYPE>::resetLinks()
       }
    }else _first=_last=-1;
 }
+/******************************************************************************/
 T1(TYPE) Bool MemLink<TYPE>::validate()C
 {
    if((_first<0)!=(_last<0)

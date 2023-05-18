@@ -186,6 +186,171 @@ struct QuadricMatrix
    QuadricMatrix& operator/=(Real r) {REPAO(m)/=r; return T;}
 };
 /******************************************************************************/
+T1(TYPE) struct MemLinkElm
+{
+   TYPE data;
+   Int  prev, next;
+};
+T1(TYPE) struct MemLink : Memc<MemLinkElm<TYPE>>
+{
+   Int _first, _last;
+
+   void zero();
+   MemLink& clear();
+   MemLink& del  ();
+  ~MemLink() {del();}
+   MemLink() {zero();}
+
+   TYPE& operator[](Int i)  {return super::operator[](i).data;}
+ C TYPE& operator[](Int i)C {return super::operator[](i).data;}
+
+   Int   absElms()C {return super::elms();}
+   TYPE& absElm(Int i)  {return super::operator[](i).data;}
+ C TYPE& absElm(Int i)C {return super::operator[](i).data;}
+   Int   absIndex(C TYPE             *elm)C {return super::index((MemLinkElm<TYPE>*)elm);}
+   Int   absIndex(C MemLinkElm<TYPE> *elm)C {return super::index(                   elm);}
+
+   Int  absToValidIndex(Int abs)C;
+   Bool absIndexIsValid(Int abs)C;
+
+   TYPE& first() {return super::operator[](_first).data;}
+   TYPE& last () {return super::operator[](_last ).data;}
+
+   MemLinkElm<TYPE>&   absFull(Int i)  {return super::operator[](i);}
+ C MemLinkElm<TYPE>&   absFull(Int i)C {return super::operator[](i);}
+   MemLinkElm<TYPE>& firstFull(     )  {return super::operator[](_first);}
+   MemLinkElm<TYPE>&  lastFull(     )  {return super::operator[](_last );}
+
+   TYPE& New();
+
+   void disconnectAbs (  Int   abs );
+   void disconnectData(C TYPE *data);
+
+   void moveAfter (Int src_abs, Int dest_abs);
+   void moveBefore(Int src_abs, Int dest_abs);
+
+   void resetLinks();
+};
+T1(TYPE) void           MemLink<TYPE>::zero () {_first=_last=-1;}
+T1(TYPE) MemLink<TYPE>& MemLink<TYPE>::clear() {super::clear(); zero(); return T;}
+T1(TYPE) MemLink<TYPE>& MemLink<TYPE>::del  () {super::del  (); zero(); return T;}
+
+T1(TYPE) Int MemLink<TYPE>::absToValidIndex(Int abs)C
+{
+   if(InRange(abs, absElms()))
+   {
+      Int valid=0;
+   again:
+      Int prev=absFull(abs).prev;
+      if( prev>=0){abs=prev; valid++; goto again;}
+      if(_first==abs)return valid;
+   }
+   return -1;
+}
+T1(TYPE) Bool MemLink<TYPE>::absIndexIsValid(Int abs)C
+{
+   if(InRange(abs, absElms()))
+   {
+    C MemLinkElm<TYPE> &elm=absFull(abs);
+      return elm.prev>=0 || _first==abs;
+   }
+   return false;
+}
+T1(TYPE) void MemLink<TYPE>::disconnectAbs(Int abs)
+{
+   if(InRange(abs, absElms()))
+   {
+      MemLinkElm<TYPE> &elm=absFull(abs);
+
+      if(_first==abs)_first=elm.next;
+      if(_last ==abs)_last =elm.prev;
+
+      if(elm.prev>=0)absFull(elm.prev).next=elm.next;
+      if(elm.next>=0)absFull(elm.next).prev=elm.prev;
+
+      elm.prev=elm.next=-1;
+   }
+}
+T1(TYPE) void MemLink<TYPE>::disconnectData(C TYPE *data)
+{
+   disconnectAbs(absIndex(data));
+}
+T1(TYPE) void MemLink<TYPE>::moveAfter(Int src_abs, Int dest_abs)
+{
+   if(InRange( src_abs, absElms())
+   && InRange(dest_abs, absElms()) && src_abs!=dest_abs)
+   {
+      MemLinkElm<TYPE> &src=absFull(src_abs); if(src.prev!=dest_abs)
+      {
+         MemLinkElm<TYPE> &dest=absFull(dest_abs);
+
+         if(_first== src_abs)_first=src.next;
+         if(_last == src_abs)_last =src.prev;
+         if(_last ==dest_abs)_last =src_abs ;
+
+         if(src.prev>=0)absFull(src.prev).next=src.next;
+         if(src.next>=0)absFull(src.next).prev=src.prev;
+
+         src.prev=dest_abs;
+         src.next=dest.next;
+
+         if(dest.next>=0)absFull(dest.next).prev=src_abs;
+            dest.next=src_abs;
+      }
+   }
+}
+T1(TYPE) void MemLink<TYPE>::moveBefore(Int src_abs, Int dest_abs)
+{
+   if(InRange( src_abs, absElms())
+   && InRange(dest_abs, absElms()) && src_abs!=dest_abs)
+   {
+      MemLinkElm<TYPE> &src=absFull(src_abs); if(src.next!=dest_abs)
+      {
+         MemLinkElm<TYPE> &dest=absFull(dest_abs);
+
+         if(_last == src_abs)_last =src.prev;
+         if(_first== src_abs)_first=src.next;
+         if(_first==dest_abs)_first=src_abs ;
+
+         if(src.prev>=0)absFull(src.prev).next=src.next;
+         if(src.next>=0)absFull(src.next).prev=src.prev;
+
+         src.prev=dest.prev;
+         src.next=dest_abs;
+
+         if(dest.prev>=0)absFull(dest.prev).next=src_abs;
+            dest.prev=src_abs;
+      }
+   }
+}
+T1(TYPE) TYPE& MemLink<TYPE>::New()
+{
+   UInt l=super::addNum(1);
+   MemLinkElm<TYPE>& end=super::last();
+   if(_last>=0)lastFull().next=l;
+   else                 _first=l;
+   end.prev=_last;
+   end.next=-1;
+  _last=l;
+   return end.data;
+}
+T1(TYPE) void MemLink<TYPE>::resetLinks()
+{
+   if(elms())
+   {
+     _first=0;
+     _last =elms()-1;
+      if(elms()>1)
+      {
+         auto &last = lastFull(); last .prev=elms()-2; last .next=-1; for(Int i=elms()-1; --i>=1; ){auto &elm=absFull(i); elm.prev=i-1; elm.next=i+1;}
+         auto &first=firstFull(); first.prev=      -1; first.next= 1;
+      }else // elms==1
+      {
+         auto &first=firstFull(); first.prev=-1; first.next=-1;
+      }
+   }else _first=_last=-1;
+}
+/******************************************************************************/
 struct Simplify // must be used for a single 'simplify', after that it cannot be used (because the members aren't cleared)
 {
    struct Weights
@@ -469,7 +634,8 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
    Simplify(Bool *stop) : _stop(stop) {}
    Bool stop()C {return _stop && *_stop;}
 
-   static Int CompareError(C Triangle &a, C Triangle &b) {return Compare(b.error_min, a.error_min);} // swap order to sort from highest to lowest
+   static Int CompareError(C            Triangle  &a, C            Triangle  &b) {return Compare(b.error_min, a.error_min);} // swap order to sort from highest to lowest
+   static Int CompareError(C MemLinkElm<Triangle> &a, C MemLinkElm<Triangle> &b) {return CompareError(a.data, b.data);}
 
    // error for one edge
 #if ALLOW_PLANES

@@ -928,7 +928,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       for(; l<=r; )
       {
          Int mid=UInt(l+r)/2;
-         if( mid==valid) // ignore this element
+         if( mid==valid) // ignore this element, because even though it's in this position, its sort value was changed and most likely should be in another place
          {
             if(mid+1<=r)mid++;else
             if(mid-1>=l)mid--;else

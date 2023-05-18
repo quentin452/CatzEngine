@@ -235,6 +235,9 @@ T1(TYPE) struct MemLink : Memc<MemLinkElm<TYPE>>
    void moveBefore(Int src_abs, Int dest_abs);
 
    void resetLinks();
+
+   Bool validate()C;
+   void validateExit()C;
 };
 T1(TYPE) void           MemLink<TYPE>::zero () {_first=_last=-1;}
 T1(TYPE) MemLink<TYPE>& MemLink<TYPE>::clear() {super::clear(); zero(); return T;}
@@ -359,6 +362,38 @@ T1(TYPE) void MemLink<TYPE>::resetLinks()
          auto &first=firstFull(); first.prev=-1; first.next=-1;
       }
    }else _first=_last=-1;
+}
+T1(TYPE) Bool MemLink<TYPE>::validate()C
+{
+   if((_first<0)!=(_last<0)
+   ||  _first>=absElms()
+   ||  _last >=absElms())return false;
+   Int valid=0;
+   if(_first>=0)
+   {
+      Int   cur_i=_first;
+      auto *cur_d=&absFull(cur_i);
+
+      if(cur_d->prev>=0)return false;
+
+   next:
+      valid++;
+      Int next_i=cur_d->next; if(next_i>=0)
+      {
+         auto &next_d=absFull(next_i);
+         if(next_d.prev!=cur_i)return false;
+
+         cur_i= next_i;
+         cur_d=&next_d;
+
+         goto next;
+      }else if(_last!=cur_i)return false;
+   }
+   return valid()==validElms();
+}
+T1(TYPE) void MemLink<TYPE>::validateExit()C
+{
+   if(!validate())Exit("MemLink fail");
 }
 /******************************************************************************/
 struct Simplify // must be used for a single 'simplify', after that it cannot be used (because the members aren't cleared)

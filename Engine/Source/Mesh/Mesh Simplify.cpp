@@ -946,7 +946,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       tris.moveElm(valid, (valid<l) ? r : l); // since this operation is "moveElm" instead of "New" then we have to move to 'r' which is "l-1" if we're moving from left side and we want to be before 'l', it works OK as confirmed by check below
       #if 0 // check sort order
          for(Int i=l-4, to=l+4; i<to; i++)
-            if(InRange(i, elms) && InRange(i+1, elms))
+            if(InRange(i, tris) && InRange(i+1, tris))
                DEBUG_ASSERT(CompareError(tris[i], tris[i+1])<=0, "simplify tris order");
       #endif
    #else // iterative method

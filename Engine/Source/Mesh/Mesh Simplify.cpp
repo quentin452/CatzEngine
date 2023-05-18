@@ -12,6 +12,7 @@
 #define VTX_BORDER_QM 1.0f
 
 #if PROFILE
+#undef STORE
 #pragma message("!! Warning: This will slow down mesh simplification, use only for testing !!")
 enum PROFILE_TYPE
 {

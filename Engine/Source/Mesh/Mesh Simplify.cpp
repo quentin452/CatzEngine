@@ -1166,6 +1166,26 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
          }
          if(cur_abs!=abs)tris.moveBefore(abs, cur_abs);
       }
+      #if DEBUG && 0 // check sort order
+         if(tris.is())
+         {
+            Int   cur_i= tris._first;
+            auto *cur_d=&tris. firstFull();
+
+         check_next:
+            Int next_i=cur_d->next; if(next_i>=0)
+            {
+               auto &next_d=tris.absFull(next_i);
+
+               DEBUG_ASSERT(CompareError(cur_d->data, next_d.data)<=0, "simplify tris order");
+
+               cur_i= next_i;
+               cur_d=&next_d;
+
+               goto check_next;
+            }
+         }
+      #endif
    #elif 1 // binary search
       Int l=0, r=tris.elms()-1;
 
@@ -1191,7 +1211,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       }
       
       tris.moveElm(valid, (valid<l) ? r : l); // since this operation is "moveElm" instead of "New" then we have to move to 'r' which is "l-1" if we're moving from left side and we want to be before 'l', it works OK as confirmed by check below
-      #if 0 // check sort order
+      #if DEBUG && 0 // check sort order
          for(Int i=l-4, to=l+4; i<to; i++)
             if(InRange(i, tris) && InRange(i+1, tris))
                DEBUG_ASSERT(CompareError(tris[i], tris[i+1])<=0, "simplify tris order");

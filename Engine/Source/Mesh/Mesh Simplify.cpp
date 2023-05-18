@@ -413,8 +413,8 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
    };
    struct Ref
    {
-      Int tri_abs      , // absolute index of the triangle
-          tri_vtx_index; // 0..2, 1 of 3 vertexes in triangle, this could be a Byte
+      Int  tri_abs      ; // absolute index of the triangle
+      Byte tri_vtx_index; // 0..2, 1 of 3 vertexes in triangle
    };
    struct VtxDupMap : VtxDup
    {
@@ -942,7 +942,13 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
             else         r=mid-1; // valid is before mid, so try moving left  (adjust right boundary)
          }
       }
-      tris.moveElm(valid, (valid<l) ? r : l);
+      
+      tris.moveElm(valid, (valid<l) ? r : l); // since this operation is "moveElm" instead of "New" then we have to move to 'r' which is "l-1" if we're moving from left side and we want to be before 'l', it works OK as confirmed by check below
+      #if 0 // check sort order
+         for(Int i=l-4, to=l+4; i<to; i++)
+            if(InRange(i, elms) && InRange(i+1, elms))
+               DDEBUG_ASSERT(CompareError(tris[i], tris[i+1])<=0, "ok");
+      #endif
    #else // iterative method
       Int target=valid;
       for(Int range=Min(tris.elms(), processed_tris); ; ) // we can ignore moving to the right of what we've already processed
@@ -1451,7 +1457,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
          #if ADJUST_REFS
             REPA(middle_tris)adjustRefs(*middle_tris[i]->tri, edge_vtx0i, edge_vtx1i);
          #endif
-         
+
             REPA(middle_tris)
             {
                Triangle *tri=middle_tris[i]->tri;

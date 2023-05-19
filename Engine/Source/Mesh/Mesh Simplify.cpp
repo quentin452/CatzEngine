@@ -209,6 +209,7 @@ T1(TYPE) struct MemLink : Memc<MemLinkElm<TYPE>>
    TYPE& operator[](Int i)  {return super::operator[](i).data;}
  C TYPE& operator[](Int i)C {return super::operator[](i).data;}
 
+   Int      elms()C {return super::elms();}
    Int   absElms()C {return super::elms();}
    TYPE& absElm(Int i)  {return super::operator[](i).data;}
  C TYPE& absElm(Int i)C {return super::operator[](i).data;}

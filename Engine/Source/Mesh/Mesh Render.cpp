@@ -288,17 +288,21 @@ Bool MeshRender::createRaw(C MeshBase &src, MESH_FLAG flag_and, Bool optimize, B
    Memt<Byte> temp;
 
    // VB
-   temp.setNumDiscard(vtx_size*vtxs);
-   SetVtxData(temp.data(), flag, src, compress);
-   if(!_vb.createNum(vtx_size, vtxs, false, temp.dataNull()))goto error;
+   {
+      temp.setNumDiscard(vtx_size*vtxs);
+      SetVtxData(temp.data(), flag, src, compress);
+      if(!_vb.createNum(vtx_size, vtxs, false, temp.dataNull()))goto error;
+   }
 
    // IB
-   Bool ib16=(vtxs<=0x10000);
-   Int  inds=tris*3;
-   Int  ind_size=(ib16 ? 2 : 4);
-   temp.setNumDiscard(ind_size*inds);
-   SetFaceIndex(temp.data(), src.tri.ind(), src.tris(), src.quad.ind(), src.quads(), ib16);
-   if(!_ib.create(inds, ib16, false, temp.dataNull()))goto error;
+   {
+      Bool ib16=(vtxs<=0x10000);
+      Int  inds=tris*3;
+      Int  ind_size=(ib16 ? 2 : 4);
+      temp.setNumDiscard(ind_size*inds);
+      SetFaceIndex(temp.data(), src.tri.ind(), src.tris(), src.quad.ind(), src.quads(), ib16);
+      if(!_ib.create(inds, ib16, false, temp.dataNull()))goto error;
+   }
 
    T._storage=(compress ? MSHR_COMPRESS : 0);
    T._tris   =tris;

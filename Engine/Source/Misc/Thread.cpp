@@ -125,8 +125,11 @@ Bool AtomicCAS(Flt   &x, Flt   compare, Flt   new_value) {return __sync_bool_com
 /******************************************************************************/
 UIntPtr Thread::id()C {return PLATFORM(GetThreadId(_handle), (UIntPtr)_handle);}
 #undef  GetThreadID
+#undef  GetCPU
 UIntPtr GetThreadID() {return _GetThreadID();}
+Int     GetCPU     () {return _GetCPU     ();}
 #define GetThreadID           _GetThreadID
+#define GetCPU                _GetCPU
 /******************************************************************************/
 void SetThreadName(C Str8 &name, UIntPtr thread_id)
 {

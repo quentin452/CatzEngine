@@ -776,6 +776,7 @@ T1(TYPE) Bool AtomicCAS(TYPE *&x, TYPE *compare, TYPE *new_value) {return Atomic
 
 // Thread functions
 UIntPtr GetThreadID  (                                             ); // get current thread ID
+Int     GetCPU       (                                             ); // get current CPU thread index 0..Cpu.threads-1
 void    SetThreadName(C Str8 &name, UIntPtr thread_id=GetThreadID()); // set custom thread name for debugging purpose
 
 void ThreadMayUseGPUData       (); // call    this from a secondary thread if you expect the thread to perform any operations on GPU data (like Mesh, Material, Image, Shaders, ..., this includes any operation like creating, editing, loading, saving, deleting, ...). This function is best called at the start of the thread, it needs to be called at least once, further calls are ignored. Once the function is called, the thread locks a secondary OpenGL context (if no context is available, then the function waits until other threads finish processing and release their context lock, amount of OpenGL contexts is specified in 'D.secondaryOpenGLContexts'). Context lock is automatically released once the thread exits. This call is required only for OpenGL renderer.
@@ -875,8 +876,10 @@ private:
    INLINE void UpdateThreads() {EmulatedThreads.update();}
 #endif
 
-     INLINE UIntPtr _GetThreadID() {return PLATFORM(GetCurrentThreadId(), (UIntPtr)pthread_self());}
+     INLINE UIntPtr _GetThreadID() {return PLATFORM(GetCurrentThreadId       (), (UIntPtr)pthread_self());}
+     INLINE Int     _GetCPU     () {return PLATFORM(GetCurrentProcessorNumber(),          sched_getcpu());}
 #define GetThreadID _GetThreadID // use this macro so all engine functions access '_GetThreadID' directly
+#define GetCPU      _GetCPU      // use this macro so all engine functions access '_GetCPU'      directly
 
 INLINE void Yield() {std::this_thread::yield();}
 #endif

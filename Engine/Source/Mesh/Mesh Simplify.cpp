@@ -672,9 +672,9 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
    };
 
    static Int   CompareError(C            Triangle  &a, C            Triangle  &b) {return Compare(b.error_min, a.error_min);} // swap order to sort from highest to lowest
-   static Bool BCompareError(C            Flt       &a, C            Flt       &b) {return         b          < a           ;} // swap order to sort from highest to lowest
+   static Bool BCompareError(C            Real      &a, C            Real      &b) {return         b          < a           ;} // swap order to sort from highest to lowest
    static Int   CompareError(C MemLinkElm<Triangle> &a, C MemLinkElm<Triangle> &b) {return CompareError(a.data, b.data);}
-   static C Flt& GetKey(C Triangle &tri) {return tri.error_min;}
+   static C Real& GetKey(C Triangle &tri) {return tri.error_min;}
 
    Bool               keep_border;
    MESH_SIMPLIFY      mode;
@@ -690,8 +690,8 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
     C TYPE& absElm(Int i)C {return super::operator[](i);}
       Int   absIndex(C TYPE *elm)C {return super::index(elm);}
    };
-   Container<Triangle     > tris;
-   WAVLTree <Triangle, Flt> tris_tree;
+   Container<Triangle      > tris;
+   WAVLTree <Triangle, Real> tris_tree;
 #elif MEM_LINK
    MemLink<Triangle > tris;
 #else
@@ -1166,6 +1166,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
    {
       PROF(RESET_ERROR);
       Real error_min=tri.error_min=Min(tri.edge_error[0], tri.edge_error[1], tri.edge_error[2]);
+
       // reposition this triangle in the 'tris' list to preserve order by 'error_min'
    #if MEM_TREE
       tris_tree.remove(&tri);

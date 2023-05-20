@@ -559,10 +559,8 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       MESH_FLAG flag; // this is obtained from the 'MeshPart.base' of that triangle
       Bool      middle,
                 visible; // this is obtained from 'MeshPart.part_flag' of that triangle (alternatively instead of having this value, we could keep an array for all mesh part properties and reuse 'part' to access that array, however that would be slower)
-   #if !ADJUST_REFS || MEM_TREE
-      Bool        exists=true; // if references are not adjusted, then we need to keep information about which triangle exists and which got removed
-     ~Triangle() {exists=false;}
-   #endif
+      Bool      exists=true; // triangles are not removed, instead they're just marked as "exists=false" so that pointers and indexes are preserved, also if references are not adjusted, then we need to keep information about which triangle exists and which got removed
+   //~Triangle() {exists=false;}
    };
    struct TrianglePtr
    {
@@ -632,7 +630,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
    };
    struct Ref
    {
-      Int  tri_abs      ; // absolute index of the triangle
+      Int  tri_index    ; // index of the triangle
       Byte tri_vtx_index; // 0..2, 1 of 3 vertexes in triangle
    };
    struct VtxDupMap : VtxDup
@@ -673,38 +671,23 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
    static Bool BCompareError(C Real     &a, C Real     &b) {return         b          < a           ;} // swap order to sort from highest to lowest
    static C Real& GetKey(C Triangle &tri) {return tri.error_min;}
 
-   Bool               keep_border;
-   MESH_SIMPLIFY      mode;
-   Int                max_skin, visible_tris=0;
-   MESH_FLAG          test_flag; // this is set based on the max tolerance parameters to the simplify function
-   Flt                max_uv2, max_color, max_material, max_normal;
-   Box                box;
-#if MEM_TREE
-   T1(TYPE) struct Container : Memc<TYPE>
-   {
-      Int   absElms()C {return super::elms();}
-      TYPE& absElm(Int i)  {return super::operator[](i);}
-    C TYPE& absElm(Int i)C {return super::operator[](i);}
-      Int   absIndex(C TYPE *elm)C {return super::index(elm);}
-   };
-   Container<Triangle      > tris;
-   WAVLTree <Triangle, Real> tris_tree;
-#else
-   Memx<Triangle    > tris;
-#endif
-   Memc<Vertex      > vtxs;
-   Memc<Ref         > refs;
-   Memc<VtxDupMap   > vtx_dups;
-   Memb<TrianglePtr >    all_tris; // need 'Memb' because we're adding new elements and storing pointers
-   Memc<TrianglePtr*> middle_tris; // usually this will be just 2 triangles, however it may be more
-   Memc<MtrlGroup   > mtrl_groups;
-   Bool             *_stop;
+   Bool                     keep_border;
+   MESH_SIMPLIFY            mode;
+   Int                      max_skin, visible_tris=0;
+   MESH_FLAG                test_flag; // this is set based on the max tolerance parameters to the simplify function
+   Flt                      max_uv2, max_color, max_material, max_normal;
+   Box                      box;
+   Memc    <Triangle      > tris;
+   WAVLTree<Triangle, Real> tree;
+   Memc    <Vertex        > vtxs;
+   Memc    <Ref           > refs;
+   Memc    <VtxDupMap     > vtx_dups;
+   Memb    <TrianglePtr   >    all_tris; // need 'Memb' because we're adding new elements and storing pointers
+   Memc    <TrianglePtr*  > middle_tris; // usually this will be just 2 triangles, however it may be more
+   Memc    <MtrlGroup     > mtrl_groups;
+   Bool                   *_stop;
 
-   Simplify(Bool *stop) : _stop(stop)
-   #if MEM_TREE
-      , tris_tree(GetKey, BCompareError)
-   #endif
-   {}
+   Simplify(Bool *stop) : _stop(stop), tree(GetKey, BCompareError) {}
    Bool stop()C {return _stop && *_stop;}
 
    // error for one edge
@@ -785,7 +768,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       REP(edge_vtx0.tri_num)
       {
        C Ref      &ref=refs[edge_vtx0.ref_start+i];
-         Triangle &tri=tris.absElm(ref.tri_abs);
+         Triangle &tri=tris[ref.tri_index];
       #if !ADJUST_REFS
          if(tri.exists)
       #endif
@@ -998,7 +981,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       REP(vtx.tri_num)
       {
        C Ref      &ref=refs[vtx.ref_start+i];
-         Triangle &tri=tris.absElm(ref.tri_abs);
+         Triangle &tri=tris[ref.tri_index];
       #if !ADJUST_REFS
          if(tri.exists)
       #endif
@@ -1124,14 +1107,14 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
    }
    void adjustRefs(Triangle &tri, Int v0, Int v1) // this removes the 'tri' reference from its vertexes
    {
-      Int  tri_abs=tris.absIndex(&tri);
+      Int  tri_index=tris.index(&tri);
       REPA(tri.ind) // iterate all vtxs of the tri
       {
          Int v=tri.ind.c[i]; if(v!=v0 && v!=v1) // we only need to process the 3rd vtx, because 'v0' will be adjusted, and 'v1' will be removed
          {
             Vertex &vtx=vtxs[v]; REP(vtx.tri_num) // iterate all triangles of this vtx
             {
-               Ref &ref=refs[vtx.ref_start+i]; if(ref.tri_abs==tri_abs) // if the tri is this one
+               Ref &ref=refs[vtx.ref_start+i]; if(ref.tri_index==tri_index) // if the tri is this one
                {
                   if(InRange(i+1, vtx.tri_num)) // if there is an element after the one being removed
                   {
@@ -1150,21 +1133,16 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       }
    }
 
-   void resetError(Triangle &tri
-   #if MEM_TREE
-   #else
-      , Int valid
-   #endif
-   )
+   void resetError(Triangle &tri)
    {
       PROF(RESET_ERROR);
       Real error_min=Min(tri.edge_error[0], tri.edge_error[1], tri.edge_error[2]);
       if(  error_min!=tri.error_min)
       {
          // reposition this triangle in the 'tris' list to preserve order by 'error_min'
-         tris_tree.remove(&tri);
+         tree.remove(&tri);
          tri.error_min=error_min;
-         tris_tree.insert(&tri);
+         tree.insert(&tri);
       }
    }
 
@@ -1223,7 +1201,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       REP(vtx.tri_num)
       {
        C Ref      &ref=refs[vtx.ref_start+i];
-         Triangle &tri=tris.absElm(ref.tri_abs);
+         Triangle &tri=tris[ref.tri_index];
       #if !ADJUST_REFS
          if(tri.exists)
       #endif
@@ -1238,11 +1216,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
             tri.edge_error[2]=calculateError(tri.ind.c[2], tri.ind.c[0], mid_pos);
 
             // re-position it in the 'tris' list based on new 'error_min'
-         #if MEM_TREE
             resetError(tri);
-         #else
-            resetError(tri, tris.absToValidIndex(ref.tri_abs));
-         #endif
             refs.add(Ref(ref)); // !! add as temp variable, because 'add' can cause 'ref' mem address to be invalid
          }
       }
@@ -1320,7 +1294,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
          REP(vtx.tri_num) // iterate all tris touching this vertex
          {
           C Ref      &ref=refs[vtx.ref_start+i];
-          C Triangle &tri=tris.absElm(ref.tri_abs);
+          C Triangle &tri=tris[ref.tri_index];
             Int tvi   =ref.tri_vtx_index,
               //tri_v0=tri.ind.c[ tvi     ], this is always 'vi', and we don't need to process it, because we're not interested in 'vi'<->'vi' connection
                 tri_v1=tri.ind.c[(tvi+1)%3],
@@ -1458,23 +1432,16 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       REPAD(t, tris)
       {
        C Triangle &tri=tris[t];
-      #if MEM_TREE
          if(tri.exists)
-      #endif
-         REPAD(v, tri.ind)
+            REPAD(v, tri.ind)
          {
           C Vertex &vtx=vtxs[tri.ind.c[v]];
             Bool    has=false;
             REP(vtx.tri_num)
             {
              C Ref      &ref=refs[vtx.ref_start+i];
-            #if !MEM_TREE
-               if(              !tris.absIndexIsValid(ref.tri_abs))Exit("vtx tri doesn't exist");
-            #endif
-             C Triangle &vtx_tri=tris.absElm         (ref.tri_abs);
-            #if MEM_TREE
+             C Triangle &vtx_tri=tris[ref.tri_index];
                if(!vtx_tri.exists)Exit("vtx tri doesn't exist");
-            #endif
                if(&tri==&vtx_tri)has=true;
             }
             if(!has)Exit("vtx doesn't have tri");
@@ -1563,18 +1530,12 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       refs.setNum(tris.elms()*3);
       REPAD(t, tris)
       {
-      #if MEM_TREE
          Triangle &tri=tris[t];
-         Int       tri_abs=t;
-      #else
-         Triangle &tri=tris[t];
-         Int       tri_abs=tris.validToAbsIndex(t);
-      #endif
          REPAD(v, tri.ind)
          {
             Vertex &vtx=vtxs[tri.ind.c[v]];
             Ref    &ref=refs[vtx.ref_start + vtx.tri_num++];
-            ref.tri_abs      =tri_abs;
+            ref.tri_index    =t;
             ref.tri_vtx_index=v;
          }
       }
@@ -1590,11 +1551,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
          }
          tri.error_min=Min(tri.edge_error[0], tri.edge_error[1], tri.edge_error[2]);
       }
-   #if MEM_TREE
-      FREPA(tris)tris_tree.insert(&tris[i]);
-   #else
-      tris.sort(CompareError); // tris are now sorted from highest to lowest error
-   #endif
+      REPA(tris)tree.insert(&tris[i]);
    }
 
    void simplify(Flt intensity, Flt max_distance, Flt max_uv, Flt max_color, Flt max_material, Flt max_skin, Flt max_normal, Bool keep_border, MESH_SIMPLIFY mode, Flt pos_eps)
@@ -1626,17 +1583,9 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
 
       // main iteration loop
       Vec mid_pos;
-   #if MEM_TREE
-      for(; tris_tree.last(); )
-   #else
-      for(; tris.elms(); )
-   #endif
+      for(; tree.last(); )
       {
-      #if MEM_TREE
-         Triangle &tri=*tris_tree.last();
-      #else
-         Triangle &tri=tris.last();
-      #endif
+         Triangle &tri=*tree.last();
          if(tri.error_min>max_error || stop())break; // tris are sorted by their error, so if we've reached the one above the limit, then stop
 
          Int i=MinI(tri.edge_error[0], tri.edge_error[1], tri.edge_error[2]);
@@ -1694,12 +1643,8 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
             {
                Triangle *tri=middle_tris[i]->tri;
                visible_tris-=tri->visible;
-            #if MEM_TREE
                tri->exists=false;
-               tris_tree.remove(tri);
-            #else
-               tris.removeData(tri, true);
-            #endif
+               tree.remove(tri);
             }
             edge_vtx0.pos=mid_pos;
             edge_vtx0.eat(edge_vtx1);
@@ -1729,11 +1674,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
          {
             tri.edge_error[i]=FLT_MAX; // set it as not-doable
             // re-position it in the 'tris' list based on new 'error_min'
-         #if MEM_TREE
             resetError(tri);
-         #else
-            resetError(tri, tris.elms()-1);
-         #endif
          }
       }
    }
@@ -1744,10 +1685,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       MESH_FLAG flags=MESH_NONE;
       REPA(tris)
       {
-       C Triangle &tri=tris[i];
-      #if MEM_TREE
-         if(tri.exists)
-      #endif
+       C Triangle &tri=tris[i]; if(tri.exists)
          {
             tri_num++;
             flags|=tri.flag;
@@ -1756,29 +1694,19 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       flags&=flag_and;
       mesh.create(tri_num*3, 0, tri_num, 0, flags&(VTX_ALL&~(VTX_TAN_BIN|VTX_DUP)));
       Int tri_index=0;
-   #if 0
-      REPA(tris)
+      FREPA(tris) // process in order as they were added from original mesh to preserve original order
       {
-         Triangle &tri=tris[i];
-   #else
-      FREP(tris.absElms()) // process in absolute order (as they were added from original mesh to preserve original order)
-      {
-      #if !MEM_TREE
-         if(!tris.absIndexIsValid(i))continue;
-      #endif
-         Triangle &tri=tris.absElm(i);
-      #if MEM_TREE
-         if(!tri.exists)continue;
-      #endif
-   #endif
-         Int vtx_index=tri_index*3;
-         mesh.tri.ind( tri_index++).set(vtx_index, vtx_index+1, vtx_index+2);
-         tri.vtxs[0].to(mesh, vtx_index  );
-         tri.vtxs[1].to(mesh, vtx_index+1);
-         tri.vtxs[2].to(mesh, vtx_index+2);
-         mesh.vtx.pos(vtx_index  )=vtxs[tri.ind.x].pos;
-         mesh.vtx.pos(vtx_index+1)=vtxs[tri.ind.y].pos;
-         mesh.vtx.pos(vtx_index+2)=vtxs[tri.ind.z].pos;
+       C Triangle &tri=tris[i]; if(tri.exists)
+         {
+            Int vtx_index=tri_index*3;
+            mesh.tri.ind( tri_index++).set(vtx_index, vtx_index+1, vtx_index+2);
+            tri.vtxs[0].to(mesh, vtx_index  );
+            tri.vtxs[1].to(mesh, vtx_index+1);
+            tri.vtxs[2].to(mesh, vtx_index+2);
+            mesh.vtx.pos(vtx_index  )=vtxs[tri.ind.x].pos;
+            mesh.vtx.pos(vtx_index+1)=vtxs[tri.ind.y].pos;
+            mesh.vtx.pos(vtx_index+2)=vtxs[tri.ind.z].pos;
+         }
       }
 
       // this needs to be done before welding vertexes so we don't weld with big tan/bin differences
@@ -1798,10 +1726,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
 
       REPA(tris)
       {
-       C Triangle &tri=tris[i];
-      #if MEM_TREE
-         if(tri.exists)
-      #endif
+       C Triangle &tri=tris[i]; if(tri.exists)
          {
             PartInfo &part=part_infos(tri.part);
             part.tris++;
@@ -1817,31 +1742,21 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       }
       REPAO(part_infos).tris=0;
 
-   #if 0
-      REPA(tris)
+      FREPA(tris) // process in order as they were added from original mesh to preserve original order
       {
-         Triangle &tri=tris[i];
-   #else
-      FREP(tris.absElms()) // process in absolute order (as they were added from original mesh to preserve original order)
-      {
-      #if !MEM_TREE
-         if(!tris.absIndexIsValid(i))continue;
-      #endif
-         Triangle &tri=tris.absElm(i);
-      #if MEM_TREE
-         if(!tri.exists)continue;
-      #endif
-   #endif
-         Int part=tri.part;
-         Int tri_index=(part_infos[part].tris++), vtx_index=tri_index*3;
-         MeshBase &mesh=parts[part].base;
-         mesh.tri.ind(tri_index).set(vtx_index, vtx_index+1, vtx_index+2);
-         tri.vtxs[0].to(mesh, vtx_index  );
-         tri.vtxs[1].to(mesh, vtx_index+1);
-         tri.vtxs[2].to(mesh, vtx_index+2);
-         mesh.vtx.pos(vtx_index  )=vtxs[tri.ind.x].pos;
-         mesh.vtx.pos(vtx_index+1)=vtxs[tri.ind.y].pos;
-         mesh.vtx.pos(vtx_index+2)=vtxs[tri.ind.z].pos;
+       C Triangle &tri=tris[i]; if(tri.exists)
+         {
+            Int part=tri.part;
+            Int tri_index=(part_infos[part].tris++), vtx_index=tri_index*3;
+            MeshBase &mesh=parts[part].base;
+            mesh.tri.ind(tri_index).set(vtx_index, vtx_index+1, vtx_index+2);
+            tri.vtxs[0].to(mesh, vtx_index  );
+            tri.vtxs[1].to(mesh, vtx_index+1);
+            tri.vtxs[2].to(mesh, vtx_index+2);
+            mesh.vtx.pos(vtx_index  )=vtxs[tri.ind.x].pos;
+            mesh.vtx.pos(vtx_index+1)=vtxs[tri.ind.y].pos;
+            mesh.vtx.pos(vtx_index+2)=vtxs[tri.ind.z].pos;
+         }
       }
       REPA(parts) // go from the end so we can remove if needed
       {

@@ -1125,6 +1125,9 @@
     <ClInclude Include="H\Misc\Translation.h">
       <Filter>H\Misc</Filter>
     </ClInclude>
+    <ClInclude Include="H\Memory\Mem Tree.h">
+      <Filter>H\Memory</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -2179,6 +2182,9 @@
     </ClCompile>
     <ClCompile Include="Source\Shaders\Atmosphere.cpp">
       <Filter>Source\Shaders</Filter>
+    </ClCompile>
+    <ClCompile Include="Source\Memory\Mem Tree.cpp">
+      <Filter>Source\Memory</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

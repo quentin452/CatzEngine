@@ -170,6 +170,7 @@ namespace EE // Esenthel Engine namespace
    #include "Memory/Mem Extended.h"
    #include "Memory/_Meml.h"
    #include "Memory/Mem List.h"
+   #include "Memory/Mem Tree.h"
    #include "Misc/String Borrowed.h"
    #include "Memory/Node.h"
    #include "Misc/Date Time.h"

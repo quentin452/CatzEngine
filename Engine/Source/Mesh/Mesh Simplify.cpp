@@ -546,10 +546,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
          }
       }
    };
-   struct Triangle
-   #if MEM_TREE
-      : TreeNode
-   #endif
+   struct Triangle : TreeNode
    {
       Real      edge_error[3], error_min;
       VecI      ind; // vertex index
@@ -1161,58 +1158,14 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
    )
    {
       PROF(RESET_ERROR);
-      Real error_min=tri.error_min=Min(tri.edge_error[0], tri.edge_error[1], tri.edge_error[2]);
-
-      // reposition this triangle in the 'tris' list to preserve order by 'error_min'
-   #if MEM_TREE
-      tris_tree.remove(&tri);
-      tris_tree.insert(&tri);
-   #elif 1 // binary search
-      Int l=0, r=tris.elms()-1;
-
-      if(InRange(valid-1, tris) && tris[valid-1].error_min>=error_min)l=valid; // left  ok
-      if(InRange(valid+1, tris) && tris[valid+1].error_min<=error_min)r=valid; // right ok
-      if(l>=r)return;
-      for(; l<=r; )
+      Real error_min=Min(tri.edge_error[0], tri.edge_error[1], tri.edge_error[2]);
+      if(  error_min!=tri.error_min)
       {
-         Int mid=UInt(l+r)/2;
-         if( mid==valid) // ignore this element, because even though it's in this position, its sort value was changed and most likely should be in another place
-         {
-            if(mid+1<=r)mid++;else
-            if(mid-1>=l)mid--;else
-               return; // we can't move to the right, and can't move to the left, this means that we've limited the range to the original valid index
-         }
-         Real e=tris[mid].error_min;
-         if(e<error_min)r=mid-1;else
-         if(e>error_min)l=mid+1;else
-         { // values are the same, however since there can be many same values, then let's move towards the original 'valid' index, so that 'moveElm' can be shortest
-            if(valid>mid)l=mid+1; // valid is after  mid, so try moving right (adjust left  boundary)
-            else         r=mid-1; // valid is before mid, so try moving left  (adjust right boundary)
-         }
+         // reposition this triangle in the 'tris' list to preserve order by 'error_min'
+         tris_tree.remove(&tri);
+         tri.error_min=error_min;
+         tris_tree.insert(&tri);
       }
-      
-      tris.moveElm(valid, (valid<l) ? r : l); // since this operation is "moveElm" instead of "New" then we have to move to 'r' which is "l-1" if we're moving from left side and we want to be before 'l', it works OK as confirmed by check below
-      #if DEBUG && 0 // check sort order
-         for(Int i=l-4, to=l+4; i<to; i++)
-            if(InRange(i, tris) && InRange(i+1, tris))
-               DEBUG_ASSERT(CompareError(tris[i], tris[i+1])<=0, "simplify tris order");
-      #endif
-   #else // linear search
-      Int target=valid;
-      for(;;)
-      {
-         Int next_i=target+1; if(!InRange(next_i, tris))break;
-       C Triangle &next=tris[next_i]; if(next.error_min<=error_min)break; // if OK then stop
-         target=next_i;
-      }
-      for(;;)
-      {
-         Int next_i=target-1; if(!InRange(next_i, tris))break;
-       C Triangle &next=tris[next_i]; if(next.error_min>=error_min)break; // if OK then stop
-         target=next_i;
-      }
-      tris.moveElm(valid, target);
-   #endif
    }
 
    void setNrmTanBin(Triangle &tri)

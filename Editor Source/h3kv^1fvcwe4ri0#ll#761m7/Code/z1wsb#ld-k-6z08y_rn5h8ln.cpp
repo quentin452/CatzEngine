@@ -286,6 +286,8 @@ p_scale=&add("Item 3D Scale"          , MemberDesc(MEMBER(Options, item_3d_scale
    static void Draw(Viewport &viewport) {Theater.draw();}
           void draw()
    {
+      if(MtrlEdit.bigVisible() || WaterMtrlEdit.bigVisible())return; // don't draw if covered by something (without this we would need to set Renderer.temporal_id before Rendering overlapping fullscreen viewports)
+
       // environment
       EnvironmentPtr env=EnvEdit.cur(); if(!env)env=Proj.gamePath(options.env_id); if(!env)env=&DefaultEnvironment; env->set();
 

@@ -1897,20 +1897,20 @@ Half MultiMaterialWeight(Half weight, Half alpha) // 'weight'=weight of this mat
 {
 #if 0 // linear
    return weight;
+#elif 0 // Pinch (not sharp enough)
+   const Half sharpen=32;
+   return Pinch(weight, ScaleFactor(alpha*sharpen - 0.5*sharpen));
+#elif 0 // PinchFactor (too sharp transitions)
+   const Half sharpen=32;
+   return PinchFactor(weight, alpha*sharpen - 0.5*sharpen);
 #elif 0 // Pow (too bright on low weights, causing visible jumps due to material reduction for low weights, also blurry (small contrast) compared to Pinch
    const Half sharpen=-5;
    return Pow(weight, ScaleFactor(alpha*sharpen - 0.5*sharpen));
-#elif 0 // Pinch (too sharp transitions)
-   const Half sharpen=32;
-   return PinchFactor(weight, alpha*sharpen - 0.5*sharpen);
-#elif 0 // uses alpha on middle and high, too bright on low weights, causing visible jumps due to material reduction for low weights
-   const Half sharpen=4;
-   return Max(0, weight*(alpha*sharpen - 0.5*sharpen + 1));
-#elif 0 // uses alpha on middle, approximation however causes artifacts
+#elif 0 // Flippable Pow approximation, however causes artifacts
    const Half sharpen=8;
    return Max(0, weight // base
                 +weight*(1-weight)*(alpha*sharpen - 0.5*sharpen)); // "weight"=ignore alpha at start "1-weight" ignore alpha at end, "(alpha-0.5)*sharpen" alpha
-#else // best
+#else // Flippable Pow - best
    const Half sharpen=12;
    #if 0
       return (alpha<=0.5) ?   Pow(  weight, 1+(0.5-alpha)*sharpen)

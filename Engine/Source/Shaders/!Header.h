@@ -1906,10 +1906,30 @@ Half MultiMaterialWeight(Half weight, Half alpha) // 'weight'=weight of this mat
 #elif 0 // uses alpha on middle and high, too bright on low weights, causing visible jumps due to material reduction for low weights
    const Half sharpen=4;
    return Max(0, weight*(alpha*sharpen - 0.5*sharpen + 1));
-#else // uses alpha on middle
+#elif 0 // uses alpha on middle, approximation however causes artifacts
    const Half sharpen=8;
    return Max(0, weight // base
                 +weight*(1-weight)*(alpha*sharpen - 0.5*sharpen)); // "weight"=ignore alpha at start "1-weight" ignore alpha at end, "(alpha-0.5)*sharpen" alpha
+#else // best
+   const Half sharpen=12;
+   #if 0
+      return (alpha<=0.5) ?   Pow(  weight, 1+(0.5-alpha)*sharpen)
+                          : 1-Pow(1-weight, 1+(alpha-0.5)*sharpen);
+   #else // optimized using only 1 Pow
+      VecH2 mad;
+      if(alpha<=0.5)
+      {
+         mad=VecH2(1, 0);
+      }else
+      {
+         mad=VecH2(-1, 1);
+       //alpha =1-alpha ; // or alternatively do alpha  MAD below
+       //weight=1-weight; // or alternatively do weight MAD below
+      }
+      alpha =alpha *mad.x+mad.y; // MAD generates smaller SPIR-V code
+      weight=weight*mad.x+mad.y; // MAD generates smaller SPIR-V code
+      return Pow(weight, 1+0.5*sharpen-alpha*sharpen)*mad.x+mad.y;
+   #endif
 #endif
 }
 /******************************************************************************/

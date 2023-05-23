@@ -63,6 +63,7 @@ T2(Node, Key) struct BSTree
    }
    void validate()C
    {
+      DYNAMIC_ASSERT(!_root || _root->parent()==null, "BSTree.root");
       DYNAMIC_ASSERT(_last==TreeNode::Last(_root), "BSTree.last");
       if(C TreeNode *node=_last)
       {

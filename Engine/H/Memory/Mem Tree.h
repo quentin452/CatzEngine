@@ -11,6 +11,10 @@ struct TreeNode
    TreeNode*  last();
    TreeNode*  prev();
    TreeNode*  next();
+ C TreeNode* first()C {return ConstCast(T).first();}
+ C TreeNode*  last()C {return ConstCast(T). last();}
+ C TreeNode*  prev()C {return ConstCast(T). prev();}
+ C TreeNode*  next()C {return ConstCast(T). next();}
 
    static TreeNode* First(TreeNode *node) {return node ? node->first() : null;}
    static TreeNode*  Last(TreeNode *node) {return node ? node-> last() : null;}
@@ -50,6 +54,20 @@ T2(Node, Key) struct BSTree
             return node;
       }
       return null;
+   }
+
+   void validate()C
+   {
+      DYNAMIC_ASSERT(_last==TreeNode::Last(_root), "BSTree.last");
+      if(C TreeNode *node=_last)while(C TreeNode *prev=node->prev())
+      {
+       C Key &p=key(*(Node*)prev);
+       C Key &n=key(*(Node*)node);
+         DYNAMIC_ASSERT(compare(p, n) // p<n
+                    || !compare(n, p) // !(n<p) = n>=p = p<=n   Check this in case compare is "<" but we need "<=", this will solve this
+                    , "BSTree.order");
+         node=prev;
+      }
    }
 
    BSTree(C Key& (&key)(C Node &node), Bool (&compare)(C Key &a, C Key &b)) : key(key), compare(compare), _root(null), _last(null) {}

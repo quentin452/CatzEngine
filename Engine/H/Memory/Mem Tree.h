@@ -56,17 +56,27 @@ T2(Node, Key) struct BSTree
       return null;
    }
 
+   static void Validate(C TreeNode &node)
+   {
+      DYNAMIC_ASSERT(!node.left  || node.left ->parent()==&node, "node.left.parent");
+      DYNAMIC_ASSERT(!node.right || node.right->parent()==&node, "node.right.parent");
+   }
    void validate()C
    {
       DYNAMIC_ASSERT(_last==TreeNode::Last(_root), "BSTree.last");
-      if(C TreeNode *node=_last)while(C TreeNode *prev=node->prev())
+      if(C TreeNode *node=_last)
       {
-       C Key &p=key(*(Node*)prev);
-       C Key &n=key(*(Node*)node);
-         DYNAMIC_ASSERT(compare(p, n) // p<n
-                    || !compare(n, p) // !(n<p) = n>=p = p<=n   Check this in case compare is "<" but we need "<=", this will solve this
-                    , "BSTree.order");
-         node=prev;
+         Validate(*node);
+         while(C TreeNode *prev=node->prev())
+         {
+            Validate(*prev);
+          C Key &p=key(*(Node*)prev);
+          C Key &n=key(*(Node*)node);
+            DYNAMIC_ASSERT(compare(p, n) // p<n
+                       || !compare(n, p) // !(n<p) = n>=p = p<=n   Check this in case compare is "<" but we need "<=", this will solve this
+                       , "BSTree.order");
+            node=prev;
+         }
       }
    }
 

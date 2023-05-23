@@ -614,7 +614,7 @@ TreeNode* _RBRemove(TreeNode* node, TreeNode* root)
    {
       Int  color;
       void setColor(Int c) {color=c;}
-      void setAsLeftChild(Bool) const {}
+      void setAsLeftChild(Bool)C {}
       TreeNode* operator()(TreeNode* child, TreeNode* parent, TreeNode* root)
       {
          if(color==BLACK)return RBRemover(child, parent, root);
@@ -629,7 +629,7 @@ TreeNode* _AVLRemove(TreeNode* node, TreeNode* root)
    struct RemoverAVL
    {
       Bool flag;
-      void setColor(Int) const {}
+      void setColor(Int)C {}
       void setAsLeftChild(Bool f) {flag=f;}
       TreeNode* operator()(TreeNode* child, TreeNode* parent, TreeNode* root)
       {
@@ -645,7 +645,7 @@ TreeNode* _WAVLRemove(TreeNode* node, TreeNode* root)
    struct RemoverWAVL
    {
       Bool flag;
-      void setColor(Int) const {}
+      void setColor(Int)C {}
       void setAsLeftChild(Bool f) {flag=f;}
       TreeNode* operator()(TreeNode* child, TreeNode* parent, TreeNode* root)
       {

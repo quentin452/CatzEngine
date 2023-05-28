@@ -182,13 +182,11 @@ TreeNode* _RBInsert(TreeNode* node, TreeNode* root)
 }
 inline TreeNode *RBRemover(TreeNode *node, TreeNode *parent, TreeNode *root)
 {
-   TreeNode *other;
-
    while((!node || node->tag()==BLACK) && node!=root)
    {
       if(parent->left==node)
       {
-         other=parent->right;
+         TreeNode *other=parent->right;
          if(other->tag()==RED)
          {
             other ->setTag<BLACK>();
@@ -220,7 +218,7 @@ inline TreeNode *RBRemover(TreeNode *node, TreeNode *parent, TreeNode *root)
          }
       }else
       {
-         other=parent->left;
+         TreeNode *other=parent->left;
          if(other->tag()==RED)
          {
             other ->setTag<BLACK>();

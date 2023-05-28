@@ -568,9 +568,8 @@ static inline TreeNode* Remove(TreeNode *node, TreeNode* root)
    TreeNode *child, *parent, *old=node;
    if(node->left && node->right)
    {
-      TreeNode *tmp;
       node=node->right;
-      while(tmp=node->left)node=tmp;
+      while(TreeNode *left=node->left)node=left;
       child =node->right;
       parent=node->parent();
       remover.setColor(node->tag());
@@ -586,7 +585,7 @@ static inline TreeNode* Remove(TreeNode *node, TreeNode* root)
          remover.setAsLeftChild(true);
       }
 
-      tmp=old->parent();
+      TreeNode *tmp=old->parent();
       node->left =old->left;
       node->right=old->right;
       node->parent(tmp);

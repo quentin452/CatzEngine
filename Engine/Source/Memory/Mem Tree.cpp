@@ -74,6 +74,7 @@ static inline void RotateLeftAsLeftChild(TreeNode* node)
    if(left)left->parent(node);
    right->left=node;
    right->parent(parent);
+   DEBUG_ASSERT(parent->left==node, "parent.left==node");
    ReplaceNodeAsLeftChild(right, parent);
    node->parent(right);
 }
@@ -84,6 +85,7 @@ static inline void RotateRightAsRightChild(TreeNode* node)
    if(right)right->parent(node);
    left->right=node;
    left->parent(parent);
+   DEBUG_ASSERT(parent->right==node, "parent.right==node");
    ReplaceNodeAsRightChild(left, parent);
    node->parent(left);
 }

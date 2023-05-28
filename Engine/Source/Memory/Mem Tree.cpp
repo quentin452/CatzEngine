@@ -51,7 +51,6 @@ TreeNode* TreeNode::prev()
 #define WLEFT   1
 #define WRIGHT  2
 
-
 static inline void ReplaceNodeAsLeftChild (TreeNode* New, TreeNode* parent) {parent->left =New;}
 static inline void ReplaceNodeAsRightChild(TreeNode* New, TreeNode* parent) {parent->right=New;}
 

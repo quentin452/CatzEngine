@@ -626,12 +626,12 @@ TreeNode* _AVLRemove(TreeNode* node, TreeNode* root)
 {
    struct RemoverAVL
    {
-      Bool flag;
+      Bool left_child;
       void setColor(Int)C {}
-      void setAsLeftChild(Bool f) {flag=f;}
+      void setAsLeftChild(Bool lc) {left_child=lc;}
       TreeNode* operator()(TreeNode* child, TreeNode* parent, TreeNode* root)
       {
-         if(parent)return AVLRemover(child, parent, root, flag);
+         if(parent)return AVLRemover(child, parent, root, left_child);
          else      return root;
       }
    };
@@ -642,12 +642,12 @@ TreeNode* _WAVLRemove(TreeNode* node, TreeNode* root)
 {
    struct RemoverWAVL
    {
-      Bool flag;
+      Bool left_child;
       void setColor(Int)C {}
-      void setAsLeftChild(Bool f) {flag=f;}
+      void setAsLeftChild(Bool lc) {left_child=lc;}
       TreeNode* operator()(TreeNode* child, TreeNode* parent, TreeNode* root)
       {
-         if(parent)return WAVLRemover(child, parent, root, flag);
+         if(parent)return WAVLRemover(child, parent, root, left_child);
          else      return root;
       }
    };

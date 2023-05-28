@@ -185,62 +185,62 @@ inline TreeNode *RBRemover(TreeNode *node, TreeNode *parent, TreeNode *root)
    {
       if(parent->left==node)
       {
-         TreeNode *other=parent->right;
-         if(other->tag()==RED)
+         TreeNode *sibling=parent->right;
+         if(sibling->tag()==RED)
          {
-            other ->setTag<BLACK>();
-            parent->setTag<RED  >();
+            sibling->setTag<BLACK>();
+            parent ->setTag<RED  >();
             RotateLeft(parent, root);
-            other=parent->right;
+            sibling=parent->right;
          }
-         if((!other->left || other->left->tag()==BLACK) && (!other->right || other->right->tag()==BLACK))
+         if((!sibling->left || sibling->left->tag()==BLACK) && (!sibling->right || sibling->right->tag()==BLACK))
          {
-            other->setTag<RED>();
+            sibling->setTag<RED>();
             node=parent;
             parent=node->parent();
          }else
          {
-            if(!other->right || other->right->tag()==BLACK)
+            if(!sibling->right || sibling->right->tag()==BLACK)
             {
-               other->left->setTag<BLACK>();
-               other->      setTag<RED  >();
-               RotateRightAsRightChild(other);
-               other=parent->right;
+               sibling->left->setTag<BLACK>();
+               sibling->      setTag<RED  >();
+               RotateRightAsRightChild(sibling);
+               sibling=parent->right;
             }
-            other ->setTag(parent->tag());
-            parent->setTag<BLACK>();
-            other->right->setTag<BLACK>();
+            sibling->       setTag(parent->tag());
+            parent ->       setTag<BLACK>();
+            sibling->right->setTag<BLACK>();
             RotateLeft(parent, root);
             node=root;
             break;
          }
       }else
       {
-         TreeNode *other=parent->left;
-         if(other->tag()==RED)
+         TreeNode *sibling=parent->left;
+         if(sibling->tag()==RED)
          {
-            other ->setTag<BLACK>();
-            parent->setTag<RED  >();
+            sibling->setTag<BLACK>();
+            parent ->setTag<RED  >();
             RotateRight(parent, root);
-            other=parent->left;
+            sibling=parent->left;
          }
-         if((!other->left || other->left->tag()==BLACK) && (!other->right || other->right->tag()==BLACK))
+         if((!sibling->left || sibling->left->tag()==BLACK) && (!sibling->right || sibling->right->tag()==BLACK))
          {
-            other->setTag<RED>();
+            sibling->setTag<RED>();
             node=parent;
             parent=node->parent();
          }else
          {
-            if(!other->left || other->left->tag()==BLACK)
+            if(!sibling->left || sibling->left->tag()==BLACK)
             {
-               other->right->setTag<BLACK>();
-               other->       setTag<RED  >();
-               RotateLeftAsLeftChild(other);
-               other=parent->left;
+               sibling->right->setTag<BLACK>();
+               sibling->       setTag<RED  >();
+               RotateLeftAsLeftChild(sibling);
+               sibling=parent->left;
             }
-            other ->setTag(parent->tag());
-            parent->setTag<BLACK>();
-            other->left->setTag<BLACK>();
+            sibling->      setTag(parent->tag());
+            parent ->      setTag<BLACK>();
+            sibling->left->setTag<BLACK>();
             RotateRight(parent, root);
             node=root;
             break;

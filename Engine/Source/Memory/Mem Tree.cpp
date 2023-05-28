@@ -566,10 +566,10 @@ template<typename Remover>
 static inline TreeNode* Remove(TreeNode *node, TreeNode* root)
 {
    Remover remover;
-   TreeNode *child, *parent;
+   TreeNode *child, *parent, *old=node;
    if(node->left && node->right)
    {
-      TreeNode *old=node, *tmp;
+      TreeNode *tmp;
       node=node->right;
       while(tmp=node->left)node=tmp;
       child =node->right;
@@ -605,6 +605,7 @@ static inline TreeNode* Remove(TreeNode *node, TreeNode* root)
       ReplaceNode(node, child, parent, root);
       if(child)child->parent(parent);
    }
+   old->zero();
    return remover(child, parent, root);
 }
 
@@ -654,6 +655,18 @@ TreeNode* _WAVLRemove(TreeNode* node, TreeNode* root)
       }
    };
    return Remove<RemoverWAVL>(node, root);
+}
+/******************************************************************************/
+void _RBValidate(C TreeNode* node)
+{
+   if(node)
+   {
+      if(node->tag()==RED)
+      {
+         REP(2)if(TreeNode *child=node->child[i])DYNAMIC_ASSERT(child->tag()!=RED, "RB.validate");
+      }
+      REP(2)_RBValidate(node->child[i]);
+   }
 }
 /******************************************************************************/
 }

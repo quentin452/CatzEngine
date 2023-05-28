@@ -1,8 +1,12 @@
 /******************************************************************************/
 struct TreeNode
 {
-   TreeNode *left, *right;
-   UIntPtr   parent_tag;
+   union
+   {
+      struct{TreeNode *child[2]    ;};
+      struct{TreeNode *left, *right;};
+   };
+   UIntPtr parent_tag;
 
    TreeNode* parent(           )C {return (TreeNode*)(parent_tag&~3);}
    void      parent(TreeNode* p)  {parent_tag&=3; parent_tag|=UIntPtr(p);}
@@ -21,6 +25,10 @@ struct TreeNode
    static TreeNode*  Prev(TreeNode *node) {return node ? node-> prev() : null;}
    static TreeNode*  Next(TreeNode *node) {return node ? node-> next() : null;}
 
+   Bool isZero()C {return !parent_tag && !left && !right;}
+   void   zero() {Zero(T);}
+   TreeNode() {zero();}
+
 #if !EE_PRIVATE
 private:
 #endif
@@ -37,6 +45,7 @@ TreeNode* _WAVLInsert(TreeNode* node, TreeNode* root);
 TreeNode*   _RBRemove(TreeNode* node, TreeNode* root);
 TreeNode*  _AVLRemove(TreeNode* node, TreeNode* root);
 TreeNode* _WAVLRemove(TreeNode* node, TreeNode* root);
+void      _RBValidate(C TreeNode* root);
 /******************************************************************************/
 T2(Node, Key) struct BSTree
 {
@@ -88,6 +97,7 @@ protected:
 
    void insert(Node* node)
    {
+      DEBUG_ASSERT(node->isZero(), "TreeNode not zero");
     C Key       &node_key=  key(*node);
       TreeNode** link    =&_root;
       Node*      parent  =  null;
@@ -106,6 +116,7 @@ protected:
    }
    Bool insertUnique(Node* node) // no duplicate keys
    {
+      DEBUG_ASSERT(node->isZero(), "TreeNode not zero");
     C Key       &node_key=  key(*node);
       TreeNode** link    =&_root;
       Node*      parent  =  null;
@@ -157,6 +168,11 @@ T2(Node, Key) struct RBTree : BSTree<Node, Key>
          removing(*node);
          root(_RBRemove(node, root()));
       }
+   }
+   void validate()C
+   {
+      super::validate();
+     _RBValidate(root());
    }
 };
 /******************************************************************************/

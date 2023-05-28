@@ -661,10 +661,7 @@ void _RBValidate(C TreeNode* node)
 {
    if(node)
    {
-      if(node->tag()==RED)
-      {
-         REP(2)if(TreeNode *child=node->child[i])DYNAMIC_ASSERT(child->tag()!=RED, "RB.validate");
-      }
+      if(node->tag()==RED)REP(2)DYNAMIC_ASSERT(!IsRed(node->child[i]), "RB.validate");
       REP(2)_RBValidate(node->child[i]);
    }
 }

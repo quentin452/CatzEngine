@@ -576,8 +576,8 @@ static inline TreeNode* Remove(TreeNode *node, TreeNode* root)
       if(parent==old)
       {
          ReplaceNodeAsRightChild(child, parent);
-         parent=node;
          remover.setAsLeftChild(false);
+         parent=node;
       }else
       {
          ReplaceNodeAsLeftChild(child, parent);
@@ -590,8 +590,8 @@ static inline TreeNode* Remove(TreeNode *node, TreeNode* root)
       node->parent(tmp);
       node->setTag(old->tag());
       ReplaceNode(old, node, tmp, root);
-      old->left->parent(node);
-      if(old->right)old->right->parent(node);
+                           old->left->parent(node);
+      if(auto right=old->right)right->parent(node);
    }else
    {
       if(!node->left)child=node->right;

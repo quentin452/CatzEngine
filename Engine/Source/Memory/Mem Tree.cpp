@@ -132,11 +132,15 @@ TreeNode* _RBInsert(TreeNode* node, TreeNode* root)
 
          if(parent->right==node)
          {
-            TreeNode *tmp;
+         #if 0
+            node=parent;
+            RotateLeft(node, root);
+             parent=node  ->parent();
+            gparent=parent->parent();
+         #else // optimized
             RotateLeftAsLeftChild(parent);
-            tmp=parent;
-            parent=node;
-            node=tmp;
+            Swap(parent, node);
+         #endif
          }
 
           parent->setTag<BLACK>();
@@ -156,11 +160,15 @@ TreeNode* _RBInsert(TreeNode* node, TreeNode* root)
 
          if(parent->left==node)
          {
-            TreeNode *tmp;
+         #if 0
+            node=parent;
+            RotateRight(node, root);
+             parent=node  ->parent();
+            gparent=parent->parent();
+         #else // optimized
             RotateRightAsRightChild(parent);
-            tmp=parent;
-            parent=node;
-            node=tmp;
+            Swap(parent, node);
+         #endif
          }
 
           parent->setTag<BLACK>();

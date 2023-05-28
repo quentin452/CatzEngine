@@ -69,10 +69,9 @@ static inline void ReplaceNode(TreeNode* old, TreeNode* New, TreeNode* parent, T
 
 static inline void RotateLeftAsLeftChild(TreeNode* node)
 {
-   auto right =node->right;
-   auto parent=node->parent();
-   node->right=right->left;
-   if(right->left)right->left->parent(node);
+   auto parent=node->parent(), right=node->right, left=right->left;
+   node->right=left;
+   if(left)left->parent(node);
    right->left=node;
    right->parent(parent);
    ReplaceNodeAsLeftChild(right, parent);
@@ -80,10 +79,9 @@ static inline void RotateLeftAsLeftChild(TreeNode* node)
 }
 static inline void RotateRightAsRightChild(TreeNode* node)
 {
-   auto left  =node->left;
-   auto parent=node->parent();
-   node->left =left->right;
-   if(left->right)left->right->parent(node);
+   auto parent=node->parent(), left=node->left, right=left->right;
+   node->left=right;
+   if(right)right->parent(node);
    left->right=node;
    left->parent(parent);
    ReplaceNodeAsRightChild(left, parent);
@@ -92,10 +90,9 @@ static inline void RotateRightAsRightChild(TreeNode* node)
 
 static inline void RotateLeft(TreeNode* node, TreeNode*& root)
 {
-   auto right =node->right;
-   auto parent=node->parent();
-   node->right=right->left;
-   if(right->left)right->left->parent(node);
+   auto parent=node->parent(), right=node->right, left=right->left;
+   node->right=left;
+   if(left)left->parent(node);
    right->left=node;
    right->parent(parent);
    ReplaceNode(node, right, parent, root);
@@ -103,10 +100,9 @@ static inline void RotateLeft(TreeNode* node, TreeNode*& root)
 }
 static inline void RotateRight(TreeNode* node, TreeNode*& root)
 {
-   auto left  =node->left;
-   auto parent=node->parent();
-   node->left =left->right;
-   if(left->right)left->right->parent(node);
+   auto parent=node->parent(), left=node->left, right=left->right;
+   node->left=right;
+   if(right)right->parent(node);
    left->right=node;
    left->parent(parent);
    ReplaceNode(node, left, parent, root);

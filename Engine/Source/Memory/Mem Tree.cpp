@@ -110,17 +110,20 @@ static inline void RotateRight(TreeNode* node, TreeNode*& root)
    node->parent(left);
 }
 /******************************************************************************/
+static inline Bool IsRed  (TreeNode *node) {return  node && node->tag()==RED  ;}
+static inline Bool IsBlack(TreeNode *node) {return !node || node->tag()==BLACK;}
+
 TreeNode* _RBInsert(TreeNode* node, TreeNode* root)
 {
    node->setTag<RED>();
-   TreeNode *parent; while((parent=node->parent()) && parent->tag()==RED)
+   TreeNode *parent; while(IsRed(parent=node->parent()))
    {
       TreeNode *gparent=parent->parent();
 
       if(parent==gparent->left)
       {
          TreeNode *uncle=gparent->right;
-         if(uncle && uncle->tag()==RED)
+         if(IsRed(uncle))
          {
               uncle->setTag<BLACK>();
              parent->setTag<BLACK>();
@@ -148,7 +151,7 @@ TreeNode* _RBInsert(TreeNode* node, TreeNode* root)
       }else
       {
          TreeNode *uncle=gparent->left;
-         if(uncle && uncle->tag()==RED)
+         if(IsRed(uncle))
          {
               uncle->setTag<BLACK>();
              parent->setTag<BLACK>();
@@ -179,7 +182,6 @@ TreeNode* _RBInsert(TreeNode* node, TreeNode* root)
    root->setTag<BLACK>();
    return root;
 }
-static inline Bool IsBlack(TreeNode *node) {return !node || node->tag()==BLACK;}
 inline TreeNode *RBRemover(TreeNode *node, TreeNode *parent, TreeNode *root)
 {
    while(IsBlack(node) && node!=root)

@@ -549,7 +549,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
    struct Triangle : TreeNode
    {
       Real      edge_error[3], error_min;
-      VecI      ind; // vertex index
+      VecI      ind; // vertex index !! WARNING: due to duplicate remap, sometimes it won't be 'allDifferent' - may point to the same vertexes !!
       Vec       nrm, tan, bin; // for simplification tangent/binormal are computed per triangle (not per vertex), tangent/binormal are not normalized
       Flt       weight;
       VtxData   vtxs[3], // data for each vertex
@@ -590,7 +590,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
    struct Vertex
    {
       Vec           pos;
-      Int           ref_start, tri_num;
+      Int           ref_start, tri_num; // !! WARNING: because of duplicate remap, the same triangle can be listed multiple times !!
       Byte          border;
       QuadricMatrix qm;
       Real          weight;
@@ -786,7 +786,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
              C Vec //&v0=   edge_vtx0.pos,
                      &v1=vtxs[tri_v1].pos,
                      &v2=vtxs[tri_v2].pos;
-               if(Dot(tri.nrm, GetNormalU(mid_pos, v1, v2))<=0)return true; // if the new triangle normal is in the opposite direction of the original normal
+               if(Dot(tri.nrm, GetNormalU(mid_pos, v1, v2))<0)return true; // if the new triangle normal is in the opposite direction of the original normal
                all_tris.New().set(tri);
             }
          }
@@ -1125,7 +1125,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
                   #endif
                   }
                   vtx.tri_num--;
-                  break; // we have found this triangle, finish
+                  break; // we have found this triangle, finish. however if 'mid_tris' would list only unique triangles (without duplicates) then this break would have to be disabled
                }
             }
             break; // if we've found that vtx, then the job is done
@@ -1495,7 +1495,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
          Triangle &tri=tris[i];
          REPA(tri.ind)
          {
-            Int    &tv =tri.ind.c[i]; tv=vtx_dups[vtx_dups[tv].dup].vtxs_index; // remap triangle vertex index to unique
+            Int    &tv =tri.ind.c[i]; tv=vtx_dups[vtx_dups[tv].dup].vtxs_index; // remap triangle vertex index to unique !! WARNING: because of this remap, 'tri.ind' sometimes won't be 'allDifferent' !!
             Vertex &vtx=vtxs[tv]    ; vtx.tri_num++;
          }
          tri.tan.zero(); tri.bin.zero(); setNrmTanBin(tri); // zero in init, in case 'setNrmTanBin' doesn't modify the values
@@ -1604,7 +1604,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
             -have only edge_vtx1                                      , let's call them "right"  triangles */
 
          // don't remove if flipped
-         middle_tris.clear(); all_tris.clear(); // clear before 'flipped' because that modifies this
+         middle_tris.clear(); all_tris.clear(); // clear before 'flipped' because that modifies this !! WARNING: this might list the same triangle multiple times !!
          if(flipped(mid_pos, edge_vtx1i, edge_vtx0, true ) // middle tris will be collected only from the first vertex
          || flipped(mid_pos, edge_vtx0i, edge_vtx1, false))goto cant;
 
@@ -1641,10 +1641,12 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
 
             REPA(middle_tris)
             {
-               Triangle *tri=middle_tris[i]->tri;
-               visible_tris-=tri->visible;
-               tri->exists=false;
-               tree.remove(tri);
+               Triangle *tri=middle_tris[i]->tri; if(tri->exists) // check if exists because this tri could be listed multiple times, and thus could be removed multiple times too
+               {
+                  tri->exists=false;
+                  visible_tris-=tri->visible;
+                  tree.remove(tri);
+               }
             }
             edge_vtx0.pos=mid_pos;
             edge_vtx0.eat(edge_vtx1);

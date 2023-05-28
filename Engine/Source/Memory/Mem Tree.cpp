@@ -203,9 +203,8 @@ inline TreeNode *RBRemover(TreeNode *node, TreeNode *parent, TreeNode *root)
          {
             if(!other->right || other->right->tag()==BLACK)
             {
-               TreeNode *o_left;
-               if((o_left=other->left))o_left->setTag<BLACK>();
-               other->setTag<RED>();
+               other->left->setTag<BLACK>();
+               other->      setTag<RED  >();
                RotateRightAsRightChild(other);
                other=parent->right;
             }
@@ -235,9 +234,8 @@ inline TreeNode *RBRemover(TreeNode *node, TreeNode *parent, TreeNode *root)
          {
             if(!other->left || other->left->tag()==BLACK)
             {
-               TreeNode *o_right;
-               if((o_right=other->right))o_right->setTag<BLACK>();
-               other->setTag<RED>();
+               other->right->setTag<BLACK>();
+               other->       setTag<RED  >();
                RotateLeftAsLeftChild(other);
                other=parent->left;
             }

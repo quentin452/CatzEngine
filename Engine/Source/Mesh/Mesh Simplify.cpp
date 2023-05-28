@@ -1143,6 +1143,10 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
          tree.remove(tri);
          tri.error_min=error_min;
          tree.insert(tri);
+      #if DEBUG && 0 // check sort order
+         if(Triangle *next=tree.last())for(; Triangle *prev=(Triangle*)next->prev(); next=prev)
+            DYNAMIC_ASSERT(CompareError(*prev, *next)<=0, "simplify tris order");
+      #endif
       }
    }
 

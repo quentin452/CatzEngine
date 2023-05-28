@@ -64,6 +64,34 @@ T2(Node, Key) struct BSTree
       }
       return null;
    }
+   Node* first(C Key& value)C // get first element for which "!compare(node, value)"
+   {
+      Bool  last_dir=false;
+      Node *first=null, *node=root();
+      while(node)
+      {
+         first=node;
+            last_dir=compare(key(*node), value);
+         if(last_dir)node=(Node*)node->right;
+         else        node=(Node*)node->left ;
+      }
+      if(last_dir)first=(Node*)first->next();
+      return first;
+   }
+   Node* last(C Key& value)C // get last element for which "!compare(value, node)"
+   {
+      Bool  last_dir=false;
+      Node *last=null, *node=root();
+      while(node)
+      {
+         last=node;
+            last_dir=compare(value, key(*node));
+         if(last_dir)node=(Node*)node->left ;
+         else        node=(Node*)node->right;
+      }
+      if(last_dir)last=(Node*)last->prev();
+      return last;
+   }
 
    static void Validate(C TreeNode &node)
    {

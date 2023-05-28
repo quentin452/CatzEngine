@@ -179,9 +179,10 @@ TreeNode* _RBInsert(TreeNode* node, TreeNode* root)
    root->setTag<BLACK>();
    return root;
 }
+static inline Bool IsBlack(TreeNode *node) {return !node || node->tag()==BLACK;}
 inline TreeNode *RBRemover(TreeNode *node, TreeNode *parent, TreeNode *root)
 {
-   while((!node || node->tag()==BLACK) && node!=root)
+   while(IsBlack(node) && node!=root)
    {
       if(parent->left==node)
       {
@@ -193,14 +194,14 @@ inline TreeNode *RBRemover(TreeNode *node, TreeNode *parent, TreeNode *root)
             RotateLeft(parent, root);
             sibling=parent->right;
          }
-         if((!sibling->left || sibling->left->tag()==BLACK) && (!sibling->right || sibling->right->tag()==BLACK))
+         if(IsBlack(sibling->left) && IsBlack(sibling->right))
          {
             sibling->setTag<RED>();
             node=parent;
             parent=node->parent();
          }else
          {
-            if(!sibling->right || sibling->right->tag()==BLACK)
+            if(IsBlack(sibling->right))
             {
                sibling->left->setTag<BLACK>();
                sibling->      setTag<RED  >();
@@ -224,14 +225,14 @@ inline TreeNode *RBRemover(TreeNode *node, TreeNode *parent, TreeNode *root)
             RotateRight(parent, root);
             sibling=parent->left;
          }
-         if((!sibling->left || sibling->left->tag()==BLACK) && (!sibling->right || sibling->right->tag()==BLACK))
+         if(IsBlack(sibling->left) && IsBlack(sibling->right))
          {
             sibling->setTag<RED>();
             node=parent;
             parent=node->parent();
          }else
          {
-            if(!sibling->left || sibling->left->tag()==BLACK)
+            if(IsBlack(sibling->left))
             {
                sibling->right->setTag<BLACK>();
                sibling->       setTag<RED  >();

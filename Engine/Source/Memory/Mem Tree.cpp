@@ -114,12 +114,10 @@ static inline void RotateRight(TreeNode* node, TreeNode*& root)
 /******************************************************************************/
 TreeNode* _RBInsert(TreeNode* node, TreeNode* root)
 {
-   TreeNode *parent, *gparent;
    node->setTag<RED>();
-
-   while((parent=node->parent()) && parent->tag()==RED)
+   TreeNode *parent; while((parent=node->parent()) && parent->tag()==RED)
    {
-      gparent=parent->parent();
+      TreeNode *gparent=parent->parent();
 
       if(parent==gparent->left)
       {

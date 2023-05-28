@@ -104,8 +104,8 @@ protected:
       while(*link)
       {
          parent=(Node*)(*link);
-         if(compare(node_key, key(*parent)))link=&(parent->left );
-         else                               link=&(parent->right);
+         if(compare(node_key, key(*parent)))link=&parent->left ;
+         else                               link=&parent->right;
       }
       node.left=node.right=null;
       node.parent(parent);
@@ -123,8 +123,8 @@ protected:
       while(*link)
       {
          parent=(Node*)(*link);
-         if(compare(node_key, key(*parent)))link=&(parent->left );else
-         if(compare(key(*parent), node_key))link=&(parent->right);else
+         if(compare(node_key, key(*parent)))link=&parent->left ;else
+         if(compare(key(*parent), node_key))link=&parent->right;else
             return false;
       }
       node.left=node.right=null;

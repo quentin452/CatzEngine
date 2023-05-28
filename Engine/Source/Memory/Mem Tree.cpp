@@ -492,8 +492,8 @@ inline TreeNode* WAVLRemover(TreeNode* node, TreeNode *parent, TreeNode* root, B
             {
                if(sibling_tag==WLEFT)
                {
-                  auto tmp    =sibling->left;
-                  auto tmp_tag=tmp->tag();
+                  TreeNode *tmp=sibling->left;
+                  auto      tmp_tag=tmp->tag();
                   RotateRightAsRightChild(sibling);
                   parent ->setTag((tmp_tag&WRIGHT) ? WLEFT  : BALANCE);
                   sibling->setTag((tmp_tag&WLEFT ) ? WRIGHT : BALANCE);
@@ -529,8 +529,8 @@ inline TreeNode* WAVLRemover(TreeNode* node, TreeNode *parent, TreeNode* root, B
             {
                if(sibling_tag==WRIGHT)
                {
-                  auto tmp    =sibling->right;
-                  auto tmp_tag=tmp->tag();
+                  TreeNode *tmp    =sibling->right;
+                  auto      tmp_tag=tmp->tag();
                   RotateLeftAsLeftChild(sibling);
                   parent ->setTag((tmp_tag&WLEFT ) ? WRIGHT : BALANCE);
                   sibling->setTag((tmp_tag&WRIGHT) ? WLEFT  : BALANCE);

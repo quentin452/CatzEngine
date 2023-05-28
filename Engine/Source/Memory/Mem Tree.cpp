@@ -127,25 +127,25 @@ TreeNode* _RBInsert(TreeNode* node, TreeNode* root)
              parent->setTag<BLACK>();
             gparent->setTag<RED  >();
             node=gparent;
-            continue;
-         }
-
-         if(parent->right==node)
+         }else
          {
-         #if 0
-            node=parent;
-            RotateLeft(node, root);
-             parent=node  ->parent();
-            gparent=parent->parent();
-         #else // optimized
-            RotateLeftAsLeftChild(parent);
-            Swap(parent, node);
-         #endif
-         }
+            if(parent->right==node)
+            {
+            #if 0
+               node=parent;
+               RotateLeft(node, root);
+                parent=node  ->parent();
+               gparent=parent->parent();
+            #else // optimized
+               RotateLeftAsLeftChild(parent);
+               Swap(parent, node);
+            #endif
+            }
 
-          parent->setTag<BLACK>();
-         gparent->setTag<RED  >();
-         RotateRight(gparent, root);
+             parent->setTag<BLACK>();
+            gparent->setTag<RED  >();
+            RotateRight(gparent, root);
+         }
       }else
       {
          TreeNode *uncle=gparent->left;
@@ -155,25 +155,25 @@ TreeNode* _RBInsert(TreeNode* node, TreeNode* root)
              parent->setTag<BLACK>();
             gparent->setTag<RED  >();
             node=gparent;
-            continue;
-         }
-
-         if(parent->left==node)
+         }else
          {
-         #if 0
-            node=parent;
-            RotateRight(node, root);
-             parent=node  ->parent();
-            gparent=parent->parent();
-         #else // optimized
-            RotateRightAsRightChild(parent);
-            Swap(parent, node);
-         #endif
-         }
+            if(parent->left==node)
+            {
+            #if 0
+               node=parent;
+               RotateRight(node, root);
+                parent=node  ->parent();
+               gparent=parent->parent();
+            #else // optimized
+               RotateRightAsRightChild(parent);
+               Swap(parent, node);
+            #endif
+            }
 
-          parent->setTag<BLACK>();
-         gparent->setTag<RED  >();
-         RotateLeft(gparent, root);
+             parent->setTag<BLACK>();
+            gparent->setTag<RED  >();
+            RotateLeft(gparent, root);
+         }
       }
    }
 

@@ -1140,9 +1140,9 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       if(  error_min!=tri.error_min)
       {
          // reposition this triangle in the 'tris' list to preserve order by 'error_min'
-         tree.remove(&tri);
+         tree.remove(tri);
          tri.error_min=error_min;
-         tree.insert(&tri);
+         tree.insert(tri);
       }
    }
 
@@ -1551,7 +1551,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
          }
          tri.error_min=Min(tri.edge_error[0], tri.edge_error[1], tri.edge_error[2]);
       }
-      REPA(tris)tree.insert(&tris[i]);
+      REPA(tris)tree.insert(tris[i]);
    }
 
    void simplify(Flt intensity, Flt max_distance, Flt max_uv, Flt max_color, Flt max_material, Flt max_skin, Flt max_normal, Bool keep_border, MESH_SIMPLIFY mode, Flt pos_eps)
@@ -1641,10 +1641,10 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
 
             REPA(middle_tris)
             {
-               Triangle *tri=middle_tris[i]->tri; if(tri->exists) // check if exists because this tri could be listed multiple times, and thus could be removed multiple times too
+               Triangle &tri=*middle_tris[i]->tri; if(tri.exists) // check if exists because this tri could be listed multiple times, and thus could be removed multiple times too
                {
-                  tri->exists=false;
-                  visible_tris-=tri->visible;
+                  tri.exists=false;
+                  visible_tris-=tri.visible;
                   tree.remove(tri);
                }
             }

@@ -95,10 +95,10 @@ T2(Node, Key) struct BSTree
 protected:
    void root(TreeNode* r) {_root=r;}
 
-   void insert(Node* node)
+   void insert(Node &node)
    {
-      DEBUG_ASSERT(node->isZero(), "TreeNode not zero");
-    C Key       &node_key=  key(*node);
+      DEBUG_ASSERT(node.isZero(), "TreeNode not zero");
+    C Key       &node_key=  key(node);
       TreeNode** link    =&_root;
       Node*      parent  =  null;
       while(*link)
@@ -107,17 +107,17 @@ protected:
          if(compare(node_key, key(*parent)))link=&(parent->left );
          else                               link=&(parent->right);
       }
-      node->left=node->right=null;
-      node->parent(parent);
-     *link=node;
+      node.left=node.right=null;
+      node.parent(parent);
+     *link=&node;
 
       if(!_last
-      || !compare(node_key, key(*(Node*)_last)))_last=node;
+      || !compare(node_key, key(*(Node*)_last)))_last=&node;
    }
-   Bool insertUnique(Node* node) // no duplicate keys
+   Bool insertUnique(Node &node) // no duplicate keys
    {
-      DEBUG_ASSERT(node->isZero(), "TreeNode not zero");
-    C Key       &node_key=  key(*node);
+      DEBUG_ASSERT(node.isZero(), "TreeNode not zero");
+    C Key       &node_key=  key(node);
       TreeNode** link    =&_root;
       Node*      parent  =  null;
       while(*link)
@@ -127,12 +127,12 @@ protected:
          if(compare(key(*parent), node_key))link=&(parent->right);else
             return false;
       }
-      node->left=node->right=null;
-      node->parent(parent);
-     *link=node;
+      node.left=node.right=null;
+      node.parent(parent);
+     *link=&node;
 
       if(!_last
-      || !compare(node_key, key(*(Node*)_last)))_last=node;
+      || !compare(node_key, key(*(Node*)_last)))_last=&node;
 
       return true;
    }
@@ -152,22 +152,19 @@ T2(Node, Key) struct RBTree : BSTree<Node, Key>
 {
    RBTree(C Key& (&key)(C Node &node), Bool (&compare)(C Key &a, C Key &b)) : BSTree(key, compare) {}
 
-   void insert(Node* node)
+   void insert(Node &node)
    {
       super::insert(node);
-      root(_RBInsert(node, root()));
+      root(_RBInsert(&node, root()));
    }
-   void insertUnique(Node* node)
+   void insertUnique(Node &node)
    {
-      if(super::insertUnique(node))root(_RBInsert(node, root()));
+      if(super::insertUnique(node))root(_RBInsert(&node, root()));
    }
-   void remove(Node* node)
+   void remove(Node &node)
    {
-      if(node)
-      {
-         removing(*node);
-         root(_RBRemove(node, root()));
-      }
+      removing(node);
+      root(_RBRemove(&node, root()));
    }
    void validate()C
    {
@@ -180,22 +177,19 @@ T2(Node, Key) struct AVLTree : BSTree<Node, Key>
 {
    AVLTree(C Key& (&key)(C Node &node), Bool (&compare)(C Key &a, C Key &b)) : BSTree(key, compare) {}
 
-   void insert(Node* node)
+   void insert(Node &node)
    {
       super::insert(node);
-      root(_AVLInsert(node, root()));
+      root(_AVLInsert(&node, root()));
    }
-   void insertUnique(Node* node)
+   void insertUnique(Node &node)
    {
-      if(super::insertUnique(node))root(_AVLInsert(node, root()));
+      if(super::insertUnique(node))root(_AVLInsert(&node, root()));
    }
-   void remove(Node* node)
+   void remove(Node &node)
    {
-      if(node)
-      {
-         removing(*node);
-         root(_AVLRemove(node, root()));
-      }
+      removing(node);
+      root(_AVLRemove(&node, root()));
    }
 };
 /******************************************************************************/
@@ -203,22 +197,19 @@ T2(Node, Key) struct WAVLTree : BSTree<Node, Key>
 {
    WAVLTree(C Key& (&key)(C Node &node), Bool (&compare)(C Key &a, C Key &b)) : BSTree(key, compare) {}
 
-   void insert(Node* node)
+   void insert(Node &node)
    {
       super::insert(node);
-      root(_WAVLInsert(node, root()));
+      root(_WAVLInsert(&node, root()));
    }
-   void insertUnique(Node* node)
+   void insertUnique(Node &node)
    {
-      if(super::insertUnique(node))root(_WAVLInsert(node, root()));
+      if(super::insertUnique(node))root(_WAVLInsert(&node, root()));
    }
-   void remove(Node* node)
+   void remove(Node &node)
    {
-      if(node)
-      {
-         removing(*node);
-         root(_WAVLRemove(node, root()));
-      }
+      removing(node);
+      root(_WAVLRemove(&node, root()));
    }
 };
 /******************************************************************************/

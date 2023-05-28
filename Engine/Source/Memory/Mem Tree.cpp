@@ -44,8 +44,8 @@ TreeNode* TreeNode::prev()
 #define RED     0
 #define BLACK   3
 
-#define LEFT    3 // left  higher
-#define RIGHT   2 // right higher
+#define LEFT    3
+#define RIGHT   2
 #define BALANCE 0
 #define WEAK    3
 #define WLEFT   1

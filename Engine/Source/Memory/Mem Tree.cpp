@@ -77,7 +77,6 @@ static inline void RotateLeftAsLeftChild(TreeNode* node)
    ReplaceNodeAsLeftChild(right, parent);
    node->parent(right);
 }
-
 static inline void RotateRightAsRightChild(TreeNode* node)
 {
    auto left  =node->left;
@@ -101,7 +100,6 @@ static inline void RotateLeft(TreeNode* node, TreeNode*& root)
    ReplaceNode(node, right, parent, root);
    node->parent(right);
 }
-
 static inline void RotateRight(TreeNode* node, TreeNode*& root)
 {
    auto left  =node->left;

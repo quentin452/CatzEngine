@@ -210,7 +210,7 @@ inline TreeNode *RBRemover(TreeNode *node, TreeNode *parent, TreeNode *root)
             }
             other ->setTag(parent->tag());
             parent->setTag<BLACK>();
-            if(other->right)other->right->setTag<BLACK>();
+            other->right->setTag<BLACK>();
             RotateLeft(parent, root);
             node=root;
             break;
@@ -241,7 +241,7 @@ inline TreeNode *RBRemover(TreeNode *node, TreeNode *parent, TreeNode *root)
             }
             other ->setTag(parent->tag());
             parent->setTag<BLACK>();
-            if(other->left)other->left->setTag<BLACK>();
+            other->left->setTag<BLACK>();
             RotateRight(parent, root);
             node=root;
             break;

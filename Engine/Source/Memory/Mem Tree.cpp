@@ -51,18 +51,19 @@ TreeNode* TreeNode::prev()
 #define WLEFT   1
 #define WRIGHT  2
 
-static inline void ReplaceNodeAsLeftChild (TreeNode* newnode, TreeNode* parent) {parent->left =newnode;}
-static inline void ReplaceNodeAsRightChild(TreeNode* newnode, TreeNode* parent) {parent->right=newnode;}
 
-static inline void ReplaceNode(TreeNode* oldnode, TreeNode* newnode, TreeNode* parent, TreeNode*& root)
+static inline void ReplaceNodeAsLeftChild (TreeNode* New, TreeNode* parent) {parent->left =New;}
+static inline void ReplaceNodeAsRightChild(TreeNode* New, TreeNode* parent) {parent->right=New;}
+
+static inline void ReplaceNode(TreeNode* old, TreeNode* New, TreeNode* parent, TreeNode*& root)
 {
    if(parent)
    {
-      if(parent->left==oldnode)ReplaceNodeAsLeftChild (newnode, parent);
-      else                     ReplaceNodeAsRightChild(newnode, parent);
+      if(parent->left==old)ReplaceNodeAsLeftChild (New, parent);
+      else                 ReplaceNodeAsRightChild(New, parent);
    }else
    {
-      root=newnode;
+      root=New;
    }
 }
 

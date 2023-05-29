@@ -229,6 +229,8 @@ void    DivideByTerrainOrient(DIR_ENUM cube_face, Vec &dest, C Vec &src); // con
 void WrapCubeFacePixel           (SphereArea &dest, C SphereArea &src, Int res); // wrap 'src' pixel to be in 0..res-1 range and store in 'dest'
 void WrapSphereTerrainPixel      (SphereArea &dest, C SphereArea &src, Int res); // wrap 'src' pixel to be in 0..res   range and store in 'dest'
 void WrapSphereTerrainPixelCenter(SphereArea &dest, C SphereArea &src, Int res); // wrap 'src' pixel to be in 0..res-1 range and store in 'dest'
+
+Bool ClipToTerrainAndProject(DIR_ENUM cube_face, Edge2 &dest, C Edge &src, Flt min_z); // convert 'src' edge to 'cube_face' terrain, clip Z with min_z and project to 'dest', returns false if fully clipped
 /******************************************************************************/
 Ball Avg(C Ball &a, C Ball &b);
 

@@ -1078,6 +1078,46 @@ void WrapSphereTerrainPixelCenter(SphereArea &dest, C SphereArea &src, Int res)
    Clamp(dest.x, 0, res-1);
    Clamp(dest.y, 0, res-1);
 }
+/******************************************************************************/
+static inline Vec2  Project(C Vec  &v) {return v.xy/v.z;}
+static inline VecD2 Project(C VecD &v) {return v.xy/v.z;}
+Bool ClipZ(Edge &edge, Flt min_z)
+{
+   Bool ok[]={edge.p[0].z>=min_z, edge.p[1].z>=min_z};
+   if(!ok[0] && !ok[1])return false; //fraction.set(0, 1);
+   if( ok[0] !=  ok[1]) // one point OK, another NOT
+   {
+      Bool index=ok[0]; // index of NOT OK point (the one that needs to be clipped), if #0 is OK, then this will be true so index=1 (NOT OK)
+      Flt  frac=(min_z-edge.p[0].z)/edge.deltaZ(); // calculate Lerp frac to intersect Edge at Z=min_z
+      edge.p[index]=Lerp(edge.p[0], edge.p[1], frac); // this Lerp generates point at intersection Z=min_z
+    //fraction.c[index]=fract;
+   }
+   return true;
+}
+Bool ClipZProject(Edge2 &dest, C Edge &src, Flt min_z)
+{
+   Bool ok[]={src.p[0].z>=min_z, src.p[1].z>=min_z};
+   if(!ok[0] && !ok[1])return false; //fraction.set(0, 1);
+   if( ok[0] !=  ok[1]) // one point OK, another NOT
+   {
+      Bool index=ok[0]; // index of NOT OK point (the one that needs to be clipped), if #0 is OK, then this will be true so index=1 (NOT OK)
+      Flt  frac=(min_z-src.p[0].z)/src.deltaZ(); // calculate Lerp frac to intersect Edge at Z=min_z
+      dest.p[index]=Lerp(src.p[0].xy, src.p[1].xy, frac)/min_z; // this Lerp generates point at intersection Z=min_z
+    //fraction.c[index]=fract;
+      index^=1;
+      dest.p[index]=Project(src.p[index]);
+   }else
+   {
+      dest.p[0]=Project(src.p[0]);
+      dest.p[1]=Project(src.p[1]);
+   }
+   return true;
+}
+Bool ClipToTerrainAndProject(DIR_ENUM cube_face, Edge2 &dest, C Edge &src, Flt min_z)
+{
+   Edge face_edge; PosToTerrainPos(cube_face, face_edge, src);
+   return ClipZProject(dest, face_edge, min_z);
+}
 /******************************************************************************
 TESTED WITH CODE BELOW:
 void _WrapCubeFacePixel(SphereArea &dest, C SphereArea &src, Int res)

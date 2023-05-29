@@ -115,11 +115,11 @@ struct SphereAreaUS : VecUS2
 {
    DIR_ENUM side;
 
+   VecUS2& xy()  {return T;}
+ C VecUS2& xy()C {return T;}
+
    SphereAreaUS& zero(                           ) {T.side=DIR_ENUM(0); T.x=0; T.y=0; return T;}
    SphereAreaUS& set (DIR_ENUM side, Int x, Int y) {T.side=side       ; T.x=x; T.y=y; return T;}
-
-   inline   VecUS2& xy()  {return T;}
-   inline C VecUS2& xy()C {return T;}
 
    Bool operator==(C SphereAreaUS &pos)C {return xy()==pos.xy() && side==pos.side;}
    Bool operator!=(C SphereAreaUS &pos)C {return xy()!=pos.xy() || side!=pos.side;}

@@ -291,6 +291,18 @@ void PosToTerrainPos(DIR_ENUM cube_face, Vec &dest, C Vec &src)
       case DIR_BACK   : dest.set( src.x,  src.y, -src.z); break;
    }
 }
+void PosToTerrainPos(DIR_ENUM cube_face, Edge &dest, C Edge &src)
+{
+   switch(cube_face) // #TerrainOrient
+   {
+      case DIR_RIGHT  : FREP(2)dest.p[i].set( src.p[i].z,  src.p[i].y,  src.p[i].x); break;
+      case DIR_LEFT   : FREP(2)dest.p[i].set(-src.p[i].z,  src.p[i].y, -src.p[i].x); break;
+      case DIR_UP     : FREP(2)dest.p[i].set( src.p[i].x,  src.p[i].z,  src.p[i].y); break;
+      case DIR_DOWN   : FREP(2)dest.p[i].set( src.p[i].x, -src.p[i].z, -src.p[i].y); break;
+      case DIR_FORWARD: FREP(2)dest.p[i].set(-src.p[i].x,  src.p[i].y,  src.p[i].z); break;
+      case DIR_BACK   : FREP(2)dest.p[i].set( src.p[i].x,  src.p[i].y, -src.p[i].z); break;
+   }
+}
 void PosToTerrainPos(DIR_ENUM cube_face, VecD *dest, C VecD *src, Int elms) // convert world space position 'src' to 'dest' where XY=plane position, Z=height
 {
    switch(cube_face) // #TerrainOrient

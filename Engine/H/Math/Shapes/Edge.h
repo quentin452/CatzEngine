@@ -16,18 +16,20 @@ struct Edge2 // Edge 2D
    Edge2& set(Flt x0, Flt y0, Flt x1, Flt y1) {p[0].set(x0,y0); p[1].set(x1,y1); return T;}
 
    // get
-   Flt  centerX(     )C {return        Avg(p[0].x, p[1].x);} // center x
-   Flt  centerY(     )C {return        Avg(p[0].y, p[1].y);} // center y
-   Vec2 center (     )C {return Vec2(centerX(), centerY());} // center
-   Vec2 delta  (     )C {return                  p[1]-p[0];} // delta
-   Vec2 dir    (     )C {return                  !delta() ;} // direction
-   Vec2 perp   (     )C {return             Perp (delta());} // perpendicular
-   Vec2 perpN  (     )C {return             PerpN(delta());} // perpendicular normalized
-   Flt  length (     )C {return   Dist (p[0]  , p[1]     );} //         length
-   Flt  length2(     )C {return   Dist2(p[0]  , p[1]     );} // squared length
-   Vec2 lerp   (Flt s)C {return    Lerp(p[0]  , p[1]  , s);} // lerp from p[0]   to p[1]
-   Flt  lerpX  (Flt s)C {return    Lerp(p[0].x, p[1].x, s);} // lerp from p[0].x to p[1].x
-   Flt  lerpY  (Flt s)C {return    Lerp(p[0].y, p[1].y, s);} // lerp from p[0].y to p[1].y
+   Flt  centerX(     )C {return      Avg(p[0].x, p[1].x);} // center x
+   Flt  centerY(     )C {return      Avg(p[0].y, p[1].y);} // center y
+   Vec2 center (     )C {return      Avg(p[0]  , p[1]  );} // center
+   Flt  deltaX (     )C {return            p[1].x-p[0].x;} // delta x
+   Flt  deltaY (     )C {return            p[1].y-p[0].y;} // delta y
+   Vec2 delta  (     )C {return            p[1]  -p[0]  ;} // delta
+   Vec2 dir    (     )C {return                !delta() ;} // direction
+   Vec2 perp   (     )C {return           Perp (delta());} // perpendicular
+   Vec2 perpN  (     )C {return           PerpN(delta());} // perpendicular normalized
+   Flt  length (     )C {return Dist (p[0]  , p[1]     );} //         length
+   Flt  length2(     )C {return Dist2(p[0]  , p[1]     );} // squared length
+   Vec2 lerp   (Flt s)C {return  Lerp(p[0]  , p[1]  , s);} // lerp from p[0]   to p[1]
+   Flt  lerpX  (Flt s)C {return  Lerp(p[0].x, p[1].x, s);} // lerp from p[0].x to p[1].x
+   Flt  lerpY  (Flt s)C {return  Lerp(p[0].y, p[1].y, s);} // lerp from p[0].y to p[1].y
 
    Str asText()C {return S+"Point0: "+p[0]+", Point1: "+p[1];} // get text description
 
@@ -74,18 +76,20 @@ struct EdgeD2 // Edge 2D (double precision)
    EdgeD2& set(Dbl x0, Dbl y0, Dbl x1, Dbl y1) {p[0].set(x0,y0); p[1].set(x1,y1); return T;}
 
    // get
-   Dbl   centerX(     )C {return         Avg(p[0].x, p[1].x);} // center x
-   Dbl   centerY(     )C {return         Avg(p[0].y, p[1].y);} // center y
-   VecD2 center (     )C {return VecD2(centerX(), centerY());} // center
-   VecD2 delta  (     )C {return                   p[1]-p[0];} // delta
-   VecD2 dir    (     )C {return                   !delta() ;} // direction
-   VecD2 perp   (     )C {return              Perp (delta());} // perpendicular
-   VecD2 perpN  (     )C {return              PerpN(delta());} // perpendicular normalized
-   Dbl   length (     )C {return    Dist (p[0]  , p[1]     );} //         length
-   Dbl   length2(     )C {return    Dist2(p[0]  , p[1]     );} // squared length
-   VecD2 lerp   (Dbl s)C {return     Lerp(p[0]  , p[1]  , s);} // lerp from p[0]   to p[1]
-   Dbl   lerpX  (Dbl s)C {return     Lerp(p[0].x, p[1].x, s);} // lerp from p[0].x to p[1].x
-   Dbl   lerpY  (Dbl s)C {return     Lerp(p[0].y, p[1].y, s);} // lerp from p[0].y to p[1].y
+   Dbl   centerX(     )C {return      Avg(p[0].x, p[1].x);} // center x
+   Dbl   centerY(     )C {return      Avg(p[0].y, p[1].y);} // center y
+   VecD2 center (     )C {return      Avg(p[0]  , p[1]  );} // center
+   Dbl   deltaX (     )C {return            p[1].x-p[0].x;} // delta x
+   Dbl   deltaY (     )C {return            p[1].y-p[0].y;} // delta y
+   VecD2 delta  (     )C {return            p[1]  -p[0]  ;} // delta
+   VecD2 dir    (     )C {return                !delta() ;} // direction
+   VecD2 perp   (     )C {return           Perp (delta());} // perpendicular
+   VecD2 perpN  (     )C {return           PerpN(delta());} // perpendicular normalized
+   Dbl   length (     )C {return Dist (p[0]  , p[1]     );} //         length
+   Dbl   length2(     )C {return Dist2(p[0]  , p[1]     );} // squared length
+   VecD2 lerp   (Dbl s)C {return  Lerp(p[0]  , p[1]  , s);} // lerp from p[0]   to p[1]
+   Dbl   lerpX  (Dbl s)C {return  Lerp(p[0].x, p[1].x, s);} // lerp from p[0].x to p[1].x
+   Dbl   lerpY  (Dbl s)C {return  Lerp(p[0].y, p[1].y, s);} // lerp from p[0].y to p[1].y
 
    // draw
    void draw(C Color &color=WHITE            )C; // draw
@@ -125,20 +129,23 @@ struct Edge // Edge 3D
    Edge& set(C Edge2 &edge          , Flt z) {p[0].set(edge.p[0], z); p[1].set(edge.p[1], z); return T;}
 
    // get
-   Edge2 xy     (     )C {return          Edge2(p[0].xy  , p[1].xy  );} // get    XY components as Edge2
-   Edge2 xz     (     )C {return          Edge2(p[0].xz(), p[1].xz());} // get    XZ components as Edge2
-   Flt   centerX(     )C {return            Avg(p[0].x   , p[1].x   );} // center x
-   Flt   centerY(     )C {return            Avg(p[0].y   , p[1].y   );} // center y
-   Flt   centerZ(     )C {return            Avg(p[0].z   , p[1].z   );} // center z
-   Vec   center (     )C {return Vec(centerX(), centerY(), centerZ());} // center
-   Vec   delta  (     )C {return                            p[1]-p[0];} // delta
-   Vec   dir    (     )C {return                             !delta();} // direction
-   Flt   length (     )C {return             Dist (p[0]  , p[1]     );} //         length
-   Flt   length2(     )C {return             Dist2(p[0]  , p[1]     );} // squared length
-   Vec   lerp   (Flt s)C {return              Lerp(p[0]  , p[1]  , s);} // lerp from p[0]   to p[1]
-   Flt   lerpX  (Flt s)C {return              Lerp(p[0].x, p[1].x, s);} // lerp from p[0].x to p[1].x
-   Flt   lerpY  (Flt s)C {return              Lerp(p[0].y, p[1].y, s);} // lerp from p[0].y to p[1].y
-   Flt   lerpZ  (Flt s)C {return              Lerp(p[0].z, p[1].z, s);} // lerp from p[0].z to p[1].z
+   Edge2 xy     (     )C {return Edge2(p[0].xy  , p[1].xy  );} // get    XY components as Edge2
+   Edge2 xz     (     )C {return Edge2(p[0].xz(), p[1].xz());} // get    XZ components as Edge2
+   Flt   centerX(     )C {return   Avg(p[0].x   , p[1].x   );} // center x
+   Flt   centerY(     )C {return   Avg(p[0].y   , p[1].y   );} // center y
+   Flt   centerZ(     )C {return   Avg(p[0].z   , p[1].z   );} // center z
+   Vec   center (     )C {return   Avg(p[0]     , p[1]     );} // center
+   Flt   deltaX (     )C {return               p[1].x-p[0].x;} // delta x
+   Flt   deltaY (     )C {return               p[1].y-p[0].y;} // delta y
+   Flt   deltaZ (     )C {return               p[1].z-p[0].z;} // delta z
+   Vec   delta  (     )C {return               p[1]  -p[0]  ;} // delta
+   Vec   dir    (     )C {return                    !delta();} // direction
+   Flt   length (     )C {return    Dist (p[0]  , p[1]     );} //         length
+   Flt   length2(     )C {return    Dist2(p[0]  , p[1]     );} // squared length
+   Vec   lerp   (Flt s)C {return     Lerp(p[0]  , p[1]  , s);} // lerp from p[0]   to p[1]
+   Flt   lerpX  (Flt s)C {return     Lerp(p[0].x, p[1].x, s);} // lerp from p[0].x to p[1].x
+   Flt   lerpY  (Flt s)C {return     Lerp(p[0].y, p[1].y, s);} // lerp from p[0].y to p[1].y
+   Flt   lerpZ  (Flt s)C {return     Lerp(p[0].z, p[1].z, s);} // lerp from p[0].z to p[1].z
 
    Str asText()C {return S+"Point0: "+p[0]+", Point1: "+p[1];} // get text description
 
@@ -195,18 +202,21 @@ struct EdgeD // Edge 3D (double precision)
    EdgeD& set(C VecD2 &p0, C VecD2 &p1, Dbl z) {p[0].set(p0,z); p[1].set(p1,z); return T;}
 
    // get
-   Dbl  centerX(     )C {return                   Avg(p[0].x, p[1].x);} // center x
-   Dbl  centerY(     )C {return                   Avg(p[0].y, p[1].y);} // center y
-   Dbl  centerZ(     )C {return                   Avg(p[0].z, p[1].z);} // center z
-   VecD center (     )C {return VecD(centerX(), centerY(), centerZ());} // center
-   VecD delta  (     )C {return                             p[1]-p[0];} // delta
-   VecD dir    (     )C {return                              !delta();} // direction
-   Dbl  length (     )C {return              Dist (p[0]  , p[1]     );} //         length
-   Dbl  length2(     )C {return              Dist2(p[0]  , p[1]     );} // squared length
-   VecD lerp   (Dbl s)C {return               Lerp(p[0]  , p[1]  , s);} // lerp from p[0]   to p[1]
-   Dbl  lerpX  (Dbl s)C {return               Lerp(p[0].x, p[1].x, s);} // lerp from p[0].x to p[1].x
-   Dbl  lerpY  (Dbl s)C {return               Lerp(p[0].y, p[1].y, s);} // lerp from p[0].y to p[1].y
-   Dbl  lerpZ  (Dbl s)C {return               Lerp(p[0].z, p[1].z, s);} // lerp from p[0].z to p[1].z
+   Dbl  centerX(     )C {return      Avg(p[0].x, p[1].x);} // center x
+   Dbl  centerY(     )C {return      Avg(p[0].y, p[1].y);} // center y
+   Dbl  centerZ(     )C {return      Avg(p[0].z, p[1].z);} // center z
+   VecD center (     )C {return      Avg(p[0]  , p[1]  );} // center
+   Dbl  deltaX (     )C {return            p[1].x-p[0].x;} // delta x
+   Dbl  deltaY (     )C {return            p[1].y-p[0].y;} // delta y
+   Dbl  deltaZ (     )C {return            p[1].z-p[0].z;} // delta z
+   VecD delta  (     )C {return            p[1]  -p[0]  ;} // delta
+   VecD dir    (     )C {return                 !delta();} // direction
+   Dbl  length (     )C {return Dist (p[0]  , p[1]     );} //         length
+   Dbl  length2(     )C {return Dist2(p[0]  , p[1]     );} // squared length
+   VecD lerp   (Dbl s)C {return  Lerp(p[0]  , p[1]  , s);} // lerp from p[0]   to p[1]
+   Dbl  lerpX  (Dbl s)C {return  Lerp(p[0].x, p[1].x, s);} // lerp from p[0].x to p[1].x
+   Dbl  lerpY  (Dbl s)C {return  Lerp(p[0].y, p[1].y, s);} // lerp from p[0].y to p[1].y
+   Dbl  lerpZ  (Dbl s)C {return  Lerp(p[0].z, p[1].z, s);} // lerp from p[0].z to p[1].z
 
    // operations
    EdgeD& reverse() {Swap(p[0], p[1]); return T;} // reverse the order of points

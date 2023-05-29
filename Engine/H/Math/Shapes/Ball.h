@@ -220,6 +220,7 @@ void CubeFacePosToPos(DIR_ENUM cube_face, Vec  &dest, C Vec  &src          ); //
 void PosToCubeFacePos(DIR_ENUM cube_face, Vec  &dest, C Vec  &src          ); // convert world space position 'src' to 'cube_face'         position 'dest' where XY=plane position, Z=height
 void PosToTerrainPos (DIR_ENUM cube_face, Vec2 &dest, C Vec  &src          ); // convert world space position 'src' to 'cube_face' terrain position 'dest' where XY=plane position
 void PosToTerrainPos (DIR_ENUM cube_face, Vec  &dest, C Vec  &src          ); // convert world space position 'src' to 'cube_face' terrain position 'dest' where XY=plane position, Z=height
+void PosToTerrainPos (DIR_ENUM cube_face, Edge &dest, C Edge &src          ); // convert world space position 'src' to 'cube_face' terrain position 'dest' where XY=plane position, Z=height
 void PosToTerrainPos (DIR_ENUM cube_face, VecD *dest, C VecD *src, Int elms); // convert world space position 'src' to 'cube_face' terrain position 'dest' where XY=plane position, Z=height
 
 void TransformByTerrainOrient(DIR_ENUM cube_face, Vec &dest, C Vec &src); // convert             terrain vector 'src' to 'cube_face' terrain vector 'dest', same as "dest=src*Matrix3().setTerrainOrient(cube_face)" but faster

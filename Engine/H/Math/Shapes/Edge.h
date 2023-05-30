@@ -396,8 +396,10 @@ struct SpherePixelWalker // iterates through pixels of a rasterized edge on a sp
    // operations
    void step(); // make a single step
 
-   SpherePixelWalker(C SphereConvert &sc                            ) : _sc(sc) {_active=false;}
-   SpherePixelWalker(C SphereConvert &sc, C Vec2 &start, C Vec2 &end) : _sc(sc) {T.start(start, end);}
+   SpherePixelWalker(C SphereConvert &sc                            ) : sc(sc) {_active=false;}
+   SpherePixelWalker(C SphereConvert &sc, C Vec2 &start, C Vec2 &end) : sc(sc) {T.start(start, end);}
+
+ C SphereConvert &sc;
 
 #if !EE_PRIVATE
 private:
@@ -406,12 +408,12 @@ private:
    VecSB2 _sign, _sign_pos;
    VecI2  _posi, _endi;
    Vec2   _posr, _delta;
- C SphereConvert &_sc;
 };
 struct SpherePixelWalker1 // iterates through pixels of a rasterized edge on a spherical grid, this returns one extra step with 'posr' set to 'end'
 {
    // get
    Bool   active()C {return _active!=0;} // if  walker still active
+   Bool   last  ()C {return _active==1;} // if  this is the last extra step at 'end'
  C VecI2& posi  ()C {return _posi     ;} // get current position in pixel coordinates
  C Vec2 & posr  ()C {return _posr     ;} // get current position in real  coordinates, this will be set to 'start', then at each edge intersection, then 'end'
 
@@ -422,8 +424,10 @@ struct SpherePixelWalker1 // iterates through pixels of a rasterized edge on a s
    // operations
    void step(); // make a single step
 
-   SpherePixelWalker1(C SphereConvert &sc                            ) : _sc(sc) {_active=0;}
-   SpherePixelWalker1(C SphereConvert &sc, C Vec2 &start, C Vec2 &end) : _sc(sc) {T.start(start, end);}
+   SpherePixelWalker1(C SphereConvert &sc                            ) : sc(sc) {_active=0;}
+   SpherePixelWalker1(C SphereConvert &sc, C Vec2 &start, C Vec2 &end) : sc(sc) {T.start(start, end);}
+
+ C SphereConvert &sc;
 
 #if !EE_PRIVATE
 private:
@@ -432,7 +436,6 @@ private:
    VecSB2 _sign, _sign_pos;
    VecI2  _posi, _endi;
    Vec2   _posr, _endr, _delta;
- C SphereConvert &_sc;
 };
 /******************************************************************************/
 struct VoxelWalker // iterates through voxels of a rasterized edge

@@ -1079,8 +1079,6 @@ void WrapSphereTerrainPixelCenter(SphereArea &dest, C SphereArea &src, Int res)
    Clamp(dest.y, 0, res-1);
 }
 /******************************************************************************/
-static inline Vec2  Project(C Vec  &v) {return v.xy/v.z;}
-static inline VecD2 Project(C VecD &v) {return v.xy/v.z;}
 Bool ClipZ(Edge &edge, Flt min_z)
 {
    Bool ok[]={edge.p[0].z>=min_z, edge.p[1].z>=min_z};
@@ -1105,11 +1103,11 @@ Bool ClipZProject(Edge2 &dest, C Edge &src, Flt min_z)
       dest.p[index]=Lerp(src.p[0].xy, src.p[1].xy, frac)/min_z; // this Lerp generates point at intersection Z=min_z
     //fraction.c[index]=fract;
       index^=1;
-      dest.p[index]=Project(src.p[index]);
+      dest.p[index]=ProjectZ(src.p[index]);
    }else
    {
-      dest.p[0]=Project(src.p[0]);
-      dest.p[1]=Project(src.p[1]);
+      dest.p[0]=ProjectZ(src.p[0]);
+      dest.p[1]=ProjectZ(src.p[1]);
    }
    return true;
 }

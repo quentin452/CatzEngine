@@ -393,8 +393,8 @@ void SpherePixelWalker::start(C Vec2 &start, C Vec2 &end)
 {
   _active=true;
 
-  _posr =start    ;        _posi=_sc.posToCellIMid(start);
-                           _endi=_sc.posToCellIMid(end  );
+  _posr =start    ;        _posi=sc.posToCellIMid(start);
+                           _endi=sc.posToCellIMid(end  );
   _delta=end-start; VecI2 deltai=_endi-_posi;
 
   _sign_pos.x=((_sign.x=Sign(deltai.x))>0); // '_sign_pos' means to check left side (current) or right side (next) of the cell
@@ -402,13 +402,13 @@ void SpherePixelWalker::start(C Vec2 &start, C Vec2 &end)
 }
 void SpherePixelWalker::start(C Vec2 &start, C Vec2 &end, C VecI2 &area, Int areas)
 {
-   Int   area_res=_sc.res/areas;
+   Int   area_res=sc.res/areas;
    RectI recti;
    recti.min=area*area_res;
    recti.max=recti.min+area_res;
    Rect rect;
-   rect.min=_sc._cellToPos(recti.min);
-   rect.max=_sc._cellToPos(recti.max);
+   rect.min=sc._cellToPos(recti.min);
+   rect.max=sc._cellToPos(recti.max);
    Edge2 edge(start, end); if(Clip(edge, rect))
    {
     C Vec2 &start=edge.p[0], &end=edge.p[1];
@@ -416,8 +416,8 @@ void SpherePixelWalker::start(C Vec2 &start, C Vec2 &end, C VecI2 &area, Int are
 
      _active=true;
 
-     _posr =start    ;        _posi=_sc.posToCellI(start); _posi&=recti;
-                              _endi=_sc.posToCellI(end  ); _endi&=recti;
+     _posr =start    ;        _posi=sc.posToCellI(start); _posi&=recti;
+                              _endi=sc.posToCellI(end  ); _endi&=recti;
      _delta=end-start; VecI2 deltai=_endi-_posi;
 
      _sign_pos.x=((_sign.x=Sign(deltai.x))>0); // '_sign_pos' means to check left side (current) or right side (next) of the cell
@@ -437,7 +437,7 @@ void SpherePixelWalker::step()
          case  1: move.x=(_posi.x<_endi.x); break;
          case -1: move.x=(_posi.x>_endi.x); break;
       }
-      if(move.x){Flt dest=_sc.tans[_posi.x+_sign_pos.x]; dist.x=(dest-_posr.x)/_delta.x;}
+      if(move.x){Flt dest=sc.tans[_posi.x+_sign_pos.x]; dist.x=(dest-_posr.x)/_delta.x;}
    no_x:
 
       switch(_sign.y)
@@ -446,7 +446,7 @@ void SpherePixelWalker::step()
          case  1: move.y=(_posi.y<_endi.y); break;
          case -1: move.y=(_posi.y>_endi.y); break;
       }
-      if(move.y){Flt dest=_sc.tans[_posi.y+_sign_pos.y]; dist.y=(dest-_posr.y)/_delta.y;}
+      if(move.y){Flt dest=sc.tans[_posi.y+_sign_pos.y]; dist.y=(dest-_posr.y)/_delta.y;}
    no_y:
 
       if(move.x) // move in X axis
@@ -467,8 +467,8 @@ void SpherePixelWalker1::start(C Vec2 &start, C Vec2 &end)
 {
   _active=2;
 
-  _posr =start    ;        _posi=_sc.posToCellIMid(start);
-  _endr =end      ;        _endi=_sc.posToCellIMid(end  );
+  _posr =start    ;        _posi=sc.posToCellIMid(start);
+  _endr =end      ;        _endi=sc.posToCellIMid(end  );
   _delta=end-start; VecI2 deltai=_endi-_posi;
 
   _sign_pos.x=((_sign.x=Sign(deltai.x))>0); // '_sign_pos' means to check left side (current) or right side (next) of the cell
@@ -476,13 +476,13 @@ void SpherePixelWalker1::start(C Vec2 &start, C Vec2 &end)
 }
 void SpherePixelWalker1::start(C Vec2 &start, C Vec2 &end, C VecI2 &area, Int areas)
 {
-   Int   area_res=_sc.res/areas;
+   Int   area_res=sc.res/areas;
    RectI recti;
    recti.min=area*area_res;
    recti.max=recti.min+area_res;
    Rect rect;
-   rect.min=_sc._cellToPos(recti.min);
-   rect.max=_sc._cellToPos(recti.max);
+   rect.min=sc._cellToPos(recti.min);
+   rect.max=sc._cellToPos(recti.max);
    Edge2 edge(start, end); if(Clip(edge, rect))
    {
     C Vec2 &start=edge.p[0], &end=edge.p[1];
@@ -490,8 +490,8 @@ void SpherePixelWalker1::start(C Vec2 &start, C Vec2 &end, C VecI2 &area, Int ar
 
      _active=2;
 
-     _posr =start    ;        _posi=_sc.posToCellI(start); _posi&=recti;
-     _endr =end      ;        _endi=_sc.posToCellI(end  ); _endi&=recti;
+     _posr =start    ;        _posi=sc.posToCellI(start); _posi&=recti;
+     _endr =end      ;        _endi=sc.posToCellI(end  ); _endi&=recti;
      _delta=end-start; VecI2 deltai=_endi-_posi;
 
      _sign_pos.x=((_sign.x=Sign(deltai.x))>0); // '_sign_pos' means to check left side (current) or right side (next) of the cell
@@ -511,7 +511,7 @@ void SpherePixelWalker1::step()
          case  1: move.x=(_posi.x<_endi.x); break;
          case -1: move.x=(_posi.x>_endi.x); break;
       }
-      if(move.x){Flt dest=_sc.tans[_posi.x+_sign_pos.x]; dist.x=(dest-_posr.x)/_delta.x;}
+      if(move.x){Flt dest=sc.tans[_posi.x+_sign_pos.x]; dist.x=(dest-_posr.x)/_delta.x;}
    no_x:
 
       switch(_sign.y)
@@ -520,7 +520,7 @@ void SpherePixelWalker1::step()
          case  1: move.y=(_posi.y<_endi.y); break;
          case -1: move.y=(_posi.y>_endi.y); break;
       }
-      if(move.y){Flt dest=_sc.tans[_posi.y+_sign_pos.y]; dist.y=(dest-_posr.y)/_delta.y;}
+      if(move.y){Flt dest=sc.tans[_posi.y+_sign_pos.y]; dist.y=(dest-_posr.y)/_delta.y;}
    no_y:
 
       if(move.x) // move in X axis

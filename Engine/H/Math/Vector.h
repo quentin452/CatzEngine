@@ -2709,6 +2709,9 @@ void Reverse(VecI4 *v, Int num);
 void SwapXZ(VecI  *v, Int num);
 void SwapXZ(VecI4 *v, Int num);
 
+inline Vec2  ProjectZ(C Vec  &v) {return v.xy/v.z;}
+inline VecD2 ProjectZ(C VecD &v) {return v.xy/v.z;}
+
 #if EE_PRIVATE
 // convert from right hand to left hand coordinate system
 void RightToLeft(Vec *vec, Int num);

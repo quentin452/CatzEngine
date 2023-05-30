@@ -119,6 +119,8 @@ VecD2 PointOnPlaneRay(C VecD2 &point, C VecD2 &plane_pos, C VecD2 &plane_normal,
 Vec   PointOnPlaneRay(C Vec   &point, C Vec   &plane_pos, C Vec   &plane_normal, C Vec   &ray) {return point-ray         *DistPointPlaneRay(point, plane_pos, plane_normal, ray);}
 VecD  PointOnPlaneRay(C VecD  &point, C VecD  &plane_pos, C Vec   &plane_normal, C Vec   &ray) {return point-ray         *DistPointPlaneRay(point, plane_pos, plane_normal, ray);}
 VecD  PointOnPlaneRay(C VecD  &point, C VecD  &plane_pos, C VecD  &plane_normal, C VecD  &ray) {return point-ray         *DistPointPlaneRay(point, plane_pos, plane_normal, ray);}
+Vec2   ZeroOnPlaneRay(                C Vec2  &plane_pos, C Vec2  &plane_normal, C Vec2  &ray) {return       ray         *DistPointPlaneRay(       plane_pos, plane_normal, ray);}
+Vec    ZeroOnPlaneRay(                C Vec   &plane_pos, C Vec   &plane_normal, C Vec   &ray) {return       ray         *DistPointPlaneRay(       plane_pos, plane_normal, ray);}
 
 Vec  PointOnPlaneY(C Vec  &point,                    C Vec  &plane_normal) {return Vec (point.x, point.y-DistPointPlaneY(point,            plane_normal), point.z);}
 VecD PointOnPlaneY(C VecD &point,                    C Vec  &plane_normal) {return VecD(point.x, point.y-DistPointPlaneY(point,            plane_normal), point.z);}

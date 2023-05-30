@@ -142,8 +142,8 @@ VecD  PointOnPlane(C VecD  &point, C VecD  &plane_pos, C Vec   &plane_normal);
 VecD  PointOnPlane(C VecD  &point, C VecD  &plane_pos, C VecD  &plane_normal);
 
 // return point casted on the plane along the 'ray' movement vector ('plane_normal' and 'ray' don't have to be normalized)
-Vec2  PointOnPlaneRay(C Vec2  &point,                     C Vec2  &plane_normal, C Vec2  &ray); // this function assumes that plane position is Vec2 (0,0,0)
-VecD2 PointOnPlaneRay(C VecD2 &point,                     C VecD2 &plane_normal, C VecD2 &ray); // this function assumes that plane position is VecD2(0,0,0)
+Vec2  PointOnPlaneRay(C Vec2  &point,                     C Vec2  &plane_normal, C Vec2  &ray); // this function assumes that plane position is Vec2 (0,0)
+VecD2 PointOnPlaneRay(C VecD2 &point,                     C VecD2 &plane_normal, C VecD2 &ray); // this function assumes that plane position is VecD2(0,0)
 Vec   PointOnPlaneRay(C Vec   &point,                     C Vec   &plane_normal, C Vec   &ray); // this function assumes that plane position is Vec  (0,0,0)
 VecD  PointOnPlaneRay(C VecD  &point,                     C Vec   &plane_normal, C Vec   &ray); // this function assumes that plane position is VecD (0,0,0)
 VecD  PointOnPlaneRay(C VecD  &point,                     C VecD  &plane_normal, C VecD  &ray); // this function assumes that plane position is VecD (0,0,0)
@@ -152,6 +152,8 @@ VecD2 PointOnPlaneRay(C VecD2 &point, C VecD2 &plane_pos, C VecD2 &plane_normal,
 Vec   PointOnPlaneRay(C Vec   &point, C Vec   &plane_pos, C Vec   &plane_normal, C Vec   &ray);
 VecD  PointOnPlaneRay(C VecD  &point, C VecD  &plane_pos, C Vec   &plane_normal, C Vec   &ray);
 VecD  PointOnPlaneRay(C VecD  &point, C VecD  &plane_pos, C VecD  &plane_normal, C VecD  &ray);
+Vec2   ZeroOnPlaneRay(                C Vec2  &plane_pos, C Vec2  &plane_normal, C Vec2  &ray); // this function assumes that point position is Vec2(0,0)
+Vec    ZeroOnPlaneRay(                C Vec   &plane_pos, C Vec   &plane_normal, C Vec   &ray); // this function assumes that point position is Vec (0,0,0)
 
 // return point casted on the plane along the Y axis movement vector ('plane_normal' doesn't have to be normalized)
 Vec  PointOnPlaneY(C Vec  &point,                    C Vec  &plane_normal); // this function assumes that plane position is Vec (0,0,0)

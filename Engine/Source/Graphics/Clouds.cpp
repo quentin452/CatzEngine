@@ -381,7 +381,7 @@ static void                  Build(VolumetricCloud &vc, Ptr user, Int thread_ind
                if(Abs(light_pos_xy.x)>Abs(light_pos_xy.y))axis.set(diagonal.x, 0);
                else                                       axis.set(0, diagonal.y);
                VecI2 dir=axis-diagonal, normal=Perp(dir); // here 'dir' and 'normal' are always normalized
-               Vec2  point=light_pos_xy*DistPointPlaneRay(axis, normal, light_pos_xy); // optimized version of "PointOnPlaneRay(Vec2(0), axis, normal, light_pos_xy);"
+               Vec2  point=ZeroOnPlaneRay(axis, normal, light_pos_xy);
                a=DistPointPlane(point, diagonal, dir);
             }
 

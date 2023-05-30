@@ -267,6 +267,18 @@ void PosToCubeFacePos(DIR_ENUM cube_face, Vec &dest, C Vec &src)
       case DIR_BACK   : dest.set(-src.x,  src.y, -src.z); break;
    }
 }
+void TerrainPosToPos(DIR_ENUM cube_face, Vec &dest, C Vec &src)
+{
+   switch(cube_face) // #TerrainOrient
+   {
+      case DIR_RIGHT  : dest.set( src.z,  src.y,  src.x); break;
+      case DIR_LEFT   : dest.set(-src.z,  src.y, -src.x); break;
+      case DIR_UP     : dest.set( src.x,  src.z,  src.y); break;
+      case DIR_DOWN   : dest.set( src.x, -src.z, -src.y); break;
+      case DIR_FORWARD: dest.set(-src.x,  src.y,  src.z); break;
+      case DIR_BACK   : dest.set( src.x,  src.y, -src.z); break;
+   }
+}
 void PosToTerrainPos(DIR_ENUM cube_face, Vec2 &dest, C Vec &src)
 {
    switch(cube_face) // #TerrainOrient

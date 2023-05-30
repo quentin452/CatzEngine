@@ -871,8 +871,8 @@ Bool NearestPointOnLine(C Vec &pos_a, C Vec &dir_a, C Vec &pos_b, C Vec &dir_b, 
    Vec normal=Cross(dir_a, dir_b);
    if( normal.normalize())
    {
-      out.p[0]=PointOnPlaneRay(pos_a, pos_b, CrossN(normal, dir_b), dir_a);
-      out.p[1]=PointOnPlaneRay(pos_b, pos_a, CrossN(normal, dir_a), dir_b);
+      out.p[0]=PointOnPlaneRay(pos_a, pos_b, Cross(normal, dir_b), dir_a);
+      out.p[1]=PointOnPlaneRay(pos_b, pos_a, Cross(normal, dir_a), dir_b);
       return true;
    }
    return false;
@@ -882,8 +882,8 @@ Bool NearestPointOnLine(C VecD &pos_a, C VecD &dir_a, C VecD &pos_b, C VecD &dir
    VecD normal=Cross(dir_a, dir_b);
    if(  normal.normalize())
    {
-      out.p[0]=PointOnPlaneRay(pos_a, pos_b, CrossN(normal, dir_b), dir_a);
-      out.p[1]=PointOnPlaneRay(pos_b, pos_a, CrossN(normal, dir_a), dir_b);
+      out.p[0]=PointOnPlaneRay(pos_a, pos_b, Cross(normal, dir_b), dir_a);
+      out.p[1]=PointOnPlaneRay(pos_b, pos_a, Cross(normal, dir_a), dir_b);
       return true;
    }
    return false;
@@ -1093,8 +1093,8 @@ Int CutsEdgeEdge(C Edge_I &a, C Edge_I &b, Edge *cuts)
       Vec normal=Cross(a.dir, b.dir);
       if( normal.normalize() && Abs(DistPointPlane(b.p[0], a.p[0], normal))<=EPS)
       {
-         Vec p=PointOnPlaneRay(a.p[0], b.p[0], CrossN(normal, b.dir), a.dir);
-         Flt d=DistPointPlane (p     , b.p[0],                        b.dir);
+         Vec p=PointOnPlaneRay(a.p[0], b.p[0], Cross(normal, b.dir), a.dir);
+         Flt d=DistPointPlane (p     , b.p[0],                       b.dir);
          if( d>=0 && d<=b.length) // EPS doesn't need to be included because those cases have already been checked when testing points
          {
             d=DistPointPlane(p, a.p[0], a.dir);
@@ -1110,8 +1110,8 @@ Int CutsEdgeEdge(C Edge_I &a, C Edge_I &b, Edge *cuts)
       Vec normal=Cross(a.dir, b.dir);
       if( normal.normalize() && Abs(DistPointPlane(b.p[0], a.p[0], normal))<=EPS)
       {
-         Vec p=PointOnPlaneRay(a.p[0], b.p[0], CrossN(normal, b.dir), a.dir);
-         Flt d=DistPointPlane (p     , b.p[0],                        b.dir);
+         Vec p=PointOnPlaneRay(a.p[0], b.p[0], Cross(normal, b.dir), a.dir);
+         Flt d=DistPointPlane (p     , b.p[0],                       b.dir);
          if( d>=0 && d<=b.length) // EPS doesn't need to be included because those cases have already been checked when testing points
          {
             d=DistPointPlane(p, a.p[0], a.dir);
@@ -1148,8 +1148,8 @@ Int CutsEdgeEdge(C EdgeD_I &a, C EdgeD_I &b, EdgeD *cuts)
       VecD normal=Cross(a.dir, b.dir);
       if(  normal.normalize() && Abs(DistPointPlane(b.p[0], a.p[0], normal))<=EPSD)
       {
-         VecD p=PointOnPlaneRay(a.p[0], b.p[0], CrossN(normal, b.dir), a.dir);
-         Dbl  d=DistPointPlane (p     , b.p[0],                        b.dir);
+         VecD p=PointOnPlaneRay(a.p[0], b.p[0], Cross(normal, b.dir), a.dir);
+         Dbl  d=DistPointPlane (p     , b.p[0],                       b.dir);
          if(  d>=0 && d<=b.length) // EPS doesn't need to be included because those cases have already been checked when testing points
          {
             d=DistPointPlane(p, a.p[0], a.dir);
@@ -1165,8 +1165,8 @@ Int CutsEdgeEdge(C EdgeD_I &a, C EdgeD_I &b, EdgeD *cuts)
       VecD normal=Cross(a.dir, b.dir);
       if(  normal.normalize() && Abs(DistPointPlane(b.p[0], a.p[0], normal))<=EPSD)
       {
-         VecD p=PointOnPlaneRay(a.p[0], b.p[0], CrossN(normal, b.dir), a.dir);
-         Dbl  d=DistPointPlane (p     , b.p[0],                        b.dir);
+         VecD p=PointOnPlaneRay(a.p[0], b.p[0], Cross(normal, b.dir), a.dir);
+         Dbl  d=DistPointPlane (p     , b.p[0],                       b.dir);
          if(  d>=0 && d<=b.length) // EPS doesn't need to be included because those cases have already been checked when testing points
          {
             d=DistPointPlane(p, a.p[0], a.dir);

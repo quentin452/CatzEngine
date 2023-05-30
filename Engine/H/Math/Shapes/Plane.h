@@ -93,7 +93,7 @@ inline Dbl DistPointPlane(C VecD  &point,                     C VecD  &plane_nor
        Dbl DistPointPlane(C VecD  &point, C VecD  &plane_pos, C Vec   &plane_normal);
        Dbl DistPointPlane(C VecD  &point, C VecD  &plane_pos, C VecD  &plane_normal);
 
-// distance between point and a plane using 'ray' movement directions ('plane_normal' and 'ray' must be normalized)
+// distance between point and a plane using 'ray' movement directions ('ray' must be normalized but 'plane_normal' doesn't have to be)
 Flt DistPointPlaneRay(C Vec2  &point,                     C Vec2  &plane_normal, C Vec2  &ray); // this function assumes that plane position is Vec2 (0,0)
 Dbl DistPointPlaneRay(C VecD2 &point,                     C VecD2 &plane_normal, C VecD2 &ray); // this function assumes that plane position is VecD2(0,0)
 Flt DistPointPlaneRay(C Vec   &point,                     C Vec   &plane_normal, C Vec   &ray); // this function assumes that plane position is Vec  (0,0,0)
@@ -105,7 +105,7 @@ Flt DistPointPlaneRay(C Vec   &point, C Vec   &plane_pos, C Vec   &plane_normal,
 Dbl DistPointPlaneRay(C VecD  &point, C VecD  &plane_pos, C Vec   &plane_normal, C Vec   &ray);
 Dbl DistPointPlaneRay(C VecD  &point, C VecD  &plane_pos, C VecD  &plane_normal, C VecD  &ray);
 
-// distance between point and a plane using Y axis movement vector ('plane_normal' must be normalized)
+// distance between point and a plane using Y axis movement vector ('plane_normal' doesn't have to be normalized)
 Flt DistPointPlaneY(C Vec  &point,                    C Vec  &plane_normal); // this function assumes that plane position is Vec (0,0,0)
 Dbl DistPointPlaneY(C VecD &point,                    C Vec  &plane_normal); // this function assumes that plane position is VecD(0,0,0)
 Dbl DistPointPlaneY(C VecD &point,                    C VecD &plane_normal); // this function assumes that plane position is VecD(0,0,0)
@@ -141,7 +141,7 @@ VecD  PointOnPlane(C VecD  &point, C Vec   &plane_pos, C Vec   &plane_normal);
 VecD  PointOnPlane(C VecD  &point, C VecD  &plane_pos, C Vec   &plane_normal);
 VecD  PointOnPlane(C VecD  &point, C VecD  &plane_pos, C VecD  &plane_normal);
 
-// return point casted on the plane along the 'ray' movement vector ('plane_normal' and 'ray' must be normalized)
+// return point casted on the plane along the 'ray' movement vector ('plane_normal' and 'ray' don't have to be normalized)
 Vec2  PointOnPlaneRay(C Vec2  &point,                     C Vec2  &plane_normal, C Vec2  &ray); // this function assumes that plane position is Vec2 (0,0,0)
 VecD2 PointOnPlaneRay(C VecD2 &point,                     C VecD2 &plane_normal, C VecD2 &ray); // this function assumes that plane position is VecD2(0,0,0)
 Vec   PointOnPlaneRay(C Vec   &point,                     C Vec   &plane_normal, C Vec   &ray); // this function assumes that plane position is Vec  (0,0,0)
@@ -153,7 +153,7 @@ Vec   PointOnPlaneRay(C Vec   &point, C Vec   &plane_pos, C Vec   &plane_normal,
 VecD  PointOnPlaneRay(C VecD  &point, C VecD  &plane_pos, C Vec   &plane_normal, C Vec   &ray);
 VecD  PointOnPlaneRay(C VecD  &point, C VecD  &plane_pos, C VecD  &plane_normal, C VecD  &ray);
 
-// return point casted on the plane along the Y axis movement vector ('plane_normal' must be normalized)
+// return point casted on the plane along the Y axis movement vector ('plane_normal' doesn't have to be normalized)
 Vec  PointOnPlaneY(C Vec  &point,                    C Vec  &plane_normal); // this function assumes that plane position is Vec (0,0,0)
 VecD PointOnPlaneY(C VecD &point,                    C Vec  &plane_normal); // this function assumes that plane position is VecD(0,0,0)
 VecD PointOnPlaneY(C VecD &point,                    C VecD &plane_normal); // this function assumes that plane position is VecD(0,0,0)

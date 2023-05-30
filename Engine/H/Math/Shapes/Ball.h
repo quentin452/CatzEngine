@@ -216,12 +216,13 @@ Vec        TerrainPosToDir        (DIR_ENUM cube_face, C Vec2 &xy           ); /
 Vec  SphereTerrainPixelToDir      (DIR_ENUM cube_face, Flt x, Flt y, Int res); // convert spherical terrain    coordinates to vector direction, 'cube_face'=terrain cube face, 'x,y'=terrain pixel coordinates (0..res  ), 'res'=terrain    resolution, returned vector is not normalized, however it's on a cube with radius=1 ("Abs(dir).max()=1")
 Vec  SphereTerrainPixelCenterToDir(DIR_ENUM cube_face, Flt x, Flt y, Int res); // convert spherical terrain    coordinates to vector direction, 'cube_face'=terrain cube face, 'x,y'=terrain pixel coordinates (0..res-1), 'res'=terrain    resolution, returned vector is not normalized, however it's on a cube with radius=1 ("Abs(dir).max()=1")
 
-void CubeFacePosToPos(DIR_ENUM cube_face, Vec  &dest, C Vec  &src          ); // convert 'cube_face' position 'src' where XY=plane position, Z=height to world space position 'dest'
-void PosToCubeFacePos(DIR_ENUM cube_face, Vec  &dest, C Vec  &src          ); // convert world space position 'src' to 'cube_face'         position 'dest' where XY=plane position, Z=height
-void PosToTerrainPos (DIR_ENUM cube_face, Vec2 &dest, C Vec  &src          ); // convert world space position 'src' to 'cube_face' terrain position 'dest' where XY=plane position
-void PosToTerrainPos (DIR_ENUM cube_face, Vec  &dest, C Vec  &src          ); // convert world space position 'src' to 'cube_face' terrain position 'dest' where XY=plane position, Z=height
-void PosToTerrainPos (DIR_ENUM cube_face, Edge &dest, C Edge &src          ); // convert world space position 'src' to 'cube_face' terrain position 'dest' where XY=plane position, Z=height
-void PosToTerrainPos (DIR_ENUM cube_face, VecD *dest, C VecD *src, Int elms); // convert world space position 'src' to 'cube_face' terrain position 'dest' where XY=plane position, Z=height
+void CubeFacePosToPos(DIR_ENUM cube_face, Vec  &dest, C Vec  &src          ); // convert 'cube_face'         position 'src' where XY=plane position, Z=height to world space         position 'dest'
+void PosToCubeFacePos(DIR_ENUM cube_face, Vec  &dest, C Vec  &src          ); // convert world space         position 'src'                                   to 'cube_face'         position 'dest' where XY=plane position, Z=height
+void TerrainPosToPos (DIR_ENUM cube_face, Vec  &dest, C Vec  &src          ); // convert 'cube_face' terrain position 'src' where XY=plane position, Z=height to world space         position 'dest'
+void PosToTerrainPos (DIR_ENUM cube_face, Vec2 &dest, C Vec  &src          ); // convert world space         position 'src'                                   to 'cube_face' terrain position 'dest' where XY=plane position
+void PosToTerrainPos (DIR_ENUM cube_face, Vec  &dest, C Vec  &src          ); // convert world space         position 'src'                                   to 'cube_face' terrain position 'dest' where XY=plane position, Z=height
+void PosToTerrainPos (DIR_ENUM cube_face, Edge &dest, C Edge &src          ); // convert world space         position 'src'                                   to 'cube_face' terrain position 'dest' where XY=plane position, Z=height
+void PosToTerrainPos (DIR_ENUM cube_face, VecD *dest, C VecD *src, Int elms); // convert world space         position 'src'                                   to 'cube_face' terrain position 'dest' where XY=plane position, Z=height
 
 void TransformByTerrainOrient(DIR_ENUM cube_face, Vec &dest, C Vec &src); // convert             terrain vector 'src' to 'cube_face' terrain vector 'dest', same as "dest=src*Matrix3().setTerrainOrient(cube_face)" but faster
 void    DivideByTerrainOrient(DIR_ENUM cube_face, Vec &dest, C Vec &src); // convert 'cube_face' terrain vector 'src' to             terrain vector 'dest', same as "dest=src/Matrix3().setTerrainOrient(cube_face)" but faster

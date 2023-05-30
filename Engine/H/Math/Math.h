@@ -198,7 +198,7 @@ inline ULong& SQR(ULong &x) {return x*=x;}
 inline Flt  & SQR(Flt   &x) {return x*=x;}
 inline Dbl  & SQR(Dbl   &x) {return x*=x;}
 
-#if EE_PRIVATE
+// fast inverse sqrt approximation
 INLINE Flt RSqrtSimd(Flt x)
 {
 #if X86
@@ -237,6 +237,7 @@ inline Flt RSqrt1(Flt x) // ~1/Sqrt(x) inverse square root, med  speed, med  pre
 }
 Flt RSqrt2(Flt x); // ~1/Sqrt(x) inverse square root, low  speed, high precision
 
+#if EE_PRIVATE
       UInt  SqrtI(UInt  x               ); // integer square root (binary    method, fastest)
        Int  SqrtI( Int  x               ); // integer square root (binary    method, fastest)
       UInt  SqrtI(ULong x               ); // integer square root (binary    method, fastest)

@@ -1893,7 +1893,7 @@ void UpdateLights()
          if(light.type==LIGHT_DIR && light.allow_main)
          {
             Flt p=light.dir.color_l.max();
-            if(main<0 || p>power){main=i; power=p;}
+            if( p>power){main=i; power=p;}
          }
       }
       if(main>0)Swap(Lights.first(), Lights[main]); // >0 already handles !=-1 (not found) and !=0 (no need to move)

@@ -57,31 +57,33 @@
 #define EPS_ANIM_POS      0.0002f           // Animation Position Epsilon (default value used for optimizing animation positions)
 #define EPS_ANIM_SCALE    0.0002f           // Animation Scale    Epsilon (default value used for optimizing animation scales)
 #define EPS_ANIM_ANGLE    0.0002f           // Animation Angle    Epsilon (default value used for optimizing animation rotation angles)
-#define EPS_COL8          (0.5f/ 256)       // Color              Epsilon (this gives  8-bit color precision)
-#define EPS_COL           (0.5f/1024)       // Color              Epsilon (this gives 10-bit color precision)
-#define EPS_COL8_COS      (1-EPS_COL8)      // Color Cos          Epsilon (Dot product of 2 directional vectors giving  8-bit color precision)
-#define EPS_COL_COS       (1-EPS_COL)       // Color Cos          Epsilon (Dot product of 2 directional vectors giving 10-bit color precision)
 #define EPS_COS           0.9999995f        // Cos Flt            Epsilon (Smallest Dot product of the same normalized directional Vec  vector)
 #define EPSD_COS          0.999999999999999 // Cos Dbl            Epsilon (Smallest Dot product of the same normalized directional VecD vector)
 #define EPS_NRM_AUTO      PI_3              // Normal Angle       Epsilon (used for calculating vertex normals)
 
+#define EPS_COL8          (0.5f/ 256)                                     // Color     Epsilon (this gives  8-bit color precision)
+#define EPS_COL           (0.5f/1024)                                     // Color     Epsilon (this gives 10-bit color precision)
+#define EPS_COL8_COS      (1-EPS_COL8)                                    // Color Cos Epsilon (Dot product of 2 directional vectors giving  8-bit color precision)
+#define EPS_COL_COS       (1-EPS_COL)                                     // Color Cos Epsilon (Dot product of 2 directional vectors giving 10-bit color precision)
+#define EPS_COL8_LINEAR   0.000151171f                                    // EPS_COL8 in linear Gamma, SRGBToLinear(0.5/ 256  )  , Warning: can be used only when comparing with 0
+#define EPS_COL_LINEAR    0.000037793f                                    // EPS_COL  in linear Gamma, SRGBToLinear(0.5/1024  )  , Warning: can be used only when comparing with 0
+
 #if EE_PRIVATE
-#define EPS_COL8_LINEAR        0.000151171f                                    // EPS_COL8 in linear Gamma, SRGBToLinear(0.5/ 256  )  , Warning: can be used only when comparing with 0
-#define EPS_COL_LINEAR         0.000037793f                                    // EPS_COL  in linear Gamma, SRGBToLinear(0.5/1024  )  , Warning: can be used only when comparing with 0
-#define EPS_COL8_NATIVE        (LINEAR_GAMMA ? EPS_COL8_LINEAR   : EPS_COL8  ) //                                                       Warning: can be used only when comparing with 0
-#define EPS_COL_NATIVE         (LINEAR_GAMMA ? EPS_COL_LINEAR    : EPS_COL   ) //                                                       Warning: can be used only when comparing with 0
-#define EPS_COL8_1             EPS_COL8                                        //                                                       Warning: can be used only when comparing with 1
-#define EPS_COL_1              EPS_COL                                         //                                                       Warning: can be used only when comparing with 1
-#define EPS_COL8_1_LINEAR      0.004448891f                                    // EPS_COL8 in linear Gamma, SRGBToLinear(0.5/ 256+1)-1, Warning: can be used only when comparing with 1
-#define EPS_COL_1_LINEAR       0.001111269f                                    // EPS_COL  in linear Gamma, SRGBToLinear(0.5/1024+1)-1, Warning: can be used only when comparing with 1
-#define EPS_COL8_1_NATIVE      (LINEAR_GAMMA ? EPS_COL8_1_LINEAR : EPS_COL8_1) //                                                       Warning: can be used only when comparing with 1
-#define EPS_COL_1_NATIVE       (LINEAR_GAMMA ? EPS_COL_1_LINEAR  : EPS_COL_1 ) //                                                       Warning: can be used only when comparing with 1
-#define EPS_GPU                (MOBILE ? HALF_EPS : FLT_EPS)                   // GPU             Epsilon (Mobile GPU's may have only half precision)
-#define EPS_ANIM_BLEND         (1.0f/4096)                                     // Animation Blend Epsilon (default value used for ignoring animations)
-#define EPS_SKY_MIN_LERP_DIST  (1.0f/8)                                        // 12.5 cm
-#define EPS_SKY_MIN_VIEW_RANGE 0.999f                                          // 0.999f was the biggest value that caused holes to disappear
-#define EPS_TAN_COS            EPS_COL_COS                                     // use strict eps to merge only if are the same, strict eps doesn't significantly increase the vertex count, on few test models vtx count was only 1% bigger when compared to 0 eps
-#define EPS_BIN_COS            0                                               // can use 0 for 'Dot' (to differentiate only if binormals are on the same side) because binormals are stored in MeshRender using 1-bit only and reconstructed as "Cross(nrm, tan)" or "-Cross(nrm, tan)"
+#define EPS_COL8_NATIVE   (LINEAR_GAMMA ? EPS_COL8_LINEAR   : EPS_COL8  ) //                                                       Warning: can be used only when comparing with 0
+#define EPS_COL_NATIVE    (LINEAR_GAMMA ? EPS_COL_LINEAR    : EPS_COL   ) //                                                       Warning: can be used only when comparing with 0
+#define EPS_COL8_1        EPS_COL8                                        //                                                       Warning: can be used only when comparing with 1
+#define EPS_COL_1         EPS_COL                                         //                                                       Warning: can be used only when comparing with 1
+#define EPS_COL8_1_LINEAR 0.004448891f                                    // EPS_COL8 in linear Gamma, SRGBToLinear(0.5/ 256+1)-1, Warning: can be used only when comparing with 1
+#define EPS_COL_1_LINEAR  0.001111269f                                    // EPS_COL  in linear Gamma, SRGBToLinear(0.5/1024+1)-1, Warning: can be used only when comparing with 1
+#define EPS_COL8_1_NATIVE (LINEAR_GAMMA ? EPS_COL8_1_LINEAR : EPS_COL8_1) //                                                       Warning: can be used only when comparing with 1
+#define EPS_COL_1_NATIVE  (LINEAR_GAMMA ? EPS_COL_1_LINEAR  : EPS_COL_1 ) //                                                       Warning: can be used only when comparing with 1
+
+#define EPS_GPU                (MOBILE ? HALF_EPS : FLT_EPS) // GPU             Epsilon (Mobile GPU's may have only half precision)
+#define EPS_ANIM_BLEND         (1.0f/4096)                   // Animation Blend Epsilon (default value used for ignoring animations)
+#define EPS_SKY_MIN_LERP_DIST  (1.0f/8)                      // 12.5 cm
+#define EPS_SKY_MIN_VIEW_RANGE 0.999f                        // 0.999f was the biggest value that caused holes to disappear
+#define EPS_TAN_COS            EPS_COL_COS                   // use strict eps to merge only if are the same, strict eps doesn't significantly increase the vertex count, on few test models vtx count was only 1% bigger when compared to 0 eps
+#define EPS_BIN_COS            0                             // can use 0 for 'Dot' (to differentiate only if binormals are on the same side) because binormals are stored in MeshRender using 1-bit only and reconstructed as "Cross(nrm, tan)" or "-Cross(nrm, tan)"
 #endif
 /******************************************************************************/
 enum AXIS_TYPE

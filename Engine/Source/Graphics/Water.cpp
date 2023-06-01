@@ -349,7 +349,13 @@ void WaterClass::begin()
          }
       }else
       {
-         if(Lights.elms() && Lights[0].type==LIGHT_DIR)Lights[0].dir.set();else LightDir(Vec(0,-1,0), VecZero).set();
+         if(Lights.elms())
+         {
+            Light &light=Lights.first(); if(light.type==LIGHT_DIR && light.allow_main){light.dir.set(); goto light_set;}
+         }
+         LightDir(Vec(0,-1,0), VecZero).set();
+      light_set:
+
          if(_shader_soft) // we're going to draw water on top of existing RT, including refraction, so we need to have a color copy of what's underwater (background) for the refraction, also we want to do softing so we need to backup depth because we can't read and write to depth in the same time
          {
             Renderer._water_col.get(rt_desc.type(GetImageRTType(Renderer._col->type()))); // create RT for the copy
@@ -452,7 +458,12 @@ Shader* WaterClass::shader()
 void WaterClass::drawSurfaces()
 {
    // these are used only when '_use_secondary_rt' is disabled
-  _shader_shadow_maps   =((Lights.elms() && Lights[0].type==LIGHT_DIR && Lights[0].shadow) ? D.shadowMapNumActual() : 0);
+   if(Lights.elms())
+   {
+      Light &light=Lights.first(); if(light.type==LIGHT_DIR && light.allow_main && light.shadow){_shader_shadow_maps=D.shadowMapNumActual(); goto light_set;}
+   }
+  _shader_shadow_maps   =0;
+light_set:
   _shader_soft          =Renderer.canReadDepth();
   _shader_reflect_env   =(         D.envMap()!=null);
   _shader_reflect_mirror=(Renderer._mirror_rt!=null);

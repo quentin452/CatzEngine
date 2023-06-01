@@ -1336,7 +1336,8 @@ void RendererClass::opaque()
          {
             // lights are already sorted, and 0-th light is the most significant, its shadow map must be rendered last to be used by BLEND_LIGHT which happens at a later stage
             Int skip_light=-1;
-            if(Lights[0].type==LIGHT_DIR && Lights[0].shadow) // 0-th is LightDir (which BlendLight only supports) and needs shadows
+            Light &light=Lights.first();
+            if(light.type==LIGHT_DIR && light.shadow) // 0-th is LightDir (which BlendLight only supports) and needs shadows
                for(Int i=Lights.elms(); --i>=1; )if(Lights[i].shadow) // if at least one different light needs shadows
                   {skip_light=0; break;} // it means we can't start with 0-th, because drawing another light will overwrite shadow map, so skip #0 when choosing the 'first_light'
 
@@ -1971,15 +1972,20 @@ void RendererClass::blend()
    Sky.setFracMulAdd();
 
    // set main light parameters for *BLEND_LIGHT* and 'Mesh.drawBlend'
-   if(Lights.elms() && Lights[0].type==LIGHT_DIR) // use 0 index as it has already been set in 'UpdateLights'
+   if(Lights.elms())
    {
-      Lights[0].dir.set();
-     _blst_light_offset=OFFSET(BLST, dir[Lights[0].shadow ? D.shadowMapNumActual() : 0]);
-   }else
+      Light &light=Lights.first(); if(light.type==LIGHT_DIR) // use first as it has already been set in 'UpdateLights'
+      {
+         light.dir.set();
+        _blst_light_offset=OFFSET(BLST, dir[light.shadow ? D.shadowMapNumActual() : 0]);
+         goto light_set;
+      }
+   }
    {
       LightDir(Vec(0, -1, 0), VecZero).set(); // set dummy light
      _blst_light_offset=OFFSET(BLST, dir[0]);
    }
+light_set:
 
    // apply light in case of drawing fur, which samples the light buffer
    if(_has&HAS_FUR)

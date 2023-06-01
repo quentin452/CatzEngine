@@ -306,9 +306,9 @@ Flt LightPoint::range()C
    Flt  albedo=1, srgb_col=LinearToSRGB(light_intensity*albedo)*255; */
 }
 /******************************************************************************/
-void LightDir   ::add(Bool shadow        , CPtr light_src                               ) {           DEBUG_ASSERT(Renderer()==RM_PREPARE,    "'LightDir.add' called outside of RM_PREPARE"); if(color_l.max()>EPS_COL8_LINEAR                                        && Renderer.firstPass()){Lights.New().set(T,       shadow        , light_src);}}
-void LightPoint ::add(Flt  shadow_opacity, CPtr light_src                               ) {Rect rect; DEBUG_ASSERT(Renderer()==RM_PREPARE,  "'LightPoint.add' called outside of RM_PREPARE"); if(color_l.max()>EPS_COL8_LINEAR && power    >EPS && toScreenRect(rect) && Renderer.firstPass()){Lights.New().set(T, rect, shadow_opacity, light_src);}}
-void LightLinear::add(Flt  shadow_opacity, CPtr light_src                               ) {Rect rect; DEBUG_ASSERT(Renderer()==RM_PREPARE, "'LightLinear.add' called outside of RM_PREPARE"); if(color_l.max()>EPS_COL8_LINEAR && range    >EPS && toScreenRect(rect) && Renderer.firstPass()){Lights.New().set(T, rect, shadow_opacity, light_src);}}
+void LightDir   ::add(Bool shadow        , CPtr light_src, Bool allow_main              ) {           DEBUG_ASSERT(Renderer()==RM_PREPARE,    "'LightDir.add' called outside of RM_PREPARE"); if(color_l.max()>EPS_COL8_LINEAR                                        && Renderer.firstPass()){Lights.New().set(T,       shadow        , light_src, allow_main);}}
+void LightPoint ::add(Flt  shadow_opacity, CPtr light_src                               ) {Rect rect; DEBUG_ASSERT(Renderer()==RM_PREPARE,  "'LightPoint.add' called outside of RM_PREPARE"); if(color_l.max()>EPS_COL8_LINEAR && power    >EPS && toScreenRect(rect) && Renderer.firstPass()){Lights.New().set(T, rect, shadow_opacity, light_src            );}}
+void LightLinear::add(Flt  shadow_opacity, CPtr light_src                               ) {Rect rect; DEBUG_ASSERT(Renderer()==RM_PREPARE, "'LightLinear.add' called outside of RM_PREPARE"); if(color_l.max()>EPS_COL8_LINEAR && range    >EPS && toScreenRect(rect) && Renderer.firstPass()){Lights.New().set(T, rect, shadow_opacity, light_src            );}}
 void LightCone  ::add(Flt  shadow_opacity, CPtr light_src, Image *image, Flt image_scale) {Rect rect; DEBUG_ASSERT(Renderer()==RM_PREPARE,   "'LightCone.add' called outside of RM_PREPARE"); if(color_l.max()>EPS_COL8_LINEAR && pyramid.h>EPS && toScreenRect(rect) && Renderer.firstPass())
    {
       Light &l=Lights.New();
@@ -1082,10 +1082,10 @@ static Bool CanDoShadow()
 {
    return D.shadowMode() && D.shadowSupported() && FovPerspective(D.viewFovMode());
 }
-void Light::set(LightDir    &light,               Bool shadow        , CPtr light_src) {Zero(T); type=LIGHT_DIR   ; dir   =light; T.rect=D.viewRect(); T.shadow=(shadow                  && CanDoShadow()); T.shadow_opacity=(T.shadow                          ); T.src=light_src;}
-void Light::set(LightPoint  &light, C Rect &rect, Flt  shadow_opacity, CPtr light_src) {Zero(T); type=LIGHT_POINT ; point =light; T.rect=        rect; T.shadow=(shadow_opacity>EPS_COL8 && CanDoShadow()); T.shadow_opacity=(T.shadow ? Sat(shadow_opacity) : 0); T.src=light_src;}
-void Light::set(LightLinear &light, C Rect &rect, Flt  shadow_opacity, CPtr light_src) {Zero(T); type=LIGHT_LINEAR; linear=light; T.rect=        rect; T.shadow=(shadow_opacity>EPS_COL8 && CanDoShadow()); T.shadow_opacity=(T.shadow ? Sat(shadow_opacity) : 0); T.src=light_src;}
-void Light::set(LightCone   &light, C Rect &rect, Flt  shadow_opacity, CPtr light_src) {Zero(T); type=LIGHT_CONE  ; cone  =light; T.rect=        rect; T.shadow=(shadow_opacity>EPS_COL8 && CanDoShadow()); T.shadow_opacity=(T.shadow ? Sat(shadow_opacity) : 0); T.src=light_src;}
+void Light::set(LightDir    &light,               Bool shadow        , CPtr light_src, Bool allow_main) {Zero(T); type=LIGHT_DIR   ; dir   =light; T.rect=D.viewRect(); T.shadow=(shadow                  && CanDoShadow()); T.shadow_opacity=(T.shadow                          ); T.src=light_src; T.allow_main=allow_main;}
+void Light::set(LightPoint  &light, C Rect &rect, Flt  shadow_opacity, CPtr light_src                 ) {Zero(T); type=LIGHT_POINT ; point =light; T.rect=        rect; T.shadow=(shadow_opacity>EPS_COL8 && CanDoShadow()); T.shadow_opacity=(T.shadow ? Sat(shadow_opacity) : 0); T.src=light_src;}
+void Light::set(LightLinear &light, C Rect &rect, Flt  shadow_opacity, CPtr light_src                 ) {Zero(T); type=LIGHT_LINEAR; linear=light; T.rect=        rect; T.shadow=(shadow_opacity>EPS_COL8 && CanDoShadow()); T.shadow_opacity=(T.shadow ? Sat(shadow_opacity) : 0); T.src=light_src;}
+void Light::set(LightCone   &light, C Rect &rect, Flt  shadow_opacity, CPtr light_src                 ) {Zero(T); type=LIGHT_CONE  ; cone  =light; T.rect=        rect; T.shadow=(shadow_opacity>EPS_COL8 && CanDoShadow()); T.shadow_opacity=(T.shadow ? Sat(shadow_opacity) : 0); T.src=light_src;}
 /******************************************************************************/
 INLINE Shader* GetShdDir  (Int map_num, Bool clouds, Bool multi_sample) {Shader* &s=Sh.ShdDir[map_num-1][clouds][multi_sample]; if(SLOW_SHADER_LOAD && !s)s=Sh.getShdDir  (map_num, clouds, multi_sample); return s;}
 INLINE Shader* GetShdPoint(                          Bool multi_sample) {Shader* &s=Sh.ShdPoint                 [multi_sample]; if(SLOW_SHADER_LOAD && !s)s=Sh.getShdPoint(                 multi_sample); return s;}
@@ -1883,20 +1883,20 @@ void UpdateLights()
    }
 
    // sort
-   // put main directional light at start (this is needed for RM_BLEND_LIGHT* and RT_FORWARD)
+   // put main directional light at start (this is needed for RM_BLEND_LIGHT*, RT_FORWARD, Water.max1Light)
    if(Lights.elms()>1)
    {
       Int main =-1;
       Flt power= 0; REPA(Lights)
       {
          Light &light=Lights[i];
-         if(light.type==LIGHT_DIR)
+         if(light.type==LIGHT_DIR && light.allow_main)
          {
             Flt p=light.dir.color_l.max();
             if(main<0 || p>power){main=i; power=p;}
          }
       }
-      if(main>0)Swap(Lights[0], Lights[main]); // >0 already handles !=-1 (not found) and !=0 (no need to move)
+      if(main>0)Swap(Lights.first(), Lights[main]); // >0 already handles !=-1 (not found) and !=0 (no need to move)
    }
 }
 void DrawLights()

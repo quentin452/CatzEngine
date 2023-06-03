@@ -787,7 +787,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
                      &v1=vtxs[tri_v1].pos,
                      &v2=vtxs[tri_v2].pos;
                Vec new_nrm=GetNormalU(mid_pos, v1, v2); // new triangle normal
-               if( new_nrm.length2()<=Sqr(EPS)       // if new triangle surface is tiny (perhaps all 3 points are now on 1 line) then we won't be able to calculate triangle normal properly and it can cause issues with collision detection (raycast)
+               if( new_nrm.length2()<=Sqr(EPSD)      // if new triangle surface is tiny (perhaps all 3 points are now on 1 line) then we won't be able to calculate triangle normal properly and it can cause issues with collision detection (raycast)
             || Dot(new_nrm, tri.nrm)< 0)return true; // if new triangle normal is in the opposite direction of the original normal
                all_tris.New().set(tri);
             }

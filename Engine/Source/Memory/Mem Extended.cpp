@@ -83,20 +83,22 @@ void _Memx::removeValid(Int i, Bool keep_order)
    if(InRange(i, _valid))
    {
       // element info
-      UInt abs=_valid [i  ];
-      Ptr  elm= absElm(abs);
+      UInt  abs=_valid [i  ];
+      Ptr   elm= absElm(abs);
+      UInt &elm_index=((UInt*)elm)[-1];
 
       // destroy as the first step, this could be done as the last step, however keep consistency with all other memory containers where elements are destroyed first, this is so their destructors can properly detect their index/presence in the container
       if(_del)
       {
         _del(elm);
-         DEBUG_ASSERT(absToValidIndex(abs)==i, "_Memx.removeValid"); // this error means that elm destructor modified the _Memx
+         i=elm_index; // this code causes deleting object from within another object deletion, so we have to get latest valid index: Objects.mode(CACHE_ALL_DUMMY); ObjectPtr base="base"; ObjectPtr obj="obj"; obj->base(base); base.clear(); obj.clear();
+         DEBUG_RANGE_ASSERT(i, _valid); // this error means that elm destructor modified the _Memx and this object doesn't exist anymore
       }
 
       // put removed to invalid
       UInt inv=_invalid.addNum(1);
                _invalid[inv]=abs;
-      ((UInt*)elm)[-1]=inv^SIGN_BIT;
+      elm_index=inv^SIGN_BIT;
 
       if(keep_order)
       {

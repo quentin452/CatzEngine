@@ -91,7 +91,7 @@ void _Memx::removeValid(Int i, Bool keep_order)
       if(_del)
       {
         _del(elm);
-         i=elm_index; // this code causes deleting object from within another object deletion, so we have to get latest valid index: Objects.mode(CACHE_ALL_DUMMY); ObjectPtr base="base"; ObjectPtr obj="obj"; obj->base(base); base.clear(); obj.clear();
+         i=elm_index; // following code causes deleting object from within another object deletion, so we have to get latest valid index: Objects.mode(CACHE_ALL_DUMMY); ObjectPtr base="base"; ObjectPtr obj="obj"; obj->base(base); base.clear(); obj.clear();
          DEBUG_RANGE_ASSERT(i, _valid); // this error means that elm destructor modified the _Memx and this object doesn't exist anymore
       }
 

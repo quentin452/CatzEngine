@@ -275,7 +275,7 @@
          if(list.sel.elms()> 1)node.New().create("Merge"                 , Merge          ).desc("Merge selected parts together");
                                node.New().create("Set Name from Material", SetNameFromMtrl).desc("Set Mesh Part name from Material name");
                                node++;                                   
-                               node.New().create("Erase"            , Erase    ).desc("Completely erase selected parts from the Mesh");
+                               node.New().create("Erase"                 , Erase          ).desc("Completely erase selected parts from the Mesh");
          Gui+=menu.create(node).posRU(pos); menu.activate();
       }
    }

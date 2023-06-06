@@ -2262,10 +2262,11 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
       REPA(v4.view)if(focus_obj==&v4.view[i].viewport) // apply on model
       {
          MeshLod &lod=getLod();
-         if(InRange(lit_part, lod)) // apply material on part
+         int part=(lit_part>=0 ? lit_part : lit_vf_part);
+         if(InRange(part, lod)) // apply material on part
             FREPA(elms)if(Elm *elm=Proj.findElm(elms[i], ELM_MTRL))
          {
-            setMaterial(lit_part, Proj.gamePath(elm->id));
+            setMaterial(part, Proj.gamePath(elm->id));
             break;
          }
 

@@ -26,8 +26,8 @@ struct LightDir // Directional Light
        vol_exponent, // volumetric exponent, (0..Inf)
        vol_steam   ; // volumetric steam   , (0..1  )
 
-   void add(Bool shadow=true, CPtr light_src=null); // add light to scene, this needs to be called only in RM_PREPARE mode, 'shadow'=if shadowing enabled, 'light_src'=custom pointer to light source (which can be later accessed from "CurrentLight.src")
-   void set(                                     ); // use only outside Renderer rendering, before drawing any shade'able meshes
+   void add(Bool shadow=true, CPtr light_src=null, Bool allow_main=true); // add light to scene, this needs to be called only in RM_PREPARE mode, 'shadow'=if shadowing enabled, 'light_src'=custom pointer to light source (which can be later accessed from "CurrentLight.src"), 'allow_main'=allow this light to be the main light (be used for water when 'Water.max1Light' is enabled).
+   void set(                                                           ); // use only outside Renderer rendering, before drawing any shade'able meshes
 
    LightDir() {}
    LightDir(C Vec &dir, C Vec &color_l=Vec(1, 1, 1), Flt radius_frac=0.0036f, Flt vol=0, Flt vol_exponent=1, Flt vol_steam=0.5f) {T.dir=dir; T.color_l=color_l; T.radius_frac=radius_frac; T.vol=vol; T.vol_exponent=vol_exponent; T.vol_steam=vol_steam;}
@@ -101,6 +101,7 @@ struct LightCone // Cone Light
 struct Light
 {
    LIGHT_TYPE type          ; // light type
+   Bool       allow_main    ; // if can be used as main light
    Bool       shadow        ; // if shadowing enabled
    Flt        shadow_opacity; // opacity of shadows
    Flt        image_scale   ; // dynamic lightmap scale
@@ -131,7 +132,7 @@ struct Light
 
    void set();
 
-   void set(LightDir    &light,               Bool shadow        , CPtr light_src);
+   void set(LightDir    &light,               Bool shadow        , CPtr light_src, Bool allow_main);
    void set(LightPoint  &light, C Rect &rect, Flt  shadow_opacity, CPtr light_src);
    void set(LightLinear &light, C Rect &rect, Flt  shadow_opacity, CPtr light_src);
    void set(LightCone   &light, C Rect &rect, Flt  shadow_opacity, CPtr light_src);

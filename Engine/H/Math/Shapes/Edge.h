@@ -16,18 +16,20 @@ struct Edge2 // Edge 2D
    Edge2& set(Flt x0, Flt y0, Flt x1, Flt y1) {p[0].set(x0,y0); p[1].set(x1,y1); return T;}
 
    // get
-   Flt  centerX(     )C {return        Avg(p[0].x, p[1].x);} // center x
-   Flt  centerY(     )C {return        Avg(p[0].y, p[1].y);} // center y
-   Vec2 center (     )C {return Vec2(centerX(), centerY());} // center
-   Vec2 delta  (     )C {return                  p[1]-p[0];} // delta
-   Vec2 dir    (     )C {return                  !delta() ;} // direction
-   Vec2 perp   (     )C {return             Perp (delta());} // perpendicular
-   Vec2 perpN  (     )C {return             PerpN(delta());} // perpendicular normalized
-   Flt  length (     )C {return   Dist (p[0]  , p[1]     );} //         length
-   Flt  length2(     )C {return   Dist2(p[0]  , p[1]     );} // squared length
-   Vec2 lerp   (Flt s)C {return    Lerp(p[0]  , p[1]  , s);} // lerp from p[0]   to p[1]
-   Flt  lerpX  (Flt s)C {return    Lerp(p[0].x, p[1].x, s);} // lerp from p[0].x to p[1].x
-   Flt  lerpY  (Flt s)C {return    Lerp(p[0].y, p[1].y, s);} // lerp from p[0].y to p[1].y
+   Flt  centerX(     )C {return      Avg(p[0].x, p[1].x);} // center x
+   Flt  centerY(     )C {return      Avg(p[0].y, p[1].y);} // center y
+   Vec2 center (     )C {return      Avg(p[0]  , p[1]  );} // center
+   Flt  deltaX (     )C {return            p[1].x-p[0].x;} // delta x
+   Flt  deltaY (     )C {return            p[1].y-p[0].y;} // delta y
+   Vec2 delta  (     )C {return            p[1]  -p[0]  ;} // delta
+   Vec2 dir    (     )C {return                !delta() ;} // direction
+   Vec2 perp   (     )C {return           Perp (delta());} // perpendicular
+   Vec2 perpN  (     )C {return           PerpN(delta());} // perpendicular normalized
+   Flt  length (     )C {return Dist (p[0]  , p[1]     );} //         length
+   Flt  length2(     )C {return Dist2(p[0]  , p[1]     );} // squared length
+   Vec2 lerp   (Flt s)C {return  Lerp(p[0]  , p[1]  , s);} // lerp from p[0]   to p[1]
+   Flt  lerpX  (Flt s)C {return  Lerp(p[0].x, p[1].x, s);} // lerp from p[0].x to p[1].x
+   Flt  lerpY  (Flt s)C {return  Lerp(p[0].y, p[1].y, s);} // lerp from p[0].y to p[1].y
 
    Str asText()C {return S+"Point0: "+p[0]+", Point1: "+p[1];} // get text description
 
@@ -74,18 +76,20 @@ struct EdgeD2 // Edge 2D (double precision)
    EdgeD2& set(Dbl x0, Dbl y0, Dbl x1, Dbl y1) {p[0].set(x0,y0); p[1].set(x1,y1); return T;}
 
    // get
-   Dbl   centerX(     )C {return         Avg(p[0].x, p[1].x);} // center x
-   Dbl   centerY(     )C {return         Avg(p[0].y, p[1].y);} // center y
-   VecD2 center (     )C {return VecD2(centerX(), centerY());} // center
-   VecD2 delta  (     )C {return                   p[1]-p[0];} // delta
-   VecD2 dir    (     )C {return                   !delta() ;} // direction
-   VecD2 perp   (     )C {return              Perp (delta());} // perpendicular
-   VecD2 perpN  (     )C {return              PerpN(delta());} // perpendicular normalized
-   Dbl   length (     )C {return    Dist (p[0]  , p[1]     );} //         length
-   Dbl   length2(     )C {return    Dist2(p[0]  , p[1]     );} // squared length
-   VecD2 lerp   (Dbl s)C {return     Lerp(p[0]  , p[1]  , s);} // lerp from p[0]   to p[1]
-   Dbl   lerpX  (Dbl s)C {return     Lerp(p[0].x, p[1].x, s);} // lerp from p[0].x to p[1].x
-   Dbl   lerpY  (Dbl s)C {return     Lerp(p[0].y, p[1].y, s);} // lerp from p[0].y to p[1].y
+   Dbl   centerX(     )C {return      Avg(p[0].x, p[1].x);} // center x
+   Dbl   centerY(     )C {return      Avg(p[0].y, p[1].y);} // center y
+   VecD2 center (     )C {return      Avg(p[0]  , p[1]  );} // center
+   Dbl   deltaX (     )C {return            p[1].x-p[0].x;} // delta x
+   Dbl   deltaY (     )C {return            p[1].y-p[0].y;} // delta y
+   VecD2 delta  (     )C {return            p[1]  -p[0]  ;} // delta
+   VecD2 dir    (     )C {return                !delta() ;} // direction
+   VecD2 perp   (     )C {return           Perp (delta());} // perpendicular
+   VecD2 perpN  (     )C {return           PerpN(delta());} // perpendicular normalized
+   Dbl   length (     )C {return Dist (p[0]  , p[1]     );} //         length
+   Dbl   length2(     )C {return Dist2(p[0]  , p[1]     );} // squared length
+   VecD2 lerp   (Dbl s)C {return  Lerp(p[0]  , p[1]  , s);} // lerp from p[0]   to p[1]
+   Dbl   lerpX  (Dbl s)C {return  Lerp(p[0].x, p[1].x, s);} // lerp from p[0].x to p[1].x
+   Dbl   lerpY  (Dbl s)C {return  Lerp(p[0].y, p[1].y, s);} // lerp from p[0].y to p[1].y
 
    // draw
    void draw(C Color &color=WHITE            )C; // draw
@@ -125,20 +129,23 @@ struct Edge // Edge 3D
    Edge& set(C Edge2 &edge          , Flt z) {p[0].set(edge.p[0], z); p[1].set(edge.p[1], z); return T;}
 
    // get
-   Edge2 xy     (     )C {return          Edge2(p[0].xy  , p[1].xy  );} // get    XY components as Edge2
-   Edge2 xz     (     )C {return          Edge2(p[0].xz(), p[1].xz());} // get    XZ components as Edge2
-   Flt   centerX(     )C {return            Avg(p[0].x   , p[1].x   );} // center x
-   Flt   centerY(     )C {return            Avg(p[0].y   , p[1].y   );} // center y
-   Flt   centerZ(     )C {return            Avg(p[0].z   , p[1].z   );} // center z
-   Vec   center (     )C {return Vec(centerX(), centerY(), centerZ());} // center
-   Vec   delta  (     )C {return                            p[1]-p[0];} // delta
-   Vec   dir    (     )C {return                             !delta();} // direction
-   Flt   length (     )C {return             Dist (p[0]  , p[1]     );} //         length
-   Flt   length2(     )C {return             Dist2(p[0]  , p[1]     );} // squared length
-   Vec   lerp   (Flt s)C {return              Lerp(p[0]  , p[1]  , s);} // lerp from p[0]   to p[1]
-   Flt   lerpX  (Flt s)C {return              Lerp(p[0].x, p[1].x, s);} // lerp from p[0].x to p[1].x
-   Flt   lerpY  (Flt s)C {return              Lerp(p[0].y, p[1].y, s);} // lerp from p[0].y to p[1].y
-   Flt   lerpZ  (Flt s)C {return              Lerp(p[0].z, p[1].z, s);} // lerp from p[0].z to p[1].z
+   Edge2 xy     (     )C {return Edge2(p[0].xy  , p[1].xy  );} // get    XY components as Edge2
+   Edge2 xz     (     )C {return Edge2(p[0].xz(), p[1].xz());} // get    XZ components as Edge2
+   Flt   centerX(     )C {return   Avg(p[0].x   , p[1].x   );} // center x
+   Flt   centerY(     )C {return   Avg(p[0].y   , p[1].y   );} // center y
+   Flt   centerZ(     )C {return   Avg(p[0].z   , p[1].z   );} // center z
+   Vec   center (     )C {return   Avg(p[0]     , p[1]     );} // center
+   Flt   deltaX (     )C {return               p[1].x-p[0].x;} // delta x
+   Flt   deltaY (     )C {return               p[1].y-p[0].y;} // delta y
+   Flt   deltaZ (     )C {return               p[1].z-p[0].z;} // delta z
+   Vec   delta  (     )C {return               p[1]  -p[0]  ;} // delta
+   Vec   dir    (     )C {return                    !delta();} // direction
+   Flt   length (     )C {return    Dist (p[0]  , p[1]     );} //         length
+   Flt   length2(     )C {return    Dist2(p[0]  , p[1]     );} // squared length
+   Vec   lerp   (Flt s)C {return     Lerp(p[0]  , p[1]  , s);} // lerp from p[0]   to p[1]
+   Flt   lerpX  (Flt s)C {return     Lerp(p[0].x, p[1].x, s);} // lerp from p[0].x to p[1].x
+   Flt   lerpY  (Flt s)C {return     Lerp(p[0].y, p[1].y, s);} // lerp from p[0].y to p[1].y
+   Flt   lerpZ  (Flt s)C {return     Lerp(p[0].z, p[1].z, s);} // lerp from p[0].z to p[1].z
 
    Str asText()C {return S+"Point0: "+p[0]+", Point1: "+p[1];} // get text description
 
@@ -195,18 +202,21 @@ struct EdgeD // Edge 3D (double precision)
    EdgeD& set(C VecD2 &p0, C VecD2 &p1, Dbl z) {p[0].set(p0,z); p[1].set(p1,z); return T;}
 
    // get
-   Dbl  centerX(     )C {return                   Avg(p[0].x, p[1].x);} // center x
-   Dbl  centerY(     )C {return                   Avg(p[0].y, p[1].y);} // center y
-   Dbl  centerZ(     )C {return                   Avg(p[0].z, p[1].z);} // center z
-   VecD center (     )C {return VecD(centerX(), centerY(), centerZ());} // center
-   VecD delta  (     )C {return                             p[1]-p[0];} // delta
-   VecD dir    (     )C {return                              !delta();} // direction
-   Dbl  length (     )C {return              Dist (p[0]  , p[1]     );} //         length
-   Dbl  length2(     )C {return              Dist2(p[0]  , p[1]     );} // squared length
-   VecD lerp   (Dbl s)C {return               Lerp(p[0]  , p[1]  , s);} // lerp from p[0]   to p[1]
-   Dbl  lerpX  (Dbl s)C {return               Lerp(p[0].x, p[1].x, s);} // lerp from p[0].x to p[1].x
-   Dbl  lerpY  (Dbl s)C {return               Lerp(p[0].y, p[1].y, s);} // lerp from p[0].y to p[1].y
-   Dbl  lerpZ  (Dbl s)C {return               Lerp(p[0].z, p[1].z, s);} // lerp from p[0].z to p[1].z
+   Dbl  centerX(     )C {return      Avg(p[0].x, p[1].x);} // center x
+   Dbl  centerY(     )C {return      Avg(p[0].y, p[1].y);} // center y
+   Dbl  centerZ(     )C {return      Avg(p[0].z, p[1].z);} // center z
+   VecD center (     )C {return      Avg(p[0]  , p[1]  );} // center
+   Dbl  deltaX (     )C {return            p[1].x-p[0].x;} // delta x
+   Dbl  deltaY (     )C {return            p[1].y-p[0].y;} // delta y
+   Dbl  deltaZ (     )C {return            p[1].z-p[0].z;} // delta z
+   VecD delta  (     )C {return            p[1]  -p[0]  ;} // delta
+   VecD dir    (     )C {return                 !delta();} // direction
+   Dbl  length (     )C {return Dist (p[0]  , p[1]     );} //         length
+   Dbl  length2(     )C {return Dist2(p[0]  , p[1]     );} // squared length
+   VecD lerp   (Dbl s)C {return  Lerp(p[0]  , p[1]  , s);} // lerp from p[0]   to p[1]
+   Dbl  lerpX  (Dbl s)C {return  Lerp(p[0].x, p[1].x, s);} // lerp from p[0].x to p[1].x
+   Dbl  lerpY  (Dbl s)C {return  Lerp(p[0].y, p[1].y, s);} // lerp from p[0].y to p[1].y
+   Dbl  lerpZ  (Dbl s)C {return  Lerp(p[0].z, p[1].z, s);} // lerp from p[0].z to p[1].z
 
    // operations
    EdgeD& reverse() {Swap(p[0], p[1]); return T;} // reverse the order of points
@@ -335,7 +345,7 @@ private:
    RectI _mask;
 };
 /******************************************************************************/
-struct PixelWalkerEdge // iterates through pixels of a rasterized line and returns intersections with the edges
+struct PixelEdgeWalker // iterates through pixels of a rasterized edge and returns intersections with the edges
 {
    // get
    Bool  active()C {return _active;} // if  walker still active
@@ -347,8 +357,8 @@ struct PixelWalkerEdge // iterates through pixels of a rasterized line and retur
    // operations
    void step(); // make a single step
 
-   PixelWalkerEdge(                          ) {_active=false;}
-   PixelWalkerEdge(C Vec2 &start, C Vec2 &end) {T.start(start, end);}
+   PixelEdgeWalker(                          ) {_active=false;}
+   PixelEdgeWalker(C Vec2 &start, C Vec2 &end) {T.start(start, end);}
 
 #if !EE_PRIVATE
 private:
@@ -357,7 +367,7 @@ private:
    Int  _steps, _pos;
    Vec2 _posr, _pos_next, _step, _pos_end;
 };
-struct PixelWalkerEdgeMask : PixelWalkerEdge // iterates through pixels of a rasterized line and returns intersections with the edges only within a specified mask
+struct PixelEdgeWalkerMask : PixelEdgeWalker // iterates through pixels of a rasterized edge and returns intersections with the edges only within a specified mask
 {
    // set
    void start(C Vec2 &start, C Vec2 &end, C RectI &mask); // start walking from 'start' to 'end', 'mask'=process pixels only within this inclusive rectangle
@@ -365,11 +375,67 @@ struct PixelWalkerEdgeMask : PixelWalkerEdge // iterates through pixels of a ras
    // operations
    void step(); // make a single step
 
-   PixelWalkerEdgeMask(                                         ) {}
-   PixelWalkerEdgeMask(C Vec2 &start, C Vec2 &end, C RectI &mask) {T.start(start, end, mask);}
+   PixelEdgeWalkerMask(                                         ) {}
+   PixelEdgeWalkerMask(C Vec2 &start, C Vec2 &end, C RectI &mask) {T.start(start, end, mask);}
 
 private:
    Rect _mask;
+};
+/******************************************************************************/
+struct SpherePixelWalker // iterates through pixels of a rasterized edge on a spherical grid
+{
+   // get
+   Bool   active()C {return _active;} // if  walker still active
+ C VecI2& posi  ()C {return _posi  ;} // get current position in pixel coordinates
+ C Vec2 & posr  ()C {return _posr  ;} // get current position in real  coordinates, this will be set to 'start', then at each edge intersection, this will not return 'end'
+
+   // set
+   void start(C Vec2 &start, C Vec2 &end                          ); // start walking from 'start' to 'end'
+   void start(C Vec2 &start, C Vec2 &end, C VecI2 &area, Int areas); // start walking from 'start' to 'end', clip walking only within 'area' out of total 'areas'
+
+   // operations
+   void step(); // make a single step
+
+   SpherePixelWalker(C SphereConvert &sc                            ) : sc(sc) {_active=false;}
+   SpherePixelWalker(C SphereConvert &sc, C Vec2 &start, C Vec2 &end) : sc(sc) {T.start(start, end);}
+
+ C SphereConvert &sc;
+
+#if !EE_PRIVATE
+private:
+#endif
+   Bool   _active;
+   VecSB2 _sign, _sign_pos;
+   VecI2  _posi, _endi;
+   Vec2   _posr, _delta;
+};
+struct SpherePixelWalker1 // iterates through pixels of a rasterized edge on a spherical grid, this returns one extra step with 'posr' set to 'end'
+{
+   // get
+   Bool   active()C {return _active!=0;} // if  walker still active
+   Bool   last  ()C {return _active==1;} // if  this is the last extra step at 'end'
+ C VecI2& posi  ()C {return _posi     ;} // get current position in pixel coordinates
+ C Vec2 & posr  ()C {return _posr     ;} // get current position in real  coordinates, this will be set to 'start', then at each edge intersection, then 'end'
+
+   // set
+   void start(C Vec2 &start, C Vec2 &end                          ); // start walking from 'start' to 'end'
+   void start(C Vec2 &start, C Vec2 &end, C VecI2 &area, Int areas); // start walking from 'start' to 'end', clip walking only within 'area' out of total 'areas'
+
+   // operations
+   void step(); // make a single step
+
+   SpherePixelWalker1(C SphereConvert &sc                            ) : sc(sc) {_active=0;}
+   SpherePixelWalker1(C SphereConvert &sc, C Vec2 &start, C Vec2 &end) : sc(sc) {T.start(start, end);}
+
+ C SphereConvert &sc;
+
+#if !EE_PRIVATE
+private:
+#endif
+   Byte   _active;
+   VecSB2 _sign, _sign_pos;
+   VecI2  _posi, _endi;
+   Vec2   _posr, _endr, _delta;
 };
 /******************************************************************************/
 struct VoxelWalker // iterates through voxels of a rasterized edge
@@ -404,6 +470,7 @@ inline Edge  ::Edge  (C EdgeD  &edge) {p[0]=edge.p[0]; p[1]=edge.p[1];}
 inline EdgeD ::EdgeD (C Edge   &edge) {p[0]=edge.p[0]; p[1]=edge.p[1];}
 /******************************************************************************/
 // distance between point and a straight line, 'line_dir'=line direction (must be normalized)
+Flt DistPointLine(C Vec   &point,                    C Vec   &line_dir); // this function assumes that line position is Vec(0,0,0)
 Flt DistPointLine(C Vec2  &point, C Vec2  &line_pos, C Vec2  &line_dir);
 Dbl DistPointLine(C VecD2 &point, C VecD2 &line_pos, C VecD2 &line_dir);
 Flt DistPointLine(C Vec   &point, C Vec   &line_pos, C Vec   &line_dir);
@@ -411,6 +478,7 @@ Dbl DistPointLine(C VecD  &point, C Vec   &line_pos, C Vec   &line_dir);
 Dbl DistPointLine(C VecD  &point, C VecD  &line_pos, C VecD  &line_dir);
 
 // squared distance between point and a straight line, 'line_dir'=line direction (must be normalized)
+Flt Dist2PointLine(C Vec   &point,                    C Vec   &line_dir); // this function assumes that line position is Vec(0,0,0)
 Flt Dist2PointLine(C Vec2  &point, C Vec2  &line_pos, C Vec2  &line_dir);
 Dbl Dist2PointLine(C VecD2 &point, C VecD2 &line_pos, C VecD2 &line_dir);
 Flt Dist2PointLine(C Vec   &point, C Vec   &line_pos, C Vec   &line_dir);

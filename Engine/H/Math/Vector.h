@@ -57,31 +57,33 @@
 #define EPS_ANIM_POS      0.0002f           // Animation Position Epsilon (default value used for optimizing animation positions)
 #define EPS_ANIM_SCALE    0.0002f           // Animation Scale    Epsilon (default value used for optimizing animation scales)
 #define EPS_ANIM_ANGLE    0.0002f           // Animation Angle    Epsilon (default value used for optimizing animation rotation angles)
-#define EPS_COL8          (0.5f/ 256)       // Color              Epsilon (this gives  8-bit color precision)
-#define EPS_COL           (0.5f/1024)       // Color              Epsilon (this gives 10-bit color precision)
-#define EPS_COL8_COS      (1-EPS_COL8)      // Color Cos          Epsilon (Dot product of 2 directional vectors giving  8-bit color precision)
-#define EPS_COL_COS       (1-EPS_COL)       // Color Cos          Epsilon (Dot product of 2 directional vectors giving 10-bit color precision)
 #define EPS_COS           0.9999995f        // Cos Flt            Epsilon (Smallest Dot product of the same normalized directional Vec  vector)
 #define EPSD_COS          0.999999999999999 // Cos Dbl            Epsilon (Smallest Dot product of the same normalized directional VecD vector)
 #define EPS_NRM_AUTO      PI_3              // Normal Angle       Epsilon (used for calculating vertex normals)
 
+#define EPS_COL8          (0.5f/ 256)                                     // Color     Epsilon (this gives  8-bit color precision)
+#define EPS_COL           (0.5f/1024)                                     // Color     Epsilon (this gives 10-bit color precision)
+#define EPS_COL8_COS      (1-EPS_COL8)                                    // Color Cos Epsilon (Dot product of 2 directional vectors giving  8-bit color precision)
+#define EPS_COL_COS       (1-EPS_COL)                                     // Color Cos Epsilon (Dot product of 2 directional vectors giving 10-bit color precision)
+#define EPS_COL8_LINEAR   0.000151171f                                    // EPS_COL8 in linear Gamma, SRGBToLinear(0.5/ 256  )  , Warning: can be used only when comparing with 0
+#define EPS_COL_LINEAR    0.000037793f                                    // EPS_COL  in linear Gamma, SRGBToLinear(0.5/1024  )  , Warning: can be used only when comparing with 0
+
 #if EE_PRIVATE
-#define EPS_COL8_LINEAR        0.000151171f                                    // EPS_COL8 in linear Gamma, SRGBToLinear(0.5/ 256  )  , Warning: can be used only when comparing with 0
-#define EPS_COL_LINEAR         0.000037793f                                    // EPS_COL  in linear Gamma, SRGBToLinear(0.5/1024  )  , Warning: can be used only when comparing with 0
-#define EPS_COL8_NATIVE        (LINEAR_GAMMA ? EPS_COL8_LINEAR   : EPS_COL8  ) //                                                       Warning: can be used only when comparing with 0
-#define EPS_COL_NATIVE         (LINEAR_GAMMA ? EPS_COL_LINEAR    : EPS_COL   ) //                                                       Warning: can be used only when comparing with 0
-#define EPS_COL8_1             EPS_COL8                                        //                                                       Warning: can be used only when comparing with 1
-#define EPS_COL_1              EPS_COL                                         //                                                       Warning: can be used only when comparing with 1
-#define EPS_COL8_1_LINEAR      0.004448891f                                    // EPS_COL8 in linear Gamma, SRGBToLinear(0.5/ 256+1)-1, Warning: can be used only when comparing with 1
-#define EPS_COL_1_LINEAR       0.001111269f                                    // EPS_COL  in linear Gamma, SRGBToLinear(0.5/1024+1)-1, Warning: can be used only when comparing with 1
-#define EPS_COL8_1_NATIVE      (LINEAR_GAMMA ? EPS_COL8_1_LINEAR : EPS_COL8_1) //                                                       Warning: can be used only when comparing with 1
-#define EPS_COL_1_NATIVE       (LINEAR_GAMMA ? EPS_COL_1_LINEAR  : EPS_COL_1 ) //                                                       Warning: can be used only when comparing with 1
-#define EPS_GPU                (MOBILE ? HALF_EPS : FLT_EPS)                   // GPU             Epsilon (Mobile GPU's may have only half precision)
-#define EPS_ANIM_BLEND         (1.0f/4096)                                     // Animation Blend Epsilon (default value used for ignoring animations)
-#define EPS_SKY_MIN_LERP_DIST  (1.0f/8)                                        // 12.5 cm
-#define EPS_SKY_MIN_VIEW_RANGE 0.999f                                          // 0.999f was the biggest value that caused holes to disappear
-#define EPS_TAN_COS            EPS_COL_COS                                     // use strict eps to merge only if are the same, strict eps doesn't significantly increase the vertex count, on few test models vtx count was only 1% bigger when compared to 0 eps
-#define EPS_BIN_COS            0                                               // can use 0 for 'Dot' (to differentiate only if binormals are on the same side) because binormals are stored in MeshRender using 1-bit only and reconstructed as "Cross(nrm, tan)" or "-Cross(nrm, tan)"
+#define EPS_COL8_NATIVE   (LINEAR_GAMMA ? EPS_COL8_LINEAR   : EPS_COL8  ) //                                                       Warning: can be used only when comparing with 0
+#define EPS_COL_NATIVE    (LINEAR_GAMMA ? EPS_COL_LINEAR    : EPS_COL   ) //                                                       Warning: can be used only when comparing with 0
+#define EPS_COL8_1        EPS_COL8                                        //                                                       Warning: can be used only when comparing with 1
+#define EPS_COL_1         EPS_COL                                         //                                                       Warning: can be used only when comparing with 1
+#define EPS_COL8_1_LINEAR 0.004448891f                                    // EPS_COL8 in linear Gamma, SRGBToLinear(0.5/ 256+1)-1, Warning: can be used only when comparing with 1
+#define EPS_COL_1_LINEAR  0.001111269f                                    // EPS_COL  in linear Gamma, SRGBToLinear(0.5/1024+1)-1, Warning: can be used only when comparing with 1
+#define EPS_COL8_1_NATIVE (LINEAR_GAMMA ? EPS_COL8_1_LINEAR : EPS_COL8_1) //                                                       Warning: can be used only when comparing with 1
+#define EPS_COL_1_NATIVE  (LINEAR_GAMMA ? EPS_COL_1_LINEAR  : EPS_COL_1 ) //                                                       Warning: can be used only when comparing with 1
+
+#define EPS_GPU                (MOBILE ? HALF_EPS : FLT_EPS) // GPU             Epsilon (Mobile GPU's may have only half precision)
+#define EPS_ANIM_BLEND         (1.0f/4096)                   // Animation Blend Epsilon (default value used for ignoring animations)
+#define EPS_SKY_MIN_LERP_DIST  (1.0f/8)                      // 12.5 cm
+#define EPS_SKY_MIN_VIEW_RANGE 0.999f                        // 0.999f was the biggest value that caused holes to disappear
+#define EPS_TAN_COS            EPS_COL_COS                   // use strict eps to merge only if are the same, strict eps doesn't significantly increase the vertex count, on few test models vtx count was only 1% bigger when compared to 0 eps
+#define EPS_BIN_COS            0                             // can use 0 for 'Dot' (to differentiate only if binormals are on the same side) because binormals are stored in MeshRender using 1-bit only and reconstructed as "Cross(nrm, tan)" or "-Cross(nrm, tan)"
 #endif
 /******************************************************************************/
 enum AXIS_TYPE
@@ -1510,6 +1512,16 @@ struct VecUS2 // Vector 2D (Unsigned Short)
    friend Vec2 operator* (Flt f, C VecUS2 &v) {return Vec2(f*v.x, f*v.y);}
    friend Vec2 operator/ (Flt f, C VecUS2 &v) {return Vec2(f/v.x, f/v.y);}
 
+   friend Vec2 operator+ (C VecUS2 &a, C Vec2 &b) {return Vec2(a.x+b.x, a.y+b.y);}
+   friend Vec2 operator- (C VecUS2 &a, C Vec2 &b) {return Vec2(a.x-b.x, a.y-b.y);}
+   friend Vec2 operator* (C VecUS2 &a, C Vec2 &b) {return Vec2(a.x*b.x, a.y*b.y);}
+   friend Vec2 operator/ (C VecUS2 &a, C Vec2 &b) {return Vec2(a.x/b.x, a.y/b.y);}
+
+   friend Vec2 operator+ (C Vec2 &a, C VecUS2 &b) {return Vec2(a.x+b.x, a.y+b.y);}
+   friend Vec2 operator- (C Vec2 &a, C VecUS2 &b) {return Vec2(a.x-b.x, a.y-b.y);}
+   friend Vec2 operator* (C Vec2 &a, C VecUS2 &b) {return Vec2(a.x*b.x, a.y*b.y);}
+   friend Vec2 operator/ (C Vec2 &a, C VecUS2 &b) {return Vec2(a.x/b.x, a.y/b.y);}
+
    Bool any()C {return x || y;} // if any component is non-zero
 
               VecUS2() {}
@@ -2234,6 +2246,87 @@ struct VecI4 // Vector 4D (integer)
 };extern VecI4
    const VecI4Zero; // VecI4(0, 0, 0, 0)
 /******************************************************************************/
+inline Bool VecUS2::operator==(C VecUS2 &v)C {return x==v.x && y==v.y;}
+inline Bool VecUS2::operator!=(C VecUS2 &v)C {return x!=v.x || y!=v.y;}
+inline Bool VecUS2::operator==(C VecB2  &v)C {return x==v.x && y==v.y;}
+inline Bool VecUS2::operator!=(C VecB2  &v)C {return x!=v.x || y!=v.y;}
+inline Bool VecUS2::operator==(C VecI2  &v)C {return x==v.x && y==v.y;}
+inline Bool VecUS2::operator!=(C VecI2  &v)C {return x!=v.x || y!=v.y;}
+
+inline Bool VecUS::operator==(C VecUS &v)C {return x==v.x && y==v.y && z==v.z;}
+inline Bool VecUS::operator!=(C VecUS &v)C {return x!=v.x || y!=v.y || z!=v.z;}
+inline Bool VecUS::operator==(C VecB  &v)C {return x==v.x && y==v.y && z==v.z;}
+inline Bool VecUS::operator!=(C VecB  &v)C {return x!=v.x || y!=v.y || z!=v.z;}
+inline Bool VecUS::operator==(C VecI  &v)C {return x==v.x && y==v.y && z==v.z;}
+inline Bool VecUS::operator!=(C VecI  &v)C {return x!=v.x || y!=v.y || z!=v.z;}
+
+inline Bool VecUS4::operator==(C VecUS4 &v)C {return x==v.x && y==v.y && z==v.z && w==v.w;}
+inline Bool VecUS4::operator!=(C VecUS4 &v)C {return x!=v.x || y!=v.y || z!=v.z || w!=v.w;}
+inline Bool VecUS4::operator==(C VecB4  &v)C {return x==v.x && y==v.y && z==v.z && w==v.w;}
+inline Bool VecUS4::operator!=(C VecB4  &v)C {return x!=v.x || y!=v.y || z!=v.z || w!=v.w;}
+inline Bool VecUS4::operator==(C VecI4  &v)C {return x==v.x && y==v.y && z==v.z && w==v.w;}
+inline Bool VecUS4::operator!=(C VecI4  &v)C {return x!=v.x || y!=v.y || z!=v.z || w!=v.w;}
+
+inline Vec2& Vec2::operator+=(C VecD2 &v) {x+=v.x; y+=v.y; return T;}
+inline Vec2& Vec2::operator-=(C VecD2 &v) {x-=v.x; y-=v.y; return T;}
+inline Vec2& Vec2::operator*=(C VecD2 &v) {x*=v.x; y*=v.y; return T;}
+inline Vec2& Vec2::operator/=(C VecD2 &v) {x/=v.x; y/=v.y; return T;}
+
+inline Vec2& Vec2::operator+=(C VecI2 &v) {x+=v.x; y+=v.y; return T;}
+inline Vec2& Vec2::operator-=(C VecI2 &v) {x-=v.x; y-=v.y; return T;}
+inline Vec2& Vec2::operator*=(C VecI2 &v) {x*=v.x; y*=v.y; return T;}
+inline Vec2& Vec2::operator/=(C VecI2 &v) {x/=v.x; y/=v.y; return T;}
+
+inline Vec& Vec::operator+=(C VecD &v) {x+=v.x; y+=v.y; z+=v.z; return T;}
+inline Vec& Vec::operator-=(C VecD &v) {x-=v.x; y-=v.y; z-=v.z; return T;}
+inline Vec& Vec::operator*=(C VecD &v) {x*=v.x; y*=v.y; z*=v.z; return T;}
+inline Vec& Vec::operator/=(C VecD &v) {x/=v.x; y/=v.y; z/=v.z; return T;}
+
+inline Vec& Vec::operator+=(C VecI &v) {x+=v.x; y+=v.y; z+=v.z; return T;}
+inline Vec& Vec::operator-=(C VecI &v) {x-=v.x; y-=v.y; z-=v.z; return T;}
+inline Vec& Vec::operator*=(C VecI &v) {x*=v.x; y*=v.y; z*=v.z; return T;}
+inline Vec& Vec::operator/=(C VecI &v) {x/=v.x; y/=v.y; z/=v.z; return T;}
+
+inline Vec4& Vec4::operator+=(C VecD4 &v) {x+=v.x; y+=v.y; z+=v.z; w+=v.w; return T;}
+inline Vec4& Vec4::operator-=(C VecD4 &v) {x-=v.x; y-=v.y; z-=v.z; w-=v.w; return T;}
+inline Vec4& Vec4::operator*=(C VecD4 &v) {x*=v.x; y*=v.y; z*=v.z; w*=v.w; return T;}
+inline Vec4& Vec4::operator/=(C VecD4 &v) {x/=v.x; y/=v.y; z/=v.z; w/=v.w; return T;}
+
+inline Vec4& Vec4::operator+=(C VecI4 &v) {x+=v.x; y+=v.y; z+=v.z; w+=v.w; return T;}
+inline Vec4& Vec4::operator-=(C VecI4 &v) {x-=v.x; y-=v.y; z-=v.z; w-=v.w; return T;}
+inline Vec4& Vec4::operator*=(C VecI4 &v) {x*=v.x; y*=v.y; z*=v.z; w*=v.w; return T;}
+inline Vec4& Vec4::operator/=(C VecI4 &v) {x/=v.x; y/=v.y; z/=v.z; w/=v.w; return T;}
+
+inline VecD2 operator+ (C Vec2 &v, Dbl r) {return VecD2(v.x+r, v.y+r);}
+inline VecD2 operator- (C Vec2 &v, Dbl r) {return VecD2(v.x-r, v.y-r);}
+inline VecD2 operator* (C Vec2 &v, Dbl r) {return VecD2(v.x*r, v.y*r);}
+inline VecD2 operator/ (C Vec2 &v, Dbl r) {return VecD2(v.x/r, v.y/r);}
+
+inline VecD2 operator+ (Dbl r, C Vec2 &v) {return VecD2(r+v.x, r+v.y);}
+inline VecD2 operator- (Dbl r, C Vec2 &v) {return VecD2(r-v.x, r-v.y);}
+inline VecD2 operator* (Dbl r, C Vec2 &v) {return VecD2(r*v.x, r*v.y);}
+inline VecD2 operator/ (Dbl r, C Vec2 &v) {return VecD2(r/v.x, r/v.y);}
+
+inline VecD operator+ (C Vec &v, Dbl r) {return VecD(v.x+r, v.y+r, v.z+r);}
+inline VecD operator- (C Vec &v, Dbl r) {return VecD(v.x-r, v.y-r, v.z-r);}
+inline VecD operator* (C Vec &v, Dbl r) {return VecD(v.x*r, v.y*r, v.z*r);}
+inline VecD operator/ (C Vec &v, Dbl r) {return VecD(v.x/r, v.y/r, v.z/r);}
+
+inline VecD operator+ (Dbl r, C Vec &v) {return VecD(r+v.x, r+v.y, r+v.z);}
+inline VecD operator- (Dbl r, C Vec &v) {return VecD(r-v.x, r-v.y, r-v.z);}
+inline VecD operator* (Dbl r, C Vec &v) {return VecD(r*v.x, r*v.y, r*v.z);}
+inline VecD operator/ (Dbl r, C Vec &v) {return VecD(r/v.x, r/v.y, r/v.z);}
+
+inline VecD operator* (C Vec &v, C OrientD &o) {return VecD(v)*=o;}
+inline VecD operator* (C Vec &v, C OrientM &o) {return VecD(v)*=o;}
+
+inline VecD operator* (C Vec &v, C MatrixD3 &m) {return VecD(v)*=m;}
+inline VecD operator* (C Vec &v, C MatrixM  &m) {return VecD(v)*=m;}
+inline VecD operator* (C Vec &v, C MatrixD  &m) {return VecD(v)*=m;}
+inline VecD operator/ (C Vec &v, C MatrixD3 &m) {return VecD(v)/=m;}
+inline VecD operator/ (C Vec &v, C MatrixM  &m) {return VecD(v)/=m;}
+inline VecD operator/ (C Vec &v, C MatrixD  &m) {return VecD(v)/=m;}
+/******************************************************************************/
 // ROUNDING
 /******************************************************************************/
 // truncate, remove fractional part, Sample Usage: Trunc(7.3) -> 7, Trunc(7.9) -> 7
@@ -2357,148 +2450,6 @@ inline    Dbl   AlignCeil (Dbl   x, Dbl   align) {return    ceil  (x/ align)*ali
 /******************************************************************************/
 // FUNCTIONS
 /******************************************************************************/
-inline VecB2 ::VecB2 (C VecI2  &v) {set(v.x, v.y          );}
-inline VecSB2::VecSB2(C VecI2  &v) {set(v.x, v.y          );}
-inline VecB  ::VecB  (C VecI   &v) {set(v.x, v.y, v.z     );}
-inline VecSB ::VecSB (C VecI   &v) {set(v.x, v.y, v.z     );}
-inline VecB4 ::VecB4 (C VecI4  &v) {set(v.x, v.y, v.z, v.w);}
-inline VecB4 ::VecB4 (C VecUS4 &v) {set(v.x, v.y, v.z, v.w);}
-inline VecSB4::VecSB4(C VecI4  &v) {set(v.x, v.y, v.z, v.w);}
-inline VecUS2::VecUS2(C VecB2  &v) {set(v.x, v.y          );}
-inline VecUS2::VecUS2(C VecI2  &v) {set(v.x, v.y          );}
-inline VecUS ::VecUS (C VecB   &v) {set(v.x, v.y, v.z     );}
-inline VecUS ::VecUS (C VecI   &v) {set(v.x, v.y, v.z     );}
-inline VecUS4::VecUS4(C VecB4  &v) {set(v.x, v.y, v.z, v.w);}
-inline VecUS4::VecUS4(C VecI4  &v) {set(v.x, v.y, v.z, v.w);}
-inline Vec2  ::Vec2  (C VecH2  &v) {set(v.x, v.y          );}
-inline Vec2  ::Vec2  (C VecD2  &v) {set(v.x, v.y          );}
-inline Vec2  ::Vec2  (C VecI2  &v) {set(v.x, v.y          );}
-inline Vec2  ::Vec2  (C VecB2  &v) {set(v.x, v.y          );}
-inline Vec2  ::Vec2  (C VecSB2 &v) {set(v.x, v.y          );}
-inline Vec2  ::Vec2  (C VecUS2 &v) {set(v.x, v.y          );}
-inline VecD2 ::VecD2 (C VecH2  &v) {set(v.x, v.y          );}
-inline VecD2 ::VecD2 (C Vec2   &v) {set(v.x, v.y          );}
-inline VecD2 ::VecD2 (C VecI2  &v) {set(v.x, v.y          );}
-inline VecD2 ::VecD2 (C VecB2  &v) {set(v.x, v.y          );}
-inline VecD2 ::VecD2 (C VecSB2 &v) {set(v.x, v.y          );}
-inline VecD2 ::VecD2 (C VecUS2 &v) {set(v.x, v.y          );}
-inline Vec   ::Vec   (C VecH   &v) {set(v.x, v.y, v.z     );}
-inline Vec   ::Vec   (C VecD   &v) {set(v.x, v.y, v.z     );}
-inline Vec   ::Vec   (C VecI   &v) {set(v.x, v.y, v.z     );}
-inline Vec   ::Vec   (C VecB   &v) {set(v.x, v.y, v.z     );}
-inline Vec   ::Vec   (C VecSB  &v) {set(v.x, v.y, v.z     );}
-inline VecD  ::VecD  (C VecH   &v) {set(v.x, v.y, v.z     );}
-inline VecD  ::VecD  (C Vec    &v) {set(v.x, v.y, v.z     );}
-inline VecD  ::VecD  (C VecI   &v) {set(v.x, v.y, v.z     );}
-inline VecD  ::VecD  (C VecB   &v) {set(v.x, v.y, v.z     );}
-inline VecD  ::VecD  (C VecSB  &v) {set(v.x, v.y, v.z     );}
-inline Vec4  ::Vec4  (C VecH4  &v) {set(v.x, v.y, v.z, v.w);}
-inline Vec4  ::Vec4  (C VecD4  &v) {set(v.x, v.y, v.z, v.w);}
-inline Vec4  ::Vec4  (C VecI4  &v) {set(v.x, v.y, v.z, v.w);}
-inline Vec4  ::Vec4  (C VecB4  &v) {set(v.x, v.y, v.z, v.w);}
-inline Vec4  ::Vec4  (C VecSB4 &v) {set(v.x, v.y, v.z, v.w);}
-inline Vec4  ::Vec4  (C VecUS4 &v) {set(v.x, v.y, v.z, v.w);}
-inline VecD4 ::VecD4 (C VecH4  &v) {set(v.x, v.y, v.z, v.w);}
-inline VecD4 ::VecD4 (C Vec4   &v) {set(v.x, v.y, v.z, v.w);}
-inline VecD4 ::VecD4 (C VecI4  &v) {set(v.x, v.y, v.z, v.w);}
-inline VecD4 ::VecD4 (C VecB4  &v) {set(v.x, v.y, v.z, v.w);}
-inline VecD4 ::VecD4 (C VecSB4 &v) {set(v.x, v.y, v.z, v.w);}
-inline VecD4 ::VecD4 (C VecUS4 &v) {set(v.x, v.y, v.z, v.w);}
-
-inline Vec  Vec2 :: xy0()C {return Vec (x, y, 0);}
-inline Vec  Vec2 :: x0y()C {return Vec (x, 0, y);}
-inline Vec  Vec2 ::_0xy()C {return Vec (0, x, y);}
-inline Vec  Vec2 ::_0yx()C {return Vec (0, y, x);}
-inline VecD VecD2:: xy0()C {return VecD(x, y, 0);}
-inline VecD VecD2:: x0y()C {return VecD(x, 0, y);}
-inline VecD VecD2::_0xy()C {return VecD(0, x, y);}
-inline VecD VecD2::_0yx()C {return VecD(0, y, x);}
-inline VecI VecI2:: xy0()C {return VecI(x, y, 0);}
-inline VecI VecI2:: x0y()C {return VecI(x, 0, y);}
-inline VecI VecI2::_0xy()C {return VecI(0, x, y);}
-inline VecI VecI2::_0yx()C {return VecI(0, y, x);}
-
-inline Bool VecUS2::operator==(C VecUS2 &v)C {return x==v.x && y==v.y;}
-inline Bool VecUS2::operator!=(C VecUS2 &v)C {return x!=v.x || y!=v.y;}
-inline Bool VecUS2::operator==(C VecB2  &v)C {return x==v.x && y==v.y;}
-inline Bool VecUS2::operator!=(C VecB2  &v)C {return x!=v.x || y!=v.y;}
-inline Bool VecUS2::operator==(C VecI2  &v)C {return x==v.x && y==v.y;}
-inline Bool VecUS2::operator!=(C VecI2  &v)C {return x!=v.x || y!=v.y;}
-
-inline Bool VecUS::operator==(C VecUS &v)C {return x==v.x && y==v.y && z==v.z;}
-inline Bool VecUS::operator!=(C VecUS &v)C {return x!=v.x || y!=v.y || z!=v.z;}
-inline Bool VecUS::operator==(C VecB  &v)C {return x==v.x && y==v.y && z==v.z;}
-inline Bool VecUS::operator!=(C VecB  &v)C {return x!=v.x || y!=v.y || z!=v.z;}
-inline Bool VecUS::operator==(C VecI  &v)C {return x==v.x && y==v.y && z==v.z;}
-inline Bool VecUS::operator!=(C VecI  &v)C {return x!=v.x || y!=v.y || z!=v.z;}
-
-inline Bool VecUS4::operator==(C VecUS4 &v)C {return x==v.x && y==v.y && z==v.z && w==v.w;}
-inline Bool VecUS4::operator!=(C VecUS4 &v)C {return x!=v.x || y!=v.y || z!=v.z || w!=v.w;}
-inline Bool VecUS4::operator==(C VecB4  &v)C {return x==v.x && y==v.y && z==v.z && w==v.w;}
-inline Bool VecUS4::operator!=(C VecB4  &v)C {return x!=v.x || y!=v.y || z!=v.z || w!=v.w;}
-inline Bool VecUS4::operator==(C VecI4  &v)C {return x==v.x && y==v.y && z==v.z && w==v.w;}
-inline Bool VecUS4::operator!=(C VecI4  &v)C {return x!=v.x || y!=v.y || z!=v.z || w!=v.w;}
-
-inline Vec2& Vec2::operator+=(C VecD2 &v) {x+=v.x; y+=v.y; return T;}
-inline Vec2& Vec2::operator-=(C VecD2 &v) {x-=v.x; y-=v.y; return T;}
-inline Vec2& Vec2::operator*=(C VecD2 &v) {x*=v.x; y*=v.y; return T;}
-inline Vec2& Vec2::operator/=(C VecD2 &v) {x/=v.x; y/=v.y; return T;}
-
-inline Vec2& Vec2::operator+=(C VecI2 &v) {x+=v.x; y+=v.y; return T;}
-inline Vec2& Vec2::operator-=(C VecI2 &v) {x-=v.x; y-=v.y; return T;}
-inline Vec2& Vec2::operator*=(C VecI2 &v) {x*=v.x; y*=v.y; return T;}
-inline Vec2& Vec2::operator/=(C VecI2 &v) {x/=v.x; y/=v.y; return T;}
-
-inline Vec& Vec::operator+=(C VecD &v) {x+=v.x; y+=v.y; z+=v.z; return T;}
-inline Vec& Vec::operator-=(C VecD &v) {x-=v.x; y-=v.y; z-=v.z; return T;}
-inline Vec& Vec::operator*=(C VecD &v) {x*=v.x; y*=v.y; z*=v.z; return T;}
-inline Vec& Vec::operator/=(C VecD &v) {x/=v.x; y/=v.y; z/=v.z; return T;}
-
-inline Vec& Vec::operator+=(C VecI &v) {x+=v.x; y+=v.y; z+=v.z; return T;}
-inline Vec& Vec::operator-=(C VecI &v) {x-=v.x; y-=v.y; z-=v.z; return T;}
-inline Vec& Vec::operator*=(C VecI &v) {x*=v.x; y*=v.y; z*=v.z; return T;}
-inline Vec& Vec::operator/=(C VecI &v) {x/=v.x; y/=v.y; z/=v.z; return T;}
-
-inline Vec4& Vec4::operator+=(C VecD4 &v) {x+=v.x; y+=v.y; z+=v.z; w+=v.w; return T;}
-inline Vec4& Vec4::operator-=(C VecD4 &v) {x-=v.x; y-=v.y; z-=v.z; w-=v.w; return T;}
-inline Vec4& Vec4::operator*=(C VecD4 &v) {x*=v.x; y*=v.y; z*=v.z; w*=v.w; return T;}
-inline Vec4& Vec4::operator/=(C VecD4 &v) {x/=v.x; y/=v.y; z/=v.z; w/=v.w; return T;}
-
-inline Vec4& Vec4::operator+=(C VecI4 &v) {x+=v.x; y+=v.y; z+=v.z; w+=v.w; return T;}
-inline Vec4& Vec4::operator-=(C VecI4 &v) {x-=v.x; y-=v.y; z-=v.z; w-=v.w; return T;}
-inline Vec4& Vec4::operator*=(C VecI4 &v) {x*=v.x; y*=v.y; z*=v.z; w*=v.w; return T;}
-inline Vec4& Vec4::operator/=(C VecI4 &v) {x/=v.x; y/=v.y; z/=v.z; w/=v.w; return T;}
-
-inline VecD2 operator+ (C Vec2 &v, Dbl r) {return VecD2(v.x+r, v.y+r);}
-inline VecD2 operator- (C Vec2 &v, Dbl r) {return VecD2(v.x-r, v.y-r);}
-inline VecD2 operator* (C Vec2 &v, Dbl r) {return VecD2(v.x*r, v.y*r);}
-inline VecD2 operator/ (C Vec2 &v, Dbl r) {return VecD2(v.x/r, v.y/r);}
-
-inline VecD2 operator+ (Dbl r, C Vec2 &v) {return VecD2(r+v.x, r+v.y);}
-inline VecD2 operator- (Dbl r, C Vec2 &v) {return VecD2(r-v.x, r-v.y);}
-inline VecD2 operator* (Dbl r, C Vec2 &v) {return VecD2(r*v.x, r*v.y);}
-inline VecD2 operator/ (Dbl r, C Vec2 &v) {return VecD2(r/v.x, r/v.y);}
-
-inline VecD operator+ (C Vec &v, Dbl r) {return VecD(v.x+r, v.y+r, v.z+r);}
-inline VecD operator- (C Vec &v, Dbl r) {return VecD(v.x-r, v.y-r, v.z-r);}
-inline VecD operator* (C Vec &v, Dbl r) {return VecD(v.x*r, v.y*r, v.z*r);}
-inline VecD operator/ (C Vec &v, Dbl r) {return VecD(v.x/r, v.y/r, v.z/r);}
-
-inline VecD operator+ (Dbl r, C Vec &v) {return VecD(r+v.x, r+v.y, r+v.z);}
-inline VecD operator- (Dbl r, C Vec &v) {return VecD(r-v.x, r-v.y, r-v.z);}
-inline VecD operator* (Dbl r, C Vec &v) {return VecD(r*v.x, r*v.y, r*v.z);}
-inline VecD operator/ (Dbl r, C Vec &v) {return VecD(r/v.x, r/v.y, r/v.z);}
-
-inline VecD operator* (C Vec &v, C OrientD &o) {return VecD(v)*=o;}
-inline VecD operator* (C Vec &v, C OrientM &o) {return VecD(v)*=o;}
-
-inline VecD operator* (C Vec &v, C MatrixD3 &m) {return VecD(v)*=m;}
-inline VecD operator* (C Vec &v, C MatrixM  &m) {return VecD(v)*=m;}
-inline VecD operator* (C Vec &v, C MatrixD  &m) {return VecD(v)*=m;}
-inline VecD operator/ (C Vec &v, C MatrixD3 &m) {return VecD(v)/=m;}
-inline VecD operator/ (C Vec &v, C MatrixM  &m) {return VecD(v)/=m;}
-inline VecD operator/ (C Vec &v, C MatrixD  &m) {return VecD(v)/=m;}
-
 // minimum & maximum
 inline Vec2  Min(C Vec2  &a, C Vec2  &b) {return Vec2 (Min(a.x,b.x), Min(a.y,b.y)                            );}
 inline VecI2 Min(C VecI2 &a, C VecI2 &b) {return VecI2(Min(a.x,b.x), Min(a.y,b.y)                            );}
@@ -2614,6 +2565,10 @@ Dbl Cross(C VecD2 &a, C VecD2 &b);
 // cross product
 Vec  Cross(C Vec  &a, C Vec  &b);
 VecD Cross(C VecD &a, C VecD &b);
+#if EE_PRIVATE
+inline Vec CrossRight(C Vec &b) {return Vec(0, -b.z, b.y);} // same as "Cross(Vec(1, 0, 0), b)"
+inline Vec CrossUp   (C Vec &b) {return Vec(b.z, 0, -b.x);} // same as "Cross(Vec(0, 1, 0), b)"
+#endif
 
 // cross product normalized
 Vec  CrossN(C Vec  &a, C Vec  &b);
@@ -2755,6 +2710,9 @@ void Reverse(VecI4 *v, Int num);
 // swap X Z components in vectors
 void SwapXZ(VecI  *v, Int num);
 void SwapXZ(VecI4 *v, Int num);
+
+inline Vec2  ProjectZ(C Vec  &v) {return v.xy/v.z;}
+inline VecD2 ProjectZ(C VecD &v) {return v.xy/v.z;}
 
 #if EE_PRIVATE
 // convert from right hand to left hand coordinate system

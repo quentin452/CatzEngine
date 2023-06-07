@@ -861,7 +861,7 @@ Bool MeshPart::loadData(File &f, CChar *path, Int lod_index)
 
       case 7:
       {
-         f.getStr(name).getMulti(part_flag, uv_scale, _draw_mask, _draw_mask_enum_id); if(uv_scale)part_flag|=MSHP_HEIGHTMAP;
+         f.getStr(name).getMulti(part_flag, uv_scale, _draw_mask, _draw_mask_enum_id); if(uv_scale)part_flag|=MSHP_HEIGHTMAP_FLAT;
         _materials[0].require(f.getAssetID(), path);
         _materials[1].require(f.getAssetID(), path);
         _materials[2].require(f.getAssetID(), path);
@@ -874,7 +874,7 @@ Bool MeshPart::loadData(File &f, CChar *path, Int lod_index)
 
       case 6:
       {
-         f._getStr1(name).getMulti(part_flag, uv_scale, _draw_mask, _draw_mask_enum_id); if(uv_scale)part_flag|=MSHP_HEIGHTMAP;
+         f._getStr1(name).getMulti(part_flag, uv_scale, _draw_mask, _draw_mask_enum_id); if(uv_scale)part_flag|=MSHP_HEIGHTMAP_FLAT;
         _materials[0].require(f.getAssetID(), path);
         _materials[1].require(f.getAssetID(), path);
         _materials[2].require(f.getAssetID(), path);
@@ -887,7 +887,7 @@ Bool MeshPart::loadData(File &f, CChar *path, Int lod_index)
 
       case 5:
       {
-         f>>name; f.getMulti(part_flag, uv_scale, _draw_mask, _draw_mask_enum_id); if(uv_scale)part_flag|=MSHP_HEIGHTMAP;
+         f>>name; f.getMulti(part_flag, uv_scale, _draw_mask, _draw_mask_enum_id); if(uv_scale)part_flag|=MSHP_HEIGHTMAP_FLAT;
         _materials[0].require(f.getAssetID(), path);
         _materials[1].require(f.getAssetID(), path);
         _materials[2].require(f.getAssetID(), path);
@@ -900,7 +900,7 @@ Bool MeshPart::loadData(File &f, CChar *path, Int lod_index)
 
       case 4:
       {
-         f>>name; f.getMulti(part_flag, uv_scale, _draw_mask, _draw_mask_enum_id); if(uv_scale)part_flag|=MSHP_HEIGHTMAP;
+         f>>name; f.getMulti(part_flag, uv_scale, _draw_mask, _draw_mask_enum_id); if(uv_scale)part_flag|=MSHP_HEIGHTMAP_FLAT;
         _variation.material    .require(f._getStr(), path);
                   _materials[0].require(f._getStr(), path);
                   _materials[1].require(f._getStr(), path);
@@ -912,7 +912,7 @@ Bool MeshPart::loadData(File &f, CChar *path, Int lod_index)
 
       case 3:
       {
-         f>>name; f.skip(1); SetOldFlag(T, f.getByte()); f>>uv_scale; if(uv_scale)part_flag|=MSHP_HEIGHTMAP;
+         f>>name; f.skip(1); SetOldFlag(T, f.getByte()); f>>uv_scale; if(uv_scale)part_flag|=MSHP_HEIGHTMAP_FLAT;
         _variation.material    .require(f._getStr(), path);
                   _materials[0].require(f._getStr(), path);
                   _materials[1].require(f._getStr(), path);
@@ -924,7 +924,7 @@ Bool MeshPart::loadData(File &f, CChar *path, Int lod_index)
 
       case 2:
       {
-         f>>name; f.skip(1); SetOldFlag(T, f.getByte()); f.skip(1); f>>uv_scale; if(uv_scale)part_flag|=MSHP_HEIGHTMAP; f.skip(20);
+         f>>name; f.skip(1); SetOldFlag(T, f.getByte()); f.skip(1); f>>uv_scale; if(uv_scale)part_flag|=MSHP_HEIGHTMAP_FLAT; f.skip(20);
         _variation.material    .require(f._getStr(), path);
                   _materials[0].require(f._getStr(), path);
                   _materials[1].require(f._getStr(), path);

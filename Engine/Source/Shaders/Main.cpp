@@ -78,8 +78,41 @@ VecH4 Draw_PS
    return col;
 }
 
-VecH4 Draw2DTex_PS (NOPERSP Vec2 uv:UV):TARGET {return       Tex(Img, uv);}
-VecH4 Draw2DTexC_PS(NOPERSP Vec2 uv:UV):TARGET {return       Tex(Img, uv)*Color[0]+Color[1];}
+VecH4 Draw2DTex_PS (NOPERSP Vec2 uv:UV):TARGET {return Tex(Img, uv);}
+VecH4 Draw2DTexC_PS(NOPERSP Vec2 uv:UV):TARGET {return Tex(Img, uv)*Color[0]+Color[1];}
+
+/* TESTING SHADER SPEED:
+//Flt Angle1(Vec2 xy) {return Angle(xy.yx);}
+//Flt Angle1(Vec2 xy) {return atan2(xy.x, xy.y);}
+//Flt Angle1(Vec2 xy) {return Atan2Fast(xy.x, xy.y);}
+Flt Angle1(Vec2 xy) {return Atan     (xy.x/xy.y);}
+Flt Angle2(Vec2 xy) {return AtanFast (xy.x/xy.y);}
+
+VecH4 Draw2DTex_PS(NOPERSP Vec2 uv:UV):TARGET
+{
+   Vec4 c;//=Tex(Img, uv);
+   c=0;
+   uv-=0.5;
+   int steps=1;
+   LOOP for(Int i=0; i<steps; i++)c.xyz+=Angle1(uv+i*0.01);
+   c.xyz/=steps;
+   c.w  =1;
+   c.xyz=SRGBToLinearFast(c.xyz);
+   return c;
+}
+VecH4 Draw2DTexC_PS(NOPERSP Vec2 uv:UV):TARGET
+{
+   Vec4 c;//=Tex(Img, uv);
+   c=0;
+   uv-=0.5;
+   int steps=1;
+   LOOP for(Int i=0; i<steps; i++)c.xyz+=Angle2(uv+i*0.01);
+   c.xyz/=steps;
+   c.w  =1;
+   c.xyz=SRGBToLinearFast(c.xyz);
+   return c;
+}*/
+
 VecH4 Draw2DTexA_PS(NOPERSP Vec2 uv:UV):TARGET {return VecH4(Tex(Img, uv).rgb, Step);}
 
 #if defined IN0_GAMMA && defined IN1_GAMMA && defined OUT_GAMMA
@@ -523,13 +556,13 @@ void ClearDeferred_PS(NOPERSP Vec projected_prev_pos_xyw:PREV_POS,
                       NOPERSP PIXEL,
    out DeferredOutput output) // #RTOutput
 {
-   output.color  (0);
-   output.glow   (0);
-   output.normal (VecH(0, 0, -1)); // set -1 because of AO #NRM_CLEAR
-   output.mode   (PSM_NONE);
-   output.rough  (1);
-   output.reflect(0);
-   output.motion (projected_prev_pos_xyw, pixel);
+   output.color   (0);
+   output.glow    (0);
+   output.normal  (VecH(0, 0, -1)); // set -1 because of AO #NRM_CLEAR
+   output.mode    (PSM_NONE);
+   output.rough   (1);
+   output.reflect (0);
+   output.motion2D(projected_prev_pos_xyw, pixel); // !! have to specify flat 2D to make sure position won't be maximized with 'Viewport.from' (inside 'GetMotion') which would break calculations if it's >1 because here we specify depth=1 !!
 }
 /******************************************************************************/
 void ClearLight_PS(out VecH lum :TARGET0,
@@ -580,7 +613,7 @@ VecH4 ColorLUT_PS(NOPERSP Vec2 uv:UV,
 // DUMMY - used only to obtain info about ConstantBuffers/ShaderParams
 /******************************************************************************/
 Flt Params0_PS():TARGET {return Highlight.x+FurVel[0].x+FurStep.x+Material.color.a+MultiMaterial0.color.a+MultiMaterial1.color.a+MultiMaterial2.color.a+MultiMaterial3.color.a+TexLod(FurCol, 0).x+TexLod(FurLight, 0).x;}
-Flt Params1_PS():TARGET {return CamMatrix[0].x+AmbientContrast2+HdrBrightness+LocalFogColor.x+OverlayOpaqueFrac()+BehindBias+Step+TransformPosPrev(0);}
+Flt Params1_PS():TARGET {return CamMatrix[0].x+AmbientContrast2+HdrBrightness+LocalFogColor.x+OverlayOpaqueFrac()+BehindBias+Step+TransformPosPrev(0)/*+TexLod(SkyA, 0).x+TexLod(SkyB, 0).x*/;}
 Flt Params2_PS():TARGET {return NightShadeColor.x+ToneMapMonitorMaxLum;}
 /******************************************************************************/
 #if GL // #WebSRGB

@@ -59,7 +59,13 @@ struct Heightmap
    void cleanColor    (); // cleanup heightmap by removing color map if it's not needed
    void clean         (); // cleanup heightmap, this calls 'cleanMaterials' and 'cleanColor'
 
-   void build(Mesh &dest_mesh, Int quality, UInt flag, C Heightmap *l=null, C Heightmap *r=null, C Heightmap *b=null, C Heightmap *f=null, C Heightmap *lb=null, C Heightmap *lf=null, C Heightmap *rb=null, C Heightmap *rf=null, Mems<Byte> *temp_mem=null); // build heightmap into 'dest_mesh', 'quality'=0-full, 1-half, 2-quarter, 'flag'=HM_FLAG, heightmap pointers are optional and represent heightmap neighbors (l-left, r-right, b-back, f-forward), all given heightmaps must be of the same resolution as this heightmap, 'temp_mem'=building heightmap mesh requires certain amount of temporary memory allocated during the process, to avoid dynamic memory allocation everytime this method is called, you may optionally pass 'temp_mem' which this method will use to allocate the memory, you may then reuse the same 'temp_mem' object for subsequent calls to this method which will reuse this memory
+   struct Sphere
+   {
+      VecI2 area;
+      Int   areas;
+      Flt   planet_radius;
+   };
+   void build(Mesh &dest_mesh, Int quality, UInt flag, C Heightmap *l=null, C Heightmap *r=null, C Heightmap *b=null, C Heightmap *f=null, C Heightmap *lb=null, C Heightmap *lf=null, C Heightmap *rb=null, C Heightmap *rf=null, Mems<Byte> *temp_mem=null, C Sphere *sphere=null); // build heightmap into 'dest_mesh', 'quality'=0-full, 1-half, 2-quarter, 'flag'=HM_FLAG, heightmap pointers are optional and represent heightmap neighbors (l-left, r-right, b-back, f-forward), all given heightmaps must be of the same resolution as this heightmap, 'temp_mem'=building heightmap mesh requires certain amount of temporary memory allocated during the process, to avoid dynamic memory allocation everytime this method is called, you may optionally pass 'temp_mem' which this method will use to allocate the memory, you may then reuse the same 'temp_mem' object for subsequent calls to this method which will reuse this memory
 
 #if EE_PRIVATE
    void mtrlBlendHP();
@@ -82,9 +88,8 @@ private:
 
 #if EE_PRIVATE
    struct BuildMem;
-   struct BuildMemSoft;
-   Bool buildEx2(Mesh &mesh, Int quality, UInt flag, BuildMemSoft &mem, C Heightmap *l, C Heightmap *r, C Heightmap *b, C Heightmap *f, C Heightmap *lb, C Heightmap *lf, C Heightmap *rb, C Heightmap *rf); // 'quality'=0-full, 1-half, 2-quarter, 'flag'=HM_FLAG, heightmap pointers are optional and represent heightmap neighbors (l-left, r-right, b-back, f-forward), all given heightmaps must be of the same resolution as this heightmap, false on fail (out of memory)
-   Bool buildEx (Mesh &mesh, Int quality, UInt flag, BuildMemSoft &mem, C Heightmap *l, C Heightmap *r, C Heightmap *b, C Heightmap *f, C Heightmap *lb, C Heightmap *lf, C Heightmap *rb, C Heightmap *rf); // 'quality'=0-full, 1-half, 2-quarter, 'flag'=HM_FLAG, heightmap pointers are optional and represent heightmap neighbors (l-left, r-right, b-back, f-forward), all given heightmaps must be of the same resolution as this heightmap, false on fail (out of memory)
+   Bool buildEx2(Mesh &mesh, Int quality, UInt flag, BuildMem &mem, C Heightmap *l, C Heightmap *r, C Heightmap *b, C Heightmap *f, C Heightmap *lb, C Heightmap *lf, C Heightmap *rb, C Heightmap *rf, C Sphere *sphere); // 'quality'=0-full, 1-half, 2-quarter, 'flag'=HM_FLAG, heightmap pointers are optional and represent heightmap neighbors (l-left, r-right, b-back, f-forward), all given heightmaps must be of the same resolution as this heightmap, false on fail (out of memory)
+   Bool buildEx (Mesh &mesh, Int quality, UInt flag, BuildMem &mem, C Heightmap *l, C Heightmap *r, C Heightmap *b, C Heightmap *f, C Heightmap *lb, C Heightmap *lf, C Heightmap *rb, C Heightmap *rf, C Sphere *sphere); // 'quality'=0-full, 1-half, 2-quarter, 'flag'=HM_FLAG, heightmap pointers are optional and represent heightmap neighbors (l-left, r-right, b-back, f-forward), all given heightmaps must be of the same resolution as this heightmap, false on fail (out of memory)
 #endif
 };
 /******************************************************************************/

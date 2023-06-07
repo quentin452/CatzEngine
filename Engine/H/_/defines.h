@@ -38,7 +38,7 @@
 #define MEMBER_ELMS(Class, member)     ELMS( MEMBER(Class,  member)) // get elements of member in class
 #define  CAST(      Class, object)     dynamic_cast<Class*>(object)  // perform a dynamic cast of 'object' to 'Class' class
 #define SCAST(      Class, object)      static_cast<Class&>(object)  // perform a  static cast of 'object' to 'Class' class
-#define ELMS(       Array        )      (SIZE(Array)/SIZE(Array[0])) // get number of elements in array (this is the compile-time version, use 'Elms' instead of 'ELMS' whenever possible)
+#define ELMS(       Array        )  UInt(SIZE(Array)/SIZE(Array[0])) // get number of elements in array (this is the compile-time version, use 'Elms' instead of 'ELMS' whenever possible)
 #define ENUM_TYPE(  Enum         )     std::underlying_type_t<Enum>  // get the actual type of an enum
 
 T1(TYPE) TYPE& ConstCast(C TYPE &x) {return const_cast<TYPE&>(x);} // remove the const modifier

@@ -78,43 +78,45 @@ struct Application // Application Settings
    void (*joypad_user_changed)(UInt joypad_id                                         ); // pointer to custom function called when user associated with a Joypad has changed. This is called on Windows UWP only.
 
    // get / set
-   Application& name          (C Str &name    );                           // set application name
- C Str&         name          (               )C {return _name          ;} // get application name
- C Str&         exe           (               )C {return _exe           ;} // get executable path and name
-   Application& lang          (LANG_TYPE lang );                           // set application language, some engine messages rely on this value, changing language triggers 'GuiObj.setText' for all gui objects, default=OSLanguage()
-   LANG_TYPE    lang          (               )C {return _lang          ;} // get application language, some engine messages rely on this value, changing language triggers 'GuiObj.setText' for all gui objects, default=OSLanguage()
-   Bool         elevated      (               )C {return _elevated      ;} // get application        process elevation (true if has administrator rights)
-   UInt   parentProcessID     (               )C;                          // get application parent process ID
-   UInt         processID     (               )C {return _process_id    ;} // get application        process ID
-   UIntPtr       threadID     (               )C {return _thread_id     ;} // get application main   thread  ID
- C SysWindow&   window        (               )C {return _window        ;} // get application system window
- C RectI&       desktopArea   (               )C {return _desktop_area  ;} // get available desktop area (not covered by windows taskbar or other desktop toolbars)
- C VecI2&       desktop       (               )C {return _desktop_size  ;} // get screen size   at the moment of application start (desktop size  )
-   Int          desktopW      (               )C {return _desktop_size.x;} // get screen width  at the moment of application start (desktop width )
-   Int          desktopH      (               )C {return _desktop_size.y;} // get screen height at the moment of application start (desktop height)
-   Bool         active        (               )C {return _active        ;} // if  application is active (its window is focused)
-   Bool         minimized     (               )C;                          // if  application is minimized
-   Bool         maximized     (               )C;                          // if  application is maximized
-   Bool         closed        (               )C {return _closed        ;} // if  application has finished closing, this is enabled at the very end of application life cycle, right before all global C++ destructors being called
-   Flt          opacity       (               )C;                          // get application window opacity, 0..1
-   Application& opacity       (Flt opacity    );                           // set application window opacity, 0..1
-   Application& flash         (               );                           // set application window to flash
-   Application& stateNormal   (               );                           // set application window to be displayed as normal                             (this will work only on Window 7 or newer)
-   Application& stateWorking  (               );                           // set application window to be displayed as working with unknown progress      (this will work only on Window 7 or newer)
-   Application& stateProgress (Flt progress   );                           // set application window to be displayed as working with 'progress' 0..1 value (this will work only on Window 7 or newer)
-   Application& statePaused   (Flt progress   );                           // set application window to be displayed as paused  with 'progress' 0..1 value (this will work only on Window 7 or newer)
-   Application& stateError    (Flt progress   );                           // set application window to be displayed as error   with 'progress' 0..1 value (this will work only on Window 7 or newer)
-   Bool         hidden        (               )C;                          // if  application window is hidden
-   Application& hide          (               );                           // set application window to be hidden
-   Application& show          (Bool activate  );                           // set application window to be visible, 'activate'=if also activate
-   DIR_ENUM     orientation   (               )C;                          // get device orientation, this is valid for mobile devices which support accelerometers, for those devices the method will return one of the following orientation: DIR_UP (default), DIR_DOWN (rotated down), DIR_LEFT (rotated left), DIR_RIGHT (rotated right), if the device doesn't support accelerometers then DIR_UP is returned
-   Bool         mainThread    (               )C;                          // if  current thread is the main thread
-   Application& icon          (C Image   &icon);                           // set custom application icon
-   Application& stayAwake     (AWAKE_MODE mode);                           // set preventing the Operating System from going to sleep
- C Str&         backgroundText(               )C {return _back_text     ;} // get text displayed on the Status Bar Notification when App is running in Background mode on Android, default="Running in background"
-   Application& backgroundText(C Str &text    );                           // set text displayed on the Status Bar Notification when App is running in Background mode on Android, default="Running in background"
-   Bool         backgroundFull(               )C {return _back_full     ;} // get if Application is allowed to remain visible on the screen when in fullscreen mode but inactive (if false then application is minimized), default=false
-   Application& backgroundFull(Bool   on      );                           // set if Application is allowed to remain visible on the screen when in fullscreen mode but inactive (if false then application is minimized), default=false
+   Application& name           (C Str &name    );                           // set application name
+ C Str&         name           (               )C {return _name          ;} // get application name
+ C Str&         exe            (               )C {return _exe           ;} // get executable path and name
+   Application& lang           (LANG_TYPE lang );                           // set application language, some engine messages rely on this value, changing language triggers 'GuiObj.setText' for all gui objects, default=OSLanguage()
+   LANG_TYPE    lang           (               )C {return _lang          ;} // get application language, some engine messages rely on this value, changing language triggers 'GuiObj.setText' for all gui objects, default=OSLanguage()
+   Bool         elevated       (               )C {return _elevated      ;} // get application        process elevation (true if has administrator rights)
+   UInt   parentProcessID      (               )C;                          // get application parent process ID
+   UInt         processID      (               )C {return _process_id    ;} // get application        process ID
+   UIntPtr       threadID      (               )C {return _thread_id     ;} // get application main   thread  ID
+   Application&  threadPriority(Int   priority );                           // set application main   thread  priority, 'priority'=-3..3
+   Application&  threadMask    (ULong mask     );                           // set application main   thread  CPU HW Threads on which the thread is allowed to run (every bit specifies different HW Thread)
+ C SysWindow&   window         (               )C {return _window        ;} // get application system window
+ C RectI&       desktopArea    (               )C {return _desktop_area  ;} // get available desktop area (not covered by windows taskbar or other desktop toolbars)
+ C VecI2&       desktop        (               )C {return _desktop_size  ;} // get screen size   at the moment of application start (desktop size  )
+   Int          desktopW       (               )C {return _desktop_size.x;} // get screen width  at the moment of application start (desktop width )
+   Int          desktopH       (               )C {return _desktop_size.y;} // get screen height at the moment of application start (desktop height)
+   Bool         active         (               )C {return _active        ;} // if  application is active (its window is focused)
+   Bool         minimized      (               )C;                          // if  application is minimized
+   Bool         maximized      (               )C;                          // if  application is maximized
+   Bool         closed         (               )C {return _closed        ;} // if  application has finished closing, this is enabled at the very end of application life cycle, right before all global C++ destructors being called
+   Flt          opacity        (               )C;                          // get application window opacity, 0..1
+   Application& opacity        (Flt opacity    );                           // set application window opacity, 0..1
+   Application& flash          (               );                           // set application window to flash
+   Application& stateNormal    (               );                           // set application window to be displayed as normal                             (this will work only on Window 7 or newer)
+   Application& stateWorking   (               );                           // set application window to be displayed as working with unknown progress      (this will work only on Window 7 or newer)
+   Application& stateProgress  (Flt progress   );                           // set application window to be displayed as working with 'progress' 0..1 value (this will work only on Window 7 or newer)
+   Application& statePaused    (Flt progress   );                           // set application window to be displayed as paused  with 'progress' 0..1 value (this will work only on Window 7 or newer)
+   Application& stateError     (Flt progress   );                           // set application window to be displayed as error   with 'progress' 0..1 value (this will work only on Window 7 or newer)
+   Bool         hidden         (               )C;                          // if  application window is hidden
+   Application& hide           (               );                           // set application window to be hidden
+   Application& show           (Bool activate  );                           // set application window to be visible, 'activate'=if also activate
+   DIR_ENUM     orientation    (               )C;                          // get device orientation, this is valid for mobile devices which support accelerometers, for those devices the method will return one of the following orientation: DIR_UP (default), DIR_DOWN (rotated down), DIR_LEFT (rotated left), DIR_RIGHT (rotated right), if the device doesn't support accelerometers then DIR_UP is returned
+   Bool         mainThread     (               )C;                          // if  current thread is the main thread
+   Application& icon           (C Image   &icon);                           // set custom application icon
+   Application& stayAwake      (AWAKE_MODE mode);                           // set preventing the Operating System from going to sleep
+ C Str&         backgroundText (               )C {return _back_text     ;} // get text displayed on the Status Bar Notification when App is running in Background mode on Android, default="Running in background"
+   Application& backgroundText (C Str &text    );                           // set text displayed on the Status Bar Notification when App is running in Background mode on Android, default="Running in background"
+   Bool         backgroundFull (               )C {return _back_full     ;} // get if Application is allowed to remain visible on the screen when in fullscreen mode but inactive (if false then application is minimized), default=false
+   Application& backgroundFull (Bool   on      );                           // set if Application is allowed to remain visible on the screen when in fullscreen mode but inactive (if false then application is minimized), default=false
 
    // system bars
                                                           Application& systemBars    (SYSTEM_BAR status, SYSTEM_BAR navigation); //     set system     bars      [Supported Platforms: Android, iOS]
@@ -186,10 +188,12 @@ private:
    DIR_ENUM            _orientation=DIR_UP;
    LANG_TYPE           _lang;
    SYSTEM_BAR          _status, _nav;
+   SByte               _thread_priority;
    Int                 _mem_leaks;
    mutable UInt        _parent_process_id;
    UInt                _process_id;
    UIntPtr             _thread_id;
+   ULong               _thread_mask;
    SysWindow           _window;
    VecI2               _window_pos, _window_size, _window_resized, _desktop_size;
    RectI               _desktop_area, _bound, _bound_maximized;

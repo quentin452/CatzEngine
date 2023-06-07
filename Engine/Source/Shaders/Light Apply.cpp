@@ -122,7 +122,7 @@ VecH4 ApplyLight_PS(NOPERSP Vec2 uv   :UV,
          color_sum+=color;
          valid_samples++;
       }
-      return color_sum/valid_samples; // MS_SAMPLES
+      return color_sum/((MULTI_SAMPLE==2) ? MS_SAMPLES : valid_samples); // MULTI_SAMPLE=3 is used for Sky which uses Alpha Blend and needs all sub-pixels to look the same hard (no AA), but when Sky is not used, then we need to soften (have AA)
    }
 }
 /******************************************************************************/

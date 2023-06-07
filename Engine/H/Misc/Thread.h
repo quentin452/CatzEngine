@@ -377,6 +377,7 @@ const_mem_addr struct Thread // Thread !! must be stored in constant memory addr
    void pause     (                   ); // pause  thread, 'func' will no longer be called until the thread is resumed
    void resume    (                   ); // resume thread from paused state
    void priority  (Int priority       ); // set    thread priority, 'priority'=-3..3
+   void mask      (ULong mask         ); // set    CPU HW Threads on which this thread is allowed to run (every bit specifies different HW Thread)
    void kill      (                   ); // kill   thread, immediately shut down the thread, usage of this method is not recommended because it may cause memory leaks
    Bool wait      (Int milliseconds=-1); // wait   until the thread finishes processing (<0 = infinite wait), false on timeout
 
@@ -620,6 +621,7 @@ const_mem_addr struct Threads // Worker Threads, allow to process data on multip
    Int      threads1()C {return _threads.elms()+1;}              // get     how many threads were created for this object + 1, use this method when allocating per-thread data to be used for 'process1' methods
    Int activeThreads()C;   Threads& activeThreads(Int active  ); // get/set how many threads should be active (remaining threads will be paused)
    Int      priority()C;   Threads& priority     (Int priority); // get/set threads priority, 'priority'=-3..3
+                           Threads& mask         (ULong mask  ); //     set CPU HW Threads on which Threads is allowed to run (every bit specifies different HW Thread)
 
   ~Threads() {del();}
    Threads();
@@ -774,6 +776,7 @@ T1(TYPE) Bool AtomicCAS(TYPE *&x, TYPE *compare, TYPE *new_value) {return Atomic
 
 // Thread functions
 UIntPtr GetThreadID  (                                             ); // get current thread ID
+Int     GetCPU       (                                             ); // get current CPU thread index 0..Cpu.threads-1
 void    SetThreadName(C Str8 &name, UIntPtr thread_id=GetThreadID()); // set custom thread name for debugging purpose
 
 void ThreadMayUseGPUData       (); // call    this from a secondary thread if you expect the thread to perform any operations on GPU data (like Mesh, Material, Image, Shaders, ..., this includes any operation like creating, editing, loading, saving, deleting, ...). This function is best called at the start of the thread, it needs to be called at least once, further calls are ignored. Once the function is called, the thread locks a secondary OpenGL context (if no context is available, then the function waits until other threads finish processing and release their context lock, amount of OpenGL contexts is specified in 'D.secondaryOpenGLContexts'). Context lock is automatically released once the thread exits. This call is required only for OpenGL renderer.
@@ -873,8 +876,10 @@ private:
    INLINE void UpdateThreads() {EmulatedThreads.update();}
 #endif
 
-     INLINE UIntPtr _GetThreadID() {return PLATFORM(GetCurrentThreadId(), (UIntPtr)pthread_self());}
+     INLINE UIntPtr _GetThreadID() {return PLATFORM(GetCurrentThreadId       (), (UIntPtr)pthread_self());}
+     INLINE Int     _GetCPU     () {return PLATFORM(GetCurrentProcessorNumber(),          sched_getcpu());}
 #define GetThreadID _GetThreadID // use this macro so all engine functions access '_GetThreadID' directly
+#define GetCPU      _GetCPU      // use this macro so all engine functions access '_GetCPU'      directly
 
 INLINE void Yield() {std::this_thread::yield();}
 #endif

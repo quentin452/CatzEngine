@@ -112,9 +112,12 @@
 #define Pow       pow
 #define Sin       sin
 #define Cos       cos
+#define Tan       tan
 #define Acos      acos
 #define Asin      asin
+#define Atan      atan
 #define Lerp      lerp
+#define Exp       exp
 /******************************************************************************/
 // CONSTANTS
 /******************************************************************************/
@@ -175,6 +178,8 @@ Bool IsClearCoat  (Flt value          ) {return IsPSM(value, PSM_CLEAR_COAT );}
    #define DEPTH_SMALLER(x, y) ((x)> (y))
    #define DEPTH_INC(x, y)     ((x)-=(y))
    #define DEPTH_DEC(x, y)     ((x)+=(y))
+   #define DEPTH_GE            SV_DepthLessEqual
+   #define DEPTH_LE            SV_DepthGreaterEqual
    #define TexDepthRawMin(uv)  TexMax(Depth, uv).x
    #define TexDepthRawMax(uv)  TexMin(Depth, uv).x
 #else
@@ -187,6 +192,8 @@ Bool IsClearCoat  (Flt value          ) {return IsPSM(value, PSM_CLEAR_COAT );}
    #define DEPTH_SMALLER(x, y) ((x)< (y))
    #define DEPTH_INC(x, y)     ((x)+=(y))
    #define DEPTH_DEC(x, y)     ((x)-=(y))
+   #define DEPTH_GE            SV_DepthGreaterEqual
+   #define DEPTH_LE            SV_DepthLessEqual
    #define TexDepthRawMin(uv)  TexMin(Depth, uv).x
    #define TexDepthRawMax(uv)  TexMax(Depth, uv).x
 #endif
@@ -432,17 +439,18 @@ BUFFER_I(Color, SBI_COLOR)
 BUFFER_END
 /******************************************************************************/
 BUFFER_I(Frame, SBI_FRAME) // once per-frame
-   Vec4  ClipPlane=Vec4(0, 0, 0, 1); // clipping plane
-   Vec4  BendFactor                ; // factors used for grass/leaf bending calculation
-   Vec4  BendFactorPrev            ; // factors used for grass/leaf bending calculation (for previous frame)
-   VecI2 NoiseOffset               ; // per-frame texture noise offset
-   Vec2  GrassRangeMulAdd          ; // factors used for grass opacity calculation
-   Flt   TesselationDensity        ; // tesselation density
-   Bool  FirstPass=true            ; // if first pass (apply Material Emissive and Light from Glow)
-   VecH  AmbientNSColor            ; // ambient combined with night shade
-   Half  AspectRatio               ; // converts UV to Screen aspect ratio
-   VecH  EnvColor                  ; // environment map color
-   Half  EnvMipMaps                ; // environment map mip-maps
+   Vec4    ClipPlane=Vec4(0, 0, 0, 1); // clipping plane
+   Vec4    BendFactor                ; // factors used for grass/leaf bending calculation
+   Vec4    BendFactorPrev            ; // factors used for grass/leaf bending calculation (for previous frame)
+   VecI2   NoiseOffset               ; // per-frame texture noise offset
+   Vec2    GrassRangeMulAdd          ; // factors used for grass opacity calculation
+   Flt     TesselationDensity        ; // tesselation density
+   Bool    FirstPass=true            ; // if first pass (apply Material Emissive and Light from Glow)
+   VecH    AmbientNSColor            ; // ambient combined with night shade
+   Half    AspectRatio               ; // converts UV to Screen aspect ratio
+   VecH    EnvColor                  ; // environment map color
+   Half    EnvMipMaps                ; // environment map mip-maps
+   Matrix3 EnvMatrix                 ; // environment map matrix
 BUFFER_END
 
 BUFFER_I(Camera, SBI_CAMERA) // this gets changed when drawing shadow maps
@@ -458,6 +466,7 @@ BUFFER_END
 
 BUFFER_I(Mesh, SBI_MESH)
    Bool  VtxSkinning;
+   Flt   VtxUVScale;
    VecH4 Highlight; // this can be modified by engine's 'SetHighlight' function
 BUFFER_END
 
@@ -523,6 +532,7 @@ ImageH2   ImgXY, ImgXY1, ImgXY2, EnvDFG;
 ImageCube Env, Cub, Cub1;
 Image3D   Vol;
 Image3DH2 VolXY, VolXY1;
+//Image     SkyA, SkyB;
 
 Texture2DMS<VecH4, MS_SAMPLES> ImgMS, ImgMS1, ImgMS2, ImgMS3;
 Texture2DMS<Half , MS_SAMPLES> ImgXMS;
@@ -867,6 +877,8 @@ VecH2 FromLen2Angle1Fast(VecH2 v) // 'v'=(X=length2, Y=Angle1Fast), returns pos 
    return p*Sqrt(v.x/Length2(p));
 }
 /******************************************************************************/
+#include "Fast Math.h"
+/******************************************************************************/
 Half  DistPointLine(VecH2 pos, VecH2 line_pos, VecH2 line_dir) {return Abs(DistPointPlane(pos, line_pos, Perp(line_dir)));}
 Half Dist2PointLine(VecH2 pos, VecH2 line_pos, VecH2 line_dir) {return Sqr(DistPointPlane(pos, line_pos, Perp(line_dir)));}
 
@@ -884,8 +896,6 @@ Half Dist2PointEdge(VecH2 pos, VecH2 edge_a, VecH2 edge_b) // safe in case 'edge
    if(DistPointPlane(pos, edge_b, d)>=0)return Dist2         (pos, edge_b);
                                         return Dist2PointLine(pos, edge_a, Normalize(d));
 }
-/******************************************************************************/
-#include "Fast Math.h"
 /******************************************************************************/
 #if 1 // faster (1.6 fps) tested on GeForce 1050 Ti
 Vec  Transform(Vec  v, Matrix3  m) {return v.x*m[0] + (v.y*m[1] + (v.z*m[2]));} // transform 'v' vector by 'm' orientation-scale matrix
@@ -1222,13 +1232,13 @@ Vec GetBoneVel(VecH local_pos, Vec view_pos, VecU bone, VecH weight) // no need 
           +GetCamAngVel( view_pos);
 }
 /******************************************************************************/
-VecH2 GetMotionUV(Vec projected_prev_pos_xyw, Vec2 uv)
+VecH2 GetMotionUV(Vec projected_prev_pos_xyw, Vec2 uv, Bool geom=true) // 'geom'=if generated using 3D geometry, which could result in position being behind the camera
 {
-   projected_prev_pos_xyw.z=Max(projected_prev_pos_xyw.z, Viewport.from); // prevent division by <=0 (needed for previous positions that are behind the camera)
+   if(geom)projected_prev_pos_xyw.z=Max(projected_prev_pos_xyw.z, Viewport.from); // prevent division by <=0 (needed for previous positions that are behind the camera)
    VecH2  vel=uv-ProjectedPosXYWToUV(projected_prev_pos_xyw); // cur-prev #MotionDir
    return vel;
 }
-VecH2 GetMotion(Vec projected_prev_pos_xyw, Vec4 pixel) {return GetMotionUV(projected_prev_pos_xyw, PixelToUV(pixel));}
+VecH2 GetMotion(Vec projected_prev_pos_xyw, Vec4 pixel, Bool geom=true) {return GetMotionUV(projected_prev_pos_xyw, PixelToUV(pixel), geom);}
 /******************************************************************************/
 // DEPTH
 /******************************************************************************/
@@ -1366,7 +1376,7 @@ struct VtxInput // Vertex Input, use this class to access vertex data in vertex 
    LOC( 7) Vec2  _uv3     :ATTR7 ;
    LOC( 8) Half  _size    :ATTR8 ;
    LOC( 9) Vec4  _bone    :ATTR9 ; // this has to be Vec4 because VecI4 and VecU4 don't work for some reason
-   LOC(10) Vec4  _weight  :ATTR10; // this has to be Vec4 instead of VecH4 because of 2 reasons, we need sum of weights to be equal to 1.0 (half's can't do that), also when converting to GLSL the explicit casts to "Vec weight" precision are optimized away and perhaps some GLSL compilers may want to perform optimizations where Half*Vec is converted to VecH which would destroy precision for skinned characters
+   LOC(10) Vec4  _weight  :ATTR10; // this has to be Vec4 instead of VecH4 because of 2 reasons, we need sum of weights to be equal to 1.0 (half's can't do that), also when converting to GLSL the explicit casts to "Vec4 weight" precision are optimized away and perhaps some GLSL compilers may want to perform optimizations where Half*Vec4 is converted to VecH4 which would destroy precision for skinned characters
    LOC(11) VecH4 _material:ATTR11;
    LOC(12) VecH4 _color   :ATTR12;
    LOC(13) VecU2 _face_id :ATTR13;
@@ -1382,7 +1392,7 @@ struct VtxInput // Vertex Input, use this class to access vertex data in vertex 
    Vec2  _uv3     :UV3         ;
    Half  _size    :PSIZE       ;
    VecU4 _bone    :BLENDINDICES;
-   Vec4  _weight  :BLENDWEIGHT ; // this has to be Vec4 instead of VecH4 because of 2 reasons, we need sum of weights to be equal to 1.0 (half's can't do that), also when converting to GLSL the explicit casts to "Vec weight" precision are optimized away and perhaps some GLSL compilers may want to perform optimizations where Half*Vec is converted to VecH which would destroy precision for skinned characters
+   Vec4  _weight  :BLENDWEIGHT ; // this has to be Vec4 instead of VecH4 because of 2 reasons, we need sum of weights to be equal to 1.0 (half's can't do that), also when converting to GLSL the explicit casts to "Vec4 weight" precision are optimized away and perhaps some GLSL compilers may want to perform optimizations where Half*Vec4 is converted to VecH4 which would destroy precision for skinned characters
    VecH4 _material:COLOR0      ;
    VecH4 _color   :COLOR1      ;
    VecU2 _face_id :FACE_ID     ;
@@ -1391,28 +1401,28 @@ struct VtxInput // Vertex Input, use this class to access vertex data in vertex 
    UInt  _instance:SV_InstanceID;
 #include "!Set Prec Default.h"
 
-   VecH  nrm      (                                        ) {return _nrm                                                                  ;} // vertex normal
-   VecH  tan      (VecH nrm          , Bool heightmap=false) {return heightmap ? VecH(1-nrm.x*nrm.x, -nrm.y*nrm.x, -nrm.z*nrm.x) : _tan.xyz;} // vertex tangent, for heightmap: PointOnPlane(Vec(1,0,0), nrm()), Vec(1,0,0)-nrm*nrm.x, which gives a perpendicular however not Normalized !!
-   VecH  bin      (VecH nrm, VecH tan, Bool heightmap=false) {return heightmap ? Cross(nrm, tan) : Cross(nrm, tan)*_tan.w                  ;} // binormal from transformed normal and tangent
-   Vec2  pos2     (                                        ) {return _pos.xy                                                               ;} // vertex position
-   Vec   pos      (                                        ) {return _pos.xyz                                                              ;} // vertex position
-   Vec4  pos4     (                                        ) {return _pos                                                                  ;} // vertex position in Vec4(pos.xyz, 1) format
-   Flt   posZ     (                                        ) {return _pos.z                                                                ;} // vertex position Z
-   Vec   hlp      (                                        ) {return _hlp                                                                  ;} // helper position
-   VecH  tan      (                                        ) {return _tan.xyz                                                              ;} // helper position
-   Vec2  uv       (                    Bool heightmap=false) {return heightmap ? Vec2(_pos.x, -_pos.z) : _uv                               ;} // tex coords 0
-   Vec2  uv1      (                                        ) {return                                     _uv1                              ;} // tex coords 1
-   Vec2  uv2      (                                        ) {return                                     _uv2                              ;} // tex coords 2
-   Vec2  uv3      (                                        ) {return                                     _uv3                              ;} // tex coords 3
+   VecH  nrm      (                                              ) {return _nrm                                                                  ;} // vertex normal
+   VecH  tan      (VecH nrm          , Int heightmap=HEIGHTMAP_NO) {return heightmap ? VecH(1-nrm.x*nrm.x, -nrm.y*nrm.x, -nrm.z*nrm.x) : _tan.xyz;} // vertex tangent, for heightmap: PointOnPlane(Vec(1,0,0), nrm()), Vec(1,0,0)-nrm*nrm.x, which gives a perpendicular however not Normalized !!
+   VecH  bin      (VecH nrm, VecH tan, Int heightmap=HEIGHTMAP_NO) {return heightmap ? Cross(nrm, tan) : Cross(nrm, tan)*_tan.w                  ;} // binormal from transformed normal and tangent
+   Vec2  pos2     (                                              ) {return _pos.xy                                                               ;} // vertex position
+   Vec   pos      (                                              ) {return _pos.xyz                                                              ;} // vertex position
+   Vec4  pos4     (                                              ) {return _pos                                                                  ;} // vertex position in Vec4(pos.xyz, 1) format
+   Flt   posZ     (                                              ) {return _pos.z                                                                ;} // vertex position Z
+   Vec   hlp      (                                              ) {return _hlp                                                                  ;} // helper position
+   VecH  tan      (                                              ) {return _tan.xyz                                                              ;} // helper position
+   Vec2  uv       (                    Int heightmap=HEIGHTMAP_NO) {return (heightmap==HEIGHTMAP_FLAT) ? Vec2(_pos.x, -_pos.z) : (heightmap==HEIGHTMAP_SPHERE) ? VtxUVScale*AtanFast(Vec2(_pos.x, -_pos.z)/_pos.y) : _uv;} // tex coords 0
+   Vec2  uv1      (                                              ) {return _uv1                                                                  ;} // tex coords 1
+   Vec2  uv2      (                                              ) {return _uv2                                                                  ;} // tex coords 2
+   Vec2  uv3      (                                              ) {return _uv3                                                                  ;} // tex coords 3
 #if GL
-   VecU4 bone     (                                        ) {return VtxSkinning ? VecU4(_bone) : VecU4(0, 0, 0, 0)                        ;} // bone matrix indexes
+   VecU4 bone     (                                              ) {return VtxSkinning ? VecU4(_bone) : VecU4(0, 0, 0, 0)                        ;} // bone matrix indexes
 #else
-   VecU4 bone     (                                        ) {return VtxSkinning ?       _bone  : VecU4(0, 0, 0, 0)                        ;} // bone matrix indexes
+   VecU4 bone     (                                              ) {return VtxSkinning ?       _bone  : VecU4(0, 0, 0, 0)                        ;} // bone matrix indexes
 #endif
-   Vec4  weight   (                                        ) {return _weight                                                               ;} // bone matrix weights
-   VecH4 material (                                        ) {return _material                                                             ;} // material    weights
-   VecH  material3(                                        ) {return _material.xyz                                                         ;} // material    weights
-   Half  size     (                                        ) {return _size                                                                 ;} // point size
+   Vec4  weight   (                                              ) {return _weight                                                               ;} // bone matrix weights
+   VecH4 material (                                              ) {return _material                                                             ;} // material    weights
+   VecH  material3(                                              ) {return _material.xyz                                                         ;} // material    weights
+   Half  size     (                                              ) {return _size                                                                 ;} // point size
 
    // need to apply gamma correction in the shader because R8G8B8A8_SRGB can't be specified in vertex buffer
 #if LINEAR_GAMMA
@@ -1564,31 +1574,24 @@ VecH4 Lerp4(VecH4 v0, VecH4 v1, VecH4 v2, VecH4 v3, Half s)
         + v3 * (   TAN*(s3-s2)                           );
 }
 /******************************************************************************/
-Half LerpCube(Half s) {return (3-2*s)*s*s;}
-Flt  LerpCube(Flt  s) {return (3-2*s)*s*s;}
-VecH LerpCube(VecH s) {return (3-2*s)*s*s;}
+Half SmoothCube(Half s) {return (3-2*s)*s*s;}
+Flt  SmoothCube(Flt  s) {return (3-2*s)*s*s;}
+VecH SmoothCube(VecH s) {return (3-2*s)*s*s;}
 
-Half LerpCube(Half from, Half to, Half s) {return Lerp(from, to, LerpCube(s));}
-Flt  LerpCube(Flt  from, Flt  to, Flt  s) {return Lerp(from, to, LerpCube(s));}
-
-/*Flt LerpSmoothPow(Flt s, Flt p)
-{
-   s=Sat(s);
-   if(s<=0.5)return   0.5*Pow(  2*s, p);
-             return 1-0.5*Pow(2-2*s, p);
-}*/
+Half SmoothCube(Half from, Half to, Half s) {return Lerp(from, to, SmoothCube(s));}
+Flt  SmoothCube(Flt  from, Flt  to, Flt  s) {return Lerp(from, to, SmoothCube(s));}
 
 Half BlendSqr(Half x) {return Sat(1-x*x);}
 Flt  BlendSqr(Flt  x) {return Sat(1-x*x);}
 
-Half BlendSmoothCube(Half x) {x=Sat(Abs(x)); return 1-LerpCube(x);}
-Flt  BlendSmoothCube(Flt  x) {x=Sat(Abs(x)); return 1-LerpCube(x);}
+Half BlendSmoothCube(Half x) {x=Sat(Abs(x)); return 1-SmoothCube(x);}
+Flt  BlendSmoothCube(Flt  x) {x=Sat(Abs(x)); return 1-SmoothCube(x);}
 
 Half BlendSmoothSin(Half x) {x=Sat(Abs(x)); return Cos(x*PI)*0.5+0.5;}
 Flt  BlendSmoothSin(Flt  x) {x=Sat(Abs(x)); return Cos(x*PI)*0.5+0.5;}
 
-Half Gaussian(Half x) {return exp(-x*x);}
-Flt  Gaussian(Flt  x) {return exp(-x*x);}
+Half Gaussian(Half x) {return Exp(-x*x);}
+Flt  Gaussian(Flt  x) {return Exp(-x*x);}
 
 Half ScaleFactor (Half x) {return (x>=0) ? (1+x) : (1/(1-x));}
 Flt  ScaleFactor (Flt  x) {return (x>=0) ? (1+x) : (1/(1-x));}
@@ -1642,6 +1645,35 @@ Vec HsbToRgb(Vec hsb)
    if(h<4)return Vec(p, q, v);
    if(h<5)return Vec(t, p, v);
           return Vec(v, p, q);
+}
+/******************************************************************************/
+// BLEND
+/******************************************************************************/
+Flt     BlendAlpha(          Flt base_a,            Flt color_a) {return base_a + color_a*(1-base_a);}
+Vec     BlendAlpha(          Vec base_a,            Vec color_a) {return base_a + color_a*(1-base_a);}
+Vec FastBlendColor(Vec base, Vec base_a, Vec color, Vec color_a) {return base*(1-color_a) + color*color_a;}
+Vec     BlendColor(Vec base, Vec base_a, Vec color, Vec color_a)
+{
+   base_a*=1-color_a;
+   Vec ret, sum=base_a+color_a;
+   if(sum.r){base_a.r/=sum.r; color_a.r=1-base_a.r; ret.r=base.r*base_a.r + color.r*color_a.r;}else ret.r=0;
+   if(sum.g){base_a.g/=sum.g; color_a.g=1-base_a.g; ret.g=base.g*base_a.g + color.g*color_a.g;}else ret.g=0;
+   if(sum.b){base_a.b/=sum.b; color_a.b=1-base_a.b; ret.b=base.b*base_a.b + color.b*color_a.b;}else ret.b=0;
+   return ret;
+}
+Vec MergeBlendColor(Vec base, Vec base_a, Vec color, Vec color_a)
+{
+   base_a*=1-color_a;
+   Vec sum=base_a+color_a;
+#if 1
+   return sum ? (base*base_a+color)/sum : 0;
+#else
+   Vec ret;
+   if(sum.r)ret.r=(base.r*base_a.r + color.r)/sum.r;else ret.r=0;
+   if(sum.g)ret.g=(base.g*base_a.g + color.g)/sum.g;else ret.g=0;
+   if(sum.b)ret.b=(base.b*base_a.b + color.b)/sum.b;else ret.b=0;
+   return ret;
+#endif
 }
 /******************************************************************************/
 // ALPHA TEST
@@ -1865,19 +1897,39 @@ Half MultiMaterialWeight(Half weight, Half alpha) // 'weight'=weight of this mat
 {
 #if 0 // linear
    return weight;
+#elif 0 // Pinch (not sharp enough)
+   const Half sharpen=32;
+   return Pinch(weight, ScaleFactor(alpha*sharpen - 0.5*sharpen));
+#elif 0 // PinchFactor (too sharp transitions)
+   const Half sharpen=32;
+   return PinchFactor(weight, alpha*sharpen - 0.5*sharpen);
 #elif 0 // Pow (too bright on low weights, causing visible jumps due to material reduction for low weights, also blurry (small contrast) compared to Pinch
    const Half sharpen=-5;
    return Pow(weight, ScaleFactor(alpha*sharpen - 0.5*sharpen));
-#elif 0 // Pinch (too sharp transitions)
-   const Half sharpen=32;
-   return PinchFactor(weight, alpha*sharpen - 0.5*sharpen);
-#elif 0 // uses alpha on middle and high, too bright on low weights, causing visible jumps due to material reduction for low weights
-   const Half sharpen=4;
-   return Max(0, weight*(alpha*sharpen - 0.5*sharpen + 1));
-#else // uses alpha on middle
+#elif 0 // Flippable Pow approximation, however causes artifacts
    const Half sharpen=8;
    return Max(0, weight // base
                 +weight*(1-weight)*(alpha*sharpen - 0.5*sharpen)); // "weight"=ignore alpha at start "1-weight" ignore alpha at end, "(alpha-0.5)*sharpen" alpha
+#else // Flippable Pow - best
+   const Half sharpen=12;
+   #if 0
+      return (alpha<=0.5) ?   Pow(  weight, 1+(0.5-alpha)*sharpen)
+                          : 1-Pow(1-weight, 1+(alpha-0.5)*sharpen);
+   #else // optimized using only 1 Pow
+      VecH2 mad;
+      if(alpha<=0.5)
+      {
+         mad=VecH2(1, 0);
+      }else
+      {
+         mad=VecH2(-1, 1);
+       //alpha =1-alpha ; // or alternatively do alpha  MAD below
+       //weight=1-weight; // or alternatively do weight MAD below
+      }
+      alpha =alpha *mad.x+mad.y; // MAD generates smaller SPIR-V code
+      weight=weight*mad.x+mad.y; // MAD generates smaller SPIR-V code
+      return Pow(weight, 1+0.5*sharpen-alpha*sharpen)*mad.x+mad.y;
+   #endif
 #endif
 }
 /******************************************************************************/
@@ -2234,7 +2286,7 @@ VecH ReflectEnv(Half rough, Half reflectivity, VecH reflect_col, Half NdotV, Boo
 }
 Vec ReflectDir(Vec eye_dir, Vec nrm) // High Precision needed for high resolution texture coordinates
 {
-   return Transform3(reflect(eye_dir, nrm), CamMatrix);
+   return Transform(reflect(eye_dir, nrm), EnvMatrix);
 }
 VecH ReflectTex(Vec reflect_dir, Half rough)
 {
@@ -2387,6 +2439,7 @@ struct DeferredOutput // use this structure in Pixel Shader for setting the outp
    void reflect(Half reflect) {out2.y=reflect;}
 
    void motion    (Vec projected_prev_pos_xyw, Vec4 pixel) {out3.xy=GetMotion(projected_prev_pos_xyw, pixel);}
+   void motion2D  (Vec projected_prev_pos_xyw, Vec4 pixel) {out3.xy=GetMotion(projected_prev_pos_xyw, pixel, false);} // use this only for 2D flat calculations that are known to be in front of camera
    void motionZero(                                      ) {out3.xy=0;}
 };
 /******************************************************************************/

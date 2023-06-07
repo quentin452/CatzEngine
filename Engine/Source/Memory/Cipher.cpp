@@ -5,7 +5,7 @@
 
 #define AES_SMALL_CODE 1 // 1=faster (0=0.211s, 1=0.207s)
 
-#if ((defined _M_IX86 || defined __i386__) || (defined _M_X64 || defined __x86_64__)) && !ANDROID && !IOS_SIMULATOR
+#if X86 && !ANDROID && !IOS_SIMULATOR
    #define AES_CPU 1
 #else
    #define AES_CPU 0
@@ -494,7 +494,7 @@ void Cipher3::decrypt(Ptr dest, CPtr src, IntPtr size, Int offset)
 // AES
 /******************************************************************************/
 #if !SWITCH
-#if defined(_MSC_VER) && (defined(_M_IX86) || defined(_M_AMD64) || defined(_M_X64))
+#if WINDOWS && X86
    #define SWAP(  x     ) (_lrotl(x, 8)&0x00ff00ff | _lrotr(x, 8)&0xff00ff00)
    #define GETU32(p     ) SWAP(*((U32*)(p)))
    #define PUTU32(ct, st) {*((U32*)(ct))=SWAP((st));}

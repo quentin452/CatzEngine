@@ -3,7 +3,7 @@
 #include "Fog.h"
 #include "Sky.h"
 /******************************************************************************/
-// SKIN, COLORS, LAYOUT, BUMP_MODE, ALPHA_TEST, ALPHA, REFLECT, EMISSIVE_MAP, FX, PER_PIXEL, SHADOW_MAPS, TESSELATE
+// SKIN, COLORS, LAYOUT, BUMP_MODE, ALPHA_TEST, ALPHA, REFLECT, EMISSIVE_MAP, UV_SCALE, FX, PER_PIXEL, SHADOW_MAPS, TESSELATE
 #define NO_AMBIENT  0 // this could be set to 1 for Secondary Passes, if we would use this then we could remove 'FirstPass'
 #define HAS_AMBIENT (!NO_AMBIENT)
 
@@ -81,7 +81,7 @@ void VS
 
 #if SET_UV
    O.uv=vtx.uv(HEIGHTMAP);
-   if(HEIGHTMAP)O.uv*=Material.uv_scale;
+   if(UV_SCALE)O.uv*=Material.uv_scale;
 #endif
 
              O.col =Material.color;

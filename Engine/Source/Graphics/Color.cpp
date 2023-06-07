@@ -391,8 +391,8 @@ Vec4 MergeBlend(C Vec4 &base, C Vec4 &color)
        color_w=   color.w        ; //   'color.w' because of standard 'Lerp', this shouldn't be multiplied by additional 'color.w' because if base.w is 1, and color.w is 0.5 then we would blend it by 0.25 which is not what we want
    if(Flt sum=base_w+color_w)
    {
-      base_w/=sum; color_w=1-base_w; // faster than "color_w/=sum;"
-      out.xyz=base.xyz*base_w + color.xyz;
+      base_w/=sum;
+      out.xyz=base.xyz*base_w + color.xyz/sum; // color.xyz/color.w*(color.w/sum), first have to div by 'color.w' to convert from pre-multiplied, then mul by "color.w/sum" according to formula same as "base", together it's simplified as "/sum"
    }else out.xyz.zero();
    out.w=base.w+color.w*(1-base.w);
    return out;

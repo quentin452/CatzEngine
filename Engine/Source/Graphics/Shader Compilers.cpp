@@ -43,9 +43,9 @@ namespace EE{
 /******************************************************************************/
 // SHADER NAMES
 /******************************************************************************/
-Str8 ShaderDeferred   (Int skin, Int materials, Int layout, Int bump_mode, Int alpha_test, Int detail, Int macro, Int color, Int mtrl_blend, Int heightmap, Int fx, Int tesselate) {return S8+skin+materials+layout+bump_mode+alpha_test+detail+macro+color+mtrl_blend+heightmap+fx+tesselate;}
-Str8 ShaderBlendLight (Int skin, Int color    , Int layout, Int bump_mode, Int alpha_test, Int alpha, Int reflect, Int emissive_map, Int fx, Int per_pixel, Int shadow_maps, Int tesselate) {return S8+skin+color+layout+bump_mode+alpha_test+alpha+reflect+emissive_map+fx+per_pixel+shadow_maps+tesselate;}
-Str8 ShaderForward    (Int skin, Int materials, Int layout, Int bump_mode, Int alpha_test, Int reflect, Int emissive_map, Int detail, Int color, Int mtrl_blend, Int heightmap, Int fx, Int per_pixel,   Int light_dir, Int light_dir_shd, Int light_dir_shd_num,   Int light_point, Int light_point_shd,   Int light_linear, Int light_linear_shd,   Int light_cone, Int light_cone_shd,   Int tesselate) {return S8+skin+materials+layout+bump_mode+alpha_test+reflect+emissive_map+detail+color+mtrl_blend+heightmap+fx+per_pixel+light_dir+light_dir_shd+light_dir_shd_num+light_point+light_point_shd+light_linear+light_linear_shd+light_cone+light_cone_shd+tesselate;}
+Str8 ShaderDeferred   (Int skin, Int materials, Int layout, Int bump_mode, Int alpha_test, Int detail, Int macro, Int color, Int mtrl_blend, Int uv_scale, Int heightmap, Int fx, Int tesselate) {return S8+skin+materials+layout+bump_mode+alpha_test+detail+macro+color+mtrl_blend+uv_scale+heightmap+fx+tesselate;}
+Str8 ShaderBlendLight (Int skin, Int color    , Int layout, Int bump_mode, Int alpha_test, Int alpha, Int reflect, Int emissive_map, Int uv_scale, Int fx, Int per_pixel, Int shadow_maps, Int tesselate) {return S8+skin+color+layout+bump_mode+alpha_test+alpha+reflect+emissive_map+uv_scale+fx+per_pixel+shadow_maps+tesselate;}
+Str8 ShaderForward    (Int skin, Int materials, Int layout, Int bump_mode, Int alpha_test, Int reflect, Int emissive_map, Int detail, Int color, Int mtrl_blend, Int uv_scale, Int heightmap, Int fx, Int per_pixel,   Int light_dir, Int light_dir_shd, Int light_dir_shd_num,   Int light_point, Int light_point_shd,   Int light_linear, Int light_linear_shd,   Int light_cone, Int light_cone_shd,   Int tesselate) {return S8+skin+materials+layout+bump_mode+alpha_test+reflect+emissive_map+detail+color+mtrl_blend+uv_scale+heightmap+fx+per_pixel+light_dir+light_dir_shd+light_dir_shd_num+light_point+light_point_shd+light_linear+light_linear_shd+light_cone+light_cone_shd+tesselate;}
 
 Str8 ShaderBehind     (Int skin, Int color, Int alpha_test) {return S8+skin+color+alpha_test;}
 Str8 ShaderBlend      (Int skin, Int color, Int layout, Int bump_mode, Int reflect, Int emissive_map) {return S8+skin+color+layout+bump_mode+reflect+emissive_map;}
@@ -212,6 +212,14 @@ static void Compile(API api, SC_FLAG flag=SC_NONE)
       src.New("Params1", S, "Params1_PS").dummy=true;
       src.New("Params2", S, "Params2_PS").dummy=true;
    }
+   { // ATMOSPHERE
+      ShaderCompiler::Source &src=compiler.New(src_path+"Atmosphere.cpp");
+      REPD(multi_sample, ms ? 3 : 1)
+      REPD(flat        , 2)
+      REPD(dither      , 2)
+      REPD(gl_es       , (api==API_GL) ? 2 : 1) // GL ES doesn't support NOPERSP
+         src.New("Atmosphere")("MULTI_SAMPLE", multi_sample)("FLAT", flat)("DITHER", dither)("GL_ES", gl_es).multiSample(multi_sample>=2);
+   }
    { // BLOOM
       ShaderCompiler::Source &src=compiler.New(src_path+"Bloom.cpp");
       REPD(view_full, 2)
@@ -318,7 +326,7 @@ static void Compile(API api, SC_FLAG flag=SC_NONE)
    }
    { // LIGHT APPLY
       ShaderCompiler::Source &src=compiler.New(src_path+"Light Apply.cpp");
-      REPD(multi_sample, ms ? 3 : 1)
+      REPD(multi_sample, ms ? 4 : 1)
       REPD(reflect_mode, 3) // None, Reflect, Reflect+ClearCoat
       REPD(ao          , 2)
       REPD(  cel_shade , 2)
@@ -725,21 +733,32 @@ static void Compile(API api, SC_FLAG flag=SC_NONE)
 #ifdef WATER
 {
    ShaderCompiler::Source &src=ShaderCompilers.New().set(dest_path+"Water", model, api, flag).New(src_path+"Water.cpp");
-   src.New("Lake" , "Surface_VS", "Surface_PS")("LIGHT", 0, "SHADOW", 0, "SOFT", 0)("REFLECT_ENV", 0, "REFLECT_MIRROR", 0, "REFRACT", 0).extra("WAVES", 0, "RIVER", 0);
-   src.New("River", "Surface_VS", "Surface_PS")("LIGHT", 0, "SHADOW", 0, "SOFT", 0)("REFLECT_ENV", 0, "REFLECT_MIRROR", 0, "REFRACT", 0).extra("WAVES", 0, "RIVER", 1);
-   src.New("Ocean", "Surface_VS", "Surface_PS")("LIGHT", 0, "SHADOW", 0, "SOFT", 0)("REFLECT_ENV", 0, "REFLECT_MIRROR", 0, "REFRACT", 0).extra("WAVES", 1, "RIVER", 0);
+   src.New("Lake" , "Surface_VS", "Surface_PS")("LIGHT", 0, "SHADOW", 0, "SOFT", 0)("REFLECT_ENV", 0, "REFLECT_MIRROR", 0, "REFRACT", 0).extra("WAVES", 0, "RIVER", 0, "BALL", 0);
+   src.New("River", "Surface_VS", "Surface_PS")("LIGHT", 0, "SHADOW", 0, "SOFT", 0)("REFLECT_ENV", 0, "REFLECT_MIRROR", 0, "REFRACT", 0).extra("WAVES", 0, "RIVER", 1, "BALL", 0);
+   src.New("Ocean", "Surface_VS", "Surface_PS")("LIGHT", 0, "SHADOW", 0, "SOFT", 0)("REFLECT_ENV", 0, "REFLECT_MIRROR", 0, "REFRACT", 0).extra("WAVES", 1, "RIVER", 0, "BALL", 0);
+
+   REPD(flat , 2)
+   REPD(conservative_depth, 2)
+   REPD(gl_es, (api==API_GL) ? 2 : 1) // GL ES doesn't support NOPERSP
+      src.New("Ball" , "Surface_VS", "Surface_PS")("LIGHT", 0, "SHADOW", 0, "SOFT", 0)("REFLECT_ENV", 0, "REFLECT_MIRROR", 0, "REFRACT", 0)("FLAT", flat, "CONSERVATIVE_DEPTH", conservative_depth)("GL_ES", gl_es).extra("WAVES", 1, "RIVER", 0, "BALL", 1).conservativeDepth(conservative_depth);
+
    REPD(refract, 2)
    {
       REPD(reflect_env   , 2)
       REPD(reflect_mirror, 2)
       REPD(gather        , 2)
       {
-         REPD(shadow, 7)
-         REPD(soft  , 2)
+         REPD(shadow_maps, 7)
+         REPD(soft       , 2)
          {
-            src.New("Lake" , "Surface_VS", "Surface_PS")("LIGHT", 1, "SHADOW", shadow, "SOFT", soft)("REFLECT_ENV", reflect_env, "REFLECT_MIRROR", reflect_mirror, "REFRACT", refract, "GATHER", gather).extra("WAVES", 0, "RIVER", 0).gather(gather);
-            src.New("River", "Surface_VS", "Surface_PS")("LIGHT", 1, "SHADOW", shadow, "SOFT", soft)("REFLECT_ENV", reflect_env, "REFLECT_MIRROR", reflect_mirror, "REFRACT", refract, "GATHER", gather).extra("WAVES", 0, "RIVER", 1).gather(gather);
-            src.New("Ocean", "Surface_VS", "Surface_PS")("LIGHT", 1, "SHADOW", shadow, "SOFT", soft)("REFLECT_ENV", reflect_env, "REFLECT_MIRROR", reflect_mirror, "REFRACT", refract, "GATHER", gather).extra("WAVES", 1, "RIVER", 0).gather(gather);
+            src.New("Lake" , "Surface_VS", "Surface_PS")("LIGHT", 1, "SHADOW", shadow_maps, "SOFT", soft)("REFLECT_ENV", reflect_env, "REFLECT_MIRROR", reflect_mirror, "REFRACT", refract, "GATHER", gather).extra("WAVES", 0, "RIVER", 0, "BALL", 0).gather(gather);
+            src.New("River", "Surface_VS", "Surface_PS")("LIGHT", 1, "SHADOW", shadow_maps, "SOFT", soft)("REFLECT_ENV", reflect_env, "REFLECT_MIRROR", reflect_mirror, "REFRACT", refract, "GATHER", gather).extra("WAVES", 0, "RIVER", 1, "BALL", 0).gather(gather);
+            src.New("Ocean", "Surface_VS", "Surface_PS")("LIGHT", 1, "SHADOW", shadow_maps, "SOFT", soft)("REFLECT_ENV", reflect_env, "REFLECT_MIRROR", reflect_mirror, "REFRACT", refract, "GATHER", gather).extra("WAVES", 1, "RIVER", 0, "BALL", 0).gather(gather);
+
+            REPD(flat , 2)
+            REPD(conservative_depth, 2)
+            REPD(gl_es, (api==API_GL) ? 2 : 1) // GL ES doesn't support NOPERSP
+               src.New("Ball" , "Surface_VS", "Surface_PS")("LIGHT", 1, "SHADOW", shadow_maps, "SOFT", soft)("REFLECT_ENV", reflect_env, "REFLECT_MIRROR", reflect_mirror, "REFRACT", refract, "GATHER", gather)("FLAT", flat, "CONSERVATIVE_DEPTH", conservative_depth)("GL_ES", gl_es).extra("WAVES", 1, "RIVER", 0, "BALL", 1).gather(gather).conservativeDepth(conservative_depth);
          }
          REPD(set_depth, 2)
             src.New("Apply", "DrawUVPosXY_VS", "Apply_PS")("SET_DEPTH", set_depth)("REFLECT_ENV", reflect_env, "REFLECT_MIRROR", reflect_mirror, "REFRACT", refract, "GATHER", gather).gather(gather);
@@ -778,7 +797,7 @@ static void Compile(API api, SC_FLAG flag=SC_NONE)
    {
       // zero (no vtx normals)
       REPD(skin, 2)
-         src.New().deferred(skin, 1, 0, SBUMP_ZERO, false, false, false, color, false, false, FX_NONE, false);
+         src.New().deferred(skin, 1, 0, SBUMP_ZERO, false, false, false, color, false, false, false, FX_NONE, false);
 
       // default
       REPD(skin, 2)
@@ -786,18 +805,19 @@ static void Compile(API api, SC_FLAG flag=SC_NONE)
       for(Int layout=((materials==1) ? 0 : 1); layout<=2; layout++) // multi-materials don't support 0 textures
       for(Int bump_mode=SBUMP_FLAT, bump_max=((layout>=2) ? SBUMP_RELIEF : SBUMP_NORMAL); bump_mode<=bump_max; bump_mode++)if(bump_mode<=SBUMP_NORMAL || bump_mode>=SBUMP_PARALLAX_MIN)
       REPD(mtrl_blend, (materials> 1 && layout>=2           ) ? 2 : 1) // can do per-pixel mtrl-blend only if we have bump map
-      REPD(heightmap , (!skin                               ) ? 2 : 1)
+      REPD(heightmap , (!skin                               ) ?  HEIGHTMAP_NUM : 1)
       REPD(alpha_test, (materials==1 && layout && !heightmap) ? ALPHA_TEST_NUM : 1)
       REPD(macro     , (!skin  &&                  heightmap) ? 2 : 1)
       REPD(tesselate , tess ? 2 : 1)
       REPD(detail    , 2)
-         src.New().deferred(skin, materials, layout, bump_mode, alpha_test, detail, macro, color, mtrl_blend, heightmap, FX_NONE, tesselate);
+      for(Int uv_scale=(((heightmap || materials>1) && layout) ? 1 : 0), uv_scale_max=((layout && !skin && !alpha_test) ? 1 : 0); uv_scale<=uv_scale_max; uv_scale++) // always apply UV-Scale for heightmap or multi-materials
+         src.New().deferred(skin, materials, layout, bump_mode, alpha_test, detail, macro, color, mtrl_blend, uv_scale, heightmap, FX_NONE, tesselate);
 
       // grass + leaf, 1 material, 1-2 tex
       for(Int layout=1; layout<=2; layout++)
       REPD (bump_mode, 2)
       REPAD(fx       , fxs)
-         src.New().deferred(false, 1, layout, bump_mode ? SBUMP_NORMAL : SBUMP_FLAT, true, false, false, color, false, false, fxs[fx], false);
+         src.New().deferred(false, 1, layout, bump_mode ? SBUMP_NORMAL : SBUMP_FLAT, true, false, false, color, false, false, false, fxs[fx], false);
 
       // clear coat
       REPD(skin, 2)
@@ -805,7 +825,7 @@ static void Compile(API api, SC_FLAG flag=SC_NONE)
       for(Int bump_mode=SBUMP_FLAT; bump_mode<=SBUMP_NORMAL; bump_mode++)
       REPD(tesselate, tess ? 2 : 1)
       REPD(detail   , 1)
-         src.New().deferred(skin, 1, layout, bump_mode, false, detail, false, color, false, false, FX_CLEAR_COAT, tesselate);
+         src.New().deferred(skin, 1, layout, bump_mode, false, detail, false, color, false, false, false, FX_CLEAR_COAT, tesselate);
    }
 }
 #endif
@@ -813,6 +833,8 @@ static void Compile(API api, SC_FLAG flag=SC_NONE)
 #ifdef BLEND_LIGHT
 {
    ShaderCompiler::Source &src=ShaderCompilers.New().set(dest_path+"Blend Light", model, api, flag).New(src_path+"Blend Light.cpp");
+   const Int  materials=1;
+   const Bool heightmap=false;
    REPD(per_pixel  , 2)
    REPD(shadow_maps, 7) // 7=(6+off), 0=off
    REPD(color      , 2)
@@ -825,7 +847,8 @@ static void Compile(API api, SC_FLAG flag=SC_NONE)
       REPD(alpha_test  , layout    ? 2 : 1)
       REPD(alpha       , layout    ? 2 : 1) // BlendLight doesn't support ALPHA_TEST_DITHER
       REPD(emissive_map, 2)
-         src.New().blendLight(skin, color, layout, bump_mode ? SBUMP_NORMAL : SBUMP_FLAT, alpha_test, alpha, reflect, emissive_map, FX_NONE, per_pixel, shadow_maps);
+      for(Int uv_scale=(((heightmap || materials>1) && layout) ? 1 : 0), uv_scale_max=((layout && !skin && !alpha_test) ? 1 : 0); uv_scale<=uv_scale_max; uv_scale++) // always apply UV-Scale for heightmap or multi-materials
+         src.New().blendLight(skin, color, layout, bump_mode ? SBUMP_NORMAL : SBUMP_FLAT, alpha_test, alpha, reflect, emissive_map, uv_scale, FX_NONE, per_pixel, shadow_maps);
 
       // grass+leaf, 1 material, 1-2 tex
       for(Int layout=1; layout<=2; layout++)
@@ -833,7 +856,7 @@ static void Compile(API api, SC_FLAG flag=SC_NONE)
       REPD (alpha_test  , layout    ? 2 : 1) // BlendLight doesn't support ALPHA_TEST_DITHER, here 'alpha_test' options are needed because of MTECH_BLEND_LIGHT_GRASS/MTECH_TEST_BLEND_LIGHT_GRASS etc.
       REPD (emissive_map, 2)
       REPAD(fx          , fxs)
-         src.New().blendLight(false, color, layout, bump_mode ? SBUMP_NORMAL : SBUMP_FLAT, alpha_test, true, reflect, emissive_map, fxs[fx], per_pixel, shadow_maps);
+         src.New().blendLight(false, color, layout, bump_mode ? SBUMP_NORMAL : SBUMP_FLAT, alpha_test, true, reflect, emissive_map, false, fxs[fx], per_pixel, shadow_maps);
    }
 }
 #endif
@@ -845,7 +868,7 @@ static void Compile(API api, SC_FLAG flag=SC_NONE)
    {
       // zero (no vtx normals)
       REPD(skin, 2)
-         src.forward(skin, 1, 0, SBUMP_ZERO, false, false, false, false, color, false, false, FX_NONE, false,   false,false,0,   false,false,   false,false,   false,false,   false);
+         src.forward(skin, 1, 0, SBUMP_ZERO, false, false, false, false, color, false, false, false, FX_NONE, false,   false,false,0,   false,false,   false,false,   false,false,   false);
 
       // default
       REPD(skin        , 2)
@@ -854,13 +877,14 @@ static void Compile(API api, SC_FLAG flag=SC_NONE)
       for(Int layout=((materials==1) ? 0 : 1); layout<=2; layout++) // multi-materials don't support 0 textures
       REPD(bump_mode   , per_pixel                              ? 2 : 1)
       REPD(mtrl_blend  , (materials> 1 && layout>=2           ) ? 2 : 1) // can do per-pixel mtrl-blend only if we have bump map
-      REPD(heightmap   , (!skin                               ) ? 2 : 1)
+      REPD(heightmap   , (!skin                               ) ?  HEIGHTMAP_NUM : 1)
       REPD(alpha_test  , (materials==1 && layout && !heightmap) ? ALPHA_TEST_NUM : 1)
       REPD(emissive_map, (materials==1 &&           !heightmap) ? 2 : 1)
       REPD(tesselate   , (tess && SUPPORT_FORWARD_TESSELATE   ) ? 2 : 1)
       REPD(detail      , (        SUPPORT_FORWARD_DETAIL      ) ? 2 : 1)
       REPD(reflect     , 2)
-         src.forwardLight(skin, materials, layout, bump_mode ? SBUMP_NORMAL : SBUMP_FLAT, alpha_test, reflect, emissive_map, detail, color, mtrl_blend, heightmap, FX_NONE, per_pixel, tesselate);
+      for(Int uv_scale=(((heightmap || materials>1) && layout) ? 1 : 0), uv_scale_max=((layout && !skin && !alpha_test) ? 1 : 0); uv_scale<=uv_scale_max; uv_scale++) // always apply UV-Scale for heightmap or multi-materials
+         src.forwardLight(skin, materials, layout, bump_mode ? SBUMP_NORMAL : SBUMP_FLAT, alpha_test, reflect, emissive_map, detail, color, mtrl_blend, uv_scale, heightmap, FX_NONE, per_pixel, tesselate);
 
       // grass + leaf, 1 material, 1-2 tex
       for(Int layout=1; layout<=2; layout++)
@@ -869,7 +893,7 @@ static void Compile(API api, SC_FLAG flag=SC_NONE)
       REPD (reflect     , 2)
       REPD (emissive_map, 2)
       REPAD(fx          , fxs)
-         src.forwardLight(false, 1, layout, bump_mode ? SBUMP_NORMAL : SBUMP_FLAT, true, reflect, emissive_map, false, color, false, false, fxs[fx], per_pixel, false);
+         src.forwardLight(false, 1, layout, bump_mode ? SBUMP_NORMAL : SBUMP_FLAT, true, reflect, emissive_map, false, color, false, false, false, fxs[fx], per_pixel, false);
    }
 }
 #endif

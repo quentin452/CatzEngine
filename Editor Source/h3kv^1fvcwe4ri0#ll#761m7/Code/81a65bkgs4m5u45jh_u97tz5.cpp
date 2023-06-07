@@ -389,6 +389,7 @@ class ProjectEx : ProjectHierarchy
    static void MtrlSetSmoothCur        (ProjectEx &proj) {if(MtrlEdit.elm)proj.mtrlSetSmooth      (proj.menu_list_sel, MtrlEdit.edit.smooth                                );else Gui.msgBox(S, "There's no Material opened");}
    static void MtrlSetReflectCur       (ProjectEx &proj) {if(MtrlEdit.elm)proj.mtrlSetReflect     (proj.menu_list_sel, MtrlEdit.edit.reflect_min, MtrlEdit.edit.reflect_max);else Gui.msgBox(S, "There's no Material opened");}
    static void MtrlSetGlowCur          (ProjectEx &proj) {if(MtrlEdit.elm)proj.mtrlSetGlow        (proj.menu_list_sel, MtrlEdit.edit.glow                                  );else Gui.msgBox(S, "There's no Material opened");}
+   static void MtrlSetUVScale          (ProjectEx &proj) {if(MtrlEdit.elm)proj.mtrlSetUVScale     (proj.menu_list_sel, MtrlEdit.edit.uv_scale                              );else Gui.msgBox(S, "There's no Material opened");}
    static void MtrlResetAlpha          (ProjectEx &proj) {                proj.mtrlResetAlpha     (proj.menu_list_sel);}
    static void MtrlCullOn              (ProjectEx &proj) {                proj.mtrlCull           (proj.menu_list_sel, true );}
    static void MtrlCullOff             (ProjectEx &proj) {                proj.mtrlCull           (proj.menu_list_sel, false);}
@@ -1594,6 +1595,20 @@ class ProjectEx : ProjectHierarchy
          {
             if(mul)edit.glow*=glow;else edit.glow=glow; edit.glow_time.now();
             ok&=mtrlSync(elm_ids[i], edit, false, false, "setGlow");
+         }
+      }
+      return ok;
+   }
+   bool mtrlSetUVScale(C MemPtr<UID> &elm_ids, flt uv_scale)
+   {
+      bool ok=true;
+      REPA(elm_ids)
+      {
+         EditMaterial edit; if(!mtrlGet(elm_ids[i], edit))ok=false;else
+         if(edit.uv_scale!=uv_scale)
+         {
+            edit.uv_scale=uv_scale; edit.uv_scale_time.now();
+            ok&=mtrlSync(elm_ids[i], edit, false, false, "setUVScale");
          }
       }
       return ok;
@@ -4328,11 +4343,12 @@ class ProjectEx : ProjectHierarchy
                   m++;
                   m.New().create("Set Technique to Edited Material", MtrlSetTechCur, T);
                   m++;
-                  m.New().create("Set Bump Value to Edited Material"   , MtrlSetBumpCur   , T);
-                  m.New().create("Set Normal Value to Edited Material" , MtrlSetNormalCur , T);
-                  m.New().create("Set Smooth Value to Edited Material" , MtrlSetSmoothCur , T);
-                  m.New().create("Set Reflect Value to Edited Material", MtrlSetReflectCur, T);
-                  m.New().create("Set Glow Value to Edited Material"   , MtrlSetGlowCur   , T);
+                  m.New().create("Set Bump Value to Edited Material"    , MtrlSetBumpCur   , T);
+                  m.New().create("Set Normal Value to Edited Material"  , MtrlSetNormalCur , T);
+                  m.New().create("Set Smooth Value to Edited Material"  , MtrlSetSmoothCur , T);
+                  m.New().create("Set Reflect Value to Edited Material" , MtrlSetReflectCur, T);
+                  m.New().create("Set Glow Value to Edited Material"    , MtrlSetGlowCur   , T);
+                  m.New().create("Set UV Scale Value to Edited Material", MtrlSetUVScale   , T);
                   m++;
                   m.New().create("Set Color Texture to Edited Material"  , MtrlSetColorTexCur , T);
                   m.New().create("Set Bump Texture to Edited Material"   , MtrlSetBumpTexCur  , T);

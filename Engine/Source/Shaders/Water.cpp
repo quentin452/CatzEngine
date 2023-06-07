@@ -59,10 +59,13 @@ This code calculates lighting by taking samples along the view ray, which is ref
    D.text(0,0.8f,S+min/max+' '+max);
 }
 /******************************************************************************/
-// LIGHT, SHADOW, SOFT, REFLECT_ENV, REFLECT_MIRROR, GATHER, WAVES, RIVER
+// LIGHT, SHADOW, SOFT, REFLECT_ENV, REFLECT_MIRROR, GATHER, WAVES, RIVER, BALL, FLAT, CONSERVATIVE_DEPTH
 // Col, Nrm, Ext = water material textures
 // ImgXF = background underwater depth
 // these must be the same as "Apply" shader - Img1=reflection (2D image), Img2=background underwater
+#ifndef BALL
+#define BALL 0
+#endif
 #ifndef WAVES
 #define WAVES 0
 #endif
@@ -74,12 +77,47 @@ This code calculates lighting by taking samples along the view ray, which is ref
 #endif
 #define DUAL_NORMAL 0
 /******************************************************************************/
-Half Wave(Vec2 world_pos)
+Half WaveVS(Vec2 uv)
 {
-   return Avg(RTexLod(Ext, (WaterOfsBump+world_pos)*WaterMaterial.scale_bump).x,  // it's better to scale 'WaterOfsBump' too #MaterialTextureLayoutWater
-              RTexLod(Ext, (WaterOfsBump-world_pos)*WaterMaterial.scale_bump).x); // it's better to scale 'WaterOfsBump' too
+   return Avg(RTexLod(Ext, (WaterOfsBump+uv)*WaterMaterial.scale_bump).x,  // it's better to scale 'WaterOfsBump' too #MaterialTextureLayoutWater
+              RTexLod(Ext, (WaterOfsBump-uv)*WaterMaterial.scale_bump).x); // it's better to scale 'WaterOfsBump' too
+}
+Half WavePS(Vec2 uv)
+{
+   return Avg(RTex(Ext, (WaterOfsBump+uv)*WaterMaterial.scale_bump).x,  // it's better to scale 'WaterOfsBump' too #MaterialTextureLayoutWater
+              RTex(Ext, (WaterOfsBump-uv)*WaterMaterial.scale_bump).x); // it's better to scale 'WaterOfsBump' too
 }
 /******************************************************************************/
+#if BALL
+void Surface_VS(VtxInput vtx,
+#if FLAT || !GL_ES // GL_ES doesn't support NOPERSP
+   NOPERSP out Vec2 posXY:POS_XY,
+#endif
+
+#if FLAT
+   NOPERSP  out Vec4 pixel:POSITION
+#else
+   #if CONSERVATIVE_DEPTH
+      centroid out Vec4 pixel:POSITION // centroid needed for DEPTH_GE
+   #else
+               out Vec4 pixel:POSITION
+   #endif
+#endif
+)
+{
+#if FLAT
+   posXY=UVToPosXY(vtx.uv());
+   pixel=Vec4(vtx.pos2(), Z_BACK, 1); // set Z to be at the end of the viewport, this enables optimizations by processing only foreground pixels (no sky/background)
+#else // GEOM
+   pixel=Project(TransformPos(vtx.pos()));
+
+#if !GL_ES
+   Vec2 uv   =ProjectedPosToUV   (pixel);
+        posXY=          UVToPosXY(uv);
+#endif
+#endif
+}
+#else
 void Surface_VS
 (
    VtxInput vtx,
@@ -100,6 +138,41 @@ void Surface_VS
 )
 {
    Vec world_pos=vtx.pos(), view_pos;
+   /*if(BALL)
+   {
+      Vec dir=Normalize(Vec(FracToPosXY(world_pos.xy), 1));
+      Vec pos   =WaterBallPosRadius.xyz;
+      Flt radius=WaterBallPosRadius.w;
+
+      Flt b=-Dot(pos, dir);
+      Flt c=Length2(pos)-Sqr(radius);
+      Flt d=b*b-c;
+      if(d<=0) // no intersection
+      {
+         //view_pos=pos;
+         Vec line_pos=0;
+         Vec line_dir=dir;
+         Vec ball_pos=pos;
+
+         Vec p=PointOnPlane(line_pos, ball_pos, line_dir);
+         Flt s=Dist        (p       , ball_pos          );
+         if(s>radius)
+         {
+            Flt new_dist=Max(0, radius+radius-s);
+            p=(p-ball_pos)*(new_dist/s)+ball_pos;
+            line_dir=Normalize(p);
+            s=new_dist;
+         }
+         s=CosSin(s/radius)*radius;
+         view_pos=p+s*line_dir;
+      }else
+      {
+         Flt start=-b-Sqrt(d);
+         view_pos=start*dir;
+      }
+      //view_pos=1000*dir;
+      world_pos=Transform(view_pos, CamMatrix);
+   }else*/
    if(WAVES)
    {
       world_pos.y=world_pos.y*WaterYMulAdd.x + WaterYMulAdd.y;
@@ -140,9 +213,9 @@ void Surface_VS
  //dist_scale=Sat( 6/dist      )*WaterMaterial.wave_scale;
 
    #define DERIVATIVE 0.125
-   Half wave  =Wave(uv),
-        wave_r=Wave(uv+Vec2(DERIVATIVE, 0)),
-        wave_f=Wave(uv+Vec2(0, DERIVATIVE));
+   Half wave  =WaveVS(uv),
+        wave_r=WaveVS(uv+Vec2(DERIVATIVE, 0)),
+        wave_f=WaveVS(uv+Vec2(0, DERIVATIVE));
 
    outWaveN.x=wave-wave_r;
    outWaveN.y=wave-wave_f;
@@ -158,6 +231,7 @@ void Surface_VS
 #endif
    vpos=Project(view_pos);
 }
+#endif
 /******************************************************************************/
 void WaterReflectColor(inout VecH total_specular, Vec nrm, Vec eye_dir, Vec2 uv, Vec2 refract, Half plane_dist)
 {
@@ -189,6 +263,26 @@ void WaterReflectColor(inout VecH total_specular, Vec nrm, Vec eye_dir, Vec2 uv,
 }
 void Surface_PS
 (
+#if BALL
+   #if FLAT || !GL_ES // GL_ES doesn't support NOPERSP
+      NOPERSP Vec2 posXY:POS_XY,
+   #endif
+
+   #if FLAT
+      NOPERSP PIXEL,
+      out Flt depth:DEPTH
+   #else
+      #if CONSERVATIVE_DEPTH
+         centroid PIXEL, // centroid needed for DEPTH_GE
+         out Flt depth:DEPTH_GE
+      #else
+         PIXEL,
+         out Flt depth:DEPTH
+      #endif
+   #endif
+
+#else // BALL
+
    Vec2 uv_col:UV_COL,
    Vec4 uv_nrm:UV_NRM,
 #if DUAL_NORMAL
@@ -201,14 +295,77 @@ void Surface_PS
    Vec  inPos      :POS,
    Half inPlaneDist:PLANE_DIST,
 #endif
-   PIXEL,
+   PIXEL
 
-   out VecH4 O_col:TARGET0
+#endif // BALL
+
+ , out VecH4 O_col    :TARGET0
 #if !LIGHT
- , out VecH  O_nrm:TARGET1
+ , out VecH  O_nrm    :TARGET1
+ , out VecH2 O_refract:TARGET2
 #endif
 ) // #RTOutput
 {
+#if BALL
+   VecI2 pix=pixel.xy;
+#if !FLAT && GL_ES // GL_ES doesn't support NOPERSP
+   Vec2 uv   =PixelToUV   (pixel);
+   Vec2 posXY=   UVToPosXY(uv);
+#endif
+
+   Flt z_raw=ImgXF[pix];
+ //Bool back_b=DEPTH_BACKGROUND(z_raw);
+   Flt z=LinearizeDepth(z_raw);
+   Vec pos=GetPos(z, posXY); // view space position of background pixel
+   Flt dist=Length(pos);
+   Vec eye_dir=pos/dist; // Normalize(Vec(posXY, 1)) view space view ray direction
+   Vec cam_pos=WaterBallPosRadius.xyz; // view space camera position relative to water ball
+
+   Flt b=Dot(cam_pos, eye_dir);
+   Flt c=Length2(cam_pos)-Sqr(WaterBallPosRadius.w);
+   Flt d=b*b-c;
+   Flt start=    -b-Sqrt(d);
+   Flt end  =Min(-b+Sqrt(d), dist);
+   if(d<=0 || end<=start || start<=0)discard;
+
+   Vec ball_surface_pos=start*eye_dir; // view space position on ball surface
+
+   Vec rel_ball_surface_pos=ball_surface_pos+cam_pos; // view space position on ball surface relative to ball center. -radius..radius
+   MatrixH3 tex_mtrx;
+   tex_mtrx[2]=Normalize(rel_ball_surface_pos); // view space ball surface normal
+   tex_mtrx[0]=Normalize(PointOnPlane(WaterBallX, tex_mtrx[2])); // tangent
+   tex_mtrx[1]=Cross(tex_mtrx[2], tex_mtrx[0]); // binormal
+
+ //Vec world_pos=Transform (    ball_surface_pos, CamMatrix);
+ //Vec world_pos=Transform3(rel_ball_surface_pos, CamMatrix); this one treats ball.pos=(0,0,0)
+ //O_col=1; O_col.xyz=Frac(world_pos.xyz/10); return; // test coords
+ //O_col=1; O_col.xyz=Normalize(rel_ball_surface_pos); return; // test normal
+
+   Vec2 uv_col;
+   Vec4 uv_nrm;
+
+   {
+      Vec2 uv;
+      uv.x=Dot(rel_ball_surface_pos, WaterBallX);
+      uv.y=Dot(rel_ball_surface_pos, WaterBallY);
+
+      uv_col   =(WaterOfsCol+uv)*WaterMaterial.scale_color ; // it's better to scale 'WaterOfsCol' too
+      uv_nrm.xy=(WaterOfsNrm+uv)*WaterMaterial.scale_normal;
+      uv_nrm.zw=(WaterOfsNrm-uv)*WaterMaterial.scale_normal;
+
+   #if WAVES
+    //ball_surface_pos  +=tex_mtrx[2]*WavePS(uv)*WaterMaterial.wave_scale ; // don't move up and down because if camera is facing forward when standing on flat water, then it won't change Z values and won't change depth and won't show waves
+    //ball_surface_pos.z+=        Abs(WavePS(uv)*WaterMaterial.wave_scale); // too strong at viewport corners. use Abs to always move forward, because if moving back sometimes then it won't show any waves
+      ball_surface_pos  +=eye_dir*Abs(WavePS(uv)*WaterMaterial.wave_scale); // best                          . use Abs to always move forward, because if moving back sometimes then it won't show any waves
+   #endif
+   }
+
+   depth=DelinearizeDepth(ball_surface_pos.z);
+   Vec  inPos=ball_surface_pos;
+   Half inPlaneDist=0;
+   VecH inWaveN=0;
+#endif
+
    VecH nrm_flat; // #MaterialTextureLayoutWater
 #if DUAL_NORMAL
    nrm_flat.xy=(RTex(Nrm, uv_nrm.xy).xy - RTex(Nrm, uv_nrm.zw).xy + RTex(Nrm, uv_nrm1.xy).xy - RTex(Nrm, uv_nrm1.zw).xy)*(WaterMaterial.normal/4); // Avg(RTex(Nrm, uv_nrm.xy).xy, -RTex(Nrm, uv_nrm.zw).xy, RTex(Nrm, uv_nrm1.xy).xy, -RTex(Nrm, uv_nrm1.zw).xy)*WaterMaterial.normal; normals from mirrored tex coordinates must be subtracted
@@ -219,11 +376,17 @@ void Surface_PS
    nrm_flat.xy+=inWaveN.xy;
 #endif
    nrm_flat.z=CalcZ(nrm_flat.xy);
+#if BALL
+   Vec nrm=Normalize(Vec(Transform(nrm_flat, tex_mtrx))); // convert to HP before Normalize
+#else
    Vec nrm=Normalize(Vec(TransformDir(nrm_flat.xzy))); // convert to view space, convert to HP before Normalize
+#endif
 
    VecH4 water_col;
    water_col.rgb=RTex(Col, uv_col).rgb*WaterMaterial.color;
    water_col.a  =0;
+
+   Vec2 refract=nrm_flat.xy*Viewport.size; // TODO: this could be improved
 
 #if !LIGHT
    O_col=water_col;
@@ -233,10 +396,16 @@ void Surface_PS
    #else
       O_nrm.xyz=nrm*0.5+0.5; // -1..1 -> 0..1
    #endif
+
+   O_refract=refract;
 #else
+
+#if !(BALL && !FLAT && GL_ES)
    Vec2 uv     =PixelToUV(pixel);
-   Vec2 refract=nrm_flat.xy*Viewport.size; // TODO: this could be improved
+#endif
+#if !BALL
    Vec  eye_dir=Normalize(inPos);
+#endif
 
    // shadow
    Half shadow; if(SHADOW)shadow=Sat(ShadowDirValue(inPos, ShadowJitter(pixel.xy), true, SHADOW, false));
@@ -265,7 +434,12 @@ void Surface_PS
    if(SOFT)
    {
       Flt water_z    =inPos.z;
+   #if BALL
+      Flt water_z_raw=depth;
+   #else
       Flt water_z_raw=pixel.z;
+   #endif
+
    #if REFRACT
       Vec2 back_uv=Mid(uv+refract*(WaterMaterial.refract/Max(1, water_z)), WaterClamp.xy, WaterClamp.zw);
    #if GATHER
@@ -285,11 +459,19 @@ void Surface_PS
       if(DEPTH_SMALLER(DEPTH_MIN(back_z_raw4), water_z_raw)) // if refracted sample is in front of water (leaking), use DEPTH_MIN to check if all samples are in front
       { // skip refracted sample
          back_uv   =uv;
+      #if BALL
+         back_z_raw=z_raw;
+      #else
          back_z_raw=TexPoint(ImgXF, uv).x;
+      #endif
       }
    #else // NO REFRACT
-      Vec2 back_uv   =uv;
-      Flt  back_z_raw=TexPoint(ImgXF, uv).x;
+         Vec2 back_uv   =uv;
+      #if BALL
+         Flt  back_z_raw=z_raw;
+      #else
+         Flt  back_z_raw=TexPoint(ImgXF, uv).x;
+      #endif
    #endif // REFRACT
       if(DEPTH_BACKGROUND(back_z_raw))O_col=water_col;else // always force full opacity when there's no background pixel set to ignore discarded pixels in RenderTarget (they could cause artifacts)
       {
@@ -336,11 +518,10 @@ VecH4 Apply_PS(NOPERSP Vec2 uv   :UV,
       Vec eye_dir=Normalize(pos);
 
       VecH4 water_col; water_col.rgb=Img3[pix].rgb; water_col.a=0; // water surface color
-      VecH  lum =   Img4  [pix]; // water surface light
-      VecH  spec=   Img5  [pix]; // water surface light specular
-      Vec   nrm =GetNormal(pix).xyz; // water surface normals
-      Vec   nrm_flat=TransformTP(nrm, (Matrix3)GetViewMatrix()).xzy;
-      Vec2  refract=nrm_flat.xy*Viewport.size; // TODO: this could be improved
+      VecH  lum    =   Img4  [pix]; // water surface light
+      VecH  spec   =   Img5  [pix]; // water surface light specular
+      Vec   nrm    =GetNormal(pix).xyz; // water surface normals
+      Vec2  refract=   ImgXY [pix];
 
       water_col.rgb*=lum;
       WaterReflectColor(spec, nrm, eye_dir, uv, refract, DistPointPlane(pos, WaterPlanePos, WaterPlaneNrm));

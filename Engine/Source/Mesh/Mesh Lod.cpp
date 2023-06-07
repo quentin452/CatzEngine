@@ -82,6 +82,32 @@ Bool MeshLod::getBox(Box &box, Bool skip_hidden_parts)C
    }
    if(!found)box.zero(); return found;
 }
+Bool MeshLod::getBox(Box &box, C Matrix3 &matrix, Bool skip_hidden_parts)C
+{
+   Bool found=false; Box temp; REPA(T)
+   {
+    C MeshPart &part=parts[i];
+      if(!skip_hidden_parts || !(part.part_flag&MSHP_HIDDEN))
+         if(part.getBox(temp, matrix))
+      {
+         if(!found){found=true; box=temp;}else box|=temp;
+      }
+   }
+   if(!found)box.zero(); return found;
+}
+Bool MeshLod::getBox(Box &box, C Matrix &matrix, Bool skip_hidden_parts)C
+{
+   Bool found=false; Box temp; REPA(T)
+   {
+    C MeshPart &part=parts[i];
+      if(!skip_hidden_parts || !(part.part_flag&MSHP_HIDDEN))
+         if(part.getBox(temp, matrix))
+      {
+         if(!found){found=true; box=temp;}else box|=temp;
+      }
+   }
+   if(!found)box.zero(); return found;
+}
 /******************************************************************************/
 // have to use SB functions for special case of -0
 Flt MeshLod::dist()C

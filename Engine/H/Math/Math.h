@@ -154,15 +154,15 @@ VecD  ScaleFactor(C VecD  &vec);   VecD  ScaleFactorR(C VecD  &vec);
 Vec4  ScaleFactor(C Vec4  &vec);   Vec4  ScaleFactorR(C Vec4  &vec);
 VecD4 ScaleFactor(C VecD4 &vec);   VecD4 ScaleFactorR(C VecD4 &vec);
 
-constexpr Int   Sqr(  Int   x) {return x*x;} // square  = x**2
-constexpr UInt  Sqr(  UInt  x) {return x*x;} // square  = x**2
-constexpr Long  Sqr(  Long  x) {return x*x;} // square  = x**2
-constexpr ULong Sqr(  ULong x) {return x*x;} // square  = x**2
-constexpr Flt   Sqr(  Flt   x) {return x*x;} // square  = x**2
-constexpr Dbl   Sqr(  Dbl   x) {return x*x;} // square  = x**2
-inline    Vec2  Sqr(C Vec2 &x) {return x*x;} // square  = x**2
-inline    Vec   Sqr(C Vec  &x) {return x*x;} // square  = x**2
-inline    Vec4  Sqr(C Vec4 &x) {return x*x;} // square  = x**2
+constexpr Int   Sqr(  Int   x) {return x*x;} // square = x**2
+constexpr UInt  Sqr(  UInt  x) {return x*x;} // square = x**2
+constexpr Long  Sqr(  Long  x) {return x*x;} // square = x**2
+constexpr ULong Sqr(  ULong x) {return x*x;} // square = x**2
+constexpr Flt   Sqr(  Flt   x) {return x*x;} // square = x**2
+constexpr Dbl   Sqr(  Dbl   x) {return x*x;} // square = x**2
+inline    Vec2  Sqr(C Vec2 &x) {return x*x;} // square = x**2
+inline    Vec   Sqr(C Vec  &x) {return x*x;} // square = x**2
+inline    Vec4  Sqr(C Vec4 &x) {return x*x;} // square = x**2
 
 constexpr Int   Cube(Int   x) {return x*x*x;} // cube = x**3
 constexpr UInt  Cube(UInt  x) {return x*x*x;} // cube = x**3
@@ -198,6 +198,45 @@ inline ULong& SQR(ULong &x) {return x*=x;}
 inline Flt  & SQR(Flt   &x) {return x*=x;}
 inline Dbl  & SQR(Dbl   &x) {return x*=x;}
 
+// fast inverse sqrt approximation
+INLINE Flt RSqrtSimd(Flt x)
+{
+#if X86
+   __m128 vx=_mm_set_ss   (x);
+   __m128 vy=_mm_rsqrt_ss (vx);
+   return    _mm_cvtss_f32(vy);
+#elif ARM
+   float32x2_t vx=vdup_n_f32 (x);
+   float32x2_t vy=vrsqrte_f32(vx);
+   return vy[0];
+#else
+   return 1/SqrtFast(x);
+#endif
+}
+inline Flt RSqrt0(Flt x) // ~1/Sqrt(x) inverse square root, high speed, low  precision
+{
+#if X86 || ARM // faster/similar speed, but more precision
+   return RSqrtSimd(x);
+#else
+   Int i=0x5F3759DF-((Int&)x>>1); // initial guess
+   Flt y=(Flt&)i;
+   return y;
+#endif
+}
+inline Flt RSqrt1(Flt x) // ~1/Sqrt(x) inverse square root, med  speed, med  precision
+{
+#if X86 || ARM // faster/similar speed, but more precision
+   return RSqrtSimd(x);
+#else
+   Flt x_2=x/2;
+   Int i=0x5F3759DF-((Int&)x>>1); // initial guess
+   Flt y=(Flt&)i;
+   y*=1.5f-(x_2*y*y); // 1st Newton iteration
+   return y;
+#endif
+}
+Flt RSqrt2(Flt x); // ~1/Sqrt(x) inverse square root, low  speed, high precision
+
 #if EE_PRIVATE
       UInt  SqrtI(UInt  x               ); // integer square root (binary    method, fastest)
        Int  SqrtI( Int  x               ); // integer square root (binary    method, fastest)
@@ -205,21 +244,21 @@ inline Dbl  & SQR(Dbl   &x) {return x*=x;}
        Int  SqrtI( Long x               ); // integer square root (binary    method, fastest)
       UInt  SqrtI(UInt  x, Int max_steps); // integer square root (iterative method, slower but can be faster if "max_steps<=2")
 #endif
-inline Flt  SqrtFast(  Int   x) {return sqrtf((Flt)x);} //                 square root, returns      NaN  for negative values
-inline Flt  SqrtFast(  Flt   x) {return sqrtf(     x);} //                 square root, returns      NaN  for negative values
-inline Dbl  SqrtFast(  Dbl   x) {return sqrt (     x);} //                 square root, returns      NaN  for negative values
-       Flt  Sqrt    (  Int   x);                        //                 square root, returns        0  for negative values
-       Flt  Sqrt    (  Flt   x);                        //                 square root, returns        0  for negative values
-       Dbl  Sqrt    (  Dbl   x);                        //                 square root, returns        0  for negative values
-       Vec2 Sqrt    (C Vec2 &x);                        //                 square root, returns        0  for negative values
-       Vec  Sqrt    (C Vec  &x);                        //                 square root, returns        0  for negative values
-       Vec4 Sqrt    (C Vec4 &x);                        //                 square root, returns        0  for negative values
-       Flt  SqrtS   (  Int   x);                        // sign preserving square root, returns -Sqrt(-x) for negative values
-       Flt  SqrtS   (  Flt   x);                        // sign preserving square root, returns -Sqrt(-x) for negative values
-       Dbl  SqrtS   (  Dbl   x);                        // sign preserving square root, returns -Sqrt(-x) for negative values
-inline Flt  Cbrt    (  Int   x) {return cbrtf((Flt)x);} //                 cube   root, works         ok  for negative values
-inline Flt  Cbrt    (  Flt   x) {return cbrtf(     x);} //                 cube   root, works         ok  for negative values
-inline Dbl  Cbrt    (  Dbl   x) {return cbrt (     x);} //                 cube   root, works         ok  for negative values
+inline Flt  SqrtFast(  Int   x) {return sqrtf((Flt)x);}                                    //                 square root, returns      NaN  for negative values
+inline Flt  SqrtFast(  Flt   x) {return sqrtf(     x);}                                    //                 square root, returns      NaN  for negative values
+inline Dbl  SqrtFast(  Dbl   x) {return sqrt (     x);}                                    //                 square root, returns      NaN  for negative values
+       Flt  Sqrt    (  Int   x);                                                           //                 square root, returns        0  for negative values
+       Flt  Sqrt    (  Flt   x);                                                           //                 square root, returns        0  for negative values
+       Dbl  Sqrt    (  Dbl   x);                                                           //                 square root, returns        0  for negative values
+inline Vec2 Sqrt    (C Vec2 &x) {return Vec2(Sqrt(x.x), Sqrt(x.y));}                       //                 square root, returns        0  for negative values
+inline Vec  Sqrt    (C Vec  &x) {return Vec (Sqrt(x.x), Sqrt(x.y), Sqrt(x.z));}            //                 square root, returns        0  for negative values
+inline Vec4 Sqrt    (C Vec4 &x) {return Vec4(Sqrt(x.x), Sqrt(x.y), Sqrt(x.z), Sqrt(x.w));} //                 square root, returns        0  for negative values
+       Flt  SqrtS   (  Int   x);                                                           // sign preserving square root, returns -Sqrt(-x) for negative values
+       Flt  SqrtS   (  Flt   x);                                                           // sign preserving square root, returns -Sqrt(-x) for negative values
+       Dbl  SqrtS   (  Dbl   x);                                                           // sign preserving square root, returns -Sqrt(-x) for negative values
+inline Flt  Cbrt    (  Int   x) {return cbrtf((Flt)x);}                                    //                 cube   root, works         ok  for negative values
+inline Flt  Cbrt    (  Flt   x) {return cbrtf(     x);}                                    //                 cube   root, works         ok  for negative values
+inline Dbl  Cbrt    (  Dbl   x) {return cbrt (     x);}                                    //                 cube   root, works         ok  for negative values
 
 inline Flt Pow(Int x, Flt y) {return powf((Flt)x,      y);} // raise 'x' to the power 'y'
 inline Flt Pow(Flt x, Int y) {return powf(     x, (Flt)y);} // raise 'x' to the power 'y'
@@ -227,6 +266,12 @@ inline Flt Pow(Flt x, Flt y) {return powf(     x,      y);} // raise 'x' to the 
 inline Dbl Pow(Int x, Dbl y) {return pow (     x,      y);} // raise 'x' to the power 'y'
 inline Dbl Pow(Dbl x, Int y) {return pow (     x,      y);} // raise 'x' to the power 'y'
 inline Dbl Pow(Dbl x, Dbl y) {return pow (     x,      y);} // raise 'x' to the power 'y'
+
+inline Flt  Exp(  Flt   x) {return expf(x);} // raise 'e' to the power 'x'
+inline Dbl  Exp(  Dbl   x) {return exp (x);} // raise 'e' to the power 'x'
+inline Vec2 Exp(C Vec2 &v) {return Vec2(Exp(v.x), Exp(v.y));}
+inline Vec  Exp(C Vec  &v) {return Vec (Exp(v.x), Exp(v.y), Exp(v.z));}
+inline Vec4 Exp(C Vec4 &v) {return Vec4(Exp(v.x), Exp(v.y), Exp(v.z), Exp(v.w));}
 
 inline Flt Ln  (Flt x) {return logf (x);} // e-base logarithm
 inline Dbl Ln  (Dbl x) {return log  (x);} // e-base logarithm
@@ -343,6 +388,9 @@ inline Flt CosSin(Flt cos_sin) {return Sqrt(1-cos_sin*cos_sin);} // convert cos<
 inline Dbl CosSin(Dbl cos_sin) {return Sqrt(1-cos_sin*cos_sin);} // convert cos<->sin, this function converts sine value to cosine value (of the same angle), and cosine value to sine value (of the same angle) at the same time
 
 #if EE_PRIVATE
+inline Flt CosSin2(Flt cos_sin_2) {return Sqrt(1-cos_sin_2);} // convert cos2->sin, sin2->cos, this function converts sine value to cosine value (of the same angle), and cosine value to sine value (of the same angle) at the same time
+inline Dbl CosSin2(Dbl cos_sin_2) {return Sqrt(1-cos_sin_2);} // convert cos2->sin, sin2->cos, this function converts sine value to cosine value (of the same angle), and cosine value to sine value (of the same angle) at the same time
+
 inline Flt CosSinPrecise(Flt cos_sin) {return (Flt)CosSin(Dbl (cos_sin));} // this is more precise than regular 'CosSin' and still fast
 inline Dbl CosSinPrecise(Dbl cos_sin) {return      Sin   (Acos(cos_sin));} // this is more precise than regular 'CosSin' but slow
 #endif
@@ -432,7 +480,7 @@ Flt BlendSmoothSin   (Flt x); // get smooth sine   blend value (0..1), basing on
 constexpr Int BlendSmoothCubeSum    (Int range) {return range          ;} // get sum of all weights for all "-range..range" steps, calculated using "Flt weight=0; for(Int dist=-range; dist<=range; dist++)weight+=BlendSmoothCube(dist/Flt(range));"
 constexpr Flt BlendSmoothCubeSumHalf(Int range) {return range*0.5f+0.5f;} // get sum of all weights for all "     0..range" steps, calculated using "Flt weight=0; for(Int dist=     0; dist<=range; dist++)weight+=BlendSmoothCube(dist/Flt(range));"
 
-Flt Gaussian(Flt x); // get the Probability Density Function (PDF) of the Normal (Gaussian) distribution "expf(-x*x)", this function returns highest value of 1 at "x==0" and drops towards zero when 'x' becomes more away from the '0' position, theoretically it never reaches zero value, however due to floating point numerical precision zero will be reached for 'x' values far from '0' position
+Flt Gaussian(Flt x); // get the Probability Density Function (PDF) of the Normal (Gaussian) distribution "Exp(-x*x)", this function returns highest value of 1 at "x==0" and drops towards zero when 'x' becomes more away from the '0' position, theoretically it never reaches zero value, however due to floating point numerical precision zero will be reached for 'x' values far from '0' position
 
 Flt  SmoothOffset(Flt  &offset, Flt max_length);
 Vec2 SmoothOffset(Vec2 &offset, Flt max_length);

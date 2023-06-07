@@ -1,10 +1,11 @@
 /******************************************************************************/
-MeshPtr Earth;
+MeshPtr    Earth;
+Atmosphere Atmos(VecDZero, 1, 0.1, 1);
 /******************************************************************************/
 bool OnWorld(GuiObj *go) {return !go || go==Gui.desktop();}
 void Resize(flt old_width=0, flt old_height=0)
 {
-   D.viewFov(DegToRad(30), (D.w()>D.h()) ? FOV_Y : FOV_X);
+   D.viewFov(DegToRad(70), (D.w()>D.h()) ? FOV_Y : FOV_X);
 }
 /******************************************************************************/
 void InitPre()
@@ -13,7 +14,7 @@ void InitPre()
    INIT();
    D.ambientPowerS(0.25);
    D.screen_changed=Resize;
-   Cam.dist =5;
+   Cam.dist =3;
    Cam.yaw  = LocationLongitude();
    Cam.pitch=-LocationLatitude ();
    Cam.setSpherical();
@@ -23,12 +24,20 @@ void InitPre()
 bool Init()
 {
    LocationRefresh(5); // refresh GPS every 5 seconds
+
    ObjectPtr obj=UID(3453681148, 1260303761, 794833293, 2782304748);
    Earth=obj->mesh();
+
    Sun.image=UID(1275694243, 1199742097, 1108828586, 1055787228);
    Sun.rays_mode=SUN_RAYS_OFF;
    Sun.light_color_l=1-D.ambientColorL();
+
    Sky.skybox(UID(540301137, 1134104252, 1741669259, 1349485002));
+
+   Atmos.mie_extinction=3/Atmos.height;
+   Atmos.light_scale=0.3/Atmos.calcCol(0).max(); // auto-calculate light-scale
+   Atmos.darken=1; // this could be adjusted based on camera distance to the planet surface, to darken space/stars when only standing on the surface
+
    return true;
 }
 /******************************************************************************/
@@ -56,7 +65,7 @@ bool Update()
       Cam.dist*=ScaleFactor((Dist (prev_a, prev_b)- Dist (cur_a, cur_b))*1.7);
    }
    Cam.dist*=ScaleFactor(Ms.wheel()*-0.2);
-   Clamp(Cam.dist, 3, 15);
+   Clamp(Cam.dist, 2, 15);
    d*=Cam.dist*0.3;
    Vec gyro=Gyroscope()*Time.ad(); if(0)gyro.xy.chs();
    switch(App.orientation())
@@ -84,6 +93,8 @@ bool Update()
    flt sun_angle=DegToRad(LocationLongitude())-day_angle;
    CosSin(Sun.pos.x, Sun.pos.z, sun_angle-PI_2); Sun.pos.y=0;
 
+   Atmosphere.SunPos=Atmos.pos+Sun.pos; // this is world-space position for the sun, however in this tutorial Earth is located at the center and sun revolves around it
+
    return true;
 }
 /******************************************************************************/
@@ -93,7 +104,8 @@ void Render()
    {
       case RM_PREPARE:
       {
-         if(Earth)Earth->draw(MatrixIdentity);
+         if(Earth)Earth->draw();
+         Atmos.draw();
       }break;
    }
 }

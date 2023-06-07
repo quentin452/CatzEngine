@@ -550,25 +550,23 @@ void Cloth::drawSkinnedOutline(C AnimatedSkeleton &anim_skel, C Color &color)C
 INLINE void ClothInstances::addShadow(C Cloth &cloth, Shader &shader, C Material &material)
 {
    ClothInstance &ci=New();
-   ci.cloth    =&cloth;
-   ci.shader   =&shader;
-   ci.material =&material; material.incUsage();
+   ci.cloth   =&cloth;
+   ci.shader  =&shader;
+   ci.material=&material; material.incUsage();
 }
 INLINE void ClothInstances::add(C Cloth &cloth, Shader &shader, C Material &material)
 {
    ClothInstance &ci=New();
-   ci.cloth           =&cloth;
-   ci.shader          =&shader;
-   ci.material        =&material; material.incUsage();
-   ci.highlight       = Renderer._mesh_highlight;
+   ci.cloth   =&cloth;
+   ci.shader  =&shader;
+   ci.material=&material; material.incUsage();
 }
 INLINE void ClothInstances::add(C Cloth &cloth, FRST &frst, C Material &material)
 {
    ClothInstance &ci=New();
-   ci.cloth    =&cloth;
-   ci.shader   =&frst;
-   ci.material =&material; material.incUsage();
-   ci.highlight= Renderer._mesh_highlight;
+   ci.cloth   =&cloth;
+   ci.shader  =&frst;
+   ci.material=&material; material.incUsage();
 }
 void Cloth::drawPhysical()C
 {

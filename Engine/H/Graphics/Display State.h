@@ -12,6 +12,7 @@ enum ALPHA_MODE : Byte // Alpha Blending Modes
    ALPHA_RENDER_BLEND       , // Color:blend, Alpha:decrease         ,   RT1: Color: increase,   RT2: Color:blend   #RTOutput.Blend
    ALPHA_RENDER_BLEND_FACTOR, // Color:blend, Alpha:blend with factor,   RT1: Color: increase,   RT2: Color:blend   #RTOutput.Blend
 #if EE_PRIVATE
+   ALPHA_RENDER_MERGE , // Color:blend alpha premultiplied, Alpha:decrease #RTOutput.Blend
    ALPHA_OVERLAY      , // Color:blend                    , Alpha:blend with factor !! #RTOutput WARNING: this uses factor for #0 RT Color glow, but also for #1 Nrm and #2 Ext (currently unused) !!
    ALPHA_FACTOR       , // Color:factor                   , Alpha:factor
    ALPHA_FONT         , // Color:clear type               , Alpha:increase
@@ -111,6 +112,7 @@ struct DisplayState // Display States Control, this class methods can be called 
    static void depthBias       (BIAS_MODE bias  );
    static void depthOnWrite    (Bool      on, Bool write);
    static void depthOnWriteFunc(Bool      on, Bool write, UInt func);
+   static void depthWriteFunc  (              Bool write, UInt func);
    static void    frontFace    (Bool      ccw   );
    static void setFrontFace    (                );
    static void wire            (Bool      on    );

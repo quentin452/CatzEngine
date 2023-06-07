@@ -108,7 +108,7 @@ MeshBase& MeshBase::create(C OBox &obox, MESH_FLAG flag, Int resolution) {return
 MeshBase& MeshBase::create(C Ball &ball, MESH_FLAG flag, Int resolution)
 {
    if(resolution<0)resolution=7;else MAX(resolution, 2); // default size else min size
-   Int face_vtxs=resolution*resolution;
+   Int    face_vtxs=resolution*resolution;
    create(face_vtxs*6, 0, 0, (resolution-1)*(resolution-1)*6, flag&VTX_TEX0);
    Vec   *pos =  vtx .pos ();
    Vec2  *tex =  vtx .tex0();

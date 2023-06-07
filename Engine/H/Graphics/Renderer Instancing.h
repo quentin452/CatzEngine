@@ -76,7 +76,6 @@ struct OpaqueShaderMaterialMeshInstance
    Int                      next_instance; // index of next instance in the same shader/material/mesh group in 'OpaqueShaderMaterialMeshInstances' container, keep 'next_instance' as first member, because it's used most often
    MatrixPair               view_matrix; // store as 'view_matrix' instead of 'obj_matrix' so we can use 'Matrix' instead of 'MatrixM'
  C Memc<ShaderParamChange> *shader_param_changes;
-   Color                    highlight;
    Byte                     stencil_value;
 
    OpaqueShaderMaterialMeshInstance& set();
@@ -147,8 +146,6 @@ extern Memc<SkeletonShaderMaterialMeshInstance> SkeletonShadowShaderMaterialMesh
 
 struct SkeletonOpaqueShaderMaterialMeshInstance : SkeletonShaderMaterialMeshInstance
 {
-   Color highlight;
-
    void set(C MeshRender &mesh);
    void set(C MeshPart   &mesh) {set(mesh.render);}
 };
@@ -274,7 +271,6 @@ struct BlendInstance
     C MeshPart                *mesh;
       MatrixPair               view_matrix; // store as 'view_matrix' instead of 'obj_matrix' so we can use 'Matrix' instead of 'MatrixM'
     C Memc<ShaderParamChange> *shader_param_changes;
-      Color                    highlight;
       STENCIL_MODE             stencil_mode;
    };
 
@@ -321,7 +317,6 @@ struct ClothInstance
  C Cloth      *cloth;
    ShaderBase *shader;
  C Material   *material;
-   Color       highlight;
 
 #if COUNT_MATERIAL_USAGE
   ~ClothInstance() {if(material)material->decUsage();}

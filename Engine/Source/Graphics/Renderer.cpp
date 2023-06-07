@@ -193,7 +193,7 @@ RendererClass::Context::Sub::Sub()
    proj_matrix_prev=ProjMatrix; // copy from current (needed for MotionBlur and Temporal)
 }
 /******************************************************************************/
-RendererClass::RendererClass() : material_color_l(null), highlight(null)
+RendererClass::RendererClass() : material_color_l(null), highlight(null), vtx_uv_scale(null)
 {
 #if 0 // there's only one 'RendererClass' global 'Renderer' and it doesn't need clearing members to zero
    stage=RS_DEFAULT;
@@ -243,7 +243,6 @@ RendererClass::RendererClass() : material_color_l(null), highlight(null)
   _mesh_blend_alpha  =ALPHA_RENDER_BLEND_FACTOR;
   _mesh_stencil_value=STENCIL_REF_ZERO;
   _mesh_stencil_mode =STENCIL_NONE;
-  _mesh_highlight    .zero();
   _mesh_draw_mask    =0xFFFFFFFF;
    SetVariation(0);
 
@@ -298,6 +297,8 @@ void RendererClass::create()
    Clouds.create();
    Water .create();
 
+ //if(_sky_a  .load("Img/Sky A.img"          ))GetShaderImage("SkyA"    )->set(_sky_a  );
+ //if(_sky_b  .load("Img/Sky B.img"          ))GetShaderImage("SkyB"    )->set(_sky_b  );
    if(_env_dfg.load("Img/Environment DFG.img"))GetShaderImage("EnvDFG"  )->set(_env_dfg);
    if(_noise  .load("Img/Blue Noise 128.img" ))GetShaderImage("ImgNoise")->set(_noise  ); ASSERT(NOISE_IMAGE_RES==128);
 #if GL
@@ -644,30 +645,33 @@ INLINE Shader* GetReplaceAlpha() {Shader* &s=Sh.ReplaceAlpha; if(SLOW_SHADER_LOA
 void RendererClass::cleanup()
 {
    FlagDisable(_has, HAS_CLEAR_COAT|HAS_FUR); // !! DO NOT CLEAR 'HAS_GLOW' and '_has_glow' because this is called also for reflections, but if reflections have glow, then it means final result should have glow too !!
-//_final     =null   ; do not clear '_final' because this is called also for reflections, after which we still need '_final'
-  _ds        .clear();
-//_ds_1s     .clear(); do not clear '_ds_1s' because 'setDepthForDebugDrawing' may be called after rendering finishes, also 'capture' makes use of it
+//_final        =null   ; do not clear '_final' because this is called also for reflections, after which we still need '_final'
+  _ds           .clear();
+//_ds_1s        .clear(); do not clear '_ds_1s' because 'setDepthForDebugDrawing' may be called after rendering finishes, also 'capture' makes use of it
    if(!_get_target)_col.clear();
-  _nrm       .clear();
-  _ext       .clear();
-  _vel       .clear();
-  _alpha     .clear();
-  _lum       .clear();
-  _lum_1s    .clear();
-  _spec      .clear();
-  _spec_1s   .clear();
-  _shd_1s    .clear();
-  _shd_ms    .clear();
-  _water_col .clear();
-  _water_nrm .clear();
-  _water_ds  .clear();
-  _water_lum .clear();
-  _water_spec.clear();
-  _vol       .clear();
-  _ao        .clear();
-  _mirror_rt .clear();
-  _outline_rt.clear();
-   Lights.clear();
+  _nrm          .clear();
+  _ext          .clear();
+  _vel          .clear();
+  _alpha        .clear();
+  _lum          .clear();
+  _lum_1s       .clear();
+  _spec         .clear();
+  _spec_1s      .clear();
+  _shd_1s       .clear();
+  _shd_ms       .clear();
+  _water_col    .clear();
+  _water_nrm    .clear();
+  _water_refract.clear();
+  _water_ds     .clear();
+  _water_lum    .clear();
+  _water_spec   .clear();
+  _vol          .clear();
+  _ao           .clear();
+  _mirror_rt    .clear();
+  _outline_rt   .clear();
+   Lights       .clear();
+   Atmospheres  .clear();
+   WaterBalls   .clear();
    ClearInstances();
 }
 void RendererClass::cleanup1()
@@ -1265,7 +1269,11 @@ start:
                if(clear_ext)D.clearCol(2,                                EXT_CLEAR);
                if(clear_vel)D.clearCol(3, D.signedVelRT() ? SVEL_CLEAR : VEL_CLEAR);
             }else
-            if(clear_col || clear_nrm || clear_ext || clear_vel)Sh.ClearDeferred->draw();
+            if(clear_col || clear_nrm || clear_ext || clear_vel)
+            {
+               if(clear_vel)SetViewToViewPrev();
+               Sh.ClearDeferred->draw();
+            }
          }
          if(clear_ds){temporalCheck(); D.clearDS();} // 'temporalCheck' and 'D.clearDS' are paired to make sure 'temporalCheck' is called only once
       }break;
@@ -1328,7 +1336,8 @@ void RendererClass::opaque()
          {
             // lights are already sorted, and 0-th light is the most significant, its shadow map must be rendered last to be used by BLEND_LIGHT which happens at a later stage
             Int skip_light=-1;
-            if(Lights[0].type==LIGHT_DIR && Lights[0].shadow) // 0-th is LightDir (which BlendLight only supports) and needs shadows
+            Light &light=Lights.first();
+            if(light.type==LIGHT_DIR && light.shadow) // 0-th is LightDir (which BlendLight only supports) and needs shadows
                for(Int i=Lights.elms(); --i>=1; )if(Lights[i].shadow) // if at least one different light needs shadows
                   {skip_light=0; break;} // it means we can't start with 0-th, because drawing another light will overwrite shadow map, so skip #0 when choosing the 'first_light'
 
@@ -1401,8 +1410,8 @@ void RendererClass::resolveDepth()
       D.alpha(ALPHA_NONE);
 
       // set multi-sampled '_ds' MSAA
-      if(_cur_type==RT_DEFERRED                             // for     deferred set it always (needed for lighting)
-      || Fog.draw || Sky.isActual() || processAlphaFinal()) // for non-deferred it will be used only for fog, sky and alpha
+      if(_cur_type==RT_DEFERRED                                                   // for     deferred set it always (needed for lighting)
+      || Fog.draw || Sky.isActual() || Atmospheres.elms() || processAlphaFinal()) // for non-deferred it will be used only for fog, sky, atmospheres and alpha
       {
          D.stencil(STENCIL_MSAA_SET, STENCIL_REF_MSAA);
          set(null, _ds, true);
@@ -1655,14 +1664,14 @@ void RendererClass::light()
          Sh.ImgXYMS ->set(_ext );
          if(hasStencilAttached())
          {
-            D.stencil   (STENCIL_MSAA_TEST, 0); GetApplyLight(1, reflect_mode, ao, cel_shade, night_shade, glow)->draw(); // 1 sample
-            if(Sky.isActual())D.depth2DOff();                                                                             // multi-sampled always fill fully when sky will be rendered
-            D.stencilRef(STENCIL_REF_MSAA    ); GetApplyLight(2, reflect_mode, ao, cel_shade, night_shade, glow)->draw(); // n samples
+            D.stencil   (STENCIL_MSAA_TEST, 0); GetApplyLight(                     1, reflect_mode, ao, cel_shade, night_shade, glow)->draw(); // 1 sample
+            if(Sky.isActual())D.depth2DOff();                                                                                                  // multi-sampled always fill fully when sky will be rendered (so we don't skip background sub-pixels)
+            D.stencilRef(STENCIL_REF_MSAA    ); GetApplyLight(Sky.isActual() ? 3 : 2, reflect_mode, ao, cel_shade, night_shade, glow)->draw(); // n samples
             D.stencil   (STENCIL_NONE        );
          }else
          {
-            if(Sky.isActual())D.depth2DOff();                                         // multi-sampled always fill fully when sky will be rendered
-            GetApplyLight(2, reflect_mode, ao, cel_shade, night_shade, glow)->draw(); // n samples
+            if(Sky.isActual())D.depth2DOff();                                                              // multi-sampled always fill fully when sky will be rendered (so we don't skip background sub-pixels)
+            GetApplyLight(Sky.isActual() ? 3 : 2, reflect_mode, ao, cel_shade, night_shade, glow)->draw(); // n samples
          }
       }
       D.depth2DOff();
@@ -1670,7 +1679,8 @@ void RendererClass::light()
       if(_spec!=_spec_1s && (/*(_has&HAS_FUR) ||*/ stage==RS_LIGHT || stage==RS_LIGHT_AO)){set(_spec_1s, null, true); D.alpha(ALPHA_ADD);                                                                             Sh.draw(*_spec);} // need to apply multi-sampled spec to 1-sample for         show light stage
             src    .clear();
            _nrm    .clear();
-   //_water_nrm    .clear(); we may still need it for refraction
+   //_water_nrm    .clear(); we may still need it for reflection/environment
+   //_water_refract.clear(); we may still need it for refraction
            _ext    .clear();
            _lum    .clear(); // '_lum' will not be used after this point, however '_lum_1s' may be for rendering fur or showing light stage
            _spec   .clear();
@@ -1712,10 +1722,11 @@ Bool RendererClass::waterPostLight()
 
       Water.set();
       Water.setImages(src, _water_ds);
-      Sh.Img[0]->set(_water_nrm ); // 'Img0' required by shader 'GetNormal', 'GetNormalMS' functions
-      Sh.Img[3]->set(_water_col );
-      Sh.Img[4]->set(_water_lum );
-      Sh.Img[5]->set(_water_spec);
+      Sh.Img  [0]->set(_water_nrm    ); // 'Img0' required by shader 'GetNormal', 'GetNormalMS' functions
+      Sh.Img  [3]->set(_water_col    );
+      Sh.Img  [4]->set(_water_lum    );
+      Sh.Img  [5]->set(_water_spec   );
+      Sh.ImgXY[0]->set(_water_refract);
       Shader *shader=WS.Apply[depth_test][Water._shader_reflect_env][Water._shader_reflect_mirror][refract]; // we need to output depth only if we need it for depth testing
       REPS(_eye, _eye_num)
       {
@@ -1751,12 +1762,13 @@ Bool RendererClass::waterPostLight()
          case RS_WATER_LIGHT : if(show(_water_lum, true                  ))return true; break;
       }
    }
-  _water_col .clear();
-  _water_nrm .clear();
-  _water_ds  .clear();
-  _water_lum .clear();
-  _water_spec.clear();
-  _mirror_rt .clear();
+  _water_col    .clear();
+  _water_nrm    .clear();
+  _water_refract.clear();
+  _water_ds     .clear();
+  _water_lum    .clear();
+  _water_spec   .clear();
+  _mirror_rt    .clear();
    return false;
 }
 void RendererClass::emissive()
@@ -1960,15 +1972,20 @@ void RendererClass::blend()
    Sky.setFracMulAdd();
 
    // set main light parameters for *BLEND_LIGHT* and 'Mesh.drawBlend'
-   if(Lights.elms() && Lights[0].type==LIGHT_DIR) // use 0 index as it has already been set in 'UpdateLights'
+   if(Lights.elms())
    {
-      Lights[0].dir.set();
-     _blst_light_offset=OFFSET(BLST, dir[Lights[0].shadow ? D.shadowMapNumActual() : 0]);
-   }else
+      Light &light=Lights.first(); if(light.type==LIGHT_DIR) // use first as it has already been set in 'UpdateLights'
+      {
+         light.dir.set();
+        _blst_light_offset=OFFSET(BLST, dir[light.shadow ? D.shadowMapNumActual() : 0]);
+         goto light_set;
+      }
+   }
    {
       LightDir(Vec(0, -1, 0), VecZero).set(); // set dummy light
      _blst_light_offset=OFFSET(BLST, dir[0]);
    }
+light_set:
 
    // apply light in case of drawing fur, which samples the light buffer
    if(_has&HAS_FUR)
@@ -2010,7 +2027,6 @@ void RendererClass::blend()
    #endif
    }
    ClearBlendInstances();
-  _SetHighlight(TRANSPARENT);
    D.set2D(); D.depthOnWriteFunc(false, true, FUNC_DEFAULT);
 
    D.stencil(STENCIL_NONE); // disable any stencil that might have been enabled
@@ -2077,7 +2093,7 @@ void RendererClass::behind()
 static const IMAGERT_TYPE IMAGERT_OUTLINE=IMAGERT_SRGBA; // here Alpha is used for outline opacity
 void RendererClass::setOutline(C Color &color)
 {
-  _SetHighlight(color);
+   highlight->setConditional(color);
    if(!_outline) // not initialized at all
    {
      _outline_rt.get(ImageRTDesc(_col->w(), _col->h(), IMAGERT_OUTLINE, _col->samples())); // here Alpha is used for outline opacity
@@ -2098,7 +2114,7 @@ void RendererClass::applyOutline()
 {
    if(_outline_rt)
    {
-     _SetHighlight(TRANSPARENT); // disable 'SetHighlight' which was called during mesh drawing
+      highlight->set(Vec4Zero); // disable 'SetHighlight' which was called during mesh drawing 'setOutline'
       D.depthOnWriteFunc(false, true, FUNC_DEFAULT); // restore default
 
       resolveMultiSample(); // don't do 'downSample' here because 'edgeSoften' and 'temporal' will be called later and they require to operate on full-sampled data

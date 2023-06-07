@@ -54,6 +54,12 @@
 #define LIGHT_MODE_WATER      2
 #define LIGHT_MODE_NUM        3
 
+// Heightmap
+#define HEIGHTMAP_NO     0
+#define HEIGHTMAP_FLAT   1
+#define HEIGHTMAP_SPHERE 2
+#define HEIGHTMAP_NUM    3
+
 // Motion
 #define DUAL_DILATE_MOTION 1 // 1=generate separate dilated motion for Temporal and Motion
 

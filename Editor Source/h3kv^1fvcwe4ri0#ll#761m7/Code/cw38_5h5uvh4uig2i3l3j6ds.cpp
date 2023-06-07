@@ -533,7 +533,7 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
                      part.waitForStream();
                      part.draw(matrix, (custom_matrix && mesh_matrix_prev_ptr) ? *mesh_matrix_prev_ptr : matrix);
 
-                     SetHighlight(TRANSPARENT);
+                     SetHighlight();
                   }
                }
                if(custom_matrix && mesh_matrix_prev_ptr)*mesh_matrix_prev_ptr=matrix;

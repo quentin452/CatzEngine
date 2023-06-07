@@ -36,6 +36,13 @@
    #define X64 0 // 32-bit
 #endif
 
+// x86
+#if (defined _M_IX86 || defined __i386__) || (defined _M_X64 || defined __x86_64__)
+   #define X86 1
+#else
+   #define X86 0
+#endif
+
 // ARM
 #if (defined _M_ARM || defined __arm__) || (defined _M_ARM64 || defined __aarch64__)
    #define ARM 1
@@ -163,6 +170,7 @@ namespace EE // Esenthel Engine namespace
    #include "Memory/Mem Extended.h"
    #include "Memory/_Meml.h"
    #include "Memory/Mem List.h"
+   #include "Memory/Mem Tree.h"
    #include "Misc/String Borrowed.h"
    #include "Memory/Node.h"
    #include "Misc/Date Time.h"
@@ -202,12 +210,12 @@ namespace EE // Esenthel Engine namespace
    // MATH
    /******************************************************************************/
    #include "Math/Shapes/Plane.h"
+   #include "Math/Shapes/Ball.h"
    #include "Math/Shapes/Edge.h"
    #include "Math/Shapes/Triangle.h"
    #include "Math/Shapes/Quad.h"
    #include "Math/Shapes/Box.h"
    #include "Math/Shapes/Circle.h"
-   #include "Math/Shapes/Ball.h"
    #include "Math/Shapes/Capsule.h"
    #include "Math/Shapes/Tube.h"
    #include "Math/Shapes/Cone.h"

@@ -38,27 +38,99 @@ void MeshBase::split(MemPtr<MeshBaseIndex> meshes, C Boxes &boxes, MESH_FLAG fla
 
    flag_and&=((VTX_ALL&~VTX_DUP)|EDGE_NRM|EDGE_FLAG|EDGE_ID|TRI_NRM|TRI_FLAG|TRI_ID|QUAD_NRM|QUAD_FLAG|QUAD_ID)&flag();
 
-   // link box->edge,tri,quad
-   Index box_edge(boxes.num());
-   Index box_tri (boxes.num());
-   Index box_quad(boxes.num());
+   // link cell->edge,tri,quad
+   Index cell_edge(boxes.num());
+   Index cell_tri (boxes.num());
+   Index cell_quad(boxes.num());
    {
-      Int *    _box= Alloc<Int>(Max(edges(), tris(), quads()));
-      Int *edge_box=_box; FREPA(edge){p=edge.ind(i).c; box_edge.incGroup(edge_box[i]=boxes.index(Avg(vtx.pos(p[0]), vtx.pos(p[1])                              )));} box_edge.set(edge_box);
-      Int * tri_box=_box; FREPA(tri ){p=tri .ind(i).c; box_tri .incGroup( tri_box[i]=boxes.index(Avg(vtx.pos(p[0]), vtx.pos(p[1]), vtx.pos(p[2])               )));} box_tri .set( tri_box);
-      Int *quad_box=_box; FREPA(quad){p=quad.ind(i).c; box_quad.incGroup(quad_box[i]=boxes.index(Avg(vtx.pos(p[0]), vtx.pos(p[1]), vtx.pos(p[2]), vtx.pos(p[3]))));} box_quad.set(quad_box);
-      Free(_box);
+      Int *    _cell= Alloc<Int>(Max(edges(), tris(), quads()));
+      Int *edge_cell=_cell; FREPA(edge){p=edge.ind(i).c; cell_edge.incGroup(edge_cell[i]=boxes.index(Avg(vtx.pos(p[0]), vtx.pos(p[1])                              )));} cell_edge.set(edge_cell);
+      Int * tri_cell=_cell; FREPA(tri ){p=tri .ind(i).c; cell_tri .incGroup( tri_cell[i]=boxes.index(Avg(vtx.pos(p[0]), vtx.pos(p[1]), vtx.pos(p[2])               )));} cell_tri .set( tri_cell);
+      Int *quad_cell=_cell; FREPA(quad){p=quad.ind(i).c; cell_quad.incGroup(quad_cell[i]=boxes.index(Avg(vtx.pos(p[0]), vtx.pos(p[1]), vtx.pos(p[2]), vtx.pos(p[3]))));} cell_quad.set(quad_cell);
+      Free(_cell);
    }
 
-   // create boxes
+   // create cells
    meshes.clear();
    Memt<Bool> vtx_is; vtx_is.setNum(vtxs());
    Memt<Int > vtx_remap;
    FREP(boxes.num())
    {
-      Int *_edge=box_edge.group[i].elm, edges=box_edge.group[i].num,
-          *_tri =box_tri .group[i].elm, tris =box_tri .group[i].num,
-          *_quad=box_quad.group[i].elm, quads=box_quad.group[i].num;
+      Int *_edge=cell_edge.group[i].elm, edges=cell_edge.group[i].num,
+          *_tri =cell_tri .group[i].elm, tris =cell_tri .group[i].num,
+          *_quad=cell_quad.group[i].elm, quads=cell_quad.group[i].num;
+
+      if(edges || tris || quads)
+      {
+         MeshBaseIndex &mesh=meshes.New();
+         mesh.index=i;
+         mesh.create(0, edges, tris, quads, flag_and);
+
+         CopyList(mesh.edge.ind (), edge.ind (), MemPtr<Int>(_edge, edges));
+         CopyList(mesh.edge.nrm (), edge.nrm (), MemPtr<Int>(_edge, edges));
+         CopyList(mesh.edge.flag(), edge.flag(), MemPtr<Int>(_edge, edges));
+         CopyList(mesh.edge.id  (), edge.id  (), MemPtr<Int>(_edge, edges));
+
+         CopyList(mesh.tri.ind (), tri.ind (), MemPtr<Int>(_tri, tris));
+         CopyList(mesh.tri.nrm (), tri.nrm (), MemPtr<Int>(_tri, tris));
+         CopyList(mesh.tri.flag(), tri.flag(), MemPtr<Int>(_tri, tris));
+         CopyList(mesh.tri.id  (), tri.id  (), MemPtr<Int>(_tri, tris));
+
+         CopyList(mesh.quad.ind (), quad.ind (), MemPtr<Int>(_quad, quads));
+         CopyList(mesh.quad.nrm (), quad.nrm (), MemPtr<Int>(_quad, quads));
+         CopyList(mesh.quad.flag(), quad.flag(), MemPtr<Int>(_quad, quads));
+         CopyList(mesh.quad.id  (), quad.id  (), MemPtr<Int>(_quad, quads));
+
+         ZeroFast(vtx_is.data(), vtx_is.elms());
+
+         REPAD(j, mesh.edge){p=mesh.edge.ind(j).c; REPD(k, 2)vtx_is[p[k]]=true;}
+         REPAD(j, mesh.tri ){p=mesh.tri .ind(j).c; REPD(k, 3)vtx_is[p[k]]=true;}
+         REPAD(j, mesh.quad){p=mesh.quad.ind(j).c; REPD(k, 4)vtx_is[p[k]]=true;}
+
+         SetRemap(vtx_remap, vtx_is         ,      vtxs ());
+         IndRemap(vtx_remap, mesh.edge.ind(), mesh.edges());
+         IndRemap(vtx_remap, mesh.tri .ind(), mesh.tris ());
+         IndRemap(vtx_remap, mesh.quad.ind(), mesh.quads());
+
+         mesh.vtx._elms=CountIs(vtx_is);
+         mesh.include(flag_and);
+         mesh.copyVtxs(T, vtx_is);
+      }
+   }
+}
+static Int CellIndex(C Vec &pos, C Plane *plane, Int planes)
+{
+   Int    index=0; REP(planes)if(Dist(pos, plane[i])>=0)index|=(1<<i);
+   return index;
+}
+void MeshBase::split(MemPtr<MeshBaseIndex> meshes, C Plane *plane, Int planes, MESH_FLAG flag_and)C
+{
+ C Int *p;
+
+   flag_and&=((VTX_ALL&~VTX_DUP)|EDGE_NRM|EDGE_FLAG|EDGE_ID|TRI_NRM|TRI_FLAG|TRI_ID|QUAD_NRM|QUAD_FLAG|QUAD_ID)&flag();
+
+   // link cell->edge,tri,quad
+   Int   cells=(1<<planes);
+   Index cell_edge(cells);
+   Index cell_tri (cells);
+   Index cell_quad(cells);
+   {
+      Int *    _cell= Alloc<Int>(Max(edges(), tris(), quads()));
+      Int *edge_cell=_cell; FREPA(edge){p=edge.ind(i).c; cell_edge.incGroup(edge_cell[i]=CellIndex(Avg(vtx.pos(p[0]), vtx.pos(p[1])                              ), plane, planes));} cell_edge.set(edge_cell);
+      Int * tri_cell=_cell; FREPA(tri ){p=tri .ind(i).c; cell_tri .incGroup( tri_cell[i]=CellIndex(Avg(vtx.pos(p[0]), vtx.pos(p[1]), vtx.pos(p[2])               ), plane, planes));} cell_tri .set( tri_cell);
+      Int *quad_cell=_cell; FREPA(quad){p=quad.ind(i).c; cell_quad.incGroup(quad_cell[i]=CellIndex(Avg(vtx.pos(p[0]), vtx.pos(p[1]), vtx.pos(p[2]), vtx.pos(p[3])), plane, planes));} cell_quad.set(quad_cell);
+      Free(_cell);
+   }
+
+   // create cells
+   meshes.clear();
+   Memt<Bool> vtx_is; vtx_is.setNum(vtxs());
+   Memt<Int > vtx_remap;
+   FREP(cells)
+   {
+      Int *_edge=cell_edge.group[i].elm, edges=cell_edge.group[i].num,
+          *_tri =cell_tri .group[i].elm, tris =cell_tri .group[i].num,
+          *_quad=cell_quad.group[i].elm, quads=cell_quad.group[i].num;
 
       if(edges || tris || quads)
       {

@@ -900,7 +900,7 @@ void _MoveElmLeftUnsafe(Ptr data, UInt elm_size, Int elm, Int new_index, Ptr tem
 /******************************************************************************/
 Bool EqualMem(CPtr a, CPtr b, IntPtr size)
 {
-   if(size>0 && a!=b)return (a && b) ? !memcmp(a, b, size) : false;
+   if(size>0 && a!=b)return (a && b) ? EqualMemFast(a, b, size) : false;
    return true;
 }
 /******************************************************************************/

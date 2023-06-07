@@ -22,7 +22,7 @@ void AddName(C Str &name) // add 'name' to names list
 /******************************************************************************/
 void ManualFind(C Str &path) // manually iterate through directories and files
 {
-   for(FileFind ff(path); ff();)switch(ff.type) // start looking for files in path, continue while active, and check for encountered type
+   for(FileFind ff(path); ff(); )switch(ff.type) // start looking for files in path, continue while active, and check for encountered type
    {
       case FSTD_DIR : ManualFind(ff.pathName()); break; // if directory encountered start looking inside it
       case FSTD_FILE: AddName   (ff.pathName()); break; // if file      encountered add it to the list

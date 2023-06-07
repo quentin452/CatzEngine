@@ -98,6 +98,8 @@ struct Randomizer;
 extern Randomizer Random;
 
 struct InterpolatorTemp;
+
+struct SphereAreaUS;
 /******************************************************************************/
 // ANIMATION
 /******************************************************************************/

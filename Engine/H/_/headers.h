@@ -745,6 +745,7 @@
    #undef max
    #define _ALLOW_RTCc_IN_STL
    #include <vcruntime_string.h> // needed for 'memcpy' (inside "string.h")
+   #include <xmmintrin.h> // needed for 'RSqrtSimd'
 #else
    #include <new>
    #include <stdint.h>

@@ -17,7 +17,7 @@
    #define OPT(non_alpha, alpha) alpha
 #endif
 /******************************************************************************
-TODO: add gaussian blur weight support instead of LerpCube
+TODO: add gaussian blur weight support instead of 'SmoothCube'
 TODO: add slow but high quality circular bokeh DoF
    -create small / quarter res (or maybe even smaller) RT containing info about biggest blur radius
    -in the blur function iterate "radius x radius" using BRANCH/LOOP and the small RT image (perhaps need to use 'SamplerPoint')
@@ -120,7 +120,7 @@ VecH4 DofDS_PS(NOPERSP Vec2 uv:UV
    return ret;
 }
 /******************************************************************************/
-Flt Weight(Flt x) {return 1-LerpCube(x);} // !! if changing from 'LerpCube' to another function then we need to change 'WeightSum' as well !!
+Flt Weight(Flt x) {return 1-SmoothCube(x);} // !! if changing from 'SmoothCube' to another function then we need to change 'WeightSum' as well !!
 Flt WeightSum(Int range) {return range+1;} // Sum of all weights for all "-range..range" steps, calculated using "Flt weight=0; for(Int dist=-range; dist<=range; dist++)weight+=BlendSmoothCube(dist/Flt(range+1));"
 // for complex 'Weight' functions where 'WeightSum' can't be computed easily, modify 'Weight' below somehow to add summing 'Weight' into "out Flt weight_sum", carefully because 'Weight' is calculated from 'x', not always, and center weight not included
 /******************************************************************************/

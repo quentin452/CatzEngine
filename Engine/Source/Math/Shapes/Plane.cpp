@@ -119,6 +119,8 @@ VecD2 PointOnPlaneRay(C VecD2 &point, C VecD2 &plane_pos, C VecD2 &plane_normal,
 Vec   PointOnPlaneRay(C Vec   &point, C Vec   &plane_pos, C Vec   &plane_normal, C Vec   &ray) {return point-ray         *DistPointPlaneRay(point, plane_pos, plane_normal, ray);}
 VecD  PointOnPlaneRay(C VecD  &point, C VecD  &plane_pos, C Vec   &plane_normal, C Vec   &ray) {return point-ray         *DistPointPlaneRay(point, plane_pos, plane_normal, ray);}
 VecD  PointOnPlaneRay(C VecD  &point, C VecD  &plane_pos, C VecD  &plane_normal, C VecD  &ray) {return point-ray         *DistPointPlaneRay(point, plane_pos, plane_normal, ray);}
+Vec2   ZeroOnPlaneRay(                C Vec2  &plane_pos, C Vec2  &plane_normal, C Vec2  &ray) {return       ray         *DistPointPlaneRay(       plane_pos, plane_normal, ray);}
+Vec    ZeroOnPlaneRay(                C Vec   &plane_pos, C Vec   &plane_normal, C Vec   &ray) {return       ray         *DistPointPlaneRay(       plane_pos, plane_normal, ray);}
 
 Vec  PointOnPlaneY(C Vec  &point,                    C Vec  &plane_normal) {return Vec (point.x, point.y-DistPointPlaneY(point,            plane_normal), point.z);}
 VecD PointOnPlaneY(C VecD &point,                    C Vec  &plane_normal) {return VecD(point.x, point.y-DistPointPlaneY(point,            plane_normal), point.z);}
@@ -219,6 +221,14 @@ Bool CutsLinePlane(C VecD &line_pos, C VecD &line_dir, C PlaneD &plane, Dbl *hit
       if(hit_frac  ) *hit_frac  =         frac;
       if(hit_pos   ) *hit_pos   =line_pos+frac*line_dir;
    }  if(hit_normal){*hit_normal=plane.normal; if(way>0)hit_normal->chs();}
+   return true;
+}
+/******************************************************************************/
+Bool Intersect(C Plane &a, C Plane &b, Vec &line_pos, Vec &line_dir)
+{
+   line_dir=Cross(a.normal, b.normal); if(!line_dir.normalize())return false;
+   Vec  ray=Cross(a.normal, line_dir); // ray is normalized already because both parameters are perp to each other
+   line_pos=PointOnPlaneRay(a.pos, b.pos, b.normal, ray);
    return true;
 }
 /******************************************************************************/

@@ -703,7 +703,7 @@ bool HighPrecTransform(C Str &name)
        || name=="avgLum" || name=="medLum" || name=="avgContrastLum" || name=="medContrastLum"
        || name=="avgHue" || name=="avgHuePhoto" || name=="avgHueAlphaWeight" || name=="avgHuePhotoAlphaWeight" || name=="medHue" || name=="medHueAlphaWeight" || name=="medHuePhoto" || name=="medHuePhotoAlphaWeight" || name=="addHue" || name=="addHuePhoto" || name=="setHue" || name=="setHuePhoto" || name=="contrastHue" || name=="contrastHuePhoto" || name=="medContrastHue" || name=="medContrastHuePhoto" || name=="contrastHueAlphaWeight" || name=="contrastHuePhotoAlphaWeight" || name=="contrastHuePow"
        || name=="lerpHue" || name=="lerpHueSat" || name=="rollHue" || name=="rollHueSat" || name=="lerpHuePhoto" || name=="lerpHueSatPhoto" || name=="rollHuePhoto" || name=="rollHueSatPhoto"
-       || name=="addSat" || name=="addSatPhoto" || name=="mulSat" || name=="mulSatPhoto" || name=="mulAddSat" || name=="mulAddSatPhoto" || name=="avgSat" || name=="avgSatPhoto" || name=="medSat" || name=="medSatPhoto" || name=="contrastSat" || name=="contrastSatPhoto" || name=="medContrastSat" || name=="contrastSatAlphaWeight" || name=="contrastSatPhotoAlphaWeight"
+       || name=="addSat" || name=="addSatPhoto" || name=="mulSat" || name=="mulSatPhoto" || name=="mulAddSat" || name=="mulAddSatPhoto" || name=="avgSat" || name=="avgSatPhoto" || name=="medSat" || name=="medSatPhoto" || name=="contrastSat" || name=="contrastSatPhoto" || name=="medContrastSat" || name=="contrastSatAlphaWeight" || name=="contrastSatPhotoAlphaWeight" || name=="minSat" || name=="minSatPhoto"
        || name=="setSat" || name=="setSatPhoto"
        || name=="addHueSat" || name=="setHueSat" || name=="setHueSatPhoto"
        || name=="mulSatH" || name=="mulSatHS" || name=="mulSatHPhoto" || name=="mulSatHSPhoto"
@@ -1017,6 +1017,31 @@ void MulAddSat(Image &image, flt mul, flt add, C BoxI &box, bool photo)
 
          c.xyz=RgbToHsb(c.xyz);
          c.y=c.y*mul+add;
+         c.xyz=HsbToRgb(c.xyz);
+         if(photo)
+         {
+          //c.xyz=SRGBToLinear(c.xyz); if(flt cur_lin_lum=LinearLumOfLinearColor(c.xyz))c.xyz*=lin_lum/cur_lin_lum; c.xyz=LinearToSRGB(c.xyz);
+                                       if(flt cur_lum    =  SRGBLumOfSRGBColor  (c.xyz))c.xyz*=    lum/cur_lum    ; // prefer multiplications in sRGB space, as linear mul may change perceptual contrast and saturation
+         }
+         image.color3DF(x, y, z, c);
+      }
+      image.unlock();
+   }   
+}
+void MinSat(Image &image, flt min, C BoxI &box, bool photo)
+{
+   if(min<1 && image.lock())
+   {
+      for(int z=box.min.z; z<box.max.z; z++)
+      for(int y=box.min.y; y<box.max.y; y++)
+      for(int x=box.min.x; x<box.max.x; x++)
+      {
+         Vec4 c=image.color3DF(x, y, z);
+       //flt  lin_lum; if(photo)lin_lum=LinearLumOfSRGBColor(c.xyz);
+         flt      lum; if(photo)    lum=  SRGBLumOfSRGBColor(c.xyz);
+
+         c.xyz=RgbToHsb(c.xyz);
+         MIN(c.y, min);
          c.xyz=HsbToRgb(c.xyz);
          if(photo)
          {
@@ -1808,6 +1833,8 @@ void TransformImage(Image &image, TextParam param, bool clamp, C Color &backgrou
    if(param.name=="addSatPhoto"   )MulAddSat(image, 1, param.asFlt(), box, true);else
    if(param.name=="setSat"        )MulAddSat(image, 0, param.asFlt(), box);else
    if(param.name=="setSatPhoto"   )MulAddSat(image, 0, param.asFlt(), box, true);else
+   if(param.name=="minSat"        )MinSat   (image, param.asFlt(), box);else
+   if(param.name=="minSatPhoto"   )MinSat   (image, param.asFlt(), box, true);else
    if(param.name=="avgSat" || param.name=="avgSatPhoto")
    {
       flt avg; if(image.statsSat(null, null, &avg, null, null, null, null, &box))if(avg)MulAddSat(image, param.asFlt()/avg, 0, box, param.name=="avgSatPhoto");
@@ -2196,7 +2223,7 @@ void TransformImage(Image &image, TextParam param, bool clamp, C Color &backgrou
    if(param.name=="bumpToNormal")
    {
       image.bumpToNormal(image, param.value.is() ? param.asFlt() : image.size().avgF()*BUMP_TO_NORMAL_SCALE);
-   }else
+   } //else TODO: FIX FOR "fatal error C1061: compiler limit: blocks nested too deeply"
    if(param.name=="scale") // the formula is ok (for normal too), it works as if the bump was scaled vertically by 'scale' factor
    {
       flt scale=param.asFlt(); if(scale!=1)
@@ -2229,7 +2256,7 @@ void TransformImage(Image &image, TextParam param, bool clamp, C Color &backgrou
       // v2=v2*r-0.5*r+0.5
       if(image.typeChannels()<=1 || image.monochromatic()){flt a=r.avg(); image.mulAdd(Vec4(Vec(a), 1), Vec4(Vec(-0.5f*a+0.5f)  , 0), &box);} // if image is 1-channel or monochromatic then we need to transform all RGB together
       else                                                                image.mulAdd(Vec4(  r, 1, 1), Vec4(    -0.5f*r+0.5f, 0, 0), &box);
-   } //else TODO: FIX FOR "fatal error C1061: compiler limit: blocks nested too deeply"
+   }else
    if(param.name=="scaleAngle") // the formula is ok (for normal too), it works as if the bump was scaled vertically by 'scale' factor
    {
       flt scale=param.asFlt(); if(scale!=1)

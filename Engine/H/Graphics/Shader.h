@@ -108,14 +108,15 @@ struct ShaderParam // Shader Parameter
             void set    (C GpuMatrix &matrix         , UInt elm ); // set matrix     array element value
             void set    (C GpuMatrix *matrix         ,  Int elms); // set matrix     array
 
-            void setConditional(C Flt  &f                    ); // set float                    value only if it's different
-            void setConditional(C Vec2 &v                    ); // set vector2D                 value only if it's different
-            void setConditional(C Vec  &v                    ); // set vector3D                 value only if it's different
-            void setConditional(C Vec4 &v                    ); // set vector4D                 value only if it's different
-            void setConditional(C Vec  &v,           UInt elm); // set vector3D   array element value only if it's different
-            void setConditional(C Vec  &a, C Vec &b          ); // set vector3Dx2               value only if it's different
-            void setConditional(C Vec  &a, C Vec &b, UInt elm); // set vector3Dx2 array element value only if it's different
-            void setConditional(C Rect &r                    ); // set vector4D                 value only if it's different
+            void setConditional(C Flt   &f                    ); // set float                    value only if it's different
+            void setConditional(C Vec2  &v                    ); // set vector2D                 value only if it's different
+            void setConditional(C Vec   &v                    ); // set vector3D                 value only if it's different
+            void setConditional(C Vec4  &v                    ); // set vector4D                 value only if it's different
+            void setConditional(C Color &color                ); // set vector4D                 value only if it's different
+            void setConditional(C Vec   &v,           UInt elm); // set vector3D   array element value only if it's different
+            void setConditional(C Vec   &a, C Vec &b          ); // set vector3Dx2               value only if it's different
+            void setConditional(C Vec   &a, C Vec &b, UInt elm); // set vector3Dx2 array element value only if it's different
+            void setConditional(C Rect  &r                    ); // set vector4D                 value only if it's different
 
             void setInRangeConditional(C Vec &a, C Vec &b, UInt elm); // set vector3Dx2 array element value only if it's different, values assumed to be always in range
 
@@ -201,19 +202,21 @@ struct ShaderParamInt : private ShaderParam // Shader Parameter
 /******************************************************************************/
 struct ShaderParamChange // Shader Parameter Change
 {
-   ShaderParam *param; // parameter to change
-   Vec4         value; // value     to change to
+   ShaderParam *param  ; // parameter to change
+   Vec4         value  ; // value     to change to
+   Bool         restore; // if restore previous value when finished drawing
 
-   ShaderParamChange& set(  Bool  b) {value.x  =b; return T;}
-   ShaderParamChange& set(  Int   i) {value.x  =i; return T;}
-   ShaderParamChange& set(  Flt   f) {value.x  =f; return T;}
-   ShaderParamChange& set(C Vec2 &v) {value.xy =v; return T;}
-   ShaderParamChange& set(C Vec  &v) {value.xyz=v; return T;}
-   ShaderParamChange& set(C Vec4 &v) {value    =v; return T;}
+   ShaderParamChange& set(  Bool   b) {value.x  =b; return T;}
+   ShaderParamChange& set(  Int    i) {value.x  =i; return T;}
+   ShaderParamChange& set(  Flt    f) {value.x  =f; return T;}
+   ShaderParamChange& set(C Vec2  &v) {value.xy =v; return T;}
+   ShaderParamChange& set(C Vec   &v) {value.xyz=v; return T;}
+   ShaderParamChange& set(C Vec4  &v) {value    =v; return T;}
+   ShaderParamChange& set(C Color &v);
 
    ShaderParamChange& set(ShaderParam *param) {T.param=param; return T;}
 
-   ShaderParamChange() {param=null; value.zero();}
+   ShaderParamChange() {param=null; value.zero(); restore=true;}
 };
 /******************************************************************************/
 #if EE_PRIVATE
@@ -630,7 +633,7 @@ private:
 #if EE_PRIVATE
 struct FRSTKey // Forward Rendering Shader Techniques Key
 {
-   Byte skin, materials, layout, bump_mode, alpha_test, reflect, emissive_map, detail, color, mtrl_blend, heightmap, fx, per_pixel, tesselate;
+   Byte skin, materials, layout, bump_mode, alpha_test, reflect, emissive_map, detail, color, mtrl_blend, uv_scale, heightmap, fx, per_pixel, tesselate;
 
    FRSTKey() {Zero(T);}
 };
@@ -647,7 +650,7 @@ struct FRST : ShaderBase // Forward Rendering Shader Techniques
 /******************************************************************************/
 struct BLSTKey // Blend Light Shader Techniques
 {
-   Byte skin, color, layout, bump_mode, alpha_test, alpha, reflect, emissive_map, fx, per_pixel;
+   Byte skin, color, layout, bump_mode, alpha_test, alpha, reflect, emissive_map, uv_scale, fx, per_pixel;
 
    BLSTKey() {Zero(T);}
 };

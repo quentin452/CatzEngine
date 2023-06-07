@@ -26,21 +26,23 @@ struct MeshLod // Level of Detail, array of Mesh Part's
    MeshLod& keepOnly(MESH_FLAG flag); // keep only elements specified with 'flag'
 
    // get
-   Bool      is       (                                     )C {return parts.elms()>0;}    // if  has any parts
-   MESH_FLAG flag     (                                     )C;                            // get available data
-   UInt      memUsage (                                     )C;                            // get memory usage
-   Int       vtxs     (                                     )C;                            // get total number of vertexes
+   Bool      is       (                                                        )C {return parts.elms()>0;}    // if  has any parts
+   MESH_FLAG flag     (                                                        )C;                            // get available data
+   UInt      memUsage (                                                        )C;                            // get memory usage
+   Int       vtxs     (                                                        )C;                            // get total number of vertexes
 #if EE_PRIVATE
-   Int       baseVtxs (                                     )C;                            // get total number of vertexes in MeshBase only, without MeshRender
+   Int       baseVtxs (                                                        )C;                            // get total number of vertexes in MeshBase only, without MeshRender
 #endif
-   Int       edges    (                                     )C;                            // get total number of edges
-   Int       tris     (                                     )C;                            // get total number of triangles
-   Int       quads    (                                     )C;                            // get total number of quads
-   Int       faces    (                                     )C;                            // get total number of faces                    , faces    =(triangles + quads  )
-   Int       trisTotal(                                     )C;                            // get total number of triangles including quads, trisTotal=(triangles + quads*2)
-   Bool      getBox   (Box &box, Bool skip_hidden_parts=true)C;                            // get box   encapsulating the MeshLod, 'skip_hidden_parts'=if MeshParts with MSHP_HIDDEN should not be included in the box, returns false on fail (if no vertexes are present)
-   Flt       area     (Vec *center=null                     )C;                            // get surface area of all mesh faces, 'center'=if specified then it will be calculated as the average surface center
-   Flt       dist     (                                     )C;   MeshLod& dist(Flt dist); // get/set LOD distance
+   Int       edges    (                                                        )C;                            // get total number of edges
+   Int       tris     (                                                        )C;                            // get total number of triangles
+   Int       quads    (                                                        )C;                            // get total number of quads
+   Int       faces    (                                                        )C;                            // get total number of faces                    , faces    =(triangles + quads  )
+   Int       trisTotal(                                                        )C;                            // get total number of triangles including quads, trisTotal=(triangles + quads*2)
+   Bool      getBox   (Box &box,                    Bool skip_hidden_parts=true)C;                            // get box   encapsulating the MeshLod, this method iterates through all vertexes, 'skip_hidden_parts'=if MeshParts with MSHP_HIDDEN should not be included in the box, returns false on fail (if no vertexes are present)
+   Bool      getBox   (Box &box, C Matrix3 &matrix, Bool skip_hidden_parts=true)C;                            // get box   encapsulating the MeshLod, this method iterates through all vertexes, 'skip_hidden_parts'=if MeshParts with MSHP_HIDDEN should not be included in the box, 'matrix'=matrix affecting vertex positions, false on fail (if no vertexes are present)
+   Bool      getBox   (Box &box, C Matrix  &matrix, Bool skip_hidden_parts=true)C;                            // get box   encapsulating the MeshLod, this method iterates through all vertexes, 'skip_hidden_parts'=if MeshParts with MSHP_HIDDEN should not be included in the box, 'matrix'=matrix affecting vertex positions, false on fail (if no vertexes are present)
+   Flt       area     (Vec *center=null                                        )C;                            // get surface area of all mesh faces, 'center'=if specified then it will be calculated as the average surface center
+   Flt       dist     (                                                        )C;   MeshLod& dist(Flt dist); // get/set LOD distance
 
    Bool hasDrawGroup           ( Int draw_group_index               )C; // check if at least one MeshPart has specified draw group enum index
    Bool hasDrawGroupMask       (UInt draw_group_mask                )C; // check if at least one MeshPart has specified draw group enum mask

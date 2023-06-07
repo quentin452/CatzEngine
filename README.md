@@ -26,11 +26,16 @@ You can create unlimited number of games/apps using Titan Engine.
 You can redistribute Titan Engine source code.
 You can make changes to Titan Engine source code.
 You don't have to make code changes public, but it would be great if you could.
-There's a 5% royalty fee - calculated from the total amount of game/app sales (excluding refunds),
+
+COST
+There's a 5% royalty fee - calculated from the total amount of game/app income,
 and not from the amount that online digital store has transferred to you.
 Example: when selling on Steam, Valve share is 30%, Esenthel share is 5%, Your share is 65%.
+This includes Game/App sales, donations, in-app purchases, etc.
 Payments have to be sent within 1 month of receiving money from digital store, to:
 Esenthel PayPal esenthel@hotmail.com or Esenthel Bank Account (please contact for details).
+However if Titan Engine creator dies without transferring Engine copyrights,
+then Engine enters the Public Domain, and can be used by anyone without any restrictions.
 
 ATTRIBUTION
 You don't have to show Titan Logo or mention the Engine anywhere in your game/app,
@@ -43,12 +48,12 @@ You may NOT remove or change any copyright messages or this License text from th
 GAME ENGINES
 You may NOT integrate the source code into other game engines, that are not based on Titan Engine. 
 You can create your own game engines based on Titan, however they must clearly state that they're
-"based on Titan Engine" with the name linking to:
-https://esenthel.com or https://github.com/Esenthel/EsenthelEngine and 15% of income generated from
-your engine and engine related services (including but not limited to: donations, license sales,
-adding features, providing support) must be shared with Titan Engine creator.
-However if Titan Engine creator dies without transferring Engine copyrights,
-then Engine enters the Public Domain, and can be used by anyone without any restrictions.
+"based on Titan Engine" with the text linking to:
+https://esenthel.com or https://github.com/Esenthel/EsenthelEngine
+Your Engine and any Games/Apps created with it are also covered under this License,
+therefore income generated from: your engine, engine related services (including but not limited to:
+donations, license sales, adding features, providing support), games/apps created with your engine,
+is also subject to the same royalty fee mentioned earlier.
 
 SHARING
 Titan Engine creator is allowed to publicly share that you are using Titan Engine,

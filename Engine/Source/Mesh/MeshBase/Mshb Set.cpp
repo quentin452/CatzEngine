@@ -34,9 +34,10 @@ Bool MeshBase::getRectXZ(Rect &rect)C
    rect.max=box.max.xz();
    return ret;
 }
-Bool MeshBase::getBox (Box  &box                        )C {return box .from(vtx.pos(), vtxs());}
-Bool MeshBase::getBox (Box  &box , C Matrix &mesh_matrix)C {return box .from(vtx.pos(), vtxs(), mesh_matrix);}
-Bool MeshBase::getBall(Ball &ball                       )C {return ball.from(vtx.pos(), vtxs());}
+Bool MeshBase::getBox (Box  &box                    )C {return box .from(vtx.pos(), vtxs());}
+Bool MeshBase::getBox (Box  &box , C Matrix3 &matrix)C {return box .from(vtx.pos(), vtxs(), matrix);}
+Bool MeshBase::getBox (Box  &box , C Matrix  &matrix)C {return box .from(vtx.pos(), vtxs(), matrix);}
+Bool MeshBase::getBall(Ball &ball                   )C {return ball.from(vtx.pos(), vtxs());}
 
 Flt MeshBase::area(Vec *center)C
 {

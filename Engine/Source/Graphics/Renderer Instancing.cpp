@@ -23,25 +23,45 @@
    However all instances are managed per 'MeshPart.Variation', which is not perfect, because for example, 'MeshPart' can have multiple variations, and some of them may have the same 'Material'.
    Even though material is the same, they will not be instanced together. We would have to manage some sort of "unique variation" list in the 'MeshPart', which would complicate things.
 
-TODO: most of (highlight, shader_param_changes, stencil) instance parameters are never used, can we do something about it? to remove overhead and memory usage
+TODO: most of (shader_param_changes, stencil) instance parameters are never used, can we do something about it? to remove overhead and memory usage
 TODO: on stereo rendering some pixels are wasted, use a stencil mask, see - http://media.steampowered.com/apps/valve/2015/Alex_Vlachos_Advanced_VR_Rendering_GDC2015.pdf
 /******************************************************************************/
 namespace EE{
 /******************************************************************************/
-static Color    Highlight;
-       Bool _SetHighlight(C Color &color)
-{
-   if(color!=Highlight){Renderer.highlight->set(Highlight=color); return true;}
-   return false;
-}
 void SetDrawMask    (  UInt     draw_mask   ) {Renderer._mesh_draw_mask    =draw_mask;}
 void SetVariation   (   Int     variation   ) {Renderer._mesh_variation_1  =variation-1;} // offset it over here, instead of every time in mesh draw
-void SetHighlight   (C Color   &color       ) {Renderer._mesh_highlight    =color;}
 void SetStencilValue(  Bool     terrain     ) {Renderer._mesh_stencil_value=(terrain      ? STENCIL_REF_TERRAIN  : STENCIL_REF_ZERO);}
 void SetStencilMode (  Bool     terrain_only) {Renderer._mesh_stencil_mode =(terrain_only ? STENCIL_TERRAIN_TEST : STENCIL_NONE    );}
 void SetBlendAlpha  (ALPHA_MODE alpha       ) {Renderer._mesh_blend_alpha  =alpha;}
 void SetEarlyZ      (  Bool     on          ) {Renderer._mesh_early_z      =on;}
 void SetBehindBias  (  Flt      distance    ) {Sh.BehindBias->setConditional(distance);}
+/******************************************************************************/
+static Bool CreateHighlight(Memc<ShaderParamChange> &data, C Color &color, Ptr user)
+{
+   data.New().set(Renderer.highlight).set(color);
+   return true;
+}
+
+static Map<Color, Memc<ShaderParamChange>> Highlights(Compare, CreateHighlight);
+static            Memc<ShaderParamChange> *Highlight;
+
+void SetHighlight()
+{
+   if(Highlight)
+   {
+      UnlinkShaderParamChanges(*Highlight);
+      Highlight=null;
+   }
+}
+void SetHighlight(C Color &color)
+{
+   auto highlight=(color.any() ? Highlights(color) : null);
+   if(Highlight!=highlight)
+   {
+      if(Highlight          )UnlinkShaderParamChanges(*Highlight);
+      if(Highlight=highlight)  LinkShaderParamChanges(*Highlight);
+   }
+}
 /******************************************************************************
 // SHADER PARAM CHANGES
 /******************************************************************************/
@@ -71,16 +91,23 @@ static Bool SetShaderParamChanges(C Memc<ShaderParamChange> *changes=null)
    {
       // restore previous changes if any
       REPAO(RestoreChanges).restore(); // restore in backward order
-      RestoreChanges.clear();
+            RestoreChanges .clear  ();
 
       // apply new changes
       if(LastChanges=changes)REPA(*LastChanges)
       {
        C ShaderParamChange &change=(*LastChanges)[i];
-         if(change.param)
-         {
-            RestoreChanges.add(change.param); // add for restoration
-            change.param->setSafe(change.value); // apply change, have to use 'setSafe' because the 'ShaderParam' can be smaller than what we're setting
+         ShaderParam       *param =change.param;
+       //if(param) skip for performance reasons, expect to be valid
+         { // apply change, have to use '#setSafeConditional' because the 'ShaderParam' can be smaller than what we're setting
+          C auto &value=change.value;
+            auto  size =Min(param->_gpu_data_size, SIZEU(value));
+            if(!EqualMemFast(param->_data, &value, size))
+            {
+               if(change.restore)RestoreChanges.add(param); // add for restoration !! BEFORE COPY !!
+               CopyFast(param->_data, &value, size);
+               param->setChanged();
+            }
          }
       }
       return true;
@@ -236,15 +263,13 @@ static INLINE void DrawOpaqueInstances(Bool forward) // !! this function should 
             {
                             SetViewMatrix        (instance->view_matrix.cur     ); Sh.ViewMatrix    ->setChanged();
                if(!forward){SetViewMatrixPrev    (instance->view_matrix.prev    ); Sh.ViewMatrixPrev->setChanged();}
-                           _SetHighlight         (instance->highlight           );
                             SetShaderParamChanges(instance->shader_param_changes);
                             D.stencilRef         (instance->stencil_value       );
                Int instances=1;
                if( instancing_mesh)for(; instance->next_instance>=0; )
                {
                   OpaqueShaderMaterialMeshInstance &next=OpaqueShaderMaterialMeshInstances[instance->next_instance];
-                  if(next.highlight           ==instance->highlight
-                  && next.shader_param_changes==instance->shader_param_changes
+                  if(next.shader_param_changes==instance->shader_param_changes
                   && next.stencil_value       ==instance->stencil_value)
                   {
                      instance=&next;
@@ -289,8 +314,7 @@ static INLINE void DrawOpaqueInstances(Bool forward) // !! this function should 
             Bool shader_params_changed=true;
             for(SkeletonOpaqueShaderMaterialMeshInstance *instance=&SkeletonOpaqueShaderMaterialMeshInstances[skel_shader_material->first_mesh_instance]; ; )
             {
-                  shader_params_changed|=_SetHighlight         (instance->highlight);
-                  shader_params_changed|= SetShaderParamChanges(instance->shader_param_changes);
+                  shader_params_changed|=SetShaderParamChanges(instance->shader_param_changes);
                if(shader_params_changed){shader_params_changed=false; shader.commit();}
                instance->mesh->set().draw();
                                                                 if(instance->next_instance<0)break;
@@ -317,7 +341,6 @@ static INLINE void DrawOpaqueInstances(Bool forward) // !! this function should 
             ClothInstance &ci=OpaqueClothInstances[i];
             Shader   &shader  = ci.shader  ->getShader(forward);
           C Material &material=*ci.material; material.setOpaque(); D.cull(material.cull);
-           _SetHighlight(ci.highlight);
             shader.begin(); ci.cloth->_drawPhysical();
          }
       }
@@ -366,7 +389,6 @@ static INLINE void DrawOpaqueInstances(Bool forward) // !! this function should 
             {
                             SetViewMatrix        (instance->view_matrix.cur     ); Sh.ViewMatrix    ->setChanged();
                if(!forward){SetViewMatrixPrev    (instance->view_matrix.prev    ); Sh.ViewMatrixPrev->setChanged();}
-                           _SetHighlight         (instance->highlight           );
                             SetShaderParamChanges(instance->shader_param_changes);
                             D.stencilRef         (instance->stencil_value       );
                Int instances=1;
@@ -374,8 +396,7 @@ static INLINE void DrawOpaqueInstances(Bool forward) // !! this function should 
                if( instancing_mesh)for(; instance->next_instance>=0; )
                {
                   OpaqueShaderMaterialMeshInstance &next=OpaqueShaderMaterialMeshInstances[instance->next_instance];
-                  if(next.highlight           ==instance->highlight
-                  && next.shader_param_changes==instance->shader_param_changes
+                  if(next.shader_param_changes==instance->shader_param_changes
                   && next.stencil_value       ==instance->stencil_value)
                   {
                      instance=&next;
@@ -405,7 +426,6 @@ static INLINE void DrawOpaqueInstances(Bool forward) // !! this function should 
    // can't clear 'MultiMaterialShaderDraws' because we might need it for second eye rendering
 
    // finish
-  _SetHighlight(TRANSPARENT);
    EndPrecomputedViewMatrix();
 
    FREPAO(OpaqueObjects)->drawOpaque();
@@ -709,7 +729,6 @@ void DrawBlendInstances() // !! this function should be safe to call 2 times in 
           C Material   &material=*object->stat.material; material.setBlend(); D.cull(material.cull); D.depthWrite(material.hasDepthWrite()); Renderer.needDepthTest(); shader.commitTex(); // !! 'needDepthTest' after 'depthWrite' !!
          opaque_shader_material:
           C MeshRender &render  = object->stat.mesh->render.set();
-           _SetHighlight         (object->stat.highlight);
             D.stencil            (object->stat.stencil_mode);
             SetShaderParamChanges(object->stat.shader_param_changes);
             SetViewMatrix        (object->stat.view_matrix.cur ); Sh.ViewMatrix    ->setChanged();
@@ -728,7 +747,6 @@ void DrawBlendInstances() // !! this function should be safe to call 2 times in 
                   if(next.stat.material==&material) // same material
                   {
                      if(&next.stat.mesh->render==&render
-                     &&  next.stat.highlight==Highlight
                      &&  next.stat.shader_param_changes==LastChanges
                      &&  next.stat.stencil_mode==D._stencil)
                      {
@@ -776,7 +794,6 @@ void DrawBlendInstances() // !! this function should be safe to call 2 times in 
           C Material   &material=*object->stat.material; material.setBlend(); D.cull(material.cull); D.depthWrite(material.hasDepthWrite()); Renderer.needDepthTest(); shader.commitTex(); // !! 'needDepthTest' after 'depthWrite' !!
          opaque_blst_shader_material:
           C MeshRender &render  = object->stat.mesh->render.set();
-           _SetHighlight         (object->stat.highlight);
             D.stencil            (object->stat.stencil_mode);
             SetShaderParamChanges(object->stat.shader_param_changes);
             SetViewMatrix        (object->stat.view_matrix.cur ); Sh.ViewMatrix    ->setChanged();
@@ -795,7 +812,6 @@ void DrawBlendInstances() // !! this function should be safe to call 2 times in 
                   if(next.stat.material==&material) // same material
                   {
                      if(&next.stat.mesh->render        ==&render
-                     &&  next.stat.highlight           ==Highlight
                      &&  next.stat.shader_param_changes==LastChanges
                      &&  next.stat.stencil_mode        ==D._stencil)
                      {
@@ -844,7 +860,6 @@ void DrawBlendInstances() // !! this function should be safe to call 2 times in 
             SetFurVelCount       ();
             SetViewMatrix        (object->stat.view_matrix.cur ); Sh.ViewMatrix    ->setChanged();
             SetViewMatrixPrev    (object->stat.view_matrix.prev); Sh.ViewMatrixPrev->setChanged();
-           _SetHighlight         (object->stat.highlight);
             SetShaderParamChanges(object->stat.shader_param_changes);
 
             Shader     &shader  =*object->stat.shader;
@@ -874,8 +889,7 @@ void DrawBlendInstances() // !! this function should be safe to call 2 times in 
                   for(SkeletonBlendShaderMaterialMeshInstance *instance=&SkeletonBlendShaderMaterialMeshInstances[skel_shader_material->first_mesh_instance]; ; )
                   {
                      D.stencil(instance->stencil_mode);
-                        shader_params_changed|=_SetHighlight         (instance->highlight);
-                        shader_params_changed|= SetShaderParamChanges(instance->shader_param_changes);
+                        shader_params_changed|=SetShaderParamChanges(instance->shader_param_changes);
                      if(shader_params_changed){shader_params_changed=false; shader.commit();}
                                                                      instance->mesh->set();
                      if(skel_shader->type!=BlendInstance::STATIC_FUR)instance->mesh->draw();
@@ -892,9 +906,9 @@ void DrawBlendInstances() // !! this function should be safe to call 2 times in 
             }
          }break;
 
-         case BlendInstance::BLEND_OBJ : ec.EndPrecomputedViewMatrix(); D.stencil(STENCIL_NONE); _SetHighlight(TRANSPARENT); object->blend_obj ->      drawBlend(); D.alpha(alpha); D.depth(true); break;
-         case BlendInstance:: GAME_OBJ : ec.EndPrecomputedViewMatrix(); D.stencil(STENCIL_NONE); _SetHighlight(TRANSPARENT); object-> game_obj ->      drawBlend(); D.alpha(alpha); D.depth(true); break;
-         case BlendInstance:: GAME_AREA: ec.EndPrecomputedViewMatrix(); D.stencil(STENCIL_NONE); _SetHighlight(TRANSPARENT); object-> game_area->customDrawBlend(); D.alpha(alpha); D.depth(true); break;
+         case BlendInstance::BLEND_OBJ : ec.EndPrecomputedViewMatrix(); D.stencil(STENCIL_NONE); object->blend_obj ->      drawBlend(); D.alpha(alpha); D.depth(true); break;
+         case BlendInstance:: GAME_OBJ : ec.EndPrecomputedViewMatrix(); D.stencil(STENCIL_NONE); object-> game_obj ->      drawBlend(); D.alpha(alpha); D.depth(true); break;
+         case BlendInstance:: GAME_AREA: ec.EndPrecomputedViewMatrix(); D.stencil(STENCIL_NONE); object-> game_area->customDrawBlend(); D.alpha(alpha); D.depth(true); break;
       }
    }
 
@@ -902,7 +916,6 @@ void DrawBlendInstances() // !! this function should be safe to call 2 times in 
    ec.EndPrecomputedViewMatrix();
    D.depthWrite(true);
    D.stencil   (STENCIL_NONE);
-  _SetHighlight(TRANSPARENT);
 }
 /******************************************************************************/
 // PALETTE
@@ -968,6 +981,8 @@ void ShutInstances()
 
    PaletteObjects.del(); Palette1Objects.del(); OverlayObjects.del(); OpaqueObjects.del(); EmissiveObjects.del(); OutlineObjects.del(); BehindObjects.del();
    PaletteAreas  .del(); Palette1Areas  .del();
+
+   SetHighlight(); Highlights.del();
 }
 void InitInstances()
 {

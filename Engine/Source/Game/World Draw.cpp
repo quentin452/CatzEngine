@@ -46,7 +46,7 @@ inline void Area::drawObjAndTerrain()
          // terrain objects
          {
           C Memc<Data::TerrainObj> &to=_data->terrain_objs;
-            if(to.elms() &&    Frustum(_data->terrain_objs_box, fully_inside))REPA(to)
+            if(to.elms() &&    Frustum(_data->terrain_objs_ext, fully_inside))REPA(to)
             {
              C Data::TerrainObj &obj=to[i];
                if(C MeshPtr &mesh=obj.obj->mesh())
@@ -63,7 +63,7 @@ inline void Area::drawObjAndTerrain()
          {
           C Memc<Data::GrassObj> &fo=_data->foliage_objs;
           C FrustumClass &frustum=world()->_frustum_grass;
-            if(fo.elms() && frustum(_data->foliage_objs_box, fully_inside))
+            if(fo.elms() && frustum(_data->foliage_objs_ext, fully_inside))
             {
                UInt density=RoundPos(D.grassDensity()*256);
                REPA(fo)
@@ -116,7 +116,7 @@ inline void Area::drawTerrainShadow()
       // terrain objects
       {
          Memc<Data::TerrainObj> &to=_data->terrain_objs;
-         if(to.elms() &&    Frustum(_data->terrain_objs_box, fully_inside))REPA(to)
+         if(to.elms() &&    Frustum(_data->terrain_objs_ext, fully_inside))REPA(to)
          {
           C Data::TerrainObj &obj=to[i];
             if(obj.obj->mesh() && (fully_inside || Frustum(*obj.obj->mesh(), obj.matrix)))
@@ -131,7 +131,7 @@ inline void Area::drawTerrainShadow()
       if(D.grassShadow() && D.grassRange()>EPS_GRASS_RANGE)
       {
        C Memc<Data::GrassObj> &fo=_data->foliage_objs;
-         if(fo.elms() &&  Frustum(_data->foliage_objs_box, fully_inside))
+         if(fo.elms() &&  Frustum(_data->foliage_objs_ext, fully_inside))
          {
             UInt density=RoundPos(D.grassDensity()*256);
             REPA(fo)

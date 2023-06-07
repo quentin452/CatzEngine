@@ -242,7 +242,7 @@ void InitGui()
    }
    GlowBorder="Gui/Misc/glow border.img";
 
-   UID skin_id(3070792110, 1173521724, 2244074370, 3689187718); // this is "Dark Grey"
+   UID skin_id(3068860333, 1264140570, 2890469249, 3573156331); // this is "Dark"
    if(C TextNode *video=Settings.findNode("Video"))if(C TextNode *p=video->findNode("GuiSkin"))skin_id=VidOpt.skinID(p->asText());
    SetGuiSkin(skin_id);
 }

@@ -346,17 +346,18 @@ struct MeshBase // Mesh Base (the most low level software mesh, contains : Verte
    Int  faces    ()C {return                              tri.elms()  + quad.elms()  ;} // get number of faces
    Int  trisTotal()C {return                              tri.elms()  + quad.elms()*2;} // get number of triangles including quads (each quad can be represented by 2 triangles)
 
-   MESH_FLAG flag        (                                 )C; // get available data
-   UInt      memUsage    (                                 )C; // get memory usage
-   Bool      getBox      (Box  &box                        )C; // get box  encapsulating the mesh, this method iterates through all vertexes, false on fail (if no vertexes are present)
-   Bool      getBox      (Box  &box , C Matrix &mesh_matrix)C; // get box  encapsulating the mesh, this method iterates through all vertexes, 'mesh_matrix'=matrix affecting vertex positions, false on fail (if no vertexes are present)
-   Bool      getBall     (Ball &ball                       )C; // get ball encapsulating the mesh, this method iterates through all vertexes, false on fail (if no vertexes are present)
-   Bool      getRect     (Rect &rect                       )C; // get 2D rectangle encapsulating the mesh on XY plane, false on fail (if no vertexes are present)
-   Bool      getRectXZ   (Rect &rect                       )C; // get 2D rectangle encapsulating the mesh on XZ plane, false on fail (if no vertexes are present)
-   Flt       area        (Vec  *center=null                )C; // get surface area of all mesh faces, 'center'=if specified then it will be calculated as the average surface center
-   Flt       convexVolume(                                 )C; // calculate volume of this mesh assuming that it's convex
-   Int       maxID       (                                 )C; // get maximum value of ID in edges/faces, -1 if doesn't have any
-   Bool      hasID       (Int   id                         )C; // if  any of the edges/faces have their ID set to 'id'
+   MESH_FLAG flag        (                            )C; // get available data
+   UInt      memUsage    (                            )C; // get memory usage
+   Bool      getBox      (Box  &box                   )C; // get box  encapsulating the mesh, this method iterates through all vertexes, false on fail (if no vertexes are present)
+   Bool      getBox      (Box  &box, C Matrix3 &matrix)C; // get box  encapsulating the mesh, this method iterates through all vertexes, 'matrix'=matrix affecting vertex positions, false on fail (if no vertexes are present)
+   Bool      getBox      (Box  &box, C Matrix  &matrix)C; // get box  encapsulating the mesh, this method iterates through all vertexes, 'matrix'=matrix affecting vertex positions, false on fail (if no vertexes are present)
+   Bool      getBall     (Ball &ball                  )C; // get ball encapsulating the mesh, this method iterates through all vertexes, false on fail (if no vertexes are present)
+   Bool      getRect     (Rect &rect                  )C; // get 2D rectangle encapsulating the mesh on XY plane, false on fail (if no vertexes are present)
+   Bool      getRectXZ   (Rect &rect                  )C; // get 2D rectangle encapsulating the mesh on XZ plane, false on fail (if no vertexes are present)
+   Flt       area        (Vec  *center=null           )C; // get surface area of all mesh faces, 'center'=if specified then it will be calculated as the average surface center
+   Flt       convexVolume(                            )C; // calculate volume of this mesh assuming that it's convex
+   Int       maxID       (                            )C; // get maximum value of ID in edges/faces, -1 if doesn't have any
+   Bool      hasID       (Int   id                    )C; // if  any of the edges/faces have their ID set to 'id'
 
    // set
 #if EE_PRIVATE
@@ -438,9 +439,10 @@ struct MeshBase // Mesh Base (the most low level software mesh, contains : Verte
    MeshBase& splitEdges(Flt length, Flt d , Bool *is=null) ; // split edges, 'length'=minimum length of edge to part, 'd'=length of added edges on left & right side, 'is'=only selected edges
 
    // join / split
-   void split    (MemPtr<MeshBaseIndex> meshes, C Boxes &boxes, MESH_FLAG flag_and=MESH_ALL)C; // split to container of meshes by boxes                                        , copy only elements included in 'flag_and'
-   void split    (MemPtr<MeshBaseIndex> meshes, C VecI  &cells, MESH_FLAG flag_and=MESH_ALL)C; // split to container of meshes by number of splits                             , copy only elements included in 'flag_and'
-   void splitBone(MeshBase &dest, Int bone                    , MESH_FLAG flag_and=MESH_ALL) ; // split by moving elements influenced by 'bone' to 'dest' leaving the rest only, copy only elements included in 'flag_and'
+   void split    (MemPtr<MeshBaseIndex> meshes, C Boxes &boxes,             MESH_FLAG flag_and=MESH_ALL)C; // split to container of meshes by boxes                                        , copy only elements included in 'flag_and'
+   void split    (MemPtr<MeshBaseIndex> meshes, C VecI  &cells,             MESH_FLAG flag_and=MESH_ALL)C; // split to container of meshes by number of splits                             , copy only elements included in 'flag_and'
+   void split    (MemPtr<MeshBaseIndex> meshes, C Plane *plane, Int planes, MESH_FLAG flag_and=MESH_ALL)C; // split to container of meshes by planes                                       , copy only elements included in 'flag_and'
+   void splitBone(MeshBase &dest, Int bone                    ,             MESH_FLAG flag_and=MESH_ALL) ; // split by moving elements influenced by 'bone' to 'dest' leaving the rest only, copy only elements included in 'flag_and'
 #endif
 
    // fix

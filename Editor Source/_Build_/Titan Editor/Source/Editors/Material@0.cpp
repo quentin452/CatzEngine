@@ -444,7 +444,7 @@ MaterialRegion MtrlEdit;
    Str  MaterialRegion::EmissiveGlow(C MaterialRegion &mr          ) {return mr.edit.emissive_glow;}
    void MaterialRegion::EmissiveGlow(  MaterialRegion &mr, C Str &t) {       mr.edit.emissive_glow=TextFlt(t); mr.edit.emissive_time.getUTC(); mr.setChanged(); D.setShader(mr.game());}
    Str  MaterialRegion::UVScale(C MaterialRegion &mr          ) {return mr.edit.uv_scale;}
-   void MaterialRegion::UVScale(  MaterialRegion &mr, C Str &t) {       mr.edit.uv_scale=TextFlt(t); mr.edit.uv_scale_time.getUTC();}
+   void MaterialRegion::UVScale(  MaterialRegion &mr, C Str &t) {       mr.edit.uv_scale=TextFlt(t); mr.edit.uv_scale_time.getUTC(); mr.setChanged(); D.setShader(mr.game());}
    void MaterialRegion::Undo(MaterialRegion &editor) {editor.undos.undo();}
    void MaterialRegion::Redo(MaterialRegion &editor) {editor.undos.redo();}
    void MaterialRegion::Locate(MaterialRegion &editor) {Proj.elmLocate(editor.elm_id);}

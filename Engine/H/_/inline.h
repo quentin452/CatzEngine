@@ -128,6 +128,69 @@ inline Ptr Randomizer::pointer()
 #endif
 }
 /******************************************************************************/
+// VECTOR
+/******************************************************************************/
+inline VecB2 ::VecB2 (C VecI2  &v) {set(v.x, v.y          );}
+inline VecSB2::VecSB2(C VecI2  &v) {set(v.x, v.y          );}
+inline VecB  ::VecB  (C VecI   &v) {set(v.x, v.y, v.z     );}
+inline VecSB ::VecSB (C VecI   &v) {set(v.x, v.y, v.z     );}
+inline VecB4 ::VecB4 (C VecI4  &v) {set(v.x, v.y, v.z, v.w);}
+inline VecB4 ::VecB4 (C VecUS4 &v) {set(v.x, v.y, v.z, v.w);}
+inline VecSB4::VecSB4(C VecI4  &v) {set(v.x, v.y, v.z, v.w);}
+inline VecUS2::VecUS2(C VecB2  &v) {set(v.x, v.y          );}
+inline VecUS2::VecUS2(C VecI2  &v) {set(v.x, v.y          );}
+inline VecUS ::VecUS (C VecB   &v) {set(v.x, v.y, v.z     );}
+inline VecUS ::VecUS (C VecI   &v) {set(v.x, v.y, v.z     );}
+inline VecUS4::VecUS4(C VecB4  &v) {set(v.x, v.y, v.z, v.w);}
+inline VecUS4::VecUS4(C VecI4  &v) {set(v.x, v.y, v.z, v.w);}
+inline Vec2  ::Vec2  (C VecH2  &v) {set(v.x, v.y          );}
+inline Vec2  ::Vec2  (C VecD2  &v) {set(v.x, v.y          );}
+inline Vec2  ::Vec2  (C VecI2  &v) {set(v.x, v.y          );}
+inline Vec2  ::Vec2  (C VecB2  &v) {set(v.x, v.y          );}
+inline Vec2  ::Vec2  (C VecSB2 &v) {set(v.x, v.y          );}
+inline Vec2  ::Vec2  (C VecUS2 &v) {set(v.x, v.y          );}
+inline VecD2 ::VecD2 (C VecH2  &v) {set(v.x, v.y          );}
+inline VecD2 ::VecD2 (C Vec2   &v) {set(v.x, v.y          );}
+inline VecD2 ::VecD2 (C VecI2  &v) {set(v.x, v.y          );}
+inline VecD2 ::VecD2 (C VecB2  &v) {set(v.x, v.y          );}
+inline VecD2 ::VecD2 (C VecSB2 &v) {set(v.x, v.y          );}
+inline VecD2 ::VecD2 (C VecUS2 &v) {set(v.x, v.y          );}
+inline Vec   ::Vec   (C VecH   &v) {set(v.x, v.y, v.z     );}
+inline Vec   ::Vec   (C VecD   &v) {set(v.x, v.y, v.z     );}
+inline Vec   ::Vec   (C VecI   &v) {set(v.x, v.y, v.z     );}
+inline Vec   ::Vec   (C VecB   &v) {set(v.x, v.y, v.z     );}
+inline Vec   ::Vec   (C VecSB  &v) {set(v.x, v.y, v.z     );}
+inline VecD  ::VecD  (C VecH   &v) {set(v.x, v.y, v.z     );}
+inline VecD  ::VecD  (C Vec    &v) {set(v.x, v.y, v.z     );}
+inline VecD  ::VecD  (C VecI   &v) {set(v.x, v.y, v.z     );}
+inline VecD  ::VecD  (C VecB   &v) {set(v.x, v.y, v.z     );}
+inline VecD  ::VecD  (C VecSB  &v) {set(v.x, v.y, v.z     );}
+inline Vec4  ::Vec4  (C VecH4  &v) {set(v.x, v.y, v.z, v.w);}
+inline Vec4  ::Vec4  (C VecD4  &v) {set(v.x, v.y, v.z, v.w);}
+inline Vec4  ::Vec4  (C VecI4  &v) {set(v.x, v.y, v.z, v.w);}
+inline Vec4  ::Vec4  (C VecB4  &v) {set(v.x, v.y, v.z, v.w);}
+inline Vec4  ::Vec4  (C VecSB4 &v) {set(v.x, v.y, v.z, v.w);}
+inline Vec4  ::Vec4  (C VecUS4 &v) {set(v.x, v.y, v.z, v.w);}
+inline VecD4 ::VecD4 (C VecH4  &v) {set(v.x, v.y, v.z, v.w);}
+inline VecD4 ::VecD4 (C Vec4   &v) {set(v.x, v.y, v.z, v.w);}
+inline VecD4 ::VecD4 (C VecI4  &v) {set(v.x, v.y, v.z, v.w);}
+inline VecD4 ::VecD4 (C VecB4  &v) {set(v.x, v.y, v.z, v.w);}
+inline VecD4 ::VecD4 (C VecSB4 &v) {set(v.x, v.y, v.z, v.w);}
+inline VecD4 ::VecD4 (C VecUS4 &v) {set(v.x, v.y, v.z, v.w);}
+
+inline Vec  Vec2 :: xy0()C {return Vec (x, y, 0);}
+inline Vec  Vec2 :: x0y()C {return Vec (x, 0, y);}
+inline Vec  Vec2 ::_0xy()C {return Vec (0, x, y);}
+inline Vec  Vec2 ::_0yx()C {return Vec (0, y, x);}
+inline VecD VecD2:: xy0()C {return VecD(x, y, 0);}
+inline VecD VecD2:: x0y()C {return VecD(x, 0, y);}
+inline VecD VecD2::_0xy()C {return VecD(0, x, y);}
+inline VecD VecD2::_0yx()C {return VecD(0, y, x);}
+inline VecI VecI2:: xy0()C {return VecI(x, y, 0);}
+inline VecI VecI2:: x0y()C {return VecI(x, 0, y);}
+inline VecI VecI2::_0xy()C {return VecI(0, x, y);}
+inline VecI VecI2::_0yx()C {return VecI(0, y, x);}
+/******************************************************************************/
 // MATRIX
 /******************************************************************************/
 inline void Matrix3::mul(C RevMatrix3 &matrix, Matrix3 &dest)C {matrix.mul(T, dest);}
@@ -143,12 +206,20 @@ inline void SetFastMatrixPrev(C Matrix  &matrix) {Sh.ViewMatrixPrev->fromMul(mat
 inline void SetFastMatrixPrev(C MatrixM &matrix) {Sh.ViewMatrixPrev->fromMul(matrix, CamMatrixInvPrev);}
 #endif
 /******************************************************************************/
+// SHAPES
+/******************************************************************************/
+inline Ball::Ball(C BallM &ball) {set(ball.r, ball.pos);}
+/******************************************************************************/
 // TEMPLATES
 /******************************************************************************/
-T1(TYPE) DISABLE_IF_ENUM(TYPE, Bool) InRange(Int   i, C TYPE &container) {return UInt (i)<UInt (Elms(container));} // template specialization for not enum's
-T1(TYPE) DISABLE_IF_ENUM(TYPE, Bool) InRange(UInt  i, C TYPE &container) {return UInt (i)<UInt (Elms(container));} // template specialization for not enum's
-T1(TYPE) DISABLE_IF_ENUM(TYPE, Bool) InRange(Long  i, C TYPE &container) {return ULong(i)<ULong(Elms(container));} // template specialization for not enum's
-T1(TYPE) DISABLE_IF_ENUM(TYPE, Bool) InRange(ULong i, C TYPE &container) {return ULong(i)<ULong(Elms(container));} // template specialization for not enum's
+T1(TYPE) DISABLE_IF_ENUM(TYPE, Bool) InRange(SByte  i, C TYPE &container) {return InRange(i, Elms(container));} // template specialization for not enum's
+T1(TYPE) DISABLE_IF_ENUM(TYPE, Bool) InRange(Byte   i, C TYPE &container) {return InRange(i, Elms(container));} // template specialization for not enum's
+T1(TYPE) DISABLE_IF_ENUM(TYPE, Bool) InRange(Short  i, C TYPE &container) {return InRange(i, Elms(container));} // template specialization for not enum's
+T1(TYPE) DISABLE_IF_ENUM(TYPE, Bool) InRange(UShort i, C TYPE &container) {return InRange(i, Elms(container));} // template specialization for not enum's
+T1(TYPE) DISABLE_IF_ENUM(TYPE, Bool) InRange(Int    i, C TYPE &container) {return InRange(i, Elms(container));} // template specialization for not enum's
+T1(TYPE) DISABLE_IF_ENUM(TYPE, Bool) InRange(UInt   i, C TYPE &container) {return InRange(i, Elms(container));} // template specialization for not enum's
+T1(TYPE) DISABLE_IF_ENUM(TYPE, Bool) InRange(Long   i, C TYPE &container) {return InRange(i, Elms(container));} // template specialization for not enum's
+T1(TYPE) DISABLE_IF_ENUM(TYPE, Bool) InRange(ULong  i, C TYPE &container) {return InRange(i, Elms(container));} // template specialization for not enum's
 /******************************************************************************/
 T1(TYPE) struct ClassFunc // various basic functions used by many classes
 {
@@ -2221,7 +2292,7 @@ namespace Edit
 /******************************************************************************/
 #if EE_PRIVATE
 
-#if (defined _M_IX86 || defined __i386__) || (defined _M_X64 || defined __x86_64__) || (ARM && X64) || WEB // x86 32/64 and ARM 64 can do unaligned reads. When using WebAssembly (WASM) for WEB platform, unaligned access is supported, however when executed on platforms without native unaligned access support (Arm32) it will be extremely slow, however since Arm32 is in extinction then it's better to enable unaligned access to get better performance on majority of platforms that support it.
+#if X86 || (ARM && X64) || WEB // x86 32/64 and ARM 64 can do unaligned reads. When using WebAssembly (WASM) for WEB platform, unaligned access is supported, however when executed on platforms without native unaligned access support (Arm32) it will be extremely slow, however since Arm32 is in extinction then it's better to enable unaligned access to get better performance on majority of platforms that support it.
    T1(TYPE) C TYPE& Unaligned(              C TYPE &src) {return src;}
    T1(TYPE)   void  Unaligned(TYPE   &dest, C TYPE &src) {  dest=src;}
    T1(TYPE)   void _Unaligned(Byte   &dest, C TYPE &src) {  dest=src;}

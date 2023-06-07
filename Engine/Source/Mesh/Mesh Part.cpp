@@ -397,17 +397,19 @@ MeshPart& MeshPart::keepOnly(MESH_FLAG flag) {return exclude(~flag);}
 /******************************************************************************/
 // GET
 /******************************************************************************/
-MESH_FLAG MeshPart::flag     (           )C {return base.is() ? base.flag     () : render.flag();}
-UInt      MeshPart::memUsage (           )C {return base.memUsage()              + render.memUsage();}
-Int       MeshPart::vtxs     (           )C {return base.is() ? base.vtxs     () : render.vtxs();}
-Int       MeshPart::edges    (           )C {return             base.edges    ()                ;}
-Int       MeshPart::tris     (           )C {return base.is() ? base.tris     () : render.tris();}
-Int       MeshPart::quads    (           )C {return             base.quads    ()                ;}
-Int       MeshPart::faces    (           )C {return base.is() ? base.faces    () : render.tris();}
-Int       MeshPart::trisTotal(           )C {return base.is() ? base.trisTotal() : render.tris();}
-Bool      MeshPart::getBox   (Box &box   )C {return base.getBox(box) || render.getBox(box);}
-Flt       MeshPart::area     (Vec *center)C {return base.is() ? base.area(center) : render.area(center);}
-Int       MeshPart::drawGroup(           )C {return _draw_mask ? BitHi(_draw_mask) : -1;}
+MESH_FLAG MeshPart::flag     (                           )C {return base.is() ? base.flag     () : render.flag();}
+UInt      MeshPart::memUsage (                           )C {return base.memUsage()              + render.memUsage();}
+Int       MeshPart::vtxs     (                           )C {return base.is() ? base.vtxs     () : render.vtxs();}
+Int       MeshPart::edges    (                           )C {return             base.edges    ()                ;}
+Int       MeshPart::tris     (                           )C {return base.is() ? base.tris     () : render.tris();}
+Int       MeshPart::quads    (                           )C {return             base.quads    ()                ;}
+Int       MeshPart::faces    (                           )C {return base.is() ? base.faces    () : render.tris();}
+Int       MeshPart::trisTotal(                           )C {return base.is() ? base.trisTotal() : render.tris();}
+Bool      MeshPart::getBox   (Box &box                   )C {return base.getBox(box        ) || render.getBox(box        );}
+Bool      MeshPart::getBox   (Box &box, C Matrix3 &matrix)C {return base.getBox(box, matrix) || render.getBox(box, matrix);}
+Bool      MeshPart::getBox   (Box &box, C Matrix  &matrix)C {return base.getBox(box, matrix) || render.getBox(box, matrix);}
+Flt       MeshPart::area     (Vec *center                )C {return base.is() ? base.area(center) : render.area(center);}
+Int       MeshPart::drawGroup(                           )C {return _draw_mask ? BitHi(_draw_mask) : -1;}
 
 C MaterialPtr& MeshPart::multiMaterial(Int i)C
 {
@@ -500,11 +502,11 @@ void MeshPart::setShaderMulti(Int lod_index)
       multiMaterial(2)(),
       multiMaterial(3)(),
    };
-   DefaultShaders(m, render.flag(), lod_index, heightmap()).set(_variation.shader, &_variation.frst, &_variation.blst);
+   DefaultShaders(m, render.flag(), lod_index, heightmapType()).set(_variation.shader, &_variation.frst, &_variation.blst);
 }
 void MeshPart::setShader(Int lod_index, Variation &variation)
 {
-   DefaultShaders(variation.material(), render.flag(), lod_index, heightmap()).set(variation.shader, &variation.frst, &variation.blst);
+   DefaultShaders(variation.material(), render.flag(), lod_index, heightmapType()).set(variation.shader, &variation.frst, &variation.blst);
 }
 MeshPart& MeshPart::setShader(Int lod_index)
 {
@@ -698,11 +700,27 @@ void MeshPart::variationRemap(C Mesh &src, C Mesh &dest)
 /******************************************************************************/
 // HEIGHTMAP
 /******************************************************************************/
-MeshPart& MeshPart::heightmap(Bool heightmap, Int lod_index)
+Byte MeshPart::heightmapType()C
 {
-   if(T.heightmap()!=heightmap)
+   if(heightmapFlat  ())return HEIGHTMAP_FLAT;
+   if(heightmapSphere())return HEIGHTMAP_SPHERE;
+                        return HEIGHTMAP_NO;
+}
+MeshPart& MeshPart::heightmapFlat(Bool heightmap, Int lod_index)
+{
+   if(T.heightmapFlat()!=heightmap)
    {
-      part_flag^=MSHP_HEIGHTMAP;
+      part_flag^=MSHP_HEIGHTMAP_FLAT;
+      if(heightmap)exclude(VTX_TEX_ALL|VTX_TAN_BIN); // if enabled heightmap, then delete tex/tan/bin as they're no longer needed
+      setShader(lod_index);
+   }
+   return T;
+}
+MeshPart& MeshPart::heightmapSphere(Bool heightmap, Int lod_index)
+{
+   if(T.heightmapSphere()!=heightmap)
+   {
+      part_flag^=MSHP_HEIGHTMAP_SPHERE;
       if(heightmap)exclude(VTX_TEX_ALL|VTX_TAN_BIN); // if enabled heightmap, then delete tex/tan/bin as they're no longer needed
       setShader(lod_index);
    }

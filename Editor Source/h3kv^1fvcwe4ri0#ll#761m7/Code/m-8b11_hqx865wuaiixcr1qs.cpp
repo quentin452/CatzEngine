@@ -525,7 +525,7 @@ class MaterialRegion : Region
    static void EmissiveGlow(  MaterialRegion &mr, C Str &t) {       mr.edit.emissive_glow=TextFlt(t); mr.edit.emissive_time.getUTC(); mr.setChanged(); D.setShader(mr.game());} // call 'setChanged' manually because it needs to be called before 'setShader'
 
    static Str  UVScale(C MaterialRegion &mr          ) {return mr.edit.uv_scale;}
-   static void UVScale(  MaterialRegion &mr, C Str &t) {       mr.edit.uv_scale=TextFlt(t); mr.edit.uv_scale_time.getUTC();}
+   static void UVScale(  MaterialRegion &mr, C Str &t) {       mr.edit.uv_scale=TextFlt(t); mr.edit.uv_scale_time.getUTC(); mr.setChanged(); D.setShader(mr.game());} // call 'setChanged' manually because it needs to be called before 'setShader'
 
    static void Undo  (MaterialRegion &editor) {editor.undos.undo();}
    static void Redo  (MaterialRegion &editor) {editor.undos.redo();}

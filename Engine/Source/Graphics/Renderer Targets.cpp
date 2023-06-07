@@ -4,27 +4,28 @@ namespace EE{
 /******************************************************************************
 
    #RTOutput
-   RT        : Width    , Height   ,                                                                                           Type           , Samples  , Comments
-  _main      : D.   resW, D.   resH,                                                                                           IMAGERT_SRGBA  , 1        , COLOR RGB, Opacity
-  _main_ds   : D.   resW, D.   resH,                                                                                           IMAGERT_DS     , 1        , this is the Main DepthStencil buffer to be used together with '_main' RT, on OpenGL (except iOS) it is provided by the system
-  _ds        : D.renderW, D.renderW,                                                                                           IMAGERT_DS     , D.samples
-  _ds_1s     : D.renderW, D.renderW,                                                                                           IMAGERT_DS     , 1        , if '_ds' is Multi-Sampled then this is created as a standalone 1-sampled depth buffer, otherwise it's a duplicate of '_ds'
-  _col       : D.renderW, D.renderH,                                                      D.highPrecColRT ? IMAGERT_SRGBA_P  : IMAGERT_SRGBA  , D.samples, COLOR RGB, GLOW
-  _nrm       : D.renderW, D.renderH,                D.highPrecNrmRT ? IMAGERT_RGB_A2_H : (D.signedNrmRT   ? IMAGERT_RGB_A2_S : IMAGERT_RGB_A2), D.samples, NRM   XYZ, #PIXEL_SHADE_MODE
-  _ext       : D.renderW, D.renderH,                                                                                           IMAGERT_TWO    , D.samples, ROUGH    , REFLECT
-  _vel       : D.renderW, D.renderH,                                                                                           IMAGERT_TWO_H  , D.samples, 2D MOTION (UV delta from CUR_POS to PREV_FRAME_POS)
-  _alpha     : D.renderW, D.renderH,                                                                                           IMAGERT_ONE    , D.samples, OPACITY
-  _lum       : D.renderW, D.renderH,                                                        D.highPrecLumRT ? IMAGERT_SRGB_H : IMAGERT_SRGB   , D.samples, LIGHT RGB
-  _lum_1s    : D.renderW, D.renderH,                                                        D.highPrecLumRT ? IMAGERT_SRGB_H : IMAGERT_SRGB   , 1        , LIGHT RGB. if '_lum' is Multi-Sampled then this is created as a standalone 1-sampled depth buffer, otherwise it's a duplicate of '_lum'
-  _spec      : D.renderW, D.renderH,                                                        D.highPrecLumRT ? IMAGERT_SRGB_H : IMAGERT_SRGB   , D.samples, LIGHT SPEC RGB
-  _spec_1s   : D.renderW, D.renderH,                                                        D.highPrecLumRT ? IMAGERT_SRGB_H : IMAGERT_SRGB   , 1        , LIGHT SPEC RGB. if '_spec' is Multi-Sampled then this is created as a standalone 1-sampled depth buffer, otherwise it's a duplicate of '_spec'
+   RT           : Width    , Height   ,                                                                                           Type           , Samples  , Comments
+  _main         : D.   resW, D.   resH,                                                                                           IMAGERT_SRGBA  , 1        , COLOR RGB, Opacity
+  _main_ds      : D.   resW, D.   resH,                                                                                           IMAGERT_DS     , 1        , this is the Main DepthStencil buffer to be used together with '_main' RT, on OpenGL (except iOS) it is provided by the system
+  _ds           : D.renderW, D.renderW,                                                                                           IMAGERT_DS     , D.samples
+  _ds_1s        : D.renderW, D.renderW,                                                                                           IMAGERT_DS     , 1        , if '_ds' is Multi-Sampled then this is created as a standalone 1-sampled depth buffer, otherwise it's a duplicate of '_ds'
+  _col          : D.renderW, D.renderH,                                                      D.highPrecColRT ? IMAGERT_SRGBA_P  : IMAGERT_SRGBA  , D.samples, COLOR RGB, GLOW
+  _nrm          : D.renderW, D.renderH,                D.highPrecNrmRT ? IMAGERT_RGB_A2_H : (D.signedNrmRT   ? IMAGERT_RGB_A2_S : IMAGERT_RGB_A2), D.samples, NRM   XYZ, #PIXEL_SHADE_MODE
+  _ext          : D.renderW, D.renderH,                                                                                           IMAGERT_TWO    , D.samples, ROUGH    , REFLECT
+  _vel          : D.renderW, D.renderH,                                                                                           IMAGERT_TWO_H  , D.samples, 2D MOTION (UV delta from CUR_POS to PREV_FRAME_POS)
+  _alpha        : D.renderW, D.renderH,                                                                                           IMAGERT_ONE    , D.samples, OPACITY
+  _lum          : D.renderW, D.renderH,                                                        D.highPrecLumRT ? IMAGERT_SRGB_H : IMAGERT_SRGB   , D.samples, LIGHT RGB
+  _lum_1s       : D.renderW, D.renderH,                                                        D.highPrecLumRT ? IMAGERT_SRGB_H : IMAGERT_SRGB   , 1        , LIGHT RGB. if '_lum' is Multi-Sampled then this is created as a standalone 1-sampled depth buffer, otherwise it's a duplicate of '_lum'
+  _spec         : D.renderW, D.renderH,                                                        D.highPrecLumRT ? IMAGERT_SRGB_H : IMAGERT_SRGB   , D.samples, LIGHT SPEC RGB
+  _spec_1s      : D.renderW, D.renderH,                                                        D.highPrecLumRT ? IMAGERT_SRGB_H : IMAGERT_SRGB   , 1        , LIGHT SPEC RGB. if '_spec' is Multi-Sampled then this is created as a standalone 1-sampled depth buffer, otherwise it's a duplicate of '_spec'
 
-  _water_col : D.renderW, D.renderH,                                                                                           IMAGERT_SRGB   , 1        , COLOR RGB
-  _water_nrm : D.renderW, D.renderH,                                                           D.signedNrmRT ? IMAGERT_RGB_S : IMAGERT_RGB    , 1        , NRM   XYZ
+  _water_col    : D.renderW, D.renderH,                                                                                           IMAGERT_SRGB   , 1        , COLOR   RGB
+  _water_nrm    : D.renderW, D.renderH,                                                           D.signedNrmRT ? IMAGERT_RGB_S : IMAGERT_RGB    , 1        , NRM     XYZ
+  _water_refract: D.renderW, D.renderH,                                                                                           IMAGERT_TWO_S  , 1        , REFRACT XY
    there's no _water_ext #WaterExt
-  _water_ds  : D.renderW, D.renderH,                                                                                           IMAGERT_DS     , 1        , Water Depth
-  _water_lum : D.renderW, D.renderH,                                                                                           IMAGERT_SRGB   , 1        , LIGHT RGB
-  _water_spec: D.renderW, D.renderH,                                                                                           IMAGERT_SRGB   , 1        , LIGHT SPEC RGB
+  _water_ds     : D.renderW, D.renderH,                                                                                           IMAGERT_DS     , 1        , Water   Depth
+  _water_lum    : D.renderW, D.renderH,                                                                                           IMAGERT_SRGB   , 1        , LIGHT   RGB
+  _water_spec   : D.renderW, D.renderH,                                                                                           IMAGERT_SRGB   , 1        , LIGHT   SPEC RGB
 
    '_gui' is set to '_main', unless stereoscopic rendering is enabled then it's set to VR RT
 
@@ -42,8 +43,8 @@ namespace EE{
          -'_ds_1s' is set to down-sampled copy of '_ds'
          -both '_ds' and '_ds_1s' have STENCIL_REF_MSAA set
       In Non-Deferred Renderer:
-         -if "processAlpha || ms_samples_color.a"       then '_ds_1s' has STENCIL_REF_MSAA set
-         -if "Fog.draw || Sky.isActual || processAlpha" then '_ds'    has STENCIL_REF_MSAA set
+         -if "processAlpha || ms_samples_color.a"                      then '_ds_1s' has STENCIL_REF_MSAA set
+         -if "Fog.draw || Sky.isActual || Atmospheres || processAlpha" then '_ds'    has STENCIL_REF_MSAA set
 
    In OpenGL (except iOS):
       '_main' and '_main_ds' don't have '_rb' and '_txtr' set, because they're provided by the system and not created by the engine.
@@ -79,33 +80,34 @@ void RendererClass::createShadowMap()
 }
 void RendererClass::rtClear()
 {
-  _h0        .clear();
-  _h1        .clear();
-  _q0        .clear();
-  _q1        .clear();
-  _col       .clear();
-  _nrm       .clear();
-  _ext       .clear();
-  _vel       .clear();
-  _alpha     .clear();
-  _lum       .clear();
-  _lum_1s    .clear();
-  _spec      .clear();
-  _spec_1s   .clear();
-  _shd_1s    .clear();
-  _shd_ms    .clear();
-  _ds        .clear();
-  _ds_1s     .clear();
-  _water_col .clear();
-  _water_nrm .clear();
-  _water_ds  .clear();
-  _water_lum .clear();
-  _water_spec.clear();
-  _vol       .clear();
-  _ao        .clear();
-  _mirror_rt .clear();
-  _outline_rt.clear();
-  _final     =null;
+  _h0           .clear();
+  _h1           .clear();
+  _q0           .clear();
+  _q1           .clear();
+  _col          .clear();
+  _nrm          .clear();
+  _ext          .clear();
+  _vel          .clear();
+  _alpha        .clear();
+  _lum          .clear();
+  _lum_1s       .clear();
+  _spec         .clear();
+  _spec_1s      .clear();
+  _shd_1s       .clear();
+  _shd_ms       .clear();
+  _ds           .clear();
+  _ds_1s        .clear();
+  _water_col    .clear();
+  _water_nrm    .clear();
+  _water_refract.clear();
+  _water_ds     .clear();
+  _water_lum    .clear();
+  _water_spec   .clear();
+  _vol          .clear();
+  _ao           .clear();
+  _mirror_rt    .clear();
+  _outline_rt   .clear();
+  _final        =null;
    D.temporalReset();
    // don't clear '_back' and '_back_ds' here in case they are used
 }

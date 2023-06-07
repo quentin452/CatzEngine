@@ -174,7 +174,7 @@ public:
    static void EmissiveGlow(  MaterialRegion &mr, C Str &t); // call 'setChanged' manually because it needs to be called before 'setShader'
 
    static Str  UVScale(C MaterialRegion &mr          );
-   static void UVScale(  MaterialRegion &mr, C Str &t);
+   static void UVScale(  MaterialRegion &mr, C Str &t); // call 'setChanged' manually because it needs to be called before 'setShader'
 
    static void Undo  (MaterialRegion &editor);
    static void Redo  (MaterialRegion &editor);

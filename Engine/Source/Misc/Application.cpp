@@ -59,6 +59,7 @@ Application::Application()
    low_memory=null;
    notification=null;
   _active=_initialized=_minimized=_maximized=_close=_closed=_del_self_at_exit=_elevated=_back_full=false;
+  _thread_priority=0;
 #if WINDOWS_NEW
   _waiting=false;
 #endif
@@ -80,6 +81,7 @@ Application::Application()
   _style_window=0;
 #endif
 #endif
+  _thread_mask=~0;
   _status_color=_nav_color=true;
   _status=      SYSTEM_BAR_HIDDEN                      ; // must match #SystemBar
   _nav   =IOS ? SYSTEM_BAR_OVERLAY : SYSTEM_BAR_VISIBLE; // must match #SystemBar
@@ -1251,7 +1253,8 @@ Bool Application::create0()
    }
 #endif
 
-   T._thread_id   =GetThreadID(); // !! adjust the thread ID here, because on WINDOWS_NEW it will be a different value !!
+   T._thread_id   =GetThreadID(); // !! adjust the thread ID here, because on WINDOWS_NEW it will be a different value !! no need to reset 'threadPriority' 'threadMask' because 'InitPre' was not yet called
+   T._thread_priority^=1; threadPriority(T._thread_priority^1); // force-set
    T._elevated    =GetProcessElevation();
    T._process_id  =PLATFORM(GetCurrentProcessId(), getpid());
    T._desktop_size=D.screen();

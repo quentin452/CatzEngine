@@ -85,7 +85,8 @@ struct RendererClass // handles rendering
    CPtr         temporal_id         ; // Temporal unique ID, you can use this to allow usage of separate render targets for Temporal effects
 
    ShaderParam *C material_color_l, // Vec4 Linear Gamma
-               *C highlight       ; // Vec
+               *C highlight       , // Vec
+               *C vtx_uv_scale    ; // Flt
 
 #if EE_PRIVATE
  C VecI2& res ()C {return _res  ;} // get Current Render Target Size   (in pixels)
@@ -304,7 +305,6 @@ private:
    Byte                  _has, _opaque_mode_index, _mesh_stencil_value, _mesh_stencil_mode, _outline, _clear;
    Int                   _eye, _eye_num, _mirror_priority, _mirror_resolution, _mesh_variation_1;
    UInt                  _frst_light_offset, _blst_light_offset, _mesh_draw_mask;
-   Color                 _mesh_highlight;
    VecI2                 _res;
    Vec2                  _pixel_size, _pixel_size_inv, _temporal_offset;
    Rect                  _clip;
@@ -314,6 +314,7 @@ private:
    Image                 _mlaa_area;
 #endif
    Image                 _smaa_area, _smaa_search, _env_dfg, _noise;
+ //Image                 _sky_a, _sky_b;
    void                (*_render)();
  C Memc<ShaderParamChange> *_shader_param_changes;
    ImageRT               _shd_map, _cld_map,
@@ -328,7 +329,7 @@ private:
    ImageRTPtr            _h0, _h1, _q0, _q1, // <- these members are to be used only temporarily
                          _col, _ds, _ds_1s, _nrm, _ext, _vel, _alpha,
                          _lum, _lum_1s, _spec, _spec_1s, _shd_1s, _shd_ms,
-                         _water_col, _water_nrm, _water_ds, _water_lum, _water_spec,
+                         _water_col, _water_nrm, _water_refract, _water_ds, _water_lum, _water_spec,
                          _vol, _ao, _fade, _back, _back_ds, _mirror_rt, _outline_rt;
    Memx<ImageRTC>        _rts;
    Map<CPtr, Context>    _ctxs;
@@ -359,17 +360,16 @@ void SetEASU(C Image &src, C Vec2 &dest_size, C Vec2 &screen_lu);
 
 INLINE Bool ReuseDefaultMaterialForNonSkinnedShadowShader(Shader *shader) {return shader==Renderer._shader_shd_map     ;} // this is the most common shadow shader, for which we don't use any material properties (except culling) so we can put all instances to default materials to reduce overhead
 INLINE Bool ReuseDefaultMaterialForSkinnedShadowShader   (Shader *shader) {return shader==Renderer._shader_shd_map_skin;} // this is the most common shadow shader, for which we don't use any material properties (except culling) so we can put all instances to default materials to reduce overhead
-
-Bool _SetHighlight  (C Color   &color                                 );
 #endif
-void SetDrawMask    (  UInt     draw_mask   =0xFFFFFFFF               ); // set MeshPart "draw group" bit combination      , this can be called before rendering       meshes                               , draw mask is used to control which MeshParts should be rendered, it is a bit combination of all MeshPart draw groups (which are set using 'MeshPart.drawGroup') that should be included in rendering, each bit is responsible for a different group, for example SetDrawMask(0xFFFFFFFF) enables drawing of all groups, SetDrawMask(IndexToFlag(1) | IndexToFlag(3)) enables drawing of only 1 and 3 group, SetDrawMask(0) completely disables rendering
-void SetHighlight   (C Color   &color       =TRANSPARENT              ); // set highlight of rendered meshes               , this can be called before rendering       meshes in RM_PREPARE             mode
-void SetVariation   (  Int      variation   =0                        ); // set material variation of rendered meshes      , this can be called before rendering       meshes in RM_PREPARE             mode, if variation index is out of range, then default #0 variation will be used
-void SetStencilValue(  Bool     terrain     =false                    ); // set stencil value applied when rendering meshes, this can be called before rendering       meshes in RM_PREPARE             mode
-void SetStencilMode (  Bool     terrain_only=false                    ); // set stencil mode  applied when rendering meshes, this can be called before rendering blend meshes in RM_PREPARE or RM_BLEND mode
-void SetBehindBias  (  Flt      distance                              ); // set bias tolerance for behind effect in meters , this can be called before rendering       meshes in RM_BEHIND              mode
-void SetBlendAlpha  (ALPHA_MODE alpha       =ALPHA_RENDER_BLEND_FACTOR); // set custom alpha blending of rendered meshes   , this can be called before rendering       meshes in RM_BLEND               mode
-void SetEarlyZ      (  Bool     on          =false                    ); // set early Z of rendered meshes                 , this can be called before rendering       meshes in RM_PREPARE             mode, default=false
+void SetDrawMask    (  UInt     draw_mask   =0xFFFFFFFF               ); // set   MeshPart "draw group" bit combination      , this can be called before rendering       meshes                               , draw mask is used to control which MeshParts should be rendered, it is a bit combination of all MeshPart draw groups (which are set using 'MeshPart.drawGroup') that should be included in rendering, each bit is responsible for a different group, for example SetDrawMask(0xFFFFFFFF) enables drawing of all groups, SetDrawMask(IndexToFlag(1) | IndexToFlag(3)) enables drawing of only 1 and 3 group, SetDrawMask(0) completely disables rendering
+void SetHighlight   (                                                 ); // clear highlight of rendered meshes               , this can be called before rendering       meshes in RM_PREPARE             mode
+void SetHighlight   (C Color   &color                                 ); // set   highlight of rendered meshes               , this can be called before rendering       meshes in RM_PREPARE             mode
+void SetVariation   (  Int      variation   =0                        ); // set   material variation of rendered meshes      , this can be called before rendering       meshes in RM_PREPARE             mode, if variation index is out of range, then default #0 variation will be used
+void SetStencilValue(  Bool     terrain     =false                    ); // set   stencil value applied when rendering meshes, this can be called before rendering       meshes in RM_PREPARE             mode
+void SetStencilMode (  Bool     terrain_only=false                    ); // set   stencil mode  applied when rendering meshes, this can be called before rendering blend meshes in RM_PREPARE or RM_BLEND mode
+void SetBehindBias  (  Flt      distance                              ); // set   bias tolerance for behind effect in meters , this can be called before rendering       meshes in RM_BEHIND              mode
+void SetBlendAlpha  (ALPHA_MODE alpha       =ALPHA_RENDER_BLEND_FACTOR); // set   custom alpha blending of rendered meshes   , this can be called before rendering       meshes in RM_BLEND               mode
+void SetEarlyZ      (  Bool     on          =false                    ); // set   early Z of rendered meshes                 , this can be called before rendering       meshes in RM_PREPARE             mode, default=false
 
 void RenderIcon(void (&render)(), C ViewSettings *view, ImageRTC &image, C VecI2 &image_size, Int super_sample=1); // create icon by performing rendering into 'image', 'render'=rendering function, 'view'=view settings (optional, if null then current 'D.view' settings will be used), 'image'=image render target, 'image_size'=image size in pixels, 'super_sample'=super sampling to be used for rendering (1=disabled, 2=2x, 4=4x, ..), this function ignores 'D.density', 'D.maxLights', 'D.eyeAdaptation', 'D.lodFactor', 'D.motionMode', 'D.temporalAntiAlias', 'D.temporalSuperRes', 'D.ambientRes'. This function can be called at any time (in State Update, Draw, Init, Shut) however only on the main thread.
 void RenderIcon(void (&render)(), C ViewSettings *view, Image    &image, C VecI2 &image_size, Int super_sample=1); // create icon by performing rendering into 'image', 'render'=rendering function, 'view'=view settings (optional, if null then current 'D.view' settings will be used), 'image'=image render target, 'image_size'=image size in pixels, 'super_sample'=super sampling to be used for rendering (1=disabled, 2=2x, 4=4x, ..), this function ignores 'D.density', 'D.maxLights', 'D.eyeAdaptation', 'D.lodFactor', 'D.motionMode', 'D.temporalAntiAlias', 'D.temporalSuperRes', 'D.ambientRes'. This function can be called at any time (in State Update, Draw, Init, Shut) however only on the main thread.

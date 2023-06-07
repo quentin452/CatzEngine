@@ -21,11 +21,11 @@ MeshGroup& MeshGroup::create(C Mesh &src, C Boxes &boxes)
 {
    struct MeshPartEx : MeshPart
    {
-      Int lod_index, box_index;
+      Int lod_index, cell_index;
    };
    Memt<MeshPartEx>    mesh_parts;
    Memt<MeshBaseIndex> mesh_splits;
-   MemtN<Int, 256>     box_parts;
+   MemtN<Int, 256>     cell_parts;
 
    // split 'src'
    FREPD(l, src.lods()) // add in order
@@ -36,23 +36,23 @@ MeshGroup& MeshGroup::create(C Mesh &src, C Boxes &boxes)
          {
             MeshBaseIndex &mesh_split=mesh_splits[s];
             MeshPartEx    &mesh_part =mesh_parts.New();
-                 Swap(mesh_part.base, SCAST(MeshBase, mesh_split));
-                      mesh_part.copyParams(part, true);
-                      mesh_part.lod_index=l;
-            box_parts(mesh_part.box_index=mesh_split.index)=1; // set that this box part has some data
+                  Swap(mesh_part.base, SCAST(MeshBase, mesh_split));
+                       mesh_part.copyParams(part, true);
+                       mesh_part. lod_index=l;
+            cell_parts(mesh_part.cell_index=mesh_split.index)=1; // set that this cell part has some data
          }
       }
    }
 
-   // check which box_parts have anything
-   Int bps=0; FREPA(box_parts) // process in order
+   // check which 'cell_parts' have anything
+   Int cells=0; FREPA(cell_parts) // process in order
    {
-      Int &box_part=box_parts[i]; if(box_part)box_part=bps++; // if box part is valid, then set its target index as current number of bps, and inc that by 1
+      Int &cell_part=cell_parts[i]; if(cell_part)cell_part=cells++; // if cell part is valid, then set its target index as current number of cells, and inc that by 1
    }
 
    // create mesh group
    MeshGroup temp, &dest=(T.meshes.contains(&src) ? temp : T); // if this contains 'src' then operate on 'temp' first
-   dest.meshes.setNum(bps); REPAD(s, dest.meshes)
+   dest.meshes.setNum(cells); REPAD(s, dest.meshes)
    {
       Mesh &mesh=dest.meshes[s].setLods(src.lods()); mesh.copyParams(src); // create split meshes to always have the same amount of LODs
       REPD(l, mesh.lods()) // process all LODs in this split mesh
@@ -61,7 +61,7 @@ MeshGroup& MeshGroup::create(C Mesh &src, C Boxes &boxes)
          Int parts=0; // how many parts in this LOD
          REPA(mesh_parts)
          {
-            MeshPartEx &mesh_part=mesh_parts[i]; if(mesh_part.lod_index==l && box_parts[mesh_part.box_index]==s)parts++; // if mesh_part should be assigned to this lod
+            MeshPartEx &mesh_part=mesh_parts[i]; if(mesh_part.lod_index==l && cell_parts[mesh_part.cell_index]==s)parts++; // if mesh_part should be assigned to this lod
          }
          lod.parts.setNum(parts); // always set LOD parts in case we're operating on MeshGroup that already had some data, and this will clear it
          if(parts)
@@ -69,7 +69,67 @@ MeshGroup& MeshGroup::create(C Mesh &src, C Boxes &boxes)
             parts=0;
             FREPA(mesh_parts) // add in order
             {
-               MeshPartEx &mesh_part=mesh_parts[i]; if(mesh_part.lod_index==l && box_parts[mesh_part.box_index]==s)Swap(SCAST(MeshPart, mesh_part), lod.parts[parts++]);
+               MeshPartEx &mesh_part=mesh_parts[i]; if(mesh_part.lod_index==l && cell_parts[mesh_part.cell_index]==s)Swap(SCAST(MeshPart, mesh_part), lod.parts[parts++]);
+            }
+         }
+      }
+   }
+   if(&dest==&temp)Swap(temp, T);
+   setBox(true); return T;
+}
+MeshGroup& MeshGroup::create(C Mesh &src, C Plane *plane, Int planes)
+{
+   struct MeshPartEx : MeshPart
+   {
+      Int lod_index, cell_index;
+   };
+   Memt<MeshPartEx>    mesh_parts;
+   Memt<MeshBaseIndex> mesh_splits;
+   MemtN<Int, 256>     cell_parts;
+
+   // split 'src'
+   FREPD(l, src.lods()) // add in order
+   {
+    C MeshLod &lod=src.lod(l); FREPAD(p, lod) // add in order
+      {
+       C MeshPart &part=lod.parts[p]; part.base.split(mesh_splits, plane, planes); FREPAD(s, mesh_splits) // add in order
+         {
+            MeshBaseIndex &mesh_split=mesh_splits[s];
+            MeshPartEx    &mesh_part =mesh_parts.New();
+                  Swap(mesh_part.base, SCAST(MeshBase, mesh_split));
+                       mesh_part.copyParams(part, true);
+                       mesh_part. lod_index=l;
+            cell_parts(mesh_part.cell_index=mesh_split.index)=1; // set that this cell part has some data
+         }
+      }
+   }
+
+   // check which cell_parts have anything
+   Int cells=0; FREPA(cell_parts) // process in order
+   {
+      Int &cell_part=cell_parts[i]; if(cell_part)cell_part=cells++; // if cell part is valid, then set its target index as current number of cells, and inc that by 1
+   }
+
+   // create mesh group
+   MeshGroup temp, &dest=(T.meshes.contains(&src) ? temp : T); // if this contains 'src' then operate on 'temp' first
+   dest.meshes.setNum(cells); REPAD(s, dest.meshes)
+   {
+      Mesh &mesh=dest.meshes[s].setLods(src.lods()); mesh.copyParams(src); // create split meshes to always have the same amount of LODs
+      REPD(l, mesh.lods()) // process all LODs in this split mesh
+      {
+         MeshLod &lod=mesh.lod(l); lod.copyParams(src.lod(l));
+         Int parts=0; // how many parts in this LOD
+         REPA(mesh_parts)
+         {
+            MeshPartEx &mesh_part=mesh_parts[i]; if(mesh_part.lod_index==l && cell_parts[mesh_part.cell_index]==s)parts++; // if mesh_part should be assigned to this lod
+         }
+         lod.parts.setNum(parts); // always set LOD parts in case we're operating on MeshGroup that already had some data, and this will clear it
+         if(parts)
+         {
+            parts=0;
+            FREPA(mesh_parts) // add in order
+            {
+               MeshPartEx &mesh_part=mesh_parts[i]; if(mesh_part.lod_index==l && cell_parts[mesh_part.cell_index]==s)Swap(SCAST(MeshPart, mesh_part), lod.parts[parts++]);
             }
          }
       }

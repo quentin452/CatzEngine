@@ -826,7 +826,7 @@ Bool Symbol::sameSymbol(Symbol &s)
 Bool Symbol::constDefineInHeader() // if define const in header
 {
    Symbol::Modif value; value=this; value.proceedToFinal(null);
-   if(value)return value.const_level==1 && !value.anyPtr() && IntType(value->var_type); // !anyPtr: accept OBJ (int x=5) and ARRAY (int x[]={1, 2})
+   if(value)return value.const_level==1 && !value.anyPtr() && (value->var_type==VAR_BOOL || IntType(value->var_type)); // !anyPtr: accept OBJ (int x=5) and ARRAY (int x[]={1, 2})
    return false;
 }
 Bool Symbol::fromPartialMacro()

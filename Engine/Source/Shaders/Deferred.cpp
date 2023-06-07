@@ -26,7 +26,7 @@
 #define SET_POS (TESSELATE || MACRO || (!FAST_TPOS && BUMP_MODE>SBUMP_FLAT))
 #define SET_UV  (LAYOUT || DETAIL || MACRO || BUMP_MODE>SBUMP_FLAT)
 /******************************************************************************
-SKIN, MATERIALS, LAYOUT, BUMP_MODE, ALPHA_TEST, DETAIL, MACRO, COLORS, MTRL_BLEND, HEIGHTMAP, FX, TESSELATE
+SKIN, MATERIALS, LAYOUT, BUMP_MODE, ALPHA_TEST, DETAIL, MACRO, COLORS, MTRL_BLEND, UV_SCALE, HEIGHTMAP, FX, TESSELATE
 /******************************************************************************/
 struct Data
 {
@@ -106,7 +106,7 @@ void VS
 
 #if SET_UV
    O.uv=vtx.uv(HEIGHTMAP);
-   if(HEIGHTMAP && MATERIALS==1)O.uv*=Material.uv_scale;
+   if(UV_SCALE && MATERIALS==1)O.uv*=Material.uv_scale;
 #endif
 
 #if ALPHA_TEST==ALPHA_TEST_DITHER
@@ -495,10 +495,19 @@ void PS
 
    // assuming that in multi materials LAYOUT!=0
    Vec2 uv0, uv1, uv2, uv3;
-                   uv0=I.uv*MultiMaterial0.uv_scale;
-                   uv1=I.uv*MultiMaterial1.uv_scale;
-   if(MATERIALS>=3)uv2=I.uv*MultiMaterial2.uv_scale;
-   if(MATERIALS>=4)uv3=I.uv*MultiMaterial3.uv_scale;
+   if(UV_SCALE)
+   {
+                      uv0=I.uv*MultiMaterial0.uv_scale;
+                      uv1=I.uv*MultiMaterial1.uv_scale;
+      if(MATERIALS>=3)uv2=I.uv*MultiMaterial2.uv_scale;
+      if(MATERIALS>=4)uv3=I.uv*MultiMaterial3.uv_scale;
+   }else
+   {
+                      uv0=I.uv;
+                      uv1=I.uv;
+      if(MATERIALS>=3)uv2=I.uv;
+      if(MATERIALS>=4)uv3=I.uv;
+   }
 
    // apply uv coord bump offset
    #if BUMP_MODE>=SBUMP_PARALLAX_MIN && BUMP_MODE<=SBUMP_PARALLAX_MAX // Parallax

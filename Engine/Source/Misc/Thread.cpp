@@ -125,8 +125,11 @@ Bool AtomicCAS(Flt   &x, Flt   compare, Flt   new_value) {return __sync_bool_com
 /******************************************************************************/
 UIntPtr Thread::id()C {return PLATFORM(GetThreadId(_handle), (UIntPtr)_handle);}
 #undef  GetThreadID
+#undef  GetCPU
 UIntPtr GetThreadID() {return _GetThreadID();}
+Int     GetCPU     () {return _GetCPU     ();}
 #define GetThreadID           _GetThreadID
+#define GetCPU                _GetCPU
 /******************************************************************************/
 void SetThreadName(C Str8 &name, UIntPtr thread_id)
 {
@@ -714,14 +717,8 @@ void Thread::resume()
    #endif
    }
 }
+/******************************************************************************/
 #if HAS_THREADS && !WINDOWS
-#if SWITCH
-   #define PRIORITY_POLICY SCHED_OTHER // SCHED_RR undefined
-#else
-   #define PRIORITY_POLICY (APPLE ? SCHED_OTHER : SCHED_RR) // SCHED_OTHER gives better results on Apple but it's not available on Android/Linux, SCHED_RR (Mac/iOS 15..47, Android 1..99), SCHED_OTHER (Mac/iOS 15..47, Android 0..0)
-#endif
-static const Int PriorityBase =sched_get_priority_min(PRIORITY_POLICY),
-                 PriorityRange=sched_get_priority_max(PRIORITY_POLICY)-PriorityBase;
 /* Tested using following program:
 const int PR=3;
 int  v[PR*2+1]; Memx<Thread> threads;
@@ -732,25 +729,97 @@ void Shut   () {threads.del();}
 bool Update () {if(Kb.bp(KB_ESC))return false; return true;}
 void Draw   () {D.clear(AZURE); Str s; int max=0; REPA(v)MAX(max, v[i]); FREPA(v){if(i)s+=", "; s+=Flt(v[i])/max;} D.text(0, 0, s);}
 */
+
+/* need to recheck for all platforms
+#if SWITCH
+   #define PRIORITY_POLICY SCHED_OTHER // SCHED_RR undefined
+#else
+   #define PRIORITY_POLICY (APPLE ? SCHED_OTHER : SCHED_RR) // SCHED_OTHER gives better results on Apple but it's not available on Android/Linux, SCHED_RR (Mac/iOS 15..47, Android 1..99), SCHED_OTHER (Mac/iOS 15..47, Android 0..0)
 #endif
+static const Int PriorityBase =sched_get_priority_min(PRIORITY_POLICY),
+                 PriorityRange=sched_get_priority_max(PRIORITY_POLICY)-PriorityBase;*/
+#endif
+static void _SetThreadPriority(PLATFORM(HANDLE, pthread_t) handle, Int priority)
+{
+#if HAS_THREADS
+   #if WINDOWS
+      ASSERT(THREAD_PRIORITY_LOWEST==-2 && THREAD_PRIORITY_HIGHEST==2);
+      SetThreadPriority(handle, (priority<-2) ? THREAD_PRIORITY_IDLE : (priority>2) ? THREAD_PRIORITY_TIME_CRITICAL : priority);
+   #elif 0
+      sched_param param; param.sched_priority=PriorityBase+PriorityRange*(priority+3)/6; // div by 6 because "priority==3" should give max
+      pthread_setschedparam(handle, PRIORITY_POLICY, &param);
+   #else
+      pid_t id=pthread_gettid_np(handle);
+      setpriority(PRIO_PROCESS, id, priority*-3-10); // converts -3..3 -> -3*-3-10 .. 3*-3-10 -> -1..-19. (lower value=higher priority). Even though the range should be -20..19 - https://linux.die.net/man/2/setpriority priorities -3 and 3 behaved similarly on Android, maybe there's some bug that treats priorities as Abs, so for best results keep all values either negative or positive
+   #endif
+#endif
+}
+Application& Application::threadPriority(Int priority)
+{
+   Clamp(priority, -3, 3);
+   if(_thread_priority!=priority)
+   {
+     _thread_priority=priority;
+   #if WINDOWS
+      if(HANDLE thread_handle=OpenThread(THREAD_SET_INFORMATION, false, _thread_id))
+      {
+        _SetThreadPriority(thread_handle, priority);
+         CloseHandle      (thread_handle);
+      }
+   #else
+     _SetThreadPriority((pthread_t)_thread_id, priority);
+   #endif
+   }
+   return T;
+}
 void Thread::priority(Int priority)
 {
    Clamp(priority, -3, 3);
    if(active() && T._priority!=priority)
    {
       T._priority=priority;
-   #if HAS_THREADS
-      #if WINDOWS
-         ASSERT(THREAD_PRIORITY_LOWEST==-2 && THREAD_PRIORITY_HIGHEST==2);
-         SetThreadPriority(_handle, (priority<-2) ? THREAD_PRIORITY_IDLE : (priority>2) ? THREAD_PRIORITY_TIME_CRITICAL : priority);
-      #else
-       //LogN(S+PriorityBase+' '+(PriorityBase+PriorityRange));
-         sched_param param; param.sched_priority=PriorityBase+PriorityRange*(priority+3)/6; // div by 6 because "priority==3" should give max
-         pthread_setschedparam(_handle, PRIORITY_POLICY, &param);
-      #endif
-   #endif
+     _SetThreadPriority(_handle, priority);
    }
 }
+/******************************************************************************/
+static void SetThreadMask(PLATFORM(HANDLE, pthread_t) handle, ULong mask)
+{
+#if WINDOWS
+   SetThreadAffinityMask(handle, mask);
+#else
+   cpu_set_t cpuset;
+                          CPU_ZERO(  &cpuset);
+   FREP(64)if(mask&(1<<i))CPU_SET(i, &cpuset);
+   #if ANDROID
+      pid_t id=pthread_gettid_np(handle);
+      sched_setaffinity(id, SIZE(cpuset), &cpuset);
+   #else
+      pthread_setaffinity_np(handle, SIZE(cpuset), &cpuset);
+   #endif
+#endif
+}
+Application& Application::threadMask(ULong mask)
+{
+   if(_thread_mask!=mask)
+   {
+     _thread_mask=mask;
+   #if WINDOWS
+      if(HANDLE thread_handle=OpenThread(THREAD_SET_INFORMATION|THREAD_QUERY_INFORMATION, false, _thread_id))
+      {
+         SetThreadMask(thread_handle, mask);
+         CloseHandle  (thread_handle);
+      }
+   #else
+      SetThreadMask((pthread_t)_thread_id, mask);
+   #endif
+   }
+   return T;
+}
+void Thread::mask(ULong mask)
+{
+   if(active())SetThreadMask(_handle, mask);
+}
+/******************************************************************************/
 void Thread::kill()
 {
    if(created())
@@ -810,7 +879,7 @@ void Thread::del(Int time)
    {
       if(active())
       {
-         stop  (    ); if(_priority<0)priority(0);
+         stop  (    );
          resume(    );
          wait  (time);
       }
@@ -857,7 +926,7 @@ Bool Thread::create(Bool func(Thread &thread), Ptr user, Int priority, Bool paus
    #if !APPLE
       SetThreadName(name, id()); // for non-Apple platforms we can change the name from any thread
    #endif
-      T.priority(priority);
+      T._priority=127; T.priority(priority); // force-set
    #if WINDOWS
       ResumeThread(_handle); // CREATE_SUSPENDED was used so resume it
    #endif
@@ -1010,6 +1079,7 @@ Threads& Threads::activeThreads(Int active)
 }
 Int      Threads::priority(            )C {return _threads.elms() ? _threads[0].priority() : 0;}
 Threads& Threads::priority(Int priority)  {REPAO( _threads).priority(priority); return T;}
+Threads& Threads::mask    (ULong mask  )  {REPAO( _threads).mask    (mask    ); return T;}
 /******************************************************************************/
 // !! 'elm_index' MUST BE 'IntPtr' and not 'Int' because we're casting to '_func' of 'Ptr' type !!
 void Threads::_process(Int elms, void func(IntPtr elm_index, Ptr user, Int thread_index), Ptr user, Int max_threads, Bool allow_processing_on_this_thread)

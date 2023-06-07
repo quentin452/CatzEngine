@@ -24,23 +24,6 @@ namespace EE{
 /******************************************************************************/
 ASSERT(MAX_HM_RES<=129); // various places use UShort to limit for 16-bit (including 'MtrlCombo.vtxs,tris', 'VtxMtrlCombo.mc_vtx_index')
 /******************************************************************************/
-static void AdjustSharpness(Flt &sharpness, Int count)
-{
-   if(count)sharpness/=count;
-#if DEBUG
- //LogN(S+sharpness);
-   // test results:
-   // min 0.0001
-   // avg 0.0014
-   // max 0.0064
-#endif
-   Flt avg=0.0014f;
-   sharpness=Mid(Pow(sharpness/avg, 0.33f), 0.6f, 2.0f);
-}
-static Flt GetLodDist(Int lod_index, Flt sharpness)
-{
-   return (1<<lod_index) * ((lod_index==3) ? 1.5f : 1.0f) * sharpness;
-}
 static VecB ColorB(C Image &image, Int x, Int y) // !! assumes that 'x, y' are in range !!
 {
    switch(image.hwType())
@@ -991,10 +974,6 @@ struct Heightmap::BuildMem // this is always used
 {
    VtxMtrlCombos vmc[MAX_HM_RES][MAX_HM_RES]; // [y][x]
 };
-struct Heightmap::BuildMemSoft : Heightmap::BuildMem // !! must inherit from 'BuildMem' !! this is used only for HM_SOFT
-{
-   Vec vtx_nrm[MAX_HM_RES][MAX_HM_RES]; // [y][x]
-};
 #endif
 /******************************************************************************/
 #if MTRL_BLEND_HP // Material Blend types
@@ -1020,12 +999,13 @@ struct Builder
           edg_mtrl_combo[4           ][MAX_HM_RES-1],
           tri_mtrl_combo[4           ][MAX_HM_RES-1];
    Byte   occlusion     [MAX_HM_RES  ][MAX_HM_RES  ]; // [y][x]
-   Flt    frac          [MAX_HM_RES  ];
-#if VTX_COMPRESS
-   VecB4  vtx_nrm       [MAX_HM_RES  ][MAX_HM_RES  ]; // [y][x]
-#else
-   Vec    vtx_nrm       [MAX_HM_RES  ][MAX_HM_RES  ]; // [y][x]
-#endif
+   Flt    frac_x        [MAX_HM_RES  ],
+          frac_y        [MAX_HM_RES  ];
+   union
+   {
+      VecB4 vtx_nrm_b[MAX_HM_RES][MAX_HM_RES]; // [y][x]
+      Vec   vtx_nrm_f[MAX_HM_RES][MAX_HM_RES]; // [y][x]
+   };
  //Vec    vtx_pos       [MAX_HM_RES  ][MAX_HM_RES  ]; // [y][x]
  //Vec    vtx_tan       [MAX_HM_RES  ][MAX_HM_RES  ]; // [y][x]
  //Vec2   vtx_tex       [MAX_HM_RES  ][MAX_HM_RES  ]; // [y][x]
@@ -1340,9 +1320,8 @@ struct Builder
    }
 
    // use NOINLINE to avoid compilers inlining because of big stack usage
-   NOINLINE void downSampleNormals(Int res, Int step, Int edge_step)
+   NOINLINE void downSampleNormalsB(Int res, Int step, Int edge_step)
    {
-   #if VTX_COMPRESS
       const Bool  storage_signed=true;
       const Int   ofs=step/2, edge_ofs=(edge_step+1)/2, edge_soft_range=edge_ofs*3, res_step=res-step, res1=res-1; // use "(edge_step+1)/2" which gives same results as "Max(1, edge_step/2)" for pow2 but faster
       // first store results into 'temp', if we would store directly in 'vtx_nrm' then one softening would affect all others
@@ -1358,7 +1337,7 @@ struct Builder
          for(Int sx=x-ofs, wx=0; wx<3; sx+=ofs, wx++)//if(InRange(sx, res)) !! not needed since we're not processing edges here !!
          {
           C Int    w=DownSizeWeights[wy][wx]; weight+=w;
-          C VecB4 &n=        vtx_nrm[sy][sx];
+          C VecB4 &n=      vtx_nrm_b[sy][sx];
             if(storage_signed)
             {
                nrm.x+=w*I8(n.x);
@@ -1399,10 +1378,10 @@ struct Builder
             weight[2]+=w;
             weight[3]+=w;
 
-          C VecB4 &n0=vtx_nrm[   0][si],
-                  &n1=vtx_nrm[res1][si],
-                  &n2=vtx_nrm[si][   0],
-                  &n3=vtx_nrm[si][res1];
+          C VecB4 &n0=vtx_nrm_b[   0][si],
+                  &n1=vtx_nrm_b[res1][si],
+                  &n2=vtx_nrm_b[si][   0],
+                  &n3=vtx_nrm_b[si][res1];
 
             if(storage_signed)
             {
@@ -1439,21 +1418,18 @@ struct Builder
 
       // store results
       for(Int y=step, ty=0; y<res_step; y+=step, ty++)
-      for(Int x=step, tx=0; x<res_step; x+=step, tx++)vtx_nrm[y][x]=temp[ty][tx];
+      for(Int x=step, tx=0; x<res_step; x+=step, tx++)vtx_nrm_b[y][x]=temp[ty][tx];
 
       for(Int i=0; i<res; i+=edge_step)
       {
-         vtx_nrm[   0][i]=temp_edge[0][i];
-         vtx_nrm[res1][i]=temp_edge[1][i];
-         vtx_nrm[i][   0]=temp_edge[2][i];
-         vtx_nrm[i][res1]=temp_edge[3][i];
+         vtx_nrm_b[   0][i]=temp_edge[0][i];
+         vtx_nrm_b[res1][i]=temp_edge[1][i];
+         vtx_nrm_b[i][   0]=temp_edge[2][i];
+         vtx_nrm_b[i][res1]=temp_edge[3][i];
       }
-   #else
-      TODO
-   #endif
    }
    // use NOINLINE to avoid compilers inlining because of big stack usage
-   NOINLINE void downSampleNormalsSoft(Int res, Int step, Int edge_step, Vec (&vtx_nrm)[MAX_HM_RES][MAX_HM_RES])
+   NOINLINE void downSampleNormalsF(Int res, Int step, Int edge_step)
    {
       const Int ofs=step/2, edge_ofs=(edge_step+1)/2, edge_soft_range=edge_ofs*3, res_step=res-step, res1=res-1; // use "(edge_step+1)/2" which gives same results as "Max(1, edge_step/2)" for pow2 but faster
       // first store results into 'temp', if we would store directly in 'vtx_nrm' then one softening would affect all others
@@ -1469,7 +1445,7 @@ struct Builder
          for(Int sx=x-ofs, wx=0; wx<3; sx+=ofs, wx++)//if(InRange(sx, res)) !! not needed since we're not processing edges here !!
          {
           C Int  w=DownSizeWeights[wy][wx]; weight+=w;
-          C Vec &n=        vtx_nrm[sy][sx];
+          C Vec &n=      vtx_nrm_f[sy][sx];
             nrm.x+=w*n.x;
             nrm.y+=w*n.y;
             nrm.z+=w*n.z;
@@ -1491,10 +1467,10 @@ struct Builder
             weight[2]+=w;
             weight[3]+=w;
 
-          C Vec &n0=vtx_nrm[   0][si],
-                &n1=vtx_nrm[res1][si],
-                &n2=vtx_nrm[si][   0],
-                &n3=vtx_nrm[si][res1];
+          C Vec &n0=vtx_nrm_f[   0][si],
+                &n1=vtx_nrm_f[res1][si],
+                &n2=vtx_nrm_f[si][   0],
+                &n3=vtx_nrm_f[si][res1];
 
             nrm[0].x+=w*n0.x; nrm[0].y+=w*n0.y; nrm[0].z+=w*n0.z;
             nrm[1].x+=w*n1.x; nrm[1].y+=w*n1.y; nrm[1].z+=w*n1.z;
@@ -1511,14 +1487,14 @@ struct Builder
 
       // store results
       for(Int y=step, ty=0; y<res_step; y+=step, ty++)
-      for(Int x=step, tx=0; x<res_step; x+=step, tx++)vtx_nrm[y][x]=temp[ty][tx];
+      for(Int x=step, tx=0; x<res_step; x+=step, tx++)vtx_nrm_f[y][x]=temp[ty][tx];
 
       for(Int i=0; i<res; i+=edge_step)
       {
-         vtx_nrm[   0][i]=temp_edge[0][i];
-         vtx_nrm[res1][i]=temp_edge[1][i];
-         vtx_nrm[i][   0]=temp_edge[2][i];
-         vtx_nrm[i][res1]=temp_edge[3][i];
+         vtx_nrm_f[   0][i]=temp_edge[0][i];
+         vtx_nrm_f[res1][i]=temp_edge[1][i];
+         vtx_nrm_f[i][   0]=temp_edge[2][i];
+         vtx_nrm_f[i][res1]=temp_edge[3][i];
       }
    }
    void downSampleMaterials(Int res, Int step)
@@ -1575,7 +1551,7 @@ struct Builder
 };
 /******************************************************************************/
 // use NOINLINE to avoid compilers inlining because of big stack usage
-NOINLINE Bool Heightmap::buildEx2(Mesh &mesh, Int quality, UInt flag, BuildMemSoft /* !! Warning: this may be only 'BuildMem' !! */ &mem, C Heightmap *h_l, C Heightmap *h_r, C Heightmap *h_b, C Heightmap *h_f, C Heightmap *h_lb, C Heightmap *h_lf, C Heightmap *h_rb, C Heightmap *h_rf) // this function should be multi-threaded safe
+NOINLINE Bool Heightmap::buildEx2(Mesh &mesh, Int quality, UInt flag, BuildMem &mem, C Heightmap *h_l, C Heightmap *h_r, C Heightmap *h_b, C Heightmap *h_f, C Heightmap *h_lb, C Heightmap *h_lf, C Heightmap *h_rb, C Heightmap *h_rf, C Sphere *sphere) // this function should be multi-threaded safe
 {
    Int res=resolution();
 
@@ -1601,15 +1577,17 @@ NOINLINE Bool Heightmap::buildEx2(Mesh &mesh, Int quality, UInt flag, BuildMemSo
          *hrf=(h_rf ? &h_rf->_height : null);
 
    // constants
+   const Bool ambient_occlusion=FlagOn(flag, HM_AO),
+              soft             =FlagOn(flag, HM_SOFT),
+              build_null_mtrl  =FlagOn(flag, HM_BUILD_NULL_MTRL),
+              nrm_f            =(!VTX_COMPRESS || soft || sphere); // if calculate float high precision normals
    const Int  res1    =res-1,
               step    =(1<<quality),
               ao_step =3,
               ao_range=2*ao_step;
-   const Flt  nrm_y   =2.00f/res1,
-              ao_mul  =0.19f*res1;
-   const Bool ambient_occlusion=FlagOn(flag, HM_AO),
-              soft             =FlagOn(flag, HM_SOFT),
-              build_null_mtrl  =FlagOn(flag, HM_BUILD_NULL_MTRL);
+   const Flt  nrm_y   =sphere ? (sphere->planet_radius*4)/(sphere->areas*res1) // best results are with 4 and not PI or PI2
+                              : 2.0f/res1,
+              ao_mul  =(0.19f*2)/nrm_y; // "0.19*res1" for flat
 
    // vars
    Flt     sharpness=0; Int sharpness_count=0;
@@ -1618,14 +1596,29 @@ NOINLINE Bool Heightmap::buildEx2(Mesh &mesh, Int quality, UInt flag, BuildMemSo
    , mem.vmc
 #endif
    );
-   Flt min_y= FLT_MAX,
-       max_y=-FLT_MAX;
+   Box box; box.min=FLT_MAX; box.max=-FLT_MAX;
    VecB4 (*const NrmToByte4)(C Vec &v)=(true ? NrmToSByte4 : NrmToUByte4);
+
+   if(sphere)
+   {
+      DEBUG_ASSERT(InRange(sphere->area.x, sphere->areas) && InRange(sphere->area.y, sphere->areas), "Heightmap.sphere.area out of range");
+      Flt mul  =                     PI_2/(sphere->areas*res1),
+          add_x=-PI_4+sphere->area.x*PI_2/ sphere->areas      ,
+          add_y=-PI_4+sphere->area.y*PI_2/ sphere->areas      ;
+      for(Int i=0; i<res; i+=step)
+      {
+         Flt m=i*mul;
+         builder.frac_x[i]=Tan(m+add_x);
+         builder.frac_y[i]=Tan(m+add_y);
+      }
+   }else
+   {
+      for(Int i=0; i<res; i+=step)builder.frac_x[i]=i/Flt(res1);
+   }
 
    // set per-vertex data and calculate min/max height
    for(Int y=0; y<res; y+=step)
    {
-      builder.frac[y]=y/Flt(res1);
       //Flt fy=y/Flt(res1);
 
       for(Int x=0; x<res; x+=step)
@@ -1643,15 +1636,14 @@ NOINLINE Bool Heightmap::buildEx2(Mesh &mesh, Int quality, UInt flag, BuildMemSo
          Flt h=_height.pixF(x, y);
 
          // min/max height
-         MIN(min_y, h);
-         MAX(max_y, h);
+         if(!sphere)
+         {
+            MIN(box.min.y, h);
+            MAX(box.max.y, h);
+         }
 
          // normal
-      #if VTX_COMPRESS
          Vec  nrm;
-      #else
-         Vec &nrm=builder.vtx_nrm[y][x];
-      #endif
          Vec2 ddh;
 
          Flt l, r;
@@ -1671,10 +1663,8 @@ NOINLINE Bool Heightmap::buildEx2(Mesh &mesh, Int quality, UInt flag, BuildMemSo
          ddh=nrm.xz();
 
          nrm.y=nrm_y; nrm.normalize();
-      #if VTX_COMPRESS
-         if(soft) mem.vtx_nrm[y][x]=nrm;
-         else builder.vtx_nrm[y][x]=NrmToByte4(nrm);
-      #endif
+         if(nrm_f)builder.vtx_nrm_f[y][x]=           nrm ;
+         else     builder.vtx_nrm_b[y][x]=NrmToByte4(nrm);
 
          // pos, tex, tan
          //builder.vtx_pos[y][x].set(fx, h, fy);
@@ -1684,7 +1674,7 @@ NOINLINE Bool Heightmap::buildEx2(Mesh &mesh, Int quality, UInt flag, BuildMemSo
                                    (-fy-area._xz.y)*tex_scale);
       #endif
 
-         if(ambient_occlusion)
+         if(ambient_occlusion) // FIXME: TODO: formula could be improved to use Tan..
          {
             Flt occl=0, power=EPS; // EPS prevents division by zero
             ddh*=-0.5f;
@@ -1692,47 +1682,51 @@ NOINLINE Bool Heightmap::buildEx2(Mesh &mesh, Int quality, UInt flag, BuildMemSo
             for(Int dy=-ao_range; dy<=ao_range; dy+=ao_step)
             for(Int dx=-ao_range; dx<=ao_range; dx+=ao_step)
             {
-               Int tx=x+dx,
-                   ty=y+dy;
-               Flt th;
-               if(tx<0)
+               Flt dist=Dist(dx, dy),
+                   p=Lerp(0.3f, 1.0f, BlendSqr(dist/ao_range));
+             //if(p>0)
                {
-                  if(ty<   0){if(hlb)th=hlb->pixF(tx+res1, ty+res1);else th=h                  +(_height.pixF(0,    0)-_height.pixF(1,      1))*Dist(dx, dy);}else
-                  if(ty>=res){if(hlf)th=hlf->pixF(tx+res1, ty-res1);else th=h                  +(_height.pixF(0, res1)-_height.pixF(1, res1-1))*Dist(dx, dy);}else
-                             {if(hl )th=hl ->pixF(tx+res1, ty     );else th=_height.pixF(x, ty)-(_height.pixF(0,   ty)-_height.pixF(1,     ty))*dx;} // here 'dx' is negative
-               }else
-               if(tx>=res)
-               {
-                  if(ty<   0){if(hrb)th=hrb->pixF(tx-res1, ty+res1);else th=h                  +(_height.pixF(res1,    0)-_height.pixF(res1-1,      1))*Dist(dx, dy);}else
-                  if(ty>=res){if(hrf)th=hrf->pixF(tx-res1, ty-res1);else th=h                  +(_height.pixF(res1, res1)-_height.pixF(res1-1, res1-1))*Dist(dx, dy);}else
-                             {if(hr )th=hr ->pixF(tx-res1, ty     );else th=_height.pixF(x, ty)+(_height.pixF(res1,   ty)-_height.pixF(res1-1,     ty))*dx;} // here 'dx' is positive
-               }else
-               {
-                  if(ty<   0){if(hb)th=hb->pixF(tx, ty+res1);else th=_height.pixF(tx, y)-(_height.pixF(tx,    0)-_height.pixF(tx,      1))*dy;}else // here 'dy' is negative
-                  if(ty>=res){if(hf)th=hf->pixF(tx, ty-res1);else th=_height.pixF(tx, y)+(_height.pixF(tx, res1)-_height.pixF(tx, res1-1))*dy;}else // here 'dy' is positive
-                                    th=_height.pixF(tx, ty);
+                  Int tx=x+dx,
+                      ty=y+dy;
+                  Flt th;
+                  if(tx<0)
+                  {
+                     if(ty<   0){if(hlb)th=hlb->pixF(tx+res1, ty+res1);else th=h                  +(_height.pixF(0,    0)-_height.pixF(1,      1))*dist;}else
+                     if(ty>=res){if(hlf)th=hlf->pixF(tx+res1, ty-res1);else th=h                  +(_height.pixF(0, res1)-_height.pixF(1, res1-1))*dist;}else
+                                {if(hl )th=hl ->pixF(tx+res1, ty     );else th=_height.pixF(x, ty)-(_height.pixF(0,   ty)-_height.pixF(1,     ty))*dx;} // here 'dx' is negative
+                  }else
+                  if(tx>=res)
+                  {
+                     if(ty<   0){if(hrb)th=hrb->pixF(tx-res1, ty+res1);else th=h                  +(_height.pixF(res1,    0)-_height.pixF(res1-1,      1))*dist;}else
+                     if(ty>=res){if(hrf)th=hrf->pixF(tx-res1, ty-res1);else th=h                  +(_height.pixF(res1, res1)-_height.pixF(res1-1, res1-1))*dist;}else
+                                {if(hr )th=hr ->pixF(tx-res1, ty     );else th=_height.pixF(x, ty)+(_height.pixF(res1,   ty)-_height.pixF(res1-1,     ty))*dx;} // here 'dx' is positive
+                  }else
+                  {
+                     if(ty<   0){if(hb)th=hb->pixF(tx, ty+res1);else th=_height.pixF(tx, y)-(_height.pixF(tx,    0)-_height.pixF(tx,      1))*dy;}else // here 'dy' is negative
+                     if(ty>=res){if(hf)th=hf->pixF(tx, ty-res1);else th=_height.pixF(tx, y)+(_height.pixF(tx, res1)-_height.pixF(tx, res1-1))*dy;}else // here 'dy' is positive
+                                       th=_height.pixF(tx, ty);
+                  }
+                  Flt d=th - h - dx*ddh.x - dy*ddh.y,
+                      o=Sat(d*ao_mul);
+                  occl +=p*o;
+                  power+=p;
                }
-               Flt d=th - h - dx*ddh.x - dy*ddh.y,
-                   o=Sat(d*ao_mul),
-                   p=Lerp(0.3f, 1.0f, BlendSqr(Dist(dx, dy)/ao_range));
-               occl +=p*o;
-               power+=p;
             }
             builder.occlusion[y][x]=FltToByte(1-occl/power);
          }
       }
    }
 
-#if 0
-   mesh.box       .set(0, min_y, 0, 1, max_y, 1);
-   mesh.lod_center.set(0.5f, mesh.box.centerY(), 0.5f);
-#else
-                   mesh.ext.ext.set(0.5f, (max_y-min_y)*0.5f, 0.5f);
-   mesh.lod_center=mesh.ext.pos.set(0.5f, (min_y+max_y)*0.5f, 0.5f);
-#endif
-
    // adjust sharpness
-   AdjustSharpness(sharpness, sharpness_count);
+   const Flt div_sharpness=16;
+   if(sharpness_count)sharpness*=Flt(Sqr(res1))/sharpness_count // this formula gives the same sharpness regardless of heightmap resolution
+                                /div_sharpness; // also adjust by some factor
+   Flt size; if(sphere){size=sphere->planet_radius/sphere->areas*PI_2; sharpness/=size;}
+   // here sharpness in range 0..Inf
+
+   Flt lod_dist_scale=64.0f/res1 // adjust by res to target same terrain cell/pixels ratio, regardless of heightmap resolution
+                     *(1+Min(sharpness, 1)); // start with base scale=1, increase by sharpness up to 1
+   if(sphere)lod_dist_scale*=size;
 
    // downsample
    REP(quality)builder.downSampleMaterials(res, 1<<i);
@@ -1756,9 +1750,9 @@ NOINLINE Bool Heightmap::buildEx2(Mesh &mesh, Int quality, UInt flag, BuildMemSo
          to  --;
 
          // downsample
-         if(soft)builder.downSampleNormalsSoft(res, step<<l, Step, mem.vtx_nrm); // normals
-         else    builder.downSampleNormals    (res, step<<l, Step             ); // normals
-                 builder.downSampleMaterials  (res, step<<(l-1)               ); // materials
+         if(nrm_f)builder.downSampleNormalsF (res, step<<l, Step); // normals
+         else     builder.downSampleNormalsB (res, step<<l, Step); // normals
+                  builder.downSampleMaterials(res, step<<(l-1)  ); // materials
          color.resize(color.w()/2+1, color.h()/2+1, FILTER_LINEAR, IC_CLAMP|IC_KEEP_EDGES); // color map
       }
 
@@ -1793,7 +1787,7 @@ NOINLINE Bool Heightmap::buildEx2(Mesh &mesh, Int quality, UInt flag, BuildMemSo
 
       // create mesh lods
       if(lod.parts.elms()!=builder.mtrl_combos.elms())lod.create(builder.mtrl_combos.elms());
-      lod.dist(GetLodDist(l, sharpness));
+      lod.dist((1<<l)*lod_dist_scale);
 
       // create mesh parts
       FREPA(builder.mtrl_combos)
@@ -1851,8 +1845,21 @@ NOINLINE Bool Heightmap::buildEx2(Mesh &mesh, Int quality, UInt flag, BuildMemSo
                {
                   Int vtx_index=vmc.mc_vtx_index;
 
-                  mshb.vtx.pos(vtx_index).set(builder.frac[x], _height.pixF(x, y), builder.frac[y]); // position
-                  mshb.vtx.nrm(vtx_index)=mem.vtx_nrm[y][x]; // normal
+                  Vec &vtx_pos=mshb   .vtx.pos(vtx_index);
+                  Vec &vtx_nrm=mshb   .vtx.nrm(vtx_index);
+                C Vec &src_nrm=builder.vtx_nrm_f[y][x];
+                  Flt  h=_height.pixF(x, y);
+                  if(sphere)
+                  {
+                     vtx_pos.set(builder.frac_x[x], 1, builder.frac_y[y]).normalize(); // position
+                     vtx_nrm=src_nrm*Matrix3().setRotationUp(vtx_pos); // normal
+                     vtx_pos*=sphere->planet_radius+h;
+                     if(!l)box|=vtx_pos;
+                  }else
+                  {
+                     vtx_pos.set(builder.frac_x[x], h, builder.frac_x[y]); // position
+                     vtx_nrm=src_nrm; // normal
+                  }
                   if(mshb.vtx.material()) // material
                   {
                      VecB4 &vtx_mtrl=mshb.vtx.material(vtx_index);
@@ -1933,17 +1940,37 @@ NOINLINE Bool Heightmap::buildEx2(Mesh &mesh, Int quality, UInt flag, BuildMemSo
                {
                   Byte *v=(Byte*)mshr.vtxLockedData()+vmc.mc_vtx_index*mshr.vtxSize();
 
-                  ((Vec*)(v+mtrl_combo.ofs_pos))->set(builder.frac[x], _height.pixF(x, y), builder.frac[y]); // position
-
+                  Vec   &vtx_pos=*(Vec  *)(v+mtrl_combo.ofs_pos);
                #if VTX_COMPRESS
-                  *((VecB4*)(v+mtrl_combo.ofs_nrm))=builder.vtx_nrm[y][x]; // normal
+                  VecB4 &vtx_nrm=*(VecB4*)(v+mtrl_combo.ofs_nrm); // normal
                #else
-                  *((Vec  *)(v+mtrl_combo.ofs_nrm))=builder.vtx_nrm[y][x]; // normal
+                  Vec   &vtx_nrm=*(Vec  *)(v+mtrl_combo.ofs_nrm); // normal
                #endif
+                  Flt h=_height.pixF(x, y);
+                  if(sphere)
+                  {
+                     vtx_pos.set(builder.frac_x[x], 1, builder.frac_y[y]).normalize(); // position
+                     Vec nrm=builder.vtx_nrm_f[y][x]*Matrix3().setRotationUp(vtx_pos); // normal
+                  #if VTX_COMPRESS
+                     vtx_nrm=NrmToByte4(nrm);
+                  #else
+                     vtx_nrm=           nrm ;
+                  #endif
+                     vtx_pos*=sphere->planet_radius+h;
+                     if(!l)box|=vtx_pos;
+                  }else
+                  {
+                     vtx_pos.set(builder.frac_x[x], h, builder.frac_x[y]); // position
+                  #if VTX_COMPRESS
+                     vtx_nrm=(nrm_f ? NrmToByte4(builder.vtx_nrm_f[y][x]) : builder.vtx_nrm_b[y][x]); // normal
+                  #else
+                     vtx_nrm=(nrm_f ?            builder.vtx_nrm_f[y][x]  : builder.vtx_nrm_b[y][x]); // normal
+                  #endif
+                  }
 
                   if(mtrl_combo.ofs_material>=0) // material
                   {
-                     VecB4 &vtx_mtrl=*((VecB4*)(v+mtrl_combo.ofs_material));
+                     VecB4 &vtx_mtrl=*(VecB4*)(v+mtrl_combo.ofs_material);
                    C VecB4 & mc_mtrl=mtrl_combo.mtrl_index,
                            & hm_mtrl=          _mtrl_index.pixB4(x, y);
                   #if 1
@@ -1955,7 +1982,7 @@ NOINLINE Bool Heightmap::buildEx2(Mesh &mesh, Int quality, UInt flag, BuildMemSo
                   }
                   if(mtrl_combo.ofs_color>=0) // color
                   {
-                     Color &vtx_color=*((Color*)(v+mtrl_combo.ofs_color));
+                     Color &vtx_color=*(Color*)(v+mtrl_combo.ofs_color);
                      if(ambient_occlusion)
                      {
                         Byte occl=builder.occlusion[y][x];
@@ -2018,10 +2045,10 @@ NOINLINE Bool Heightmap::buildEx2(Mesh &mesh, Int quality, UInt flag, BuildMemSo
             mshr.vtxUnlock();
          }
          {
-            MtrlCombo &mtrl_combo=builder.mtrl_combos[i];
+            MtrlCombo &mtrl_combo=builder   .mtrl_combos[i];
             VecB4     &mtrl_index=mtrl_combo.mtrl_index;
          #if VTX_HEIGHTMAP
-            part.part_flag|=MSHP_HEIGHTMAP; // !! set before calling 'multiMaterial' because this value affects the shader !!
+            part.part_flag|=(sphere ? MSHP_HEIGHTMAP_SPHERE : MSHP_HEIGHTMAP_FLAT); // !! set before calling 'multiMaterial' because this value affects the shader !!
          #endif
             part.multiMaterial(_materials[mtrl_index.c[0]], _materials[mtrl_index.c[1]], _materials[mtrl_index.c[2]], _materials[mtrl_index.c[3]], soft ? -1 : l); // set shaders only for hardware mode
          }
@@ -2032,14 +2059,30 @@ NOINLINE Bool Heightmap::buildEx2(Mesh &mesh, Int quality, UInt flag, BuildMemSo
          lod.parts.remove(i, true);
       }
    }
+
+   // set box
+   if(sphere)
+   {
+      mesh.ext=box;
+      mesh.lod_center=mesh.ext.pos;
+   }else
+   {
+   #if 0
+      mesh.box       .set(0, box.min.y, 0, 1, box.max.y, 1);
+      mesh.lod_center.set(0.5f, mesh.box.centerY(), 0.5f);
+   #else
+                      mesh.ext.ext.set(0.5f, (box.max.y-box.min.y)*0.5f, 0.5f);
+      mesh.lod_center=mesh.ext.pos.set(0.5f, (box.min.y+box.max.y)*0.5f, 0.5f);
+   #endif
+   }
    return true;
 }
-Bool Heightmap::buildEx(Mesh &mesh, Int quality, UInt flag, BuildMemSoft &mem, C Heightmap *h_l, C Heightmap *h_r, C Heightmap *h_b, C Heightmap *h_f, C Heightmap *h_lb, C Heightmap *h_lf, C Heightmap *h_rb, C Heightmap *h_rf) // this function should be multi-threaded safe
+Bool Heightmap::buildEx(Mesh &mesh, Int quality, UInt flag, BuildMem &mem, C Heightmap *h_l, C Heightmap *h_r, C Heightmap *h_b, C Heightmap *h_f, C Heightmap *h_lb, C Heightmap *h_lf, C Heightmap *h_rb, C Heightmap *h_rf, C Sphere *sphere) // this function should be multi-threaded safe
 {
    if(is())
    {
       // buildEx2 was separated because it uses a very big stack
-      if(buildEx2(mesh, quality, flag, mem, h_l, h_r, h_b, h_f, h_lb, h_lf, h_rb, h_rf))
+      if(buildEx2(mesh, quality, flag, mem, h_l, h_r, h_b, h_f, h_lb, h_lf, h_rb, h_rf, sphere))
       {
          // remove empty lods
          REPD(l, mesh.lods())if(l && !mesh.lod(l).is())mesh.removeLod(l);
@@ -2051,14 +2094,13 @@ Bool Heightmap::buildEx(Mesh &mesh, Int quality, UInt flag, BuildMemSoft &mem, C
    mesh.del(); return false;
 }
 /******************************************************************************/
-void Heightmap::build(Mesh &dest_mesh, Int quality, UInt flag, C Heightmap *l, C Heightmap *r, C Heightmap *b, C Heightmap *f, C Heightmap *lb, C Heightmap *lf, C Heightmap *rb, C Heightmap *rf, Mems<Byte> *temp_mem)
+void Heightmap::build(Mesh &dest_mesh, Int quality, UInt flag, C Heightmap *l, C Heightmap *r, C Heightmap *b, C Heightmap *f, C Heightmap *lb, C Heightmap *lf, C Heightmap *rb, C Heightmap *rf, Mems<Byte> *temp_mem, C Sphere *sphere)
 {
    if(is())
    {
       // !! prefer 'Mems' because 'Memc' for example will round up memory size to nearest Pow2
-      Int build_mem_size=((flag&HM_SOFT) ? SIZE(BuildMemSoft) : SIZE(BuildMem));
-      Ptr build_mem; if(temp_mem)build_mem=temp_mem->setNum(build_mem_size).data();else build_mem=Alloc(build_mem_size);
-      buildEx(dest_mesh, quality, flag, *(BuildMemSoft*)build_mem, l, r, b, f, lb, lf, rb, rf);
+      Ptr build_mem; if(temp_mem)build_mem=temp_mem->setNum(SIZE(BuildMem)).data();else build_mem=Alloc(SIZE(BuildMem));
+      buildEx(dest_mesh, quality, flag, *(BuildMem*)build_mem, l, r, b, f, lb, lf, rb, rf, sphere);
       if(!temp_mem)Free(build_mem);
    }else dest_mesh.del();
 }

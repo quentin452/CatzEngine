@@ -12,6 +12,7 @@
 #define VTX_BORDER_QM 1.0f
 
 #if PROFILE
+#undef STORE
 #pragma message("!! Warning: This will slow down mesh simplification, use only for testing !!")
 enum PROFILE_TYPE
 {
@@ -185,6 +186,224 @@ struct QuadricMatrix
    QuadricMatrix& operator/=(Real r) {REPAO(m)/=r; return T;}
 };
 /******************************************************************************/
+#if 0
+T1(TYPE) struct MemLinkElm
+{
+   TYPE data;
+   Int  prev, next;
+};
+T1(TYPE) struct MemLink : Memc<MemLinkElm<TYPE>>
+{
+   Int _first, _last;
+
+   void zero();
+   MemLink& clear();
+   MemLink& del  ();
+  ~MemLink() {del();}
+   MemLink() {zero();}
+
+   Bool is()C {return _first>=0;}
+
+   Int validElms()C;
+
+   TYPE& operator[](Int i)  {return super::operator[](i).data;}
+ C TYPE& operator[](Int i)C {return super::operator[](i).data;}
+
+   Int      elms()C {return super::elms();}
+   Int   absElms()C {return super::elms();}
+   TYPE& absElm(Int i)  {return super::operator[](i).data;}
+ C TYPE& absElm(Int i)C {return super::operator[](i).data;}
+   Int   absIndex(C TYPE             *elm)C {return super::index((MemLinkElm<TYPE>*)elm);}
+   Int   absIndex(C MemLinkElm<TYPE> *elm)C {return super::index(                   elm);}
+
+   Int  absToValidIndex(Int abs)C;
+   Bool absIndexIsValid(Int abs)C;
+
+   TYPE& first() {return super::operator[](_first).data;}
+   TYPE& last () {return super::operator[](_last ).data;}
+
+   MemLinkElm<TYPE>&   absFull(Int i)  {return super::operator[](i);}
+ C MemLinkElm<TYPE>&   absFull(Int i)C {return super::operator[](i);}
+   MemLinkElm<TYPE>& firstFull(     )  {return super::operator[](_first);}
+   MemLinkElm<TYPE>&  lastFull(     )  {return super::operator[](_last );}
+
+   TYPE& New();
+
+   void disconnectAbs (  Int   abs );
+   void disconnectData(C TYPE *data);
+
+   void moveAfter (Int src_abs, Int dest_abs);
+   void moveBefore(Int src_abs, Int dest_abs);
+
+   void resetLinks();
+
+   Bool validate()C;
+   void validateExit()C;
+};
+/******************************************************************************/
+T1(TYPE) void           MemLink<TYPE>::zero () {_first=_last=-1;}
+T1(TYPE) MemLink<TYPE>& MemLink<TYPE>::clear() {super::clear(); zero(); return T;}
+T1(TYPE) MemLink<TYPE>& MemLink<TYPE>::del  () {super::del  (); zero(); return T;}
+/******************************************************************************/
+T1(TYPE) Int MemLink<TYPE>::validElms()C
+{
+   Int    valid=is(); REP(absElms())if(absFull(i).prev>=0)valid++;
+   return valid;
+}
+T1(TYPE) Int MemLink<TYPE>::absToValidIndex(Int abs)C
+{
+   if(InRange(abs, absElms()))
+   {
+      Int valid=0;
+   again:
+      Int prev=absFull(abs).prev;
+      if( prev>=0){abs=prev; valid++; goto again;}
+      if(_first==abs)return valid;
+   }
+   return -1;
+}
+T1(TYPE) Bool MemLink<TYPE>::absIndexIsValid(Int abs)C
+{
+   if(InRange(abs, absElms()))
+   {
+    C MemLinkElm<TYPE> &elm=absFull(abs);
+      return elm.prev>=0 || _first==abs;
+   }
+   return false;
+}
+/******************************************************************************/
+T1(TYPE) void MemLink<TYPE>::disconnectAbs(Int abs)
+{
+   if(InRange(abs, absElms()))
+   {
+      MemLinkElm<TYPE> &elm=absFull(abs);
+
+      if(_first==abs)_first=elm.next;
+      if(_last ==abs)_last =elm.prev;
+
+      if(elm.prev>=0)absFull(elm.prev).next=elm.next;
+      if(elm.next>=0)absFull(elm.next).prev=elm.prev;
+
+      elm.prev=elm.next=-1;
+   }
+}
+T1(TYPE) void MemLink<TYPE>::disconnectData(C TYPE *data)
+{
+   disconnectAbs(absIndex(data));
+}
+/******************************************************************************/
+T1(TYPE) void MemLink<TYPE>::moveAfter(Int src_abs, Int dest_abs)
+{
+   if(InRange( src_abs, absElms())
+   && InRange(dest_abs, absElms()) && src_abs!=dest_abs)
+   {
+      MemLinkElm<TYPE> &src=absFull(src_abs); if(src.prev!=dest_abs)
+      {
+         MemLinkElm<TYPE> &dest=absFull(dest_abs);
+
+         if(_first== src_abs)_first=src.next;
+         if(_last == src_abs)_last =src.prev;
+         if(_last ==dest_abs)_last =src_abs ;
+
+         if(src.prev>=0)absFull(src.prev).next=src.next;
+         if(src.next>=0)absFull(src.next).prev=src.prev;
+
+         src.prev=dest_abs;
+         src.next=dest.next;
+
+         if(dest.next>=0)absFull(dest.next).prev=src_abs;
+            dest.next=src_abs;
+      }
+   }
+}
+T1(TYPE) void MemLink<TYPE>::moveBefore(Int src_abs, Int dest_abs)
+{
+   if(InRange( src_abs, absElms())
+   && InRange(dest_abs, absElms()) && src_abs!=dest_abs)
+   {
+      MemLinkElm<TYPE> &src=absFull(src_abs); if(src.next!=dest_abs)
+      {
+         MemLinkElm<TYPE> &dest=absFull(dest_abs);
+
+         if(_last == src_abs)_last =src.prev;
+         if(_first== src_abs)_first=src.next;
+         if(_first==dest_abs)_first=src_abs ;
+
+         if(src.prev>=0)absFull(src.prev).next=src.next;
+         if(src.next>=0)absFull(src.next).prev=src.prev;
+
+         src.prev=dest.prev;
+         src.next=dest_abs;
+
+         if(dest.prev>=0)absFull(dest.prev).next=src_abs;
+            dest.prev=src_abs;
+      }
+   }
+}
+/******************************************************************************/
+T1(TYPE) TYPE& MemLink<TYPE>::New()
+{
+   UInt l=super::addNum(1);
+   MemLinkElm<TYPE>& end=super::last();
+   if(_last>=0)lastFull().next=l;
+   else                 _first=l;
+   end.prev=_last;
+   end.next=-1;
+  _last=l;
+   return end.data;
+}
+/******************************************************************************/
+T1(TYPE) void MemLink<TYPE>::resetLinks()
+{
+   if(elms())
+   {
+     _first=0;
+     _last =elms()-1;
+      if(elms()>1)
+      {
+         auto &last = lastFull(); last .prev=elms()-2; last .next=-1; for(Int i=elms()-1; --i>=1; ){auto &elm=absFull(i); elm.prev=i-1; elm.next=i+1;}
+         auto &first=firstFull(); first.prev=      -1; first.next= 1;
+      }else // elms==1
+      {
+         auto &first=firstFull(); first.prev=-1; first.next=-1;
+      }
+   }else _first=_last=-1;
+}
+/******************************************************************************/
+T1(TYPE) Bool MemLink<TYPE>::validate()C
+{
+   if((_first<0)!=(_last<0)
+   ||  _first>=absElms()
+   ||  _last >=absElms())return false;
+   Int valid=0;
+   if(_first>=0)
+   {
+      Int   cur_i=_first;
+      auto *cur_d=&absFull(cur_i);
+
+      if(cur_d->prev>=0)return false;
+
+   next:
+      valid++;
+      Int next_i=cur_d->next; if(next_i>=0)
+      {
+         auto &next_d=absFull(next_i);
+         if(next_d.prev!=cur_i)return false;
+
+         cur_i= next_i;
+         cur_d=&next_d;
+
+         goto next;
+      }else if(_last!=cur_i)return false;
+   }
+   return valid==validElms();
+}
+T1(TYPE) void MemLink<TYPE>::validateExit()C
+{
+   if(!validate())Exit("MemLink fail");
+}
+#endif
+/******************************************************************************/
 struct Simplify // must be used for a single 'simplify', after that it cannot be used (because the members aren't cleared)
 {
    struct Weights
@@ -327,10 +546,10 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
          }
       }
    };
-   struct Triangle
+   struct Triangle : TreeNode
    {
       Real      edge_error[3], error_min;
-      VecI      ind; // vertex index
+      VecI      ind; // vertex index !! WARNING: due to duplicate remap, sometimes it won't be 'allDifferent' - may point to the same vertexes !!
       Vec       nrm, tan, bin; // for simplification tangent/binormal are computed per triangle (not per vertex), tangent/binormal are not normalized
       Flt       weight;
       VtxData   vtxs[3], // data for each vertex
@@ -340,10 +559,8 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       MESH_FLAG flag; // this is obtained from the 'MeshPart.base' of that triangle
       Bool      middle,
                 visible; // this is obtained from 'MeshPart.part_flag' of that triangle (alternatively instead of having this value, we could keep an array for all mesh part properties and reuse 'part' to access that array, however that would be slower)
-   #if !ADJUST_REFS
-      Bool      exists=true; // if references are not adjusted, then we need to keep information about which triangle exists and which got removed
-     ~Triangle() {exists=false;}
-   #endif
+      Bool      exists=true; // triangles are not removed, instead they're just marked as "exists=false" so that pointers and indexes are preserved, also if references are not adjusted, then we need to keep information about which triangle exists and which got removed
+   //~Triangle() {exists=false;}
    };
    struct TrianglePtr
    {
@@ -373,7 +590,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
    struct Vertex
    {
       Vec           pos;
-      Int           ref_start, tri_num;
+      Int           ref_start, tri_num; // !! WARNING: because of duplicate remap, the same triangle can be listed multiple times !!
       Byte          border;
       QuadricMatrix qm;
       Real          weight;
@@ -413,8 +630,8 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
    };
    struct Ref
    {
-      Int tri_abs      , // absolute index of the triangle
-          tri_vtx_index; // 0..2, 1 of 3 vertexes in triangle, this could be a Byte
+      Int  tri_index    ; // index of the triangle
+      Byte tri_vtx_index; // 0..2, 1 of 3 vertexes in triangle
    };
    struct VtxDupMap : VtxDup
    {
@@ -450,25 +667,28 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       }
    };
 
-   Bool               keep_border;
-   MESH_SIMPLIFY      mode;
-   Int                processed_tris, max_skin, visible_tris=0;
-   MESH_FLAG          test_flag; // this is set based on the max tolerance parameters to the simplify function
-   Flt                max_uv2, max_color, max_material, max_normal;
-   Box                box;
-   Memx<Triangle    > tris;
-   Memc<Vertex      > vtxs;
-   Memc<Ref         > refs;
-   Memc<VtxDupMap   > vtx_dups;
-   Memb<TrianglePtr >    all_tris; // need 'Memb' because we're adding new elements and storing pointers
-   Memc<TrianglePtr*> middle_tris; // usually this will be just 2 triangles, however it may be more
-   Memc<MtrlGroup   > mtrl_groups;
-   Bool             *_stop;
+   static Int   CompareError(C Triangle &a, C Triangle &b) {return Compare(b.error_min, a.error_min);} // swap order to sort from highest to lowest
+   static Bool BCompareError(C Real     &a, C Real     &b) {return         b          < a           ;} // swap order to sort from highest to lowest
+   static C Real& GetKey(C Triangle &tri) {return tri.error_min;}
 
-   Simplify(Bool *stop) : _stop(stop) {}
+   Bool                     keep_border;
+   MESH_SIMPLIFY            mode;
+   Int                      max_skin, visible_tris=0;
+   MESH_FLAG                test_flag; // this is set based on the max tolerance parameters to the simplify function
+   Flt                      max_uv2, max_color, max_material, max_normal;
+   Box                      box;
+   Memc    <Triangle      > tris;
+   WAVLTree<Triangle, Real> tree;
+   Memc    <Vertex        > vtxs;
+   Memc    <Ref           > refs;
+   Memc    <VtxDupMap     > vtx_dups;
+   Memb    <TrianglePtr   >    all_tris; // need 'Memb' because we're adding new elements and storing pointers
+   Memc    <TrianglePtr*  > middle_tris; // usually this will be just 2 triangles, however it may be more
+   Memc    <MtrlGroup     > mtrl_groups;
+   Bool                   *_stop;
+
+   Simplify(Bool *stop) : _stop(stop), tree(GetKey, BCompareError) {}
    Bool stop()C {return _stop && *_stop;}
-
-   static Int CompareError(C Triangle &a, C Triangle &b) {return Compare(b.error_min, a.error_min);} // swap order to sort from highest to lowest
 
    // error for one edge
 #if ALLOW_PLANES
@@ -548,7 +768,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       REP(edge_vtx0.tri_num)
       {
        C Ref      &ref=refs[edge_vtx0.ref_start+i];
-         Triangle &tri=tris.absElm(ref.tri_abs);
+         Triangle &tri=tris[ref.tri_index];
       #if !ADJUST_REFS
          if(tri.exists)
       #endif
@@ -566,7 +786,9 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
              C Vec //&v0=   edge_vtx0.pos,
                      &v1=vtxs[tri_v1].pos,
                      &v2=vtxs[tri_v2].pos;
-               if(Dot(tri.nrm, GetNormalU(mid_pos, v1, v2))<=0)return true; // if the new triangle normal is in the opposite direction of the original normal
+               Vec new_nrm=GetNormalU(mid_pos, v1, v2); // new triangle normal
+               if( new_nrm.length2()<=Sqr(EPSD)      // if new triangle surface is tiny (perhaps all 3 points are now on 1 line) then we won't be able to calculate triangle normal properly and it can cause issues with collision detection (raycast). Use EPSD instead of EPS because for 1cm x 1cm tri, normal length=0.0001 which is very close to EPS but we still need to process smaller tris.
+            || Dot(new_nrm, tri.nrm)< 0)return true; // if new triangle normal is in the opposite direction of the original normal
                all_tris.New().set(tri);
             }
          }
@@ -761,7 +983,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       REP(vtx.tri_num)
       {
        C Ref      &ref=refs[vtx.ref_start+i];
-         Triangle &tri=tris.absElm(ref.tri_abs);
+         Triangle &tri=tris[ref.tri_index];
       #if !ADJUST_REFS
          if(tri.exists)
       #endif
@@ -887,14 +1109,14 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
    }
    void adjustRefs(Triangle &tri, Int v0, Int v1) // this removes the 'tri' reference from its vertexes
    {
-      Int  tri_abs=tris.absIndex(&tri);
+      Int  tri_index=tris.index(&tri);
       REPA(tri.ind) // iterate all vtxs of the tri
       {
          Int v=tri.ind.c[i]; if(v!=v0 && v!=v1) // we only need to process the 3rd vtx, because 'v0' will be adjusted, and 'v1' will be removed
          {
             Vertex &vtx=vtxs[v]; REP(vtx.tri_num) // iterate all triangles of this vtx
             {
-               Ref &ref=refs[vtx.ref_start+i]; if(ref.tri_abs==tri_abs) // if the tri is this one
+               Ref &ref=refs[vtx.ref_start+i]; if(ref.tri_index==tri_index) // if the tri is this one
                {
                   if(InRange(i+1, vtx.tri_num)) // if there is an element after the one being removed
                   {
@@ -905,7 +1127,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
                   #endif
                   }
                   vtx.tri_num--;
-                  break; // we have found this triangle, finish
+                  break; // we have found this triangle, finish. however if 'mid_tris' would list only unique triangles (without duplicates) then this break would have to be disabled
                }
             }
             break; // if we've found that vtx, then the job is done
@@ -913,52 +1135,21 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       }
    }
 
-   void resetError(Triangle &tri, Int valid)
+   void resetError(Triangle &tri)
    {
       PROF(RESET_ERROR);
-      Real error_min=tri.error_min=Min(tri.edge_error[0], tri.edge_error[1], tri.edge_error[2]);
-      // reposition this triangle in the 'tris' list to preserve order by 'error_min'
-   #if 1 // binary search
-      Int elms=Min(tris.elms(), processed_tris), // we can ignore moving to the right of what we've already processed
-          l=0, r=elms-1;
-
-      if(InRange(valid-1, elms) && tris[valid-1].error_min>=error_min)l=valid; // left  ok
-      if(InRange(valid+1, elms) && tris[valid+1].error_min<=error_min)r=valid; // right ok
-      if(l>=r)return;
-      for(; l<=r; )
+      Real error_min=Min(tri.edge_error[0], tri.edge_error[1], tri.edge_error[2]);
+      if(  error_min!=tri.error_min)
       {
-         Int mid=UInt(l+r)/2;
-         if( mid==valid) // ignore this element
-         {
-            if(mid+1<=r)mid++;else
-            if(mid-1>=l)mid--;else
-               return; // we can't move to the right, and can't move to the left, this means that we've limited the range to the original valid index
-         }
-         Real e=tris[mid].error_min;
-         if(e<error_min)r=mid-1;else
-         if(e>error_min)l=mid+1;else
-         { // values are the same, however since there can be many same values, then let's move towards the original 'valid' index, so that 'moveElm' can be shortest
-            if(valid>mid)l=mid+1; // valid is after  mid, so try moving right (adjust left  boundary)
-            else         r=mid-1; // valid is before mid, so try moving left  (adjust right boundary)
-         }
+         // reposition this triangle in the 'tris' list to preserve order by 'error_min'
+         tree.remove(tri);
+         tri.error_min=error_min;
+         tree.insert(tri);
+      #if DEBUG && 0 // check sort order
+         if(Triangle *next=tree.last())for(; Triangle *prev=(Triangle*)next->prev(); next=prev)
+            DYNAMIC_ASSERT(CompareError(*prev, *next)<=0, "simplify tris order");
+      #endif
       }
-      tris.moveElm(valid, (valid<l) ? r : l);
-   #else // iterative method
-      Int target=valid;
-      for(Int range=Min(tris.elms(), processed_tris); ; ) // we can ignore moving to the right of what we've already processed
-      {
-         Int next_i=target+1; if(!InRange(next_i, range))break;
-       C Triangle &next=tris[next_i]; if(next.error_min<=error_min)break; // if OK then stop
-         target=next_i;
-      }
-      for(;;)
-      {
-         Int next_i=target-1; if(!InRange(next_i, tris))break;
-       C Triangle &next=tris[next_i]; if(next.error_min>=error_min)break; // if OK then stop
-         target=next_i;
-      }
-      tris.moveElm(valid, target);
-   #endif
    }
 
    void setNrmTanBin(Triangle &tri)
@@ -1016,7 +1207,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       REP(vtx.tri_num)
       {
        C Ref      &ref=refs[vtx.ref_start+i];
-         Triangle &tri=tris.absElm(ref.tri_abs);
+         Triangle &tri=tris[ref.tri_index];
       #if !ADJUST_REFS
          if(tri.exists)
       #endif
@@ -1029,7 +1220,9 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
             tri.edge_error[0]=calculateError(tri.ind.c[0], tri.ind.c[1], mid_pos);
             tri.edge_error[1]=calculateError(tri.ind.c[1], tri.ind.c[2], mid_pos);
             tri.edge_error[2]=calculateError(tri.ind.c[2], tri.ind.c[0], mid_pos);
-            resetError(tri, tris.absToValidIndex(ref.tri_abs));
+
+            // re-position it in the 'tris' list based on new 'error_min'
+            resetError(tri);
             refs.add(Ref(ref)); // !! add as temp variable, because 'add' can cause 'ref' mem address to be invalid
          }
       }
@@ -1107,7 +1300,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
          REP(vtx.tri_num) // iterate all tris touching this vertex
          {
           C Ref      &ref=refs[vtx.ref_start+i];
-          C Triangle &tri=tris.absElm(ref.tri_abs);
+          C Triangle &tri=tris[ref.tri_index];
             Int tvi   =ref.tri_vtx_index,
               //tri_v0=tri.ind.c[ tvi     ], this is always 'vi', and we don't need to process it, because we're not interested in 'vi'<->'vi' connection
                 tri_v1=tri.ind.c[(tvi+1)%3],
@@ -1244,14 +1437,17 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
    {
       REPAD(t, tris)
       {
-       C Triangle &tri=tris[t]; REPAD(v, tri.ind)
+       C Triangle &tri=tris[t];
+         if(tri.exists)
+            REPAD(v, tri.ind)
          {
           C Vertex &vtx=vtxs[tri.ind.c[v]];
             Bool    has=false;
             REP(vtx.tri_num)
             {
              C Ref      &ref=refs[vtx.ref_start+i];
-             C Triangle &vtx_tri=tris.absElm(ref.tri_abs); if(tris.absToValidIndex(ref.tri_abs)<0)Exit("vtx tri doesn't exist");
+             C Triangle &vtx_tri=tris[ref.tri_index];
+               if(!vtx_tri.exists)Exit("vtx tri doesn't exist");
                if(&tri==&vtx_tri)has=true;
             }
             if(!has)Exit("vtx doesn't have tri");
@@ -1305,7 +1501,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
          Triangle &tri=tris[i];
          REPA(tri.ind)
          {
-            Int    &tv =tri.ind.c[i]; tv=vtx_dups[vtx_dups[tv].dup].vtxs_index; // remap triangle vertex index to unique
+            Int    &tv =tri.ind.c[i]; tv=vtx_dups[vtx_dups[tv].dup].vtxs_index; // remap triangle vertex index to unique !! WARNING: because of this remap, 'tri.ind' sometimes won't be 'allDifferent' !!
             Vertex &vtx=vtxs[tv]    ; vtx.tri_num++;
          }
          tri.tan.zero(); tri.bin.zero(); setNrmTanBin(tri); // zero in init, in case 'setNrmTanBin' doesn't modify the values
@@ -1341,12 +1537,11 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       REPAD(t, tris)
       {
          Triangle &tri=tris[t];
-         Int       tri_abs=tris.validToAbsIndex(t);
          REPAD(v, tri.ind)
          {
             Vertex &vtx=vtxs[tri.ind.c[v]];
             Ref    &ref=refs[vtx.ref_start + vtx.tri_num++];
-            ref.tri_abs      =tri_abs;
+            ref.tri_index    =t;
             ref.tri_vtx_index=v;
          }
       }
@@ -1362,7 +1557,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
          }
          tri.error_min=Min(tri.edge_error[0], tri.edge_error[1], tri.edge_error[2]);
       }
-      tris.sort(CompareError); // tris are now sorted from highest to lowest error
+      REPA(tris)tree.insert(tris[i]);
    }
 
    void simplify(Flt intensity, Flt max_distance, Flt max_uv, Flt max_color, Flt max_material, Flt max_skin, Flt max_normal, Bool keep_border, MESH_SIMPLIFY mode, Flt pos_eps)
@@ -1394,12 +1589,10 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
 
       // main iteration loop
       Vec mid_pos;
-      REPA(tris)
-         if(InRange(i, tris)) // check in case it got deleted
+      for(; tree.last(); )
       {
-         processed_tris=i;
-      again:
-         Triangle &tri=tris[i]; if(tri.error_min>max_error || stop())break; // tris are sorted by their error, so if we've reached the one above the limit, then stop
+         Triangle &tri=*tree.last();
+         if(tri.error_min>max_error || stop())break; // tris are sorted by their error, so if we've reached the one above the limit, then stop
 
          Int i=MinI(tri.edge_error[0], tri.edge_error[1], tri.edge_error[2]);
          Int edge_vtx0i=tri.ind.c[ i     ]; Vertex &edge_vtx0=vtxs[edge_vtx0i];
@@ -1417,7 +1610,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
             -have only edge_vtx1                                      , let's call them "right"  triangles */
 
          // don't remove if flipped
-         middle_tris.clear(); all_tris.clear(); // clear before 'flipped' because that modifies this
+         middle_tris.clear(); all_tris.clear(); // clear before 'flipped' because that modifies this !! WARNING: this might list the same triangle multiple times !!
          if(flipped(mid_pos, edge_vtx1i, edge_vtx0, true ) // middle tris will be collected only from the first vertex
          || flipped(mid_pos, edge_vtx0i, edge_vtx1, false))goto cant;
 
@@ -1451,12 +1644,15 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
          #if ADJUST_REFS
             REPA(middle_tris)adjustRefs(*middle_tris[i]->tri, edge_vtx0i, edge_vtx1i);
          #endif
-         
+
             REPA(middle_tris)
             {
-               Triangle *tri=middle_tris[i]->tri;
-               visible_tris-=tri->visible;
-               tris.removeData(tri, true);
+               Triangle &tri=*middle_tris[i]->tri; if(tri.exists) // check if exists because this tri could be listed multiple times, and thus could be removed multiple times too
+               {
+                  tri.exists=false;
+                  visible_tris-=tri.visible;
+                  tree.remove(tri);
+               }
             }
             edge_vtx0.pos=mid_pos;
             edge_vtx0.eat(edge_vtx1);
@@ -1485,34 +1681,40 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
          if(tri.edge_error[i]<FLT_MAX) // this was the min, and if the min was doable, then
          {
             tri.edge_error[i]=FLT_MAX; // set it as not-doable
-            resetError(tri, processed_tris); // re-position it in the 'tris' list based on new 'error_min'
-            goto again; // try again with the same index
+            // re-position it in the 'tris' list based on new 'error_min'
+            resetError(tri);
          }
       }
    }
 
    void store(MeshBase &mesh, MESH_FLAG flag_and=MESH_ALL)
    {
-      MESH_FLAG flags=MESH_NONE; REPA(tris)flags|=tris[i].flag; flags&=flag_and;
-      mesh.create(tris.elms()*3, 0, tris.elms(), 0, flags&(VTX_ALL&~(VTX_TAN_BIN|VTX_DUP)));
-      Int tri_index=0;
-   #if 0
+      Int       tri_num=0;
+      MESH_FLAG flags=MESH_NONE;
       REPA(tris)
       {
-         Triangle &tri=tris[i];
-   #else
-      FREP(tris.absElms()) // process in absolute order (as they were added from original mesh to preserve original order)
+       C Triangle &tri=tris[i]; if(tri.exists)
+         {
+            tri_num++;
+            flags|=tri.flag;
+         }
+      }
+      flags&=flag_and;
+      mesh.create(tri_num*3, 0, tri_num, 0, flags&(VTX_ALL&~(VTX_TAN_BIN|VTX_DUP)));
+      Int tri_index=0;
+      FREPA(tris) // process in order as they were added from original mesh to preserve original order
       {
-         if(!tris.absIndexIsValid(i))continue; Triangle &tri=tris.absElm(i);
-   #endif
-         Int vtx_index=tri_index*3;
-         mesh.tri.ind( tri_index++).set(vtx_index, vtx_index+1, vtx_index+2);
-         tri.vtxs[0].to(mesh, vtx_index  );
-         tri.vtxs[1].to(mesh, vtx_index+1);
-         tri.vtxs[2].to(mesh, vtx_index+2);
-         mesh.vtx.pos(vtx_index  )=vtxs[tri.ind.x].pos;
-         mesh.vtx.pos(vtx_index+1)=vtxs[tri.ind.y].pos;
-         mesh.vtx.pos(vtx_index+2)=vtxs[tri.ind.z].pos;
+       C Triangle &tri=tris[i]; if(tri.exists)
+         {
+            Int vtx_index=tri_index*3;
+            mesh.tri.ind( tri_index++).set(vtx_index, vtx_index+1, vtx_index+2);
+            tri.vtxs[0].to(mesh, vtx_index  );
+            tri.vtxs[1].to(mesh, vtx_index+1);
+            tri.vtxs[2].to(mesh, vtx_index+2);
+            mesh.vtx.pos(vtx_index  )=vtxs[tri.ind.x].pos;
+            mesh.vtx.pos(vtx_index+1)=vtxs[tri.ind.y].pos;
+            mesh.vtx.pos(vtx_index+2)=vtxs[tri.ind.z].pos;
+         }
       }
 
       // this needs to be done before welding vertexes so we don't weld with big tan/bin differences
@@ -1532,10 +1734,12 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
 
       REPA(tris)
       {
-       C Triangle &tri =tris[i];
-         PartInfo &part=part_infos(tri.part);
-         part.tris++;
-         part.flag|=tri.flag;
+       C Triangle &tri=tris[i]; if(tri.exists)
+         {
+            PartInfo &part=part_infos(tri.part);
+            part.tris++;
+            part.flag|=tri.flag;
+         }
       }
       parts.setNum(part_infos.elms());
       REPA(parts)
@@ -1546,25 +1750,21 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
       }
       REPAO(part_infos).tris=0;
 
-   #if 0
-      REPA(tris)
+      FREPA(tris) // process in order as they were added from original mesh to preserve original order
       {
-         Triangle &tri=tris[i];
-   #else
-      FREP(tris.absElms()) // process in absolute order (as they were added from original mesh to preserve original order)
-      {
-         if(!tris.absIndexIsValid(i))continue; Triangle &tri=tris.absElm(i);
-   #endif
-         Int part=tri.part;
-         Int tri_index=(part_infos[part].tris++), vtx_index=tri_index*3;
-         MeshBase &mesh=parts[part].base;
-         mesh.tri.ind(tri_index).set(vtx_index, vtx_index+1, vtx_index+2);
-         tri.vtxs[0].to(mesh, vtx_index  );
-         tri.vtxs[1].to(mesh, vtx_index+1);
-         tri.vtxs[2].to(mesh, vtx_index+2);
-         mesh.vtx.pos(vtx_index  )=vtxs[tri.ind.x].pos;
-         mesh.vtx.pos(vtx_index+1)=vtxs[tri.ind.y].pos;
-         mesh.vtx.pos(vtx_index+2)=vtxs[tri.ind.z].pos;
+       C Triangle &tri=tris[i]; if(tri.exists)
+         {
+            Int part=tri.part;
+            Int tri_index=(part_infos[part].tris++), vtx_index=tri_index*3;
+            MeshBase &mesh=parts[part].base;
+            mesh.tri.ind(tri_index).set(vtx_index, vtx_index+1, vtx_index+2);
+            tri.vtxs[0].to(mesh, vtx_index  );
+            tri.vtxs[1].to(mesh, vtx_index+1);
+            tri.vtxs[2].to(mesh, vtx_index+2);
+            mesh.vtx.pos(vtx_index  )=vtxs[tri.ind.x].pos;
+            mesh.vtx.pos(vtx_index+1)=vtxs[tri.ind.y].pos;
+            mesh.vtx.pos(vtx_index+2)=vtxs[tri.ind.z].pos;
+         }
       }
       REPA(parts) // go from the end so we can remove if needed
       {

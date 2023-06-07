@@ -3,6 +3,9 @@
 namespace EE{
 /******************************************************************************/
 SkyClass Sky;
+Flt  Atmosphere::ViewRange=10000;
+VecD Atmosphere::SunPos;
+Memc<Atmosphere> Atmospheres;
 /******************************************************************************/
 static inline Vec4 SkyNightLightColor(Vec4 srgb_col) {srgb_col.xyz*=NightLightFactor(Sky.nightLight()); if(LINEAR_GAMMA)srgb_col.xyz=SRGBToLinear(srgb_col.xyz); return srgb_col;}
 
@@ -39,9 +42,9 @@ SkyClass& SkyClass::create()
    Flt temp=_hor_exp; _hor_exp=-1; atmosphericHorizonExponent(temp); // set -1 to force reset
        temp=_dns_exp; _dns_exp=-1; atmosphericDensityExponent(temp); // set -1 to force reset
 
+   // SKY_MESH_MIN_DIST
    MeshBase mshb; mshb.createIco(Ball(1), MESH_NONE, 3); // res 3 gives 'dist'=0.982246876
   _mshr.create(mshb.reverse());
-   #define SKY_MESH_MIN_DIST 0.98f // it's good to make it a bit smaller than 'dist' to have some epsilon for precision issues, this is the closest point on the mesh to the Vec(0,0,0), it's not equal to radius=1, because the mesh is composed out of triangles, and the triangle surfaces are closer
 #if DEBUG && 0 // calculate actual distance
    Flt dist=1; C Vec *pos=mshb.vtx.pos();
    REPA(mshb.tri ){C VecI  &t=mshb.tri .ind(i); MIN(dist, Dist(VecZero, Tri (pos[t.x], pos[t.y], pos[t.z])));}
@@ -141,7 +144,54 @@ INLINE Shader* SkyTF(                  Int  textures  ,                         
 INLINE Shader* SkyT (Int multi_sample, Int  textures  ,                           Bool dither, Bool cloud) {Shader* &s=Sh.SkyT [multi_sample][textures-1]                [dither][cloud]; if(SLOW_SHADER_LOAD && !s)s=Sh.getSkyT (multi_sample, textures  ,                 dither, cloud); return s;}
 INLINE Shader* SkyAF(                  Bool per_vertex,               Bool stars, Bool dither, Bool cloud) {Shader* &s=Sh.SkyAF              [per_vertex]         [stars][dither][cloud]; if(SLOW_SHADER_LOAD && !s)s=Sh.getSkyAF(              per_vertex,          stars, dither, cloud); return s;}
 INLINE Shader* SkyA (Int multi_sample, Bool per_vertex, Bool density, Bool stars, Bool dither, Bool cloud) {Shader* &s=Sh.SkyA [multi_sample][per_vertex][density][stars][dither][cloud]; if(SLOW_SHADER_LOAD && !s)s=Sh.getSkyA (multi_sample, per_vertex, density, stars, dither, cloud); return s;}
+/******************************************************************************/
+// ATMOSPHERE
+/******************************************************************************/
+INLINE Shader* AtmosphereShader(Bool flat, Bool dither, Int multi_sample) {Shader* &s=Sh.Atmosphere[multi_sample][flat][dither]; if(SLOW_SHADER_LOAD && !s)s=Sh.getAtmosphere(multi_sample, flat, dither); return s;}
+static inline Flt AtmosphereAltScaleRay(Flt height) {return (-50/8.0f)/height;} // - because of Exp, 50 was chosen to fill entire sphere with some color, 8.0 real physical value, 'height' proportional to atmosphere height
+static inline Flt AtmosphereAltScaleMie(Flt height) {return (-50/1.2f)/height;} // - because of Exp, 50 was chosen to fill entire sphere with some color, 1.2 real physical value, 'height' proportional to atmosphere height
+inline void Atmosphere::drawDo(Int multi_sample, Bool dither)C
+{
+   Flt  draw_r=r/SKY_MESH_MIN_DIST;
+   Flt  dist2 =Dist2(ActiveCam.matrix.pos, pos); // use 'ActiveCam' instead of 'CamMatrix' because it's not affected by eyes
+   Bool flat  =(dist2<=Sqr(draw_r+FrustumMain.view_quad_max_dist+D.eyeDistance_2())); // use flat if camera intersects with mesh
 
+   MatrixM matrix; if(!flat)
+   {
+      matrix.setScalePos(-draw_r, pos); // reverse faces because 'Sky._mshr' is reversed
+      Sky._mshr.set();
+      D.depth(true);
+      D.cull (true);
+   }//else D.depth(false); already handled in "shader->draw" below
+
+   Sh.AtmospherePlanetRadius ->set(planet_radius);
+ //Sh.AtmosphereHeight       ->set(height);
+   Sh.AtmosphereRadius       ->set(r);
+   Sh.AtmosphereLightPos     ->set(!(Vec(SunPos-pos)*CamMatrixInv.orn()));
+   Sh.AtmosphereAltScaleRay  ->set(AtmosphereAltScaleRay(height));
+   Sh.AtmosphereAltScaleMie  ->set(AtmosphereAltScaleMie(height));
+   Sh.AtmosphereMieExtinction->set(mie_extinction);
+   Sh.AtmosphereLightScale   ->set(light_scale);
+   Sh.AtmosphereFogReduce    ->set(fog_reduce);
+   Sh.AtmosphereFogReduceDist->set(fog_reduce_dist);
+   Sh.AtmosphereDarken       ->set(darken);
+
+   Shader *shader      =                AtmosphereShader(flat, dither,            0),
+          *shader_multi=(multi_sample ? AtmosphereShader(flat, dither, multi_sample) : null);
+
+   REPS(Renderer._eye, Renderer._eye_num)
+   {
+      Renderer.setEyeViewportCam();
+      Sh.AtmospherePos->set(Vec(CamMatrix.pos-pos)*CamMatrixInv.orn()); if(!flat)SetFastMatrix(matrix); // set these after 'setEyeViewportCam'. position that we set is for camera relative to ball. because shader assumes ball is at Vec(0,0,0) and the position that we specify is camera position relative to ball in view space
+      if(shader_multi){D.stencil(STENCIL_MSAA_TEST, STENCIL_REF_MSAA); if(flat)shader_multi->draw();else{shader_multi->begin(); Sky._mshr.draw();} D.stencilRef(0);} // call this first to set stencil, reset stencil ref for call below
+                                                                       if(flat)shader      ->draw();else{shader      ->begin(); Sky._mshr.draw();}                   // call this next
+   }
+}
+/******************************************************************************/
+static Int Compare(C Atmosphere &a, C Atmosphere &b)
+{
+   return Compare(Dist2(a.pos, ActiveCam.matrix.pos), Dist2(b.pos, ActiveCam.matrix.pos));
+}
 void SkyClass::draw()
 {
    if(isActual())
@@ -205,7 +255,7 @@ void SkyClass::draw()
          if(sky_ball_mesh_size*SKY_MESH_MIN_DIST<=Frustum.view_quad_max_dist){sky_ball_mesh_size=to; ds=false;} // if the closest point on the mesh surface is in touch with the view quad, it means that the ball would not render fully, we have to render it with full size and with depth test disabled
       }else sky_ball_mesh_size=to;
    #if !REVERSE_DEPTH // for low precision depth we need to make sure that sky ball mesh is slightly smaller than view range, to avoid mesh clipping, this was observed on OpenGL with viewFrom=0.05, viewRange=1024, Cam.yaw=0, Cam.pitch=PI_2
-      MIN(sky_ball_mesh_size, to*EPS_SKY_MIN_VIEW_RANGE); // alternatively we could try using D3DRS_CLIPPING, DepthClipEnable, GL_DEPTH_CLAMP
+      MIN(sky_ball_mesh_size, to*EPS_SKY_MIN_VIEW_RANGE); // alternatively we could try using 'D.depthClip'
    #endif
       // !! THIS MUST NOT MODIFY 'Renderer._alpha' BECAUSE THAT WOULD DISABLE SUN RAYS !!
       Renderer.set(Renderer._col, Renderer._ds, true, blend ? NEED_DEPTH_READ : NO_DEPTH_READ); // specify correct mode because without it the sky may cover everything completely
@@ -217,12 +267,157 @@ void SkyClass::draw()
       REPS(Renderer._eye, Renderer._eye_num)
       {
          Renderer.setEyeViewportCam();
-         if(shader_multi){D.depth((multi==1) ? false : ds); D.stencil(STENCIL_MSAA_TEST, STENCIL_REF_MSAA); shader_multi->begin(); _mshr.draw(); D.stencilRef(0); D.depth(ds);} // MS edges for deferred must not use depth testing, call this first to set stencil, reset stencil ref and depth for call below
-                                                                                                            shader      ->begin(); _mshr.draw(); // call this next
+         if(shader_multi){D.depth((multi==1) ? false : ds); D.stencil(STENCIL_MSAA_TEST, STENCIL_REF_MSAA); shader_multi->begin(); _mshr.draw(); D.stencilRef(0); D.depth(ds);} // call this first to set stencil, MS edges for deferred must not use depth testing, reset stencil ref and depth for call below
+                                                                                                            shader      ->begin(); _mshr.draw();                                // call this next
       }
       D.depthOnWriteFunc(false, true, FUNC_DEFAULT);
       D.stencil         (STENCIL_NONE);
    }
+
+   if(Atmospheres.elms())
+   {
+      Atmospheres.sort(Compare); // sort from closest (i=0 first), to farthest (last)
+      Renderer.set(Renderer._col, Renderer._ds, true, NEED_DEPTH_READ);
+      D.alpha(ALPHA_RENDER_MERGE);
+      D.depthWriteFunc(false, FUNC_LESS);
+      SetMatrixCount(); // needed for drawing mesh
+
+      Flt to  =    D.viewRange(),
+          from=Min(D.viewRange()*frac(), to-EPS_SKY_MIN_LERP_DIST);
+      //Flt sky_opacity=Length(O.pos)*MulAdd.x+MulAdd.y;
+      //              0=       from  *MulAdd.x+MulAdd.y;
+      //              1=       to    *MulAdd.x+MulAdd.y;
+      Vec2 mul_add; mul_add.x=1/(to-from); mul_add.y=-from*mul_add.x;
+      Sh.SkyFracMulAdd->set(mul_add);
+      Sh.AtmosphereViewRange->set(Atmosphere::ViewRange);
+
+      Int  multi_sample=(Renderer._col->multiSample() ? ((Renderer._cur_type==RT_DEFERRED) ? 1 : 2) : 0);
+      Bool dither      =(D.dither() && !Renderer._col->highPrecision());
+      REPAO(Atmospheres).drawDo(multi_sample, dither);
+
+      // restore default
+      D.depthOnWriteFunc(false, true, FUNC_DEFAULT);
+      D.stencil(STENCIL_NONE);
+   }
+}
+/******************************************************************************/
+void Atmosphere::draw()C
+{
+   DEBUG_ASSERT(Renderer()==RM_PREPARE, "'Atmosphere.draw' called outside of RM_PREPARE");
+   if(Frustum(T) && Renderer.firstPass())Atmospheres.add(T);
+}
+/******************************************************************************/
+const Vec RayleighScattering=Vec(5.2091275314786692e-06, 1.2171661977460255e-05, 2.9715971624658822e-05); // Vec(5.802, 13.558, 33.1)*0.000001;
+const Flt MieScattering=3.996*0.000001;
+/******************************************************************************/
+Flt RayleighPhase(Flt angle_cos)
+{
+   return 3/(16*PI)*(1+angle_cos*angle_cos);
+}
+Flt MiePhase(Flt angle_cos)
+{
+   const Flt g=0.8;
+
+   Flt   num=3/(8*PI)*(1-g*g)*(1+angle_cos*angle_cos);
+   Flt denom=(2+g*g)*Pow(1 + g*g - 2*g*angle_cos, 1.5f);
+
+   return num/denom;
+}
+/******************************************************************************/
+void Atmosphere::scattering(Flt height, Vec &rayleigh_scattering, Flt &mie_scattering, Vec &extinction)C
+{
+   Flt altitude        =Max(0, height-planet_radius);
+   Flt rayleigh_density=Exp(altitude*AtmosphereAltScaleRay(T.height));
+   Flt      mie_density=Exp(altitude*AtmosphereAltScaleMie(T.height));
+
+       rayleigh_scattering=RayleighScattering*rayleigh_density;
+ //Flt rayleigh_absorption=RayleighAbsorption*rayleigh_density;
+
+       mie_scattering=   MieScattering*mie_density;
+   Flt mie_extinction=T.mie_extinction*mie_density;
+
+ //extinction=rayleigh_scattering+(rayleigh_absorption+mie_scattering+mie_absorption);
+   extinction=rayleigh_scattering+mie_extinction;
+
+ //Vec ozone_absorption=OzoneAbsorption*Max(0, 1-Abs(altitude_km-25)/15); extinction+=ozone_absorption;
+}
+/******************************************************************************/
+// !! THIS IGNORES 'light_scale', 'fog_reduce' AND MIE SCATTERING  !!
+Vec Atmosphere::calcCol(C Vec &pos, C Vec &ray, C Vec &sun)C
+{
+   Flt start, end;
+ //Flt fog_factor; // fake factor that removes fog and mie highlights on objects (this is faster than shadow testing per sample)
+   {
+      Flt b=Dot(pos, ray);
+      Flt c=pos.length2()-Sqr(T.r);
+      Flt d=b*b-c;
+      Flt atmos_start=-b-Sqrt(d),
+          atmos_end  =-b+Sqrt(d);
+      start=Max(atmos_start, 0);
+      end  =    atmos_end      ;
+      if(d<=0 || end<=start)return 0; // no atmosphere intersection
+    //Flt factor=1 ? (end-start)/(atmos_end-start) : end/atmos_end; // proportion of pixel_pos_cam_dist to atmos_end
+    //fog_factor=1-fog_reduce*(1-factor)*Sat(1-end/fog_reduce_dist);
+   }
+
+   Flt      angle_cos=Dot(ray, sun);
+   Flt rayleigh_phase=RayleighPhase(angle_cos);
+   Flt      mie_phase=     MiePhase(angle_cos);
+
+   const Int steps=16; // 16 is smallest value that looks as good as 256
+   Vec lum=0, transmittance=1;
+   Flt t0=start, mul=end-start;
+   for(Int i=1; i<=steps; i++)
+   {
+      Flt t1=Flt(i)/steps;
+      if(1)t1*=t1; // focus on samples closer to camera, this increases precision
+      t1=t1*mul+start;
+      Flt t=Avg(t0, t1), dt=t1-t0; t0=t1;
+
+      Vec sample_pos=pos+t*ray;
+      Flt height=sample_pos.length();
+
+      Vec rayleigh_scattering, extinction;
+      Flt      mie_scattering;
+      scattering(height, rayleigh_scattering, mie_scattering, extinction);
+
+   #if 1
+      Flt sun_zenith_angle_cos=Dot(sun, sample_pos)/height; // Dot(sun, sample_pos/height) -1..1
+
+      // !! IF CHANGING FORMULA THEN ALSO CHANGE #AtmosphereFormula !!
+    //Flt x=sun_zenith_angle_cos*0.5+0.5;
+      Flt mul=0.6; Flt x=Max(0, sun_zenith_angle_cos*mul+(1-mul)); // mul=0.5 (balance) .. 1.0 (more night). x=0..1
+      Flt sun_transmittance=SmoothCube(x);
+
+      Vec scattering=(rayleigh_scattering*rayleigh_phase/* + mie_scattering*mie_phase*/)*sun_transmittance;
+   #else
+      Vec  up=sample_pos/height;
+      Flt  sun_zenith_angle_cos=Dot(sun, up);
+      Vec2 uv=Vec2(sun_zenith_angle_cos*0.5+0.5, (height-AtmospherePlanetRadius)/AtmosphereHeight);
+
+      Vec sun_transmittance=TexLod(SkyA, uv).rgb; // Lod needed for clamp
+      Vec multi_scatter    =TexLod(SkyB, uv).rgb; // Lod needed for clamp
+
+      Vec rayleigh_scattering_1=rayleigh_scattering*(rayleigh_phase*sun_transmittance+multi_scatter);
+      Vec      mie_scattering_1=     mie_scattering*(     mie_phase*sun_transmittance+multi_scatter);
+      Vec          scattering  =rayleigh_scattering_1+mie_scattering_1;
+   #endif
+
+      Vec sample_transmittance=Exp(-dt*extinction);
+   #if 1 // faster but may have issues in certain cases with low 'steps', have to test if results are satisfactory
+      lum+=transmittance*scattering*dt;
+   #else
+      Vec scattering_integral=(scattering-scattering*sample_transmittance)/extinction;
+      lum+=transmittance*scattering_integral;
+   #endif
+      transmittance*=sample_transmittance;
+   }
+ //lum*=fog_factor*light_scale;
+   return lum;
+}
+Vec Atmosphere::calcCol(Flt look_angle)C
+{
+   return calcCol(Vec(0, planet_radius, 0), Vec(0, Cos(look_angle), Sin(look_angle)), Vec(0, 1, 0));
 }
 /******************************************************************************/
 }

@@ -65,10 +65,10 @@ void Draw()
    D.clear(GREY);
 
    REPD(y, pf.h())
-   REPD(x, pf.w())DrawPixel(x, y, FlagTest(pf.pixelFlag(x, y), PFP_WALKABLE) ? WHITE : BLACK); // draw map
-   REPA(path     )DrawPixel(path[i].x, path[i].y, YELLOW);                                     // draw path              with yellow color
-                  DrawPixel(start  .x, start  .y, GREEN );                                     // draw starting position with green  color
-                  DrawPixel(end    .x, end    .y, RED   );                                     // draw ending   position with red    color
+   REPD(x, pf.w())DrawPixel(x, y, FlagOn(pf.pixelFlag(x, y), PFP_WALKABLE) ? WHITE : BLACK); // draw map
+   REPA(path     )DrawPixel(path[i].x, path[i].y, YELLOW);                                   // draw path              with yellow color
+                  DrawPixel(start  .x, start  .y, GREEN );                                   // draw starting position with green  color
+                  DrawPixel(end    .x, end    .y, RED   );                                   // draw ending   position with red    color
    VI.end();
 
    D.text(0, 0.9, "Press LMB and RMB to set Start and End position");

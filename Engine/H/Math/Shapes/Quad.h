@@ -16,9 +16,9 @@ struct Quad2 // Quadrilateral 2D
    // get
    Vec2 center   (           )C {return Avg(p[0], p[1], p[2], p[3]);} // get quad center
    Flt  area     (           )C; // get surface area
-   Bool convex   (           )C; // if quad is convex
-   Bool valid    (Flt eps=EPS)C; // if quad is valid (points aren't inline)
-   Bool clockwise(           )C; // if points are in clockwise order
+   Bool convex   (           )C; // if  quad is convex
+   Bool valid    (Flt eps=EPS)C; // if  quad is valid (points aren't inline)
+   Bool clockwise(           )C; // if  points are in clockwise order
 
    Tri2 tri013()C {return Tri2(p[0], p[1], p[3]);}
    Tri2 tri123()C {return Tri2(p[1], p[2], p[3]);}
@@ -52,7 +52,7 @@ struct QuadD2 // Quadrilateral 2D (double precision)
    // get
    VecD2 center   ()C {return Avg(p[0], p[1], p[2], p[3]);} // get quad center
    Dbl   area     ()C; // get triangle surface area
-   Bool  clockwise()C; // if points are in clockwise order
+   Bool  clockwise()C; // if  points are in clockwise order
 
    TriD2 tri013()C {return TriD2(p[0], p[1], p[3]);}
    TriD2 tri123()C {return TriD2(p[1], p[2], p[3]);}
@@ -85,9 +85,9 @@ struct Quad // Quadrilateral 3D
    Vec  getNormal (             )C {return GetNormal (p[0], p[1],       p[3]);} // calculate    normalized normal vector from triangle points
    Vec  getNormalU(             )C {return GetNormalU(p[0], p[1],       p[3]);} // calculate un-normalized normal vector from triangle points (length of the vector is proportional to the area of the triangle)
    Flt  area      (             )C; // get quad surface area
-   Bool convex    (             )C; // if quad is convex
-   Bool valid     (Flt eps=EPS  )C; // if quad is valid (points aren't inline)
-   Bool coplanar  (C QuadN &quad)C; // if quads are coplanar
+   Bool convex    (             )C; // if  quad is convex
+   Bool valid     (Flt eps=EPS  )C; // if  quad is valid (points aren't inline)
+   Bool coplanar  (C QuadN &quad)C; // if  quads are coplanar
 
    Tri tri013()C {return Tri(p[0], p[1], p[3]);}
    Tri tri123()C {return Tri(p[1], p[2], p[3]);}

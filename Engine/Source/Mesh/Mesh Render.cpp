@@ -169,130 +169,165 @@ Bool MeshRender::setVF()
 #endif
    return _vf!=null;
 }
+static void SetVtxData(Byte *v, MESH_FLAG flag, C MeshBase &src, Bool compress)
+{
+   if(compress)
+   {
+      if((flag&(VTX_MSHR&~VTX_MATERIAL))==(VTX_POS|VTX_NRM|VTX_COLOR)) // optimized version for heightmaps (most heightmaps will have VTX_COLOR due to ambient occlusion) it's included because heightmaps can be created at runtime
+      {
+       C Vec   *vtx_pos     =                       src.vtx.pos     ();
+       C Vec   *vtx_nrm     =                       src.vtx.nrm     ();
+       C VecB4 *vtx_material=((flag&VTX_MATERIAL) ? src.vtx.material() : null);
+       C Color *vtx_color   =                       src.vtx.color   ();
+         if(vtx_material)REPA(src.vtx)
+         {
+            Set(v,             *vtx_pos     ++ );
+            Set(v, NrmToSByte4(*vtx_nrm     ++));
+            Set(v,             *vtx_material++ );
+            Set(v,             *vtx_color   ++ );
+         }else REPA(src.vtx)
+         {
+            Set(v,             *vtx_pos  ++ );
+            Set(v, NrmToSByte4(*vtx_nrm  ++));
+            Set(v,             *vtx_color++ );
+         }
+      }else
+      {
+       C Vec     *vtx_pos     =((flag&VTX_POS     ) ? src.vtx.pos     () : null);
+       C Vec     *vtx_nrm     =((flag&VTX_NRM     ) ? src.vtx.nrm     () : null);
+       C Vec     *vtx_tan     =((flag&VTX_TAN_BIN ) ? src.vtx.tan     () : null);
+       C Vec     *vtx_bin     =((flag&VTX_TAN_BIN ) ? src.vtx.bin     () : null);
+       C Vec     *vtx_hlp     =((flag&VTX_HLP     ) ? src.vtx.hlp     () : null);
+       C Vec2    *vtx_tex0    =((flag&VTX_TEX0    ) ? src.vtx.tex0    () : null);
+       C Vec2    *vtx_tex1    =((flag&VTX_TEX1    ) ? src.vtx.tex1    () : null);
+       C Vec2    *vtx_tex2    =((flag&VTX_TEX2    ) ? src.vtx.tex2    () : null);
+       C Vec2    *vtx_tex3    =((flag&VTX_TEX3    ) ? src.vtx.tex3    () : null);
+       C VtxBone *vtx_matrix  =((flag&VTX_MATRIX  ) ? src.vtx.matrix  () : null);
+       C VecB4   *vtx_blend   =((flag&VTX_BLEND   ) ? src.vtx.blend   () : null);
+       C Flt     *vtx_size    =((flag&VTX_SIZE    ) ? src.vtx.size    () : null);
+       C VecB4   *vtx_material=((flag&VTX_MATERIAL) ? src.vtx.material() : null);
+       C Color   *vtx_color   =((flag&VTX_COLOR   ) ? src.vtx.color   () : null);
+
+         FREPA(src.vtx)
+         {
+            Set(v, i, vtx_pos);
+            if(vtx_nrm           )Set(v, NrmToSByte4(vtx_nrm[i]));
+            if(vtx_tan || vtx_bin)Set(v, TBNToSByte4(vtx_tan ? &vtx_tan[i] : null, vtx_bin ? &vtx_bin[i] : null, vtx_nrm ? &vtx_nrm[i] : null));
+            Set(v, i, vtx_hlp     );
+            Set(v, i, vtx_tex0    );
+            Set(v, i, vtx_tex1    );
+            Set(v, i, vtx_tex2    );
+            Set(v, i, vtx_tex3    );
+        BoneSet(v, i, vtx_matrix  );
+       BlendSet(v, i, vtx_blend   );
+            Set(v, i, vtx_size    );
+            Set(v, i, vtx_material);
+            Set(v, i, vtx_color   );
+         }
+      }
+   }else
+   {
+    C Vec     *vtx_pos     =((flag&VTX_POS     ) ? src.vtx.pos     () : null);
+    C Vec     *vtx_nrm     =((flag&VTX_NRM     ) ? src.vtx.nrm     () : null);
+    C Vec     *vtx_tan     =((flag&VTX_TAN     ) ? src.vtx.tan     () : null);
+    C Vec     *vtx_bin     =((flag&VTX_BIN     ) ? src.vtx.bin     () : null);
+    C Vec     *vtx_hlp     =((flag&VTX_HLP     ) ? src.vtx.hlp     () : null);
+    C Vec2    *vtx_tex0    =((flag&VTX_TEX0    ) ? src.vtx.tex0    () : null);
+    C Vec2    *vtx_tex1    =((flag&VTX_TEX1    ) ? src.vtx.tex1    () : null);
+    C Vec2    *vtx_tex2    =((flag&VTX_TEX2    ) ? src.vtx.tex2    () : null);
+    C Vec2    *vtx_tex3    =((flag&VTX_TEX3    ) ? src.vtx.tex3    () : null);
+    C VtxBone *vtx_matrix  =((flag&VTX_MATRIX  ) ? src.vtx.matrix  () : null);
+    C VecB4   *vtx_blend   =((flag&VTX_BLEND   ) ? src.vtx.blend   () : null);
+    C Flt     *vtx_size    =((flag&VTX_SIZE    ) ? src.vtx.size    () : null);
+    C VecB4   *vtx_material=((flag&VTX_MATERIAL) ? src.vtx.material() : null);
+    C Color   *vtx_color   =((flag&VTX_COLOR   ) ? src.vtx.color   () : null);
+
+      FREPA(src.vtx)
+      {
+         Set(v, i, vtx_pos     );
+         Set(v, i, vtx_nrm     );
+         Set(v, i, vtx_tan     );
+         Set(v, i, vtx_bin     );
+         Set(v, i, vtx_hlp     );
+         Set(v, i, vtx_tex0    );
+         Set(v, i, vtx_tex1    );
+         Set(v, i, vtx_tex2    );
+         Set(v, i, vtx_tex3    );
+     BoneSet(v, i, vtx_matrix  );
+    BlendSet(v, i, vtx_blend   );
+         Set(v, i, vtx_size    );
+         Set(v, i, vtx_material);
+         Set(v, i, vtx_color   );
+      }
+   }
+}
 Bool MeshRender::create(Int vtxs, Int tris, MESH_FLAG flag, Bool compress)
 { // avoid deleting at the start, instead, check if some members already match
    UInt compress_flag=(compress ? VTX_COMPRESS_NRM_TAN_BIN : 0);
    Bool same_format=(flag==T.flag() && compress==storageCompress()); // !! this must check for all parameters which are passed into 'VtxFormatKey' !!
 
-   if((same_format && _vb.vtxs()==vtxs && !_vb._lock_mode) || _vb.create(vtxs  , flag         , compress_flag)) // do a separate check for '_vb' because its faster than 'create' method which may do some more checks for vtx size
+   if((same_format && _vb.vtxs()==vtxs && !_vb._lock_mode) || _vb.create(vtxs  , flag         , compress_flag)) // do a separate check for '_vb' because it's faster than 'create' method which may do some more checks for vtx size
    if(                                                        _ib.create(tris*3, vtxs<=0x10000               ))
    {
       T._storage=(compress ? MSHR_COMPRESS : 0);
       T._tris   =tris;
       T._flag   =flag;
-      if(GL)return setVF(); // set VAO
-      return same_format || setVF(); // skip setting VF if we already have same format
+      return (!GL && same_format) || setVF(); // skip setting VF if we already have same format (however for GL we always need it to set VAO)
    }
    del(); return false;
 }
 Bool MeshRender::createRaw(C MeshBase &src, MESH_FLAG flag_and, Bool optimize, Bool compress)
 {
-   if(create(src.vtxs(), src.trisTotal(), src.flag()&flag_and&VTX_MSHR, compress))
+   MESH_FLAG flag=flag_and&src.flag()&VTX_MSHR;
+   Int vtxs=src.vtxs(), tris=src.trisTotal();
+
+#if 1 // lock-less version
+   UInt compress_flag=(compress ? VTX_COMPRESS_NRM_TAN_BIN : 0);
+   Bool same_format=(flag==T.flag() && compress==storageCompress()); // !! this must check for all parameters which are passed into 'VtxFormatKey' !!
+   Int  vtx_size=VtxSize(flag, compress_flag);
+   Memt<Byte> temp;
+
+   // VB
    {
-      if(Byte *v=vtxLock(LOCK_WRITE))
-      {
-         if(storageCompress())
-         {
-            if((flag()&(VTX_MSHR&~VTX_MATERIAL))==(VTX_POS|VTX_NRM|VTX_COLOR)) // optimized version for heightmaps (most heightmaps will have VTX_COLOR due to ambient occlusion) it's included because heightmaps can be created at runtime
-            {
-             C Vec   *vtx_pos     =                         src.vtx.pos     ();
-             C Vec   *vtx_nrm     =                         src.vtx.nrm     ();
-             C VecB4 *vtx_material=((flag()&VTX_MATERIAL) ? src.vtx.material() : null);
-             C Color *vtx_color   =                         src.vtx.color   ();
-               if(vtx_material)REPA(src.vtx)
-               {
-                  Set(v,             *vtx_pos     ++ );
-                  Set(v, NrmToSByte4(*vtx_nrm     ++));
-                  Set(v,             *vtx_material++ );
-                  Set(v,             *vtx_color   ++ );
-               }else REPA(src.vtx)
-               {
-                  Set(v,             *vtx_pos  ++ );
-                  Set(v, NrmToSByte4(*vtx_nrm  ++));
-                  Set(v,             *vtx_color++ );
-               }
-            }else
-            {
-             C Vec     *vtx_pos     =((flag()&VTX_POS     ) ? src.vtx.pos     () : null);
-             C Vec     *vtx_nrm     =((flag()&VTX_NRM     ) ? src.vtx.nrm     () : null);
-             C Vec     *vtx_tan     =((flag()&VTX_TAN_BIN ) ? src.vtx.tan     () : null);
-             C Vec     *vtx_bin     =((flag()&VTX_TAN_BIN ) ? src.vtx.bin     () : null);
-             C Vec     *vtx_hlp     =((flag()&VTX_HLP     ) ? src.vtx.hlp     () : null);
-             C Vec2    *vtx_tex0    =((flag()&VTX_TEX0    ) ? src.vtx.tex0    () : null);
-             C Vec2    *vtx_tex1    =((flag()&VTX_TEX1    ) ? src.vtx.tex1    () : null);
-             C Vec2    *vtx_tex2    =((flag()&VTX_TEX2    ) ? src.vtx.tex2    () : null);
-             C Vec2    *vtx_tex3    =((flag()&VTX_TEX3    ) ? src.vtx.tex3    () : null);
-             C VtxBone *vtx_matrix  =((flag()&VTX_MATRIX  ) ? src.vtx.matrix  () : null);
-             C VecB4   *vtx_blend   =((flag()&VTX_BLEND   ) ? src.vtx.blend   () : null);
-             C Flt     *vtx_size    =((flag()&VTX_SIZE    ) ? src.vtx.size    () : null);
-             C VecB4   *vtx_material=((flag()&VTX_MATERIAL) ? src.vtx.material() : null);
-             C Color   *vtx_color   =((flag()&VTX_COLOR   ) ? src.vtx.color   () : null);
-
-               FREPA(src.vtx)
-               {
-                  Set(v, i, vtx_pos);
-                  if(vtx_nrm           )Set(v, NrmToSByte4(vtx_nrm[i]));
-                  if(vtx_tan || vtx_bin)Set(v, TBNToSByte4(vtx_tan ? &vtx_tan[i] : null, vtx_bin ? &vtx_bin[i] : null, vtx_nrm ? &vtx_nrm[i] : null));
-                  Set(v, i, vtx_hlp     );
-                  Set(v, i, vtx_tex0    );
-                  Set(v, i, vtx_tex1    );
-                  Set(v, i, vtx_tex2    );
-                  Set(v, i, vtx_tex3    );
-              BoneSet(v, i, vtx_matrix  );
-             BlendSet(v, i, vtx_blend   );
-                  Set(v, i, vtx_size    );
-                  Set(v, i, vtx_material);
-                  Set(v, i, vtx_color   );
-               }
-            }
-         }else
-         {
-          C Vec     *vtx_pos     =((flag()&VTX_POS     ) ? src.vtx.pos     () : null);
-          C Vec     *vtx_nrm     =((flag()&VTX_NRM     ) ? src.vtx.nrm     () : null);
-          C Vec     *vtx_tan     =((flag()&VTX_TAN     ) ? src.vtx.tan     () : null);
-          C Vec     *vtx_bin     =((flag()&VTX_BIN     ) ? src.vtx.bin     () : null);
-          C Vec     *vtx_hlp     =((flag()&VTX_HLP     ) ? src.vtx.hlp     () : null);
-          C Vec2    *vtx_tex0    =((flag()&VTX_TEX0    ) ? src.vtx.tex0    () : null);
-          C Vec2    *vtx_tex1    =((flag()&VTX_TEX1    ) ? src.vtx.tex1    () : null);
-          C Vec2    *vtx_tex2    =((flag()&VTX_TEX2    ) ? src.vtx.tex2    () : null);
-          C Vec2    *vtx_tex3    =((flag()&VTX_TEX3    ) ? src.vtx.tex3    () : null);
-          C VtxBone *vtx_matrix  =((flag()&VTX_MATRIX  ) ? src.vtx.matrix  () : null);
-          C VecB4   *vtx_blend   =((flag()&VTX_BLEND   ) ? src.vtx.blend   () : null);
-          C Flt     *vtx_size    =((flag()&VTX_SIZE    ) ? src.vtx.size    () : null);
-          C VecB4   *vtx_material=((flag()&VTX_MATERIAL) ? src.vtx.material() : null);
-          C Color   *vtx_color   =((flag()&VTX_COLOR   ) ? src.vtx.color   () : null);
-
-            FREPA(src.vtx)
-            {
-               Set(v, i, vtx_pos     );
-               Set(v, i, vtx_nrm     );
-               Set(v, i, vtx_tan     );
-               Set(v, i, vtx_bin     );
-               Set(v, i, vtx_hlp     );
-               Set(v, i, vtx_tex0    );
-               Set(v, i, vtx_tex1    );
-               Set(v, i, vtx_tex2    );
-               Set(v, i, vtx_tex3    );
-           BoneSet(v, i, vtx_matrix  );
-          BlendSet(v, i, vtx_blend   );
-               Set(v, i, vtx_size    );
-               Set(v, i, vtx_material);
-               Set(v, i, vtx_color   );
-            }
-         }
-         vtxUnlock();
-      }
-
-      if(Ptr ind=indLock(LOCK_WRITE))
-      {
-         SetFaceIndex(ind, src.tri.ind(), src.tris(), src.quad.ind(), src.quads(), _ib.bit16());
-         indUnlock();
-      }
-
-      if(optimize)T.optimize();
-      return true;
+      temp.setNumDiscard(vtx_size*vtxs);
+      SetVtxData(temp.data(), flag, src, compress);
+      if(!_vb.createNum(vtx_size, vtxs, false, temp.dataNull()))goto error;
    }
-   return false;
+
+   // IB
+   {
+      Bool ib16=(vtxs<=0x10000);
+      Int  inds=tris*3;
+      Int  ind_size=(ib16 ? 2 : 4);
+      temp.setNumDiscard(ind_size*inds);
+      SetFaceIndex(temp.data(), src.tri.ind(), src.tris(), src.quad.ind(), src.quads(), ib16);
+      if(!_ib.create(inds, ib16, false, temp.dataNull()))goto error;
+   }
+
+   T._storage=(compress ? MSHR_COMPRESS : 0);
+   T._tris   =tris;
+   T._flag   =flag;
+   if(!((!GL && same_format) || setVF()))goto error; // skip setting VF if we already have same format (however for GL we always need it to set VAO)
+#else
+   if(!create(vtxs, tris, flag, compress))goto error;
+
+   if(Byte *vtx=vtxLock(LOCK_WRITE))
+   {
+      SetVtxData(vtx, T.flag(), src, storageCompress());
+      vtxUnlock();
+   }
+
+   if(Ptr ind=indLock(LOCK_WRITE))
+   {
+      SetFaceIndex(ind, src.tri.ind(), src.tris(), src.quad.ind(), src.quads(), _ib.bit16());
+      indUnlock();
+   }
+#endif
+
+   if(optimize)T.optimize();
+   return true;
+error:
+   del(); return false;
 }
 /*struct SplitPart
 {
@@ -616,7 +651,31 @@ Bool MeshRender::getBox(Box &box)C
    if( pos>=0)if(C Byte *vtx=vtxLockRead())
    {
       vtx+=pos;
-      box=*(Vec*)vtx; REP(vtxs()-1){vtx+=vtxSize(); box|=*(Vec*)vtx;}
+      box=*(Vec*)vtx; REP(vtxs()-1){vtx+=vtxSize(); box.validInclude(*(Vec*)vtx);}
+      vtxUnlock();
+      return true;
+   }
+   box.zero(); return false;
+}
+Bool MeshRender::getBox(Box &box, C Matrix3 &matrix)C
+{
+   Int pos =vtxOfs(VTX_POS);
+   if( pos>=0)if(C Byte *vtx=vtxLockRead())
+   {
+      vtx+=pos;
+      box=(*(Vec*)vtx)*matrix; REP(vtxs()-1){vtx+=vtxSize(); box.validInclude((*(Vec*)vtx)*matrix);}
+      vtxUnlock();
+      return true;
+   }
+   box.zero(); return false;
+}
+Bool MeshRender::getBox(Box &box, C Matrix &matrix)C
+{
+   Int pos =vtxOfs(VTX_POS);
+   if( pos>=0)if(C Byte *vtx=vtxLockRead())
+   {
+      vtx+=pos;
+      box=(*(Vec*)vtx)*matrix; REP(vtxs()-1){vtx+=vtxSize(); box.validInclude((*(Vec*)vtx)*matrix);}
       vtxUnlock();
       return true;
    }

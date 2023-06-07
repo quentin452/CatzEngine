@@ -239,6 +239,7 @@ public:
    static void MtrlSetSmoothCur        (ProjectEx &proj);
    static void MtrlSetReflectCur       (ProjectEx &proj);
    static void MtrlSetGlowCur          (ProjectEx &proj);
+   static void MtrlSetUVScale          (ProjectEx &proj);
    static void MtrlResetAlpha          (ProjectEx &proj);
    static void MtrlCullOn              (ProjectEx &proj);
    static void MtrlCullOff             (ProjectEx &proj);
@@ -388,6 +389,7 @@ public:
    bool mtrlSetSmooth(C MemPtr<UID> &elm_ids, flt smooth, bool mul=false);
    bool mtrlSetReflect(C MemPtr<UID> &elm_ids, flt reflect_min, flt reflect_max);
    bool mtrlSetGlow(C MemPtr<UID> &elm_ids, flt glow, bool mul=false);
+   bool mtrlSetUVScale(C MemPtr<UID> &elm_ids, flt uv_scale);
    bool mtrlSetTexColor(C MemPtr<UID> &elm_ids, C Str &color_map);
    bool mtrlSetTexBump(C MemPtr<UID> &elm_ids, C Str &bump_map);
    bool mtrlSetTexNormal(C MemPtr<UID> &elm_ids, C Str &normal_map, bool flip_normal_y);

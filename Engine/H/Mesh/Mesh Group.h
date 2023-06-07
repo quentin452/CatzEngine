@@ -12,7 +12,8 @@ struct MeshGroup // Mesh Group (array of Meshes)
    MeshGroup& del   (                                             ); // delete
    MeshGroup& create(C MeshGroup &src, MESH_FLAG flag_and=MESH_ALL); // create from 'src', 'flag_and'=data to copy
 
-   MeshGroup& create(C Mesh &src, C VecI &cells); // create from 'src' partitioned into "cells.x * cells.y * cells.z" meshes
+   MeshGroup& create(C Mesh &src, C VecI &cells             ); // create from 'src' partitioned into "cells.x * cells.y * cells.z" meshes
+   MeshGroup& create(C Mesh &src, C Plane *plane, Int planes); // create from 'src' separated by planes
 
 #if EE_PRIVATE
    MeshGroup& create(C Mesh &src, C Boxes &boxes); // create from 'src' and boxes

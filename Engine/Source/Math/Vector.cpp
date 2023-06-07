@@ -497,10 +497,6 @@ Int Compare(C Color &c0, C Color &c1)
    return 0;
 }
 /******************************************************************************/
-Vec2 Sqrt(C Vec2 &x) {return Vec2(Sqrt(x.x), Sqrt(x.y));}
-Vec  Sqrt(C Vec  &x) {return Vec (Sqrt(x.x), Sqrt(x.y), Sqrt(x.z));}
-Vec4 Sqrt(C Vec4 &x) {return Vec4(Sqrt(x.x), Sqrt(x.y), Sqrt(x.z), Sqrt(x.w));}
-/******************************************************************************/
 Flt Vec2 ::length()C {return SqrtFast(length2());}
 Flt VecI2::length()C {return SqrtFast(length2());}
 Dbl VecD2::length()C {return SqrtFast(length2());}

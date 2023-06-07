@@ -20,8 +20,6 @@
       however this is needed to be done on the main thread, so new data will be synchronized with times.
 
 /******************************************************************************/
-const bool FastTerrainPhys=true;
-/******************************************************************************/
 BuilderClass Builder;
 /******************************************************************************/
 void Build(Heightmap &hm, Mesh &mesh, flt area_size, C VecI2 &area_xy, Heightmap *l, Heightmap *r, Heightmap *b, Heightmap *f, Heightmap *lb, Heightmap *lf, Heightmap *rb, Heightmap *rf)

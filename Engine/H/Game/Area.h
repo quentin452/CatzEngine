@@ -105,9 +105,9 @@ struct Area // World Area
       Actor             actor           ; // area actor, created from the 'phys' member
       Memc<AreaObj    > objs            ; // list of all area objects which are not dynamic (their access is not OBJ_ACCESS_CUSTOM), this does not include terrain objects which are too big and needed to be split into smaller parts (those objects are stored in the 'mesh' and 'phys' members)
       Memc<TerrainObj > terrain_objs    ; // list of all area objects of OBJ_ACCESS_TERRAIN access, these objects are always taken from the 'objs' container ('terrain_objs' container is not stored in the area data file, instead it is always copied from 'objs' member at area load)
-      Box               terrain_objs_box; // this covers all 'terrain_objs'
+      Extent            terrain_objs_ext; // this covers all 'terrain_objs'
       Memc<GrassObj   > foliage_objs    ; // list of all area objects of OBJ_ACCESS_GRASS   access, these objects are always taken from the 'objs' container ('foliage_objs' container is not stored in the area data file, instead it is always copied from 'objs' member at area load)
-      Box               foliage_objs_box; // this covers all 'foliage_objs'
+      Extent            foliage_objs_ext; // this covers all 'foliage_objs'
       Image             height          , // area height   map, each pixel value stores information about the height of the terrain
                         material_map    ; // area material map, each pixel value stores information about index of the most significant material in the 'materials' container, must be in sync with 'materials' member !!
       Mems<MaterialPtr> materials       ; // list of materials used by the terrain, must be in sync with 'material_map' member !!

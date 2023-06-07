@@ -278,6 +278,15 @@ C MeshLod& Mesh::getDrawLod()C
    }
    return T;
 }
+C MeshLod& Mesh::getDrawLod(C Matrix3 &matrix)C
+{
+   if(_lods.elms())
+   {
+      Flt dist2=GetLodDist2(lod_center, matrix);
+      REPA(_lods){C MeshLod &test=_lods[i]; if(dist2>=test.dist2)return test;} // go from the end because most likely there will be more objects far from camera with higher LOD
+   }
+   return T;
+}
 C MeshLod& Mesh::getDrawLod(C Matrix &matrix)C
 {
    if(_lods.elms())
@@ -301,6 +310,15 @@ Int Mesh::getDrawLodI()C
    if(_lods.elms())
    {
       Flt dist2=GetLodDist2(lod_center);
+      REPA(_lods)if(dist2>=_lods[i].dist2)return i+1; // go from the end because most likely there will be more objects far from camera with higher LOD
+   }
+   return 0;
+}
+Int Mesh::getDrawLodI(C Matrix3 &matrix)C
+{
+   if(_lods.elms())
+   {
+      Flt dist2=GetLodDist2(lod_center, matrix);
       REPA(_lods)if(dist2>=_lods[i].dist2)return i+1; // go from the end because most likely there will be more objects far from camera with higher LOD
    }
    return 0;

@@ -115,6 +115,7 @@ struct MainShaderClass
       *NightShadeColor    =&Dummy,
       *EnvColor           =&Dummy,
       *EnvMipMaps         =&Dummy,
+      *EnvMatrix          =&Dummy,
 
       *HdrBrightness=&Dummy,
       *HdrExp       =&Dummy,
@@ -135,6 +136,20 @@ struct MainShaderClass
       *SkyStarOrn     =&Dummy,
       *SkySunHighlight=&Dummy,
       *SkySunPos      =&Dummy,
+
+      *AtmospherePos,
+      *AtmosphereViewRange,
+      *AtmosphereLightPos,
+      *AtmospherePlanetRadius,
+    //*AtmosphereHeight,
+      *AtmosphereRadius,
+      *AtmosphereAltScaleRay,
+      *AtmosphereAltScaleMie,
+      *AtmosphereMieExtinction,
+      *AtmosphereLightScale,
+      *AtmosphereFogReduce,
+      *AtmosphereFogReduceDist,
+      *AtmosphereDarken,
 
       *FogColor       ,
       *FogDensity     ,
@@ -342,7 +357,7 @@ struct MainShaderClass
 
    // APPLY LIGHT
    Shader
-      *ApplyLight[3][3][2][2][2][2]; // [MultiSample] [ReflectMode] [AmbientOcclusion] [CelShade] [NightShade] [Glow]
+      *ApplyLight[4][3][2][2][2][2]; // [MultiSample] [ReflectMode] [AmbientOcclusion] [CelShade] [NightShade] [Glow]
    Shader* getApplyLight(Int multi_sample, Int reflect_mode, Bool ao, Bool cel_shade, Bool night_shade, Bool glow);
 
    // BLOOM
@@ -372,6 +387,10 @@ struct MainShaderClass
    Shader* getSkyA (Int multi_sample, Bool per_vertex, Bool density, Bool stars, Bool dither, Bool cloud);
 
    Shader* getSky(Int multi_sample, Bool flat, Bool density, Int textures, Bool stars, Bool dither, Bool per_vertex, Bool cloud);
+
+   Shader
+      *Atmosphere[3][2][2]; // [MultiSample] [Flat] [Dither]
+   Shader* getAtmosphere(Int multi_sample, Bool flat, Bool dither);
 }extern
    Sh;
 
@@ -481,14 +500,16 @@ struct DepthOfField
 struct WaterShader
 {
    ShaderFile *shader;
-   Shader     *Ocean                , //
-              *Lake                 , //
-              *River                , //
-              *OceanL[7][2][2][2][2], // [Shadows] [Soft ] [ReflectEnv] [ReflectMirror] [Refract]
-              *LakeL [7][2][2][2][2], // [Shadows] [Soft ] [ReflectEnv] [ReflectMirror] [Refract]
-              *RiverL[7][2][2][2][2], // [Shadows] [Soft ] [ReflectEnv] [ReflectMirror] [Refract]
-              *Apply    [2][2][2][2], //           [Depth] [ReflectEnv] [ReflectMirror] [Refract]
-              *Under                ;
+   Shader     *Ocean                   , //
+              *Lake                    , //
+              *River                   , //
+              *Ball                 [2], //                                                             [Flat]
+              *OceanL[7][2][2][2][2]   , // [ShadowMaps] [Soft ] [ReflectEnv] [ReflectMirror] [Refract]
+              * LakeL[7][2][2][2][2]   , // [ShadowMaps] [Soft ] [ReflectEnv] [ReflectMirror] [Refract]
+              *RiverL[7][2][2][2][2]   , // [ShadowMaps] [Soft ] [ReflectEnv] [ReflectMirror] [Refract]
+              * BallL[7][2][2][2][2][2], // [ShadowMaps] [Soft ] [ReflectEnv] [ReflectMirror] [Refract] [Flat]
+              *Apply    [2][2][2][2]   , //              [Depth] [ReflectEnv] [ReflectMirror] [Refract]
+              *Under                   ;
 
    ShaderParam
       *WaterMaterial,
@@ -501,6 +522,9 @@ struct WaterShader
       *WaterYMulAdd,
       *WaterPlanePos,
       *WaterPlaneNrm,
+      *WaterBallPosRadius,
+      *WaterBallX,
+      *WaterBallY,
       *WaterFlow,
       *WaterReflectMulAdd=&Sh.Dummy,
       *WaterClamp;
@@ -515,9 +539,9 @@ void Create2DSampler    ();
 void CreateFontSampler  ();
 void CreateRenderSampler();
 
-Str8 ShaderDeferred   (Int skin, Int materials, Int layout, Int bump_mode, Int alpha_test, Int detail, Int macro, Int color, Int mtrl_blend, Int heightmap, Int fx, Int tesselate);
-Str8 ShaderForward    (Int skin, Int materials, Int layout, Int bump_mode, Int alpha_test, Int reflect, Int emissive_map, Int detail, Int color, Int mtrl_blend, Int heightmap, Int fx, Int per_pixel,   Int light_dir, Int light_dir_shd, Int light_dir_shd_num,   Int light_point, Int light_point_shd,   Int light_linear, Int light_linear_shd,   Int light_cone, Int light_cone_shd,   Int tesselate);
-Str8 ShaderBlendLight (Int skin, Int color    , Int layout, Int bump_mode, Int alpha_test, Int alpha, Int reflect, Int emissive_map, Int fx, Int per_pixel, Int shadow_maps, Int tesselate);
+Str8 ShaderDeferred   (Int skin, Int materials, Int layout, Int bump_mode, Int alpha_test, Int detail, Int macro, Int color, Int mtrl_blend, Int uv_scale, Int heightmap, Int fx, Int tesselate);
+Str8 ShaderForward    (Int skin, Int materials, Int layout, Int bump_mode, Int alpha_test, Int reflect, Int emissive_map, Int detail, Int color, Int mtrl_blend, Int uv_scale, Int heightmap, Int fx, Int per_pixel,   Int light_dir, Int light_dir_shd, Int light_dir_shd_num,   Int light_point, Int light_point_shd,   Int light_linear, Int light_linear_shd,   Int light_cone, Int light_cone_shd,   Int tesselate);
+Str8 ShaderBlendLight (Int skin, Int color    , Int layout, Int bump_mode, Int alpha_test, Int alpha, Int reflect, Int emissive_map, Int uv_scale, Int fx, Int per_pixel, Int shadow_maps, Int tesselate);
 Str8 ShaderPosition   (Int skin, Int color, Int alpha_test, Int test_blend, Int fx, Int tesselate);
 Str8 ShaderBlend      (Int skin, Int color, Int layout, Int bump_mode, Int reflect, Int emissive_map);
 Str8 ShaderSetColor   (Int skin, Int color, Int alpha_test, Int tesselate);
@@ -534,18 +558,18 @@ struct DefaultShaders
    Bool valid,
         detail, macro, reflect,
         mtrl_blend,
-        heightmap,
-        tex, normal, color, size,
+        uv_scale,
+        uv, normal, color, size,
         fur, grass, leaf,
         alpha, alpha_blend, alpha_blend_no_light, alpha_blend_light,
         skin,
         tesselate,
         clear_coat;
-   Byte materials, alpha_test, layout, bump, emissive, fx;
+   Byte materials, heightmap, alpha_test, layout, bump, emissive, fx;
 
-   void      init(C Material *material[4], MESH_FLAG mesh_flag, Int lod_index, Bool heightmap);
-   DefaultShaders(C Material *material[4], MESH_FLAG mesh_flag, Int lod_index, Bool heightmap) {init(material, mesh_flag, lod_index, heightmap);}
-   DefaultShaders(C Material *material   , MESH_FLAG mesh_flag, Int lod_index, Bool heightmap);
+   void      init(C Material *material[4], MESH_FLAG mesh_flag, Int lod_index, Byte heightmap);
+   DefaultShaders(C Material *material[4], MESH_FLAG mesh_flag, Int lod_index, Byte heightmap) {init(material, mesh_flag, lod_index, heightmap);}
+   DefaultShaders(C Material *material   , MESH_FLAG mesh_flag, Int lod_index, Byte heightmap);
 
    Shader* EarlyZ  ()C;
    Shader* Opaque  (Bool mirror=false)C;

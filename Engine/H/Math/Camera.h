@@ -132,6 +132,8 @@ Bool ToFullScreenRect(C Ball     &ball   , Rect &rect); // project 3D ball    to
 Bool ToFullScreenRect(C BallM    &ball   , Rect &rect); // project 3D ball    to 2D (full and not gui) on-screen rectangle, false on fail (shape is behind the camera)
 Bool ToFullScreenRect(C Pyramid  &pyramid, Rect &rect); // project 3D pyramid to 2D (full and not gui) on-screen rectangle, false on fail (shape is behind the camera)
 Bool ToFullScreenRect(C PyramidM &pyramid, Rect &rect); // project 3D pyramid to 2D (full and not gui) on-screen rectangle, false on fail (shape is behind the camera)
+
+Bool ToEyeRect(Rect &rect); // convert rectangle to active eye rect, false if invalid
 #endif
 /******************************************************************************/
 #if EE_PRIVATE

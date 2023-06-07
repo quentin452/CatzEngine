@@ -1,7 +1,7 @@
 /******************************************************************************/
 #include "!Header.h"
 /******************************************************************************
-SKIN, MATERIALS, LAYOUT, BUMP_MODE, ALPHA_TEST, REFLECT, EMISSIVE_MAP, DETAIL, COLORS, MTRL_BLEND, HEIGHTMAP, FX, PER_PIXEL
+SKIN, MATERIALS, LAYOUT, BUMP_MODE, ALPHA_TEST, REFLECT, EMISSIVE_MAP, DETAIL, COLORS, MTRL_BLEND, UV_SCALE, HEIGHTMAP, FX, PER_PIXEL
 LIGHT_DIR, LIGHT_DIR_SHD, LIGHT_DIR_SHD_NUM
 LIGHT_POINT, LIGHT_POINT_SHD
 LIGHT_LINEAR, LIGHT_LINEAR_SHD
@@ -93,7 +93,7 @@ void VS
 
 #if SET_UV
    O.uv=vtx.uv(HEIGHTMAP);
-   if(HEIGHTMAP && MATERIALS==1)O.uv*=Material.uv_scale;
+   if(UV_SCALE && MATERIALS==1)O.uv*=Material.uv_scale;
 #endif
 
 #if ALPHA_TEST==ALPHA_TEST_DITHER
@@ -395,10 +395,19 @@ VecH4 PS
 
    // assuming that in multi materials LAYOUT!=0
    Vec2 uv0, uv1, uv2, uv3;
-                   uv0=I.uv*MultiMaterial0.uv_scale;
-                   uv1=I.uv*MultiMaterial1.uv_scale;
-   if(MATERIALS>=3)uv2=I.uv*MultiMaterial2.uv_scale;
-   if(MATERIALS>=4)uv3=I.uv*MultiMaterial3.uv_scale;
+   if(UV_SCALE)
+   {
+                      uv0=I.uv*MultiMaterial0.uv_scale;
+                      uv1=I.uv*MultiMaterial1.uv_scale;
+      if(MATERIALS>=3)uv2=I.uv*MultiMaterial2.uv_scale;
+      if(MATERIALS>=4)uv3=I.uv*MultiMaterial3.uv_scale;
+   }else
+   {
+                      uv0=I.uv;
+                      uv1=I.uv;
+      if(MATERIALS>=3)uv2=I.uv;
+      if(MATERIALS>=4)uv3=I.uv;
+   }
 
    // #MaterialTextureLayout #MaterialTextureLayoutDetail
 

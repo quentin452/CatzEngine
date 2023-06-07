@@ -235,6 +235,8 @@ private:
 void InitVtxInd();
 void ShutVtxInd();
 
+Int VtxSize(MESH_FLAG flag, UInt compress);
+
 #if GL
    INLINE void SetDefaultVAO() {glBindVertexArray(VAO);}
 #else

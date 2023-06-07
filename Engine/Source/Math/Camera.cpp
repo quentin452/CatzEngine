@@ -55,15 +55,16 @@ Camera& Camera::setSpherical(C VecD &at, Flt yaw, Flt pitch, Flt roll, Flt dist)
 }
 Camera& Camera::setSpherical()
 {
-   matrix.setPos(0, 0, -dist).rotateZ(-roll).rotateXY(-pitch, -yaw).move(at);
+   matrix.orn().setRotateZ(-roll).rotateXY(-pitch, -yaw);
+   matrix.pos=at-dist*matrix.z;
    return T;
 }
 Camera& Camera::setFromAt(C VecD &from, C VecD &at, Flt roll)
 {
    matrix.z=at-from; dist=matrix.z.normalize();
-   matrix.x=Cross(Vec(0, 1, 0), matrix.z);
-   if(!dist || !matrix.x.normalize())matrix.identity();else
+   if(!dist)matrix.orn().identity();else
    {
+      matrix.x=CrossUp(matrix.z); if(matrix.x.normalize()<=EPS)matrix.x.set(1, 0, 0); // right
       matrix.x*=Matrix3().setRotate(matrix.z, -roll);
       matrix.y=Cross(matrix.z, matrix.x);
    }
@@ -77,7 +78,7 @@ Camera& Camera::setFromAt(C VecD &from, C VecD &at, Flt roll)
 Camera& Camera::setPosDir(C VecD &pos, C Vec &dir, C Vec &up)
 {
    Vec dir_n=                 dir   ; dist=dir_n.normalize(); if(!dist)dir_n.set(0, 0, 1);
-   Vec  up_f=PointOnPlane(up, dir_n);   if(!up_f.normalize())           up_f=PerpN(dir_n);
+   Vec  up_f=PointOnPlane(up, dir_n);    if(up_f.normalize()<=EPS)      up_f=PerpN(dir_n);
    T.matrix.setPosDir(pos, dir_n, up_f);
    T.at   =pos+dir;
    T.yaw  =-Angle(matrix.z.zx());
@@ -151,6 +152,7 @@ void ActiveCamChanged()
 {
    ActiveCamZ=Dot(ActiveCam.matrix.pos, ActiveCam.matrix.z);
    SetEyeMatrix(); SetCam(ActiveCam.matrix, ActiveCam._matrix_prev); Frustum.set();
+   D.envMatrixSet();
 }
 void Camera::set()C // this should be called only outside of 'Renderer' rendering
 {
@@ -490,25 +492,48 @@ Bool ToScreenRect(C Ball &ball, Rect &rect)
    if(!FrustumMain(ball))return false;
    if(Cuts(CamMatrix.pos, ball)){rect=D.viewRect(); return true;}
 #if 1
-   Flt  l, s, c;
+   Flt  len2, sin2, cos, r2=Sqr(ball.r);
    Vec2 screen;
    Vec  zd, d, z=ball.pos-CamMatrix.pos; // no need for 'VecD'
 
-   zd=PointOnPlane(z, CamMatrix.y); l=zd.normalize(); s=ball.r/l;
-   if(s>=1)rect.setX(D.viewRect().min.x, D.viewRect().max.x);else
+   zd=PointOnPlane(z, CamMatrix.y); len2=zd.length2();
+   if(r2>=len2)rect.setX(D.viewRect().min.x, D.viewRect().max.x);else
    {
-      c=CosSin(s); d=Cross(CamMatrix.y, zd); d.setLength(c*ball.r); zd*=-s*ball.r; zd+=ball.pos; if(Renderer.mirror())d.chs();
-      rect.setX((PosToScreen(zd-d, screen) ? screen.x : D.viewRect().min.x),
-                (PosToScreen(zd+d, screen) ? screen.x : D.viewRect().max.x));
+      sin2=r2/len2; cos=CosSin2(sin2); d=Cross(CamMatrix.y, zd); d.setLength(cos*ball.r); zd*=-sin2; zd+=ball.pos; if(Renderer.mirror())d.chs();
+      rect.setX(PosToScreen(zd-d, screen) ? screen.x : D.viewRect().min.x,
+                PosToScreen(zd+d, screen) ? screen.x : D.viewRect().max.x);
       if(!rect.validX())return false;
    }
 
-   zd=PointOnPlane(z, CamMatrix.x); l=zd.normalize(); s=ball.r/l;
-   if(s>=1)rect.setY(D.viewRect().min.y, D.viewRect().max.y);else
+   zd=PointOnPlane(z, CamMatrix.x); len2=zd.length2();
+   if(r2>=len2)rect.setY(D.viewRect().min.y, D.viewRect().max.y);else
    {
-      c=CosSin(s); d=Cross(CamMatrix.x, zd); d.setLength(c*ball.r); zd*=-s*ball.r; zd+=ball.pos; if(Renderer.mirror())d.chs();
-      rect.setY((PosToScreen(zd+d, screen) ? screen.y : D.viewRect().min.y),
-                (PosToScreen(zd-d, screen) ? screen.y : D.viewRect().max.y));
+      sin2=r2/len2; cos=CosSin2(sin2); d=Cross(CamMatrix.x, zd); d.setLength(cos*ball.r); zd*=-sin2; zd+=ball.pos; if(Renderer.mirror())d.chs();
+      rect.setY(PosToScreen(zd+d, screen) ? screen.y : D.viewRect().min.y,
+                PosToScreen(zd-d, screen) ? screen.y : D.viewRect().max.y);
+      if(!rect.validY())return false;
+   }
+   return true;
+#elif 1
+   Flt  len, sin, cos;
+   Vec2 screen;
+   Vec  zd, d, z=ball.pos-CamMatrix.pos; // no need for 'VecD'
+
+   zd=PointOnPlane(z, CamMatrix.y); len=zd.normalize(); sin=ball.r/len;
+   if(sin>=1)rect.setX(D.viewRect().min.x, D.viewRect().max.x);else
+   {
+      cos=CosSin(sin); d=Cross(CamMatrix.y, zd); d.setLength(cos*ball.r); zd*=-sin*ball.r; zd+=ball.pos; if(Renderer.mirror())d.chs();
+      rect.setX(PosToScreen(zd-d, screen) ? screen.x : D.viewRect().min.x,
+                PosToScreen(zd+d, screen) ? screen.x : D.viewRect().max.x);
+      if(!rect.validX())return false;
+   }
+
+   zd=PointOnPlane(z, CamMatrix.x); len=zd.normalize(); sin=ball.r/len;
+   if(sin>=1)rect.setY(D.viewRect().min.y, D.viewRect().max.y);else
+   {
+      cos=CosSin(sin); d=Cross(CamMatrix.x, zd); d.setLength(cos*ball.r); zd*=-sin*ball.r; zd+=ball.pos; if(Renderer.mirror())d.chs();
+      rect.setY(PosToScreen(zd+d, screen) ? screen.y : D.viewRect().min.y,
+                PosToScreen(zd-d, screen) ? screen.y : D.viewRect().max.y);
       if(!rect.validY())return false;
    }
    return true;
@@ -520,96 +545,87 @@ Bool ToScreenRect(C BallM &ball, Rect &rect)
 {
    if(!FrustumMain(ball))return false;
    if(Cuts(CamMatrix.pos, ball)){rect=D.viewRect(); return true;}
-#if 1
-   Flt  l, s, c;
+
+   Flt  len2, sin2, cos, r2=Sqr(ball.r);
    Vec2 screen;
    Vec  zd, d, z=ball.pos-CamMatrix.pos; // no need for 'VecD'
    VecD zp;
 
-   zd=PointOnPlane(z, CamMatrix.y); l=zd.normalize(); s=ball.r/l;
-   if(s>=1)rect.setX(D.viewRect().min.x, D.viewRect().max.x);else
+   zd=PointOnPlane(z, CamMatrix.y); len2=zd.length2();
+   if(r2>=len2)rect.setX(D.viewRect().min.x, D.viewRect().max.x);else
    {
-      c=CosSin(s); d=Cross(CamMatrix.y, zd); d.setLength(c*ball.r); zd*=-s*ball.r; zp=zd+ball.pos; if(Renderer.mirror())d.chs();
-      rect.setX((PosToScreen(zp-d, screen) ? screen.x : D.viewRect().min.x),
-                (PosToScreen(zp+d, screen) ? screen.x : D.viewRect().max.x));
+      sin2=r2/len2; cos=CosSin2(sin2); d=Cross(CamMatrix.y, zd); d.setLength(cos*ball.r); zd*=-sin2; zp=zd+ball.pos; if(Renderer.mirror())d.chs();
+      rect.setX(PosToScreen(zp-d, screen) ? screen.x : D.viewRect().min.x,
+                PosToScreen(zp+d, screen) ? screen.x : D.viewRect().max.x);
       if(!rect.validX())return false;
    }
 
-   zd=PointOnPlane(z, CamMatrix.x); l=zd.normalize(); s=ball.r/l;
-   if(s>=1)rect.setY(D.viewRect().min.y, D.viewRect().max.y);else
+   zd=PointOnPlane(z, CamMatrix.x); len2=zd.length2();
+   if(r2>=len2)rect.setY(D.viewRect().min.y, D.viewRect().max.y);else
    {
-      c=CosSin(s); d=Cross(CamMatrix.x, zd); d.setLength(c*ball.r); zd*=-s*ball.r; zp=zd+ball.pos; if(Renderer.mirror())d.chs();
-      rect.setY((PosToScreen(zp+d, screen) ? screen.y : D.viewRect().min.y),
-                (PosToScreen(zp-d, screen) ? screen.y : D.viewRect().max.y));
+      sin2=r2/len2; cos=CosSin2(sin2); d=Cross(CamMatrix.x, zd); d.setLength(cos*ball.r); zd*=-sin2; zp=zd+ball.pos; if(Renderer.mirror())d.chs();
+      rect.setY(PosToScreen(zp+d, screen) ? screen.y : D.viewRect().min.y,
+                PosToScreen(zp-d, screen) ? screen.y : D.viewRect().max.y);
       if(!rect.validY())return false;
    }
    return true;
-#else
-   return ToScreenRect(BoxD(ball), rect);
-#endif
 }
 Bool ToFullScreenRect(C Ball &ball, Rect &rect)
 {
    if(!FrustumMain(ball))return false;
    if(Cuts(CamMatrix.pos, ball)){rect=D.viewRect(); return true;}
-#if 1
-   Flt  l, s, c;
+
+   Flt  len2, sin2, cos, r2=Sqr(ball.r);
    Vec2 screen;
    Vec  zd, d, z=ball.pos-CamMatrix.pos; // no need for 'VecD'
 
-   zd=PointOnPlane(z, CamMatrix.y); l=zd.normalize(); s=ball.r/l;
-   if(s>=1)rect.setX(D.viewRect().min.x, D.viewRect().max.x);else
+   zd=PointOnPlane(z, CamMatrix.y); len2=zd.length2();
+   if(r2>=len2)rect.setX(D.viewRect().min.x, D.viewRect().max.x);else
    {
-      c=CosSin(s); d=Cross(CamMatrix.y, zd); d.setLength(c*ball.r); zd*=-s*ball.r; zd+=ball.pos; if(Renderer.mirror())d.chs();
+      sin2=r2/len2; cos=CosSin2(sin2); d=Cross(CamMatrix.y, zd); d.setLength(cos*ball.r); zd*=-sin2; zd+=ball.pos; if(Renderer.mirror())d.chs();
       rect.setX((PosToFullScreen(zd-d, screen) ? screen.x : D.viewRect().min.x),
                 (PosToFullScreen(zd+d, screen) ? screen.x : D.viewRect().max.x));
       if(!rect.validX())return false;
    }
 
-   zd=PointOnPlane(z, CamMatrix.x); l=zd.normalize(); s=ball.r/l;
-   if(s>=1)rect.setY(D.viewRect().min.y, D.viewRect().max.y);else
+   zd=PointOnPlane(z, CamMatrix.x); len2=zd.length2();
+   if(r2>=len2)rect.setY(D.viewRect().min.y, D.viewRect().max.y);else
    {
-      c=CosSin(s); d=Cross(CamMatrix.x, zd); d.setLength(c*ball.r); zd*=-s*ball.r; zd+=ball.pos; if(Renderer.mirror())d.chs();
+      sin2=r2/len2; cos=CosSin2(sin2); d=Cross(CamMatrix.x, zd); d.setLength(cos*ball.r); zd*=-sin2; zd+=ball.pos; if(Renderer.mirror())d.chs();
       rect.setY((PosToFullScreen(zd+d, screen) ? screen.y : D.viewRect().min.y),
                 (PosToFullScreen(zd-d, screen) ? screen.y : D.viewRect().max.y));
       if(!rect.validY())return false;
    }
    return true;
-#else
-   return ToFullScreenRect(Box(ball), rect);
-#endif
 }
 Bool ToFullScreenRect(C BallM &ball, Rect &rect)
 {
    if(!FrustumMain(ball))return false;
    if(Cuts(CamMatrix.pos, ball)){rect=D.viewRect(); return true;}
-#if 1
-   Flt  l, s, c;
+
+   Flt  len2, sin2, cos, r2=Sqr(ball.r);
    Vec2 screen;
    Vec  zd, d, z=ball.pos-CamMatrix.pos; // no need for 'VecD'
    VecD zp;
 
-   zd=PointOnPlane(z, CamMatrix.y); l=zd.normalize(); s=ball.r/l;
-   if(s>=1)rect.setX(D.viewRect().min.x, D.viewRect().max.x);else
+   zd=PointOnPlane(z, CamMatrix.y); len2=zd.length2();
+   if(r2>=len2)rect.setX(D.viewRect().min.x, D.viewRect().max.x);else
    {
-      c=CosSin(s); d=Cross(CamMatrix.y, zd); d.setLength(c*ball.r); zd*=-s*ball.r; zp=zd+ball.pos; if(Renderer.mirror())d.chs();
+      sin2=r2/len2; cos=CosSin2(sin2); d=Cross(CamMatrix.y, zd); d.setLength(cos*ball.r); zd*=-sin2; zp=zd+ball.pos; if(Renderer.mirror())d.chs();
       rect.setX((PosToFullScreen(zp-d, screen) ? screen.x : D.viewRect().min.x),
                 (PosToFullScreen(zp+d, screen) ? screen.x : D.viewRect().max.x));
       if(!rect.validX())return false;
    }
 
-   zd=PointOnPlane(z, CamMatrix.x); l=zd.normalize(); s=ball.r/l;
-   if(s>=1)rect.setY(D.viewRect().min.y, D.viewRect().max.y);else
+   zd=PointOnPlane(z, CamMatrix.x); len2=zd.length2();
+   if(r2>=len2)rect.setY(D.viewRect().min.y, D.viewRect().max.y);else
    {
-      c=CosSin(s); d=Cross(CamMatrix.x, zd); d.setLength(c*ball.r); zd*=-s*ball.r; zp=zd+ball.pos; if(Renderer.mirror())d.chs();
+      sin2=r2/len2; cos=CosSin2(sin2); d=Cross(CamMatrix.x, zd); d.setLength(cos*ball.r); zd*=-sin2; zp=zd+ball.pos; if(Renderer.mirror())d.chs();
       rect.setY((PosToFullScreen(zp+d, screen) ? screen.y : D.viewRect().min.y),
                 (PosToFullScreen(zp-d, screen) ? screen.y : D.viewRect().max.y));
       if(!rect.validY())return false;
    }
    return true;
-#else
-   return ToFullScreenRect(BoxD(ball), rect);
-#endif
 }
 Bool ToScreenRect(C Capsule &capsule, Rect &rect)
 {
@@ -617,52 +633,51 @@ Bool ToScreenRect(C Capsule &capsule, Rect &rect)
    if(!FrustumMain(capsule))return false;
    if(Cuts(CamMatrix.pos, capsule)){rect=D.viewRect(); return true;}
 #if 1
-   Flt  l, s, c;
+   Flt  len2, sin2, cos, r2=Sqr(capsule.r);
    Vec2 screen;
-   Vec  z, zd, d;
-   Ball ball;
+   Vec  z, zd, d, ball_pos;
 
    // upper ball
    {
-      ball=capsule.ballU();
-      z   =ball.pos-CamMatrix.pos; // no need for 'VecD'
+      ball_pos=capsule.ballUPos();
+      z       =ball_pos-CamMatrix.pos; // no need for 'VecD'
 
-      zd=PointOnPlane(z, CamMatrix.y); l=zd.normalize(); s=ball.r/l;
-      if(s>=1)rect.setX(D.viewRect().min.x, D.viewRect().max.x);else
+      zd=PointOnPlane(z, CamMatrix.y); len2=zd.length2();
+      if(r2>=len2)rect.setX(D.viewRect().min.x, D.viewRect().max.x);else
       {
-         c=CosSin(s); d=Cross(CamMatrix.y, zd); d.setLength(c*ball.r); zd*=-s*ball.r; zd+=ball.pos; if(Renderer.mirror())d.chs();
-         rect.setX((PosToScreen(zd-d, screen) ? screen.x : D.viewRect().min.x),
-                   (PosToScreen(zd+d, screen) ? screen.x : D.viewRect().max.x));
+         sin2=r2/len2; cos=CosSin2(sin2); d=Cross(CamMatrix.y, zd); d.setLength(cos*capsule.r); zd*=-sin2; zd+=ball_pos; if(Renderer.mirror())d.chs();
+         rect.setX(PosToScreen(zd-d, screen) ? screen.x : D.viewRect().min.x,
+                   PosToScreen(zd+d, screen) ? screen.x : D.viewRect().max.x);
       }
 
-      zd=PointOnPlane(z, CamMatrix.x); l=zd.normalize(); s=ball.r/l;
-      if(s>=1)rect.setY(D.viewRect().min.y, D.viewRect().max.y);else
+      zd=PointOnPlane(z, CamMatrix.x); len2=zd.length2();
+      if(r2>=len2)rect.setY(D.viewRect().min.y, D.viewRect().max.y);else
       {
-         c=CosSin(s); d=Cross(CamMatrix.x, zd); d.setLength(c*ball.r); zd*=-s*ball.r; zd+=ball.pos; if(Renderer.mirror())d.chs();
-         rect.setY((PosToScreen(zd+d, screen) ? screen.y : D.viewRect().min.y),
-                   (PosToScreen(zd-d, screen) ? screen.y : D.viewRect().max.y));
+         sin2=r2/len2; cos=CosSin2(sin2); d=Cross(CamMatrix.x, zd); d.setLength(cos*capsule.r); zd*=-sin2; zd+=ball_pos; if(Renderer.mirror())d.chs();
+         rect.setY(PosToScreen(zd+d, screen) ? screen.y : D.viewRect().min.y,
+                   PosToScreen(zd-d, screen) ? screen.y : D.viewRect().max.y);
       }
    }
 
    // lower ball
    {
-      ball=capsule.ballD();
-      z   =ball.pos-CamMatrix.pos; // no need for 'VecD'
+      ball_pos=capsule.ballDPos();
+      z       =ball_pos-CamMatrix.pos; // no need for 'VecD'
 
-      zd=PointOnPlane(z, CamMatrix.y); l=zd.normalize(); s=ball.r/l;
-      if(s>=1)rect.setX(D.viewRect().min.x, D.viewRect().max.x);else
+      zd=PointOnPlane(z, CamMatrix.y); len2=zd.length2();
+      if(r2>=len2)rect.setX(D.viewRect().min.x, D.viewRect().max.x);else
       {
-         c=CosSin(s); d=Cross(CamMatrix.y, zd); d.setLength(c*ball.r); zd*=-s*ball.r; zd+=ball.pos; if(Renderer.mirror())d.chs();
-         rect.includeX((PosToScreen(zd-d, screen) ? screen.x : D.viewRect().min.x),
-                       (PosToScreen(zd+d, screen) ? screen.x : D.viewRect().max.x));
+         sin2=r2/len2; cos=CosSin2(sin2); d=Cross(CamMatrix.y, zd); d.setLength(cos*capsule.r); zd*=-sin2; zd+=ball_pos; if(Renderer.mirror())d.chs();
+         rect.includeX(PosToScreen(zd-d, screen) ? screen.x : D.viewRect().min.x,
+                       PosToScreen(zd+d, screen) ? screen.x : D.viewRect().max.x);
       }
 
-      zd=PointOnPlane(z, CamMatrix.x); l=zd.normalize(); s=ball.r/l;
-      if(s>=1)rect.setY(D.viewRect().min.y, D.viewRect().max.y);else
+      zd=PointOnPlane(z, CamMatrix.x); len2=zd.length2();
+      if(r2>=len2)rect.setY(D.viewRect().min.y, D.viewRect().max.y);else
       {
-         c=CosSin(s); d=Cross(CamMatrix.x, zd); d.setLength(c*ball.r); zd*=-s*ball.r; zd+=ball.pos; if(Renderer.mirror())d.chs();
-         rect.includeY((PosToScreen(zd+d, screen) ? screen.y : D.viewRect().min.y),
-                       (PosToScreen(zd-d, screen) ? screen.y : D.viewRect().max.y));
+         sin2=r2/len2; cos=CosSin2(sin2); d=Cross(CamMatrix.x, zd); d.setLength(cos*capsule.r); zd*=-sin2; zd+=ball_pos; if(Renderer.mirror())d.chs();
+         rect.includeY(PosToScreen(zd+d, screen) ? screen.y : D.viewRect().min.y,
+                       PosToScreen(zd-d, screen) ? screen.y : D.viewRect().max.y);
       }
    }
 
@@ -680,53 +695,53 @@ Bool ToScreenRect(C CapsuleM &capsule, Rect &rect)
    if(capsule.isBall())return ToScreenRect(BallM(capsule), rect);
    if(!FrustumMain(capsule))return false;
    if(Cuts(CamMatrix.pos, capsule)){rect=D.viewRect(); return true;}
-   Flt   l, s, c;
-   Vec2  screen;
-   Vec   z, zd, d;
-   VecD  zp;
-   BallM ball;
+
+   Flt  len2, sin2, cos, r2=Sqr(capsule.r);
+   Vec2 screen;
+   Vec  z, zd, d;
+   VecD zp, ball_pos;
 
    // upper ball
    {
-      ball=capsule.ballU();
-      z   =ball.pos-CamMatrix.pos; // no need for 'VecD'
+      ball_pos=capsule.ballUPos();
+      z       =ball_pos-CamMatrix.pos; // no need for 'VecD'
 
-      zd=PointOnPlane(z, CamMatrix.y); l=zd.normalize(); s=ball.r/l;
-      if(s>=1)rect.setX(D.viewRect().min.x, D.viewRect().max.x);else
+      zd=PointOnPlane(z, CamMatrix.y); len2=zd.length2();
+      if(r2>=len2)rect.setX(D.viewRect().min.x, D.viewRect().max.x);else
       {
-         c=CosSin(s); d=Cross(CamMatrix.y, zd); d.setLength(c*ball.r); zd*=-s*ball.r; zp=zd+ball.pos; if(Renderer.mirror())d.chs();
-         rect.setX((PosToScreen(zp-d, screen) ? screen.x : D.viewRect().min.x),
-                   (PosToScreen(zp+d, screen) ? screen.x : D.viewRect().max.x));
+         sin2=r2/len2; cos=CosSin2(sin2); d=Cross(CamMatrix.y, zd); d.setLength(cos*capsule.r); zd*=-sin2; zp=zd+ball_pos; if(Renderer.mirror())d.chs();
+         rect.setX(PosToScreen(zp-d, screen) ? screen.x : D.viewRect().min.x,
+                   PosToScreen(zp+d, screen) ? screen.x : D.viewRect().max.x);
       }
 
-      zd=PointOnPlane(z, CamMatrix.x); l=zd.normalize(); s=ball.r/l;
-      if(s>=1)rect.setY(D.viewRect().min.y, D.viewRect().max.y);else
+      zd=PointOnPlane(z, CamMatrix.x); len2=zd.length2();
+      if(r2>=len2)rect.setY(D.viewRect().min.y, D.viewRect().max.y);else
       {
-         c=CosSin(s); d=Cross(CamMatrix.x, zd); d.setLength(c*ball.r); zd*=-s*ball.r; zp=zd+ball.pos; if(Renderer.mirror())d.chs();
-         rect.setY((PosToScreen(zp+d, screen) ? screen.y : D.viewRect().min.y),
-                   (PosToScreen(zp-d, screen) ? screen.y : D.viewRect().max.y));
+         sin2=r2/len2; cos=CosSin2(sin2); d=Cross(CamMatrix.x, zd); d.setLength(cos*capsule.r); zd*=-sin2; zp=zd+ball_pos; if(Renderer.mirror())d.chs();
+         rect.setY(PosToScreen(zp+d, screen) ? screen.y : D.viewRect().min.y,
+                   PosToScreen(zp-d, screen) ? screen.y : D.viewRect().max.y);
       }
    }
 
    // lower ball
    {
-      ball=capsule.ballD();
-      z   =ball.pos-CamMatrix.pos; // no need for 'VecD'
+      ball_pos=capsule.ballDPos();
+      z       =ball_pos-CamMatrix.pos; // no need for 'VecD'
 
-      zd=PointOnPlane(z, CamMatrix.y); l=zd.normalize(); s=ball.r/l;
-      if(s>=1)rect.setX(D.viewRect().min.x, D.viewRect().max.x);else
+      zd=PointOnPlane(z, CamMatrix.y); len2=zd.length2();
+      if(r2>=len2)rect.setX(D.viewRect().min.x, D.viewRect().max.x);else
       {
-         c=CosSin(s); d=Cross(CamMatrix.y, zd); d.setLength(c*ball.r); zd*=-s*ball.r; zp=zd+ball.pos; if(Renderer.mirror())d.chs();
-         rect.includeX((PosToScreen(zp-d, screen) ? screen.x : D.viewRect().min.x),
-                       (PosToScreen(zp+d, screen) ? screen.x : D.viewRect().max.x));
+         sin2=r2/len2; cos=CosSin2(sin2); d=Cross(CamMatrix.y, zd); d.setLength(cos*capsule.r); zd*=-sin2; zp=zd+ball_pos; if(Renderer.mirror())d.chs();
+         rect.includeX(PosToScreen(zp-d, screen) ? screen.x : D.viewRect().min.x,
+                       PosToScreen(zp+d, screen) ? screen.x : D.viewRect().max.x);
       }
 
-      zd=PointOnPlane(z, CamMatrix.x); l=zd.normalize(); s=ball.r/l;
-      if(s>=1)rect.setY(D.viewRect().min.y, D.viewRect().max.y);else
+      zd=PointOnPlane(z, CamMatrix.x); len2=zd.length2();
+      if(r2>=len2)rect.setY(D.viewRect().min.y, D.viewRect().max.y);else
       {
-         c=CosSin(s); d=Cross(CamMatrix.x, zd); d.setLength(c*ball.r); zd*=-s*ball.r; zp=zd+ball.pos; if(Renderer.mirror())d.chs();
-         rect.includeY((PosToScreen(zp+d, screen) ? screen.y : D.viewRect().min.y),
-                       (PosToScreen(zp-d, screen) ? screen.y : D.viewRect().max.y));
+         sin2=r2/len2; cos=CosSin2(sin2); d=Cross(CamMatrix.x, zd); d.setLength(cos*capsule.r); zd*=-sin2; zp=zd+ball_pos; if(Renderer.mirror())d.chs();
+         rect.includeY(PosToScreen(zp+d, screen) ? screen.y : D.viewRect().min.y,
+                       PosToScreen(zp-d, screen) ? screen.y : D.viewRect().max.y);
       }
    }
 
@@ -784,6 +799,27 @@ Bool ToScreenRect(C Shape *shape, Int shapes, Rect &rect)
       }
    }
    return NO_BRANCH ? rect.validX() : in;
+}
+/******************************************************************************/
+Bool ToEyeRect(Rect &rect)
+{
+   Flt D_w_2=D.w()*0.5f;
+
+   // apply projection offset
+   Flt po=ProjMatrixEyeOffset[Renderer._eye]*D_w_2;
+   if(rect.min.x>D.rect().min.x+EPS)rect.min.x+=po;
+   if(rect.max.x<D.rect().max.x-EPS)rect.max.x+=po;
+
+   // apply viewport offset
+   Flt vo=D_w_2*SignBool(Renderer._eye!=0);
+   rect.min.x+=vo;
+   rect.max.x+=vo;
+
+   // clamp and test if valid
+   if(Renderer._eye){if(rect.min.x<0)if(rect.max.x>0)rect.min.x=0;else return false;}
+   else             {if(rect.max.x>0)if(rect.min.x<0)rect.max.x=0;else return false;}
+
+   return true;
 }
 /******************************************************************************/
 Int CompareTransparencyOrderDepth(C Vec &pos_a, C Vec &pos_b)

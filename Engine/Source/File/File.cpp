@@ -1746,8 +1746,8 @@ Bool File::equal(File &f, Long max_size)
       for(; max_size>0; )
       {
          Int l=Min(buf_size, max_size); max_size-=l;
-         if(!getFast (buf, l) || !f.getFast(buf2, l))return false;
-         if(!EqualMem(buf,                  buf2, l))return false;
+         if(!getFast     (buf, l) || !f.getFast(buf2, l))return false;
+         if(!EqualMemFast(buf,                  buf2, l))return false;
       }
    }
    return true;

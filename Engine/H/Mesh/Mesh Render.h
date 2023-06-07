@@ -38,13 +38,15 @@ struct MeshRender // Mesh Renderable (Hardware: contains Vertexes + Triangles)
    Int  vtxs()C {return _vb.vtxs()      ;} // get number of vertexes
    Int  tris()C {return    _tris        ;} // get number of triangles
 
-   UInt   memUsage(                )C {return _vb.memUsage()+_ib.memUsage();} // get memory usage of the mesh (in bytes)
-   Int    vtxSize (                )C {return _vb.vtxSize ()               ;} // get size of a single vertex
-   Int    vtxOfs  (MESH_FLAG elm   )C;                                        // get offset of a specified vertex component in the vertex data, -1 if not found
-   Bool   indBit16(                )C {return _ib.bit16()                  ;} // if  indices are 16-bit (false for 32-bit)
-   MESH_FLAG  flag(                )C {return _flag                        ;} // get available data
-   Bool     getBox(Box &box        )C;                                        // get box encapsulating the mesh, this method iterates through all vertexes, false on fail (if no vertexes are present)
-   Flt        area(Vec *center=null)C;                                        // get surface area of all mesh faces, 'center'=if specified then it will be calculated as the average surface center
+   UInt   memUsage(                           )C {return _vb.memUsage()+_ib.memUsage();} // get memory usage of the mesh (in bytes)
+   Int    vtxSize (                           )C {return _vb.vtxSize ()               ;} // get size of a single vertex
+   Int    vtxOfs  (MESH_FLAG elm              )C;                                        // get offset of a specified vertex component in the vertex data, -1 if not found
+   Bool   indBit16(                           )C {return _ib.bit16()                  ;} // if  indices are 16-bit (false for 32-bit)
+   MESH_FLAG  flag(                           )C {return _flag                        ;} // get available data
+   Bool     getBox(Box &box                   )C;                                        // get box encapsulating the mesh, this method iterates through all vertexes, false on fail (if no vertexes are present)
+   Bool     getBox(Box &box, C Matrix3 &matrix)C;                                        // get box encapsulating the mesh, this method iterates through all vertexes, 'matrix'=matrix affecting vertex positions, false on fail (if no vertexes are present)
+   Bool     getBox(Box &box, C Matrix  &matrix)C;                                        // get box encapsulating the mesh, this method iterates through all vertexes, 'matrix'=matrix affecting vertex positions, false on fail (if no vertexes are present)
+   Flt        area(Vec *center=null           )C;                                        // get surface area of all mesh faces, 'center'=if specified then it will be calculated as the average surface center
 
    // transform
    void scaleMove(C Vec &scale, C Vec &move=VecZero);

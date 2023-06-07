@@ -31,7 +31,7 @@ struct Command
 
    CMD_TYPE      type;
    Memc<Command> cmds, cmds_false; // 'cmds_false' is used for "if(..).. else cmds_false;"
-   union // all ranges may be invalid "max<min", ranges are described as "VecI2.x=min, VecI2.y=max"
+   union // all ranges may be invalid "min>max", ranges are described as "VecI2.x=min, VecI2.y=max"
    {
       VecI2 raw_range;
       For  _for      ;

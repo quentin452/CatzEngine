@@ -180,6 +180,7 @@ Bool DisplayState::depthWrite      (         Bool write           ) {Bool last=D
 void DisplayState::depthFunc       (                     UInt func) {                          if(                                         D._depth_func!=func){                                   D._depth_func=func; SetDS();}}
 void DisplayState::depthOnWrite    (Bool on, Bool write           ) {                          if(D._depth!=on || D._depth_write!=write                       ){D._depth=on; D._depth_write=write;                     SetDS();}} // this ignores '_depth_lock'
 void DisplayState::depthOnWriteFunc(Bool on, Bool write, UInt func) {                          if(D._depth!=on || D._depth_write!=write || D._depth_func!=func){D._depth=on; D._depth_write=write; D._depth_func=func; SetDS();}} // this ignores '_depth_lock'
+void DisplayState::depthWriteFunc  (         Bool write, UInt func) {                          if(                D._depth_write!=write || D._depth_func!=func){             D._depth_write=write; D._depth_func=func; SetDS();}} // this ignores '_depth_lock'
 void DisplayState::stencilRef      (                   Byte ref   ) {                          if(D._stencil_ref!=ref                                         ){D._stencil_ref=ref ;                                   SetDS();}}
 void DisplayState::stencil         (STENCIL_MODE mode, Byte ref   ) {                          if(D._stencil_ref!=ref || D._stencil!=mode                     ){D._stencil_ref=ref ; D._stencil=mode;                  SetDS();}}
 #elif GL
@@ -219,6 +220,7 @@ void DisplayState::depthAllow(Bool on)
 }
 void DisplayState::depthOnWrite    (Bool on, Bool write           ) {D.depth(on); D.depthWrite(write);}
 void DisplayState::depthOnWriteFunc(Bool on, Bool write, UInt func) {D.depth(on); D.depthWrite(write); D.depthFunc(func);}
+void DisplayState::depthWriteFunc  (         Bool write, UInt func) {             D.depthWrite(write); D.depthFunc(func);}
 #endif
 /******************************************************************************/
 void DisplayState::depth2DOn(UInt func)
@@ -549,6 +551,11 @@ ALPHA_MODE DisplayState::alpha(ALPHA_MODE alpha)
          glEnable           (GL_BLEND);
          glBlendEquation    (GL_FUNC_ADD);
          glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ONE_MINUS_DST_ALPHA, GL_ONE);
+      break;
+      case ALPHA_RENDER_MERGE:
+         glEnable           (GL_BLEND);
+         glBlendEquation    (GL_FUNC_ADD);
+         glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ZERO, GL_ONE_MINUS_SRC_ALPHA);
       break;
       case ALPHA_ADD_KEEP:
          glEnable           (GL_BLEND);
@@ -894,6 +901,19 @@ void DisplayState::create()
       desc.RenderTarget[0].DestBlendAlpha=D3D11_BLEND_ONE;
       desc.RenderTarget[0].RenderTargetWriteMask=D3D11_COLOR_WRITE_ENABLE_ALL;
       BlendStates[ALPHA_MERGE].create(desc);
+   }
+   {
+      D3D11_BLEND_DESC desc; Zero(desc);
+      desc.AlphaToCoverageEnable =false;
+      desc.IndependentBlendEnable=false;
+      desc.RenderTarget[0].BlendEnable   =true;
+      desc.RenderTarget[0].BlendOp       =desc.RenderTarget[0].BlendOpAlpha=D3D11_BLEND_OP_ADD;
+      desc.RenderTarget[0]. SrcBlend     =D3D11_BLEND_ONE;
+      desc.RenderTarget[0].DestBlend     =D3D11_BLEND_INV_SRC_ALPHA;
+      desc.RenderTarget[0]. SrcBlendAlpha=D3D11_BLEND_ZERO;
+      desc.RenderTarget[0].DestBlendAlpha=D3D11_BLEND_INV_SRC_ALPHA;
+      desc.RenderTarget[0].RenderTargetWriteMask=D3D11_COLOR_WRITE_ENABLE_ALL;
+      BlendStates[ALPHA_RENDER_MERGE].create(desc);
    }
    {
       D3D11_BLEND_DESC desc; Zero(desc);

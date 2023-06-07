@@ -611,6 +611,16 @@ Bool DisplayClass::gatherChannelAvailable()C
    return shaderModel()>=SM_GL_4; // 4.0+ GL required
 #endif
 }
+Bool DisplayClass::conservativeDepthAvailable()C
+{
+#if DX11
+   return shaderModel()>=SM_5;
+#elif GL_ES
+   return false;
+#elif GL
+   return shaderModel()>=SM_GL_4_2; // 4.2+ GL required
+#endif
+}
 Bool DisplayClass::computeAvailable()C
 {
 #if DX11
@@ -954,6 +964,7 @@ DisplayClass::DisplayClass() : _monitors(Compare, null, null, 4)
 //_ns_color_l.zero();
 
   _env_color=1;
+  _env_matrix.identity();
 
 //_vol_light=false;
 //_vol_add  =false;
@@ -1692,7 +1703,9 @@ void DisplayClass::androidOpen()
 {
 #if ANDROID
    SyncLocker locker(_lock);
-   App._thread_id=GetThreadID(); // !! adjust the thread ID here, because it will be a different value !!
+   App._thread_id       =GetThreadID(); // !! adjust the thread ID here, because it will be a different value !!
+   App._thread_priority^=1; App.threadPriority(App._thread_priority^1); // reset priority for main thread
+   App._thread_mask    ^=1; App.threadMask    (App._thread_mask    ^1); // reset mask     for main thread
    androidClose();
    if(GLDisplay && MainContext.context)
    {
@@ -2236,6 +2249,7 @@ void DisplayClass::getCaps()
    }*/
 #elif GL
  //CChar8 *ext=(CChar8*)glGetString(GL_EXTENSIONS);
+      //_conservative_depth=ContainsAny(ext, "GL_EXT_conservative_depth GL_ARB_conservative_depth", false, WHOLE_WORD_STRICT);
         _max_tex_size    =2048; glGetIntegerv(GL_MAX_TEXTURE_SIZE          , &_max_tex_size    );
    GLint aniso           =  16; glGetIntegerv(GL_MAX_TEXTURE_MAX_ANISOTROPY, & aniso           ); _max_tex_filter =Mid(aniso         , 1, 255);
  //GLint max_vtx_attrib  =   0; glGetIntegerv(GL_MAX_VERTEX_ATTRIBS        , & max_vtx_attrib  ); _max_vtx_attribs=Mid(max_vtx_attrib, 0, 255);
@@ -3401,8 +3415,10 @@ Vec           DisplayClass::nightShadeColorS(                 )C {return LinearT
 DisplayClass& DisplayClass::nightShadeColorS(C Vec &srgb_color)  {return nightShadeColorL(SRGBToLinear(srgb_color));}
 DisplayClass& DisplayClass::nightShadeColorL(C Vec & lin_color)  {Vec c(Max(lin_color.x, 0), Max(lin_color.y, 0), Max(lin_color.z, 0)); if(_ns_color_l!=c){_ns_color_l=c; ambientSet();} return T;}
 /******************************************************************************/
-DisplayClass& DisplayClass::envColor(C Vec      &color) {if(_env_color!=color)                    Sh.EnvColor->set( _env_color=color  );                                                                                          return T;}
-DisplayClass& DisplayClass::envMap  (C ImagePtr &cube ) {if(_env_map  !=cube ){Bool was=_env_map; Sh.Env     ->set((_env_map  =cube)()); if(cube)Sh.EnvMipMaps->setConditional(cube->mipMaps()-1); if(was!=_env_map)setShader();} return T;} // if changed map presence then reset shader
+DisplayClass& DisplayClass::envColor (C Vec      &color ) {if(_env_color!=color)                    Sh.EnvColor->set( _env_color =color  );                                                                                          return T;}
+DisplayClass& DisplayClass::envMap   (C ImagePtr &cube  ) {if(_env_map  !=cube ){Bool was=_env_map; Sh.Env     ->set((_env_map   =cube)()); if(cube)Sh.EnvMipMaps->setConditional(cube->mipMaps()-1); if(was!=_env_map)setShader();} return T;} // if changed map presence then reset shader
+DisplayClass& DisplayClass::envMatrix(C Matrix3  &matrix) {                                                           _env_matrix=matrix  ; envMatrixSet();                                                                          return T;}
+void          DisplayClass::envMatrixSet()C {Sh.EnvMatrix->set(ActiveCam.matrix.orn()*D.envMatrix());} // first convert from view space by camera matrix to world space, then by env matrix
 /******************************************************************************/
 Flt           DisplayClass::motionRes   (                 )C {return   ByteScaleToFlt(_mtn_res);}
 DisplayClass& DisplayClass::motionRes   (Flt         scale)  {Byte res=FltToByteScale(scale); if(res!=_mtn_res){_mtn_res=res; Renderer.rtClean();}                                                         return T;}

@@ -94,16 +94,16 @@ VecH4 Sky_PS
 #if FLAT
    alpha=0; // flat uses ALPHA_NONE
 #else
-   #if MULTI_SAMPLE==0
-      Flt frac=TexDepthPix(pixel.xy)/Normalize(pos).z;
-      alpha=Sat(frac*SkyFracMulAdd.x + SkyFracMulAdd.y);
-   #elif MULTI_SAMPLE==1
       Flt pos_scale=Normalize(pos).z;
+   #if   MULTI_SAMPLE==0
+      Flt dist=TexDepthPix(pixel.xy)/pos_scale;
+      alpha=Sat(dist*SkyFracMulAdd.x + SkyFracMulAdd.y);
+   #elif MULTI_SAMPLE==1
       alpha=0; UNROLL for(Int i=0; i<MS_SAMPLES; i++){Flt dist=TexDepthMS(pixel.xy, i)/pos_scale; alpha+=Sat(dist*SkyFracMulAdd.x + SkyFracMulAdd.y);}
       alpha/=MS_SAMPLES;
    #elif MULTI_SAMPLE==2
-      Flt pos_scale=Normalize(pos).z;
-      alpha=Sat(TexDepthMS(pixel.xy, index)/pos_scale*SkyFracMulAdd.x + SkyFracMulAdd.y);
+      Flt dist=TexDepthMS(pixel.xy, index)/pos_scale;
+      alpha=Sat(dist*SkyFracMulAdd.x + SkyFracMulAdd.y);
    #endif
 
    if(DENSITY)alpha=Pow(SkyDnsExp, alpha)*SkyDnsMulAdd.x+SkyDnsMulAdd.y; // here 'alpha' means opacity of the sky which is used as the distance from start to end point, this function matches 'AccumulatedDensity'

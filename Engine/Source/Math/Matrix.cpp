@@ -1974,6 +1974,35 @@ MatrixD3& MatrixD3::rotateZLOrthoNormalized(Dbl angle)
    return T;
 }
 /******************************************************************************/
+Matrix3& Matrix3::rotateToYKeepX(C Vec &y)
+{
+   T.y=y;
+   x=PointOnPlane(x, y); if(x.normalize()<=EPS)x=PerpN(y); // try to preserve x
+   z=Cross(x, y);
+   return T;
+}
+Matrix3& Matrix3::rotateToYKeepZ(C Vec &y)
+{
+   T.y=y;
+   z=PointOnPlane(z, y); if(z.normalize()<=EPS)z=PerpN(y); // try to preserve z
+   x=Cross(y, z);
+   return T;
+}
+Matrix3& Matrix3::rotateToZKeepX(C Vec &z)
+{
+   T.z=z;
+   x=PointOnPlane(x, z); if(x.normalize()<=EPS)x=PerpN(z); // try to preserve x
+   y=Cross(z, x);
+   return T;
+}
+Matrix3& Matrix3::rotateToZKeepY(C Vec &z)
+{
+   T.z=z;
+   y=PointOnPlane(y, z); if(y.normalize()<=EPS)y=PerpN(z); // try to preserve y
+   x=Cross(y, z);
+   return T;
+}
+/******************************************************************************/
 Matrix2& Matrix2::zero()
 {
    x.zero();
@@ -2650,7 +2679,7 @@ Matrix3& Matrix3::setOrient(DIR_ENUM dir)
 {
    Zero(T); switch(dir)
    {
-      default       : x.x= 1; y.y= 1; z.z= 1; break;
+      default       : x.x= 1; y.y= 1; z.z= 1; break; // DIR_FORWARD identity
       case DIR_BACK : x.x=-1; y.y= 1; z.z=-1; break;
       case DIR_UP   : x.x= 1; y.z=-1; z.y= 1; break;
       case DIR_DOWN : x.x= 1; y.z= 1; z.y=-1; break;
@@ -2663,7 +2692,7 @@ MatrixD3& MatrixD3::setOrient(DIR_ENUM dir)
 {
    Zero(T); switch(dir)
    {
-      default       : x.x= 1; y.y= 1; z.z= 1; break;
+      default       : x.x= 1; y.y= 1; z.z= 1; break; // DIR_FORWARD identity
       case DIR_BACK : x.x=-1; y.y= 1; z.z=-1; break;
       case DIR_UP   : x.x= 1; y.z=-1; z.y= 1; break;
       case DIR_DOWN : x.x= 1; y.z= 1; z.y=-1; break;
@@ -2672,8 +2701,23 @@ MatrixD3& MatrixD3::setOrient(DIR_ENUM dir)
    }
    return T;
 }
+Matrix3& Matrix3::setTerrainOrient(DIR_ENUM dir) // this assumes that terrain mesh is located on the XZ plane, and Y=up height #TerrainOrient
+{
+   Zero(T); switch(dir)
+   {
+      case DIR_FORWARD: x.x=-1; y.z= 1; z.y= 1; break;
+      case DIR_BACK   : x.x= 1; y.z=-1; z.y= 1; break;
+      default         : x.x= 1; y.y= 1; z.z= 1; break; // DIR_UP identity
+      case DIR_DOWN   : x.x= 1; y.y=-1; z.z=-1; break;
+      case DIR_RIGHT  : x.z= 1; y.x= 1; z.y= 1; break;
+      case DIR_LEFT   : x.z=-1; y.x=-1; z.y= 1; break;
+   }
+   return T;
+}
 Matrix3 & Matrix3 ::setRight(C Vec  &right                         ) {x=right; y=PerpN(x); z=Cross(x, y); return T;}
 MatrixD3& MatrixD3::setRight(C VecD &right                         ) {x=right; y=PerpN(x); z=Cross(x, y); return T;}
+Matrix3 & Matrix3 ::setRight(C Vec  &right, C Vec  &up             ) {x=right; y=up      ; z=Cross(x, y); return T;}
+MatrixD3& MatrixD3::setRight(C VecD &right, C VecD &up             ) {x=right; y=up      ; z=Cross(x, y); return T;}
 Matrix3 & Matrix3 ::setUp   (C Vec  &up                            ) {y=up   ; z=PerpN(y); x=Cross(y, z); return T;}
 MatrixD3& MatrixD3::setUp   (C VecD &up                            ) {y=up   ; z=PerpN(y); x=Cross(y, z); return T;}
 Matrix3 & Matrix3 ::setDir  (C Vec  &dir                           ) {z=dir  ; y=PerpN(z); x=Cross(y, z); return T;}
@@ -2701,6 +2745,9 @@ MatrixD& MatrixD::setPosDir   (C VecD &pos, C VecD &dir, C VecD &up             
 Matrix & Matrix ::setPosDir   (C Vec  &pos, C Vec  &dir, C Vec  &up, C Vec  &right) {     z=dir; y=up; x=right; T.pos=pos; return T;}
 MatrixM& MatrixM::setPosDir   (C VecD &pos, C Vec  &dir, C Vec  &up, C Vec  &right) {     z=dir; y=up; x=right; T.pos=pos; return T;}
 MatrixD& MatrixD::setPosDir   (C VecD &pos, C VecD &dir, C VecD &up, C VecD &right) {     z=dir; y=up; x=right; T.pos=pos; return T;}
+
+Matrix & Matrix ::setPosTerrainOrient(C Vec  &pos, DIR_ENUM dir) {super::setTerrainOrient(dir); T.pos=pos; return T;}
+MatrixM& MatrixM::setPosTerrainOrient(C VecD &pos, DIR_ENUM dir) {super::setTerrainOrient(dir); T.pos=pos; return T;}
 /******************************************************************************/
 Matrix3& Matrix3::setRotation(C Vec &dir_from, C Vec &dir_to) // !! Warning: this will give identity if directions are opposite "dir_from==-dir_to" !!
 {
@@ -2710,6 +2757,12 @@ Matrix3& Matrix3::setRotation(C Vec &dir_from, C Vec &dir_to) // !! Warning: thi
 MatrixD3& MatrixD3::setRotation(C VecD &dir_from, C VecD &dir_to) // !! Warning: this will give identity if directions are opposite "dir_from==-dir_to" !!
 {
    VecD cross=Cross(dir_from, dir_to); if(Dbl sin=cross.normalize())setRotateCosSin(cross, Dot(dir_from, dir_to), sin);else identity();
+   return T;
+}
+
+Matrix3& Matrix3::setRotationUp(C Vec &dir_to)
+{
+   Vec cross=CrossUp(dir_to); if(Flt sin=cross.normalize())setRotateCosSin(cross, dir_to.y, sin);else identity();
    return T;
 }
 
@@ -4092,6 +4145,12 @@ Flt GetLodDist2(C Vec &lod_center)
 {
    Flt dist2=D._lod_current_factor;
    if(FovPerspective(D.viewFovMode()))dist2*=Dist2(lod_center, ActiveCam.matrix.pos); // has to be 'ActiveCam.matrix' and not 'CamMatrix' because we need the same LOD for shadows as for normal
+   return dist2;
+}
+Flt GetLodDist2(C Vec &lod_center, C Matrix3 &matrix)
+{
+   Flt dist2=D._lod_current_factor/matrix.x.length2(); // Warning: only 'matrix.x' length is used (ignoring Y and Z)
+   if(FovPerspective(D.viewFovMode()))dist2*=Dist2(lod_center*matrix, ActiveCam.matrix.pos); // has to be 'ActiveCam.matrix' and not 'CamMatrix' because we need the same LOD for shadows as for normal
    return dist2;
 }
 Flt GetLodDist2(C Vec &lod_center, C Matrix &matrix)

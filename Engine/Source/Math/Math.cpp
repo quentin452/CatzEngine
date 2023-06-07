@@ -49,6 +49,31 @@ Flt SqrtS(Int x) {return (x>=0) ? SqrtFast(x) : -SqrtFast(-x);}
 Flt SqrtS(Flt x) {return (x>=0) ? SqrtFast(x) : -SqrtFast(-x);}
 Dbl SqrtS(Dbl x) {return (x>=0) ? SqrtFast(x) : -SqrtFast(-x);}
 
+/* SPEED TEST:
+   dbl t0=Time.curTime(); flt x0=0; REP(1024*10)x0+=1/SqrtFast(i+1); t0=Time.curTime()-t0;
+   dbl t1=Time.curTime(); flt x1=0; REP(1024*10)x1+= RSqrtSimd(i+1); t1=Time.curTime()-t1;
+   dbl t2=Time.curTime(); flt x2=0; REP(1024*10)x2+= RSqrt0   (i+1); t2=Time.curTime()-t2;
+   dbl t3=Time.curTime(); flt x3=0; REP(1024*10)x3+= RSqrt1   (i+1); t3=Time.curTime()-t3;
+   dbl t4=Time.curTime(); flt x4=0; REP(1024*10)x4+= RSqrt2   (i+1); t4=Time.curTime()-t4;
+   Exit(S+t0+"s "+x0+" REAL\n"
+         +t1+"s "+x1+" SIMD\n"
+         +t2+"s "+x2+" FAST0\n"
+         +t3+"s "+x3+" FAST1\n"
+         +t4+"s "+x4+" FAST2\n");*/
+Flt RSqrt2(Flt x)
+{
+#if 0 // faster speed, but less precision
+   return RSqrtSimd(x);
+#else
+   Flt x_2=x/2;
+   Int i=0x5F3759DF-((Int&)x>>1); // initial guess
+   Flt y=(Flt&)i;
+   y*=1.5f-(x_2*y*y); // 1st Newton iteration
+   y*=1.5f-(x_2*y*y); // 2nd Newton iteration
+   return y;
+#endif
+}
+
 UInt SqrtI(UInt x, Int max_steps)
 {
    if(x<=1)return x;
@@ -651,7 +676,7 @@ Flt SmoothPinch(Flt x, Flt pinch)
 Flt gd(Flt x) {return Atan(sinhf(x));}
 Dbl gd(Dbl x) {return Atan(sinh (x));}
 
-Flt SigmoidExp    (Flt x) {return 2/(1+expf(-x))-1;}
+Flt SigmoidExp    (Flt x) {return 2/(1+Exp(-x))-1;}
 Flt SigmoidDiv    (Flt x) {return x/(1+x);}
 Flt SigmoidAtan   (Flt x) {return Atan(PI_2*x)*2/PI;}
 Flt SigmoidSqrt   (Flt x) {return x/SqrtFast(1+x*x);}
@@ -677,7 +702,7 @@ Flt BlendSmoothSqr(Flt x)
 Flt BlendSmoothCube(Flt x) // !! avoid changing this formula, but if it's changed, then adjust 'BlendSmoothCubeSum' and 'BlendSmoothCubeSumHalf' !!
 {
    ABS(x);
-   return (x<1) ? 1-(3-2*x)*x*x : 0;
+   return (x<1) ? 1-(3-2*x)*x*x : 0; // 1-_SmoothCube(x)
 }
 Flt BlendSmoothSextic(Flt x)
 {
@@ -692,7 +717,7 @@ Flt BlendSmoothSin(Flt x)
 /******************************************************************************/
 Flt Gaussian(Flt x)
 {
-    return expf(-x*x);
+    return Exp(-x*x);
 }
 /******************************************************************************/
 // EQUATIONS

@@ -970,6 +970,10 @@ Bool CanCompress(IMAGE_TYPE dest)
          return CompressASTC!=null;
    }
 }
+Bool NeedMultiChannel(IMAGE_TYPE src, IMAGE_TYPE dest)
+{
+   return ImageTI[src].channels>1 || src!=dest;
+}
 /******************************************************************************/
 #if GL
 UInt SourceGLFormat(IMAGE_TYPE type)
@@ -3621,62 +3625,6 @@ Bool Image::accessible()C
 Bool Image::compatible(C Image &image)C
 {
    return size3()==image.size3() && samples()==image.samples();
-}
-/******************************************************************************/
-DIR_ENUM DirToCubeFace(C Vec &dir)
-{
-   if(Flt f=Abs(dir).max())
-   {
-      Vec n=dir/f;
-      const Flt one=1-FLT_EPS; // have to use epsilon, because just "1" failed in some cases
-    //if(n.x>= one)return DIR_RIGHT; already listed at the bottom
-      if(n.x<=-one)return DIR_LEFT;
-      if(n.y>= one)return DIR_UP;
-      if(n.y<=-one)return DIR_DOWN;
-      if(n.z>= one)return DIR_FORWARD;
-      if(n.z<=-one)return DIR_BACK;
-   }
-   return DIR_RIGHT;
-}
-DIR_ENUM DirToCubeFace(C Vec &dir, Int res, Vec2 &tex)
-{
-   if(Flt f=Abs(dir).max())
-   {
-      Vec n=dir/f;
-      const Flt one=1-FLT_EPS; // have to use epsilon, because just "1" failed in some cases
-      // tex.x=(n.x+1)/2*res-0.5
-      // tex.x=(n.x+1)*res/2-0.5
-      // tex.x=n.x*res/2 + res/2-0.5
-      Flt mul=res*0.5f, add=mul-0.5f;
-      if(n.x>= one){tex.set(-n.z*mul+add, -n.y*mul+add); return DIR_RIGHT  ;}
-      if(n.x<=-one){tex.set( n.z*mul+add, -n.y*mul+add); return DIR_LEFT   ;}
-      if(n.y>= one){tex.set( n.x*mul+add,  n.z*mul+add); return DIR_UP     ;}
-      if(n.y<=-one){tex.set( n.x*mul+add, -n.z*mul+add); return DIR_DOWN   ;}
-      if(n.z>= one){tex.set( n.x*mul+add, -n.y*mul+add); return DIR_FORWARD;}
-      if(n.z<=-one){tex.set(-n.x*mul+add, -n.y*mul+add); return DIR_BACK   ;}
-   }
-   tex.zero(); return DIR_RIGHT;
-}
-Vec CubeFaceToDir(Flt x, Flt y, Int res, DIR_ENUM cube_face)
-{
-   // tex.x=(dir.x+1)/2*res-0.5
-   // (tex.x+0.5)*2/res-1=dir.x
-   // dir.x=tex.x*2/res + 0.5*2/res - 1
-   // dir.x=tex.x*2/res + 1/res-1
-   if(res>0)
-   {
-      Flt inv_res=1.0f/res, mul=2*inv_res, add=inv_res-1;
-      switch(cube_face)
-      {
-         case DIR_RIGHT  : return Vec( 1, -y*mul-add, -x*mul-add);
-         case DIR_LEFT   : return Vec(-1, -y*mul-add,  x*mul+add);
-         case DIR_UP     : return Vec( x*mul+add,  1,  y*mul+add);
-         case DIR_DOWN   : return Vec( x*mul+add, -1, -y*mul-add);
-         case DIR_FORWARD: return Vec( x*mul+add, -y*mul-add,  1);
-         case DIR_BACK   : return Vec(-x*mul-add, -y*mul-add, -1);
-      }
-   }
-   return VecZero;
 }
 /******************************************************************************/
 }

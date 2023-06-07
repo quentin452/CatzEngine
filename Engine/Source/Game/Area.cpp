@@ -350,8 +350,8 @@ Area::Data::Data(Area &area)
    T._path_mesh=null;
    T._path2D   =null;
    T._path_node_offset=0;
-   terrain_objs_box.zero();
-   foliage_objs_box.zero();
+   terrain_objs_ext.zero();
+   foliage_objs_ext.zero();
 }
 Bool Area::Data::save(File &f)
 {
@@ -438,8 +438,8 @@ Bool Area::Data::load(File &f)
    }
 
    // setup terrain/foliage objects (these containers should not be saved, because they are dynamically created from 'objs' which are already stored)
-   terrain_objs_box.zero(); Bool have_terrain_box=false, have_foliage_box=false;
-   foliage_objs_box.zero();
+   Box terrain_objs_box; terrain_objs_box.zero(); Bool have_terrain_box=false;
+   Box foliage_objs_box; foliage_objs_box.zero(); Bool have_foliage_box=false;
    terrain_objs.clear();
    foliage_objs.clear();
    FREPA(objs) // add in order
@@ -484,6 +484,8 @@ Bool Area::Data::load(File &f)
          }break;
       }
    }
+   terrain_objs_ext=terrain_objs_box;
+   foliage_objs_ext=foliage_objs_box;
 
    if(f.ok())return true;
    /*del();*/ return false;

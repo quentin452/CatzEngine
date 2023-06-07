@@ -61,3 +61,34 @@ private:
 }extern
    Sky; // Main Sky
 /******************************************************************************/
+struct Atmosphere : BallM // BallM.r = total radius of the atmosphere = planet radius + atmosphere height, BallM.pos = world-space position
+{
+   static Flt  ViewRange; // View Range for rendering Atmosphere, 0..Inf, this value is used inside the Atmosphere shader, and can be larger than 'D.viewRange', to allow drawing full atmosphere in Planetary View, while limiting terrain and objects to 'D.viewRange'
+   static VecD SunPos   ; // world-space sun position that will give light for the Atmosphere
+
+   Flt planet_radius  , // planet radius, excluding atmosphere, 0..Inf
+       height         , // height of the atmosphere itself, excluding 'planet_radius', for the total atmosphere radius please see 'BallM.r' = planet_radius+height, 0..Inf
+       light_scale    , // light scale, 0..Inf
+       fog_reduce     , // fog reduction = 1-MaxFog, 0..1
+       fog_reduce_dist, // fog reduction distance  , 0..Inf
+       darken         , // how much to darken space background based on light intensity, 0..Inf
+       mie_extinction ; // Mie extinction=scattering+absorption, 0..Inf
+
+   Atmosphere() {}
+   Atmosphere(C VecD &pos, Flt planet_radius, Flt height, Flt light_scale) {T.pos=pos; T.planet_radius=planet_radius; T.height=height; T.r=planet_radius+height; T.light_scale=light_scale; T.fog_reduce=1.0f; T.fog_reduce_dist=height; T.darken=14; T.mie_extinction=0.0016f;}
+
+   Vec calcCol(Flt look_angle                        )C; // calculate sky color when standing on ground surface                       , when looking at direction based on 'look_angle' (0..PI/2, 0=look up, PI/2=look forward), at noon                                                                  , this ignores 'light_scale', 'fog_reduce' and Mie scattering
+   Vec calcCol(C Vec &pos, C Vec &ray, C Vec &sun_pos)C; // calculate sky color when standing on 'pos' position relative to atmosphere, when looking at 'ray' direction (must be normalized)                                   , with sun located at 'sun_pos' relative to atmosphere (must be normalized), this ignores 'light_scale', 'fog_reduce' and Mie scattering
+
+   void draw()C; // draw this Atmosphere object, this should be called only in RM_PREPARE mode
+#if EE_PRIVATE
+   void scattering(Flt height, Vec &rayleigh_scattering, Flt &mie_scattering, Vec &extinction)C;
+   void drawDo(Int multi_sample, Bool dither)C;
+   Bool toScreenRect(Rect &rect)C {return ToFullScreenRect(T, rect);}
+#endif
+};
+#if EE_PRIVATE
+#define SKY_MESH_MIN_DIST 0.98f // it's good to make it a bit smaller than 'dist' to have some epsilon for precision issues, this is the closest point on the mesh to the Vec(0,0,0), it's not equal to radius=1, because the mesh is composed out of triangles, and the triangle surfaces are closer
+extern Memc<Atmosphere> Atmospheres;
+#endif
+/******************************************************************************/

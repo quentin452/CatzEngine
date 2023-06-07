@@ -374,6 +374,8 @@ Shader* MainShaderClass::getSunRays(Bool alpha, Bool dither, Bool jitter, Bool g
 
 Shader* MainShaderClass::getSky(Int multi_sample, Bool flat, Bool density, Int textures, Bool stars, Bool dither, Bool per_vertex, Bool cloud) {return get(S8+"Sky"+multi_sample+flat+density+textures+stars+dither+per_vertex+cloud);}
 
+Shader* MainShaderClass::getAtmosphere(Int multi_sample, Bool flat, Bool dither) {return get(S8+"Atmosphere"+multi_sample+flat+dither+GL_ES);}
+
 Shader* MainShaderClass::getSkyTF(                  Int  textures  ,                           Bool dither, Bool cloud) {Int multi_sample=0;                 Bool flat=true , density=false, stars=false, per_vertex=false; return getSky(multi_sample, flat, density, textures, stars, dither, per_vertex, cloud);}
 Shader* MainShaderClass::getSkyT (Int multi_sample, Int  textures  ,                           Bool dither, Bool cloud) {                                    Bool flat=false, density=false, stars=false, per_vertex=false; return getSky(multi_sample, flat, density, textures, stars, dither, per_vertex, cloud);}
 Shader* MainShaderClass::getSkyAF(                  Bool per_vertex,               Bool stars, Bool dither, Bool cloud) {Int multi_sample=0; Int textures=0; Bool flat=true , density=false                               ; return getSky(multi_sample, flat, density, textures, stars, dither, per_vertex, cloud);}
@@ -524,6 +526,7 @@ void MainShaderClass::getTechniques()
    Color[1]  =GetShaderParam("Color[1]"  );
    BehindBias=GetShaderParam("BehindBias");
 
+   ConstCast(Renderer.vtx_uv_scale)=GetShaderParam("VtxUVScale");
    VtxSkinning=GetShaderParamBool("VtxSkinning");
 
    LightMapScale=GetShaderParam("LightMapScale");
@@ -534,6 +537,7 @@ void MainShaderClass::getTechniques()
 
    EnvColor           =GetShaderParam    ("EnvColor"           ); EnvColor->set(D.envColor());
    EnvMipMaps         =GetShaderParam    ("EnvMipMaps"         ); if(D.envMap())EnvMipMaps->set(D.envMap()->mipMaps()-1);
+   EnvMatrix          =GetShaderParam    ("EnvMatrix"          ); // set in 'ActiveCamChanged'
    FirstPass          =GetShaderParamBool("FirstPass"          );
    NoiseOffset        =GetShaderParamInt ("NoiseOffset"        );
    NightShadeColor    =GetShaderParam    ("NightShadeColor"    ); // set in 'D.ambientSet()'
@@ -752,6 +756,27 @@ void MainShaderClass::getTechniques()
  //SunRaysSoft=get("SunRaysSoft");
 #endif
 
+   // ATMOSPHERE
+   AtmospherePos          =GetShaderParam("AtmospherePos");
+   AtmosphereViewRange    =GetShaderParam("AtmosphereViewRange");
+   AtmosphereLightPos     =GetShaderParam("AtmosphereLightPos");
+   AtmospherePlanetRadius =GetShaderParam("AtmospherePlanetRadius");
+ //AtmosphereHeight       =GetShaderParam("AtmosphereHeight");
+   AtmosphereRadius       =GetShaderParam("AtmosphereRadius");
+   AtmosphereAltScaleRay  =GetShaderParam("AtmosphereAltScaleRay");
+   AtmosphereAltScaleMie  =GetShaderParam("AtmosphereAltScaleMie");
+   AtmosphereMieExtinction=GetShaderParam("AtmosphereMieExtinction");
+   AtmosphereLightScale   =GetShaderParam("AtmosphereLightScale");
+   AtmosphereFogReduce    =GetShaderParam("AtmosphereFogReduce");
+   AtmosphereFogReduceDist=GetShaderParam("AtmosphereFogReduceDist");
+   AtmosphereDarken       =GetShaderParam("AtmosphereDarken");
+#if !SLOW_SHADER_LOAD
+   REPD(multi_sample, (D.shaderModel()>=SM_4_1) ? 3 : (D.shaderModel()>=SM_4) ? 2 : 1)
+   REPD(flat        , 2)
+   REPD(dither      , 2)
+      Atmosphere[multi_sample][flat][dither]=getAtmosphere(multi_sample, flat, dither);
+#endif
+
    // SHADOWS
    REPAO(ShdStep      )=GetShaderParam(S8+"ShdStep["+i+']');
          ShdJitter     =GetShaderParam("ShdJitter");
@@ -809,8 +834,8 @@ void MainShaderClass::getTechniques()
                        }
       }
 
-      // COL LIGHT
-      REPD(multi_sample, (D.shaderModel()>=SM_4_1) ? 3 : 1)
+      // APPLY LIGHT
+      REPD(multi_sample, (D.shaderModel()>=SM_4_1) ? 4 : 1)
       REPD(reflect_mode, 3)
       REPD(ao          , 2)
       REPD(  cel_shade , 2)
@@ -1035,25 +1060,31 @@ void WaterShader::load()
       WaterYMulAdd           =GetShaderParam("WaterYMulAdd");
       WaterPlanePos          =GetShaderParam("WaterPlanePos");
       WaterPlaneNrm          =GetShaderParam("WaterPlaneNrm");
+      WaterBallPosRadius     =GetShaderParam("WaterBallPosRadius");
+      WaterBallX             =GetShaderParam("WaterBallX");
+      WaterBallY             =GetShaderParam("WaterBallY");
       WaterFlow              =GetShaderParam("WaterFlow");
       WaterReflectMulAdd     =GetShaderParam("WaterReflectMulAdd");
       WaterClamp             =GetShaderParam("WaterClamp");
 
       Bool gather=D.gatherAvailable();
+      Bool conservative_depth=D.conservativeDepthAvailable();
       Lake =shader->get(S8+"Lake" +0+0+0+0+0+0);
       River=shader->get(S8+"River"+0+0+0+0+0+0);
       Ocean=shader->get(S8+"Ocean"+0+0+0+0+0+0);
+      REPD(flat, 2)Ball[flat]=shader->get(S8+"Ball" +0+0+0+0+0+0+flat+conservative_depth+GL_ES);
       REPD(refract, 2)
       {
          REPD(reflect_env   , 2)
          REPD(reflect_mirror, 2)
          {
-            REPD(shadow, 7)
-            REPD(soft  , 2)
+            REPD(shadow_maps, 7)
+            REPD(soft       , 2)
             {
-               LakeL [shadow][soft][reflect_env][reflect_mirror][refract]=shader->get(S8+"Lake" +1+shadow+soft+reflect_env+reflect_mirror+refract+gather);
-               RiverL[shadow][soft][reflect_env][reflect_mirror][refract]=shader->get(S8+"River"+1+shadow+soft+reflect_env+reflect_mirror+refract+gather);
-               OceanL[shadow][soft][reflect_env][reflect_mirror][refract]=shader->get(S8+"Ocean"+1+shadow+soft+reflect_env+reflect_mirror+refract+gather);
+                LakeL[shadow_maps][soft][reflect_env][reflect_mirror][refract]      =shader->get(S8+"Lake" +1+shadow_maps+soft+reflect_env+reflect_mirror+refract+gather);
+               RiverL[shadow_maps][soft][reflect_env][reflect_mirror][refract]      =shader->get(S8+"River"+1+shadow_maps+soft+reflect_env+reflect_mirror+refract+gather);
+               OceanL[shadow_maps][soft][reflect_env][reflect_mirror][refract]      =shader->get(S8+"Ocean"+1+shadow_maps+soft+reflect_env+reflect_mirror+refract+gather);
+   REPD(flat, 2)BallL[shadow_maps][soft][reflect_env][reflect_mirror][refract][flat]=shader->get(S8+"Ball" +1+shadow_maps+soft+reflect_env+reflect_mirror+refract+gather+flat+conservative_depth+GL_ES);
             }
             REPD(depth, 2)Apply[depth][reflect_env][reflect_mirror][refract]=shader->get(S8+"Apply"+depth+reflect_env+reflect_mirror+refract+gather);
          }

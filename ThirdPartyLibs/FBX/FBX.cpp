@@ -929,24 +929,13 @@ struct FBX
                   base.weldVtx(VTX_ALL, EPSD, EPS_COL_COS, -1); // use small pos epsilon in case mesh is scaled down
 
                   // extract LOD index from name
-                  Int lod_i=-1; // -1=unspecified
                   Str part_name=node.full_name;
-                  {
-                     Str temp_name=part_name;
-                     for(; CharFlag(temp_name.last())&CHARF_DIG; )temp_name.removeLast();
-                     if(Ends(temp_name, "_LOD", true))
-                     {
-                        lod_i=TextInt(part_name()+temp_name.length());
-                        if(!InRange(lod_i, 16))lod_i=-1; // keep within sensible ranges
-                        part_name=temp_name.removeLast(4); // remove "_LOD"
-                     }
-                  }
-                  MAX(lod_i, 0);
+                  Int lod_i=LodIndex(part_name);
                   mesh->setLods(Max(mesh->lods(), lod_i+1)); // make room for 'lod_i'
                   MIN(lod_i, mesh->lods()-1); // in case failed to create
 
-                  Int pmi_pos=0; // position in 'part_material_index' at which to add new parts, it's sorted by LODs first, then by parts (L0P0 L0P1, L1P0 L1P1, ..), so we have to insert in between other elements
-                  if(part_material_index)for(Int i=0; i<=lod_i; i++)pmi_pos+=mesh->lod(i).parts.elms(); // count how many parts are there for LODs up to 'lod_i' (inclusive)
+                  Int pmi_pos; // position in 'part_material_index' at which to add new parts, it's sorted by LODs first, then by parts (L0P0 L0P1, L1P0 L1P1, ..), so we have to insert in between other elements
+                  if(part_material_index){pmi_pos=0; for(Int i=0; i<=lod_i; i++)pmi_pos+=mesh->lod(i).parts.elms();} // count how many parts are there for LODs up to 'lod_i' (inclusive)
 
                   // put to Mesh LOD
                   MeshLod &lod=mesh->lod(lod_i);

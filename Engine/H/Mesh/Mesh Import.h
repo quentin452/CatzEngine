@@ -152,6 +152,7 @@ Bool ImportXPS      (C Str &name, Mesh *mesh, Skeleton *skeleton, MemPtr<XMateri
 Bool Import(C Str &name, Mesh *mesh, Skeleton *skeleton, MemPtr<XAnimation> animations, MemPtr<XMaterial> materials, MemPtr<Int> part_material_index, XSkeleton *xskeleton=null, Bool all_nodes_as_bones=false); // import data according to file extension, false on fail
 
 #if EE_PRIVATE
+Int  LodIndex(Str &name);
 void CleanMesh(Mesh &mesh);
 void ProcessBoneNames(MemPtrN<Str8, 256> names);
 #endif

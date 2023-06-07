@@ -26,7 +26,7 @@ struct Group
 
    Int faces()C {return tri.elms() + quad.elms();}
 
-   Group& set(Int material) {T.material=material; return T;}
+   Group& set(Int material, C Str &name) {T.material=material; T.name=name; return T;}
 };
 /******************************************************************************/
 static void ImportMtl(C Str &name, MemPtr<XMaterial> materials)
@@ -68,8 +68,9 @@ Bool ImportOBJ(C Str &name, Mesh *mesh, MemPtr<XMaterial> materials, MemPtr<Int>
 
    FileTextEx f; if(f.read(name))
    {
-      Int         cur_material=-1;
       Bool        flip_normal_y=false;
+      Int         cur_material=-1;
+      Str         cur_name;
       Memc<Vec  > vpos;
       Memc<Vec  > vnrm;
       Memc<Vec2 > vtex;
@@ -92,22 +93,37 @@ Bool ImportOBJ(C Str &name, Mesh *mesh, MemPtr<XMaterial> materials, MemPtr<Int>
          }else
          if(c=='g' && f.getChar()==' ')
          {
-            if(groups.elms() && !groups.last().faces())groups.removeLast();
-            f.getLine(groups.New().set(cur_material).name);
+            f.getLine(cur_name);
+            if(groups.elms())
+            {
+               Group &last=groups.last();
+               if(last.faces())groups.New().set(cur_material, cur_name);
+               else            last.name=cur_name;
+            }
          }else
          if(c=='u' && f.getChar()=='s' && f.getChar()=='e' && f.getChar()=='m' && f.getChar()=='t' && f.getChar()=='l' && f.getChar()==' ')
          {
             if(materials)
             {
                f.getLine(line);
-               cur_material=-1; REPA(materials)if(Equal(materials[i].name, line)){cur_material=i; break;}
+               cur_material=-1; if(line.is()) // treat empty name as null
+               {
+                  REPA(materials)if(materials[i].name==line){cur_material=i; goto found_material;} // find existing
+                  cur_material=materials.elms(); materials.New().name=line; // create new
+               found_material:;
+               }
             }else f.skipLine();
-            if(groups.elms() && groups.last().faces())groups.New ().set(cur_material);else
-            if(groups.elms()                         )groups.last().set(cur_material);
+
+            if(groups.elms())
+            {
+               Group &last=groups.last();
+               if(last.faces())groups.New().set(cur_material, cur_name);
+               else            last.material=cur_material;
+            }
          }else
          if(c=='f' && f.getChar()==' ')
          {
-            if(!groups.elms())groups.New().set(cur_material);
+            if(!groups.elms())groups.New().set(cur_material, cur_name);
             Group &group=groups.last();
             f.getLine(line);
             for(CChar *face=line; face; )
@@ -208,22 +224,37 @@ Bool ImportOBJ(C Str &name, Mesh *mesh, MemPtr<XMaterial> materials, MemPtr<Int>
       // create mesh
       if(mesh)
       {
-         mesh->create(groups.elms());
          FREPA(groups)
          {
-            Group    &cur =groups[i];
-            MeshPart &part=mesh->parts[i]; Set(part.name, cur.name);
+            Group &group=groups[i];
+
+            // extract LOD index from name
+            Int lod_i=LodIndex(group.name);
+            mesh->setLods(Max(mesh->lods(), lod_i+1)); // make room for 'lod_i'
+            MIN(lod_i, mesh->lods()-1); // in case failed to create
+
+            // material indexes
+            if(part_material_index)
+            {
+               Int pmi_pos=0; // position in 'part_material_index' at which to add new parts, it's sorted by LODs first, then by parts (L0P0 L0P1, L1P0 L1P1, ..), so we have to insert in between other elements
+               for(Int i=0; i<=lod_i; i++)pmi_pos+=mesh->lod(i).parts.elms(); // count how many parts are there for LODs up to 'lod_i' (inclusive)
+               part_material_index.NewAt(pmi_pos)=group.material;
+            }
+
+            // put to Mesh LOD
+            MeshLod  &lod =mesh->lod(lod_i);
+            MeshPart &part=lod.parts.New(); Set(part.name, group.name);
             MeshBase &base=part.base;
-            base.create(cur.tri.elms()*3+cur.quad.elms()*4, 0, cur.tri.elms(), cur.quad.elms(), (vnrm.elms() ? VTX_NRM : MESH_NONE) | (vtex.elms() ? VTX_TEX0 : MESH_NONE));
+            base.create(group.tri.elms()*3+group.quad.elms()*4, 0, group.tri.elms(), group.quad.elms(), (vnrm.elms() ? VTX_NRM : MESH_NONE) | (vtex.elms() ? VTX_TEX0 : MESH_NONE));
             Vec   *pos =base.vtx .pos ();
             Vec   *nrm =base.vtx .nrm ();
             Vec2  *tex =base.vtx .tex0();
             VecI  *tri =base.tri .ind ();
             VecI4 *quad=base.quad.ind ();
             Int    vtxs=0;
-            FREPA(cur.tri)
+            FREPA(group.tri)
             {
-               FTri &ftri=cur.tri[i];
+               FTri &ftri=group.tri[i];
                if(pos)
                {
                   pos[0]=vpos[ftri.pos.c[0]];
@@ -244,9 +275,9 @@ Bool ImportOBJ(C Str &name, Mesh *mesh, MemPtr<XMaterial> materials, MemPtr<Int>
                }
                (tri++)->set(vtxs, vtxs+1, vtxs+2); vtxs+=3;
             }
-            FREPA(cur.quad)
+            FREPA(group.quad)
             {
-               FQuad &fquad=cur.quad[i];
+               FQuad &fquad=group.quad[i];
                if(pos)
                {
                   pos[0]=vpos[fquad.pos.c[0]];
@@ -276,10 +307,8 @@ Bool ImportOBJ(C Str &name, Mesh *mesh, MemPtr<XMaterial> materials, MemPtr<Int>
          }
          mesh->mirrorX().setBox();
          CleanMesh(*mesh);
+         Flt dist=2; for(Int i=1; i<mesh->lods(); i++, dist*=2)mesh->lod(i).dist(dist); // set LOD distances
       }
-
-      // material indexes
-      if(part_material_index)FREPA(groups)part_material_index.add(groups[i].material);
       return true;
    }
    return false;

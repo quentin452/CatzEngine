@@ -786,7 +786,7 @@ static void SetThreadMask(PLATFORM(HANDLE, pthread_t) handle, ULong mask)
 {
 #if WINDOWS
    SetThreadAffinityMask(handle, mask);
-#else
+#elif !APPLE
    cpu_set_t cpuset;
                           CPU_ZERO(  &cpuset);
    FREP(64)if(mask&(1<<i))CPU_SET(i, &cpuset);

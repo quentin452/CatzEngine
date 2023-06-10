@@ -178,66 +178,66 @@ private:
 /******************************************************************************/
 T2(Node, Key) struct RBTree : BSTree<Node, Key>
 {
-   RBTree(C Key& (&key)(C Node &node), Bool (&compare)(C Key &a, C Key &b)) : BSTree(key, compare) {}
+   RBTree(C Key& (&key)(C Node &node), Bool (&compare)(C Key &a, C Key &b)) : BSTree<Node, Key>(key, compare) {}
 
    void insert(Node &node)
    {
       super::insert(node);
-      root(_RBInsert(&node, root()));
+      T.root(_RBInsert(&node, T.root()));
    }
    void insertUnique(Node &node)
    {
-      if(super::insertUnique(node))root(_RBInsert(&node, root()));
+      if(super::insertUnique(node))T.root(_RBInsert(&node, T.root()));
    }
    void remove(Node &node)
    {
-      removing(node);
-      root(_RBRemove(&node, root()));
+      T.removing(node);
+      T.root(_RBRemove(&node, T.root()));
    }
    void validate()C
    {
       super::validate();
-     _RBValidate(root());
+     _RBValidate(T.root());
    }
 };
 /******************************************************************************/
 T2(Node, Key) struct AVLTree : BSTree<Node, Key>
 {
-   AVLTree(C Key& (&key)(C Node &node), Bool (&compare)(C Key &a, C Key &b)) : BSTree(key, compare) {}
+   AVLTree(C Key& (&key)(C Node &node), Bool (&compare)(C Key &a, C Key &b)) : BSTree<Node, Key>(key, compare) {}
 
    void insert(Node &node)
    {
       super::insert(node);
-      root(_AVLInsert(&node, root()));
+      T.root(_AVLInsert(&node, T.root()));
    }
    void insertUnique(Node &node)
    {
-      if(super::insertUnique(node))root(_AVLInsert(&node, root()));
+      if(super::insertUnique(node))T.root(_AVLInsert(&node, T.root()));
    }
    void remove(Node &node)
    {
-      removing(node);
-      root(_AVLRemove(&node, root()));
+      T.removing(node);
+      T.root(_AVLRemove(&node, T.root()));
    }
 };
 /******************************************************************************/
 T2(Node, Key) struct WAVLTree : BSTree<Node, Key>
 {
-   WAVLTree(C Key& (&key)(C Node &node), Bool (&compare)(C Key &a, C Key &b)) : BSTree(key, compare) {}
+   WAVLTree(C Key& (&key)(C Node &node), Bool (&compare)(C Key &a, C Key &b)) : BSTree<Node, Key>(key, compare) {}
 
    void insert(Node &node)
    {
       super::insert(node);
-      root(_WAVLInsert(&node, root()));
+      T.root(_WAVLInsert(&node, T.root()));
    }
    void insertUnique(Node &node)
    {
-      if(super::insertUnique(node))root(_WAVLInsert(&node, root()));
+      if(super::insertUnique(node))T.root(_WAVLInsert(&node, T.root()));
    }
    void remove(Node &node)
    {
-      removing(node);
-      root(_WAVLRemove(&node, root()));
+      T.removing(node);
+      T.root(_WAVLRemove(&node, T.root()));
    }
 };
 /******************************************************************************/

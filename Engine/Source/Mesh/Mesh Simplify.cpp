@@ -687,7 +687,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
    Memc    <MtrlGroup     > mtrl_groups;
    Bool                   *_stop;
 
-   Simplify(Bool *stop) : _stop(stop), tree(GetKey, BCompareError) {}
+   Simplify(Bool *stop) : tree(GetKey, BCompareError), _stop(stop) {}
    Bool stop()C {return _stop && *_stop;}
 
    // error for one edge

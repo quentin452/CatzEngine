@@ -304,7 +304,7 @@
       #include <StoreKit/StoreKit.h>
       #include <AudioToolbox/AudioToolbox.h>
       #if MAC
-         #ifdef __x86_64__
+         #if X86
             #include <smmintrin.h>
             #include <wmmintrin.h>
          #endif
@@ -745,7 +745,6 @@
    #undef max
    #define _ALLOW_RTCc_IN_STL
    #include <vcruntime_string.h> // needed for 'memcpy' (inside "string.h")
-   #include <xmmintrin.h> // needed for 'RSqrtSimd'
 #else
    #include <new>
    #include <stdint.h>
@@ -755,6 +754,9 @@
 #include <math.h>
 #include <typeinfo>
 #include <type_traits> // needed for 'std::enable_if', 'std::is_enum'
+#if X86
+   #include <xmmintrin.h> // needed for 'RSqrtSimd'
+#endif
 #if ANDROID
    #include <android/api-level.h> // needed for __ANDROID_API__
 #endif

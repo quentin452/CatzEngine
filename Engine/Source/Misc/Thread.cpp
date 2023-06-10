@@ -748,7 +748,7 @@ static void _SetThreadPriority(PLATFORM(HANDLE, pthread_t) handle, Int priority)
    #elif 0
       sched_param param; param.sched_priority=PriorityBase+PriorityRange*(priority+3)/6; // div by 6 because "priority==3" should give max
       pthread_setschedparam(handle, PRIORITY_POLICY, &param);
-   #elif !APPLE && !LINUX // on Apple "uint64_t id; pthread_threadid_np(handle, &id); setpriority(PRIO_PROCESS or PRIO_DARWIN_THREAD, id, priority*-3-10);" both options didn't work. Linux doesn't have 'pthread_gettid_np' FIXME: would have to use 'gettid' at start of 'ThreadFunc' store it, and then set the priority there too.
+   #elif !APPLE && !LINUX && !SWITCH // on Apple "uint64_t id; pthread_threadid_np(handle, &id); setpriority(PRIO_PROCESS or PRIO_DARWIN_THREAD, id, priority*-3-10);" both options didn't work. Linux doesn't have 'pthread_gettid_np' FIXME: would have to use 'gettid' at start of 'ThreadFunc' store it, and then set the priority there too.
       pid_t id=pthread_gettid_np(handle);
       setpriority(PRIO_PROCESS, id, priority*-3-10); // converts -3..3 -> -3*-3-10 .. 3*-3-10 -> -1..-19. (lower value=higher priority). Even though the range should be -20..19 - https://linux.die.net/man/2/setpriority priorities -3 and 3 behaved similarly on Android, maybe there's some bug that treats priorities as Abs, so for best results keep all values either negative or positive
    #endif

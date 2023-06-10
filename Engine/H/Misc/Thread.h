@@ -880,7 +880,7 @@ private:
    #if !APPLE
      INLINE Int     _GetCPU     () {return PLATFORM(GetCurrentProcessorNumber(),          sched_getcpu());}
    #else
-     INLINE Int     _GetCPU     () {return 0;} // FIXME
+     INLINE Int     _GetCPU     () {return 0;}
    #endif
 #define GetThreadID _GetThreadID // use this macro so all engine functions access '_GetThreadID' directly
 #define GetCPU      _GetCPU      // use this macro so all engine functions access '_GetCPU'      directly

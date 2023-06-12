@@ -1323,6 +1323,7 @@ struct VecB // Vector 3D (Byte)
               VecB(Byte x, Byte y, Byte z) {set(x, y, z);}
    CONVERSION VecB(C VecI &v);
 };
+ASSERT(SIZE(VecB)==3); // some codes expect continuous memory for array of VecB[] to be accessed with [0].c
 /******************************************************************************/
 struct VecSB // Vector 3D (SByte)
 {
@@ -1361,6 +1362,7 @@ struct VecSB // Vector 3D (SByte)
               VecSB(SByte x, SByte y, SByte z) {set(x, y, z);}
    CONVERSION VecSB(C VecI &v);
 };
+ASSERT(SIZE(VecSB)==3); // some codes expect continuous memory for array of VecSB[] to be accessed with [0].c
 /******************************************************************************/
 struct VecB4 // Vector 4D (Byte)
 {

@@ -559,6 +559,20 @@ Vec2 SphereConvert::dirToSphereTerrainPixel(C Vec &dir, DIR_ENUM cube_face)C
       return Vec2(posToCell(x), posToCell(y));
 zero: return 0;
 }
+VecI2 SphereConvert::dirToSphereTerrainPixelI(C Vec &dir, DIR_ENUM cube_face)C
+{
+   Flt x, y; switch(cube_face) // #TerrainOrient
+   {
+      case DIR_RIGHT  : if(!dir.x)goto zero; x= dir.z/dir.x; y= dir.y/dir.x; break;
+      case DIR_LEFT   : if(!dir.x)goto zero; x= dir.z/dir.x; y=-dir.y/dir.x; break;
+      case DIR_UP     : if(!dir.y)goto zero; x= dir.x/dir.y; y= dir.z/dir.y; break;
+      case DIR_DOWN   : if(!dir.y)goto zero; x=-dir.x/dir.y; y= dir.z/dir.y; break;
+      case DIR_FORWARD: if(!dir.z)goto zero; x=-dir.x/dir.z; y= dir.y/dir.z; break;
+      case DIR_BACK   : if(!dir.z)goto zero; x=-dir.x/dir.z; y=-dir.y/dir.z; break;
+   }
+      return VecI2(posToCellI(x), posToCellI(y));
+zero: return 0;
+}
 /******************************************************************************/
 static INLINE Vec _CubeFacePosToDir(DIR_ENUM cube_face, Flt x, Flt y)
 {

@@ -1522,7 +1522,9 @@ void MeshPart::drawBlend(C Vec4 *color)C
             Renderer.material_color_l->set(col);
             MaterialClear(); // we've changed material properties
          }
+         SetShaderParamChanges(Renderer._shader_param_changes);
          s->begin(); render.set().draw();
+         SetShaderParamChanges(); // this must be called here before setting new shader params, because we may have some 'ShaderParamRestore' that we need to apply before any new shader params, for example if we don't call it here, and a new material is set, and we process 'SetShaderParamChanges' later, then it could restore the material values that are now old because new material was already set
          D.stencil(STENCIL_NONE);
       }
    }
@@ -1552,7 +1554,9 @@ void MeshPart::drawBlend(C Material &material, C Vec4 *color)C
             Renderer.material_color_l->set(col);
             MaterialClear(); // we've changed material properties
          }
+         SetShaderParamChanges(Renderer._shader_param_changes);
          s->begin(); render.set().draw();
+         SetShaderParamChanges(); // this must be called here before setting new shader params, because we may have some 'ShaderParamRestore' that we need to apply before any new shader params, for example if we don't call it here, and a new material is set, and we process 'SetShaderParamChanges' later, then it could restore the material values that are now old because new material was already set
          D.stencil(STENCIL_NONE);
       }
    }

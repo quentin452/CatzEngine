@@ -291,7 +291,12 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
    bool ObjView::customDrawMatrix()C {return lodEditDist() || lodDrawAtDist();}
    bool ObjView::partVisible(int p, C MeshPart &part, bool allow_lit)C
    {
-      if(mode()==REMOVE || (mode()==PHYS && phys_tabs()==PHYS_TOGGLE))return true;
+      if(mode()==REMOVE)return true;
+      if(mode()==PHYS && phys_tabs()==PHYS_TOGGLE)
+      {
+         if(Kb.shift() && part.part_flag&MSHP_NO_PHYS_BODY)return false;
+         return true;
+      }
       if(mode()==MESH || mode()==SKIN)
       {
          if(allow_lit && p==lit_part)return true;

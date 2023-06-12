@@ -120,8 +120,8 @@ struct SphereAreaUS : VecUS2
    VecUS2& xy()  {return T;}
  C VecUS2& xy()C {return T;}
 
-   SphereAreaUS& zero(                           ) {T.side=DIR_ENUM(0); T.x=0; T.y=0; return T;}
-   SphereAreaUS& set (DIR_ENUM side, Int x, Int y) {T.side=side       ; T.x=x; T.y=y; return T;}
+   SphereAreaUS& zero(                                 ) {T.side=DIR_ENUM(0); T.x=0; T.y=0; return T;}
+   SphereAreaUS& set (DIR_ENUM side, UShort x, UShort y) {T.side=side       ; T.x=x; T.y=y; return T;}
 
    Bool operator==(C SphereAreaUS &pos)C {return xy()==pos.xy() && side==pos.side;}
    Bool operator!=(C SphereAreaUS &pos)C {return xy()!=pos.xy() || side!=pos.side;}
@@ -129,8 +129,8 @@ struct SphereAreaUS : VecUS2
    Bool operator!=(C SphereArea   &pos)C {return xy()!=pos.xy() || side!=pos.side;}
 
    SphereAreaUS() {}
-   SphereAreaUS(DIR_ENUM side, Int x, Int y) {set(    side,     x,     y);}
-   SphereAreaUS(C SphereArea &pos          ) {set(pos.side, pos.x, pos.y);}
+   SphereAreaUS(DIR_ENUM side, UShort x, UShort y) {set(    side,     x,     y);}
+   SphereAreaUS(C SphereArea &pos                ) {set(pos.side, pos.x, pos.y);}
 };
 inline      SphereArea::SphereArea(C SphereAreaUS &pos)  {set(pos.side, pos.x, pos.y);}
 inline Bool SphereArea::operator==(C SphereAreaUS &pos)C {return xy()==pos.xy() && side==pos.side;}

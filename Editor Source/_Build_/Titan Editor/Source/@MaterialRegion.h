@@ -56,7 +56,7 @@ public:
    Vec2              light_angle;
    Region            sub;
    Button            brightness, rgb_1, emissive;
-   Property         *red, *green, *blue, *alpha, *emit_red, *emit_green, *emit_blue, *smooth;
+   Property         *red, *green, *blue, *alpha, *emit_red, *emit_green, *emit_blue, *smooth; // !! IF ADDING NEW PARAM HERE THEN CLEAR IT IN 'clearPropPtrs' !!
    Memx<Property>    props;
    Memx<Texture>     texs;
    TextBlack         ts;
@@ -69,6 +69,10 @@ public:
    Elm              *elm;
    bool              changed;
    Edit::Undo<Change> undos;   void undoVis();
+
+   MaterialRegion();
+
+   void clearPropPtrs();
 
    Vec previewLight()C;
 
@@ -407,9 +411,6 @@ public:
 
    // update
    virtual void update(C GuiPC &gpc)override;
-
-public:
-   MaterialRegion();
 };
 /******************************************************************************/
 /******************************************************************************/

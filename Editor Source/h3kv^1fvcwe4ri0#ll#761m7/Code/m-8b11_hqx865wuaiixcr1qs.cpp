@@ -310,7 +310,7 @@ class MaterialRegion : Region
    Vec2              light_angle=PI_4;
    Region            sub;
    Button            brightness, rgb_1, emissive;
-   Property         *red=null, *green=null, *blue=null, *alpha=null, *emit_red=null, *emit_green=null, *emit_blue=null, *smooth=null;
+   Property         *red, *green, *blue, *alpha, *emit_red, *emit_green, *emit_blue, *smooth; // !! IF ADDING NEW PARAM HERE THEN CLEAR IT IN 'clearPropPtrs' !!
    Memx<Property>    props;
    Memx<Texture>     texs;
    TextBlack         ts;
@@ -323,6 +323,10 @@ class MaterialRegion : Region
    Elm              *elm=null;
    bool              changed=false;
    Edit.Undo<Change> undos(true);   void undoVis() {SetUndo(undos, undo, redo);}
+
+   MaterialRegion() {clearPropPtrs();}
+
+   void clearPropPtrs() {red=green=blue=alpha=emit_red=emit_green=emit_blue=smooth=null;}
 
    Vec previewLight()C {return Matrix3().setRotateXY(light_angle.y-ActiveCam.pitch, light_angle.x-ActiveCam.yaw).z;}
 

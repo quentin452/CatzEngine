@@ -316,6 +316,8 @@ MaterialRegion MtrlEdit;
          }
       }
    void MaterialRegion::undoVis() {SetUndo(undos, undo, redo);}
+   MaterialRegion::MaterialRegion() : elm_type(ELM_MTRL), auto_reload(true), min_zoom(0.48f), max_zoom(3), mouse_edit_delta(0), mouse_edit_value(0), light_angle(PI_4), game(&temp), elm_id(UIDZero), elm(null), changed(false), undos(true) {clearPropPtrs();}
+   void MaterialRegion::clearPropPtrs() {red=green=blue=alpha=emit_red=emit_green=emit_blue=smooth=null;}
    Vec MaterialRegion::previewLight()C {return Matrix3().setRotateXY(light_angle.y-ActiveCam.pitch, light_angle.x-ActiveCam.yaw).z;}
    void MaterialRegion::Render() {MtrlEdit.render();}
           void MaterialRegion::render()
@@ -1396,8 +1398,6 @@ Property &tss=props.New().create("Tex Size Switch", MemberDesc(DATA_INT).setFunc
          if(next.pd()){next.eat(); Proj.elmNext(elm_id    );}
       }
    }
-MaterialRegion::MaterialRegion() : elm_type(ELM_MTRL), auto_reload(true), min_zoom(0.48f), max_zoom(3), mouse_edit_delta(0), mouse_edit_value(0), light_angle(PI_4), red(null), green(null), blue(null), alpha(null), emit_red(null), emit_green(null), emit_blue(null), smooth(null), game(&temp), elm_id(UIDZero), elm(null), changed(false), undos(true) {}
-
 MaterialRegion::Texture::Texture() : mr(null) {}
 
 MaterialRegion::ImageSource::ImageSource() : multi_channel(false), need_metal_channel(true), index(0), order(0), detected_channels(0) {}

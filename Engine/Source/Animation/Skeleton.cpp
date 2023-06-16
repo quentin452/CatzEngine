@@ -924,7 +924,6 @@ struct BoneTypeIndexSetter
       for(; bone_i<child_end; bone_i++)
       {
          SkelBone &bone=skel.bones[bone_i];
-         Bool  singular=Singular(bone.type);
 
          Bone &child=children.New();
          child.bone_i=bone_i;
@@ -945,15 +944,15 @@ struct BoneTypeIndexSetter
                break;
             }
          }
-         if(singular || !child.start)
+         if(!child.start || Singular(bone.type))
          {
-            // keep current 'side' from parent
+            // keep current 'child.side' from parent
             child.side_bool=true; // use positive indexes by default
          }else
          {
-            if(!child.side)child.side=(pos.x>=0 ? 1 : -1); // if side unknown then calculate it
+            if(!child.side)child.side=((pos.x>=0) ? 1 : -1); // if side unknown then calculate it
                 child.side_bool=(child.side>=0);
-            if(!child.side_bool)pos.chsX(); // mirror order for negative side
+            if(!child.side_bool)pos.chsX(); // mirror X order for negative side
          }
          pos.normalize();
          if(bone.type==BONE_FINGER || bone.type==BONE_TOE)
@@ -976,7 +975,7 @@ struct BoneTypeIndexSetter
             bone_start.add(child);
          }
       }
-      FREPA(children)
+      REPA(children)
       {
          Bone &child=children[i];
          if(!child.start)flood(child.bone_i, parent_start_i, depth+1, child.side);

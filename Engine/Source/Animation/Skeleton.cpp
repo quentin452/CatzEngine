@@ -448,6 +448,11 @@ SkelBone& Skeleton:: getBone (BONE_TYPE type, Int type_index, Int type_sub)  {re
 SkelBone& Skeleton:: getBone (CChar8 *name                                )  {return bones     [ getBoneI(name)];}
 SkelSlot& Skeleton:: getSlot (CChar8 *name                                )  {return slots     [ getSlotI(name)];}
 /******************************************************************************/
+Int Skeleton::parentlessBones()C
+{
+   Int    i=0; for(; i<bones.elms(); i++)if(bones[i].parent!=BONE_NULL)break;
+   return i;
+}
 Bool Skeleton::contains(Int parent, Int child)C
 {
    if(parent<0)parent=BONE_NULL;

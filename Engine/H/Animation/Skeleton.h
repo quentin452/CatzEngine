@@ -171,6 +171,7 @@ struct Skeleton // Animation Skeleton - base skeleton used by 'AnimatedSkeleton'
    Int boneLevel  (Int bone)C; // get bone level
    Int bonesSharedParent(MemPtrN<BoneType, 256> bones)C; // get nearest parent which all bones share, or BONE_NULL if none
    Int hierarchyDistance(Int bone_a, Int bone_b)C; // get hierarchy distance between bones
+   Int parentlessBones()C; // number of bones that don't have any parent
 
    SkelAnim* findSkelAnim(C Str &name)C {return _skel_anims.get(name);} // find skeleton animation, null on fail
    SkelAnim* findSkelAnim(C UID &id  )C {return _skel_anims.get(id  );} // find skeleton animation, null on fail

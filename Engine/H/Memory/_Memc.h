@@ -1,6 +1,8 @@
 /******************************************************************************/
 struct _Memc // Continuous Memory Based Container Base - Do not use this class, use 'Memc' instead
 {
+   static constexpr Bool Continuous=true; // Memc memory is continuous
+
    void del  ();
    void clear();
 

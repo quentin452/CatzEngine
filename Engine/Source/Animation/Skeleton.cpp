@@ -849,15 +849,6 @@ Skeleton& Skeleton::setBoneLengths()
    return T;
 }
 /******************************************************************************/
-struct BoneOrder
-{
-   Int bone_i, parent;
-   Flt order;
-
-   void set(Int bone_i, Int parent, Flt order) {T.bone_i=bone_i; T.parent=parent; T.order=order;}
-
-   static Int Compare(C BoneOrder &a, C BoneOrder &b) {if(Int c=::Compare(a.parent, b.parent))return c; return ::Compare(a.order, b.order);}
-};
 static inline Bool Lower(Char8 c) {return c>='a' && c<='z';}
 static inline Bool Upper(Char8 c) {return c>='A' && c<='Z';}
 
@@ -891,22 +882,144 @@ static Bool BoneName(C SkelBone &bone, CChar8 *name) // this works as 'Contains'
    }
    return false;
 }
-#define UNASSIGNED (-128)
-static Int BoneTypeIndex(C Skeleton &skel, C SkelBone &bone) // this function needs to be used to check all parents recursively, because we're processing elements out of order (for example we're processing Head bones in Hydra model, and we're asking for type indexes of their parents (necks) however some leaf-necks may still have UNASSIGNED because only root-necks are set)
+struct BoneTypeIndexSetter
 {
-   if(bone.type_index!=UNASSIGNED)return bone.type_index; // if already known, then set
-   for(Int cur=skel.bones.index(&bone); ; ) // iterate all parents until a parent of same type with known index is found
+   struct Bone
    {
-      cur=skel.boneParent(cur); if(cur<0)break;
-    C SkelBone &parent=skel.bones[cur]; if(parent.type==bone.type && parent.type_index!=UNASSIGNED)return parent.type_index;
+      Bool     start, side_bool;
+      SByte    side;
+      BoneType bone_i, depth,
+             //child_i,
+               bone_start_i, // index in which initially it was added to the 'bone_start'
+               parent_start_i; // index of parent in 'bone_start'
+      Flt      order;
+   };
+   static Int CompareChild(C Bone &a, C Bone &b)
+   {
+      if(Int c=Compare(a.side_bool, b.side_bool))return c;
+        return Compare(a.order    , b.order);
    }
-   return 0;
-}
-static Int BoneTypeIndexSub(C Skeleton &skel, C SkelBone &bone)
-{
-   Byte index=Abs(BoneTypeIndex(skel, bone)); // use Abs because of negative numbers
-   return (index<<8)|(255-bone.type_sub); // prioritize index and reverse order for sub-index (to make shoulders have lowest type index when they belong to most furthest bones, for example monsters with 4 shoulders/arms will have top shoulders/arms with 0 and -1 indexes, while lower shoulders/arms will have 1 and -2 indexes)
-}
+   static Int CompareGlobal(C Bone &a, C Bone &b)
+   {
+      if(Int c=Compare(a.side_bool     , b.side_bool     ))return c;
+      if(Int c=Compare(a.parent_start_i, b.parent_start_i))return c;
+      if(Int c=Compare(a.depth         , b.depth         ))return c;
+      if(Int c=Compare(a.bone_start_i  , b.bone_start_i  ))return c;
+    //if(Int c=Compare(a.child_i       , b.child_i       ))return c;
+    //if(Int c=Compare(a.order         , b.order         ))return c;
+      return 0;
+   }
+
+   MemtN<Bone, 256> bone_start;
+   Skeleton &skel;
+
+   void flood(BoneType parent_i, BoneType parent_start_i, BoneType depth, SByte side) // 'side'=-1 negative, 0=unknown, 1=positive
+   {
+      SkelBone  *parent=skel.bones.addr(parent_i);
+      Matrix     parent_matrix;
+      Int        bone_i, child_end;
+      if(parent){bone_i=parent->children_offset; child_end=bone_i+parent->children_num; parent_matrix=*parent;}
+      else      {bone_i=                      0; child_end=skel.parentlessBones();}
+      MemtN<Bone, 256> children;
+      for(; bone_i<child_end; bone_i++)
+      {
+         SkelBone &bone=skel.bones[bone_i];
+         Bool  singular=Singular(bone.type);
+
+         Bone &child=children.New();
+         child.bone_i=bone_i;
+         child.depth =depth;
+         child.start =(bone.type && !bone.type_sub);
+         child.side  =side;
+
+         Vec pos=((bone.type==BONE_SHOULDER) ? bone.to() : bone.pos); // for shoulders use target location because they can be located close to the center (or in case of some models even on the other side)
+         if(parent)
+         {
+            pos.divNormalized(parent_matrix);
+            switch(parent->type)
+            {
+               case BONE_SPINE:
+               case BONE_NECK :
+               case BONE_HEAD :
+                  pos.swapYZ(); CHS(pos.x); // swap YZ because spine is expected to have perp Y pointed forward, and dir Z pointed up, change X sign because cross X points left
+               break;
+            }
+         }
+         if(singular || !child.start)
+         {
+            // keep current 'side' from parent
+            child.side_bool=true; // use positive indexes by default
+         }else
+         {
+            if(!child.side)child.side=(pos.x>=0 ? 1 : -1); // if side unknown then calculate it
+                child.side_bool=(child.side>=0);
+            if(!child.side_bool)pos.chsX(); // mirror order for negative side
+         }
+         pos.normalize();
+         if(bone.type==BONE_FINGER || bone.type==BONE_TOE)
+         {
+            child.order=pos.x; // start with left
+         }else
+         {
+            child.order=pos.x-pos.y-pos.z; // start with left top front
+         }
+      }
+      children.sort(CompareChild);
+      REPA(children) // add in reversed order because later we're processing bones from the end
+      {
+         Bone &child=children[i];
+         if(child.start)
+         {
+          //child.child_i=i;
+            child.bone_start_i=bone_start.elms();
+            child.parent_start_i=parent_start_i;
+            bone_start.add(child);
+         }
+      }
+      FREPA(children)
+      {
+         Bone &child=children[i];
+         if(!child.start)flood(child.bone_i, parent_start_i, depth+1, child.side);
+      }
+   }
+   BoneTypeIndexSetter(Skeleton &skel) : skel(skel)
+   {
+      flood(BONE_NULL, BONE_NULL, 0, 0);
+      if(Int end=bone_start.elms())
+      {
+         Int start=0;
+         do
+         {
+            ASSERT(bone_start.Continuous); Sort(&bone_start[start], end-start, CompareGlobal);
+            do
+            {
+               Bone &bone=bone_start[start];
+               flood(bone.bone_i, start, bone.depth+1, bone.side);
+            }while(++start<end);
+            end=bone_start.elms();
+         }while(start<end); // if added new elements then process them
+      }
+
+      BoneType bone_num[BONE_NUM][2]; Zero(bone_num); // number of bones for each side
+      REPA(bone_start) // process bones from the end to list furthest shoulders/arms/legs as first (smallest index)
+      {
+         Bone     &bone=bone_start[i];
+         SkelBone &sbon=skel.bones[bone.bone_i];
+         BoneType &bones=bone_num[sbon.type][bone.side_bool];
+         sbon.type_index=(bone.side_bool ? bones : -1-bones);
+         bones++;
+      }
+      FREPA(skel.bones)
+      {
+         SkelBone &bone=skel.bones[i]; if(bone.type_sub)
+         {
+            Int parent=skel.findParent(i, bone.type);
+            if( parent>=0)bone.type_index=skel.bones[parent].type_index; // set from parent
+            else          bone.type_index=0;
+         }
+      }
+   }
+};
 Skeleton& Skeleton::setBoneTypes()
 {
    // STEP 1 - set 'type'
@@ -1019,92 +1132,33 @@ Skeleton& Skeleton::setBoneTypes()
    MemtN<Link, 256> links; links.setNum(bones.elms());
    FREPA(bones) // go from the start to assign parents first
    {
-      SkelBone &bone=bones[i]; if(bone.type)
+      SkelBone &bone=bones[i];
+      if(bone.type)
       {
          Link &bone_link=links[i];
-         for(Int cur=i; ; ) // find first parent with same type
+         Int parent_i=findParent(i, bone.type); // find first parent with same type
+         if( parent_i>=0)
          {
-            cur=boneParent(cur); if(cur<0)break;
-            SkelBone &parent=bones[cur]; if(parent.type==bone.type) // found a parent with same type 'same_type_parent'
-            {
-               Int top_parent=links[cur].top_parent; // get top parent according to same_type_parent
-               bone_link.top_parent=top_parent; // set this bone's top_parent to be 'same_type_parent.top_parent'
-             //bone_link.total_subs=0; can be ignored because this is used only for the top parent, and since here we've found a parent, then this is not a top parent
-               bone.type_sub=++links[top_parent].total_subs; // increase top parent total subs
-               goto have_sub;
-            }
+            SkelBone &parent=bones[parent_i];
+            Int top_parent=links[parent_i].top_parent; // get top parent according to parent
+            bone_link.top_parent=top_parent; // set this bone's top_parent to be 'parent.top_parent'
+          //bone_link.total_subs=0; can be ignored because this is used only for the top parent, and since here we've found a parent, then this is not a top parent
+            bone.type_sub=++links[top_parent].total_subs; // increase top parent total subs
+         }else
+         {
+            bone_link.top_parent=i; // set top parent to be self
+            bone_link.total_subs=0; // have 0 subs
+            bone.type_sub=0;
          }
-      // didn't found same_type_parent:
-         bone_link.top_parent=i; // set top parent to be self
-         bone_link.total_subs=0; // have 0 subs
-         bone.type_sub=0;
-      have_sub:
-         bone.type_index=UNASSIGNED; // set 'type_index' to unknown to be used in the next STEP
       }else
       {
-         bone.type_sub  =0;
-         bone.type_index=0; // set all BONE_UNKNOWN to 0
+         bone.type_sub=0;
+         bone.type_index=0;
       }
    }
 
    // STEP 3 - set 'type_index'
-   MemtN<BoneOrder, 256> groups[2]; // 0=negative, 1=positive
-   FREPA(bones) // go from the start to assign parents first
-   {
-      SkelBone &bone=bones[i]; if(bone.type_index==UNASSIGNED) // if not yet assigned
-      {
-         if(bone.type_sub)bone.type_index=BoneTypeIndex(T, bone);else // if this is a sub bone then grab from parent
-         {
-            Bool singular=Singular(bone.type);
-            REPA(bones) // get all bones that have the same type and zero sub level
-            {
-             C SkelBone &test=bones[i]; if(test.type==bone.type && !test.type_sub)
-               {
-                  Bool      positive;
-                  Flt       order;
-                  SkelBone *parent=bones.addr(test.parent);
-                  Vec       pos=((test.type==BONE_SHOULDER) ? test.to() : test.pos); // for shoulders use target location because they can be located close to the center (or in case of some models even on the other side)
-                  if(parent)
-                  {
-                     pos.divNormalized(Matrix(*parent));
-                     switch(parent->type)
-                     {
-                        case BONE_SPINE:
-                        case BONE_NECK :
-                        case BONE_HEAD :
-                           pos.swapYZ(); CHS(pos.x); // swap YZ because spine is expected to have perp(Y) pointed forward, and dir(Z) pointed up, change X sign because cross(X) points left
-                        break;
-                     }
-                  }
-                  if(!singular) // if not singular then detect side
-                  {
-                     if(parent && !Singular(parent->type))positive=(BoneTypeIndex(T, *parent)>=0); // if have a non-singular parent, then get from parent
-                     else                                 positive=(pos.x>=0);
-                     order=Abs(pos.x)-pos.y-pos.z; // start with left top front
-                  }else
-                  {
-                     positive=true; // use positive indexes by default
-                     order=pos.x-pos.y-pos.z; // start with left top front
-                  }
-                  if(test.type==BONE_FINGER || test.type==BONE_TOE)
-                  {
-                     pos.normalize();
-                     order=pos.x; // start with left
-                     if(!positive)CHS(order); // change order for left hands/feet
-                  }
-                  groups[positive].New().set(i, parent ? BoneTypeIndexSub(T, *parent) : 0, order);
-               }
-            }
-            REPAD(sides, groups)
-            {
-               MemtN<BoneOrder, 256> &group=groups[sides];
-               group.sort(BoneOrder::Compare);
-               REPA(group)bones[group[i].bone_i].type_index=(sides ? i : -1-i);
-               group.clear();
-            }
-         }
-      }
-   }
+   BoneTypeIndexSetter(T);
 
    return T;
 }

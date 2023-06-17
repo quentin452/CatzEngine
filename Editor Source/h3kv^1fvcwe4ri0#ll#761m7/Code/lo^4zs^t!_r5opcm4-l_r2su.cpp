@@ -1178,6 +1178,7 @@ class ImporterClass
                               }  
                            }
                         }
+                        new_skel.setBoneShapes();
                      }
                      Proj.adjustAnimations(skel_elm.id, old_edit_skel, *old_skel, new_skel, bone_weights); // !! convert animations before saving skeleton which modifies 'old_skel' which is a pointer to cache element !!
 

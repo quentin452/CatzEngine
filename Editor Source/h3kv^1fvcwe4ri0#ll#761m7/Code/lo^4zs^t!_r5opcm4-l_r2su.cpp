@@ -1171,9 +1171,10 @@ class ImporterClass
                                  {
                                   C SkelBone & src_bone=old_skel.bones[best_old_skel_bone_i];
                                     SkelBone &dest_bone=new_skel.bones[     new_skel_bone_i];
-                                    dest_bone.width=src_bone.width;
-                                  //dest_bone.frac =src_bone.frac ;
-                                    dest_bone.flag =src_bone.flag ;
+                                    dest_bone.width =src_bone.width ;
+                                  //dest_bone.offset=src_bone.offset;
+                                  //dest_bone.frac  =src_bone.frac  ;
+                                    dest_bone.flag  =src_bone.flag  ;
                                  }
                               }  
                            }

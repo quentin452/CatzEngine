@@ -230,8 +230,7 @@ VecH ToneMapSigmoid(VecH x)
    x=x*2-1;
    x=SigmoidExp(Vec(x*contrast  ))/SigmoidExp(contrast  ); // need to use high precision
    x=x*0.5+0.5;
-   x=mul(ACESOutputMat, x);
- //x=Max(0, x);
+   x=mul(ACESOutputMat, x); x=Max(0, x);
    return x;
 }
 /******************************************************************************/

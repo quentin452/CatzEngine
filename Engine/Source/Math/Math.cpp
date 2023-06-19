@@ -678,12 +678,13 @@ Dbl gd(Dbl x) {return Atan(sinh (x));}
 
 Flt SigmoidExp    (Flt x) {return 2/(1+Exp(-x))-1;}
 Flt SigmoidDiv    (Flt x) {return x/(1+x);}
-Flt SigmoidAtan   (Flt x) {return Atan(PI_2*x)*2/PI;}
+Flt SigmoidAtan   (Flt x) {return Atan(PI_2*x)*(2/PI);}
 Flt SigmoidSqrt   (Flt x) {return x/SqrtFast(1+x*x);}
 Flt SigmoidSqrtInv(Flt y) {return y/SqrtFast(1-y*y);}
 Flt SigmoidGd     (Flt x) {return (2/PI)*gd(PI_2*x);}
 Flt SigmoidTanh   (Flt x) {return tanhf(x);}
 Flt SigmoidErf    (Flt x) {return erff((SqrtFast(PI)/2)*x);}
+//Flt SigmoidSC     (Flt x) {return SmoothCube(x/3+0.5f)*2-1;} not fully smooth
 /******************************************************************************/
 // BLENDING
 /******************************************************************************/

@@ -1456,6 +1456,99 @@ static Bool CSRGBToLinear(CalcValue &x)
    return true;
 }
 /******************************************************************************/
+inline Flt Tanh(Flt x) {return tanhf(x);}
+inline Dbl Tanh(Dbl x) {return tanh (x);}
+static Bool CTanh(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =Tanh(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =Tanh(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=Tanh(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =Tanh(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=Tanh(    x.v4);else
+      return false;
+   return true;
+}
+static Bool CSigmoidExp(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidExp(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidExp(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidExp(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidExp(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidExp(    x.v4);else
+      return false;
+   return true;
+}
+static Bool CSigmoidDiv(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidDiv(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidDiv(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidDiv(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidDiv(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidDiv(    x.v4);else
+      return false;
+   return true;
+}
+static Bool CSigmoidAtan(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidAtan(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidAtan(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidAtan(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidAtan(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidAtan(    x.v4);else
+      return false;
+   return true;
+}
+static Bool CSigmoidSqrt(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidSqrt(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidSqrt(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidSqrt(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidSqrt(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidSqrt(    x.v4);else
+      return false;
+   return true;
+}
+static Bool CSigmoidSqrtInv(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidSqrtInv(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidSqrtInv(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidSqrtInv(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidSqrtInv(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidSqrtInv(    x.v4);else
+      return false;
+   return true;
+}
+static Bool CSigmoidGd(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidGd(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidGd(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidGd(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidGd(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidGd(    x.v4);else
+      return false;
+   return true;
+}
+static Bool CSigmoidTanh(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidTanh(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidTanh(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidTanh(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidTanh(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidTanh(    x.v4);else
+      return false;
+   return true;
+}
+static Bool CSigmoidErf(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidErf(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidErf(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidErf(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidErf(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidErf(    x.v4);else
+      return false;
+   return true;
+}
+/******************************************************************************/
 static Bool CGaussian(CalcValue &x)
 {
    if(x.type==CVAL_INT )x.r=Gaussian(Dbl(x.i));else
@@ -1585,6 +1678,7 @@ static struct CalcFuncInfo
    {1, "Sin"             , (Ptr)CSin             },
    {1, "Cos"             , (Ptr)CCos             },
    {1, "Tan"             , (Ptr)CTan             },
+   {1, "Tanh"            , (Ptr)CTanh            },
    {1, "Ctg"             , (Ptr)CCtg             },
    {1, "Acos"            , (Ptr)CAcos            },
    {1, "Asin"            , (Ptr)CAsin            },
@@ -1635,6 +1729,14 @@ static struct CalcFuncInfo
    {1, "LinearToSRGB"    , (Ptr)CLinearToSRGB    },
    {1, "SRGBToLinear"    , (Ptr)CSRGBToLinear    },
    {1, "Gaussian"        , (Ptr)CGaussian        },
+   {1, "SigmoidExp"      , (Ptr)CSigmoidExp      },
+   {1, "SigmoidDiv"      , (Ptr)CSigmoidDiv      },
+   {1, "SigmoidAtan"     , (Ptr)CSigmoidAtan     },
+   {1, "SigmoidSqrt"     , (Ptr)CSigmoidSqrt     },
+   {1, "SigmoidSqrtInv"  , (Ptr)CSigmoidSqrtInv  },
+   {1, "SigmoidGd"       , (Ptr)CSigmoidGd       },
+   {1, "SigmoidTanh"     , (Ptr)CSigmoidTanh     },
+   {1, "SigmoidErf"      , (Ptr)CSigmoidErf      },
 };
 struct CalcFunc
 {

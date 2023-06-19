@@ -36,6 +36,21 @@ BUFFER(ToneMap)
 BUFFER_END
 #include "!Set Prec Default.h"
 /******************************************************************************/
+#define MUL (1)
+static const MatrixH3 ACESInputMat= // sRGB => XYZ => D65_2_D60 => AP1 => RRT_SAT
+{
+   {0.59719*MUL, 0.35458*MUL, 0.04823*MUL},
+   {0.07600*MUL, 0.90834*MUL, 0.01566*MUL},
+   {0.02840*MUL, 0.13383*MUL, 0.83777*MUL},
+};
+#undef MUL
+static const MatrixH3 ACESOutputMat= // ODT_SAT => XYZ => D60_2_D65 => sRGB
+{
+   { 1.60475, -0.53108, -0.07367},
+   {-0.10208,  1.10813, -0.00605},
+   {-0.00327, -0.07276,  1.07602},
+};
+/******************************************************************************/
 void DarkenDarks(inout VecH x)
 {
    VecH step=Sat(x/ToneMapDarkenRange);
@@ -206,6 +221,19 @@ VecH TonemapLogML16Sat(VecH x)
 Half  TonemapExp(Half  x, Half max_lum) {return TonemapExp(x)/TonemapExp(max_lum);}
 VecH  TonemapExp(VecH  x, Half max_lum) {return TonemapExp(x)/TonemapExp(max_lum);}
 VecH4 TonemapExp(VecH4 x, Half max_lum) {return TonemapExp(x)/TonemapExp(max_lum);}
+/******************************************************************************/
+VecH ToneMapSigmoid(VecH x)
+{ // here 'SigmoidExp' works better than 'SigmoidSqrt' because sqrt introduces too much highlights on already bright colors
+   x=mul(ACESInputMat, x); // convert to ACES and prevent saturation
+   x=Max(0, x);
+   Half contrast=2, brightness=2;
+   x=SigmoidExp(Vec(x*brightness))/SigmoidExp(brightness); // need to use high precision
+   x=x*2-1;
+   x=SigmoidExp(Vec(x*contrast  ))/SigmoidExp(contrast  ); // need to use high precision
+   x=x*0.5+0.5;
+   x=mul(ACESOutputMat, x);
+   return x;
+}
 /******************************************************************************/
 VecH TonemapEsenthel(VecH x)
 {
@@ -420,20 +448,6 @@ VecH TonemapACES_HDR_Narkowicz(VecH x) // returns 0 .. 12.5 (0..1000 nits), Krzy
    return (x*(a*x+b))/(x*(c*x+d)+e); // ((x*0.7)*(15.8*(x*0.7)+2.12))/((x*0.7)*(1.2*(x*0.7)+5.92)+1.9)
 }
 /******************************************************************************
-#define MUL (2*0.8) // to match 'TonemapACES_LDR_Narkowicz'
-static const MatrixH3 ACESInputMat= // sRGB => XYZ => D65_2_D60 => AP1 => RRT_SAT
-{
-   {0.59719*MUL, 0.35458*MUL, 0.04823*MUL},
-   {0.07600*MUL, 0.90834*MUL, 0.01566*MUL},
-   {0.02840*MUL, 0.13383*MUL, 0.83777*MUL},
-};
-#undef MUL
-static const MatrixH3 ACESOutputMat= // ODT_SAT => XYZ => D60_2_D65 => sRGB
-{
-   { 1.60475, -0.53108, -0.07367},
-   {-0.10208,  1.10813, -0.00605},
-   {-0.00327, -0.07276,  1.07602},
-};
 VecH RRTAndODTFit(VecH v)
 {
    VecH a=v*(v+0.0245786)-0.000090537;

@@ -1607,6 +1607,11 @@ Flt  SigmoidSqrt(Flt  x) {return x/Sqrt(1+x*x);}
 Half SigmoidSqrt(Half x) {return x/Sqrt(1+x*x);}
 Vec  SigmoidSqrt(Vec  x) {return x/Sqrt(1+x*x);}
 VecH SigmoidSqrt(VecH x) {return x/Sqrt(1+x*x);}
+
+Flt  SigmoidExp(Flt  x) {return 2/(1+Exp(-x))-1;}
+Half SigmoidExp(Half x) {return 2/(1+Exp(-x))-1;}
+Vec  SigmoidExp(Vec  x) {return 2/(1+Exp(-x))-1;}
+VecH SigmoidExp(VecH x) {return 2/(1+Exp(-x))-1;}
 /******************************************************************************/
 Half     VisibleOpacity(Flt density, Flt range) {return   Pow(1-density, range);} // calculate visible     opacity (0..1) having 'density' environment density (0..1), and 'range' (0..Inf)
 Half AccumulatedDensity(Flt density, Flt range) {return 1-Pow(1-density, range);} // calculate accumulated density (0..1) having 'density' environment density (0..1), and 'range' (0..Inf)

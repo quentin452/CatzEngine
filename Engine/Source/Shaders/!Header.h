@@ -1602,6 +1602,11 @@ Half Pinch      (Half x, Half pinch) {return x*pinch/(1+x*(pinch-1));}
 Flt  Pinch      (Flt  x, Flt  pinch) {return x*pinch/(1+x*(pinch-1));}
 Half PinchFactor(Half x, Half pinch) {return Pinch(x, ScaleFactor(pinch));}
 Flt  PinchFactor(Flt  x, Flt  pinch) {return Pinch(x, ScaleFactor(pinch));}
+
+Flt  SigmoidSqrt(Flt  x) {return x/Sqrt(1+x*x);}
+Half SigmoidSqrt(Half x) {return x/Sqrt(1+x*x);}
+Vec  SigmoidSqrt(Vec  x) {return x/Sqrt(1+x*x);}
+VecH SigmoidSqrt(VecH x) {return x/Sqrt(1+x*x);}
 /******************************************************************************/
 Half     VisibleOpacity(Flt density, Flt range) {return   Pow(1-density, range);} // calculate visible     opacity (0..1) having 'density' environment density (0..1), and 'range' (0..Inf)
 Half AccumulatedDensity(Flt density, Flt range) {return 1-Pow(1-density, range);} // calculate accumulated density (0..1) having 'density' environment density (0..1), and 'range' (0..Inf)

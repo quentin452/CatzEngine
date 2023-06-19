@@ -225,13 +225,13 @@ VecH4 TonemapExp(VecH4 x, Half max_lum) {return TonemapExp(x)/TonemapExp(max_lum
 VecH ToneMapSigmoid(VecH x)
 { // here 'SigmoidExp' works better than 'SigmoidSqrt' because sqrt introduces too much highlights on already bright colors
    x=mul(ACESInputMat, x); // convert to ACES and prevent saturation
-   x=Max(0, x);
    Half contrast=2, brightness=2;
    x=SigmoidExp(Vec(x*brightness))/SigmoidExp(brightness); // need to use high precision
    x=x*2-1;
    x=SigmoidExp(Vec(x*contrast  ))/SigmoidExp(contrast  ); // need to use high precision
    x=x*0.5+0.5;
    x=mul(ACESOutputMat, x);
+ //x=Max(0, x);
    return x;
 }
 /******************************************************************************/

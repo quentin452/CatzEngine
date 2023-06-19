@@ -458,7 +458,7 @@ VecH TonemapACESHill(VecH color) // Stephen Hill "self_shadow", desaturates too 
    color=mul(ACESInputMat, color);
    color=RRTAndODTFit(color); // Apply RRT and ODT
    color=mul(ACESOutputMat, color);
-   color=Sat(color);
+   color=Max(0, color);
    return color;
 }
 /******************************************************************************

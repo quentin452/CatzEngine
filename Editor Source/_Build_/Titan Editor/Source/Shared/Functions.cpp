@@ -663,6 +663,7 @@ bool NonMonoTransform   (C TextParam &p   ) // if can change a mono image to non
        || p.name=="mulRGBHS" && values>1
        || p.name=="gamma" && TextVecEx(p.value).anyDifferent()
        || p.name=="brightness" && TextVecEx(p.value).anyDifferent()
+       || p.name=="sigmoid" && TextVecEx(p.value).anyDifferent()
        || p.name=="contrast" && TextVecEx(p.value).anyDifferent()
        || p.name=="contrastAlphaWeight" && TextVecEx(p.value).anyDifferent()
        || p.name=="addSat"
@@ -697,6 +698,7 @@ bool HighPrecTransform(C Str &name)
        || name=="bump" || name=="bumpClamp"
        || name=="contrast" || name=="contrastLum" || name=="contrastAlphaWeight" || name=="contrastLumAlphaWeight"
        || name=="brightness" || name=="brightnessLum" || name=="brightnessLumS"
+       || name=="sigmoid" || name=="sigmoidLum"
        || name=="gamma" || name=="gammaA" || name=="gammaLum" || name=="gammaLumPhoto" || name=="gammaSat"
        || name=="SRGBToLinear" || name=="LinearToSRGB"
        || name=="greyPhoto"
@@ -1089,14 +1091,27 @@ flt   PowMax   (flt x, flt y) {return (x<=0) ? 0 : Pow(x, y);}
 
 flt _ApplyBrightness(flt x, flt brightness) // !! ASSUMES THAT "x>0 && x<1 && brightness" !!
 {
-   x=Sqr(x);
+   x=Sqr(x); // SRGBToLinearFast
    if(brightness<0)x=SigmoidSqrtInv(x*SigmoidSqrt(brightness))/            brightness ;
    else            x=SigmoidSqrt   (x*            brightness )/SigmoidSqrt(brightness);
-   return SqrtFast(x);
+   return SqrtFast(x); // LinearToSRGBFast
+}
+flt _ApplyContrast(flt x, flt contrast) // !! ASSUMES THAT "x>0 && x<1 && contrast" !!
+{
+   x=Sqr(x); // SRGBToLinearFast
+   x=x*2-1;
+   if(contrast<0)x=SigmoidSqrtInv(x*SigmoidSqrt(contrast))/            contrast ;
+   else          x=SigmoidSqrt   (x*            contrast )/SigmoidSqrt(contrast);
+   x=x*0.5f+0.5f;
+   return SqrtFast(x); // LinearToSRGBFast
 }
 void ApplyBrightness(flt &x, flt brightness)
 {
    if(x>0 && x<1 && brightness)x=_ApplyBrightness(x, brightness);
+}
+void ApplyContrast(flt &x, flt contrast)
+{
+   if(x>0 && x<1 && contrast)x=_ApplyContrast(x, contrast);
 }
 
 void Crop(Image &image, int x, int y, int w, int h, C Color &background, bool hp)
@@ -1628,6 +1643,58 @@ void TransformImage(Image &image, TextParam param, bool clamp, C Color &backgrou
             flt sat=RgbToHsb(c.xyz).y; if(flt b=bright*sat)
             {
                flt new_lum=_ApplyBrightness(old_lum, b);
+               c.xyz*=new_lum/old_lum;
+               image.color3DF(x, y, z, c);
+            }
+         }
+      }
+   }else
+   if(param.name=="sigmoid")
+   {
+      Vec contrast=TextVecEx(param.value), mul; if(contrast.any())
+      {
+         if(contrast.anyDifferent())AdjustImage(image, true, false, false);
+         flt (*R)(flt);
+         flt (*G)(flt);
+         flt (*B)(flt);
+         if(!contrast.x){contrast.x=1; mul.x=1; R=FloatSelf;}else if(contrast.x<0){mul.x=1/contrast.x; contrast.x=SigmoidSqrt(contrast.x); R=SigmoidSqrtInv;}else{mul.x=1/SigmoidSqrt(contrast.x); R=SigmoidSqrt;}
+         if(!contrast.y){contrast.y=1; mul.y=1; G=FloatSelf;}else if(contrast.y<0){mul.y=1/contrast.y; contrast.y=SigmoidSqrt(contrast.y); G=SigmoidSqrtInv;}else{mul.y=1/SigmoidSqrt(contrast.y); G=SigmoidSqrt;}
+         if(!contrast.z){contrast.z=1; mul.z=1; B=FloatSelf;}else if(contrast.z<0){mul.z=1/contrast.z; contrast.z=SigmoidSqrt(contrast.z); B=SigmoidSqrtInv;}else{mul.z=1/SigmoidSqrt(contrast.z); B=SigmoidSqrt;}
+         Vec ofs=contrast;
+         contrast*=2;
+         mul     *=0.5f;
+         for(int z=box.min.z; z<box.max.z; z++)
+         for(int y=box.min.y; y<box.max.y; y++)
+         for(int x=box.min.x; x<box.max.x; x++)
+         {
+            Vec4 c=image.color3DF(x, y, z);
+            if(c.x>0 && c.x<1)c.x=SqrtFast(R(Sqr(c.x)*contrast.x-ofs.x)*mul.x+0.5f);
+            if(c.y>0 && c.y<1)c.y=SqrtFast(G(Sqr(c.y)*contrast.y-ofs.y)*mul.y+0.5f);
+            if(c.z>0 && c.z<1)c.z=SqrtFast(B(Sqr(c.z)*contrast.z-ofs.z)*mul.z+0.5f);
+            image.color3DF(x, y, z, c);
+         }
+      }
+   }else
+   if(param.name=="sigmoidLum")
+   {
+      flt contrast=param.asFlt(), mul; flt (*f)(flt);
+      if( contrast)
+      {
+         if(contrast<0){mul=1/            contrast ; contrast=SigmoidSqrt(contrast); f=SigmoidSqrtInv;}
+         else          {mul=1/SigmoidSqrt(contrast);                                 f=SigmoidSqrt   ;}
+         flt ofs=contrast;
+         contrast*=2;
+         mul     *=0.5f;
+         for(int z=box.min.z; z<box.max.z; z++)
+         for(int y=box.min.y; y<box.max.y; y++)
+         for(int x=box.min.x; x<box.max.x; x++)
+         {
+            Vec4 c=image.color3DF(x, y, z); flt old_lum=c.xyz.max();
+            if(old_lum>0 && old_lum<1)
+            {
+               flt new_lum=Sqr(old_lum);
+               new_lum=f(new_lum*contrast-ofs)*mul+0.5f;
+               new_lum=SqrtFast(new_lum);
                c.xyz*=new_lum/old_lum;
                image.color3DF(x, y, z, c);
             }

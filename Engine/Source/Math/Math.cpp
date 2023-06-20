@@ -678,6 +678,8 @@ Dbl gd(Dbl x) {return Atan(sinh (x));}
 
 Flt SigmoidExp    (Flt x) {return 2/(1+Exp (-x))-1;}
 Flt SigmoidExp2   (Flt x) {return 2/(1+Exp2(-x))-1;}
+Flt SigmoidExpInv (Flt y) {y=y*0.5f+0.5f; return Ln  (y/(1-y));}
+Flt SigmoidExp2Inv(Flt y) {y=y*0.5f+0.5f; return Log2(y/(1-y));}
 Flt SigmoidDiv    (Flt x) {return x/(1+Abs(x));}
 Flt SigmoidAtan   (Flt x) {return Atan(PI_2*x)*(2/PI);}
 Flt SigmoidSqrt   (Flt x) {return x/SqrtFast(1+x*x);}

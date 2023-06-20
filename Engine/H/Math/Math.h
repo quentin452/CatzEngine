@@ -313,7 +313,9 @@ Flt AccumulatedDensity(Flt density, Flt range); // calculate accumulated density
 
 // sigmoid
 Flt SigmoidExp    (Flt x);
+Flt SigmoidExpInv (Flt y);
 Flt SigmoidExp2   (Flt x);
+Flt SigmoidExp2Inv(Flt y);
 Flt SigmoidDiv    (Flt x);
 Flt SigmoidAtan   (Flt x);
 Flt SigmoidSqrt   (Flt x);

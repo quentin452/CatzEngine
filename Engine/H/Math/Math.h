@@ -320,10 +320,10 @@ Flt SigmoidAtanInv(Flt y); // inverse function of 'SigmoidAtan', SigmoidAtanInv(
 Flt SigmoidSqrt   (Flt x);
 Flt SigmoidSqrtInv(Flt y); // inverse function of 'SigmoidSqrt', SigmoidSqrtInv(SigmoidSqrt(x))=x
 Flt SigmoidPow    (Flt x, Flt exp);
-Flt SigmoidPowInv (Flt x, Flt exp); // inverse function of 'SigmoidPow', SigmoidPowInv(SigmoidPow(x, exp), exp)=x
+Flt SigmoidPowInv (Flt y, Flt exp); // inverse function of 'SigmoidPow', SigmoidPowInv(SigmoidPow(x, exp), exp)=x
 Flt SigmoidGd     (Flt x);
 Flt SigmoidTanh   (Flt x);
-Flt SigmoidTanhInv(Flt x); // inverse function of 'SigmoidTanh', SigmoidTanhInv(SigmoidTanh(x))=x
+Flt SigmoidTanhInv(Flt y); // inverse function of 'SigmoidTanh', SigmoidTanhInv(SigmoidTanh(x))=x
 Flt SigmoidErf    (Flt x);
 
 #if EE_PRIVATE

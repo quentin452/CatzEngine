@@ -687,10 +687,10 @@ Flt SigmoidAtanInv(Flt y) {return Tan(y*PI_2)/PI_2;}
 Flt SigmoidSqrt   (Flt x) {return x/SqrtFast(1+x*x);}
 Flt SigmoidSqrtInv(Flt y) {return y/SqrtFast(1-y*y);}
 Flt SigmoidPow    (Flt x, Flt exp) {return x/Pow(1+Pow(Abs(x), exp), 1/exp);}
-Flt SigmoidPowInv (Flt x, Flt exp) {return x/Pow(1-Pow(Abs(x), exp), 1/exp);}
+Flt SigmoidPowInv (Flt y, Flt exp) {return y/Pow(1-Pow(Abs(y), exp), 1/exp);}
 Flt SigmoidGd     (Flt x) {return (2/PI)*gd(PI_2*x);}
 Flt SigmoidTanh   (Flt x) {return  tanhf(x);}
-Flt SigmoidTanhInv(Flt x) {return atanhf(x);}
+Flt SigmoidTanhInv(Flt y) {return atanhf(y);}
 Flt SigmoidErf    (Flt x) {return erff((SqrtFast(PI)/2)*x);}
 //Flt SigmoidSC     (Flt x) {return SmoothCube(x/3+0.5f)*2-1;} not fully smooth
 /******************************************************************************/

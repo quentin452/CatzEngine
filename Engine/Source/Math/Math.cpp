@@ -682,6 +682,7 @@ Flt SigmoidDiv    (Flt x) {return x/(1+x);}
 Flt SigmoidAtan   (Flt x) {return Atan(PI_2*x)*(2/PI);}
 Flt SigmoidSqrt   (Flt x) {return x/SqrtFast(1+x*x);}
 Flt SigmoidSqrtInv(Flt y) {return y/SqrtFast(1-y*y);}
+Flt SigmoidPow    (Flt x, Flt y) {return x/Pow(1+Pow(Abs(x), y), 1/y);}
 Flt SigmoidGd     (Flt x) {return (2/PI)*gd(PI_2*x);}
 Flt SigmoidTanh   (Flt x) {return tanhf(x);}
 Flt SigmoidErf    (Flt x) {return erff((SqrtFast(PI)/2)*x);}

@@ -318,6 +318,7 @@ Flt SigmoidDiv    (Flt x);
 Flt SigmoidAtan   (Flt x);
 Flt SigmoidSqrt   (Flt x);
 Flt SigmoidSqrtInv(Flt y); // inverse function of 'SigmoidSqrt', SigmoidSqrtInv(SigmoidSqrt(x))=x
+Flt SigmoidPow    (Flt x, Flt y);
 Flt SigmoidGd     (Flt x);
 Flt SigmoidTanh   (Flt x);
 Flt SigmoidErf    (Flt x);

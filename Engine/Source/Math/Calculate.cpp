@@ -1548,6 +1548,16 @@ static Bool CSigmoidSqrtInv(CalcValue &x)
       return false;
    return true;
 }
+static Bool CSigmoidPow(CalcValue &x, CalcValue &y)
+{
+   Dbl xr, yr;
+   if(x.type==CVAL_INT )xr=x.i;else
+   if(x.type==CVAL_REAL)xr=x.r;else return false;
+   if(y.type==CVAL_INT )yr=y.i;else
+   if(y.type==CVAL_REAL)yr=y.r;else return false;
+   x.r   =SigmoidPow(xr, yr);
+   x.type=CVAL_REAL; return true;
+}
 static Bool CSigmoidGd(CalcValue &x)
 {
    if(x.type==CVAL_INT ){x.r =SigmoidGd(Dbl(x.i)); x.type=CVAL_REAL;}else
@@ -1767,6 +1777,7 @@ static struct CalcFuncInfo
    {1, "SigmoidAtan"     , (Ptr)CSigmoidAtan     },
    {1, "SigmoidSqrt"     , (Ptr)CSigmoidSqrt     },
    {1, "SigmoidSqrtInv"  , (Ptr)CSigmoidSqrtInv  },
+   {2, "SigmoidPow"      , (Ptr)CSigmoidPow      },
    {1, "SigmoidGd"       , (Ptr)CSigmoidGd       },
    {1, "SigmoidTanh"     , (Ptr)CSigmoidTanh     },
    {1, "SigmoidErf"      , (Ptr)CSigmoidErf      },

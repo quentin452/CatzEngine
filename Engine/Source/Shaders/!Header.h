@@ -109,7 +109,7 @@
 #define Sqrt      sqrt
 #define Rsqrt     rsqrt
 #define Normalize normalize
-#define Pow       pow
+#define Pow       pow // Exp2(Log2(x)*y)
 #define Sin       sin
 #define Cos       cos
 #define Tan       tan
@@ -117,7 +117,9 @@
 #define Asin      asin
 #define Atan      atan
 #define Lerp      lerp
-#define Exp       exp
+#define Exp       exp // Exp2(x*1.4426950408889634)
+#define Exp2      exp2
+#define Log2      log2
 /******************************************************************************/
 // CONSTANTS
 /******************************************************************************/
@@ -1612,6 +1614,11 @@ Flt  SigmoidExp(Flt  x) {return 2/(1+Exp(-x))-1;}
 Half SigmoidExp(Half x) {return 2/(1+Exp(-x))-1;}
 Vec  SigmoidExp(Vec  x) {return 2/(1+Exp(-x))-1;}
 VecH SigmoidExp(VecH x) {return 2/(1+Exp(-x))-1;}
+
+Flt  SigmoidExp2(Flt  x) {return 2/(1+Exp2(-x))-1;}
+Half SigmoidExp2(Half x) {return 2/(1+Exp2(-x))-1;}
+Vec  SigmoidExp2(Vec  x) {return 2/(1+Exp2(-x))-1;}
+VecH SigmoidExp2(VecH x) {return 2/(1+Exp2(-x))-1;}
 /******************************************************************************/
 Half     VisibleOpacity(Flt density, Flt range) {return   Pow(1-density, range);} // calculate visible     opacity (0..1) having 'density' environment density (0..1), and 'range' (0..Inf)
 Half AccumulatedDensity(Flt density, Flt range) {return 1-Pow(1-density, range);} // calculate accumulated density (0..1) having 'density' environment density (0..1), and 'range' (0..Inf)
@@ -1723,8 +1730,8 @@ VecH2 GetExtMS   (VecI2 pixel, UInt sample) {return              TexSample(ImgXY
 // LOD INDEX
 /******************************************************************************/
 // TODO: 'CalculateLevelOfDetail' could be used however it's only DX 10.1 SM_4_1 / GL 4.0+ / GL ES ?
-Flt GetLod(Vec2 uv, Flt  tex_size) {Vec2 pix=uv*tex_size; return 0.5*log2(Max(Length2(ddx(pix)), Length2(ddy(pix))));}
-Flt GetLod(Vec2 uv, Vec2 tex_size) {Vec2 pix=uv*tex_size; return 0.5*log2(Max(Length2(ddx(pix)), Length2(ddy(pix))));}
+Flt GetLod(Vec2 uv, Flt  tex_size) {Vec2 pix=uv*tex_size; return 0.5*Log2(Max(Length2(ddx(pix)), Length2(ddy(pix))));}
+Flt GetLod(Vec2 uv, Vec2 tex_size) {Vec2 pix=uv*tex_size; return 0.5*Log2(Max(Length2(ddx(pix)), Length2(ddy(pix))));}
 /******************************************************************************/
 // GRASS AND LEAF
 /******************************************************************************/

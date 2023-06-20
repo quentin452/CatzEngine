@@ -75,6 +75,8 @@ struct CalcValue // Calculator Value
    Bool ln  (              ); // e-base logarithm
    Bool log2(              ); // 2-base logarithm
    Bool log (C CalcValue &x); // x-base logarithm
+   Bool exp (              );
+   Bool exp2(              );
 
    Bool And(C CalcValue &x); // &
    Bool Or (C CalcValue &x); // |

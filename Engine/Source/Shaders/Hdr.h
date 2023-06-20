@@ -68,8 +68,8 @@ VecH  TonemapRcpSqr(VecH  x) {return x/Sqrt(1+x*x);} // x=0..Inf
 VecH4 TonemapRcpSqr(VecH4 x) {return x/Sqrt(1+x*x);} // x=0..Inf
 
 /* constants calculated using:
-Half  TonemapLog(Half x) {return log2(1+x);}
-Half  TonemapExp(Half x) {return 1-exp2(-x);}
+Half  TonemapLog(Half x) {return Log2(1+x);}
+Half  TonemapExp(Half x) {return 1-Exp2(-x);}
 
 Flt scale=1, min=0, max=16;
 Flt x=1.0/65536;
@@ -82,8 +82,8 @@ REP(65536)
 }
 Flt z=TonemapLog(x*scale)/x;
 
-Half TonemapLog(Half  x) {return log2(1+x*0.69140625);} // x=0..Inf
-Half TonemapExp(Half  x) {return 1-exp2(x*-1.4375);} // x=0..Inf
+Half TonemapLog(Half  x) {return Log2(1+x*0.69140625);} // x=0..Inf
+Half TonemapExp(Half  x) {return 1-Exp2(x*-1.4375);} // x=0..Inf
 
 Half TonemapLog(Half x, Half max_lum, Half mul) {return TonemapLog(mul*x)/TonemapLog(mul*max_lum);}
 Half TonemapExp(Half x, Half max_lum, Half mul) {return TonemapExp(mul*x)/TonemapExp(mul*max_lum);}
@@ -99,13 +99,13 @@ REP(65536)
 }
 Flt z=TonemapLog(x, max_lum, scale)/x; */
 
-Half  TonemapLog(Half  x) {return log2(1+x*0.69140625);} // x=0..Inf
-VecH  TonemapLog(VecH  x) {return log2(1+x*0.69140625);} // x=0..Inf
-VecH4 TonemapLog(VecH4 x) {return log2(1+x*0.69140625);} // x=0..Inf
+Half  TonemapLog(Half  x) {return Log2(1+x*0.69140625);} // x=0..Inf
+VecH  TonemapLog(VecH  x) {return Log2(1+x*0.69140625);} // x=0..Inf
+VecH4 TonemapLog(VecH4 x) {return Log2(1+x*0.69140625);} // x=0..Inf
 
-Half  TonemapExp(Half  x) {return 1-exp2(x*-1.4375);} // x=0..Inf
-VecH  TonemapExp(VecH  x) {return 1-exp2(x*-1.4375);} // x=0..Inf
-VecH4 TonemapExp(VecH4 x) {return 1-exp2(x*-1.4375);} // x=0..Inf
+Half  TonemapExp(Half  x) {return 1-Exp2(x*-1.4375);} // x=0..Inf
+VecH  TonemapExp(VecH  x) {return 1-Exp2(x*-1.4375);} // x=0..Inf
+VecH4 TonemapExp(VecH4 x) {return 1-Exp2(x*-1.4375);} // x=0..Inf
 
 // Max Lum versions
 Half  _TonemapRcp(Half  x, Half max_lum) {return (1+x/Sqr(max_lum))/(1+x);} // Max Lum version x=0..max_lum - internal without "x*"

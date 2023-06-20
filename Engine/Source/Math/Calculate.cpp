@@ -645,6 +645,24 @@ Bool CalcValue::log(C CalcValue &x)
    }
    return false;
 }
+Bool CalcValue::exp()
+{
+   switch(type)
+   {
+      case CVAL_INT : r=Exp(Dbl(i)); type=CVAL_REAL; return true;
+      case CVAL_REAL: r=Exp(    r );                 return true;
+   }
+   return false;
+}
+Bool CalcValue::exp2()
+{
+   switch(type)
+   {
+      case CVAL_INT : r=Exp2(Dbl(i)); type=CVAL_REAL; return true;
+      case CVAL_REAL: r=Exp2(    r );                 return true;
+   }
+   return false;
+}
 /******************************************************************************/
 Bool CalcValue::And(C CalcValue &x) {if(type==CVAL_INT && x.type==CVAL_INT){i &=x.i; return true;} return false;}
 Bool CalcValue::Or (C CalcValue &x) {if(type==CVAL_INT && x.type==CVAL_INT){i |=x.i; return true;} return false;}
@@ -1120,6 +1138,8 @@ static Bool CPow (CalcValue &x, CalcValue &y) {return x.pow (y);}
 static Bool CLn  (CalcValue &x              ) {return x.ln  ( );}
 static Bool CLog2(CalcValue &x              ) {return x.log2( );}
 static Bool CLog (CalcValue &x, CalcValue &y) {return x.log (y);}
+static Bool CExp (CalcValue &x              ) {return x.exp ( );}
+static Bool CExp2(CalcValue &x              ) {return x.exp2( );}
 
 static Bool CAnd(CalcValue &x, CalcValue &y) {return x.And(y);}
 static Bool COr (CalcValue &x, CalcValue &y) {return x.Or (y);}
@@ -1478,6 +1498,16 @@ static Bool CSigmoidExp(CalcValue &x)
       return false;
    return true;
 }
+static Bool CSigmoidExp2(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidExp2(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidExp2(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidExp2(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidExp2(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidExp2(    x.v4);else
+      return false;
+   return true;
+}
 static Bool CSigmoidDiv(CalcValue &x)
 {
    if(x.type==CVAL_INT ){x.r =SigmoidDiv(Dbl(x.i)); x.type=CVAL_REAL;}else
@@ -1675,6 +1705,8 @@ static struct CalcFuncInfo
    {1, "Ln"              , (Ptr)CLn              },
    {1, "Log2"            , (Ptr)CLog2            },
    {2, "Log"             , (Ptr)CLog             },
+   {1, "Exp"             , (Ptr)CExp             },
+   {1, "Exp2"            , (Ptr)CExp2            },
    {1, "Sin"             , (Ptr)CSin             },
    {1, "Cos"             , (Ptr)CCos             },
    {1, "Tan"             , (Ptr)CTan             },
@@ -1730,6 +1762,7 @@ static struct CalcFuncInfo
    {1, "SRGBToLinear"    , (Ptr)CSRGBToLinear    },
    {1, "Gaussian"        , (Ptr)CGaussian        },
    {1, "SigmoidExp"      , (Ptr)CSigmoidExp      },
+   {1, "SigmoidExp2"     , (Ptr)CSigmoidExp2     },
    {1, "SigmoidDiv"      , (Ptr)CSigmoidDiv      },
    {1, "SigmoidAtan"     , (Ptr)CSigmoidAtan     },
    {1, "SigmoidSqrt"     , (Ptr)CSigmoidSqrt     },

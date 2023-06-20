@@ -676,7 +676,8 @@ Flt SmoothPinch(Flt x, Flt pinch)
 Flt gd(Flt x) {return Atan(sinhf(x));}
 Dbl gd(Dbl x) {return Atan(sinh (x));}
 
-Flt SigmoidExp    (Flt x) {return 2/(1+Exp(-x))-1;}
+Flt SigmoidExp    (Flt x) {return 2/(1+Exp (-x))-1;}
+Flt SigmoidExp2   (Flt x) {return 2/(1+Exp2(-x))-1;}
 Flt SigmoidDiv    (Flt x) {return x/(1+x);}
 Flt SigmoidAtan   (Flt x) {return Atan(PI_2*x)*(2/PI);}
 Flt SigmoidSqrt   (Flt x) {return x/SqrtFast(1+x*x);}

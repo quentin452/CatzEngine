@@ -30,7 +30,7 @@ Flt HdrDS_PS(NOPERSP Vec2 uv:UV):TARGET
    lum=Sqr(lum);
 #endif
 #if GEOMETRIC
-   lum=log2(Max(lum, HALF_MIN)); // NaN
+   lum=Log2(Max(lum, HALF_MIN)); // NaN
 #endif
 
    return lum;
@@ -49,7 +49,7 @@ Flt HdrUpdate_PS():TARGET // here use full precision
 
    // adjustment restore
 #if GEOMETRIC
-   lum=exp2(lum); // we've applied 'log2' above, so revert it back
+   lum=exp2(lum); // we've applied 'Log2' above, so revert it back
 #endif
 #if BRIGHT
    lum=Sqrt(lum); // we've applied 'Sqr' above, so revert it back

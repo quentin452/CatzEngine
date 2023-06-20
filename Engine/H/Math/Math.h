@@ -260,18 +260,24 @@ inline Flt  Cbrt    (  Int   x) {return cbrtf((Flt)x);}                         
 inline Flt  Cbrt    (  Flt   x) {return cbrtf(     x);}                                    //                 cube   root, works         ok  for negative values
 inline Dbl  Cbrt    (  Dbl   x) {return cbrt (     x);}                                    //                 cube   root, works         ok  for negative values
 
-inline Flt Pow(Int x, Flt y) {return powf((Flt)x,      y);} // raise 'x' to the power 'y'
-inline Flt Pow(Flt x, Int y) {return powf(     x, (Flt)y);} // raise 'x' to the power 'y'
-inline Flt Pow(Flt x, Flt y) {return powf(     x,      y);} // raise 'x' to the power 'y'
-inline Dbl Pow(Int x, Dbl y) {return pow (     x,      y);} // raise 'x' to the power 'y'
-inline Dbl Pow(Dbl x, Int y) {return pow (     x,      y);} // raise 'x' to the power 'y'
-inline Dbl Pow(Dbl x, Dbl y) {return pow (     x,      y);} // raise 'x' to the power 'y'
+inline Flt Pow(Int x, Flt y) {return powf((Flt)x,      y);} // raise 'x' to the power 'y' = Exp2(Log2(x)*y)
+inline Flt Pow(Flt x, Int y) {return powf(     x, (Flt)y);} // raise 'x' to the power 'y' = Exp2(Log2(x)*y)
+inline Flt Pow(Flt x, Flt y) {return powf(     x,      y);} // raise 'x' to the power 'y' = Exp2(Log2(x)*y)
+inline Dbl Pow(Int x, Dbl y) {return pow (     x,      y);} // raise 'x' to the power 'y' = Exp2(Log2(x)*y)
+inline Dbl Pow(Dbl x, Int y) {return pow (     x,      y);} // raise 'x' to the power 'y' = Exp2(Log2(x)*y)
+inline Dbl Pow(Dbl x, Dbl y) {return pow (     x,      y);} // raise 'x' to the power 'y' = Exp2(Log2(x)*y)
 
-inline Flt  Exp(  Flt   x) {return expf(x);} // raise 'e' to the power 'x'
-inline Dbl  Exp(  Dbl   x) {return exp (x);} // raise 'e' to the power 'x'
+inline Flt  Exp(  Flt   x) {return expf(x);} // raise 'e' to the power 'x' = Exp2(x/Log(2)) = Exp2(x*1.4426950408889634)
+inline Dbl  Exp(  Dbl   x) {return exp (x);} // raise 'e' to the power 'x' = Exp2(x/Log(2)) = Exp2(x*1.4426950408889634)
 inline Vec2 Exp(C Vec2 &v) {return Vec2(Exp(v.x), Exp(v.y));}
 inline Vec  Exp(C Vec  &v) {return Vec (Exp(v.x), Exp(v.y), Exp(v.z));}
 inline Vec4 Exp(C Vec4 &v) {return Vec4(Exp(v.x), Exp(v.y), Exp(v.z), Exp(v.w));}
+
+inline Flt  Exp2(  Flt   x) {return exp2f(x);} // raise '2' to the power 'x'
+inline Dbl  Exp2(  Dbl   x) {return exp2 (x);} // raise '2' to the power 'x'
+inline Vec2 Exp2(C Vec2 &v) {return Vec2(Exp2(v.x), Exp2(v.y));}
+inline Vec  Exp2(C Vec  &v) {return Vec (Exp2(v.x), Exp2(v.y), Exp2(v.z));}
+inline Vec4 Exp2(C Vec4 &v) {return Vec4(Exp2(v.x), Exp2(v.y), Exp2(v.z), Exp2(v.w));}
 
 inline Flt Ln  (Flt x) {return logf (x);} // e-base logarithm
 inline Dbl Ln  (Dbl x) {return log  (x);} // e-base logarithm
@@ -307,6 +313,7 @@ Flt AccumulatedDensity(Flt density, Flt range); // calculate accumulated density
 
 // sigmoid
 Flt SigmoidExp    (Flt x);
+Flt SigmoidExp2   (Flt x);
 Flt SigmoidDiv    (Flt x);
 Flt SigmoidAtan   (Flt x);
 Flt SigmoidSqrt   (Flt x);

@@ -1498,6 +1498,16 @@ static Bool CSigmoidExp(CalcValue &x)
       return false;
    return true;
 }
+static Bool CSigmoidExpInv(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidExpInv(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidExpInv(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidExpInv(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidExpInv(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidExpInv(    x.v4);else
+      return false;
+   return true;
+}
 static Bool CSigmoidExp2(CalcValue &x)
 {
    if(x.type==CVAL_INT ){x.r =SigmoidExp2(Dbl(x.i)); x.type=CVAL_REAL;}else
@@ -1505,6 +1515,16 @@ static Bool CSigmoidExp2(CalcValue &x)
  //if(x.type==CVAL_VEC2) x.v2=SigmoidExp2(    x.v2);else
  //if(x.type==CVAL_VEC ) x.v =SigmoidExp2(    x.v );else
  //if(x.type==CVAL_VEC4) x.v4=SigmoidExp2(    x.v4);else
+      return false;
+   return true;
+}
+static Bool CSigmoidExp2Inv(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidExp2Inv(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidExp2Inv(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidExp2Inv(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidExp2Inv(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidExp2Inv(    x.v4);else
       return false;
    return true;
 }
@@ -1773,6 +1793,8 @@ static struct CalcFuncInfo
    {1, "Gaussian"        , (Ptr)CGaussian        },
    {1, "SigmoidExp"      , (Ptr)CSigmoidExp      },
    {1, "SigmoidExp2"     , (Ptr)CSigmoidExp2     },
+   {1, "SigmoidExpInv"   , (Ptr)CSigmoidExpInv   },
+   {1, "SigmoidExp2Inv"  , (Ptr)CSigmoidExp2Inv  },
    {1, "SigmoidDiv"      , (Ptr)CSigmoidDiv      },
    {1, "SigmoidAtan"     , (Ptr)CSigmoidAtan     },
    {1, "SigmoidSqrt"     , (Ptr)CSigmoidSqrt     },

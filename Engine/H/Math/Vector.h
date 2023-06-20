@@ -2319,6 +2319,16 @@ inline VecD operator- (Dbl r, C Vec &v) {return VecD(r-v.x, r-v.y, r-v.z);}
 inline VecD operator* (Dbl r, C Vec &v) {return VecD(r*v.x, r*v.y, r*v.z);}
 inline VecD operator/ (Dbl r, C Vec &v) {return VecD(r/v.x, r/v.y, r/v.z);}
 
+inline VecD4 operator+ (C Vec4 &v, Dbl r) {return VecD4(v.x+r, v.y+r, v.z+r, v.w+r);}
+inline VecD4 operator- (C Vec4 &v, Dbl r) {return VecD4(v.x-r, v.y-r, v.z-r, v.w-r);}
+inline VecD4 operator* (C Vec4 &v, Dbl r) {return VecD4(v.x*r, v.y*r, v.z*r, v.w*r);}
+inline VecD4 operator/ (C Vec4 &v, Dbl r) {return VecD4(v.x/r, v.y/r, v.z/r, v.w/r);}
+
+inline VecD4 operator+ (Dbl r, C Vec4 &v) {return VecD4(r+v.x, r+v.y, r+v.z, r+v.w);}
+inline VecD4 operator- (Dbl r, C Vec4 &v) {return VecD4(r-v.x, r-v.y, r-v.z, r-v.w);}
+inline VecD4 operator* (Dbl r, C Vec4 &v) {return VecD4(r*v.x, r*v.y, r*v.z, r*v.w);}
+inline VecD4 operator/ (Dbl r, C Vec4 &v) {return VecD4(r/v.x, r/v.y, r/v.z, r/v.w);}
+
 inline VecD operator* (C Vec &v, C OrientD &o) {return VecD(v)*=o;}
 inline VecD operator* (C Vec &v, C OrientM &o) {return VecD(v)*=o;}
 

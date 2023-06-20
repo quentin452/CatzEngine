@@ -109,7 +109,7 @@
 #define Sqrt      sqrt
 #define Rsqrt     rsqrt
 #define Normalize normalize
-#define Pow       pow // Exp2(Log2(x)*y)
+#define Pow       pow // Exp2(Log2(x)*y) !! FASTER IF 'x' IS KNOWN AT COMPILE TIME !!
 #define Sin       sin
 #define Cos       cos
 #define Tan       tan
@@ -117,9 +117,10 @@
 #define Asin      asin
 #define Atan      atan
 #define Lerp      lerp
-#define Exp       exp // Exp2(x*1.4426950408889634)
-#define Exp2      exp2
-#define Log2      log2
+#define Exp       exp  // identical performance as Exp2, Exp2(x*1.4426950408889634)
+#define Exp2      exp2 // identical performance as Exp
+#define Log       log  // identical performance as Log2
+#define Log2      log2 // identical performance as Log
 /******************************************************************************/
 // CONSTANTS
 /******************************************************************************/

@@ -270,6 +270,7 @@ inline Vec2 Exp(C Vec2 &v) {return Vec2(Exp(v.x), Exp(v.y));}
 inline Vec  Exp(C Vec  &v) {return Vec (Exp(v.x), Exp(v.y), Exp(v.z));}
 inline Vec4 Exp(C Vec4 &v) {return Vec4(Exp(v.x), Exp(v.y), Exp(v.z), Exp(v.w));}
 
+// 'Exp2' is slower than 'Exp' on Intel Core i7-11700K, so try using 'Exp' instead
 inline Flt  Exp2(  Flt   x) {return exp2f(x);} // raise '2' to the power 'x'
 inline Dbl  Exp2(  Dbl   x) {return exp2 (x);} // raise '2' to the power 'x'
 inline Vec2 Exp2(C Vec2 &v) {return Vec2(Exp2(v.x), Exp2(v.y));}
@@ -278,7 +279,7 @@ inline Vec4 Exp2(C Vec4 &v) {return Vec4(Exp2(v.x), Exp2(v.y), Exp2(v.z), Exp2(v
 
 inline Flt Ln  (Flt x) {return logf (x);} // e-base logarithm
 inline Dbl Ln  (Dbl x) {return log  (x);} // e-base logarithm
-inline Flt Log2(Flt x) {return log2f(x);} // 2-base logarithm
+inline Flt Log2(Flt x) {return log2f(x);} // 2-base logarithm, 'Log2' is slower than 'Ln' on Intel Core i7-11700K, so try using 'Ln' instead
 inline Dbl Log2(Dbl x) {return log2 (x);} // 2-base logarithm
        Flt Log (Flt x, Flt base);         //        logarithm
        Dbl Log (Dbl x, Dbl base);         //        logarithm

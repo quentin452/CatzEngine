@@ -1538,6 +1538,16 @@ static Bool CSigmoidDiv(CalcValue &x)
       return false;
    return true;
 }
+static Bool CSigmoidDivInv(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidDivInv(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidDivInv(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidDivInv(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidDivInv(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidDivInv(    x.v4);else
+      return false;
+   return true;
+}
 static Bool CSigmoidAtan(CalcValue &x)
 {
    if(x.type==CVAL_INT ){x.r =SigmoidAtan(Dbl(x.i)); x.type=CVAL_REAL;}else
@@ -1545,6 +1555,16 @@ static Bool CSigmoidAtan(CalcValue &x)
  //if(x.type==CVAL_VEC2) x.v2=SigmoidAtan(    x.v2);else
  //if(x.type==CVAL_VEC ) x.v =SigmoidAtan(    x.v );else
  //if(x.type==CVAL_VEC4) x.v4=SigmoidAtan(    x.v4);else
+      return false;
+   return true;
+}
+static Bool CSigmoidAtanInv(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidAtanInv(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidAtanInv(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidAtanInv(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidAtanInv(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidAtanInv(    x.v4);else
       return false;
    return true;
 }
@@ -1576,6 +1596,16 @@ static Bool CSigmoidPow(CalcValue &x, CalcValue &y)
    if(y.type==CVAL_INT )yr=y.i;else
    if(y.type==CVAL_REAL)yr=y.r;else return false;
    x.r   =SigmoidPow(xr, yr);
+   x.type=CVAL_REAL; return true;
+}
+static Bool CSigmoidPowInv(CalcValue &x, CalcValue &y)
+{
+   Dbl xr, yr;
+   if(x.type==CVAL_INT )xr=x.i;else
+   if(x.type==CVAL_REAL)xr=x.r;else return false;
+   if(y.type==CVAL_INT )yr=y.i;else
+   if(y.type==CVAL_REAL)yr=y.r;else return false;
+   x.r   =SigmoidPowInv(xr, yr);
    x.type=CVAL_REAL; return true;
 }
 static Bool CSigmoidGd(CalcValue &x)
@@ -1796,10 +1826,13 @@ static struct CalcFuncInfo
    {1, "SigmoidExpInv"   , (Ptr)CSigmoidExpInv   },
    {1, "SigmoidExp2Inv"  , (Ptr)CSigmoidExp2Inv  },
    {1, "SigmoidDiv"      , (Ptr)CSigmoidDiv      },
+   {1, "SigmoidDivInv"   , (Ptr)CSigmoidDivInv   },
    {1, "SigmoidAtan"     , (Ptr)CSigmoidAtan     },
+   {1, "SigmoidAtanInv"  , (Ptr)CSigmoidAtanInv  },
    {1, "SigmoidSqrt"     , (Ptr)CSigmoidSqrt     },
    {1, "SigmoidSqrtInv"  , (Ptr)CSigmoidSqrtInv  },
    {2, "SigmoidPow"      , (Ptr)CSigmoidPow      },
+   {2, "SigmoidPowInv"   , (Ptr)CSigmoidPowInv   },
    {1, "SigmoidGd"       , (Ptr)CSigmoidGd       },
    {1, "SigmoidTanh"     , (Ptr)CSigmoidTanh     },
    {1, "SigmoidErf"      , (Ptr)CSigmoidErf      },

@@ -139,9 +139,6 @@ inline VecSB4 SignEpsB(C Vec4 &v, Flt eps=EPS ) {return VecSB4(SignEps(v.x, eps)
 inline Int CompareEps(C Flt &a, C Flt &b) {return SignEps(a-b);}
 inline Int CompareEps(C Dbl &a, C Dbl &b) {return SignEps(a-b);}
 
-inline Flt   PackInf(Flt x) {return 1-1/(x+1);} //   pack value from 0..Inf to 0..1
-inline Flt UnpackInf(Flt x) {return 1/(1-x)-1;} // unpack value from 0..1   to 0..Inf
-
 inline Flt ScaleFactor (Flt x) {return (x>=0) ? (1+x) : (1/(1-x));} // get scaling factor from linear  value
 inline Dbl ScaleFactor (Dbl x) {return (x>=0) ? (1+x) : (1/(1-x));} // get scaling factor from linear  value
 inline Flt ScaleFactorR(Flt s) {return (s>=1) ? (s-1) : (1-(1/s));} // get linear  value  from scaling factor
@@ -313,16 +310,20 @@ Flt AccumulatedDensity(Flt density, Flt range); // calculate accumulated density
 
 // sigmoid
 Flt SigmoidExp    (Flt x);
-Flt SigmoidExpInv (Flt y);
+Flt SigmoidExpInv (Flt y); // inverse function of 'SigmoidExp', SigmoidExpInv(SigmoidExp(x))=x
 Flt SigmoidExp2   (Flt x);
-Flt SigmoidExp2Inv(Flt y);
+Flt SigmoidExp2Inv(Flt y); // inverse function of 'SigmoidExp2', SigmoidExp2Inv(SigmoidExp2(x))=x
 Flt SigmoidDiv    (Flt x);
+Flt SigmoidDivInv (Flt y); // inverse function of 'SigmoidDiv', SigmoidDivInv(SigmoidDiv(x))=x
 Flt SigmoidAtan   (Flt x);
+Flt SigmoidAtanInv(Flt y); // inverse function of 'SigmoidAtan', SigmoidAtanInv(SigmoidAtan(x))=x
 Flt SigmoidSqrt   (Flt x);
 Flt SigmoidSqrtInv(Flt y); // inverse function of 'SigmoidSqrt', SigmoidSqrtInv(SigmoidSqrt(x))=x
-Flt SigmoidPow    (Flt x, Flt y);
+Flt SigmoidPow    (Flt x, Flt exp);
+Flt SigmoidPowInv (Flt x, Flt exp); // inverse function of 'SigmoidPow', SigmoidPowInv(SigmoidPow(x, exp), exp)=x
 Flt SigmoidGd     (Flt x);
 Flt SigmoidTanh   (Flt x);
+Flt SigmoidTanhInv(Flt x); // inverse function of 'SigmoidTanh', SigmoidTanhInv(SigmoidTanh(x))=x
 Flt SigmoidErf    (Flt x);
 
 #if EE_PRIVATE

@@ -145,6 +145,8 @@
 #define SQRT3_3 0.5773502691896257 // Sqrt(3)/3
 #define TAN     0.5                // tangent calculation constant
 
+#define LOG2E 1.44269504088896340736 // Log2(e)
+
 #define ColorLumWeight  VecH(0.2126, 0.7152, 0.0722)
 #define ColorLumWeight2 VecH(0.2990, 0.5870, 0.1140)
 
@@ -1606,10 +1608,11 @@ Flt  Pinch      (Flt  x, Flt  pinch) {return x*pinch/(1+x*(pinch-1));}
 Half PinchFactor(Half x, Half pinch) {return Pinch(x, ScaleFactor(pinch));}
 Flt  PinchFactor(Flt  x, Flt  pinch) {return Pinch(x, ScaleFactor(pinch));}
 
-Flt  SigmoidSqrt(Flt  x) {return x/Sqrt(1+x*x);}
-Half SigmoidSqrt(Half x) {return x/Sqrt(1+x*x);}
-Vec  SigmoidSqrt(Vec  x) {return x/Sqrt(1+x*x);}
-VecH SigmoidSqrt(VecH x) {return x/Sqrt(1+x*x);}
+Flt   SigmoidSqrt(Flt   x) {return x/Sqrt(1+x*x);}
+Half  SigmoidSqrt(Half  x) {return x/Sqrt(1+x*x);}
+Vec   SigmoidSqrt(Vec   x) {return x/Sqrt(1+x*x);}
+VecH  SigmoidSqrt(VecH  x) {return x/Sqrt(1+x*x);}
+VecH4 SigmoidSqrt(VecH4 x) {return x/Sqrt(1+x*x);}
 
 Flt  SigmoidExp(Flt  x) {return 2/(1+Exp(-x))-1;}
 Half SigmoidExp(Half x) {return 2/(1+Exp(-x))-1;}

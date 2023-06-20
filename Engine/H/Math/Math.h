@@ -277,12 +277,20 @@ inline Vec2 Exp2(C Vec2 &v) {return Vec2(Exp2(v.x), Exp2(v.y));}
 inline Vec  Exp2(C Vec  &v) {return Vec (Exp2(v.x), Exp2(v.y), Exp2(v.z));}
 inline Vec4 Exp2(C Vec4 &v) {return Vec4(Exp2(v.x), Exp2(v.y), Exp2(v.z), Exp2(v.w));}
 
-inline Flt Ln  (Flt x) {return logf (x);} // e-base logarithm
-inline Dbl Ln  (Dbl x) {return log  (x);} // e-base logarithm
-inline Flt Log2(Flt x) {return log2f(x);} // 2-base logarithm, 'Log2' is slower than 'Ln' on Intel Core i7-11700K, so try using 'Ln' instead
-inline Dbl Log2(Dbl x) {return log2 (x);} // 2-base logarithm
-       Flt Log (Flt x, Flt base);         //        logarithm
-       Dbl Log (Dbl x, Dbl base);         //        logarithm
+inline Flt  Ln(  Flt   x) {return logf(x);} // e-base logarithm
+inline Dbl  Ln(  Dbl   x) {return log (x);} // e-base logarithm
+inline Vec2 Ln(C Vec2 &v) {return Vec2(Ln(v.x), Ln(v.y));}
+inline Vec  Ln(C Vec  &v) {return Vec (Ln(v.x), Ln(v.y), Ln(v.z));}
+inline Vec4 Ln(C Vec4 &v) {return Vec4(Ln(v.x), Ln(v.y), Ln(v.z), Ln(v.w));}
+
+inline Flt  Log2(  Flt   x) {return log2f(x);} // 2-base logarithm, 'Log2' is slower than 'Ln' on Intel Core i7-11700K, so try using 'Ln' instead
+inline Dbl  Log2(  Dbl   x) {return log2 (x);} // 2-base logarithm
+inline Vec2 Log2(C Vec2 &v) {return Vec2(Log2(v.x), Log2(v.y));}
+inline Vec  Log2(C Vec  &v) {return Vec (Log2(v.x), Log2(v.y), Log2(v.z));}
+inline Vec4 Log2(C Vec4 &v) {return Vec4(Log2(v.x), Log2(v.y), Log2(v.z), Log2(v.w));}
+
+Flt Log(Flt x, Flt base); // logarithm
+Dbl Log(Dbl x, Dbl base); // logarithm
 
 Flt Pinch      (Flt x, Flt pinch       ); // pinch, 'x'=0..1, 'pinch'       =   0..Inf (<1 makes the curve start slow and accelerate, 1 makes the curve linear, >1 makes the curve start fast and deccelerate)
 Flt PinchFactor(Flt x, Flt pinch_factor); // pinch, 'x'=0..1, 'pinch_factor'=-Inf..Inf (<0 makes the curve start slow and accelerate, 0 makes the curve linear, >0 makes the curve start fast and deccelerate)

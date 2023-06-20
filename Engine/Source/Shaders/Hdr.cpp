@@ -49,7 +49,7 @@ Flt HdrUpdate_PS():TARGET // here use full precision
 
    // adjustment restore
 #if GEOMETRIC
-   lum=exp2(lum); // we've applied 'Log2' above, so revert it back
+   lum=Exp2(lum); // we've applied 'Log2' above, so revert it back
 #endif
 #if BRIGHT
    lum=Sqrt(lum); // we've applied 'Sqr' above, so revert it back

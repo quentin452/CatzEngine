@@ -2002,12 +2002,12 @@ Half LightConeAngle (Vec2 pos      ) {Half v=Sat(  Length(pos) *LightCone  .fall
 /******************************************************************************/
 Half F_Schlick(Half f0, Half f90, Half cos) // High Precision not needed
 {
-   Half q=Quint(1-cos); // Quint(1-x) = ~exp2(-9.28*x)
+   Half q=Quint(1-cos); // Quint(1-x) = ~Exp2(-9.28*x)
    return (f90-f0)*q + f0;
 }
 VecH F_Schlick(VecH f0, Half f90, Half cos) // High Precision not needed
 {
-   Half q=Quint(1-cos); // Quint(1-x) = ~exp2(-9.28*x)
+   Half q=Quint(1-cos); // Quint(1-x) = ~Exp2(-9.28*x)
    return f90*q + f0*(1-q); // re-ordered because of Vec
 }
 Half Vis_SmithR2Inv(Half rough2, Half NdotL, Half NdotV) // High Precision not needed, "rough2=Sqr(rough)", result is inversed 1/x
@@ -2233,7 +2233,7 @@ http://miciwan.com/SIGGRAPH2015/course_notes_wip.pdf
 NO because has overshots in low reflectivity
 VecH2 EnvDFGIwanicki(Half rough, Half NdotV)
 {
-   Half bias=exp2(-(7*NdotV+4*rough));
+   Half bias=Exp2(-(7*NdotV+4*rough));
    Half scale=1-bias-rough*Max(bias, Min(Sqrt(rough), 0.739 + 0.323*NdotV)-0.434);
    return VecH2(scale, bias);
 }
@@ -2248,7 +2248,7 @@ VecH2 EnvDFGLazarovNarkowiczSmooth(Half smooth, Half NdotV)
 
    VecH4 t = smooth * p0 + p1;
 
-   Half bias  = Sat( t.x * Min( t.y, exp2( -7.672 * NdotV ) ) + t.z );
+   Half bias  = Sat( t.x * Min( t.y, Exp2( -7.672 * NdotV ) ) + t.z );
    Half delta = Sat( t.w );
    Half scale = delta - bias;
 

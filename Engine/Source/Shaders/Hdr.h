@@ -59,15 +59,59 @@ void DarkenDarks(inout VecH x)
 /******************************************************************************/
 Half TonemapLum(VecH x) {return LinearLumOfLinearColor(x);} // could also be "Avg(x)" to darken bright blue skies
 /******************************************************************************/
-Half  TonemapRcp(Half  x) {return x/(1+x);} // x=0..Inf
-VecH  TonemapRcp(VecH  x) {return x/(1+x);} // x=0..Inf
-VecH4 TonemapRcp(VecH4 x) {return x/(1+x);} // x=0..Inf
+// All functions below need to start initially with derivative=1, at the start looking like y=x (scale=1), only after that they can bend down
 
-Half  TonemapRcpSqr(Half  x) {return SigmoidSqr(x);} // x=-Inf..Inf
-VecH  TonemapRcpSqr(VecH  x) {return SigmoidSqr(x);} // x=-Inf..Inf
-VecH4 TonemapRcpSqr(VecH4 x) {return SigmoidSqr(x);} // x=-Inf..Inf
+Half  TonemapRcp(Half  x) {return x/(1+x);} // x=0..Inf, returns 0..1
+VecH  TonemapRcp(VecH  x) {return x/(1+x);} // x=0..Inf, returns 0..1
+VecH4 TonemapRcp(VecH4 x) {return x/(1+x);} // x=0..Inf, returns 0..1
 
-/* constants were calculated to have linear growth at the start, similar to y=x, derivative=1, using:
+Half  TonemapSigmoidSqr(Half  x) {return SigmoidSqr(x);} // x=0..Inf, returns 0..1
+VecH  TonemapSigmoidSqr(VecH  x) {return SigmoidSqr(x);} // x=0..Inf, returns 0..1
+VecH4 TonemapSigmoidSqr(VecH4 x) {return SigmoidSqr(x);} // x=0..Inf, returns 0..1
+
+Half  TonemapExp(Half  x) {return 1-Exp(-x);} // x=0..Inf, returns 0..1
+VecH  TonemapExp(VecH  x) {return 1-Exp(-x);} // x=0..Inf, returns 0..1
+VecH4 TonemapExp(VecH4 x) {return 1-Exp(-x);} // x=0..Inf, returns 0..1
+
+Half  TonemapSigmoidExp(Half  x) {return SigmoidExp(x*2);} // x=0..Inf, returns 0..1
+VecH  TonemapSigmoidExp(VecH  x) {return SigmoidExp(x*2);} // x=0..Inf, returns 0..1
+VecH4 TonemapSigmoidExp(VecH4 x) {return SigmoidExp(x*2);} // x=0..Inf, returns 0..1
+
+Half  TonemapLog(Half  x) {return Log(1+x);} // x=0..Inf, returns 0..Inf
+VecH  TonemapLog(VecH  x) {return Log(1+x);} // x=0..Inf, returns 0..Inf
+VecH4 TonemapLog(VecH4 x) {return Log(1+x);} // x=0..Inf, returns 0..Inf
+
+Half  TonemapLog2(Half  x) {return Log2(1+x/LOG2E);} // x=0..Inf, returns 0..Inf
+VecH  TonemapLog2(VecH  x) {return Log2(1+x/LOG2E);} // x=0..Inf, returns 0..Inf
+VecH4 TonemapLog2(VecH4 x) {return Log2(1+x/LOG2E);} // x=0..Inf, returns 0..Inf
+
+// Max Lum versions
+Half  _TonemapRcp(Half  x, Half max_lum) {return (1+x/Sqr(max_lum))/(1+x);} // Max Lum version internal without "x*", x=0..max_lum
+VecH  _TonemapRcp(VecH  x, Half max_lum) {return (1+x/Sqr(max_lum))/(1+x);} // Max Lum version internal without "x*", x=0..max_lum
+VecH4 _TonemapRcp(VecH4 x, Half max_lum) {return (1+x/Sqr(max_lum))/(1+x);} // Max Lum version internal without "x*", x=0..max_lum
+
+Half  TonemapRcp(Half  x, Half max_lum) {return x*_TonemapRcp(x, max_lum);} // Max Lum version, x=0..max_lum, returns 0..1
+VecH  TonemapRcp(VecH  x, Half max_lum) {return x*_TonemapRcp(x, max_lum);} // Max Lum version, x=0..max_lum, returns 0..1
+VecH4 TonemapRcp(VecH4 x, Half max_lum) {return x*_TonemapRcp(x, max_lum);} // Max Lum version, x=0..max_lum, returns 0..1
+
+VecH TonemapRcpLum(VecH x              ) {Half lum=TonemapLum(x); return x/(1+lum)                  ;} // optimized "x*(TonemapRcp(lum         )/lum)", x=0..Inf    , returns 0..1
+VecH TonemapRcpLum(VecH x, Half max_lum) {Half lum=TonemapLum(x); return x*_TonemapRcp(lum, max_lum);} // optimized "x*(TonemapRcp(lum, max_lum)/lum)", x=0..max_lum, returns 0..1
+
+VecH TonemapRcpSat(VecH x) // preserves saturation
+{
+   VecH d=TonemapRcp   (x); // desaturated, per channel
+   VecH s=TonemapRcpLum(x); //   saturated, luminance based
+   return Lerp(s, d, d);
+}
+VecH TonemapRcpSat(VecH x, Half max_lum) // preserves saturation
+{
+   VecH d=TonemapRcp   (x, max_lum); // desaturated, per channel
+   VecH s=TonemapRcpLum(x, max_lum); //   saturated, luminance based
+   return Lerp(s, d, d);
+}
+
+/* Constants were calculated to have derivative=1:
+here if internally 'TonemapLog' or 'TonemapLog2' is used, it doesn't matter, results are the same, however 'mul' has to be calculated differently, so choose the func that's faster on GPU
 #define LOG2E 1.44269504088896340736 // Log2(e)
 Dbl TonemapLog (Dbl x) {return Log (1+x      );} // x=0..Inf
 Dbl TonemapLog2(Dbl x) {return Log2(1+x/LOG2E);} // x=0..Inf
@@ -86,71 +130,33 @@ void InitPre()
    }
    Dbl z=TonemapLog2(x, max_lum, mul)/x; // 'z' should be 1
 */
-Half  TonemapLog(Half  x) {return Log(1+x);} // x=0..Inf
-VecH  TonemapLog(VecH  x) {return Log(1+x);} // x=0..Inf
-VecH4 TonemapLog(VecH4 x) {return Log(1+x);} // x=0..Inf
+Half  TonemapLogML2(Half  x) {Half mul=1.8126472301912768, max_lum=2; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);} // x=0..2, returns 0..1
+VecH  TonemapLogML2(VecH  x) {Half mul=1.8126472301912768, max_lum=2; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);} // x=0..2, returns 0..1
+VecH4 TonemapLogML2(VecH4 x) {Half mul=1.8126472301912768, max_lum=2; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);} // x=0..2, returns 0..1
 
-Half  TonemapLog2(Half  x) {return Log2(1+x/LOG2E);} // x=0..Inf
-VecH  TonemapLog2(VecH  x) {return Log2(1+x/LOG2E);} // x=0..Inf
-VecH4 TonemapLog2(VecH4 x) {return Log2(1+x/LOG2E);} // x=0..Inf
+Half  TonemapLogML3(Half  x) {Half mul=2.7466228567967343, max_lum=3; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);} // x=0..3, returns 0..1
+VecH  TonemapLogML3(VecH  x) {Half mul=2.7466228567967343, max_lum=3; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);} // x=0..3, returns 0..1
+VecH4 TonemapLogML3(VecH4 x) {Half mul=2.7466228567967343, max_lum=3; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);} // x=0..3, returns 0..1
 
-Half  TonemapExp(Half  x) {return 1-Exp(-x);} // x=-Inf..Inf
-VecH  TonemapExp(VecH  x) {return 1-Exp(-x);} // x=-Inf..Inf
-VecH4 TonemapExp(VecH4 x) {return 1-Exp(-x);} // x=-Inf..Inf
+Half  TonemapLogML4(Half  x) {Half mul=3.3710924801422451, max_lum=4; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);} // x=0..4, returns 0..1
+VecH  TonemapLogML4(VecH  x) {Half mul=3.3710924801422451, max_lum=4; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);} // x=0..4, returns 0..1
+VecH4 TonemapLogML4(VecH4 x) {Half mul=3.3710924801422451, max_lum=4; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);} // x=0..4, returns 0..1
 
-// Max Lum versions
-Half  _TonemapRcp(Half  x, Half max_lum) {return (1+x/Sqr(max_lum))/(1+x);} // Max Lum version x=0..max_lum - internal without "x*"
-VecH  _TonemapRcp(VecH  x, Half max_lum) {return (1+x/Sqr(max_lum))/(1+x);} // Max Lum version x=0..max_lum - internal without "x*"
-VecH4 _TonemapRcp(VecH4 x, Half max_lum) {return (1+x/Sqr(max_lum))/(1+x);} // Max Lum version x=0..max_lum - internal without "x*"
+Half  TonemapLogML5(Half  x) {Half mul=3.8381449965429031, max_lum=5; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);} // x=0..5, returns 0..1
+VecH  TonemapLogML5(VecH  x) {Half mul=3.8381449965429031, max_lum=5; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);} // x=0..5, returns 0..1
+VecH4 TonemapLogML5(VecH4 x) {Half mul=3.8381449965429031, max_lum=5; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);} // x=0..5, returns 0..1
 
-Half  TonemapRcp(Half  x, Half max_lum) {return x*_TonemapRcp(x, max_lum);} // Max Lum version x=0..max_lum
-VecH  TonemapRcp(VecH  x, Half max_lum) {return x*_TonemapRcp(x, max_lum);} // Max Lum version x=0..max_lum
-VecH4 TonemapRcp(VecH4 x, Half max_lum) {return x*_TonemapRcp(x, max_lum);} // Max Lum version x=0..max_lum
+Half  TonemapLogML6(Half  x) {Half mul=4.2102181645742114, max_lum=6; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);} // x=0..6, returns 0..1
+VecH  TonemapLogML6(VecH  x) {Half mul=4.2102181645742114, max_lum=6; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);} // x=0..6, returns 0..1
+VecH4 TonemapLogML6(VecH4 x) {Half mul=4.2102181645742114, max_lum=6; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);} // x=0..6, returns 0..1
 
-VecH TonemapRcpLum(VecH x              ) {Half lum=TonemapLum(x); return x/(1+lum)                  ;} // optimized "x*(TonemapRcp(lum         )/lum)"
-VecH TonemapRcpLum(VecH x, Half max_lum) {Half lum=TonemapLum(x); return x*_TonemapRcp(lum, max_lum);} // optimized "x*(TonemapRcp(lum, max_lum)/lum)"
+Half  TonemapLogML8(Half  x) {Half mul=4.7823577990751875, max_lum=8; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);} // x=0..8, returns 0..1
+VecH  TonemapLogML8(VecH  x) {Half mul=4.7823577990751875, max_lum=8; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);} // x=0..8, returns 0..1
+VecH4 TonemapLogML8(VecH4 x) {Half mul=4.7823577990751875, max_lum=8; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);} // x=0..8, returns 0..1
 
-VecH TonemapRcpSat(VecH x) // preserves saturation
-{
-   VecH d=TonemapRcp   (x); // desaturated, per channel
-   VecH s=TonemapRcpLum(x); //   saturated, luminance based
-   return Lerp(s, d, d);
-}
-VecH TonemapRcpSat(VecH x, Half max_lum) // preserves saturation
-{
-   VecH d=TonemapRcp   (x, max_lum); // desaturated, per channel
-   VecH s=TonemapRcpLum(x, max_lum); //   saturated, luminance based
-   return Lerp(s, d, d);
-}
-
-// here if internally 'TonemapLog' or 'TonemapLog2' is used, it doesn't matter, results are the same, however 'mul' has to be calculated differently
-Half  TonemapLogML2(Half  x) {Half mul=1.8126472301912768, max_lum=2; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);}
-VecH  TonemapLogML2(VecH  x) {Half mul=1.8126472301912768, max_lum=2; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);}
-VecH4 TonemapLogML2(VecH4 x) {Half mul=1.8126472301912768, max_lum=2; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);}
-
-Half  TonemapLogML3(Half  x) {Half mul=2.7466228567967343, max_lum=3; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);}
-VecH  TonemapLogML3(VecH  x) {Half mul=2.7466228567967343, max_lum=3; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);}
-VecH4 TonemapLogML3(VecH4 x) {Half mul=2.7466228567967343, max_lum=3; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);}
-
-Half  TonemapLogML4(Half  x) {Half mul=3.3710924801422451, max_lum=4; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);}
-VecH  TonemapLogML4(VecH  x) {Half mul=3.3710924801422451, max_lum=4; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);}
-VecH4 TonemapLogML4(VecH4 x) {Half mul=3.3710924801422451, max_lum=4; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);}
-
-Half  TonemapLogML5(Half  x) {Half mul=3.8381449965429031, max_lum=5; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);}
-VecH  TonemapLogML5(VecH  x) {Half mul=3.8381449965429031, max_lum=5; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);}
-VecH4 TonemapLogML5(VecH4 x) {Half mul=3.8381449965429031, max_lum=5; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);}
-
-Half  TonemapLogML6(Half  x) {Half mul=4.2102181645742114, max_lum=6; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);}
-VecH  TonemapLogML6(VecH  x) {Half mul=4.2102181645742114, max_lum=6; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);}
-VecH4 TonemapLogML6(VecH4 x) {Half mul=4.2102181645742114, max_lum=6; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);}
-
-Half  TonemapLogML8(Half  x) {Half mul=4.7823577990751875, max_lum=8; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);}
-VecH  TonemapLogML8(VecH  x) {Half mul=4.7823577990751875, max_lum=8; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);}
-VecH4 TonemapLogML8(VecH4 x) {Half mul=4.7823577990751875, max_lum=8; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);}
-
-Half  TonemapLogML16(Half  x) {Half mul=6.1015816363998532, max_lum=16; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);}
-VecH  TonemapLogML16(VecH  x) {Half mul=6.1015816363998532, max_lum=16; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);}
-VecH4 TonemapLogML16(VecH4 x) {Half mul=6.1015816363998532, max_lum=16; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);}
+Half  TonemapLogML16(Half  x) {Half mul=6.1015816363998532, max_lum=16; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);} // x=0..16, returns 0..1
+VecH  TonemapLogML16(VecH  x) {Half mul=6.1015816363998532, max_lum=16; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);} // x=0..16, returns 0..1
+VecH4 TonemapLogML16(VecH4 x) {Half mul=6.1015816363998532, max_lum=16; return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);} // x=0..16, returns 0..1
 
 VecH TonemapLogSat(VecH x)
 {

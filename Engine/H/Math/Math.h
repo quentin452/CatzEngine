@@ -326,8 +326,8 @@ Flt SigmoidDiv    (Flt x);
 Flt SigmoidDivInv (Flt y); // inverse function of 'SigmoidDiv', SigmoidDivInv(SigmoidDiv(x))=x
 Flt SigmoidAtan   (Flt x);
 Flt SigmoidAtanInv(Flt y); // inverse function of 'SigmoidAtan', SigmoidAtanInv(SigmoidAtan(x))=x
-Flt SigmoidSqrt   (Flt x);
-Flt SigmoidSqrtInv(Flt y); // inverse function of 'SigmoidSqrt', SigmoidSqrtInv(SigmoidSqrt(x))=x
+Flt SigmoidSqr    (Flt x);
+Flt SigmoidSqrInv (Flt y); // inverse function of 'SigmoidSqr', SigmoidSqrInv(SigmoidSqr(x))=x
 Flt SigmoidPow    (Flt x, Flt exp);
 Flt SigmoidPowInv (Flt y, Flt exp); // inverse function of 'SigmoidPow', SigmoidPowInv(SigmoidPow(x, exp), exp)=x
 Flt SigmoidGd     (Flt x);
@@ -342,29 +342,34 @@ inline Flt LengthMul(C Vec &a, C Vec &b) {return SqrtFast(a.length2()*b.length2(
 /******************************************************************************/
 // ANGLES
 /******************************************************************************/
-inline Flt  Sin   (  Flt   angle) {return sinf(angle);}       // get   sine of angle, -1..1
-inline Dbl  Sin   (  Dbl   angle) {return sin (angle);}       // get   sine of angle, -1..1
-inline Flt  Cos   (  Flt   angle) {return cosf(angle);}       // get cosine of angle, -1..1
-inline Dbl  Cos   (  Dbl   angle) {return cos (angle);}       // get cosine of angle, -1..1
-       void CosSin(  Flt  &cos, Flt &sin, Flt angle);         // get cosine and sine of angle, cos=Cos(angle), sin=Sin(angle)
-       void CosSin(  Dbl  &cos, Dbl &sin, Dbl angle);         // get cosine and sine of angle, cos=Cos(angle), sin=Sin(angle)
-inline Flt  Tan   (  Flt   angle) {return tanf(angle);}       // get   tangent "sin/cos" of angle, -Inf..Inf
-inline Dbl  Tan   (  Dbl   angle) {return tan (angle);}       // get   tangent "sin/cos" of angle, -Inf..Inf
-       Vec2 Tan   (C Vec2 &angle);                            // get   tangent "sin/cos" of angle, -Inf..Inf
-inline Flt  Ctg   (  Flt   angle) {return tanf(PI_2 -angle);} // get cotangent "cos/sin" of angle, -Inf..Inf, alternative: {Flt t=tanf(angle); return t ? 1.0f/t : 0;}
-inline Dbl  Ctg   (  Dbl   angle) {return tan (PID_2-angle);} // get cotangent "cos/sin" of angle, -Inf..Inf, alternative: {Dbl t=tan (angle); return t ? 1.0 /t : 0;}
-       Flt  Acos  (  Flt   cos  );                            // get arc  cosine (angle which has specified  cosine),     0..PI
-       Dbl  Acos  (  Dbl   cos  );                            // get arc  cosine (angle which has specified  cosine),     0..PI
-       Flt  Asin  (  Flt   sin  );                            // get arc    sine (angle which has specified    sine), -PI_2..PI_2
-       Dbl  Asin  (  Dbl   sin  );                            // get arc    sine (angle which has specified    sine), -PI_2..PI_2
-inline Flt  Atan  (  Flt   tan  ) {return atanf(tan);}        // get arc tangent (angle which has specified tangent), -PI_2..PI_2
-inline Dbl  Atan  (  Dbl   tan  ) {return atan (tan);}        // get arc tangent (angle which has specified tangent), -PI_2..PI_2
-       Vec2 Atan  (C Vec2 &tan  );                            // get arc tangent (angle which has specified tangent), -PI_2..PI_2
+inline Flt Sin(Flt angle) {return sinf(angle);} // get   sine of angle, -1..1
+inline Dbl Sin(Dbl angle) {return sin (angle);} // get   sine of angle, -1..1
+inline Flt Cos(Flt angle) {return cosf(angle);} // get cosine of angle, -1..1
+inline Dbl Cos(Dbl angle) {return cos (angle);} // get cosine of angle, -1..1
 
+void CosSin(Flt &cos, Flt &sin, Flt angle); // get cosine and sine of angle, cos=Cos(angle), sin=Sin(angle)
+void CosSin(Dbl &cos, Dbl &sin, Dbl angle); // get cosine and sine of angle, cos=Cos(angle), sin=Sin(angle)
+
+inline Flt  Tan(  Flt   angle) {return tanf(angle);}                      // get tangent "sin/cos" of angle, -Inf..Inf
+inline Dbl  Tan(  Dbl   angle) {return tan (angle);}                      // get tangent "sin/cos" of angle, -Inf..Inf
+inline Vec2 Tan(C Vec2 &angle) {return Vec2(Tan(angle.x), Tan(angle.y));} // get tangent "sin/cos" of angle, -Inf..Inf
+
+inline Flt  Ctg(  Flt   angle) {return tanf(PI_2 -angle);} // get cotangent "cos/sin" of angle, -Inf..Inf, alternative: {Flt t=tanf(angle); return t ? 1.0f/t : 0;}
+inline Dbl  Ctg(  Dbl   angle) {return tan (PID_2-angle);} // get cotangent "cos/sin" of angle, -Inf..Inf, alternative: {Dbl t=tan (angle); return t ? 1.0 /t : 0;}
+
+       Flt Acos    (Flt cos);                     // get arc cosine (angle which has specified cosine),     0..PI
+       Dbl Acos    (Dbl cos);                     // get arc cosine (angle which has specified cosine),     0..PI
+       Flt Asin    (Flt sin);                     // get arc   sine (angle which has specified   sine), -PI_2..PI_2
+       Dbl Asin    (Dbl sin);                     // get arc   sine (angle which has specified   sine), -PI_2..PI_2
 inline Flt AcosFast(Flt cos) {return acosf(cos);} // get arc cosine (angle which has specified cosine),     0..PI  , returns NaN for values out of -1..1 range
 inline Dbl AcosFast(Dbl cos) {return acos (cos);} // get arc cosine (angle which has specified cosine),     0..PI  , returns NaN for values out of -1..1 range
 inline Flt AsinFast(Flt sin) {return asinf(sin);} // get arc   sine (angle which has specified   sine), -PI_2..PI_2, returns NaN for values out of -1..1 range
 inline Dbl AsinFast(Dbl sin) {return asin (sin);} // get arc   sine (angle which has specified   sine), -PI_2..PI_2, returns NaN for values out of -1..1 range
+
+inline Flt  Atan(  Flt   tan) {return atanf(tan);}                     // get arc tangent (angle which has specified tangent), -PI_2..PI_2
+inline Dbl  Atan(  Dbl   tan) {return atan (tan);}                     // get arc tangent (angle which has specified tangent), -PI_2..PI_2
+inline Vec2 Atan(C Vec2 &tan) {return Vec2(Atan(tan.x), Atan(tan.y));} // get arc tangent (angle which has specified tangent), -PI_2..PI_2
+
 #if EE_PRIVATE
 Flt ACosSin(Flt cos, Flt sin); // get angle which has specified cosine and sine, 0..PI (this assumes "sin>=0"), this is faster than 'Angle', however point needs to be normalized (X=cos, Y=sin), and remember that this function ignores "sin<0"
 Dbl ACosSin(Dbl cos, Dbl sin); // get angle which has specified cosine and sine, 0..PI (this assumes "sin>=0"), this is faster than 'Angle', however point needs to be normalized (X=cos, Y=sin), and remember that this function ignores "sin<0"

@@ -1568,23 +1568,23 @@ static Bool CSigmoidAtanInv(CalcValue &x)
       return false;
    return true;
 }
-static Bool CSigmoidSqrt(CalcValue &x)
+static Bool CSigmoidSqr(CalcValue &x)
 {
-   if(x.type==CVAL_INT ){x.r =SigmoidSqrt(Dbl(x.i)); x.type=CVAL_REAL;}else
-   if(x.type==CVAL_REAL) x.r =SigmoidSqrt(    x.r );else
- //if(x.type==CVAL_VEC2) x.v2=SigmoidSqrt(    x.v2);else
- //if(x.type==CVAL_VEC ) x.v =SigmoidSqrt(    x.v );else
- //if(x.type==CVAL_VEC4) x.v4=SigmoidSqrt(    x.v4);else
+   if(x.type==CVAL_INT ){x.r =SigmoidSqr(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidSqr(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidSqr(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidSqr(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidSqr(    x.v4);else
       return false;
    return true;
 }
-static Bool CSigmoidSqrtInv(CalcValue &x)
+static Bool CSigmoidSqrInv(CalcValue &x)
 {
-   if(x.type==CVAL_INT ){x.r =SigmoidSqrtInv(Dbl(x.i)); x.type=CVAL_REAL;}else
-   if(x.type==CVAL_REAL) x.r =SigmoidSqrtInv(    x.r );else
- //if(x.type==CVAL_VEC2) x.v2=SigmoidSqrtInv(    x.v2);else
- //if(x.type==CVAL_VEC ) x.v =SigmoidSqrtInv(    x.v );else
- //if(x.type==CVAL_VEC4) x.v4=SigmoidSqrtInv(    x.v4);else
+   if(x.type==CVAL_INT ){x.r =SigmoidSqrInv(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidSqrInv(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidSqrInv(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidSqrInv(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidSqrInv(    x.v4);else
       return false;
    return true;
 }
@@ -1829,8 +1829,8 @@ static struct CalcFuncInfo
    {1, "SigmoidDivInv"   , (Ptr)CSigmoidDivInv   },
    {1, "SigmoidAtan"     , (Ptr)CSigmoidAtan     },
    {1, "SigmoidAtanInv"  , (Ptr)CSigmoidAtanInv  },
-   {1, "SigmoidSqrt"     , (Ptr)CSigmoidSqrt     },
-   {1, "SigmoidSqrtInv"  , (Ptr)CSigmoidSqrtInv  },
+   {1, "SigmoidSqr"      , (Ptr)CSigmoidSqr      },
+   {1, "SigmoidSqrInv"   , (Ptr)CSigmoidSqrInv   },
    {2, "SigmoidPow"      , (Ptr)CSigmoidPow      },
    {2, "SigmoidPowInv"   , (Ptr)CSigmoidPowInv   },
    {1, "SigmoidGd"       , (Ptr)CSigmoidGd       },

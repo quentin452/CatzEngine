@@ -1608,11 +1608,11 @@ Flt  Pinch      (Flt  x, Flt  pinch) {return x*pinch/(1+x*(pinch-1));}
 Half PinchFactor(Half x, Half pinch) {return Pinch(x, ScaleFactor(pinch));}
 Flt  PinchFactor(Flt  x, Flt  pinch) {return Pinch(x, ScaleFactor(pinch));}
 
-Flt   SigmoidSqrt(Flt   x) {return x/Sqrt(1+x*x);}
-Half  SigmoidSqrt(Half  x) {return x/Sqrt(1+x*x);}
-Vec   SigmoidSqrt(Vec   x) {return x/Sqrt(1+x*x);}
-VecH  SigmoidSqrt(VecH  x) {return x/Sqrt(1+x*x);}
-VecH4 SigmoidSqrt(VecH4 x) {return x/Sqrt(1+x*x);}
+Flt   SigmoidSqr(Flt   x) {return x/Sqrt(1+x*x);}
+Half  SigmoidSqr(Half  x) {return x/Sqrt(1+x*x);}
+Vec   SigmoidSqr(Vec   x) {return x/Sqrt(1+x*x);}
+VecH  SigmoidSqr(VecH  x) {return x/Sqrt(1+x*x);}
+VecH4 SigmoidSqr(VecH4 x) {return x/Sqrt(1+x*x);}
 
 Flt  SigmoidExp(Flt  x) {return 2/(1+Exp(-x))-1;}
 Half SigmoidExp(Half x) {return 2/(1+Exp(-x))-1;}

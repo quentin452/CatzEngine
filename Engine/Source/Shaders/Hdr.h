@@ -63,9 +63,9 @@ Half  TonemapRcp(Half  x) {return x/(1+x);} // x=0..Inf
 VecH  TonemapRcp(VecH  x) {return x/(1+x);} // x=0..Inf
 VecH4 TonemapRcp(VecH4 x) {return x/(1+x);} // x=0..Inf
 
-Half  TonemapRcpSqr(Half  x) {return SigmoidSqrt(x);} // x=-Inf..Inf
-VecH  TonemapRcpSqr(VecH  x) {return SigmoidSqrt(x);} // x=-Inf..Inf
-VecH4 TonemapRcpSqr(VecH4 x) {return SigmoidSqrt(x);} // x=-Inf..Inf
+Half  TonemapRcpSqr(Half  x) {return SigmoidSqr(x);} // x=-Inf..Inf
+VecH  TonemapRcpSqr(VecH  x) {return SigmoidSqr(x);} // x=-Inf..Inf
+VecH4 TonemapRcpSqr(VecH4 x) {return SigmoidSqr(x);} // x=-Inf..Inf
 
 /* constants were calculated to have linear growth at the start, similar to y=x, derivative=1, using:
 #define LOG2E 1.44269504088896340736 // Log2(e)
@@ -215,7 +215,7 @@ VecH  TonemapExp(VecH  x, Half max_lum) {return TonemapExp(x)/TonemapExp(max_lum
 VecH4 TonemapExp(VecH4 x, Half max_lum) {return TonemapExp(x)/TonemapExp(max_lum);}
 /******************************************************************************/
 VecH ToneMapSigmoid(VecH x)
-{ // here 'SigmoidExp' works better than 'SigmoidSqrt' because sqrt introduces too much highlights on already bright colors
+{ // here 'SigmoidExp' works better than 'SigmoidSqr' because sqrt introduces too much highlights on already bright colors
    x=mul(ACESInputMat, x); // convert to ACES and prevent saturation
    Half contrast=2, brightness=2;
    x=SigmoidExp(Vec(x*brightness))/SigmoidExp(brightness); // need to use high precision

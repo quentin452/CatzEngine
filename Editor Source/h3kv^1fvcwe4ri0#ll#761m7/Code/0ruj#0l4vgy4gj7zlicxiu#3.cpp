@@ -1256,16 +1256,16 @@ flt   PowMax   (flt x, flt y) {return (x<=0) ? 0 : Pow(x, y);}
 flt _ApplyBrightness(flt x, flt brightness) // !! ASSUMES THAT "x>0 && x<1 && brightness" !!
 {
    x=Sqr(x); // SRGBToLinearFast
-   if(brightness<0)x=SigmoidSqrtInv(x*SigmoidSqrt(brightness))/            brightness ;
-   else            x=SigmoidSqrt   (x*            brightness )/SigmoidSqrt(brightness);
+   if(brightness<0)x=SigmoidSqrInv(x*SigmoidSqr(brightness))/           brightness ;
+   else            x=SigmoidSqr   (x*           brightness )/SigmoidSqr(brightness);
    return SqrtFast(x); // LinearToSRGBFast
 }
 flt _ApplyContrast(flt x, flt contrast) // !! ASSUMES THAT "x>0 && x<1 && contrast" !!
 {
    x=Sqr(x); // SRGBToLinearFast
    x=x*2-1;
-   if(contrast<0)x=SigmoidSqrtInv(x*SigmoidSqrt(contrast))/            contrast ;
-   else          x=SigmoidSqrt   (x*            contrast )/SigmoidSqrt(contrast);
+   if(contrast<0)x=SigmoidSqrInv(x*SigmoidSqr(contrast))/           contrast ;
+   else          x=SigmoidSqr   (x*           contrast )/SigmoidSqr(contrast);
    x=x*0.5+0.5;
    return SqrtFast(x); // LinearToSRGBFast
 }
@@ -1756,9 +1756,9 @@ void TransformImage(Image &image, TextParam param, bool clamp, C Color &backgrou
          flt (*R)(flt);
          flt (*G)(flt);
          flt (*B)(flt);
-         if(!bright.x){bright.x=1; mul.x=1; R=FloatSelf;}else if(bright.x<0){mul.x=1/bright.x; bright.x=SigmoidSqrt(bright.x); R=SigmoidSqrtInv;}else{mul.x=1/SigmoidSqrt(bright.x); R=SigmoidSqrt;}
-         if(!bright.y){bright.y=1; mul.y=1; G=FloatSelf;}else if(bright.y<0){mul.y=1/bright.y; bright.y=SigmoidSqrt(bright.y); G=SigmoidSqrtInv;}else{mul.y=1/SigmoidSqrt(bright.y); G=SigmoidSqrt;}
-         if(!bright.z){bright.z=1; mul.z=1; B=FloatSelf;}else if(bright.z<0){mul.z=1/bright.z; bright.z=SigmoidSqrt(bright.z); B=SigmoidSqrtInv;}else{mul.z=1/SigmoidSqrt(bright.z); B=SigmoidSqrt;}
+         if(!bright.x){bright.x=1; mul.x=1; R=FloatSelf;}else if(bright.x<0){mul.x=1/bright.x; bright.x=SigmoidSqr(bright.x); R=SigmoidSqrInv;}else{mul.x=1/SigmoidSqr(bright.x); R=SigmoidSqr;}
+         if(!bright.y){bright.y=1; mul.y=1; G=FloatSelf;}else if(bright.y<0){mul.y=1/bright.y; bright.y=SigmoidSqr(bright.y); G=SigmoidSqrInv;}else{mul.y=1/SigmoidSqr(bright.y); G=SigmoidSqr;}
+         if(!bright.z){bright.z=1; mul.z=1; B=FloatSelf;}else if(bright.z<0){mul.z=1/bright.z; bright.z=SigmoidSqr(bright.z); B=SigmoidSqrInv;}else{mul.z=1/SigmoidSqr(bright.z); B=SigmoidSqr;}
          for(int z=box.min.z; z<box.max.z; z++)
          for(int y=box.min.y; y<box.max.y; y++)
          for(int x=box.min.x; x<box.max.x; x++)
@@ -1776,8 +1776,8 @@ void TransformImage(Image &image, TextParam param, bool clamp, C Color &backgrou
       flt bright=param.asFlt(), mul; flt (*f)(flt);
       if( bright)
       {
-         if(bright<0){mul=1/            bright ; bright=SigmoidSqrt(bright); f=SigmoidSqrtInv;}
-         else        {mul=1/SigmoidSqrt(bright);                             f=SigmoidSqrt   ;}
+         if(bright<0){mul=1/           bright ; bright=SigmoidSqr(bright); f=SigmoidSqrInv;}
+         else        {mul=1/SigmoidSqr(bright);                            f=SigmoidSqr   ;}
          for(int z=box.min.z; z<box.max.z; z++)
          for(int y=box.min.y; y<box.max.y; y++)
          for(int x=box.min.x; x<box.max.x; x++)
@@ -1821,9 +1821,9 @@ void TransformImage(Image &image, TextParam param, bool clamp, C Color &backgrou
          flt (*R)(flt);
          flt (*G)(flt);
          flt (*B)(flt);
-         if(!contrast.x){contrast.x=1; mul.x=1; R=FloatSelf;}else if(contrast.x<0){mul.x=1/contrast.x; contrast.x=SigmoidSqrt(contrast.x); R=SigmoidSqrtInv;}else{mul.x=1/SigmoidSqrt(contrast.x); R=SigmoidSqrt;}
-         if(!contrast.y){contrast.y=1; mul.y=1; G=FloatSelf;}else if(contrast.y<0){mul.y=1/contrast.y; contrast.y=SigmoidSqrt(contrast.y); G=SigmoidSqrtInv;}else{mul.y=1/SigmoidSqrt(contrast.y); G=SigmoidSqrt;}
-         if(!contrast.z){contrast.z=1; mul.z=1; B=FloatSelf;}else if(contrast.z<0){mul.z=1/contrast.z; contrast.z=SigmoidSqrt(contrast.z); B=SigmoidSqrtInv;}else{mul.z=1/SigmoidSqrt(contrast.z); B=SigmoidSqrt;}
+         if(!contrast.x){contrast.x=1; mul.x=1; R=FloatSelf;}else if(contrast.x<0){mul.x=1/contrast.x; contrast.x=SigmoidSqr(contrast.x); R=SigmoidSqrInv;}else{mul.x=1/SigmoidSqr(contrast.x); R=SigmoidSqr;}
+         if(!contrast.y){contrast.y=1; mul.y=1; G=FloatSelf;}else if(contrast.y<0){mul.y=1/contrast.y; contrast.y=SigmoidSqr(contrast.y); G=SigmoidSqrInv;}else{mul.y=1/SigmoidSqr(contrast.y); G=SigmoidSqr;}
+         if(!contrast.z){contrast.z=1; mul.z=1; B=FloatSelf;}else if(contrast.z<0){mul.z=1/contrast.z; contrast.z=SigmoidSqr(contrast.z); B=SigmoidSqrInv;}else{mul.z=1/SigmoidSqr(contrast.z); B=SigmoidSqr;}
          Vec ofs=contrast;
          contrast*=2;
          mul     *=0.5;
@@ -1844,8 +1844,8 @@ void TransformImage(Image &image, TextParam param, bool clamp, C Color &backgrou
       flt contrast=param.asFlt(), mul; flt (*f)(flt);
       if( contrast)
       {
-         if(contrast<0){mul=1/            contrast ; contrast=SigmoidSqrt(contrast); f=SigmoidSqrtInv;}
-         else          {mul=1/SigmoidSqrt(contrast);                                 f=SigmoidSqrt   ;}
+         if(contrast<0){mul=1/           contrast ; contrast=SigmoidSqr(contrast); f=SigmoidSqrInv;}
+         else          {mul=1/SigmoidSqr(contrast);                                f=SigmoidSqr   ;}
          flt ofs=contrast;
          contrast*=2;
          mul     *=0.5;

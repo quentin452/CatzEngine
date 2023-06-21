@@ -684,8 +684,8 @@ Flt SigmoidExpA   (Flt x) {return (x>=0) ? 1-Exp(-x) : Exp(x)-1;}
 Flt SigmoidExpAInv(Flt y) {return (y>=0) ?  -Ln(1-y) : Ln(y+1) ;}
 Flt SigmoidExpInv (Flt y) {y=y*0.5f+0.5f; return Ln  (y/(1-y));}
 Flt SigmoidExp2Inv(Flt y) {y=y*0.5f+0.5f; return Log2(y/(1-y));}
-Flt SigmoidAtan   (Flt x) {return Atan(PI_2*x)*(2/PI);}
-Flt SigmoidAtanInv(Flt y) {return Tan(y*PI_2)/PI_2;}
+Flt SigmoidAtan   (Flt x) {return Atan(x*PI_2)*(2/PI);}
+Flt SigmoidAtanInv(Flt y) {return  Tan(y*PI_2)*(2/PI);}
 Flt SigmoidTanh   (Flt x) {return  tanhf(x);}
 Flt SigmoidTanhInv(Flt y) {return atanhf(y);}
 Flt SigmoidGd     (Flt x) {return (2/PI)*gd(PI_2*x);}

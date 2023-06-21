@@ -318,21 +318,21 @@ Flt     VisibleOpacity(Flt density, Flt range); // calculate visible     opacity
 Flt AccumulatedDensity(Flt density, Flt range); // calculate accumulated density (0..1) having 'density' environment density (0..1), and 'range' (0..Inf)
 
 // sigmoid
-Flt SigmoidExp    (Flt x);
-Flt SigmoidExpInv (Flt y); // inverse function of 'SigmoidExp', SigmoidExpInv(SigmoidExp(x))=x
-Flt SigmoidExp2   (Flt x);
-Flt SigmoidExp2Inv(Flt y); // inverse function of 'SigmoidExp2', SigmoidExp2Inv(SigmoidExp2(x))=x
 Flt SigmoidDiv    (Flt x);
 Flt SigmoidDivInv (Flt y); // inverse function of 'SigmoidDiv', SigmoidDivInv(SigmoidDiv(x))=x
-Flt SigmoidAtan   (Flt x);
-Flt SigmoidAtanInv(Flt y); // inverse function of 'SigmoidAtan', SigmoidAtanInv(SigmoidAtan(x))=x
 Flt SigmoidSqr    (Flt x);
 Flt SigmoidSqrInv (Flt y); // inverse function of 'SigmoidSqr', SigmoidSqrInv(SigmoidSqr(x))=x
 Flt SigmoidPow    (Flt x, Flt exp);
 Flt SigmoidPowInv (Flt y, Flt exp); // inverse function of 'SigmoidPow', SigmoidPowInv(SigmoidPow(x, exp), exp)=x
-Flt SigmoidGd     (Flt x);
+Flt SigmoidExp    (Flt x);
+Flt SigmoidExpInv (Flt y); // inverse function of 'SigmoidExp', SigmoidExpInv(SigmoidExp(x))=x
+Flt SigmoidExp2   (Flt x);
+Flt SigmoidExp2Inv(Flt y); // inverse function of 'SigmoidExp2', SigmoidExp2Inv(SigmoidExp2(x))=x
+Flt SigmoidAtan   (Flt x);
+Flt SigmoidAtanInv(Flt y); // inverse function of 'SigmoidAtan', SigmoidAtanInv(SigmoidAtan(x))=x
 Flt SigmoidTanh   (Flt x);
 Flt SigmoidTanhInv(Flt y); // inverse function of 'SigmoidTanh', SigmoidTanhInv(SigmoidTanh(x))=x
+Flt SigmoidGd     (Flt x);
 Flt SigmoidErf    (Flt x);
 
 #if EE_PRIVATE

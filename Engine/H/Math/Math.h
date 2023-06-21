@@ -328,6 +328,8 @@ Flt SigmoidExp    (Flt x);
 Flt SigmoidExpInv (Flt y); // inverse function of 'SigmoidExp', SigmoidExpInv(SigmoidExp(x))=x
 Flt SigmoidExp2   (Flt x);
 Flt SigmoidExp2Inv(Flt y); // inverse function of 'SigmoidExp2', SigmoidExp2Inv(SigmoidExp2(x))=x
+Flt SigmoidExpA   (Flt x);
+Flt SigmoidExpAInv(Flt y); // inverse function of 'SigmoidExpA', SigmoidExpAInv(SigmoidExpA(x))=x
 Flt SigmoidAtan   (Flt x);
 Flt SigmoidAtanInv(Flt y); // inverse function of 'SigmoidAtan', SigmoidAtanInv(SigmoidAtan(x))=x
 Flt SigmoidTanh   (Flt x);

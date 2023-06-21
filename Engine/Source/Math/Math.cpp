@@ -680,6 +680,8 @@ Flt SigmoidPow    (Flt x, Flt exp) {return x/Pow(1+Pow(Abs(x), exp), 1/exp);}
 Flt SigmoidPowInv (Flt y, Flt exp) {return y/Pow(1-Pow(Abs(y), exp), 1/exp);}
 Flt SigmoidExp    (Flt x) {return 2/(1+Exp (-x))-1;}
 Flt SigmoidExp2   (Flt x) {return 2/(1+Exp2(-x))-1;}
+Flt SigmoidExpA   (Flt x) {return (x>=0) ? 1-Exp(-x) : Exp(x)-1;}
+Flt SigmoidExpAInv(Flt y) {return (y>=0) ?  -Ln(1-y) : Ln(y+1) ;}
 Flt SigmoidExpInv (Flt y) {y=y*0.5f+0.5f; return Ln  (y/(1-y));}
 Flt SigmoidExp2Inv(Flt y) {y=y*0.5f+0.5f; return Log2(y/(1-y));}
 Flt SigmoidAtan   (Flt x) {return Atan(PI_2*x)*(2/PI);}

@@ -94,6 +94,10 @@ Half  TonemapRcp(Half  x, Half max_lum) {return x*_TonemapRcp(x, max_lum);} // M
 VecH  TonemapRcp(VecH  x, Half max_lum) {return x*_TonemapRcp(x, max_lum);} // Max Lum version, x=0..max_lum, returns 0..1
 VecH4 TonemapRcp(VecH4 x, Half max_lum) {return x*_TonemapRcp(x, max_lum);} // Max Lum version, x=0..max_lum, returns 0..1
 
+Half  TonemapRcp1(Half  x, Half max_lum) {return x/(1+x*((max_lum-1)/max_lum));} // Max Lum version, x=0..max_lum, returns 0..1
+VecH  TonemapRcp1(VecH  x, Half max_lum) {return x/(1+x*((max_lum-1)/max_lum));} // Max Lum version, x=0..max_lum, returns 0..1
+VecH4 TonemapRcp1(VecH4 x, Half max_lum) {return x/(1+x*((max_lum-1)/max_lum));} // Max Lum version, x=0..max_lum, returns 0..1
+
 VecH TonemapRcpLum(VecH x              ) {Half lum=TonemapLum(x); return x/(1+lum)                  ;} // optimized "x*(TonemapRcp(lum         )/lum)", x=0..Inf    , returns 0..1
 VecH TonemapRcpLum(VecH x, Half max_lum) {Half lum=TonemapLum(x); return x*_TonemapRcp(lum, max_lum);} // optimized "x*(TonemapRcp(lum, max_lum)/lum)", x=0..max_lum, returns 0..1
 

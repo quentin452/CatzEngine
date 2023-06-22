@@ -167,6 +167,9 @@ Half  TonemapLogML16(Half  x) {Half mul=4.2292934127543553; return TonemapLog(x*
 VecH  TonemapLogML16(VecH  x) {Half mul=4.2292934127543553; return TonemapLog(x*mul)/mul;} // x=0..16, returns 0..1
 VecH4 TonemapLogML16(VecH4 x) {Half mul=4.2292934127543553; return TonemapLog(x*mul)/mul;} // x=0..16, returns 0..1
 
+Half  TonemapAtanML4(Half  x) {Half mul=1.3932490753255884; return Atan(x*mul)/mul;} // x=0..4, returns 0..1
+Half  TonemapAtanML8(Half  x) {Half mul=1.4869275602717664; return Atan(x*mul)/mul;} // x=0..8, returns 0..1
+
 // here 'mul' can be ignored because in tests it was 0.983722866 for max_lum=4, and 1.00362146 for max_lum=16, for max_lum>=4 they look almost identical, so maybe no need to use them
 Half  TonemapExpA(Half  x, Half max_lum) {return TonemapExpA(x)/TonemapExpA(max_lum);}
 VecH  TonemapExpA(VecH  x, Half max_lum) {return TonemapExpA(x)/TonemapExpA(max_lum);}

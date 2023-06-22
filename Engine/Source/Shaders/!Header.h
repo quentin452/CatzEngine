@@ -1620,6 +1620,12 @@ Half  SigmoidExp(Half  x) {return 2/(1+Exp(x*-2))-1;}
 Vec   SigmoidExp(Vec   x) {return 2/(1+Exp(x*-2))-1;}
 VecH  SigmoidExp(VecH  x) {return 2/(1+Exp(x*-2))-1;}
 VecH4 SigmoidExp(VecH4 x) {return 2/(1+Exp(x*-2))-1;}
+
+Flt   SigmoidAtan(Flt   x) {return Atan(x*PI_2)*(2/PI);}
+Half  SigmoidAtan(Half  x) {return Atan(x*PI_2)*(2/PI);}
+Vec   SigmoidAtan(Vec   x) {return Atan(x*PI_2)*(2/PI);}
+VecH  SigmoidAtan(VecH  x) {return Atan(x*PI_2)*(2/PI);}
+VecH4 SigmoidAtan(VecH4 x) {return Atan(x*PI_2)*(2/PI);}
 /******************************************************************************/
 Half     VisibleOpacity(Flt density, Flt range) {return   Pow(1-density, range);} // calculate visible     opacity (0..1) having 'density' environment density (0..1), and 'range' (0..Inf)
 Half AccumulatedDensity(Flt density, Flt range) {return 1-Pow(1-density, range);} // calculate accumulated density (0..1) having 'density' environment density (0..1), and 'range' (0..Inf)

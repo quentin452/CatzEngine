@@ -117,7 +117,7 @@
 #define Asin      asin
 #define Atan      atan
 #define Lerp      lerp
-#define Exp       exp  // identical performance as Exp2, Exp2(x*1.4426950408889634)
+#define Exp       exp  // identical performance as Exp2 = Exp2(x/Log(2))
 #define Exp2      exp2 // identical performance as Exp
 #define Log       log  // identical performance as Log2
 #define Log2      log2 // identical performance as Log
@@ -145,7 +145,8 @@
 #define SQRT3_3 0.5773502691896257 // Sqrt(3)/3
 #define TAN     0.5                // tangent calculation constant
 
-#define LOG2E 1.44269504088896340736 // Log2(e)
+#define LOG_2  0.69314718055994529    // Log (2)
+#define LOG2_E 1.44269504088896340736 // Log2(e)
 
 #define ColorLumWeight  VecH(0.2126, 0.7152, 0.0722)
 #define ColorLumWeight2 VecH(0.2990, 0.5870, 0.1140)
@@ -1614,15 +1615,11 @@ Vec   SigmoidSqr(Vec   x) {return x/Sqrt(1+x*x);}
 VecH  SigmoidSqr(VecH  x) {return x/Sqrt(1+x*x);}
 VecH4 SigmoidSqr(VecH4 x) {return x/Sqrt(1+x*x);}
 
-Flt  SigmoidExp(Flt  x) {return 2/(1+Exp(-x))-1;}
-Half SigmoidExp(Half x) {return 2/(1+Exp(-x))-1;}
-Vec  SigmoidExp(Vec  x) {return 2/(1+Exp(-x))-1;}
-VecH SigmoidExp(VecH x) {return 2/(1+Exp(-x))-1;}
-
-Flt  SigmoidExp2(Flt  x) {return 2/(1+Exp2(-x))-1;}
-Half SigmoidExp2(Half x) {return 2/(1+Exp2(-x))-1;}
-Vec  SigmoidExp2(Vec  x) {return 2/(1+Exp2(-x))-1;}
-VecH SigmoidExp2(VecH x) {return 2/(1+Exp2(-x))-1;}
+Flt   SigmoidExp(Flt   x) {return 2/(1+Exp(x*-2))-1;}
+Half  SigmoidExp(Half  x) {return 2/(1+Exp(x*-2))-1;}
+Vec   SigmoidExp(Vec   x) {return 2/(1+Exp(x*-2))-1;}
+VecH  SigmoidExp(VecH  x) {return 2/(1+Exp(x*-2))-1;}
+VecH4 SigmoidExp(VecH4 x) {return 2/(1+Exp(x*-2))-1;}
 /******************************************************************************/
 Half     VisibleOpacity(Flt density, Flt range) {return   Pow(1-density, range);} // calculate visible     opacity (0..1) having 'density' environment density (0..1), and 'range' (0..Inf)
 Half AccumulatedDensity(Flt density, Flt range) {return 1-Pow(1-density, range);} // calculate accumulated density (0..1) having 'density' environment density (0..1), and 'range' (0..Inf)

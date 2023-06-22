@@ -73,17 +73,21 @@ Half  TonemapExp(Half  x) {return 1-Exp(-x);} // x=0..Inf, returns 0..1
 VecH  TonemapExp(VecH  x) {return 1-Exp(-x);} // x=0..Inf, returns 0..1
 VecH4 TonemapExp(VecH4 x) {return 1-Exp(-x);} // x=0..Inf, returns 0..1
 
-Half  TonemapSigmoidExp(Half  x) {return SigmoidExp(x*2);} // x=0..Inf, returns 0..1
-VecH  TonemapSigmoidExp(VecH  x) {return SigmoidExp(x*2);} // x=0..Inf, returns 0..1
-VecH4 TonemapSigmoidExp(VecH4 x) {return SigmoidExp(x*2);} // x=0..Inf, returns 0..1
+Half  TonemapSigmoidExp(Half  x) {return SigmoidExp(x);} // x=0..Inf, returns 0..1
+VecH  TonemapSigmoidExp(VecH  x) {return SigmoidExp(x);} // x=0..Inf, returns 0..1
+VecH4 TonemapSigmoidExp(VecH4 x) {return SigmoidExp(x);} // x=0..Inf, returns 0..1
 
 Half  TonemapLog(Half  x) {return Log(1+x);} // x=0..Inf, returns 0..Inf
 VecH  TonemapLog(VecH  x) {return Log(1+x);} // x=0..Inf, returns 0..Inf
 VecH4 TonemapLog(VecH4 x) {return Log(1+x);} // x=0..Inf, returns 0..Inf
 
-Half  TonemapLog2(Half  x) {return Log2(1+x/LOG2E);} // x=0..Inf, returns 0..Inf
-VecH  TonemapLog2(VecH  x) {return Log2(1+x/LOG2E);} // x=0..Inf, returns 0..Inf
-VecH4 TonemapLog2(VecH4 x) {return Log2(1+x/LOG2E);} // x=0..Inf, returns 0..Inf
+Half  TonemapLog2(Half  x) {return Log2(1+x/LOG2_E);} // x=0..Inf, returns 0..Inf
+VecH  TonemapLog2(VecH  x) {return Log2(1+x/LOG2_E);} // x=0..Inf, returns 0..Inf
+VecH4 TonemapLog2(VecH4 x) {return Log2(1+x/LOG2_E);} // x=0..Inf, returns 0..Inf
+
+Half  TonemapAtan(Half  x) {return Atan(x);} // x=0..Inf, returns 0..PI/2
+VecH  TonemapAtan(VecH  x) {return Atan(x);} // x=0..Inf, returns 0..PI/2
+VecH4 TonemapAtan(VecH4 x) {return Atan(x);} // x=0..Inf, returns 0..PI/2
 
 // Max Lum versions
 Half  _TonemapRcp(Half  x, Half max_lum) {return (1+x/Sqr(max_lum))/(1+x);} // Max Lum version internal without "x*", x=0..max_lum
@@ -116,9 +120,9 @@ VecH TonemapRcpSat(VecH x, Half max_lum) // preserves saturation
 
 /* Constants were calculated to have derivative=1:
 here if internally 'TonemapLog' or 'TonemapLog2' is used, it doesn't matter, results are the same, however 'mul' has to be calculated differently, so choose the func that's faster on GPU
-#define LOG2E 1.44269504088896340736 // Log2(e)
-Dbl TonemapLog (Dbl x) {return Log (1+x      );} // x=0..Inf
-Dbl TonemapLog2(Dbl x) {return Log2(1+x/LOG2E);} // x=0..Inf
+#define LOG2_E 1.44269504088896340736 // Log2(e)
+Dbl TonemapLog (Dbl x) {return Log (1+x       );} // x=0..Inf
+Dbl TonemapLog2(Dbl x) {return Log2(1+x/LOG2_E);} // x=0..Inf
 Dbl TonemapLog (Dbl x, Dbl max_lum, Dbl mul) {return TonemapLog (mul*x)/TonemapLog (mul*max_lum);}
 Dbl TonemapLog2(Dbl x, Dbl max_lum, Dbl mul) {return TonemapLog2(mul*x)/TonemapLog2(mul*max_lum);}
 void InitPre()

@@ -264,8 +264,8 @@ inline Dbl Pow(Int x, Dbl y) {return pow (     x,      y);} // raise 'x' to the 
 inline Dbl Pow(Dbl x, Int y) {return pow (     x,      y);} // raise 'x' to the power 'y' = Exp2(Log2(x)*y)
 inline Dbl Pow(Dbl x, Dbl y) {return pow (     x,      y);} // raise 'x' to the power 'y' = Exp2(Log2(x)*y)
 
-inline Flt  Exp(  Flt   x) {return expf(x);} // raise 'e' to the power 'x' = Exp2(x/Log(2)) = Exp2(x*1.4426950408889634)
-inline Dbl  Exp(  Dbl   x) {return exp (x);} // raise 'e' to the power 'x' = Exp2(x/Log(2)) = Exp2(x*1.4426950408889634)
+inline Flt  Exp(  Flt   x) {return expf(x);} // raise 'e' to the power 'x' = Exp2(x/Log(2))
+inline Dbl  Exp(  Dbl   x) {return exp (x);} // raise 'e' to the power 'x' = Exp2(x/Log(2))
 inline Vec2 Exp(C Vec2 &v) {return Vec2(Exp(v.x), Exp(v.y));}
 inline Vec  Exp(C Vec  &v) {return Vec (Exp(v.x), Exp(v.y), Exp(v.z));}
 inline Vec4 Exp(C Vec4 &v) {return Vec4(Exp(v.x), Exp(v.y), Exp(v.z), Exp(v.w));}
@@ -317,7 +317,7 @@ Flt       SplitAlpha  (Flt alpha  , Int steps); // calculate alpha to be used fo
 Flt     VisibleOpacity(Flt density, Flt range); // calculate visible     opacity (0..1) having 'density' environment density (0..1), and 'range' (0..Inf)
 Flt AccumulatedDensity(Flt density, Flt range); // calculate accumulated density (0..1) having 'density' environment density (0..1), and 'range' (0..Inf)
 
-// sigmoid
+// sigmoid, these functions squash -Inf..Inf to -1..1 range, with Sigmoid(0)=0, and having derivative(0)=1, they are "S" shaped
 Flt SigmoidDiv    (Flt x);
 Flt SigmoidDivInv (Flt y); // inverse function of 'SigmoidDiv', SigmoidDivInv(SigmoidDiv(x))=x
 Flt SigmoidSqr    (Flt x);
@@ -326,8 +326,6 @@ Flt SigmoidPow    (Flt x, Flt exp);
 Flt SigmoidPowInv (Flt y, Flt exp); // inverse function of 'SigmoidPow', SigmoidPowInv(SigmoidPow(x, exp), exp)=x
 Flt SigmoidExp    (Flt x);
 Flt SigmoidExpInv (Flt y); // inverse function of 'SigmoidExp', SigmoidExpInv(SigmoidExp(x))=x
-Flt SigmoidExp2   (Flt x);
-Flt SigmoidExp2Inv(Flt y); // inverse function of 'SigmoidExp2', SigmoidExp2Inv(SigmoidExp2(x))=x
 Flt SigmoidExpA   (Flt x);
 Flt SigmoidExpAInv(Flt y); // inverse function of 'SigmoidExpA', SigmoidExpAInv(SigmoidExpA(x))=x
 Flt SigmoidAtan   (Flt x);

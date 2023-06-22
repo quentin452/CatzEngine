@@ -669,8 +669,8 @@ Flt SmoothPinch(Flt x, Flt pinch)
 /******************************************************************************/
 // SIGMOID
 /******************************************************************************/
-Flt gd(Flt x) {return Atan(sinhf(x));}
-Dbl gd(Dbl x) {return Atan(sinh (x));}
+Flt Gd(Flt x) {return Atan(sinhf(x));}
+Dbl Gd(Dbl x) {return Atan(sinh (x));}
 
 Flt SigmoidDiv    (Flt x) {return x/(1+Abs(x));}
 Flt SigmoidDivInv (Flt y) {return y/(1-Abs(y));}
@@ -678,19 +678,29 @@ Flt SigmoidSqr    (Flt x) {return x/SqrtFast(1+x*x);}
 Flt SigmoidSqrInv (Flt y) {return y/SqrtFast(1-y*y);}
 Flt SigmoidPow    (Flt x, Flt exp) {return x/Pow(1+Pow(Abs(x), exp), 1/exp);}
 Flt SigmoidPowInv (Flt y, Flt exp) {return y/Pow(1-Pow(Abs(y), exp), 1/exp);}
-Flt SigmoidExp    (Flt x) {return 2/(1+Exp (-x))-1;}
-Flt SigmoidExp2   (Flt x) {return 2/(1+Exp2(-x))-1;}
+Flt SigmoidExp    (Flt x) {return 2/(1+Exp(x*-2))-1;}
+Flt SigmoidExpInv (Flt y) {y=y*0.5f+0.5f; return Ln(y/(1-y))/2;}
 Flt SigmoidExpA   (Flt x) {return (x>=0) ? 1-Exp(-x) : Exp(x)-1;}
 Flt SigmoidExpAInv(Flt y) {return (y>=0) ?  -Ln(1-y) : Ln(y+1) ;}
-Flt SigmoidExpInv (Flt y) {y=y*0.5f+0.5f; return Ln  (y/(1-y));}
-Flt SigmoidExp2Inv(Flt y) {y=y*0.5f+0.5f; return Log2(y/(1-y));}
 Flt SigmoidAtan   (Flt x) {return Atan(x*PI_2)*(2/PI);}
 Flt SigmoidAtanInv(Flt y) {return  Tan(y*PI_2)*(2/PI);}
 Flt SigmoidTanh   (Flt x) {return  tanhf(x);}
 Flt SigmoidTanhInv(Flt y) {return atanhf(y);}
-Flt SigmoidGd     (Flt x) {return (2/PI)*gd(PI_2*x);}
+Flt SigmoidGd     (Flt x) {return (2/PI)*Gd(PI_2*x);}
 Flt SigmoidErf    (Flt x) {return erff((SqrtFast(PI)/2)*x);}
-//Flt SigmoidSC     (Flt x) {return SmoothCube(x/3+0.5f)*2-1;} not fully smooth
+
+/* work same as Exp
+Flt SigmoidExp2    (Flt x);
+Flt SigmoidExp2Inv (Flt y); // inverse function of 'SigmoidExp2', SigmoidExp2Inv(SigmoidExp2(x))=x
+Flt SigmoidExp2    (Flt x) {return 2/(1+Exp2(x*(-2/LOG_2)))-1;}
+Flt SigmoidExp2Inv (Flt y) {y=y*0.5f+0.5f; return Log2(y/(1-y))/(2/LOG_2);}
+
+Flt SigmoidExp2A   (Flt x);
+Flt SigmoidExp2AInv(Flt y); // inverse function of 'SigmoidExp2A', SigmoidExp2AInv(SigmoidExp2A(x))=x
+Flt SigmoidExp2A   (Flt x) {return (x>=0) ? 1-Exp2(x /-LOG_2) : Exp2(x /LOG_2)-1;}
+Flt SigmoidExp2AInv(Flt y) {return (y>=0) ?   Ln(1-y)*-LOG_2  : Ln(y+1)*LOG_2   ;}
+
+Flt SigmoidSC      (Flt x) {return SmoothCube(x/3+0.5f)*2-1;} not fully smooth
 /******************************************************************************/
 // BLENDING
 /******************************************************************************/

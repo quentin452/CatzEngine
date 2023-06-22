@@ -241,28 +241,37 @@ Flt RSqrt2(Flt x); // ~1/Sqrt(x) inverse square root, low  speed, high precision
        Int  SqrtI( Long x               ); // integer square root (binary    method, fastest)
       UInt  SqrtI(UInt  x, Int max_steps); // integer square root (iterative method, slower but can be faster if "max_steps<=2")
 #endif
-inline Flt  SqrtFast(  Int   x) {return sqrtf((Flt)x);}                                    //                 square root, returns      NaN  for negative values
-inline Flt  SqrtFast(  Flt   x) {return sqrtf(     x);}                                    //                 square root, returns      NaN  for negative values
-inline Dbl  SqrtFast(  Dbl   x) {return sqrt (     x);}                                    //                 square root, returns      NaN  for negative values
-       Flt  Sqrt    (  Int   x);                                                           //                 square root, returns        0  for negative values
-       Flt  Sqrt    (  Flt   x);                                                           //                 square root, returns        0  for negative values
-       Dbl  Sqrt    (  Dbl   x);                                                           //                 square root, returns        0  for negative values
-inline Vec2 Sqrt    (C Vec2 &x) {return Vec2(Sqrt(x.x), Sqrt(x.y));}                       //                 square root, returns        0  for negative values
-inline Vec  Sqrt    (C Vec  &x) {return Vec (Sqrt(x.x), Sqrt(x.y), Sqrt(x.z));}            //                 square root, returns        0  for negative values
-inline Vec4 Sqrt    (C Vec4 &x) {return Vec4(Sqrt(x.x), Sqrt(x.y), Sqrt(x.z), Sqrt(x.w));} //                 square root, returns        0  for negative values
-       Flt  SqrtS   (  Int   x);                                                           // sign preserving square root, returns -Sqrt(-x) for negative values
-       Flt  SqrtS   (  Flt   x);                                                           // sign preserving square root, returns -Sqrt(-x) for negative values
-       Dbl  SqrtS   (  Dbl   x);                                                           // sign preserving square root, returns -Sqrt(-x) for negative values
-inline Flt  Cbrt    (  Int   x) {return cbrtf((Flt)x);}                                    //                 cube   root, works         ok  for negative values
-inline Flt  Cbrt    (  Flt   x) {return cbrtf(     x);}                                    //                 cube   root, works         ok  for negative values
-inline Dbl  Cbrt    (  Dbl   x) {return cbrt (     x);}                                    //                 cube   root, works         ok  for negative values
+inline Flt  SqrtFast(  Int   x) {return sqrtf((Flt)x);} // square root, returns NaN for negative values
+inline Flt  SqrtFast(  Flt   x) {return sqrtf(     x);} // square root, returns NaN for negative values
+inline Dbl  SqrtFast(  Dbl   x) {return sqrt (     x);} // square root, returns NaN for negative values
+inline Vec2 SqrtFast(C Vec2 &x) {return Vec2(SqrtFast(x.x), SqrtFast(x.y));}
+inline Vec  SqrtFast(C Vec  &x) {return Vec (SqrtFast(x.x), SqrtFast(x.y), SqrtFast(x.z));}
+inline Vec4 SqrtFast(C Vec4 &x) {return Vec4(SqrtFast(x.x), SqrtFast(x.y), SqrtFast(x.z), SqrtFast(x.w));}
 
-inline Flt Pow(Int x, Flt y) {return powf((Flt)x,      y);} // raise 'x' to the power 'y' = Exp2(Log2(x)*y)
-inline Flt Pow(Flt x, Int y) {return powf(     x, (Flt)y);} // raise 'x' to the power 'y' = Exp2(Log2(x)*y)
-inline Flt Pow(Flt x, Flt y) {return powf(     x,      y);} // raise 'x' to the power 'y' = Exp2(Log2(x)*y)
-inline Dbl Pow(Int x, Dbl y) {return pow (     x,      y);} // raise 'x' to the power 'y' = Exp2(Log2(x)*y)
-inline Dbl Pow(Dbl x, Int y) {return pow (     x,      y);} // raise 'x' to the power 'y' = Exp2(Log2(x)*y)
-inline Dbl Pow(Dbl x, Dbl y) {return pow (     x,      y);} // raise 'x' to the power 'y' = Exp2(Log2(x)*y)
+       Flt  Sqrt(  Int   x); // square root, returns 0  for negative values
+       Flt  Sqrt(  Flt   x); // square root, returns 0  for negative values
+       Dbl  Sqrt(  Dbl   x); // square root, returns 0  for negative values
+inline Vec2 Sqrt(C Vec2 &x) {return Vec2(Sqrt(x.x), Sqrt(x.y));}
+inline Vec  Sqrt(C Vec  &x) {return Vec (Sqrt(x.x), Sqrt(x.y), Sqrt(x.z));}
+inline Vec4 Sqrt(C Vec4 &x) {return Vec4(Sqrt(x.x), Sqrt(x.y), Sqrt(x.z), Sqrt(x.w));}
+
+Flt SqrtS(Int x); // sign preserving square root, returns -Sqrt(-x) for negative values
+Flt SqrtS(Flt x); // sign preserving square root, returns -Sqrt(-x) for negative values
+Dbl SqrtS(Dbl x); // sign preserving square root, returns -Sqrt(-x) for negative values
+
+inline Flt Cbrt(Int x) {return cbrtf((Flt)x);} // cube root, works ok for negative values
+inline Flt Cbrt(Flt x) {return cbrtf(     x);} // cube root, works ok for negative values
+inline Dbl Cbrt(Dbl x) {return cbrt (     x);} // cube root, works ok for negative values
+
+inline Flt  Pow(Int x, Flt y) {return powf((Flt)x,      y);} // raise 'x' to the power 'y' = Exp2(Log2(x)*y)
+inline Flt  Pow(Flt x, Int y) {return powf(     x, (Flt)y);} // raise 'x' to the power 'y' = Exp2(Log2(x)*y)
+inline Flt  Pow(Flt x, Flt y) {return powf(     x,      y);} // raise 'x' to the power 'y' = Exp2(Log2(x)*y)
+inline Dbl  Pow(Int x, Dbl y) {return pow (     x,      y);} // raise 'x' to the power 'y' = Exp2(Log2(x)*y)
+inline Dbl  Pow(Dbl x, Int y) {return pow (     x,      y);} // raise 'x' to the power 'y' = Exp2(Log2(x)*y)
+inline Dbl  Pow(Dbl x, Dbl y) {return pow (     x,      y);} // raise 'x' to the power 'y' = Exp2(Log2(x)*y)
+inline Vec2 Pow(C Vec2 &v, Flt exp) {return Vec2(Pow(v.x, exp), Pow(v.y, exp));}
+inline Vec  Pow(C Vec  &v, Flt exp) {return Vec (Pow(v.x, exp), Pow(v.y, exp), Pow(v.z, exp));}
+inline Vec4 Pow(C Vec4 &v, Flt exp) {return Vec4(Pow(v.x, exp), Pow(v.y, exp), Pow(v.z, exp), Pow(v.w, exp));}
 
 inline Flt  Exp(  Flt   x) {return expf(x);} // raise 'e' to the power 'x' = Exp2(x/Log(2))
 inline Dbl  Exp(  Dbl   x) {return exp (x);} // raise 'e' to the power 'x' = Exp2(x/Log(2))
@@ -366,9 +375,11 @@ inline Dbl AcosFast(Dbl cos) {return acos (cos);} // get arc cosine (angle which
 inline Flt AsinFast(Flt sin) {return asinf(sin);} // get arc   sine (angle which has specified   sine), -PI_2..PI_2, returns NaN for values out of -1..1 range
 inline Dbl AsinFast(Dbl sin) {return asin (sin);} // get arc   sine (angle which has specified   sine), -PI_2..PI_2, returns NaN for values out of -1..1 range
 
-inline Flt  Atan(  Flt   tan) {return atanf(tan);}                     // get arc tangent (angle which has specified tangent), -PI_2..PI_2
-inline Dbl  Atan(  Dbl   tan) {return atan (tan);}                     // get arc tangent (angle which has specified tangent), -PI_2..PI_2
-inline Vec2 Atan(C Vec2 &tan) {return Vec2(Atan(tan.x), Atan(tan.y));} // get arc tangent (angle which has specified tangent), -PI_2..PI_2
+inline Flt  Atan(  Flt   tan) {return atanf(tan);} // get arc tangent (angle which has specified tangent), -PI_2..PI_2
+inline Dbl  Atan(  Dbl   tan) {return atan (tan);} // get arc tangent (angle which has specified tangent), -PI_2..PI_2
+inline Vec2 Atan(C Vec2 &tan) {return Vec2(Atan(tan.x), Atan(tan.y));}
+inline Vec  Atan(C Vec  &tan) {return Vec (Atan(tan.x), Atan(tan.y), Atan(tan.z));}
+inline Vec4 Atan(C Vec4 &tan) {return Vec4(Atan(tan.x), Atan(tan.y), Atan(tan.z), Atan(tan.w));}
 
 #if EE_PRIVATE
 Flt ACosSin(Flt cos, Flt sin); // get angle which has specified cosine and sine, 0..PI (this assumes "sin>=0"), this is faster than 'Angle', however point needs to be normalized (X=cos, Y=sin), and remember that this function ignores "sin<0"

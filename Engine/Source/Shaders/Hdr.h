@@ -124,7 +124,6 @@ VecH4 TonemapSqr(VecH4 x, Half max_lum) {Half mul=SigmoidSqrMul(max_lum); return
 
 /* Constants were calculated to have derivative=1:
 here if internally 'TonemapLog' or 'TonemapLog2' is used, it doesn't matter, results are the same, however 'mul' has to be calculated differently, so choose the func that's faster on GPU
-#define LOG2_E 1.44269504088896340736 // Log2(e)
 Dbl TonemapLog (Dbl x) {return Log (1+x       );} // x=0..Inf
 Dbl TonemapLog2(Dbl x) {return Log2(1+x/LOG2_E);} // x=0..Inf
 void InitPre()

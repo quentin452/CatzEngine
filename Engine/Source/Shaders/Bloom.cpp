@@ -177,10 +177,7 @@ VecH4 Bloom_PS
 #endif
 
 #if CONTRAST // needs to be after TONE_MAP
-   const Bool ACES=false;
-   const Int  gamma=0;
-
-   if(ACES)col.rgb=mul(ACESInputMat, col.rgb);
+   const Int gamma=0;
 
    if(gamma==0)col.rgb=LinearToSRGB (col.rgb);else // preserves sRGB 0.5 and overall brightness
    if(gamma==1)col.rgb=LinearToSRGB1(col.rgb);else // preserves sRGB 0.5 and overall brightness, dark colors darkened too much
@@ -192,8 +189,6 @@ VecH4 Bloom_PS
    if(gamma==0)col.rgb=SRGBToLinear (col.rgb);else
    if(gamma==1)col.rgb=SRGBToLinear1(col.rgb);else
                col.rgb=Sqr          (col.rgb);
-
-   if(ACES){col.rgb=mul(ACESOutputMat, col.rgb); col.rgb=Max(0, col.rgb);}
 #endif
 
 #if DITHER

@@ -432,7 +432,7 @@ VecH TonemapUchimura(VecH x, Half black=1) // 'black' can also be 1.33
 /******************************************************************************/
 VecH TonemapACES_LDR_Narkowicz(VecH x) // returns 0..1 (0..80 nits), Krzysztof Narkowicz - https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/
 {
-   x*=0.8; // everything is too bright, so darken, also this matches UE4
+   x*=0.72; // 0.72 matches SigmoidSqr 0.8 contrast and UE5, 0.8 matches UE4
    x=Min(x, 160); // for Half, values bigger than 160 will result in Infinity
 
    Half a=2.51;
@@ -445,7 +445,7 @@ VecH TonemapACES_LDR_Narkowicz(VecH x) // returns 0..1 (0..80 nits), Krzysztof N
 }
 VecH TonemapACES_HDR_Narkowicz(VecH x) // returns 0 .. 12.5 (0..1000 nits), Krzysztof Narkowicz - https://knarkowicz.wordpress.com/2016/08/31/hdr-display-first-steps/
 {
-   x*=0.7; // 0.7 matches preserving mid tone with TonemapACES_LDR_Narkowicz, 0.6 matches original ACES
+   x*=0.62; // 0.62 matches SigmoidSqr 0.6 contrast, 0.6 matches original ACES
    x=Min(x, 64); // for Half, values bigger than 64 will result in Infinity
 
    Half a=15.8;
@@ -453,7 +453,8 @@ VecH TonemapACES_HDR_Narkowicz(VecH x) // returns 0 .. 12.5 (0..1000 nits), Krzy
    Half c=1.2;
    Half d=5.92;
    Half e=1.9;
-   return (x*(a*x+b))/(x*(c*x+d)+e); // ((x*0.7)*(15.8*(x*0.7)+2.12))/((x*0.7)*(1.2*(x*0.7)+5.92)+1.9)
+   x=(x*(a*x+b))/(x*(c*x+d)+e);
+   return x;
 }
 /******************************************************************************
 static const MatrixH3 ACESInputMat= // sRGB => XYZ => D65_2_D60 => AP1 => RRT_SAT

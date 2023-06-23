@@ -1303,11 +1303,18 @@ Vec GetPosLinear(Vec2  uv   ,              Vec2 pos_xy) {return GetPos(TexDepthL
 Half SRGBToLinear(Half s) {return (s<=0.04045  ) ? s/12.92 : Pow(s/1.055+0.055/1.055, 2.4);} // convert 0..1 srgb   to 0..1 linear, (s+0.055)/1.055
 Half LinearToSRGB(Half l) {return (l<=0.0031308) ? l*12.92 : Pow(l, 1/2.4)*1.055-0.055    ;} // convert 0..1 linear to 0..1 srgb
 
+// a little bit faster approximation, exp calculated using: Dbl exp=Ln(SRGBToLinear(0.5))/Ln(0.5), l=SRGBToLinear(0.5), s=Pow(l, 1/exp);
+Half SRGBToLinear1(Half s) {return Pow(s,   2.2240399129654920);}
+Half LinearToSRGB1(Half l) {return Pow(l, 1/2.2240399129654920);}
+
 VecH2 SRGBToLinear(VecH2 s) {return VecH2(SRGBToLinear(s.x), SRGBToLinear(s.y));}
 VecH2 LinearToSRGB(VecH2 l) {return VecH2(LinearToSRGB(l.x), LinearToSRGB(l.y));}
 
 VecH SRGBToLinear(VecH s) {return VecH(SRGBToLinear(s.x), SRGBToLinear(s.y), SRGBToLinear(s.z));}
 VecH LinearToSRGB(VecH l) {return VecH(LinearToSRGB(l.x), LinearToSRGB(l.y), LinearToSRGB(l.z));}
+
+VecH SRGBToLinear1(VecH s) {return VecH(SRGBToLinear1(s.x), SRGBToLinear1(s.y), SRGBToLinear1(s.z));}
+VecH LinearToSRGB1(VecH l) {return VecH(LinearToSRGB1(l.x), LinearToSRGB1(l.y), LinearToSRGB1(l.z));}
 
 VecH4 SRGBToLinear(VecH4 s) {return VecH4(SRGBToLinear(s.x), SRGBToLinear(s.y), SRGBToLinear(s.z), s.w);}
 VecH4 LinearToSRGB(VecH4 l) {return VecH4(LinearToSRGB(l.x), LinearToSRGB(l.y), LinearToSRGB(l.z), l.w);}

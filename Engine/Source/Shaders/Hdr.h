@@ -51,12 +51,6 @@ static const MatrixH3 ACESOutputMat= // ODT_SAT => XYZ => D60_2_D65 => sRGB
    {-0.00327, -0.07276,  1.07602},
 };
 /******************************************************************************/
-void DarkenDarks(inout VecH x)
-{
-   VecH step=Sat(x/ToneMapDarkenRange);
-   x=Lerp(Pow(step, ToneMapDarkenExp)*ToneMapDarkenRange, x, Sqr(step)); // alternative: SmoothCube(step), but it's more expensive and only a small difference, not necessarily better
-}
-/******************************************************************************/
 Half TonemapLum(VecH x) {return LinearLumOfLinearColor(x);} // could also be "Avg(x)" to darken bright blue skies
 /******************************************************************************/
 // All functions below need to start initially with derivative=1, at the start looking like y=x (scale=1), only after that they can bend down
@@ -252,18 +246,6 @@ VecH TonemapLogML16Sat(VecH x)
    return Lerp(s, d.rgb, d.rgb);
 }
 /******************************************************************************/
-VecH ToneMapSigmoid(VecH x)
-{ // here 'SigmoidExp' works better than 'SigmoidSqr' because sqrt introduces too much highlights on already bright colors
-   x=mul(ACESInputMat, x); // convert to ACES and prevent saturation
-   Half contrast=2, brightness=2;
-   x=SigmoidExp(Vec(x*brightness))/SigmoidExp(brightness); // need to use high precision
-   x=x*2-1;
-   x=SigmoidExp(Vec(x*contrast  ))/SigmoidExp(contrast  ); // need to use high precision
-   x=x*0.5+0.5;
-   x=mul(ACESOutputMat, x); x=Max(0, x);
-   return x;
-}
-/******************************************************************************/
 VecH TonemapEsenthel(VecH x)
 {
    Half end=ToneMapMonitorMaxLum, start=end-ToneMapTopRange;
@@ -285,7 +267,6 @@ VecH TonemapEsenthel(VecH x)
 
  //x=(x>start ? Lerp(start, end, l) : x);
    x=(x>start ? l*ToneMapTopRange+start : x);
-   DarkenDarks(x);
    return x;
 }
 /******************************************************************************
@@ -355,7 +336,6 @@ VecH TonemapAMD_Cauldron(VecH col, Half Contrast=0) // Contrast=0..1, 1=desatura
       ratio=Lerp(ratio, 1, Quart(peak)); // ratio 0..1
 
    col=peak*ratio;
-   //DarkenDarks(col);
    return col;
 }
 /******************************************************************************

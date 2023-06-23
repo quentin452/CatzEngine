@@ -483,20 +483,35 @@ VecH TonemapACESHill(VecH color) // Stephen Hill "self_shadow", desaturates too 
    return color;
 }
 /******************************************************************************
-after tweaking 'mid' parameters it's almost the same as Narkowicz
 VecH TonemapACESLottes(VecH x) // Timothy Lottes "Advanced Techniques and Optimization of HDR Color Pipelines" - https://gpuopen.com/wp-content/uploads/2016/03/GdcVdrLottes.pdf
 {
-   const Half a     =1.6;
-   const Half d     =0.977;
-   const Half hdrMax=MAX_LUM;
+   const Half a     =1.28;
+   const Half d     =1.24;
+   const Half hdrMax=1;
    const Half midIn =0.18;
-   const Half midOut=0.267;
+   const Half midOut=0.18;
 
    // can be precomputed
    const Half b = (-Pow(midIn, a) + Pow(hdrMax, a) * midOut) / ((Pow(hdrMax, a * d) - Pow(midIn, a * d)) * midOut);
    const Half c = (Pow(hdrMax, a * d) * Pow(midIn, a) - Pow(hdrMax, a) * Pow(midIn, a * d) * midOut) / ((Pow(hdrMax, a * d) - Pow(midIn, a * d)) * midOut);
 
-   return Pow(x, a)/(Pow(x, a*d)*b+c);
+   const Bool lum=false;
+   if(lum)
+   {
+      Half l=Max(x); // don't use l=TonemapLum(x); because it darkens compared to non-lum version
+      if(CanDiv(l))
+      {
+         l=Min(l, hdrMax); // if value is outside hdrMax range, then artifacts can occur and colors can get actually darker and black
+         Half o=l;
+         l=Pow(l, a)/(Pow(l, a*d)*b+c);
+         x*=l/o;
+      }
+   }else
+   {
+      x=Min(x, hdrMax); // if value is outside hdrMax range, then artifacts can occur and colors can get actually darker and black
+      x=Pow(x, a)/(Pow(x, a*d)*b+c);
+   }
+   return x;
 }
 /******************************************************************************
 VecH TonemapUnreal(VecH x) // Unreal 3, Documentation: "Color Grading", adapted to be close to TonemapACES with similar range

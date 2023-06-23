@@ -528,9 +528,9 @@ void RendererClass::motionBlur(ImageRT &src, ImageRT &dest, ImageRTPtr &bloom_gl
    Mtn.getBlur(Round(dest.h()*(7.0f/1080)), _has_glow ? exposure ? 2 : 1 : 0, (D.dither() && !dest.highPrecision()) ? src.highPrecision() ? 1/*always: should be 2 but disabled because rarely used*/ : 1/*only in blur*/ : 0, alpha)->draw(src); // here blurring may generate high precision values, use 7 samples on a 1080 resolution #MotionBlurSamples
 }
 /******************************************************************************/
-INLINE Shader* GetPrecomputedBloomDS(Bool view_full, Bool half_res               ) {Shader* &s=Sh.PrecomputedBloomDS[view_full][half_res]     ; if(SLOW_SHADER_LOAD && !s)s=Sh.getPrecomputedBloomDS(view_full, half_res     ); return s;}
-INLINE Shader* GetBloomDS(Bool glow, Bool view_full, Bool half_res, Bool exposure) {Shader* &s=Sh.BloomDS[glow][view_full][half_res][exposure]; if(SLOW_SHADER_LOAD && !s)s=Sh.getBloomDS(glow, view_full, half_res, exposure); return s;}
-INLINE Shader* GetBloom  (Int tone_map, Int alpha, Bool dither    , Bool exposure) {Shader* &s=Sh.Bloom[tone_map][alpha][dither]    [exposure]; if(SLOW_SHADER_LOAD && !s)s=Sh.getBloom  (tone_map, alpha, dither  , exposure); return s;}
+INLINE Shader* GetPrecomputedBloomDS(Bool view_full, Bool half_res                                     ) {Shader* &s=Sh.PrecomputedBloomDS[view_full][half_res]           ; if(SLOW_SHADER_LOAD && !s)s=Sh.getPrecomputedBloomDS(view_full, half_res                        ); return s;}
+INLINE Shader* GetBloomDS           (Bool glow, Bool view_full, Bool half_res, Bool exposure           ) {Shader* &s=Sh.BloomDS[glow][view_full][half_res][exposure]      ; if(SLOW_SHADER_LOAD && !s)s=Sh.getBloomDS           (glow, view_full, half_res, exposure        ); return s;}
+INLINE Shader* GetBloom             (Bool contrast, Int tone_map, Int alpha, Bool dither, Bool exposure) {Shader* &s=Sh.Bloom[tone_map][alpha][dither][exposure][contrast]; if(SLOW_SHADER_LOAD && !s)s=Sh.getBloom             (tone_map, alpha, dither, exposure, contrast); return s;}
 // !! Assumes that 'ImgClamp' was already set !!
 void RendererClass::bloom(ImageRT &src, ImageRT &dest, ImageRTPtr &bloom_glow, Bool alpha, Bool combine, ImageRT *exposure)
 {
@@ -541,7 +541,7 @@ void RendererClass::bloom(ImageRT &src, ImageRT &dest, ImageRTPtr &bloom_glow, B
 
    D.alpha(ALPHA_NONE);
    Sh.ImgX[1]->set(exposure); // this is used by both BloomDS and Bloom
-   if(D.bloomAllow() && // this has to be checked because bloom is merged with tonemapping, and if bloom is disabled but tone mapping enabled, then we will still run this code
+   if(D.bloomAllow() && // this has to be checked because bloom is merged with contrast/tonemapping, and if bloom is disabled but tone mapping enabled, then we will still run this code
      (_has_glow || D.bloomScale())) // if we have something there
    {
       ImageRTDesc rt_desc(fxW()>>shift, fxH()>>shift, IMAGERT_SRGB); // using IMAGERT_SRGB will clip to 0..1 range !! USING HIGH PRECISION WOULD REQUIRE CLAMPING IN THE SHADER TO MAKE SURE VALUES DON'T GO BELOW 0 !!
@@ -586,7 +586,7 @@ void RendererClass::bloom(ImageRT &src, ImageRT &dest, ImageRTPtr &bloom_glow, B
    set(&dest, null, true); if(combine && &dest==_final)D.alpha(ALPHA_MERGE);
    Sh.Img [1]->set( rt0  );
    Sh.ImgX[0]->set(_alpha);
-   GetBloom(D.toneMap(), _alpha ? 2 : alpha ? 1 : 0, D.dither() /*&& (src.highPrecision() || rt0->highPrecision())*/ && !dest.highPrecision(), exposure!=null)->draw(src); // merging 2 RT's ('src' and 'rt0') with some scaling factors will give high precision
+   GetBloom(D.useContrast(), D.toneMap(), _alpha ? 2 : alpha ? 1 : 0, D.dither() /*&& (src.highPrecision() || rt0->highPrecision())*/ && !dest.highPrecision(), exposure!=null)->draw(src); // merging 2 RT's ('src' and 'rt0') with some scaling factors will give high precision
    bloom_glow.clear(); // not needed anymore
 }
 /******************************************************************************/
@@ -1166,7 +1166,7 @@ start:
    IMAGE_PRECISION prec=((_cur_type==RT_DEFERRED) ? D.highPrecColRT() ? IMAGE_PRECISION_10 : IMAGE_PRECISION_8 : D.litColRTPrecision()); // for deferred renderer we first render to col and only after that we mix it with light, other modes render color already mixed with light, for high precision we need only 10-bit, no need for 16-bit
    if(_cur_type==RT_DEFERRED /*|| mirror() _get_target already enabled for mirror*/ || _get_target // <- these always require
    || _final->size()!=rt_size || _final->samples()!=samples || _final->precision()<prec // if current RT does not match the requested rendering settings
-   || wantEdgeSoften() || wantTemporal() || wantEyeAdapt() || D.toneMap() || wantMotion() || wantBloom() || wantDof() || D.sharpen() // if we want to perform post process effects then we will be rendering to a secondary RT anyway, so let's start with secondary with a chance that during the effect we can render directly to '_final'
+   || wantEdgeSoften() || wantTemporal() || wantEyeAdapt() || D.useContrast() || D.toneMap() || wantMotion() || wantBloom() || wantDof() || D.sharpen() // if we want to perform post process effects then we will be rendering to a secondary RT anyway, so let's start with secondary with a chance that during the effect we can render directly to '_final'
    || (D.glowAllow() && _final->hwTypeInfo().a<8) // we need alpha for glow, this check is needed for example if we have IMAGE_R10G10B10A2
    || (_final==&_main && !_main_ds.depthTexture() && wantDepth()) // if we're setting '_main' which is always paired with '_main_ds', and that is not a depth texture but we need to access depth, then try getting custom RT with depth texture (don't check for '_cur_main' and '_cur_main_ds' because depth buffers other than '_main_ds' are always tried to be created as depth texture first, so if that failed, then there's no point in trying to create one again)
    )    _col.get(ImageRTDesc(rt_size.x, rt_size.y, GetImageRTType(D.glowAllow(), prec), samples)); // here Alpha is used for glow
@@ -2278,7 +2278,7 @@ void RendererClass::postProcess()
    Bool temporal =_temporal_use       , // hasTemporal()
         adapt_eye= hasEyeAdapt      (),
         motion   = hasMotion        (),
-        bloom    =(hasBloom         () || _has_glow || D.toneMap()),
+        bloom    =(hasBloom         () || _has_glow || D.useContrast() || D.toneMap()),
         alpha    = processAlphaFinal(), // this is always enabled for 'slowCombine'
         dof      = hasDof           (),
         sharpen  = D.sharpen        (),

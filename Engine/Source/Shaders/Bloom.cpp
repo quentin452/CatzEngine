@@ -133,6 +133,13 @@ VecH4 Bloom_PS
 #endif
    col.rgb=col.rgb*bloom_orig + TexLod(Img1, uv).rgb; // bloom, can't use 'TexPoint' because 'Img1' can be smaller
 
+#if CONTRAST
+   col.rgb=Sqrt(col.rgb);
+ //col.rgb=col.rgb*2-1; col.rgb=SigmoidSqr(col.rgb*contrast)/SigmoidSqr(contrast); col.rgb=col.rgb*0.5+0.5;
+   col.rgb=SigmoidSqr(col.rgb*Contrast.x+Contrast.y); col.rgb=col.rgb*Contrast.z+0.5;
+   col.rgb=Sqr(col.rgb);
+#endif
+
 #if TONE_MAP
    if(TONE_MAP==STONE_MAP_DEFAULT )col.rgb=TonemapEsenthel          (col.rgb);
    if(TONE_MAP==STONE_MAP_ACES_LDR)col.rgb=TonemapACES_LDR_Narkowicz(col.rgb);

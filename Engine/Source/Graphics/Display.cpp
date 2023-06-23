@@ -1023,6 +1023,8 @@ DisplayClass::DisplayClass() : _monitors(Compare, null, null, 4)
            _glow_allow=!MOBILE;
   _color_palette_allow=!MOBILE;
 
+//_contrast=0;
+
   _lod_factor       =1;
   _lod_factor_mirror=2;
 
@@ -3291,10 +3293,19 @@ void DisplayClass::bloomScaleCut(Flt scale, Flt cut)
   _bloom_add=-scale*SRGBToLinear(cut);
   _bloom_cut= cut; // keep as copy, because we can't reconstruct from '_bloom_add' if '_bloom_mul' is zero
 }
+void DisplayClass::setContrast()C
+{
+ /*col=col*2-1; col=SigmoidSqr(col*contrast)/SigmoidSqr(contrast); col=col*0.5+0.5;
+   col=SigmoidSqr((col*2-1)*contrast); col=col*0.5/SigmoidSqr(contrast)+0.5;
+   col=SigmoidSqr(col*(2*contrast)-contrast  ); col=col*(0.5/SigmoidSqr(contrast))+0.5;
+   col=SigmoidSqr(col*(Contrast.x)+Contrast.y); col=col*(Contrast.z              )+0.5; */
+   Sh.Contrast->set(Vec(_contrast*2, -_contrast, 0.5f/SigmoidSqr(_contrast)));
+}
 DisplayClass& DisplayClass:: glowAllow   (Bool allow   ) {if(_glow_allow!=allow){_glow_allow   =allow   ; temporalReset();} return T;} // 'glowAllow' affects type of Temporal RT's #RTOutput
 DisplayClass& DisplayClass::bloomAllow   (Bool allow   ) {                      _bloom_allow   =allow   ;                   return T;}
 DisplayClass& DisplayClass::bloomOriginal(Flt  original) {MAX(original, 0);     _bloom_original=original;                   return T;}
 DisplayClass& DisplayClass::bloomGlow    (Flt  glow    ) {MAX(glow    , 0);     _bloom_glow    =glow    ;                   return T;}
+DisplayClass& DisplayClass::contrast     (Flt  contrast) {MAX(contrast, 0); if(_contrast!=contrast){_contrast=contrast; setContrast();} return T;}
 DisplayClass& DisplayClass::bloomScale   (Flt  scale   ) {bloomScaleCut(scale, bloomCut()); return T;}
 DisplayClass& DisplayClass::bloomCut     (Flt  cut     ) {bloomScaleCut(bloomScale(), cut); return T;}
 Bool          DisplayClass::bloomUsed    (             )C{return bloomAllow() && (!Equal(bloomOriginal(), 1, EPS_COL8_1_NATIVE) || !Equal(bloomScale(), 0, EPS_COL8_NATIVE));}

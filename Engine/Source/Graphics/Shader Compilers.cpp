@@ -240,7 +240,8 @@ static void Compile(API api, SC_FLAG flag=SC_NONE)
          REPD(tone_map, TONE_MAP_NUM)
          REPD(alpha   , 3)
          REPD(dither  , 2)
-            src.New("Bloom", "Bloom_VS", "Bloom_PS")("TONE_MAP", tone_map, "ALPHA", alpha, "DITHER", dither, "EXPOSURE", exposure);
+         REPD(contrast, 2)
+            src.New("Bloom", "Bloom_VS", "Bloom_PS")("TONE_MAP", tone_map, "ALPHA", alpha, "DITHER", dither, "EXPOSURE", exposure, "CONTRAST", contrast);
       }
    }
    { // BLUR

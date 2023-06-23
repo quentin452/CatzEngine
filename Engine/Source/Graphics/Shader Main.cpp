@@ -352,9 +352,9 @@ void MainShaderClass::draw (C Image &image                  ,                   
 void MainShaderClass::draw (C Image &image, C   Vec4  &color, C   Vec4  &color_add, C Rect *rect) {Sh.Color[0]->set(color); Sh.Color[1]->set(color_add); Sh.DrawC            ->draw(image, rect);}
 void MainShaderClass::draw (C Image &image, C ::Color &color, C ::Color &color_add, C Rect *rect) {Sh.Color[0]->set(color); Sh.Color[1]->set(color_add); Sh.DrawC            ->draw(image, rect);}
 /******************************************************************************/
-Shader* MainShaderClass::getPrecomputedBloomDS(Bool view_full, Bool half_res               ) {return get(S8+"PrecomputedBloomDS"+view_full+half_res);}
-Shader* MainShaderClass::getBloomDS(Bool glow, Bool view_full, Bool half_res, Bool exposure) {return get(S8+"BloomDS"+glow+view_full+half_res+exposure);}
-Shader* MainShaderClass::getBloom  (Int tone_map, Int alpha, Bool dither    , Bool exposure) {return get(S8+"Bloom"  +tone_map+alpha+dither+exposure);}
+Shader* MainShaderClass::getPrecomputedBloomDS(Bool view_full, Bool half_res                                     ) {return get(S8+"PrecomputedBloomDS"+view_full+half_res);}
+Shader* MainShaderClass::getBloomDS           (Bool glow, Bool view_full, Bool half_res, Bool exposure           ) {return get(S8+"BloomDS"+glow+view_full+half_res+exposure);}
+Shader* MainShaderClass::getBloom             (Int tone_map, Int alpha, Bool dither, Bool exposure, Bool contrast) {return get(S8+"Bloom"+tone_map+alpha+dither+exposure+contrast);}
 
 Shader* MainShaderClass::getShdDir  (Int map_num, Bool clouds, Bool multi_sample) {return get(S8+"ShdDir"  +multi_sample+map_num+clouds);}
 Shader* MainShaderClass::getShdPoint(                          Bool multi_sample) {return get(S8+"ShdPoint"+multi_sample);}
@@ -662,22 +662,25 @@ void MainShaderClass::getTechniques()
    }
 
    // BLOOM
+   Contrast   =GetShaderParam("Contrast"); D.setContrast();
    BloomParams=GetShaderParam("BloomParams");
 #if !SLOW_SHADER_LOAD
    REPD(view_full, 2)
    REPD(half     , 2)
       PrecomputedBloomDS[view_full][half]=getPrecomputedBloomDS(view_full, half);
-   REPD(adapt_eye, 2)
+
+   REPD(exposure, 2)
    {
       REPD(glow     , 2)
       REPD(view_full, 2)
       REPD(half     , 2)
-         BloomDS[glow][view_full][half][adapt_eye]=getBloomDS(glow, view_full, half, adapt_eye);
+         BloomDS[glow][view_full][half][exposure]=getBloomDS(glow, view_full, half, exposure);
 
       REPD(tone_map, TONE_MAP_NUM)
       REPD(alpha   , 3)
       REPD(dither  , 2)
-         Bloom[tone_map][alpha][dither][adapt_eye]=getBloom(tone_map, alpha, dither, adapt_eye);
+      REPD(contrast, 2)
+         Bloom[tone_map][alpha][dither][exposure][contrast]=getBloom(tone_map, alpha, dither, exposure, contrast);
    }
 #endif
 

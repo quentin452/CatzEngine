@@ -291,6 +291,13 @@ struct DisplayClass : DisplayState, DisplayDraw // Display Control
    DisplayClass& bloomGlow    (Flt  glow    );   Flt  bloomGlow    ()C {return _bloom_glow    ;} // set/get Bloom from Glow       (   0..Inf , default=1.0                    ), the change is instant, you can call it real-time
                                                  Bool bloomUsed    ()C;                          //     if  Bloom post process is going to be used
 
+   // Contrast
+   DisplayClass& contrast(Flt contrast);   Flt contrast()C {return _contrast;} // set/get contrast (0..Inf, default=0.0 disabled), the change is instant, you can call it real-time
+#if EE_PRIVATE
+   Bool useContrast()C {return _contrast>=HALF_MIN;}
+   void setContrast()C;
+#endif
+
    // Ambient Light
 #if EE_PRIVATE
    Bool aoWant()C;
@@ -600,6 +607,7 @@ private:
                      _eye_dist, _eye_dist_2,
                      _shd_frac, _shd_fade, _shd_range, _shd_map_size_l, _shd_map_size_c, _shd_bias,
                      _bloom_original, _bloom_mul, _bloom_add, _bloom_glow, _bloom_cut,
+                     _contrast,
                      _mtn_scale,
                      _dof_focus, _dof_range, _dof_intensity,
                      _vol_max,

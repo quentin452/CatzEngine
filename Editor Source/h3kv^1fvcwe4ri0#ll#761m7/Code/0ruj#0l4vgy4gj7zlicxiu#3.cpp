@@ -1253,21 +1253,27 @@ Vec2 ILerpToMad(flt from, flt to) {return Vec2(1/(to-from), from/(from-to));}
 flt   FloatSelf(flt x) {return x;}
 flt   PowMax   (flt x, flt y) {return (x<=0) ? 0 : Pow(x, y);}
 
+// using sRGB->Sqr gives best results, preserves contrast the most, and looks most similar to Photoshop Brightness
+inline flt SRGBToBrightness(flt x) {if(1)x=SqrS (x);else x=SRGBToLinear(x); return x;}
+inline flt BrightnessToSRGB(flt x) {if(1)x=SqrtS(x);else x=LinearToSRGB(x); return x;}
 flt _ApplyBrightness(flt x, flt brightness) // !! ASSUMES THAT "x>0 && x<1 && brightness" !!
 {
-   x=Sqr(x); // SRGBToLinearFast
+   x=SRGBToBrightness(x);
    if(brightness<0)x=SigmoidSqrInv(x*SigmoidSqr(brightness))/           brightness ;
    else            x=SigmoidSqr   (x*           brightness )/SigmoidSqr(brightness);
-   return SqrtFast(x); // LinearToSRGBFast
+   return BrightnessToSRGB(x);
 }
+// contrast has to be done in some gamma space (not linear), because we need linear middle gray ~0.18 to be around 0.5 so that contrast won't change it. So either keep current sRGB gamma, or convert to Linear then Sqrt. sRGB looks most similar to Photoshop Brightness
+inline flt SRGBToContrast(flt x) {if(0)x=SqrtS(SRGBToLinear(x)); return x;}
+inline flt ContrastToSRGB(flt x) {if(0)x=LinearToSRGB(SqrS (x)); return x;}
 flt _ApplyContrast(flt x, flt contrast) // !! ASSUMES THAT "x>0 && x<1 && contrast" !!
 {
-   x=Sqr(x); // SRGBToLinearFast
+   x=SRGBToContrast(x);
    x=x*2-1;
    if(contrast<0)x=SigmoidSqrInv(x*SigmoidSqr(contrast))/           contrast ;
    else          x=SigmoidSqr   (x*           contrast )/SigmoidSqr(contrast);
    x=x*0.5+0.5;
-   return SqrtFast(x); // LinearToSRGBFast
+   return ContrastToSRGB(x);
 }
 void ApplyBrightness(flt &x, flt brightness)
 {
@@ -1764,9 +1770,9 @@ void TransformImage(Image &image, TextParam param, bool clamp, C Color &backgrou
          for(int x=box.min.x; x<box.max.x; x++)
          {
             Vec4 c=image.color3DF(x, y, z);
-            if(c.x>0 && c.x<1)c.x=SqrtFast(R(Sqr(c.x)*bright.x)*mul.x);
-            if(c.y>0 && c.y<1)c.y=SqrtFast(G(Sqr(c.y)*bright.y)*mul.y);
-            if(c.z>0 && c.z<1)c.z=SqrtFast(B(Sqr(c.z)*bright.z)*mul.z);
+            if(c.x>0 && c.x<1)c.x=BrightnessToSRGB(R(SRGBToBrightness(c.x)*bright.x)*mul.x);
+            if(c.y>0 && c.y<1)c.y=BrightnessToSRGB(G(SRGBToBrightness(c.y)*bright.y)*mul.y);
+            if(c.z>0 && c.z<1)c.z=BrightnessToSRGB(B(SRGBToBrightness(c.z)*bright.z)*mul.z);
             image.color3DF(x, y, z, c);
          }
       }
@@ -1785,9 +1791,9 @@ void TransformImage(Image &image, TextParam param, bool clamp, C Color &backgrou
             Vec4 c=image.color3DF(x, y, z); flt old_lum=c.xyz.max();
             if(old_lum>0 && old_lum<1)
             {
-               flt new_lum=Sqr(old_lum);
+               flt new_lum=SRGBToBrightness(old_lum);
                new_lum=f(new_lum*bright)*mul;
-               new_lum=SqrtFast(new_lum);
+               new_lum=BrightnessToSRGB(new_lum);
                c.xyz*=new_lum/old_lum;
                image.color3DF(x, y, z, c);
             }
@@ -1832,9 +1838,9 @@ void TransformImage(Image &image, TextParam param, bool clamp, C Color &backgrou
          for(int x=box.min.x; x<box.max.x; x++)
          {
             Vec4 c=image.color3DF(x, y, z);
-            if(c.x>0 && c.x<1)c.x=SqrtFast(R(Sqr(c.x)*contrast.x-ofs.x)*mul.x+0.5);
-            if(c.y>0 && c.y<1)c.y=SqrtFast(G(Sqr(c.y)*contrast.y-ofs.y)*mul.y+0.5);
-            if(c.z>0 && c.z<1)c.z=SqrtFast(B(Sqr(c.z)*contrast.z-ofs.z)*mul.z+0.5);
+            if(c.x>0 && c.x<1)c.x=ContrastToSRGB(R(SRGBToContrast(c.x)*contrast.x-ofs.x)*mul.x+0.5);
+            if(c.y>0 && c.y<1)c.y=ContrastToSRGB(G(SRGBToContrast(c.y)*contrast.y-ofs.y)*mul.y+0.5);
+            if(c.z>0 && c.z<1)c.z=ContrastToSRGB(B(SRGBToContrast(c.z)*contrast.z-ofs.z)*mul.z+0.5);
             image.color3DF(x, y, z, c);
          }
       }
@@ -1856,9 +1862,9 @@ void TransformImage(Image &image, TextParam param, bool clamp, C Color &backgrou
             Vec4 c=image.color3DF(x, y, z); flt old_lum=c.xyz.max();
             if(old_lum>0 && old_lum<1)
             {
-               flt new_lum=Sqr(old_lum);
+               flt new_lum=SRGBToContrast(old_lum);
                new_lum=f(new_lum*contrast-ofs)*mul+0.5;
-               new_lum=SqrtFast(new_lum);
+               new_lum=ContrastToSRGB(new_lum);
                c.xyz*=new_lum/old_lum;
                image.color3DF(x, y, z, c);
             }

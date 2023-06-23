@@ -178,7 +178,7 @@ VecH4 Bloom_PS
 
 #if CONTRAST // needs to be after TONE_MAP
    const Bool ACES=false;
-   const int  gamma=0;
+   const Int  gamma=0;
 
    if(ACES)col.rgb=mul(ACESInputMat, col.rgb);
 

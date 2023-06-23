@@ -1303,7 +1303,7 @@ Vec GetPosLinear(Vec2  uv   ,              Vec2 pos_xy) {return GetPos(TexDepthL
 Half SRGBToLinear(Half s) {return (s<=0.04045  ) ? s/12.92 : Pow(s/1.055+0.055/1.055, 2.4);} // convert 0..1 srgb   to 0..1 linear, (s+0.055)/1.055
 Half LinearToSRGB(Half l) {return (l<=0.0031308) ? l*12.92 : Pow(l, 1/2.4)*1.055-0.055    ;} // convert 0..1 linear to 0..1 srgb
 
-// a little bit faster approximation, exp calculated using: Dbl exp=Ln(SRGBToLinear(0.5))/Ln(0.5), l=SRGBToLinear(0.5), s=Pow(l, 1/exp);
+// a little bit faster approximation, exp calculated to preserve sRGB 0.5 (grey) using: Dbl l=SRGBToLinear(0.5), exp=Ln(l)/Ln(0.5), s=Pow(l, 1/exp);
 Half SRGBToLinear1(Half s) {return Pow(s,   2.2240399129654920);}
 Half LinearToSRGB1(Half l) {return Pow(l, 1/2.2240399129654920);}
 

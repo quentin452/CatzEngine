@@ -50,7 +50,7 @@ static const MatrixH3 ACESOutputMat=
    {-0.023963084814622154, -0.12898841130813682, 1.1530100831323533},
 };
 /******************************************************************************/
-Half TonemapLum(VecH x) {return LinearLumOfLinearColor(x);} // could also be "Avg(x)" to darken bright blue skies
+Half TonemapLum(VecH x) {return LinearLumOfLinearColor(x);} // alternative is "Avg(x)" to darken bright blue skies and brighten green grass however it looked a little worse, "Max(x)" is not good because it darkens everything too much
 /******************************************************************************/
 // All functions below need to start initially with derivative=1, at the start looking like y=x (scale=1), only after that they can bend down
 

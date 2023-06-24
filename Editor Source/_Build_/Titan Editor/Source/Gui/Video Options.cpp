@@ -354,7 +354,7 @@ diffuse=&props.New().create("Diffuse Mode"         , MemberDesc(         ).setFu
          props.New().create("Eye Adaptation Brightness"  , MemberDesc(DATA_REAL).setFunc(EyeAdaptBrigh, EyeAdaptBrigh)).range(0, 2).desc("Total light scale for Eye Adaptation Effect");
        //props.New().create("Tone Mapping"               , MemberDesc(         ).setFunc(ToneMap      , ToneMap      )).setEnum(ToneMap_t, Elms(ToneMap_t));
          props.New().create("Tone Mapping"               , MemberDesc(DATA_BOOL).setFunc(ToneMap      , ToneMap      ));
-         props.New().create("Contrast"                   , MemberDesc(DATA_REAL).setFunc(Contrast     , Contrast     )).range(0, 1).setSlider();
+         props.New().create("Contrast"                   , MemberDesc(DATA_REAL).setFunc(Contrast     , Contrast     )).range(0, 1);
          props.New().create("Bloom Scale"                , MemberDesc(DATA_REAL).setFunc(BloomScale   , BloomScale   )).range(0, 2);
          props.New().create("Ambient Light"              , MemberDesc(DATA_REAL).setFunc(AmbLight     , AmbLight     )).range(0, 1);
          props.New().create("Ambient Occlusion Contrast" , MemberDesc(DATA_REAL).setFunc(AOContrast   , AOContrast   )).range(0, 8);

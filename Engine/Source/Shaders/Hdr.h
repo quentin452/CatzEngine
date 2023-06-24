@@ -235,7 +235,7 @@ VecH TonemapLogML8Sat(VecH x)
    VecH4 rgbl=VecH4(x, TonemapLum(x));
    VecH4 d=TonemapLogML8(rgbl);         // desaturated, per channel
    VecH  s=rgbl.w ? x*(d.w/rgbl.w) : 0; //   saturated, luminance based
-   return Lerp(s, d.rgb, d.rgb);
+   return Lerp(s, d.rgb, d.rgb); // only this combination is good, "Lerp(s, d.rgb, s.rgb)" changed bright blue sun highlight on "BasketballCourt_3k.hdr" to green, while 2 other combinations reduced saturation
 }
 VecH TonemapLogML16Sat(VecH x)
 {

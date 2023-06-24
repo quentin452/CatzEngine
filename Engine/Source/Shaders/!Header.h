@@ -1591,8 +1591,9 @@ Half SmoothCube(Half s) {return (3-2*s)*s*s;}
 Flt  SmoothCube(Flt  s) {return (3-2*s)*s*s;}
 VecH SmoothCube(VecH s) {return (3-2*s)*s*s;}
 
-Half SmoothCube(Half from, Half to, Half s) {return Lerp(from, to, SmoothCube(s));}
-Flt  SmoothCube(Flt  from, Flt  to, Flt  s) {return Lerp(from, to, SmoothCube(s));}
+Half LerpSmoothCube(Half from, Half to, Half s) {return Lerp(from, to, SmoothCube(s));}
+Flt  LerpSmoothCube(Flt  from, Flt  to, Flt  s) {return Lerp(from, to, SmoothCube(s));}
+VecH LerpSmoothCube(VecH from, VecH to, Half s) {return Lerp(from, to, SmoothCube(s));}
 
 Half BlendSqr(Half x) {return Sat(1-x*x);}
 Flt  BlendSqr(Flt  x) {return Sat(1-x*x);}

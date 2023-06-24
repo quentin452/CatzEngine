@@ -1008,7 +1008,7 @@ DisplayClass::DisplayClass() : _monitors(Compare, null, null, 4)
   _eye_adapt_speed     =6.5f;
   _eye_adapt_weight.set(0.9f, 1, 0.7f); // use smaller value for blue, to make blue skies have brighter multiplier, because human eye sees blue color as darker than others
 
-//_tone_map_mode=TONE_MAP_OFF;
+//_tone_map=false;
 
   _grass_range  =50;
   _grass_density=(MOBILE ? 0.5f : 1);
@@ -1063,9 +1063,6 @@ DisplayClass::DisplayClass() : _monitors(Compare, null, null, 4)
   _screen_max_lum=1;
 //_screen_nits=0;
   _tone_map_max_lum=1;
-  _tone_map_top_range=0.7f;
-  _tone_map_dark_range=0.123f;
-  _tone_map_dark_exp=1.3f;
 }
 void DisplayClass::init() // make this as a method because if we put this to Display constructor, then 'SecondaryContexts' may not have been initialized yet
 {
@@ -1756,10 +1753,7 @@ _linear_gamma^=1; linearGamma(!_linear_gamma); // set after loading shaders
    {auto v=temporalSuperRes (); _temp_super_res   =false           ; temporalSuperRes (v);} // resetting will load shaders
    {auto v=grassRange       (); _grass_range      =-1              ; grassRange       (v);}
    {auto v=sharpenIntensity (); _sharpen_intensity=-1;             ; sharpenIntensity (v);}
-  _tone_map_max_lum=0; toneMapMonitorMaxLumAuto(); //SPSet("ToneMapMonitorMaxLum", D.toneMapMonitorMaxLum());
-   SPSet("ToneMapTopRange"     , D.toneMapTopRange   ());
-   SPSet("ToneMapDarkenRange"  , D.toneMapDarkenRange());
-   SPSet("ToneMapDarkenExp"    , D.toneMapDarkenExp  ());
+  _tone_map_max_lum=0; toneMapMonitorMaxLumAuto();
    lod            (_lod_factor, _lod_factor_mirror);
    shadowJitterSet();
    shadowRangeSet ();
@@ -3461,12 +3455,29 @@ DisplayClass& DisplayClass::resetEyeAdaptation     (  Flt  brightness)
    return T;
 }
 /******************************************************************************/
-DisplayClass& DisplayClass::toneMap             (TONE_MAP_MODE mode) {if(InRange(mode, TONE_MAP_NUM))_tone_map_mode=mode; return T;}
-DisplayClass& DisplayClass::toneMapMonitorMaxLum(Flt        max_lum) {MAX  (max_lum,           1); if(_tone_map_max_lum   !=max_lum){_tone_map_max_lum   =max_lum; SPSet("ToneMapMonitorMaxLum", max_lum);} return T;}
-DisplayClass& DisplayClass::toneMapTopRange     (Flt          range) {Clamp(range  , HALF_MIN, 1); if(_tone_map_top_range !=range  ){_tone_map_top_range =range  ; SPSet("ToneMapTopRange"     , range  );} return T;}
-DisplayClass& DisplayClass::toneMapDarkenRange  (Flt          range) {Clamp(range  , HALF_MIN, 1); if(_tone_map_dark_range!=range  ){_tone_map_dark_range=range  ; SPSet("ToneMapDarkenRange"  , range  );} return T;}
-DisplayClass& DisplayClass::toneMapDarkenExp    (Flt            exp) {Clamp(exp    ,        1, 2); if(_tone_map_dark_exp  !=exp    ){_tone_map_dark_exp  =exp    ; SPSet("ToneMapDarkenExp"    , exp    );} return T;}
-void          DisplayClass::toneMapMonitorMaxLumAuto() {D.toneMapMonitorMaxLum((D.outputPrecision()>IMAGE_PRECISION_8) ? D.screenMaxLum()/D.whiteLum() : 1);} // divide by 'whiteLum' because we're going to multiply entire screen by it later in #AutoHdrBoost
+DisplayClass& DisplayClass::toneMap             (Bool on) {_tone_map=on; return T;}
+DisplayClass& DisplayClass::toneMapMonitorMaxLum(Flt monitor_lum)
+{
+   MAX(monitor_lum, 0); if(_tone_map_max_lum!=monitor_lum)
+   {
+     _tone_map_max_lum=monitor_lum; // SPSet("ToneMapMonitorMaxLum", monitor_lum);
+      // this will calculate 'mul' so that 0..render_lum gets converted to 0..monitor_lum
+      Dbl mul, min=1.0/16, max=16, // don't go lower than some min because that would cause color Half's in the shader to lose precision
+          render_lum=8; // some reasonable max linear color of render scene pixel
+      REP(256)
+      {
+         mul=Avg(min, max);
+         Dbl t=Atan(render_lum*mul)/mul;
+         if(t>monitor_lum)min=mul;else
+         if(t<monitor_lum)max=mul;else
+            break;
+      }
+    //Dbl t=Atan(render_lum*mul)/mul; // 't' should be 'monitor_lum'
+      SPSet("ToneMapAtanMul", mul);
+   }
+   return T;
+}
+void DisplayClass::toneMapMonitorMaxLumAuto() {D.toneMapMonitorMaxLum((D.outputPrecision()>IMAGE_PRECISION_8) ? D.screenMaxLum()/D.whiteLum() : 1);} // divide by 'whiteLum' because we're going to multiply entire screen by it later in #AutoHdrBoost
 /******************************************************************************/
 DisplayClass& DisplayClass::grassDensity(Flt  density) {_grass_density=Sat(density); return T;}
 DisplayClass& DisplayClass::grassShadow (Bool on     ) {_grass_shadow =    on      ; return T;}

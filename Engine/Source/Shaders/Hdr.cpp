@@ -1,5 +1,6 @@
 /******************************************************************************/
 #include "!Header.h"
+#include "Bloom.h"
 #include "Hdr.h"
 /******************************************************************************/
 #define BRIGHT    1 // if apply adjustment for scenes where half pixels are bright, and other half are dark, in that case prefer focus on brighter, to avoid making already bright pixels too bright

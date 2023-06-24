@@ -528,9 +528,9 @@ void RendererClass::motionBlur(ImageRT &src, ImageRT &dest, ImageRTPtr &bloom_gl
    Mtn.getBlur(Round(dest.h()*(7.0f/1080)), _has_glow ? exposure ? 2 : 1 : 0, (D.dither() && !dest.highPrecision()) ? src.highPrecision() ? 1/*always: should be 2 but disabled because rarely used*/ : 1/*only in blur*/ : 0, alpha)->draw(src); // here blurring may generate high precision values, use 7 samples on a 1080 resolution #MotionBlurSamples
 }
 /******************************************************************************/
-INLINE Shader* GetPrecomputedBloomDS(Bool view_full, Bool half_res                                     ) {Shader* &s=Sh.PrecomputedBloomDS[view_full][half_res]           ; if(SLOW_SHADER_LOAD && !s)s=Sh.getPrecomputedBloomDS(view_full, half_res                        ); return s;}
-INLINE Shader* GetBloomDS           (Bool glow, Bool view_full, Bool half_res, Bool exposure           ) {Shader* &s=Sh.BloomDS[glow][view_full][half_res][exposure]      ; if(SLOW_SHADER_LOAD && !s)s=Sh.getBloomDS           (glow, view_full, half_res, exposure        ); return s;}
-INLINE Shader* GetBloom             (Bool contrast, Int tone_map, Int alpha, Bool dither, Bool exposure) {Shader* &s=Sh.Bloom[tone_map][alpha][dither][exposure][contrast]; if(SLOW_SHADER_LOAD && !s)s=Sh.getBloom             (tone_map, alpha, dither, exposure, contrast); return s;}
+INLINE Shader* GetPrecomputedBloomDS(Bool view_full, Bool half_res                                      ) {Shader* &s=Sh.PrecomputedBloomDS[view_full][half_res]           ; if(SLOW_SHADER_LOAD && !s)s=Sh.getPrecomputedBloomDS(view_full, half_res                        ); return s;}
+INLINE Shader* GetBloomDS           (Bool glow, Bool view_full, Bool half_res, Bool exposure            ) {Shader* &s=Sh.BloomDS[glow][view_full][half_res][exposure]      ; if(SLOW_SHADER_LOAD && !s)s=Sh.getBloomDS           (glow, view_full, half_res, exposure        ); return s;}
+INLINE Shader* GetBloom             (Bool contrast, Bool tone_map, Int alpha, Bool dither, Bool exposure) {Shader* &s=Sh.Bloom[alpha][tone_map][dither][exposure][contrast]; if(SLOW_SHADER_LOAD && !s)s=Sh.getBloom             (alpha, tone_map, dither, exposure, contrast); return s;}
 // !! Assumes that 'ImgClamp' was already set !!
 void RendererClass::bloom(ImageRT &src, ImageRT &dest, ImageRTPtr &bloom_glow, Bool alpha, Bool combine, ImageRT *exposure)
 {
@@ -913,7 +913,7 @@ Bool RendererClass::reflection()
       auto hp_pal_rt      =D.highPrecPalRT    ();                     D._hp_pal_rt      =false             ;
       auto lit_col_rt_prec=D.litColRTPrecision();                     D._lit_col_rt_prec=IMAGE_PRECISION_8 ;
       auto eye_adapt      =D.eyeAdaptation    ();                     D.eyeAdaptation   (false            );
-      auto tone_map       =D.toneMap          ();                     D.toneMap         (TONE_MAP_OFF     );
+      auto tone_map       =D.toneMap          ();                     D.toneMap         (false            );
       auto vol_light      =D.volLight         ();                     D.volLight        (false            ); // if it will be enabled, then calling 'volumetric' is required and clearing '_vol_is'
       auto amb_mode       =D.ambientMode      ();                     D.ambientMode     (AMBIENT_FLAT     );
       auto mtn_mode       =D.motionMode       ();                     D.motionMode      (MOTION_NONE      );

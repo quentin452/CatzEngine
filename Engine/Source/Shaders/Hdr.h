@@ -27,13 +27,6 @@ BUFFER(Hdr)
         HdrMaxBright ;
    VecH HdrWeight    ;
 BUFFER_END
-
-BUFFER(ToneMap)
-   Half ToneMapMonitorMaxLum,
-        ToneMapTopRange,
-        ToneMapDarkenRange,
-        ToneMapDarkenExp;
-BUFFER_END
 #include "!Set Prec Default.h"
 /******************************************************************************
 // sRGB -> ACEScg - https://www.colour-science.org/apps/
@@ -187,6 +180,13 @@ VecH TonemapDivSat(VecH x, Half max_lum) // preserves saturation
    VecH s=TonemapDivLum(x, max_lum); //   saturated, luminance based
    return Lerp(s, d, d);
 }
+VecH TonemapDiv1Sat(VecH x, Half max_lum) // FIXME which faster this or trick with 'TonemapDivSat' ?
+{
+   VecH4 rgbl=VecH4(x, TonemapLum(x));
+   VecH4 d=TonemapDiv1(rgbl, max_lum);  // desaturated, per channel
+   VecH  s=rgbl.w ? x*(d.w/rgbl.w) : 0; //   saturated, luminance based
+   return Lerp(s, d.rgb, d.rgb);
+}
 
 VecH TonemapLogSat(VecH x)
 {
@@ -243,6 +243,13 @@ VecH TonemapLogML16Sat(VecH x)
    VecH4 d=TonemapLogML16(rgbl);        // desaturated, per channel
    VecH  s=rgbl.w ? x*(d.w/rgbl.w) : 0; //   saturated, luminance based
    return Lerp(s, d.rgb, d.rgb);
+}
+VecH TonemapPowSat(VecH x, Half exp)
+{
+   VecH4 rgbl=VecH4(x, TonemapLum(x));
+   VecH4 d=TonemapPow(rgbl, exp);       // desaturated, per channel
+   VecH  s=rgbl.w ? x*(d.w/rgbl.w) : 0; //   saturated, luminance based
+   return Lerp(s, d.rgb, d.rgb); // only this combination is good, "Lerp(s, d.rgb, s.rgb)" changed bright blue sun highlight on "BasketballCourt_3k.hdr" to green, while 2 other combinations reduced saturation
 }
 /******************************************************************************/
 VecH TonemapEsenthel(VecH x)
@@ -429,7 +436,7 @@ VecH TonemapUchimura(VecH x, Half black=1) // 'black' can also be 1.33
    const Half b=0;     // pedestal
    return _TonemapUchimura(x, P, a, m, l, c, b);
 }
-/******************************************************************************/
+/******************************************************************************
 VecH TonemapACES_LDR_Narkowicz(VecH x) // returns 0..1 (0..80 nits), Krzysztof Narkowicz - https://knarkowicz.wordpress.com/2016/01/06/aces-filmic-tone-mapping-curve/
 {
    x*=0.72; // 0.72 matches SigmoidSqr 0.8 contrast and UE5, 0.8 matches UE4

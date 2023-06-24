@@ -31,13 +31,6 @@
 #define SDIFFUSE_BURLEY     2
 #define SDIFFUSE_NUM        3
 
-// Shader Tone Map Modes
-#define STONE_MAP_OFF      0
-#define STONE_MAP_DEFAULT  1
-#define STONE_MAP_ACES_LDR 2
-#define STONE_MAP_ACES_HDR 3
-#define STONE_MAP_NUM      4
-
 // Effects
 #define FX_NONE       0
 #define FX_GRASS_2D   1

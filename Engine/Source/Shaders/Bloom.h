@@ -3,6 +3,7 @@
 BUFFER(Bloom)
    VecH4 BloomParams; // x=original, y=scale, z=cut, w=glow/(res*res)
    VecH  Contrast;
+   Half  ToneMapAtanMul;
 BUFFER_END
 #include "!Set Prec Default.h"
 /******************************************************************************/

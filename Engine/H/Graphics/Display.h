@@ -64,14 +64,6 @@ enum DOF_MODE : Byte // Depth of Field Mode
    DOF_GAUSSIAN, // based on Gaussian Blur, fast but not realistic
    DOF_NUM     , // number of Depth of Field modes
 };
-enum TONE_MAP_MODE : Byte // Tone Mapping Mode
-{
-   TONE_MAP_OFF     , // disabled
-   TONE_MAP_DEFAULT , // default
-   TONE_MAP_ACES_LDR, // ACES 0 ..  1.0 (  80 nits) for use on  Low Dynamic Range Monitors
-   TONE_MAP_ACES_HDR, // ACES 0 .. 12.5 (1000 nits) for use on High Dynamic Range Monitors
-   TONE_MAP_NUM     , // number of Tone Mapping Modes
-};
 enum EDGE_DETECT_MODE : Byte // Edge Detect Mode
 {
    EDGE_DETECT_NONE, // disabled
@@ -386,13 +378,10 @@ struct DisplayClass : DisplayState, DisplayDraw // Display Control
    DisplayClass& resetEyeAdaptation     (  Flt  brightness=1);                                                                   // reset   Eye Adaptation value, eye adaptation changes over time according to screen colors, this method resets the adaptation to its original state, 'brightness'=initial brightness (0..Inf), the change is NOT instant, avoid calling real-time
 
    // Tone Mapping
-   DisplayClass& toneMap           (TONE_MAP_MODE mode);   TONE_MAP_MODE toneMap           ()C {return _tone_map_mode      ;} // set/get Tone Mapping Mode                       (TONE_MAP_MODE, default=TONE_MAP_OFF), the change is instant, you can call it real-time
-   DisplayClass& toneMapTopRange   (Flt          range);   Flt           toneMapTopRange   ()C {return _tone_map_top_range ;} // set/get Tone Mapping Top    (Shoulder) Range    (0..1         , default=0.7         ), the change is instant, you can call it real-time, this is the range used for fitting too bright colors, too bright colors will be compressed into "max_lum-top_range .. max_lum" range. So for example with top_range=0.82 and monitor_max_lum=1.0, bright colors will be compressed into "1.0-0.82 .. 1.0" range, which is "0.18 .. 1.0", which makes colors in "0 .. 0.18" unaffected, and all colors >0.18 compressed into "0.18 .. 1.0" range.
-   DisplayClass& toneMapDarkenRange(Flt          range);   Flt           toneMapDarkenRange()C {return _tone_map_dark_range;} // set/get Tone Mapping Darken (Toe     ) Range    (0..1         , default=0.123       ), the change is instant, you can call it real-time, this is the luminance range for darkening dark colors, affected colors are in range [0..toneMapDarkenRange)
-   DisplayClass& toneMapDarkenExp  (Flt            exp);   Flt           toneMapDarkenExp  ()C {return _tone_map_dark_exp  ;} // set/get Tone Mapping Darken (Toe     ) Exponent (1..2         , default=1.3         ), the change is instant, you can call it real-time, this is the power exponent  for darkening dark colors, colors are darkened using function "Pow(color, exp)", using 1.0 exponent disables darkening
+   DisplayClass& toneMap(Bool on);   Bool toneMap()C {return _tone_map;} // set/get Tone Mapping (true/false, default=false), the change is instant, you can call it real-time
 #if EE_PRIVATE
    void          toneMapMonitorMaxLumAuto(); // automatically set
-   DisplayClass& toneMapMonitorMaxLum(Flt      max_lum);   Flt         toneMapMonitorMaxLum()C {return _tone_map_max_lum   ;} // set/get Tone Mapping Monitor Max Luminance (0..Inf, default=1), the change is instant, you can call it real-time, this is the maximum luminance supported by your monitor, LDR monitors have 1, while HDR monitors can be higher
+   DisplayClass& toneMapMonitorMaxLum(Flt max_lum);   Flt toneMapMonitorMaxLum()C {return _tone_map_max_lum;} // set/get Tone Mapping Monitor Max Luminance (0..Inf, default=1), the change is instant, you can call it real-time, this is the maximum luminance supported by your monitor, LDR monitors have 1, while HDR monitors can be higher
 #endif
 
    // Level of Detail
@@ -567,7 +556,6 @@ private:
    SHADOW_MODE       _shd_mode;
    MOTION_MODE       _mtn_mode;
    DOF_MODE          _dof_mode;
-   TONE_MAP_MODE     _tone_map_mode;
    EDGE_DETECT_MODE  _edge_detect, _outline_mode;
    EDGE_SOFTEN_MODE  _edge_soften;
    TEXTURE_USAGE     _tex_detail;
@@ -587,7 +575,7 @@ private:
                      _grass_shadow, _grass_mirror,
                      _vol_light, _vol_add,
                      _temp_anti_alias, _temp_super_res,
-                     _glow_allow, _dither, _bend_leafs, _eye_adapt, _dof_foc_mode, _color_palette_allow, _gamma_all, _fade_get, _fade_auto_draw, _mtrl_blend, _draw_null_mtrl, _view_square_pixel, _allow_stereo, _max_lights_soft, _sharpen,
+                     _glow_allow, _dither, _bend_leafs, _eye_adapt, _dof_foc_mode, _color_palette_allow, _gamma_all, _fade_get, _fade_auto_draw, _mtrl_blend, _draw_null_mtrl, _view_square_pixel, _allow_stereo, _max_lights_soft, _sharpen, _tone_map,
                      _initialized, _resetting, _no_gpu;
   SByte              _half_supported;
    Byte              _density, _samples, _max_tex_filter, _max_rt,
@@ -620,7 +608,7 @@ private:
                      _sharpen_intensity,
                      _smaa_threshold,
                      _white_lum, _screen_max_lum, _screen_nits,
-                     _tone_map_max_lum, _tone_map_top_range, _tone_map_dark_range, _tone_map_dark_exp;
+                     _tone_map_max_lum;
    Vec2              _unscaled_size, _size2, _pixel_size, _pixel_size_2, _pixel_size_inv,
                      _window_pixel_to_screen_mul, _window_pixel_to_screen_add, _window_pixel_to_screen_scale,
                      _shd_map_split;

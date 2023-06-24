@@ -1,5 +1,5 @@
 /******************************************************************************/
-// GLOW, VIEW_FULL, HALF_RES, DITHER, PRECOMPUTED, EXPOSURE, TONE_MAP
+// GLOW, VIEW_FULL, HALF_RES, DITHER, PRECOMPUTED, EXPOSURE, TONE_MAP, CONTRAST
 #include "!Header.h"
 #include "Bloom.h"
 #include "Hdr.h"
@@ -134,46 +134,7 @@ VecH4 Bloom_PS
    col.rgb=col.rgb*bloom_orig + TexLod(Img1, uv).rgb; // bloom, can't use 'TexPoint' because 'Img1' can be smaller
 
 #if TONE_MAP // needs to be before CONTRAST
-   if(TONE_MAP==STONE_MAP_DEFAULT )col.rgb=TonemapEsenthel          (col.rgb);
-   if(TONE_MAP==STONE_MAP_ACES_LDR)col.rgb=TonemapACES_LDR_Narkowicz(col.rgb);
-   if(TONE_MAP==STONE_MAP_ACES_HDR)col.rgb=TonemapACES_HDR_Narkowicz(col.rgb);
-
- /*if(TONE_MAP==1                                 )col.rgb=TonemapAMD_Cauldron(col.rgb);
-   if(TONE_MAP==2                                 )col.rgb=TonemapLog     (col.rgb);
-   if(TONE_MAP==3                                 )col.rgb=TonemapRcpSqr  (col.rgb);
-   if(TONE_MAP==4                                 )col.rgb=TonemapExp     (col.rgb);
-   if(TONE_MAP==5                                 )col.rgb=TonemapRcp     (col.rgb);
-   if(TONE_MAP==6                                 )col.rgb=TonemapEsenthel(col.rgb);
-   if(TONE_MAP==7                                 )col.rgb=TonemapLogML4  (col.rgb);
-   if(TONE_MAP==8                                 )col.rgb=TonemapLogML5  (col.rgb);
-   if(TONE_MAP==9                                 )col.rgb=TonemapLogML6  (col.rgb);
-
-   if(TONE_MAP==STONE_MAP_ACES_HILL               )col.rgb=TonemapACESHill         (col.rgb);
-   if(TONE_MAP==STONE_MAP_ACES_LOTTES             )col.rgb=TonemapACESLottes       (col.rgb);
-   if(TONE_MAP==STONE_MAP_HEJL_BURGESS_DAWSON     )col.rgb=ToneMapHejlBurgessDawson(col.rgb);*/
-
-   #if 0 // Debug Drawing
-      Vec2 pos=Vec2(uv.x*AspectRatio, 1-uv.y);
-   #if 1
-      Flt eps=1/(SRGBToLinear(pos.y+1.0/512)-SRGBToLinear(pos.y));
-      pos=SRGBToLinear(pos);
-   #else
-      Flt eps=256;
-   #endif
-      //Flt eps=1/pos.y*128;//pos.x;
-      pos*=16; eps/=16;
-      DrawLine(col.rgb, VecH(1,1,1), pos, eps, pos.x);
-    /*DrawLine(col.rgb, VecH(0.5,0,0), pos, eps, TonemapLog(pos.x));
-      DrawLine(col.rgb, VecH(0.5,0,0), pos, eps, TonemapLogML4(pos.x));
-      DrawLine(col.rgb, VecH(0.5,0,0), pos, eps, TonemapLogML5(pos.x));
-      DrawLine(col.rgb, VecH(0.5,0,0), pos, eps, TonemapLogML6(pos.x));
-      DrawLine(col.rgb, VecH(0,0.5,0), pos, eps, TonemapRcpSqr(pos.x));
-      DrawLine(col.rgb, VecH(0,0,0.5), pos, eps, TonemapExp(pos.x));
-      DrawLine(col.rgb, VecH(0.5,0.5,0), pos, eps, TonemapRcp(pos.x));*/
-      DrawLine(col.rgb, VecH(1,0,0), pos, eps, TonemapEsenthel(pos.x));
-      DrawLine(col.rgb, VecH(0,1,0), pos, eps, TonemapACES_LDR_Narkowicz(pos.x));
-      DrawLine(col.rgb, VecH(0,0,1), pos, eps, TonemapACES_HDR_Narkowicz(pos.x));
-   #endif
+   col.rgb=TonemapEsenthel(col.rgb);
 #endif
 
 #if CONTRAST // needs to be after TONE_MAP
@@ -189,6 +150,38 @@ VecH4 Bloom_PS
    if(gamma==0)col.rgb=SRGBToLinear (col.rgb);else
    if(gamma==1)col.rgb=SRGBToLinear1(col.rgb);else
                col.rgb=Sqr          (col.rgb);
+#endif
+
+#if 0 // DEBUG DRAWING
+   Vec2 pos=Vec2(uv.x*AspectRatio, 1-uv.y);
+   pos/=AspectRatio; // set range x=0..1
+#if 1
+   Flt eps=1/(SRGBToLinear(pos.y+1.0/512)-SRGBToLinear(pos.y));
+   pos=SRGBToLinear(pos);
+#else
+   Flt eps=256;
+#endif
+   //Flt eps=1/pos.y*128;//pos.x;
+   Flt max=8*2; // set range x=0..max
+   pos*=max; eps/=max;
+   DrawLine(col.rgb, VecH(1,1,1), pos, eps, pos.x);
+   DrawLine(col.rgb, VecH(1,1,1), pos, eps, 1);
+   DrawLine(col.rgb, VecH(0.5,0.5,0.5), pos, eps, 0.3);
+
+   DrawLine(col.rgb, VecH(0,1,0), pos, eps, TonemapDiv     (pos.x));
+   DrawLine(col.rgb, VecH(0,0.5,0), pos, eps, TonemapDiv     (pos.x, 8));
+   DrawLine(col.rgb, VecH(0,0.25,0), pos, eps, TonemapDiv1    (pos.x, 8));
+   DrawLine(col.rgb, VecH(0,0,1), pos, eps, TonemapSqr     (pos.x));
+   DrawLine(col.rgb, VecH(0,0,0.5), pos, eps, TonemapSqr     (pos.x, 8));
+ //DrawLine(col.rgb, VecH(1,0,1), pos, eps, TonemapPow     (pos.x, MY*2));
+   DrawLine(col.rgb, VecH(1,1,0), pos, eps, TonemapExp     (pos.x));
+   DrawLine(col.rgb, VecH(0,1,1), pos, eps, TonemapExpA    (pos.x));
+   DrawLine(col.rgb, VecH(1,1,1), pos, eps, TonemapAtan    (pos.x));
+   DrawLine(col.rgb, VecH(1,0,1), pos, eps, TonemapLogML8  (pos.x));
+   DrawLine(col.rgb, VecH(1,0,0), pos, eps, TonemapEsenthel(pos.x));
+      
+ //DrawLine(col.rgb, VecH(0,1,0), pos, eps, TonemapACES_LDR_Narkowicz(pos.x));
+ //DrawLine(col.rgb, VecH(0,0,1), pos, eps, TonemapACES_HDR_Narkowicz(pos.x));
 #endif
 
 #if DITHER

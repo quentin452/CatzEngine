@@ -1023,7 +1023,7 @@ DisplayClass::DisplayClass() : _monitors(Compare, null, null, 4)
            _glow_allow=!MOBILE;
   _color_palette_allow=!MOBILE;
 
-//_contrast=0;
+  _contrast=0.8f;
 
   _lod_factor       =1;
   _lod_factor_mirror=2;

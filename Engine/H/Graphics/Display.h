@@ -284,7 +284,7 @@ struct DisplayClass : DisplayState, DisplayDraw // Display Control
                                                  Bool bloomUsed    ()C;                          //     if  Bloom post process is going to be used
 
    // Contrast
-   DisplayClass& contrast(Flt contrast);   Flt contrast()C {return _contrast;} // set/get contrast (0..Inf, default=0.0 disabled), the change is instant, you can call it real-time
+   DisplayClass& contrast(Flt contrast);   Flt contrast()C {return _contrast;} // set/get contrast (0..Inf, 0=disabled, default=0.8), the change is instant, you can call it real-time
 #if EE_PRIVATE
    Bool useContrast()C {return _contrast>=HALF_MIN;}
    void setContrast()C;

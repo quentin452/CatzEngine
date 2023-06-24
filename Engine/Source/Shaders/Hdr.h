@@ -180,100 +180,187 @@ VecH TonemapDivSat(VecH x, Half max_lum) // preserves saturation
    VecH s=TonemapDivLum(x, max_lum); //   saturated, luminance based
    return Lerp(s, d, d);
 }
-VecH TonemapDiv1Sat(VecH x, Half max_lum) // FIXME which faster this or trick with 'TonemapDivSat' ?
+VecH TonemapDiv1Sat(VecH x, Half max_lum) // FIXME which faster this or trick with 'TonemapDivSat'?
 {
    VecH4 rgbl=VecH4(x, TonemapLum(x));
-   VecH4 d=TonemapDiv1(rgbl, max_lum);  // desaturated, per channel
-   VecH  s=rgbl.w ? x*(d.w/rgbl.w) : 0; //   saturated, luminance based
+   VecH4 d=TonemapDiv1(rgbl, max_lum);          // desaturated, per channel
+   VecH  s=CanDiv(rgbl.w) ? x*(d.w/rgbl.w) : 0; //   saturated, luminance based
    return Lerp(s, d.rgb, d.rgb);
 }
 
 VecH TonemapLogSat(VecH x)
 {
    VecH4 rgbl=VecH4(x, TonemapLum(x));
-   VecH4 d=TonemapLog(rgbl);            // desaturated, per channel
-   VecH  s=rgbl.w ? x*(d.w/rgbl.w) : 0; //   saturated, luminance based
+   VecH4 d=TonemapLog(rgbl);                    // desaturated, per channel
+   VecH  s=CanDiv(rgbl.w) ? x*(d.w/rgbl.w) : 0; //   saturated, luminance based
    return Lerp(s, d.rgb, d.rgb);
 }
 VecH TonemapLogML2Sat(VecH x)
 {
    VecH4 rgbl=VecH4(x, TonemapLum(x));
-   VecH4 d=TonemapLogML2(rgbl);         // desaturated, per channel
-   VecH  s=rgbl.w ? x*(d.w/rgbl.w) : 0; //   saturated, luminance based
+   VecH4 d=TonemapLogML2(rgbl);                 // desaturated, per channel
+   VecH  s=CanDiv(rgbl.w) ? x*(d.w/rgbl.w) : 0; //   saturated, luminance based
    return Lerp(s, d.rgb, d.rgb);
 }
 VecH TonemapLogML3Sat(VecH x)
 {
    VecH4 rgbl=VecH4(x, TonemapLum(x));
-   VecH4 d=TonemapLogML3(rgbl);         // desaturated, per channel
-   VecH  s=rgbl.w ? x*(d.w/rgbl.w) : 0; //   saturated, luminance based
+   VecH4 d=TonemapLogML3(rgbl);                 // desaturated, per channel
+   VecH  s=CanDiv(rgbl.w) ? x*(d.w/rgbl.w) : 0; //   saturated, luminance based
    return Lerp(s, d.rgb, d.rgb);
 }
 VecH TonemapLogML4Sat(VecH x)
 {
    VecH4 rgbl=VecH4(x, TonemapLum(x));
-   VecH4 d=TonemapLogML4(rgbl);         // desaturated, per channel
-   VecH  s=rgbl.w ? x*(d.w/rgbl.w) : 0; //   saturated, luminance based
+   VecH4 d=TonemapLogML4(rgbl);                 // desaturated, per channel
+   VecH  s=CanDiv(rgbl.w) ? x*(d.w/rgbl.w) : 0; //   saturated, luminance based
    return Lerp(s, d.rgb, d.rgb);
 }
 VecH TonemapLogML5Sat(VecH x)
 {
    VecH4 rgbl=VecH4(x, TonemapLum(x));
-   VecH4 d=TonemapLogML5(rgbl);         // desaturated, per channel
-   VecH  s=rgbl.w ? x*(d.w/rgbl.w) : 0; //   saturated, luminance based
+   VecH4 d=TonemapLogML5(rgbl);                 // desaturated, per channel
+   VecH  s=CanDiv(rgbl.w) ? x*(d.w/rgbl.w) : 0; //   saturated, luminance based
    return Lerp(s, d.rgb, d.rgb);
 }
 VecH TonemapLogML6Sat(VecH x)
 {
    VecH4 rgbl=VecH4(x, TonemapLum(x));
-   VecH4 d=TonemapLogML6(rgbl);         // desaturated, per channel
-   VecH  s=rgbl.w ? x*(d.w/rgbl.w) : 0; //   saturated, luminance based
+   VecH4 d=TonemapLogML6(rgbl);                 // desaturated, per channel
+   VecH  s=CanDiv(rgbl.w) ? x*(d.w/rgbl.w) : 0; //   saturated, luminance based
    return Lerp(s, d.rgb, d.rgb);
 }
 VecH TonemapLogML8Sat(VecH x)
 {
    VecH4 rgbl=VecH4(x, TonemapLum(x));
-   VecH4 d=TonemapLogML8(rgbl);         // desaturated, per channel
-   VecH  s=rgbl.w ? x*(d.w/rgbl.w) : 0; //   saturated, luminance based
+   VecH4 d=TonemapLogML8(rgbl);                 // desaturated, per channel
+   VecH  s=CanDiv(rgbl.w) ? x*(d.w/rgbl.w) : 0; //   saturated, luminance based
    return Lerp(s, d.rgb, d.rgb); // only this combination is good, "Lerp(s, d.rgb, s.rgb)" changed bright blue sun highlight on "BasketballCourt_3k.hdr" to green, while 2 other combinations reduced saturation
 }
 VecH TonemapLogML16Sat(VecH x)
 {
    VecH4 rgbl=VecH4(x, TonemapLum(x));
-   VecH4 d=TonemapLogML16(rgbl);        // desaturated, per channel
-   VecH  s=rgbl.w ? x*(d.w/rgbl.w) : 0; //   saturated, luminance based
+   VecH4 d=TonemapLogML16(rgbl);                // desaturated, per channel
+   VecH  s=CanDiv(rgbl.w) ? x*(d.w/rgbl.w) : 0; //   saturated, luminance based
    return Lerp(s, d.rgb, d.rgb);
 }
 VecH TonemapPowSat(VecH x, Half exp)
 {
    VecH4 rgbl=VecH4(x, TonemapLum(x));
-   VecH4 d=TonemapPow(rgbl, exp);       // desaturated, per channel
-   VecH  s=rgbl.w ? x*(d.w/rgbl.w) : 0; //   saturated, luminance based
+   VecH4 d=TonemapPow(rgbl, exp);               // desaturated, per channel
+   VecH  s=CanDiv(rgbl.w) ? x*(d.w/rgbl.w) : 0; //   saturated, luminance based
    return Lerp(s, d.rgb, d.rgb); // only this combination is good, "Lerp(s, d.rgb, s.rgb)" changed bright blue sun highlight on "BasketballCourt_3k.hdr" to green, while 2 other combinations reduced saturation
 }
 /******************************************************************************/
 VecH TonemapEsenthel(VecH x)
 {
-   Half end=ToneMapMonitorMaxLum, start=end-ToneMapTopRange;
+   return Atan(x*ToneMapAtanMul)/ToneMapAtanMul; // atan was chosen because it doesn't darken low colors, we need around 0 .. 0.3 linear range to remain mostly the same
+   /*if(WI)
+   {
+      if(SH)return TonemapDiv1(x, 8);
+            return TonemapDiv (x, 8);
+   }
+   /*if(CT)
+   {
+      x/=3;
+      x=TonemapLogML8Sat(x);
+      x*=3;
+      return x;
+   }*/
+
+   /*if(SH) // broken
+   {
+      VecH y=x;
+      {
+         Vec x=y;
+         x=Pow(x/8, MY*10)*8;
+         x=TonemapLogML8Sat(x);
+         x=Pow(x, 1/(MY*10));
+         return x;
+      }
+   }*/
+
+   /*if(CT)
+   {
+      Half brightness=MY*2;
+      x=TonemapLogML8Sat(x);
+      if(AL)x=Sqr(x);
+      x=SigmoidSqr(x*brightness)/SigmoidSqr(brightness);
+      if(AL)x=Sqrt(x);
+      return x;
+   }*/
+
+   /*if(CT) // WARNING: for this to work best, it should be done before anti-aliasing (edgeSoften and temporal) because if done after anti-alias then it might produce bright highlights around edges with high contrast (dark bright)
+   {
+      const Bool lum=false; // true looks unnatural (blue skies are too dark compared to the rest)
+      Half l=Max(x); // Avg(x) and LinearLumOfLinearColor(x) made the skies too bright
+      if(lum)
+      {
+         if(CanDiv(l))
+         {
+            Half f=l;
+            f=Sat(f);
+            Half t=TonemapLogML8(l);
+            t=LerpSmoothCube(l, t, f);
+            x*=t/l;
+         }
+      }else
+      {
+         Half f=l;
+         f/=8;
+       //if(SH)f=LerpR(0.30, 1.0, f);
+       //if(SH)f=LerpR(0.30, 0.7, f);
+       //if(SH)f=LerpR(0.18, 1.0, f);
+         f=Sat(f);
+         if(1)f=SmoothCube(f);
+         if(1)f=Pow(f, 1/(0.25*50));
+         else  f=1-Pow(1-f, 0.25*50);
+         if(SH)f=SmoothCube(f);
+         VecH t=TonemapLogML8Sat(x);
+       //f=SmoothCube(f);
+         x=Lerp(x, t, f); // SmoothCube(f) works best, other were not good: Sqr(f), Sqrt(f), 1-Sqr(1-f), f
+      }
+      return x;
+   }*/
+
+   //if(CT)return TonemapExpA(x);
+   //if(AL)return TonemapDiv(x/1.17)*1.17;
+
+ /*Half end=ToneMapMonitorMaxLum, start=end-ToneMapTopRange;
  //VecH f=Max(0, LerpR(start, end, x)); // max 0 needed because negative colors are not allowed and may cause artifacts
    VecH f=Max(0, (x-start)/ToneMapTopRange); // max 0 needed because negative colors are not allowed and may cause artifacts
 
    VecH l=TonemapLogML8Sat(f); // have to use 'f' instead of "x-start" because that would break continuity
-#if 0 // testing
-   if(Mode==1)l=TonemapDivSat   (f, 3);
-   if(Mode==2)l=TonemapDivSat   (f, 4);
-   if(Mode==3)l=TonemapDivSat   (f, 5);
-   if(Mode==4)l=TonemapDivSat   (f, 8);
-   if(Mode==5)l=TonemapLogML3Sat(f);
-   if(Mode==6)l=TonemapLogML4Sat(f);
-   if(Mode==7)l=TonemapLogML5Sat(f);
-   if(Mode==8)l=TonemapLogML8Sat(f);
-   if(Mode==9)l=TonemapExpA     (f);
-#endif
+   if(CT)l=TonemapAtanML8(f);
+   if(SH)l=TonemapAtanML8(f/ToneMapMonitorMaxLum)*ToneMapMonitorMaxLum;
+   if(AL)l=TonemapAtanML8(f/2)*2;
+   if(WI)l=TonemapAtanML4(f/2)*2;
+ //if(SH)l=TonemapSqr(f);
+ //if(AL)l=TonemapExp(f);
+   /*if(ToneMapTopRange>0.8)
+   {
+      l=TonemapLogML4Sat(f);
+      if(CT)l=TonemapDiv1Sat(f, 4);
+      if(SH)l=TonemapDivSat(f, 4);
+      if(AL)l=TonemapSqr(f, 4);
+      if(WI){l=TonemapExpA(f, 4);
+      if(AL)l=TonemapAtanML4(f);}
+   }else
+   {
+      l=TonemapLogML8Sat(f);
+      if(CT)l=TonemapDiv1Sat(f, 8);
+      if(SH)l=TonemapDivSat(f, 8);
+      if(AL)l=TonemapSqr(f, 8);
+      if(WI){l=TonemapExpA(f, 8);
+      if(AL)l=TonemapAtanML8(f);}
+   }
+   /**
+   //if(WI)l=TonemapPowSat(f*mx, MY*2)/mx;
+   //if(SH)l=TonemapDiv (f, 8-start);
 
  //x=(x>start ? Lerp(start, end, l) : x);
    x=(x>start ? l*ToneMapTopRange+start : x);
-   return x;
+   return x;*/
 }
 /******************************************************************************
 AMD Tonemapper

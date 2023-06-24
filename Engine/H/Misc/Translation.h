@@ -113,6 +113,7 @@ CChar* TCommentLinkHasBeenCopiedToClipboard();
 CChar* TConfigureControllers();
 CChar* TCongratulations();
 CChar* TContinue();
+CChar* TContrast();
 CChar* TController();
 CChar* TControllerDeadZone();
 CChar* TControllerDisconnected();

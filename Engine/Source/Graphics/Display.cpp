@@ -1001,12 +1001,31 @@ DisplayClass::DisplayClass() : _monitors(Compare, null, null, 4)
   _dof_intensity=1;
 
 //_eye_adapt           =false;
-  _eye_adapt_brightness=0.65f;
+  _eye_adapt_brightness=0.06f;
   _eye_adapt_exp       =0.5f;
   _eye_adapt_max_dark  =0.5f;
   _eye_adapt_max_bright=2.0f;
   _eye_adapt_speed     =6.5f;
-  _eye_adapt_weight.set(0.9f, 1, 0.7f); // use smaller value for blue, to make blue skies have brighter multiplier, because human eye sees blue color as darker than others
+  _eye_adapt_weight.set(0.687f, 1, 0.486f);
+/* use smaller value for blue, to make blue skies have brighter multiplier, because human eye sees blue color as darker than others
+   this was calculated using following code:
+
+   Vec col_lum_weight_1=1; col_lum_weight_1/=col_lum_weight_1.sum(); // identity = all colors have same weight
+   Flt step=Sat(Ms.pos().x);
+   Vec eye_adapt_weight=Lerp(col_lum_weight_1, ColorLumWeight2, step); // lerp between identity and 'ColorLumWeight2'
+ //eye_adapt_weight/=eye_adapt_weight.sum();
+   eye_adapt_weight/=eye_adapt_weight.max();
+
+   D.eyeAdaptation(true);
+   D.eyeAdaptationWeight(Kb.ctrl() ? col_lum_weight_1 : Kb.shift() ? ColorLumWeight2 : eye_adapt_weight);
+   D.eyeAdaptationSpeed(1000000);
+   D.eyeAdaptationMaxDark(0.01).eyeAdaptationMaxBright(100);
+   D.eyeAdaptationExp(1);
+   D.eyeAdaptationBrightness(SRGBToLinear(0.45)*D.eyeAdaptationWeight().y); // always have same brightness for green color (when looking at grass)
+   Flt eye_adapt_bright=D.eyeAdaptationBrightness();
+
+   these settings allow to have fast eye adaptation without limits, then looking down at grass (to have satisfactory look), then look up at sky and tweak 'step' to have satisfactory sky brightness compared to grass, best results were with "step=0.5"
+*/
 
 //_tone_map=_tone_map_allow=_tone_map_use=false;
 

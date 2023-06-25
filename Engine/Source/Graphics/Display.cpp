@@ -3490,10 +3490,7 @@ static Bool ContrastInv(Dbl &col)
 void DisplayClass::setToneMap()
 {
    // this will calculate 'mul' so that 0..render_lum gets converted to 0.._tone_map_max_lum
-   Dbl mul, min=0, max=16,
-       allowed_min=1.0/16, // don't go lower than this because that would cause color Half's in the shader to lose precision
-       render_lum=8, // some reasonable max linear color of render scene pixel
-       tone_map_max_lum=_tone_map_max_lum;
+   Dbl tone_map_max_lum=_tone_map_max_lum;
    /* Shader:
       assume col=0..render_lum
       col=ToneMap (col);
@@ -3505,20 +3502,25 @@ void DisplayClass::setToneMap()
    }
    DEBUG_ASSERT(Equal((Flt)Contrast(tone_map_max_lum), _tone_map_max_lum), "ToneMap"); // Contrast(tone_map_max_lum) should be equal to '_tone_map_max_lum'
 
-   REP(256)
    {
-      mul=Avg(min, max);
-      Dbl t=ToneMap(render_lum, mul);
-      if(t>tone_map_max_lum){                                  min=mul;}else
-      if(t<tone_map_max_lum){if(mul<=allowed_min)goto disable; max=mul;}else
-         break;
+      Dbl mul, min=0, max=16,
+          allowed_min=1.0/16, // don't go lower than this because that would cause color Half's in the shader to lose precision
+          render_lum=8; // some reasonable max linear color of render scene pixel
+      REP(256)
+      {
+         mul=Avg(min, max);
+         Dbl t=ToneMap(render_lum, mul);
+         if(t>tone_map_max_lum){                                  min=mul;}else
+         if(t<tone_map_max_lum){if(mul<=allowed_min)goto disable; max=mul;}else
+            break;
+      }
+   #if DEBUG
+      Dbl t=ToneMap (render_lum, mul); DEBUG_ASSERT(Equal((Flt)t, (Flt) tone_map_max_lum), "ToneMap"); // 't' should be  'tone_map_max_lum'
+      Dbl c=Contrast(t              ); DEBUG_ASSERT(Equal((Flt)c, (Flt)_tone_map_max_lum), "ToneMap"); // 'c' should be '_tone_map_max_lum'
+   #endif
+      SPSet("ToneMapAtanMul", mul);
+     _tone_map_allow=true;
    }
-#if DEBUG
-   Dbl t=ToneMap (render_lum, mul); DEBUG_ASSERT(Equal((Flt)t, (Flt) tone_map_max_lum), "ToneMap"); // 't' should be  'tone_map_max_lum'
-   Dbl c=Contrast(t              ); DEBUG_ASSERT(Equal((Flt)c, (Flt)_tone_map_max_lum), "ToneMap"); // 'c' should be '_tone_map_max_lum'
-#endif
-   SPSet("ToneMapAtanMul", mul);
-  _tone_map_allow=true;
 end:
   _tone_map_use=(_tone_map && _tone_map_allow);
 }

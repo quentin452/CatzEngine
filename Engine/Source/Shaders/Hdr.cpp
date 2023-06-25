@@ -24,7 +24,13 @@ Flt HdrDS_PS(NOPERSP Vec2 uv:UV):TARGET
    sum=SRGBToLinearFast(sum)/4; // SRGBToLinearFast(sum/4)*4
 #endif
 
-   Flt lum=Dot(sum, HdrWeight);
+   Flt lum;
+   switch(mode)
+   {
+      case 0: lum=Dot   (sum, HdrWeight); break;
+      case 1: lum=Max   (sum* HdrWeight); break;
+      case 2: lum=Length(sum* HdrWeight); break;
+   }
 
 // adjustment
 #if BRIGHT
@@ -56,12 +62,10 @@ Flt HdrUpdate_PS():TARGET // here use full precision
    lum=Sqrt(lum); // we've applied 'Sqr' above, so revert it back
 #endif
 
-   lum=Pow(lum, HdrExp); //lum=Sqrt(lum); // if further from the target brightness, apply the smaller scale. When using a smaller 'HdrExp' then scale will be stretched towards "1" (meaning smaller changes), using exp=0.5 gives Sqrt(lum)
-
-   lum=HdrBrightness/Max(lum, EPS_COL); // desired scale
-
-   lum=Mid(lum, HdrMaxDark, HdrMaxBright);
-   return Lerp(lum, ImgXF1[VecI2(0, 0)].x, Step); // lerp new with old
+   Flt scale=HdrBrightness/Max(lum, EPS_COL); // desired scale
+   scale=Pow(scale, HdrExp); //scale=Sqrt(scale); // if further from the target brightness, apply the smaller scale. When using a smaller 'HdrExp' then scale will be stretched towards "1" (meaning smaller changes), using exp=0.5 gives Sqrt(scale)
+   scale=Mid(scale, HdrMaxDark, HdrMaxBright);
+   return Lerp(scale, ImgXF1[VecI2(0, 0)].x, Step); // lerp new with old
 }
 /******************************************************************************/
 void AdaptEye_VS(VtxInput vtx,

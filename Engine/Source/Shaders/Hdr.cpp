@@ -3,8 +3,7 @@
 #include "Bloom.h"
 #include "Hdr.h"
 /******************************************************************************/
-#define BRIGHT    1 // if apply adjustment for scenes where half pixels are bright, and other half are dark, in that case prefer focus on brighter, to avoid making already bright pixels too bright
-#define GEOMETRIC 0 // don't use geometric mean, because of cases when bright sky is mostly occluded by dark objects, then entire scene will get brighter, making the sky look too bright and un-realistic
+#define BRIGHT 1 // if apply adjustment for scenes where half pixels are bright, and other half are dark, in that case prefer focus on brighter, to avoid making already bright pixels too bright
 /******************************************************************************/
 // HDR
 /******************************************************************************/
@@ -37,9 +36,6 @@ Flt HdrDS_PS(NOPERSP Vec2 uv:UV):TARGET
 #if BRIGHT
    lum=Sqr(lum);
 #endif
-#if GEOMETRIC
-   lum=Log2(Max(lum, HALF_MIN)); // NaN
-#endif
 
    return lum;
 #else
@@ -56,9 +52,6 @@ Flt HdrUpdate_PS():TARGET // here use full precision
    Flt lum=ImgXF[VecI2(0, 0)].x; // new luminance
 
    // adjustment restore
-#if GEOMETRIC
-   lum=Exp2(lum); // we've applied 'Log2' above, so revert it back
-#endif
 #if BRIGHT
    lum=Sqrt(lum); // we've applied 'Sqr' above, so revert it back
 #endif

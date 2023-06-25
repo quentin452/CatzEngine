@@ -24,12 +24,13 @@ Flt HdrDS_PS(NOPERSP Vec2 uv:UV):TARGET
    sum=SRGBToLinearFast(sum)/4; // SRGBToLinearFast(sum/4)*4
 #endif
 
+   const Int mode=2;
    Flt lum;
    switch(mode)
    {
       case 0: lum=Dot   (sum, HdrWeight); break;
-      case 1: lum=Max   (sum* HdrWeight); break;
-      case 2: lum=Length(sum* HdrWeight); break;
+      case 1: lum=Length(sum* HdrWeight); break;
+      case 2: lum=Max   (sum* HdrWeight); break;
    }
 
 // adjustment

@@ -1008,7 +1008,7 @@ DisplayClass::DisplayClass() : _monitors(Compare, null, null, 4)
   _eye_adapt_speed     =6.5f;
   _eye_adapt_weight.set(0.9f, 1, 0.7f); // use smaller value for blue, to make blue skies have brighter multiplier, because human eye sees blue color as darker than others
 
-//_tone_map=false;
+//_tone_map=_tone_map_allow=_tone_map_use=false;
 
   _grass_range  =50;
   _grass_density=(MOBILE ? 0.5f : 1);
@@ -3299,7 +3299,7 @@ DisplayClass& DisplayClass:: glowAllow   (Bool allow   ) {if(_glow_allow!=allow)
 DisplayClass& DisplayClass::bloomAllow   (Bool allow   ) {                      _bloom_allow   =allow   ;                   return T;}
 DisplayClass& DisplayClass::bloomOriginal(Flt  original) {MAX(original, 0);     _bloom_original=original;                   return T;}
 DisplayClass& DisplayClass::bloomGlow    (Flt  glow    ) {MAX(glow    , 0);     _bloom_glow    =glow    ;                   return T;}
-DisplayClass& DisplayClass::contrast     (Flt  contrast) {MAX(contrast, 0); if(_contrast!=contrast){_contrast=contrast; setContrast();} return T;}
+DisplayClass& DisplayClass::contrast     (Flt  contrast) {MAX(contrast, 0); if(_contrast!=contrast){_contrast=contrast; setContrast(); setToneMap();} return T;}
 DisplayClass& DisplayClass::bloomScale   (Flt  scale   ) {bloomScaleCut(scale, bloomCut()); return T;}
 DisplayClass& DisplayClass::bloomCut     (Flt  cut     ) {bloomScaleCut(bloomScale(), cut); return T;}
 Bool          DisplayClass::bloomUsed    (             )C{return bloomAllow() && (!Equal(bloomOriginal(), 1, EPS_COL8_1_NATIVE) || !Equal(bloomScale(), 0, EPS_COL8_NATIVE));}
@@ -3455,25 +3455,80 @@ DisplayClass& DisplayClass::resetEyeAdaptation     (  Flt  brightness)
    return T;
 }
 /******************************************************************************/
-DisplayClass& DisplayClass::toneMap             (Bool on) {_tone_map=on; return T;}
+static Bool SigmoidSqrInvSafe(Dbl &y)
+{
+   // y/SqrtFast(1-y*y);
+   Dbl s=1-y*y;
+   if(s<=0)return false;
+   y/=SqrtFast(s);
+   return true;
+}
+static Dbl ToneMap(Dbl col, Dbl mul)
+{
+   return Atan(col*mul)/mul;
+}
+static Dbl Contrast(Dbl col)
+{
+   if(D.useContrast())
+   {
+      col=col*2-1; col=SigmoidSqr(col*D.contrast())/SigmoidSqr(D.contrast()); col=col*0.5+0.5;
+   }
+   return col;
+}
+static Bool ContrastInv(Dbl &col)
+{
+   if(D.useContrast())
+   {
+      col=col*2-1; // reverse: col*0.5+0.5;
+      col*=SigmoidSqr(D.contrast()); // reverse: /SigmoidSqr(contrast);
+      if(!SigmoidSqrInvSafe(col))return false; // reverse: SigmoidSqr(col). if because of Contrast we can never reach 'col' then fail
+      col/=D.contrast(); // reverse: *contrast
+      col=col*0.5+0.5; // reverse: col*2-1;
+   }
+   return true;
+}
+void DisplayClass::setToneMap()
+{
+   // this will calculate 'mul' so that 0..render_lum gets converted to 0.._tone_map_max_lum
+   Dbl mul, min=0, max=16,
+       allowed_min=1.0/16, // don't go lower than this because that would cause color Half's in the shader to lose precision
+       render_lum=8, // some reasonable max linear color of render scene pixel
+       tone_map_max_lum=_tone_map_max_lum;
+   /* Shader:
+      assume col=0..render_lum
+      col=ToneMap (col);
+      col=Contrast(col);
+      now want col=0..tone_map_max_lum */
+   if(!ContrastInv(tone_map_max_lum))
+   {
+   disable: _tone_map_allow=false; goto end;
+   }
+   DEBUG_ASSERT(Equal((Flt)Contrast(tone_map_max_lum), _tone_map_max_lum), "ToneMap"); // Contrast(tone_map_max_lum) should be equal to '_tone_map_max_lum'
+
+   REP(256)
+   {
+      mul=Avg(min, max);
+      Dbl t=ToneMap(render_lum, mul);
+      if(t>tone_map_max_lum){                                  min=mul;}else
+      if(t<tone_map_max_lum){if(mul<=allowed_min)goto disable; max=mul;}else
+         break;
+   }
+#if DEBUG
+   Dbl t=ToneMap (render_lum, mul); DEBUG_ASSERT(Equal((Flt)t, (Flt) tone_map_max_lum), "ToneMap"); // 't' should be  'tone_map_max_lum'
+   Dbl c=Contrast(t              ); DEBUG_ASSERT(Equal((Flt)c, (Flt)_tone_map_max_lum), "ToneMap"); // 'c' should be '_tone_map_max_lum'
+#endif
+   SPSet("ToneMapAtanMul", mul);
+  _tone_map_allow=true;
+end:
+  _tone_map_use=(_tone_map && _tone_map_allow);
+}
+DisplayClass& DisplayClass::toneMap             (Bool on) {_tone_map=on; _tone_map_use=(_tone_map && _tone_map_allow); return T;}
 DisplayClass& DisplayClass::toneMapMonitorMaxLum(Flt monitor_lum)
 {
    MAX(monitor_lum, 0); if(_tone_map_max_lum!=monitor_lum)
    {
      _tone_map_max_lum=monitor_lum; // SPSet("ToneMapMonitorMaxLum", monitor_lum);
-      // this will calculate 'mul' so that 0..render_lum gets converted to 0..monitor_lum
-      Dbl mul, min=1.0/16, max=16, // don't go lower than some min because that would cause color Half's in the shader to lose precision
-          render_lum=8; // some reasonable max linear color of render scene pixel
-      REP(256)
-      {
-         mul=Avg(min, max);
-         Dbl t=Atan(render_lum*mul)/mul;
-         if(t>monitor_lum)min=mul;else
-         if(t<monitor_lum)max=mul;else
-            break;
-      }
-    //Dbl t=Atan(render_lum*mul)/mul; // 't' should be 'monitor_lum'
-      SPSet("ToneMapAtanMul", mul);
+      setToneMap();
    }
    return T;
 }

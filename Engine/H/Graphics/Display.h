@@ -380,6 +380,7 @@ struct DisplayClass : DisplayState, DisplayDraw // Display Control
    // Tone Mapping
    DisplayClass& toneMap(Bool on);   Bool toneMap()C {return _tone_map;} // set/get Tone Mapping (true/false, default=false), the change is instant, you can call it real-time
 #if EE_PRIVATE
+   void          setToneMap();
    void          toneMapMonitorMaxLumAuto(); // automatically set
    DisplayClass& toneMapMonitorMaxLum(Flt max_lum);   Flt toneMapMonitorMaxLum()C {return _tone_map_max_lum;} // set/get Tone Mapping Monitor Max Luminance (0..Inf, default=1), the change is instant, you can call it real-time, this is the maximum luminance supported by your monitor, LDR monitors have 1, while HDR monitors can be higher
 #endif
@@ -575,7 +576,8 @@ private:
                      _grass_shadow, _grass_mirror,
                      _vol_light, _vol_add,
                      _temp_anti_alias, _temp_super_res,
-                     _glow_allow, _dither, _bend_leafs, _eye_adapt, _dof_foc_mode, _color_palette_allow, _gamma_all, _fade_get, _fade_auto_draw, _mtrl_blend, _draw_null_mtrl, _view_square_pixel, _allow_stereo, _max_lights_soft, _sharpen, _tone_map,
+                     _glow_allow, _dither, _bend_leafs, _eye_adapt, _dof_foc_mode, _color_palette_allow, _gamma_all, _fade_get, _fade_auto_draw, _mtrl_blend, _draw_null_mtrl, _view_square_pixel, _allow_stereo, _max_lights_soft, _sharpen,
+                     _tone_map, _tone_map_allow, _tone_map_use,
                      _initialized, _resetting, _no_gpu;
   SByte              _half_supported;
    Byte              _density, _samples, _max_tex_filter, _max_rt,

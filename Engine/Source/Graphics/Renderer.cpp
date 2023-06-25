@@ -586,7 +586,7 @@ void RendererClass::bloom(ImageRT &src, ImageRT &dest, ImageRTPtr &bloom_glow, B
    set(&dest, null, true); if(combine && &dest==_final)D.alpha(ALPHA_MERGE);
    Sh.Img [1]->set( rt0  );
    Sh.ImgX[0]->set(_alpha);
-   GetBloom(D.useContrast(), D.toneMap(), _alpha ? 2 : alpha ? 1 : 0, D.dither() /*&& (src.highPrecision() || rt0->highPrecision())*/ && !dest.highPrecision(), exposure!=null)->draw(src); // merging 2 RT's ('src' and 'rt0') with some scaling factors will give high precision
+   GetBloom(D.useContrast(), D._tone_map_use, _alpha ? 2 : alpha ? 1 : 0, D.dither() /*&& (src.highPrecision() || rt0->highPrecision())*/ && !dest.highPrecision(), exposure!=null)->draw(src); // merging 2 RT's ('src' and 'rt0') with some scaling factors will give high precision
    bloom_glow.clear(); // not needed anymore
 }
 /******************************************************************************/
@@ -631,7 +631,7 @@ void RendererClass::toneMap(ImageRT &src, ImageRT &dest, Bool alpha, Bool combin
 {
    Hdr.load();
    set(&dest, null, true); D.alpha((combine && &dest==_final) ? ALPHA_MERGE : ALPHA_NONE);
-   Hdr.ToneMap[D.toneMap()-1][alpha][D.dither() && !dest.highPrecision()]->draw(src);
+   Hdr.ToneMap[D.toneMapMode()-1][alpha][D.dither() && !dest.highPrecision()]->draw(src);
 }
 /******************************************************************************/
 INLINE Shader* GetSetAlphaFromDepth        (Bool sky) {Shader* &s=Sh.SetAlphaFromDepth        [sky]; if(SLOW_SHADER_LOAD && !s)s=Sh.get(S8+"SetAlphaFromDepth"        +sky); return s;}
@@ -1166,7 +1166,7 @@ start:
    IMAGE_PRECISION prec=((_cur_type==RT_DEFERRED) ? D.highPrecColRT() ? IMAGE_PRECISION_10 : IMAGE_PRECISION_8 : D.litColRTPrecision()); // for deferred renderer we first render to col and only after that we mix it with light, other modes render color already mixed with light, for high precision we need only 10-bit, no need for 16-bit
    if(_cur_type==RT_DEFERRED /*|| mirror() _get_target already enabled for mirror*/ || _get_target // <- these always require
    || _final->size()!=rt_size || _final->samples()!=samples || _final->precision()<prec // if current RT does not match the requested rendering settings
-   || wantEdgeSoften() || wantTemporal() || wantEyeAdapt() || D.useContrast() || D.toneMap() || wantMotion() || wantBloom() || wantDof() || D.sharpen() // if we want to perform post process effects then we will be rendering to a secondary RT anyway, so let's start with secondary with a chance that during the effect we can render directly to '_final'
+   || wantEdgeSoften() || wantTemporal() || wantEyeAdapt() || D.useContrast() || D._tone_map_use || wantMotion() || wantBloom() || wantDof() || D.sharpen() // if we want to perform post process effects then we will be rendering to a secondary RT anyway, so let's start with secondary with a chance that during the effect we can render directly to '_final'
    || (D.glowAllow() && _final->hwTypeInfo().a<8) // we need alpha for glow, this check is needed for example if we have IMAGE_R10G10B10A2
    || (_final==&_main && !_main_ds.depthTexture() && wantDepth()) // if we're setting '_main' which is always paired with '_main_ds', and that is not a depth texture but we need to access depth, then try getting custom RT with depth texture (don't check for '_cur_main' and '_cur_main_ds' because depth buffers other than '_main_ds' are always tried to be created as depth texture first, so if that failed, then there's no point in trying to create one again)
    )    _col.get(ImageRTDesc(rt_size.x, rt_size.y, GetImageRTType(D.glowAllow(), prec), samples)); // here Alpha is used for glow
@@ -2278,7 +2278,7 @@ void RendererClass::postProcess()
    Bool temporal =_temporal_use       , // hasTemporal()
         adapt_eye= hasEyeAdapt      (),
         motion   = hasMotion        (),
-        bloom    =(hasBloom         () || _has_glow || D.useContrast() || D.toneMap()),
+        bloom    =(hasBloom         () || _has_glow || D.useContrast() || D._tone_map_use),
         alpha    = processAlphaFinal(), // this is always enabled for 'slowCombine'
         dof      = hasDof           (),
         sharpen  = D.sharpen        (),

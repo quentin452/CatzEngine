@@ -254,6 +254,7 @@ VecH TonemapPowSat(VecH x, Half exp)
 /******************************************************************************/
 VecH TonemapEsenthel(VecH x)
 {
+ //return TonemapLogML8Sat(x); // this provides best results for a photo realistic scene (taken from camera) however it darkens values 0 .. 0.3 too much, which are typically generated in games
    return Atan(x*ToneMapAtanMul)/ToneMapAtanMul; // atan was chosen because it doesn't darken low colors, we need around 0 .. 0.3 linear range to remain mostly the same
    /*if(WI)
    {

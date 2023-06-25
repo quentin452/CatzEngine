@@ -27,9 +27,9 @@ Flt HdrDS_PS(NOPERSP Vec2 uv:UV):TARGET
    Flt lum;
    switch(mode)
    {
-      case 0: lum=Dot   (sum, HdrWeight); break;
-      case 1: lum=Length(sum* HdrWeight); break;
-      case 2: lum=Max   (sum* HdrWeight); break;
+      case 0: lum=Dot   (sum, HdrWeight); break; // made white screen even   darker when it was already dark, and red screen much brighter than white
+      case 1: lum=Length(sum* HdrWeight); break; // made blue  screen even brighter when it was already max
+      case 2: lum=Max   (sum* HdrWeight); break; // best
    }
 
 // adjustment

@@ -1001,7 +1001,7 @@ DisplayClass::DisplayClass() : _monitors(Compare, null, null, 4)
   _dof_intensity=1;
 
 //_eye_adapt           =false;
-  _eye_adapt_brightness=0.06f;
+  _eye_adapt_brightness=0.2f;
   _eye_adapt_exp       =0.5f;
   _eye_adapt_max_dark  =0.5f;
   _eye_adapt_max_bright=2.0f;

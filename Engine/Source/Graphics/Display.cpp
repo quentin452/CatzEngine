@@ -3489,7 +3489,7 @@ static Bool ContrastInv(Dbl &col)
 }
 void DisplayClass::setToneMap()
 {
-   // this will calculate 'mul' so that 0..render_lum gets converted to 0.._tone_map_max_lum
+   // this will calculate tone map 'mul' so that 0..render_lum gets converted to 0.._tone_map_max_lum
    Dbl tone_map_max_lum=_tone_map_max_lum;
    /* Shader:
       assume col=0..render_lum
@@ -3510,8 +3510,8 @@ void DisplayClass::setToneMap()
       {
          mul=Avg(min, max);
          Dbl t=ToneMap(render_lum, mul);
-         if(t>tone_map_max_lum){                                  min=mul;}else
-         if(t<tone_map_max_lum){if(mul<=allowed_min)goto disable; max=mul;}else
+         if( t>tone_map_max_lum){                                  min=mul;}else
+         if( t<tone_map_max_lum){if(mul<=allowed_min)goto disable; max=mul;}else
             break;
       }
    #if DEBUG

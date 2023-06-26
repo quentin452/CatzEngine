@@ -2585,6 +2585,7 @@ enum APPLY_MODE
    APPLY_MERGE_SIMPLE,
    APPLY_MUL,
    APPLY_MUL_RGB,
+   APPLY_MUL_RGB_BLEND, // mul RGB by layer but take into account layer opacity (don't mul when opacity=0)
    APPLY_MUL_RGB_SAT,
    APPLY_MUL_RGB_INV_SAT,
    APPLY_MUL_RGB_LIN,
@@ -2686,6 +2687,7 @@ force_src_resize:
             if(p.value=="mergeSimple"                                                            )mode=APPLY_MERGE_SIMPLE;else
             if(p.value=="mul"                                                                    )mode=APPLY_MUL;else
             if(p.value=="mulRGB"                                                                 )mode=APPLY_MUL_RGB;else
+            if(p.value=="mulRGBblend"                                                            )mode=APPLY_MUL_RGB_BLEND;else
             if(p.value=="mulRGBS"                                                                )mode=APPLY_MUL_RGB_SAT;else
             if(p.value=="mulRGBIS"                                                               )mode=APPLY_MUL_RGB_INV_SAT;else
             if(p.value=="mulRGBLin"                                                              )mode=APPLY_MUL_RGB_LIN;else
@@ -2798,6 +2800,7 @@ force_src_resize:
                               case APPLY_MERGE_SIMPLE       : c=FastMergeBlend(base, l); break;
                               case APPLY_MUL                : c=base*l; break;
                               case APPLY_MUL_RGB            : c.set(base.xyz*l.xyz, base.w); break;
+                              case APPLY_MUL_RGB_BLEND      : c.set(base.xyz*Lerp(VecOne, l.xyz, l.w), base.w); break;
                               case APPLY_MUL_RGB_LIN        : c.set(LinearToSRGB(SRGBToLinear(base.xyz)*l.xyz), base.w); break; // this treats 'l' as already linear
                               case APPLY_MUL_A              : c.set(base.xyz, base.w*l.w); break;
                               case APPLY_SET_A_FROM_RGB     : c.set(base.xyz, l.xyz.max()); break;

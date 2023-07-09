@@ -1256,7 +1256,7 @@ flt   PowMax   (flt x, flt y) {return (x<=0) ? 0 : Pow(x, y);}
 // using sRGB->Sqr gives best results, preserves contrast the most, and looks most similar to Photoshop Brightness
 inline flt SRGBToBrightness(flt x) {if(1)x=SqrS (x);else x=SRGBToLinear(x); return x;}
 inline flt BrightnessToSRGB(flt x) {if(1)x=SqrtS(x);else x=LinearToSRGB(x); return x;}
-flt _ApplyBrightness(flt x, flt brightness) // !! ASSUMES THAT "x>0 && x<1 && brightness" !!
+flt _ApplyBrightness(flt x, flt brightness) // !! ASSUMES THAT "brightness!=0" !!
 {
    x=SRGBToBrightness(x);
    if(brightness<0)x=SigmoidSqrInv(x*SigmoidSqr(brightness))/           brightness ;
@@ -1266,7 +1266,7 @@ flt _ApplyBrightness(flt x, flt brightness) // !! ASSUMES THAT "x>0 && x<1 && br
 // contrast has to be done in some gamma space (not linear), because we need linear middle gray ~0.18 to be around 0.5 so that contrast won't change it. So either keep current sRGB gamma, or convert to Linear then Sqrt. sRGB looks most similar to Photoshop Brightness
 inline flt SRGBToContrast(flt x) {if(0)x=SqrtS(SRGBToLinear(x)); return x;}
 inline flt ContrastToSRGB(flt x) {if(0)x=LinearToSRGB(SqrS (x)); return x;}
-flt _ApplyContrast(flt x, flt contrast) // !! ASSUMES THAT "x>0 && x<1 && contrast" !!
+flt _ApplyContrast(flt x, flt contrast) // !! ASSUMES THAT "contrast!=0" !!
 {
    x=SRGBToContrast(x);
    x=x*2-1;

@@ -1623,6 +1623,12 @@ Vec   SigmoidSqr(Vec   x) {return x/Sqrt(1+x*x);}
 VecH  SigmoidSqr(VecH  x) {return x/Sqrt(1+x*x);}
 VecH4 SigmoidSqr(VecH4 x) {return x/Sqrt(1+x*x);}
 
+Flt   SigmoidSqrInv(Flt   y) {return y/Sqrt(1-y*y);}
+Half  SigmoidSqrInv(Half  y) {return y/Sqrt(1-y*y);}
+Vec   SigmoidSqrInv(Vec   y) {return y/Sqrt(1-y*y);}
+VecH  SigmoidSqrInv(VecH  y) {return y/Sqrt(1-y*y);}
+VecH4 SigmoidSqrInv(VecH4 y) {return y/Sqrt(1-y*y);}
+
 Flt   SigmoidExp(Flt   x) {return 2/(1+Exp(x*-2))-1;}
 Half  SigmoidExp(Half  x) {return 2/(1+Exp(x*-2))-1;}
 Vec   SigmoidExp(Vec   x) {return 2/(1+Exp(x*-2))-1;}
@@ -1935,6 +1941,12 @@ Half MultiMaterialWeight(Half weight, Half alpha) // 'weight'=weight of this mat
 #elif 0 // PinchFactor (too sharp transitions)
    const Half sharpen=32;
    return PinchFactor(weight, alpha*sharpen - 0.5*sharpen);
+#elif 0 // Sigmoid (not sharp enough, but when increasing sharpen then too bright on low weights, causing visible jumps due to material reduction for low weights
+   const Half sharpen=21;
+   alpha=alpha*sharpen - 0.5*sharpen; // (alpha-0.5)*sharpen
+   if(alpha<-HALF_MIN)weight=SigmoidSqrInv(weight*SigmoidSqr(alpha))/           alpha ;else
+   if(alpha> HALF_MIN)weight=SigmoidSqr   (weight*           alpha )/SigmoidSqr(alpha);
+   return weight;
 #elif 0 // Pow (too bright on low weights, causing visible jumps due to material reduction for low weights, also blurry (small contrast) compared to Pinch
    const Half sharpen=-5;
    return Pow(weight, ScaleFactor(alpha*sharpen - 0.5*sharpen));

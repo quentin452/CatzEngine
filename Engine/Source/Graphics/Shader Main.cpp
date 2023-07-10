@@ -551,6 +551,7 @@ void MainShaderClass::getTechniques()
 
    HdrBrightness=GetShaderParam("HdrBrightness"); HdrBrightness->set(D.eyeAdaptationBrightness());
    HdrExp       =GetShaderParam("HdrExp"       ); HdrExp       ->set(D.eyeAdaptationExp       ());
+   HdrIntensity =GetShaderParam("HdrIntensity" ); HdrIntensity ->set(D.eyeAdaptationIntensity ());
    HdrMaxDark   =GetShaderParam("HdrMaxDark"   ); HdrMaxDark   ->set(D.eyeAdaptationMaxDark   ());
    HdrMaxBright =GetShaderParam("HdrMaxBright" ); HdrMaxBright ->set(D.eyeAdaptationMaxBright ());
    HdrWeight    =GetShaderParam("HdrWeight"    ); HdrWeight    ->set(D.eyeAdaptationWeight()/4  );

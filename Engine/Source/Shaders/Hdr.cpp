@@ -57,8 +57,9 @@ Flt HdrUpdate_PS():TARGET // here use full precision
 #endif
 
    Flt scale=HdrBrightness/Max(lum, EPS_COL); // desired scale
-   scale=Pow(scale, HdrExp); //scale=Sqrt(scale); // if further from the target brightness, apply the smaller scale. When using a smaller 'HdrExp' then scale will be stretched towards "1" (meaning smaller changes), using exp=0.5 gives Sqrt(scale)
-   scale=Mid(scale, HdrMaxDark, HdrMaxBright);
+   scale=Pow (scale, HdrExp); //scale=Sqrt(scale); // if further from the target brightness, apply the smaller scale. When using a smaller 'HdrExp' then scale will be stretched towards "1" (meaning smaller changes), using exp=0.5 gives Sqrt(scale)
+   scale=Lerp(1, scale, HdrIntensity);
+   scale=Mid (scale, HdrMaxDark, HdrMaxBright);
    return Lerp(scale, ImgXF1[VecI2(0, 0)].x, Step); // lerp new with old
 }
 /******************************************************************************/

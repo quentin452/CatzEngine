@@ -21,11 +21,12 @@ AU4 LpmFilterCtl(AU1 i) {return AMD_LPT_constant[i];}
 /******************************************************************************/
 #include "!Set Prec Struct.h"
 BUFFER(Hdr)
+   VecH HdrWeight    ;
    Flt  HdrBrightness,
         HdrExp       ,
+        HdrIntensity ,
         HdrMaxDark   ,
         HdrMaxBright ;
-   VecH HdrWeight    ;
 BUFFER_END
 #include "!Set Prec Default.h"
 /******************************************************************************

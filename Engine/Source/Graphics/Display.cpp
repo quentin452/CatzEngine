@@ -1003,6 +1003,7 @@ DisplayClass::DisplayClass() : _monitors(Compare, null, null, 4)
 //_eye_adapt           =false;
   _eye_adapt_brightness=0.1f;
   _eye_adapt_exp       =0.5f;
+  _eye_adapt_intensity =1.0f;
   _eye_adapt_max_dark  =0.5f;
   _eye_adapt_max_bright=2.0f;
   _eye_adapt_speed     =6.5f;
@@ -3459,6 +3460,7 @@ DisplayClass& DisplayClass::dofIntensity(Flt      intensity) {                  
 DisplayClass& DisplayClass::eyeAdaptation          (  Bool on        ) {                                                            _eye_adapt           =on        ;                                                    return T;}
 DisplayClass& DisplayClass::eyeAdaptationBrightness(  Flt  brightness) {MAX  (brightness, 0); if(_eye_adapt_brightness!=brightness){_eye_adapt_brightness=brightness; Sh.HdrBrightness->set(eyeAdaptationBrightness());} return T;}
 DisplayClass& DisplayClass::eyeAdaptationExp       (  Flt  exp       ) {Clamp(exp, 0.1f , 1); if(_eye_adapt_exp       !=exp       ){_eye_adapt_exp       =exp       ; Sh.HdrExp       ->set(eyeAdaptationExp       ());} return T;}
+DisplayClass& DisplayClass::eyeAdaptationIntensity (  Flt  intensity ) {SAT  (intensity    ); if(_eye_adapt_intensity !=intensity ){_eye_adapt_intensity =intensity ; Sh.HdrIntensity ->set(eyeAdaptationIntensity ());} return T;}
 DisplayClass& DisplayClass::eyeAdaptationMaxDark   (  Flt  max_dark  ) {MAX  (max_dark  , 0); if(_eye_adapt_max_dark  !=max_dark  ){_eye_adapt_max_dark  =max_dark  ; Sh.HdrMaxDark   ->set(eyeAdaptationMaxDark   ());} return T;}
 DisplayClass& DisplayClass::eyeAdaptationMaxBright (  Flt  max_bright) {MAX  (max_bright, 0); if(_eye_adapt_max_bright!=max_bright){_eye_adapt_max_bright=max_bright; Sh.HdrMaxBright ->set(eyeAdaptationMaxBright ());} return T;}
 DisplayClass& DisplayClass::eyeAdaptationSpeed     (  Flt  speed     ) {MAX  (speed     , 1); if(_eye_adapt_speed     !=speed     ){_eye_adapt_speed     =speed     ;                                                  } return T;}

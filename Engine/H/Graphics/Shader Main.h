@@ -119,6 +119,7 @@ struct MainShaderClass
 
       *HdrBrightness=&Dummy,
       *HdrExp       =&Dummy,
+      *HdrIntensity =&Dummy,
       *HdrMaxDark   =&Dummy,
       *HdrMaxBright =&Dummy,
       *HdrWeight    =&Dummy,

@@ -952,16 +952,15 @@ struct BoneTypeIndexSetter
          {
             if(!child.side)child.side=((pos.x>=0) ? 1 : -1); // if side unknown then calculate it
                 child.side_bool=(child.side>=0);
-            if(!child.side_bool)pos.chsX(); // mirror X order for negative side
          }
-         pos.normalize();
-         if(bone.type==BONE_FINGER || bone.type==BONE_TOE)
-         {
-            child.order=pos.x; // start with left
-         }else
-         {
-            child.order=pos.x-pos.y-pos.z; // start with left top front
-         }
+         if(child.side<0)pos.chsX(); // mirror X order for negative side
+         child.order=Angle(pos.z, pos.x); // swap XZ to start with left
+         if(bone.type!=BONE_FINGER && bone.type!=BONE_TOE) // ignore for fingers and toes because thumb may be located down
+         #if 1
+            child.order-=Angle(pos.xz().length(), pos.y); // subtract to start with top
+         #else
+            if(Flt len=pos.length())child.order-=Asin(pos.y/len); // subtract to start with top, (normalized pos).y
+         #endif
       }
       children.sort(CompareChild);
       REPA(children) // add in reversed order because later we're processing bones from the end

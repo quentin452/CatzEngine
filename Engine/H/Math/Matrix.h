@@ -151,6 +151,7 @@ struct Matrix3 // Matrix 3x3 (orientation + scale)
    Matrix3& rotateZLOrthoNormalized(Flt angle); // rotate matrix by its z vector (z-axis rotation in local space), this method is faster than 'rotateZL' however matrix must be orthogonal and normalized
 
    Matrix3& rotateXLOrthoNormalized(Flt cos, Flt sin); // rotate matrix by its x vector (x-axis rotation in local space), this method works like 'rotateXLOrthoNormalized(Flt angle)' however it accepts 'Cos' and 'Sin' of 'angle'
+   Matrix3& rotateYLOrthoNormalized(Flt cos, Flt sin); // rotate matrix by its y vector (y-axis rotation in local space), this method works like 'rotateYLOrthoNormalized(Flt angle)' however it accepts 'Cos' and 'Sin' of 'angle'
 
    Matrix3& rotateToYKeepX(C Vec &y); // rotate matrix to Y direction, try to preserve existing X direction, 'y' must be normalized
    Matrix3& rotateToYKeepZ(C Vec &y); // rotate matrix to Y direction, try to preserve existing Z direction, 'y' must be normalized

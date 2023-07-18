@@ -1924,6 +1924,13 @@ Matrix3& Matrix3::rotateYLOrthoNormalized(Flt angle)
    }
    return T;
 }
+Matrix3& Matrix3::rotateYLOrthoNormalized(Flt cos, Flt sin)
+{
+   Vec x=T.x;
+   T.x=x*cos - z*sin;
+   T.z=x*sin + z*cos;
+   return T;
+}
 Matrix3& Matrix3::rotateZLOrthoNormalized(Flt angle)
 {
    if(Any(angle))

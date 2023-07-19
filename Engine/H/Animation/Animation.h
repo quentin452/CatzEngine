@@ -56,7 +56,7 @@ enum ROOT_FLAG // Root Flags
 struct Animation // set of animation keyframes used for animating 'AnimatedSkeleton'
 {
    Mems<AnimBone>  bones ; // bone animations
-   Mems<AnimEvent> events; // animation events
+   Mems<AnimEvent> events; // animation events, sorted by time
    AnimKeys        keys  ; // animation keys of the whole body
 
    // get / set

@@ -2300,6 +2300,8 @@ namespace Edit
    T1(TYPE)  TYPE*  Undo<TYPE>::set( Int change_type, Bool force_create, Flt extra_time) {return (TYPE*)super::set(change_type, force_create, extra_time);}
 
    T1(TYPE) T1(CHANGE)  Undo<TYPE>&  Undo<TYPE>::replaceClass() {ASSERT_BASE_EXTENDED<TYPE, CHANGE>(); _changes.replaceClass<CHANGE>(); return T;}
+
+   inline C ObjData::Param* ObjData::findParam(C Str &name, PARAM_TYPE type, Bool include_removed, Bool include_inherited)C {return ConstCast(T).findParam(name, type, include_removed, include_inherited);}
 }
 /******************************************************************************/
 #if EE_PRIVATE

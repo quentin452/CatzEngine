@@ -124,7 +124,8 @@ struct ObjData
    OBJ_PATH    path  ; // path   mode of the object
    Memc<Param> params; // parameters  of the object
 
-   Param* findParam(C Str &name, PARAM_TYPE type=PARAM_NUM, Bool include_removed=false, Bool include_inherited=true); // find the first parameter from 'params' of 'name' and 'type' (use PARAM_NUM to accept all parameter types), 'include_removed'=if return removed parameters as well, 'include_inherited'=if return inherited parameters as well, null on fail (if not found)
+   Param* findParam(C Str &name, PARAM_TYPE type=PARAM_NUM, Bool include_removed=false, Bool include_inherited=true) ; // find the first parameter from 'params' of 'name' and 'type' (use PARAM_NUM to accept all parameter types), 'include_removed'=if return removed parameters as well, 'include_inherited'=if return inherited parameters as well, null on fail (if not found)
+ C Param* findParam(C Str &name, PARAM_TYPE type=PARAM_NUM, Bool include_removed=false, Bool include_inherited=true)C; // find the first parameter from 'params' of 'name' and 'type' (use PARAM_NUM to accept all parameter types), 'include_removed'=if return removed parameters as well, 'include_inherited'=if return inherited parameters as well, null on fail (if not found)
 
    Bool save(File &f)C;
    Bool load(File &f);

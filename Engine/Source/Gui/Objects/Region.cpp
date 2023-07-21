@@ -136,7 +136,7 @@ void Region::setRectAndButtons()
    Rect old_client=localClientRect();
 
    // first calculate client rectangle
-   T._crect=rect();
+  _crect=rect();
    if(GuiSkin *skin=getSkin())
       if(Panel *panel=skin->region.normal())
    {

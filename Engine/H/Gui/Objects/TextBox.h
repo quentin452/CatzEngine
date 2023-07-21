@@ -57,7 +57,7 @@ const_mem_addr struct TextBox : GuiObj // Gui TextBox !! must be stored in const
 #if EE_PRIVATE
    void           zero();
    void           call();
-   void     setButtons();
+   void setRectAndButtons();
    void      setParent();
    void      setParams();
    Bool     setChanged(C Str &text, SET_MODE mode=SET_DEFAULT);

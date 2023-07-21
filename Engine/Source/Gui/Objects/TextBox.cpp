@@ -109,16 +109,26 @@ TextBox& TextBox::slidebarSize(Flt size)
    if(_slidebar_size!=size)
    {
      _slidebar_size=size;
-      if(wordWrap())setVirtualSize();else setButtons(); // in 'wordWrap' mode, virtual size is dependent on the slidebar size
+      if(wordWrap())setVirtualSize();else setRectAndButtons(); // in 'wordWrap' mode, virtual size is dependent on the slidebar size
    }
    return T;
 }
 void TextBox::setVirtualSize(C Rect *set_rect)
 {
+   Flt  padd_h=0;
    Vec2 size=0;
-   Rect rect=(set_rect ? *set_rect : T.rect());
-  _text_space=rect.w();
-   if(GuiSkin *skin=getSkin())
+   Rect rect=(set_rect ? *set_rect : T.rect()), crect=rect;
+   GuiSkin *skin=getSkin();
+   if(skin)
+      if(Panel *panel=skin->region.normal())
+   {
+      Rect padd; panel->innerPadding(crect, padd);
+      crect.min+=padd.min;
+      crect.max-=padd.max;
+      padd_h=padd.min.y+padd.max.y;
+   }
+  _text_space=crect.w();
+   if(skin)
       if(TextStyle *text_style=skin->textline.text_style())
    {
    #if DEFAULT_FONT_FROM_CUSTOM_SKIN
@@ -132,11 +142,11 @@ void TextBox::setVirtualSize(C Rect *set_rect)
       if(_auto_height)
       {
          Flt client_height=Max(size.y, min_height);
-         rect.min.y=rect.max.y-client_height;
+         rect.min.y=rect.max.y-client_height-padd_h;
       }else
       if(wordWrap()) // check if in word wrap we're exceeding lines beyond client rectangle, in that case slidebar has to be made visible, which reduces client width
       {
-         Flt client_height=rect.h(); // here can't use 'clientHeight' because it may not be available yet
+         Flt client_height=crect.h(); // here can't use 'clientHeight' because it may not be available yet
          if(size.y>client_height+EPS) // exceeds client height
          { // recalculate using smaller width
             size.y=ts.textHeight(T(), _text_space-=slidebarSize(), wordWrap(), &size.x);
@@ -147,7 +157,7 @@ void TextBox::setVirtualSize(C Rect *set_rect)
    if(_auto_height)super::rect(rect);
    slidebar[0]._length_total=size.x;
    slidebar[1]._length_total=size.y;
-   setButtons();
+   setRectAndButtons();
 }
 /******************************************************************************/
 TextBox& TextBox::maxLength(Int max_length)
@@ -379,20 +389,30 @@ skip:
    return T;
 }
 /******************************************************************************/
-void TextBox::setButtons()
+void TextBox::setRectAndButtons()
 {
+   // first calculate client rectangle
+  _crect=rect();
+   if(GuiSkin *skin=getSkin())
+      if(Panel *panel=skin->region.normal())
+   {
+      Rect padd; panel->innerPadding(_crect, padd);
+     _crect.min+=padd.min;
+     _crect.max-=padd.max;
+   }
+
    Bool vertical, horizontal;
    Flt  width =virtualWidth (),
         height=virtualHeight();
 
-   Rect srect=_crect=rect();
+   Rect srect=_crect, mrect=_crect;
    if( vertical  =(slidebar[1].is() && clientHeight()+EPS<height)){srect.max.x-=slidebarSize();                _crect.max.x-=slidebarSize();}
    if( horizontal=(slidebar[0].is() && clientWidth ()+EPS<width )){srect.min.y+=slidebarSize(); if(!wordWrap())_crect.min.y+=slidebarSize();
    if(!vertical && slidebar[1].is() && clientHeight()+EPS<height ){srect.max.x-=slidebarSize();                _crect.max.x-=slidebarSize(); vertical=true;}}
 
-   slidebar[0].setLengths(clientWidth (), width ).rect(Rect(rect().min.x               ,  rect().min.y, srect  .max.x, rect().min.y+slidebarSize())); slidebar[0].visible(slidebar[0]._usable && !wordWrap());
-   slidebar[1].setLengths(clientHeight(), height).rect(Rect(rect().max.x-slidebarSize(), srect  .min.y,  rect().max.x, rect().max.y               )); slidebar[1].visible(slidebar[1]._usable               );
-   view                                          .rect(Rect(rect().max.x-slidebarSize(),  rect().min.y,  rect().max.x, rect().min.y+slidebarSize())).visible(slidebar[0]._usable && slidebar[1]._usable);
+   slidebar[0].setLengths(clientWidth (), width ).rect(Rect(mrect.min.x               , mrect.min.y, srect.max.x, mrect.min.y+slidebarSize())); slidebar[0].visible(slidebar[0]._usable && !wordWrap());
+   slidebar[1].setLengths(clientHeight(), height).rect(Rect(mrect.max.x-slidebarSize(), srect.min.y, mrect.max.x, mrect.max.y               )); slidebar[1].visible(slidebar[1]._usable               );
+   view                                          .rect(Rect(mrect.max.x-slidebarSize(), mrect.min.y, mrect.max.x, mrect.min.y+slidebarSize())).visible(slidebar[0]._usable && slidebar[1]._usable);
 }
 TextBox& TextBox::wordWrap(Bool wrap)
 {
@@ -417,7 +437,7 @@ TextBox& TextBox::rect(C Rect &rect)
       if(_auto_height)setVirtualSize(&rect);else // for '_auto_height' need to adjust height in 'setVirtualSize', it will call 'super::rect'
       {
          super::rect(rect);
-         if(wordWrap())setVirtualSize();else setButtons(); // in 'wordWrap' mode, virtual size is dependent on the rectangle
+         if(wordWrap())setVirtualSize();else setRectAndButtons(); // in 'wordWrap' mode, virtual size is dependent on the rectangle
       }
    }
    return T;
@@ -437,15 +457,15 @@ TextBox& TextBox::move(C Vec2 &delta)
 /******************************************************************************/
 TextBox& TextBox::skin(C GuiSkinPtr &skin, Bool sub_objects)
 {
+   if(sub_objects)
+   {
+            view     .skin=skin ;
+      REPAO(slidebar).skin(skin);
+   }
    if(_skin!=skin)
    {
      _skin=skin;
-      if(sub_objects)
-      {
-               view     .skin=skin ;
-         REPAO(slidebar).skin(skin);
-      }
-      setVirtualSize(); // new skin can have different text style, so have to recalculate
+      setVirtualSize(); // new skin can have different text style and inner padding, so have to recalculate
    }
    return T;
 }

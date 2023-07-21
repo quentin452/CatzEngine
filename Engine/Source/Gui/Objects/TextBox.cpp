@@ -225,8 +225,8 @@ TextBox& TextBox::scrollToCursor(Bool margin)
       {
          Region &region=parent->asRegion();
          Vec2 ofs(-slidebar[0].wantedOffset(), -slidebar[1].wantedOffset());
-         ofs.x+=rect().min.x;
-         ofs.y-=rect().max.y;
+         ofs.x+=clientRect().min.x;
+         ofs.y-=clientRect().max.y;
          if(Kb.visible())
          { // TODO: this assumes screen keyboard is at the bottom
             Rect screen_rect=region.screenRect();

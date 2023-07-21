@@ -644,7 +644,7 @@ void TextBox::update(C GuiPC &gpc)
             Flt  offset=ts.size.x*TEXTBOX_OFFSET;
             Rect   clip=gpc.clip;
             Rect    kb_rect; if(Kb.rect(kb_rect))MAX(clip.min.y, kb_rect.max.y); // TODO: this assumes screen keyboard is at the bottom
-            Rect  text_rect=_crect+gpc.offset, clipped_text_rect=text_rect&clip;
+            Rect  text_rect=clientRect()+gpc.offset, clipped_text_rect=text_rect&clip;
             Vec2  clipped_pos=*mt_pos&clipped_text_rect; // have to clip so after we start selecting and move mouse outside the client rectangle, we don't set cursor to be outside, instead start smooth scrolling when mouse is outside towards cursor, but limit the cursor position within visible area
             Bool eol; Int pos=ts.textIndex(T(), clipped_pos.x - text_rect.min.x + slidebar[0].offset() - offset, text_rect.max.y - clipped_pos.y + slidebar[1].offset(), (ButtonDb(mt_state) || _edit.overwrite) ? TEXT_INDEX_OVERWRITE : TEXT_INDEX_DEFAULT, _text_space, wordWrap(), eol);
 
@@ -705,10 +705,10 @@ void TextBox::update(C GuiPC &gpc)
                      MIN(clipped_text_rect.max.y, D.rectUI().max.y-margin);
                   }
                   // if pos is outside of clipped text rect then scroll (check <= instead of < in case we're at screen border), scroll parents only if rect is actually clipped with some margin (so we can still scroll a little bit more so we can see visually the rect)
-                  if(mt_pos->x<=clipped_text_rect.min.x)ScrollMinus(&slidebar[0], (_rect.min.x+gpc.offset.x<clip.min.x+(ts.size.x*TEXTBOX_MARGIN_REL+TEXTBOX_MARGIN_ABS)) ? parent() : null, false);else
-                  if(mt_pos->x>=clipped_text_rect.max.x)ScrollPlus (&slidebar[0], (_rect.max.x+gpc.offset.x>clip.max.x-(ts.size.x*TEXTBOX_MARGIN_REL+TEXTBOX_MARGIN_ABS)) ? parent() : null, false);
-                  if(mt_pos->y<=clipped_text_rect.min.y)ScrollPlus (&slidebar[1], (_rect.min.y+gpc.offset.y<clip.min.y+(ts.size.y*TEXTBOX_MARGIN_REL+TEXTBOX_MARGIN_ABS)) ? parent() : null, true );else
-                  if(mt_pos->y>=clipped_text_rect.max.y)ScrollMinus(&slidebar[1], (_rect.max.y+gpc.offset.y>clip.max.y-(ts.size.y*TEXTBOX_MARGIN_REL+TEXTBOX_MARGIN_ABS)) ? parent() : null, true );
+                  if(mt_pos->x<=clipped_text_rect.min.x)ScrollMinus(&slidebar[0], (rect().min.x+gpc.offset.x<clip.min.x+(ts.size.x*TEXTBOX_MARGIN_REL+TEXTBOX_MARGIN_ABS)) ? parent() : null, false);else
+                  if(mt_pos->x>=clipped_text_rect.max.x)ScrollPlus (&slidebar[0], (rect().max.x+gpc.offset.x>clip.max.x-(ts.size.x*TEXTBOX_MARGIN_REL+TEXTBOX_MARGIN_ABS)) ? parent() : null, false);
+                  if(mt_pos->y<=clipped_text_rect.min.y)ScrollPlus (&slidebar[1], (rect().min.y+gpc.offset.y<clip.min.y+(ts.size.y*TEXTBOX_MARGIN_REL+TEXTBOX_MARGIN_ABS)) ? parent() : null, true );else
+                  if(mt_pos->y>=clipped_text_rect.max.y)ScrollMinus(&slidebar[1], (rect().max.y+gpc.offset.y>clip.max.y-(ts.size.y*TEXTBOX_MARGIN_REL+TEXTBOX_MARGIN_ABS)) ? parent() : null, true );
                }else
                if(mt_state&BS_RELEASED) // released
                {
@@ -752,7 +752,7 @@ void TextBox::draw(C GuiPC &gpc)
                   if(!ts.font())ts.font(skin->font()); // adjust font in case it's empty and the custom skin has a different font than the 'Gui.skin'
                #endif
 
-                  Rect text_rect=_crect+gpc.offset;
+                  Rect text_rect=clientRect()+gpc.offset;
                   D.clip(text_rect&gpc.clip);
                   Flt offset=TEXTBOX_OFFSET*ts.size.x;
                   if(T().is() || active)

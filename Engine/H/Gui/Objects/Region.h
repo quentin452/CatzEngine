@@ -38,19 +38,22 @@ const_mem_addr struct Region : GuiObj // Gui Region !! must be stored in constan
    GuiObj* nearest(C Vec2 &screen_pos, C Vec2 &dir); // get nearest child object, starting from 'screen_pos' screen position towards 'dir' direction, null on fail
 
    // set / get
-   virtual Region& rect        (C Rect &rect                             )override; C Rect&  rect        ()C {return super::rect()                        ;} // set/get rectangle
+   virtual Region& rect        (C Rect &rect                             )override; C Rect&   rect        ()C {return super::rect()                        ;} // set/get rectangle
    virtual Region& move        (C Vec2 &delta                            )override;                                                                          // move by delta
-           Region& slidebarSize(  Flt   size                             );           Flt    slidebarSize()C {return      _slidebar_size                  ;} // set/get slidebar size, default=0.05
-                                                                                      Flt    clientWidth ()C {return      _crect.w          ()            ;} //     get client   width
-                                                                                      Flt    clientHeight()C {return      _crect.h          ()            ;} //     get client   height
-                                                                                      Vec2   clientSize  ()C {return      _crect.size       ()            ;} //     get client   size
-                                                                                    C Rect&  clientRect  ()C {return      _crect                          ;} //     get client   rectangle
-                                                                                      Flt   virtualWidth ()C {return slidebar[0].lengthTotal()            ;} //     get virtual  width
-                                                                                      Flt   virtualHeight()C {return slidebar[1].lengthTotal()            ;} //     get virtual  height
-           Region& virtualSize (C Vec2       *size                       );           Vec2  virtualSize  ()C {return Vec2(virtualWidth(), virtualHeight());} // set/get virtual  size, pass null to use 'childrenSize'
-                                                                                      Vec2 childrenSize  ()C;                                                //     get virtual  size needed to cover all children
-           Region& skin        (C GuiSkinPtr &skin, Bool sub_objects=true);         C GuiSkinPtr&    skin()C {return _skin                                ;} // set/get skin override, default=null (if set to null then current value of 'Gui.skin' is used), 'sub_objects'=if additionally change the skin of slidebars and view button
-                                                                                      GuiSkin*    getSkin()C {return _skin ? _skin() : Gui.skin()         ;} //     get actual   skin
+           Region& slidebarSize(  Flt   size                             );           Flt     slidebarSize()C {return      _slidebar_size                  ;} // set/get slidebar size, default=0.05
+                                                                                      Flt  minClientWidth ()C;                                                //     get client   width  as if vertical   slidebar  is  always visible
+                                                                                      Flt  minClientHeight()C;                                                //     get client   height as if horizontal slidebar  is  always visible
+                                                                                      Vec2 minClientSize  ()C;                                                //     get client   size   as if            slidebars are always visible
+                                                                                      Flt     clientWidth ()C {return      _crect.w          ()            ;} //     get client   width
+                                                                                      Flt     clientHeight()C {return      _crect.h          ()            ;} //     get client   height
+                                                                                      Vec2    clientSize  ()C {return      _crect.size       ()            ;} //     get client   size
+                                                                                    C Rect&   clientRect  ()C {return      _crect                          ;} //     get client   rectangle
+                                                                                      Flt    virtualWidth ()C {return slidebar[0].lengthTotal()            ;} //     get virtual  width
+                                                                                      Flt    virtualHeight()C {return slidebar[1].lengthTotal()            ;} //     get virtual  height
+           Region& virtualSize (C Vec2       *size                       );           Vec2   virtualSize  ()C {return Vec2(virtualWidth(), virtualHeight());} // set/get virtual  size, pass null to use 'childrenSize'
+                                                                                      Vec2  childrenSize  ()C;                                                //     get virtual  size needed to cover all children
+           Region& skin        (C GuiSkinPtr &skin, Bool sub_objects=true);         C GuiSkinPtr&     skin()C {return _skin                                ;} // set/get skin override, default=null (if set to null then current value of 'Gui.skin' is used), 'sub_objects'=if additionally change the skin of slidebars and view button
+                                                                                      GuiSkin*     getSkin()C {return _skin ? _skin() : Gui.skin()         ;} //     get actual   skin
 
    // main
    virtual GuiObj* test  (C GuiPC &gpc, C Vec2 &pos, GuiObj* &mouse_wheel)override; // test if 'pos' screen position intersects with the object, by returning pointer to object or its children upon intersection and null in case no intersection, 'mouse_wheel' may be modified upon intersection either to the object or its children or null

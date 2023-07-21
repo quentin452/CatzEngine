@@ -85,7 +85,7 @@ class ObjPaintClass : PropWin
    void toGuiMtrls(Memx<Mtrl> &mtrls, Region &region)
    {
       const int cols=4;
-      const flt size=(region.rect().w()-region.slidebarSize())/cols;
+      const flt size=(region.minClientWidth())/cols;
       FREPA(mtrls)
       {
          int x=i%cols, y=i/cols;

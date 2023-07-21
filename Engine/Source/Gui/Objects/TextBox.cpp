@@ -386,9 +386,9 @@ void TextBox::setButtons()
         height=virtualHeight();
 
    Rect srect=_crect=rect();
-   if( vertical  =(slidebar[1].is() && height>clientHeight()+EPS)){srect.max.x-=slidebarSize();                _crect.max.x-=slidebarSize();}
-   if( horizontal=(slidebar[0].is() && width >clientWidth ()+EPS)){srect.min.y+=slidebarSize(); if(!wordWrap())_crect.min.y+=slidebarSize();
-   if(!vertical && slidebar[1].is() && height>clientHeight()+EPS ){srect.max.x-=slidebarSize();                _crect.max.x-=slidebarSize(); vertical=true;}}
+   if( vertical  =(slidebar[1].is() && clientHeight()+EPS<height)){srect.max.x-=slidebarSize();                _crect.max.x-=slidebarSize();}
+   if( horizontal=(slidebar[0].is() && clientWidth ()+EPS<width )){srect.min.y+=slidebarSize(); if(!wordWrap())_crect.min.y+=slidebarSize();
+   if(!vertical && slidebar[1].is() && clientHeight()+EPS<height ){srect.max.x-=slidebarSize();                _crect.max.x-=slidebarSize(); vertical=true;}}
 
    slidebar[0].setLengths(clientWidth (), width ).rect(Rect(rect().min.x               ,  rect().min.y, srect  .max.x, rect().min.y+slidebarSize())); slidebar[0].visible(slidebar[0]._usable && !wordWrap());
    slidebar[1].setLengths(clientHeight(), height).rect(Rect(rect().max.x-slidebarSize(), srect  .min.y,  rect().max.x, rect().max.y               )); slidebar[1].visible(slidebar[1]._usable               );

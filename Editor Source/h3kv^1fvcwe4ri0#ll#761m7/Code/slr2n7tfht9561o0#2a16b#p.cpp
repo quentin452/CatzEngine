@@ -1480,7 +1480,7 @@ class StoreClass : ClosableWindow
 
       e_item_name .rect(Rect_U(t_item_name.rect().up(), 1.0, 0.05));
       e_item_video.rect(Rect_LU(item_video.rect().lerp(item_video.visible(), 1), 0.28+item_video.size().x*!item_video.visible(), 0.045));
-      e_item_desc .rect(Rect_LD(item_desc_region.rect().ld(), item_desc_region.size().x-item_desc_region.slidebarSize(), 0.05));
+      e_item_desc .rect(Rect_LD(item_desc_region.rect().ld(), item_desc_region.minClientWidth(), 0.05));
       e_item_price.rect(Rect_LD(buy.rect().lerp(0, buy.visible()), buy.size()));
 
       b_login.rect(Rect_R(items_region.rect().max.x, hello_user.pos().y, 0.17, 0.05));

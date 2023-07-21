@@ -420,7 +420,7 @@ ObjClassEditor ObjClassEdit;
          if(!is_class)r.max.set(2.0f, screenPos().y-(-D.h())-0.1f);
          return r;
       }
-      flt ParamEditor::ParamWindow::listWidth() {return region.rect().w()-region.slidebarSize();}
+      flt ParamEditor::ParamWindow::listWidth()C {return region.minClientWidth();}
     C Rect& ParamEditor::ParamWindow::rect()C {return super::rect();}
       ::ParamEditor::ParamWindow& ParamEditor::ParamWindow::rect(C Rect &rect)
 {

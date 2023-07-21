@@ -242,7 +242,7 @@ void DrawProject()
          }
          void ProjectEx::ElmList::AppCheck::setRect()
          {
-            flt x=Proj.region.rect().w()-Proj.region.slidebarSize()-D.pixelToScreenSize().x;
+            flt x=Proj.region.minClientWidth()-D.pixelToScreenSize().x;
             rect(Rect_RU(x, 0, Proj.list.elmHeight(), Proj.list.elmHeight()));
          }
       ListElm* ProjectEx::ElmList::curToListElm(              )C {return List<ListElm>::operator()();}
@@ -3426,7 +3426,7 @@ void DrawProject()
          {
             list.sound_play.lit_id=elm->id;
             list.sound_play.image =((sound.playing() && list.sound_play.lit_id==list.sound_play.play_id || elm->type!=ELM_SOUND) ? icon_stop : icon_play);
-            list.sound_play.posRU(Vec2(region.rect().w()-region.slidebarSize(), 0));
+            list.sound_play.posRU(Vec2(region.minClientWidth(), 0));
             list.addChild(list.sound_play, list.visToAbs(list.lit), 0);
          }else list-=list.sound_play;
       }
@@ -4138,7 +4138,7 @@ void DrawProject()
       setListPadding();
       list.columnWidth (0, text_size*0.8f);
       list.columnWidth (1, text_size*0.8f);
-    //list.columnWidth (2, region.rect().w()-region.slidebarSize()-list.columnWidth(1)-list.columnWidth(0)); don't set fixed column width
+    //list.columnWidth (2, region.minClientWidth()-list.columnWidth(1)-list.columnWidth(0)); don't set fixed column width
       list.sound_play.size(list.elmHeight());
    }
    void ProjectEx::elmMenu(C Vec2 &pos, bool touch)

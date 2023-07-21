@@ -181,6 +181,10 @@ Vec2 Region::childrenSize()C
    ChildrenSize(size, _children);
    return size;
 }
+Flt  Region::minClientWidth ()C {Flt w=clientWidth (); if(slidebar[1].hidden() && slidebar[1].is()                                   )w-=slidebarSize(); return w;}
+Flt  Region::minClientHeight()C {Flt h=clientHeight(); if(slidebar[0].hidden() && slidebar[0].is() && !alwaysHideHorizontalSlideBar())h-=slidebarSize(); return h;}
+Vec2 Region::minClientSize  ()C {return Vec2(minClientWidth(), minClientHeight());}
+
 Region& Region::slidebarSize(Flt size)
 {
    MAX(size, 0);

@@ -641,7 +641,7 @@ void WindowIO::setRect()
 
    // middle
    region.rect(Rect(r.min.x, textline.rect().max.y+0.04f, r.max.x, rename.rect().min.y-0.03f));
-   list.columnWidth(0, region.rect().w()-region.slidebarSize()-list.columnWidth(1));
+   list.columnWidth(0, region.minClientWidth()-list.columnWidth(1));
 }
 WindowIO& WindowIO::rect(C Rect &rect)
 {

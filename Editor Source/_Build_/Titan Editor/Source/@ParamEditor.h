@@ -138,7 +138,7 @@ public:
 
       ParamWindow& create(C Rect &rect, bool is_class);
       virtual Rect sizeLimit()C override;
-      flt listWidth();                    
+      flt listWidth()C;                   
     C Rect& rect()C;                      
       virtual ParamWindow& rect(C Rect &rect)override;
       virtual void update(C GuiPC &gpc)override;

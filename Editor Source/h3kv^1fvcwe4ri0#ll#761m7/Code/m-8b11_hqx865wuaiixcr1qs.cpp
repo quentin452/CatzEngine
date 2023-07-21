@@ -823,7 +823,7 @@ class MaterialRegion : Region
    void create()
    {
       Gui+=super.create(Rect_LU(0, 0, 0.73, 1)).skin(&LightSkin, false).hide();
-      flt w=rect().w()-slidebarSize(), e=0.01, we=w-e*2, p=0.007, h=0.05, prop_height=0.044;
+      flt w=minClientWidth(), e=0.01, we=w-e*2, p=0.007, h=0.05, prop_height=0.044;
         T+=big         .create(Rect_LU(e, 0, h*1.6, h), "<<").focusable(false); big.mode=BUTTON_TOGGLE;
         T+=set_mtrl    .create(Rect_LU(big.rect().max.x+p, big.rect().max.y, h, h)).func(SetMtrl, T).focusable(false).desc("Enable this and click on the screen to set material at that location.\nOptionally hold Shift key to completely replace target material on all parts that use it."); set_mtrl.mode=BUTTON_TOGGLE; set_mtrl.image="Gui/Misc/set.img";
         T+=undo        .create(Rect_LU(set_mtrl.rect().ru()+Vec2(p, 0), 0.05, 0.05 )).func(Undo, T).focusable(false).desc("Undo"); undo.image="Gui/Misc/undo.img";

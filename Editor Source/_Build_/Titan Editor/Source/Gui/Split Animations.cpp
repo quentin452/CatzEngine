@@ -16,7 +16,7 @@ SplitAnimation SplitAnim;
       }
       void SplitAnimation::Anim::pos(flt y)
       {
-         flt h=0.05f, total_width=SplitAnim.region.rect().w()-SplitAnim.region.slidebarSize(), frame_width=h*4;
+         flt h=0.05f, total_width=SplitAnim.region.minClientWidth(), frame_width=h*4;
          remove.rect(Rect_LU(Vec2(0, y), h));
          name  .rect(Rect_LU(remove.rect().ru(), total_width-h-frame_width*2-h, h));
          from  .rect(Rect_LU(name  .rect().ru(), frame_width, h));

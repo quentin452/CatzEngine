@@ -190,7 +190,7 @@ Flt _List::parentWidth()C
          if(GuiObj *owner=parent->asMenu().Owner())if(owner->isComboBox())return owner->clientSize().x;
       }
 
-      if(parent->isRegion())return parent->size().x-parent->asRegion().slidebarSize();
+      if(parent->isRegion())return parent->asRegion().minClientWidth();
       else                  return parent->clientSize().x;
    }
    return 0;
@@ -724,8 +724,8 @@ void _List::setRects()
       if(parent() && parent()->isRegion())
       {
          Region &region=parent()->asRegion();
-         MAX(max_size.x, region.rect().w()-region.slidebarSize());
-         MAX(max_size.y, region.rect().h()-region.slidebarSize());
+         MAX(max_size.x, region.minClientWidth ());
+         MAX(max_size.y, region.minClientHeight());
       }
       max_size+=EPS;
       FREPA(T)

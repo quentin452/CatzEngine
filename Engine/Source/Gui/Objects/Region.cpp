@@ -98,7 +98,7 @@ void Region::childRectChanged(C Rect *old_rect, C Rect *new_rect, GuiObj &child)
          {
             if(inc_w)slidebar[0]._length_total=x;
             if(inc_h)slidebar[1]._length_total=y;
-            setButtons();
+            setRectAndButtons();
          }
       }
    }//else having null rectangles means object is hidden and we don't need to do anything
@@ -118,7 +118,7 @@ Region& Region::removeSlideBars()
    slidebar[0].del();
    slidebar[1].del();
    view       .del();
-   setButtons(); return T;
+   setRectAndButtons(); return T;
 }
 Bool    Region::alwaysHideHorizontalSlideBar(         )C {return FlagOn(_flag, ALWAYS_HIDE_HORIZONTAL_SLIDEBAR);}
 Region& Region::alwaysHideHorizontalSlideBar(Bool hide)
@@ -126,27 +126,42 @@ Region& Region::alwaysHideHorizontalSlideBar(Bool hide)
    if(hide!=alwaysHideHorizontalSlideBar())
    {
      _flag^=ALWAYS_HIDE_HORIZONTAL_SLIDEBAR;
-      setButtons();
+      setRectAndButtons();
    }
    return T;
 }
 /******************************************************************************/
-void Region::setButtons()
+void Region::setRectAndButtons()
 {
+   Rect old_client=localClientRect();
+
+   // first calculate client rectangle
+   T._crect=rect();
+   if(GuiSkin *skin=getSkin())
+      if(Panel *panel=skin->region.normal())
+   {
+      Rect padd; panel->innerPadding(_crect, padd);
+     _crect.min+=padd.min;
+     _crect.max-=padd.max;
+   }
+
    Bool vertical, horizontal;
    Flt  width =virtualWidth (),
         height=virtualHeight();
 
-   Rect srect=_crect=rect();
-   if( vertical  =(slidebar[1].is() && height>clientHeight()+EPS)){srect.max.x-=slidebarSize();                                    _crect.max.x-=slidebarSize();}
-   if( horizontal=(slidebar[0].is() && width >clientWidth ()+EPS)){srect.min.y+=slidebarSize(); if(!alwaysHideHorizontalSlideBar())_crect.min.y+=slidebarSize();
-   if(!vertical && slidebar[1].is() && height>clientHeight()+EPS ){srect.max.x-=slidebarSize();                                    _crect.max.x-=slidebarSize(); vertical=true;}}
+   Rect srect=_crect, mrect=_crect;
+   if( vertical  =(slidebar[1].is() && clientHeight()+EPS<height)){srect.max.x-=slidebarSize();                                    _crect.max.x-=slidebarSize();}
+   if( horizontal=(slidebar[0].is() && clientWidth ()+EPS<width )){srect.min.y+=slidebarSize(); if(!alwaysHideHorizontalSlideBar())_crect.min.y+=slidebarSize();
+   if(!vertical && slidebar[1].is() && clientHeight()+EPS<height ){srect.max.x-=slidebarSize();                                    _crect.max.x-=slidebarSize(); vertical=true;}}
 
    setParent(false); // detach before setting rectangle so virtual size won't be changed
-   slidebar[0].setLengths(clientWidth (), width ).rect(Rect(rect().min.x               ,  rect().min.y, srect  .max.x, rect().min.y+slidebarSize())); slidebar[0].visible(slidebar[0]._usable && !alwaysHideHorizontalSlideBar());
-   slidebar[1].setLengths(clientHeight(), height).rect(Rect(rect().max.x-slidebarSize(), srect  .min.y,  rect().max.x, rect().max.y               )); slidebar[1].visible(slidebar[1]._usable                                   );
-   view                                          .rect(Rect(rect().max.x-slidebarSize(),  rect().min.y,  rect().max.x, rect().min.y+slidebarSize())).visible(slidebar[0]._usable && slidebar[1]._usable);
+   slidebar[0].setLengths(clientWidth (), width ).rect(Rect(mrect.min.x               , mrect.min.y, srect.max.x, mrect.min.y+slidebarSize())); slidebar[0].visible(slidebar[0]._usable && !alwaysHideHorizontalSlideBar());
+   slidebar[1].setLengths(clientHeight(), height).rect(Rect(mrect.max.x-slidebarSize(), srect.min.y, mrect.max.x, mrect.max.y               )); slidebar[1].visible(slidebar[1]._usable                                   );
+   view                                          .rect(Rect(mrect.max.x-slidebarSize(), mrect.min.y, mrect.max.x, mrect.min.y+slidebarSize())).visible(slidebar[0]._usable && slidebar[1]._usable);
    setParent();
+
+   Rect new_client=localClientRect();
+   if(  old_client!=new_client)notifyChildrenOfClientRectChange(&old_client, &new_client);
 }
 static void ChildrenSize(Vec2 &size, C GuiObjChildren &children)
 {
@@ -172,7 +187,7 @@ Region& Region::slidebarSize(Flt size)
    if(_slidebar_size!=size)
    {
      _slidebar_size=size;
-      setButtons();
+      setRectAndButtons();
    }
    return T;
 }
@@ -181,15 +196,15 @@ Region& Region::virtualSize(C Vec2 *size)
    Vec2 temp; if(!size)size=&(temp=childrenSize());
    slidebar[0]._length_total=size->x;
    slidebar[1]._length_total=size->y;
-   setButtons(); return T;
+   setRectAndButtons(); return T;
 }
 Region& Region::rect(C Rect &rect)
 {
    if(T.rect()!=rect)
    {
-      Rect old_client=localClientRect(), old_rect=T.rect(); T._rect=rect; setButtons(); // set manually instead of calling 'super::rect' because that will call 'notifyChildrenOfClientRectChange' before we finish setting client rectangle
-      Rect new_client=localClientRect();
-      notifyChildrenOfClientRectChange(&old_client, &new_client);
+      Rect /*old_client=localClientRect(), */old_rect=T.rect(); T._rect=rect; setRectAndButtons(); // set manually instead of calling 'super::rect' because that will call 'notifyChildrenOfClientRectChange' before we finish setting client rectangle
+    //Rect   new_client=localClientRect();
+    //notifyChildrenOfClientRectChange(&old_client, &new_client); already called in 'setRectAndButtons'
       notifyParentOfRectChange        ( old_rect  ,  visible() );
    }
    return T;
@@ -225,11 +240,15 @@ Region& Region::scrollTo(C GuiObj &child, Bool immediate)
 /******************************************************************************/
 Region& Region::skin(C GuiSkinPtr &skin, Bool sub_objects)
 {
-  _skin=skin;
    if(sub_objects)
    {
             view     .skin=skin ;
       REPAO(slidebar).skin(skin);
+   }
+   if(_skin!=skin)
+   {
+     _skin=skin;
+      setRectAndButtons();
    }
    return T;
 }

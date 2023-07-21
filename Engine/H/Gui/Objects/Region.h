@@ -61,9 +61,9 @@ const_mem_addr struct Region : GuiObj // Gui Region !! must be stored in constan
    void        zero();
    void    addChild(GuiObj &child);
    void removeChild(GuiObj &child);
-   void  setButtons();
-   void  setParams ();
-   void  setParent (Bool on=true);
+   void   setParams();
+   void   setParent(Bool on=true);
+   void   setRectAndButtons();
 
    enum
    {

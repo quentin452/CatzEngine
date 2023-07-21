@@ -39,11 +39,14 @@ const_mem_addr struct Region : GuiObj // Gui Region !! must be stored in constan
 
    // set / get
    virtual Region& rect        (C Rect &rect                             )override; C Rect&   rect        ()C {return super::rect()                        ;} // set/get rectangle
-   virtual Region& move        (C Vec2 &delta                            )override;                                                                          // move by delta
+   virtual Region& move        (C Vec2 &delta                            )override;                                                                           // move by delta
            Region& slidebarSize(  Flt   size                             );           Flt     slidebarSize()C {return      _slidebar_size                  ;} // set/get slidebar size, default=0.05
                                                                                       Flt  minClientWidth ()C;                                                //     get client   width  as if vertical   slidebar  is  always visible
                                                                                       Flt  minClientHeight()C;                                                //     get client   height as if horizontal slidebar  is  always visible
                                                                                       Vec2 minClientSize  ()C;                                                //     get client   size   as if            slidebars are always visible
+                                                                                      Flt  maxClientWidth ()C;                                                //     get client   width  as if vertical   slidebar  is  always hidden
+                                                                                      Flt  maxClientHeight()C;                                                //     get client   height as if horizontal slidebar  is  always hidden
+                                                                                      Vec2 maxClientSize  ()C;                                                //     get client   size   as if            slidebars are always hidden
                                                                                       Flt     clientWidth ()C {return      _crect.w          ()            ;} //     get client   width
                                                                                       Flt     clientHeight()C {return      _crect.h          ()            ;} //     get client   height
                                                                                       Vec2    clientSize  ()C {return      _crect.size       ()            ;} //     get client   size

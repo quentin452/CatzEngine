@@ -100,9 +100,10 @@ Vec  ScreenToViewPos(C Vec2 &screen  , Flt z=ActiveCam.dist); // convert 2D scre
 Vec  ScreenToPosDM  (C Vec2 &screen_d, Flt z=ActiveCam.dist); // convert 2D screen delta    to 3D world-space delta    (affected by camera, transformed by current object drawing matrix which is set by 'SetMatrix')
 VecD ScreenToPosM   (C Vec2 &screen  , Flt z=ActiveCam.dist); // convert 2D screen position to 3D world-space position (affected by camera, transformed by current object drawing matrix which is set by 'SetMatrix')
 
-Vec  ScreenToDir   (C Vec2 &screen                     ); // convert 2D screen position to world space                       3D direction
-void ScreenToPosDir(C Vec2 &screen, Vec  &pos, Vec &dir); // convert 2D screen position to world space 3D position start and 3D direction
-void ScreenToPosDir(C Vec2 &screen, VecD &pos, Vec &dir); // convert 2D screen position to world space 3D position start and 3D direction
+Vec  ScreenToDir   (C Vec2 &screen                     ); // convert 2D screen position to world space                       3D direction, direction is     normalized
+Vec  ScreenToDir1  (C Vec2 &screen                     ); // convert 2D screen position to world space                       3D direction, direction is NOT normalized, it's on the plane in front of camera
+void ScreenToPosDir(C Vec2 &screen, Vec  &pos, Vec &dir); // convert 2D screen position to world space 3D position start and 3D direction, direction is     normalized
+void ScreenToPosDir(C Vec2 &screen, VecD &pos, Vec &dir); // convert 2D screen position to world space 3D position start and 3D direction, direction is     normalized
 
 Bool ToScreenRect(C Box      &box    ,             Rect &rect); // project 3D box     to 2D on-screen rectangle, false on fail (shape is behind the camera)
 Bool ToScreenRect(C OBox     &obox   ,             Rect &rect); // project 3D obox    to 2D on-screen rectangle, false on fail (shape is behind the camera)

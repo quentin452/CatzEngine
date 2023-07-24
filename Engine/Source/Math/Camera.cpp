@@ -342,6 +342,19 @@ Vec ScreenToDir(C Vec2 &screen)
       return CamMatrix.z;
    }
 }
+Vec ScreenToDir1(C Vec2 &screen)
+{
+   if(FovPerspective(D.viewFovMode()))
+   {
+      Vec2 v=screen-D.viewCenter();
+      return (v.x*D.viewFovTanGui().x)*CamMatrix.x
+            +(v.y*D.viewFovTanGui().y)*CamMatrix.y
+            +                          CamMatrix.z;
+   }else
+   {
+      return CamMatrix.z;
+   }
+}
 void ScreenToPosDir(C Vec2 &screen, Vec &pos, Vec &dir)
 {
    Vec2 v=screen-D.viewCenter();

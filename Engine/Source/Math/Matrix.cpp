@@ -3259,8 +3259,10 @@ VecD2 MatrixD3::convert(C VecD &src, Bool normalized)C
 Vec   Matrix3 ::convert(C Vec2  &src                 )C {return src.x*x + src.y*y                   ;}
 VecD  MatrixD3::convert(C VecD2 &src                 )C {return src.x*x + src.y*y                   ;}
 Vec2  Matrix  ::convert(C Vec   &src, Bool normalized)C {return super::convert(src -pos, normalized);}
+Vec2  MatrixM ::convert(C VecD  &src, Bool normalized)C {return super::convert(src -pos, normalized);}
 VecD2 MatrixD ::convert(C VecD  &src, Bool normalized)C {return super::convert(src -pos, normalized);}
 Vec   Matrix  ::convert(C Vec2  &src                 )C {return super::convert(src)+pos             ;}
+VecD  MatrixM ::convert(C Vec2  &src                 )C {return super::convert(src)+pos             ;}
 VecD  MatrixD ::convert(C VecD2 &src                 )C {return super::convert(src)+pos             ;}
 
 Edge2  Matrix3 ::convert(C Edge   &src, Bool normalized)C {return Edge2 (convert(src.p[0], normalized), convert(src.p[1], normalized));}
@@ -3268,8 +3270,10 @@ EdgeD2 MatrixD3::convert(C EdgeD  &src, Bool normalized)C {return EdgeD2(convert
 Edge   Matrix3 ::convert(C Edge2  &src                 )C {return Edge  (convert(src.p[0]            ), convert(src.p[1]            ));}
 EdgeD  MatrixD3::convert(C EdgeD2 &src                 )C {return EdgeD (convert(src.p[0]            ), convert(src.p[1]            ));}
 Edge2  Matrix  ::convert(C Edge   &src, Bool normalized)C {return Edge2 (convert(src.p[0], normalized), convert(src.p[1], normalized));}
+Edge2  MatrixM ::convert(C EdgeD  &src, Bool normalized)C {return Edge2 (convert(src.p[0], normalized), convert(src.p[1], normalized));}
 EdgeD2 MatrixD ::convert(C EdgeD  &src, Bool normalized)C {return EdgeD2(convert(src.p[0], normalized), convert(src.p[1], normalized));}
 Edge   Matrix  ::convert(C Edge2  &src                 )C {return Edge  (convert(src.p[0]            ), convert(src.p[1]            ));}
+EdgeD  MatrixM ::convert(C Edge2  &src                 )C {return EdgeD (convert(src.p[0]            ), convert(src.p[1]            ));}
 EdgeD  MatrixD ::convert(C EdgeD2 &src                 )C {return EdgeD (convert(src.p[0]            ), convert(src.p[1]            ));}
 /******************************************************************************/
 Matrix& Matrix::anchor(C Vec &anchor)

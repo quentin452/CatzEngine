@@ -285,13 +285,16 @@ Bool Inside(C Extent &a, C Ball &b); // if 'a' is fully inside 'b'
 
 // sweep
 Bool SweepPointBall(C Vec  &point, C Vec  &move, C Ball  &ball, Flt *hit_frac=null, Vec  *hit_normal=null); // if moving point cuts through a static ball
+Bool SweepPointBall(C VecD &point, C Vec  &move, C BallM &ball, Flt *hit_frac=null, Vec  *hit_normal=null); // if moving point cuts through a static ball
 Bool SweepPointBall(C VecD &point, C VecD &move, C BallD &ball, Dbl *hit_frac=null, VecD *hit_normal=null); // if moving point cuts through a static ball
 Bool SweepEdgeBall (C Edge  &edge, C Vec  &move, C Ball  &ball, Flt *hit_frac=null, Vec  *hit_normal=null); // if moving edge  cuts through a static ball
 Bool SweepEdgeBall (C EdgeD &edge, C VecD &move, C BallD &ball, Dbl *hit_frac=null, VecD *hit_normal=null); // if moving edge  cuts through a static ball
 
 Bool SweepBallPoint(C Ball  &ball, C Vec  &move, C Vec   &point, Flt *hit_frac=null, Vec  *hit_normal=null); // if moving ball cuts through a static point
+Bool SweepBallPoint(C BallM &ball, C Vec  &move, C VecD  &point, Flt *hit_frac=null, Vec  *hit_normal=null); // if moving ball cuts through a static point
 Bool SweepBallPoint(C BallD &ball, C VecD &move, C VecD  &point, Dbl *hit_frac=null, VecD *hit_normal=null); // if moving ball cuts through a static point
 Bool SweepBallEdge (C Ball  &ball, C Vec  &move, C Edge  &edge , Flt *hit_frac=null, Vec  *hit_normal=null); // if moving ball cuts through a static edge
+Bool SweepBallEdge (C BallM &ball, C Vec  &move, C EdgeD &edge , Flt *hit_frac=null, Vec  *hit_normal=null); // if moving ball cuts through a static edge
 Bool SweepBallEdge (C BallD &ball, C VecD &move, C EdgeD &edge , Dbl *hit_frac=null, VecD *hit_normal=null); // if moving ball cuts through a static edge
 Bool SweepBallBall (C Ball  &ball, C Vec  &move, C Ball  &ball2, Flt *hit_frac=null, Vec  *hit_normal=null); // if moving ball cuts through a static ball
 Bool SweepBallBall (C BallD &ball, C VecD &move, C BallD &ball2, Dbl *hit_frac=null, VecD *hit_normal=null); // if moving ball cuts through a static ball

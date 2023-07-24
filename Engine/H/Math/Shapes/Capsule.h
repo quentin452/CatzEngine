@@ -183,8 +183,9 @@ Bool Cuts(C BallM   &ball , C CapsuleM &capsule); // if ball     cuts a capsule
 Bool Cuts(C Capsule &a    , C Capsule  &b      ); // if capsule  cuts a capsule
 
 // sweep
-Bool SweepPointCapsule(C Vec  &point, C Vec &move, C Capsule &capsule, Flt *hit_frac=null, Vec *hit_normal=null); // if moving point cuts through a static capsule
-Bool SweepBallCapsule (C Ball &ball , C Vec &move, C Capsule &capsule, Flt *hit_frac=null, Vec *hit_normal=null); // if moving ball  cuts through a static capsule
+Bool SweepPointCapsule(C Vec  &point, C Vec &move, C Capsule  &capsule, Flt *hit_frac=null, Vec *hit_normal=null); // if moving point cuts through a static capsule
+Bool SweepPointCapsule(C VecD &point, C Vec &move, C CapsuleM &capsule, Flt *hit_frac=null, Vec *hit_normal=null); // if moving point cuts through a static capsule
+Bool SweepBallCapsule (C Ball &ball , C Vec &move, C Capsule  &capsule, Flt *hit_frac=null, Vec *hit_normal=null); // if moving ball  cuts through a static capsule
 
 Bool SweepCapsuleEdge (C Capsule &capsule, C Vec &move, C Edge  &edge , Flt *hit_frac=null, Vec *hit_normal=null                   ); // if moving capsule cuts through a static edge
 Bool SweepCapsulePlane(C Capsule &capsule, C Vec &move, C Plane &plane, Flt *hit_frac=null, Vec *hit_normal=null, Vec *hit_pos=null); // if moving capsule cuts through a static plane

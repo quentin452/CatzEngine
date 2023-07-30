@@ -62,10 +62,11 @@ ULong AtomicSub(ULong &x, ULong y) {return InterlockedExchangeAdd64((LONG64*)&x,
 
 #pragma warning(pop)
 
-Int AtomicAnd    (Int &x, Int y) {return _InterlockedAnd((LONG*)&x,  y);} // 'InterlockedAnd' returns the old value
-Int AtomicDisable(Int &x, Int y) {return _InterlockedAnd((LONG*)&x, ~y);} // 'InterlockedAnd' returns the old value
-Int AtomicOr     (Int &x, Int y) {return _InterlockedOr ((LONG*)&x,  y);} // 'InterlockedOr'  returns the old value
-Int AtomicXor    (Int &x, Int y) {return _InterlockedXor((LONG*)&x,  y);} // 'InterlockedXor' returns the old value
+Int  AtomicAnd    (Int  &x, Int  y) {return _InterlockedAnd((LONG*)&x,  y);} // 'InterlockedAnd' returns the old value
+Int  AtomicDisable(Int  &x, Int  y) {return _InterlockedAnd((LONG*)&x, ~y);} // 'InterlockedAnd' returns the old value
+Int  AtomicOr     (Int  &x, Int  y) {return _InterlockedOr ((LONG*)&x,  y);} // 'InterlockedOr'  returns the old value
+UInt AtomicOr     (UInt &x, UInt y) {return _InterlockedOr ((LONG*)&x,  y);} // 'InterlockedOr'  returns the old value
+Int  AtomicXor    (Int  &x, Int  y) {return _InterlockedXor((LONG*)&x,  y);} // 'InterlockedXor' returns the old value
 
 Int   AtomicGetSet(Int   &x, Int   y) {return _InterlockedExchange  ((LONG  *)&x, y);} // 'InterlockedExchange' returns the old value
 UInt  AtomicGetSet(UInt  &x, UInt  y) {return _InterlockedExchange  ((LONG  *)&x, y);} // 'InterlockedExchange' returns the old value
@@ -106,10 +107,11 @@ ULong AtomicAdd(ULong &x, ULong y) {return __sync_fetch_and_add(&x, y);} // '__s
  Long AtomicSub( Long &x,  Long y) {return __sync_fetch_and_sub(&x, y);} // '__sync_fetch_and_sub' returns the old value
 ULong AtomicSub(ULong &x, ULong y) {return __sync_fetch_and_sub(&x, y);} // '__sync_fetch_and_sub' returns the old value
 
-Int AtomicAnd    (Int &x, Int y) {return __sync_fetch_and_and(&x,  y);} // '__sync_fetch_and_and' returns the old value
-Int AtomicDisable(Int &x, Int y) {return __sync_fetch_and_and(&x, ~y);} // '__sync_fetch_and_and' returns the old value
-Int AtomicOr     (Int &x, Int y) {return __sync_fetch_and_or (&x,  y);} // '__sync_fetch_and_or'  returns the old value
-Int AtomicXor    (Int &x, Int y) {return __sync_fetch_and_xor(&x,  y);} // '__sync_fetch_and_xor' returns the old value
+Int  AtomicAnd    (Int  &x, Int  y) {return __sync_fetch_and_and(&x,  y);} // '__sync_fetch_and_and' returns the old value
+Int  AtomicDisable(Int  &x, Int  y) {return __sync_fetch_and_and(&x, ~y);} // '__sync_fetch_and_and' returns the old value
+Int  AtomicOr     (Int  &x, Int  y) {return __sync_fetch_and_or (&x,  y);} // '__sync_fetch_and_or'  returns the old value
+UInt AtomicOr     (UInt &x, UInt y) {return __sync_fetch_and_or (&x,  y);} // '__sync_fetch_and_or'  returns the old value
+Int  AtomicXor    (Int  &x, Int  y) {return __sync_fetch_and_xor(&x,  y);} // '__sync_fetch_and_xor' returns the old value
 
  Int  AtomicGetSet( Int  &x,  Int  y) {return __sync_lock_test_and_set(&x, y);} // '__sync_lock_test_and_set' returns the old value
 UInt  AtomicGetSet(UInt  &x, UInt  y) {return __sync_lock_test_and_set(&x, y);} // '__sync_lock_test_and_set' returns the old value

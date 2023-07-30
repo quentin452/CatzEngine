@@ -107,12 +107,12 @@ void TimeClass::speed(Flt speed)
    if(T._speed!=speed)
    {
       T._speed=speed;
-      SpeedSound();
+      ChangeSoundsSeparate(SOUND_CHANGED_SPEED); // can't use 'ChangeSounds' and have to use 'ChangeSoundsSeparate' because of #SOUND_CHANGED_SPEED which doesn't look at listener changes
    }
 }
 /******************************************************************************/
-void TimeClass::skipUpdate(Byte frames           ) {MAX(_skip, frames);}
-void TimeClass::wait      (Int       milliseconds)
+void TimeClass::skipUpdate(Byte frames      ) {MAX(_skip, frames);}
+void TimeClass::wait      (Int  milliseconds)
 {
    if(milliseconds>0)
    {

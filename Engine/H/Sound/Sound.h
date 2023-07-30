@@ -52,17 +52,20 @@ struct ListenerClass
  C Vec& up   ()C {return _orn.perp   ;} // get listener up      direction
    Vec  right()C {return _orn.cross();} // get listener right   direction
  C Vec& vel  ()C {return _vel        ;} // get listener velocity
+   Flt  range()C {return _range      ;} // get listener range, default=1
 
    // set
-   ListenerClass& pos(C Vec &pos                        ); // set listener position
-   ListenerClass& orn(C Vec &dir, C Vec &up=Vec(0, 1, 0)); // set listener orientation, 'dir'=forward direction (must be normalized), 'up'=up direction (must be normalized)
-   ListenerClass& vel(C Vec &vel                        ); // set listener velocity
+   ListenerClass& pos  (C Vec &pos           ); // set listener position
+   ListenerClass& orn  (C Vec &dir, C Vec &up); // set listener orientation, 'dir'=forward direction (must be normalized), 'up'=up direction (must be normalized)
+   ListenerClass& vel  (C Vec &vel           ); // set listener velocity
+   ListenerClass& range(  Flt  range         ); // set listener range
 
 #if !EE_PRIVATE
 private:
 #endif
    OrientP _orn;
    Vec     _vel;
+   Flt     _range;
    Int     _flag;
 
    ListenerClass();
@@ -99,10 +102,10 @@ const_mem_addr struct _Sound // can be moved however 'memAddressChanged' needs t
    FADE_CURVE         _fade_curve;
    Int                 flag;
    Long                raw_pos;
-   Flt                _volume, _speed, _actual_speed, _range, _time, _fade, _fade_d, priority;
+   SoundDataCallback *_callback;
+   Flt                _volume, _speed, _actual_speed, _range, _actual_range, _time, _fade, _fade_d, priority;
    Vec                _pos, _vel;
    Str                _name;
-   SoundDataCallback *_callback;
    SoundStream        _stream;
    SoundBuffer        _buffer;
 
@@ -154,6 +157,7 @@ const_mem_addr struct _Sound // can be moved however 'memAddressChanged' needs t
    Flt  actualVolume ()C;
    void setVolume    ();
    void setSpeed     ();
+   void setRange     ();
    Bool update       (Flt dt);
    void updatePlaying(Int thread_index);
    void memAddressChanged();
@@ -272,9 +276,13 @@ Int SoundMaxConcurrent();   void SoundMaxConcurrent(Int max   ); // get/set maxi
 Int SoundMaxThreads   ();   void SoundMaxThreads   (Int max   ); // get/set maximum number of threads used for sound processing, default=1
 /******************************************************************************/
 #if EE_PRIVATE
-extern SyncLock SoundAPILock; //    Sound API Lock
-extern Bool     SoundAPI    , // if Sound API is available
-                SoundFunc   ; // if we can access Sound functions
+#define LISTENER_CHANGED (XAUDIO || CUSTOM_AUDIO) // if using global 'ListenerChanged' which affects all sounds
+
+extern Memx<_Sound > SoundMemx;
+extern Memc<_Sound*> SoundMemxPlaying;
+extern SyncLock      SoundAPILock, SoundMemxLock;
+extern Bool          SoundAPI    , // if Sound API is available
+                     SoundFunc   ; // if we can access Sound functions
 
 void    InitSound  ();
 void    ShutSound  ();
@@ -283,10 +291,9 @@ void    ShutSound2 ();
 void  UpdateSound  ();
 void   PauseSound  ();
 void  ResumeSound  ();
-void  VolumeSound  ();
-void EmulateSound3D();
-void   SpeedSound  ();
 Int  PlayingSounds ();
 Bool PlayingAnySound();
+void  ChangeSounds        (UInt change); // apply 'change' flag for one global variable if possible, if not then for all sounds separately
+void  ChangeSoundsSeparate(UInt change); // apply 'change' flag for all sounds separately
 #endif
 /******************************************************************************/

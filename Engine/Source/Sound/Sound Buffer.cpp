@@ -76,7 +76,7 @@ static void Get3DParams(C Vec &pos, Flt range, Flt volume, Flt &out_volume, Flt 
    out_volume=volume;
    out_pan   =Dot(delta, Listener.right())/((dist>EarRadius) ? dist : EarRadius); // normalize only if length is greater than 'EarRadius' so that we can still have pan when distance is less than 'EarRadius'
 }
-static Flt Get3DPan(C Vec &pos, Flt range) // pan will always be -1..1
+static Flt Get3DPan(C Vec &pos) // pan will always be -1..1
 {
    Vec delta=pos-Listener.pos();
    Flt dist =delta.length();
@@ -525,7 +525,7 @@ void SoundBuffer::set3DParams(C _Sound &sound, Bool pos_range, Bool speed)
          emitter.ChannelCount=_par.channels;
          emitter.pChannelAzimuths=ChannelAzimuths; DEBUG_ASSERT(emitter.ChannelCount<=Elms(ChannelAzimuths), "ChannelAzimuths");
          emitter.InnerRadius=EarRadius;
-         emitter.CurveDistanceScaler=Max(FLT_MIN, sound._range);
+         emitter.CurveDistanceScaler=Max(FLT_MIN, sound._actual_range);
 
          dsp.SrcChannelCount= _par.channels;
          dsp.DstChannelCount=XAudioChannels;
@@ -544,7 +544,7 @@ void SoundBuffer::set3DParams(C _Sound &sound, Bool pos_range, Bool speed)
       SOUND_API_LOCK_WEAK;
       if(pos_range)
       {
-         Flt pan=Get3DPan(sound.pos(), sound.range());
+         Flt pan=Get3DPan(sound.pos());
          switch(_par.channels) // volumes have to be set to have same loudness for both mono/stereo sounds
          {
          #if FULL_VOL_AT_CENTER
@@ -579,7 +579,7 @@ void SoundBuffer::set3DParams(C _Sound &sound, Bool pos_range, Bool speed)
       if(pos_range)
       {
          // first calculate on temporaries
-         Flt volume, pan; Get3DParams(sound.pos(), sound.range(), _volume, volume, pan);
+         Flt volume, pan; Get3DParams(sound.pos(), sound._actual_range, _volume, volume, pan);
       #if FULL_VOL_AT_CENTER
          Flt volume_left =volume*Min(1-pan, 1),
              volume_right=volume*Min(pan+1, 1);
@@ -837,16 +837,38 @@ Vec ListenerClass::pos()
    return VecZero;
 }
 #endif
-ListenerClass::ListenerClass() {_orn.pos.zero(); _orn.dir.set(0, 0, 1); _orn.perp.set(0, 1, 0); _vel.zero(); _flag=SOUND_CHANGED_POS|SOUND_CHANGED_VEL|SOUND_CHANGED_ORN;} // set flag to make sure that we set params in case the SoundAPI uses different initial values
+ListenerClass::ListenerClass() {_orn.pos.zero(); _orn.dir.set(0, 0, 1); _orn.perp.set(0, 1, 0); _vel.zero(); _range=1; _flag=SOUND_CHANGED_POS|SOUND_CHANGED_VEL|SOUND_CHANGED_ORN|SOUND_CHANGED_RANGE;} // set flag to make sure that we set params in case the SoundAPI uses different initial values
 ListenerClass& ListenerClass::pos(C Vec &pos) {if(T.pos()!=pos){T._orn.pos=pos; AtomicOr(_flag, SOUND_CHANGED_POS);} return T;} // modify first and enable flag at the end
 ListenerClass& ListenerClass::vel(C Vec &vel) {if(T.vel()!=vel){T._vel    =vel; AtomicOr(_flag, SOUND_CHANGED_VEL);} return T;} // modify first and enable flag at the end
 ListenerClass& ListenerClass::orn(C Vec &dir, C Vec &up)
 {
-   Orient orn(dir, up); orn.fixPerp();
-   if(SCAST(Orient, T._orn)!=orn)
+   if(_orn.dir!=dir || _orn.perp!=up)
    {
-      SCAST(Orient, T._orn)=orn;
+     _orn.dir =dir;
+     _orn.perp=up ;
       AtomicOr(_flag, SOUND_CHANGED_ORN); // modify first and enable flag at the end
+   }
+   return T;
+}
+ListenerClass& ListenerClass::range(Flt range)
+{
+   if(T.range()!=range)
+   {
+      T._range=range; // modify first
+      // 'ChangeSounds'
+      { // this func is called very rarely, so it's better to just process 'setRange' here, instead of in 'updateNoLock' which would be checked everytime other listener parameters are changed
+         SyncLocker locker(SoundMemxLock);
+         REPA(SoundMemx)
+         {
+           _Sound &sound=SoundMemx[i]; sound.setRange();
+         #if !LISTENER_CHANGED
+            AtomicOr(sound.flag, SOUND_CHANGED_RANGE); // enable flag at the end
+         #endif
+         }
+      }
+   #if LISTENER_CHANGED
+      AtomicOr(_flag, SOUND_CHANGED_RANGE); // enable flag at the end
+   #endif
    }
    return T;
 }
@@ -854,14 +876,15 @@ UInt ListenerClass::updateNoLock() // requires 'SoundAPILock'
 {
    if(_flag)
    {
-      UInt flag=AtomicDisable(_flag, SOUND_CHANGED_POS|SOUND_CHANGED_VEL|SOUND_CHANGED_ORN); // disable these flags first, so in case the user modifies listener parameters while this function is running, it will be activated again
+      UInt flag=AtomicGetSet(_flag, 0); // disable flags first, so in case the user modifies listener parameters while this function is running, it will be activated again
 
    #if DIRECT_SOUND
       if(DSL)
       {
-         if(flag&SOUND_CHANGED_POS)DSL->SetPosition   (pos().x, pos().y, pos().z,                         DS3D_DEFERRED);
-         if(flag&SOUND_CHANGED_VEL)DSL->SetVelocity   (vel().x, vel().y, vel().z,                         DS3D_DEFERRED);
-         if(flag&SOUND_CHANGED_ORN)DSL->SetOrientation(dir().x, dir().y, dir().z, up().x, up().y, up().z, DS3D_DEFERRED);
+         if(flag&SOUND_CHANGED_POS  )DSL->SetPosition      (pos().x, pos().y, pos().z,                         DS3D_DEFERRED);
+         if(flag&SOUND_CHANGED_VEL  )DSL->SetVelocity      (vel().x, vel().y, vel().z,                         DS3D_DEFERRED);
+         if(flag&SOUND_CHANGED_ORN  )DSL->SetOrientation   (dir().x, dir().y, dir().z, up().x, up().y, up().z, DS3D_DEFERRED);
+       //if(flag&SOUND_CHANGED_RANGE)DSL->SetDistanceFactor(range(),                                           DS3D_DEFERRED); not working so just handle manually using '_actual_range'
       }
    #elif XAUDIO
       if(flag&SOUND_CHANGED_POS){X3DListener.Position   .x=pos().x; X3DListener.Position   .y=pos().y; X3DListener.Position   .z=pos().z;}
@@ -900,7 +923,7 @@ UInt ListenerClass::updateNoLock() // requires 'SoundAPILock'
    }
    return 0;
 }
-void ListenerClass::commitNoLock() // requires 'SoundAPILock', also because of 'EmulateSound3D'
+void ListenerClass::commitNoLock() // requires 'SoundAPILock', also because of 'emulate3D'
 {
    // commit changes, do this always, not only on Listener change, because sound positions on DirectSound are called with DS3D_DEFERRED and on XAudio not just 3D is deferred but most of the operations
 #if DIRECT_SOUND
@@ -910,7 +933,11 @@ void ListenerClass::commitNoLock() // requires 'SoundAPILock', also because of '
 #elif OPEN_AL
    // 'alcProcessContext' 'alcSuspendContext' are not used because they seem to be a no-op and there's no way to test them
 #elif OPEN_SL
-   if(SLListenerCommit)(*SLListenerCommit)->Commit(SLListenerCommit);else EmulateSound3D(); // if listener is not available then it means 3D Audio is simulated manually
+   if(SLListenerCommit)(*SLListenerCommit)->Commit(SLListenerCommit);else
+   { // if listener is not available then it means 3D Audio is simulated manually
+     // !! this can be called only inside 'Listener' on sound thread !! because it's called only there, it already had 'SoundAPILock' lock applied so we don't need to call it again, since it's the sound thread then we can use 'SoundMemxPlaying'
+      REPAO(SoundMemxPlaying)->_buffer.emulate3D(); // !! requires 'SoundAPILock' !!
+   }
 #endif
 }
 Bool ListenerClass::create()

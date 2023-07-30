@@ -28,7 +28,7 @@ namespace EE{
    Sound Threads operate  on _Sound.raw  (main), time, frac. Raw  was chosen to be the main value because sound buffer data operate on it.
       However, when _Sound is not playing ("_buffer_playing==false"), then _Sound operates on '_Sound._time'.
 
-   At the moment, 'VOLUME_GROUP' and 'SoundVolume' multipliers don't contribute to Sound priority,
+   TODO: At the moment, 'VOLUME_GROUP' and 'SoundVolume' multipliers don't contribute to Sound priority,
       to avoid extra calculations.
 
 /******************************************************************************/

@@ -633,12 +633,16 @@ void _Sound::updatePlaying(Int thread_index)
    #endif
 
       UInt flag=AtomicGet(T.flag), handled=SOUND_CHANGED_POS|SOUND_CHANGED_VEL|SOUND_CHANGED_ORN|SOUND_CHANGED_RANGE|SOUND_CHANGED_VOLUME|SOUND_CHANGED_SPEED|SOUND_CHANGED_TIME|SOUND_CHANGING_TIME; // flags handled here, need to check for SOUND_CHANGED_ORN because of Listener changes
-      if(LISTENER_CHANGED)flag|=ListenerChanged;
+   #if LISTENER_CHANGED
+      flag|=ListenerChanged;
+   #endif
 
       if(flag&handled)
       {
          flag=AtomicDisable(T.flag, handled); // disable these flags first, so in case the user modifies parameters while this function is running, it will be activated again, don't surround this with another 'if' (to avoid extra branching) because most likely they will return handled flags
-         if(LISTENER_CHANGED)flag|=ListenerChanged;
+      #if LISTENER_CHANGED
+         flag|=ListenerChanged;
+      #endif
 
          SOUND_API_LOCK_COND; // below !! requires 'SoundAPILock' !!
          if(flag&SOUND_CHANGED_VOLUME)setActualVolume(); // !! call this first before 'set3DParams' because CUSTOM_AUDIO needs this !!

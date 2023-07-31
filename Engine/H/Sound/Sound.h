@@ -153,11 +153,12 @@ const_mem_addr struct _Sound // can be moved however 'memAddressChanged' needs t
    void preciseFrac(Flt  f  );   Flt  preciseFrac()C; // set/get sound fraction position, 0..1
 
    // operations
-   Flt  actualSpeed  ()C;
-   Flt  actualVolume ()C;
-   void setVolume    ();
-   void setSpeed     ();
-   void setRange     ();
+   Flt  actualRange ()C;
+   Flt  actualSpeed ()C;
+   Flt  actualVolume()C;
+   void setActualRange ();
+   void setActualSpeed ();
+   void setActualVolume();
    Bool update       (Flt dt);
    void updatePlaying(Int thread_index);
    void memAddressChanged();

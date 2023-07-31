@@ -855,20 +855,16 @@ ListenerClass& ListenerClass::range(Flt range)
    if(T.range()!=range)
    {
       T._range=range; // modify first
-      // 'ChangeSounds'
+      // 'ChangeSounds' + 'setActualRange'
       { // this func is called very rarely, so it's better to just process 'setActualRange' here, instead of in 'updateNoLock' which would be checked everytime other listener parameters are changed
          SyncLocker locker(SoundMemxLock);
          REPA(SoundMemx)
          {
            _Sound &sound=SoundMemx[i]; sound.setActualRange();
-         #if !LISTENER_CHANGED
-            AtomicOr(sound.flag, SOUND_CHANGED_RANGE); // enable flag at the end
-         #endif
+            if(!LISTENER_CHANGED)AtomicOr(sound.flag, SOUND_CHANGED_RANGE); // enable flag at the end
          }
       }
-   #if LISTENER_CHANGED
-      AtomicOr(_flag, SOUND_CHANGED_RANGE); // enable flag at the end
-   #endif
+      if(LISTENER_CHANGED)AtomicOr(_flag, SOUND_CHANGED_RANGE); // enable flag at the end
    }
    return T;
 }

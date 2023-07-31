@@ -278,6 +278,7 @@ Int SoundMaxThreads   ();   void SoundMaxThreads   (Int max   ); // get/set maxi
 /******************************************************************************/
 #if EE_PRIVATE
 #define LISTENER_CHANGED (XAUDIO || CUSTOM_AUDIO) // if using global 'ListenerChanged' which affects all sounds
+#define SOUND_SPEED_ON_SOUND_THREAD 0 // if call 'setActualSpeed' only on sound thread
 
 extern Memx<_Sound > SoundMemx;
 extern Memc<_Sound*> SoundMemxPlaying;

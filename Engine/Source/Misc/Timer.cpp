@@ -107,7 +107,19 @@ void TimeClass::speed(Flt speed)
    if(T._speed!=speed)
    {
       T._speed=speed;
-      ChangeSoundsSeparate(SOUND_CHANGED_SPEED); // can't use 'ChangeSounds' and have to use 'ChangeSoundsSeparate' because of #SOUND_CHANGED_SPEED which doesn't look at listener changes
+      if(SOUND_SPEED_ON_SOUND_THREAD)ChangeSoundsSeparate(SOUND_CHANGED_SPEED);else // can't use 'ChangeSounds' and have to use 'ChangeSoundsSeparate' because of #SOUND_CHANGED_SPEED which doesn't look at listener changes
+      {
+         // 'ChangeSounds' + 'setActualSpeed'
+         {
+            SyncLocker locker(SoundMemxLock);
+            REPA(SoundMemx)
+            {
+              _Sound &sound=SoundMemx[i]; sound.setActualSpeed();
+               if(!LISTENER_CHANGED)AtomicOr(sound.flag, SOUND_CHANGED_SPEED); // enable flag at the end
+            }
+         }
+         if(LISTENER_CHANGED)AtomicOr(Listener._flag, SOUND_CHANGED_SPEED); // enable flag at the end
+      }
    }
 }
 /******************************************************************************/

@@ -25,6 +25,7 @@ namespace EE{
 #define OPERATION_SET        (!XAUDIO2_COMMIT_NOW) // make sure that this is not XAUDIO2_COMMIT_NOW
 
 #define FULL_VOL_AT_CENTER 1 // play 3D sounds at full volume when they're at Listener position
+#define DOWNMIX_3D_STEREO  0 // affects only XAudio, disable because it provides greater depth for stereo sounds
 
 #if DIRECT_SOUND
 static IDirectSound           *DS;
@@ -563,8 +564,13 @@ void SoundBuffer::set3DParams(C _Sound &sound, Bool pos_range, Bool speed)
             #endif
                if(dsp.DstChannelCount==2)
                {
-                  dsp.pMatrixCoefficients[0]*=vol[0]; dsp.pMatrixCoefficients[2]*=vol[0]; // left
-                  dsp.pMatrixCoefficients[1]*=vol[1]; dsp.pMatrixCoefficients[3]*=vol[1]; // right
+               #if DOWNMIX_3D_STEREO
+                  dsp.pMatrixCoefficients[0]*=vol[0]; dsp.pMatrixCoefficients[2]*=vol[0]; // dest left
+                  dsp.pMatrixCoefficients[1]*=vol[1]; dsp.pMatrixCoefficients[3]*=vol[1]; // dest right
+               #else // for left dest use only left source, for right dest use only right source
+                  dsp.pMatrixCoefficients[0]=(dsp.pMatrixCoefficients[0]+dsp.pMatrixCoefficients[2])*vol[0]; dsp.pMatrixCoefficients[2]=0; // dest left
+                  dsp.pMatrixCoefficients[3]=(dsp.pMatrixCoefficients[3]+dsp.pMatrixCoefficients[1])*vol[1]; dsp.pMatrixCoefficients[1]=0; // dest right
+               #endif
                }else _sv->SetChannelVolumes(2, vol, OPERATION_SET);
             }break;
          }

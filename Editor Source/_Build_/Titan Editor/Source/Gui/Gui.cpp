@@ -797,7 +797,7 @@ ConvertToDeAtlas.drag(elms, obj, screen_pos);
                }
             }break;
          }
-         path.set(FileParams::Encode(files));
+         path.set(FileParams::Encode(files)).kbSet();
          super::activate();
       }
    }

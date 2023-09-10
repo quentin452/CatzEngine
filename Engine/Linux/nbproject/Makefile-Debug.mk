@@ -231,6 +231,7 @@ OBJECTFILES= \
 	${OBJECTDIR}/_ext/36d10766/Mem_Continuous.o \
 	${OBJECTDIR}/_ext/36d10766/Mem_Extended.o \
 	${OBJECTDIR}/_ext/36d10766/Mem_List.o \
+	${OBJECTDIR}/_ext/36d10766/Mem_Tree.o \
 	${OBJECTDIR}/_ext/36d10766/Memory.o \
 	${OBJECTDIR}/_ext/36aab592/Blocks.o \
 	${OBJECTDIR}/_ext/36aab592/Heightmap.o \
@@ -1343,6 +1344,11 @@ ${OBJECTDIR}/_ext/36d10766/Mem_List.o: ../Source/Memory/Mem\ List.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/36d10766
 	${RM} "$@.d"
 	$(COMPILE.cc) -g -DDEBUG=1 -I.. -I../H/_ -I../../ThirdPartyLibs -I../../ThirdPartyLibs/Bullet/lib/src -I../../ThirdPartyLibs/FBX -I../../ThirdPartyLibs/FreeType/lib/include -I../../ThirdPartyLibs/Ogg/include -I../../ThirdPartyLibs/Opus/lib/include -I../../ThirdPartyLibs/Opus/file/include -I../../ThirdPartyLibs/Theora/include -I../../ThirdPartyLibs/Vorbis/include -I../../ThirdPartyLibs/VP/libvpx/third_party/libwebm -I../../ThirdPartyLibs/FDK-AAC/lib/libAACdec/include -I../../ThirdPartyLibs/FDK-AAC/lib/libAACenc/include -I../../ThirdPartyLibs/FDK-AAC/lib/libFDK/include -I../../ThirdPartyLibs/FDK-AAC/lib/libMpegTPDec/include -I../../ThirdPartyLibs/FDK-AAC/lib/libMpegTPEnc/include -I../../ThirdPartyLibs/FDK-AAC/lib/libPCMutils/include -I../../ThirdPartyLibs/FDK-AAC/lib/libSBRdec/include -I../../ThirdPartyLibs/FDK-AAC/lib/libSBRenc/include -I../../ThirdPartyLibs/FDK-AAC/lib/libSYS/include -I../../ThirdPartyLibs/PhysX/physx/include -I../../ThirdPartyLibs/PhysX/pxshared/include -I../../ThirdPartyLibs/PhysX/physx/source/common/src -I../../ThirdPartyLibs/PhysX/physx/source/foundation/include -I../../ThirdPartyLibs/PhysX/physx/source/geomutils/src -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/36d10766/Mem_List.o ../Source/Memory/Mem\ List.cpp
+
+${OBJECTDIR}/_ext/36d10766/Mem_Tree.o: ../Source/Memory/Mem\ Tree.cpp
+	${MKDIR} -p ${OBJECTDIR}/_ext/36d10766
+	${RM} "$@.d"
+	$(COMPILE.cc) -g -DDEBUG=1 -I.. -I../H/_ -I../../ThirdPartyLibs -I../../ThirdPartyLibs/Bullet/lib/src -I../../ThirdPartyLibs/FBX -I../../ThirdPartyLibs/FreeType/lib/include -I../../ThirdPartyLibs/Ogg/include -I../../ThirdPartyLibs/Opus/lib/include -I../../ThirdPartyLibs/Opus/file/include -I../../ThirdPartyLibs/Theora/include -I../../ThirdPartyLibs/Vorbis/include -I../../ThirdPartyLibs/VP/libvpx/third_party/libwebm -I../../ThirdPartyLibs/FDK-AAC/lib/libAACdec/include -I../../ThirdPartyLibs/FDK-AAC/lib/libAACenc/include -I../../ThirdPartyLibs/FDK-AAC/lib/libFDK/include -I../../ThirdPartyLibs/FDK-AAC/lib/libMpegTPDec/include -I../../ThirdPartyLibs/FDK-AAC/lib/libMpegTPEnc/include -I../../ThirdPartyLibs/FDK-AAC/lib/libPCMutils/include -I../../ThirdPartyLibs/FDK-AAC/lib/libSBRdec/include -I../../ThirdPartyLibs/FDK-AAC/lib/libSBRenc/include -I../../ThirdPartyLibs/FDK-AAC/lib/libSYS/include -I../../ThirdPartyLibs/PhysX/physx/include -I../../ThirdPartyLibs/PhysX/pxshared/include -I../../ThirdPartyLibs/PhysX/physx/source/common/src -I../../ThirdPartyLibs/PhysX/physx/source/foundation/include -I../../ThirdPartyLibs/PhysX/physx/source/geomutils/src -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/36d10766/Mem_Tree.o ../Source/Memory/Mem\ Tree.cpp
 
 ${OBJECTDIR}/_ext/36d10766/Memory.o: ../Source/Memory/Memory.cpp
 	${MKDIR} -p ${OBJECTDIR}/_ext/36d10766

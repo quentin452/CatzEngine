@@ -508,6 +508,7 @@
         <itemPath>../Source/Memory/Mem Continuous.cpp</itemPath>
         <itemPath>../Source/Memory/Mem Extended.cpp</itemPath>
         <itemPath>../Source/Memory/Mem List.cpp</itemPath>
+        <itemPath>../Source/Memory/Mem Tree.cpp</itemPath>
         <itemPath>../Source/Memory/Memory.cpp</itemPath>
       </logicalFolder>
       <logicalFolder name="Mesh" displayName="Mesh" projectFiles="true">
@@ -1749,6 +1750,8 @@
       <item path="../Source/Memory/Mem Extended.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Memory/Mem List.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../Source/Memory/Mem Tree.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Memory/Memory.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -3183,6 +3186,8 @@
       <item path="../Source/Memory/Mem Extended.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Memory/Mem List.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../Source/Memory/Mem Tree.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Memory/Memory.cpp" ex="false" tool="1" flavor2="0">
       </item>

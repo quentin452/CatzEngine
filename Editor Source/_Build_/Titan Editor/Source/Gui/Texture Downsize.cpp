@@ -105,6 +105,8 @@ TextureDownsize TexDownsize;
    void TextureDownsize::Draw(Viewport &viewport) {if(Edit::Viewport4::View *view=TexDownsize.v4.getView(&viewport))TexDownsize.draw(*view);}
           void TextureDownsize::draw(Edit::Viewport4::View &view)
    {
+      if(BigVisible())return;
+
       // environment
       EnvironmentPtr env=EnvEdit.cur(); if(!env)env=&DefaultEnvironment; env->set();
 

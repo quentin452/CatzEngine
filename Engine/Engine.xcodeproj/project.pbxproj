@@ -1005,6 +1005,9 @@
 		B66FD3EE295C9E9900F1CFE5 /* libaom.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B66FD3ED295C9E9900F1CFE5 /* libaom.a */; };
 		B66FD42A295CBD5900F1CFE5 /* libaom.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B66FD429295CBD5800F1CFE5 /* libaom.a */; };
 		B66FD42C295CBD7200F1CFE5 /* libavif-iOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = B66FD42B295CBD7100F1CFE5 /* libavif-iOS.a */; };
+		B68355762A35EC3E0034ED97 /* Mem Tree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B68355752A35EC3E0034ED97 /* Mem Tree.cpp */; };
+		B68355772A35EC3E0034ED97 /* Mem Tree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B68355752A35EC3E0034ED97 /* Mem Tree.cpp */; };
+		B68355782A35EC3E0034ED97 /* Mem Tree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B68355752A35EC3E0034ED97 /* Mem Tree.cpp */; };
 		B6C416AD295972790073B05F /* AVIF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B6C416AC295972790073B05F /* AVIF.cpp */; };
 		B6C416AE295972790073B05F /* AVIF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B6C416AC295972790073B05F /* AVIF.cpp */; };
 		B6C416AF295972790073B05F /* AVIF.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B6C416AC295972790073B05F /* AVIF.cpp */; };
@@ -1674,6 +1677,7 @@
 		B66FD3ED295C9E9900F1CFE5 /* libaom.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libaom.a; path = ../ThirdPartyLibs/AOM/Mac/Release/libaom.a; sourceTree = "<group>"; };
 		B66FD429295CBD5800F1CFE5 /* libaom.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = libaom.a; path = ../ThirdPartyLibs/AOM/iOS/libaom.a; sourceTree = "<group>"; };
 		B66FD42B295CBD7100F1CFE5 /* libavif-iOS.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; name = "libavif-iOS.a"; path = "../ThirdPartyLibs/AVIF/Mac/Release/libavif-iOS.a"; sourceTree = "<group>"; };
+		B68355752A35EC3E0034ED97 /* Mem Tree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "Mem Tree.cpp"; sourceTree = "<group>"; };
 		B6C416AC295972790073B05F /* AVIF.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AVIF.cpp; sourceTree = "<group>"; };
 		B6D3A6ED298A2A190050C6B8 /* Vorbis Encoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "Vorbis Encoder.cpp"; sourceTree = "<group>"; };
 		B6D3A710298A2AC10050C6B8 /* SMAA.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = SMAA.cpp; sourceTree = "<group>"; };
@@ -2207,6 +2211,7 @@
 				0BED2FAB16B6E3BC0088106C /* Mem Continuous.cpp */,
 				0BED2FAC16B6E3BC0088106C /* Mem Extended.cpp */,
 				0BED2FAD16B6E3BC0088106C /* Mem List.cpp */,
+				B68355752A35EC3E0034ED97 /* Mem Tree.cpp */,
 				0B18997712DA3FD300499CA9 /* Memory.cpp */,
 			);
 			name = Memory;
@@ -3497,6 +3502,7 @@
 				0BB718DE162EDD82003FC814 /* CE Source C++.cpp in Sources */,
 				0BB718E1162EDD82003FC814 /* CE Source Edit.cpp in Sources */,
 				0BB718E4162EDD82003FC814 /* CE Source GUI.cpp in Sources */,
+				B68355782A35EC3E0034ED97 /* Mem Tree.cpp in Sources */,
 				0BB718E7162EDD82003FC814 /* CE Source Preprocessor.cpp in Sources */,
 				0BB718EA162EDD82003FC814 /* CE Source Suggestions.cpp in Sources */,
 				0BB718ED162EDD82003FC814 /* CE Source.cpp in Sources */,
@@ -3712,6 +3718,7 @@
 				0B18A0CB12DA4DA400499CA9 /* File Text.cpp in Sources */,
 				0B18A0CD12DA4DA400499CA9 /* File.cpp in Sources */,
 				0B18A0CE12DA4DA400499CA9 /* IO.cpp in Sources */,
+				B68355762A35EC3E0034ED97 /* Mem Tree.cpp in Sources */,
 				0B18A0CF12DA4DA400499CA9 /* Pak.cpp in Sources */,
 				0B18A10812DA4E2A00499CA9 /* MyApplication.mm in Sources */,
 				0B18A10A12DA4E2A00499CA9 /* MyOpenGLView.mm in Sources */,
@@ -4122,6 +4129,7 @@
 				0BB718E0162EDD82003FC814 /* CE Source Edit.cpp in Sources */,
 				0BB718E3162EDD82003FC814 /* CE Source GUI.cpp in Sources */,
 				0BB718E6162EDD82003FC814 /* CE Source Preprocessor.cpp in Sources */,
+				B68355772A35EC3E0034ED97 /* Mem Tree.cpp in Sources */,
 				0BB718E9162EDD82003FC814 /* CE Source Suggestions.cpp in Sources */,
 				0BB718EC162EDD82003FC814 /* CE Source.cpp in Sources */,
 				0BB718EF162EDD82003FC814 /* CE Symbol.cpp in Sources */,

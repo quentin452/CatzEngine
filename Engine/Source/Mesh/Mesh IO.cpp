@@ -1672,6 +1672,20 @@ void RemoveNubBones(Mesh *mesh, Skeleton &skeleton, C CMemPtr<Animation*> &anima
    }
 }
 /******************************************************************************/
+Int LodIndex(Str &name)
+{
+   Int lod_i=-1; // -1=unspecified
+   Int index=name.length(); for(; CharFlag(name[index-1])&CHARF_DIG; )index--;
+   Int index4=index-4; if(index4>=0 && Starts(name()+index4, "_LOD", true))
+   {
+      lod_i=TextInt(name()+index);
+      if(!InRange(lod_i, 16))lod_i=-1; // keep within sensible ranges
+      name.clip(index4); // remove "_LOD*"
+   }
+   MAX(lod_i, 0);
+   return lod_i;
+}
+/******************************************************************************/
 void CleanMesh(Mesh &mesh)
 {
    REPD(l, mesh.lods())

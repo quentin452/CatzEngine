@@ -1,6 +1,8 @@
 /******************************************************************************/
 struct _Meml // List Based Container Base - Do not use this class, use 'Meml' instead
 {
+   static constexpr Bool Continuous=false; // Meml memory is NOT continuous
+
    void del  ();
    void clear();
 

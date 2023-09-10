@@ -455,7 +455,7 @@ p_scale=&add("Item 3D Scale"          , MemberDesc(MEMBER(Options, item_3d_scale
    void refreshNow()
    {
       VecD2 offset=T.offset();
-      VecD2 size=rect().size()-slidebarSize();
+      VecD2 size=minClientSize();
       if(options.horizontal)
       {
          size=size.y/options.rows;

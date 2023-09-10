@@ -64,14 +64,6 @@ enum DOF_MODE : Byte // Depth of Field Mode
    DOF_GAUSSIAN, // based on Gaussian Blur, fast but not realistic
    DOF_NUM     , // number of Depth of Field modes
 };
-enum TONE_MAP_MODE : Byte // Tone Mapping Mode
-{
-   TONE_MAP_OFF     , // disabled
-   TONE_MAP_DEFAULT , // default
-   TONE_MAP_ACES_LDR, // ACES 0 ..  1.0 (  80 nits) for use on  Low Dynamic Range Monitors
-   TONE_MAP_ACES_HDR, // ACES 0 .. 12.5 (1000 nits) for use on High Dynamic Range Monitors
-   TONE_MAP_NUM     , // number of Tone Mapping Modes
-};
 enum EDGE_DETECT_MODE : Byte // Edge Detect Mode
 {
    EDGE_DETECT_NONE, // disabled
@@ -291,6 +283,13 @@ struct DisplayClass : DisplayState, DisplayDraw // Display Control
    DisplayClass& bloomGlow    (Flt  glow    );   Flt  bloomGlow    ()C {return _bloom_glow    ;} // set/get Bloom from Glow       (   0..Inf , default=1.0                    ), the change is instant, you can call it real-time
                                                  Bool bloomUsed    ()C;                          //     if  Bloom post process is going to be used
 
+   // Contrast
+   DisplayClass& contrast(Flt contrast);   Flt contrast()C {return _contrast;} // set/get contrast (0..Inf, 0=disabled, default=0.8), the change is instant, you can call it real-time
+#if EE_PRIVATE
+   Bool useContrast()C {return _contrast>=HALF_MIN;}
+   void setContrast()C;
+#endif
+
    // Ambient Light
 #if EE_PRIVATE
    Bool aoWant()C;
@@ -369,23 +368,22 @@ struct DisplayClass : DisplayState, DisplayDraw // Display Control
    DisplayClass& dofIntensity(Flt      intensity);   Flt      dofIntensity()C {return _dof_intensity;} // set/get Depth of Field Intensity            (   0..Inf , default=       1), intensity of the depth of field effect, the change is instant, you can call it real-time
 
    // Eye Adaptation
-   DisplayClass& eyeAdaptation          (  Bool on          );   Bool eyeAdaptation          ()C {return _eye_adapt           ;} // set/get Eye Adaptation usage                (                true/false                  , default=false        ), enables automatic screen brightness adjustment, the change is instant, you can call it real-time
-   DisplayClass& eyeAdaptationBrightness(  Flt  brightness  );   Flt  eyeAdaptationBrightness()C {return _eye_adapt_brightness;} // set/get Eye Adaptation brightness           (                   0..Inf                   , default= 0.7         ), total scale of lighting, the change is instant, you can call it real-time
-   DisplayClass& eyeAdaptationExp       (  Flt  exp         );   Flt  eyeAdaptationExp       ()C {return _eye_adapt_exp       ;} // set/get Eye Adaptation exponent             (                   0..1                     , default= 0.5         ), affects how much brightness can change towards desired 'eyeAdaptationBrightness', value of 1 means that all targets can be reached, value of 0.5 means that the actual brightness scale will be a square root of full brightness scale, brightness scale is calculated based on following formula: "actual_scale = Pow(desired_scale, exp)", where 'desired_scale' is the scale needed to exactly reach target brightness, making exponent smaller results in making the 'actual_scale' closer to 1.0, which means smaller brightness scales are performed. You can call this method real-time
-   DisplayClass& eyeAdaptationMaxDark   (  Flt  max_dark    );   Flt  eyeAdaptationMaxDark   ()C {return _eye_adapt_max_dark  ;} // set/get Eye Adaptation maximum   darkening  (                   0..eyeAdaptationMaxBright, default= 0.5         ), this is a hard limit for maximum   darkening, the change is instant, you can call it real-time
-   DisplayClass& eyeAdaptationMaxBright (  Flt  max_bright  );   Flt  eyeAdaptationMaxBright ()C {return _eye_adapt_max_bright;} // set/get Eye Adaptation maximum brightening  (eyeAdaptationMaxDark..Inf                   , default= 2.0         ), this is a hard limit for maximum brightening, the change is instant, you can call it real-time
-   DisplayClass& eyeAdaptationSpeed     (  Flt  speed       );   Flt  eyeAdaptationSpeed     ()C {return _eye_adapt_speed     ;} // set/get Eye Adaptation speed                (                   1..Inf                   , default= 6.5         ), the change is instant, you can call it real-time
-   DisplayClass& eyeAdaptationWeight    (C Vec &weight      ); C Vec& eyeAdaptationWeight    ()C {return _eye_adapt_weight    ;} // set/get Eye Adaptation color weight         (           (0, 0, 0)..(1, 1, 1)             , default=(0.9, 1, 0.7)), the change is instant, you can call it real-time
+   DisplayClass& eyeAdaptation          (  Bool on          );   Bool eyeAdaptation          ()C {return _eye_adapt           ;} // set/get Eye Adaptation usage                (                true/false                  , default=false            ), enables automatic screen brightness adjustment, the change is instant, you can call it real-time
+   DisplayClass& eyeAdaptationBrightness(  Flt  brightness  );   Flt  eyeAdaptationBrightness()C {return _eye_adapt_brightness;} // set/get Eye Adaptation brightness           (                   0..Inf                   , default= 0.1             ), total scale of lighting, the change is instant, you can call it real-time
+   DisplayClass& eyeAdaptationExp       (  Flt  exp         );   Flt  eyeAdaptationExp       ()C {return _eye_adapt_exp       ;} // set/get Eye Adaptation exponent             (                   0..1                     , default= 0.333           ), affects how much brightness can change towards desired 'eyeAdaptationBrightness', value of 1 means that all targets can be reached, value of 0.5 means that the actual brightness scale will be a square root of full brightness scale, brightness scale is calculated based on following formula: "actual_scale = Pow(desired_scale, exp)", where 'desired_scale' is the scale needed to exactly reach target brightness, making exponent smaller results in making the 'actual_scale' closer to 1.0, which means smaller brightness scales are performed, the change is instant, you can call it real-time
+   DisplayClass& eyeAdaptationIntensity (  Flt  intensity   );   Flt  eyeAdaptationIntensity ()C {return _eye_adapt_intensity ;} // set/get Eye Adaptation intensity            (                   0..1                     , default= 1.0             ), the change is instant, you can call it real-time
+   DisplayClass& eyeAdaptationMaxDark   (  Flt  max_dark    );   Flt  eyeAdaptationMaxDark   ()C {return _eye_adapt_max_dark  ;} // set/get Eye Adaptation maximum   darkening  (                   0..eyeAdaptationMaxBright, default= 0.5             ), this is a hard limit for maximum   darkening, the change is instant, you can call it real-time
+   DisplayClass& eyeAdaptationMaxBright (  Flt  max_bright  );   Flt  eyeAdaptationMaxBright ()C {return _eye_adapt_max_bright;} // set/get Eye Adaptation maximum brightening  (eyeAdaptationMaxDark..Inf                   , default= 2.0             ), this is a hard limit for maximum brightening, the change is instant, you can call it real-time
+   DisplayClass& eyeAdaptationSpeed     (  Flt  speed       );   Flt  eyeAdaptationSpeed     ()C {return _eye_adapt_speed     ;} // set/get Eye Adaptation speed                (                   1..Inf                   , default= 6.5             ), the change is instant, you can call it real-time
+   DisplayClass& eyeAdaptationWeight    (C Vec &weight      ); C Vec& eyeAdaptationWeight    ()C {return _eye_adapt_weight    ;} // set/get Eye Adaptation color weight         (           (0, 0, 0)..(1, 1, 1)             , default=(0.509, 1, 0.194)), the change is instant, you can call it real-time
    DisplayClass& resetEyeAdaptation     (  Flt  brightness=1);                                                                   // reset   Eye Adaptation value, eye adaptation changes over time according to screen colors, this method resets the adaptation to its original state, 'brightness'=initial brightness (0..Inf), the change is NOT instant, avoid calling real-time
 
    // Tone Mapping
-   DisplayClass& toneMap           (TONE_MAP_MODE mode);   TONE_MAP_MODE toneMap           ()C {return _tone_map_mode      ;} // set/get Tone Mapping Mode                       (TONE_MAP_MODE, default=TONE_MAP_OFF), the change is instant, you can call it real-time
-   DisplayClass& toneMapTopRange   (Flt          range);   Flt           toneMapTopRange   ()C {return _tone_map_top_range ;} // set/get Tone Mapping Top    (Shoulder) Range    (0..1         , default=0.7         ), the change is instant, you can call it real-time, this is the range used for fitting too bright colors, too bright colors will be compressed into "max_lum-top_range .. max_lum" range. So for example with top_range=0.82 and monitor_max_lum=1.0, bright colors will be compressed into "1.0-0.82 .. 1.0" range, which is "0.18 .. 1.0", which makes colors in "0 .. 0.18" unaffected, and all colors >0.18 compressed into "0.18 .. 1.0" range.
-   DisplayClass& toneMapDarkenRange(Flt          range);   Flt           toneMapDarkenRange()C {return _tone_map_dark_range;} // set/get Tone Mapping Darken (Toe     ) Range    (0..1         , default=0.123       ), the change is instant, you can call it real-time, this is the luminance range for darkening dark colors, affected colors are in range [0..toneMapDarkenRange)
-   DisplayClass& toneMapDarkenExp  (Flt            exp);   Flt           toneMapDarkenExp  ()C {return _tone_map_dark_exp  ;} // set/get Tone Mapping Darken (Toe     ) Exponent (1..2         , default=1.3         ), the change is instant, you can call it real-time, this is the power exponent  for darkening dark colors, colors are darkened using function "Pow(color, exp)", using 1.0 exponent disables darkening
+   DisplayClass& toneMap(Bool on);   Bool toneMap()C {return _tone_map;} // set/get Tone Mapping (true/false, default=false), the change is instant, you can call it real-time
 #if EE_PRIVATE
+   void          setToneMap();
    void          toneMapMonitorMaxLumAuto(); // automatically set
-   DisplayClass& toneMapMonitorMaxLum(Flt      max_lum);   Flt         toneMapMonitorMaxLum()C {return _tone_map_max_lum   ;} // set/get Tone Mapping Monitor Max Luminance (0..Inf, default=1), the change is instant, you can call it real-time, this is the maximum luminance supported by your monitor, LDR monitors have 1, while HDR monitors can be higher
+   DisplayClass& toneMapMonitorMaxLum(Flt max_lum);   Flt toneMapMonitorMaxLum()C {return _tone_map_max_lum;} // set/get Tone Mapping Monitor Max Luminance (0..Inf, default=1), the change is instant, you can call it real-time, this is the maximum luminance supported by your monitor, LDR monitors have 1, while HDR monitors can be higher
 #endif
 
    // Level of Detail
@@ -560,7 +558,6 @@ private:
    SHADOW_MODE       _shd_mode;
    MOTION_MODE       _mtn_mode;
    DOF_MODE          _dof_mode;
-   TONE_MAP_MODE     _tone_map_mode;
    EDGE_DETECT_MODE  _edge_detect, _outline_mode;
    EDGE_SOFTEN_MODE  _edge_soften;
    TEXTURE_USAGE     _tex_detail;
@@ -581,6 +578,7 @@ private:
                      _vol_light, _vol_add,
                      _temp_anti_alias, _temp_super_res,
                      _glow_allow, _dither, _bend_leafs, _eye_adapt, _dof_foc_mode, _color_palette_allow, _gamma_all, _fade_get, _fade_auto_draw, _mtrl_blend, _draw_null_mtrl, _view_square_pixel, _allow_stereo, _max_lights_soft, _sharpen,
+                     _tone_map, _tone_map_allow, _tone_map_use,
                      _initialized, _resetting, _no_gpu;
   SByte              _half_supported;
    Byte              _density, _samples, _max_tex_filter, _max_rt,
@@ -596,10 +594,11 @@ private:
    VecI2             _res, _render_res;
    Flt               _app_aspect_ratio, _disp_aspect_ratio, _disp_aspect_ratio_want, _pixel_aspect, _gamma, _tex_mip_bias, _image_mip_bias, _font_mip_bias, _scale,
                      _amb_range, _amb_contrast, _amb_min,
-                     _eye_adapt_brightness, _eye_adapt_exp, _eye_adapt_max_dark, _eye_adapt_max_bright, _eye_adapt_speed,
+                     _eye_adapt_brightness, _eye_adapt_exp, _eye_adapt_intensity, _eye_adapt_max_dark, _eye_adapt_max_bright, _eye_adapt_speed,
                      _eye_dist, _eye_dist_2,
                      _shd_frac, _shd_fade, _shd_range, _shd_map_size_l, _shd_map_size_c, _shd_bias,
                      _bloom_original, _bloom_mul, _bloom_add, _bloom_glow, _bloom_cut,
+                     _contrast,
                      _mtn_scale,
                      _dof_focus, _dof_range, _dof_intensity,
                      _vol_max,
@@ -612,7 +611,7 @@ private:
                      _sharpen_intensity,
                      _smaa_threshold,
                      _white_lum, _screen_max_lum, _screen_nits,
-                     _tone_map_max_lum, _tone_map_top_range, _tone_map_dark_range, _tone_map_dark_exp;
+                     _tone_map_max_lum;
    Vec2              _unscaled_size, _size2, _pixel_size, _pixel_size_2, _pixel_size_inv,
                      _window_pixel_to_screen_mul, _window_pixel_to_screen_add, _window_pixel_to_screen_scale,
                      _shd_map_split;

@@ -291,7 +291,12 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
    bool ObjView::customDrawMatrix()C {return lodEditDist() || lodDrawAtDist();}
    bool ObjView::partVisible(int p, C MeshPart &part, bool allow_lit)C
    {
-      if(mode()==REMOVE || (mode()==PHYS && phys_tabs()==PHYS_TOGGLE))return true;
+      if(mode()==REMOVE)return true;
+      if(mode()==PHYS && phys_tabs()==PHYS_TOGGLE)
+      {
+         if(Kb.shift() && part.part_flag&MSHP_NO_PHYS_BODY)return false;
+         return true;
+      }
       if(mode()==MESH || mode()==SKIN)
       {
          if(allow_lit && p==lit_part)return true;
@@ -376,6 +381,7 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
    void ObjView::Render() {ObjEdit.render();}
           void ObjView::render()
    {
+      bool allow_lit=!(Kb.winCtrl() || Kb.b(KB_SPACE) || Ms.b(2) || Ms.b(MS_MAXIMIZE) || Ms.b(MS_BACK));
       switch(Renderer())
       {
          case RM_PREPARE:
@@ -397,7 +403,6 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
             {
                SetVariation(visibleVariation());
                if(group.groups_l.lit>=0)SetDrawMask(IndexToFlag(group.groups_l.lit));
-               bool     allow_lit=!(Kb.winCtrl() || Kb.b(KB_SPACE) || Ms.b(2) || Ms.b(MS_MAXIMIZE) || Ms.b(MS_BACK));
                MeshLod &lod=getDrawLod();
                bool     custom_matrix=customDrawMatrix();
                Matrix   matrix; if(custom_matrix)setMatrixAtDist(matrix, NewLod.draw_distance);
@@ -405,6 +410,7 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
                {
                   MeshPart &part=lod.parts[i]; if(partVisible(i, part))
                   {
+                     if(mode()==PHYS && phys_tabs()==PHYS_TOGGLE)if(FlagOn(part.part_flag, MSHP_NO_PHYS_BODY))continue;
                      bool invalid=false; if(interval)
                      {
                         bool optional=(obj_elm && obj_elm->finalNoPublish()); // if the object itself is not published, then set reference as optional
@@ -412,12 +418,12 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
                         REP(part.variations())if(Proj.invalidRef(part.variation    (i).id(), optional)){invalid=true; break;}
                      }
                      bool lit=(allow_lit && i==lit_part), sel=partSel(i);
-                     if(mode()==PHYS && phys_tabs()==PHYS_TOGGLE)SetHighlight(Color((FlagOn(part.part_flag, MSHP_NO_PHYS_BODY) && interval) ? 85 : 0, lit ? 85 : 0, lit ? 85 : 0, 0));else
-                     if(mode()==REMOVE                          )SetHighlight(Color((FlagOn(part.part_flag, MSHP_HIDDEN      ) && interval) ? 85 : 0, lit ? 85 : 0, lit ? 85 : 0, 0));else
-                     if(invalid   )SetHighlight(Color(85,  0,  0, 0));else
-                     if(sel && lit)SetHighlight(Color(40,  0,  0, 0));else
-                     if(sel       )SetHighlight(Color(40, 40,  0, 0));else
-                     if(       lit)SetHighlight(Color( 0, 85, 85, 0));
+                   //if(mode()==PHYS && phys_tabs()==PHYS_TOGGLE)SetHighlight(Color((FlagOn(part.part_flag, MSHP_NO_PHYS_BODY) && interval) ? 85 : 0, lit ? 85 : 0, lit ? 85 : 0, 0));else
+                     if(mode()==REMOVE)SetHighlight(Color((FlagOn(part.part_flag, MSHP_HIDDEN      ) && interval) ? 85 : 0, lit ? 85 : 0, lit ? 85 : 0, 0));else
+                     if(invalid       )SetHighlight(Color(85,  0,  0, 0));else
+                     if(sel && lit    )SetHighlight(Color(40,  0,  0, 0));else
+                     if(sel           )SetHighlight(Color(40, 40,  0, 0));else
+                     if(       lit    )SetHighlight(Color( 0, 85, 85, 0));
 
                      if(!custom_matrix)matrix=transformMatrix(partOp(i));
                      part.waitForStream();
@@ -443,6 +449,39 @@ cur_skel_to_saved_skel= ObjEdit.cur_skel_to_saved_skel;
 
          case RM_BLEND:
          {
+            if(lodEditDist())
+            {
+               
+            }else // default
+            if(!showChangeSkin())
+            {
+               if(mode()==PHYS && phys_tabs()==PHYS_TOGGLE)
+               {
+                  SetVariation(visibleVariation());
+                  if(group.groups_l.lit>=0)SetDrawMask(IndexToFlag(group.groups_l.lit));
+                  MeshLod &lod=getDrawLod();
+                  FREPA(lod)
+                  {
+                     MeshPart &part=lod.parts[i]; if(partVisible(i, part))
+                     {
+                        if(mode()==PHYS && phys_tabs()==PHYS_TOGGLE)if(!FlagOn(part.part_flag, MSHP_NO_PHYS_BODY))continue;
+                        bool lit=(allow_lit && i==lit_part), sel=partSel(i);
+                        if(sel && lit)SetHighlight(Color(40,  0,  0, 0));else
+                        if(sel       )SetHighlight(Color(40, 40,  0, 0));else
+                        if(       lit)SetHighlight(Color( 0, 85, 85, 0));
+
+                        SetMatrix(transformMatrix(partOp(i)));
+                        part.waitForStream();
+                        part.drawBlend(&Vec4(1, 1, 1, 0.333f));
+
+                        SetHighlight();
+                     }
+                  }
+                  SetDrawMask();
+                  SetVariation();
+               }
+            }
+
             if(showChangeSkin())
             {
                SetMatrix(transformMatrix());

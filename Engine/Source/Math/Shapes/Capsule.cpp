@@ -363,6 +363,11 @@ Bool SweepPointCapsule(C Vec &point, C Vec &move, C Capsule &capsule, Flt *hit_f
    return capsule.isBall() ? SweepBallPoint(Ball(capsule.ballR(), point), move, capsule.pos       , hit_frac, hit_normal)
                            : SweepBallEdge (Ball(capsule.r      , point), move, capsule.ballEdge(), hit_frac, hit_normal);
 }
+Bool SweepPointCapsule(C VecD &point, C Vec &move, C CapsuleM &capsule, Flt *hit_frac, Vec *hit_normal)
+{
+   return capsule.isBall() ? SweepBallPoint(BallM(capsule.ballR(), point), move, capsule.pos       , hit_frac, hit_normal)
+                           : SweepBallEdge (BallM(capsule.r      , point), move, capsule.ballEdge(), hit_frac, hit_normal);
+}
 Bool SweepBallCapsule(C Ball &ball, C Vec &move, C Capsule &capsule, Flt *hit_frac, Vec *hit_normal)
 {
    return capsule.isBall() ? SweepBallPoint(Ball(ball.r+capsule.ballR(), ball.pos), move, capsule.pos       , hit_frac, hit_normal)

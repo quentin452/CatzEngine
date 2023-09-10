@@ -1001,14 +1001,34 @@ DisplayClass::DisplayClass() : _monitors(Compare, null, null, 4)
   _dof_intensity=1;
 
 //_eye_adapt           =false;
-  _eye_adapt_brightness=0.7f;
-  _eye_adapt_exp       =0.5f;
+  _eye_adapt_brightness=0.1f;
+  _eye_adapt_exp       =1.0f/3;
+  _eye_adapt_intensity =1.0f;
   _eye_adapt_max_dark  =0.5f;
   _eye_adapt_max_bright=2.0f;
   _eye_adapt_speed     =6.5f;
-  _eye_adapt_weight.set(0.9f, 1, 0.7f); // use smaller value for blue, to make blue skies have brighter multiplier, because human eye sees blue color as darker than others
+  _eye_adapt_weight=ColorLumWeight2/ColorLumWeight2.max();
+/* use smaller value for blue, to make blue skies have brighter multiplier, because human eye sees blue color as darker than others
+   this was calculated using following code:
 
-//_tone_map_mode=TONE_MAP_OFF;
+   Vec col_lum_weight_1=1; col_lum_weight_1/=col_lum_weight_1.sum(); // identity = all colors have same weight
+   Flt step=Sat(Ms.pos().x);
+   Vec eye_adapt_weight=Lerp(col_lum_weight_1, ColorLumWeight2, step); // lerp between identity and 'ColorLumWeight2'
+ //eye_adapt_weight/=eye_adapt_weight.sum();
+   eye_adapt_weight/=eye_adapt_weight.max();
+
+   D.eyeAdaptation(true);
+   D.eyeAdaptationWeight(Kb.ctrl() ? col_lum_weight_1 : Kb.shift() ? ColorLumWeight2 : eye_adapt_weight);
+   D.eyeAdaptationSpeed(65536);
+   D.eyeAdaptationMaxDark(0.01).eyeAdaptationMaxBright(100);
+   D.eyeAdaptationExp(1);
+   D.eyeAdaptationBrightness(0.1*D.eyeAdaptationWeight().y); // always have same brightness for green color (when looking at grass)
+   Flt eye_adapt_bright=D.eyeAdaptationBrightness();
+
+   these settings allow to have fast eye adaptation without limits, then looking down at grass (to have satisfactory look), then look up at sky and tweak 'step' to have satisfactory sky brightness compared to grass, best results were with "step=1"
+*/
+
+//_tone_map=_tone_map_allow=_tone_map_use=false;
 
   _grass_range  =50;
   _grass_density=(MOBILE ? 0.5f : 1);
@@ -1022,6 +1042,8 @@ DisplayClass::DisplayClass() : _monitors(Compare, null, null, 4)
           _bloom_allow=!MOBILE;
            _glow_allow=!MOBILE;
   _color_palette_allow=!MOBILE;
+
+  _contrast=0.8f;
 
   _lod_factor       =1;
   _lod_factor_mirror=2;
@@ -1061,9 +1083,6 @@ DisplayClass::DisplayClass() : _monitors(Compare, null, null, 4)
   _screen_max_lum=1;
 //_screen_nits=0;
   _tone_map_max_lum=1;
-  _tone_map_top_range=0.7f;
-  _tone_map_dark_range=0.123f;
-  _tone_map_dark_exp=1.3f;
 }
 void DisplayClass::init() // make this as a method because if we put this to Display constructor, then 'SecondaryContexts' may not have been initialized yet
 {
@@ -1754,10 +1773,7 @@ _linear_gamma^=1; linearGamma(!_linear_gamma); // set after loading shaders
    {auto v=temporalSuperRes (); _temp_super_res   =false           ; temporalSuperRes (v);} // resetting will load shaders
    {auto v=grassRange       (); _grass_range      =-1              ; grassRange       (v);}
    {auto v=sharpenIntensity (); _sharpen_intensity=-1;             ; sharpenIntensity (v);}
-  _tone_map_max_lum=0; toneMapMonitorMaxLumAuto(); //SPSet("ToneMapMonitorMaxLum", D.toneMapMonitorMaxLum());
-   SPSet("ToneMapTopRange"     , D.toneMapTopRange   ());
-   SPSet("ToneMapDarkenRange"  , D.toneMapDarkenRange());
-   SPSet("ToneMapDarkenExp"    , D.toneMapDarkenExp  ());
+  _tone_map_max_lum=0; toneMapMonitorMaxLumAuto();
    lod            (_lod_factor, _lod_factor_mirror);
    shadowJitterSet();
    shadowRangeSet ();
@@ -3291,10 +3307,19 @@ void DisplayClass::bloomScaleCut(Flt scale, Flt cut)
   _bloom_add=-scale*SRGBToLinear(cut);
   _bloom_cut= cut; // keep as copy, because we can't reconstruct from '_bloom_add' if '_bloom_mul' is zero
 }
+void DisplayClass::setContrast()C
+{
+ /*col=col*2-1; col=SigmoidSqr(col*contrast)/SigmoidSqr(contrast); col=col*0.5+0.5;
+   col=SigmoidSqr((col*2-1)*contrast); col=col*0.5/SigmoidSqr(contrast)+0.5;
+   col=SigmoidSqr(col*(2*contrast)-contrast  ); col=col*(0.5/SigmoidSqr(contrast))+0.5;
+   col=SigmoidSqr(col*(Contrast.x)+Contrast.y); col=col*(Contrast.z              )+0.5; */
+   Sh.Contrast->set(Vec(_contrast*2, -_contrast, 0.5f/SigmoidSqr(_contrast)));
+}
 DisplayClass& DisplayClass:: glowAllow   (Bool allow   ) {if(_glow_allow!=allow){_glow_allow   =allow   ; temporalReset();} return T;} // 'glowAllow' affects type of Temporal RT's #RTOutput
 DisplayClass& DisplayClass::bloomAllow   (Bool allow   ) {                      _bloom_allow   =allow   ;                   return T;}
 DisplayClass& DisplayClass::bloomOriginal(Flt  original) {MAX(original, 0);     _bloom_original=original;                   return T;}
 DisplayClass& DisplayClass::bloomGlow    (Flt  glow    ) {MAX(glow    , 0);     _bloom_glow    =glow    ;                   return T;}
+DisplayClass& DisplayClass::contrast     (Flt  contrast) {MAX(contrast, 0); if(_contrast!=contrast){_contrast=contrast; setContrast(); setToneMap();} return T;}
 DisplayClass& DisplayClass::bloomScale   (Flt  scale   ) {bloomScaleCut(scale, bloomCut()); return T;}
 DisplayClass& DisplayClass::bloomCut     (Flt  cut     ) {bloomScaleCut(bloomScale(), cut); return T;}
 Bool          DisplayClass::bloomUsed    (             )C{return bloomAllow() && (!Equal(bloomOriginal(), 1, EPS_COL8_1_NATIVE) || !Equal(bloomScale(), 0, EPS_COL8_NATIVE));}
@@ -3435,6 +3460,7 @@ DisplayClass& DisplayClass::dofIntensity(Flt      intensity) {                  
 DisplayClass& DisplayClass::eyeAdaptation          (  Bool on        ) {                                                            _eye_adapt           =on        ;                                                    return T;}
 DisplayClass& DisplayClass::eyeAdaptationBrightness(  Flt  brightness) {MAX  (brightness, 0); if(_eye_adapt_brightness!=brightness){_eye_adapt_brightness=brightness; Sh.HdrBrightness->set(eyeAdaptationBrightness());} return T;}
 DisplayClass& DisplayClass::eyeAdaptationExp       (  Flt  exp       ) {Clamp(exp, 0.1f , 1); if(_eye_adapt_exp       !=exp       ){_eye_adapt_exp       =exp       ; Sh.HdrExp       ->set(eyeAdaptationExp       ());} return T;}
+DisplayClass& DisplayClass::eyeAdaptationIntensity (  Flt  intensity ) {SAT  (intensity    ); if(_eye_adapt_intensity !=intensity ){_eye_adapt_intensity =intensity ; Sh.HdrIntensity ->set(eyeAdaptationIntensity ());} return T;}
 DisplayClass& DisplayClass::eyeAdaptationMaxDark   (  Flt  max_dark  ) {MAX  (max_dark  , 0); if(_eye_adapt_max_dark  !=max_dark  ){_eye_adapt_max_dark  =max_dark  ; Sh.HdrMaxDark   ->set(eyeAdaptationMaxDark   ());} return T;}
 DisplayClass& DisplayClass::eyeAdaptationMaxBright (  Flt  max_bright) {MAX  (max_bright, 0); if(_eye_adapt_max_bright!=max_bright){_eye_adapt_max_bright=max_bright; Sh.HdrMaxBright ->set(eyeAdaptationMaxBright ());} return T;}
 DisplayClass& DisplayClass::eyeAdaptationSpeed     (  Flt  speed     ) {MAX  (speed     , 1); if(_eye_adapt_speed     !=speed     ){_eye_adapt_speed     =speed     ;                                                  } return T;}
@@ -3450,12 +3476,86 @@ DisplayClass& DisplayClass::resetEyeAdaptation     (  Flt  brightness)
    return T;
 }
 /******************************************************************************/
-DisplayClass& DisplayClass::toneMap             (TONE_MAP_MODE mode) {if(InRange(mode, TONE_MAP_NUM))_tone_map_mode=mode; return T;}
-DisplayClass& DisplayClass::toneMapMonitorMaxLum(Flt        max_lum) {MAX  (max_lum,           1); if(_tone_map_max_lum   !=max_lum){_tone_map_max_lum   =max_lum; SPSet("ToneMapMonitorMaxLum", max_lum);} return T;}
-DisplayClass& DisplayClass::toneMapTopRange     (Flt          range) {Clamp(range  , HALF_MIN, 1); if(_tone_map_top_range !=range  ){_tone_map_top_range =range  ; SPSet("ToneMapTopRange"     , range  );} return T;}
-DisplayClass& DisplayClass::toneMapDarkenRange  (Flt          range) {Clamp(range  , HALF_MIN, 1); if(_tone_map_dark_range!=range  ){_tone_map_dark_range=range  ; SPSet("ToneMapDarkenRange"  , range  );} return T;}
-DisplayClass& DisplayClass::toneMapDarkenExp    (Flt            exp) {Clamp(exp    ,        1, 2); if(_tone_map_dark_exp  !=exp    ){_tone_map_dark_exp  =exp    ; SPSet("ToneMapDarkenExp"    , exp    );} return T;}
-void          DisplayClass::toneMapMonitorMaxLumAuto() {D.toneMapMonitorMaxLum((D.outputPrecision()>IMAGE_PRECISION_8) ? D.screenMaxLum()/D.whiteLum() : 1);} // divide by 'whiteLum' because we're going to multiply entire screen by it later in #AutoHdrBoost
+static Bool SigmoidSqrInvSafe(Dbl &y)
+{
+   // y/SqrtFast(1-y*y);
+   Dbl s=1-y*y;
+   if(s<=0)return false;
+   y/=SqrtFast(s);
+   return true;
+}
+static Dbl ToneMap(Dbl col, Dbl mul)
+{
+   return Atan(col*mul)/mul;
+}
+static Dbl Contrast(Dbl col)
+{
+   if(D.useContrast())
+   {
+      col=col*2-1; col=SigmoidSqr(col*D.contrast())/SigmoidSqr(D.contrast()); col=col*0.5+0.5;
+   }
+   return col;
+}
+static Bool ContrastInv(Dbl &col)
+{
+   if(D.useContrast())
+   {
+      col=col*2-1; // reverse: col*0.5+0.5;
+      col*=SigmoidSqr(D.contrast()); // reverse: /SigmoidSqr(contrast);
+      if(!SigmoidSqrInvSafe(col))return false; // reverse: SigmoidSqr(col). if because of Contrast we can never reach 'col' then fail
+      col/=D.contrast(); // reverse: *contrast
+      col=col*0.5+0.5; // reverse: col*2-1;
+   }
+   return true;
+}
+void DisplayClass::setToneMap()
+{
+   // this will calculate tone map 'mul' so that 0..render_lum gets converted to 0.._tone_map_max_lum
+   Dbl tone_map_max_lum=_tone_map_max_lum;
+   /* Shader:
+      assume col=0..render_lum
+      col=ToneMap (col);
+      col=Contrast(col);
+      now want col=0..tone_map_max_lum */
+   if(!ContrastInv(tone_map_max_lum))
+   {
+   disable: _tone_map_allow=false; goto end;
+   }
+   DEBUG_ASSERT(Equal((Flt)Contrast(tone_map_max_lum), _tone_map_max_lum), "ToneMap"); // Contrast(tone_map_max_lum) should be equal to '_tone_map_max_lum'
+
+   {
+      Dbl mul, min=0, max=16,
+          allowed_min=1.0/16, // don't go lower than this because that would cause color Half's in the shader to lose precision
+          render_lum=8; // some reasonable max linear color of render scene pixel
+      REP(256)
+      {
+         mul=Avg(min, max);
+         Dbl t=ToneMap(render_lum, mul);
+         if( t>tone_map_max_lum){                                  min=mul;}else
+         if( t<tone_map_max_lum){if(mul<=allowed_min)goto disable; max=mul;}else
+            break;
+      }
+   #if DEBUG
+      Dbl t=ToneMap (render_lum, mul); DEBUG_ASSERT(Equal((Flt)t, (Flt) tone_map_max_lum), "ToneMap"); // 't' should be  'tone_map_max_lum'
+      Dbl c=Contrast(t              ); DEBUG_ASSERT(Equal((Flt)c, (Flt)_tone_map_max_lum), "ToneMap"); // 'c' should be '_tone_map_max_lum'
+   #endif
+      SPSet("ToneMapAtanMul", mul);
+     _tone_map_allow=true;
+   }
+end:
+  _tone_map_use=(_tone_map && _tone_map_allow);
+}
+DisplayClass& DisplayClass::toneMap             (Bool on) {_tone_map=on; _tone_map_use=(_tone_map && _tone_map_allow); return T;}
+DisplayClass& DisplayClass::toneMapMonitorMaxLum(Flt monitor_lum)
+{
+   MAX(monitor_lum, 0); if(_tone_map_max_lum!=monitor_lum)
+   {
+     _tone_map_max_lum=monitor_lum; // SPSet("ToneMapMonitorMaxLum", monitor_lum);
+      setToneMap();
+   }
+   return T;
+}
+void DisplayClass::toneMapMonitorMaxLumAuto() {D.toneMapMonitorMaxLum((D.outputPrecision()>IMAGE_PRECISION_8) ? D.screenMaxLum()/D.whiteLum() : 1);} // divide by 'whiteLum' because we're going to multiply entire screen by it later in #AutoHdrBoost
 /******************************************************************************/
 DisplayClass& DisplayClass::grassDensity(Flt  density) {_grass_density=Sat(density); return T;}
 DisplayClass& DisplayClass::grassShadow (Bool on     ) {_grass_shadow =    on      ; return T;}

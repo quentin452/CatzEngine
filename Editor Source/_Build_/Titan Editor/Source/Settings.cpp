@@ -107,6 +107,7 @@ bool SaveSettings(C Str &name)
       video.nodes.New().set("EyeAdaptationBrightness" , D.eyeAdaptationBrightness());
       video.nodes.New().set("HDR"                     , D.outputPrecision()>IMAGE_PRECISION_8);
       video.nodes.New().set("ToneMapping"             , D.toneMap());
+      video.nodes.New().set("Contrast"                , D.contrast());
       video.nodes.New().set("Dither"                  , D.dither());
       video.nodes.New().set("ColRTPrecision"          , D.highPrecColRT    ());
       video.nodes.New().set("NrmRTPrecision"          , D.highPrecNrmRT    ());
@@ -179,7 +180,8 @@ void ApplyVideoSettings(C TextData &data)
       if(C TextParam *p=video->findNode("EyeAdaptation"           ))D.eyeAdaptation(p->asBool());
       if(C TextParam *p=video->findNode("EyeAdaptationBrightness" ))D.eyeAdaptationBrightness(p->asFlt());
       if(C TextParam *p=video->findNode("HDR"                     ))D.outputPrecision(p->asBool() ? IMAGE_PRECISION_16 : IMAGE_PRECISION_8);
-      if(C TextParam *p=video->findNode("ToneMapping"             ))D.toneMap(TONE_MAP_MODE(p->asInt()));
+      if(C TextParam *p=video->findNode("ToneMapping"             ))D.toneMap(p->asBool());
+      if(C TextParam *p=video->findNode("Contrast"                ))D.contrast(p->asFlt());
       if(C TextParam *p=video->findNode("Dither"                  ))D.dither(p->asBool());
       if(C TextParam *p=video->findNode("ColRTPrecision"          ))D.highPrecColRT    (p->asBool());
       if(C TextParam *p=video->findNode("NrmRTPrecision"          ))D.highPrecNrmRT    (p->asBool());

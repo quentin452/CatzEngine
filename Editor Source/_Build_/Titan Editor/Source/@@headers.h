@@ -284,6 +284,7 @@ enum APPLY_MODE
    APPLY_MERGE_SIMPLE,
    APPLY_MUL,
    APPLY_MUL_RGB,
+   APPLY_MUL_RGB_BLEND, // mul RGB by layer but take into account layer opacity (don't mul when opacity=0)
    APPLY_MUL_RGB_SAT,
    APPLY_MUL_RGB_INV_SAT,
    APPLY_MUL_RGB_LIN,

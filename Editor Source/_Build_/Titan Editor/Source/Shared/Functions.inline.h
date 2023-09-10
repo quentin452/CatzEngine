@@ -54,6 +54,10 @@ template<typename TYPE> bool UndoMem(TimeStamp &time, C TimeStamp &src_time, TYP
    return UndoByTimeMem (time, src_time, data, src_data) // first check by time because it's faster
        || UndoByValueMem(time, src_time, data, src_data);
 }
+flt SRGBToBrightness(flt x) {if(1)x=SqrS (x);else x=SRGBToLinear(x); return x;}
+flt BrightnessToSRGB(flt x) {if(1)x=SqrtS(x);else x=LinearToSRGB(x); return x;}
+flt SRGBToContrast(flt x) {if(0)x=SqrtS(SRGBToLinear(x)); return x;}
+flt ContrastToSRGB(flt x) {if(0)x=LinearToSRGB(SqrS (x)); return x;}
 VecI2 TextVecI2Ex(cchar *t) {return TextVecI2(t);}
 Vec2  TextVec2Ex(cchar *t) {return TextVec2 (t);}
 Vec   TextVecEx(cchar *t) {return TextVec  (t);}

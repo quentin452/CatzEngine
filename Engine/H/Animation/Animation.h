@@ -56,7 +56,7 @@ enum ROOT_FLAG // Root Flags
 struct Animation // set of animation keyframes used for animating 'AnimatedSkeleton'
 {
    Mems<AnimBone>  bones ; // bone animations
-   Mems<AnimEvent> events; // animation events
+   Mems<AnimEvent> events; // animation events, sorted by time
    AnimKeys        keys  ; // animation keys of the whole body
 
    // get / set
@@ -200,9 +200,9 @@ struct SkelAnim // helper class for 'Skeleton' <-> 'Animation' relation, 'SkelAn
    Bool eventBetween (CChar8 *from, CChar8 *to, Flt start_time, Flt dt)C {return _animation ? _animation->eventBetween  (from, to   , start_time, dt) : false;} // if           between events 'from' and 'to', 'start_time'=animation time at the start of the frame, 'dt'=animation time delta (should be set to "Time.d() * animation_speed")
    Flt  eventProgress(CChar8 *from, CChar8 *to, Flt       time        )C {return _animation ? _animation->eventProgress (from, to   ,       time    ) :     0;} // get progress between events 'from' and 'to',       'time'=animation time, 0 on fail
 
+   Int  sbonToAbon(Int  sbon)C;                      // convert 'SkelBone' to 'AnimBone' index, -1        on fail
 #if EE_PRIVATE
    Byte abonToSbon(Byte abon)C {return _bone[abon];} // convert 'AnimBone' to 'SkelBone' index, BONE_NULL on fail
-   Int  sbonToAbon(Int  sbon)C;                      // convert 'SkelBone' to 'AnimBone' index, -1        on fail
 
    Bool load(C Str &name          ) {return false;} // this is unused, 'load' with 'user' is used instead
    Bool load(C Str &name, Ptr user);

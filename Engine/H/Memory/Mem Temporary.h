@@ -27,6 +27,8 @@
 /******************************************************************************/
 template<const_mem_addr typename TYPE, Int size> struct Memt // Temporary Memory Based Container, 'TYPE'=type of elements to be stored in this container, 'size'=memory size (in bytes) that can be used for storing the elements without having to allocate any dynamic memory
 {
+   static constexpr Bool Continuous=true; // Memt memory is continuous
+
    // manage
    Memt& clear(); // remove all elements and free helper memory
    Memt& del  (); // remove all elements and free helper memory

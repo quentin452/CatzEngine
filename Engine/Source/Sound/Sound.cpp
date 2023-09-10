@@ -28,7 +28,7 @@ namespace EE{
    Sound Threads operate  on _Sound.raw  (main), time, frac. Raw  was chosen to be the main value because sound buffer data operate on it.
       However, when _Sound is not playing ("_buffer_playing==false"), then _Sound operates on '_Sound._time'.
 
-   At the moment, 'VOLUME_GROUP' and 'SoundVolume' multipliers don't contribute to Sound priority,
+   TODO: At the moment, 'VOLUME_GROUP' and 'SoundVolume' multipliers don't contribute to Sound priority,
       to avoid extra calculations.
 
 /******************************************************************************/
@@ -53,9 +53,10 @@ ALIGN_ASSERT(_Sound, _callback); // must have native alignment because we use it
    #define SOUND_API_LOCK_SET  locker.set(SoundAPILockDo)
 #endif
 
-#if XAUDIO || CUSTOM_AUDIO
+#if LISTENER_CHANGED
 static UInt ListenerChanged;
-#elif OPEN_AL
+#endif
+#if OPEN_AL
 static Mems< Mems<Byte> > SoundThreadBuffer;
 #endif
 
@@ -72,15 +73,15 @@ enum
    SOUND_LOAD_ERROR,
 };
 
-static Memx<_Sound >    SoundMemx;
-static Memc<_Sound*>    SoundMemxPlaying;
+       Memx<_Sound >    SoundMemx;
+       Memc<_Sound*>    SoundMemxPlaying;
 static Thread           SoundThread;
 static Threads          SoundThreads;
 static SyncEvent        SoundEvent, SoundWaiting;
 static Bool             SoundWaited;
 static Int              SoundPause, SoundMaxConc=16, SoundMaxThread=1;
 static Flt              SoundMinVol=0.020f, // min volume required for a sound to play, this value was chosen by playing music at half volume, and then playing a sound with different volumes, the value was chosen at which the sound couldn't be heard
-                        SoundPlayPriority=0.012f, // if a sound is already playing, then increase its priority to avoid playing/stopping due to minor priority differences which causes overhead
+                        SoundPlayPriority=SoundMinVol/2, // if a sound is already playing, then increase its priority to avoid playing/stopping due to minor priority differences which causes overhead
                         SoundGroupPriority[VOLUME_NUM];
 static Dbl              SoundTime; // time of the last sound update
        SoundVolumeClass SoundVolume;
@@ -99,7 +100,7 @@ void SoundVolumeClass::ambient(Flt v) {SAT(v); if(_v[VOLUME_AMBIENT]!=v){_v[VOLU
 void SoundVolumeClass::voice  (Flt v) {SAT(v); if(_v[VOLUME_VOICE  ]!=v){_v[VOLUME_VOICE  ]=v; update();}}
 void SoundVolumeClass::ui     (Flt v) {SAT(v); if(_v[VOLUME_UI     ]!=v){_v[VOLUME_UI     ]=v; update();}}
 void SoundVolumeClass::global (Flt v) {SAT(v); if(_v[VOLUME_NUM    ]!=v){_v[VOLUME_NUM    ]=v; update();}}
-void SoundVolumeClass::update (     ) {VolumeSound();}
+void SoundVolumeClass::update (     ) {ChangeSounds(SOUND_CHANGED_VOLUME);}
 /******************************************************************************/
 // _SOUND
 /******************************************************************************/
@@ -114,7 +115,7 @@ void _Sound::zero()
    volume_group=VOLUME_FX;
   _fade_curve=FADE_LINEAR;
    raw_pos=0;
-  _volume=_speed=_actual_speed=_range=_fade=1;
+  _volume=_speed=_actual_speed=_range=_actual_range=_fade=1;
   _fade_d=_time=0;
    priority=-1;
   _pos=_vel.zero();
@@ -143,7 +144,8 @@ void _Sound::init(C Str &name, SoundCallback *call, Bool is3D, VOLUME_GROUP volu
    T._stream._callback=call;
 
    T.volume_group=(VOLUME_GROUP)Mid(volume_group, 0, VOLUME_NUM-1); // clamp it just in case because later we're using it as array index
-   setSpeed(); // !! call this after setting 'volume_group' because that affects the result !!
+   setActualSpeed(); // !! call this after setting 'volume_group' because that affects the result !!
+   setActualRange();
 }
 Bool _Sound::init(C _Sound &src)
 {
@@ -173,6 +175,7 @@ Bool _Sound::init(C _Sound &src)
 /******************************************************************************/
 // OPERATIONS
 /******************************************************************************/
+inline Flt _Sound::actualRange()C {return range()*Listener.range();}
 inline Flt _Sound::actualSpeed()C
 {
    Flt speed=T._speed;
@@ -188,21 +191,16 @@ inline Flt _Sound::actualVolume()C
    switch(_fade_curve) // and fade
    {
       case FADE_LINEAR: volume*=         _fade ; break;
-      case FADE_SQRT  : volume*=SqrtFast(_fade); break; // can use sqrt fast because '_fade' always guaranteed to be 0..1
+      case FADE_SQRT  : volume*=SqrtFast(_fade); break; // can use 'SqrtFast' because '_fade' always guaranteed to be 0..1
    }
 #if !WINDOWS_OLD
    volume*=AppVolume.volume(); // non Windows platforms don't support 'AppVolume' directly, so let's simulate it here
 #endif
    return volume;
 }
-void _Sound::setVolume() // !! requires 'SoundAPILock' !!
-{
-  _buffer.volume(actualVolume()); // !! requires 'SoundAPILock' !!
-}
-void _Sound::setSpeed()
-{
-  _actual_speed=actualSpeed();
-}
+void _Sound::setActualRange () {_actual_range=actualRange();}
+void _Sound::setActualSpeed () {_actual_speed=actualSpeed();}
+void _Sound::setActualVolume() {_buffer.volume(actualVolume());} // !! requires 'SoundAPILock' !!
 /******************************************************************************/
 void _Sound::stop () {_playing=false; time(0);}
 void _Sound::pause() {_playing=false;}
@@ -263,11 +261,11 @@ Flt         _Sound::length   ()C {return stream().length   ();}
 SOUND_CODEC _Sound::codec    ()C {return stream().codec    ();}
 
 void _Sound::loop  (  Bool loop  ) {T._loop=loop;}
-void _Sound::volume(  Flt  volume) {SAT(volume  ); if(T._volume!=volume){T._volume=volume; AtomicOr(flag, SOUND_CHANGED_VOLUME);}}
-void _Sound::range (  Flt  range ) {MAX(range, 0); if(T._range !=range ){T._range =range ; AtomicOr(flag, SOUND_CHANGED_RANGE );}}
-void _Sound::pos   (C Vec &pos   ) {               if(T._pos   !=pos   ){T._pos   =pos   ; AtomicOr(flag, SOUND_CHANGED_POS   );}}
-void _Sound::vel   (C Vec &vel   ) {               if(T._vel   !=vel   ){T._vel   =vel   ; AtomicOr(flag, SOUND_CHANGED_VEL   );}}
-void _Sound::speed (  Flt  speed ) {MAX(speed, 0); if(T._speed !=speed ){T._speed =speed ; AtomicOr(flag, SOUND_CHANGED_SPEED );}}
+void _Sound::volume(  Flt  volume) {SAT(volume  ); if(T._volume!=volume){T._volume=volume;                                                   AtomicOr(flag, SOUND_CHANGED_VOLUME);}}
+void _Sound::range (  Flt  range ) {MAX(range, 0); if(T._range !=range ){T._range =range ;                                 setActualRange(); AtomicOr(flag, SOUND_CHANGED_RANGE );}} // have to 'setActualRange' here already because we need it for 'update' and 'priority'
+void _Sound::pos   (C Vec &pos   ) {               if(T._pos   !=pos   ){T._pos   =pos   ;                                                   AtomicOr(flag, SOUND_CHANGED_POS   );}}
+void _Sound::vel   (C Vec &vel   ) {               if(T._vel   !=vel   ){T._vel   =vel   ;                                                   AtomicOr(flag, SOUND_CHANGED_VEL   );}}
+void _Sound::speed (  Flt  speed ) {MAX(speed, 0); if(T._speed !=speed ){T._speed =speed ; if(!SOUND_SPEED_ON_SOUND_THREAD)setActualSpeed(); AtomicOr(flag, SOUND_CHANGED_SPEED );}}
 
 void _Sound::raw     (Long raw   )  {C SoundStream &stream=T.stream(); if(Long size   =stream.size   ())time(raw   *(Dbl(stream.length ())/size   ));else time(0);} // use Dbl because index can be huge (more than INT_MAX)
 void _Sound::sample  (Long sample)  {C SoundStream &stream=T.stream(); if(Long samples=stream.samples())time(sample*(Dbl(stream.length ())/samples));else time(0);} // use Dbl because index can be huge (more than INT_MAX)
@@ -600,7 +598,7 @@ Bool _Sound::update(Flt dt) // !! requires 'SoundAPILock' !!
       if(is3D())
       {
          Flt dist=Dist(_pos, Listener.pos());
-         if( dist>_range)priority*=_range/dist;
+         if( dist>_actual_range)priority*=_actual_range/dist;
       }
 
       // add modifiers
@@ -633,45 +631,52 @@ void _Sound::updatePlaying(Int thread_index)
    #if !DEL_BUFFER_WHEN_NOT_PLAYING
       if(!_buffer_playing)AtomicOr(T.flag, SOUND_CHANGED_VOLUME|SOUND_CHANGED_SPEED|SOUND_CHANGED_TIME); // if not playing yet then we need to apply volume and speed because they are affected by global parameters, also reset the time because it's modified when sound is paused
    #endif
+
       UInt flag=AtomicGet(T.flag), handled=SOUND_CHANGED_POS|SOUND_CHANGED_VEL|SOUND_CHANGED_ORN|SOUND_CHANGED_RANGE|SOUND_CHANGED_VOLUME|SOUND_CHANGED_SPEED|SOUND_CHANGED_TIME|SOUND_CHANGING_TIME; // flags handled here, need to check for SOUND_CHANGED_ORN because of Listener changes
-   #if XAUDIO || CUSTOM_AUDIO
+   #if LISTENER_CHANGED
       flag|=ListenerChanged;
    #endif
+
       if(flag&handled)
       {
          flag=AtomicDisable(T.flag, handled); // disable these flags first, so in case the user modifies parameters while this function is running, it will be activated again, don't surround this with another 'if' (to avoid extra branching) because most likely they will return handled flags
-      #if XAUDIO || CUSTOM_AUDIO
+      #if LISTENER_CHANGED
          flag|=ListenerChanged;
       #endif
+
          SOUND_API_LOCK_COND; // below !! requires 'SoundAPILock' !!
-         if(flag&SOUND_CHANGED_VOLUME)setVolume(); // !! call this first before 'set3DParams' because CUSTOM_AUDIO needs this !!
+         if(flag&SOUND_CHANGED_VOLUME)setActualVolume(); // !! call this first before 'set3DParams' because CUSTOM_AUDIO needs this !!
       #if XAUDIO
          if(_is3D)
          {
-            if(flag&SOUND_CHANGED_SPEED)setSpeed(); // !! call this first before 'set3DParams' !!
-            if(flag&(SOUND_CHANGED_POS|SOUND_CHANGED_ORN|SOUND_CHANGED_RANGE|SOUND_CHANGED_VEL|SOUND_CHANGED_SPEED)) // need to check for SOUND_CHANGED_ORN because of Listener changes
+            if(flag&(SOUND_CHANGED_POS|SOUND_CHANGED_VEL|SOUND_CHANGED_ORN|SOUND_CHANGED_RANGE|SOUND_CHANGED_SPEED)) // need to check for SOUND_CHANGED_ORN because of Listener changes
+            {
+               if(SOUND_SPEED_ON_SOUND_THREAD && flag&SOUND_CHANGED_SPEED)setActualSpeed(); // !! call this first before 'set3DParams' !!
               _buffer.set3DParams(T, FlagOn(flag, SOUND_CHANGED_POS|SOUND_CHANGED_ORN|SOUND_CHANGED_RANGE), FlagOn(flag, SOUND_CHANGED_POS|SOUND_CHANGED_VEL|SOUND_CHANGED_SPEED));
+            }
          }else
          {
-            if(flag&SOUND_CHANGED_SPEED){setSpeed(); _buffer.speed(SoundSpeed(_actual_speed));}
+            if(flag&SOUND_CHANGED_SPEED){if(SOUND_SPEED_ON_SOUND_THREAD)setActualSpeed(); _buffer.speed(SoundSpeed(_actual_speed));}
          }
       #elif CUSTOM_AUDIO
          if(_is3D)
          {
-            if(flag&SOUND_CHANGED_SPEED)setSpeed(); // !! call this first before 'set3DParams' !!
-            if(flag&(SOUND_CHANGED_VOLUME|SOUND_CHANGED_POS|SOUND_CHANGED_ORN|SOUND_CHANGED_RANGE|SOUND_CHANGED_VEL|SOUND_CHANGED_SPEED)) // need to check for SOUND_CHANGED_ORN because of Listener changes
-              _buffer.set3DParams(T, FlagOn(flag, SOUND_CHANGED_VOLUME|SOUND_CHANGED_POS|SOUND_CHANGED_ORN|SOUND_CHANGED_RANGE), FlagOn(flag, SOUND_CHANGED_POS|SOUND_CHANGED_VEL|SOUND_CHANGED_SPEED));
+            if(flag&(SOUND_CHANGED_POS|SOUND_CHANGED_VEL|SOUND_CHANGED_ORN|SOUND_CHANGED_RANGE|SOUND_CHANGED_VOLUME|SOUND_CHANGED_SPEED)) // need to check for SOUND_CHANGED_ORN because of Listener changes
+            {
+               if(SOUND_SPEED_ON_SOUND_THREAD && flag&SOUND_CHANGED_SPEED)setActualSpeed(); // !! call this first before 'set3DParams' !!
+              _buffer.set3DParams(T, FlagOn(flag, SOUND_CHANGED_POS|SOUND_CHANGED_ORN|SOUND_CHANGED_RANGE|SOUND_CHANGED_VOLUME), FlagOn(flag, SOUND_CHANGED_POS|SOUND_CHANGED_VEL|SOUND_CHANGED_SPEED));
+            }
          }else
          {
-            if(flag&SOUND_CHANGED_SPEED){setSpeed(); _buffer.speed(SoundSpeed(_actual_speed));}
+            if(flag&SOUND_CHANGED_SPEED){if(SOUND_SPEED_ON_SOUND_THREAD)setActualSpeed(); _buffer.speed(SoundSpeed(_actual_speed));}
          }
       #else
-         if(flag&SOUND_CHANGED_SPEED ){setSpeed(); _buffer.speed(SoundSpeed(_actual_speed));}
-         if(flag&SOUND_CHANGED_POS   )_buffer.pos  (_pos);
-         if(flag&SOUND_CHANGED_VEL   )_buffer.vel  (_vel);
-         if(flag&SOUND_CHANGED_RANGE )_buffer.range(_range);
+         if(flag&SOUND_CHANGED_POS  )_buffer.pos  (_pos);
+         if(flag&SOUND_CHANGED_VEL  )_buffer.vel  (_vel);
+         if(flag&SOUND_CHANGED_RANGE)_buffer.range(_actual_range);
+         if(flag&SOUND_CHANGED_SPEED){if(SOUND_SPEED_ON_SOUND_THREAD)setActualSpeed(); _buffer.speed(SoundSpeed(_actual_speed));}
       #endif
-         if(flag&SOUND_CHANGED_TIME  )preciseTime(time());
+         if(flag&SOUND_CHANGED_TIME )preciseTime(time());
       }
 
       // buffer data
@@ -927,14 +932,6 @@ Bool Sound::load(File &f, CChar *path)
    return false;
 }
 /******************************************************************************/
-#if OPEN_SL
-// !! this can be called only inside 'Listener' on sound thread !! because it's called only there, it already had 'SoundAPILock' lock applied so we don't need to call it again, since it's the sound thread then we can use 'SoundMemxPlaying'
-void EmulateSound3D() {REPAO(SoundMemxPlaying)->_buffer.emulate3D();} // !! requires 'SoundAPILock' !!
-#endif
-// following can be called on the main thread, because of that we can't use 'SoundMemxPlaying'
-void VolumeSound() {SyncLocker SoundMemxLocker(SoundMemxLock); REPA(SoundMemx)AtomicOr(SoundMemx[i].flag, SOUND_CHANGED_VOLUME);}
-void  SpeedSound() {SyncLocker SoundMemxLocker(SoundMemxLock); REPA(SoundMemx)AtomicOr(SoundMemx[i].flag, SOUND_CHANGED_SPEED );}
-
 static Int CompareSound(C _Sound &a, C _Sound &b)
 {
    return Compare(b.priority, a.priority); // compare reversed so that we start with highest priority
@@ -1037,10 +1034,10 @@ again:
             }else
             if(sound.playing() && !sound.loop()) // update time but only if the sound is not looped, if it's looped then for simplicity we skip this
             {  // update time over here because above it is already set from precise value
-               if(AtomicGet(sound.flag)&SOUND_CHANGED_SPEED) // check if speed was changed, which affects time updates
+               if(SOUND_SPEED_ON_SOUND_THREAD && AtomicGet(sound.flag)&SOUND_CHANGED_SPEED) // check if speed was changed, which affects time updates #SOUND_CHANGED_SPEED
                {
                   AtomicDisable(sound.flag, SOUND_CHANGED_SPEED); // disable flag first, so in case the user modifies parameters while this function is running, it will be activated again
-                  sound.setSpeed();
+                  sound.setActualSpeed();
                }
                Flt time=sound._time; AtomicCAS(sound._time, time, time+sound._actual_speed*dt); // update time only if it wasn't changed on another thread, normally we should also set SOUND_CHANGED_TIME flag, however to avoid doing it everytime, since the sound is paused, then we just apply that flag once when the sound is unpaused. This is a safe change since it's a small relative change using 'AtomicCAS' which can be performed even if time was modified on another thread.
                if(sound.time()>=sound.length())sound.del(); // !! requires 'SoundAPILock' !! if reached the end, then delete it
@@ -1051,7 +1048,7 @@ again:
 
       if(SoundMemxPlaying.elms())
       {
-      #if XAUDIO || CUSTOM_AUDIO
+      #if LISTENER_CHANGED
          ListenerChanged=
       #endif
             Listener.updateNoLock(); // !! requires 'SoundAPILock' !!
@@ -1125,6 +1122,17 @@ void ResumeSound()
 /******************************************************************************/
 Int  PlayingSounds  () {return SoundMemxPlaying.elms()  ;}
 Bool PlayingAnySound() {return SoundMemxPlaying.elms()>0;}
+/******************************************************************************/
+void ChangeSoundsSeparate(UInt change) // set for all sounds separately
+{
+   // this can be called on the main thread, because of that we can't use 'SoundMemxPlaying'
+   SyncLocker SoundMemxLocker(SoundMemxLock); REPA(SoundMemx)AtomicOr(SoundMemx[i].flag, change);
+}
+void ChangeSounds(UInt change) // try using global
+{
+   if(LISTENER_CHANGED)AtomicOr(Listener._flag, change); // if we're using one global listener changed flag, then just use it
+   else                    ChangeSoundsSeparate(change); // if not, then have to set separately for all sounds
+}
 /******************************************************************************/
 static void SoundPlay2D(C Str &name, SoundCallback *call, Flt volume, VOLUME_GROUP volume_group, Flt speed) // !! call 'call.del' if not passed down !!
 {

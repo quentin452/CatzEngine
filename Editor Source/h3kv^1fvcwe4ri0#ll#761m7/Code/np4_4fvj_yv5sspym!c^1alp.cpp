@@ -82,13 +82,13 @@ class VideoOptions : PropWin
          "Water Light"      , // 17
       }; ASSERT(RS_DEFAULT==0 && RS_DEPTH==1 && RS_COLOR==2 && RS_NORMAL==3 && RS_SMOOTH==4 && RS_REFLECT==5 && RS_GLOW==6 && RS_EMISSIVE==7 && RS_MOTION==8 && RS_LIGHT==9 && RS_LIGHT_AO==10 && RS_AO==11 && RS_LIT_COLOR==12
              && RS_ALPHA==13 && RS_REFLECTION==14 && RS_WATER_COLOR==15 && RS_WATER_NORMAL==16 && RS_WATER_LIGHT==17);
-      static cchar8 *ToneMap_t[]=
+    /*static cchar8 *ToneMap_t[]=
       {
          "Off"     , // 0
          "Default" , // 1
          "ACES LDR", // 2
          "ACES HDR", // 3
-      }; ASSERT(TONE_MAP_OFF==0 && TONE_MAP_DEFAULT==1 && TONE_MAP_ACES_LDR==2 && TONE_MAP_ACES_HDR==3 && TONE_MAP_NUM==4);
+      }; ASSERT(TONE_MAP_OFF==0 && TONE_MAP_DEFAULT==1 && TONE_MAP_ACES_LDR==2 && TONE_MAP_ACES_HDR==3 && TONE_MAP_NUM==4); */
       static cchar8 *ShadowReduceFlicker_t[]=
       {
          "Off",
@@ -135,7 +135,9 @@ class VideoOptions : PropWin
       static Str  Stage        (C Advanced &adv             ) {return Renderer.stage;}
       static void Stage        (  Advanced &adv, C Str &text) {       Renderer.stage=(RENDER_STAGE)TextInt(text);}
       static Str  ToneMap      (C Advanced &adv             ) {return D.toneMap();}
-      static void ToneMap      (  Advanced &adv, C Str &text) {       D.toneMap((TONE_MAP_MODE)TextInt(text));}
+      static void ToneMap      (  Advanced &adv, C Str &text) {       D.toneMap(TextBool(text));}
+      static Str  Contrast     (C Advanced &adv             ) {return D.contrast();}
+      static void Contrast     (  Advanced &adv, C Str &text) {       D.contrast(TextFlt(text));}
       static Str  EyeAdaptBrigh(C Advanced &adv             ) {return D.eyeAdaptationBrightness();}
       static void EyeAdaptBrigh(  Advanced &adv, C Str &text) {       D.eyeAdaptationBrightness(TextFlt(text));}
       static Str  Exclusive    (C Advanced &adv             ) {return D.exclusive();}
@@ -303,7 +305,9 @@ diffuse=&props.New().create("Diffuse Mode"         , MemberDesc(         ).setFu
          props.New().create("High Precision Normal RT"   , MemberDesc(DATA_BOOL).setFunc(NrmRTPrec    , NrmRTPrec    )).desc("Enable high precision normal render target\nThis increases precision of specular lighting in Deferred Renderer.");
          props.New().create("High Precision Light RT"    , MemberDesc(DATA_BOOL).setFunc(LumRTPrec    , LumRTPrec    )).desc("Enable high precision light render target\nThis increases lighting precision in Deferred Renderer.");
          props.New().create("Eye Adaptation Brightness"  , MemberDesc(DATA_REAL).setFunc(EyeAdaptBrigh, EyeAdaptBrigh)).range(0, 2).desc("Total light scale for Eye Adaptation Effect");
-         props.New().create("Tone Mapping"               , MemberDesc(         ).setFunc(ToneMap      , ToneMap      )).setEnum(ToneMap_t, Elms(ToneMap_t));
+       //props.New().create("Tone Mapping"               , MemberDesc(         ).setFunc(ToneMap      , ToneMap      )).setEnum(ToneMap_t, Elms(ToneMap_t));
+         props.New().create("Tone Mapping"               , MemberDesc(DATA_BOOL).setFunc(ToneMap      , ToneMap      ));
+         props.New().create("Contrast"                   , MemberDesc(DATA_REAL).setFunc(Contrast     , Contrast     )).range(0, 1);
          props.New().create("Bloom Scale"                , MemberDesc(DATA_REAL).setFunc(BloomScale   , BloomScale   )).range(0, 2);
          props.New().create("Ambient Light"              , MemberDesc(DATA_REAL).setFunc(AmbLight     , AmbLight     )).range(0, 1);
          props.New().create("Ambient Occlusion Contrast" , MemberDesc(DATA_REAL).setFunc(AOContrast   , AOContrast   )).range(0, 8);

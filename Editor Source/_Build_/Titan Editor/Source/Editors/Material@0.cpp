@@ -316,6 +316,8 @@ MaterialRegion MtrlEdit;
          }
       }
    void MaterialRegion::undoVis() {SetUndo(undos, undo, redo);}
+   MaterialRegion::MaterialRegion() : elm_type(ELM_MTRL), auto_reload(true), min_zoom(0.48f), max_zoom(3), mouse_edit_delta(0), mouse_edit_value(0), light_angle(PI_4), game(&temp), elm_id(UIDZero), elm(null), changed(false), undos(true) {clearPropPtrs();}
+   void MaterialRegion::clearPropPtrs() {red=green=blue=alpha=emit_red=emit_green=emit_blue=smooth=null;}
    Vec MaterialRegion::previewLight()C {return Matrix3().setRotateXY(light_angle.y-ActiveCam.pitch, light_angle.x-ActiveCam.yaw).z;}
    void MaterialRegion::Render() {MtrlEdit.render();}
           void MaterialRegion::render()
@@ -711,7 +713,7 @@ MaterialRegion MtrlEdit;
    void MaterialRegion::create()
    {
       Gui+=super::create(Rect_LU(0, 0, 0.73f, 1)).skin(&LightSkin, false).hide();
-      flt w=rect().w()-slidebarSize(), e=0.01f, we=w-e*2, p=0.007f, h=0.05f, prop_height=0.044f;
+      flt w=minClientWidth(), e=0.01f, we=w-e*2, p=0.007f, h=0.05f, prop_height=0.044f;
         T+=big         .create(Rect_LU(e, 0, h*1.6f, h), "<<").focusable(false); big.mode=BUTTON_TOGGLE;
         T+=set_mtrl    .create(Rect_LU(big.rect().max.x+p, big.rect().max.y, h, h)).func(SetMtrl, T).focusable(false).desc("Enable this and click on the screen to set material at that location.\nOptionally hold Shift key to completely replace target material on all parts that use it."); set_mtrl.mode=BUTTON_TOGGLE; set_mtrl.image="Gui/Misc/set.img";
         T+=undo        .create(Rect_LU(set_mtrl.rect().ru()+Vec2(p, 0), 0.05f, 0.05f )).func(Undo, T).focusable(false).desc("Undo"); undo.image="Gui/Misc/undo.img";
@@ -1396,8 +1398,6 @@ Property &tss=props.New().create("Tex Size Switch", MemberDesc(DATA_INT).setFunc
          if(next.pd()){next.eat(); Proj.elmNext(elm_id    );}
       }
    }
-MaterialRegion::MaterialRegion() : elm_type(ELM_MTRL), auto_reload(true), min_zoom(0.48f), max_zoom(3), mouse_edit_delta(0), mouse_edit_value(0), light_angle(PI_4), red(null), green(null), blue(null), alpha(null), emit_red(null), emit_green(null), emit_blue(null), smooth(null), game(&temp), elm_id(UIDZero), elm(null), changed(false), undos(true) {}
-
 MaterialRegion::Texture::Texture() : mr(null) {}
 
 MaterialRegion::ImageSource::ImageSource() : multi_channel(false), need_metal_channel(true), index(0), order(0), detected_channels(0) {}

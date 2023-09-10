@@ -645,6 +645,24 @@ Bool CalcValue::log(C CalcValue &x)
    }
    return false;
 }
+Bool CalcValue::exp()
+{
+   switch(type)
+   {
+      case CVAL_INT : r=Exp(Dbl(i)); type=CVAL_REAL; return true;
+      case CVAL_REAL: r=Exp(    r );                 return true;
+   }
+   return false;
+}
+Bool CalcValue::exp2()
+{
+   switch(type)
+   {
+      case CVAL_INT : r=Exp2(Dbl(i)); type=CVAL_REAL; return true;
+      case CVAL_REAL: r=Exp2(    r );                 return true;
+   }
+   return false;
+}
 /******************************************************************************/
 Bool CalcValue::And(C CalcValue &x) {if(type==CVAL_INT && x.type==CVAL_INT){i &=x.i; return true;} return false;}
 Bool CalcValue::Or (C CalcValue &x) {if(type==CVAL_INT && x.type==CVAL_INT){i |=x.i; return true;} return false;}
@@ -1120,6 +1138,8 @@ static Bool CPow (CalcValue &x, CalcValue &y) {return x.pow (y);}
 static Bool CLn  (CalcValue &x              ) {return x.ln  ( );}
 static Bool CLog2(CalcValue &x              ) {return x.log2( );}
 static Bool CLog (CalcValue &x, CalcValue &y) {return x.log (y);}
+static Bool CExp (CalcValue &x              ) {return x.exp ( );}
+static Bool CExp2(CalcValue &x              ) {return x.exp2( );}
 
 static Bool CAnd(CalcValue &x, CalcValue &y) {return x.And(y);}
 static Bool COr (CalcValue &x, CalcValue &y) {return x.Or (y);}
@@ -1456,6 +1476,180 @@ static Bool CSRGBToLinear(CalcValue &x)
    return true;
 }
 /******************************************************************************/
+inline Flt Tanh(Flt x) {return tanhf(x);}
+inline Dbl Tanh(Dbl x) {return tanh (x);}
+static Bool CTanh(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =Tanh(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =Tanh(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=Tanh(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =Tanh(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=Tanh(    x.v4);else
+      return false;
+   return true;
+}
+/******************************************************************************/
+static Bool CSigmoidDiv(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidDiv(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidDiv(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidDiv(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidDiv(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidDiv(    x.v4);else
+      return false;
+   return true;
+}
+static Bool CSigmoidDivInv(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidDivInv(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidDivInv(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidDivInv(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidDivInv(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidDivInv(    x.v4);else
+      return false;
+   return true;
+}
+static Bool CSigmoidSqr(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidSqr(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidSqr(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidSqr(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidSqr(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidSqr(    x.v4);else
+      return false;
+   return true;
+}
+static Bool CSigmoidSqrInv(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidSqrInv(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidSqrInv(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidSqrInv(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidSqrInv(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidSqrInv(    x.v4);else
+      return false;
+   return true;
+}
+static Bool CSigmoidPow(CalcValue &x, CalcValue &y)
+{
+   Dbl xr, yr;
+   if(x.type==CVAL_INT )xr=x.i;else
+   if(x.type==CVAL_REAL)xr=x.r;else return false;
+   if(y.type==CVAL_INT )yr=y.i;else
+   if(y.type==CVAL_REAL)yr=y.r;else return false;
+   x.r   =SigmoidPow(xr, yr);
+   x.type=CVAL_REAL; return true;
+}
+static Bool CSigmoidPowInv(CalcValue &x, CalcValue &y)
+{
+   Dbl xr, yr;
+   if(x.type==CVAL_INT )xr=x.i;else
+   if(x.type==CVAL_REAL)xr=x.r;else return false;
+   if(y.type==CVAL_INT )yr=y.i;else
+   if(y.type==CVAL_REAL)yr=y.r;else return false;
+   x.r   =SigmoidPowInv(xr, yr);
+   x.type=CVAL_REAL; return true;
+}
+static Bool CSigmoidExp(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidExp(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidExp(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidExp(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidExp(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidExp(    x.v4);else
+      return false;
+   return true;
+}
+static Bool CSigmoidExpInv(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidExpInv(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidExpInv(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidExpInv(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidExpInv(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidExpInv(    x.v4);else
+      return false;
+   return true;
+}
+static Bool CSigmoidExpA(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidExpA(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidExpA(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidExpA(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidExpA(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidExpA(    x.v4);else
+      return false;
+   return true;
+}
+static Bool CSigmoidExpAInv(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidExpAInv(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidExpAInv(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidExpAInv(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidExpAInv(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidExpAInv(    x.v4);else
+      return false;
+   return true;
+}
+static Bool CSigmoidAtan(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidAtan(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidAtan(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidAtan(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidAtan(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidAtan(    x.v4);else
+      return false;
+   return true;
+}
+static Bool CSigmoidAtanInv(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidAtanInv(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidAtanInv(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidAtanInv(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidAtanInv(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidAtanInv(    x.v4);else
+      return false;
+   return true;
+}
+static Bool CSigmoidTanh(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidTanh(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidTanh(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidTanh(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidTanh(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidTanh(    x.v4);else
+      return false;
+   return true;
+}
+static Bool CSigmoidTanhInv(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidTanhInv(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidTanhInv(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidTanhInv(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidTanhInv(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidTanhInv(    x.v4);else
+      return false;
+   return true;
+}
+static Bool CSigmoidGd(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidGd(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidGd(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidGd(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidGd(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidGd(    x.v4);else
+      return false;
+   return true;
+}
+static Bool CSigmoidErf(CalcValue &x)
+{
+   if(x.type==CVAL_INT ){x.r =SigmoidErf(Dbl(x.i)); x.type=CVAL_REAL;}else
+   if(x.type==CVAL_REAL) x.r =SigmoidErf(    x.r );else
+ //if(x.type==CVAL_VEC2) x.v2=SigmoidErf(    x.v2);else
+ //if(x.type==CVAL_VEC ) x.v =SigmoidErf(    x.v );else
+ //if(x.type==CVAL_VEC4) x.v4=SigmoidErf(    x.v4);else
+      return false;
+   return true;
+}
+/******************************************************************************/
 static Bool CGaussian(CalcValue &x)
 {
    if(x.type==CVAL_INT )x.r=Gaussian(Dbl(x.i));else
@@ -1582,9 +1776,12 @@ static struct CalcFuncInfo
    {1, "Ln"              , (Ptr)CLn              },
    {1, "Log2"            , (Ptr)CLog2            },
    {2, "Log"             , (Ptr)CLog             },
+   {1, "Exp"             , (Ptr)CExp             },
+   {1, "Exp2"            , (Ptr)CExp2            },
    {1, "Sin"             , (Ptr)CSin             },
    {1, "Cos"             , (Ptr)CCos             },
    {1, "Tan"             , (Ptr)CTan             },
+   {1, "Tanh"            , (Ptr)CTanh            },
    {1, "Ctg"             , (Ptr)CCtg             },
    {1, "Acos"            , (Ptr)CAcos            },
    {1, "Asin"            , (Ptr)CAsin            },
@@ -1635,6 +1832,22 @@ static struct CalcFuncInfo
    {1, "LinearToSRGB"    , (Ptr)CLinearToSRGB    },
    {1, "SRGBToLinear"    , (Ptr)CSRGBToLinear    },
    {1, "Gaussian"        , (Ptr)CGaussian        },
+   {1, "SigmoidDiv"      , (Ptr)CSigmoidDiv      },
+   {1, "SigmoidDivInv"   , (Ptr)CSigmoidDivInv   },
+   {1, "SigmoidSqr"      , (Ptr)CSigmoidSqr      },
+   {1, "SigmoidSqrInv"   , (Ptr)CSigmoidSqrInv   },
+   {2, "SigmoidPow"      , (Ptr)CSigmoidPow      },
+   {2, "SigmoidPowInv"   , (Ptr)CSigmoidPowInv   },
+   {1, "SigmoidExp"      , (Ptr)CSigmoidExp      },
+   {1, "SigmoidExpA"     , (Ptr)CSigmoidExpA     },
+   {1, "SigmoidExpInv"   , (Ptr)CSigmoidExpInv   },
+   {1, "SigmoidExpAInv"  , (Ptr)CSigmoidExpAInv  },
+   {1, "SigmoidAtan"     , (Ptr)CSigmoidAtan     },
+   {1, "SigmoidAtanInv"  , (Ptr)CSigmoidAtanInv  },
+   {1, "SigmoidTanh"     , (Ptr)CSigmoidTanh     },
+   {1, "SigmoidTanhInv"  , (Ptr)CSigmoidTanhInv  },
+   {1, "SigmoidGd"       , (Ptr)CSigmoidGd       },
+   {1, "SigmoidErf"      , (Ptr)CSigmoidErf      },
 };
 struct CalcFunc
 {

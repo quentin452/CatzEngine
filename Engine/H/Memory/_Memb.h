@@ -1,6 +1,8 @@
 /******************************************************************************/
 struct _Memb // Block Based Container Base - Do not use this class, use 'Memb' instead
 {
+   static constexpr Bool Continuous=false; // Memb memory is NOT continuous
+
    void del  ();
    void clear();
 

@@ -23,8 +23,13 @@ class VideoOptions : PropWin
       static cchar8 *Stage_t[]
 ; ASSERT(RS_DEFAULT==0 && RS_DEPTH==1 && RS_COLOR==2 && RS_NORMAL==3 && RS_SMOOTH==4 && RS_REFLECT==5 && RS_GLOW==6 && RS_EMISSIVE==7 && RS_MOTION==8 && RS_LIGHT==9 && RS_LIGHT_AO==10 && RS_AO==11 && RS_LIT_COLOR==12
              && RS_ALPHA==13 && RS_REFLECTION==14 && RS_WATER_COLOR==15 && RS_WATER_NORMAL==16 && RS_WATER_LIGHT==17);
-      static cchar8 *ToneMap_t[]
-; ASSERT(TONE_MAP_OFF==0 && TONE_MAP_DEFAULT==1 && TONE_MAP_ACES_LDR==2 && TONE_MAP_ACES_HDR==3 && TONE_MAP_NUM==4);
+    /*static cchar8 *ToneMap_t[]=
+      {
+         "Off"     , // 0
+         "Default" , // 1
+         "ACES LDR", // 2
+         "ACES HDR", // 3
+      }; ASSERT(TONE_MAP_OFF==0 && TONE_MAP_DEFAULT==1 && TONE_MAP_ACES_LDR==2 && TONE_MAP_ACES_HDR==3 && TONE_MAP_NUM==4); */
       static cchar8 *ShadowReduceFlicker_t[]
 ;
       static cchar8 *ColorSpace_t[]
@@ -64,6 +69,8 @@ class VideoOptions : PropWin
       static void Stage        (  Advanced &adv, C Str &text);        
       static Str  ToneMap      (C Advanced &adv             );        
       static void ToneMap      (  Advanced &adv, C Str &text);        
+      static Str  Contrast     (C Advanced &adv             );        
+      static void Contrast     (  Advanced &adv, C Str &text);        
       static Str  EyeAdaptBrigh(C Advanced &adv             );        
       static void EyeAdaptBrigh(  Advanced &adv, C Str &text);        
       static Str  Exclusive    (C Advanced &adv             );        

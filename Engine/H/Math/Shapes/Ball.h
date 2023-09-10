@@ -104,8 +104,10 @@ struct SphereArea : VecI2
    SphereArea& zero(                           ) {T.side=DIR_ENUM(0); T.x=0; T.y=0; return T;}
    SphereArea& set (DIR_ENUM side, Int x, Int y) {T.side=side       ; T.x=x; T.y=y; return T;}
 
-   Bool operator==(C SphereArea &pos)C {return xy()==pos.xy() && side==pos.side;}
-   Bool operator!=(C SphereArea &pos)C {return xy()!=pos.xy() || side!=pos.side;}
+   Bool operator==(C SphereArea   &pos)C {return xy()==pos.xy() && side==pos.side;}
+   Bool operator!=(C SphereArea   &pos)C {return xy()!=pos.xy() || side!=pos.side;}
+   Bool operator==(C SphereAreaUS &pos)C;
+   Bool operator!=(C SphereAreaUS &pos)C;
 
    SphereArea() {}
    SphereArea(DIR_ENUM side, Int x, Int y) {set(side, x, y);}
@@ -118,17 +120,21 @@ struct SphereAreaUS : VecUS2
    VecUS2& xy()  {return T;}
  C VecUS2& xy()C {return T;}
 
-   SphereAreaUS& zero(                           ) {T.side=DIR_ENUM(0); T.x=0; T.y=0; return T;}
-   SphereAreaUS& set (DIR_ENUM side, Int x, Int y) {T.side=side       ; T.x=x; T.y=y; return T;}
+   SphereAreaUS& zero(                                 ) {T.side=DIR_ENUM(0); T.x=0; T.y=0; return T;}
+   SphereAreaUS& set (DIR_ENUM side, UShort x, UShort y) {T.side=side       ; T.x=x; T.y=y; return T;}
 
    Bool operator==(C SphereAreaUS &pos)C {return xy()==pos.xy() && side==pos.side;}
    Bool operator!=(C SphereAreaUS &pos)C {return xy()!=pos.xy() || side!=pos.side;}
+   Bool operator==(C SphereArea   &pos)C {return xy()==pos.xy() && side==pos.side;}
+   Bool operator!=(C SphereArea   &pos)C {return xy()!=pos.xy() || side!=pos.side;}
 
    SphereAreaUS() {}
-   SphereAreaUS(DIR_ENUM side, Int x, Int y) {set(    side,     x,     y);}
-   SphereAreaUS(C SphereArea &pos          ) {set(pos.side, pos.x, pos.y);}
+   SphereAreaUS(DIR_ENUM side, UShort x, UShort y) {set(    side,     x,     y);}
+   SphereAreaUS(C SphereArea &pos                ) {set(pos.side, pos.x, pos.y);}
 };
-inline SphereArea::SphereArea(C SphereAreaUS &pos) {set(pos.side, pos.x, pos.y);}
+inline      SphereArea::SphereArea(C SphereAreaUS &pos)  {set(pos.side, pos.x, pos.y);}
+inline Bool SphereArea::operator==(C SphereAreaUS &pos)C {return xy()==pos.xy() && side==pos.side;}
+inline Bool SphereArea::operator!=(C SphereAreaUS &pos)C {return xy()!=pos.xy() || side!=pos.side;}
 #if EE_PRIVATE
 struct SphereAreaDist : SphereArea
 {
@@ -173,6 +179,7 @@ struct SphereConvert
    DIR_ENUM dirToSphereTerrainPixel      (C Vec &dir, Vec2  &xy           )C; // convert vector direction (doesn't need to be normalized) to cube face and spherical terrain coordinates, 'xy'=image pixel coordinates (0..res  )
    DIR_ENUM dirToSphereTerrainPixelIMid  (C Vec &dir, VecI2 &xy           )C; // convert vector direction (doesn't need to be normalized) to cube face and spherical terrain coordinates, 'xy'=image pixel coordinates (0..res-1)
    Vec2     dirToSphereTerrainPixel      (C Vec &dir, DIR_ENUM cube_face  )C; // convert vector direction (doesn't need to be normalized) to               spherical terrain coordinates, 'cube_face'=cube face that 'dir' belongs to, returns image pixel coordinates (0..res)
+   VecI2    dirToSphereTerrainPixelI     (C Vec &dir, DIR_ENUM cube_face  )C; // convert vector direction (doesn't need to be normalized) to               spherical terrain coordinates, 'cube_face'=cube face that 'dir' belongs to, returns image pixel coordinates (0..res)
    Vec      sphereTerrainPixelToDir      (DIR_ENUM cube_face, Flt x, Flt y)C; // convert spherical terrain coordinates to vector direction, 'cube_face'=terrain cube face, 'x,y'=terrain pixel coordinates (0..res  ), returned vector is not normalized, however it's on a cube with radius=1 ("Abs(dir).max()=1")
    Vec     _sphereTerrainPixelToDir      (DIR_ENUM cube_face, Int x, Int y)C; // convert spherical terrain coordinates to vector direction, 'cube_face'=terrain cube face, 'x,y'=terrain pixel coordinates (0..res  ), returned vector is not normalized, however it's on a cube with radius=1 ("Abs(dir).max()=1"), !! 'x' 'y' MUST BE IN RANGE "0..res"   !!
    Vec     _sphereTerrainPixelCenterToDir(DIR_ENUM cube_face, Int x, Int y)C; // convert spherical terrain coordinates to vector direction, 'cube_face'=terrain cube face, 'x,y'=terrain pixel coordinates (0..res-1), returned vector is not normalized, however it's on a cube with radius=1 ("Abs(dir).max()=1"), !! 'x' 'y' MUST BE IN RANGE "0..res-1" !! THIS IS FAST APPROXIMATION !!
@@ -183,8 +190,8 @@ struct SphereConvert
 #if EE_PRIVATE
    void draw()C;
    void drawCell(C Color &color, C VecI2 &cell)C;
-   void drawCell(C Color &color, C SphereArea &area, Flt radius)C;
 #endif
+   void drawCell(C Color &color, C SphereArea &area, Flt radius)C;
 };
 struct SphereConvertEx : SphereConvert
 {
@@ -278,13 +285,16 @@ Bool Inside(C Extent &a, C Ball &b); // if 'a' is fully inside 'b'
 
 // sweep
 Bool SweepPointBall(C Vec  &point, C Vec  &move, C Ball  &ball, Flt *hit_frac=null, Vec  *hit_normal=null); // if moving point cuts through a static ball
+Bool SweepPointBall(C VecD &point, C Vec  &move, C BallM &ball, Flt *hit_frac=null, Vec  *hit_normal=null); // if moving point cuts through a static ball
 Bool SweepPointBall(C VecD &point, C VecD &move, C BallD &ball, Dbl *hit_frac=null, VecD *hit_normal=null); // if moving point cuts through a static ball
 Bool SweepEdgeBall (C Edge  &edge, C Vec  &move, C Ball  &ball, Flt *hit_frac=null, Vec  *hit_normal=null); // if moving edge  cuts through a static ball
 Bool SweepEdgeBall (C EdgeD &edge, C VecD &move, C BallD &ball, Dbl *hit_frac=null, VecD *hit_normal=null); // if moving edge  cuts through a static ball
 
 Bool SweepBallPoint(C Ball  &ball, C Vec  &move, C Vec   &point, Flt *hit_frac=null, Vec  *hit_normal=null); // if moving ball cuts through a static point
+Bool SweepBallPoint(C BallM &ball, C Vec  &move, C VecD  &point, Flt *hit_frac=null, Vec  *hit_normal=null); // if moving ball cuts through a static point
 Bool SweepBallPoint(C BallD &ball, C VecD &move, C VecD  &point, Dbl *hit_frac=null, VecD *hit_normal=null); // if moving ball cuts through a static point
 Bool SweepBallEdge (C Ball  &ball, C Vec  &move, C Edge  &edge , Flt *hit_frac=null, Vec  *hit_normal=null); // if moving ball cuts through a static edge
+Bool SweepBallEdge (C BallM &ball, C Vec  &move, C EdgeD &edge , Flt *hit_frac=null, Vec  *hit_normal=null); // if moving ball cuts through a static edge
 Bool SweepBallEdge (C BallD &ball, C VecD &move, C EdgeD &edge , Dbl *hit_frac=null, VecD *hit_normal=null); // if moving ball cuts through a static edge
 Bool SweepBallBall (C Ball  &ball, C Vec  &move, C Ball  &ball2, Flt *hit_frac=null, Vec  *hit_normal=null); // if moving ball cuts through a static ball
 Bool SweepBallBall (C BallD &ball, C VecD &move, C BallD &ball2, Dbl *hit_frac=null, VecD *hit_normal=null); // if moving ball cuts through a static ball

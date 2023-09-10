@@ -88,7 +88,7 @@ class PreviewClass : Window // create as window so it will be above other window
       }
       if(Renderer()==RM_BLEND)
       {
-         if(elm_type==ELM_OBJ   && body                            )body ->drawBlend (MatrixMIdentity, &NoTemp(Vec4(1, 1, 1, 0.32)));
+         if(elm_type==ELM_OBJ   && body                            )body ->drawBlend (MatrixMIdentity, &NoTemp(Vec4(1, 1, 1, 0.333)));
          if(elm_type==ELM_IMAGE && image && image->mode()==IMAGE_3D)image->drawVolume(WHITE, TRANSPARENT, OBox(Box(1)), 0.05);
       }
    }

@@ -60,7 +60,7 @@
       T+=groups_t.create(groups_r.rect().up()+Vec2(0, 0.005f), "Enum Draw Groups" , &ts);
       T+= parts_t.create( parts_r.rect().up()+Vec2(0, 0.005f), "Object Mesh Parts", &ts);
 
-      flt iw=0.05f*0, w=groups_r.rect().w()-groups_r.slidebarSize()-iw;
+      flt iw=0.05f*0, w=groups_r.minClientWidth()-iw;
       ListColumn groups_lc[]=
       {
        //ListColumn(MEMBER(Index, i), iw, null  ),
@@ -68,7 +68,7 @@
       };
       groups_r+=groups_l.create(groups_lc, Elms(groups_lc)).elmHeight(0.037f).textSize(0, 1).columnHeight(0.05f); groups_l.cur_mode=LCM_MOUSE; FlagDisable(groups_l.flag, LIST_SORTABLE); groups_l.flag|=LIST_SCALABLE; groups_l.desc("Drag and drop groups onto mesh parts to assign them");
 
-      iw=0.05f*0, w=parts_r.rect().w()-parts_r.slidebarSize()-iw;
+      iw=0.05f*0, w=parts_r.minClientWidth()-iw;
       ListColumn parts_lc[]=
       {
        //ListColumn(MEMBER(Index, i), iw    , null   ),

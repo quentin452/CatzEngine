@@ -291,7 +291,11 @@ class AnimEditor : Viewport4Region
                   int       bone=(editing ? AnimEdit.sel_bone : AnimEdit.lit_bone);
                   Skeleton *skel=AnimEdit.skel;
                   flt frame, frames; Str frame_t; if(AnimEdit.timeToFrame(AnimEdit.animTime(), frame) && AnimEdit.timeToFrame(anim.length(), frames))frame_t=S+", "+Round(frame)+'/'+Round(frames)+"f";
-                                                       D.text(ObjEdit.ts, p, S+"Time: "+AnimEdit.animTime()+'/'+anim.length()+"s ("+Round(AnimEdit.timeToFrac(AnimEdit.animTime())*100)+'%'+frame_t+')'); p.y-=ObjEdit.ts.size.y;
+                  D.text(ObjEdit.ts, p, S+"Time: "+AnimEdit.animTime()+'/'+anim.length()+"s ("+Round(AnimEdit.timeToFrac(AnimEdit.animTime())*100)+'%'+frame_t+')'); p.y-=ObjEdit.ts.size.y;
+                  if(1)
+                  {      
+                     D.text(ObjEdit.ts, p, S+"Speed: "+anim.rootSpeed()); p.y-=ObjEdit.ts.size.y;
+                  }
                   if(skel && InRange(bone, skel.bones))
                   {
                      D.text(ObjEdit.ts, p, S+"Bone \""+skel.bones[bone].name+"\", Parent: "+(InRange(skel.bones[bone].parent, skel.bones) ? S+'"'+skel.bones[skel.bones[bone].parent].name+'"' : S+"none")); p.y-=ObjEdit.ts.size.y;

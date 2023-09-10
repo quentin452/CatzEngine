@@ -486,7 +486,7 @@ class ParamEditor : Region
          if(!is_class)r.max.set(2.0, screenPos().y-(-D.h())-0.1);
          return r;
       }
-      flt listWidth() {return region.rect().w()-region.slidebarSize();}
+      flt listWidth()C {return region.minClientWidth();}
     C Rect& rect()C {return super.rect();}
       virtual ParamWindow& rect(C Rect &rect)override
       {

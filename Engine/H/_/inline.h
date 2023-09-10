@@ -1479,7 +1479,19 @@ template<typename TYPE, Int Memt_size>  void  CMemPtr<TYPE, Memt_size>::copyTo(T
 #endif
 template<typename TYPE, Int Memt_size>        CMemPtr<TYPE, Memt_size>::operator Bool()C {return _mode!=PTR || elms();}
 template<typename TYPE, Int Memt_size>  Bool  CMemPtr<TYPE, Memt_size>::resizable    ()C {return _mode!=PTR;}
-template<typename TYPE, Int Memt_size>  Bool  CMemPtr<TYPE, Memt_size>::continuous   ()C {return _mode==PTR || _mode==MEMS || _mode==MEMC || _mode==MEMT;}
+template<typename TYPE, Int Memt_size>  Bool  CMemPtr<TYPE, Memt_size>::continuous   ()C
+{
+   switch(_mode)
+   {
+      default  : return  true; // PTR
+      case MEMS: return  Mems<TYPE>           ::Continuous;
+      case MEMC: return _Memc                 ::Continuous;
+      case MEMT: return  Memt<TYPE, Memt_size>::Continuous;
+      case MEMB: return _Memb                 ::Continuous;
+      case MEMX: return _Memx                 ::Continuous;
+      case MEML: return _Meml                 ::Continuous;
+   }
+}
 
 template<typename TYPE, Int Memt_size>  Bool  CMemPtr<TYPE, Memt_size>::save(File &f)C
 {
@@ -2288,6 +2300,8 @@ namespace Edit
    T1(TYPE)  TYPE*  Undo<TYPE>::set( Int change_type, Bool force_create, Flt extra_time) {return (TYPE*)super::set(change_type, force_create, extra_time);}
 
    T1(TYPE) T1(CHANGE)  Undo<TYPE>&  Undo<TYPE>::replaceClass() {ASSERT_BASE_EXTENDED<TYPE, CHANGE>(); _changes.replaceClass<CHANGE>(); return T;}
+
+   inline C ObjData::Param* ObjData::findParam(C Str &name, PARAM_TYPE type, Bool include_removed, Bool include_inherited)C {return ConstCast(T).findParam(name, type, include_removed, include_inherited);}
 }
 /******************************************************************************/
 #if EE_PRIVATE

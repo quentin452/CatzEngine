@@ -109,7 +109,7 @@
 #define Sqrt      sqrt
 #define Rsqrt     rsqrt
 #define Normalize normalize
-#define Pow       pow
+#define Pow       pow // Exp2(Log2(x)*y) !! FASTER IF 'x' IS KNOWN AT COMPILE TIME !!
 #define Sin       sin
 #define Cos       cos
 #define Tan       tan
@@ -117,7 +117,10 @@
 #define Asin      asin
 #define Atan      atan
 #define Lerp      lerp
-#define Exp       exp
+#define Exp       exp  // identical performance as Exp2 = Exp2(x/Log(2))
+#define Exp2      exp2 // identical performance as Exp
+#define Log       log  // identical performance as Log2
+#define Log2      log2 // identical performance as Log
 /******************************************************************************/
 // CONSTANTS
 /******************************************************************************/
@@ -141,6 +144,9 @@
 #define SQRT2_2 0.7071067811865475 // Sqrt(2)/2
 #define SQRT3_3 0.5773502691896257 // Sqrt(3)/3
 #define TAN     0.5                // tangent calculation constant
+
+#define LOG_2  0.69314718055994529    // Log (2)
+#define LOG2_E 1.44269504088896340736 // Log2(e)
 
 #define ColorLumWeight  VecH(0.2126, 0.7152, 0.0722)
 #define ColorLumWeight2 VecH(0.2990, 0.5870, 0.1140)
@@ -1297,11 +1303,18 @@ Vec GetPosLinear(Vec2  uv   ,              Vec2 pos_xy) {return GetPos(TexDepthL
 Half SRGBToLinear(Half s) {return (s<=0.04045  ) ? s/12.92 : Pow(s/1.055+0.055/1.055, 2.4);} // convert 0..1 srgb   to 0..1 linear, (s+0.055)/1.055
 Half LinearToSRGB(Half l) {return (l<=0.0031308) ? l*12.92 : Pow(l, 1/2.4)*1.055-0.055    ;} // convert 0..1 linear to 0..1 srgb
 
+// a little bit faster approximation, exp calculated to preserve sRGB 0.5 (grey) using: Dbl l=SRGBToLinear(0.5), exp=Ln(l)/Ln(0.5), s=Pow(l, 1/exp);
+Half SRGBToLinear1(Half s) {return Pow(s,   2.2240399129654920);}
+Half LinearToSRGB1(Half l) {return Pow(l, 1/2.2240399129654920);}
+
 VecH2 SRGBToLinear(VecH2 s) {return VecH2(SRGBToLinear(s.x), SRGBToLinear(s.y));}
 VecH2 LinearToSRGB(VecH2 l) {return VecH2(LinearToSRGB(l.x), LinearToSRGB(l.y));}
 
 VecH SRGBToLinear(VecH s) {return VecH(SRGBToLinear(s.x), SRGBToLinear(s.y), SRGBToLinear(s.z));}
 VecH LinearToSRGB(VecH l) {return VecH(LinearToSRGB(l.x), LinearToSRGB(l.y), LinearToSRGB(l.z));}
+
+VecH SRGBToLinear1(VecH s) {return VecH(SRGBToLinear1(s.x), SRGBToLinear1(s.y), SRGBToLinear1(s.z));}
+VecH LinearToSRGB1(VecH l) {return VecH(LinearToSRGB1(l.x), LinearToSRGB1(l.y), LinearToSRGB1(l.z));}
 
 VecH4 SRGBToLinear(VecH4 s) {return VecH4(SRGBToLinear(s.x), SRGBToLinear(s.y), SRGBToLinear(s.z), s.w);}
 VecH4 LinearToSRGB(VecH4 l) {return VecH4(LinearToSRGB(l.x), LinearToSRGB(l.y), LinearToSRGB(l.z), l.w);}
@@ -1578,8 +1591,9 @@ Half SmoothCube(Half s) {return (3-2*s)*s*s;}
 Flt  SmoothCube(Flt  s) {return (3-2*s)*s*s;}
 VecH SmoothCube(VecH s) {return (3-2*s)*s*s;}
 
-Half SmoothCube(Half from, Half to, Half s) {return Lerp(from, to, SmoothCube(s));}
-Flt  SmoothCube(Flt  from, Flt  to, Flt  s) {return Lerp(from, to, SmoothCube(s));}
+Half LerpSmoothCube(Half from, Half to, Half s) {return Lerp(from, to, SmoothCube(s));}
+Flt  LerpSmoothCube(Flt  from, Flt  to, Flt  s) {return Lerp(from, to, SmoothCube(s));}
+VecH LerpSmoothCube(VecH from, VecH to, Half s) {return Lerp(from, to, SmoothCube(s));}
 
 Half BlendSqr(Half x) {return Sat(1-x*x);}
 Flt  BlendSqr(Flt  x) {return Sat(1-x*x);}
@@ -1602,6 +1616,30 @@ Half Pinch      (Half x, Half pinch) {return x*pinch/(1+x*(pinch-1));}
 Flt  Pinch      (Flt  x, Flt  pinch) {return x*pinch/(1+x*(pinch-1));}
 Half PinchFactor(Half x, Half pinch) {return Pinch(x, ScaleFactor(pinch));}
 Flt  PinchFactor(Flt  x, Flt  pinch) {return Pinch(x, ScaleFactor(pinch));}
+
+Flt   SigmoidSqr(Flt   x) {return x/Sqrt(1+x*x);}
+Half  SigmoidSqr(Half  x) {return x/Sqrt(1+x*x);}
+Vec   SigmoidSqr(Vec   x) {return x/Sqrt(1+x*x);}
+VecH  SigmoidSqr(VecH  x) {return x/Sqrt(1+x*x);}
+VecH4 SigmoidSqr(VecH4 x) {return x/Sqrt(1+x*x);}
+
+Flt   SigmoidSqrInv(Flt   y) {return y/Sqrt(1-y*y);}
+Half  SigmoidSqrInv(Half  y) {return y/Sqrt(1-y*y);}
+Vec   SigmoidSqrInv(Vec   y) {return y/Sqrt(1-y*y);}
+VecH  SigmoidSqrInv(VecH  y) {return y/Sqrt(1-y*y);}
+VecH4 SigmoidSqrInv(VecH4 y) {return y/Sqrt(1-y*y);}
+
+Flt   SigmoidExp(Flt   x) {return 2/(1+Exp(x*-2))-1;}
+Half  SigmoidExp(Half  x) {return 2/(1+Exp(x*-2))-1;}
+Vec   SigmoidExp(Vec   x) {return 2/(1+Exp(x*-2))-1;}
+VecH  SigmoidExp(VecH  x) {return 2/(1+Exp(x*-2))-1;}
+VecH4 SigmoidExp(VecH4 x) {return 2/(1+Exp(x*-2))-1;}
+
+Flt   SigmoidAtan(Flt   x) {return Atan(x*PI_2)*(2/PI);}
+Half  SigmoidAtan(Half  x) {return Atan(x*PI_2)*(2/PI);}
+Vec   SigmoidAtan(Vec   x) {return Atan(x*PI_2)*(2/PI);}
+VecH  SigmoidAtan(VecH  x) {return Atan(x*PI_2)*(2/PI);}
+VecH4 SigmoidAtan(VecH4 x) {return Atan(x*PI_2)*(2/PI);}
 /******************************************************************************/
 Half     VisibleOpacity(Flt density, Flt range) {return   Pow(1-density, range);} // calculate visible     opacity (0..1) having 'density' environment density (0..1), and 'range' (0..Inf)
 Half AccumulatedDensity(Flt density, Flt range) {return 1-Pow(1-density, range);} // calculate accumulated density (0..1) having 'density' environment density (0..1), and 'range' (0..Inf)
@@ -1713,8 +1751,8 @@ VecH2 GetExtMS   (VecI2 pixel, UInt sample) {return              TexSample(ImgXY
 // LOD INDEX
 /******************************************************************************/
 // TODO: 'CalculateLevelOfDetail' could be used however it's only DX 10.1 SM_4_1 / GL 4.0+ / GL ES ?
-Flt GetLod(Vec2 uv, Flt  tex_size) {Vec2 pix=uv*tex_size; return 0.5*log2(Max(Length2(ddx(pix)), Length2(ddy(pix))));}
-Flt GetLod(Vec2 uv, Vec2 tex_size) {Vec2 pix=uv*tex_size; return 0.5*log2(Max(Length2(ddx(pix)), Length2(ddy(pix))));}
+Flt GetLod(Vec2 uv, Flt  tex_size) {Vec2 pix=uv*tex_size; return 0.5*Log2(Max(Length2(ddx(pix)), Length2(ddy(pix))));}
+Flt GetLod(Vec2 uv, Vec2 tex_size) {Vec2 pix=uv*tex_size; return 0.5*Log2(Max(Length2(ddx(pix)), Length2(ddy(pix))));}
 /******************************************************************************/
 // GRASS AND LEAF
 /******************************************************************************/
@@ -1903,6 +1941,12 @@ Half MultiMaterialWeight(Half weight, Half alpha) // 'weight'=weight of this mat
 #elif 0 // PinchFactor (too sharp transitions)
    const Half sharpen=32;
    return PinchFactor(weight, alpha*sharpen - 0.5*sharpen);
+#elif 0 // Sigmoid (not sharp enough, but when increasing sharpen then too bright on low weights, causing visible jumps due to material reduction for low weights
+   const Half sharpen=21;
+   alpha=alpha*sharpen - 0.5*sharpen; // (alpha-0.5)*sharpen
+   if(alpha<-HALF_MIN)weight=SigmoidSqrInv(weight*SigmoidSqr(alpha))/           alpha ;else
+   if(alpha> HALF_MIN)weight=SigmoidSqr   (weight*           alpha )/SigmoidSqr(alpha);
+   return weight;
 #elif 0 // Pow (too bright on low weights, causing visible jumps due to material reduction for low weights, also blurry (small contrast) compared to Pinch
    const Half sharpen=-5;
    return Pow(weight, ScaleFactor(alpha*sharpen - 0.5*sharpen));
@@ -1985,12 +2029,12 @@ Half LightConeAngle (Vec2 pos      ) {Half v=Sat(  Length(pos) *LightCone  .fall
 /******************************************************************************/
 Half F_Schlick(Half f0, Half f90, Half cos) // High Precision not needed
 {
-   Half q=Quint(1-cos); // Quint(1-x) = ~exp2(-9.28*x)
+   Half q=Quint(1-cos); // Quint(1-x) = ~Exp2(-9.28*x)
    return (f90-f0)*q + f0;
 }
 VecH F_Schlick(VecH f0, Half f90, Half cos) // High Precision not needed
 {
-   Half q=Quint(1-cos); // Quint(1-x) = ~exp2(-9.28*x)
+   Half q=Quint(1-cos); // Quint(1-x) = ~Exp2(-9.28*x)
    return f90*q + f0*(1-q); // re-ordered because of Vec
 }
 Half Vis_SmithR2Inv(Half rough2, Half NdotL, Half NdotV) // High Precision not needed, "rough2=Sqr(rough)", result is inversed 1/x
@@ -2216,7 +2260,7 @@ http://miciwan.com/SIGGRAPH2015/course_notes_wip.pdf
 NO because has overshots in low reflectivity
 VecH2 EnvDFGIwanicki(Half rough, Half NdotV)
 {
-   Half bias=exp2(-(7*NdotV+4*rough));
+   Half bias=Exp2(-(7*NdotV+4*rough));
    Half scale=1-bias-rough*Max(bias, Min(Sqrt(rough), 0.739 + 0.323*NdotV)-0.434);
    return VecH2(scale, bias);
 }
@@ -2231,7 +2275,7 @@ VecH2 EnvDFGLazarovNarkowiczSmooth(Half smooth, Half NdotV)
 
    VecH4 t = smooth * p0 + p1;
 
-   Half bias  = Sat( t.x * Min( t.y, exp2( -7.672 * NdotV ) ) + t.z );
+   Half bias  = Sat( t.x * Min( t.y, Exp2( -7.672 * NdotV ) ) + t.z );
    Half delta = Sat( t.w );
    Half scale = delta - bias;
 

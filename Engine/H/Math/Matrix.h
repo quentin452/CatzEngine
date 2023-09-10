@@ -151,6 +151,7 @@ struct Matrix3 // Matrix 3x3 (orientation + scale)
    Matrix3& rotateZLOrthoNormalized(Flt angle); // rotate matrix by its z vector (z-axis rotation in local space), this method is faster than 'rotateZL' however matrix must be orthogonal and normalized
 
    Matrix3& rotateXLOrthoNormalized(Flt cos, Flt sin); // rotate matrix by its x vector (x-axis rotation in local space), this method works like 'rotateXLOrthoNormalized(Flt angle)' however it accepts 'Cos' and 'Sin' of 'angle'
+   Matrix3& rotateYLOrthoNormalized(Flt cos, Flt sin); // rotate matrix by its y vector (y-axis rotation in local space), this method works like 'rotateYLOrthoNormalized(Flt angle)' however it accepts 'Cos' and 'Sin' of 'angle'
 
    Matrix3& rotateToYKeepX(C Vec &y); // rotate matrix to Y direction, try to preserve existing X direction, 'y' must be normalized
    Matrix3& rotateToYKeepZ(C Vec &y); // rotate matrix to Y direction, try to preserve existing Z direction, 'y' must be normalized
@@ -828,6 +829,13 @@ struct MatrixM : Matrix3 // Matrix 4x3 (orientation + scale + position, mixed pr
    MatrixM& setPosTerrainOrient(C VecD &pos, DIR_ENUM dir); // set as orientation from DIR_ENUM to be used for drawing spherical terrain heightmaps
 
    // operations
+#if EE_PRIVATE
+   Vec2  convert(C VecD  &src, Bool normalized=false)C; // return converted 3D 'src' to 2D vector according to matrix x,y axes and position
+   VecD  convert(C Vec2  &src                       )C; // return converted 2D 'src' to 3D vector according to matrix x,y axes and position
+   Edge2 convert(C EdgeD &src, Bool normalized=false)C; // return converted 3D 'src' to 2D edge   according to matrix x,y axes and position
+   EdgeD convert(C Edge2 &src                       )C; // return converted 2D 'src' to 3D edge   according to matrix x,y axes and position
+#endif
+
    MatrixM& setTransformAtPos(C VecD &pos, C Matrix3 &matrix); // set as transformation at position
    MatrixM& setTransformAtPos(C VecD &pos, C MatrixM &matrix); // set as transformation at position
    MatrixM&    transformAtPos(C VecD &pos, C Matrix3 &matrix); //        transform      at position

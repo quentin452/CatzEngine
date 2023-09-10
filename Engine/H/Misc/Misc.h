@@ -172,9 +172,11 @@ constexpr Long  DivRound(Long  x, Long  y) {return (x>=0) ? (x+y/2)/y : (x-y/2)/
 constexpr UInt  DivRound(UInt  x, UInt  y) {return          (x+y/2)/y            ;} // integer divide with round
 constexpr ULong DivRound(ULong x, ULong y) {return          (x+y/2)/y            ;} // integer divide with round
 
-constexpr Int     Mod(Int  x, Int  y          ) {if(!y)return 0; Int  z=x%y; return (z>=0) ? z : z+y;} // safe modulo "x%y" , returns always a positive number between   "0..y-1"
-constexpr Long    Mod(Long x, Long y          ) {if(!y)return 0; Long z=x%y; return (z>=0) ? z : z+y;} // safe modulo "x%y" , returns always a positive number between   "0..y-1"
-          Int  MidMod(Int  x, Int min, Int max);                                                       // safe middle modulo, returns always a          number between "min..max"
+constexpr Int     Mod(Int   x, Int  y          ) {if(!y)return 0; Int  z=x%y; return (z>=0) ? z : z+y;} // safe modulo "x%y" , returns always a positive number between   "0..y-1"
+constexpr Long    Mod(Long  x, Long y          ) {if(!y)return 0; Long z=x%y; return (z>=0) ? z : z+y;} // safe modulo "x%y" , returns always a positive number between   "0..y-1"
+constexpr Int     Mod(UInt  x, Int  y          ) {return y ? x%Unsigned(y) : 0                       ;} // safe modulo "x%y" , returns always a positive number between   "0..y-1"
+constexpr Long    Mod(ULong x, Long y          ) {return y ? x%Unsigned(y) : 0                       ;} // safe modulo "x%y" , returns always a positive number between   "0..y-1"
+          Int  MidMod(Int   x, Int min, Int max);                                                       // safe middle modulo, returns always a          number between "min..max"
 
 UInt Ceil2      (UInt   x); // rounds 'x' to the nearest multiple of 2  , which is equal or greater than 'x'
 UInt Ceil4      (UInt   x); // rounds 'x' to the nearest multiple of 4  , which is equal or greater than 'x'

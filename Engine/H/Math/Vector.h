@@ -84,6 +84,12 @@
 #define EPS_SKY_MIN_VIEW_RANGE 0.999f                        // 0.999f was the biggest value that caused holes to disappear
 #define EPS_TAN_COS            EPS_COL_COS                   // use strict eps to merge only if are the same, strict eps doesn't significantly increase the vertex count, on few test models vtx count was only 1% bigger when compared to 0 eps
 #define EPS_BIN_COS            0                             // can use 0 for 'Dot' (to differentiate only if binormals are on the same side) because binormals are stored in MeshRender using 1-bit only and reconstructed as "Cross(nrm, tan)" or "-Cross(nrm, tan)"
+
+#define LOG_2  0.69314718055994529f // Log(2)
+#define LOG_2D 0.69314718055994529  // Log(2)
+
+#define LOG2_E  1.44269504088896340736f // Log2(e)
+#define LOG2_ED 1.44269504088896340736  // Log2(e)
 #endif
 /******************************************************************************/
 enum AXIS_TYPE
@@ -1323,6 +1329,7 @@ struct VecB // Vector 3D (Byte)
               VecB(Byte x, Byte y, Byte z) {set(x, y, z);}
    CONVERSION VecB(C VecI &v);
 };
+ASSERT(SIZE(VecB)==3); // some codes expect continuous memory for array of VecB[] to be accessed with [0].c
 /******************************************************************************/
 struct VecSB // Vector 3D (SByte)
 {
@@ -1361,6 +1368,7 @@ struct VecSB // Vector 3D (SByte)
               VecSB(SByte x, SByte y, SByte z) {set(x, y, z);}
    CONVERSION VecSB(C VecI &v);
 };
+ASSERT(SIZE(VecSB)==3); // some codes expect continuous memory for array of VecSB[] to be accessed with [0].c
 /******************************************************************************/
 struct VecB4 // Vector 4D (Byte)
 {
@@ -2316,6 +2324,16 @@ inline VecD operator+ (Dbl r, C Vec &v) {return VecD(r+v.x, r+v.y, r+v.z);}
 inline VecD operator- (Dbl r, C Vec &v) {return VecD(r-v.x, r-v.y, r-v.z);}
 inline VecD operator* (Dbl r, C Vec &v) {return VecD(r*v.x, r*v.y, r*v.z);}
 inline VecD operator/ (Dbl r, C Vec &v) {return VecD(r/v.x, r/v.y, r/v.z);}
+
+inline VecD4 operator+ (C Vec4 &v, Dbl r) {return VecD4(v.x+r, v.y+r, v.z+r, v.w+r);}
+inline VecD4 operator- (C Vec4 &v, Dbl r) {return VecD4(v.x-r, v.y-r, v.z-r, v.w-r);}
+inline VecD4 operator* (C Vec4 &v, Dbl r) {return VecD4(v.x*r, v.y*r, v.z*r, v.w*r);}
+inline VecD4 operator/ (C Vec4 &v, Dbl r) {return VecD4(v.x/r, v.y/r, v.z/r, v.w/r);}
+
+inline VecD4 operator+ (Dbl r, C Vec4 &v) {return VecD4(r+v.x, r+v.y, r+v.z, r+v.w);}
+inline VecD4 operator- (Dbl r, C Vec4 &v) {return VecD4(r-v.x, r-v.y, r-v.z, r-v.w);}
+inline VecD4 operator* (Dbl r, C Vec4 &v) {return VecD4(r*v.x, r*v.y, r*v.z, r*v.w);}
+inline VecD4 operator/ (Dbl r, C Vec4 &v) {return VecD4(r/v.x, r/v.y, r/v.z, r/v.w);}
 
 inline VecD operator* (C Vec &v, C OrientD &o) {return VecD(v)*=o;}
 inline VecD operator* (C Vec &v, C OrientM &o) {return VecD(v)*=o;}

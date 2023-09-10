@@ -663,6 +663,7 @@ bool NonMonoTransform   (C TextParam &p   ) // if can change a mono image to non
        || p.name=="mulRGBHS" && values>1
        || p.name=="gamma" && TextVecEx(p.value).anyDifferent()
        || p.name=="brightness" && TextVecEx(p.value).anyDifferent()
+       || p.name=="sigmoid" && TextVecEx(p.value).anyDifferent()
        || p.name=="contrast" && TextVecEx(p.value).anyDifferent()
        || p.name=="contrastAlphaWeight" && TextVecEx(p.value).anyDifferent()
        || p.name=="addSat"
@@ -697,6 +698,7 @@ bool HighPrecTransform(C Str &name)
        || name=="bump" || name=="bumpClamp"
        || name=="contrast" || name=="contrastLum" || name=="contrastAlphaWeight" || name=="contrastLumAlphaWeight"
        || name=="brightness" || name=="brightnessLum" || name=="brightnessLumS"
+       || name=="sigmoid" || name=="sigmoidLum"
        || name=="gamma" || name=="gammaA" || name=="gammaLum" || name=="gammaLumPhoto" || name=="gammaSat"
        || name=="SRGBToLinear" || name=="LinearToSRGB"
        || name=="greyPhoto"
@@ -1087,16 +1089,31 @@ Vec2 ILerpToMad(flt from, flt to) {return Vec2(1/(to-from), from/(from-to));}
 flt   FloatSelf(flt x) {return x;}
 flt   PowMax   (flt x, flt y) {return (x<=0) ? 0 : Pow(x, y);}
 
-flt _ApplyBrightness(flt x, flt brightness) // !! ASSUMES THAT "x>0 && x<1 && brightness" !!
+// using sRGB->Sqr gives best results, preserves contrast the most, and looks most similar to Photoshop Brightness
+flt _ApplyBrightness(flt x, flt brightness) // !! ASSUMES THAT "brightness!=0" !!
 {
-   x=Sqr(x);
-   if(brightness<0)x=SigmoidSqrtInv(x*SigmoidSqrt(brightness))/            brightness ;
-   else            x=SigmoidSqrt   (x*            brightness )/SigmoidSqrt(brightness);
-   return SqrtFast(x);
+   x=SRGBToBrightness(x);
+   if(brightness<0)x=SigmoidSqrInv(x*SigmoidSqr(brightness))/           brightness ;
+   else            x=SigmoidSqr   (x*           brightness )/SigmoidSqr(brightness);
+   return BrightnessToSRGB(x);
+}
+// contrast has to be done in some gamma space (not linear), because we need linear middle gray ~0.18 to be around 0.5 so that contrast won't change it. So either keep current sRGB gamma, or convert to Linear then Sqrt. sRGB looks most similar to Photoshop Brightness
+flt _ApplyContrast(flt x, flt contrast) // !! ASSUMES THAT "contrast!=0" !!
+{
+   x=SRGBToContrast(x);
+   x=x*2-1;
+   if(contrast<0)x=SigmoidSqrInv(x*SigmoidSqr(contrast))/           contrast ;
+   else          x=SigmoidSqr   (x*           contrast )/SigmoidSqr(contrast);
+   x=x*0.5f+0.5f;
+   return ContrastToSRGB(x);
 }
 void ApplyBrightness(flt &x, flt brightness)
 {
    if(x>0 && x<1 && brightness)x=_ApplyBrightness(x, brightness);
+}
+void ApplyContrast(flt &x, flt contrast)
+{
+   if(x>0 && x<1 && contrast)x=_ApplyContrast(x, contrast);
 }
 
 void Crop(Image &image, int x, int y, int w, int h, C Color &background, bool hp)
@@ -1577,17 +1594,17 @@ void TransformImage(Image &image, TextParam param, bool clamp, C Color &backgrou
          flt (*R)(flt);
          flt (*G)(flt);
          flt (*B)(flt);
-         if(!bright.x){bright.x=1; mul.x=1; R=FloatSelf;}else if(bright.x<0){mul.x=1/bright.x; bright.x=SigmoidSqrt(bright.x); R=SigmoidSqrtInv;}else{mul.x=1/SigmoidSqrt(bright.x); R=SigmoidSqrt;}
-         if(!bright.y){bright.y=1; mul.y=1; G=FloatSelf;}else if(bright.y<0){mul.y=1/bright.y; bright.y=SigmoidSqrt(bright.y); G=SigmoidSqrtInv;}else{mul.y=1/SigmoidSqrt(bright.y); G=SigmoidSqrt;}
-         if(!bright.z){bright.z=1; mul.z=1; B=FloatSelf;}else if(bright.z<0){mul.z=1/bright.z; bright.z=SigmoidSqrt(bright.z); B=SigmoidSqrtInv;}else{mul.z=1/SigmoidSqrt(bright.z); B=SigmoidSqrt;}
+         if(!bright.x){bright.x=1; mul.x=1; R=FloatSelf;}else if(bright.x<0){mul.x=1/bright.x; bright.x=SigmoidSqr(bright.x); R=SigmoidSqrInv;}else{mul.x=1/SigmoidSqr(bright.x); R=SigmoidSqr;}
+         if(!bright.y){bright.y=1; mul.y=1; G=FloatSelf;}else if(bright.y<0){mul.y=1/bright.y; bright.y=SigmoidSqr(bright.y); G=SigmoidSqrInv;}else{mul.y=1/SigmoidSqr(bright.y); G=SigmoidSqr;}
+         if(!bright.z){bright.z=1; mul.z=1; B=FloatSelf;}else if(bright.z<0){mul.z=1/bright.z; bright.z=SigmoidSqr(bright.z); B=SigmoidSqrInv;}else{mul.z=1/SigmoidSqr(bright.z); B=SigmoidSqr;}
          for(int z=box.min.z; z<box.max.z; z++)
          for(int y=box.min.y; y<box.max.y; y++)
          for(int x=box.min.x; x<box.max.x; x++)
          {
             Vec4 c=image.color3DF(x, y, z);
-            if(c.x>0 && c.x<1)c.x=SqrtFast(R(Sqr(c.x)*bright.x)*mul.x);
-            if(c.y>0 && c.y<1)c.y=SqrtFast(G(Sqr(c.y)*bright.y)*mul.y);
-            if(c.z>0 && c.z<1)c.z=SqrtFast(B(Sqr(c.z)*bright.z)*mul.z);
+            if(c.x>0 && c.x<1)c.x=BrightnessToSRGB(R(SRGBToBrightness(c.x)*bright.x)*mul.x);
+            if(c.y>0 && c.y<1)c.y=BrightnessToSRGB(G(SRGBToBrightness(c.y)*bright.y)*mul.y);
+            if(c.z>0 && c.z<1)c.z=BrightnessToSRGB(B(SRGBToBrightness(c.z)*bright.z)*mul.z);
             image.color3DF(x, y, z, c);
          }
       }
@@ -1597,8 +1614,8 @@ void TransformImage(Image &image, TextParam param, bool clamp, C Color &backgrou
       flt bright=param.asFlt(), mul; flt (*f)(flt);
       if( bright)
       {
-         if(bright<0){mul=1/            bright ; bright=SigmoidSqrt(bright); f=SigmoidSqrtInv;}
-         else        {mul=1/SigmoidSqrt(bright);                             f=SigmoidSqrt   ;}
+         if(bright<0){mul=1/           bright ; bright=SigmoidSqr(bright); f=SigmoidSqrInv;}
+         else        {mul=1/SigmoidSqr(bright);                            f=SigmoidSqr   ;}
          for(int z=box.min.z; z<box.max.z; z++)
          for(int y=box.min.y; y<box.max.y; y++)
          for(int x=box.min.x; x<box.max.x; x++)
@@ -1606,9 +1623,9 @@ void TransformImage(Image &image, TextParam param, bool clamp, C Color &backgrou
             Vec4 c=image.color3DF(x, y, z); flt old_lum=c.xyz.max();
             if(old_lum>0 && old_lum<1)
             {
-               flt new_lum=Sqr(old_lum);
+               flt new_lum=SRGBToBrightness(old_lum);
                new_lum=f(new_lum*bright)*mul;
-               new_lum=SqrtFast(new_lum);
+               new_lum=BrightnessToSRGB(new_lum);
                c.xyz*=new_lum/old_lum;
                image.color3DF(x, y, z, c);
             }
@@ -1628,6 +1645,58 @@ void TransformImage(Image &image, TextParam param, bool clamp, C Color &backgrou
             flt sat=RgbToHsb(c.xyz).y; if(flt b=bright*sat)
             {
                flt new_lum=_ApplyBrightness(old_lum, b);
+               c.xyz*=new_lum/old_lum;
+               image.color3DF(x, y, z, c);
+            }
+         }
+      }
+   }else
+   if(param.name=="sigmoid")
+   {
+      Vec contrast=TextVecEx(param.value), mul; if(contrast.any())
+      {
+         if(contrast.anyDifferent())AdjustImage(image, true, false, false);
+         flt (*R)(flt);
+         flt (*G)(flt);
+         flt (*B)(flt);
+         if(!contrast.x){contrast.x=1; mul.x=1; R=FloatSelf;}else if(contrast.x<0){mul.x=1/contrast.x; contrast.x=SigmoidSqr(contrast.x); R=SigmoidSqrInv;}else{mul.x=1/SigmoidSqr(contrast.x); R=SigmoidSqr;}
+         if(!contrast.y){contrast.y=1; mul.y=1; G=FloatSelf;}else if(contrast.y<0){mul.y=1/contrast.y; contrast.y=SigmoidSqr(contrast.y); G=SigmoidSqrInv;}else{mul.y=1/SigmoidSqr(contrast.y); G=SigmoidSqr;}
+         if(!contrast.z){contrast.z=1; mul.z=1; B=FloatSelf;}else if(contrast.z<0){mul.z=1/contrast.z; contrast.z=SigmoidSqr(contrast.z); B=SigmoidSqrInv;}else{mul.z=1/SigmoidSqr(contrast.z); B=SigmoidSqr;}
+         Vec ofs=contrast;
+         contrast*=2;
+         mul     *=0.5f;
+         for(int z=box.min.z; z<box.max.z; z++)
+         for(int y=box.min.y; y<box.max.y; y++)
+         for(int x=box.min.x; x<box.max.x; x++)
+         {
+            Vec4 c=image.color3DF(x, y, z);
+            if(c.x>0 && c.x<1)c.x=ContrastToSRGB(R(SRGBToContrast(c.x)*contrast.x-ofs.x)*mul.x+0.5f);
+            if(c.y>0 && c.y<1)c.y=ContrastToSRGB(G(SRGBToContrast(c.y)*contrast.y-ofs.y)*mul.y+0.5f);
+            if(c.z>0 && c.z<1)c.z=ContrastToSRGB(B(SRGBToContrast(c.z)*contrast.z-ofs.z)*mul.z+0.5f);
+            image.color3DF(x, y, z, c);
+         }
+      }
+   }else
+   if(param.name=="sigmoidLum")
+   {
+      flt contrast=param.asFlt(), mul; flt (*f)(flt);
+      if( contrast)
+      {
+         if(contrast<0){mul=1/           contrast ; contrast=SigmoidSqr(contrast); f=SigmoidSqrInv;}
+         else          {mul=1/SigmoidSqr(contrast);                                f=SigmoidSqr   ;}
+         flt ofs=contrast;
+         contrast*=2;
+         mul     *=0.5f;
+         for(int z=box.min.z; z<box.max.z; z++)
+         for(int y=box.min.y; y<box.max.y; y++)
+         for(int x=box.min.x; x<box.max.x; x++)
+         {
+            Vec4 c=image.color3DF(x, y, z); flt old_lum=c.xyz.max();
+            if(old_lum>0 && old_lum<1)
+            {
+               flt new_lum=SRGBToContrast(old_lum);
+               new_lum=f(new_lum*contrast-ofs)*mul+0.5f;
+               new_lum=ContrastToSRGB(new_lum);
                c.xyz*=new_lum/old_lum;
                image.color3DF(x, y, z, c);
             }
@@ -2391,6 +2460,7 @@ force_src_resize:
             if(p->value=="mergeSimple"                                                            )mode=APPLY_MERGE_SIMPLE;else
             if(p->value=="mul"                                                                    )mode=APPLY_MUL;else
             if(p->value=="mulRGB"                                                                 )mode=APPLY_MUL_RGB;else
+            if(p->value=="mulRGBblend"                                                            )mode=APPLY_MUL_RGB_BLEND;else
             if(p->value=="mulRGBS"                                                                )mode=APPLY_MUL_RGB_SAT;else
             if(p->value=="mulRGBIS"                                                               )mode=APPLY_MUL_RGB_INV_SAT;else
             if(p->value=="mulRGBLin"                                                              )mode=APPLY_MUL_RGB_LIN;else
@@ -2503,6 +2573,7 @@ force_src_resize:
                               case APPLY_MERGE_SIMPLE       : c=FastMergeBlend(base, l); break;
                               case APPLY_MUL                : c=base*l; break;
                               case APPLY_MUL_RGB            : c.set(base.xyz*l.xyz, base.w); break;
+                              case APPLY_MUL_RGB_BLEND      : c.set(base.xyz*Lerp(VecOne, l.xyz, l.w), base.w); break;
                               case APPLY_MUL_RGB_LIN        : c.set(LinearToSRGB(SRGBToLinear(base.xyz)*l.xyz), base.w); break; // this treats 'l' as already linear
                               case APPLY_MUL_A              : c.set(base.xyz, base.w*l.w); break;
                               case APPLY_SET_A_FROM_RGB     : c.set(base.xyz, l.xyz.max()); break;

@@ -360,6 +360,8 @@ void SetEASU(C Image &src, C Vec2 &dest_size, C Vec2 &screen_lu);
 
 INLINE Bool ReuseDefaultMaterialForNonSkinnedShadowShader(Shader *shader) {return shader==Renderer._shader_shd_map     ;} // this is the most common shadow shader, for which we don't use any material properties (except culling) so we can put all instances to default materials to reduce overhead
 INLINE Bool ReuseDefaultMaterialForSkinnedShadowShader   (Shader *shader) {return shader==Renderer._shader_shd_map_skin;} // this is the most common shadow shader, for which we don't use any material properties (except culling) so we can put all instances to default materials to reduce overhead
+
+Bool SetShaderParamChanges(C Memc<ShaderParamChange> *changes=null);
 #endif
 void SetDrawMask    (  UInt     draw_mask   =0xFFFFFFFF               ); // set   MeshPart "draw group" bit combination      , this can be called before rendering       meshes                               , draw mask is used to control which MeshParts should be rendered, it is a bit combination of all MeshPart draw groups (which are set using 'MeshPart.drawGroup') that should be included in rendering, each bit is responsible for a different group, for example SetDrawMask(0xFFFFFFFF) enables drawing of all groups, SetDrawMask(IndexToFlag(1) | IndexToFlag(3)) enables drawing of only 1 and 3 group, SetDrawMask(0) completely disables rendering
 void SetHighlight   (                                                 ); // clear highlight of rendered meshes               , this can be called before rendering       meshes in RM_PREPARE             mode

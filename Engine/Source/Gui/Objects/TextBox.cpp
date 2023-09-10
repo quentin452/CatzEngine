@@ -109,16 +109,26 @@ TextBox& TextBox::slidebarSize(Flt size)
    if(_slidebar_size!=size)
    {
      _slidebar_size=size;
-      if(wordWrap())setVirtualSize();else setButtons(); // in 'wordWrap' mode, virtual size is dependent on the slidebar size
+      if(wordWrap())setVirtualSize();else setRectAndButtons(); // in 'wordWrap' mode, virtual size is dependent on the slidebar size
    }
    return T;
 }
 void TextBox::setVirtualSize(C Rect *set_rect)
 {
+   Flt  padd_h=0;
    Vec2 size=0;
-   Rect rect=(set_rect ? *set_rect : T.rect());
-  _text_space=rect.w();
-   if(GuiSkin *skin=getSkin())
+   Rect rect=(set_rect ? *set_rect : T.rect()), crect=rect;
+   GuiSkin *skin=getSkin();
+   if(skin)
+      if(Panel *panel=skin->region.normal())
+   {
+      Rect padd; panel->innerPadding(crect, padd);
+      crect.min+=padd.min;
+      crect.max-=padd.max;
+      padd_h=padd.min.y+padd.max.y;
+   }
+  _text_space=crect.w();
+   if(skin)
       if(TextStyle *text_style=skin->textline.text_style())
    {
    #if DEFAULT_FONT_FROM_CUSTOM_SKIN
@@ -132,11 +142,11 @@ void TextBox::setVirtualSize(C Rect *set_rect)
       if(_auto_height)
       {
          Flt client_height=Max(size.y, min_height);
-         rect.min.y=rect.max.y-client_height;
+         rect.min.y=rect.max.y-client_height-padd_h;
       }else
       if(wordWrap()) // check if in word wrap we're exceeding lines beyond client rectangle, in that case slidebar has to be made visible, which reduces client width
       {
-         Flt client_height=rect.h(); // here can't use 'clientHeight' because it may not be available yet
+         Flt client_height=crect.h(); // here can't use 'clientHeight' because it may not be available yet
          if(size.y>client_height+EPS) // exceeds client height
          { // recalculate using smaller width
             size.y=ts.textHeight(T(), _text_space-=slidebarSize(), wordWrap(), &size.x);
@@ -147,7 +157,7 @@ void TextBox::setVirtualSize(C Rect *set_rect)
    if(_auto_height)super::rect(rect);
    slidebar[0]._length_total=size.x;
    slidebar[1]._length_total=size.y;
-   setButtons();
+   setRectAndButtons();
 }
 /******************************************************************************/
 TextBox& TextBox::maxLength(Int max_length)
@@ -215,8 +225,8 @@ TextBox& TextBox::scrollToCursor(Bool margin)
       {
          Region &region=parent->asRegion();
          Vec2 ofs(-slidebar[0].wantedOffset(), -slidebar[1].wantedOffset());
-         ofs.x+=rect().min.x;
-         ofs.y-=rect().max.y;
+         ofs.x+=clientRect().min.x;
+         ofs.y-=clientRect().max.y;
          if(Kb.visible())
          { // TODO: this assumes screen keyboard is at the bottom
             Rect screen_rect=region.screenRect();
@@ -379,20 +389,30 @@ skip:
    return T;
 }
 /******************************************************************************/
-void TextBox::setButtons()
+void TextBox::setRectAndButtons()
 {
+   // first calculate client rectangle
+  _crect=rect();
+   if(GuiSkin *skin=getSkin())
+      if(Panel *panel=skin->region.normal())
+   {
+      Rect padd; panel->innerPadding(_crect, padd);
+     _crect.min+=padd.min;
+     _crect.max-=padd.max;
+   }
+
    Bool vertical, horizontal;
    Flt  width =virtualWidth (),
         height=virtualHeight();
 
-   Rect srect=_crect=rect();
-   if( vertical  =(slidebar[1].is() && height>clientHeight()+EPS)){srect.max.x-=slidebarSize();                _crect.max.x-=slidebarSize();}
-   if( horizontal=(slidebar[0].is() && width >clientWidth ()+EPS)){srect.min.y+=slidebarSize(); if(!wordWrap())_crect.min.y+=slidebarSize();
-   if(!vertical && slidebar[1].is() && height>clientHeight()+EPS ){srect.max.x-=slidebarSize();                _crect.max.x-=slidebarSize(); vertical=true;}}
+   Rect srect=_crect, mrect=_crect;
+   if( vertical  =(slidebar[1].is() && clientHeight()+EPS<height)){srect.max.x-=slidebarSize();                _crect.max.x-=slidebarSize();}
+   if( horizontal=(slidebar[0].is() && clientWidth ()+EPS<width )){srect.min.y+=slidebarSize(); if(!wordWrap())_crect.min.y+=slidebarSize();
+   if(!vertical && slidebar[1].is() && clientHeight()+EPS<height ){srect.max.x-=slidebarSize();                _crect.max.x-=slidebarSize(); vertical=true;}}
 
-   slidebar[0].setLengths(clientWidth (), width ).rect(Rect(rect().min.x               ,  rect().min.y, srect  .max.x, rect().min.y+slidebarSize())); slidebar[0].visible(slidebar[0]._usable && !wordWrap());
-   slidebar[1].setLengths(clientHeight(), height).rect(Rect(rect().max.x-slidebarSize(), srect  .min.y,  rect().max.x, rect().max.y               )); slidebar[1].visible(slidebar[1]._usable               );
-   view                                          .rect(Rect(rect().max.x-slidebarSize(),  rect().min.y,  rect().max.x, rect().min.y+slidebarSize())).visible(slidebar[0]._usable && slidebar[1]._usable);
+   slidebar[0].setLengths(clientWidth (), width ).rect(Rect(mrect.min.x               , mrect.min.y, srect.max.x, mrect.min.y+slidebarSize())); slidebar[0].visible(slidebar[0]._usable && !wordWrap());
+   slidebar[1].setLengths(clientHeight(), height).rect(Rect(mrect.max.x-slidebarSize(), srect.min.y, mrect.max.x, mrect.max.y               )); slidebar[1].visible(slidebar[1]._usable               );
+   view                                          .rect(Rect(mrect.max.x-slidebarSize(), mrect.min.y, mrect.max.x, mrect.min.y+slidebarSize())).visible(slidebar[0]._usable && slidebar[1]._usable);
 }
 TextBox& TextBox::wordWrap(Bool wrap)
 {
@@ -417,7 +437,7 @@ TextBox& TextBox::rect(C Rect &rect)
       if(_auto_height)setVirtualSize(&rect);else // for '_auto_height' need to adjust height in 'setVirtualSize', it will call 'super::rect'
       {
          super::rect(rect);
-         if(wordWrap())setVirtualSize();else setButtons(); // in 'wordWrap' mode, virtual size is dependent on the rectangle
+         if(wordWrap())setVirtualSize();else setRectAndButtons(); // in 'wordWrap' mode, virtual size is dependent on the rectangle
       }
    }
    return T;
@@ -437,15 +457,15 @@ TextBox& TextBox::move(C Vec2 &delta)
 /******************************************************************************/
 TextBox& TextBox::skin(C GuiSkinPtr &skin, Bool sub_objects)
 {
+   if(sub_objects)
+   {
+            view     .skin=skin ;
+      REPAO(slidebar).skin(skin);
+   }
    if(_skin!=skin)
    {
      _skin=skin;
-      if(sub_objects)
-      {
-               view     .skin=skin ;
-         REPAO(slidebar).skin(skin);
-      }
-      setVirtualSize(); // new skin can have different text style, so have to recalculate
+      setVirtualSize(); // new skin can have different text style and inner padding, so have to recalculate
    }
    return T;
 }
@@ -624,7 +644,7 @@ void TextBox::update(C GuiPC &gpc)
             Flt  offset=ts.size.x*TEXTBOX_OFFSET;
             Rect   clip=gpc.clip;
             Rect    kb_rect; if(Kb.rect(kb_rect))MAX(clip.min.y, kb_rect.max.y); // TODO: this assumes screen keyboard is at the bottom
-            Rect  text_rect=_crect+gpc.offset, clipped_text_rect=text_rect&clip;
+            Rect  text_rect=clientRect()+gpc.offset, clipped_text_rect=text_rect&clip;
             Vec2  clipped_pos=*mt_pos&clipped_text_rect; // have to clip so after we start selecting and move mouse outside the client rectangle, we don't set cursor to be outside, instead start smooth scrolling when mouse is outside towards cursor, but limit the cursor position within visible area
             Bool eol; Int pos=ts.textIndex(T(), clipped_pos.x - text_rect.min.x + slidebar[0].offset() - offset, text_rect.max.y - clipped_pos.y + slidebar[1].offset(), (ButtonDb(mt_state) || _edit.overwrite) ? TEXT_INDEX_OVERWRITE : TEXT_INDEX_DEFAULT, _text_space, wordWrap(), eol);
 
@@ -685,10 +705,10 @@ void TextBox::update(C GuiPC &gpc)
                      MIN(clipped_text_rect.max.y, D.rectUI().max.y-margin);
                   }
                   // if pos is outside of clipped text rect then scroll (check <= instead of < in case we're at screen border), scroll parents only if rect is actually clipped with some margin (so we can still scroll a little bit more so we can see visually the rect)
-                  if(mt_pos->x<=clipped_text_rect.min.x)ScrollMinus(&slidebar[0], (_rect.min.x+gpc.offset.x<clip.min.x+(ts.size.x*TEXTBOX_MARGIN_REL+TEXTBOX_MARGIN_ABS)) ? parent() : null, false);else
-                  if(mt_pos->x>=clipped_text_rect.max.x)ScrollPlus (&slidebar[0], (_rect.max.x+gpc.offset.x>clip.max.x-(ts.size.x*TEXTBOX_MARGIN_REL+TEXTBOX_MARGIN_ABS)) ? parent() : null, false);
-                  if(mt_pos->y<=clipped_text_rect.min.y)ScrollPlus (&slidebar[1], (_rect.min.y+gpc.offset.y<clip.min.y+(ts.size.y*TEXTBOX_MARGIN_REL+TEXTBOX_MARGIN_ABS)) ? parent() : null, true );else
-                  if(mt_pos->y>=clipped_text_rect.max.y)ScrollMinus(&slidebar[1], (_rect.max.y+gpc.offset.y>clip.max.y-(ts.size.y*TEXTBOX_MARGIN_REL+TEXTBOX_MARGIN_ABS)) ? parent() : null, true );
+                  if(mt_pos->x<=clipped_text_rect.min.x)ScrollMinus(&slidebar[0], (rect().min.x+gpc.offset.x<clip.min.x+(ts.size.x*TEXTBOX_MARGIN_REL+TEXTBOX_MARGIN_ABS)) ? parent() : null, false);else
+                  if(mt_pos->x>=clipped_text_rect.max.x)ScrollPlus (&slidebar[0], (rect().max.x+gpc.offset.x>clip.max.x-(ts.size.x*TEXTBOX_MARGIN_REL+TEXTBOX_MARGIN_ABS)) ? parent() : null, false);
+                  if(mt_pos->y<=clipped_text_rect.min.y)ScrollPlus (&slidebar[1], (rect().min.y+gpc.offset.y<clip.min.y+(ts.size.y*TEXTBOX_MARGIN_REL+TEXTBOX_MARGIN_ABS)) ? parent() : null, true );else
+                  if(mt_pos->y>=clipped_text_rect.max.y)ScrollMinus(&slidebar[1], (rect().max.y+gpc.offset.y>clip.max.y-(ts.size.y*TEXTBOX_MARGIN_REL+TEXTBOX_MARGIN_ABS)) ? parent() : null, true );
                }else
                if(mt_state&BS_RELEASED) // released
                {
@@ -732,7 +752,7 @@ void TextBox::draw(C GuiPC &gpc)
                   if(!ts.font())ts.font(skin->font()); // adjust font in case it's empty and the custom skin has a different font than the 'Gui.skin'
                #endif
 
-                  Rect text_rect=_crect+gpc.offset;
+                  Rect text_rect=clientRect()+gpc.offset;
                   D.clip(text_rect&gpc.clip);
                   Flt offset=TEXTBOX_OFFSET*ts.size.x;
                   if(T().is() || active)

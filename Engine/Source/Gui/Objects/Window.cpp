@@ -251,7 +251,7 @@ void Window::setRect()
    // first calculate client rectangle
    T._crect=rect();
    if(GuiSkin *skin=getSkin())
-      if(Panel *panel=panel=(barVisible() ? skin->window.normal() : skin->window.normal_no_bar()))
+      if(Panel *panel=(barVisible() ? skin->window.normal() : skin->window.normal_no_bar()))
    {
       Rect padd; panel->innerPadding(T.rect(), padd);
      _crect.min+=padd.min;

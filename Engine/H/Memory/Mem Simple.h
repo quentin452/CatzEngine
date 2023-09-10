@@ -18,6 +18,8 @@
 /******************************************************************************/
 T1(const_mem_addr TYPE) struct Mems // Simple Continuous Memory Based Container
 {
+   static constexpr Bool Continuous=true; // Mems memory is continuous
+
    // manage
    Mems& clear(); // remove all elements and free helper memory
    Mems& del  (); // remove all elements and free helper memory

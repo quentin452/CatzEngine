@@ -1,6 +1,8 @@
 /******************************************************************************/
 struct _Memx // Block Based Extended Container Base - Do not use this class, use 'Memx' instead
 {
+   static constexpr Bool Continuous=false; // Memx memory is NOT continuous
+
    void del  ();
    void clear();
 

@@ -224,6 +224,34 @@ class ImporterClass
          }
          return true;
       }
+      enum DOWNMIX : byte
+      {
+         DOWNMIX_NO,
+         DOWNMIX_LEFT,
+         DOWNMIX_RIGHT,
+         DOWNMIX_MIX,
+      }
+      static bool DownMix(ptr data, int &size, DOWNMIX downmix)
+      {
+         if(!downmix || !data)return true;
+         if(size&1)return false; // need 2 byte alignment for a full sample
+         size/=2;
+         short *sample =(short*)data;
+         int    samples=size/SIZE(short);
+         FREP(  samples)
+         {
+            short left =sample[i*2+0],
+                  right=sample[i*2+1],
+                  &dest=sample[i];
+            switch(downmix)
+            {
+               default           : dest=(left+right)/2; break; // DOWNMIX_MIX
+               case DOWNMIX_LEFT : dest= left         ; break;
+               case DOWNMIX_RIGHT: dest= right        ; break;
+            }
+         }
+         return true;
+      }
 
       bool import() // !! this is called on a secondary thread !!
       {
@@ -248,14 +276,15 @@ class ImporterClass
 
             case ELM_SOUND:
             {
-               SOUND_CODEC codec=SOUND_NONE; if(C TextParam *param=files[0].findParam("codec" ))codec =TextSoundCodec(param.value);
-               dbl         start=0;          if(C TextParam *param=files[0].findParam("start" ))start =param.asDbl();
-               dbl         end   =-1;        if(C TextParam *param=files[0].findParam("end"   ))end   =param.asDbl();
-               dbl         length=-1;        if(C TextParam *param=files[0].findParam("length"))length=param.asDbl();
-               flt         volume=1;         if(C TextParam *param=files[0].findParam("volume"))volume=param.asFlt(); bool apply_vol=!Equal(volume, 1);
-               int         hz=-1;            if(C TextParam *param=files[0].findParam("hz"    ))hz    =param.asInt();
-               int         rel_bit_rate=-1 ; C TextParam *rbr=files[0].findParam("relBitRate"); if(!rbr)rbr=files[0].findParam("relativeBitRate"); if(rbr)rel_bit_rate=rbr.asInt();
-               if(codec || rel_bit_rate>=0 || start>0 || end>=0 || length>=0 || hz>0 || apply_vol)
+               SOUND_CODEC codec=SOUND_NONE;   if(C TextParam *param=files[0].findParam("codec" ))codec =TextSoundCodec(param.value);
+               dbl         start=0;            if(C TextParam *param=files[0].findParam("start" ))start =param.asDbl();
+               dbl         end   =-1;          if(C TextParam *param=files[0].findParam("end"   ))end   =param.asDbl();
+               dbl         length=-1;          if(C TextParam *param=files[0].findParam("length"))length=param.asDbl();
+               flt         volume=1;           if(C TextParam *param=files[0].findParam("volume"))volume=param.asFlt(); bool apply_vol=!Equal(volume, 1);
+               int         hz=-1;              if(C TextParam *param=files[0].findParam("hz"    ))hz    =param.asInt();
+               DOWNMIX     downmix=DOWNMIX_NO; if(C TextParam *param=files[0].findParam("mono"  )){if(param.value=="l" || param.value=="left")downmix=DOWNMIX_LEFT;else if(param.value=="r" || param.value=="right")downmix=DOWNMIX_RIGHT;else downmix=DOWNMIX_MIX;}
+               int         rel_bit_rate=-1;       C TextParam *rbr  =files[0].findParam("relBitRate"); if(!rbr)rbr=files[0].findParam("relativeBitRate"); if(rbr)rel_bit_rate=rbr.asInt();
+               if(codec || rel_bit_rate>=0 || start>0 || end>=0 || length>=0 || hz>0 || apply_vol || downmix)
                {
                   SoundStream s; if(s.create(file) && s.block())
                   {
@@ -264,10 +293,12 @@ class ImporterClass
                      long length_sample=Max(0, end_sample-start_sample); if(length>=0)MIN(length_sample, RoundL(length*s.frequency()));
                      if(!codec)codec=s.codec(); // if not specified then use original
                      if(hz<=0)hz=s.frequency();
+                     if(s.channels()!=2)downmix=DOWNMIX_NO;
                      
+                     int channels=(downmix ? 1 : s.channels());
                      int bit_rate=-1; if(rel_bit_rate>0) // calculate from relative bit rate
                      {
-                        bit_rate=long(rel_bit_rate*1000) * s.frequency()/44100 * s.channels()/2;
+                        bit_rate=long(rel_bit_rate*1000) * s.frequency()/44100 * channels/2;
                      }else
                      if(rel_bit_rate<0 && (Equal(s.codecName(), "opus") || Equal(s.codecName(), "vorbis"))) // get from source (accept only from good lossy compressed codecs, because Raw/Flac will have very big values)
                      {
@@ -279,6 +310,7 @@ class ImporterClass
                      || length_sample!=s.samples() // if we want to skip some data
                      || apply_vol // if we want to change volume
                      || hz!=s.frequency() // want to change frequency
+                     || downmix
                      )
                      {
                         if(codec!=SOUND_WAV
@@ -288,10 +320,10 @@ class ImporterClass
 
                         if(bit_rate<=0) // use default bit rate
                         {
-                           if(Equal(CodecName(codec), "opus"  ))bit_rate=long(DefaultOpusBitRate  ) * s.frequency()/44100 * s.channels()/2;else
-                           if(Equal(CodecName(codec), "vorbis"))bit_rate=long(DefaultVorbisBitRate) * s.frequency()/44100 * s.channels()/2;
+                           if(Equal(CodecName(codec), "opus"  ))bit_rate=long(DefaultOpusBitRate  ) * s.frequency()/44100 * channels/2;else
+                           if(Equal(CodecName(codec), "vorbis"))bit_rate=long(DefaultVorbisBitRate) * s.frequency()/44100 * channels/2;
                         }
-                        int bit_rate_hq=Max(long(DefaultHQBitRate) * s.frequency()/44100 * s.channels()/2, bit_rate);
+                        int bit_rate_hq=Max(long(DefaultHQBitRate) * s.frequency()/44100 * channels/2, bit_rate);
 
                         raw.writeMem();
                         byte temp[65536];
@@ -299,20 +331,21 @@ class ImporterClass
                         long size=length_sample*s.block();
                         if(codec==SOUND_WAV)
                         {
-                           SndRawEncoder encoder; if(encoder.create(raw, hz, s.channels(), length_sample))
+                           SndRawEncoder encoder; if(encoder.create(raw, hz, channels, length_sample))
                            {
                               for(; size>0; )
                               {
-                                 int r=s.set(temp, Min(size, (int)SIZE(temp))); if(r<=0)goto error;
+                                 int r=s.set(temp, Min(size, (int)SIZE(temp))); if(r<=0)goto error; size-=r;
+                                 if(downmix && !DownMix(temp, r, downmix))goto error;
                                  if(apply_vol && !ApplyVolume(temp, r, volume))goto error;
-                                 if(!encoder.encode(temp, r))goto error; size-=r;
+                                 if(!encoder.encode(temp, r))goto error;
                               }
                               if(!encoder.finish())goto error; return true;
                            }
                         }else
                         if(Equal(CodecName(codec), "opus"))
                         {
-                           SndOpusEncoder encoder; if(encoder.create(raw, length_sample, hz, s.channels(), bit_rate_hq)) // prioritize first frame (to avoid pop/clicks for looped audio)
+                           SndOpusEncoder encoder; if(encoder.create(raw, length_sample, hz, channels, bit_rate_hq)) // prioritize first frame (to avoid pop/clicks for looped audio)
                            {
                               int  frame_size=encoder.block()*encoder.frameSamples();
                               long raw_start=raw.pos();
@@ -321,10 +354,10 @@ class ImporterClass
                               {
                                  int r=Min(size, (int)SIZE(temp));
                                  if(first)MIN(r, frame_size); // make sure we encode only the first frame with higher bit rate
-                                 r=s.set(temp, r);
-                                 if(r<=0)goto error;
+                                 r=s.set(temp, r); if(r<=0)goto error; size-=r;
+                                 if(downmix && !DownMix(temp, r, downmix))goto error;
                                  if(apply_vol && !ApplyVolume(temp, r, volume))goto error;
-                                 if(!encoder.encode(temp, r))goto error; size-=r;
+                                 if(!encoder.encode(temp, r))goto error;
                                  if(first && raw.pos()!=raw_start) // if wrote the first frame
                                  {
                                     first=false;
@@ -335,17 +368,18 @@ class ImporterClass
                               if(!encoder.finish())goto error; return true;
                            }
                         }else
-                        if(Equal(CodecName(codec), "vorbis") && s.channels() && s.frequency())
+                        if(Equal(CodecName(codec), "vorbis") && channels && s.frequency())
                         {
-                           rel_bit_rate=long(bit_rate) * 2/s.channels() * 44100/s.frequency();
+                           rel_bit_rate=long(bit_rate) * 2/channels * 44100/s.frequency();
                            flt quality=VorbisBitRateToQuality(rel_bit_rate);
-                           OggVorbisEncoder encoder; if(encoder.create(raw, hz, s.channels(), quality))
+                           OggVorbisEncoder encoder; if(encoder.create(raw, hz, channels, quality))
                            {
                               for(; size>0; )
                               {
-                                 int r=s.set(temp, Min(size, (int)SIZE(temp))); if(r<=0)goto error;
+                                 int r=s.set(temp, Min(size, (int)SIZE(temp))); if(r<=0)goto error; size-=r;
+                                 if(downmix && !DownMix(temp, r, downmix))goto error;
                                  if(apply_vol && !ApplyVolume(temp, r, volume))goto error;
-                                 if(!encoder.encode(temp, r))goto error; size-=r;
+                                 if(!encoder.encode(temp, r))goto error;
                               }
                               if(!encoder.finish())goto error; return true;
                            }
@@ -1171,13 +1205,15 @@ class ImporterClass
                                  {
                                   C SkelBone & src_bone=old_skel.bones[best_old_skel_bone_i];
                                     SkelBone &dest_bone=new_skel.bones[     new_skel_bone_i];
-                                    dest_bone.width=src_bone.width;
-                                  //dest_bone.frac =src_bone.frac ;
-                                    dest_bone.flag =src_bone.flag ;
+                                    dest_bone.width =src_bone.width ;
+                                  //dest_bone.offset=src_bone.offset;
+                                  //dest_bone.frac  =src_bone.frac  ;
+                                    dest_bone.flag  =src_bone.flag  ;
                                  }
                               }  
                            }
                         }
+                        new_skel.setBoneShapes();
                      }
                      Proj.adjustAnimations(skel_elm.id, old_edit_skel, *old_skel, new_skel, bone_weights); // !! convert animations before saving skeleton which modifies 'old_skel' which is a pointer to cache element !!
 

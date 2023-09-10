@@ -51,6 +51,14 @@ public:
       Import& set(C UID &elm_id, C UID &parent_id, C Str &file, MODE mode, ELM_TYPE type, C Str &force_name, bool remember_result);
 
       static bool ApplyVolume(ptr data, int size, flt vol);
+      enum DOWNMIX : byte
+      {
+         DOWNMIX_NO,
+         DOWNMIX_LEFT,
+         DOWNMIX_RIGHT,
+         DOWNMIX_MIX,
+      };
+      static bool DownMix(ptr data, int &size, DOWNMIX downmix);
 
       bool import(); // !! this is called on a secondary thread !!
 

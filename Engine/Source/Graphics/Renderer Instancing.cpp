@@ -85,7 +85,7 @@ struct ShaderParamRestore
 static   Memc<ShaderParamRestore> RestoreChanges;
 static C Memc<ShaderParamChange >   *LastChanges;
 
-static Bool SetShaderParamChanges(C Memc<ShaderParamChange> *changes=null)
+Bool SetShaderParamChanges(C Memc<ShaderParamChange> *changes)
 {
    if(LastChanges!=changes)
    {

@@ -338,11 +338,12 @@ struct Image // Image (Texture)
 #endif
    Image& del(); // delete
 
-   Bool create    (Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int mip_maps=0, Bool alt_type_on_fail=true);                                                                        // create                 image, 'mip_maps'=number of mip-maps (0=autodetect), 'alt_type_on_fail'=if try using an alternative type if 'type' is not supported, false on fail
-   Bool create2D  (Int w, Int h,        IMAGE_TYPE type,                  Int mip_maps=0, Bool alt_type_on_fail=true) {return create(w, h, 1, type, IMAGE_2D  , mip_maps, alt_type_on_fail);} // create hardware 2D   texture, 'mip_maps'=number of mip-maps (0=autodetect), 'alt_type_on_fail'=if try using an alternative type if 'type' is not supported, false on fail
-   Bool create3D  (Int w, Int h, Int d, IMAGE_TYPE type,                  Int mip_maps=1, Bool alt_type_on_fail=true) {return create(w, h, d, type, IMAGE_3D  , mip_maps, alt_type_on_fail);} // create hardware 3D   texture, 'mip_maps'=number of mip-maps (0=autodetect), 'alt_type_on_fail'=if try using an alternative type if 'type' is not supported, false on fail
-   Bool createCube(Int w,               IMAGE_TYPE type,                  Int mip_maps=1, Bool alt_type_on_fail=true) {return create(w, w, 1, type, IMAGE_CUBE, mip_maps, alt_type_on_fail);} // create hardware cube texture, 'mip_maps'=number of mip-maps (0=autodetect), 'alt_type_on_fail'=if try using an alternative type if 'type' is not supported, false on fail
-   Bool createSoft(Int w, Int h, Int d, IMAGE_TYPE type,                  Int mip_maps=1                            ) {return create(w, h, d, type, IMAGE_SOFT, mip_maps,            false);} // create software        image, 'mip_maps'=number of mip-maps (0=autodetect),                                                                                 false on fail
+   Bool create        (Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int mip_maps=0, Bool alt_type_on_fail=true);                                                                             // create                 image, 'mip_maps'=number of mip-maps (0=autodetect), 'alt_type_on_fail'=if try using an alternative type if 'type' is not supported, false on fail
+   Bool create2D      (Int w, Int h,        IMAGE_TYPE type,                  Int mip_maps=0, Bool alt_type_on_fail=true) {return create(w, h, 1, type, IMAGE_2D       , mip_maps, alt_type_on_fail);} // create hardware 2D   texture, 'mip_maps'=number of mip-maps (0=autodetect), 'alt_type_on_fail'=if try using an alternative type if 'type' is not supported, false on fail
+   Bool create3D      (Int w, Int h, Int d, IMAGE_TYPE type,                  Int mip_maps=1, Bool alt_type_on_fail=true) {return create(w, h, d, type, IMAGE_3D       , mip_maps, alt_type_on_fail);} // create hardware 3D   texture, 'mip_maps'=number of mip-maps (0=autodetect), 'alt_type_on_fail'=if try using an alternative type if 'type' is not supported, false on fail
+   Bool createCube    (Int w,               IMAGE_TYPE type,                  Int mip_maps=1, Bool alt_type_on_fail=true) {return create(w, w, 1, type, IMAGE_CUBE     , mip_maps, alt_type_on_fail);} // create hardware cube texture, 'mip_maps'=number of mip-maps (0=autodetect), 'alt_type_on_fail'=if try using an alternative type if 'type' is not supported, false on fail
+   Bool createSoft    (Int w, Int h, Int d, IMAGE_TYPE type,                  Int mip_maps=1                            ) {return create(w, h, d, type, IMAGE_SOFT     , mip_maps,            false);} // create software        image, 'mip_maps'=number of mip-maps (0=autodetect),                                                                                 false on fail
+   Bool createSoftCube(Int w,               IMAGE_TYPE type,                  Int mip_maps=1                            ) {return create(w, w, 1, type, IMAGE_SOFT_CUBE, mip_maps,            false);} // create software cube   image, 'mip_maps'=number of mip-maps (0=autodetect),                                                                                 false on fail
 
    Image& mustCreate    (Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int mip_maps=0, Bool alt_type_on_fail=true);                                                                            // create                 image, 'mip_maps'=number of mip-maps (0=autodetect), 'alt_type_on_fail'=if try using an alternative type if 'type' is not supported, Exit  on fail
    Image& mustCreate2D  (Int w, Int h,        IMAGE_TYPE type,                  Int mip_maps=0, Bool alt_type_on_fail=true) {return mustCreate(w, h, 1, type, IMAGE_2D  , mip_maps, alt_type_on_fail);} // create hardware 2D   texture, 'mip_maps'=number of mip-maps (0=autodetect), 'alt_type_on_fail'=if try using an alternative type if 'type' is not supported, Exit  on fail
@@ -383,13 +384,16 @@ struct Image // Image (Texture)
    Bool   waitForStream(Int mip=0)C; // wait until streaming has finished, false on fail
    Image& updateMipMaps(FILTER_TYPE filter=FILTER_BEST, UInt flags=IC_CLAMP, Int mip_start=0); // update mip maps of the image, 'flags'=IMAGE_COPY_FLAG, 'mip_start'=index of the mip map to start with (this mip map will be taken, and downsampled to following mip maps)
 
-   Bool blurCubeMipMaps(); // blur mip maps based on increasing angles per mip-map, this method is only for Cube Images, false on fail
+   Bool blurCubeAngle  (Flt angle      , Bool linear); // blur cube image,                                             'linear'=if image pixels are in linear space (or false in spherical space), false on fail
+   Bool blurCubePixel  (Flt pixel_range, Bool linear); // blur cube image, angle is calculated based on 'pixel_range', 'linear'=if image pixels are in linear space (or false in spherical space), false on fail
+   Bool blurCubeMipMaps(                            ); // blur mip maps based on increasing angles per mip-map, this method is only for Cube Images, false on fail
 
    Image& freeOpenGLESData(); // this method is used only under OpenGL ES (on other platforms it is ignored), the method frees the software copy of the GPU data which increases available memory, however after calling this method the data can no longer be accessed on the CPU (can no longer be locked or saved to file)
 
    // pixel
    UInt  pixel (Int x, Int y)C;   void pixel (Int x, Int y,   UInt   pixel); // get/set pixel UInt value, image  gamma (no gamma conversion), (these methods may not support all compressed types, instead try using 'copy' method first)
    Flt   pixelF(Int x, Int y)C;   void pixelF(Int x, Int y,   Flt    pixel); // get/set pixel Flt  value, image  gamma (no gamma conversion), (these methods may not support all compressed types, instead try using 'copy' method first)
+   Flt   pixelL(Int x, Int y)C;   void pixelL(Int x, Int y,   Flt    pixel); // get/set pixel Flt  value, linear gamma (   gamma conversion), (these methods may not support all compressed types, instead try using 'copy' method first)
    Color color (Int x, Int y)C;   void color (Int x, Int y, C Color &color); // get/set color Byte color, image  gamma (no gamma conversion), (these methods may not support all compressed types, instead try using 'copy' method first)
    Vec4  colorF(Int x, Int y)C;   void colorF(Int x, Int y, C Vec4  &color); // get/set color Flt  color, image  gamma (no gamma conversion), (these methods may not support all compressed types, instead try using 'copy' method first)
    Vec4  colorL(Int x, Int y)C;   void colorL(Int x, Int y, C Vec4  &color); // get/set color Flt  color, linear gamma (   gamma conversion), (these methods may not support all compressed types, instead try using 'copy' method first)
@@ -398,14 +402,15 @@ struct Image // Image (Texture)
    void blendF(Int x, Int y, C Vec4 &color); // apply 'color' pixel using ALPHA_BLEND formula
    void mergeF(Int x, Int y, C Vec4 &color); // apply 'color' pixel using ALPHA_MERGE formula
 
-   Flt pixelFNearest        (Flt x, Flt y, Bool clamp=true)C; // get pixel Flt with no                interpolation, image gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
-   Flt pixelFLinear         (Flt x, Flt y, Bool clamp=true)C; // get pixel Flt with Linear            interpolation, image gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
-   Flt pixelFCubicFast      (Flt x, Flt y, Bool clamp=true)C; // get pixel Flt with Cubic Fast        interpolation, image gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
-   Flt pixelFCubicFastSmooth(Flt x, Flt y, Bool clamp=true)C; // get pixel Flt with Cubic Fast Smooth interpolation, image gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
-   Flt pixelFCubicFastMed   (Flt x, Flt y, Bool clamp=true)C; // get pixel Flt with Cubic Fast Med    interpolation, image gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
-   Flt pixelFCubicFastSharp (Flt x, Flt y, Bool clamp=true)C; // get pixel Flt with Cubic Fast Sharp  interpolation, image gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
-   Flt pixelFCubicPlus      (Flt x, Flt y, Bool clamp=true)C; // get pixel Flt with Cubic Plus        interpolation, image gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
-   Flt pixelFCubicPlusSharp (Flt x, Flt y, Bool clamp=true)C; // get pixel Flt with Cubic Plus Sharp  interpolation, image gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
+   Flt pixelFNearest        (Flt x, Flt y, Bool clamp=true)C; // get pixel Flt with no                interpolation, image  gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
+   Flt pixelFLinear         (Flt x, Flt y, Bool clamp=true)C; // get pixel Flt with Linear            interpolation, image  gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
+   Flt pixelLLinear         (Flt x, Flt y, Bool clamp=true)C; // get pixel Flt with Linear            interpolation, linear gamma (   gamma conversion), 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
+   Flt pixelFCubicFast      (Flt x, Flt y, Bool clamp=true)C; // get pixel Flt with Cubic Fast        interpolation, image  gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
+   Flt pixelFCubicFastSmooth(Flt x, Flt y, Bool clamp=true)C; // get pixel Flt with Cubic Fast Smooth interpolation, image  gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
+   Flt pixelFCubicFastMed   (Flt x, Flt y, Bool clamp=true)C; // get pixel Flt with Cubic Fast Med    interpolation, image  gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
+   Flt pixelFCubicFastSharp (Flt x, Flt y, Bool clamp=true)C; // get pixel Flt with Cubic Fast Sharp  interpolation, image  gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
+   Flt pixelFCubicPlus      (Flt x, Flt y, Bool clamp=true)C; // get pixel Flt with Cubic Plus        interpolation, image  gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
+   Flt pixelFCubicPlusSharp (Flt x, Flt y, Bool clamp=true)C; // get pixel Flt with Cubic Plus Sharp  interpolation, image  gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, (these methods may not support all compressed types, instead try using 'copy' method first)
 
    Vec4 colorFNearest        (Flt x, Flt y, Bool clamp=true, Bool alpha_weight=false)C; // get color Vec4 with no                interpolation, image  gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
    Vec4 colorFLinear         (Flt x, Flt y, Bool clamp=true, Bool alpha_weight=false)C; // get color Vec4 with Linear            interpolation, image  gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
@@ -424,6 +429,7 @@ struct Image // Image (Texture)
    // pixel 3D
    UInt  pixel3D (Int x, Int y, Int z)C;   void pixel3D (Int x, Int y, Int z,   UInt   pixel); // get/set pixel 3D UInt value, image  gamma (no gamma conversion), (these methods may not support all compressed types, instead try using 'copy' method first)
    Flt   pixel3DF(Int x, Int y, Int z)C;   void pixel3DF(Int x, Int y, Int z,   Flt    pixel); // get/set pixel 3D Flt  value, image  gamma (no gamma conversion), (these methods may not support all compressed types, instead try using 'copy' method first)
+   Flt   pixel3DL(Int x, Int y, Int z)C;   void pixel3DL(Int x, Int y, Int z,   Flt    pixel); // get/set pixel 3D Flt  value, linear gamma (   gamma conversion), (these methods may not support all compressed types, instead try using 'copy' method first)
    Color color3D (Int x, Int y, Int z)C;   void color3D (Int x, Int y, Int z, C Color &color); // get/set color 3D Byte color, image  gamma (no gamma conversion), (these methods may not support all compressed types, instead try using 'copy' method first)
    Vec4  color3DF(Int x, Int y, Int z)C;   void color3DF(Int x, Int y, Int z, C Vec4  &color); // get/set color 3D Flt  color, image  gamma (no gamma conversion), (these methods may not support all compressed types, instead try using 'copy' method first)
    Vec4  color3DL(Int x, Int y, Int z)C;   void color3DL(Int x, Int y, Int z, C Vec4  &color); // get/set color 3D Flt  color, linear gamma (   gamma conversion), (these methods may not support all compressed types, instead try using 'copy' method first)
@@ -459,6 +465,15 @@ struct Image // Image (Texture)
    Vec4 areaColorFCubicFastSharp (C Vec2 &pos, C Vec2 &size, Bool clamp=true, Bool alpha_weight=false)C; // get average color Vec4 of specified 'pos' position and 'size' coverage with Cubic Fast Sharp  interpolation, image  gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
    Vec4 areaColorFCubicPlus      (C Vec2 &pos, C Vec2 &size, Bool clamp=true, Bool alpha_weight=false)C; // get average color Vec4 of specified 'pos' position and 'size' coverage with Cubic Plus        interpolation, image  gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
    Vec4 areaColorFCubicPlusSharp (C Vec2 &pos, C Vec2 &size, Bool clamp=true, Bool alpha_weight=false)C; // get average color Vec4 of specified 'pos' position and 'size' coverage with Cubic Plus Sharp  interpolation, image  gamma (no gamma conversion), 'clamp'=if use clamping when filtering pixels, 'alpha_weight'=if use pixel's alpha for weight of pixel's color (these methods may not support all compressed types, instead try using 'copy' method first)
+
+   // pixel cube
+   Flt cubePixelFNearest  (C Vec &dir, Bool linear)C; // get pixel Flt of specified 'dir' direction (doesn't need to be normalized), with no         interpolation, image gamma (no gamma conversion), this function supports only non-compressed IMAGE_SOFT_CUBE, 'linear'=if image pixels are in linear space (or false in spherical space)
+   Flt cubePixelFLinear   (C Vec &dir, Bool linear)C; // get pixel Flt of specified 'dir' direction (doesn't need to be normalized), with Linear     interpolation, image gamma (no gamma conversion), this function supports only non-compressed IMAGE_SOFT_CUBE, 'linear'=if image pixels are in linear space (or false in spherical space)
+   Flt cubePixelFCubicFast(C Vec &dir, Bool linear)C; // get pixel Flt of specified 'dir' direction (doesn't need to be normalized), with Cubic Fast interpolation, image gamma (no gamma conversion), this function supports only non-compressed IMAGE_SOFT_CUBE, 'linear'=if image pixels are in linear space (or false in spherical space)
+
+   Vec4 cubeColorFNearest  (C Vec &dir, Bool linear)C; // get color Vec4 of specified 'dir' direction (doesn't need to be normalized), with no         interpolation, image gamma (no gamma conversion), this function supports only non-compressed IMAGE_SOFT_CUBE, 'linear'=if image pixels are in linear space (or false in spherical space)
+   Vec4 cubeColorFLinear   (C Vec &dir, Bool linear)C; // get color Vec4 of specified 'dir' direction (doesn't need to be normalized), with Linear     interpolation, image gamma (no gamma conversion), this function supports only non-compressed IMAGE_SOFT_CUBE, 'linear'=if image pixels are in linear space (or false in spherical space)
+   Vec4 cubeColorFCubicFast(C Vec &dir, Bool linear)C; // get color Vec4 of specified 'dir' direction (doesn't need to be normalized), with Cubic Fast interpolation, image gamma (no gamma conversion), this function supports only non-compressed IMAGE_SOFT_CUBE, 'linear'=if image pixels are in linear space (or false in spherical space)
 
    // operations
    Image& clear                (                                                                                                                                                                           ) ; // clear to 0 (transparent black)
@@ -529,7 +544,7 @@ struct Image // Image (Texture)
 
    Bool raycast(C Vec &start, C Vec &move, C Matrix *image_matrix=null, Flt *hit_frac=null, Vec *hit_pos=null, Flt precision=1.0f)C; // perform ray casting from 'start' position along 'move' vector, return true if collision encountered with the image, by default the Image is on XY plane with its pixel values extending it towards the Z axis, 'image_matrix'=image transformation matrix, 'hit_frac'=fraction of the movement where collision occurs, 'hit_pos'=position where collision occurs, 'precision'=affects number of pixels to advance in a single step (lower value makes calculations faster but less precise)
 
-   // !! warning: following methods do not check for coordinates being out of range, image type matching, and image being locked, use only if you know what you're doing !!
+   // !! WARNING: following methods do not check for coordinates being out of range, image type matching, and image being locked, use only if you know what you're doing !!
    Byte & pixB (Int x, Int y) {return *(Byte *)(_data + x*SIZE(Byte ) + y*_pitch);}   Byte & pixB (C VecI2 &v) {return pixB (v.x, v.y);}
    UInt & pix  (Int x, Int y) {return *(UInt *)(_data + x*SIZE(UInt ) + y*_pitch);}   UInt & pix  (C VecI2 &v) {return pix  (v.x, v.y);}
    Color& pixC (Int x, Int y) {return *(Color*)(_data + x*SIZE(Color) + y*_pitch);}   Color& pixC (C VecI2 &v) {return pixC (v.x, v.y);}
@@ -540,6 +555,7 @@ struct Image // Image (Texture)
    Vec  & pixF3(Int x, Int y) {return *(Vec  *)(_data + x*SIZE(Vec  ) + y*_pitch);}   Vec  & pixF3(C VecI2 &v) {return pixF3(v.x, v.y);}
    Vec4 & pixF4(Int x, Int y) {return *(Vec4 *)(_data + x*SIZE(Vec4 ) + y*_pitch);}   Vec4 & pixF4(C VecI2 &v) {return pixF4(v.x, v.y);}
 
+   // 3D
    Byte & pixB (Int x, Int y, Int z) {return *(Byte *)(_data + x*SIZE(Byte ) + y*_pitch + z*_pitch2);}   Byte & pixB (C VecI &v) {return pixB (v.x, v.y, v.z);}
    UInt & pix  (Int x, Int y, Int z) {return *(UInt *)(_data + x*SIZE(UInt ) + y*_pitch + z*_pitch2);}   UInt & pix  (C VecI &v) {return pix  (v.x, v.y, v.z);}
    Color& pixC (Int x, Int y, Int z) {return *(Color*)(_data + x*SIZE(Color) + y*_pitch + z*_pitch2);}   Color& pixC (C VecI &v) {return pixC (v.x, v.y, v.z);}
@@ -550,6 +566,18 @@ struct Image // Image (Texture)
    Vec  & pixF3(Int x, Int y, Int z) {return *(Vec  *)(_data + x*SIZE(Vec  ) + y*_pitch + z*_pitch2);}   Vec  & pixF3(C VecI &v) {return pixF3(v.x, v.y, v.z);}
    Vec4 & pixF4(Int x, Int y, Int z) {return *(Vec4 *)(_data + x*SIZE(Vec4 ) + y*_pitch + z*_pitch2);}   Vec4 & pixF4(C VecI &v) {return pixF4(v.x, v.y, v.z);}
 
+   // IMAGE_SOFT_CUBE only (no IMAGE_CUBE)
+   Byte & pixB (Int x, Int y, DIR_ENUM cube_face) {return *(Byte *)(_data + x*SIZE(Byte ) + y*_pitch + cube_face*_pitch2);}   Byte & pixB (C VecI2 &v, DIR_ENUM cube_face) {return pixB (v.x, v.y, cube_face);}
+   UInt & pix  (Int x, Int y, DIR_ENUM cube_face) {return *(UInt *)(_data + x*SIZE(UInt ) + y*_pitch + cube_face*_pitch2);}   UInt & pix  (C VecI2 &v, DIR_ENUM cube_face) {return pix  (v.x, v.y, cube_face);}
+   Color& pixC (Int x, Int y, DIR_ENUM cube_face) {return *(Color*)(_data + x*SIZE(Color) + y*_pitch + cube_face*_pitch2);}   Color& pixC (C VecI2 &v, DIR_ENUM cube_face) {return pixC (v.x, v.y, cube_face);}
+   VecB & pixB3(Int x, Int y, DIR_ENUM cube_face) {return *(VecB *)(_data + x*SIZE(VecB ) + y*_pitch + cube_face*_pitch2);}   VecB & pixB3(C VecI2 &v, DIR_ENUM cube_face) {return pixB3(v.x, v.y, cube_face);}
+   VecB4& pixB4(Int x, Int y, DIR_ENUM cube_face) {return *(VecB4*)(_data + x*SIZE(VecB4) + y*_pitch + cube_face*_pitch2);}   VecB4& pixB4(C VecI2 &v, DIR_ENUM cube_face) {return pixB4(v.x, v.y, cube_face);}
+   Flt  & pixF (Int x, Int y, DIR_ENUM cube_face) {return *(Flt  *)(_data + x*SIZE(Flt  ) + y*_pitch + cube_face*_pitch2);}   Flt  & pixF (C VecI2 &v, DIR_ENUM cube_face) {return pixF (v.x, v.y, cube_face);}
+   Vec2 & pixF2(Int x, Int y, DIR_ENUM cube_face) {return *(Vec2 *)(_data + x*SIZE(Vec2 ) + y*_pitch + cube_face*_pitch2);}   Vec2 & pixF2(C VecI2 &v, DIR_ENUM cube_face) {return pixF2(v.x, v.y, cube_face);}
+   Vec  & pixF3(Int x, Int y, DIR_ENUM cube_face) {return *(Vec  *)(_data + x*SIZE(Vec  ) + y*_pitch + cube_face*_pitch2);}   Vec  & pixF3(C VecI2 &v, DIR_ENUM cube_face) {return pixF3(v.x, v.y, cube_face);}
+   Vec4 & pixF4(Int x, Int y, DIR_ENUM cube_face) {return *(Vec4 *)(_data + x*SIZE(Vec4 ) + y*_pitch + cube_face*_pitch2);}   Vec4 & pixF4(C VecI2 &v, DIR_ENUM cube_face) {return pixF4(v.x, v.y, cube_face);}
+
+   // CONST
  C Byte & pixB (Int x, Int y)C {return *(Byte *)(_data + x*SIZE(Byte ) + y*_pitch);}   C Byte & pixB (C VecI2 &v)C {return pixB (v.x, v.y);}
  C UInt & pix  (Int x, Int y)C {return *(UInt *)(_data + x*SIZE(UInt ) + y*_pitch);}   C UInt & pix  (C VecI2 &v)C {return pix  (v.x, v.y);}
  C Color& pixC (Int x, Int y)C {return *(Color*)(_data + x*SIZE(Color) + y*_pitch);}   C Color& pixC (C VecI2 &v)C {return pixC (v.x, v.y);}
@@ -560,6 +588,7 @@ struct Image // Image (Texture)
  C Vec  & pixF3(Int x, Int y)C {return *(Vec  *)(_data + x*SIZE(Vec  ) + y*_pitch);}   C Vec  & pixF3(C VecI2 &v)C {return pixF3(v.x, v.y);}
  C Vec4 & pixF4(Int x, Int y)C {return *(Vec4 *)(_data + x*SIZE(Vec4 ) + y*_pitch);}   C Vec4 & pixF4(C VecI2 &v)C {return pixF4(v.x, v.y);}
 
+   // CONST 3D
  C Byte & pixB (Int x, Int y, Int z)C {return *(Byte *)(_data + x*SIZE(Byte ) + y*_pitch + z*_pitch2);}   C Byte & pixB (C VecI &v)C {return pixB (v.x, v.y, v.z);}
  C UInt & pix  (Int x, Int y, Int z)C {return *(UInt *)(_data + x*SIZE(UInt ) + y*_pitch + z*_pitch2);}   C UInt & pix  (C VecI &v)C {return pix  (v.x, v.y, v.z);}
  C Color& pixC (Int x, Int y, Int z)C {return *(Color*)(_data + x*SIZE(Color) + y*_pitch + z*_pitch2);}   C Color& pixC (C VecI &v)C {return pixC (v.x, v.y, v.z);}
@@ -570,8 +599,20 @@ struct Image // Image (Texture)
  C Vec  & pixF3(Int x, Int y, Int z)C {return *(Vec  *)(_data + x*SIZE(Vec  ) + y*_pitch + z*_pitch2);}   C Vec  & pixF3(C VecI &v)C {return pixF3(v.x, v.y, v.z);}
  C Vec4 & pixF4(Int x, Int y, Int z)C {return *(Vec4 *)(_data + x*SIZE(Vec4 ) + y*_pitch + z*_pitch2);}   C Vec4 & pixF4(C VecI &v)C {return pixF4(v.x, v.y, v.z);}
 
-   // !! warning: 'gather' methods are written for speed and not safety, they assume that image is locked and that offsets are in range, these methods set 'pixels/colors' array from image values, coordinates are specified in the 'offset' parameters !!
+   // CONST IMAGE_SOFT_CUBE only (no IMAGE_CUBE)
+ C Byte & pixB (Int x, Int y, DIR_ENUM cube_face)C {return *(Byte *)(_data + x*SIZE(Byte ) + y*_pitch + cube_face*_pitch2);}   C Byte & pixB (C VecI2 &v, DIR_ENUM cube_face)C {return pixB (v.x, v.y, cube_face);}
+ C UInt & pix  (Int x, Int y, DIR_ENUM cube_face)C {return *(UInt *)(_data + x*SIZE(UInt ) + y*_pitch + cube_face*_pitch2);}   C UInt & pix  (C VecI2 &v, DIR_ENUM cube_face)C {return pix  (v.x, v.y, cube_face);}
+ C Color& pixC (Int x, Int y, DIR_ENUM cube_face)C {return *(Color*)(_data + x*SIZE(Color) + y*_pitch + cube_face*_pitch2);}   C Color& pixC (C VecI2 &v, DIR_ENUM cube_face)C {return pixC (v.x, v.y, cube_face);}
+ C VecB & pixB3(Int x, Int y, DIR_ENUM cube_face)C {return *(VecB *)(_data + x*SIZE(VecB ) + y*_pitch + cube_face*_pitch2);}   C VecB & pixB3(C VecI2 &v, DIR_ENUM cube_face)C {return pixB3(v.x, v.y, cube_face);}
+ C VecB4& pixB4(Int x, Int y, DIR_ENUM cube_face)C {return *(VecB4*)(_data + x*SIZE(VecB4) + y*_pitch + cube_face*_pitch2);}   C VecB4& pixB4(C VecI2 &v, DIR_ENUM cube_face)C {return pixB4(v.x, v.y, cube_face);}
+ C Flt  & pixF (Int x, Int y, DIR_ENUM cube_face)C {return *(Flt  *)(_data + x*SIZE(Flt  ) + y*_pitch + cube_face*_pitch2);}   C Flt  & pixF (C VecI2 &v, DIR_ENUM cube_face)C {return pixF (v.x, v.y, cube_face);}
+ C Vec2 & pixF2(Int x, Int y, DIR_ENUM cube_face)C {return *(Vec2 *)(_data + x*SIZE(Vec2 ) + y*_pitch + cube_face*_pitch2);}   C Vec2 & pixF2(C VecI2 &v, DIR_ENUM cube_face)C {return pixF2(v.x, v.y, cube_face);}
+ C Vec  & pixF3(Int x, Int y, DIR_ENUM cube_face)C {return *(Vec  *)(_data + x*SIZE(Vec  ) + y*_pitch + cube_face*_pitch2);}   C Vec  & pixF3(C VecI2 &v, DIR_ENUM cube_face)C {return pixF3(v.x, v.y, cube_face);}
+ C Vec4 & pixF4(Int x, Int y, DIR_ENUM cube_face)C {return *(Vec4 *)(_data + x*SIZE(Vec4 ) + y*_pitch + cube_face*_pitch2);}   C Vec4 & pixF4(C VecI2 &v, DIR_ENUM cube_face)C {return pixF4(v.x, v.y, cube_face);}
+
+   // !! WARNING: 'gather' methods are written for speed and not safety, they assume that image is locked and that offsets are in range, these methods set 'pixels/colors' array from image values, coordinates are specified in the 'offset' parameters !!
    void gather (Flt   *pixels, Int *x_offset, Int x_offsets, Int *y_offset, Int y_offsets)C;
+   void gatherL(Flt   *pixels, Int *x_offset, Int x_offsets, Int *y_offset, Int y_offsets)C;
    void gather (VecB  *colors, Int *x_offset, Int x_offsets, Int *y_offset, Int y_offsets)C;
    void gather (Color *colors, Int *x_offset, Int x_offsets, Int *y_offset, Int y_offsets)C;
    void gather (Vec2  *colors, Int *x_offset, Int x_offsets, Int *y_offset, Int y_offsets)C;
@@ -617,9 +658,6 @@ struct Image // Image (Texture)
    void drawRotate(                                    C Vec2 &center, C Vec2 &size, Flt angle, C Vec2 *rotation_center_uv=null)C; // 'rotation_center_uv'=optional rotation center in range 0..1
    void drawRotate(C Color &color, C Color &color_add, C Vec2 &center, C Vec2 &size, Flt angle, C Vec2 *rotation_center_uv=null)C; // 'rotation_center_uv'=optional rotation center in range 0..1
 
-   // draw image as rotated tiled background, 'tex_scale'=texture coordinates scaling, 'rotation_center_uv'=optional rotation center in range 0..1
-   void drawTileRotate(C Color& color, C Color& color_add, C Vec2& center, C Vec2& size, Flt tex_scale, Flt angle, C Vec2* rotation_center_uv = null)C;
-
    // draw masked
    void drawMask         (C Color &color, C Color &color_add, C Rect &rect, C Image &mask, C Rect &mask_rect)C; // draw image using 'mask', final result is calculated as: this*           mask   *color+color_add
    void drawMaskNoFilter (C Color &color, C Color &color_add, C Rect &rect, C Image &mask, C Rect &mask_rect)C; // draw image using 'mask', final result is calculated as: this*           mask   *color+color_add, uses FILTER_NONE for this, but FILTER_LINEAR for 'mask'
@@ -632,6 +670,8 @@ struct Image // Image (Texture)
    // draw image as tiled background, 'tex_scale'=texture coordinates scaling
    void drawTile(                                    C Rect &rect, Flt tex_scale=1)C;
    void drawTile(C Color &color, C Color &color_add, C Rect &rect, Flt tex_scale=1)C;
+   
+   void Image::drawTileRotate(C Color & color, C Color & color_add, C Vec2& center, C Vec2& size, Flt tex_scale, Flt angle, C Vec2* rotation_center_uv)C;
 
    // draw image as rectangle's border
    void drawBorder(                                    C Rect &rect, Flt border=0.02f, Flt tex_scale=1, Flt tex_offset=0, Bool wrap_mode=false)C;
@@ -861,10 +901,6 @@ IMAGE_TYPE ImageTypeHighPrec(IMAGE_TYPE type); // convert 'type' to the most sim
 IMAGE_TYPE ImageTypeUncompressed(IMAGE_TYPE type); // convert 'type' to the most similar IMAGE_TYPE that is not compressed
 
 IMAGE_TYPE ImageTypeForMode(IMAGE_TYPE type, IMAGE_MODE mode); // convert 'type' to the most similar IMAGE_TYPE that can be used for 'mode'
-
-DIR_ENUM DirToCubeFace(C Vec &dir                    ); // convert vector direction (doesn't need to be normalized) to cube face
-DIR_ENUM DirToCubeFace(C Vec &dir, Int res, Vec2 &tex); // convert vector direction (doesn't need to be normalized) to cube face and texture coordinates, 'res'=cube image resolution, 'tex'=image coordinates
-Vec      CubeFaceToDir(Flt x, Flt y, Int res, DIR_ENUM cube_face); // convert image coordinates, 'x,y'=image coordinates (0..res-1), 'res'=cube image resolution, 'cube_face'=image cube face, returned vector is not normalized, however its on a cube with radius=1 ("Abs(dir).max()=1")
 /******************************************************************************/
 #if EE_PRIVATE
 #define MAX_MIP_MAPS 32
@@ -907,7 +943,10 @@ Bool IgnoreGamma(UInt flags, IMAGE_TYPE src, IMAGE_TYPE dest);
 Bool CanDoRawCopy(IMAGE_TYPE src, IMAGE_TYPE dest, Bool ignore_gamma=false);
 Bool CanDoRawCopy(C Image   &src, C Image   &dest, Bool ignore_gamma=false);
 Bool CanCompress (IMAGE_TYPE dest);
+Bool NeedMultiChannel(IMAGE_TYPE src, IMAGE_TYPE dest);
 Bool CompatibleLock(LOCK_MODE cur, LOCK_MODE lock); // if 'lock' is okay to be applied when 'cur' is already applied
+Flt  ImagePixelF(CPtr data, IMAGE_TYPE hw_type);
+Flt  ImagePixelL(CPtr data, IMAGE_TYPE hw_type);
 Vec4 ImageColorF(CPtr data, IMAGE_TYPE hw_type);
 Vec4 ImageColorL(CPtr data, IMAGE_TYPE hw_type);
 void CopyNoStretch(C Image &src, Image &dest, Bool clamp, Bool ignore_gamma=false); // assumes 'src,dest' are locked and non-compressed

@@ -132,6 +132,12 @@ struct SteamWorks
     
     void (*OnSteamWorkshopItemReceived)(E_WORKSHOPRESULT EResult, ULong m_nPublishedFileId, bool m_bUserNeedsToAcceptWorkshopLegalAgreement) = null; // pointer to a custom function that will be called when workshop item is ready 
 
+    void (*OnSteamNetworkingMessagesSessionRequest)(ULong m_ulSteamIDMember) = null; // pointer to a custom function that will be called when we receive incoming connection
+
+    void (*OnSteamNetworkingMessagesSessionRequestFailed)(int m_failedReason) = null; // pointer to a custom function that will be called when we receive notice of failed connection
+    
+    void (*OnSteamNetConnectionStatusChanged)() = null; // pointer to a custom function that will be called when we receive notice of conection status changed
+    
     // get
     Bool        initialized()C { return _initialized; } // if Steam is initialized
     UInt         appID()C; // get app  Steam ID

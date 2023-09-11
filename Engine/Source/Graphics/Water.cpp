@@ -2,9 +2,10 @@
 #include "stdafx.h"
 namespace EE{
 /******************************************************************************/
-      WaterClass   Water;
-const WaterMtrl   *WaterMtrlLast;
-      WaterMtrlPtr WaterMtrlNull;
+      WaterClass         Water;
+const WaterMtrl         *WaterMtrlLast;
+      WaterMtrlPtr       WaterMtrlNull;
+      Memc<C WaterBall*> WaterBalls;
 DEFINE_CACHE(WaterMtrl, WaterMtrls, WaterMtrlPtr, "Water Material");
 /******************************************************************************/
 // WATER PARAMETERS
@@ -170,13 +171,13 @@ void WaterClass::create()
    del();
 
    // create mesh
-   MeshBase mshb; mshb.createPlane(128, 192).scaleMove(Vec(1, -1, 1), Vec(0, 1, 0));
-
+   MeshBase mshb; mshb.createPlane(128, 192); // keep vtx number under 64K to use 16-bit index buffers
    REPA(mshb.vtx)
    {
       Vec &pos=mshb.vtx.pos(i);
+      pos.y=1-pos.y;
       if(  pos.x<=EPS || pos.x>=1-EPS
-      ||   pos.y<=EPS || pos.y>=1-EPS)pos.xy=(pos.xy-0.5f)*6+0.5f;
+      ||   pos.y<=EPS || pos.y>=1-EPS)pos.xy=(pos.xy-0.5f)*6+0.5f; // stretch border vertexes more far away from the center
    }
   _mshr.create(mshb);
 }
@@ -210,7 +211,7 @@ void WaterClass::prepare() // this is called at the start
       VecD    p   =PointOnPlane(CamMatrix.pos, plane.pos, plane.normal);
 
       under(plane, T);
-      if(Frustum(Box(size*2, wave_scale, size*2), MatrixM(matrix, p)))
+      if(Frustum(Extent(Vec(size, wave_scale, size)), MatrixM(matrix, p)))
       {
         _draw_plane_surface=true;
         _quad.set(p+size*(matrix.z-matrix.x), p+size*(matrix.x+matrix.z), p+size*(matrix.x-matrix.z), p+size*(-matrix.x-matrix.z));
@@ -308,7 +309,7 @@ void WaterClass::setEyeViewportCam()
    }
 }
 /******************************************************************************/
-void WaterClass::begin(Vec2 specifcWaterOfsCol)
+void WaterClass::begin()
 {
    if(!_began)
    {
@@ -321,9 +322,10 @@ void WaterClass::begin(Vec2 specifcWaterOfsCol)
       if(_use_secondary_rt)
       {
         _swapped_ds=false;
-         Renderer._water_col.get  (rt_desc.type(                                  IMAGERT_SRGB)); // here Alpha is unused
-         Renderer._water_nrm.get  (rt_desc.type(D.signedNrmRT() ? IMAGERT_RGB_S : IMAGERT_RGB )); // here Alpha is unused
-         Renderer._water_ds .getDS(Renderer._col->w(), Renderer._col->h(), 1, false);
+         Renderer._water_col    .get  (rt_desc.type(                                  IMAGERT_SRGB )); // here Alpha is unused
+         Renderer._water_nrm    .get  (rt_desc.type(D.signedNrmRT() ? IMAGERT_RGB_S : IMAGERT_RGB  )); // here Alpha is unused
+         Renderer._water_refract.get  (rt_desc.type(                                  IMAGERT_TWO_S)); // here Alpha is unused
+         Renderer._water_ds     .getDS(Renderer._col->w(), Renderer._col->h(), 1, false);
 
          if(Renderer.stage)switch(Renderer.stage)
          {
@@ -337,17 +339,23 @@ void WaterClass::begin(Vec2 specifcWaterOfsCol)
             Renderer.set(null, Renderer._water_ds, true);
             D.depthLock  (true); D.depthFunc(FUNC_ALWAYS ); D.stencil(STENCIL_ALWAYS_SET, 0); shader->draw();
             D.depthUnlock(    ); D.depthFunc(FUNC_DEFAULT); D.stencil(STENCIL_NONE         );
-          //Renderer.set(Renderer._water_col, Renderer._water_nrm, null, null, Renderer._water_ds, true); don't set, instead swap first and set later
+          //Renderer.set(Renderer._water_col, Renderer._water_nrm, Renderer._water_refract, null, Renderer._water_ds, true); don't set, instead swap first and set later
            _swapped_ds=Renderer.swapDS1S(Renderer._water_ds); // try to swap DS to put existing stencil values into '_water_ds' because we will write water depths onto '_water_ds' and we want to use it later instead of '_ds_1s' so we want all stencil values to be kept
-            Renderer.set(Renderer._water_col, Renderer._water_nrm, null, null, Renderer._water_ds, true);
+            Renderer.set(Renderer._water_col, Renderer._water_nrm, Renderer._water_refract, null, Renderer._water_ds, true);
          }else // if we can't copy then just clear it
          {
-            Renderer.set(Renderer._water_col, Renderer._water_nrm, null, null, Renderer._water_ds, true);
+            Renderer.set(Renderer._water_col, Renderer._water_nrm, Renderer._water_refract, null, Renderer._water_ds, true);
             D.clearDS();
          }
       }else
       {
-         if(Lights.elms() && Lights[0].type==LIGHT_DIR)Lights[0].dir.set();else LightDir(Vec(0,-1,0), VecZero).set();
+         if(Lights.elms())
+         {
+            Light &light=Lights.first(); if(light.type==LIGHT_DIR && light.allow_main){light.dir.set(); goto light_set;}
+         }
+         LightDir(Vec(0,-1,0), VecZero).set();
+      light_set:
+
          if(_shader_soft) // we're going to draw water on top of existing RT, including refraction, so we need to have a color copy of what's underwater (background) for the refraction, also we want to do softing so we need to backup depth because we can't read and write to depth in the same time
          {
             Renderer._water_col.get(rt_desc.type(GetImageRTType(Renderer._col->type()))); // create RT for the copy
@@ -371,8 +379,7 @@ void WaterClass::begin(Vec2 specifcWaterOfsCol)
       D.cull      (true);
       D.stencil   (STENCIL_WATER_SET, STENCIL_REF_WATER);
       WS.WaterFlow   ->set(Time.time()*3);
-      if (specifcWaterOfsCol != Vec2(0))WS.WaterOfsCol->set(specifcWaterOfsCol); // set the dir flow to be as per watermesh
-      else WS.WaterOfsCol->set(_offset_col);
+      WS.WaterOfsCol ->set(_offset_col  );
       WS.WaterOfsNrm ->set(_offset_nrm  );
       WS.WaterOfsBump->set(_offset_bump );
       Rect uv=D.screenToUV(D.viewRect()); // UV
@@ -437,21 +444,26 @@ void WaterClass::endImages()
 {
 }
 /******************************************************************************/
-Bool WaterClass::ocean()
+Bool WaterClass::bump()
 {
    #define EPS_WAVE_SCALE 0.001f // 1 mm
    return _bump_map && wave_scale>EPS_WAVE_SCALE;
 }
 Shader* WaterClass::shader()
 {
-   return _use_secondary_rt ? (ocean() ? WS.Ocean  : WS.Lake )
-                            : (ocean() ? WS.OceanL : WS.LakeL)[_shader_shadow][_shader_soft][_shader_reflect_env][_shader_reflect_mirror][refract>EPS_MATERIAL_BUMP];
+   return _use_secondary_rt ? (bump() ? WS.Ocean  : WS.Lake )
+                            : (bump() ? WS.OceanL : WS.LakeL)[_shader_shadow_maps][_shader_soft][_shader_reflect_env][_shader_reflect_mirror][refract>EPS_MATERIAL_BUMP];
 }
 /******************************************************************************/
 void WaterClass::drawSurfaces()
 {
    // these are used only when '_use_secondary_rt' is disabled
-  _shader_shadow        =((Lights.elms() && Lights[0].type==LIGHT_DIR && Lights[0].shadow) ? D.shadowMapNumActual() : 0);
+   if(Lights.elms())
+   {
+      Light &light=Lights.first(); if(light.type==LIGHT_DIR && light.allow_main && light.shadow){_shader_shadow_maps=D.shadowMapNumActual(); goto light_set;}
+   }
+  _shader_shadow_maps   =0;
+light_set:
   _shader_soft          =Renderer.canReadDepth();
   _shader_reflect_env   =(         D.envMap()!=null);
   _shader_reflect_mirror=(Renderer._mirror_rt!=null);
@@ -466,7 +478,7 @@ void WaterClass::drawSurfaces()
          begin();
          set  ();
 
-         if(ocean())
+         if(bump())
          {
             WS.WaterPlanePos->set(plane.pos   *CamMatrixInv      );
             WS.WaterPlaneNrm->set(plane.normal*CamMatrixInv.orn());
@@ -484,6 +496,13 @@ void WaterClass::drawSurfaces()
       if(!(_under_mtrl && _under_step>=1)) // don't draw any surfaces when totally under water
       {
          Renderer.mode(RM_WATER); Renderer._render();
+      }
+
+      // !! DRAW THIS LAST BECAUSE IT MIGHT USE CUSTOM DRAW MATRIX !! but those above need identity
+      if(WaterBalls.elms())
+      {
+         Water.begin();
+         REPAO(WaterBalls)->drawDo();
       }
    }
 
@@ -505,7 +524,6 @@ void WaterMesh::zero()
    depth=0;
   _lake =false;
   _box.zero();
-  _dirFlow = _offsetFlow =Vec2(0);
 }
 WaterMesh::WaterMesh() {zero();}
 void WaterMesh::del()
@@ -515,34 +533,14 @@ void WaterMesh::del()
   _material.clear();
    zero();
 }
-void WaterMesh::create(C MeshBase &src, Bool lake, Flt depth, C WaterMtrlPtr &material, Vec2 dirFlow)
+void WaterMesh::create(C MeshBase &src, Bool lake, Flt depth, C WaterMtrlPtr &material)
 {
    T._lake    =lake;
    T. depth   =depth;
    T._material=material;
-   T._dirFlow = dirFlow;
   _mshb.create(src, VTX_POS|VTX_TEX0|TRI_IND|QUAD_IND).getBox(_box);
   _mshr.create(_mshb); // 'mshb' is kept for testing 'under'
    WS.load();
-}
-
-void WaterMesh::dirFlow(Vec2 &tdirFlow)
-{
-    T._dirFlow = tdirFlow;
-}
-Vec2 WaterMesh::dirFlow()
-{
-    return T._dirFlow;
-}
-
-void WaterMesh::resetOffsetFlow()
-{
-    T._offsetFlow = Vec2(0);
-}
-
-void WaterMesh::updateCustomDirFlow(Vec2 CustomDir)
-{
-    T._offsetFlow += (T._dirFlow+CustomDir) * Time.d();
 }
 /******************************************************************************/
 Bool WaterMesh::under(C Vec &pos, Flt *depth)C
@@ -613,7 +611,7 @@ Shader* WaterMesh::shader()C
    if(WaterMtrl *mtrl=getMaterial())
    {
       return Water._use_secondary_rt ? (_lake ? WS.Lake  : WS.River )
-                                     : (_lake ? WS.LakeL : WS.RiverL)[Water._shader_shadow][Water._shader_soft][Water._shader_reflect_env][Water._shader_reflect_mirror][mtrl->refract>EPS_MATERIAL_BUMP];
+                                     : (_lake ? WS.LakeL : WS.RiverL)[Water._shader_shadow_maps][Water._shader_soft][Water._shader_reflect_env][Water._shader_reflect_mirror][mtrl->refract>EPS_MATERIAL_BUMP];
    }
    return null;
 }
@@ -627,7 +625,7 @@ void WaterMesh::draw()C
          if(Frustum(_box) && _mshr.is())
             if(Shader *shader=T.shader())
          {
-            Water  .begin(_offsetFlow);
+            Water  .begin();
             mtrl  ->set  ();
             shader->begin(); _mshr.set().draw();
          }
@@ -659,8 +657,8 @@ void WaterMesh::draw()C
 /******************************************************************************/
 Bool WaterMesh::save(File &f, CChar *path)C
 {
-   f.cmpUIntV(1); // version
-   f<<_lake<<depth<<_box<<_dirFlow;
+   f.cmpUIntV(0); // version
+   f<<_lake<<depth<<_box;
    if(_mshb.save(f))
    if(_mshr.save(f))
    {
@@ -675,21 +673,7 @@ Bool WaterMesh::load(File &f, CChar *path)
    {
       case 0:
       {
-          f >> _lake >> depth >> _box;
-          if (_mshb.load(f))
-              if (_mshr.load(f))
-              {
-                  _material.require(f._getStr(), path);
-                  if (f.ok())
-                  {
-                      WS.load();
-                      return true;
-                  }
-              }
-      }break;
-      case 1:
-      {
-         f>>_lake>>depth>>_box>>_dirFlow;
+         f>>_lake>>depth>>_box;
          if(_mshb.load(f))
          if(_mshr.load(f))
          {
@@ -703,6 +687,66 @@ Bool WaterMesh::load(File &f, CChar *path)
       }break;
    }
    del(); return false;
+}
+/******************************************************************************/
+// WATER BALL
+/******************************************************************************/
+void WaterBall::draw()C
+{
+   DEBUG_ASSERT(Renderer()==RM_PREPARE, "'WaterBall.draw' called outside of RM_PREPARE");
+   if(Frustum(T) && Renderer.firstPass())
+   {
+      Flt eps=D.viewFromActual()+WATER_TRANSITION;
+      Vec delta=CamMatrix.pos-pos;
+      Flt delta_len=delta.normalize();
+      Flt dist=delta_len-r;
+      if( dist>0) // above surface
+      {
+         if(Dot(delta, _uv_plane.z)<0.9f) // if new direction (from ball pos to camera pos) is much different than last saved, then recalc uv plane. this value is smallest that doesn't introduce too much stretching
+            ConstCast(_uv_plane).rotateToZKeepY(delta); // try to preserve up
+         WaterBalls.add(&T);
+      }
+      if(dist<eps) // under surface
+      {
+         Water.under(PlaneM(pos+delta*r, delta), *material);
+      }
+   }
+}
+void WaterBall::drawDo()C
+{
+   Flt  draw_r=r/SKY_MESH_MIN_DIST;
+   Flt  dist2 =Dist2(ActiveCam.matrix.pos, pos); // use 'ActiveCam' instead of 'CamMatrix' because it's not affected by eyes
+   Bool flat  =(dist2<=Sqr(draw_r+FrustumMain.view_quad_max_dist+D.eyeDistance_2())); // use flat if camera intersects with mesh
+
+   if(Shader *shader=Water._use_secondary_rt ? WS.Ball                                                                                                                                              [flat]
+                                             : WS.BallL[Water._shader_shadow_maps][Water._shader_soft][Water._shader_reflect_env][Water._shader_reflect_mirror][material->refract>EPS_MATERIAL_BUMP][flat])
+   {
+      MatrixM matrix; if(!flat)
+      {
+         matrix.setScalePos(-draw_r, pos); // reverse faces because 'Sky._mshr' is reversed
+         Sky._mshr.set();
+         D.depth(true);
+         D.cull (true);
+      }else
+      {
+         D.depthLock(true);
+      }
+
+      material->set();
+
+    //REPS(Renderer._eye, Renderer._eye_num) this is already under loop
+      {
+       //Renderer.setEyeViewportCam();
+         WS.WaterBallPosRadius->set(Vec4(Vec(CamMatrix.pos-pos)*CamMatrixInv.orn(), r)); if(!flat)SetFastMatrix(matrix); // set these after 'setEyeViewportCam'. position that we set is for camera relative to ball. because shader assumes ball is at Vec(0,0,0) and the position that we specify is camera position relative to ball in view space
+         WS.WaterBallX->set(_uv_plane.x*CamMatrixInv.orn());
+         WS.WaterBallY->set(_uv_plane.y*CamMatrixInv.orn());
+         if(flat)
+         {
+            Rect rect; if(toScreenRect(rect))if(!Renderer._stereo || ToEyeRect(rect))shader->draw(&rect);
+         }else{shader->begin(); Sky._mshr.draw();} // call this next
+      }
+      if(flat)D.depthUnlock();
+   }
 }
 /******************************************************************************/
 // WATER DROPS

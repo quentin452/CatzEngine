@@ -63,7 +63,7 @@ DECLARE_CACHE(WaterMtrl, WaterMtrls, WaterMtrlPtr); // Water Material Cache
 extern const WaterMtrl   *WaterMtrlLast; // Last set Water Material
 extern       WaterMtrlPtr WaterMtrlNull;
 
-#define WATER_TRANSITION 0.1f // transition between above and under surface
+#define WATER_TRANSITION 0.1f // transition between above and under surface. this is in meters, this value is added on top of water surfaces. So underwater effect starts fading from water_surface+water_up*WATER_TRANSITION (intensity=0) to water_surface (intensity=1)
 #endif
 /******************************************************************************/
 struct WaterClass : WaterMtrl // Main water control
@@ -75,7 +75,7 @@ struct WaterClass : WaterMtrl // Main water control
    PlaneM plane                ; // water plane                  ,           , default=(pos(0,0,0), normal(0,1,0))
 
    WaterClass& reflectionRenderer(RENDER_TYPE type);   RENDER_TYPE reflectionRenderer()C {return _reflect_renderer;} // set/get Renderer used for rendering the reflaction , default=RT_DEFERRED
-   WaterClass& max1Light         (Bool          on);   Bool        max1Light         ()C {return _max_1_light     ;} // set/get if use only up to 1 light for water surface, default=true (this greatly increases water rendering performance, however allows only 1 directional light affecting water surface), this affects only RT_DEFERRED renderer, all other renderers are always limited to only 1 directional light
+   WaterClass& max1Light         (Bool          on);   Bool        max1Light         ()C {return _max_1_light     ;} // set/get if use only up to 1 light for water surface, default=true (this greatly increases water rendering performance, however allows only 1 directional light affecting water surface), this affects only RT_DEFERRED renderer, all other renderers are always limited to only 1 directional light. If this is disabled then some water material parameters are taken from global 'Water' instead of per water mesh material.
 
    WaterClass& update(C Vec2 &vel); // update wave movement, 'vel'=velocity
 
@@ -87,13 +87,13 @@ struct WaterClass : WaterMtrl // Main water control
       MODE_UNDERWATER,
    };
 
-   Bool    ocean ();
+   Bool    bump  ();
    Shader* shader();
 
    void del              ();
    void create           ();
    void prepare          ();
-   void begin            (Vec2 specifcWaterOfsCol=Vec2(0)); // this is called just before WaterPlane and WaterMesh drawing, SpecificWaterOfsCol can be specified to override water.update
+   void begin            (); // this is called just before       WaterPlane and WaterMesh drawing
    void end              (); // this is called at the end of all WaterPlane and WaterMesh drawing
    void under            (C PlaneM &plane, WaterMtrl &mtrl); // set if camera is under custom water plane
    void setImages        (Image *src, Image *depth);
@@ -106,7 +106,7 @@ struct WaterClass : WaterMtrl // Main water control
 private:
 #endif
    Bool         _max_1_light, _draw_plane_surface, _use_secondary_rt, _began, _swapped_ds;
-   Byte         _mode, _shader_shadow, _shader_soft, _shader_reflect_env, _shader_reflect_mirror;
+   Byte         _mode, _shader_shadow_maps, _shader_soft, _shader_reflect_env, _shader_reflect_mirror;
    RENDER_TYPE  _reflect_renderer;
    Flt          _under_step, _offset_nrm, _offset_bump;
    Vec2         _offset_col, _y_mul_add;
@@ -138,13 +138,13 @@ struct WaterMesh // manually specified water mesh, water meshes don't support wa
 
    // manage
    void del();
-   void create(C MeshBase &src, Bool lake, Flt depth=3, C WaterMtrlPtr &material=null, Vec2 dirFlow=Vec2(0)); // create from 'src' mesh
+   void create(C MeshBase &src, Bool lake, Flt depth=3, C WaterMtrlPtr &material=null); // create from 'src' mesh
 
-   void WaterMesh::dirFlow(Vec2& tdirFlow); // set WaterMesh dirFlow
-   Vec2 WaterMesh::dirFlow(); // get WaterMesh dirFlow
+																	
+													  
 
-   void resetOffsetFlow(); //set offsetFlow to be 0,0, when at 0,0 it will not override the global water update
-   void updateCustomDirFlow(Vec2 CustomDir=Vec2(0));// update offsetFlow by dirFlow+CustomDir
+																											   
+																							 
 
    // draw
    void draw()C; // draw water area, this should be called only in RM_WATER mode, automatically uses frustum culling
@@ -160,11 +160,30 @@ private:
 #endif
    Bool         _lake    ;
    Box          _box     ;
-   Vec2         _dirFlow, _offsetFlow ;
+									   
    MeshBase     _mshb    ;
    MeshRender   _mshr    ;
    WaterMtrlPtr _material;
 };
+/******************************************************************************/
+struct WaterBall : BallM // BallM.r = water ball radius, BallM.pos = world-space position
+{
+   WaterMtrlPtr material;
+
+   void draw()C; // draw this water ball object, this should be called only in RM_PREPARE mode !! OBJECT MUST REMAIN IN CONSTANT MEMORY ADDRESS UNTIL RENDERING HAS FINISHED !!
+#if EE_PRIVATE
+   void drawDo()C;
+   Bool toScreenRect(Rect &rect)C {return ToFullScreenRect(T, rect);}
+#endif
+
+   WaterBall() {_uv_plane.zero();}
+
+private:
+   Matrix3 _uv_plane;
+};
+#if EE_PRIVATE
+extern Memc<C WaterBall*> WaterBalls;
+#endif
 /******************************************************************************/
 TEX_FLAG  CreateWaterBaseTextures(  Image &base_0, Image &base_1, Image &base_2, C ImageSource &color, C ImageSource &alpha, C ImageSource &bump, C ImageSource &normal, C ImageSource &smooth, C ImageSource &reflect, C ImageSource &glow, Bool resize_to_pow2=true, Bool flip_normal_y=false, Bool smooth_is_rough=false); // create 'base_0', 'base_1' and 'base_2' base material textures from given images, textures will be created as IMAGE_R8G8B8A8_SRGB, IMAGE_R8G8_SIGN IMAGE_SOFT, 'flip_normal_y'=if flip normal map Y channel, 'smooth_is_rough'=if smoothness map is actually roughness map, returns bit combination of used textures
 TEX_FLAG ExtractWaterBase0Texture(C Image &base_0, Image *color ); // returns bit combination of used textures

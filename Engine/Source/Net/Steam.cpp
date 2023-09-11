@@ -55,6 +55,9 @@ static struct SteamCallbacks // !! do not remove this !!
    STEAM_CALLBACK(SteamCallbacks, LobbyDataUpdate              ,               LobbyDataUpdate_t, m_LobbyDataUpdate);
    STEAM_CALLBACK(SteamCallbacks, P2PSessionRequest            ,             P2PSessionRequest_t, m_P2PSessionRequest);
    STEAM_CALLBACK(SteamCallbacks, CreateItemResult             ,              CreateItemResult_t, m_CreateItemResult);
+   STEAM_CALLBACK(SteamCallbacks, MessagesSessionRequest       , SteamNetworkingMessagesSessionRequest_t, m_MessagesSessionRequest);
+   STEAM_CALLBACK(SteamCallbacks, MessagesSessionRequestFailed , SteamNetworkingMessagesSessionFailed_t, m_MessagesSessionRequestFailed);
+   STEAM_CALLBACK(SteamCallbacks, SteamNetConnectionStatusChanged, SteamNetConnectionStatusChangedCallback_t, m_SteamNetConnectionStatusChanged);
 
    SteamCallbacks() : // this will register the callbacks using Steam API, using callbacks requires 'SteamUpdate' to be called
       m_MicroTxnAuthorizationResponse(this, &SteamCallbacks::MicroTxnAuthorizationResponse),
@@ -69,7 +72,10 @@ static struct SteamCallbacks // !! do not remove this !!
       m_LobbyChatMsg                 (this, &SteamCallbacks::LobbyChatMsg),
       m_LobbyDataUpdate              (this, &SteamCallbacks::LobbyDataUpdate),
       m_P2PSessionRequest            (this, &SteamCallbacks::P2PSessionRequest),
-      m_CreateItemResult             (this, &SteamCallbacks::CreateItemResult)
+      m_CreateItemResult             (this, &SteamCallbacks::CreateItemResult),
+      m_MessagesSessionRequest       (this, &SteamCallbacks::MessagesSessionRequest),
+      m_MessagesSessionRequestFailed (this, &SteamCallbacks::MessagesSessionRequestFailed),
+      m_SteamNetConnectionStatusChanged(this, &SteamCallbacks::SteamNetConnectionStatusChanged)
    {}
 }SC;
 
@@ -164,6 +170,26 @@ void SteamCallbacks::CreateItemResult(CreateItemResult_t* data)
 {
     if (auto callback = Steam.OnSteamWorkshopItemReceived)callback((SteamWorks::E_WORKSHOPRESULT)data->m_eResult, data->m_nPublishedFileId, data->m_bUserNeedsToAcceptWorkshopLegalAgreement);
 }
+
+void SteamCallbacks::MessagesSessionRequest(SteamNetworkingMessagesSessionRequest_t* data)
+{
+    if (auto callback = Steam.OnSteamNetworkingMessagesSessionRequest)callback(data->m_identityRemote.GetSteamID64());
+}
+
+void SteamCallbacks::MessagesSessionRequestFailed(SteamNetworkingMessagesSessionFailed_t* data)
+{
+    if (auto callback = Steam.OnSteamNetworkingMessagesSessionRequestFailed)callback(data->m_info.m_eEndReason);
+}
+
+void SteamCallbacks::SteamNetConnectionStatusChanged(SteamNetConnectionStatusChangedCallback_t* data)
+{
+    if (auto callback = Steam.OnSteamNetConnectionStatusChanged)
+    {
+        if (data->m_eOldState == k_ESteamNetworkingConnectionState_None && data->m_info.m_eState == k_ESteamNetworkingConnectionState_Connecting)callback();
+        //callback(data);
+    }
+}
+
 
 #endif
 SteamWorks Steam;

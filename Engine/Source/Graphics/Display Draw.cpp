@@ -574,12 +574,12 @@ namespace EE {
             v[1].pos.set(size.x, 0) *= m;
             v[2].pos.set(0, -size.y) *= m;
             v[3].pos.set(size.x, -size.y) *= m;
-            Flt w = size.x * tex_scale,
-                h = size.y * tex_scale * aspect();
+            Flt w = size.x * tex_scale ,
+                h = size.y * tex_scale * aspect(); // h is not used, since it is constant, the one from before rotate is done
             v[0].tex.set(0, 0);
             v[1].tex.set(w, 0);
-            v[2].tex.set(0, h);
-            v[3].tex.set(w, h);
+            v[2].tex.set(0, _part.y);
+            v[3].tex.set(w, _part.y);
         }
         VI.end();
     }

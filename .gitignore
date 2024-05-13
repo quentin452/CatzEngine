@@ -75,16 +75,18 @@ Lock
 !/Editor/Projects
 !/Editor/Projects/541oob6a_h_5el6-6!zan_50
 /Editor/Projects/541oob6a_h_5el6-6!zan_50/Temp
+Editor Source/_Build_/Titan Editor/Titan Editor
 
 # Engine Builder
 !/Engine Builder.exe
 !/Engine Builder.app
 !/Engine Builder
 /Engine/Engine Config.h
+/Engine/Engine/x64
 
 # Extra
 !/Extra
 
 !.gitignore
-/Engine/Engine/x64
-Editor Source/_Build_/Titan Editor/Titan Editor
+!.vscode
+!!tests

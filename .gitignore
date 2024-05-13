@@ -86,3 +86,4 @@ Lock
 !/Extra
 
 !.gitignore
+/Engine/Engine/x64

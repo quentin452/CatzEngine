@@ -1,6 +1,7 @@
 # Currently support Release DX11 X64 AND UNICODE ONLY (cannot compile without UNICODE IN SOME WAY)
 
 cmake_minimum_required(VERSION 3.11.0)
+
 set(NAME CatzEngineEditor)
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE_DX11 "${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
 
@@ -26,14 +27,6 @@ set(ALL_INCLUDE_DIR
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE TRUE)
 
 message(STATUS "using ${CMAKE_GENERATOR}")
-if (CMAKE_GENERATOR STREQUAL "MinGW Makefiles")
-    if (NOT MINGW_PATH) 
-      message(FATAL_ERROR "MINGW_PATH not set in .env.cmake")
-    endif()
-    set(USE_MINGW "True")
-    set(CMAKE_C_COMPILER ${MINGW_PATH}/bin/gcc.exe)
-    set(CMAKE_CXX_COMPILER  ${MINGW_PATH}/bin/g++.exe)
-endif()
 
 project(${NAME} VERSION 0.23.0)
 

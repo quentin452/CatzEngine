@@ -91,3 +91,4 @@ Editor Source/_Build_/Titan Editor/Titan Editor
 !.vscode
 !!tests
 Engine Builder
+!Cmakelists.txt

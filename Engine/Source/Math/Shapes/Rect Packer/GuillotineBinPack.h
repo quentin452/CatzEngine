@@ -1,5 +1,5 @@
 /** @file GuillotineBinPack.h
-	@author Jukka Jylänki
+	@author Jukka Jylï¿½nki
 
 	@brief Implements different bin packer algorithms that use the GUILLOTINE data structure.
 
@@ -8,6 +8,7 @@
 #pragma once
 
 #include "Rect.h"
+#include <H/Memory/Mem Pointer.h>
 
 /** GuillotineBinPack implements different variants of bin packer algorithms that use the GUILLOTINE data structure
 	to keep track of the free space of the bin where rectangles may be placed. */

@@ -2427,12 +2427,12 @@ void DisplayClass::flip()
             if(present==DXGI_ERROR_DEVICE_REMOVED)present=D3D->GetDeviceRemovedReason();
             switch(present)
             {
-               case DXGI_ERROR_DEVICE_RESET         : msg+="DXGI_ERROR_DEVICE_RESET"              ; break;
-               case DXGI_ERROR_DEVICE_REMOVED       : msg+="DXGI_ERROR_DEVICE_REMOVED"            ; break;
-               case DXGI_ERROR_DEVICE_HUNG          : msg+="DXGI_ERROR_DEVICE_HUNG"               ; break; // this can happen for example if a shader entered an infinite loop
-               case DXGI_ERROR_DRIVER_INTERNAL_ERROR: msg+="DXGI_ERROR_DRIVER_INTERNAL_ERROR"     ; break;
-               case DXGI_ERROR_INVALID_CALL         : msg+="DXGI_ERROR_INVALID_CALL"              ; break;
-               default                              : msg+=TextHex(Unsigned(present), -1, 0, true); break;
+               case DXGI_ERROR_DEVICE_RESET         : msg+="DXGI_ERROR_DEVICE_RESET"                                    ; break;
+               case DXGI_ERROR_DEVICE_REMOVED       : msg+="DXGI_ERROR_DEVICE_REMOVED"                                  ; break;
+               case DXGI_ERROR_DEVICE_HUNG          : msg+="DXGI_ERROR_DEVICE_HUNG"                                     ; break; // this can happen for example if a shader entered an infinite loop
+               case DXGI_ERROR_DRIVER_INTERNAL_ERROR: msg+="DXGI_ERROR_DRIVER_INTERNAL_ERROR"                           ; break;
+               case DXGI_ERROR_INVALID_CALL         : msg+="DXGI_ERROR_INVALID_CALL"                                    ; break;
+               default                              : msg+=TextHex(EE::Unsigned(static_cast<Long>(present)), -1, 0, true); break;
             }
             msg+=", please restart application."; 
             OSMsgBox("Error", msg, true);

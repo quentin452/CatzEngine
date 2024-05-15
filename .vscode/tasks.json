@@ -67,7 +67,7 @@
     }
   ]
 }
-*//*
+*/ /*
 {
   "version": "2.0.0",
   "tasks": [
@@ -92,3 +92,31 @@
   ]
 }
 */
+
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build CatzEngineEditor Release DX11 X64",
+      "type": "shell",
+      "command": "powershell.exe",
+      "args": [
+        "-Command",
+        "if (!(Test-Path ${workspaceFolder}/build)) { mkdir ${workspaceFolder}/build };",
+        "cd ${workspaceFolder};",
+        "cmake -S . -B build -DCMAKE_EXPORT_COMPILE_COMMANDS=ON -DCMAKE_CXX_STANDARD=20 -DCMAKE_BUILD_TYPE=Release_DX11 -DCMAKE_GENERATOR_PLATFORM=x64 -DUNICODE=1 -DEE_PRIVATE=1 -DSMAA_HLSL_4_1=1 -DDX11=1;",
+        "cmake --build build --config Release_DX11;",
+        "if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE };"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "silent",
+        "panel": "new"
+      },
+      "problemMatcher": []
+    }
+  ]
+}

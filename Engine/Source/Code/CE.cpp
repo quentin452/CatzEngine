@@ -812,12 +812,13 @@ static void DevlogExport(C Str &name, CodeEditor &ce)
 }
 static void DevlogFilter(CodeEditor &ce)
 {
-   Memt  <Bool> visible;
-   MemPtr<Bool> v;
+   Memt<Bool> visible;
+   Bool initialValue = true; // TODO NOT SURE ON THIS
+MemPtr<Bool> v = MemPtr<Bool>(initialValue);
    if(ce.devlog_filter())
    {
       v.point(visible.setNum(ce.devlog_data.elms()));
-      REPAO(visible)=(ce.devlog_data[i].mode==CodeEditor::DeviceLog::APP);
+      REPAO(visible) = (ce.devlog_data[i].mode == CodeEditor::DeviceLog::APP);
    }
    ce.devlog_list.setData(ce.devlog_data, v, true);
 }

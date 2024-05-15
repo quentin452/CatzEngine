@@ -1,3 +1,4 @@
+#include <H/_/types.h>
 /******************************************************************************
 
    Use 'MemPtr' to operate on any kind of memory container.
@@ -21,6 +22,9 @@
             ..
 
 /******************************************************************************/
+template<typename TYPE, int Memt_size>
+struct MemPtr;
+
 template<typename TYPE, Int Memt_size> struct CMemPtr // Const Memory Container Pointer, 'Memt_size'=size of the 'Memt' helper stack memory
 {
    // get / set
@@ -133,7 +137,18 @@ private:
    template<Int src_size> CMemPtr& operator=(C CMemPtr<TYPE,  src_size> &src           )=delete;
                           CMemPtr& operator=(C CMemPtr<TYPE, Memt_size> &src           )=delete; // this must be specified even though method above should do the same, because without it compiler will try to use the built-in 'operator=' which will just do raw memory copy
 
-   union
+   friend struct Mems  <TYPE>;
+   friend struct Memc  <TYPE>;
+   friend struct Memt  <TYPE, Memt_size>;
+   friend struct Memb  <TYPE>;
+   friend struct Memx  <TYPE>;
+   friend struct Meml  <TYPE>;
+   //friend struct MemPtr<TYPE, Memt_size>;
+   public:
+   MODE _mode;
+   Int _ptr_elms;
+
+    union
    {
     C TYPE                  *_ptr ;
     C Mems<TYPE           > *_mems;
@@ -143,20 +158,10 @@ private:
     C Memx<TYPE           > *_memx;
     C Meml<TYPE           > *_meml;
    };
-   MODE _mode;
-   Int  _ptr_elms;
-
-   friend struct Mems  <TYPE>;
-   friend struct Memc  <TYPE>;
-   friend struct Memt  <TYPE, Memt_size>;
-   friend struct Memb  <TYPE>;
-   friend struct Memx  <TYPE>;
-   friend struct Meml  <TYPE>;
-   friend struct MemPtr<TYPE, Memt_size>;
 };
 /******************************************************************************/
-template<typename TYPE, Int Memt_size> struct MemPtr : CMemPtr<TYPE, Memt_size> // Memory Container Pointer, 'Memt_size'=size of the 'Memt' helper stack memory
-{
+template<typename TYPE, Int Memt_size>
+struct MemPtr : public EE::CMemPtr<TYPE, Memt_size> { // Memory Container Pointer, 'Memt_size'=size of the 'Memt' helper stack memory
    // manage
    MemPtr& clear(); // remove all elements
    MemPtr& del  (); // remove all elements and free helper memory
@@ -274,7 +279,7 @@ template<typename TYPE, Int Memt_size> struct MemPtr : CMemPtr<TYPE, Memt_size> 
                           MemPtr(  MemPtr<TYPE, Memt_size>  &src               ) : CMemPtr<TYPE, Memt_size>(src          ) {}
                           MemPtr(  MemPtr<TYPE, Memt_size> &&src               ) : CMemPtr<TYPE, Memt_size>(src          ) {}
                           MemPtr(C MemPtr<TYPE, Memt_size>  &src               )=delete; // prevent from pointing to const pointers
-
+                          
    Mems<TYPE           >* mems()  {return (T._mode==T.MEMS) ? ConstCast(T._mems) : null;}
  C Mems<TYPE           >* mems()C {return (T._mode==T.MEMS) ?           T._mems  : null;}
    Memc<TYPE           >* memc()  {return (T._mode==T.MEMC) ? ConstCast(T._memc) : null;}
@@ -316,7 +321,8 @@ template<const_mem_addr typename TYPE, Int Memt_elms> struct MemPtrN : MemPtr<TY
                           MemPtrN& operator=(C  MemPtrN<TYPE, Memt_elms> &src           ); // copy elements using assignment operator (this must be specified even though method above should do the same, because without it compiler will try to use the built-in 'operator=' which will just do raw memory copy)
 
    // initialize 'MemPtrN' to point to source
-                          MemPtrN(        null_t=null                                    ) : MemPtr<TYPE, SIZE(TYPE)*Memt_elms>(             ) {}
+                          MemPtrN(null_t=null) : MemPtr<TYPE, SIZE(TYPE)*Memt_elms>(null_t()) {}
+                          //MemPtrN(null_t=null) : MemPtr<TYPE, SIZE(TYPE)*Memt_elms>() {}
                           MemPtrN(        TYPE                        &src               ) : MemPtr<TYPE, SIZE(TYPE)*Memt_elms>(src          ) {}
    template<Int src_elms> MemPtrN(        TYPE                       (&src)    [src_elms]) : MemPtr<TYPE, SIZE(TYPE)*Memt_elms>(src          ) {}
                           MemPtrN(        TYPE                        *src, Int src_elms ) : MemPtr<TYPE, SIZE(TYPE)*Memt_elms>(src, src_elms) {}

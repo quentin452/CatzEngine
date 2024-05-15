@@ -1364,8 +1364,8 @@ struct PakCreator
    MemPtr<DataRangeAbs>  used_file_ranges;
    Memt  <DataRangeAbs>  used_file_ranges_temp;
 
-   PakCreator(Pak &pak, UInt pak_flag, Cipher *src_cipher, COMPRESS_TYPE compress, Int compression_level, Str *error_message, PakProgress *progress, PakInPlace *in_place, MemPtr<DataRangeAbs> used_file_ranges, COMPRESS_MODE (*CompressMode)(C Str &name)) : pak(pak)
-   {
+  PakCreator(Pak &pak, UInt pak_flag, Cipher *src_cipher, COMPRESS_TYPE compress, Int compression_level, Str *error_message, PakProgress *progress, PakInPlace *in_place, MemPtr<DataRangeAbs> used_file_ranges, COMPRESS_MODE (*CompressMode)(C Str &name))
+    : pak(pak), used_file_ranges(nullptr) {
       if(pak_flag&PAK_NO_FILE)pak_flag|=PAK_NO_DATA;  // if we're not creating any file, then we can't save data either
       if(pak_flag&PAK_NO_DATA)compress=COMPRESS_NONE; // if we're not saving data, then disable compression (because it's not needed, however we still may want to process files for calculating hash)
 

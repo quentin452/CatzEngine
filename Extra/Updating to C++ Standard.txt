@@ -1,39 +1,8 @@
 /******************************************************************************/
-Replace all C++17
-	CE Editor C++.cpp
+Replace all: c++17
+Replace all: stdcpp17
+Replace all: <standard>17</standard>
 
-	WEB
-	Engine\Engine.vcxproj
-	Editor Data\Code\Windows\Project.vcxproj
-
-	MAC
-	Engine\Engine.xcodeproj\project.pbxproj
-	Project\Project.xcodeproj\project.pbxproj
-	Editor Data\Code\Apple\project.pbxproj
-
-	LINUX
-	Engine\Linux\nbproject\configurations.xml
-	Engine\Linux\nbproject\Makefile-Debug.mk
-	Engine\Linux\nbproject\Makefile-Release.mk
-	Project\Linux\nbproject\configurations.xml
-	Project\Linux\nbproject\Makefile-Debug.mk
-	Project\Linux\nbproject\Makefile-Release.mk
-	Editor Data\Code\Linux\nbproject\configurations.xml
-	Editor Data\Code\Linux\nbproject\Makefile-Debug.mk
-	Editor Data\Code\Linux\nbproject\Makefile-Release.mk
-
-	ANDROID
-	Engine\Android\jni\Android.mk
-	Editor Data\Code\Android\Android.mk
-
-Replace all stdcpp17
-	Engine\Engine.vcxproj
-	Project\Project.vcxproj
-	Editor Data\Code\Windows\Project.vcxproj
-
-Replace all <standard>17</standard>
-	Engine\Linux\nbproject\configurations.xml
-	Project\Linux\nbproject\configurations.xml
-	Editor Data\Code\Linux\nbproject\configurations.xml
+by using ctrl + shift + f in visual studio code and replacing all occurrences
 /******************************************************************************/
 Re-export Editor to Windows, Mac, Linux projects

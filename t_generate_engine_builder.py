@@ -1,12 +1,5 @@
 import os
 
-
-if 'python' in os.environ:
-    python_path = os.environ['python']
-else:
-    python_path = None
-    print("python is not defined in environment variable (CANNOT BUILD)")
-
 if 'MSBuild' in os.environ:
     msbuild_path = os.environ['MSBuild']
 else:
@@ -60,5 +53,3 @@ if not os.path.exists("Titan.sln"):
 # Exécute msbuild
 msbuild_command = f'"{msbuild_path}" /p:Configuration={configuration} /p:Platform={architecture} /verbosity:normal Titan.sln'
 os.system(msbuild_command)
-
-input("Press Enter to continue...")

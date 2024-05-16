@@ -1033,11 +1033,11 @@ void CompileEngineWindows64GL() {
             CopyEngineWindows64GL);
 }
 void CompileEngineWindows64DX9() {
-  CompileVS(EnginePath + VSEngineProject, "Release DX9", "x64",
+  CompileVS(EnginePath + VSEngineProject, "ReleaseDX9", "x64",
             CopyEngineWindows64DX9);
 }
 void CompileEngineWindows32DX9() {
-  CompileVS(EnginePath + VSEngineProject, "Release DX9", "x86",
+  CompileVS(EnginePath + VSEngineProject, "ReleaseDX9", "x86",
             CopyEngineWindows32DX9);
 }
 void CompileEngineWindows64DX11() {
@@ -1130,7 +1130,7 @@ void CompileEditorWindows64DX11() {
             CopyEditorWindows64DX11, DelEditorExe);
 }
 void CompileEditorWindows32DX9() {
-  CompileVS(EditorSourcePath + VSEditorProject, "Release DX9", "x86",
+  CompileVS(EditorSourcePath + VSEditorProject, "ReleaseDX9", "x86",
             CopyEditorWindows32DX9, DelEditorExe);
 }
 

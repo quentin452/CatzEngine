@@ -4540,9 +4540,9 @@ void CodeEditor::build(BUILD_MODE mode) {
 
       Str platform =
           ((build_exe_type == EXE_APK || build_exe_type == EXE_AAB)
-               ? "5) Android"
-           : (build_exe_type == EXE_NS)  ? "4) Nintendo Switch"
-           : (build_exe_type == EXE_WEB) ? "3) Web"
+               ? "Android"
+           : (build_exe_type == EXE_NS)  ? "NintendoSwitch"
+           : (build_exe_type == EXE_WEB) ? "Web"
                                          : /*config_32_bit ? "x86" :*/ "x64");
 
       if (build_exe_type == EXE_WEB) // currently WEB compilation is available

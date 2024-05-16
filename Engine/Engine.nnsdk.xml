@@ -4,7 +4,7 @@
   <ProjectSetting>
     <ConfigurationSettings>
       <ConfigurationSetting>
-        <Name>DebugDX11|Android-arm64-v8a</Name>
+        <Name>Debug DX11|Android-arm64-v8a</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -14,7 +14,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>DebugDX11|ARM</Name>
+        <Name>Debug DX11|ARM</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -24,7 +24,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>DebugDX11|Emscripten</Name>
+        <Name>Debug DX11|Emscripten</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -34,7 +34,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>DebugDX11|NX64</Name>
+        <Name>Debug DX11|NX64</Name>
         <IsSdkEnabled>true</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -44,7 +44,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>DebugDX11|Win32</Name>
+        <Name>Debug DX11|Win32</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -54,7 +54,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>DebugDX11|x64</Name>
+        <Name>Debug DX11|x64</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -64,7 +64,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>DebugGL|Android-arm64-v8a</Name>
+        <Name>Debug GL|Android-arm64-v8a</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -74,7 +74,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>DebugGL|ARM</Name>
+        <Name>Debug GL|ARM</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -84,7 +84,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>DebugGL|Emscripten</Name>
+        <Name>Debug GL|Emscripten</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -94,7 +94,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>DebugGL|NX64</Name>
+        <Name>Debug GL|NX64</Name>
         <IsSdkEnabled>true</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -104,7 +104,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>DebugGL|Win32</Name>
+        <Name>Debug GL|Win32</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -114,7 +114,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>DebugGL|x64</Name>
+        <Name>Debug GL|x64</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -124,7 +124,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>DebugUniversalDX11|Android-arm64-v8a</Name>
+        <Name>Debug Universal DX11|Android-arm64-v8a</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -134,7 +134,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>DebugUniversalDX11|ARM</Name>
+        <Name>Debug Universal DX11|ARM</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -144,7 +144,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>DebugUniversalDX11|Emscripten</Name>
+        <Name>Debug Universal DX11|Emscripten</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -154,7 +154,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>DebugUniversalDX11|NX64</Name>
+        <Name>Debug Universal DX11|NX64</Name>
         <IsSdkEnabled>true</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -164,7 +164,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>DebugUniversalDX11|Win32</Name>
+        <Name>Debug Universal DX11|Win32</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -174,7 +174,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>DebugUniversalDX11|x64</Name>
+        <Name>Debug Universal DX11|x64</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -184,7 +184,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>ReleaseDX11|Android-arm64-v8a</Name>
+        <Name>Release DX11|Android-arm64-v8a</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -194,7 +194,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>ReleaseDX11|ARM</Name>
+        <Name>Release DX11|ARM</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -204,7 +204,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>ReleaseDX11|Emscripten</Name>
+        <Name>Release DX11|Emscripten</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -214,67 +214,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>ReleaseDX11|NX64</Name>
-        <IsSdkEnabled>true</IsSdkEnabled>
-        <SdkRoot>
-          <Kind>DirectProperty</Kind>
-          <Value>$(NINTENDO_SDK_ROOT)</Value>
-        </SdkRoot>
-        <Spec>NX</Spec>
-        <BuildType>Release</BuildType>
-      </ConfigurationSetting>
-      <ConfigurationSetting>
-        <Name>ReleaseDX11|Win32</Name>
-        <IsSdkEnabled>false</IsSdkEnabled>
-        <SdkRoot>
-          <Kind>DirectProperty</Kind>
-          <Value />
-        </SdkRoot>
-        <Spec>Generic</Spec>
-        <BuildType>Develop</BuildType>
-      </ConfigurationSetting>
-      <ConfigurationSetting>
-        <Name>ReleaseDX11|x64</Name>
-        <IsSdkEnabled>false</IsSdkEnabled>
-        <SdkRoot>
-          <Kind>DirectProperty</Kind>
-          <Value />
-        </SdkRoot>
-        <Spec>Generic</Spec>
-        <BuildType>Develop</BuildType>
-      </ConfigurationSetting>
-      <ConfigurationSetting>
-        <Name>ReleaseGL|Android-arm64-v8a</Name>
-        <IsSdkEnabled>false</IsSdkEnabled>
-        <SdkRoot>
-          <Kind>DirectProperty</Kind>
-          <Value />
-        </SdkRoot>
-        <Spec>Generic</Spec>
-        <BuildType>Develop</BuildType>
-      </ConfigurationSetting>
-      <ConfigurationSetting>
-        <Name>ReleaseGL|ARM</Name>
-        <IsSdkEnabled>false</IsSdkEnabled>
-        <SdkRoot>
-          <Kind>DirectProperty</Kind>
-          <Value />
-        </SdkRoot>
-        <Spec>Generic</Spec>
-        <BuildType>Develop</BuildType>
-      </ConfigurationSetting>
-      <ConfigurationSetting>
-        <Name>ReleaseGL|Emscripten</Name>
-        <IsSdkEnabled>false</IsSdkEnabled>
-        <SdkRoot>
-          <Kind>DirectProperty</Kind>
-          <Value />
-        </SdkRoot>
-        <Spec>Generic</Spec>
-        <BuildType>Develop</BuildType>
-      </ConfigurationSetting>
-      <ConfigurationSetting>
-        <Name>ReleaseGL|NX64</Name>
+        <Name>Release DX11|NX64</Name>
         <IsSdkEnabled>true</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -284,7 +224,7 @@
         <BuildType>Release</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>ReleaseGL|Win32</Name>
+        <Name>Release DX11|Win32</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -294,7 +234,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>ReleaseGL|x64</Name>
+        <Name>Release DX11|x64</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -304,7 +244,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>ReleaseUniversalDX11|Android-arm64-v8a</Name>
+        <Name>Release GL|Android-arm64-v8a</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -314,7 +254,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>ReleaseUniversalDX11|ARM</Name>
+        <Name>Release GL|ARM</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -324,7 +264,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>ReleaseUniversalDX11|Emscripten</Name>
+        <Name>Release GL|Emscripten</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -334,7 +274,7 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>ReleaseUniversalDX11|NX64</Name>
+        <Name>Release GL|NX64</Name>
         <IsSdkEnabled>true</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -344,7 +284,7 @@
         <BuildType>Release</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>ReleaseUniversalDX11|Win32</Name>
+        <Name>Release GL|Win32</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -354,7 +294,67 @@
         <BuildType>Develop</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>ReleaseUniversalDX11|x64</Name>
+        <Name>Release GL|x64</Name>
+        <IsSdkEnabled>false</IsSdkEnabled>
+        <SdkRoot>
+          <Kind>DirectProperty</Kind>
+          <Value />
+        </SdkRoot>
+        <Spec>Generic</Spec>
+        <BuildType>Develop</BuildType>
+      </ConfigurationSetting>
+      <ConfigurationSetting>
+        <Name>Release Universal DX11|Android-arm64-v8a</Name>
+        <IsSdkEnabled>false</IsSdkEnabled>
+        <SdkRoot>
+          <Kind>DirectProperty</Kind>
+          <Value />
+        </SdkRoot>
+        <Spec>Generic</Spec>
+        <BuildType>Develop</BuildType>
+      </ConfigurationSetting>
+      <ConfigurationSetting>
+        <Name>Release Universal DX11|ARM</Name>
+        <IsSdkEnabled>false</IsSdkEnabled>
+        <SdkRoot>
+          <Kind>DirectProperty</Kind>
+          <Value />
+        </SdkRoot>
+        <Spec>Generic</Spec>
+        <BuildType>Develop</BuildType>
+      </ConfigurationSetting>
+      <ConfigurationSetting>
+        <Name>Release Universal DX11|Emscripten</Name>
+        <IsSdkEnabled>false</IsSdkEnabled>
+        <SdkRoot>
+          <Kind>DirectProperty</Kind>
+          <Value />
+        </SdkRoot>
+        <Spec>Generic</Spec>
+        <BuildType>Develop</BuildType>
+      </ConfigurationSetting>
+      <ConfigurationSetting>
+        <Name>Release Universal DX11|NX64</Name>
+        <IsSdkEnabled>true</IsSdkEnabled>
+        <SdkRoot>
+          <Kind>DirectProperty</Kind>
+          <Value>$(NINTENDO_SDK_ROOT)</Value>
+        </SdkRoot>
+        <Spec>NX</Spec>
+        <BuildType>Release</BuildType>
+      </ConfigurationSetting>
+      <ConfigurationSetting>
+        <Name>Release Universal DX11|Win32</Name>
+        <IsSdkEnabled>false</IsSdkEnabled>
+        <SdkRoot>
+          <Kind>DirectProperty</Kind>
+          <Value />
+        </SdkRoot>
+        <Spec>Generic</Spec>
+        <BuildType>Develop</BuildType>
+      </ConfigurationSetting>
+      <ConfigurationSetting>
+        <Name>Release Universal DX11|x64</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>

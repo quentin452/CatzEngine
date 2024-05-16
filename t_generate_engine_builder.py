@@ -1,4 +1,5 @@
 import os
+import subprocess
 
 if 'MSBuild' in os.environ:
     msbuild_path = os.environ['MSBuild']
@@ -7,21 +8,21 @@ else:
     print("MSBuild is not defined in environment variable (CANNOT BUILD)")
 
 architectures = {
-    1: "x64",
-    2: "x86",
-    3: "ARM",
-    4: "Web",
-    5: "NintendoSwitch",
-    6: "Android"
+    1: "1) 64 bit",
+    2: "1) 32 bit",
+    3: "3) ARM",
+    4: "4) Web",
+    5: "5) Nintendo Switch",
+    6: "6) Android"
 }
 
 configurations = {
-    1: "DebugDX11",
-    2: "DebugGL",
-    3: "DebugUniversalDX11",
-    4: "ReleaseDX11",
-    5: "ReleaseGL",
-    6: "ReleaseUniversalDX11"
+    1: "Debug  DX11",
+    2: "Debug GL",
+    3: "Debug Universal DX11",
+    4: "Release DX11",
+    5: "Release GL",
+    6: "Release Universal DX11"
 }
 
 print("Enter The Architecture :")
@@ -51,5 +52,15 @@ if not os.path.exists("Titan.sln"):
     exit(1)
 
 # Exécute msbuild
-msbuild_command = f'"{msbuild_path}" /p:Configuration={configuration} /p:Platform={architecture} /verbosity:normal Titan.sln'
-os.system(msbuild_command)
+msbuild_command = [
+    msbuild_path,
+    f'/p:Configuration={configuration}',
+    f'/p:Platform={architecture}',
+    '/verbosity:normal',
+    'Titan.sln'
+]
+try:
+    result = subprocess.run(msbuild_command, check=True)
+    print("Build succeeded.")
+except subprocess.CalledProcessError as e:
+    print(f"Build failed: {e}")

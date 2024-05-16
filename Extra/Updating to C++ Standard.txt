@@ -4,5 +4,6 @@ Replace all: stdcpp17
 Replace all: <standard>17</standard>
 
 by using ctrl + shift + f in visual studio code and replacing all occurrences
+(probably unsafe)
 /******************************************************************************/
 Re-export Editor to Windows, Mac, Linux projects

@@ -15,7 +15,6 @@
 *.pri
 *.recipe
 *.tlog
-.*
 ipch/
 asm/
 
@@ -47,7 +46,6 @@ Desktop.ini
 .DS_Store
 
 # Esenthel
-/*
 !/Data
 !/Editor
 !/Editor Data
@@ -91,3 +89,17 @@ Editor Source/_Build_/Titan Editor/Titan Editor
 !.vscode
 !t_generate_engine_builder.py
 Engine Builder
+/build
+t_copy_headers.py
+t_create_code_editor_dat.py
+t_create_editor_pak.py
+t_create_engine_pak.py
+t_generate_game_engine.py
+/.vs/Titan/FileContentIndex
+/.vs/Titan/v17
+build_log.txt
+/CMake
+Editor Data/Code/Windows/.vs/Project/FileContentIndex/1c8d25d1-8816-4768-80c1-50f7db8e5149.vsidx
+Editor Data/Code/Windows/.vs/Project/v17/DocumentLayout.json
+Engine/.vs/Engine/v17/DocumentLayout.json
+Engine/.vs/Engine/v17/fileList.bin

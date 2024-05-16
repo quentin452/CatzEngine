@@ -89,5 +89,5 @@ Editor Source/_Build_/Titan Editor/Titan Editor
 
 !.gitignore
 !.vscode
-!!tests
+!t_generate_engine_builder.py
 Engine Builder

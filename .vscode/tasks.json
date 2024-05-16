@@ -67,28 +67,22 @@
     }
   ]
 }
-*//*
+*/
 {
   "version": "2.0.0",
   "tasks": [
-      {
-          "label": "WINDOWS Generate Titan SLN",
-          "type": "shell",
-          "command": "Titan.bat",
-          "group": {
-              "kind": "build",
-              "isDefault": true
-          }
+    {
+      "label": "WINDOWS Generate Engine Build",
+      "type": "shell",
+      "command": "python ${workspaceFolder}/t_generate_engine_builder.py",
+      "group": {
+        "kind": "build",
+        "isDefault": false
       },
-      {
-        "label": "LINUX Generate Titan SLN",
-        "type": "shell",
-        "command": "Titan.sh",
-        "group": {
-            "kind": "build",
-            "isDefault": true
-        }
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
     }
   ]
 }
-*/

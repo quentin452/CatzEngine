@@ -4,7 +4,7 @@
   <ProjectSetting>
     <ConfigurationSettings>
       <ConfigurationSetting>
-        <Name>Debug DX11|ARM</Name>
+        <Name>DebugDX11|ARM</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -14,7 +14,7 @@
         <BuildType>Release</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>Debug DX11|Emscripten</Name>
+        <Name>DebugDX11|Emscripten</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -24,7 +24,7 @@
         <BuildType>Release</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>Debug DX11|NX64</Name>
+        <Name>DebugDX11|NX64</Name>
         <IsSdkEnabled>true</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -34,7 +34,7 @@
         <BuildType>Release</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>Debug DX11|x64</Name>
+        <Name>DebugDX11|x64</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -44,7 +44,7 @@
         <BuildType>Release</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>Debug Universal DX11|ARM</Name>
+        <Name>DebugUniversalDX11|ARM</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -54,7 +54,7 @@
         <BuildType>Release</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>Debug Universal DX11|Emscripten</Name>
+        <Name>DebugUniversalDX11|Emscripten</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -64,7 +64,7 @@
         <BuildType>Release</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>Debug Universal DX11|NX64</Name>
+        <Name>DebugUniversalDX11|NX64</Name>
         <IsSdkEnabled>true</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -74,7 +74,7 @@
         <BuildType>Release</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>Debug Universal DX11|x64</Name>
+        <Name>DebugUniversalDX11|x64</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -84,7 +84,7 @@
         <BuildType>Release</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>Release DX11|ARM</Name>
+        <Name>ReleaseDX11|ARM</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -94,7 +94,7 @@
         <BuildType>Release</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>Release DX11|Emscripten</Name>
+        <Name>ReleaseDX11|Emscripten</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -104,7 +104,7 @@
         <BuildType>Release</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>Release DX11|NX64</Name>
+        <Name>ReleaseDX11|NX64</Name>
         <IsSdkEnabled>true</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -114,7 +114,7 @@
         <BuildType>Release</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>Release DX11|x64</Name>
+        <Name>ReleaseDX11|x64</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -124,7 +124,7 @@
         <BuildType>Release</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>Release Universal DX11|ARM</Name>
+        <Name>ReleaseUniversalDX11|ARM</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -134,7 +134,7 @@
         <BuildType>Release</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>Release Universal DX11|Emscripten</Name>
+        <Name>ReleaseUniversalDX11|Emscripten</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -144,7 +144,7 @@
         <BuildType>Release</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>Release Universal DX11|NX64</Name>
+        <Name>ReleaseUniversalDX11|NX64</Name>
         <IsSdkEnabled>true</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>
@@ -154,7 +154,7 @@
         <BuildType>Release</BuildType>
       </ConfigurationSetting>
       <ConfigurationSetting>
-        <Name>Release Universal DX11|x64</Name>
+        <Name>ReleaseUniversalDX11|x64</Name>
         <IsSdkEnabled>false</IsSdkEnabled>
         <SdkRoot>
           <Kind>DirectProperty</Kind>

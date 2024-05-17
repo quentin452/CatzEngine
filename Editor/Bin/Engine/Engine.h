@@ -140,7 +140,7 @@ namespace EE // Esenthel Engine namespace
 {
    /******************************************************************************/
    #if EE_PRIVATE
-      #include "../Source/Shaders/!Header CPU.h"
+      #include "../../../Engine/Source/Shaders/!Header CPU.h"
    #endif
    #pragma pack(push, 4)
    #include "_/defines.h"

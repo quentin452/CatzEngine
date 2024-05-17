@@ -60,7 +60,6 @@ Lock
 
 # Editor
 /Editor/*
-/Editor/Bin/*
 /Editor/Bin/Android/*.a
 /Editor/Projects/*
 !/Editor/Assets
@@ -103,3 +102,14 @@ Editor Data/Code/Windows/.vs/Project/FileContentIndex/1c8d25d1-8816-4768-80c1-50
 Editor Data/Code/Windows/.vs/Project/v17/DocumentLayout.json
 Engine/.vs/Engine/v17/DocumentLayout.json
 Engine/.vs/Engine/v17/fileList.bin
+Editor/Bin/Code Editor.dat
+Editor/Bin/Editor.pak
+Editor/Bin/Engine.pak
+/Editor/Bin/Update
+Editor/Bin/File Browser.txt
+Editor/Bin/Mobile/Engine.pak
+Editor/Bin/Universal/Engine.pak
+Editor/Bin/Uploader.txt
+Editor/Bin/Web/Engine.pak
+Editor/Bin/EngineUniversal64DX11.lib
+Editor/Bin/Engine64DX11.lib

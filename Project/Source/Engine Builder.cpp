@@ -285,141 +285,6 @@ void CopyOutput(Ptr) {Str s; FREPA(data){s+=data[i]; s+='\n';} ClipSet(s);}
 void Clear(Ptr) {list.setData(data.clear());}
 void DoSelected(Ptr) {FREPA(Tasks)if(Tasks[i].cb())Tasks[i].queue();}
 void BuildRun(Build &build, Ptr user, Int thread_index) {build.run();}
-/******************************************************************************/
-CChar8 *separator="/******************************************************************************/";
-CChar8 *copyright="/******************************************************************************\n"
-                  " * Copyright (c) Grzegorz Slazinski. All Rights Reserved.                     *\n"
-        " * " ENGINE_NAME " Engine (https://esenthel.com) header file.                           *\n";
-/******************************************************************************/
-FILE_LIST_MODE Header(C FileFind &ff, Ptr)
-{
-   if(ff.type==FSTD_FILE)if(ff.name!="Engine Config.h")
-   {
-      Str name=ff.pathName();
-
-      // read from source file
-      FileText f; f.read(name);
-      Meml<Str> src; for(; !f.end(); )src.New()=f.fullLine();
-
-      // remove empty line followed by "#ifdef"
-      //SMFREP(src)if(_next_ && !SkipWhiteChars(src[i]).is() && Contains(src[_next_], "#ifdef"))src.remove(i);
-
-      // hide EE_PRIVATE sections
-      enum STACK_TYPE
-      {
-         STACK_NONE       ,
-         STACK_PRIVATE    ,
-         STACK_NOT_PRIVATE,
-      };
-      Memb<STACK_TYPE> stack  ; // #if stack
-      Int              level=0; // EE_PRIVATE depth level
-      for(MemlNode *node=src.first(); node;)
-      {
-         MemlNode *next=node->next();
-         
-       C Str &s    =src[node];
-         Str  first=SkipWhiteChars(s);
-         if(first.first()=='#') // if preprocessor command
-         {
-            if(Starts(first, "#if")) // #if #ifdef #ifndef
-            {
-               if(Starts(first, "#if EE_PRIVATE"))
-               {
-                  stack.add(STACK_PRIVATE);
-                  level++;
-                  src.remove(node);
-               }else
-               if(Starts(first, "#if !EE_PRIVATE"))
-               {
-                  stack.add(STACK_NOT_PRIVATE);
-                  src.remove(node);
-               }else
-               {
-                  stack.add(STACK_NONE);
-                  if(level)src.remove(node);
-               }
-            }else
-            if(Starts(first, "#el")) // #else #elif
-            {
-               if(stack.elms() && stack.last()==STACK_PRIVATE)
-               {
-                  stack.last()=STACK_NOT_PRIVATE; // #if !EE_PRIVATE
-                  level--;
-                  src.remove(node);
-               }else
-               if(stack.elms() && stack.last()==STACK_NOT_PRIVATE)
-               {
-                  stack.last()=STACK_PRIVATE;
-                  level++;
-                  src.remove(node);
-               }else
-               {
-                  if(level)src.remove(node);
-               }
-            }else
-            if(Starts(first, "#endif"))
-            {
-               if(stack.elms())
-               {
-                  if(stack.last() || level)src.remove(node);
-                  if(stack.last()==STACK_PRIVATE)
-                  {
-                     level--;
-                     if(!level)
-                     {
-                        if(next->prev())
-                        {
-                           Str a=src[next->prev()],
-                               b=src[next        ];
-
-                           if(!SkipWhiteChars(a).is() && Contains(b, separator))src.remove(next->prev());else // remove empty line followed  by /**/
-                           if(!SkipWhiteChars(b).is() && Contains(a, separator))                              // remove empty line preceeded by /**/
-                           {
-                              MemlNode *temp=next->next(); src.remove(next); next=temp;
-                           }
-                        }
-                     }
-                  }
-                  stack.removeLast();
-               }else
-               {
-                  Exit(S+"Invalid #endif at \""+name+'"');
-               }
-            }else
-            {
-               if(level)src.remove(node);
-            }
-         }else
-         {
-            if(level)src.remove(node);
-         }
-
-         node=next;
-      }
-
-      // remove double lines /**/
-      SMFREP(src)if(_next_ && Contains(src[i], separator) && Equal(src[i], src[_next_]))src.remove(i);
-
-      // remove double empty lines
-      SMFREP(src)if(_next_ && !SkipWhiteChars(src[i]).is() && !SkipWhiteChars(src[_next_]).is())src.remove(i);
-
-      // remove empty line followed by "}"
-      SMFREP(src)if(_next_ && !SkipWhiteChars(src[i]).is() && Starts(SkipWhiteChars(src[_next_]), "}"))src.remove(i);
-
-      // remove empty line preceeded by "}"
-      SMFREP(src)if(!SkipWhiteChars(src[i]).is() && i->prev() && Starts(SkipWhiteChars(src[i->prev()]), "{"))src.remove(i);
-
-      // write to destination file
-      Str dest=EditorPath+"Bin/Engine/"+SkipStartPath(name, EnginePath+"H"); FCreateDirs(GetPath(dest));
-                f.write  (dest);
-                f.putText(copyright);
-      MFREP(src)f.putLine(src[i]);
-                f.del    ();
-      FTimeUTC(dest, ff.modify_time_utc);
-   }
-   return FILE_LIST_CONTINUE;
-}
-/******************************************************************************/
 static void Copy(C Str &src, C Str &dest, FILE_OVERWRITE_MODE overwrite=FILE_OVERWRITE_DIFFERENT)
 {
    if(!FCopy(src, dest, overwrite))
@@ -600,13 +465,6 @@ void CompileEngineAndroid()
    }
 }
 void AndroidLibs() {build_threads.queue(build_requests.New().set(MakeAndroidLibs), BuildRun);}
-/******************************************************************************/
-void UpdateHeaders()
-{
-   // process engine headers
-   FDelDirs(EditorPath+"Bin/Engine"); // delete
-   FList(EnginePath+"H", Header); // convert
-}
 /******************************************************************************/
 // ENGINE PAK
 /******************************************************************************/
@@ -849,7 +707,6 @@ void              LinuxLibs() {build_threads.queue(build_requests.New().set(Make
 
 void  EnginePak() {build_threads.queue(build_requests.New().set(CreateEnginePak), BuildRun);}
 void  EditorPak() {build_threads.queue(build_requests.New().set(CreateEditorPak), BuildRun);}
-void    Headers() {build_threads.queue(build_requests.New().set(UpdateHeaders  ), BuildRun);}
 void CodeEditorData()
 { // must be done on the main thread
    CE.create    (null, true); // don't use GUI because we don't need it, also it would require "Editor.pak" which may not be available yet
@@ -939,7 +796,6 @@ TaskBase TaskBases[]=
    {"Compile Web"               , "Compile the Engine for Web"                                                         , CompileEngineWeb                , WEB_DEFAULT},
    {"Make Web Libs"             , "Make the Engine Web Lib from the compilation result to the Editor Bin folder"       , WebLibs                         , WEB_DEFAULT},
 #endif
-   {"Copy Headers"              , "Copy cleaned Engine Headers from the Engine folder to the Editor folder.\nCleaning removes all 'EE_PRIVATE' sections from the headers."                                                                    , Headers       , true },
    {"Create \"Code Editor.dat\"", "Create \"Code Editor.dat\" file needed for Code Editor in the Engine's Editor.\nThis data is generated from the Engine headers in the Editor Bin folder, which are generated in the \"Copy Headers\" step.", CodeEditorData, true },
    {"Create \"Engine.pak\""     , "Create \"Engine.pak\" file from the \"Data\" folder into the Editor Bin folder"       , EnginePak                , true },
    {"Create \"Editor.pak\""     , "Create \"Editor.pak\" file from the \"Editor Data\" folder into the Editor Bin folder", EditorPak                , true },

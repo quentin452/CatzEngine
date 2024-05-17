@@ -672,7 +672,6 @@ static CChar8 *ExcludeHeaders[]=
    "Aggregate.h",
    "Android.h",
    "String Borrowed.h",
-   "Engine Config.h",
    "MP4.h",
 };
 /*static CChar8 *ReplaceHeaders[][2]=

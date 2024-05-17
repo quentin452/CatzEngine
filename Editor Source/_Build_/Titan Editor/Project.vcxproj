@@ -1532,7 +1532,6 @@
 	<ImportGroup Label="ExtensionTargets"/>
 	<ItemGroup>
 		<ClCompile Include="Source\Auto.cpp"/>
-		<ClCompile Include="Source\Editor Update.cpp"/>
 		<ClCompile Include="Source\Editors\Animation.cpp"/>
 		<ClCompile Include="Source\Editors\Code@0.cpp"/>
 		<ClCompile Include="Source\Editors\Enum@0.cpp"/>

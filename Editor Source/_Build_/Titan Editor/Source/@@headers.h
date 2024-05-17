@@ -978,7 +978,6 @@ ASSERT(OBJ_ACCESS_CUSTOM==0 && OBJ_ACCESS_TERRAIN==1 && OBJ_ACCESS_GRASS==2 && O
 // CPP
 /******************************************************************************/
 #include "Auto.h"
-#include "Editor Update.h"
 #include "Editors/Code@0.h"
 #include "Editors/Mini Map.h"
 #include "Editors/Object/Mesh.h"

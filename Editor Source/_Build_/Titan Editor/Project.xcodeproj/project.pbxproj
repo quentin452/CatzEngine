@@ -237,8 +237,6 @@
 		00000000EEC0C0A000000149 /* iOS: Source\Editors\Code@0.cpp */ = {isa = PBXBuildFile; fileRef = 00000000EEC0C0A000000147 /* Source\Editors\Code@0.cpp */; };
 		00000000EEC0C0A00000014B /* Mac: Source\Editors\Animation.cpp */ = {isa = PBXBuildFile; fileRef = 00000000EEC0C0A00000014A /* Source\Editors\Animation.cpp */; };
 		00000000EEC0C0A00000014C /* iOS: Source\Editors\Animation.cpp */ = {isa = PBXBuildFile; fileRef = 00000000EEC0C0A00000014A /* Source\Editors\Animation.cpp */; };
-		00000000EEC0C0A00000014E /* Mac: Source\Editor Update.cpp */ = {isa = PBXBuildFile; fileRef = 00000000EEC0C0A00000014D /* Source\Editor Update.cpp */; };
-		00000000EEC0C0A00000014F /* iOS: Source\Editor Update.cpp */ = {isa = PBXBuildFile; fileRef = 00000000EEC0C0A00000014D /* Source\Editor Update.cpp */; };
 		00000000EEC0C0A000000151 /* Mac: Source\Auto.cpp */ = {isa = PBXBuildFile; fileRef = 00000000EEC0C0A000000150 /* Source\Auto.cpp */; };
 		00000000EEC0C0A000000152 /* iOS: Source\Auto.cpp */ = {isa = PBXBuildFile; fileRef = 00000000EEC0C0A000000150 /* Source\Auto.cpp */; };
 		00000000EEC0C0A000000154 /* Mac: Assets/EngineEmbed.pak */ = {isa = PBXBuildFile; fileRef = 00000000EEC0C0A000000153 /* Assets/EngineEmbed.pak */; };
@@ -383,7 +381,6 @@
 		00000000EEC0C0A000000144 /* Source\Editors\Enum@0.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "Enum@0.cpp"; path = "Source/Editors/Enum@0.cpp"; sourceTree = "<group>"; };
 		00000000EEC0C0A000000147 /* Source\Editors\Code@0.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "Code@0.cpp"; path = "Source/Editors/Code@0.cpp"; sourceTree = "<group>"; };
 		00000000EEC0C0A00000014A /* Source\Editors\Animation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "Animation.cpp"; path = "Source/Editors/Animation.cpp"; sourceTree = "<group>"; };
-		00000000EEC0C0A00000014D /* Source\Editor Update.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "Editor Update.cpp"; path = "Source/Editor Update.cpp"; sourceTree = "<group>"; };
 		00000000EEC0C0A000000150 /* Source\Auto.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "Auto.cpp"; path = "Source/Auto.cpp"; sourceTree = "<group>"; };
 		00000000EEC0C0A000000153 /* Assets/EngineEmbed.pak */ = {isa = PBXFileReference; lastKnownFileType = file; name = "EngineEmbed.pak"; path = "Assets/EngineEmbed.pak"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -479,7 +476,6 @@
 				00000000EEC0C0A00000015C /* Shared */,
 				00000000EEC0C0A00000015E /* Store */,
 				00000000EEC0C0A000000150 /* Auto.cpp */,
-				00000000EEC0C0A00000014D /* Editor Update.cpp */,
 				00000000EEC0C0A0000000B7 /* Elm@0.cpp */,
 				00000000EEC0C0A00000006C /* Import.cpp */,
 				00000000EEC0C0A000000069 /* Main.cpp */,
@@ -876,7 +872,6 @@
 				00000000EEC0C0A000000145 /* Source\Editors\Enum@0.cpp */,
 				00000000EEC0C0A000000148 /* Source\Editors\Code@0.cpp */,
 				00000000EEC0C0A00000014B /* Source\Editors\Animation.cpp */,
-				00000000EEC0C0A00000014E /* Source\Editor Update.cpp */,
 				00000000EEC0C0A000000151 /* Source\Auto.cpp */,
 /* ESENTHEL MAC SOURCE */
 			);
@@ -997,7 +992,6 @@
 				00000000EEC0C0A000000146 /* Source\Editors\Enum@0.cpp */,
 				00000000EEC0C0A000000149 /* Source\Editors\Code@0.cpp */,
 				00000000EEC0C0A00000014C /* Source\Editors\Animation.cpp */,
-				00000000EEC0C0A00000014F /* Source\Editor Update.cpp */,
 				00000000EEC0C0A000000152 /* Source\Auto.cpp */,
 /* ESENTHEL IOS SOURCE */
 			);

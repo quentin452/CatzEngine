@@ -351,9 +351,6 @@
 		<ClCompile Include="Source\Auto.cpp">
 			<Filter>Source</Filter>
 		</ClCompile>
-		<ClCompile Include="Source\Editor Update.cpp">
-			<Filter>Source</Filter>
-		</ClCompile>
 		<ClCompile Include="Source\Elm@0.cpp">
 			<Filter>Source</Filter>
 		</ClCompile>

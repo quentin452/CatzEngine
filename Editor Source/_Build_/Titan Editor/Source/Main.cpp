@@ -30,7 +30,6 @@ void ScreenChanged(flt old_width, flt old_height)
     CodeEdit.resize();
     CopyElms.resize();
   GameScreenChanged();
-      ResizeInstall();
      SetKbExclusive(); // call because it depends on fullscreen mode
 }
 void SetShader()
@@ -106,94 +105,64 @@ Environment& CurrentEnvironment() {if(Environment *env=EnvEdit.cur())return *env
 /******************************************************************************/
 void InitPre()
 {
-   if(App.cmd_line.elms()) // if given command line param
-      if(GetExt(App.cmd_line[0])==ProjectPackageExt) // param is Project Package
-   { // check if there's already another instance of the Editor running
-      Memc<uint> proc; ProcList(proc);
-      REPA(proc)if(proc[i]!=App.processID())
-      {
-         Str proc_name=GetBase(ProcName(proc[i]));
-         if( proc_name==S+APP_NAME+".exe")
-            if(SysWindow window=ProcWindow(proc[i]))
-         { // send command to that instance, and exit this one
-            File f; f.writeMem().putStr(App.cmd_line[0]).pos(0);
-            Memt<byte> temp; temp.setNum(f.left()); f.get(temp.data(), temp.elms());
-            window.sendData(temp.data(), temp.elms());
-            App.flag=APP_EXIT_IMMEDIATELY;
-            return;
-         }
-      }
-   }
+    ASSERT(ELM_NUM == (int)Edit::ELM_NUM); // they must match exactly
+    Str path = GetPath(App.exe()).tailSlash(true);
 
-   ASSERT(ELM_NUM==(int)Edit::ELM_NUM); // they must match exactly
-   Str path=GetPath(App.exe()).tailSlash(true);
-   InstallerMode=(STEAM ? false : !(FExistSystem(path+"Bin/Code Editor.dat") && FExistSystem(path+"Bin/Engine.pak") && FExistSystem(path+"Bin/Editor.pak") && FExistSystem(path+"Bin/Mobile/Engine.pak") && FExistSystem(path+"Bin/Engine/Engine.h")));
-   App.x=App.y=0;
-   App.receive_data=ReceiveData;
-   D.screen_changed=ScreenChanged;
-   D.exclusive(false);
+    App.x = App.y = 0;
+    App.receive_data = ReceiveData;
+    D.screen_changed = ScreenChanged;
+    D.exclusive(false);
 
-   App.flag|=APP_MINIMIZABLE|APP_MAXIMIZABLE|APP_NO_PAUSE_ON_WINDOW_MOVE_SIZE|APP_WORK_IN_BACKGROUND|APP_RESIZABLE;
-   INIT(false, false);
+    App.flag |= APP_MINIMIZABLE | APP_MAXIMIZABLE | APP_NO_PAUSE_ON_WINDOW_MOVE_SIZE | APP_WORK_IN_BACKGROUND | APP_RESIZABLE;
+    INIT(false, false);
 #if DEBUG
-   App.flag|=APP_BREAKPOINT_ON_ERROR|APP_MEM_LEAKS|APP_CALLSTACK_ON_ERROR;
-   Paks.add(ENGINE_DATA_PATH);
-   Paks.add(GetPath(ENGINE_DATA_PATH).tailSlash(true)+"Editor.pak");
-   if(ForceInstaller<0)InstallerMode=false;else if(ForceInstaller>0)InstallerMode=true;
-   SetFbxDllPath(GetPath(ENGINE_DATA_PATH).tailSlash(true)+"FBX32.dll", GetPath(ENGINE_DATA_PATH).tailSlash(true)+"FBX64.dll");
+    App.flag |= APP_BREAKPOINT_ON_ERROR | APP_MEM_LEAKS | APP_CALLSTACK_ON_ERROR;
+    Paks.add(ENGINE_DATA_PATH);
+    Paks.add(GetPath(ENGINE_DATA_PATH).tailSlash(true) + "Editor.pak");
+    SetFbxDllPath(GetPath(ENGINE_DATA_PATH).tailSlash(true) + "FBX32.dll", GetPath(ENGINE_DATA_PATH).tailSlash(true) + "FBX64.dll");
 #endif
-   if(InstallerMode)
-   {
-      App.name(InstallerName);
-   #if WINDOWS
-      App.flag|=APP_ALLOW_NO_GPU;
-   #endif
-      D.mode(App.desktopW()*0.4f, App.desktopH()*0.6f);
-   }else
-   {
-      SupportCompressAll();
-      SupportFilterWaifu();
-   #if LINUX
-      SettingsPath=SystemPath(SP_APP_DATA).tailSlash(true)+".esenthel\\Editor\\";
-   #elif DESKTOP
-      SettingsPath=SystemPath(SP_APP_DATA).tailSlash(true)+"Esenthel\\Editor\\";
-   #else
-      SettingsPath=SystemPath(SP_APP_DATA).tailSlash(true);
-   #endif
-      FCreateDirs(SettingsPath);
-      ProjectsPath=MakeFullPath("Projects\\"); CodeEdit.projectsBuildPath(ProjectsPath+ProjectsBuildPath);
-      App.name(AppName);
-      App.flag|=APP_FULL_TOGGLE;
-      App.backgroundFull(true);
-      App.drop=Drop;
-      App.quit=Quit;
-      App.resumed=Resumed;
-      D.secondaryOpenGLContexts(Cpu.threads()*3); // worker threads + importer threads + manually called threads
-      D.drawNullMaterials(true);
-      D.dofFocusMode(true);
-      D.set_shader=SetShader;
-      D.mode(App.desktopW()*0.8f, App.desktopH()*0.8f);
-   #if !DEBUG
-      Paks.add("Bin/Engine.pak");
-      Paks.add("Bin/Editor.pak");
-   #endif
-      Sky.atmospheric();
-      InitElmOrder();
-      LoadSettings();
-      VidOpt.ctor(); // init before applying video settings
-      ApplyVideoSettings();
-   }
-       WorkerThreads.create(true , Cpu.threads()  , 0, "Editor.Worker");
-      BuilderThreads.create(false, Cpu.threads()  , 0, "Editor.Builder");
-   BackgroundThreads.create(false, Cpu.threads()-1, 0, "Editor.Background");
+
+    SupportCompressAll();
+    SupportFilterWaifu();
+#if LINUX
+    SettingsPath = SystemPath(SP_APP_DATA).tailSlash(true) + ".esenthel\\Editor\\";
+#elif DESKTOP
+    SettingsPath = SystemPath(SP_APP_DATA).tailSlash(true) + "Esenthel\\Editor\\";
+#else
+    SettingsPath = SystemPath(SP_APP_DATA).tailSlash(true);
+#endif
+    FCreateDirs(SettingsPath);
+    ProjectsPath = MakeFullPath("Projects\\");
+    CodeEdit.projectsBuildPath(ProjectsPath + ProjectsBuildPath);
+    App.name(AppName);
+    App.flag |= APP_FULL_TOGGLE;
+    App.backgroundFull(true);
+    App.drop = Drop;
+    App.quit = Quit;
+    App.resumed = Resumed;
+    D.secondaryOpenGLContexts(Cpu.threads() * 3); // worker threads + importer threads + manually called threads
+    D.drawNullMaterials(true);
+    D.dofFocusMode(true);
+    D.set_shader = SetShader;
+    D.mode(App.desktopW() * 0.8f, App.desktopH() * 0.8f);
+#if !DEBUG
+    Paks.add("Bin/Engine.pak");
+    Paks.add("Bin/Editor.pak");
+#endif
+    Sky.atmospheric();
+    InitElmOrder();
+    LoadSettings();
+    VidOpt.ctor(); // init before applying video settings
+    ApplyVideoSettings();
+
+    WorkerThreads.create(true, Cpu.threads(), 0, "Editor.Worker");
+    BuilderThreads.create(false, Cpu.threads(), 0, "Editor.Builder");
+    BackgroundThreads.create(false, Cpu.threads() - 1, 0, "Editor.Background");
 }
 /******************************************************************************/
 bool Init()
 {
-   if(InstallerMode)StateInstall.set();else
    {
-      Updater.create();
-
       if(!Physics.created())Physics.create().timestep(PHYS_TIMESTEP_VARIABLE);
 
       const flt delay_remove=10;
@@ -303,7 +272,6 @@ void Shut()
    Proj.close();
    if(Initialized)SaveSettings(); // save before deletion
    CodeEdit         .del();
-   Updater          .del();
        WorkerThreads.del();
       BuilderThreads.del();
    BackgroundThreads.del();

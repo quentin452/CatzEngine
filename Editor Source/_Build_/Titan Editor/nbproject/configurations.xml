@@ -124,7 +124,6 @@
 <itemPath>Source/Store/Store.cpp</itemPath>
 </logicalFolder>
 <itemPath>Source/Auto.cpp</itemPath>
-<itemPath>Source/Editor Update.cpp</itemPath>
 <itemPath>Source/Elm@0.cpp</itemPath>
 <itemPath>Source/Import.cpp</itemPath>
 <itemPath>Source/Main.cpp</itemPath>
@@ -208,7 +207,6 @@
          </linkerTool>
       </compileType>
       <item path="Source/Auto.cpp" ex="false" tool="1" flavor2="0" />
-<item path="Source/Editor Update.cpp" ex="false" tool="1" flavor2="0" />
 <item path="Source/Editors/Animation.cpp" ex="false" tool="1" flavor2="0" />
 <item path="Source/Editors/Code@0.cpp" ex="false" tool="1" flavor2="0" />
 <item path="Source/Editors/Enum@0.cpp" ex="false" tool="1" flavor2="0" />
@@ -389,7 +387,6 @@
         </linkerTool>
       </compileType>
 <item path="Source/Auto.cpp" ex="false" tool="1" flavor2="0" />
-<item path="Source/Editor Update.cpp" ex="false" tool="1" flavor2="0" />
 <item path="Source/Editors/Animation.cpp" ex="false" tool="1" flavor2="0" />
 <item path="Source/Editors/Code@0.cpp" ex="false" tool="1" flavor2="0" />
 <item path="Source/Editors/Enum@0.cpp" ex="false" tool="1" flavor2="0" />

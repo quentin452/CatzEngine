@@ -102,8 +102,8 @@ Thank you to all of the third-party library developers!
 
 ### Getting things running
 1. Download the entire repository to your computer
-2. execute t_generate_engine_builder.py (need MSBuild Variable Environment to build the Engine Builder)
-3. Start the "Engine Builder" tool and click "Do Selected" to run all checked tasks in order (compile the engine, link the libraries, compile the editor, etc.)
+2. execute t_generate_engine_builder.py (need MSBuild Variable Environment to build the Engine Builder(Project.exe))
+3. Start the "Engine Builder" named Project.exe in CatzEngine/Project/ tool and click "Do Selected" to run all checked tasks in order (compile the engine, link the libraries, compile the editor, etc.)
 4. Enjoy!
 
 

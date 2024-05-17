@@ -764,9 +764,9 @@ void CompileEditorWindows() {FREPAO(CompileEditorWindowsTB).queue();}
 TaskBase TaskBases[]=
 {
 #if WINDOWS
-   {"Compile Windows 64 DX11    "      , "Compile the Engine in Release mode for Windows 64-bit DX10+ WinAPI only"       , CompileEngineWindows64DX11              , false},
+   {"Compile Windows 64 DX11    "      , "Compile the Engine in Release mode for Windows 64-bit DX10+ WinAPI only"       , CompileEngineWindows64DX11              , true},
    {"Compile Windows 64 DX11 UWP"      , "Compile the Engine in Release mode for Windows 64-bit DX10+ UWP only"          , CompileEngineWindowsUniversal64DX11     , false},
-   {"Compile Windows All        "      , "Compile the Engine in Release mode for all Windows targets"                    , CompileEngineWindows                    , true , true},
+   {"Compile Windows All        "      , "Compile the Engine in Release mode for all Windows targets"                    , CompileEngineWindows                    , false , true},
    {"Compile Windows 64 DX11     Debug", "Compile the Engine in Debug mode for Windows 64-bit DX10+ WinAPI only"         , CompileEngineDebugWindows64DX11         , false},
    {"Compile Windows 64 DX11 UWP Debug", "Compile the Engine in Debug mode for Windows 64-bit DX10+ UWP only"            , CompileEngineDebugWindowsUniversal64DX11, false},
    {"Compile Windows All         Debug", "Compile the Engine in Debug mode for all Windows targets"                      , CompileEngineDebugWindows               , false, true},

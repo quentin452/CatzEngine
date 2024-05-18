@@ -16,7 +16,7 @@ public:
             t_editor_network_interface, t_editor_network_interface_desc;
    TextLine proj_path, email, pass, server;
    WindowIO proj_path_io, import_proj_io, import_proj_1_0_io;
-   Button   proj_path_explore, proj_path_sel, connect, forgot_pass, disconnect, change_pass, new_proj, import_proj, import_proj_1_0, editor_network_interface, vid_opt;
+   Button   proj_path_explore, proj_path_sel,proj_recursivity_check, connect, forgot_pass, disconnect, change_pass, new_proj, import_proj, import_proj_1_0, editor_network_interface, vid_opt;
    ComboBox menu;
    Menu     proj_menu;
    UID      proj_menu_id;
@@ -30,6 +30,7 @@ public:
 
    Elm* findProj(C UID &id);
 
+   static void Recursivity(Projects &projs) ;
    static void SelectPath (             Projects &projs);
    static void SelectPath (C Str &name, Projects &projs);
    static void PathExplore(             Projects &projs);
@@ -61,6 +62,7 @@ public:
    void forgotPass();
    void connectDo();
    void refresh();
+   void recursiveProjectSearch(const Str& path, int maxDepth);
    void selectProj(C UID &proj_id, bool kb_focus=true);
    bool newProj(C Str &name);
    bool toggleSynchronizeProj(C UID &proj_id, C Str &name);

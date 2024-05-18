@@ -15,6 +15,12 @@ RegisterWin Register;
 /******************************************************************************/
 ChangePassWin ChangePass;
 /******************************************************************************/
+// Recursivity depth for Project searching
+// TODO SAVE str_recursivity_max_depth value
+Str project_finding_depth;
+Str str_recursivity_max_depth = "5";
+bool refresh_depth = false;
+/******************************************************************************/
 bool InitProjectList()
 {
    SetKbExclusive();
@@ -64,6 +70,22 @@ void DrawProjectList()
    ::Projects::Elm* Projects::findProj(C UID &id) {if(id.valid())REPA(proj_data)if(proj_data[i].id==id)return &proj_data[i]; return null;}
    void Projects::SelectPath(             Projects &projs) {projs.proj_path_io.path(S, projs.proj_path()).activate();}
    void Projects::SelectPath(C Str &name, Projects &projs) {projs.proj_path.set(name);}
+   void Projects::Recursivity(Projects &projs) {
+      if (str_recursivity_max_depth == "0") {
+         str_recursivity_max_depth = "1";
+      } else if(str_recursivity_max_depth == "1"){
+         str_recursivity_max_depth = "2";
+      } else if(str_recursivity_max_depth == "2"){
+          str_recursivity_max_depth = "3";
+      } else if(str_recursivity_max_depth == "3"){
+         str_recursivity_max_depth = "4";
+      } else if(str_recursivity_max_depth == "4"){
+         str_recursivity_max_depth = "5";
+      } else {    
+         str_recursivity_max_depth = "0";
+      }
+      refresh_depth = true;
+   }
    void Projects::PathExplore(             Projects &projs) {Explore(ProjectsPath);}
    void Projects::PathChanged(             Projects &projs) {ProjectsPath=Str(projs.proj_path()).tailSlash(true); CodeEdit.projectsBuildPath(ProjectsPath+ProjectsBuildPath); projs.refresh();}
    void Projects::Connect(             Projects &projs) {projs.connectDo();}
@@ -144,6 +166,9 @@ void DrawProjectList()
       proj_path_explore.create("Explore").func(PathExplore, T);
       proj_path        .create(ProjectsPath).func(PathChanged, T, true).maxLength(1024); // set immediate change in case we set this through Editor Network Interface, and we need the change to be performed immediately
       proj_path_sel    .create("...").func(SelectPath, T);
+      project_finding_depth = "Depth: ";
+      project_finding_depth += str_recursivity_max_depth;
+      proj_recursivity_check.create(project_finding_depth).func(Recursivity, T);
       server           .create().maxLength(256);
       email            .create().maxLength(256);
       pass             .create().maxLength(16).password(true);
@@ -163,17 +188,21 @@ void DrawProjectList()
    void Projects::resize()
    {
       flt y=D.h()-0.1f, h=0.06f;
-      proj_path        .rect(Rect_LU(-D.w()+0.05f, y, D.w()*0.9f, h));
+      proj_path.rect(Rect_LU(-D.w()+0.05f, y, D.w()*0.9f, h));
       proj_path_explore.rect(Rect_RD(proj_path.rect().ru(), 0.25f, h));
-      proj_path_sel    .rect(Rect_LU(proj_path.rect().ru(), proj_path.rect().h()));
-      t_proj_path      .pos (proj_path.rect().lu());
-      t_path_desc      .pos (proj_path.rect().ld());
-      
-      flt x=D.w()*0.41f, s=h*1.2f, w=D.w()*0.42f;
+      flt proj_recursivity_check_offset_y = -0.06f;
+      proj_recursivity_check.rect(Rect_RD(proj_path_explore.rect().lu() + Vec2(0, proj_recursivity_check_offset_y), proj_path_explore.rect().w(), h));
+      proj_path_sel.rect(Rect_LU(proj_path.rect().ru(), proj_path.rect().h()));
+      t_proj_path.pos (proj_path.rect().lu());
+      t_path_desc.pos (proj_path.rect().ld());
+
+      flt x = D.w() * 0.41f;
+      flt s = h * 1.2f;
+      flt w = D.w() * 0.42f;
       server        .rect(Rect_LU(x, y, w, h)); t_server.pos(server.rect().left()-Vec2(0.3f, 0)); y-=s;
       email         .rect(Rect_LU(x, y, w, h)); t_email .pos(email .rect().left()-Vec2(0.3f, 0)); y-=s;
       pass          .rect(Rect_LU(x, y, w, h)); t_pass  .pos(pass  .rect().left()-Vec2(0.3f, 0)); y-=s;
-         connect    .rect(Rect_U (Lerp(t_pass.rect().min.x, pass.rect().max.x, 0.25f), y, 0.3f, h));
+      connect    .rect(Rect_U (Lerp(t_pass.rect().min.x, pass.rect().max.x, 0.25f), y, 0.3f, h));
       disconnect    .rect(Rect_U (Lerp(t_pass.rect().min.x, pass.rect().max.x, 0.25f), y, 0.3f, h));
       change_pass   .rect(Rect_U (Lerp(t_pass.rect().min.x, pass.rect().max.x, 0.75f), y, 0.4f, h));
       forgot_pass   .rect(Rect_U (Lerp(t_pass.rect().min.x, pass.rect().max.x, 0.75f), y, 0.4f, h)); y-=s;
@@ -182,7 +211,7 @@ void DrawProjectList()
       
       t_login_desc.rect(Rect(t_pass.rect().min.x, y, pass.rect().max.x, y));
 
-        editor_network_interface     .rect(Rect_LU(t_path_desc.pos()-Vec2(0, h*2.5f), 0.65f, h));
+      editor_network_interface     .rect(Rect_LU(t_path_desc.pos()-Vec2(0, h*2.5f), 0.65f, h));
       t_editor_network_interface     .pos (editor_network_interface.rect().lu());
       t_editor_network_interface_desc.rect(Rect_LU(editor_network_interface.rect().ld(), proj_path.rect().w(), 0));
 
@@ -214,16 +243,13 @@ void DrawProjectList()
          Server.connect(sa, email(), pass());
       }
    }
-   void Projects::refresh()
-   {
-      if(proj_list.is())
-      {
-         UID sel_proj_id=UIDZero; if(Elm *elm=proj_list())sel_proj_id=elm->id;
-         proj_data.clear();
+   void Projects::recursiveProjectSearch(const Str& path, int maxDepth) {
+      if (maxDepth < 0)
+        return;
 
-         // add local projects
-         Project temp; for(FileFind ff(ProjectsPath); ff(); )if(temp.isProject(ff))
-         {
+    Project temp;
+    for (FileFind ff(path); ff(); ) {
+        if (temp.isProject(ff)) {
             Elm &proj=proj_data.New();
             proj.id  =temp.id;
             proj.name=proj.local_name=temp.name;
@@ -231,29 +257,40 @@ void DrawProjectList()
             proj.desc=S+"Project folder name \""+ff.name+'"';
             proj.sync_val=temp.synchronize;
             proj_list.addChild(proj.synchronize.create(Rect_C(proj_list.columnWidth(2)/2, proj_list.elmHeight()/-2, proj_list.elmHeight()*(0.95f/2)), temp.synchronize).func(ToggleSynchronize, proj).desc("If automatically synchronize this project with the Server after opening it."), proj_data.elms()-1, 2);
-         }
+        } else {
+            recursiveProjectSearch(ff.pathName(), maxDepth - 1);
+        }
+      }
+   }
+
+   void Projects::refresh() {
+      if (proj_list.is()) {
+         UID sel_proj_id = UIDZero;
+         if (Elm* elm = proj_list()) sel_proj_id = elm->id;
+         proj_data.clear();
+
+         int temp_depth = TextInt(str_recursivity_max_depth);
+         recursiveProjectSearch(ProjectsPath, temp_depth);
 
          // add server projects
-         FREPA(Server.projects)
-         {
-          C Project &server_proj=Server.projects[i];
-            if(Elm *project=findProj(server_proj.id)) // if project is already listed locally
-            {
-               project->server_name=server_proj.name; // only add server name
-            }else
-            { // fill new data
-               Elm &proj=proj_data.New();
-               proj.id  =server_proj.id;
-               proj.name=proj.server_name=server_proj.name;
-               proj.path=ProjectsPath+EncodeFileName(proj.id).tailSlash(true);
-               // don't set 'desc' about folder name because it's not stored yet on the disk locally
-            }
+         FREPA(Server.projects) {
+               C Project& server_proj = Server.projects[i];
+               if (Elm* project = findProj(server_proj.id)) { // if project is already listed locally
+                  project->server_name = server_proj.name; // only add server name
+               } else { // fill new data
+                  Elm& proj = proj_data.New();
+                  proj.id = server_proj.id;
+                  proj.name = proj.server_name = server_proj.name;
+                  proj.path = ProjectsPath + EncodeFileName(proj.id).tailSlash(true);
+                  // don't set 'desc' about folder name because it's not stored yet on the disk locally
+               }
          }
 
          proj_list.setData(proj_data);
          selectProj(sel_proj_id, false);
       }
    }
+
    void Projects::selectProj(C UID &proj_id, bool kb_focus)
    {
       if(Elm *proj=findProj(proj_id))
@@ -322,7 +359,7 @@ void DrawProjectList()
    }
    bool Projects::open(Elm &proj, bool ignore_lock)
    {
-      Str path=ProjectsPath+EncodeFileName(proj.id);
+      Str path = proj.path; // Use Complete Project Path
       if(!FCreateDirs(path))Gui.msgBox(S, S+"Can't write to \""+GetPath(path)+"\"");else
       {
          Str error; LOAD_RESULT result=Proj.open(proj.id, proj.name, path, error, ignore_lock);
@@ -336,6 +373,7 @@ void DrawProjectList()
       }
       return false;
    }
+
    void Projects::show()
    {
       Gui+=t_proj_path   ;
@@ -352,6 +390,7 @@ void DrawProjectList()
       Gui+=proj_path_explore;
       Gui+=proj_path     ;
       Gui+=proj_path_sel ;
+      Gui+=proj_recursivity_check ;
       Gui+=server        ;
       Gui+=email         ;
       Gui+=pass          ;
@@ -389,6 +428,7 @@ void DrawProjectList()
       Gui-=proj_path_explore;
       Gui-=proj_path     ;
       Gui-=proj_path_sel ;
+      Gui-=proj_recursivity_check ;
       Gui-=server        ;
       Gui-=email         ;
       Gui-=pass          ;
@@ -462,7 +502,13 @@ void DrawProjectList()
             projMenu(MT.pos(i), MT.touch(i)!=null); break;
          }
       }
-   }
+    if (refresh_depth == true){
+    project_finding_depth = "Depth: ";
+    project_finding_depth += str_recursivity_max_depth;
+    proj_recursivity_check.setText(project_finding_depth);
+    Projs.refresh();
+    refresh_depth = false;
+}}
    void NewProjWin::OK(NewProjWin &npw) {if(Projs.newProj(npw.name()))npw.button[2].push();}
    void NewProjWin::create()
    {

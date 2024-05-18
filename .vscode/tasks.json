@@ -83,6 +83,19 @@
         "reveal": "always",
         "panel": "new"
       }
+    },
+    {
+      "label": "WINDOWS Format Whole SRC with clang",
+      "type": "shell",
+      "command": "python ${workspaceFolder}/t_format_workspace.py",
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
     }
   ]
 }

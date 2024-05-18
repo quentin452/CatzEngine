@@ -2,7 +2,6 @@
  * Copyright (c) Grzegorz Slazinski. All Rights Reserved.                     *
  * Titan Engine (https://esenthel.com) header file.                           *
 /******************************************************************************
-
    Use         'Skeleton' as         a base static (non-animated) skeleton, that contain bones and slots in their initial pose.
    Use 'AnimatedSkeleton' to animate a base static 'Skeleton', by applying 'Animation's on the 'AnimatedSkeleton'.
 
@@ -385,9 +384,10 @@ struct  AnimatedSkeleton // Animated Skeleton - used for animating meshes
 
       // apply custom modifications (this can be called before or after 'updateMatrix' methods)
       AnimatedSkeleton&           forceMatrix(Int bone, C MatrixM &matrix, Bool auto_update_matrixes=true); // force usage of custom transformation 'matrix' for 'bone', if used then the bone will ignore its transformations from the animations, if 'auto_update_matrixes' is set to true then 'updateMatrixChildren(bone)' will be called automatically
-      
-      template<typename MatrixType>
-      AnimatedSkeleton& transformInWorldSpace(Int bone, const MatrixType &matrix, Bool auto_update_matrixes=true); // transform bone by world space 'matrix', if 'auto_update_matrixes' is set to true then 'updateMatrixChildren(bone)' will be called automatically
+      AnimatedSkeleton& transformInWorldSpace(Int bone, C Matrix3 &matrix, Bool auto_update_matrixes=true); // transform bone by world space 'matrix', if 'auto_update_matrixes' is set to true then 'updateMatrixChildren(bone)' will be called automatically
+      AnimatedSkeleton& transformInWorldSpace(Int bone, C Matrix  &matrix, Bool auto_update_matrixes=true); // transform bone by world space 'matrix', if 'auto_update_matrixes' is set to true then 'updateMatrixChildren(bone)' will be called automatically
+      AnimatedSkeleton& transformInWorldSpace(Int bone, C MatrixM &matrix, Bool auto_update_matrixes=true); // transform bone by world space 'matrix', if 'auto_update_matrixes' is set to true then 'updateMatrixChildren(bone)' will be called automatically
+
       // end
       void updateEnd(); // call this once per frame, after 'clear', 'animate', 'animateRoot' and 'updateMatrix'
 

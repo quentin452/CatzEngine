@@ -702,31 +702,54 @@ AnimatedSkeleton& AnimatedSkeleton::forceMatrix(Int bone, C MatrixM &matrix, Boo
    }
    return T;
 }
-template<typename MatrixType>
-AnimatedSkeleton& AnimatedSkeleton::transformInWorldSpace(Int bone, const MatrixType &matrix, Bool auto_update_matrixes)
+AnimatedSkeleton& AnimatedSkeleton::transformInWorldSpace(Int bone, C Matrix3 &matrix, Bool auto_update_matrixes)
 {
-   if (InRange(bone, bones))
+   if(InRange(bone, bones))
    {
-      AnimSkelBone &b = bones[bone];
+      AnimSkelBone &b=bones[bone];
 
-      if (b._world_space_transform)
+      if(b._world_space_transform)b._world_space_transform_matrix*=matrix;else // if there was already a world transform, then adjust it
       {
-         b._world_space_transform_matrix *= matrix; // if there was already a world transform, then adjust it
-      }
-      else
-      {
-         b._world_space_transform = true;
-         b._world_space_transform_matrix = matrix;
+         b._world_space_transform       =true;
+         b._world_space_transform_matrix=matrix;
       }
 
-      if (auto_update_matrixes)
-      {
-         updateMatrixChildren(bone); // this will update 'bone' too
-      }
+      if(auto_update_matrixes)updateMatrixChildren(bone); // this will update 'bone' too
    }
-   return *this;
+   return T;
 }
+AnimatedSkeleton& AnimatedSkeleton::transformInWorldSpace(Int bone, C Matrix &matrix, Bool auto_update_matrixes)
+{
+   if(InRange(bone, bones))
+   {
+      AnimSkelBone &b=bones[bone];
 
+      if(b._world_space_transform)b._world_space_transform_matrix*=matrix;else // if there was already a world transform, then adjust it
+      {
+         b._world_space_transform       =true;
+         b._world_space_transform_matrix=matrix;
+      }
+
+      if(auto_update_matrixes)updateMatrixChildren(bone); // this will update 'bone' too
+   }
+   return T;
+}
+AnimatedSkeleton& AnimatedSkeleton::transformInWorldSpace(Int bone, C MatrixM &matrix, Bool auto_update_matrixes)
+{
+   if(InRange(bone, bones))
+   {
+      AnimSkelBone &b=bones[bone];
+
+      if(b._world_space_transform)b._world_space_transform_matrix*=matrix;else // if there was already a world transform, then adjust it
+      {
+         b._world_space_transform       =true;
+         b._world_space_transform_matrix=matrix;
+      }
+
+      if(auto_update_matrixes)updateMatrixChildren(bone); // this will update 'bone' too
+   }
+   return T;
+}
 /******************************************************************************
 static Vec FurVel(C Vec &vel, Flt fur_vel_scale, Flt fur_gravity)
 {

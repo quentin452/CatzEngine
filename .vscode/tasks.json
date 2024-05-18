@@ -96,6 +96,19 @@
         "reveal": "always",
         "panel": "new"
       }
+    },
+    {
+      "label": "WINDOWS Generate Compilation Database",
+      "type": "shell",
+      "command": "python ${workspaceFolder}/t_generate_compilation_database.py",
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
     }
   ]
 }

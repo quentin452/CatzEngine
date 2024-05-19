@@ -519,7 +519,8 @@ Shape Actor::shape(Bool local) C {
 /******************************************************************************/
 RigidBody::~RigidBody() {
     REPA(ignore)
-    if (RigidBody *rb = CAST(RigidBody, ignore[i])) rb->ignore.exclude(this); // remove self from other ignores
+    if (RigidBody *rb = CAST(RigidBody, ignore[i]))
+        rb->ignore.exclude(this); // remove self from other ignores
 }
 RigidBody::RigidBody(btRigidBody::btRigidBodyConstructionInfo &info) : btRigidBody(info) {
     material = &Physics.mtrl_default;

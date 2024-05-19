@@ -1529,7 +1529,8 @@ Bool PhysBody::saveData(File &f, CChar *path) C {
     f._putStr(PhysMtrls.name(material, path));
     f.cmpUIntV(parts.elms());
     FREPA(T)
-    if (!parts[i].saveData(f)) return false;
+    if (!parts[i].saveData(f))
+        return false;
     return f.ok();
 }
 Bool PhysBody::loadData(File &f, CChar *path) {
@@ -1539,7 +1540,8 @@ Bool PhysBody::loadData(File &f, CChar *path) {
         material = PhysMtrls(f._getStr(), path);
         parts.setNum(f.decUIntV());
         FREPA(T)
-        if (!parts[i].loadData(f)) return false;
+        if (!parts[i].loadData(f))
+            return false;
         if (f.ok())
             return true;
     } break;
@@ -1551,7 +1553,8 @@ Bool PhysBody::loadData(File &f, CChar *path) {
         f >> density;
         material = null;
         FREPA(T)
-        if (!parts[i].loadData(f)) return false;
+        if (!parts[i].loadData(f))
+            return false;
         setBox(); // set after loading all data
         if (f.ok())
             return true;

@@ -3,81 +3,93 @@
 /******************************************************************************/
 #include "!Set Prec Struct.h"
 BUFFER(SMAA)
-   Flt SMAAThreshold=0.05;
+Flt SMAAThreshold = 0.05;
 BUFFER_END
 
 #define SMAA_HLSL_4 1 // TODO: using SMAA_HLSL_4_1 would be faster, however it's only used for predication and 'SMAADepthEdgeDetectionPS' which are not used
-#define PointSampler  SamplerPoint
+#define PointSampler SamplerPoint
 #define LinearSampler SamplerLinearClamp
 
 #define SMAA_AREATEX_SELECT(sample) sample.rg
-#define SMAA_RT_METRICS             RTSize // can use 'RTSize' instead of 'ImgSize' since there's no scale
-#define SMAA_THRESHOLD              SMAAThreshold // best noticable on "iloyjp6kr6q56_jzjamo0z6#" /* Vehicles\Cartoon\Tank */
-#define SMAA_MAX_SEARCH_STEPS       6
-#define SMAA_MAX_SEARCH_STEPS_DIAG  0
-#define SMAA_CORNER_ROUNDING        100
-#if SMAA_MAX_SEARCH_STEPS_DIAG==0
-   #define SMAA_DISABLE_DIAG_DETECTION
+#define SMAA_RT_METRICS RTSize       // can use 'RTSize' instead of 'ImgSize' since there's no scale
+#define SMAA_THRESHOLD SMAAThreshold // best noticable on "iloyjp6kr6q56_jzjamo0z6#" /* Vehicles\Cartoon\Tank */
+#define SMAA_MAX_SEARCH_STEPS 6
+#define SMAA_MAX_SEARCH_STEPS_DIAG 0
+#define SMAA_CORNER_ROUNDING 100
+#if SMAA_MAX_SEARCH_STEPS_DIAG == 0
+#define SMAA_DISABLE_DIAG_DETECTION
 #endif
-#define SMAA_COLOR_WEIGHT_USE 1 // enabling slightly increases performance
-#define SMAA_COLOR_WEIGHT     float3(0.509, 1.000, 0.194) // ClipSet(ColorLumWeight2/ColorLumWeight2.max());
+#define SMAA_COLOR_WEIGHT_USE 1                       // enabling slightly increases performance
+#define SMAA_COLOR_WEIGHT float3(0.509, 1.000, 0.194) // ClipSet(ColorLumWeight2/ColorLumWeight2.max());
 
+#include "!Set Prec Default.h"
 #include "!Set Prec Image.h"
 #include "SMAA.h"
-#include "!Set Prec Default.h"
 
 void SMAAEdge_VS(VtxInput vtx,
-     NOPERSP out Vec2 uv       :UV,
-     NOPERSP out Vec4 offset[3]:OFFSET,
-     NOPERSP out Vec4 vpos     :POSITION)
-{
-   vpos=Vec4(vtx.pos2(), Z_BACK, 1); // set Z to be at the end of the viewport, this enables optimizations by processing only foreground pixels (no sky/background)
-   uv  =vtx.uv();
-   SMAAEdgeDetectionVS(uv, offset);
+                 NOPERSP out Vec2 uv
+                 : UV,
+                   NOPERSP out Vec4 offset[3]
+                 : OFFSET,
+                   NOPERSP out Vec4 vpos
+                 : POSITION) {
+    vpos = Vec4(vtx.pos2(), Z_BACK, 1); // set Z to be at the end of the viewport, this enables optimizations by processing only foreground pixels (no sky/background)
+    uv = vtx.uv();
+    SMAAEdgeDetectionVS(uv, offset);
 }
-VecH2 SMAAEdge_PS(NOPERSP Vec2 uv       :UV,
-                  NOPERSP Vec4 offset[3]:OFFSET):TARGET // Input: GAMMA
+VecH2 SMAAEdge_PS(NOPERSP Vec2 uv
+                  : UV,
+                    NOPERSP Vec4 offset[3]
+                  : OFFSET) : TARGET // Input: GAMMA
 {
-   return SMAAColorEdgeDetectionPS(uv, offset, Img); // use instead of "SMAALumaEdgeDetectionPS" to differentiate between different colors
+    return SMAAColorEdgeDetectionPS(uv, offset, Img); // use instead of "SMAALumaEdgeDetectionPS" to differentiate between different colors
 }
 
 void SMAABlend_VS(VtxInput vtx,
-      NOPERSP out Vec2 uv       :UV,
-      NOPERSP out Vec2 pixcoord :PIXCOORD,
-      NOPERSP out Vec4 offset[3]:OFFSET,
-      NOPERSP out Vec4 vpos     :POSITION)
-{
-   vpos=Vec4(vtx.pos2(), Z_BACK, 1); // set Z to be at the end of the viewport, this enables optimizations by processing only foreground pixels (no sky/background)
-   uv  =vtx.uv();
-   SMAABlendingWeightCalculationVS(uv, pixcoord, offset);
+                  NOPERSP out Vec2 uv
+                  : UV,
+                    NOPERSP out Vec2 pixcoord
+                  : PIXCOORD,
+                    NOPERSP out Vec4 offset[3]
+                  : OFFSET,
+                    NOPERSP out Vec4 vpos
+                  : POSITION) {
+    vpos = Vec4(vtx.pos2(), Z_BACK, 1); // set Z to be at the end of the viewport, this enables optimizations by processing only foreground pixels (no sky/background)
+    uv = vtx.uv();
+    SMAABlendingWeightCalculationVS(uv, pixcoord, offset);
 }
-VecH4 SMAABlend_PS(NOPERSP Vec2 uv       :UV,
-                   NOPERSP Vec2 pixcoord :PIXCOORD,
-                   NOPERSP Vec4 offset[3]:OFFSET):TARGET
-{
-   return SMAABlendingWeightCalculationPS(uv, pixcoord, offset, Img, Img1, Img2, 0);
+VecH4 SMAABlend_PS(NOPERSP Vec2 uv
+                   : UV,
+                     NOPERSP Vec2 pixcoord
+                   : PIXCOORD,
+                     NOPERSP Vec4 offset[3]
+                   : OFFSET) : TARGET {
+    return SMAABlendingWeightCalculationPS(uv, pixcoord, offset, Img, Img1, Img2, 0);
 }
 
 void SMAA_VS(VtxInput vtx,
- NOPERSP out Vec2 uv    :UV,
- NOPERSP out Vec4 offset:OFFSET,
- NOPERSP out Vec4 vpos  :POSITION)
-{
-   vpos=Vec4(vtx.pos2(), Z_BACK, 1); // set Z to be at the end of the viewport, this enables optimizations by processing only foreground pixels (no sky/background)
-   uv  =vtx.uv();
-   SMAANeighborhoodBlendingVS(uv, offset);
+             NOPERSP out Vec2 uv
+             : UV,
+               NOPERSP out Vec4 offset
+             : OFFSET,
+               NOPERSP out Vec4 vpos
+             : POSITION) {
+    vpos = Vec4(vtx.pos2(), Z_BACK, 1); // set Z to be at the end of the viewport, this enables optimizations by processing only foreground pixels (no sky/background)
+    uv = vtx.uv();
+    SMAANeighborhoodBlendingVS(uv, offset);
 }
-VecH4 SMAA_PS(NOPERSP Vec2 uv    :UV,
-              NOPERSP Vec4 offset:OFFSET):TARGET
-{
-   return SMAANeighborhoodBlendingPS(uv, offset, Img, Img1);
+VecH4 SMAA_PS(NOPERSP Vec2 uv
+              : UV,
+                NOPERSP Vec4 offset
+              : OFFSET) : TARGET {
+    return SMAANeighborhoodBlendingPS(uv, offset, Img, Img1);
 }
 /******************************************************************************
 // MLAA
 Copyright (C) 2011 Jorge Jimenez (jorge@iryoku.com)
-Copyright (C) 2011 Belen Masia (bmasia@unizar.es) 
-Copyright (C) 2011 Jose I. Echevarria (joseignacioechevarria@gmail.com) 
-Copyright (C) 2011 Fernando Navarro (fernandn@microsoft.com) 
+Copyright (C) 2011 Belen Masia (bmasia@unizar.es)
+Copyright (C) 2011 Jose I. Echevarria (joseignacioechevarria@gmail.com)
+Copyright (C) 2011 Fernando Navarro (fernandn@microsoft.com)
 Copyright (C) 2011 Diego Gutierrez (diegog@unizar.es)
 All rights reserved.
 /******************************************************************************
@@ -109,7 +121,7 @@ Vec4 MLAAEdge_PS(NOPERSP Vec2 texcoord :TEXCOORD0,
 {
    Flt L      =Dot(TexPoint(Img, texcoord    ).rgb, ColorLumWeight2);
    Flt Lleft  =Dot(TexPoint(Img, offset[0].xy).rgb, ColorLumWeight2);
-   Flt Ltop   =Dot(TexPoint(Img, offset[0].zw).rgb, ColorLumWeight2);  
+   Flt Ltop   =Dot(TexPoint(Img, offset[0].zw).rgb, ColorLumWeight2);
    Flt Lright =Dot(TexPoint(Img, offset[1].xy).rgb, ColorLumWeight2);
    Flt Lbottom=Dot(TexPoint(Img, offset[1].zw).rgb, ColorLumWeight2);
 

@@ -91,17 +91,20 @@ Bool Vehicle::is() C { return _actor.is(); }
 Int Vehicle::onGroundNum() C {
     Int n = 0;
     REPA(_wheel)
-    if (_wheel[i].compress > 0) n++;
+    if (_wheel[i].compress > 0)
+        n++;
     return n;
 }
 Bool Vehicle::onGroundAny() C {
     REPA(_wheel)
-    if (_wheel[i].compress > 0) return true;
+    if (_wheel[i].compress > 0)
+        return true;
     return false;
 }
 Bool Vehicle::onGroundAll() C {
     REPA(_wheel)
-    if (_wheel[i].compress <= 0) return false;
+    if (_wheel[i].compress <= 0)
+        return false;
     return true;
 }
 Bool Vehicle::onGround(WHEEL_TYPE wheel) C { return InRange(wheel, _wheel) ? _wheel[wheel].compress > 0 : false; }
@@ -551,13 +554,13 @@ void Vehicle::update() {
     // braking
     if (brake)
         REP(WHEEL_NUM)
-        if (onGround(WHEEL_TYPE(i))) {
-            _Wheel &wheel = _wheel[i];
-            Vec point_vel = PointVel(actor_vel, actor_ang_vel, actor_com, wheel_pos[i]);
-            Vec ground_vel = PointOnPlane(point_vel, wheel.contact.normal);
-            ground_vel.clipLength(brake * (IsFront(WHEEL_TYPE(i)) ? _brake_ratio : 1 - _brake_ratio));
-            addImpulse(-ground_vel * actor_mass, wheel_pos[i]); // do not remove 'actor.mass' and replace 'addImpulse' with 'addVel' because of torque (mass<->inertia), this would work incorrect if vehicle is very big, and angular velocities would be applied too big because of big distance between point of applied force and center of mass
-        }
+    if (onGround(WHEEL_TYPE(i))) {
+        _Wheel &wheel = _wheel[i];
+        Vec point_vel = PointVel(actor_vel, actor_ang_vel, actor_com, wheel_pos[i]);
+        Vec ground_vel = PointOnPlane(point_vel, wheel.contact.normal);
+        ground_vel.clipLength(brake * (IsFront(WHEEL_TYPE(i)) ? _brake_ratio : 1 - _brake_ratio));
+        addImpulse(-ground_vel * actor_mass, wheel_pos[i]); // do not remove 'actor.mass' and replace 'addImpulse' with 'addVel' because of torque (mass<->inertia), this would work incorrect if vehicle is very big, and angular velocities would be applied too big because of big distance between point of applied force and center of mass
+    }
 }
 /******************************************************************************/
 Bool Vehicle::saveState(File &f) C {
@@ -1168,7 +1171,8 @@ Bool PhysXVehicle::onGround(WHEEL_TYPE wheel) C { return (_vehicle && InRange(wh
 Bool PhysXVehicle::onGround() C {
     if (_vehicle)
         REPA(_vehicle->wheel_query_result)
-        if (!_vehicle->wheel_query_result[i].isInAir) return true;
+    if (!_vehicle->wheel_query_result[i].isInAir)
+        return true;
     return false;
 } // if any is not in air then return true (on ground)
 

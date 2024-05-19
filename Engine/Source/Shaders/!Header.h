@@ -2346,7 +2346,7 @@ struct LightParams {
       NdotH_HP=Dot(N, H);
       VdotH   =Dot(L, H);
 #else // faster
-        // VdotL=2*VdotH*VdotH-1
+      // VdotL=2*VdotH*VdotH-1
         Flt VL = Rsqrt(VdotL_HP * 2 + 2);
         NdotH_HP = (NdotL_HP + NdotV_HP) * VL;
         VdotH = VL * VdotL_HP + VL;

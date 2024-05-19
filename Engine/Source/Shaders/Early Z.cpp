@@ -3,23 +3,18 @@
 /******************************************************************************
 SKIN
 /******************************************************************************/
-void VS
-(
-   VtxInput vtx,
+void VS(
+    VtxInput vtx,
 
-   out Vec4 vpos:POSITION
-)
-{
-   if(!SKIN)
-   {
-      vpos=Project(TransformPos(vtx.pos())); // #EarlyZInstancing vtx.instance()
-   }else
-   {
-      vpos=Project(TransformPos(vtx.pos(), vtx.bone(), vtx.weight()));
-   }
+    out Vec4 vpos
+    : POSITION) {
+    if (!SKIN) {
+        vpos = Project(TransformPos(vtx.pos())); // #EarlyZInstancing vtx.instance()
+    } else {
+        vpos = Project(TransformPos(vtx.pos(), vtx.bone(), vtx.weight()));
+    }
 }
 /******************************************************************************/
-void PS()
-{
+void PS() {
 }
 /******************************************************************************/

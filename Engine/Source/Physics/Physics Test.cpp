@@ -389,32 +389,33 @@ Bool Actor::cuts(UInt groups) C {
         qfd.data.word0 = groups;
         ReadLock lock(Physics._rws);
         REP(_actor->getNbShapes())
-        if (_actor->getShapes(&shape, 1, i)) switch (shape->getGeometryType()) {
-        case PxGeometryType::eBOX: {
-            PxBoxGeometry box;
-            if (shape->getBoxGeometry(box))
-                if (Physx.world->overlap(box, _actor->getGlobalPose() * shape->getLocalPose(), buf, qfd, &acc))
-                    return true;
-        } break;
-        case PxGeometryType::eSPHERE: {
-            PxSphereGeometry sphere;
-            if (shape->getSphereGeometry(sphere))
-                if (Physx.world->overlap(sphere, _actor->getGlobalPose() * shape->getLocalPose(), buf, qfd, &acc))
-                    return true;
-        } break;
-        case PxGeometryType::eCAPSULE: {
-            PxCapsuleGeometry capsule;
-            if (shape->getCapsuleGeometry(capsule))
-                if (Physx.world->overlap(capsule, _actor->getGlobalPose() * shape->getLocalPose(), buf, qfd, &acc))
-                    return true;
-        } break;
-        case PxGeometryType::eCONVEXMESH: {
-            PxConvexMeshGeometry convex;
-            if (shape->getConvexMeshGeometry(convex))
-                if (Physx.world->overlap(convex, _actor->getGlobalPose() * shape->getLocalPose(), buf, qfd, &acc))
-                    return true;
-        } break;
-        }
+        if (_actor->getShapes(&shape, 1, i))
+            switch (shape->getGeometryType()) {
+            case PxGeometryType::eBOX: {
+                PxBoxGeometry box;
+                if (shape->getBoxGeometry(box))
+                    if (Physx.world->overlap(box, _actor->getGlobalPose() * shape->getLocalPose(), buf, qfd, &acc))
+                        return true;
+            } break;
+            case PxGeometryType::eSPHERE: {
+                PxSphereGeometry sphere;
+                if (shape->getSphereGeometry(sphere))
+                    if (Physx.world->overlap(sphere, _actor->getGlobalPose() * shape->getLocalPose(), buf, qfd, &acc))
+                        return true;
+            } break;
+            case PxGeometryType::eCAPSULE: {
+                PxCapsuleGeometry capsule;
+                if (shape->getCapsuleGeometry(capsule))
+                    if (Physx.world->overlap(capsule, _actor->getGlobalPose() * shape->getLocalPose(), buf, qfd, &acc))
+                        return true;
+            } break;
+            case PxGeometryType::eCONVEXMESH: {
+                PxConvexMeshGeometry convex;
+                if (shape->getConvexMeshGeometry(convex))
+                    if (Physx.world->overlap(convex, _actor->getGlobalPose() * shape->getLocalPose(), buf, qfd, &acc))
+                        return true;
+            } break;
+            }
     }
     return false;
 }
@@ -450,28 +451,29 @@ void Actor::cuts(PhysCutsCallback &callback, UInt groups) C {
         qfd.data.word0 = groups;
         ReadLock lock(Physics._rws);
         REP(_actor->getNbShapes())
-        if (_actor->getShapes(&shape, 1, i)) switch (shape->getGeometryType()) {
-        case PxGeometryType::eBOX: {
-            PxBoxGeometry box;
-            if (shape->getBoxGeometry(box))
-                Physx.world->overlap(box, _actor->getGlobalPose() * shape->getLocalPose(), buf, qfd, &acc);
-        } break;
-        case PxGeometryType::eSPHERE: {
-            PxSphereGeometry sphere;
-            if (shape->getSphereGeometry(sphere))
-                Physx.world->overlap(sphere, _actor->getGlobalPose() * shape->getLocalPose(), buf, qfd, &acc);
-        } break;
-        case PxGeometryType::eCAPSULE: {
-            PxCapsuleGeometry capsule;
-            if (shape->getCapsuleGeometry(capsule))
-                Physx.world->overlap(capsule, _actor->getGlobalPose() * shape->getLocalPose(), buf, qfd, &acc);
-        } break;
-        case PxGeometryType::eCONVEXMESH: {
-            PxConvexMeshGeometry convex;
-            if (shape->getConvexMeshGeometry(convex))
-                Physx.world->overlap(convex, _actor->getGlobalPose() * shape->getLocalPose(), buf, qfd, &acc);
-        } break;
-        }
+        if (_actor->getShapes(&shape, 1, i))
+            switch (shape->getGeometryType()) {
+            case PxGeometryType::eBOX: {
+                PxBoxGeometry box;
+                if (shape->getBoxGeometry(box))
+                    Physx.world->overlap(box, _actor->getGlobalPose() * shape->getLocalPose(), buf, qfd, &acc);
+            } break;
+            case PxGeometryType::eSPHERE: {
+                PxSphereGeometry sphere;
+                if (shape->getSphereGeometry(sphere))
+                    Physx.world->overlap(sphere, _actor->getGlobalPose() * shape->getLocalPose(), buf, qfd, &acc);
+            } break;
+            case PxGeometryType::eCAPSULE: {
+                PxCapsuleGeometry capsule;
+                if (shape->getCapsuleGeometry(capsule))
+                    Physx.world->overlap(capsule, _actor->getGlobalPose() * shape->getLocalPose(), buf, qfd, &acc);
+            } break;
+            case PxGeometryType::eCONVEXMESH: {
+                PxConvexMeshGeometry convex;
+                if (shape->getConvexMeshGeometry(convex))
+                    Physx.world->overlap(convex, _actor->getGlobalPose() * shape->getLocalPose(), buf, qfd, &acc);
+            } break;
+            }
     }
 }
 /******************************************************************************/

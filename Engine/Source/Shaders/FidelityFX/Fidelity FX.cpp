@@ -11,57 +11,55 @@ ALPHA, DITHER, IN_GAMMA, OUT_GAMMA, GATHER, HALF
 /******************************************************************************/
 #include "../!Header.h"
 #define Quart _Quart // "ffx_a.h" has its own 'Quart'
-#define A_GPU  1
+#define A_GPU 1
 #define A_HLSL 1
 #if HALF // workaround for Nvidia GeForce Half FIXME: TODO: check again in the future if this is still needed, if Nvidia bug is fixed then ALWAYS do "#define A_HALF 1" #NvidiaGeForceFidelityFXHalf
-   #define A_HALF 1
+#define A_HALF 1
 #endif
 #include "ffx_a.h"
 /******************************************************************************/
-VecH4 GetChannel(VecH4 c)
-{
+VecH4 GetChannel(VecH4 c) {
 #if IN_GAMMA
-   #if FAST_GAMMA
-      c.x=LinearToSRGBFast(c.x);
-      c.y=LinearToSRGBFast(c.y);
-      c.z=LinearToSRGBFast(c.z);
-      c.w=LinearToSRGBFast(c.w);
-   #else
-      c.x=LinearToSRGB(c.x);
-      c.y=LinearToSRGB(c.y);
-      c.z=LinearToSRGB(c.z);
-      c.w=LinearToSRGB(c.w);
-   #endif
+#if FAST_GAMMA
+    c.x = LinearToSRGBFast(c.x);
+    c.y = LinearToSRGBFast(c.y);
+    c.z = LinearToSRGBFast(c.z);
+    c.w = LinearToSRGBFast(c.w);
+#else
+    c.x = LinearToSRGB(c.x);
+    c.y = LinearToSRGB(c.y);
+    c.z = LinearToSRGB(c.z);
+    c.w = LinearToSRGB(c.w);
 #endif
-   return c;
+#endif
+    return c;
 }
-VecH4 GetColor(VecH4 col)
-{
+VecH4 GetColor(VecH4 col) {
 #if IN_GAMMA
-   #if FAST_GAMMA
-      col.rgb=LinearToSRGBFast(col.rgb);
-   #else
-      col.rgb=LinearToSRGB(col.rgb);
-   #endif
+#if FAST_GAMMA
+    col.rgb = LinearToSRGBFast(col.rgb);
+#else
+    col.rgb = LinearToSRGB(col.rgb);
 #endif
-   return col;
+#endif
+    return col;
 }
 
-VecH4 FsrEasuRH(Vec2 p) {return GetChannel(TexGatherR(Img, p));}
-VecH4 FsrEasuGH(Vec2 p) {return GetChannel(TexGatherG(Img, p));}
-VecH4 FsrEasuBH(Vec2 p) {return GetChannel(TexGatherB(Img, p));}
-Vec4  FsrEasuRF(Vec2 p) {return GetChannel(TexGatherR(Img, p));}
-Vec4  FsrEasuGF(Vec2 p) {return GetChannel(TexGatherG(Img, p));}
-Vec4  FsrEasuBF(Vec2 p) {return GetChannel(TexGatherB(Img, p));}
+VecH4 FsrEasuRH(Vec2 p) { return GetChannel(TexGatherR(Img, p)); }
+VecH4 FsrEasuGH(Vec2 p) { return GetChannel(TexGatherG(Img, p)); }
+VecH4 FsrEasuBH(Vec2 p) { return GetChannel(TexGatherB(Img, p)); }
+Vec4 FsrEasuRF(Vec2 p) { return GetChannel(TexGatherR(Img, p)); }
+Vec4 FsrEasuGF(Vec2 p) { return GetChannel(TexGatherG(Img, p)); }
+Vec4 FsrEasuBF(Vec2 p) { return GetChannel(TexGatherB(Img, p)); }
 
-VecH4 FsrEasuH(Vec2 p, VecI2 ofs) {return GetColor(TexPointOfs(Img, p, ofs));}
-Vec4  FsrEasuF(Vec2 p, VecI2 ofs) {return GetColor(TexPointOfs(Img, p, ofs));}
+VecH4 FsrEasuH(Vec2 p, VecI2 ofs) { return GetColor(TexPointOfs(Img, p, ofs)); }
+Vec4 FsrEasuF(Vec2 p, VecI2 ofs) { return GetColor(TexPointOfs(Img, p, ofs)); }
 
 #if A_HALF
-VecH4 FsrRcasLoadH(ASW2 p) {return GetColor(Img[p]);}
+VecH4 FsrRcasLoadH(ASW2 p) { return GetColor(Img[p]); }
 void FsrRcasInputH(inout AH1 r, inout AH1 g, inout AH1 b) {}
 #endif
-Vec4  FsrRcasLoadF(ASU2 p) {return GetColor(Img[p]);}
+Vec4 FsrRcasLoadF(ASU2 p) { return GetColor(Img[p]); }
 void FsrRcasInputF(inout AF1 r, inout AF1 g, inout AF1 b) {}
 /******************************************************************************/
 #define FSR_EASU_H 1
@@ -69,99 +67,97 @@ void FsrRcasInputF(inout AF1 r, inout AF1 g, inout AF1 b) {}
 #define FSR_RCAS_H 1
 #define FSR_RCAS_F 1
 #if ALPHA
-   #define FSR_RCAS_PASSTHROUGH_ALPHA 1
+#define FSR_RCAS_PASSTHROUGH_ALPHA 1
 #endif
 #include "ffx_fsr1.h"
 /******************************************************************************/
-struct EASU
-{
-   AU4 c0, c1, c2, c3;
+struct EASU {
+    AU4 c0, c1, c2, c3;
 };
 BUFFER(EASU)
-   EASU Easu;
+EASU Easu;
 BUFFER_END
 
-VecH4 EASU_PS(NOPERSP PIXEL):TARGET
-{
-   VecI2 pix=pixel.xy;
-   VecH4 col;
+VecH4 EASU_PS(NOPERSP PIXEL) : TARGET {
+    VecI2 pix = pixel.xy;
+    VecH4 col;
 #if A_HALF && GATHER // use Half only for Gather version, because Half non-gather fails to compile
-   FsrEasuH(col.rgb, pix, Easu.c0, Easu.c1, Easu.c2, Easu.c3);
+    FsrEasuH(col.rgb, pix, Easu.c0, Easu.c1, Easu.c2, Easu.c3);
 #else
-   FsrEasuF(col.rgb, pix, Easu.c0, Easu.c1, Easu.c2, Easu.c3);
+    FsrEasuF(col.rgb, pix, Easu.c0, Easu.c1, Easu.c2, Easu.c3);
 #endif
 
 #if ALPHA
-   // FIXME OPTIMIZE
-   Vec2 uv=(Vec2(pix) * AF2_AU2(Easu.c0.xy) + AF2_AU2(Easu.c0.zw)) * AF2_AU2(Easu.c1.xy) + Vec2(0.5, -0.5) * AF2_AU2(Easu.c1.zw);
-   col.a=Tex(Img, uv).a;
+    // FIXME OPTIMIZE
+    Vec2 uv = (Vec2(pix) * AF2_AU2(Easu.c0.xy) + AF2_AU2(Easu.c0.zw)) * AF2_AU2(Easu.c1.xy) + Vec2(0.5, -0.5) * AF2_AU2(Easu.c1.zw);
+    col.a = Tex(Img, uv).a;
 #else
-   col.a=1;
+    col.a = 1;
 #endif
 
 #if DITHER
-   ApplyDither(col.rgb, pixel.xy, false); // here 'col' is already in gamma space
+    ApplyDither(col.rgb, pixel.xy, false); // here 'col' is already in gamma space
 #endif
 
 #if OUT_GAMMA
-   #if FAST_GAMMA
-      col.rgb=SRGBToLinearFast(col.rgb);
-   #else
-      col.rgb=SRGBToLinear(col.rgb);
-   #endif
+#if FAST_GAMMA
+    col.rgb = SRGBToLinearFast(col.rgb);
+#else
+    col.rgb = SRGBToLinear(col.rgb);
+#endif
 #endif
 
 #if COLORS
-   col=col*Color[0]+Color[1]; // this needs to be done in Linear Gamma
+    col = col * Color[0] + Color[1]; // this needs to be done in Linear Gamma
 #endif
-   return col;
+    return col;
 }
 /******************************************************************************/
-struct RCAS
-{
-   AU4 c0;
+struct RCAS {
+    AU4 c0;
 };
 BUFFER(RCAS)
-   RCAS Rcas;
+RCAS Rcas;
 #if GL
-   Vec2 RcasMulAdd;
+Vec2 RcasMulAdd;
 #endif
 BUFFER_END
 
-VecH4 RCAS_PS(NOPERSP PIXEL):TARGET
-{
+VecH4 RCAS_PS(NOPERSP PIXEL) : TARGET {
 #if GL
-   VecI2 pix=VecI2(pixel.x, pixel.y*RcasMulAdd.x+RcasMulAdd.y);
+    VecI2 pix = VecI2(pixel.x, pixel.y * RcasMulAdd.x + RcasMulAdd.y);
 #else
-   VecI2 pix=pixel.xy;
+    VecI2 pix = pixel.xy;
 #endif
-   VecH4 col;
+    VecH4 col;
 #if A_HALF && GATHER // use Half only for Gather version, because Half non-gather fails to compile
-   #if ALPHA
-      FsrRcasH(col.r, col.g, col.b, col.a, pix, Rcas.c0);
-   #else
-      FsrRcasH(col.r, col.g, col.b, pix, Rcas.c0); col.a=1;
-   #endif
+#if ALPHA
+    FsrRcasH(col.r, col.g, col.b, col.a, pix, Rcas.c0);
 #else
-   #if ALPHA
-      FsrRcasF(col.r, col.g, col.b, col.a, pix, Rcas.c0);
-   #else
-      FsrRcasF(col.r, col.g, col.b, pix, Rcas.c0); col.a=1;
-   #endif
+    FsrRcasH(col.r, col.g, col.b, pix, Rcas.c0);
+    col.a = 1;
+#endif
+#else
+#if ALPHA
+    FsrRcasF(col.r, col.g, col.b, col.a, pix, Rcas.c0);
+#else
+    FsrRcasF(col.r, col.g, col.b, pix, Rcas.c0);
+    col.a = 1;
+#endif
 #endif
 
 #if DITHER
-   ApplyDither(col.rgb, pixel.xy, false); // here 'col' is already in gamma space
+    ApplyDither(col.rgb, pixel.xy, false); // here 'col' is already in gamma space
 #endif
 
 #if OUT_GAMMA
-   #if FAST_GAMMA
-      col.rgb=SRGBToLinearFast(col.rgb);
-   #else
-      col.rgb=SRGBToLinear(col.rgb);
-   #endif
+#if FAST_GAMMA
+    col.rgb = SRGBToLinearFast(col.rgb);
+#else
+    col.rgb = SRGBToLinear(col.rgb);
 #endif
-   return col;
+#endif
+    return col;
 }
 /******************************************************************************
 void Filter(int2 pos)

@@ -867,8 +867,10 @@ Bool Actor::createTry(C PhysPart &const_part, Flt density, C Vec &scale, Bool ki
 /******************************************************************************/
 #endif
 /******************************************************************************/
-_ActorShapes::~_ActorShapes() { REPA(pm)
-                                DecRef(pm[i]); }
+_ActorShapes::~_ActorShapes() {
+    REPA(pm)
+    DecRef(pm[i]);
+}
 ActorShapes::~ActorShapes() { Delete(_as); }
 ActorShapes::ActorShapes() {
     New(_as);
@@ -985,8 +987,10 @@ static void CheckMesh(C PhysPart &part, C PhysBody *owner = null) {
     } break;
     }
 }
-static void CheckMesh(C PhysBody &phys) { REPA(phys)
-                                          CheckMesh(phys.parts[i], &phys); }
+static void CheckMesh(C PhysBody &phys) {
+    REPA(phys)
+    CheckMesh(phys.parts[i], &phys);
+}
 /******************************************************************************/
 Actor &Actor::create(C ActorShapes &shapes, Flt density, Bool kinematic) {
     if (!createTry(shapes, density, kinematic)) {

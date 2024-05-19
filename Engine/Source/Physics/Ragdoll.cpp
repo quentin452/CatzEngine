@@ -472,7 +472,8 @@ Ragdoll &Ragdoll::ignore(Actor &actor, Bool ignore) {
 /******************************************************************************/
 Int Ragdoll::findBoneI(CChar8 *name) {
     REPA(T)
-    if (Equal(bone(i).name, name)) return i;
+    if (Equal(bone(i).name, name))
+        return i;
     return -1;
 }
 Ragdoll::Bone *Ragdoll::findBone(CChar8 *name) {
@@ -494,7 +495,8 @@ Int Ragdoll::findBoneIndexFromSkelBone(BoneType skel_bone_index) C {
                 if (_skel->bones[skel_bone_index].flag & BONE_RAGDOLL) // if skeleton bone should contain a bone in the ragdoll
                 {
                     REPA(T)
-                    if (bone(i).skel_bone == skel_bone_index) return i;
+                    if (bone(i).skel_bone == skel_bone_index)
+                        return i;
                 }
                 skel_bone_index = _skel->bones[skel_bone_index].parent;
                 if (skel_bone_index == BONE_NULL)

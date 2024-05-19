@@ -895,7 +895,8 @@ Bool Joint::save(File &f) C // !! IF MAKING ANY CHANGE, UPDATE TO NEW VERSION BE
         }
         btRigidBody &rb = _joint->getRigidBodyA();
         REP(rb.getNumConstraintRefs())
-        if (rb.getConstraintRef(i) == _joint) goto no_collision;
+        if (rb.getConstraintRef(i) == _joint)
+            goto no_collision;
         flag |= JOINT_COLLISION;
     no_collision:;
 #endif

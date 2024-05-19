@@ -6,7 +6,7 @@ import threading
 
 def format_files(files, params):
     blacklist = [""]
-    blacklist_dirs = ["ThirdPartyLibs", "Shaders","Engine","Project","Source"]
+    blacklist_dirs = ["ThirdPartyLibs", "_Build_","Shaders","Engine","Project","Source"]
     for file in files:
         if os.path.basename(file) not in blacklist and not any(blacklist_dir in file for blacklist_dir in blacklist_dirs):
             print(f"Formatting {file}...")

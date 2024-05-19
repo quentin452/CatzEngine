@@ -3,8 +3,8 @@
  * Titan Engine (https://esenthel.com) header file.                           *
 /******************************************************************************/
 #if EE_PRIVATE
-void    InitFur();
+void InitFur();
 void PrepareFur();
-void    DrawFur(C MeshRender &mshr, Shader &shader, Flt scale);
+void DrawFur(C MeshRender &mshr, Shader &shader, Flt scale);
 #endif
 /******************************************************************************/

@@ -299,7 +299,7 @@ SyncLock::SyncLock() {
 SyncLock::~SyncLock() {
     if (owned())
         REP(_lock_count)
-        off();
+    off();
     _is = false;
     pthread_mutex_destroy(&_lock);
     _lock_count = 0;
@@ -725,7 +725,8 @@ Bool ReadWriteSync::ownedRead() {
         UIntPtr thread_id = GetThreadID();
         SyncLocker lock(_locks_lock);
         REPA(_locks)
-        if (_locks[i].thread_id == thread_id) return true;
+        if (_locks[i].thread_id == thread_id)
+            return true;
     }
     return false;
 }
@@ -914,7 +915,8 @@ static void SetThreadMask(PLATFORM(HANDLE, pthread_t) handle, ULong mask) {
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
     FREP(64)
-    if (mask & (1 << i)) CPU_SET(i, &cpuset);
+    if (mask & (1 << i))
+        CPU_SET(i, &cpuset);
 #if ANDROID
     pid_t id = pthread_gettid_np(handle);
     sched_setaffinity(id, SIZE(cpuset), &cpuset);
@@ -1586,7 +1588,8 @@ Threads &Threads::wait() {
         if (callsLeft())
             goto wait;
         REPA(_threads)
-        if (_threads[i].call.is()) goto wait;
+        if (_threads[i].call.is())
+            goto wait;
 
         _waiting--; // !! can modify '_waiting' only under lock !!
         _lock_calls.off();
@@ -1612,7 +1615,8 @@ void Threads::_wait(void func(Ptr data, Ptr user, Int thread_index)) {
             if (_calls[i].func == func)
                 goto wait;
         REPA(_threads)
-        if (_threads[i].call.func == func) goto wait;
+        if (_threads[i].call.func == func)
+            goto wait;
 
         _waiting--; // !! can modify '_waiting' only under lock !!
         _lock_calls.off();
@@ -1637,7 +1641,8 @@ void Threads::_wait(void func(Ptr data, Ptr user, Int thread_index), Ptr user) {
             if (_calls[i].isFuncUser(func, user))
                 goto wait;
         REPA(_threads)
-        if (_threads[i].call.isFuncUser(func, user)) goto wait;
+        if (_threads[i].call.isFuncUser(func, user))
+            goto wait;
 
         _waiting--; // !! can modify '_waiting' only under lock !!
         _lock_calls.off();
@@ -1663,7 +1668,8 @@ void Threads::_wait(Ptr data, void func(Ptr data, Ptr user, Int thread_index), P
             if (_calls[i] == call)
                 goto wait;
         REPA(_threads)
-        if (_threads[i].call == call) goto wait;
+        if (_threads[i].call == call)
+            goto wait;
 
         _waiting--; // !! can modify '_waiting' only under lock !!
         _lock_calls.off();
@@ -1691,7 +1697,8 @@ void Threads::wait(C CMemPtr<Call> &calls) {
                     if (_calls[i] == call)
                         goto wait;
                 REPA(_threads)
-                if (_threads[i].call == call) goto wait;
+                if (_threads[i].call == call)
+                    goto wait;
             }
 
             _waiting--; // !! can modify '_waiting' only under lock !!
@@ -1740,7 +1747,8 @@ Int Threads::_queued(void func(Ptr data, Ptr user, Int thread_index)) C {
             if (_calls[i].func == func)
                 queued++;
         REPA(_threads)
-        if (_threads[i].call.func == func) queued++;
+        if (_threads[i].call.func == func)
+            queued++;
     }
     return queued;
 }
@@ -1752,7 +1760,8 @@ Int Threads::_queued(void func(Ptr data, Ptr user, Int thread_index), Ptr user) 
             if (_calls[i].isFuncUser(func, user))
                 queued++;
         REPA(_threads)
-        if (_threads[i].call.isFuncUser(func, user)) queued++;
+        if (_threads[i].call.isFuncUser(func, user))
+            queued++;
     }
     return queued;
 }
@@ -1765,7 +1774,8 @@ Int Threads::_queued(Ptr data, void func(Ptr data, Ptr user, Int thread_index), 
             if (_calls[i] == call)
                 queued++;
         REPA(_threads)
-        if (_threads[i].call == call) queued++;
+        if (_threads[i].call == call)
+            queued++;
     }
     return queued;
 }
@@ -1776,7 +1786,8 @@ Bool Threads::busy() C {
     if (_threads.elms()) {
         SyncLocker locker(_lock_calls);
         REPA(_threads)
-        if (_threads[i].call.is()) return true;
+        if (_threads[i].call.is())
+            return true;
     }
     return false;
 }
@@ -1787,7 +1798,8 @@ Bool Threads::_busy(void func(Ptr data, Ptr user, Int thread_index)) C {
             if (_calls[i].func == func)
                 return true;
         REPA(_threads)
-        if (_threads[i].call.func == func) return true;
+        if (_threads[i].call.func == func)
+            return true;
     }
     return false;
 }
@@ -1798,7 +1810,8 @@ Bool Threads::_busy(void func(Ptr data, Ptr user, Int thread_index), Ptr user) C
             if (_calls[i].isFuncUser(func, user))
                 return true;
         REPA(_threads)
-        if (_threads[i].call.isFuncUser(func, user)) return true;
+        if (_threads[i].call.isFuncUser(func, user))
+            return true;
     }
     return false;
 }
@@ -1810,7 +1823,8 @@ Bool Threads::_busy(Ptr data, void func(Ptr data, Ptr user, Int thread_index), P
             if (_calls[i] == call)
                 return true;
         REPA(_threads)
-        if (_threads[i].call == call) return true;
+        if (_threads[i].call == call)
+            return true;
     }
     return false;
 }
@@ -1864,7 +1878,7 @@ void MultiThreadedCall(Int elms, void func(Int elm_index, Ptr user, Int thread_i
     } else
 #endif
         FREP(elms)
-        func(i, user, 0);
+    func(i, user, 0);
 }
 /******************************************************************************/
 struct MTFC_Ptr // MTFC for Ptr
@@ -1935,7 +1949,8 @@ ThreadEmulation::ThreadEmulation() {
 void ThreadEmulation::include(Thread &thread) {
     if (thread.sleep()) {
         REPA(_delayed_threads)
-        if (_delayed_threads[i].thread == &thread) return;
+        if (_delayed_threads[i].thread == &thread)
+            return;
         _delayed_threads.New().thread = &thread;
     } else {
         _rt_threads.include(&thread);

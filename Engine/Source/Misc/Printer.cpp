@@ -259,7 +259,8 @@ Bool ReceiptPrinter::operator+=(C Image &img) {
             FREPD(sy, 3) {
                 Byte b = 0;
                 FREP(8)
-                if (SRGBToBit(src->colorS(x, y + 7 - i + sy * 8))) b |= (1 << i);
+                if (SRGBToBit(src->colorS(x, y + 7 - i + sy * 8)))
+                    b |= (1 << i);
                 data += Char8(b);
             }
             data += '\n';

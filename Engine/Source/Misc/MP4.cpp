@@ -65,9 +65,8 @@ Int MP4::Track::frames() C {
     Int frames = 0;
     if (stts.elms())
         REPA(stts)
-        frames += stts[i].count;
-    else
-        REPA(parts)
+    frames += stts[i].count;
+    else REPA(parts)
         frames += parts[i].frames;
     return frames;
 }
@@ -153,7 +152,8 @@ Long MP4::Track::dataSize() C {
 }
 MP4::Track *MP4::findTrack(Int id) {
     REPA(tracks)
-    if (tracks[i].id == id) return &tracks[i];
+    if (tracks[i].id == id)
+        return &tracks[i];
     return null;
 }
 /******************************************************************************/

@@ -14,14 +14,16 @@ void Callbacks::add(void func(Ptr user), Ptr user) {
 void Callbacks::include(void func()) {
     if (func != null) {
         REPA(_callbacks)
-        if (_callbacks[i].func == func) return;
+        if (_callbacks[i].func == func)
+            return;
         add(func);
     }
 }
 void Callbacks::include(void func(Ptr user), Ptr user) {
     if (func != null) {
         REPA(_callbacks_user)
-        if (_callbacks_user[i].func == func && _callbacks_user[i].user == user) return;
+        if (_callbacks_user[i].func == func && _callbacks_user[i].user == user)
+            return;
         add(func, user);
     }
 }
@@ -29,12 +31,14 @@ void Callbacks::include(void func(Ptr user), Ptr user) {
 void Callbacks::exclude(void func()) {
     if (func != null)
         REPA(_callbacks)
-        if (_callbacks[i].func == func) _callbacks.remove(i, true);
+    if (_callbacks[i].func == func)
+        _callbacks.remove(i, true);
 }
 void Callbacks::exclude(void func(Ptr user), Ptr user) {
     if (func != null)
         REPA(_callbacks_user)
-        if (_callbacks_user[i].func == func && _callbacks_user[i].user == user) _callbacks.remove(i, true);
+    if (_callbacks_user[i].func == func && _callbacks_user[i].user == user)
+        _callbacks.remove(i, true);
 }
 
 void Callbacks::del() {

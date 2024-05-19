@@ -19,10 +19,10 @@ void DLL::delForce() {
     del();
     if (module)
         REP(16)
-        if (!FreeLibrary(module)) {
-            SetLastError(0);
-            break;
-        } // clear any errors that 'FreeLibrary' might have generated
+    if (!FreeLibrary(module)) {
+        SetLastError(0);
+        break;
+    } // clear any errors that 'FreeLibrary' might have generated
 }
 DLL &DLL::del() {
 #if MEMORY == 1

@@ -5,7 +5,7 @@ import sys
 import threading
 
 BLACKLIST_FILES = [""]
-BLACKLIST_DIRS = ["ThirdPartyLibs", "_Build_", "build", "CMakeFiles", "Animation", "Code", "Game", "Graphics", "Gui", "Math", "Mesh"]
+BLACKLIST_DIRS = ["ThirdPartyLibs", "_Build_", "build", "CMakeFiles", "Animation", "Code", "Game", "Graphics"]
 FORMAT_STYLE = "{BasedOnStyle: llvm, IndentWidth: 4, ColumnLimit: 0}"
 
 def format_files(files, params):

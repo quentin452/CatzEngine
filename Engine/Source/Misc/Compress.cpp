@@ -876,7 +876,7 @@ static Bool RLEDecompress(File &src, File &dest, Long compressed_size, Long deco
             } else {
                 if (callback)
                     REP(length)
-                    callback->data(&b, SIZE(b));
+                callback->data(&b, SIZE(b));
                 REP(length)
                 dest.putByte(b);
             }

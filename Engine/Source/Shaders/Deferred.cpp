@@ -359,10 +359,10 @@ void PS(
         Half steps = Mid(length, 1, RELIEF_STEPS_MAX),
              stp = 1.0 / steps,
              ray = 1;
-        Vec2 uv_step = tpos.xy * stp; // keep as HP to avoid conversions several times in the loop below
+        Vec2 uv_step = tpos.xy * stp;        // keep as HP to avoid conversions several times in the loop below
 
 #if 1 // linear + interval search (faster)
-        // linear search
+      // linear search
         Half height_next, height_prev = 0.5; // use 0.5 as approximate average value, we could do "RTexLodI(BUMP_IMAGE, I.uv, lod).BASE_CHANNEL_BUMP", however in tests that wasn't needed but only reduced performance
         LOOP for (;;) {
             ray -= stp;
@@ -405,7 +405,7 @@ void PS(
             }
         }
 #else // linear + binary search (slower because requires 3 tex reads in binary to get the same results as with only 0-1 tex reads in interval)
-        // linear search
+      // linear search
         LOOP for (Int i = 0;; i++) {
             ray -= stp;
             I.uv += uv_step;
@@ -715,10 +715,10 @@ void PS(
         Half steps = Mid(length, 1, RELIEF_STEPS_MAX),
              stp = 1.0 / steps,
              ray = 1;
-        Vec2 uv_step = tpos.xy * stp; // keep as HP to avoid conversions several times in the loop below
+        Vec2 uv_step = tpos.xy * stp;        // keep as HP to avoid conversions several times in the loop below
 
 #if 1 // linear + interval search (faster)
-        // linear search
+      // linear search
         Half height_next, height_prev = 0.5; // use 0.5 as approximate average value, we could do "RTexLodI(BUMP_IMAGE, I.uv, lod).BASE_CHANNEL_BUMP", however in tests that wasn't needed but only reduced performance
         LOOP for (;;) {
             ray -= stp;

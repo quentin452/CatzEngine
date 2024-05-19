@@ -804,7 +804,8 @@ Str ConsoleProcess::get() {
             Str str = FromUTF8(_data);
             _data.clear();
             FREP(skip)
-            if (temp[i]) _data += temp[i];
+            if (temp[i])
+                _data += temp[i];
             return str;
         }
     }

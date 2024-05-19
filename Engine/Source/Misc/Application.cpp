@@ -866,8 +866,8 @@ void Application::showError(CChar *error) {
         if (D.full() && App.window()) {
             if (!ANDROID)
                 hide();
-#if DX11    // hiding window on DX10+ is not enough, try disabling Fullscreen
-            // ChangeDisplaySettings(null, 0); this didn't help
+#if DX11 // hiding window on DX10+ is not enough, try disabling Fullscreen
+         // ChangeDisplaySettings(null, 0); this didn't help
             if (SwapChain
 #if WINDOWS_OLD
                 && D.exclusiveFull()

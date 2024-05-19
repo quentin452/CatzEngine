@@ -41,7 +41,7 @@ struct StackWalkerEx : StackWalker {
 
     virtual void OnCallstackEntry(CallstackEntryType eType, CallstackEntry &entry) {
         if (++i > 2 // skip first 2 entries ("StackWalkerEx::ShowCallStack", "GetCallStack", "check" is inlined in release)
-            // skip Windows stuff
+                    // skip Windows stuff
             && !Equal(entry.name, "RtlUnicodeStringToInteger", true) && !Equal(entry.name, "RtlUserThreadStart", true) && !Equal(entry.name, "BaseThreadInitThunk", true) && !Equal(entry.name, "__scrt_common_main_seh", true) && !Equal(entry.name, X64 ? "thread_start<unsigned int (__cdecl*)(void * __ptr64)>" : "thread_start<unsigned int (__stdcall*)(void *)>", true)) {
             SWP_START
             stack->line() += entry.name;

@@ -1135,7 +1135,9 @@ Bool PathWorld::_set(_PathMesh *path_mesh, C VecI2 &area_xy, Bool set_obstacles)
         {
             SyncLocker lock(_lock);
             REPA(_built)
-            if (dtMeshHeader *header = (dtMeshHeader *)_built[i].data.data()) if (header->userId == (UIntPtr)old) _built.remove(i, true);
+            if (dtMeshHeader *header = (dtMeshHeader *)_built[i].data.data())
+                if (header->userId == (UIntPtr)old)
+                    _built.remove(i, true);
         }
     }
     if (path_mesh)
@@ -1415,7 +1417,7 @@ void PathWorld::draw(Byte surface_color_alpha, Flt y_offset, C Color &outer_edge
     SetMatrix(Matrix(Vec(0, y_offset, 0)));
     if (C dtNavMesh *cmesh = _mesh)
         REP(cmesh->getMaxTiles())
-        DrawMeshTile(cmesh->getTile(i), surface_color_alpha, outer_edge_color, inner_edge_color);
+    DrawMeshTile(cmesh->getTile(i), surface_color_alpha, outer_edge_color, inner_edge_color);
 }
 /******************************************************************************/
 } // namespace EE

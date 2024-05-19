@@ -548,7 +548,8 @@ void SmoothValueAccel2::update(C Vec2 &target, C SmoothValueSettings &settings) 
 
             Vec2 a = accel, b = 2 * velocity, c = velocity * velocity / accel * 0.5f + value - target, d = Sqr(b) - 4 * a * c, accel_time = -b;
             FREP(2)
-            if (d.c[i] > 0) accel_time.c[i] += Sign(a.c[i]) * SqrtFast(d.c[i]);
+            if (d.c[i] > 0)
+                accel_time.c[i] += Sign(a.c[i]) * SqrtFast(d.c[i]);
             accel_time /= 2 * a;
 
             /*
@@ -573,7 +574,8 @@ void SmoothValueAccel2::update(C Vec2 &target, C SmoothValueSettings &settings) 
 
             Vec2 brake_time = velocity / accel; // (velocity+accel*Max(0, accel_time))/accel
             FREP(2)
-            if (accel_time.c[i] > 0) brake_time.c[i] += accel_time.c[i];
+            if (accel_time.c[i] > 0)
+                brake_time.c[i] += accel_time.c[i];
             Vec2 total_time = accel_time + brake_time;
 
             accel *= Sqr(total_time); // TODO: this is an approximation
@@ -587,7 +589,8 @@ void SmoothValueAccel2::update(C Vec2 &target, C SmoothValueSettings &settings) 
             d = Sqr(b) - 4 * a * c;
             accel_time = -b;
             FREP(2)
-            if (d.c[i] > 0) accel_time.c[i] += Sign(a.c[i]) * SqrtFast(d.c[i]);
+            if (d.c[i] > 0)
+                accel_time.c[i] += Sign(a.c[i]) * SqrtFast(d.c[i]);
             accel_time /= 2 * a;
 
             // brake_time=velocity/accel; // (velocity+accel*Max(0, accel_time))/accel
@@ -634,12 +637,14 @@ void SmoothValueAccel3::update(C Vec &target, C SmoothValueSettings &settings) {
 
             Vec a = accel, b = 2 * velocity, c = velocity * velocity / accel * 0.5f + value - target, d = Sqr(b) - 4 * a * c, accel_time = -b;
             FREP(3)
-            if (d.c[i] > 0) accel_time.c[i] += Sign(a.c[i]) * SqrtFast(d.c[i]);
+            if (d.c[i] > 0)
+                accel_time.c[i] += Sign(a.c[i]) * SqrtFast(d.c[i]);
             accel_time /= 2 * a;
 
             Vec brake_time = velocity / accel; // (velocity+accel*Max(0, accel_time))/accel
             FREP(3)
-            if (accel_time.c[i] > 0) brake_time.c[i] += accel_time.c[i];
+            if (accel_time.c[i] > 0)
+                brake_time.c[i] += accel_time.c[i];
             Vec total_time = accel_time + brake_time;
 
             accel *= Sqr(total_time); // TODO: this is an approximation
@@ -650,7 +655,8 @@ void SmoothValueAccel3::update(C Vec &target, C SmoothValueSettings &settings) {
             d = Sqr(b) - 4 * a * c;
             accel_time = -b;
             FREP(3)
-            if (d.c[i] > 0) accel_time.c[i] += Sign(a.c[i]) * SqrtFast(d.c[i]);
+            if (d.c[i] > 0)
+                accel_time.c[i] += Sign(a.c[i]) * SqrtFast(d.c[i]);
             accel_time /= 2 * a;
 
             FREP(3)
@@ -1642,7 +1648,8 @@ Bool ClipSet(C Str &text) {
 }
 static void Clean(Str &s) {
     REPA(s)
-    if (!Safe(s()[i])) s.remove(i);
+    if (!Safe(s()[i]))
+        s.remove(i);
 }
 Str ClipGet() {
     Str s;
@@ -2256,25 +2263,29 @@ struct Language {
 LANG_TYPE LanguageCode(CChar8 *code) {
     if (Is(code))
         FREPA(Languages)
-        if (Starts(code, Languages[i].code)) return Languages[i].lang;
+    if (Starts(code, Languages[i].code))
+        return Languages[i].lang;
     return LANG_NONE;
 }
 LANG_TYPE LanguageCode(C Str &code) {
     if (code.is())
         FREPA(Languages)
-        if (Starts(code, Languages[i].code)) return Languages[i].lang;
+    if (Starts(code, Languages[i].code))
+        return Languages[i].lang;
     return LANG_NONE;
 }
 CChar8 *LanguageCode(LANG_TYPE lang) {
     if (lang)
         FREPA(Languages)
-        if (Languages[i].lang == lang) return Languages[i].code;
+    if (Languages[i].lang == lang)
+        return Languages[i].code;
     return null;
 }
 CChar8 *LanguageName(LANG_TYPE lang) {
     if (lang)
         FREPA(Languages)
-        if (Languages[i].lang == lang) return Languages[i].name;
+    if (Languages[i].lang == lang)
+        return Languages[i].name;
     return null;
 }
 LANG_TYPE OSLanguage() {
@@ -3439,7 +3450,8 @@ Str CleanFileName(C Str &name) {
     }
     temp.removeOuterWhiteChars(); // on Windows names can't end with spaces (but they can start with spaces), on Windows names can start with spaces (but remove them anyway, because it's a non-standard naming convention to start with a space)
     REPA(temp)
-    if (temp[i] != '.' && temp[i] != ' ') return temp; // on Windows name must contain at least one character which is not space or dot (".", "..", ". .", "......", ". . ." - all of these are invalid names)
+    if (temp[i] != '.' && temp[i] != ' ')
+        return temp; // on Windows name must contain at least one character which is not space or dot (".", "..", ". .", "......", ". . ." - all of these are invalid names)
     return S;
 }
 /******************************************************************************/
@@ -4505,8 +4517,10 @@ struct QList {
     void removeLast() { _.removeLast(); }
 
     void operator+=(C TYPE &value) { _.New() = value; }
-    void operator+=(C QList<TYPE> &other) { FREPA(other)
-                                            T += other[i]; }
+    void operator+=(C QList<TYPE> &other) {
+        FREPA(other)
+        T += other[i];
+    }
     QList<TYPE> operator+(C QList<TYPE> &other) C {
         QList<TYPE> temp = T;
         temp += other;
@@ -5162,10 +5176,14 @@ struct std__string {
         return T;
     }
 
-    std__string(CChar8 *t, Int length) { FREP(length)
-                                         str += t[i]; }
-    std__string(CChar *t, Int length) { FREP(length)
-                                        str += t[i]; }
+    std__string(CChar8 *t, Int length) {
+        FREP(length)
+        str += t[i];
+    }
+    std__string(CChar *t, Int length) {
+        FREP(length)
+        str += t[i];
+    }
     std__string(CChar8 *t) : str(t) {}
     std__string(CChar *t) : str(t) {}
     std__string(C Str8 &s) : str(s) {}
@@ -5344,10 +5362,14 @@ struct std__wstring {
         return T;
     }
 
-    std__wstring(CChar8 *t, Int length) { FREP(length)
-                                          str += t[i]; }
-    std__wstring(CChar *t, Int length) { FREP(length)
-                                         str += t[i]; }
+    std__wstring(CChar8 *t, Int length) {
+        FREP(length)
+        str += t[i];
+    }
+    std__wstring(CChar *t, Int length) {
+        FREP(length)
+        str += t[i];
+    }
     std__wstring(CChar8 *t) : str(t) {}
     std__wstring(CChar *t) : str(t) {}
     std__wstring(C Str8 &s) : str(s) {}
@@ -5536,12 +5558,14 @@ Bool ParseExe(C Str &name, MemPtr<ExeSection> sections) {
 }
 Int FindSectionNameI(C CMemPtr<ExeSection> &sections, CChar8 *name) {
     REPA(sections)
-    if (Equal(sections[i].name, name, true)) return i;
+    if (Equal(sections[i].name, name, true))
+        return i;
     return -1;
 }
 Int FindSectionOffsetI(C CMemPtr<ExeSection> &sections, CPtr offset) {
     REPA(sections)
-    if (sections[i].contains(offset)) return i;
+    if (sections[i].contains(offset))
+        return i;
     return -1;
 }
 C ExeSection *FindSectionName(C CMemPtr<ExeSection> &sections, CChar8 *name) { return sections.addr(FindSectionNameI(sections, name)); }

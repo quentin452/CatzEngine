@@ -502,7 +502,7 @@ Half AO_PS(
                     o = 0;
                 w = w * 0.5 + 0.5; // fix artifacts, this increases weight if it's small, which results in brightening because we don't touch occlusion
                                    // w=Max(0.5, w); // fix artifacts, this increases weight if it's small, which results in brightening because we don't touch occlusion
-                // w=Max(1, 1/Sqrt(delta_len2));
+                                   // w=Max(1, 1/Sqrt(delta_len2));
 #if !DYNAMIC
                 if (UVOutsideView(test_uv)) {
                     o = 0;

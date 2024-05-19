@@ -29,7 +29,8 @@ static C Str &LockedSongName(Int global_song) { return InRange(global_song, Song
 static Int LockedSongFind(CChar *name) {
     if (Is(name))
         FREPA(Songs)
-        if (EqualPath(name, Songs[i].name)) return i;
+    if (EqualPath(name, Songs[i].name))
+        return i;
     return -1;
 }
 static Int LockedSongGet(CChar *name) {
@@ -107,14 +108,14 @@ void Playlist::operator-=(C Str &name) {
         Int song = LockedSongFind(name);
         if (song >= 0)
             REPA(_songs)
-            if (_songs[i] == song) {
-                _songs.remove(i, true);
-                if (_cur == i)
-                    _cur = -1;
-                else if (_cur > i)
-                    _cur--;
-                break;
-            }
+        if (_songs[i] == song) {
+            _songs.remove(i, true);
+            if (_cur == i)
+                _cur = -1;
+            else if (_cur > i)
+                _cur--;
+            break;
+        }
     }
 }
 void Playlist::operator+=(C UID &id) {

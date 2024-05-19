@@ -316,7 +316,8 @@ Bool Param::hasID(C UID &id) C {
     case PARAM_ID_ARRAY: {
         UID *ids = (UID *)value.s();
         REP(arrayIDs())
-        if (ids[i] == id) return true;
+        if (ids[i] == id)
+            return true;
     } break;
     }
     return false;
@@ -1252,7 +1253,8 @@ Int CompareValue(C Param &p0, C Param &p1) {
     case PARAM_ID_ARRAY: {
         Int ids0 = p0.arrayIDs(), ids1 = p1.arrayIDs(), ids = Min(ids0, ids1);
         FREP(ids)
-        if (Int c = Compare(p0.asID(i), p1.asID(i))) return c;
+        if (Int c = Compare(p0.asID(i), p1.asID(i)))
+            return c;
         return Compare(ids0, ids1);
     } break;
 

@@ -389,10 +389,12 @@ Bool Object::saveData(File &f, CChar *path) C {
         f << _align;
     f.cmpUIntV(params.elms());
     FREPA(params)
-    if (!params[i].save(f, path)) return false;
+    if (!params[i].save(f, path))
+        return false;
     f.cmpUIntV(sub_objs.elms());
     FREPA(sub_objs)
-    if (!sub_objs[i].saveData(f, path)) return false;
+    if (!sub_objs[i].saveData(f, path))
+        return false;
     return f.ok();
 }
 /******************************************************************************/
@@ -446,10 +448,12 @@ Bool Object::loadData(File &f, CChar *path) {
             f >> _align;
         params.setNum(f.decUIntV());
         FREPA(params)
-        if (!params[i].load(f, path)) goto error;
+        if (!params[i].load(f, path))
+            goto error;
         sub_objs.setNum(f.decUIntV());
         FREPA(sub_objs)
-        if (!sub_objs[i].loadData(f, path)) goto error;
+        if (!sub_objs[i].loadData(f, path))
+            goto error;
         if (f.ok()) {
             updateBaseSelf();
             return true;
@@ -480,9 +484,11 @@ Bool Object::loadData(File &f, CChar *path) {
             f >> _align;
         params.setNum(f.getInt());
         FREPA(params)
-        if (!params[i].load(f, path)) goto error;
+        if (!params[i].load(f, path))
+            goto error;
         REP(f.getInt())
-        if (!sub_objs.New().loadData(f, path)) goto error;
+        if (!sub_objs.New().loadData(f, path))
+            goto error;
         if (f.ok()) {
             updateBaseSelf();
             return true;
@@ -515,9 +521,11 @@ Bool Object::loadData(File &f, CChar *path) {
             f >> _align;
         params.setNum(f.getInt());
         FREPA(params)
-        if (!params[i].load(f, path)) goto error;
+        if (!params[i].load(f, path))
+            goto error;
         REP(f.getInt())
-        if (!sub_objs.New().loadData(f, path)) goto error;
+        if (!sub_objs.New().loadData(f, path))
+            goto error;
         if (f.ok()) {
             updateBaseSelf();
             if (!(_flag & OBJ_OVR_ACCESS))
@@ -554,7 +562,8 @@ Bool Object::loadData(File &f, CChar *path) {
             f >> _align;
         params.setNum(f.getInt());
         FREPA(params)
-        if (!params[i].load(f, path)) goto error;
+        if (!params[i].load(f, path))
+            goto error;
         if (_flag & (1 << 7)) {
             Param &param = params.New();
             param.type = PARAM_STR;
@@ -564,7 +573,8 @@ Bool Object::loadData(File &f, CChar *path) {
             _flag ^= (1 << 7);
         }
         REP(f.getInt())
-        if (!sub_objs.New().loadData(f, path)) goto error;
+        if (!sub_objs.New().loadData(f, path))
+            goto error;
         if (f.ok()) {
             updateBaseSelf();
             if (!(_flag & OBJ_OVR_ACCESS))
@@ -601,7 +611,8 @@ Bool Object::loadData(File &f, CChar *path) {
             f >> _align;
         params.setNum(f.getInt());
         FREPA(params)
-        if (!params[i].load(f, path)) goto error;
+        if (!params[i].load(f, path))
+            goto error;
         if (_flag & (1 << 7)) {
             Param &param = params.New();
             param.type = PARAM_STR;
@@ -611,7 +622,8 @@ Bool Object::loadData(File &f, CChar *path) {
             _flag ^= (1 << 7);
         }
         REP(f.getInt())
-        if (!sub_objs.New().loadData(f, path)) goto error;
+        if (!sub_objs.New().loadData(f, path))
+            goto error;
         if (f.ok()) {
             updateBaseSelf();
             if (!(_flag & OBJ_OVR_ACCESS))
@@ -644,9 +656,11 @@ Bool Object::loadData(File &f, CChar *path) {
             f >> _align;
         params.setNum(f.getInt());
         FREPA(params)
-        if (!params[i].load(f, path)) goto error;
+        if (!params[i].load(f, path))
+            goto error;
         REP(f.getInt())
-        if (!sub_objs.New().loadData(f, path)) goto error;
+        if (!sub_objs.New().loadData(f, path))
+            goto error;
         if (f.ok()) {
             updateBaseSelf();
             if (!(_flag & OBJ_OVR_ACCESS))
@@ -686,9 +700,11 @@ Bool Object::loadData(File &f, CChar *path) {
             SetOldAccess(T, 0); // old OBJ_CONST
         params.setNum(f.getInt());
         FREPA(params)
-        if (!params[i].load(f, path)) goto error;
+        if (!params[i].load(f, path))
+            goto error;
         REP(f.getInt())
-        if (!sub_objs.New().loadData(f, path)) goto error;
+        if (!sub_objs.New().loadData(f, path))
+            goto error;
         if (f.ok()) {
             updateBaseSelf();
             return true;
@@ -796,9 +812,11 @@ void Object::operator=(C Str &name) {
 Bool Object::operator==(C Object &obj) C {
     if (_type == obj._type && _flag == obj._flag && _align == obj._align && _access == obj._access && _path == obj._path && _base == obj._base && _mesh == obj._mesh && _mesh_variation_id == obj._mesh_variation_id && _phys == obj._phys && params.elms() == obj.params.elms() && sub_objs.elms() == obj.sub_objs.elms()) {
         REPA(params)
-        if (Compare(params[i], obj.params[i])) return false;
+        if (Compare(params[i], obj.params[i]))
+            return false;
         REPA(sub_objs)
-        if (sub_objs[i] != obj.sub_objs[i]) return false;
+        if (sub_objs[i] != obj.sub_objs[i])
+            return false;
         return true;
     }
     return false;

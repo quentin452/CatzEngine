@@ -2,23 +2,32 @@
 #include "stdafx.h"
 #define VAO_EXCLUSIVE HAS_THREADS // if VAO's can be processed only on the main thread - https://www.khronos.org/opengl/wiki/Vertex_Specification#Vertex_Array_Object "Note: VAOs cannot be shared between OpenGL contexts"
 /******************************************************************************/
-namespace EE{
+namespace EE {
 #if GL && VAO_EXCLUSIVE
 static Memc<UInt> VAOs; // list of released VAO's !! must be handled only under D._lock !! we could optionally 'glDeleteVertexArrays' them at app shut down but it's not needed
 #endif
 /******************************************************************************/
-Int BoneSplit::realToSplit0(Int bone)C {return Max(0, realToSplit(bone));}
-Int BoneSplit::realToSplit (Int bone)C
-{
-   REP(bones)if(split_to_real[i]==bone)return i;
-   return -1;
+Int BoneSplit::realToSplit0(Int bone) C { return Max(0, realToSplit(bone)); }
+Int BoneSplit::realToSplit(Int bone) C {
+    REP(bones)
+    if (split_to_real[i] == bone) return i;
+    return -1;
 }
 /******************************************************************************/
-T1(TYPE) static INLINE void Set(Byte *&v, Int i, C TYPE *s) {if(s){*(TYPE*)v=s[i]; v+=SIZE(TYPE);}}
-T1(TYPE) static INLINE void Set(Byte *&v,        C TYPE &s) {      *(TYPE*)v=s   ; v+=SIZE(TYPE); }
+T1(TYPE)
+static INLINE void Set(Byte *&v, Int i, C TYPE *s) {
+    if (s) {
+        *(TYPE *)v = s[i];
+        v += SIZE(TYPE);
+    }
+}
+T1(TYPE)
+static INLINE void Set(Byte *&v, C TYPE &s) {
+    *(TYPE *)v = s;
+    v += SIZE(TYPE);
+}
 /******************************************************************************/
-static INLINE void BlendSet(Byte *&v, Int i, C VecB4 *s)
-{
+static INLINE void BlendSet(Byte *&v, Int i, C VecB4 *s) {
 #if 0 // limit to first 3 bones (bones are already sorted in 'SetSkin')
    if(s)
    {
@@ -35,299 +44,405 @@ static INLINE void BlendSet(Byte *&v, Int i, C VecB4 *s)
       v+=SIZE(VecB4);
    }
 #else
-   Set(v, i, s);
+    Set(v, i, s);
 #endif
 }
-static INLINE void BoneSet(Byte *&v, Int i, C VtxBone *s)
-{
+static INLINE void BoneSet(Byte *&v, Int i, C VtxBone *s) {
 #if 1 // convert to VecB4 #MeshVtxBoneHW
-   if(s)
-   {
-      VecB4 &d=*(VecB4*)v;
-      d=s[i];
-      v+=SIZE(VecB4);
-   }
+    if (s) {
+        VecB4 &d = *(VecB4 *)v;
+        d = s[i];
+        v += SIZE(VecB4);
+    }
 #else
-   Set(v, i, s);
+    Set(v, i, s);
 #endif
 }
 /******************************************************************************/
-void MeshRender::zero()
-{
+void MeshRender::zero() {
 #if GL && VAO_EXCLUSIVE
-  _vao_reset=false;
+    _vao_reset = false;
 #endif
-  _storage=0;
-  _tris=0;
-  _flag=MESH_NONE;
-  _vf=null;
+    _storage = 0;
+    _tris = 0;
+    _flag = MESH_NONE;
+    _vf = null;
 }
-MeshRender::MeshRender(                 )                {zero();}
-MeshRender::MeshRender(C MeshRender &src) : MeshRender() {T=src;}
+MeshRender::MeshRender() { zero(); }
+MeshRender::MeshRender(C MeshRender &src) : MeshRender() { T = src; }
 /******************************************************************************/
-Int MeshRender::vtxOfs(MESH_FLAG elm)C
-{
-   Int ofs=0;
-   if(storageCompress())
-   {
-      if(_flag&VTX_POS     ){if(elm&VTX_POS     )return ofs; ofs+=SIZE(Vec  );}
-      if(_flag&VTX_NRM     ){if(elm&VTX_NRM     )return ofs; ofs+=SIZE(VecB4);}
-      if(_flag&VTX_TAN_BIN ){if(elm&VTX_TAN_BIN )return ofs; ofs+=SIZE(VecB4);} // in compressed mode Tan and Bin are merged together
-      if(_flag&VTX_HLP     ){if(elm&VTX_HLP     )return ofs; ofs+=SIZE(Vec  );}
-      if(_flag&VTX_TEX0    ){if(elm&VTX_TEX0    )return ofs; ofs+=SIZE(Vec2 );}
-      if(_flag&VTX_TEX1    ){if(elm&VTX_TEX1    )return ofs; ofs+=SIZE(Vec2 );}
-      if(_flag&VTX_TEX2    ){if(elm&VTX_TEX2    )return ofs; ofs+=SIZE(Vec2 );}
-      if(_flag&VTX_TEX3    ){if(elm&VTX_TEX3    )return ofs; ofs+=SIZE(Vec2 );}
-      if(_flag&VTX_MATRIX  ){if(elm&VTX_MATRIX  )return ofs; ofs+=SIZE(VecB4);} // #MeshVtxBoneHW
-      if(_flag&VTX_BLEND   ){if(elm&VTX_BLEND   )return ofs; ofs+=SIZE(VecB4);}
-      if(_flag&VTX_SIZE    ){if(elm&VTX_SIZE    )return ofs; ofs+=SIZE(Flt  );}
-      if(_flag&VTX_MATERIAL){if(elm&VTX_MATERIAL)return ofs; ofs+=SIZE(VecB4);}
-      if(_flag&VTX_COLOR   ){if(elm&VTX_COLOR   )return ofs; ofs+=SIZE(VecB4);}
-   }else
-   {
-      if(_flag&VTX_POS     ){if(elm&VTX_POS     )return ofs; ofs+=SIZE(Vec  );}
-      if(_flag&VTX_NRM     ){if(elm&VTX_NRM     )return ofs; ofs+=SIZE(Vec  );}
-      if(_flag&VTX_TAN     ){if(elm&VTX_TAN     )return ofs; ofs+=SIZE(Vec  );}
-      if(_flag&VTX_BIN     ){if(elm&VTX_BIN     )return ofs; ofs+=SIZE(Vec  );}
-      if(_flag&VTX_HLP     ){if(elm&VTX_HLP     )return ofs; ofs+=SIZE(Vec  );}
-      if(_flag&VTX_TEX0    ){if(elm&VTX_TEX0    )return ofs; ofs+=SIZE(Vec2 );}
-      if(_flag&VTX_TEX1    ){if(elm&VTX_TEX1    )return ofs; ofs+=SIZE(Vec2 );}
-      if(_flag&VTX_TEX2    ){if(elm&VTX_TEX2    )return ofs; ofs+=SIZE(Vec2 );}
-      if(_flag&VTX_TEX3    ){if(elm&VTX_TEX3    )return ofs; ofs+=SIZE(Vec2 );}
-      if(_flag&VTX_MATRIX  ){if(elm&VTX_MATRIX  )return ofs; ofs+=SIZE(VecB4);} // #MeshVtxBoneHW
-      if(_flag&VTX_BLEND   ){if(elm&VTX_BLEND   )return ofs; ofs+=SIZE(VecB4);}
-      if(_flag&VTX_SIZE    ){if(elm&VTX_SIZE    )return ofs; ofs+=SIZE(Flt  );}
-      if(_flag&VTX_MATERIAL){if(elm&VTX_MATERIAL)return ofs; ofs+=SIZE(VecB4);}
-      if(_flag&VTX_COLOR   ){if(elm&VTX_COLOR   )return ofs; ofs+=SIZE(VecB4);}
-   }
-   return -1;
+Int MeshRender::vtxOfs(MESH_FLAG elm) C {
+    Int ofs = 0;
+    if (storageCompress()) {
+        if (_flag & VTX_POS) {
+            if (elm & VTX_POS)
+                return ofs;
+            ofs += SIZE(Vec);
+        }
+        if (_flag & VTX_NRM) {
+            if (elm & VTX_NRM)
+                return ofs;
+            ofs += SIZE(VecB4);
+        }
+        if (_flag & VTX_TAN_BIN) {
+            if (elm & VTX_TAN_BIN)
+                return ofs;
+            ofs += SIZE(VecB4);
+        } // in compressed mode Tan and Bin are merged together
+        if (_flag & VTX_HLP) {
+            if (elm & VTX_HLP)
+                return ofs;
+            ofs += SIZE(Vec);
+        }
+        if (_flag & VTX_TEX0) {
+            if (elm & VTX_TEX0)
+                return ofs;
+            ofs += SIZE(Vec2);
+        }
+        if (_flag & VTX_TEX1) {
+            if (elm & VTX_TEX1)
+                return ofs;
+            ofs += SIZE(Vec2);
+        }
+        if (_flag & VTX_TEX2) {
+            if (elm & VTX_TEX2)
+                return ofs;
+            ofs += SIZE(Vec2);
+        }
+        if (_flag & VTX_TEX3) {
+            if (elm & VTX_TEX3)
+                return ofs;
+            ofs += SIZE(Vec2);
+        }
+        if (_flag & VTX_MATRIX) {
+            if (elm & VTX_MATRIX)
+                return ofs;
+            ofs += SIZE(VecB4);
+        } // #MeshVtxBoneHW
+        if (_flag & VTX_BLEND) {
+            if (elm & VTX_BLEND)
+                return ofs;
+            ofs += SIZE(VecB4);
+        }
+        if (_flag & VTX_SIZE) {
+            if (elm & VTX_SIZE)
+                return ofs;
+            ofs += SIZE(Flt);
+        }
+        if (_flag & VTX_MATERIAL) {
+            if (elm & VTX_MATERIAL)
+                return ofs;
+            ofs += SIZE(VecB4);
+        }
+        if (_flag & VTX_COLOR) {
+            if (elm & VTX_COLOR)
+                return ofs;
+            ofs += SIZE(VecB4);
+        }
+    } else {
+        if (_flag & VTX_POS) {
+            if (elm & VTX_POS)
+                return ofs;
+            ofs += SIZE(Vec);
+        }
+        if (_flag & VTX_NRM) {
+            if (elm & VTX_NRM)
+                return ofs;
+            ofs += SIZE(Vec);
+        }
+        if (_flag & VTX_TAN) {
+            if (elm & VTX_TAN)
+                return ofs;
+            ofs += SIZE(Vec);
+        }
+        if (_flag & VTX_BIN) {
+            if (elm & VTX_BIN)
+                return ofs;
+            ofs += SIZE(Vec);
+        }
+        if (_flag & VTX_HLP) {
+            if (elm & VTX_HLP)
+                return ofs;
+            ofs += SIZE(Vec);
+        }
+        if (_flag & VTX_TEX0) {
+            if (elm & VTX_TEX0)
+                return ofs;
+            ofs += SIZE(Vec2);
+        }
+        if (_flag & VTX_TEX1) {
+            if (elm & VTX_TEX1)
+                return ofs;
+            ofs += SIZE(Vec2);
+        }
+        if (_flag & VTX_TEX2) {
+            if (elm & VTX_TEX2)
+                return ofs;
+            ofs += SIZE(Vec2);
+        }
+        if (_flag & VTX_TEX3) {
+            if (elm & VTX_TEX3)
+                return ofs;
+            ofs += SIZE(Vec2);
+        }
+        if (_flag & VTX_MATRIX) {
+            if (elm & VTX_MATRIX)
+                return ofs;
+            ofs += SIZE(VecB4);
+        } // #MeshVtxBoneHW
+        if (_flag & VTX_BLEND) {
+            if (elm & VTX_BLEND)
+                return ofs;
+            ofs += SIZE(VecB4);
+        }
+        if (_flag & VTX_SIZE) {
+            if (elm & VTX_SIZE)
+                return ofs;
+            ofs += SIZE(Flt);
+        }
+        if (_flag & VTX_MATERIAL) {
+            if (elm & VTX_MATERIAL)
+                return ofs;
+            ofs += SIZE(VecB4);
+        }
+        if (_flag & VTX_COLOR) {
+            if (elm & VTX_COLOR)
+                return ofs;
+            ofs += SIZE(VecB4);
+        }
+    }
+    return -1;
 }
 /******************************************************************************/
-MeshRender& MeshRender::del()
-{
+MeshRender &MeshRender::del() {
 #if GL
-   if(_vao) // delete VAO
-   {
-      SafeSyncLocker lock(D._lock);
-      if(_vao)
-      {
-         if(D.created())
-         {
-         #if VAO_EXCLUSIVE
-            if(!App.mainThread())VAOs.add(_vao);else // if this is not the main thread, then store it in container for future re-use
-         #endif
-               glDeleteVertexArrays(1, &_vao); // we can delete it
-         }
-        _vao=0; // clear while in lock
-      }
-   }
+    if (_vao) // delete VAO
+    {
+        SafeSyncLocker lock(D._lock);
+        if (_vao) {
+            if (D.created()) {
+#if VAO_EXCLUSIVE
+                if (!App.mainThread())
+                    VAOs.add(_vao);
+                else // if this is not the main thread, then store it in container for future re-use
 #endif
-  _vb.del();
-  _ib.del();
-   zero(); return T;
-}
-Bool MeshRender::setVF()
-{
-#if GL
-   // create VAO
-   if(D.created())
-   {
-   #if VAO_EXCLUSIVE
-      if(!App.mainThread())_vao_reset=true;else // if this is not the main thread, then we have to reset it later
-   #endif
-      {
-         VtxFormatGL *temp=VtxFormats(VtxFormatKey(_flag, storageCompress() ? VTX_COMPRESS_NRM_TAN_BIN : 0))->vf; if(!temp)return false;
-         if(!_vao)
-         {
-            SyncLocker lock(D._lock);
-         #if VAO_EXCLUSIVE
-            if(VAOs.elms())_vao=VAOs.pop();else // re-use if we have any
-         #endif
-            {
-               glGenVertexArrays(1, &_vao); // create new one
-               if(!_vao)return false;
+                    glDeleteVertexArrays(1, &_vao); // we can delete it
             }
-         }
-         glBindVertexArray(_vao);
-        _vb.set(); // these must be set after 'glBindVertexArray' and before 'enableSet'
-        _ib.set(); // these must be set after 'glBindVertexArray' and before 'enableSet'
-         REP(GL_VTX_NUM)glDisableVertexAttribArray(i); // first disable all, in case this VAO was set with other data before
-         temp->enableSet(); // enable and set new data with VB and IB already set
-      #if VAO_EXCLUSIVE
-        _vao_reset=false; // we've just set it now, so clear reset
-      #else
-         glFlush(); // to make sure that the data was initialized, in case it'll be accessed on a secondary thread, no need to flush on exclusive mode, because there all VAO's are used only on the main thread
-      #endif
-      #if 0 // !! Don't do this, instead every time we want to bind some IB we use 'BindIndexBuffer' which disables VAO, also this method 'setVF' requires to have VAO already bound at the end so we don't have to bind it again in 'MeshRender.set' !!
-         glBindVertexArray(0); // disable VAO so binding IB will not modify this VAO
-      #endif
-      }
-      return true; // return success in both cases (!mainThread=reset later, and mainThread=created VAO)
-   }
-#else
-  _vf=VtxFormats(VtxFormatKey(_flag, storageCompress() ? VTX_COMPRESS_NRM_TAN_BIN : 0))->vf;
+            _vao = 0; // clear while in lock
+        }
+    }
 #endif
-   return _vf!=null;
+    _vb.del();
+    _ib.del();
+    zero();
+    return T;
 }
-static void SetVtxData(Byte *v, MESH_FLAG flag, C MeshBase &src, Bool compress)
-{
-   if(compress)
-   {
-      if((flag&(VTX_MSHR&~VTX_MATERIAL))==(VTX_POS|VTX_NRM|VTX_COLOR)) // optimized version for heightmaps (most heightmaps will have VTX_COLOR due to ambient occlusion) it's included because heightmaps can be created at runtime
-      {
-       C Vec   *vtx_pos     =                       src.vtx.pos     ();
-       C Vec   *vtx_nrm     =                       src.vtx.nrm     ();
-       C VecB4 *vtx_material=((flag&VTX_MATERIAL) ? src.vtx.material() : null);
-       C Color *vtx_color   =                       src.vtx.color   ();
-         if(vtx_material)REPA(src.vtx)
-         {
-            Set(v,             *vtx_pos     ++ );
-            Set(v, NrmToSByte4(*vtx_nrm     ++));
-            Set(v,             *vtx_material++ );
-            Set(v,             *vtx_color   ++ );
-         }else REPA(src.vtx)
-         {
-            Set(v,             *vtx_pos  ++ );
-            Set(v, NrmToSByte4(*vtx_nrm  ++));
-            Set(v,             *vtx_color++ );
-         }
-      }else
-      {
-       C Vec     *vtx_pos     =((flag&VTX_POS     ) ? src.vtx.pos     () : null);
-       C Vec     *vtx_nrm     =((flag&VTX_NRM     ) ? src.vtx.nrm     () : null);
-       C Vec     *vtx_tan     =((flag&VTX_TAN_BIN ) ? src.vtx.tan     () : null);
-       C Vec     *vtx_bin     =((flag&VTX_TAN_BIN ) ? src.vtx.bin     () : null);
-       C Vec     *vtx_hlp     =((flag&VTX_HLP     ) ? src.vtx.hlp     () : null);
-       C Vec2    *vtx_tex0    =((flag&VTX_TEX0    ) ? src.vtx.tex0    () : null);
-       C Vec2    *vtx_tex1    =((flag&VTX_TEX1    ) ? src.vtx.tex1    () : null);
-       C Vec2    *vtx_tex2    =((flag&VTX_TEX2    ) ? src.vtx.tex2    () : null);
-       C Vec2    *vtx_tex3    =((flag&VTX_TEX3    ) ? src.vtx.tex3    () : null);
-       C VtxBone *vtx_matrix  =((flag&VTX_MATRIX  ) ? src.vtx.matrix  () : null);
-       C VecB4   *vtx_blend   =((flag&VTX_BLEND   ) ? src.vtx.blend   () : null);
-       C Flt     *vtx_size    =((flag&VTX_SIZE    ) ? src.vtx.size    () : null);
-       C VecB4   *vtx_material=((flag&VTX_MATERIAL) ? src.vtx.material() : null);
-       C Color   *vtx_color   =((flag&VTX_COLOR   ) ? src.vtx.color   () : null);
+Bool MeshRender::setVF() {
+#if GL
+    // create VAO
+    if (D.created()) {
+#if VAO_EXCLUSIVE
+        if (!App.mainThread())
+            _vao_reset = true;
+        else // if this is not the main thread, then we have to reset it later
+#endif
+        {
+            VtxFormatGL *temp = VtxFormats(VtxFormatKey(_flag, storageCompress() ? VTX_COMPRESS_NRM_TAN_BIN : 0))->vf;
+            if (!temp)
+                return false;
+            if (!_vao) {
+                SyncLocker lock(D._lock);
+#if VAO_EXCLUSIVE
+                if (VAOs.elms())
+                    _vao = VAOs.pop();
+                else // re-use if we have any
+#endif
+                {
+                    glGenVertexArrays(1, &_vao); // create new one
+                    if (!_vao)
+                        return false;
+                }
+            }
+            glBindVertexArray(_vao);
+            _vb.set(); // these must be set after 'glBindVertexArray' and before 'enableSet'
+            _ib.set(); // these must be set after 'glBindVertexArray' and before 'enableSet'
+            REP(GL_VTX_NUM)
+            glDisableVertexAttribArray(i); // first disable all, in case this VAO was set with other data before
+            temp->enableSet();             // enable and set new data with VB and IB already set
+#if VAO_EXCLUSIVE
+            _vao_reset = false; // we've just set it now, so clear reset
+#else
+            glFlush(); // to make sure that the data was initialized, in case it'll be accessed on a secondary thread, no need to flush on exclusive mode, because there all VAO's are used only on the main thread
+#endif
+#if 0 // !! Don't do this, instead every time we want to bind some IB we use 'BindIndexBuffer' which disables VAO, also this method 'setVF' requires to have VAO already bound at the end so we don't have to bind it again in 'MeshRender.set' !!
+         glBindVertexArray(0); // disable VAO so binding IB will not modify this VAO
+#endif
+        }
+        return true; // return success in both cases (!mainThread=reset later, and mainThread=created VAO)
+    }
+#else
+    _vf = VtxFormats(VtxFormatKey(_flag, storageCompress() ? VTX_COMPRESS_NRM_TAN_BIN : 0))->vf;
+#endif
+    return _vf != null;
+}
+static void SetVtxData(Byte *v, MESH_FLAG flag, C MeshBase &src, Bool compress) {
+    if (compress) {
+        if ((flag & (VTX_MSHR & ~VTX_MATERIAL)) == (VTX_POS | VTX_NRM | VTX_COLOR)) // optimized version for heightmaps (most heightmaps will have VTX_COLOR due to ambient occlusion) it's included because heightmaps can be created at runtime
+        {
+            C Vec *vtx_pos = src.vtx.pos();
+            C Vec *vtx_nrm = src.vtx.nrm();
+            C VecB4 *vtx_material = ((flag & VTX_MATERIAL) ? src.vtx.material() : null);
+            C Color *vtx_color = src.vtx.color();
+            if (vtx_material)
+                REPA(src.vtx) {
+                    Set(v, *vtx_pos++);
+                    Set(v, NrmToSByte4(*vtx_nrm++));
+                    Set(v, *vtx_material++);
+                    Set(v, *vtx_color++);
+                }
+            else
+                REPA(src.vtx) {
+                    Set(v, *vtx_pos++);
+                    Set(v, NrmToSByte4(*vtx_nrm++));
+                    Set(v, *vtx_color++);
+                }
+        } else {
+            C Vec *vtx_pos = ((flag & VTX_POS) ? src.vtx.pos() : null);
+            C Vec *vtx_nrm = ((flag & VTX_NRM) ? src.vtx.nrm() : null);
+            C Vec *vtx_tan = ((flag & VTX_TAN_BIN) ? src.vtx.tan() : null);
+            C Vec *vtx_bin = ((flag & VTX_TAN_BIN) ? src.vtx.bin() : null);
+            C Vec *vtx_hlp = ((flag & VTX_HLP) ? src.vtx.hlp() : null);
+            C Vec2 *vtx_tex0 = ((flag & VTX_TEX0) ? src.vtx.tex0() : null);
+            C Vec2 *vtx_tex1 = ((flag & VTX_TEX1) ? src.vtx.tex1() : null);
+            C Vec2 *vtx_tex2 = ((flag & VTX_TEX2) ? src.vtx.tex2() : null);
+            C Vec2 *vtx_tex3 = ((flag & VTX_TEX3) ? src.vtx.tex3() : null);
+            C VtxBone *vtx_matrix = ((flag & VTX_MATRIX) ? src.vtx.matrix() : null);
+            C VecB4 *vtx_blend = ((flag & VTX_BLEND) ? src.vtx.blend() : null);
+            C Flt *vtx_size = ((flag & VTX_SIZE) ? src.vtx.size() : null);
+            C VecB4 *vtx_material = ((flag & VTX_MATERIAL) ? src.vtx.material() : null);
+            C Color *vtx_color = ((flag & VTX_COLOR) ? src.vtx.color() : null);
 
-         FREPA(src.vtx)
-         {
+            FREPA(src.vtx) {
+                Set(v, i, vtx_pos);
+                if (vtx_nrm)
+                    Set(v, NrmToSByte4(vtx_nrm[i]));
+                if (vtx_tan || vtx_bin)
+                    Set(v, TBNToSByte4(vtx_tan ? &vtx_tan[i] : null, vtx_bin ? &vtx_bin[i] : null, vtx_nrm ? &vtx_nrm[i] : null));
+                Set(v, i, vtx_hlp);
+                Set(v, i, vtx_tex0);
+                Set(v, i, vtx_tex1);
+                Set(v, i, vtx_tex2);
+                Set(v, i, vtx_tex3);
+                BoneSet(v, i, vtx_matrix);
+                BlendSet(v, i, vtx_blend);
+                Set(v, i, vtx_size);
+                Set(v, i, vtx_material);
+                Set(v, i, vtx_color);
+            }
+        }
+    } else {
+        C Vec *vtx_pos = ((flag & VTX_POS) ? src.vtx.pos() : null);
+        C Vec *vtx_nrm = ((flag & VTX_NRM) ? src.vtx.nrm() : null);
+        C Vec *vtx_tan = ((flag & VTX_TAN) ? src.vtx.tan() : null);
+        C Vec *vtx_bin = ((flag & VTX_BIN) ? src.vtx.bin() : null);
+        C Vec *vtx_hlp = ((flag & VTX_HLP) ? src.vtx.hlp() : null);
+        C Vec2 *vtx_tex0 = ((flag & VTX_TEX0) ? src.vtx.tex0() : null);
+        C Vec2 *vtx_tex1 = ((flag & VTX_TEX1) ? src.vtx.tex1() : null);
+        C Vec2 *vtx_tex2 = ((flag & VTX_TEX2) ? src.vtx.tex2() : null);
+        C Vec2 *vtx_tex3 = ((flag & VTX_TEX3) ? src.vtx.tex3() : null);
+        C VtxBone *vtx_matrix = ((flag & VTX_MATRIX) ? src.vtx.matrix() : null);
+        C VecB4 *vtx_blend = ((flag & VTX_BLEND) ? src.vtx.blend() : null);
+        C Flt *vtx_size = ((flag & VTX_SIZE) ? src.vtx.size() : null);
+        C VecB4 *vtx_material = ((flag & VTX_MATERIAL) ? src.vtx.material() : null);
+        C Color *vtx_color = ((flag & VTX_COLOR) ? src.vtx.color() : null);
+
+        FREPA(src.vtx) {
             Set(v, i, vtx_pos);
-            if(vtx_nrm           )Set(v, NrmToSByte4(vtx_nrm[i]));
-            if(vtx_tan || vtx_bin)Set(v, TBNToSByte4(vtx_tan ? &vtx_tan[i] : null, vtx_bin ? &vtx_bin[i] : null, vtx_nrm ? &vtx_nrm[i] : null));
-            Set(v, i, vtx_hlp     );
-            Set(v, i, vtx_tex0    );
-            Set(v, i, vtx_tex1    );
-            Set(v, i, vtx_tex2    );
-            Set(v, i, vtx_tex3    );
-        BoneSet(v, i, vtx_matrix  );
-       BlendSet(v, i, vtx_blend   );
-            Set(v, i, vtx_size    );
+            Set(v, i, vtx_nrm);
+            Set(v, i, vtx_tan);
+            Set(v, i, vtx_bin);
+            Set(v, i, vtx_hlp);
+            Set(v, i, vtx_tex0);
+            Set(v, i, vtx_tex1);
+            Set(v, i, vtx_tex2);
+            Set(v, i, vtx_tex3);
+            BoneSet(v, i, vtx_matrix);
+            BlendSet(v, i, vtx_blend);
+            Set(v, i, vtx_size);
             Set(v, i, vtx_material);
-            Set(v, i, vtx_color   );
-         }
-      }
-   }else
-   {
-    C Vec     *vtx_pos     =((flag&VTX_POS     ) ? src.vtx.pos     () : null);
-    C Vec     *vtx_nrm     =((flag&VTX_NRM     ) ? src.vtx.nrm     () : null);
-    C Vec     *vtx_tan     =((flag&VTX_TAN     ) ? src.vtx.tan     () : null);
-    C Vec     *vtx_bin     =((flag&VTX_BIN     ) ? src.vtx.bin     () : null);
-    C Vec     *vtx_hlp     =((flag&VTX_HLP     ) ? src.vtx.hlp     () : null);
-    C Vec2    *vtx_tex0    =((flag&VTX_TEX0    ) ? src.vtx.tex0    () : null);
-    C Vec2    *vtx_tex1    =((flag&VTX_TEX1    ) ? src.vtx.tex1    () : null);
-    C Vec2    *vtx_tex2    =((flag&VTX_TEX2    ) ? src.vtx.tex2    () : null);
-    C Vec2    *vtx_tex3    =((flag&VTX_TEX3    ) ? src.vtx.tex3    () : null);
-    C VtxBone *vtx_matrix  =((flag&VTX_MATRIX  ) ? src.vtx.matrix  () : null);
-    C VecB4   *vtx_blend   =((flag&VTX_BLEND   ) ? src.vtx.blend   () : null);
-    C Flt     *vtx_size    =((flag&VTX_SIZE    ) ? src.vtx.size    () : null);
-    C VecB4   *vtx_material=((flag&VTX_MATERIAL) ? src.vtx.material() : null);
-    C Color   *vtx_color   =((flag&VTX_COLOR   ) ? src.vtx.color   () : null);
-
-      FREPA(src.vtx)
-      {
-         Set(v, i, vtx_pos     );
-         Set(v, i, vtx_nrm     );
-         Set(v, i, vtx_tan     );
-         Set(v, i, vtx_bin     );
-         Set(v, i, vtx_hlp     );
-         Set(v, i, vtx_tex0    );
-         Set(v, i, vtx_tex1    );
-         Set(v, i, vtx_tex2    );
-         Set(v, i, vtx_tex3    );
-     BoneSet(v, i, vtx_matrix  );
-    BlendSet(v, i, vtx_blend   );
-         Set(v, i, vtx_size    );
-         Set(v, i, vtx_material);
-         Set(v, i, vtx_color   );
-      }
-   }
+            Set(v, i, vtx_color);
+        }
+    }
 }
-Bool MeshRender::create(Int vtxs, Int tris, MESH_FLAG flag, Bool compress)
-{ // avoid deleting at the start, instead, check if some members already match
-   UInt compress_flag=(compress ? VTX_COMPRESS_NRM_TAN_BIN : 0);
-   Bool same_format=(flag==T.flag() && compress==storageCompress()); // !! this must check for all parameters which are passed into 'VtxFormatKey' !!
+Bool MeshRender::create(Int vtxs, Int tris, MESH_FLAG flag, Bool compress) { // avoid deleting at the start, instead, check if some members already match
+    UInt compress_flag = (compress ? VTX_COMPRESS_NRM_TAN_BIN : 0);
+    Bool same_format = (flag == T.flag() && compress == storageCompress()); // !! this must check for all parameters which are passed into 'VtxFormatKey' !!
 
-   if((same_format && _vb.vtxs()==vtxs && !_vb._lock_mode) || _vb.create(vtxs  , flag         , compress_flag)) // do a separate check for '_vb' because it's faster than 'create' method which may do some more checks for vtx size
-   if(                                                        _ib.create(tris*3, vtxs<=0x10000               ))
-   {
-      T._storage=(compress ? MSHR_COMPRESS : 0);
-      T._tris   =tris;
-      T._flag   =flag;
-      return (!GL && same_format) || setVF(); // skip setting VF if we already have same format (however for GL we always need it to set VAO)
-   }
-   del(); return false;
+    if ((same_format && _vb.vtxs() == vtxs && !_vb._lock_mode) || _vb.create(vtxs, flag, compress_flag)) // do a separate check for '_vb' because it's faster than 'create' method which may do some more checks for vtx size
+        if (_ib.create(tris * 3, vtxs <= 0x10000)) {
+            T._storage = (compress ? MSHR_COMPRESS : 0);
+            T._tris = tris;
+            T._flag = flag;
+            return (!GL && same_format) || setVF(); // skip setting VF if we already have same format (however for GL we always need it to set VAO)
+        }
+    del();
+    return false;
 }
-Bool MeshRender::createRaw(C MeshBase &src, MESH_FLAG flag_and, Bool optimize, Bool compress)
-{
-   MESH_FLAG flag=flag_and&src.flag()&VTX_MSHR;
-   Int vtxs=src.vtxs(), tris=src.trisTotal();
+Bool MeshRender::createRaw(C MeshBase &src, MESH_FLAG flag_and, Bool optimize, Bool compress) {
+    MESH_FLAG flag = flag_and & src.flag() & VTX_MSHR;
+    Int vtxs = src.vtxs(), tris = src.trisTotal();
 
 #if 1 // lock-less version
-   UInt compress_flag=(compress ? VTX_COMPRESS_NRM_TAN_BIN : 0);
-   Bool same_format=(flag==T.flag() && compress==storageCompress()); // !! this must check for all parameters which are passed into 'VtxFormatKey' !!
-   Int  vtx_size=VtxSize(flag, compress_flag);
-   Memt<Byte> temp;
+    UInt compress_flag = (compress ? VTX_COMPRESS_NRM_TAN_BIN : 0);
+    Bool same_format = (flag == T.flag() && compress == storageCompress()); // !! this must check for all parameters which are passed into 'VtxFormatKey' !!
+    Int vtx_size = VtxSize(flag, compress_flag);
+    Memt<Byte> temp;
 
-   // VB
-   {
-      temp.setNumDiscard(vtx_size*vtxs);
-      SetVtxData(temp.data(), flag, src, compress);
-      if(!_vb.createNum(vtx_size, vtxs, false, temp.dataNull()))goto error;
-   }
+    // VB
+    {
+        temp.setNumDiscard(vtx_size * vtxs);
+        SetVtxData(temp.data(), flag, src, compress);
+        if (!_vb.createNum(vtx_size, vtxs, false, temp.dataNull()))
+            goto error;
+    }
 
-   // IB
-   {
-      Bool ib16=(vtxs<=0x10000);
-      Int  inds=tris*3;
-      Int  ind_size=(ib16 ? 2 : 4);
-      temp.setNumDiscard(ind_size*inds);
-      SetFaceIndex(temp.data(), src.tri.ind(), src.tris(), src.quad.ind(), src.quads(), ib16);
-      if(!_ib.create(inds, ib16, false, temp.dataNull()))goto error;
-   }
+    // IB
+    {
+        Bool ib16 = (vtxs <= 0x10000);
+        Int inds = tris * 3;
+        Int ind_size = (ib16 ? 2 : 4);
+        temp.setNumDiscard(ind_size * inds);
+        SetFaceIndex(temp.data(), src.tri.ind(), src.tris(), src.quad.ind(), src.quads(), ib16);
+        if (!_ib.create(inds, ib16, false, temp.dataNull()))
+            goto error;
+    }
 
-   T._storage=(compress ? MSHR_COMPRESS : 0);
-   T._tris   =tris;
-   T._flag   =flag;
-   if(!((!GL && same_format) || setVF()))goto error; // skip setting VF if we already have same format (however for GL we always need it to set VAO)
+    T._storage = (compress ? MSHR_COMPRESS : 0);
+    T._tris = tris;
+    T._flag = flag;
+    if (!((!GL && same_format) || setVF()))
+        goto error; // skip setting VF if we already have same format (however for GL we always need it to set VAO)
 #else
-   if(!create(vtxs, tris, flag, compress))goto error;
+    if (!create(vtxs, tris, flag, compress))
+        goto error;
 
-   if(Byte *vtx=vtxLock(LOCK_WRITE))
-   {
-      SetVtxData(vtx, T.flag(), src, storageCompress());
-      vtxUnlock();
-   }
+    if (Byte *vtx = vtxLock(LOCK_WRITE)) {
+        SetVtxData(vtx, T.flag(), src, storageCompress());
+        vtxUnlock();
+    }
 
-   if(Ptr ind=indLock(LOCK_WRITE))
-   {
-      SetFaceIndex(ind, src.tri.ind(), src.tris(), src.quad.ind(), src.quads(), _ib.bit16());
-      indUnlock();
-   }
+    if (Ptr ind = indLock(LOCK_WRITE)) {
+        SetFaceIndex(ind, src.tri.ind(), src.tris(), src.quad.ind(), src.quads(), _ib.bit16());
+        indUnlock();
+    }
 #endif
 
-   if(optimize)T.optimize();
-   return true;
+    if (optimize)
+        T.optimize();
+    return true;
 error:
-   del(); return false;
+    del();
+    return false;
 }
 /*struct SplitPart
 {
@@ -368,356 +483,420 @@ error:
 
    SplitPart() {matrixes=0; Zero(matrix_used);}
 };*/
-Bool MeshRender::create(C MeshBase &src, MESH_FLAG flag_and, Bool optimize, Bool compress)
-{
- /*check if MAX_MATRIX limit is exceeded
-   if((flag_and&VTX_MATRIX) && src.vtx.matrix())REPA(src.vtx)
-   {
-    C VecB4 &m=src.vtx.matrix(i);
-      if(m.x>=MAX_MATRIX // we exceed the limit of available matrixes, so we need to create in parts
-      || m.y>=MAX_MATRIX  // MAX_MATRIX must be checked instead of MAX_MATRIX_HW because we're preparing splits for all platforms (in affected platforms we would then just adjust vertex matrixes instead of recalculating the splits)
-      || m.z>=MAX_MATRIX
-      || m.w>=MAX_MATRIX)
+Bool MeshRender::create(C MeshBase &src, MESH_FLAG flag_and, Bool optimize, Bool compress) {
+    /*check if MAX_MATRIX limit is exceeded
+      if((flag_and&VTX_MATRIX) && src.vtx.matrix())REPA(src.vtx)
       {
-         Memb<SplitPart> splits;
-         Memc<MeshBase > mshbs ;
-         Mems<Int>  tri_split;  tri_split.setNum(src.tris ()); Memt<Bool>  tri_is;  tri_is.setNum(src.tris ());
-         Mems<Int> quad_split; quad_split.setNum(src.quads()); Memt<Bool> quad_is; quad_is.setNum(src.quads());
-
-         // set split index for each triangle and quad
-         VecB4 weight[4]; // 3 vtxs in a tri and 4 vtxs in a quad
-         REPAO(weight).set(255, 255, 255, 255); // assume that all are used
-         FREPA(src.tri) // add in original order
+       C VecB4 &m=src.vtx.matrix(i);
+         if(m.x>=MAX_MATRIX // we exceed the limit of available matrixes, so we need to create in parts
+         || m.y>=MAX_MATRIX  // MAX_MATRIX must be checked instead of MAX_MATRIX_HW because we're preparing splits for all platforms (in affected platforms we would then just adjust vertex matrixes instead of recalculating the splits)
+         || m.z>=MAX_MATRIX
+         || m.w>=MAX_MATRIX)
          {
-          C VecI &ind     = src.tri.ind(i);
-            VecB4 matrix[]={src.vtx.matrix(ind.x), src.vtx.matrix(ind.y), src.vtx.matrix(ind.z)};
-            if(src.vtx.blend())REPA(ind)weight[i]=src.vtx.blend(ind.c[i]); 
-            Int   s=0; for(; s<splits.elms(); s++)if(splits[s].canFit(matrix, weight, Elms(matrix)))break; if(!InRange(s, splits))s=splits.addNum(1);
-            splits[s].add(matrix, weight, Elms(matrix));
-            tri_split[i]=s;
-         }
-         FREPA(src.quad) // add in original order
-         {
-          C VecI4 &ind     = src.quad.ind(i);
-            VecB4  matrix[]={src.vtx.matrix(ind.x), src.vtx.matrix(ind.y), src.vtx.matrix(ind.z), src.vtx.matrix(ind.w)};
-            if(src.vtx.blend())REPA(ind)weight[i]=src.vtx.blend(ind.c[i]); 
-            Int    s=0; for(; s<splits.elms(); s++)if(splits[s].canFit(matrix, weight, Elms(matrix)))break; if(!InRange(s, splits))s=splits.addNum(1);
-            splits[s].add(matrix, weight, Elms(matrix));
-            quad_split[i]=s;
-         }
+            Memb<SplitPart> splits;
+            Memc<MeshBase > mshbs ;
+            Mems<Int>  tri_split;  tri_split.setNum(src.tris ()); Memt<Bool>  tri_is;  tri_is.setNum(src.tris ());
+            Mems<Int> quad_split; quad_split.setNum(src.quads()); Memt<Bool> quad_is; quad_is.setNum(src.quads());
 
-         // create mesh and splits
-         BoneSplit *bone_splits=AllocZero<BoneSplit>(splits.elms()); // AllocZero to zero all maps
-         const Bool bone_split =D.meshBoneSplit();
-         FREPAD(s, splits)
-         {
-            // copy mesh
-            MeshBase &mshb=mshbs.New();
-            REPA(src.tri ) tri_is[i]=( tri_split[i]==s);
-            REPA(src.quad)quad_is[i]=(quad_split[i]==s);
-            src.copyFace(mshb, null, tri_is, quad_is, flag_and);
-            mshb.quadToTri(); // we need to call this at this stage, so triangle indexes will be correct for creating 1 mesh from split meshes
-
-            // set split
-            SplitPart &split=     splits[s];
-            BoneSplit &bs   =bone_splits[s];
-            Byte       real_to_split[256]; Zero(real_to_split);
-
-            bs.vtxs =mshb.vtxs();
-            bs.tris =mshb.tris();
-            bs.bones=0;
-            FREPA(split.matrix_used)if(split.matrix_used[i])
+            // set split index for each triangle and quad
+            VecB4 weight[4]; // 3 vtxs in a tri and 4 vtxs in a quad
+            REPAO(weight).set(255, 255, 255, 255); // assume that all are used
+            FREPA(src.tri) // add in original order
             {
-                   real_to_split[i]=bs.bones;
-               bs.split_to_real [bs.bones]=i;
-               bs.bones++;
+             C VecI &ind     = src.tri.ind(i);
+               VecB4 matrix[]={src.vtx.matrix(ind.x), src.vtx.matrix(ind.y), src.vtx.matrix(ind.z)};
+               if(src.vtx.blend())REPA(ind)weight[i]=src.vtx.blend(ind.c[i]);
+               Int   s=0; for(; s<splits.elms(); s++)if(splits[s].canFit(matrix, weight, Elms(matrix)))break; if(!InRange(s, splits))s=splits.addNum(1);
+               splits[s].add(matrix, weight, Elms(matrix));
+               tri_split[i]=s;
+            }
+            FREPA(src.quad) // add in original order
+            {
+             C VecI4 &ind     = src.quad.ind(i);
+               VecB4  matrix[]={src.vtx.matrix(ind.x), src.vtx.matrix(ind.y), src.vtx.matrix(ind.z), src.vtx.matrix(ind.w)};
+               if(src.vtx.blend())REPA(ind)weight[i]=src.vtx.blend(ind.c[i]);
+               Int    s=0; for(; s<splits.elms(); s++)if(splits[s].canFit(matrix, weight, Elms(matrix)))break; if(!InRange(s, splits))s=splits.addNum(1);
+               splits[s].add(matrix, weight, Elms(matrix));
+               quad_split[i]=s;
             }
 
-            // remap vertex matrixes
-            if(bone_split)REPA(mshb.vtx)
+            // create mesh and splits
+            BoneSplit *bone_splits=AllocZero<BoneSplit>(splits.elms()); // AllocZero to zero all maps
+            const Bool bone_split =D.meshBoneSplit();
+            FREPAD(s, splits)
             {
-               VecB4 &matrix=mshb.vtx.matrix(i);
-               matrix.x=real_to_split[matrix.x];
-               matrix.y=real_to_split[matrix.y];
-               matrix.z=real_to_split[matrix.z];
-               matrix.w=real_to_split[matrix.w];
-            }
-         }
+               // copy mesh
+               MeshBase &mshb=mshbs.New();
+               REPA(src.tri ) tri_is[i]=( tri_split[i]==s);
+               REPA(src.quad)quad_is[i]=(quad_split[i]==s);
+               src.copyFace(mshb, null, tri_is, quad_is, flag_and);
+               mshb.quadToTri(); // we need to call this at this stage, so triangle indexes will be correct for creating 1 mesh from split meshes
 
-         MeshBase temp; temp.create(mshbs.data(), mshbs.elms());
-         if(createRaw(temp, ~0, false, compress)) // don't optimize yet, wait until splits are set
-         {
-            Free(T._bone_split)=bone_splits; T._bone_splits=splits.elms(); // remove old splits and replace them with new ones
-            if(optimize)T.optimize();
+               // set split
+               SplitPart &split=     splits[s];
+               BoneSplit &bs   =bone_splits[s];
+               Byte       real_to_split[256]; Zero(real_to_split);
+
+               bs.vtxs =mshb.vtxs();
+               bs.tris =mshb.tris();
+               bs.bones=0;
+               FREPA(split.matrix_used)if(split.matrix_used[i])
+               {
+                      real_to_split[i]=bs.bones;
+                  bs.split_to_real [bs.bones]=i;
+                  bs.bones++;
+               }
+
+               // remap vertex matrixes
+               if(bone_split)REPA(mshb.vtx)
+               {
+                  VecB4 &matrix=mshb.vtx.matrix(i);
+                  matrix.x=real_to_split[matrix.x];
+                  matrix.y=real_to_split[matrix.y];
+                  matrix.z=real_to_split[matrix.z];
+                  matrix.w=real_to_split[matrix.w];
+               }
+            }
+
+            MeshBase temp; temp.create(mshbs.data(), mshbs.elms());
+            if(createRaw(temp, ~0, false, compress)) // don't optimize yet, wait until splits are set
+            {
+               Free(T._bone_split)=bone_splits; T._bone_splits=splits.elms(); // remove old splits and replace them with new ones
+               if(optimize)T.optimize();
+               return true;
+            }
+
+            // free
+            Free(bone_splits);
+            return false;
+         }
+      }*/
+    return createRaw(src, flag_and, optimize, compress);
+}
+Bool MeshRender::create(C MeshRender *src[], Int elms, MESH_FLAG flag_and, Bool optimize, Bool compress) {
+    /*// check for bone splits
+    REP(elms)if(C MeshRender *mesh=src[i])if(mesh->_bone_splits) // if any of the meshes have bone splits
+    { // we need to convert to MeshBase first
+       Memt<MeshBase> base; base.setNum(elms);
+       REPA(base)if(C MeshRender *mesh=src[i])base[i].create(*mesh, flag_and);
+       MeshBase all; all.create(base.data(), base.elms());
+       return create(all, flag_and, optimize, compress);
+    }*/
+
+    // do fast merge
+    Int vtxs = 0, tris = 0;
+    MESH_FLAG flag_all = MESH_NONE;
+    REP(elms)
+    if (C MeshRender *mesh = src[i]) {
+        vtxs += mesh->vtxs();
+        tris += mesh->tris();
+        flag_all |= mesh->flag();
+    }
+    Bool ok = true;
+    MeshRender temp;
+    if (temp.create(vtxs, tris, flag_all & flag_and, compress)) // operate on 'temp' in case 'this' belongs to one of 'src' meshes
+    {
+        // vertexes
+        if (Byte *v = temp.vtxLock(LOCK_WRITE)) {
+            FREP(elms)
+            if (C MeshRender *mesh = src[i]) {
+                if (C Byte *src = mesh->vtxLockRead()) {
+                    if (temp.flag() == mesh->flag() && temp.vtxSize() == mesh->vtxSize() && temp.storageCompress() == mesh->storageCompress()) {
+                        Int size = mesh->vtxs() * mesh->vtxSize();
+                        CopyFast(v, src, size);
+                        v += size;
+                    } else {
+                        Int vtx_pos = mesh->vtxOfs(VTX_POS),
+                            vtx_nrm = mesh->vtxOfs(VTX_NRM),
+                            vtx_tan = mesh->vtxOfs(VTX_TAN),
+                            vtx_bin = mesh->vtxOfs(VTX_BIN),
+                            vtx_hlp = mesh->vtxOfs(VTX_HLP),
+                            vtx_tex0 = mesh->vtxOfs(VTX_TEX0),
+                            vtx_tex1 = mesh->vtxOfs(VTX_TEX1),
+                            vtx_tex2 = mesh->vtxOfs(VTX_TEX2),
+                            vtx_tex3 = mesh->vtxOfs(VTX_TEX3),
+                            vtx_matrix = mesh->vtxOfs(VTX_MATRIX),
+                            vtx_blend = mesh->vtxOfs(VTX_BLEND),
+                            vtx_size = mesh->vtxOfs(VTX_SIZE),
+                            vtx_material = mesh->vtxOfs(VTX_MATERIAL),
+                            vtx_color = mesh->vtxOfs(VTX_COLOR);
+                        REP(mesh->vtxs()) {
+                            if (temp.flag() & VTX_POS)
+                                if (vtx_pos >= 0)
+                                    Set(v, *(Vec *)(src + vtx_pos));
+                                else
+                                    Set(v, VecZero);
+                            if (temp.flag() & VTX_NRM) {
+                                if (temp.storageCompress()) {
+                                    if (vtx_nrm >= 0)
+                                        if (mesh->storageCompress())
+                                            Set(v, *(VecB4 *)(src + vtx_nrm));
+                                        else
+                                            Set(v, NrmToSByte4(*(Vec *)(src + vtx_nrm)));
+                                    else
+                                        Set(v, VecB4(0));
+                                } else {
+                                    if (vtx_nrm >= 0)
+                                        if (mesh->storageCompress())
+                                            Set(v, SByte4ToNrm(*(VecB4 *)(src + vtx_nrm)));
+                                        else
+                                            Set(v, *(Vec *)(src + vtx_nrm));
+                                    else
+                                        Set(v, VecZero);
+                                }
+                            }
+                            if (temp.flag() & VTX_TAN_BIN) {
+                                if (temp.storageCompress()) // set as 1 packed VecB4 TanBin
+                                {
+                                    if (vtx_tan >= 0) {
+                                        if (mesh->storageCompress())
+                                            Set(v, *(VecB4 *)(src + vtx_tan));
+                                        else {
+                                            Set(v, TBNToSByte4((vtx_tan >= 0) ? (Vec *)(src + vtx_tan) : null, (vtx_bin >= 0) ? (Vec *)(src + vtx_bin) : null, (vtx_nrm >= 0) ? (Vec *)(src + vtx_nrm) : null));
+                                        }
+                                    } else
+                                        Set(v, VecB4(0));
+                                } else {
+                                    if (temp.flag() & VTX_TAN) {
+                                        if (vtx_tan >= 0) {
+                                            if (!mesh->storageCompress())
+                                                Set(v, *(Vec *)(src + vtx_tan));
+                                            else {
+                                                Set(v, SByte4ToNrm(*(VecB4 *)(src + vtx_tan)));
+                                            }
+                                        } else
+                                            Set(v, VecZero);
+                                    }
+                                    if (temp.flag() & VTX_BIN) {
+                                        if (vtx_bin >= 0) {
+                                            if (!mesh->storageCompress())
+                                                Set(v, *(Vec *)(src + vtx_bin));
+                                            else {
+                                                Vec bin;
+                                                SByte4ToTan(*(VecB4 *)(src + vtx_bin), null, &bin, (vtx_nrm >= 0) ? &NoTemp(SByte4ToNrm(*(VecB4 *)(src + vtx_nrm))) : null);
+                                                Set(v, bin);
+                                            }
+                                        } else
+                                            Set(v, VecZero);
+                                    }
+                                }
+                            }
+                            if (temp.flag() & VTX_HLP)
+                                if (vtx_hlp >= 0)
+                                    Set(v, *(Vec *)(src + vtx_hlp));
+                                else
+                                    Set(v, VecZero);
+                            if (temp.flag() & VTX_TEX0)
+                                if (vtx_tex0 >= 0)
+                                    Set(v, *(Vec2 *)(src + vtx_tex0));
+                                else
+                                    Set(v, Vec2Zero);
+                            if (temp.flag() & VTX_TEX1)
+                                if (vtx_tex1 >= 0)
+                                    Set(v, *(Vec2 *)(src + vtx_tex1));
+                                else
+                                    Set(v, Vec2Zero);
+                            if (temp.flag() & VTX_TEX2)
+                                if (vtx_tex2 >= 0)
+                                    Set(v, *(Vec2 *)(src + vtx_tex2));
+                                else
+                                    Set(v, Vec2Zero);
+                            if (temp.flag() & VTX_TEX3)
+                                if (vtx_tex3 >= 0)
+                                    Set(v, *(Vec2 *)(src + vtx_tex3));
+                                else
+                                    Set(v, Vec2Zero);
+                            if (temp.flag() & VTX_MATRIX)
+                                if (vtx_matrix >= 0)
+                                    Set(v, *(VecB4 *)(src + vtx_matrix));
+                                else
+                                    Set(v, VecB4(0, 0, 0, 0)); // #MeshVtxBoneHW
+                            if (temp.flag() & VTX_BLEND)
+                                if (vtx_blend >= 0)
+                                    Set(v, *(VecB4 *)(src + vtx_blend));
+                                else
+                                    Set(v, VecB4(255, 0, 0, 0));
+                            if (temp.flag() & VTX_SIZE)
+                                if (vtx_size >= 0)
+                                    Set(v, *(Flt *)(src + vtx_size));
+                                else
+                                    Set(v, Flt(0));
+                            if (temp.flag() & VTX_MATERIAL)
+                                if (vtx_material >= 0)
+                                    Set(v, *(VecB4 *)(src + vtx_material));
+                                else
+                                    Set(v, VecB4(255, 0, 0, 0));
+                            if (temp.flag() & VTX_COLOR)
+                                if (vtx_color >= 0)
+                                    Set(v, *(Color *)(src + vtx_color));
+                                else
+                                    Set(v, WHITE);
+                            src += mesh->vtxSize();
+                        }
+                    }
+                    mesh->vtxUnlock();
+                } else
+                    ok = false;
+            }
+            temp.vtxUnlock();
+        } else
+            ok = false;
+
+        // indexes
+        if (Ptr ind = temp.indLock(LOCK_WRITE)) {
+            vtxs = 0;
+            VecUS *ind16 = (temp.indBit16() ? (VecUS *)ind : null);
+            VecI *ind32 = (temp.indBit16() ? null : (VecI *)ind);
+            FREP(elms)
+            if (C MeshRender *mesh = src[i]) {
+                if (CPtr src = mesh->indLockRead()) {
+                    if (mesh->indBit16()) {
+                        C VecUS *s = (C VecUS *)src;
+                        if (ind16)
+                            REP(mesh->tris()) *ind16++ = (*s++) + vtxs;
+                        else if (ind32)
+                            REP(mesh->tris()) *ind32++ = (*s++) + vtxs;
+                    } else {
+                        C VecI *s = (C VecI *)src;
+                        if (ind16)
+                            REP(mesh->tris()) *ind16++ = (*s++) + vtxs;
+                        else if (ind32)
+                            REP(mesh->tris()) *ind32++ = (*s++) + vtxs;
+                    }
+                    mesh->indUnlock();
+                } else
+                    ok = false;
+                vtxs += mesh->vtxs();
+            }
+            temp.indUnlock();
+        } else
+            ok = false;
+        if (ok) {
+            if (optimize)
+                temp.optimize();
+            Swap(temp, T);
+        } else
+            del();
+        return ok;
+    }
+    return false;
+}
+Bool MeshRender::create(C MeshRender &src) {
+    if (this == &src)
+        return true;
+
+    del();
+
+    if (_vb.create(src._vb))
+        if (_ib.create(src._ib)) {
+            _storage = src._storage;
+            _tris = src._tris;
+            _flag = src._flag;
+            if (GL)
+                setVF();
+            else
+                _vf = src._vf; // VAO
             return true;
-         }
-
-         // free
-         Free(bone_splits);
-         return false;
-      }
-   }*/
-   return createRaw(src, flag_and, optimize, compress);
-}
-Bool MeshRender::create(C MeshRender *src[], Int elms, MESH_FLAG flag_and, Bool optimize, Bool compress)
-{
-   /*// check for bone splits
-   REP(elms)if(C MeshRender *mesh=src[i])if(mesh->_bone_splits) // if any of the meshes have bone splits
-   { // we need to convert to MeshBase first
-      Memt<MeshBase> base; base.setNum(elms);
-      REPA(base)if(C MeshRender *mesh=src[i])base[i].create(*mesh, flag_and);
-      MeshBase all; all.create(base.data(), base.elms());
-      return create(all, flag_and, optimize, compress);
-   }*/
-
-   // do fast merge
-   Int       vtxs=0, tris=0;
-   MESH_FLAG flag_all=MESH_NONE;
-   REP(elms)if(C MeshRender *mesh=src[i])
-   {
-      vtxs    +=mesh->vtxs();
-      tris    +=mesh->tris();
-      flag_all|=mesh->flag();
-   }
-   Bool ok=true;
-   MeshRender temp; if(temp.create(vtxs, tris, flag_all&flag_and, compress)) // operate on 'temp' in case 'this' belongs to one of 'src' meshes
-   {
-      // vertexes
-      if(Byte *v=temp.vtxLock(LOCK_WRITE))
-      {
-         FREP(elms)if(C MeshRender *mesh=src[i])
-         {
-            if(C Byte *src=mesh->vtxLockRead())
-            {
-               if(temp.flag()==mesh->flag() && temp.vtxSize()==mesh->vtxSize() && temp.storageCompress()==mesh->storageCompress())
-               {
-                  Int size=mesh->vtxs()*mesh->vtxSize();
-                  CopyFast(v, src, size);
-                  v+=size;
-               }else
-               {
-                  Int vtx_pos     =mesh->vtxOfs(VTX_POS     ),
-                      vtx_nrm     =mesh->vtxOfs(VTX_NRM     ),
-                      vtx_tan     =mesh->vtxOfs(VTX_TAN     ),
-                      vtx_bin     =mesh->vtxOfs(VTX_BIN     ),
-                      vtx_hlp     =mesh->vtxOfs(VTX_HLP     ),
-                      vtx_tex0    =mesh->vtxOfs(VTX_TEX0    ),
-                      vtx_tex1    =mesh->vtxOfs(VTX_TEX1    ),
-                      vtx_tex2    =mesh->vtxOfs(VTX_TEX2    ),
-                      vtx_tex3    =mesh->vtxOfs(VTX_TEX3    ),
-                      vtx_matrix  =mesh->vtxOfs(VTX_MATRIX  ),
-                      vtx_blend   =mesh->vtxOfs(VTX_BLEND   ),
-                      vtx_size    =mesh->vtxOfs(VTX_SIZE    ),
-                      vtx_material=mesh->vtxOfs(VTX_MATERIAL),
-                      vtx_color   =mesh->vtxOfs(VTX_COLOR   );
-                  REP(mesh->vtxs())
-                  {
-                     if(temp.flag()&VTX_POS)if(vtx_pos>=0)Set(v, *(Vec*)(src+vtx_pos));else Set(v, VecZero);
-                     if(temp.flag()&VTX_NRM)
-                     {
-                        if(temp.storageCompress())
-                        {
-                           if(vtx_nrm>=0)if(mesh->storageCompress())Set(v, *(VecB4*)(src+vtx_nrm));else Set(v, NrmToSByte4(*(Vec*)(src+vtx_nrm)));else Set(v, VecB4(0));
-                        }else
-                        {
-                           if(vtx_nrm>=0)if(mesh->storageCompress())Set(v, SByte4ToNrm(*(VecB4*)(src+vtx_nrm)));else Set(v, *(Vec*)(src+vtx_nrm));else Set(v, VecZero);
-                        }
-                     }
-                     if(temp.flag()&VTX_TAN_BIN)
-                     {
-                        if(temp.storageCompress()) // set as 1 packed VecB4 TanBin
-                        {
-                           if(vtx_tan>=0)
-                           {
-                              if(mesh->storageCompress())Set(v, *(VecB4*)(src+vtx_tan));else
-                              {
-                                 Set(v, TBNToSByte4((vtx_tan>=0) ? (Vec*)(src+vtx_tan) : null, (vtx_bin>=0) ? (Vec*)(src+vtx_bin) : null, (vtx_nrm>=0) ? (Vec*)(src+vtx_nrm) : null));
-                              }
-                           }else Set(v, VecB4(0));
-                        }else
-                        {
-                           if(temp.flag()&VTX_TAN)
-                           {
-                              if(vtx_tan>=0)
-                              {
-                                 if(!mesh->storageCompress())Set(v, *(Vec*)(src+vtx_tan));else
-                                 {
-                                    Set(v, SByte4ToNrm(*(VecB4*)(src+vtx_tan)));
-                                 }
-                              }else Set(v, VecZero);
-                           }
-                           if(temp.flag()&VTX_BIN)
-                           {
-                              if(vtx_bin>=0)
-                              {
-                                 if(!mesh->storageCompress())Set(v, *(Vec*)(src+vtx_bin));else
-                                 {
-                                    Vec bin;
-                                    SByte4ToTan(*(VecB4*)(src+vtx_bin), null, &bin, (vtx_nrm>=0) ? &NoTemp(SByte4ToNrm(*(VecB4*)(src+vtx_nrm))) : null);
-                                    Set(v, bin);
-                                 }
-                              }else Set(v, VecZero);
-                           }
-                        }
-                     }
-                     if(temp.flag()&VTX_HLP     )if(vtx_hlp     >=0)Set(v, *(Vec  *)(src+vtx_hlp     ));else Set(v, VecZero);
-                     if(temp.flag()&VTX_TEX0    )if(vtx_tex0    >=0)Set(v, *(Vec2 *)(src+vtx_tex0    ));else Set(v, Vec2Zero);
-                     if(temp.flag()&VTX_TEX1    )if(vtx_tex1    >=0)Set(v, *(Vec2 *)(src+vtx_tex1    ));else Set(v, Vec2Zero);
-                     if(temp.flag()&VTX_TEX2    )if(vtx_tex2    >=0)Set(v, *(Vec2 *)(src+vtx_tex2    ));else Set(v, Vec2Zero);
-                     if(temp.flag()&VTX_TEX3    )if(vtx_tex3    >=0)Set(v, *(Vec2 *)(src+vtx_tex3    ));else Set(v, Vec2Zero);
-                     if(temp.flag()&VTX_MATRIX  )if(vtx_matrix  >=0)Set(v, *(VecB4*)(src+vtx_matrix  ));else Set(v, VecB4(  0, 0, 0, 0)); // #MeshVtxBoneHW
-                     if(temp.flag()&VTX_BLEND   )if(vtx_blend   >=0)Set(v, *(VecB4*)(src+vtx_blend   ));else Set(v, VecB4(255, 0, 0, 0));
-                     if(temp.flag()&VTX_SIZE    )if(vtx_size    >=0)Set(v, *(Flt  *)(src+vtx_size    ));else Set(v, Flt(0));
-                     if(temp.flag()&VTX_MATERIAL)if(vtx_material>=0)Set(v, *(VecB4*)(src+vtx_material));else Set(v, VecB4(255, 0, 0, 0));
-                     if(temp.flag()&VTX_COLOR   )if(vtx_color   >=0)Set(v, *(Color*)(src+vtx_color   ));else Set(v, WHITE);
-                     src+=mesh->vtxSize();
-                  }
-               }
-               mesh->vtxUnlock();
-            }else ok=false;
-         }
-         temp.vtxUnlock();
-      }else ok=false;
-
-      // indexes
-      if(Ptr ind=temp.indLock(LOCK_WRITE))
-      {
-         vtxs=0;
-         VecUS *ind16=(temp.indBit16() ?        (VecUS*)ind : null);
-         VecI  *ind32=(temp.indBit16() ? null : (VecI *)ind);
-         FREP(elms)if(C MeshRender *mesh=src[i])
-         {
-            if(CPtr src=mesh->indLockRead())
-            {
-               if(mesh->indBit16())
-               {
-                C VecUS *s=(C VecUS*)src;
-                  if(ind16)REP(mesh->tris())*ind16++=(*s++)+vtxs;else
-                  if(ind32)REP(mesh->tris())*ind32++=(*s++)+vtxs;
-               }else
-               {
-                C VecI *s=(C VecI*)src;
-                  if(ind16)REP(mesh->tris())*ind16++=(*s++)+vtxs;else
-                  if(ind32)REP(mesh->tris())*ind32++=(*s++)+vtxs;
-               }
-               mesh->indUnlock();
-            }else ok=false;
-            vtxs+=mesh->vtxs();
-         }
-         temp.indUnlock();
-      }else ok=false;
-      if(ok)
-      {
-         if(optimize)temp.optimize();
-         Swap(temp, T);
-      }else del();
-      return ok;
-   }
-   return false;
-}
-Bool MeshRender::create(C MeshRender &src)
-{
-   if(this==&src)return true;
-
-   del();
-
-   if(_vb.create(src._vb))
-   if(_ib.create(src._ib))
-   {
-     _storage=src._storage;
-     _tris   =src._tris   ;
-     _flag   =src._flag   ;
-      if(GL)setVF();else _vf=src._vf; // VAO
-      return true;
-   }
-   return false;
+        }
+    return false;
 }
 /******************************************************************************/
-C Byte* MeshRender::vtxLockedElm(MESH_FLAG elm)C
-{
-   if(C Byte *data=vtxLockedData())
-   {
-      Int ofs=vtxOfs(elm);
-      if( ofs>=0)return data+ofs;
-   }
-   return null;
+C Byte *MeshRender::vtxLockedElm(MESH_FLAG elm) C {
+    if (C Byte *data = vtxLockedData()) {
+        Int ofs = vtxOfs(elm);
+        if (ofs >= 0)
+            return data + ofs;
+    }
+    return null;
 }
 /******************************************************************************/
 // GET
 /******************************************************************************/
-Bool MeshRender::getBox(Box &box)C
-{
-   Int pos =vtxOfs(VTX_POS);
-   if( pos>=0)if(C Byte *vtx=vtxLockRead())
-   {
-      vtx+=pos;
-      box=*(Vec*)vtx; REP(vtxs()-1){vtx+=vtxSize(); box.validInclude(*(Vec*)vtx);}
-      vtxUnlock();
-      return true;
-   }
-   box.zero(); return false;
-}
-Bool MeshRender::getBox(Box &box, C Matrix3 &matrix)C
-{
-   Int pos =vtxOfs(VTX_POS);
-   if( pos>=0)if(C Byte *vtx=vtxLockRead())
-   {
-      vtx+=pos;
-      box=(*(Vec*)vtx)*matrix; REP(vtxs()-1){vtx+=vtxSize(); box.validInclude((*(Vec*)vtx)*matrix);}
-      vtxUnlock();
-      return true;
-   }
-   box.zero(); return false;
-}
-Bool MeshRender::getBox(Box &box, C Matrix &matrix)C
-{
-   Int pos =vtxOfs(VTX_POS);
-   if( pos>=0)if(C Byte *vtx=vtxLockRead())
-   {
-      vtx+=pos;
-      box=(*(Vec*)vtx)*matrix; REP(vtxs()-1){vtx+=vtxSize(); box.validInclude((*(Vec*)vtx)*matrix);}
-      vtxUnlock();
-      return true;
-   }
-   box.zero(); return false;
-}
-Flt MeshRender::area(Vec *center)C
-{
-   if(center)center->zero();
-   Flt area=0;
-   Int pos =vtxOfs(VTX_POS);
-   if( pos>=0)if(C Byte *vtx=vtxLockRead())
-   {
-      vtx+=pos;
-      if(CPtr ind=indLockRead())
-      {
-         if(indBit16())
-         {
-          C VecUS *tri=(C VecUS*)ind;
-            REP(tris())
-            {
-               Tri t(*(Vec*)(vtx+tri->x*vtxSize()), *(Vec*)(vtx+tri->y*vtxSize()), *(Vec*)(vtx+tri->z*vtxSize())); tri++;
-               Flt a=t.area();
-                          area  +=a;
-               if(center)*center+=a*t.center();
+Bool MeshRender::getBox(Box &box) C {
+    Int pos = vtxOfs(VTX_POS);
+    if (pos >= 0)
+        if (C Byte *vtx = vtxLockRead()) {
+            vtx += pos;
+            box = *(Vec *)vtx;
+            REP(vtxs() - 1) {
+                vtx += vtxSize();
+                box.validInclude(*(Vec *)vtx);
             }
-         }else
-         {
-          C VecI *tri=(C VecI*)ind;
-            REP(tris())
-            {
-               Tri t(*(Vec*)(vtx+tri->x*vtxSize()), *(Vec*)(vtx+tri->y*vtxSize()), *(Vec*)(vtx+tri->z*vtxSize())); tri++;
-               Flt a=t.area();
-                          area  +=a;
-               if(center)*center+=a*t.center();
+            vtxUnlock();
+            return true;
+        }
+    box.zero();
+    return false;
+}
+Bool MeshRender::getBox(Box &box, C Matrix3 &matrix) C {
+    Int pos = vtxOfs(VTX_POS);
+    if (pos >= 0)
+        if (C Byte *vtx = vtxLockRead()) {
+            vtx += pos;
+            box = (*(Vec *)vtx) * matrix;
+            REP(vtxs() - 1) {
+                vtx += vtxSize();
+                box.validInclude((*(Vec *)vtx) * matrix);
             }
-         }
-         indUnlock();
-      }
-      vtxUnlock();
-   }
-   if(center && area)*center/=area;
-   return area;
+            vtxUnlock();
+            return true;
+        }
+    box.zero();
+    return false;
+}
+Bool MeshRender::getBox(Box &box, C Matrix &matrix) C {
+    Int pos = vtxOfs(VTX_POS);
+    if (pos >= 0)
+        if (C Byte *vtx = vtxLockRead()) {
+            vtx += pos;
+            box = (*(Vec *)vtx) * matrix;
+            REP(vtxs() - 1) {
+                vtx += vtxSize();
+                box.validInclude((*(Vec *)vtx) * matrix);
+            }
+            vtxUnlock();
+            return true;
+        }
+    box.zero();
+    return false;
+}
+Flt MeshRender::area(Vec *center) C {
+    if (center)
+        center->zero();
+    Flt area = 0;
+    Int pos = vtxOfs(VTX_POS);
+    if (pos >= 0)
+        if (C Byte *vtx = vtxLockRead()) {
+            vtx += pos;
+            if (CPtr ind = indLockRead()) {
+                if (indBit16()) {
+                    C VecUS *tri = (C VecUS *)ind;
+                    REP(tris()) {
+                        Tri t(*(Vec *)(vtx + tri->x * vtxSize()), *(Vec *)(vtx + tri->y * vtxSize()), *(Vec *)(vtx + tri->z * vtxSize()));
+                        tri++;
+                        Flt a = t.area();
+                        area += a;
+                        if (center)
+                            *center += a * t.center();
+                    }
+                } else {
+                    C VecI *tri = (C VecI *)ind;
+                    REP(tris()) {
+                        Tri t(*(Vec *)(vtx + tri->x * vtxSize()), *(Vec *)(vtx + tri->y * vtxSize()), *(Vec *)(vtx + tri->z * vtxSize()));
+                        tri++;
+                        Flt a = t.area();
+                        area += a;
+                        if (center)
+                            *center += a * t.center();
+                    }
+                }
+                indUnlock();
+            }
+            vtxUnlock();
+        }
+    if (center && area)
+        *center /= area;
+    return area;
 }
 /******************************************************************************/
 // SET
@@ -940,60 +1119,76 @@ void MeshRender::setNormalHeightmap(Image &height,Image *l,Image *r,Image *b,Ima
 /******************************************************************************/
 // TEXTURIZE
 /******************************************************************************/
-void MeshRender::texMove(C Vec2 &move, Byte uv_index)
-{
-   if(InRange(uv_index, 4) && move.any())
-   {
-      Int ofs =vtxOfs((uv_index==0) ? VTX_TEX0 : (uv_index==1) ? VTX_TEX1 : (uv_index==2) ? VTX_TEX2 : VTX_TEX3);
-      if( ofs>=0)if(Byte *vtx=vtxLock())
-      {
-         vtx+=ofs; REP(vtxs()){*(Vec2*)vtx+=move; vtx+=vtxSize();}
-         vtxUnlock();
-      }
-   }
+void MeshRender::texMove(C Vec2 &move, Byte uv_index) {
+    if (InRange(uv_index, 4) && move.any()) {
+        Int ofs = vtxOfs((uv_index == 0) ? VTX_TEX0 : (uv_index == 1) ? VTX_TEX1
+                                                  : (uv_index == 2)   ? VTX_TEX2
+                                                                      : VTX_TEX3);
+        if (ofs >= 0)
+            if (Byte *vtx = vtxLock()) {
+                vtx += ofs;
+                REP(vtxs()) {
+                    *(Vec2 *)vtx += move;
+                    vtx += vtxSize();
+                }
+                vtxUnlock();
+            }
+    }
 }
-void MeshRender::texScale(C Vec2 &scale, Byte uv_index)
-{
-   if(InRange(uv_index, 4) && scale!=1)
-   {
-      Int ofs =vtxOfs((uv_index==0) ? VTX_TEX0 : (uv_index==1) ? VTX_TEX1 : (uv_index==2) ? VTX_TEX2 : VTX_TEX3);
-      if( ofs>=0)if(Byte *vtx=vtxLock())
-      {
-         vtx+=ofs; REP(vtxs()){*(Vec2*)vtx*=scale; vtx+=vtxSize();}
-         vtxUnlock();
-      }
-   }
+void MeshRender::texScale(C Vec2 &scale, Byte uv_index) {
+    if (InRange(uv_index, 4) && scale != 1) {
+        Int ofs = vtxOfs((uv_index == 0) ? VTX_TEX0 : (uv_index == 1) ? VTX_TEX1
+                                                  : (uv_index == 2)   ? VTX_TEX2
+                                                                      : VTX_TEX3);
+        if (ofs >= 0)
+            if (Byte *vtx = vtxLock()) {
+                vtx += ofs;
+                REP(vtxs()) {
+                    *(Vec2 *)vtx *= scale;
+                    vtx += vtxSize();
+                }
+                vtxUnlock();
+            }
+    }
 }
-void MeshRender::texRotate(Flt angle, Byte uv_index)
-{
-   if(InRange(uv_index, 4) && angle)
-   {
-      Int ofs =vtxOfs((uv_index==0) ? VTX_TEX0 : (uv_index==1) ? VTX_TEX1 : (uv_index==2) ? VTX_TEX2 : VTX_TEX3);
-      if( ofs>=0)if(Byte *vtx=vtxLock())
-      {
-         Flt cos, sin; CosSin(cos, sin, angle);
-         vtx+=ofs; REP(vtxs()){((Vec2*)vtx)->rotateCosSin(cos, sin); vtx+=vtxSize();}
-         vtxUnlock();
-      }
-   }
+void MeshRender::texRotate(Flt angle, Byte uv_index) {
+    if (InRange(uv_index, 4) && angle) {
+        Int ofs = vtxOfs((uv_index == 0) ? VTX_TEX0 : (uv_index == 1) ? VTX_TEX1
+                                                  : (uv_index == 2)   ? VTX_TEX2
+                                                                      : VTX_TEX3);
+        if (ofs >= 0)
+            if (Byte *vtx = vtxLock()) {
+                Flt cos, sin;
+                CosSin(cos, sin, angle);
+                vtx += ofs;
+                REP(vtxs()) {
+                    ((Vec2 *)vtx)->rotateCosSin(cos, sin);
+                    vtx += vtxSize();
+                }
+                vtxUnlock();
+            }
+    }
 }
 /******************************************************************************/
 // TRANSFORM
 /******************************************************************************/
-void MeshRender::scaleMove(C Vec &scale, C Vec &move)
-{
-   Int pos=vtxOfs(VTX_POS),
-       hlp=vtxOfs(VTX_HLP);
-   if(Byte *vtx=vtxLock())
-   {
-      REP(vtxs())
-      {
-         if(pos>=0){Vec &v=*(Vec*)(&vtx[pos]); v=v*scale+move;}
-         if(hlp>=0){Vec &v=*(Vec*)(&vtx[hlp]); v=v*scale+move;}
-         vtx+=vtxSize();
-      }
-      vtxUnlock();
-   }
+void MeshRender::scaleMove(C Vec &scale, C Vec &move) {
+    Int pos = vtxOfs(VTX_POS),
+        hlp = vtxOfs(VTX_HLP);
+    if (Byte *vtx = vtxLock()) {
+        REP(vtxs()) {
+            if (pos >= 0) {
+                Vec &v = *(Vec *)(&vtx[pos]);
+                v = v * scale + move;
+            }
+            if (hlp >= 0) {
+                Vec &v = *(Vec *)(&vtx[hlp]);
+                v = v * scale + move;
+            }
+            vtx += vtxSize();
+        }
+        vtxUnlock();
+    }
 }
 /*void MeshRender::transform(Matrix3 &matrix)
 {
@@ -1048,99 +1243,100 @@ void MeshRender::transform(Matrix &matrix)
 /******************************************************************************/
 // OPERATIONS
 /******************************************************************************/
-void MeshRender::adjustToPlatform(Bool compressed, Bool sign, Bool bone_split, C CMemPtr<BoneSplit> &bone_splits)
-{
-   const Bool want_bone_split  =false,
-              want_sign        =true,
-              change_signed    =(compressed         && sign      !=want_sign       && (_flag&(VTX_NRM|VTX_TAN))),
-              change_bone_split=(bone_splits.elms() && bone_split!=want_bone_split && (_flag&(VTX_MATRIX     )));
+void MeshRender::adjustToPlatform(Bool compressed, Bool sign, Bool bone_split, C CMemPtr<BoneSplit> &bone_splits) {
+    const Bool want_bone_split = false,
+               want_sign = true,
+               change_signed = (compressed && sign != want_sign && (_flag & (VTX_NRM | VTX_TAN))),
+               change_bone_split = (bone_splits.elms() && bone_split != want_bone_split && (_flag & (VTX_MATRIX)));
 
-   if(change_signed || change_bone_split)
-   {
-      if(Byte *vtx=vtxLock())
-      {
-         Int nrm_ofs=vtxOfs(VTX_NRM   ),
-             tan_ofs=vtxOfs(VTX_TAN   ),
-            bone_ofs=vtxOfs(VTX_MATRIX);
+    if (change_signed || change_bone_split) {
+        if (Byte *vtx = vtxLock()) {
+            Int nrm_ofs = vtxOfs(VTX_NRM),
+                tan_ofs = vtxOfs(VTX_TAN),
+                bone_ofs = vtxOfs(VTX_MATRIX);
 
-         if(change_signed && (nrm_ofs>=0 || tan_ofs>=0))
-         {
-            Byte *v=vtx;
-            REP(_vb.vtxs())
-            {
-            #if DEBUG // avoid debug runtime checks
-               if(nrm_ofs>=0){VecB4 &v4=((VecB4&)v[nrm_ofs]); REPAO(v4.c)=(v4.c[i]+128)&0xFF;}
-               if(tan_ofs>=0){VecB4 &v4=((VecB4&)v[tan_ofs]); REPAO(v4.c)=(v4.c[i]+128)&0xFF;}
-            #else
-               if(nrm_ofs>=0)((VecB4&)v[nrm_ofs])+=128;
-               if(tan_ofs>=0)((VecB4&)v[tan_ofs])+=128;
-            #endif
-               v+=_vb._vtx_size;
-            }
-         }
-
-         if(change_bone_split && bone_ofs>=0)
-         {
-            Byte *v=vtx+bone_ofs; FREPA(bone_splits)
-            {
-             C BoneSplit &split=bone_splits[i]; FREP(split.vtxs)
-               {
-                  VecB4 &matrix=*(VecB4*)v; // #MeshVtxBoneHW
-                  if(want_bone_split)
-                  {
-                     matrix.x=split.realToSplit0(matrix.x);
-                     matrix.y=split.realToSplit0(matrix.y);
-                     matrix.z=split.realToSplit0(matrix.z);
-                     matrix.w=split.realToSplit0(matrix.w);
-                  }else
-                  {
-                     matrix.x=split.split_to_real[matrix.x];
-                     matrix.y=split.split_to_real[matrix.y];
-                     matrix.z=split.split_to_real[matrix.z];
-                     matrix.w=split.split_to_real[matrix.w];
-                  }
-                  v+=_vb._vtx_size;
-               }
-            }
-         }
-
-         vtxUnlock();
-      }
-   }
-}
-/******************************************************************************/
-C MeshRender& MeshRender::set()C
-{
-#if GL
-   #if VAO_EXCLUSIVE
-      if(_vao_reset)
-      {
-         if(!ConstCast(T).setVF())Exit("Can't create VAO");
-      }else // 'setVF' will already 'glBindVertexArray' the VAO
-   #endif
-         glBindVertexArray(_vao);
+            if (change_signed && (nrm_ofs >= 0 || tan_ofs >= 0)) {
+                Byte *v = vtx;
+                REP(_vb.vtxs()) {
+#if DEBUG // avoid debug runtime checks
+                    if (nrm_ofs >= 0) {
+                        VecB4 &v4 = ((VecB4 &)v[nrm_ofs]);
+                        REPAO(v4.c) = (v4.c[i] + 128) & 0xFF;
+                    }
+                    if (tan_ofs >= 0) {
+                        VecB4 &v4 = ((VecB4 &)v[tan_ofs]);
+                        REPAO(v4.c) = (v4.c[i] + 128) & 0xFF;
+                    }
 #else
-  _vb.set(); _ib.set(); D.vf(_vf);
+                    if (nrm_ofs >= 0)
+                        ((VecB4 &)v[nrm_ofs]) += 128;
+                    if (tan_ofs >= 0)
+                        ((VecB4 &)v[tan_ofs]) += 128;
 #endif
-   return T;
+                    v += _vb._vtx_size;
+                }
+            }
+
+            if (change_bone_split && bone_ofs >= 0) {
+                Byte *v = vtx + bone_ofs;
+                FREPA(bone_splits) {
+                    C BoneSplit &split = bone_splits[i];
+                    FREP(split.vtxs) {
+                        VecB4 &matrix = *(VecB4 *)v; // #MeshVtxBoneHW
+                        if (want_bone_split) {
+                            matrix.x = split.realToSplit0(matrix.x);
+                            matrix.y = split.realToSplit0(matrix.y);
+                            matrix.z = split.realToSplit0(matrix.z);
+                            matrix.w = split.realToSplit0(matrix.w);
+                        } else {
+                            matrix.x = split.split_to_real[matrix.x];
+                            matrix.y = split.split_to_real[matrix.y];
+                            matrix.z = split.split_to_real[matrix.z];
+                            matrix.w = split.split_to_real[matrix.w];
+                        }
+                        v += _vb._vtx_size;
+                    }
+                }
+            }
+
+            vtxUnlock();
+        }
+    }
 }
 /******************************************************************************/
-MeshRender& MeshRender::freeOpenGLESData()
-{
-  _vb.freeOpenGLESData();
-  _ib.freeOpenGLESData();
-   return T;
-}
-MeshRender& MeshRender::operator =(C MeshRender &src) {create(src); return T;}
-MeshRender& MeshRender::operator+=(C MeshRender &src)
-{
-   if(src.is())
-   {
-    C MeshRender *meshes[]={this, &src};
-      create(meshes, Elms(meshes));
-   }
-   return T;
+C MeshRender &MeshRender::set() C {
+#if GL
+#if VAO_EXCLUSIVE
+    if (_vao_reset) {
+        if (!ConstCast(T).setVF())
+            Exit("Can't create VAO");
+    } else // 'setVF' will already 'glBindVertexArray' the VAO
+#endif
+        glBindVertexArray(_vao);
+#else
+    _vb.set();
+    _ib.set();
+    D.vf(_vf);
+#endif
+    return T;
 }
 /******************************************************************************/
+MeshRender &MeshRender::freeOpenGLESData() {
+    _vb.freeOpenGLESData();
+    _ib.freeOpenGLESData();
+    return T;
 }
+MeshRender &MeshRender::operator=(C MeshRender &src) {
+    create(src);
+    return T;
+}
+MeshRender &MeshRender::operator+=(C MeshRender &src) {
+    if (src.is()) {
+        C MeshRender *meshes[] = {this, &src};
+        create(meshes, Elms(meshes));
+    }
+    return T;
+}
+/******************************************************************************/
+} // namespace EE
 /******************************************************************************/

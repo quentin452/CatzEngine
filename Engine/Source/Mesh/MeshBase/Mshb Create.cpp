@@ -1,996 +1,1100 @@
 /******************************************************************************/
 #include "stdafx.h"
-namespace EE{
+namespace EE {
 /******************************************************************************/
-MeshBase& MeshBase::createPlane(Int x, Int y, MESH_FLAG flag)
-{
-   MAX(x, 2);
-   MAX(y, 2);
-   create(x*y, 0, 0, (x-1)*(y-1), flag&(VTX_NRM_TAN_BIN|VTX_TEX0));
+MeshBase &MeshBase::createPlane(Int x, Int y, MESH_FLAG flag) {
+    MAX(x, 2);
+    MAX(y, 2);
+    create(x * y, 0, 0, (x - 1) * (y - 1), flag & (VTX_NRM_TAN_BIN | VTX_TEX0));
 
-   // face
-   if(VecI4 *quad=T.quad.ind())
-   FREPD(sy, y-1)
-   FREPD(sx, x-1)
-   {
-      Int p=sx+sy*x;
-      (quad++)->set(p+x, p+1+x, p+1, p);
-   }
+    // face
+    if (VecI4 *quad = T.quad.ind())
+        FREPD(sy, y - 1)
+    FREPD(sx, x - 1) {
+        Int p = sx + sy * x;
+        (quad++)->set(p + x, p + 1 + x, p + 1, p);
+    }
 
-   // vtx
-   if(Vec *pos=vtx.pos())FREPD(sy, y)
-   {
-      Flt fy=sy/Flt(y-1);
-      FREPD(sx, x)(pos++)->set(sx/Flt(x-1), fy, 0);
-   }
-   if(Vec *nrm=vtx.nrm())REPA(vtx)(nrm++)->set(0,  0, -1);
-   if(Vec *tan=vtx.tan())REPA(vtx)(tan++)->set(1,  0,  0);
-   if(Vec *bin=vtx.bin())REPA(vtx)(bin++)->set(0, -1,  0);
-   if(vtx.tex0())texMap();
+    // vtx
+    if (Vec *pos = vtx.pos())
+        FREPD(sy, y) {
+            Flt fy = sy / Flt(y - 1);
+            FREPD(sx, x)
+            (pos++)->set(sx / Flt(x - 1), fy, 0);
+        }
+    if (Vec *nrm = vtx.nrm())
+        REPA(vtx)
+        (nrm++)->set(0, 0, -1);
+    if (Vec *tan = vtx.tan())
+        REPA(vtx)
+        (tan++)->set(1, 0, 0);
+    if (Vec *bin = vtx.bin())
+        REPA(vtx)
+        (bin++)->set(0, -1, 0);
+    if (vtx.tex0())
+        texMap();
 
-   return T;
+    return T;
 }
-MeshBase& MeshBase::createGrid(Int x, Int y, Bool fast)
-{
-   MAX(x, 2);
-   MAX(y, 2);
-   if(fast)create(x*2+(y-2)*2, x+y            , 0, 0);
-   else    create(x*y        , y*(x-1)+x*(y-1), 0, 0);
+MeshBase &MeshBase::createGrid(Int x, Int y, Bool fast) {
+    MAX(x, 2);
+    MAX(y, 2);
+    if (fast)
+        create(x * 2 + (y - 2) * 2, x + y, 0, 0);
+    else
+        create(x * y, y * (x - 1) + x * (y - 1), 0, 0);
 
-   // vtx
-   Vec *pos=vtx.pos();
-   if(fast)
-   {
-      FREPD(sx, x)               (pos++)->set(   sx/Flt(x-1), 1, 0);
-      FREPD(sx, x)               (pos++)->set(   sx/Flt(x-1), 0, 0);
-      for(Int sy=1; sy<y-1; sy++)(pos++)->set(0, sy/Flt(y-1), 0   );
-      for(Int sy=1; sy<y-1; sy++)(pos++)->set(1, sy/Flt(y-1), 0   );
-   }else
-   FREPD(sy, y)
-   {
-      Flt fy=sy/Flt(y-1);
-      FREPD(sx, x)(pos++)->set(sx/Flt(x-1), fy, 0);
-   }
+    // vtx
+    Vec *pos = vtx.pos();
+    if (fast) {
+        FREPD(sx, x)
+        (pos++)->set(sx / Flt(x - 1), 1, 0);
+        FREPD(sx, x)
+        (pos++)->set(sx / Flt(x - 1), 0, 0);
+        for (Int sy = 1; sy < y - 1; sy++)
+            (pos++)->set(0, sy / Flt(y - 1), 0);
+        for (Int sy = 1; sy < y - 1; sy++)
+            (pos++)->set(1, sy / Flt(y - 1), 0);
+    } else
+        FREPD(sy, y) {
+            Flt fy = sy / Flt(y - 1);
+            FREPD(sx, x)
+            (pos++)->set(sx / Flt(x - 1), fy, 0);
+        }
 
-   // edge
-   VecI2 *edge=T.edge.ind();
-   if(fast)
-   {
-      FREPD(sx, x  )(edge++)->set(    sx,       sx+x);
-                    (edge++)->set(     x,      x+x-1);
-      FREPD(sy, y-2)(edge++)->set(x+x+sy, x+x+sy+y-2);
-                    (edge++)->set(     0,        x-1);
-   }else
-   {
-      FREPD(sy, y)FREPD(sx, x-1)(edge++)->set(sx+sy*x, sx+1+(sy  )*x);
-      FREPD(sx, x)FREPD(sy, y-1)(edge++)->set(sx+sy*x, sx  +(sy+1)*x);
-   }
-   return T;
+    // edge
+    VecI2 *edge = T.edge.ind();
+    if (fast) {
+        FREPD(sx, x)
+        (edge++)->set(sx, sx + x);
+        (edge++)->set(x, x + x - 1);
+        FREPD(sy, y - 2)
+        (edge++)->set(x + x + sy, x + x + sy + y - 2);
+        (edge++)->set(0, x - 1);
+    } else {
+        FREPD(sy, y)
+        FREPD(sx, x - 1)(edge++)->set(sx + sy * x, sx + 1 + (sy)*x);
+        FREPD(sx, x)
+        FREPD(sy, y - 1)(edge++)->set(sx + sy * x, sx + (sy + 1) * x);
+    }
+    return T;
 }
 /******************************************************************************/
-MeshBase& MeshBase::createFast(C Box &box)
-{
-   create(8, 0, 0, 6);
+MeshBase &MeshBase::createFast(C Box &box) {
+    create(8, 0, 0, 6);
 
-   // vtx
-      FREP(8)vtx.pos(i).set(( i    &1) ? box.max.x : box.min.x,
-                            ((i>>1)&1) ? box.max.y : box.min.y,
-                            ((i>>2)&1) ? box.max.z : box.min.z);
-   // face
-      // x
-      quad.ind(0).set(1|2|0, 1|2|4, 1|0|4, 1|0|0);
-      quad.ind(1).set(0|0|0, 0|0|4, 0|2|4, 0|2|0);
-      // y
-      quad.ind(2).set(2|4|0, 2|4|1, 2|0|1, 2|0|0);
-      quad.ind(3).set(0|0|0, 0|0|1, 0|4|1, 0|4|0);
-      // z
-      quad.ind(4).set(4|1|2, 4|0|2, 4|0|0, 4|1|0);
-      quad.ind(5).set(0|1|0, 0|0|0, 0|0|2, 0|1|2);
+    // vtx
+    FREP(8)
+    vtx.pos(i).set((i & 1) ? box.max.x : box.min.x,
+                   ((i >> 1) & 1) ? box.max.y : box.min.y,
+                   ((i >> 2) & 1) ? box.max.z : box.min.z);
+    // face
+    // x
+    quad.ind(0).set(1 | 2 | 0, 1 | 2 | 4, 1 | 0 | 4, 1 | 0 | 0);
+    quad.ind(1).set(0 | 0 | 0, 0 | 0 | 4, 0 | 2 | 4, 0 | 2 | 0);
+    // y
+    quad.ind(2).set(2 | 4 | 0, 2 | 4 | 1, 2 | 0 | 1, 2 | 0 | 0);
+    quad.ind(3).set(0 | 0 | 0, 0 | 0 | 1, 0 | 4 | 1, 0 | 4 | 0);
+    // z
+    quad.ind(4).set(4 | 1 | 2, 4 | 0 | 2, 4 | 0 | 0, 4 | 1 | 0);
+    quad.ind(5).set(0 | 1 | 0, 0 | 0 | 0, 0 | 0 | 2, 0 | 1 | 2);
 
-   return T;
+    return T;
 }
-MeshBase& MeshBase::createBox(C Matrix &matrix, MESH_FLAG flag, Int resolution)
-{
-   Matrix m; MeshBase mesh[6]; REPA(mesh)
-   {
-      m.setOrient(DIR_ENUM(i));
-      m.anchor(0.5f);
-      m*=matrix;
-      mesh[i].createPlane(resolution, resolution, flag).transform(m);
-   }
-   create(mesh, Elms(mesh));
-   if(!(flag&(VTX_TAN_BIN|VTX_TEX0)))weldVtx(VTX_ALL, EPS, EPS_COL_COS, -1);
-   return T;
+MeshBase &MeshBase::createBox(C Matrix &matrix, MESH_FLAG flag, Int resolution) {
+    Matrix m;
+    MeshBase mesh[6];
+    REPA(mesh) {
+        m.setOrient(DIR_ENUM(i));
+        m.anchor(0.5f);
+        m *= matrix;
+        mesh[i].createPlane(resolution, resolution, flag).transform(m);
+    }
+    create(mesh, Elms(mesh));
+    if (!(flag & (VTX_TAN_BIN | VTX_TEX0)))
+        weldVtx(VTX_ALL, EPS, EPS_COL_COS, -1);
+    return T;
 }
-MeshBase& MeshBase::create(C  Box & box, MESH_FLAG flag, Int resolution) {return createBox(Matrix(     box.size(),      box.min)            , flag, resolution);}
-MeshBase& MeshBase::create(C OBox &obox, MESH_FLAG flag, Int resolution) {return createBox(Matrix(obox.box.size(), obox.box.min)*obox.matrix, flag, resolution);}
+MeshBase &MeshBase::create(C Box &box, MESH_FLAG flag, Int resolution) { return createBox(Matrix(box.size(), box.min), flag, resolution); }
+MeshBase &MeshBase::create(C OBox &obox, MESH_FLAG flag, Int resolution) { return createBox(Matrix(obox.box.size(), obox.box.min) * obox.matrix, flag, resolution); }
 /******************************************************************************/
-MeshBase& MeshBase::create(C Ball &ball, MESH_FLAG flag, Int resolution)
-{
-   if(resolution<0)resolution=7;else MAX(resolution, 2); // default size else min size
-   Int    face_vtxs=resolution*resolution;
-   create(face_vtxs*6, 0, 0, (resolution-1)*(resolution-1)*6, flag&VTX_TEX0);
-   Vec   *pos =  vtx .pos ();
-   Vec2  *tex =  vtx .tex0();
-   VecI4 *quad=T.quad.ind ();
+MeshBase &MeshBase::create(C Ball &ball, MESH_FLAG flag, Int resolution) {
+    if (resolution < 0)
+        resolution = 7;
+    else
+        MAX(resolution, 2); // default size else min size
+    Int face_vtxs = resolution * resolution;
+    create(face_vtxs * 6, 0, 0, (resolution - 1) * (resolution - 1) * 6, flag & VTX_TEX0);
+    Vec *pos = vtx.pos();
+    Vec2 *tex = vtx.tex0();
+    VecI4 *quad = T.quad.ind();
 
-   // vtx
-   FREPD(y, resolution)
-   {
-      Flt fy=y/Flt(resolution-1), sy=-Tan(fy*PI_2-PI_4);
-      FREPD(x, resolution)
-      {
-         Flt fx=x/Flt(resolution-1), sx=-Tan(fx*PI_2-PI_4);
-         pos[face_vtxs*0].set( sx, sy,  1 );
-         pos[face_vtxs*1].set( 1 , sy, -sx);
-         pos[face_vtxs*2].set(-sx, sy, -1 );
-         pos[face_vtxs*3].set(-1 , sy,  sx);
-         pos[face_vtxs*4].set(-sx,  1,  sy);
-         pos[face_vtxs*5].set(-sx, -1, -sy);
-         pos++;
-         if(tex)
-         {
-            tex[face_vtxs*0].set(fx, fy);
-            tex[face_vtxs*1].set(fx, fy);
-            tex[face_vtxs*2].set(fx, fy);
-            tex[face_vtxs*3].set(fx, fy);
-            tex[face_vtxs*4].set(fx, fy);
-            tex[face_vtxs*5].set(fx, fy);
-            tex++;
-         }
-      }
-   }
+    // vtx
+    FREPD(y, resolution) {
+        Flt fy = y / Flt(resolution - 1), sy = -Tan(fy * PI_2 - PI_4);
+        FREPD(x, resolution) {
+            Flt fx = x / Flt(resolution - 1), sx = -Tan(fx * PI_2 - PI_4);
+            pos[face_vtxs * 0].set(sx, sy, 1);
+            pos[face_vtxs * 1].set(1, sy, -sx);
+            pos[face_vtxs * 2].set(-sx, sy, -1);
+            pos[face_vtxs * 3].set(-1, sy, sx);
+            pos[face_vtxs * 4].set(-sx, 1, sy);
+            pos[face_vtxs * 5].set(-sx, -1, -sy);
+            pos++;
+            if (tex) {
+                tex[face_vtxs * 0].set(fx, fy);
+                tex[face_vtxs * 1].set(fx, fy);
+                tex[face_vtxs * 2].set(fx, fy);
+                tex[face_vtxs * 3].set(fx, fy);
+                tex[face_vtxs * 4].set(fx, fy);
+                tex[face_vtxs * 5].set(fx, fy);
+                tex++;
+            }
+        }
+    }
 
-   // face
-   FREPD(f, 6)
-   FREPD(y, resolution-1)
-   FREPD(x, resolution-1)
-   {
-      Int p=x + y*resolution + f*face_vtxs;
-      (quad++)->set(p, p+1, p+1+resolution, p+resolution);
-   }
+    // face
+    FREPD(f, 6)
+    FREPD(y, resolution - 1)
+    FREPD(x, resolution - 1) {
+        Int p = x + y * resolution + f * face_vtxs;
+        (quad++)->set(p, p + 1, p + 1 + resolution, p + resolution);
+    }
 
-   if(!(flag&VTX_TEX0))weldVtx(VTX_ALL, EPS, EPS_COL_COS, -1);
-   Normalize(vtx.pos(), vtxs());
-   if(flag&VTX_NRM)
-   {
-      include(VTX_NRM);
-      CopyN  (vtx.nrm(), vtx.pos(), vtxs());
-   }
-   transform(Matrix(ball.r, ball.pos));
-   if(flag&VTX_TAN_BIN)setTanBin(); // if(flag&VTX_TAN)setTangents(); if(flag&VTX_BIN)setBinormals();
-   return T;
+    if (!(flag & VTX_TEX0))
+        weldVtx(VTX_ALL, EPS, EPS_COL_COS, -1);
+    Normalize(vtx.pos(), vtxs());
+    if (flag & VTX_NRM) {
+        include(VTX_NRM);
+        CopyN(vtx.nrm(), vtx.pos(), vtxs());
+    }
+    transform(Matrix(ball.r, ball.pos));
+    if (flag & VTX_TAN_BIN)
+        setTanBin(); // if(flag&VTX_TAN)setTangents(); if(flag&VTX_BIN)setBinormals();
+    return T;
 }
-MeshBase& MeshBase::createHalf(C Ball &ball, MESH_FLAG flag, Int resolution)
-{
-   if(resolution<0)resolution=7;else MAX(resolution, 2); // default size else min size
-#if 1 // floor
-   Int  res_half=Max((resolution+1)/2, 2),
+MeshBase &MeshBase::createHalf(C Ball &ball, MESH_FLAG flag, Int resolution) {
+    if (resolution < 0)
+        resolution = 7;
+    else
+        MAX(resolution, 2); // default size else min size
+#if 1                       // floor
+    Int res_half = Max((resolution + 1) / 2, 2),
 #else // ceil
-   Int  res_half=resolution/2+1,
+    Int res_half = resolution / 2 + 1,
 #endif
-       face_vtxs=resolution*resolution,
-       half_vtxs=resolution*res_half;
-   create(half_vtxs*4 + face_vtxs, 0, 0, (resolution-1)*(res_half-1)*4 + (resolution-1)*(resolution-1), flag&VTX_TEX0);
-   Vec   *pos =  vtx .pos ();
-   Vec2  *tex =  vtx .tex0();
-   VecI4 *quad=T.quad.ind ();
+        face_vtxs = resolution * resolution,
+        half_vtxs = resolution * res_half;
+    create(half_vtxs * 4 + face_vtxs, 0, 0, (resolution - 1) * (res_half - 1) * 4 + (resolution - 1) * (resolution - 1), flag & VTX_TEX0);
+    Vec *pos = vtx.pos();
+    Vec2 *tex = vtx.tex0();
+    VecI4 *quad = T.quad.ind();
 
-   // vtx
-   FREPD(y, res_half)
-   {
-      Flt fy=y/Flt((res_half-1)*2), sy=-Tan(fy*PI_2-PI_4);
-      FREPD(x, resolution)
-      {
-         Flt fx=x/Flt(resolution-1), sx=-Tan(fx*PI_2-PI_4);
-         pos[half_vtxs*0].set( sx, sy,  1 );
-         pos[half_vtxs*1].set( 1 , sy, -sx);
-         pos[half_vtxs*2].set(-sx, sy, -1 );
-         pos[half_vtxs*3].set(-1 , sy,  sx);
-         pos++;
-         if(tex)
-         {
-            tex[half_vtxs*0].set(fx, fy);
-            tex[half_vtxs*1].set(fx, fy);
-            tex[half_vtxs*2].set(fx, fy);
-            tex[half_vtxs*3].set(fx, fy);
-            tex++;
-         }
-      }
-   }
-          pos+=resolution*res_half*3;
-   if(tex)tex+=resolution*res_half*3;
-   FREPD(y, resolution)
-   {
-      Flt fy=y/Flt(resolution-1), sy=-Tan(fy*PI_2-PI_4);
-      FREPD(x, resolution)
-      {
-         Flt fx=x/Flt(resolution-1), sx=-Tan(fx*PI_2-PI_4);
-                (pos++)->set(-sx,  1,  sy);
-         if(tex)(tex++)->set( fx, fy);
-      }
-   }
+    // vtx
+    FREPD(y, res_half) {
+        Flt fy = y / Flt((res_half - 1) * 2), sy = -Tan(fy * PI_2 - PI_4);
+        FREPD(x, resolution) {
+            Flt fx = x / Flt(resolution - 1), sx = -Tan(fx * PI_2 - PI_4);
+            pos[half_vtxs * 0].set(sx, sy, 1);
+            pos[half_vtxs * 1].set(1, sy, -sx);
+            pos[half_vtxs * 2].set(-sx, sy, -1);
+            pos[half_vtxs * 3].set(-1, sy, sx);
+            pos++;
+            if (tex) {
+                tex[half_vtxs * 0].set(fx, fy);
+                tex[half_vtxs * 1].set(fx, fy);
+                tex[half_vtxs * 2].set(fx, fy);
+                tex[half_vtxs * 3].set(fx, fy);
+                tex++;
+            }
+        }
+    }
+    pos += resolution * res_half * 3;
+    if (tex)
+        tex += resolution * res_half * 3;
+    FREPD(y, resolution) {
+        Flt fy = y / Flt(resolution - 1), sy = -Tan(fy * PI_2 - PI_4);
+        FREPD(x, resolution) {
+            Flt fx = x / Flt(resolution - 1), sx = -Tan(fx * PI_2 - PI_4);
+            (pos++)->set(-sx, 1, sy);
+            if (tex)
+                (tex++)->set(fx, fy);
+        }
+    }
 
-   // face
-   FREPD(f, 4)
-   FREPD(y, res_half  -1)
-   FREPD(x, resolution-1)
-   {
-      Int p=x + y*resolution + f*half_vtxs;
-      (quad++)->set(p, p+1, p+1+resolution, p+resolution);
-   }
-   FREPD(y, resolution-1)
-   FREPD(x, resolution-1)
-   {
-      Int p=x + y*resolution + 4*half_vtxs;
-      (quad++)->set(p, p+1, p+1+resolution, p+resolution);
-   }
+    // face
+    FREPD(f, 4)
+    FREPD(y, res_half - 1)
+    FREPD(x, resolution - 1) {
+        Int p = x + y * resolution + f * half_vtxs;
+        (quad++)->set(p, p + 1, p + 1 + resolution, p + resolution);
+    }
+    FREPD(y, resolution - 1)
+    FREPD(x, resolution - 1) {
+        Int p = x + y * resolution + 4 * half_vtxs;
+        (quad++)->set(p, p + 1, p + 1 + resolution, p + resolution);
+    }
 
-   if(!(flag&VTX_TEX0))weldVtx(VTX_ALL, EPS, EPS_COL_COS, -1);
-   Normalize(vtx.pos(), vtxs());
-   if(flag&VTX_NRM)
-   {
-      include(VTX_NRM);
-      CopyN  (vtx.nrm(), vtx.pos(), vtxs());
-   }
-   transform(Matrix(ball.r, ball.pos));
-   if(flag&VTX_TAN_BIN)setTanBin(); // if(flag&VTX_TAN)setTangents(); if(flag&VTX_BIN)setBinormals();
-   return T;
+    if (!(flag & VTX_TEX0))
+        weldVtx(VTX_ALL, EPS, EPS_COL_COS, -1);
+    Normalize(vtx.pos(), vtxs());
+    if (flag & VTX_NRM) {
+        include(VTX_NRM);
+        CopyN(vtx.nrm(), vtx.pos(), vtxs());
+    }
+    transform(Matrix(ball.r, ball.pos));
+    if (flag & VTX_TAN_BIN)
+        setTanBin(); // if(flag&VTX_TAN)setTangents(); if(flag&VTX_BIN)setBinormals();
+    return T;
 }
 /******************************************************************************/
-MeshBase& MeshBase::create2(C Ball &ball, MESH_FLAG flag, Int resolution, Int resolution2)
-{
-   if(resolution <0)resolution =24;else MAX(resolution , 3); // default size else min size
-   if(resolution2<0)resolution2=13;else MAX(resolution2, 3); // default size else min size
-   create((resolution+1)*resolution2, 0, resolution*2, resolution*(resolution2-3), flag&VTX_TEX0);
+MeshBase &MeshBase::create2(C Ball &ball, MESH_FLAG flag, Int resolution, Int resolution2) {
+    if (resolution < 0)
+        resolution = 24;
+    else
+        MAX(resolution, 3); // default size else min size
+    if (resolution2 < 0)
+        resolution2 = 13;
+    else
+        MAX(resolution2, 3); // default size else min size
+    create((resolution + 1) * resolution2, 0, resolution * 2, resolution * (resolution2 - 3), flag & VTX_TEX0);
 
-   // vertexes
-   REPD(y, resolution2)
-   {
-      Flt cy, sy; CosSin(cy, sy, y/Flt(resolution2-1)*PI-PI_2);
-      REPD(x, resolution+1)
-      {
-         Flt cx, sx; CosSin(cx, sx, x/Flt(resolution)*PI2);
-                       vtx.pos (x+y*(resolution+1)).set(cx*cy, sy, sx*cy);
-         if(vtx.tex0())vtx.tex0(x+y*(resolution+1)).set(x/Flt(resolution), y/Flt(resolution2-1));
-      }
-   }
+    // vertexes
+    REPD(y, resolution2) {
+        Flt cy, sy;
+        CosSin(cy, sy, y / Flt(resolution2 - 1) * PI - PI_2);
+        REPD(x, resolution + 1) {
+            Flt cx, sx;
+            CosSin(cx, sx, x / Flt(resolution) * PI2);
+            vtx.pos(x + y * (resolution + 1)).set(cx * cy, sy, sx * cy);
+            if (vtx.tex0())
+                vtx.tex0(x + y * (resolution + 1)).set(x / Flt(resolution), y / Flt(resolution2 - 1));
+        }
+    }
 
-   // triangles
-   REPD(x, resolution)
-   {
-      Int i=x+             0 *(resolution+1); tri.ind(x           ).set(i+resolution+1, i+resolution+1+1, i);
-          i=x+(resolution2-2)*(resolution+1); tri.ind(x+resolution).set(i+resolution+1, i+1             , i);
-   }
+    // triangles
+    REPD(x, resolution) {
+        Int i = x + 0 * (resolution + 1);
+        tri.ind(x).set(i + resolution + 1, i + resolution + 1 + 1, i);
+        i = x + (resolution2 - 2) * (resolution + 1);
+        tri.ind(x + resolution).set(i + resolution + 1, i + 1, i);
+    }
 
-   // quads
-   REPD(y, resolution2-3)
-   REPD(x, resolution)
-   {
-      Int i=x+(y+1)*(resolution+1); quad.ind(x+y*resolution).set(i+resolution+1, i+resolution+1+1, i+1, i);
-   }
+    // quads
+    REPD(y, resolution2 - 3)
+    REPD(x, resolution) {
+        Int i = x + (y + 1) * (resolution + 1);
+        quad.ind(x + y * resolution).set(i + resolution + 1, i + resolution + 1 + 1, i + 1, i);
+    }
 
-   if(!(flag&VTX_TEX0))weldVtx(VTX_ALL, EPS, EPS_COL_COS, -1);
-   Normalize(vtx.pos(), vtxs());
-   if(flag&VTX_NRM)
-   {
-      include(VTX_NRM);
-      CopyN  (vtx.nrm(), vtx.pos(), vtxs());
-   }
-   transform(Matrix(ball.r, ball.pos));
-   if(flag&VTX_TAN_BIN)setTanBin(); // if(flag&VTX_TAN)setTangents(); if(flag&VTX_BIN)setBinormals();
-   return T;
+    if (!(flag & VTX_TEX0))
+        weldVtx(VTX_ALL, EPS, EPS_COL_COS, -1);
+    Normalize(vtx.pos(), vtxs());
+    if (flag & VTX_NRM) {
+        include(VTX_NRM);
+        CopyN(vtx.nrm(), vtx.pos(), vtxs());
+    }
+    transform(Matrix(ball.r, ball.pos));
+    if (flag & VTX_TAN_BIN)
+        setTanBin(); // if(flag&VTX_TAN)setTangents(); if(flag&VTX_BIN)setBinormals();
+    return T;
 }
 /******************************************************************************/
-//VecD2 p((1+Sqrt(5.0))/2, 1); p.normalize();
+// VecD2 p((1+Sqrt(5.0))/2, 1); p.normalize();
 #define X 0.85065080835203999f // p.x
 #define Y 0.52573111211913359f // p.y
-static const Vec IcoVtxs[]=
-{
-  Vec( Y, 0,-X), Vec(-Y, 0,-X), Vec( Y, 0, X), Vec(-Y, 0, X),
-  Vec( 0,-X,-Y), Vec( 0,-X, Y), Vec( 0, X,-Y), Vec( 0, X, Y),
-  Vec(-X,-Y, 0), Vec( X,-Y, 0), Vec(-X, Y, 0), Vec( X, Y, 0),
+static const Vec IcoVtxs[] =
+    {
+        Vec(Y, 0, -X),
+        Vec(-Y, 0, -X),
+        Vec(Y, 0, X),
+        Vec(-Y, 0, X),
+        Vec(0, -X, -Y),
+        Vec(0, -X, Y),
+        Vec(0, X, -Y),
+        Vec(0, X, Y),
+        Vec(-X, -Y, 0),
+        Vec(X, -Y, 0),
+        Vec(-X, Y, 0),
+        Vec(X, Y, 0),
 };
-static const VecI IcoTris[]=
-{
-  VecI(0, 4, 1), VecI(0,9, 4), VecI(9, 5,4), VecI( 4,5,8), VecI(4,8, 1),
-  VecI(8,10, 1), VecI(8,3,10), VecI(5, 3,8), VecI( 5,2,3), VecI(2,7, 3),
-  VecI(7,10, 3), VecI(7,6,10), VecI(7,11,6), VecI(11,0,6), VecI(0,1, 6),
-  VecI(6, 1,10), VecI(9,0,11), VecI(9,11,2), VecI( 9,2,5), VecI(7,2,11),
+static const VecI IcoTris[] =
+    {
+        VecI(0, 4, 1),
+        VecI(0, 9, 4),
+        VecI(9, 5, 4),
+        VecI(4, 5, 8),
+        VecI(4, 8, 1),
+        VecI(8, 10, 1),
+        VecI(8, 3, 10),
+        VecI(5, 3, 8),
+        VecI(5, 2, 3),
+        VecI(2, 7, 3),
+        VecI(7, 10, 3),
+        VecI(7, 6, 10),
+        VecI(7, 11, 6),
+        VecI(11, 0, 6),
+        VecI(0, 1, 6),
+        VecI(6, 1, 10),
+        VecI(9, 0, 11),
+        VecI(9, 11, 2),
+        VecI(9, 2, 5),
+        VecI(7, 2, 11),
 };
 #undef X
 #undef Y
-MeshBase& MeshBase::createIco(C Ball &ball, MESH_FLAG flag, Int resolution)
-{
-   if(resolution< 0)resolution=3; // default
-   if(resolution<=0) // simple
-   {
-      create(Elms(IcoVtxs), 0, Elms(IcoTris), 0);
-      CopyN(vtx.pos(), IcoVtxs, vtxs());
-      CopyN(tri.ind(), IcoTris, tris());
-   }else // subdivision
-   {
-      resolution++;
-      const Int vtxs=(resolution+1)*(resolution+2)/2, tris=resolution*resolution, sides=Elms(IcoTris);
-      create(vtxs*sides, 0, tris*sides, 0);
-      Int   vtx_offset=0;
-      Vec  *p=vtx.pos();
-      VecI *t=tri.ind();
-      REP(sides)
-      {
-       C VecI &tri_ind=IcoTris[i];
-       C Vec  &v0     =IcoVtxs[tri_ind.x],
-              &v1     =IcoVtxs[tri_ind.y],
-              &v2     =IcoVtxs[tri_ind.z];
-         Vec   v01    =(v1-v0)/resolution,
-               v02    =(v2-v0)/resolution,
-               vy     =v0;
-         for(Int y=0; y<=resolution; y++)
-         {
-            Vec vx=vy;
-            Int xs=resolution-y;
-            for(Int x=0; x<=xs; x++)
-            {
-               *p++=vx;
-               vx+=v01;
-               if(y!=resolution && x!=xs)
-               {
-                            (t++)->set(vtx_offset     , vtx_offset+1, vtx_offset+xs+1);
-                  if(x+1<xs)(t++)->set(vtx_offset+xs+1, vtx_offset+1, vtx_offset+xs+2);
-               }
-               vtx_offset++;
+MeshBase &MeshBase::createIco(C Ball &ball, MESH_FLAG flag, Int resolution) {
+    if (resolution < 0)
+        resolution = 3;  // default
+    if (resolution <= 0) // simple
+    {
+        create(Elms(IcoVtxs), 0, Elms(IcoTris), 0);
+        CopyN(vtx.pos(), IcoVtxs, vtxs());
+        CopyN(tri.ind(), IcoTris, tris());
+    } else // subdivision
+    {
+        resolution++;
+        const Int vtxs = (resolution + 1) * (resolution + 2) / 2, tris = resolution * resolution, sides = Elms(IcoTris);
+        create(vtxs * sides, 0, tris * sides, 0);
+        Int vtx_offset = 0;
+        Vec *p = vtx.pos();
+        VecI *t = tri.ind();
+        REP(sides) {
+            C VecI &tri_ind = IcoTris[i];
+            C Vec &v0 = IcoVtxs[tri_ind.x],
+                  &v1 = IcoVtxs[tri_ind.y],
+                  &v2 = IcoVtxs[tri_ind.z];
+            Vec v01 = (v1 - v0) / resolution,
+                v02 = (v2 - v0) / resolution,
+                vy = v0;
+            for (Int y = 0; y <= resolution; y++) {
+                Vec vx = vy;
+                Int xs = resolution - y;
+                for (Int x = 0; x <= xs; x++) {
+                    *p++ = vx;
+                    vx += v01;
+                    if (y != resolution && x != xs) {
+                        (t++)->set(vtx_offset, vtx_offset + 1, vtx_offset + xs + 1);
+                        if (x + 1 < xs)
+                            (t++)->set(vtx_offset + xs + 1, vtx_offset + 1, vtx_offset + xs + 2);
+                    }
+                    vtx_offset++;
+                }
+                vy += v02;
             }
-            vy+=v02;
-         }
-      }
-      weldVtx(VTX_ALL, EPS, EPS_COL_COS, -1);
-      Normalize(vtx.pos(), T.vtxs());
-   }
-   if(flag&VTX_NRM)
-   {
-      include(VTX_NRM);
-      CopyN  (vtx.nrm(), vtx.pos(), T.vtxs());
-   }
-   transform(Matrix(ball.r, ball.pos));
-   if(flag&VTX_TAN_BIN)setTanBin(); // if(flag&VTX_TAN)setTangents(); if(flag&VTX_BIN)setBinormals();
-   return T;
+        }
+        weldVtx(VTX_ALL, EPS, EPS_COL_COS, -1);
+        Normalize(vtx.pos(), T.vtxs());
+    }
+    if (flag & VTX_NRM) {
+        include(VTX_NRM);
+        CopyN(vtx.nrm(), vtx.pos(), T.vtxs());
+    }
+    transform(Matrix(ball.r, ball.pos));
+    if (flag & VTX_TAN_BIN)
+        setTanBin(); // if(flag&VTX_TAN)setTangents(); if(flag&VTX_BIN)setBinormals();
+    return T;
 }
 /******************************************************************************/
-MeshBase& MeshBase::createIcoHalf(C Ball &ball, MESH_FLAG flag, Int resolution)
-{
-   createIco(Ball(1), MESH_NONE, resolution);
-   Memt<Bool> is; is.setNumZero(vtxs());
-   REPA(tri)
-   {
-    C VecI &t=tri.ind(i);
-      if(vtx.pos(t.x).y>EPS
-      || vtx.pos(t.y).y>EPS
-      || vtx.pos(t.z).y>EPS)is[t.x]=is[t.y]=is[t.z]=true;
-   }
-   keepVtxs(is);
-   REPA(vtx){Vec &p=vtx.pos(i); if(p.y<0){p.y=0; p.normalize();}}
-   if(flag&VTX_NRM)
-   {
-      include(VTX_NRM);
-      CopyN  (vtx.nrm(), vtx.pos(), T.vtxs());
-   }
-   transform(Matrix(ball.r, ball.pos));
-   if(flag&VTX_TAN_BIN)setTanBin(); // if(flag&VTX_TAN)setTangents(); if(flag&VTX_BIN)setBinormals();
-   return T;
+MeshBase &MeshBase::createIcoHalf(C Ball &ball, MESH_FLAG flag, Int resolution) {
+    createIco(Ball(1), MESH_NONE, resolution);
+    Memt<Bool> is;
+    is.setNumZero(vtxs());
+    REPA(tri) {
+        C VecI &t = tri.ind(i);
+        if (vtx.pos(t.x).y > EPS || vtx.pos(t.y).y > EPS || vtx.pos(t.z).y > EPS)
+            is[t.x] = is[t.y] = is[t.z] = true;
+    }
+    keepVtxs(is);
+    REPA(vtx) {
+        Vec &p = vtx.pos(i);
+        if (p.y < 0) {
+            p.y = 0;
+            p.normalize();
+        }
+    }
+    if (flag & VTX_NRM) {
+        include(VTX_NRM);
+        CopyN(vtx.nrm(), vtx.pos(), T.vtxs());
+    }
+    transform(Matrix(ball.r, ball.pos));
+    if (flag & VTX_TAN_BIN)
+        setTanBin(); // if(flag&VTX_TAN)setTangents(); if(flag&VTX_BIN)setBinormals();
+    return T;
 }
 /******************************************************************************/
-MeshBase& MeshBase::create(C Capsule &capsule, MESH_FLAG flag, Int resolution, Int resolution2)
-{
-   if(resolution <0)resolution =12;else MAX(resolution , 3);
-   if(resolution2<0)resolution2= 5;else MAX(resolution2, 2);
-   Bool ball;
-   Flt  ihh, top, r;
-   if(ball=capsule.isBall())
-   {
-      ihh=0;
-      top=r=capsule.ballR();
-   }else
-   {
-      ihh=capsule.innerHeightHalf();
-      top=capsule.h*0.5f;
-      r  =capsule.r;
-   }
-   Int ball_quads=(resolution2-2)*resolution*2;
-   create((resolution+1)*(resolution2-1)*2+2, 0, resolution*2, ball_quads + (ball ? 0 : resolution), flag&VTX_TEX0);
-   REPD(y, resolution2-1)
-   {
-      Flt cy, sy; CosSin(cy, sy, y/Flt(resolution2-1)*PI_2);
-      REPD(x, resolution+1)
-      {
-         Flt cx, sx; CosSin(cx, sx, x/Flt(resolution)*PI2);
-         Int i0=x+ y               *(resolution+1),
-             i1=x+(y+resolution2-1)*(resolution+1);
-              vtx.pos(i0).set(cy*cx*r, ihh+sy*r, cy*sx*r);
-         CHS((vtx.pos(i1)=vtx.pos(i0)).y);
-         if(vtx.tex0())
-         {
-            vtx.tex0(i0).set(x/Flt(resolution), (y/Flt(resolution2-1)*r + ihh)/top*0.5f+0.5f);
-            vtx.tex0(i1).set(vtx.tex0(i0).x, 1-vtx.tex0(i0).y);
-         }
-      }
-   }
-   vtx.pos(vtxs()-2).set(0,  top, 0);
-   vtx.pos(vtxs()-1).set(0, -top, 0);
-   if(vtx.tex0())
-   {
-      vtx.tex0(vtxs()-2).set(0.5f, 1);
-      vtx.tex0(vtxs()-1).set(0.5f, 0);
-   }
-   REP(resolution)
-   {
-      Int lo=(resolution2-1)*(resolution+1),
-          o =lo-(resolution+1);
-               tri .ind(i           ).set(o+ i+1, o+     i, vtxs()-2);
-               tri .ind(i+resolution).set(o+lo+i, o+lo+i+1, vtxs()-1);
-      if(!ball)quad.ind(i+ball_quads).set(lo+i+1, lo+i, i, i+1);
-      REPD(y, resolution2-2)
-      {
-         o=y*(resolution+1);
-         quad.ind(resolution* y               +i).set(o+i+1, o+i, o+(resolution+1)+i, o+(resolution+1)+i+1); o+=lo;
-         quad.ind(resolution*(y+resolution2-2)+i).set(o+(resolution+1)+i+1, o+(resolution+1)+i, o+i, o+i+1);
-      }
-   }
+MeshBase &MeshBase::create(C Capsule &capsule, MESH_FLAG flag, Int resolution, Int resolution2) {
+    if (resolution < 0)
+        resolution = 12;
+    else
+        MAX(resolution, 3);
+    if (resolution2 < 0)
+        resolution2 = 5;
+    else
+        MAX(resolution2, 2);
+    Bool ball;
+    Flt ihh, top, r;
+    if (ball = capsule.isBall()) {
+        ihh = 0;
+        top = r = capsule.ballR();
+    } else {
+        ihh = capsule.innerHeightHalf();
+        top = capsule.h * 0.5f;
+        r = capsule.r;
+    }
+    Int ball_quads = (resolution2 - 2) * resolution * 2;
+    create((resolution + 1) * (resolution2 - 1) * 2 + 2, 0, resolution * 2, ball_quads + (ball ? 0 : resolution), flag & VTX_TEX0);
+    REPD(y, resolution2 - 1) {
+        Flt cy, sy;
+        CosSin(cy, sy, y / Flt(resolution2 - 1) * PI_2);
+        REPD(x, resolution + 1) {
+            Flt cx, sx;
+            CosSin(cx, sx, x / Flt(resolution) * PI2);
+            Int i0 = x + y * (resolution + 1),
+                i1 = x + (y + resolution2 - 1) * (resolution + 1);
+            vtx.pos(i0).set(cy * cx * r, ihh + sy * r, cy * sx * r);
+            CHS((vtx.pos(i1) = vtx.pos(i0)).y);
+            if (vtx.tex0()) {
+                vtx.tex0(i0).set(x / Flt(resolution), (y / Flt(resolution2 - 1) * r + ihh) / top * 0.5f + 0.5f);
+                vtx.tex0(i1).set(vtx.tex0(i0).x, 1 - vtx.tex0(i0).y);
+            }
+        }
+    }
+    vtx.pos(vtxs() - 2).set(0, top, 0);
+    vtx.pos(vtxs() - 1).set(0, -top, 0);
+    if (vtx.tex0()) {
+        vtx.tex0(vtxs() - 2).set(0.5f, 1);
+        vtx.tex0(vtxs() - 1).set(0.5f, 0);
+    }
+    REP(resolution) {
+        Int lo = (resolution2 - 1) * (resolution + 1),
+            o = lo - (resolution + 1);
+        tri.ind(i).set(o + i + 1, o + i, vtxs() - 2);
+        tri.ind(i + resolution).set(o + lo + i, o + lo + i + 1, vtxs() - 1);
+        if (!ball)
+            quad.ind(i + ball_quads).set(lo + i + 1, lo + i, i, i + 1);
+        REPD(y, resolution2 - 2) {
+            o = y * (resolution + 1);
+            quad.ind(resolution * y + i).set(o + i + 1, o + i, o + (resolution + 1) + i, o + (resolution + 1) + i + 1);
+            o += lo;
+            quad.ind(resolution * (y + resolution2 - 2) + i).set(o + (resolution + 1) + i + 1, o + (resolution + 1) + i, o + i, o + i + 1);
+        }
+    }
 
-   if(!(flag&VTX_TEX0))weldVtx(VTX_ALL, EPS, EPS_COL_COS, -1);
-   transform(Matrix().setPosUp(capsule.pos, capsule.up));
-   if(flag&VTX_NRM    )setVtxDup().setNormals().exclude(VTX_DUP);
-   if(flag&VTX_TAN_BIN)setTanBin(); // if(flag&VTX_TAN)setTangents(); if(flag&VTX_BIN)setBinormals();
-   return T;
+    if (!(flag & VTX_TEX0))
+        weldVtx(VTX_ALL, EPS, EPS_COL_COS, -1);
+    transform(Matrix().setPosUp(capsule.pos, capsule.up));
+    if (flag & VTX_NRM)
+        setVtxDup().setNormals().exclude(VTX_DUP);
+    if (flag & VTX_TAN_BIN)
+        setTanBin(); // if(flag&VTX_TAN)setTangents(); if(flag&VTX_BIN)setBinormals();
+    return T;
 }
 /******************************************************************************/
-MeshBase& MeshBase::createFast(C Tube &tube, Int resolution)
-{
-   if(resolution<0)resolution=12;else MAX(resolution, 3);
-   create(resolution*2, 0, (resolution-2)*2+resolution*2, 0);
-   VecI *tri=T.tri.ind();
-   Flt   h_2=tube.h/2;
-   REP(resolution)
-   {
-      Flt c, s; CosSin(c, s, i*PI2/resolution);
-      vtx.pos(           i).set(c*tube.r,  h_2, s*tube.r);
-      vtx.pos(resolution+i).set(c*tube.r, -h_2, s*tube.r);
-      (tri++)->set(i, (i+1)%resolution, resolution+i);
-      (tri++)->set((i+1)%resolution, (i+1)%resolution+resolution, resolution+i);
-   }
-   REP(resolution-2)
-   {
-      tri[             i].set(         0,            i+2,            i+1);
-      tri[resolution-2+i].set(resolution, resolution+i+1, resolution+i+2);
-   }
-   transform(Matrix().setPosUp(tube.pos, tube.up));
-   return T;
+MeshBase &MeshBase::createFast(C Tube &tube, Int resolution) {
+    if (resolution < 0)
+        resolution = 12;
+    else
+        MAX(resolution, 3);
+    create(resolution * 2, 0, (resolution - 2) * 2 + resolution * 2, 0);
+    VecI *tri = T.tri.ind();
+    Flt h_2 = tube.h / 2;
+    REP(resolution) {
+        Flt c, s;
+        CosSin(c, s, i * PI2 / resolution);
+        vtx.pos(i).set(c * tube.r, h_2, s * tube.r);
+        vtx.pos(resolution + i).set(c * tube.r, -h_2, s * tube.r);
+        (tri++)->set(i, (i + 1) % resolution, resolution + i);
+        (tri++)->set((i + 1) % resolution, (i + 1) % resolution + resolution, resolution + i);
+    }
+    REP(resolution - 2) {
+        tri[i].set(0, i + 2, i + 1);
+        tri[resolution - 2 + i].set(resolution, resolution + i + 1, resolution + i + 2);
+    }
+    transform(Matrix().setPosUp(tube.pos, tube.up));
+    return T;
 }
-MeshBase& MeshBase::create(C Tube &tube, MESH_FLAG flag, Int resolution)
-{
-   if(resolution<0)resolution=12;else MAX(resolution, 3);
-   Int offset,
-       resolution1=resolution+1;
-   Flt h_2=tube.h/2;
-   create(resolution*2 + resolution1*2, 0, (resolution-2)*2, resolution, flag&(VTX_NRM_TAN_BIN|VTX_TEX0));
-   VecI  *tri =T.tri .ind();
-   VecI4 *quad=T.quad.ind();
+MeshBase &MeshBase::create(C Tube &tube, MESH_FLAG flag, Int resolution) {
+    if (resolution < 0)
+        resolution = 12;
+    else
+        MAX(resolution, 3);
+    Int offset,
+        resolution1 = resolution + 1;
+    Flt h_2 = tube.h / 2;
+    create(resolution * 2 + resolution1 * 2, 0, (resolution - 2) * 2, resolution, flag & (VTX_NRM_TAN_BIN | VTX_TEX0));
+    VecI *tri = T.tri.ind();
+    VecI4 *quad = T.quad.ind();
 
-   // vtxs
-   REP(resolution)
-   {
-      Flt c, s; CosSin(c, s, i*PI2/resolution);
-      vtx.pos(           i).set(c*tube.r,  h_2, s*tube.r);
-      vtx.pos(resolution+i).set(c*tube.r, -h_2, s*tube.r);
-      if(vtx.nrm())
-      {
-         vtx.nrm(           i).set(0,  1, 0);
-         vtx.nrm(resolution+i).set(0, -1, 0);
-      }
-      if(vtx.tan())
-      {
-         vtx.tan(           i).set(1, 0, 0);
-         vtx.tan(resolution+i).set(1, 0, 0);
-      }
-      if(vtx.bin())
-      {
-         vtx.bin(           i).set(0, 0, -1);
-         vtx.bin(resolution+i).set(0, 0,  1);
-      }
-      if(vtx.tex0())
-      {
-         vtx.tex0(           i).set(c*0.5f+0.5f, -s*0.5f+0.5f);
-         vtx.tex0(resolution+i).set(c*0.5f+0.5f,  s*0.5f+0.5f);
-      }
-   }
-   offset=resolution*2; REP(resolution1)
-   {
-      Flt c, s; CosSin(c, s, i*PI2/resolution);
-      vtx.pos(offset+            i).set(c*tube.r,  h_2, s*tube.r);
-      vtx.pos(offset+resolution1+i).set(c*tube.r, -h_2, s*tube.r);
-      if(vtx.nrm())
-      {
-         vtx.nrm(offset+            i).set(c, 0, s);
-         vtx.nrm(offset+resolution1+i).set(c, 0, s);
-      }
-      if(vtx.tan())
-      {
-         vtx.tan(offset+            i).set(-s, 0, c);
-         vtx.tan(offset+resolution1+i).set(-s, 0, c);
-      }
-      if(vtx.bin())
-      {
-         vtx.bin(offset+            i).set(0, -1, 0);
-         vtx.bin(offset+resolution1+i).set(0, -1, 0);
-      }
-      if(vtx.tex0())
-      {
-         vtx.tex0(offset+            i).set(Flt(i)/resolution, 0);
-         vtx.tex0(offset+resolution1+i).set(Flt(i)/resolution, 1);
-      }
-   }
+    // vtxs
+    REP(resolution) {
+        Flt c, s;
+        CosSin(c, s, i * PI2 / resolution);
+        vtx.pos(i).set(c * tube.r, h_2, s * tube.r);
+        vtx.pos(resolution + i).set(c * tube.r, -h_2, s * tube.r);
+        if (vtx.nrm()) {
+            vtx.nrm(i).set(0, 1, 0);
+            vtx.nrm(resolution + i).set(0, -1, 0);
+        }
+        if (vtx.tan()) {
+            vtx.tan(i).set(1, 0, 0);
+            vtx.tan(resolution + i).set(1, 0, 0);
+        }
+        if (vtx.bin()) {
+            vtx.bin(i).set(0, 0, -1);
+            vtx.bin(resolution + i).set(0, 0, 1);
+        }
+        if (vtx.tex0()) {
+            vtx.tex0(i).set(c * 0.5f + 0.5f, -s * 0.5f + 0.5f);
+            vtx.tex0(resolution + i).set(c * 0.5f + 0.5f, s * 0.5f + 0.5f);
+        }
+    }
+    offset = resolution * 2;
+    REP(resolution1) {
+        Flt c, s;
+        CosSin(c, s, i * PI2 / resolution);
+        vtx.pos(offset + i).set(c * tube.r, h_2, s * tube.r);
+        vtx.pos(offset + resolution1 + i).set(c * tube.r, -h_2, s * tube.r);
+        if (vtx.nrm()) {
+            vtx.nrm(offset + i).set(c, 0, s);
+            vtx.nrm(offset + resolution1 + i).set(c, 0, s);
+        }
+        if (vtx.tan()) {
+            vtx.tan(offset + i).set(-s, 0, c);
+            vtx.tan(offset + resolution1 + i).set(-s, 0, c);
+        }
+        if (vtx.bin()) {
+            vtx.bin(offset + i).set(0, -1, 0);
+            vtx.bin(offset + resolution1 + i).set(0, -1, 0);
+        }
+        if (vtx.tex0()) {
+            vtx.tex0(offset + i).set(Flt(i) / resolution, 0);
+            vtx.tex0(offset + resolution1 + i).set(Flt(i) / resolution, 1);
+        }
+    }
 
-   // tris
-   REP(resolution-2)
-   {
-      tri[             i].set(         0,            i+2,            i+1);
-      tri[resolution-2+i].set(resolution, resolution+i+1, resolution+i+2);
-   }
+    // tris
+    REP(resolution - 2) {
+        tri[i].set(0, i + 2, i + 1);
+        tri[resolution - 2 + i].set(resolution, resolution + i + 1, resolution + i + 2);
+    }
 
-   // quads
-   REP(resolution)(quad++)->set(offset+i, offset+i+1, offset+resolution1+i+1, offset+resolution1+i); // sides
+    // quads
+    REP(resolution)
+    (quad++)->set(offset + i, offset + i + 1, offset + resolution1 + i + 1, offset + resolution1 + i); // sides
 
-   if(!(flag&VTX_TEX0))weldVtx(VTX_ALL, EPS, EPS_COL_COS, -1);
-   transform(Matrix().setPosUp(tube.pos, tube.up));
-   return T;
+    if (!(flag & VTX_TEX0))
+        weldVtx(VTX_ALL, EPS, EPS_COL_COS, -1);
+    transform(Matrix().setPosUp(tube.pos, tube.up));
+    return T;
 }
 /******************************************************************************/
-MeshBase& MeshBase::create(C Cone &cone, MESH_FLAG flag, Int resolution)
-{
-   if( resolution<0)resolution=12;else MAX(resolution, 3);
-   Int resolution1 =resolution+1,
-       offset;
+MeshBase &MeshBase::create(C Cone &cone, MESH_FLAG flag, Int resolution) {
+    if (resolution < 0)
+        resolution = 12;
+    else
+        MAX(resolution, 3);
+    Int resolution1 = resolution + 1,
+        offset;
 
-   if(cone.r_low >EPS
-   && cone.r_high>EPS)
-   {
-      offset=resolution*2;
-      create(resolution*2+resolution1*2, 0, (resolution-2)*2, resolution, flag&(VTX_NRM_TAN_BIN|VTX_TEX0));
-      VecI  *tri =T.tri .ind();
-      VecI4 *quad=T.quad.ind();
+    if (cone.r_low > EPS && cone.r_high > EPS) {
+        offset = resolution * 2;
+        create(resolution * 2 + resolution1 * 2, 0, (resolution - 2) * 2, resolution, flag & (VTX_NRM_TAN_BIN | VTX_TEX0));
+        VecI *tri = T.tri.ind();
+        VecI4 *quad = T.quad.ind();
 
-      // vtxs
-      REP(resolution)
-      {
-         Flt c, s; CosSin(c, s, i*PI2/resolution);
-         vtx.pos(           i).set(c*cone.r_high, cone.h, s*cone.r_high);
-         vtx.pos(resolution+i).set(c*cone.r_low ,      0, s*cone.r_low );
-         if(vtx.nrm())
-         {
-            vtx.nrm(           i).set(0,  1, 0);
-            vtx.nrm(resolution+i).set(0, -1, 0);
-         }
-         if(vtx.tan())
-         {
-            vtx.tan(           i).set(1, 0, 0);
-            vtx.tan(resolution+i).set(1, 0, 0);
-         }
-         if(vtx.bin())
-         {
-            vtx.bin(           i).set(0, 0, -1);
-            vtx.bin(resolution+i).set(0, 0,  1);
-         }
-         if(vtx.tex0())
-         {
-            vtx.tex0(           i).set(c, 1-s);
-            vtx.tex0(resolution+i).set(c,   s);
-         }
-      }
-      Vec2 N(cone.r_high-cone.r_low, cone.h); N=PerpN(N);
-      REP(resolution1)
-      {
-         Flt c, s; CosSin(c, s, i*PI2/resolution);
-         vtx.pos(offset+            i).set(c*cone.r_high, cone.h, s*cone.r_high);
-         vtx.pos(offset+resolution1+i).set(c*cone.r_low ,      0, s*cone.r_low );
-         if(vtx.nrm())
-         {
-            vtx.nrm(offset+            i).set(N.x*c, N.y, N.x*s);
-            vtx.nrm(offset+resolution1+i).set(N.x*c, N.y, N.x*s);
-         }
-         if(vtx.tan())
-         {
-            vtx.tan(offset+            i).set(-s,0,c);
-            vtx.tan(offset+resolution1+i).set(-s,0,c);
-         }
-         if(vtx.bin())
-         {
-            vtx.bin(offset+            i).set(N.y*c, -N.x, N.y*s);
-            vtx.bin(offset+resolution1+i).set(N.y*c, -N.x, N.y*s);
-         }
-         if(vtx.tex0())
-         {
-            vtx.tex0(offset+            i).set(Flt(i)/resolution, 0);
-            vtx.tex0(offset+resolution1+i).set(Flt(i)/resolution, 1);
-         }
-      }
+        // vtxs
+        REP(resolution) {
+            Flt c, s;
+            CosSin(c, s, i * PI2 / resolution);
+            vtx.pos(i).set(c * cone.r_high, cone.h, s * cone.r_high);
+            vtx.pos(resolution + i).set(c * cone.r_low, 0, s * cone.r_low);
+            if (vtx.nrm()) {
+                vtx.nrm(i).set(0, 1, 0);
+                vtx.nrm(resolution + i).set(0, -1, 0);
+            }
+            if (vtx.tan()) {
+                vtx.tan(i).set(1, 0, 0);
+                vtx.tan(resolution + i).set(1, 0, 0);
+            }
+            if (vtx.bin()) {
+                vtx.bin(i).set(0, 0, -1);
+                vtx.bin(resolution + i).set(0, 0, 1);
+            }
+            if (vtx.tex0()) {
+                vtx.tex0(i).set(c, 1 - s);
+                vtx.tex0(resolution + i).set(c, s);
+            }
+        }
+        Vec2 N(cone.r_high - cone.r_low, cone.h);
+        N = PerpN(N);
+        REP(resolution1) {
+            Flt c, s;
+            CosSin(c, s, i * PI2 / resolution);
+            vtx.pos(offset + i).set(c * cone.r_high, cone.h, s * cone.r_high);
+            vtx.pos(offset + resolution1 + i).set(c * cone.r_low, 0, s * cone.r_low);
+            if (vtx.nrm()) {
+                vtx.nrm(offset + i).set(N.x * c, N.y, N.x * s);
+                vtx.nrm(offset + resolution1 + i).set(N.x * c, N.y, N.x * s);
+            }
+            if (vtx.tan()) {
+                vtx.tan(offset + i).set(-s, 0, c);
+                vtx.tan(offset + resolution1 + i).set(-s, 0, c);
+            }
+            if (vtx.bin()) {
+                vtx.bin(offset + i).set(N.y * c, -N.x, N.y * s);
+                vtx.bin(offset + resolution1 + i).set(N.y * c, -N.x, N.y * s);
+            }
+            if (vtx.tex0()) {
+                vtx.tex0(offset + i).set(Flt(i) / resolution, 0);
+                vtx.tex0(offset + resolution1 + i).set(Flt(i) / resolution, 1);
+            }
+        }
 
-      // tris
-      REP(resolution-2)
-      {
-         tri[             i].set(         0,            i+2,            i+1);
-         tri[resolution-2+i].set(resolution, resolution+i+1, resolution+i+2);
-      }
+        // tris
+        REP(resolution - 2) {
+            tri[i].set(0, i + 2, i + 1);
+            tri[resolution - 2 + i].set(resolution, resolution + i + 1, resolution + i + 2);
+        }
 
-      // quads
-      REP(resolution)(quad++)->set(offset+i, offset+i+1, offset+resolution1+i+1, offset+resolution1+i); // sides
+        // quads
+        REP(resolution)
+        (quad++)->set(offset + i, offset + i + 1, offset + resolution1 + i + 1, offset + resolution1 + i); // sides
 
-      transform(Matrix().setPosUp(cone.pos, cone.up));
-   }else
-   if(cone.r_low>EPS)
-   {
-      offset=resolution;
-      create(resolution+resolution1*2,  0, resolution-2+resolution, 0, flag&(VTX_NRM_TAN_BIN|VTX_TEX0));
-      VecI *tri=T.tri.ind();
+        transform(Matrix().setPosUp(cone.pos, cone.up));
+    } else if (cone.r_low > EPS) {
+        offset = resolution;
+        create(resolution + resolution1 * 2, 0, resolution - 2 + resolution, 0, flag & (VTX_NRM_TAN_BIN | VTX_TEX0));
+        VecI *tri = T.tri.ind();
 
-      // vtxs
-      REP(resolution)
-      {
-         Flt c, s; CosSin(c, s, i*PI2/resolution);
-                       vtx.pos (i).set(c*cone.r_low, 0, s*cone.r_low);
-         if(vtx.nrm ())vtx.nrm (i).set(0, -1, 0);
-         if(vtx.tan ())vtx.tan (i).set(1,  0, 0);
-         if(vtx.bin ())vtx.bin (i).set(0,  0, 1);
-         if(vtx.tex0())vtx.tex0(i).set(c,  s   );
-      }
-      Vec2 N(cone.r_high-cone.r_low, cone.h); N=PerpN(N);
-      REP(resolution1)
-      {
-         Flt c, s; CosSin(c, s, i*PI2/resolution);
-         vtx.pos(offset+            i).set(c*cone.r_high, cone.h, s*cone.r_high);
-         vtx.pos(offset+resolution1+i).set(c*cone.r_low ,      0, s*cone.r_low );
-         if(vtx.nrm())
-         {
-            vtx.nrm(offset+            i).set(    0,   1,     0);
-            vtx.nrm(offset+resolution1+i).set(N.x*c, N.y, N.x*s);
-         }
-         if(vtx.tan())
-         {
-            vtx.tan(offset+            i).set(-s, 0, c);
-            vtx.tan(offset+resolution1+i).set(-s, 0, c);
-         }
-         if(vtx.bin())
-         {
-            vtx.bin(offset+            i).set(N.y*c, -N.x, N.y*s);
-            vtx.bin(offset+resolution1+i).set(N.y*c, -N.x, N.y*s);
-         }
-         if(vtx.tex0())
-         {
-            vtx.tex0(offset+            i).set(             0.5f, 0);
-            vtx.tex0(offset+resolution1+i).set(Flt(i)/resolution, 1);
-         }
-      }
+        // vtxs
+        REP(resolution) {
+            Flt c, s;
+            CosSin(c, s, i * PI2 / resolution);
+            vtx.pos(i).set(c * cone.r_low, 0, s * cone.r_low);
+            if (vtx.nrm())
+                vtx.nrm(i).set(0, -1, 0);
+            if (vtx.tan())
+                vtx.tan(i).set(1, 0, 0);
+            if (vtx.bin())
+                vtx.bin(i).set(0, 0, 1);
+            if (vtx.tex0())
+                vtx.tex0(i).set(c, s);
+        }
+        Vec2 N(cone.r_high - cone.r_low, cone.h);
+        N = PerpN(N);
+        REP(resolution1) {
+            Flt c, s;
+            CosSin(c, s, i * PI2 / resolution);
+            vtx.pos(offset + i).set(c * cone.r_high, cone.h, s * cone.r_high);
+            vtx.pos(offset + resolution1 + i).set(c * cone.r_low, 0, s * cone.r_low);
+            if (vtx.nrm()) {
+                vtx.nrm(offset + i).set(0, 1, 0);
+                vtx.nrm(offset + resolution1 + i).set(N.x * c, N.y, N.x * s);
+            }
+            if (vtx.tan()) {
+                vtx.tan(offset + i).set(-s, 0, c);
+                vtx.tan(offset + resolution1 + i).set(-s, 0, c);
+            }
+            if (vtx.bin()) {
+                vtx.bin(offset + i).set(N.y * c, -N.x, N.y * s);
+                vtx.bin(offset + resolution1 + i).set(N.y * c, -N.x, N.y * s);
+            }
+            if (vtx.tex0()) {
+                vtx.tex0(offset + i).set(0.5f, 0);
+                vtx.tex0(offset + resolution1 + i).set(Flt(i) / resolution, 1);
+            }
+        }
 
-      // bottom
-      REP(resolution-2)(tri++)->set(0, i+1, i+2);
+        // bottom
+        REP(resolution - 2)
+        (tri++)->set(0, i + 1, i + 2);
 
-      // sides
-      REP(resolution)(tri++)->set(offset+i, offset+resolution1+i+1, offset+resolution1+i);
+        // sides
+        REP(resolution)
+        (tri++)->set(offset + i, offset + resolution1 + i + 1, offset + resolution1 + i);
 
-      transform(Matrix().setPosUp(cone.pos, cone.up));
-   }else
-   if(cone.r_high>EPS)
-   {
-      offset=resolution;
-      create(resolution+resolution1*2, 0, resolution-2+resolution, 0, flag&(VTX_NRM_TAN_BIN|VTX_TEX0));
-      VecI *tri=T.tri.ind();
+        transform(Matrix().setPosUp(cone.pos, cone.up));
+    } else if (cone.r_high > EPS) {
+        offset = resolution;
+        create(resolution + resolution1 * 2, 0, resolution - 2 + resolution, 0, flag & (VTX_NRM_TAN_BIN | VTX_TEX0));
+        VecI *tri = T.tri.ind();
 
-      // vtxs
-      REP(resolution)
-      {
-         Flt c, s; CosSin(c, s, i*PI2/resolution);
-                       vtx.pos (i).set(c*cone.r_high, cone.h, s*cone.r_high);
-         if(vtx.nrm ())vtx.nrm (i).set(0, 1,  0);
-         if(vtx.tan ())vtx.tan (i).set(1, 0,  0);
-         if(vtx.bin ())vtx.bin (i).set(0, 0, -1);
-         if(vtx.tex0())vtx.tex0(i).set(c, 1-s  );
-      }
-      Vec2 N(cone.r_high-cone.r_low, cone.h); N=PerpN(N);
-      REP(resolution1)
-      {
-         Flt c, s; CosSin(c, s, i*PI2/resolution);
-         vtx.pos(offset+            i).set(c*cone.r_high, cone.h, s*cone.r_high);
-         vtx.pos(offset+resolution1+i).set(c*cone.r_low ,      0, s*cone.r_low );
-         if(vtx.nrm())
-         {
-            vtx.nrm(offset+            i).set(N.x*c, N.y, N.x*s);
-            vtx.nrm(offset+resolution1+i).set(    0,  -1,     0);
-         }
-         if(vtx.tan())
-         {
-            vtx.tan(offset+            i).set(-s, 0, c);
-            vtx.tan(offset+resolution1+i).set(-s, 0, c);
-         }
-         if(vtx.bin())
-         {
-            vtx.bin(offset+            i).set(N.y*c, -N.x, N.y*s);
-            vtx.bin(offset+resolution1+i).set(N.y*c, -N.x, N.y*s);
-         }
-         if(vtx.tex0())
-         {
-            vtx.tex0(offset+            i).set(Flt(i)/resolution, 0);
-            vtx.tex0(offset+resolution1+i).set(             0.5f, 1);
-         }
-      }
+        // vtxs
+        REP(resolution) {
+            Flt c, s;
+            CosSin(c, s, i * PI2 / resolution);
+            vtx.pos(i).set(c * cone.r_high, cone.h, s * cone.r_high);
+            if (vtx.nrm())
+                vtx.nrm(i).set(0, 1, 0);
+            if (vtx.tan())
+                vtx.tan(i).set(1, 0, 0);
+            if (vtx.bin())
+                vtx.bin(i).set(0, 0, -1);
+            if (vtx.tex0())
+                vtx.tex0(i).set(c, 1 - s);
+        }
+        Vec2 N(cone.r_high - cone.r_low, cone.h);
+        N = PerpN(N);
+        REP(resolution1) {
+            Flt c, s;
+            CosSin(c, s, i * PI2 / resolution);
+            vtx.pos(offset + i).set(c * cone.r_high, cone.h, s * cone.r_high);
+            vtx.pos(offset + resolution1 + i).set(c * cone.r_low, 0, s * cone.r_low);
+            if (vtx.nrm()) {
+                vtx.nrm(offset + i).set(N.x * c, N.y, N.x * s);
+                vtx.nrm(offset + resolution1 + i).set(0, -1, 0);
+            }
+            if (vtx.tan()) {
+                vtx.tan(offset + i).set(-s, 0, c);
+                vtx.tan(offset + resolution1 + i).set(-s, 0, c);
+            }
+            if (vtx.bin()) {
+                vtx.bin(offset + i).set(N.y * c, -N.x, N.y * s);
+                vtx.bin(offset + resolution1 + i).set(N.y * c, -N.x, N.y * s);
+            }
+            if (vtx.tex0()) {
+                vtx.tex0(offset + i).set(Flt(i) / resolution, 0);
+                vtx.tex0(offset + resolution1 + i).set(0.5f, 1);
+            }
+        }
 
-      // bottom
-      REP(resolution-2)(tri++)->set(0, i+2, i+1);
+        // bottom
+        REP(resolution - 2)
+        (tri++)->set(0, i + 2, i + 1);
 
-      // sides
-      REP(resolution)(tri++)->set(offset+i, offset+i+1, offset+resolution1+i);
+        // sides
+        REP(resolution)
+        (tri++)->set(offset + i, offset + i + 1, offset + resolution1 + i);
 
-      transform(Matrix().setPosUp(cone.pos, cone.up));
-   }else
-   {
-      del();
-   }
-   if(!(flag&VTX_TEX0))weldVtx(VTX_ALL, EPS, EPS_COL_COS, -1);
-   return T;
+        transform(Matrix().setPosUp(cone.pos, cone.up));
+    } else {
+        del();
+    }
+    if (!(flag & VTX_TEX0))
+        weldVtx(VTX_ALL, EPS, EPS_COL_COS, -1);
+    return T;
 }
 /******************************************************************************/
-MeshBase& MeshBase::create(C Torus &torus, MESH_FLAG flag, Int resolution, Int resolution2)
-{
-   if(resolution <0)resolution =12;else MAX(resolution , 3);
-   if(resolution2<0)resolution2=12;else MAX(resolution2, 3);
-   create((resolution+1)*(resolution2+1), 0, 0, resolution*resolution2, flag&(VTX_NRM_TAN_BIN|VTX_TEX0));
-   VecI4 *quad=T.quad.ind();
-   Matrix3 m; m.setUp(torus.up);
+MeshBase &MeshBase::create(C Torus &torus, MESH_FLAG flag, Int resolution, Int resolution2) {
+    if (resolution < 0)
+        resolution = 12;
+    else
+        MAX(resolution, 3);
+    if (resolution2 < 0)
+        resolution2 = 12;
+    else
+        MAX(resolution2, 3);
+    create((resolution + 1) * (resolution2 + 1), 0, 0, resolution * resolution2, flag & (VTX_NRM_TAN_BIN | VTX_TEX0));
+    VecI4 *quad = T.quad.ind();
+    Matrix3 m;
+    m.setUp(torus.up);
 
-   // vtxs
-   REP(resolution+1)
-   {
-      Vec2 cs; CosSin(cs.x, cs.y, i*PI2/resolution);
-      Vec  d=cs.x*m.x + cs.y*m.z;
-      REPD(i2, resolution2+1)
-      {
-         Vec2 cs2; CosSin(cs2.x, cs2.y, i2*PI2/resolution2);
-         Vec  d2=cs2.x*d + cs2.y*m.y;
-         Int  j=i*(resolution2+1)+i2;
-                       vtx.pos (j)=torus.pos + d*torus.R + d2*torus.r;
-         if(vtx.nrm ())vtx.nrm (j)=d2;
-         if(vtx.tan ())vtx.tan (j)=cs.y*m.x - cs.x*m.z;
-         if(vtx.bin ())vtx.bin (j)=cs2.x*m.y - cs2.y*d;
-         if(vtx.tex0())vtx.tex0(j).set((1-Flt(i)/resolution)*4, Flt(i2)/resolution2);
-      }
-   }
+    // vtxs
+    REP(resolution + 1) {
+        Vec2 cs;
+        CosSin(cs.x, cs.y, i * PI2 / resolution);
+        Vec d = cs.x * m.x + cs.y * m.z;
+        REPD(i2, resolution2 + 1) {
+            Vec2 cs2;
+            CosSin(cs2.x, cs2.y, i2 * PI2 / resolution2);
+            Vec d2 = cs2.x * d + cs2.y * m.y;
+            Int j = i * (resolution2 + 1) + i2;
+            vtx.pos(j) = torus.pos + d * torus.R + d2 * torus.r;
+            if (vtx.nrm())
+                vtx.nrm(j) = d2;
+            if (vtx.tan())
+                vtx.tan(j) = cs.y * m.x - cs.x * m.z;
+            if (vtx.bin())
+                vtx.bin(j) = cs2.x * m.y - cs2.y * d;
+            if (vtx.tex0())
+                vtx.tex0(j).set((1 - Flt(i) / resolution) * 4, Flt(i2) / resolution2);
+        }
+    }
 
-   // quads
-   REPD(i , resolution )
-   REPD(i2, resolution2)(quad++)->set( i   *(resolution2+1) + i2  ,  i   *(resolution2+1) + i2+1,
-                                      (i+1)*(resolution2+1) + i2+1, (i+1)*(resolution2+1) + i2  );
+    // quads
+    REPD(i, resolution)
+    REPD(i2, resolution2)
+    (quad++)->set(i * (resolution2 + 1) + i2, i * (resolution2 + 1) + i2 + 1,
+                  (i + 1) * (resolution2 + 1) + i2 + 1, (i + 1) * (resolution2 + 1) + i2);
 
-   if(!(flag&VTX_TEX0))weldVtx(VTX_ALL, EPS, EPS_COL_COS, -1);
-   return T;
+    if (!(flag & VTX_TEX0))
+        weldVtx(VTX_ALL, EPS, EPS_COL_COS, -1);
+    return T;
 }
 /******************************************************************************/
-MeshBase& MeshBase::createEdge(C Rect &rect, Bool solid)
-{
-   create(4, 4, 0, 0, solid ? EDGE_FLAG : MESH_NONE);
-   vtx .pos(0).set(rect.min.x, rect.max.y, 0);
-   vtx .pos(1).set(rect.max.x, rect.max.y, 0);
-   vtx .pos(2).set(rect.max.x, rect.min.y, 0);
-   vtx .pos(3).set(rect.min.x, rect.min.y, 0);
-   edge.ind(0).set(0, 1);
-   edge.ind(1).set(1, 2);
-   edge.ind(2).set(2, 3);
-   edge.ind(3).set(3, 0);
-   if(edge.flag())edge.flag(0)=edge.flag(1)=edge.flag(2)=edge.flag(3)=ETQ_R;
-   return T;
+MeshBase &MeshBase::createEdge(C Rect &rect, Bool solid) {
+    create(4, 4, 0, 0, solid ? EDGE_FLAG : MESH_NONE);
+    vtx.pos(0).set(rect.min.x, rect.max.y, 0);
+    vtx.pos(1).set(rect.max.x, rect.max.y, 0);
+    vtx.pos(2).set(rect.max.x, rect.min.y, 0);
+    vtx.pos(3).set(rect.min.x, rect.min.y, 0);
+    edge.ind(0).set(0, 1);
+    edge.ind(1).set(1, 2);
+    edge.ind(2).set(2, 3);
+    edge.ind(3).set(3, 0);
+    if (edge.flag())
+        edge.flag(0) = edge.flag(1) = edge.flag(2) = edge.flag(3) = ETQ_R;
+    return T;
 }
 /******************************************************************************/
-MeshBase& MeshBase::create(C Shape &shape, MESH_FLAG flag, Int resolution, Int resolution2)
-{
-   switch(shape.type)
-   {
-      case SHAPE_BOX    : return create(shape.box    , flag, resolution);
-      case SHAPE_OBOX   : return create(shape.obox   , flag, resolution);
-      case SHAPE_BALL   : return create(shape.ball   , flag, resolution);
-      case SHAPE_CAPSULE: return create(shape.capsule, flag, resolution, resolution2);
-      case SHAPE_TUBE   : return create(shape.tube   , flag, resolution);
-      case SHAPE_CONE   : return create(shape.cone   , flag, resolution);
-      case SHAPE_TORUS  : return create(shape.torus  , flag, resolution, resolution2);
-      default           : return del();
-   }
+MeshBase &MeshBase::create(C Shape &shape, MESH_FLAG flag, Int resolution, Int resolution2) {
+    switch (shape.type) {
+    case SHAPE_BOX:
+        return create(shape.box, flag, resolution);
+    case SHAPE_OBOX:
+        return create(shape.obox, flag, resolution);
+    case SHAPE_BALL:
+        return create(shape.ball, flag, resolution);
+    case SHAPE_CAPSULE:
+        return create(shape.capsule, flag, resolution, resolution2);
+    case SHAPE_TUBE:
+        return create(shape.tube, flag, resolution);
+    case SHAPE_CONE:
+        return create(shape.cone, flag, resolution);
+    case SHAPE_TORUS:
+        return create(shape.torus, flag, resolution, resolution2);
+    default:
+        return del();
+    }
 }
 /******************************************************************************/
-MeshBase& MeshBase::createEdge(C Circle &circle, Bool solid, Int resolution)
-{
-   if(resolution<0)resolution=24;else MAX(resolution, 3);
-   create(resolution, resolution, 0, 0, solid ? EDGE_FLAG : MESH_NONE);
-   FREP(resolution)
-   {
-      Vec2 v; CosSin(v.x, v.y, i*-PI2/resolution);
-                     vtx .pos (i).set(circle.pos+v*circle.r, 0);
-                     edge.ind (i).set(i, (i+1)%resolution);
-      if(edge.flag())edge.flag(i)=ETQ_R;
-   }
-   return T;
+MeshBase &MeshBase::createEdge(C Circle &circle, Bool solid, Int resolution) {
+    if (resolution < 0)
+        resolution = 24;
+    else
+        MAX(resolution, 3);
+    create(resolution, resolution, 0, 0, solid ? EDGE_FLAG : MESH_NONE);
+    FREP(resolution) {
+        Vec2 v;
+        CosSin(v.x, v.y, i * -PI2 / resolution);
+        vtx.pos(i).set(circle.pos + v * circle.r, 0);
+        edge.ind(i).set(i, (i + 1) % resolution);
+        if (edge.flag())
+            edge.flag(i) = ETQ_R;
+    }
+    return T;
 }
 /******************************************************************************/
-MeshBase& MeshBase::createEdgeStar(Flt r1, Flt r2, Bool solid, Int resolution)
-{
-   MAX(resolution, 3); resolution*=2;
-   create(resolution, resolution, 0, 0, solid ? EDGE_FLAG : MESH_NONE);
-   FREP(resolution)
-   {
-      Flt x, y; CosSin(x, y, PI_2-i*PI2/resolution);
-      if(i&1)        vtx .pos (i).set(x*r1, y*r1, 0);
-      else           vtx .pos (i).set(x*r2, y*r2, 0);
-                     edge.ind (i).set(i, (i+1)%resolution);
-      if(edge.flag())edge.flag(i)=ETQ_R;
-   }
-   return T;
+MeshBase &MeshBase::createEdgeStar(Flt r1, Flt r2, Bool solid, Int resolution) {
+    MAX(resolution, 3);
+    resolution *= 2;
+    create(resolution, resolution, 0, 0, solid ? EDGE_FLAG : MESH_NONE);
+    FREP(resolution) {
+        Flt x, y;
+        CosSin(x, y, PI_2 - i * PI2 / resolution);
+        if (i & 1)
+            vtx.pos(i).set(x * r1, y * r1, 0);
+        else
+            vtx.pos(i).set(x * r2, y * r2, 0);
+        edge.ind(i).set(i, (i + 1) % resolution);
+        if (edge.flag())
+            edge.flag(i) = ETQ_R;
+    }
+    return T;
 }
 /******************************************************************************/
 // CONVEX
 /******************************************************************************/
-struct Face
-{
-   VecI  tri  ;
-   Plane plane;
+struct Face {
+    VecI tri;
+    Plane plane;
 };
-struct Convex
-{
-   Memb<Vec > pos ;
-   Memb<Face> face;
+struct Convex {
+    Memb<Vec> pos;
+    Memb<Face> face;
 
-   void newFace(Int p0, Int p1, Int p2)
-   {
-      Face &f=face.New();
-      f.tri  .set(p0, p1, p2);
-      f.plane.set(pos[p0], GetNormal(pos[p0], pos[p1], pos[p2]));
-   }
-   Bool cutsEps(C Vec &pos)C
-   {
-      if(face.elms())
-      {
-         REPA(face)if(Dist(pos, face[i].plane)>EPS)return false;
-         return true;
-      }
-      return false;
-   }
-   Flt distPlanar(C Vec &pos)C
-   {
-      Flt    d=0; REPA(face)MAX(d, Dist(pos, face[i].plane));
-      return d;
-   }
-   void include(C Vec &pos)
-   {
-      Int         pos_index=-1;
-      Memt<VecI2> edge;
-      REPA(face) // order is important
-      {
-         Face &f=face[i];
-         Flt   d=Dist(pos, f.plane);
-         if(   d>EPS) // face requires removing
-         {
-            if(pos_index<0){pos_index=T.pos.elms(); T.pos.add(pos);} // add point to container
-            VecI2 test;
-            Int   t;
-            test.set(f.tri.c[0], f.tri.c[1]); t=edge.find(test); if(t>=0)edge.remove(t);else{test.reverse(); edge.add(test);}
-            test.set(f.tri.c[1], f.tri.c[2]); t=edge.find(test); if(t>=0)edge.remove(t);else{test.reverse(); edge.add(test);}
-            test.set(f.tri.c[2], f.tri.c[0]); t=edge.find(test); if(t>=0)edge.remove(t);else{test.reverse(); edge.add(test);}
-            face.remove(i);
-         }
-      }
-
-      // add faces
-    //if(pos_index>=0) no need to check this because below we're iterating 'edge', which will be set only if 'pos_index' was set
-      {
-         REPA(edge)newFace(pos_index, edge[i].y, edge[i].x);
-      }
-   }
-};
-MeshBase& MeshBase::createConvex(C Vec *point, Int points, Int max_points)
-{
-   // !! Warning: 'point' might come from 'this' for example 'T.vtx.pos' !!
-   Box box; if(getBox(box))
-   {
-      VecI4 tetra=-1; // tetrahedron
-
-      // find point furthest from the center
-      Flt dist2 =-1;
-      Vec center= box.center();
-      REP(points)
-      {
-         Flt d2=Dist2(point[i], center);
-         if( d2>dist2){dist2=d2; tetra.x=i;}
-      }
-      if(tetra.x>=0) // if found
-      {
-         // find point furthest from 'tetra0'
-       C Vec &tetra0=point[tetra.x];
-         dist2=Sqr(EPS); // don't accept same positions, distance has to bigger than EPS
-         REP(points)
-         {
-            Flt d2=Dist2(point[i], tetra0);
-            if( d2>dist2){dist2=d2; tetra.y=i;}
-         }
-         if(tetra.y>=0) // if found
-         {
-            // find point furthest from 'tetra0', 'tetra1' line
-          C Vec &tetra1  =point[tetra.y];
-            Vec  line_dir=!(tetra1-tetra0);
-            Flt  dist    =EPS; // don't accept inline points, distance has to bigger than EPS
-            REP(points)
+    void newFace(Int p0, Int p1, Int p2) {
+        Face &f = face.New();
+        f.tri.set(p0, p1, p2);
+        f.plane.set(pos[p0], GetNormal(pos[p0], pos[p1], pos[p2]));
+    }
+    Bool cutsEps(C Vec &pos) C {
+        if (face.elms()) {
+            REPA(face)
+            if (Dist(pos, face[i].plane) > EPS) return false;
+            return true;
+        }
+        return false;
+    }
+    Flt distPlanar(C Vec &pos) C {
+        Flt d = 0;
+        REPA(face)
+        MAX(d, Dist(pos, face[i].plane));
+        return d;
+    }
+    void include(C Vec &pos) {
+        Int pos_index = -1;
+        Memt<VecI2> edge;
+        REPA(face) // order is important
+        {
+            Face &f = face[i];
+            Flt d = Dist(pos, f.plane);
+            if (d > EPS) // face requires removing
             {
-               Flt d=DistPointLine(point[i], tetra0, line_dir);
-               if( d>dist){dist=d; tetra.z=i;}
+                if (pos_index < 0) {
+                    pos_index = T.pos.elms();
+                    T.pos.add(pos);
+                } // add point to container
+                VecI2 test;
+                Int t;
+                test.set(f.tri.c[0], f.tri.c[1]);
+                t = edge.find(test);
+                if (t >= 0)
+                    edge.remove(t);
+                else {
+                    test.reverse();
+                    edge.add(test);
+                }
+                test.set(f.tri.c[1], f.tri.c[2]);
+                t = edge.find(test);
+                if (t >= 0)
+                    edge.remove(t);
+                else {
+                    test.reverse();
+                    edge.add(test);
+                }
+                test.set(f.tri.c[2], f.tri.c[0]);
+                t = edge.find(test);
+                if (t >= 0)
+                    edge.remove(t);
+                else {
+                    test.reverse();
+                    edge.add(test);
+                }
+                face.remove(i);
             }
-            if(tetra.z>=0) // if found
+        }
+
+        // add faces
+        // if(pos_index>=0) no need to check this because below we're iterating 'edge', which will be set only if 'pos_index' was set
+        {
+            REPA(edge)
+            newFace(pos_index, edge[i].y, edge[i].x);
+        }
+    }
+};
+MeshBase &MeshBase::createConvex(C Vec *point, Int points, Int max_points) {
+    // !! Warning: 'point' might come from 'this' for example 'T.vtx.pos' !!
+    Box box;
+    if (getBox(box)) {
+        VecI4 tetra = -1; // tetrahedron
+
+        // find point furthest from the center
+        Flt dist2 = -1;
+        Vec center = box.center();
+        REP(points) {
+            Flt d2 = Dist2(point[i], center);
+            if (d2 > dist2) {
+                dist2 = d2;
+                tetra.x = i;
+            }
+        }
+        if (tetra.x >= 0) // if found
+        {
+            // find point furthest from 'tetra0'
+            C Vec &tetra0 = point[tetra.x];
+            dist2 = Sqr(EPS); // don't accept same positions, distance has to bigger than EPS
+            REP(points) {
+                Flt d2 = Dist2(point[i], tetra0);
+                if (d2 > dist2) {
+                    dist2 = d2;
+                    tetra.y = i;
+                }
+            }
+            if (tetra.y >= 0) // if found
             {
-               // find point furthest from 'tetra0', 'tetra1', 'tetra2' triangle/plane
-             C Vec &tetra2=point[tetra.z];
-               Vec  tri_n =GetNormal(tetra0, tetra1, tetra2);
-               dist=EPS; // don't accept coplanar points, distance has to bigger than EPS
-               REP(points)
-               {
-                  Flt d=DistPointPlane(point[i], tetra0, tri_n);
-                  if(Abs(d)>Abs(dist)){dist=d; tetra.w=i;}
-               }
-               if(tetra.w>=0) // if found
-               {
-                  // adjust
-                  if(dist>0)tetra.xyz.reverse();
-
-                  // build convex from the 4 points
-                  Convex convex;
-                  convex.pos.New()=point[tetra.x];
-                  convex.pos.New()=point[tetra.y];
-                  convex.pos.New()=point[tetra.z];
-                  convex.pos.New()=point[tetra.w];
-                  convex.newFace(0, 1, 2);
-                  convex.newFace(1, 0, 3);
-                  convex.newFace(2, 1, 3);
-                  convex.newFace(0, 2, 3);
-
-                  // if allowed to insert more points
-                  if(max_points<0                )REP(points)convex.include(point[i]);else // unlimited
-                  if(max_points>convex.pos.elms()) // more than current
-                  {
-                     Memt<Int> outer; outer.setNum(points); REPAO(outer)=i; // points left to process, set all at the start
-                     for(; outer.elms() && convex.pos.elms()<max_points; )
-                     {
-                        // find the most distant
-                        Int disti=-1;
-                        Flt dist = 0;
-                        for(Int i=0; i<outer.elms(); ) // order is important
-                        {
-                           Flt d=convex.distPlanar(point[outer[i]]);
-                           if( d>EPS) // potentially to be added
-                           {
-                              if(d>dist){dist=d; disti=i;}
-                              i++; // continue to the next one
-                           }else // it's too close to convex so it can be thrown out
-                           {
-                              outer.remove(i);
-                           }
+                // find point furthest from 'tetra0', 'tetra1' line
+                C Vec &tetra1 = point[tetra.y];
+                Vec line_dir = !(tetra1 - tetra0);
+                Flt dist = EPS; // don't accept inline points, distance has to bigger than EPS
+                REP(points) {
+                    Flt d = DistPointLine(point[i], tetra0, line_dir);
+                    if (d > dist) {
+                        dist = d;
+                        tetra.z = i;
+                    }
+                }
+                if (tetra.z >= 0) // if found
+                {
+                    // find point furthest from 'tetra0', 'tetra1', 'tetra2' triangle/plane
+                    C Vec &tetra2 = point[tetra.z];
+                    Vec tri_n = GetNormal(tetra0, tetra1, tetra2);
+                    dist = EPS; // don't accept coplanar points, distance has to bigger than EPS
+                    REP(points) {
+                        Flt d = DistPointPlane(point[i], tetra0, tri_n);
+                        if (Abs(d) > Abs(dist)) {
+                            dist = d;
+                            tetra.w = i;
                         }
-                        if(disti<0)break; // didn't found
-                        convex.include(point[outer[disti]]);
-                        outer .remove (            disti  );
-                     }
-                  }
+                    }
+                    if (tetra.w >= 0) // if found
+                    {
+                        // adjust
+                        if (dist > 0)
+                            tetra.xyz.reverse();
 
-                  // create mesh from convex data
-                  create(convex.pos.elms(), 0, convex.face.elms(), 0);
-                  REPA(vtx)vtx.pos(i)=convex.pos [i];
-                  REPA(tri)tri.ind(i)=convex.face[i].tri;
-                  return T;
-               }
+                        // build convex from the 4 points
+                        Convex convex;
+                        convex.pos.New() = point[tetra.x];
+                        convex.pos.New() = point[tetra.y];
+                        convex.pos.New() = point[tetra.z];
+                        convex.pos.New() = point[tetra.w];
+                        convex.newFace(0, 1, 2);
+                        convex.newFace(1, 0, 3);
+                        convex.newFace(2, 1, 3);
+                        convex.newFace(0, 2, 3);
+
+                        // if allowed to insert more points
+                        if (max_points < 0)
+                            REP(points)
+                            convex.include(point[i]);
+                        else                                    // unlimited
+                            if (max_points > convex.pos.elms()) // more than current
+                            {
+                                Memt<Int> outer;
+                                outer.setNum(points);
+                                REPAO(outer) = i; // points left to process, set all at the start
+                                for (; outer.elms() && convex.pos.elms() < max_points;) {
+                                    // find the most distant
+                                    Int disti = -1;
+                                    Flt dist = 0;
+                                    for (Int i = 0; i < outer.elms();) // order is important
+                                    {
+                                        Flt d = convex.distPlanar(point[outer[i]]);
+                                        if (d > EPS) // potentially to be added
+                                        {
+                                            if (d > dist) {
+                                                dist = d;
+                                                disti = i;
+                                            }
+                                            i++; // continue to the next one
+                                        } else   // it's too close to convex so it can be thrown out
+                                        {
+                                            outer.remove(i);
+                                        }
+                                    }
+                                    if (disti < 0)
+                                        break; // didn't found
+                                    convex.include(point[outer[disti]]);
+                                    outer.remove(disti);
+                                }
+                            }
+
+                        // create mesh from convex data
+                        create(convex.pos.elms(), 0, convex.face.elms(), 0);
+                        REPA(vtx)
+                        vtx.pos(i) = convex.pos[i];
+                        REPA(tri)
+                        tri.ind(i) = convex.face[i].tri;
+                        return T;
+                    }
+                }
             }
-         }
-      }
-   }
-   del(); return T;
+        }
+    }
+    del();
+    return T;
 }
 /******************************************************************************
    MeshBase& createBlade(                                                          Int resolution=2, Flt width=0.06f, Flt angle=1.0f, Bool center=false, Flt normal_x_add=2, Flt normal_y_add=3); // create mesh as grass blade,                                                                                    'resolution'=resolution, 'width'=blade width, 'angle'=blade bend angle, 'center'=if create center vertexes, 'normal_x_add normal_y_add' offsets to vertex normal
@@ -1124,7 +1228,7 @@ MeshBase& MeshBase::createRock(Int resolution, Int subdivisions)
 /******************************************************************************/
 // TREE
 /******************************************************************************/
-#define RES  7
+#define RES 7
 #define STEP 2
 /******************************************************************************
 struct Branch
@@ -1374,5 +1478,5 @@ Mesh& Mesh::createTree(MaterialPtr bark_material, Memb<MaterialPtr> &leaf_materi
    return T;
 }
 /******************************************************************************/
-}
+} // namespace EE
 /******************************************************************************/

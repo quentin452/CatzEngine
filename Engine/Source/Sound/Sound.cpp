@@ -690,7 +690,8 @@ Bool _Sound::testBuffer(Int thread_index) // this manages locking on its own
         XAUDIO2_VOICE_STATE state;
         _buffer._sv->GetState(&state, XAUDIO2_VOICE_NOSAMPLESPLAYED);
         REP(2 - state.BuffersQueued)
-        if (!setNextBuffer(thread_index)) return false;
+        if (!setNextBuffer(thread_index))
+            return false;
         // unlike OpenAL we don't need to check if buffer is no longer playing due to running out of buffers, because XAudio will auto-play when adding new buffers if it's in play mode - "If the voice is started and has no buffers queued, the new buffer will start playing immediately" https://msdn.microsoft.com/en-us/library/windows/desktop/microsoft.directx_sdk.ixaudio2sourcevoice.ixaudio2sourcevoice.submitsourcebuffer(v=vs.85).aspx
     }
 #elif OPEN_AL
@@ -719,13 +720,15 @@ Bool _Sound::testBuffer(Int thread_index) // this manages locking on its own
 #elif OPEN_SL
     if (Int processed = AtomicGet(_buffer._processed)) {
         REP(processed)
-        if (!setNextBuffer(thread_index)) return false;
+        if (!setNextBuffer(thread_index))
+            return false;
         AtomicSub(_buffer._processed, processed);
         // unlike OpenAL we don't need to check if buffer is no longer playing due to running out of buffers, because OpenSL will auto-play when adding new buffers if it's in play mode, check comments on 'Enqueue' function - https://www.khronos.org/registry/sles/specs/OpenSL_ES_Specification_1.0.1.pdf
     }
 #elif CUSTOM_AUDIO
     REP(buffers() - _buffer._voice->queued)
-    if (!setNextBuffer(thread_index)) return false;
+    if (!setNextBuffer(thread_index))
+        return false;
 #endif
     return true;
 }
@@ -871,7 +874,8 @@ void _Sound::updatePlaying(Int thread_index) {
             // set buffer data
             Int buffers = T.buffers();
             FREP(buffers)
-            if (!setBuffer(i, thread_index)) goto error; // set in order
+            if (!setBuffer(i, thread_index))
+                goto error; // set in order
             _buffer_playing = true;
             SOUND_API_LOCK_COND;
             _buffer.play(true); // !! requires 'SoundAPILock' !!
@@ -1256,7 +1260,8 @@ again:
         SoundAPILockDo = false; // disable 'SoundAPILock' because we're already covered by the lock here
 #endif
         REPA(SoundMemx)
-        if (!SoundMemx[i].update(dt)) SoundMemx.removeValid(i, true); // !! requires 'SoundAPILock' !!
+        if (!SoundMemx[i].update(dt))
+            SoundMemx.removeValid(i, true); // !! requires 'SoundAPILock' !!
         SoundMemx.sort(CompareSound);
 
         // detect sounds which should be playing

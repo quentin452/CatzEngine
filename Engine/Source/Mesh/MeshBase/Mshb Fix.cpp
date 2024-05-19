@@ -1,6 +1,6 @@
 /******************************************************************************/
 #include "stdafx.h"
-namespace EE{
+namespace EE {
 /******************************************************************************
 MeshBase& fixSolid      (Bool swapped           ); // fix edge winding according to ETQ_FLAG
 MeshBase& MeshBase::fixSolid(Bool swapped)
@@ -100,174 +100,297 @@ MeshBase& MeshBase::fixWinding(Int face, Bool ok)
    return T;
 }
 /******************************************************************************/
-struct VTX
-{
-   Int dup;
-   Flt tex_min, tex_max;
+struct VTX {
+    Int dup;
+    Flt tex_min, tex_max;
 
-   void init(Flt tex)
-   {
-      dup=0;
-      tex_min=tex_max=tex;
-   }
+    void init(Flt tex) {
+        dup = 0;
+        tex_min = tex_max = tex;
+    }
 };
-MeshBase& MeshBase::fixTexWrapping(Byte uv_index)
-{
-   if(InRange(uv_index, 4))
-      if(Vec2 *tex=((uv_index==0) ? vtx.tex0() : (uv_index==1) ? vtx.tex1() : (uv_index==2) ? vtx.tex2() : vtx.tex3()))
-   {
-      Int *p, p0, p1, p2, p3, j;
-      Memt<VTX> vs; vs.setNum(vtxs());
+MeshBase &MeshBase::fixTexWrapping(Byte uv_index) {
+    if (InRange(uv_index, 4))
+        if (Vec2 *tex = ((uv_index == 0) ? vtx.tex0() : (uv_index == 1) ? vtx.tex1()
+                                                    : (uv_index == 2)   ? vtx.tex2()
+                                                                        : vtx.tex3())) {
+            Int *p, p0, p1, p2, p3, j;
+            Memt<VTX> vs;
+            vs.setNum(vtxs());
 
-      // get tex range
-      Flt x;
-      FREPA(vtx)vs[i].init(tex[i].x);
-      FREPA(tri)
-      {
-         p=tri.ind(i).c; p0=p[0]; p1=p[1]; p2=p[2];
-         x=tex[p0].x; if(x<vs[p1].tex_min)vs[p1].tex_min=x;else if(x>vs[p1].tex_max)vs[p1].tex_max=x;
-                      if(x<vs[p2].tex_min)vs[p2].tex_min=x;else if(x>vs[p2].tex_max)vs[p2].tex_max=x;
-         x=tex[p1].x; if(x<vs[p0].tex_min)vs[p0].tex_min=x;else if(x>vs[p0].tex_max)vs[p0].tex_max=x;
-                      if(x<vs[p2].tex_min)vs[p2].tex_min=x;else if(x>vs[p2].tex_max)vs[p2].tex_max=x;
-         x=tex[p2].x; if(x<vs[p0].tex_min)vs[p0].tex_min=x;else if(x>vs[p0].tex_max)vs[p0].tex_max=x;
-                      if(x<vs[p1].tex_min)vs[p1].tex_min=x;else if(x>vs[p1].tex_max)vs[p1].tex_max=x;
-      }
-      FREPA(quad)
-      {
-         p=quad.ind(i).c; p0=p[0]; p1=p[1]; p2=p[2]; p3=p[3];
-         x=tex[p0].x; if(x<vs[p1].tex_min)vs[p1].tex_min=x;else if(x>vs[p1].tex_max)vs[p1].tex_max=x;
-                      if(x<vs[p2].tex_min)vs[p2].tex_min=x;else if(x>vs[p2].tex_max)vs[p2].tex_max=x;
-                      if(x<vs[p3].tex_min)vs[p3].tex_min=x;else if(x>vs[p3].tex_max)vs[p3].tex_max=x;
-         x=tex[p1].x; if(x<vs[p0].tex_min)vs[p0].tex_min=x;else if(x>vs[p0].tex_max)vs[p0].tex_max=x;
-                      if(x<vs[p2].tex_min)vs[p2].tex_min=x;else if(x>vs[p2].tex_max)vs[p2].tex_max=x;
-                      if(x<vs[p3].tex_min)vs[p3].tex_min=x;else if(x>vs[p3].tex_max)vs[p3].tex_max=x;
-         x=tex[p2].x; if(x<vs[p0].tex_min)vs[p0].tex_min=x;else if(x>vs[p0].tex_max)vs[p0].tex_max=x;
-                      if(x<vs[p1].tex_min)vs[p1].tex_min=x;else if(x>vs[p1].tex_max)vs[p1].tex_max=x;
-                      if(x<vs[p3].tex_min)vs[p3].tex_min=x;else if(x>vs[p3].tex_max)vs[p3].tex_max=x;
-         x=tex[p3].x; if(x<vs[p0].tex_min)vs[p0].tex_min=x;else if(x>vs[p0].tex_max)vs[p0].tex_max=x;
-                      if(x<vs[p1].tex_min)vs[p1].tex_min=x;else if(x>vs[p1].tex_max)vs[p1].tex_max=x;
-                      if(x<vs[p2].tex_min)vs[p2].tex_min=x;else if(x>vs[p2].tex_max)vs[p2].tex_max=x;
-      }
-      // get odd vtxs (tex.range >= 2/3)
-      Int dups=0;
-      FREPA(vtx)if(vs[i].tex_max-vs[i].tex_min>=2.0f/3)vs[i].dup=vtxs()+(dups++);
+            // get tex range
+            Flt x;
+            FREPA(vtx)
+            vs[i].init(tex[i].x);
+            FREPA(tri) {
+                p = tri.ind(i).c;
+                p0 = p[0];
+                p1 = p[1];
+                p2 = p[2];
+                x = tex[p0].x;
+                if (x < vs[p1].tex_min)
+                    vs[p1].tex_min = x;
+                else if (x > vs[p1].tex_max)
+                    vs[p1].tex_max = x;
+                if (x < vs[p2].tex_min)
+                    vs[p2].tex_min = x;
+                else if (x > vs[p2].tex_max)
+                    vs[p2].tex_max = x;
+                x = tex[p1].x;
+                if (x < vs[p0].tex_min)
+                    vs[p0].tex_min = x;
+                else if (x > vs[p0].tex_max)
+                    vs[p0].tex_max = x;
+                if (x < vs[p2].tex_min)
+                    vs[p2].tex_min = x;
+                else if (x > vs[p2].tex_max)
+                    vs[p2].tex_max = x;
+                x = tex[p2].x;
+                if (x < vs[p0].tex_min)
+                    vs[p0].tex_min = x;
+                else if (x > vs[p0].tex_max)
+                    vs[p0].tex_max = x;
+                if (x < vs[p1].tex_min)
+                    vs[p1].tex_min = x;
+                else if (x > vs[p1].tex_max)
+                    vs[p1].tex_max = x;
+            }
+            FREPA(quad) {
+                p = quad.ind(i).c;
+                p0 = p[0];
+                p1 = p[1];
+                p2 = p[2];
+                p3 = p[3];
+                x = tex[p0].x;
+                if (x < vs[p1].tex_min)
+                    vs[p1].tex_min = x;
+                else if (x > vs[p1].tex_max)
+                    vs[p1].tex_max = x;
+                if (x < vs[p2].tex_min)
+                    vs[p2].tex_min = x;
+                else if (x > vs[p2].tex_max)
+                    vs[p2].tex_max = x;
+                if (x < vs[p3].tex_min)
+                    vs[p3].tex_min = x;
+                else if (x > vs[p3].tex_max)
+                    vs[p3].tex_max = x;
+                x = tex[p1].x;
+                if (x < vs[p0].tex_min)
+                    vs[p0].tex_min = x;
+                else if (x > vs[p0].tex_max)
+                    vs[p0].tex_max = x;
+                if (x < vs[p2].tex_min)
+                    vs[p2].tex_min = x;
+                else if (x > vs[p2].tex_max)
+                    vs[p2].tex_max = x;
+                if (x < vs[p3].tex_min)
+                    vs[p3].tex_min = x;
+                else if (x > vs[p3].tex_max)
+                    vs[p3].tex_max = x;
+                x = tex[p2].x;
+                if (x < vs[p0].tex_min)
+                    vs[p0].tex_min = x;
+                else if (x > vs[p0].tex_max)
+                    vs[p0].tex_max = x;
+                if (x < vs[p1].tex_min)
+                    vs[p1].tex_min = x;
+                else if (x > vs[p1].tex_max)
+                    vs[p1].tex_max = x;
+                if (x < vs[p3].tex_min)
+                    vs[p3].tex_min = x;
+                else if (x > vs[p3].tex_max)
+                    vs[p3].tex_max = x;
+                x = tex[p3].x;
+                if (x < vs[p0].tex_min)
+                    vs[p0].tex_min = x;
+                else if (x > vs[p0].tex_max)
+                    vs[p0].tex_max = x;
+                if (x < vs[p1].tex_min)
+                    vs[p1].tex_min = x;
+                else if (x > vs[p1].tex_max)
+                    vs[p1].tex_max = x;
+                if (x < vs[p2].tex_min)
+                    vs[p2].tex_min = x;
+                else if (x > vs[p2].tex_max)
+                    vs[p2].tex_max = x;
+            }
+            // get odd vtxs (tex.range >= 2/3)
+            Int dups = 0;
+            FREPA(vtx)
+            if (vs[i].tex_max - vs[i].tex_min >= 2.0f / 3) vs[i].dup = vtxs() + (dups++);
 
-      // copy mshb
-      {
-         MeshBase temp(vtxs()+dups, 0, 0, 0, flag()); temp.copyVtxs(T);
-         tex=((uv_index==0) ? temp.vtx.tex0() : (uv_index==1) ? temp.vtx.tex1() : (uv_index==2) ? temp.vtx.tex2() : temp.vtx.tex3());
-         FREPA(vtx)if(vs[i].dup)
-         {
-            j=vs[i].dup; copyVtx(i, temp, j);
-            Int d=Trunc(vs[i].tex_max-vs[i].tex_min+2.0f/3);
-            if(Abs(tex[j].x-vs[i].tex_max)<Abs(tex[i].x-vs[i].tex_min))tex[i].x-=d;else tex[j].x+=d;
-         }
-         Swap(vtx, temp.vtx);
-      }
+            // copy mshb
+            {
+                MeshBase temp(vtxs() + dups, 0, 0, 0, flag());
+                temp.copyVtxs(T);
+                tex = ((uv_index == 0) ? temp.vtx.tex0() : (uv_index == 1) ? temp.vtx.tex1()
+                                                       : (uv_index == 2)   ? temp.vtx.tex2()
+                                                                           : temp.vtx.tex3());
+                FREPA(vtx)
+                if (vs[i].dup) {
+                    j = vs[i].dup;
+                    copyVtx(i, temp, j);
+                    Int d = Trunc(vs[i].tex_max - vs[i].tex_min + 2.0f / 3);
+                    if (Abs(tex[j].x - vs[i].tex_max) < Abs(tex[i].x - vs[i].tex_min))
+                        tex[i].x -= d;
+                    else
+                        tex[j].x += d;
+                }
+                Swap(vtx, temp.vtx);
+            }
 
-      // correct indexing to nearest tex.coord
-      FREPA(tri)
-      {
-         p=tri.ind(i).c; p0=p[0]; p1=p[1]; p2=p[2];
-         if(j=vs[p0].dup)
-         {
-            if(!vs[p1].dup){if(Abs(tex[p1].x-tex[j].x)<Abs(tex[p1].x-tex[p0].x))p[0]=j;}else
-            if(!vs[p2].dup){if(Abs(tex[p2].x-tex[j].x)<Abs(tex[p2].x-tex[p0].x))p[0]=j;}
-         }
-         if(j=vs[p1].dup)
-         {
-            if(!vs[p0].dup){if(Abs(tex[p0].x-tex[j].x)<Abs(tex[p0].x-tex[p1].x))p[1]=j;}else
-            if(!vs[p2].dup){if(Abs(tex[p2].x-tex[j].x)<Abs(tex[p2].x-tex[p1].x))p[1]=j;}
-         }
-         if(j=vs[p2].dup)
-         {
-            if(!vs[p0].dup){if(Abs(tex[p0].x-tex[j].x)<Abs(tex[p0].x-tex[p2].x))p[2]=j;}else
-            if(!vs[p1].dup){if(Abs(tex[p1].x-tex[j].x)<Abs(tex[p1].x-tex[p2].x))p[2]=j;}
-         }
-      }
-      FREPA(quad)
-      {
-         p=quad.ind(i).c; p0=p[0]; p1=p[1]; p2=p[2]; p3=p[3];
-         if(j=vs[p0].dup)
-         {
-            if(!vs[p1].dup){if(Abs(tex[p1].x-tex[j].x)<Abs(tex[p1].x-tex[p0].x))p[0]=j;}else
-            if(!vs[p2].dup){if(Abs(tex[p2].x-tex[j].x)<Abs(tex[p2].x-tex[p0].x))p[0]=j;}else
-            if(!vs[p3].dup){if(Abs(tex[p3].x-tex[j].x)<Abs(tex[p3].x-tex[p0].x))p[0]=j;}
-         }
-         if(j=vs[p1].dup)
-         {
-            if(!vs[p0].dup){if(Abs(tex[p0].x-tex[j].x)<Abs(tex[p0].x-tex[p1].x))p[1]=j;}else
-            if(!vs[p2].dup){if(Abs(tex[p2].x-tex[j].x)<Abs(tex[p2].x-tex[p1].x))p[1]=j;}else
-            if(!vs[p3].dup){if(Abs(tex[p3].x-tex[j].x)<Abs(tex[p3].x-tex[p1].x))p[1]=j;}
-         }
-         if(j=vs[p2].dup)
-         {
-            if(!vs[p0].dup){if(Abs(tex[p0].x-tex[j].x)<Abs(tex[p0].x-tex[p2].x))p[2]=j;}else
-            if(!vs[p1].dup){if(Abs(tex[p1].x-tex[j].x)<Abs(tex[p1].x-tex[p2].x))p[2]=j;}else
-            if(!vs[p3].dup){if(Abs(tex[p3].x-tex[j].x)<Abs(tex[p3].x-tex[p2].x))p[2]=j;}
-         }
-         if(j=vs[p3].dup)
-         {
-            if(!vs[p0].dup){if(Abs(tex[p0].x-tex[j].x)<Abs(tex[p0].x-tex[p3].x))p[3]=j;}else
-            if(!vs[p1].dup){if(Abs(tex[p1].x-tex[j].x)<Abs(tex[p1].x-tex[p3].x))p[3]=j;}else
-            if(!vs[p2].dup){if(Abs(tex[p2].x-tex[j].x)<Abs(tex[p2].x-tex[p3].x))p[3]=j;}
-         }
-      }
-   }
-   return T;
+            // correct indexing to nearest tex.coord
+            FREPA(tri) {
+                p = tri.ind(i).c;
+                p0 = p[0];
+                p1 = p[1];
+                p2 = p[2];
+                if (j = vs[p0].dup) {
+                    if (!vs[p1].dup) {
+                        if (Abs(tex[p1].x - tex[j].x) < Abs(tex[p1].x - tex[p0].x))
+                            p[0] = j;
+                    } else if (!vs[p2].dup) {
+                        if (Abs(tex[p2].x - tex[j].x) < Abs(tex[p2].x - tex[p0].x))
+                            p[0] = j;
+                    }
+                }
+                if (j = vs[p1].dup) {
+                    if (!vs[p0].dup) {
+                        if (Abs(tex[p0].x - tex[j].x) < Abs(tex[p0].x - tex[p1].x))
+                            p[1] = j;
+                    } else if (!vs[p2].dup) {
+                        if (Abs(tex[p2].x - tex[j].x) < Abs(tex[p2].x - tex[p1].x))
+                            p[1] = j;
+                    }
+                }
+                if (j = vs[p2].dup) {
+                    if (!vs[p0].dup) {
+                        if (Abs(tex[p0].x - tex[j].x) < Abs(tex[p0].x - tex[p2].x))
+                            p[2] = j;
+                    } else if (!vs[p1].dup) {
+                        if (Abs(tex[p1].x - tex[j].x) < Abs(tex[p1].x - tex[p2].x))
+                            p[2] = j;
+                    }
+                }
+            }
+            FREPA(quad) {
+                p = quad.ind(i).c;
+                p0 = p[0];
+                p1 = p[1];
+                p2 = p[2];
+                p3 = p[3];
+                if (j = vs[p0].dup) {
+                    if (!vs[p1].dup) {
+                        if (Abs(tex[p1].x - tex[j].x) < Abs(tex[p1].x - tex[p0].x))
+                            p[0] = j;
+                    } else if (!vs[p2].dup) {
+                        if (Abs(tex[p2].x - tex[j].x) < Abs(tex[p2].x - tex[p0].x))
+                            p[0] = j;
+                    } else if (!vs[p3].dup) {
+                        if (Abs(tex[p3].x - tex[j].x) < Abs(tex[p3].x - tex[p0].x))
+                            p[0] = j;
+                    }
+                }
+                if (j = vs[p1].dup) {
+                    if (!vs[p0].dup) {
+                        if (Abs(tex[p0].x - tex[j].x) < Abs(tex[p0].x - tex[p1].x))
+                            p[1] = j;
+                    } else if (!vs[p2].dup) {
+                        if (Abs(tex[p2].x - tex[j].x) < Abs(tex[p2].x - tex[p1].x))
+                            p[1] = j;
+                    } else if (!vs[p3].dup) {
+                        if (Abs(tex[p3].x - tex[j].x) < Abs(tex[p3].x - tex[p1].x))
+                            p[1] = j;
+                    }
+                }
+                if (j = vs[p2].dup) {
+                    if (!vs[p0].dup) {
+                        if (Abs(tex[p0].x - tex[j].x) < Abs(tex[p0].x - tex[p2].x))
+                            p[2] = j;
+                    } else if (!vs[p1].dup) {
+                        if (Abs(tex[p1].x - tex[j].x) < Abs(tex[p1].x - tex[p2].x))
+                            p[2] = j;
+                    } else if (!vs[p3].dup) {
+                        if (Abs(tex[p3].x - tex[j].x) < Abs(tex[p3].x - tex[p2].x))
+                            p[2] = j;
+                    }
+                }
+                if (j = vs[p3].dup) {
+                    if (!vs[p0].dup) {
+                        if (Abs(tex[p0].x - tex[j].x) < Abs(tex[p0].x - tex[p3].x))
+                            p[3] = j;
+                    } else if (!vs[p1].dup) {
+                        if (Abs(tex[p1].x - tex[j].x) < Abs(tex[p1].x - tex[p3].x))
+                            p[3] = j;
+                    } else if (!vs[p2].dup) {
+                        if (Abs(tex[p2].x - tex[j].x) < Abs(tex[p2].x - tex[p3].x))
+                            p[3] = j;
+                    }
+                }
+            }
+        }
+    return T;
 }
 /******************************************************************************/
-MeshBase& MeshBase::fixTexOffset(Byte uv_index)
-{
-   if(InRange(uv_index, 4))
-      if(Vec2 *tex=((uv_index==0) ? vtx.tex0() : (uv_index==1) ? vtx.tex1() : (uv_index==2) ? vtx.tex2() : vtx.tex3()))
-   {
-      exclude(VTX_DUP);
+MeshBase &MeshBase::fixTexOffset(Byte uv_index) {
+    if (InRange(uv_index, 4))
+        if (Vec2 *tex = ((uv_index == 0) ? vtx.tex0() : (uv_index == 1) ? vtx.tex1()
+                                                    : (uv_index == 2)   ? vtx.tex2()
+                                                                        : vtx.tex3())) {
+            exclude(VTX_DUP);
 
-      Index vtx_vtx; linkVtxVtxOnFace(vtx_vtx); // link vertexes together
-      Memt<Int , 16384> mvtx;
-      Memt<Int , 16384> madd;
-      Memt<Bool, 32768> vtx_is; vtx_is.setNumZero(vtxs());
+            Index vtx_vtx;
+            linkVtxVtxOnFace(vtx_vtx); // link vertexes together
+            Memt<Int, 16384> mvtx;
+            Memt<Int, 16384> madd;
+            Memt<Bool, 32768> vtx_is;
+            vtx_is.setNumZero(vtxs());
 
-      REPA(vtx)if(!vtx_is[i]) // process all vertexes
-      {
-         // get list of all vertexes that are connected together
-         mvtx.clear();
-         madd.add(i); vtx_is[i]=true;
-         for(; madd.elms(); )
-         {
-            Int vtx=madd.pop();
-            mvtx.add(vtx);
-            IndexGroup &ig=vtx_vtx.group[vtx];
-            REPA(ig)
+            REPA(vtx)
+            if (!vtx_is[i]) // process all vertexes
             {
-               Int v=ig[i]; if(!vtx_is[v])
-               {
-                  madd.add(v);
-                  vtx_is[v]=true;
-               }
+                // get list of all vertexes that are connected together
+                mvtx.clear();
+                madd.add(i);
+                vtx_is[i] = true;
+                for (; madd.elms();) {
+                    Int vtx = madd.pop();
+                    mvtx.add(vtx);
+                    IndexGroup &ig = vtx_vtx.group[vtx];
+                    REPA(ig) {
+                        Int v = ig[i];
+                        if (!vtx_is[v]) {
+                            madd.add(v);
+                            vtx_is[v] = true;
+                        }
+                    }
+                }
+                // calculate their average texture coordinates
+                if (mvtx.elms()) {
+                    Vec2 min, max;
+                    min = max = tex[mvtx.last()];
+                    REP(mvtx.elms() - 1) {
+                        C Vec2 &t = tex[mvtx[i]];
+                        if (t.x < min.x)
+                            min.x = t.x;
+                        else if (t.x > max.x)
+                            max.x = t.x;
+                        if (t.y < min.y)
+                            min.y = t.y;
+                        else if (t.y > max.y)
+                            max.y = t.y;
+                    }
+                    VecI2 center = Floor(Avg(min, max)); // always try to fit UV's in 0..1, even if the Average is -0.1 which translates to -1..0 range, because material atlas generation tests for 0..1 range
+                    if (center.any()) {
+                        Vec2 offset = -center;
+                        REPA(mvtx)
+                        tex[mvtx[i]] += offset; // apply offset
+                    }
+                }
             }
-         }
-         // calculate their average texture coordinates
-         if(mvtx.elms())
-         {
-            Vec2 min, max; min=max=tex[mvtx.last()];
-            REP(mvtx.elms()-1)
-            {
-             C Vec2 &t=tex[mvtx[i]];
-               if(t.x<min.x)min.x=t.x;else if(t.x>max.x)max.x=t.x;
-               if(t.y<min.y)min.y=t.y;else if(t.y>max.y)max.y=t.y;
-            }
-            VecI2 center=Floor(Avg(min, max)); // always try to fit UV's in 0..1, even if the Average is -0.1 which translates to -1..0 range, because material atlas generation tests for 0..1 range
-            if(center.any())
-            {
-               Vec2 offset=-center; REPA(mvtx)tex[mvtx[i]]+=offset; // apply offset
-            }
-         }
-      }
-   }
-   return T;
+        }
+    return T;
 }
 /******************************************************************************/
-}
+} // namespace EE
 /******************************************************************************/

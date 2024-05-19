@@ -380,12 +380,14 @@ Bool HasUnicode(CChar8 *t) {
 }
 Bool HasUnicode(C Str &s) {
     FREPA(s)
-    if (HasUnicode(s[i])) return true;
+    if (HasUnicode(s[i]))
+        return true;
     return false;
 } // keep this function to allow having '\0' chars in the middle
 Bool HasUnicode(C Str8 &s) {
     FREPA(s)
-    if (HasUnicode(s[i])) return true;
+    if (HasUnicode(s[i]))
+        return true;
     return false;
 } // keep this function to allow having '\0' chars in the middle
 Bool HasWide(CChar *t) {
@@ -397,7 +399,8 @@ Bool HasWide(CChar *t) {
 }
 Bool HasWide(C Str &s) {
     FREPA(s)
-    if (HasWide(s[i])) return true;
+    if (HasWide(s[i]))
+        return true;
     return false;
 } // keep this function to allow having '\0' chars in the middle
 /******************************************************************************/
@@ -1466,25 +1469,29 @@ Bool StartsPath(CChar *t, CChar *start) {
 /****************************************************************************/
 Bool Contains(C Str8 &src, Char8 c) {
     FREPA(src)
-    if (src()[i] == c) return true;
+    if (src()[i] == c)
+        return true;
     return false;
 } // keep this function to allow having '\0' chars in the middle, () avoids range check
 Bool Contains(C Str &src, Char c) {
     FREPA(src)
-    if (src()[i] == c) return true;
+    if (src()[i] == c)
+        return true;
     return false;
 } // keep this function to allow having '\0' chars in the middle, () avoids range check
 Bool Contains(C Str &src, Char8 c) {
     Char a = Char8To16(c);
     FREPA(src)
-    if (src()[i] == a) return true;
+    if (src()[i] == a)
+        return true;
     return false;
 } // keep this function to allow having '\0' chars in the middle, () avoids range check
 Bool Contains(C Str8 &src, Char c) {
     Char8 a = Char16To8(c);
     if (Char8To16(a) == c)
         FREPA(src)
-        if (src()[i] == a) return true;
+    if (src()[i] == a)
+        return true;
     return false;
 } // keep this function to allow having '\0' chars in the middle, () avoids range check, 'Char16To8' may not support all characters, so we have to check if it's a direct mapping in both ways
 Bool Contains(CChar8 *src, Char8 c) {
@@ -4753,17 +4760,21 @@ Str &Str ::reverse() {
 Str8 &Str8::replace(Char8 src, Char8 dest) {
     if (src && src != dest)
         REPA(T)
-        if (_d[i] == src) if (dest) _d[i] = dest;
-    else
-        remove(i);
+    if (_d[i] == src)
+        if (dest)
+            _d[i] = dest;
+        else
+            remove(i);
     return T;
 }
 Str &Str ::replace(Char src, Char dest) {
     if (src && src != dest)
         REPA(T)
-        if (_d[i] == src) if (dest) _d[i] = dest;
-    else
-        remove(i);
+    if (_d[i] == src)
+        if (dest)
+            _d[i] = dest;
+        else
+            remove(i);
     return T;
 }
 
@@ -4820,26 +4831,34 @@ Str &Str::tailSlash(Bool on) {
 Str8 &Str8::removeOuterWhiteChars() {
     Int n = 0;
     REPA(T)
-    if (WhiteChar(T[i])) n++;
-    else break;
+    if (WhiteChar(T[i]))
+        n++;
+    else
+        break;
     removeLast(n);
     n = 0;
     FREPA(T)
-    if (WhiteChar(T[i])) n++;
-    else break;
+    if (WhiteChar(T[i]))
+        n++;
+    else
+        break;
     remove(0, n);
     return T;
 }
 Str &Str::removeOuterWhiteChars() {
     Int n = 0;
     REPA(T)
-    if (WhiteChar(T[i])) n++;
-    else break;
+    if (WhiteChar(T[i]))
+        n++;
+    else
+        break;
     removeLast(n);
     n = 0;
     FREPA(T)
-    if (WhiteChar(T[i])) n++;
-    else break;
+    if (WhiteChar(T[i]))
+        n++;
+    else
+        break;
     remove(0, n);
     return T;
 }
@@ -6255,7 +6274,9 @@ void StrLibrary::create(C CMemPtr<Str> &strings, Bool case_sensitive, Bool paths
     cleaned.New(); // insert empty string so saving empty strings will require only 1 byte
     cleaned.sort(compare);
     REPA(cleaned)
-    if (i) if (!compare(cleaned[i], cleaned[i - 1])) cleaned.remove(i, true); // remove duplicates
+    if (i)
+        if (!compare(cleaned[i], cleaned[i - 1]))
+            cleaned.remove(i, true); // remove duplicates
 #endif
 
     REPA(cleaned) {
@@ -6449,7 +6470,8 @@ Bool BStr::operator==(CChar8 c) C { return _length == 1 && _d[0] == Char8To16(c)
 Bool BStr::operator==(CChar *t) C {
     if (t) {
         FREP(_length)
-        if (_d[i] != *t++) return false;
+        if (_d[i] != *t++)
+            return false;
         return *t == '\0';
     }
     return _length == 0;
@@ -6457,7 +6479,8 @@ Bool BStr::operator==(CChar *t) C {
 Bool BStr::operator==(CChar8 *t) C {
     if (t) {
         FREP(_length)
-        if (_d[i] != Char8To16(*t++)) return false;
+        if (_d[i] != Char8To16(*t++))
+            return false;
         return *t == '\0';
     }
     return _length == 0;
@@ -6466,21 +6489,24 @@ Bool BStr::operator==(C Str &s) C {
     if (_length != s.length())
         return false;
     FREP(_length)
-    if (_d[i] != s()[i]) return false;
+    if (_d[i] != s()[i])
+        return false;
     return true;
 }
 Bool BStr::operator==(C Str8 &s) C {
     if (_length != s.length())
         return false;
     FREP(_length)
-    if (_d[i] != Char8To16(s()[i])) return false;
+    if (_d[i] != Char8To16(s()[i]))
+        return false;
     return true;
 }
 Bool BStr::operator==(C BStr &s) C {
     if (_length != s.length())
         return false;
     FREP(_length)
-    if (_d[i] != s()[i]) return false;
+    if (_d[i] != s()[i])
+        return false;
     return true;
 }
 
@@ -6520,8 +6546,11 @@ static void GenMap() {
 
     Memc<VecI2> ranges;
     FREP(65536)
-    if (iswalpha(i)) if (ranges.elms() && ranges.last().y == i - 1) ranges.last().y++;
-    else ranges.New() = i;
+    if (iswalpha(i))
+        if (ranges.elms() && ranges.last().y == i - 1)
+            ranges.last().y++;
+        else
+            ranges.New() = i;
     Str s;
     s += "static const U16 Alphas[][2]={";
     FREPA(ranges) {
@@ -6951,7 +6980,8 @@ Font &Font::removeAccent(Bool permanent) {
 static Bool HasUnicode(NSString *str) {
     if (str)
         REP([str length])
-        if (Unsigned([str characterAtIndex:i]) > 127) return true;
+    if (Unsigned([str characterAtIndex:i]) > 127)
+        return true;
     return false;
 }
 /******************************************************************************/

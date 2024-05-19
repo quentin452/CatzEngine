@@ -5,10 +5,10 @@ import sys
 import threading
 
 def format_files(files, params):
-    blacklist = [""]
+    blacklist_files = [""]
     blacklist_dirs = ["ThirdPartyLibs", "_Build_","Shaders","Engine","Project","Source"]
     for file in files:
-        if os.path.basename(file) not in blacklist and not any(blacklist_dir in file for blacklist_dir in blacklist_dirs):
+        if os.path.basename(file) not in blacklist_files and not any(blacklist_dir in file for blacklist_dir in blacklist_dirs):
             print(f"Formatting {file}...")
             subprocess.run(["clang-format", "-i", "-style", params, file], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         else:

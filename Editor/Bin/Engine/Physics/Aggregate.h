@@ -2,26 +2,25 @@
  * Copyright (c) Grzegorz Slazinski. All Rights Reserved.                     *
  * Titan Engine (https://esenthel.com) header file.                           *
 /******************************************************************************/
-struct Aggregate
-{
+struct Aggregate {
 #if EE_PRIVATE
-   void create(Int    max_actors, Bool self_collision=true);
-   void add   (Actor &actor);
+    void create(Int max_actors, Bool self_collision = true);
+    void add(Actor &actor);
 #endif
 
-   void         del();
-  ~Aggregate() {del();}
-   Aggregate() {_aggr=null;}
+    void del();
+    ~Aggregate() { del(); }
+    Aggregate() { _aggr = null; }
 
 #if !EE_PRIVATE
-private:
+  private:
 #endif
 #if EE_PRIVATE
-   PHYS_API(PxAggregate, void) *_aggr;
+    PHYS_API(PxAggregate, void) * _aggr;
 #else
-   Ptr _aggr;
+    Ptr _aggr;
 #endif
 
-   NO_COPY_CONSTRUCTOR(Aggregate);
+    NO_COPY_CONSTRUCTOR(Aggregate);
 };
 /******************************************************************************/

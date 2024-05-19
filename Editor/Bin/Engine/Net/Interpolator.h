@@ -45,91 +45,89 @@
    }
 
 /******************************************************************************/
-struct InterpolatorTime
-{
-   Bool is()C {return _elms!=0;} // if have any value
+struct InterpolatorTime {
+    Bool is() C { return _elms != 0; } // if have any value
 
-   // operations
-   void add   (Flt duration, InterpolatorTemp &temp); // call this method when received new data !! before calling 'add'    method of other classes ('AngularInterpolator', 'LinearInterpolator', 'SplineInterpolator') !! 'duration'=for how long this data should be valid
-   void update(              InterpolatorTemp &temp); // call this method once per frame         !! before calling 'update' method of other classes ('AngularInterpolator', 'LinearInterpolator', 'SplineInterpolator') !!
+    // operations
+    void add(Flt duration, InterpolatorTemp &temp); // call this method when received new data !! before calling 'add'    method of other classes ('AngularInterpolator', 'LinearInterpolator', 'SplineInterpolator') !! 'duration'=for how long this data should be valid
+    void update(InterpolatorTemp &temp);            // call this method once per frame         !! before calling 'update' method of other classes ('AngularInterpolator', 'LinearInterpolator', 'SplineInterpolator') !!
 
-   InterpolatorTime& reset(); // reset to initial settings
+    InterpolatorTime &reset(); // reset to initial settings
 
-   InterpolatorTime() {reset();}
-
-#if !EE_PRIVATE
-private:
-#endif
-   Byte _elms, _count;
-   Flt  _time, _cur_duration, _next_duration, _left;
-};
-/******************************************************************************/
-T1(TYPE) struct AngularInterpolator
-{
-   // get
- C TYPE& operator()()C {return _value;} // get current value
-
-   // operations
-   void add   (C TYPE &value, C InterpolatorTemp &temp); // call this method when received new data !! after calling 'InterpolatorTime.add'    with the same 'temp' !!, 'value'=received data value
-   void update(               C InterpolatorTemp &temp); // call this method once per frame         !! after calling 'InterpolatorTime.update' with the same 'temp' !!
-
-   AngularInterpolator();
+    InterpolatorTime() { reset(); }
 
 #if !EE_PRIVATE
-private:
+  private:
 #endif
-   TYPE _value, _prev, _cur, _next;
+    Byte _elms, _count;
+    Flt _time, _cur_duration, _next_duration, _left;
 };
 /******************************************************************************/
-T1(TYPE) struct LinearInterpolator
-{
-   // get
- C TYPE& operator()()C {return _value;} // get current value
+T1(TYPE)
+struct AngularInterpolator {
+    // get
+    C TYPE &operator()() C { return _value; } // get current value
 
-   // operations
-   void add   (C TYPE &value, C InterpolatorTemp &temp); // call this method when received new data !! after calling 'InterpolatorTime.add'    with the same 'temp' !!, 'value'=received data value
-   void update(               C InterpolatorTemp &temp); // call this method once per frame         !! after calling 'InterpolatorTime.update' with the same 'temp' !!
+    // operations
+    void add(C TYPE &value, C InterpolatorTemp &temp); // call this method when received new data !! after calling 'InterpolatorTime.add'    with the same 'temp' !!, 'value'=received data value
+    void update(C InterpolatorTemp &temp);             // call this method once per frame         !! after calling 'InterpolatorTime.update' with the same 'temp' !!
 
-   LinearInterpolator();
+    AngularInterpolator();
 
 #if !EE_PRIVATE
-private:
+  private:
 #endif
-   TYPE _value, _prev, _cur, _next;
+    TYPE _value, _prev, _cur, _next;
 };
 /******************************************************************************/
-T1(TYPE) struct SplineInterpolator
-{
-   // get
- C TYPE& operator()()C {return _value;} // get current value
+T1(TYPE)
+struct LinearInterpolator {
+    // get
+    C TYPE &operator()() C { return _value; } // get current value
 
-   // operations
-   void add   (C TYPE &value, C InterpolatorTemp &temp); // call this method when received new data !! after calling 'InterpolatorTime.add'    with the same 'temp' !!, 'value'=received data value
-   void update(               C InterpolatorTemp &temp); // call this method once per frame         !! after calling 'InterpolatorTime.update' with the same 'temp' !!
+    // operations
+    void add(C TYPE &value, C InterpolatorTemp &temp); // call this method when received new data !! after calling 'InterpolatorTime.add'    with the same 'temp' !!, 'value'=received data value
+    void update(C InterpolatorTemp &temp);             // call this method once per frame         !! after calling 'InterpolatorTime.update' with the same 'temp' !!
 
-   SplineInterpolator();
+    LinearInterpolator();
 
 #if !EE_PRIVATE
-private:
+  private:
 #endif
-   TYPE _value, _prev2, _prev, _cur, _next;
+    TYPE _value, _prev, _cur, _next;
 };
 /******************************************************************************/
-struct InterpolatorTemp
-{
-   Byte op;
-   Flt  frac;
+T1(TYPE)
+struct SplineInterpolator {
+    // get
+    C TYPE &operator()() C { return _value; } // get current value
+
+    // operations
+    void add(C TYPE &value, C InterpolatorTemp &temp); // call this method when received new data !! after calling 'InterpolatorTime.add'    with the same 'temp' !!, 'value'=received data value
+    void update(C InterpolatorTemp &temp);             // call this method once per frame         !! after calling 'InterpolatorTime.update' with the same 'temp' !!
+
+    SplineInterpolator();
+
+#if !EE_PRIVATE
+  private:
+#endif
+    TYPE _value, _prev2, _prev, _cur, _next;
+};
+/******************************************************************************/
+struct InterpolatorTemp {
+    Byte op;
+    Flt frac;
 };
 /******************************************************************************/
 typedef AngularInterpolator<Flt> InterpolatorA;
 
-typedef LinearInterpolator<Flt > Interpolator1;
+typedef LinearInterpolator<Flt> Interpolator1;
 typedef LinearInterpolator<Vec2> Interpolator2;
-typedef LinearInterpolator<Vec > Interpolator3;
+typedef LinearInterpolator<Vec> Interpolator3;
 typedef LinearInterpolator<Vec4> Interpolator4;
 
-typedef SplineInterpolator<Flt > Interpolator1S;
+typedef SplineInterpolator<Flt> Interpolator1S;
 typedef SplineInterpolator<Vec2> Interpolator2S;
-typedef SplineInterpolator<Vec > Interpolator3S;
+typedef SplineInterpolator<Vec> Interpolator3S;
 typedef SplineInterpolator<Vec4> Interpolator4S;
 /******************************************************************************/

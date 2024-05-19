@@ -28,57 +28,58 @@
 /******************************************************************************/
 #define FACEBOOK (ANDROID || IOS) // if Facebook is supported on this platform
 /******************************************************************************/
-struct Facebook
-{
-   struct User
-   {
-      ULong id=0; // user id
-      Str   name; // user name (first+last)
+struct Facebook {
+    struct User {
+        ULong id = 0; // user id
+        Str name;     // user name (first+last)
 
-      void clear() {id=0; name.clear();}
-   };
-   struct UserEmail : User
-   {
-      Str email; // user email
+        void clear() {
+            id = 0;
+            name.clear();
+        }
+    };
+    struct UserEmail : User {
+        Str email; // user email
 
-      void clear() {User::clear(); email.clear();}
-   };
+        void clear() {
+            User::clear();
+            email.clear();
+        }
+    };
 
 #if EE_PRIVATE
-   // !! THESE ENUMS MUST BE EQUAL TO "EsenthelActivity.java" !!
+    // !! THESE ENUMS MUST BE EQUAL TO "EsenthelActivity.java" !!
 #endif
-   enum RESULT : Byte
-   {
-      POST_ERROR  , // there was an error while trying to post
-      POST_CANCEL , // user canceled posting
-      POST_SUCCESS, // post completed successfully
-   };
+    enum RESULT : Byte {
+        POST_ERROR,   // there was an error while trying to post
+        POST_CANCEL,  // user canceled posting
+        POST_SUCCESS, // post completed successfully
+    };
 
-   void (*callback)(RESULT result)=null; // pointer to a custom function that will be called with processed events, 'result'=message received at the moment
+    void (*callback)(RESULT result) = null; // pointer to a custom function that will be called with processed events, 'result'=message received at the moment
 
-   // manage
-   Bool      loggedIn()C; // if currently logged in to Facebook
-   Facebook& logIn   () ; // log in  to   Facebook
-   Facebook& logOut  () ; // log out from Facebook
+    // manage
+    Bool loggedIn() C;  // if currently logged in to Facebook
+    Facebook &logIn();  // log in  to   Facebook
+    Facebook &logOut(); // log out from Facebook
 
-   Facebook& getMe     (); // request my         profile information to be downloaded, 'logIn' will be automatically called if needed
-   Facebook& getFriends(); // request my friends profile information to be downloaded, 'logIn' will be automatically called if needed
+    Facebook &getMe();      // request my         profile information to be downloaded, 'logIn' will be automatically called if needed
+    Facebook &getFriends(); // request my friends profile information to be downloaded, 'logIn' will be automatically called if needed
 
- C UserEmail & me     ()C {return _me     ;} // get my         profile information, 'getMe'      should be called first
- C Mems<User>& friends()C {return _friends;} // get my friends profile information, 'getFriends' should be called first
+    C UserEmail &me() C { return _me; }            // get my         profile information, 'getMe'      should be called first
+    C Mems<User> &friends() C { return _friends; } // get my friends profile information, 'getFriends' should be called first
 
-   Str userImageURL(ULong user_id, Int width=-1, Int height=-1)C; // get user image url from which you can download his/her photo, for example by using the 'Download' class, 'width height'=custom dimensions of the image in pixels -1..Inf (-1=default), you can leave both as default, or specify only one and the other will be set automatically, or you can specify both dimensions, they are treated as hints only
+    Str userImageURL(ULong user_id, Int width = -1, Int height = -1) C; // get user image url from which you can download his/her photo, for example by using the 'Download' class, 'width height'=custom dimensions of the image in pixels -1..Inf (-1=default), you can leave both as default, or specify only one and the other will be set automatically, or you can specify both dimensions, they are treated as hints only
 
-   // operations
-   void openPage(C Str &page_name, C Str &page_id=S); // open a Facebook page, 'page_name'=name of the page (for example "EsenthelEngine"), 'page_id'=ID number of the page (for example "161038147263508", this is optional). By default the page will be opened in a browser, however on Android and iOS, if you specify the 'page_id', then it will be opened in the Facebook app if it's available.
+    // operations
+    void openPage(C Str &page_name, C Str &page_id = S); // open a Facebook page, 'page_name'=name of the page (for example "EsenthelEngine"), 'page_id'=ID number of the page (for example "161038147263508", this is optional). By default the page will be opened in a browser, however on Android and iOS, if you specify the 'page_id', then it will be opened in the Facebook app if it's available.
 
-   void post(C Str &url, C Str &quote=S); // post link to user's timeline, 'url'=link address, 'quote'=text to quote in the post
+    void post(C Str &url, C Str &quote = S); // post link to user's timeline, 'url'=link address, 'quote'=text to quote in the post
 
 #if !EE_PRIVATE
-private:
+  private:
 #endif
-   UserEmail  _me;
-   Mems<User> _friends;
-}extern
-   FB;
+    UserEmail _me;
+    Mems<User> _friends;
+} extern FB;
 /******************************************************************************/

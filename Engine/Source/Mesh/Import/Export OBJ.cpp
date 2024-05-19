@@ -20,13 +20,13 @@ Bool ExportOBJ(C Str &name, C MeshLod &mesh) {
             f.putLine(S + "g " + Replace(part.name, '\n', ' '));
             if (pos)
                 FREPA(base->vtx)
-                f.putLine(S + "v " + Dbl(-pos[i].x) + ' ' + Dbl(pos[i].y) + ' ' + Dbl(pos[i].z));
+            f.putLine(S + "v " + Dbl(-pos[i].x) + ' ' + Dbl(pos[i].y) + ' ' + Dbl(pos[i].z));
             if (tex)
                 FREPA(base->vtx)
-                f.putLine(S + "vt " + Dbl(tex[i].x) + ' ' + Dbl(1 - tex[i].y));
+            f.putLine(S + "vt " + Dbl(tex[i].x) + ' ' + Dbl(1 - tex[i].y));
             if (nrm)
                 FREPA(base->vtx)
-                f.putLine(S + "vn " + Dbl(-nrm[i].x) + ' ' + Dbl(nrm[i].y) + ' ' + Dbl(nrm[i].z));
+            f.putLine(S + "vn " + Dbl(-nrm[i].x) + ' ' + Dbl(nrm[i].y) + ' ' + Dbl(nrm[i].z));
 
             if (C VecI *tri = base->tri.ind())
                 FREPA(base->tri) {

@@ -702,7 +702,8 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
 
         void includePlane(C Plane &plane) {
             REPA(planes)
-            if (planes[i] == plane) return; // if plane is similar, then don't add it
+            if (planes[i] == plane)
+                return; // if plane is similar, then don't add it
             planes.add(plane);
         }
 #endif
@@ -742,7 +743,8 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
             if ((flag & mask) != (mg.flag & mask))
                 return false;
             REPA(multi_mtrls)
-            if (multi_mtrls[i] != mg.multi_mtrls[i]) return false;
+            if (multi_mtrls[i] != mg.multi_mtrls[i])
+                return false;
             return true;
         }
         Bool testAndMerge(C MtrlGroup &mg) {
@@ -908,7 +910,8 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
     {
         Int b = 0;
         REPA(matrix)
-        if (matrix.c[i] == index) b += blend.c[i];
+        if (matrix.c[i] == index)
+            b += blend.c[i];
         return b;
     }
     static Int SkinDifference(C VtxBone &matrix_a, C VecB4 &blend_a, C VtxBone &matrix_b, C VecB4 &blend_b) {
@@ -1902,7 +1905,8 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
             REPA(middle_tris)
             addVtxData(*middle_tris[i], edge_vtx0i, edge_vtx1i);
             REPA(all_tris)
-            if (!setVtxData(all_tris[i], edge_vtx0i, edge_vtx1i)) goto cant;
+            if (!setVtxData(all_tris[i], edge_vtx0i, edge_vtx1i))
+                goto cant;
             if (test_flag) {
                 if (!testTriangles(edge_vtx0, mid_pos) || !testTriangles(edge_vtx1, mid_pos))
                     goto cant;

@@ -1243,7 +1243,8 @@ Bool FrustumClass::operator()(C Shape &shape) C {
 }
 Bool FrustumClass::operator()(C Shape *shape, Int shapes) C {
     REP(shapes)
-    if (T(shape[i])) return true;
+    if (T(shape[i]))
+        return true;
     return false;
 }
 /******************************************************************************/
@@ -1257,7 +1258,9 @@ Bool FrustumClass::operator()(C FrustumClass &frustum) C // assumes that one fru
             VecD contact;
             EdgeD ed(a.point[a.edge[e].x], a.point[a.edge[e].y]);
             REPA(b.plane)
-            if (Cuts(ed, b.plane[i], &contact)) if (b(contact - b.plane[i].normal * EPSL)) return true; // use epsilon to make sure that we're under plane surface
+            if (Cuts(ed, b.plane[i], &contact))
+                if (b(contact - b.plane[i].normal * EPSL))
+                    return true; // use epsilon to make sure that we're under plane surface
         }
     }
     return false;

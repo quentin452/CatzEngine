@@ -201,7 +201,7 @@ Bool ImportASE(C Str &name, Mesh *mesh, MemPtr<XMaterial> materials, MemPtr<Int>
         // materials
         if (materials)
             FREPA(ase.mtrl)
-            ase.mtrl[i].copyTo(materials);
+        ase.mtrl[i].copyTo(materials);
 
         // mesh
         if (mesh) {
@@ -216,7 +216,8 @@ Bool ImportASE(C Str &name, Mesh *mesh, MemPtr<XMaterial> materials, MemPtr<Int>
                 FREPA(src.tri) {
                     C VecI &ind = src.tri[i].ind;
                     REPA(ind)
-                    if (!InRange(ind.c[i], src.pos)) return false;
+                    if (!InRange(ind.c[i], src.pos))
+                        return false;
                     base.tri.ind(i).set(j, j + 1, j + 2);
                     base.vtx.pos(j++) = src.pos[ind.c[0]];
                     base.vtx.pos(j++) = src.pos[ind.c[1]];
@@ -240,7 +241,8 @@ Bool ImportASE(C Str &name, Mesh *mesh, MemPtr<XMaterial> materials, MemPtr<Int>
                     FREPA(src.ttex) {
                         C VecI &ttex = src.ttex[i];
                         REPA(ttex)
-                        if (!InRange(ttex.c[i], src.tex)) return false;
+                        if (!InRange(ttex.c[i], src.tex))
+                            return false;
                         base.vtx.tex0(j++) = src.tex[ttex.c[0]];
                         base.vtx.tex0(j++) = src.tex[ttex.c[1]];
                         base.vtx.tex0(j++) = src.tex[ttex.c[2]];

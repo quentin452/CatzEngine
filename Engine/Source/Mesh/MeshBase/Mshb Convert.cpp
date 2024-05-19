@@ -140,11 +140,11 @@ MeshBase &MeshBase::inflateEdges(TEX_MODE x_tex_coords, TEX_MODE y_tex_coords, B
             IndexGroup &ig = vtx_vtx.group[p0];
             if (ig.num > 1) // if vertex is connected with at least 2 others
                 REPA(ig)
-                if (ig.elm[i] == p1) {
-                    p0_p = ig.elm[(i + ig.num - 1) % ig.num];
-                    p0_n = ig.elm[(i + 1) % ig.num];
-                    break;
-                }
+            if (ig.elm[i] == p1) {
+                p0_p = ig.elm[(i + ig.num - 1) % ig.num];
+                p0_n = ig.elm[(i + 1) % ig.num];
+                break;
+            }
         }
 
         // find a pair of vertexes for p1
@@ -153,11 +153,11 @@ MeshBase &MeshBase::inflateEdges(TEX_MODE x_tex_coords, TEX_MODE y_tex_coords, B
             IndexGroup &ig = vtx_vtx.group[p1];
             if (ig.num > 1) // if vertex is connected with at least 2 others
                 REPA(ig)
-                if (ig.elm[i] == p0) {
-                    p1_p = ig.elm[(i + ig.num - 1) % ig.num];
-                    p1_n = ig.elm[(i + 1) % ig.num];
-                    break;
-                }
+            if (ig.elm[i] == p0) {
+                p1_p = ig.elm[(i + ig.num - 1) % ig.num];
+                p1_n = ig.elm[(i + 1) % ig.num];
+                break;
+            }
         }
 
         Vec lb, rb, lf, rf;      // pos
@@ -447,66 +447,67 @@ MeshBase &MeshBase::edgeToPoly(MemPtr<Poly> polys) {
 
         // get polys
         REPAD(e, edge)
-        if (flag[e] & ETQ_LR)                                   // for each solid edge
-            REPD(side, 2) if (flag[e] & (side ? ETQ_R : ETQ_L)) // for each solid side
-        {
-            Poly &poly = polys.New().create(vtx.pos(), edge.id() ? edge.id(e) : -1); // start creating new poly and optionally set its ID from edge ID
-            Int prev_vtx = edge.ind(e).c[!side],                                     // setting 'prev' and 'cur' vertexes determines movement direction
-                cur_vtx = edge.ind(e).c[side], next_vtx;
-            flag[e] &= (side ? ~ETQ_R : ~ETQ_L); // eat solid
-
-            for (Int edge_cur = e;;) // start movement loop
+        if (flag[e] & ETQ_LR) // for each solid edge
+            REPD(side, 2)
+            if (flag[e] & (side ? ETQ_R : ETQ_L)) // for each solid side
             {
-                next_vtx = -1;                            // set next vertex as unknown
-                poly.addVtx(prev_vtx, edge_cur);          // add 'prev' vertex to the poly list
-                IndexGroup &ig = vtx_edge.group[cur_vtx]; // get next edge linked with 'cur_vtx'
-                REPA(ig)                                  // iterate all edges linked with 'cur_vtx' to find the next valid edge (which has solid info)
-                {
-                    Int edge_test = ig[i];
-                    if (edge_test == edge_cur) // find 'i' position in which the edge is equal to the current
-                    {
-                        Bool other_side = false;          // work mode
-                        for (Int j = 1; j <= ig.num; j++) // start from the next edge (+1) but finish also on the starting (edge_cur) because there are cases that only it's the correct one
-                        {
-                            edge_test = ig[(i + j) % ig.num];
-                            Int *p = edge.ind(edge_test).c;
-                            Byte &fl = flag[edge_test], f = ETQ_R, nf = ETQ_L; // on the end when j==ig.num, (i+ig.num)%ig.num==i, this means that at the end will be checked the starting edge (edge_cur)
-                            next_vtx = p[1];
-                            if (next_vtx == cur_vtx) {
-                                next_vtx = p[0];
-                                Swap(f, nf);
-                            } // make sure that the next vertex isn't set as the current one
+                Poly &poly = polys.New().create(vtx.pos(), edge.id() ? edge.id(e) : -1); // start creating new poly and optionally set its ID from edge ID
+                Int prev_vtx = edge.ind(e).c[!side],                                     // setting 'prev' and 'cur' vertexes determines movement direction
+                    cur_vtx = edge.ind(e).c[side], next_vtx;
+                flag[e] &= (side ? ~ETQ_R : ~ETQ_L); // eat solid
 
-                            if (!other_side) // normal work mode
+                for (Int edge_cur = e;;) // start movement loop
+                {
+                    next_vtx = -1;                            // set next vertex as unknown
+                    poly.addVtx(prev_vtx, edge_cur);          // add 'prev' vertex to the poly list
+                    IndexGroup &ig = vtx_edge.group[cur_vtx]; // get next edge linked with 'cur_vtx'
+                    REPA(ig)                                  // iterate all edges linked with 'cur_vtx' to find the next valid edge (which has solid info)
+                    {
+                        Int edge_test = ig[i];
+                        if (edge_test == edge_cur) // find 'i' position in which the edge is equal to the current
+                        {
+                            Bool other_side = false;          // work mode
+                            for (Int j = 1; j <= ig.num; j++) // start from the next edge (+1) but finish also on the starting (edge_cur) because there are cases that only it's the correct one
                             {
-                                if (fl & f) {
-                                    fl &= ~f;
-                                    break;
-                                } else // encountered edge has desired info about solid, so let's eat it and finish
+                                edge_test = ig[(i + j) % ig.num];
+                                Int *p = edge.ind(edge_test).c;
+                                Byte &fl = flag[edge_test], f = ETQ_R, nf = ETQ_L; // on the end when j==ig.num, (i+ig.num)%ig.num==i, this means that at the end will be checked the starting edge (edge_cur)
+                                next_vtx = p[1];
+                                if (next_vtx == cur_vtx) {
+                                    next_vtx = p[0];
+                                    Swap(f, nf);
+                                } // make sure that the next vertex isn't set as the current one
+
+                                if (!other_side) // normal work mode
                                 {
+                                    if (fl & f) {
+                                        fl &= ~f;
+                                        break;
+                                    } else // encountered edge has desired info about solid, so let's eat it and finish
+                                    {
+                                        next_vtx = -1;
+                                        if (fl & nf)
+                                            other_side = true; // encountered edge has info about solid but from the other side, this means that now we'll have to skip all information about solid because we're not interested in them
+                                    }
+                                } else // secondary work mode in which we skip information about encountered solid
+                                {
+                                    if (fl & f && !(fl & nf))
+                                        other_side = false; // we've encountered closing solid
                                     next_vtx = -1;
-                                    if (fl & nf)
-                                        other_side = true; // encountered edge has info about solid but from the other side, this means that now we'll have to skip all information about solid because we're not interested in them
                                 }
-                            } else // secondary work mode in which we skip information about encountered solid
-                            {
-                                if (fl & f && !(fl & nf))
-                                    other_side = false; // we've encountered closing solid
-                                next_vtx = -1;
                             }
+                            edge_cur = edge_test;
+                            break;
                         }
-                        edge_cur = edge_test;
-                        break;
                     }
+                    if (next_vtx < 0)
+                        break;
+                    prev_vtx = cur_vtx;
+                    cur_vtx = next_vtx;
                 }
-                if (next_vtx < 0)
-                    break;
-                prev_vtx = cur_vtx;
-                cur_vtx = next_vtx;
+                if (poly.vtx.elms() <= 2)
+                    polys.removeLast();
             }
-            if (poly.vtx.elms() <= 2)
-                polys.removeLast();
-        }
 
         // free
         Free(flag);
@@ -762,10 +763,12 @@ MeshBase &MeshBase::edgeToTri(Bool set_id) // assumes: weldVtx, removeUnusedVtxs
         // link vtx->polys
         ett.vtx_poly.create(ett.vtxs);
         MFREP(ett.polys)
-        MFREPD(vtx, ett.polys[i].vtx) ett.vtx_poly.incGroup(ett.polys[i].vtx[vtx].index);
+        MFREPD(vtx, ett.polys[i].vtx)
+        ett.vtx_poly.incGroup(ett.polys[i].vtx[vtx].index);
         ett.vtx_poly.set();
         MFREP(ett.polys)
-        MFREPD(vtx, ett.polys[i].vtx) ett.vtx_poly.addElm(ett.polys[i].vtx[vtx].index, i);
+        MFREPD(vtx, ett.polys[i].vtx)
+        ett.vtx_poly.addElm(ett.polys[i].vtx[vtx].index, i);
 
         // create angle array
         ett.fis = 0;

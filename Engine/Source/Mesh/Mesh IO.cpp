@@ -741,7 +741,7 @@ Bool MeshBase::loadData(File &f) {
             f.getN(vtx.color(), vtxs);
         if (vtx.color())
             REP(vtxs)
-            Swap(vtx.color(i).r, vtx.color(i).b); // convert BGRA -> RGBA
+        Swap(vtx.color(i).r, vtx.color(i).b); // convert BGRA -> RGBA
         if (flag & VTX_FLAG)
             f.getN(vtx.flag(), vtxs);
 
@@ -1348,7 +1348,8 @@ Bool MeshPart::load(File &f, CChar *path) {
 Bool MeshLod::saveData(File &f, CChar *path) C {
     f.putMulti(Byte(0), Int(parts.elms()), dist2); // version
     FREPA(T)
-    if (!parts[i].saveData(f, path)) return false;
+    if (!parts[i].saveData(f, path))
+        return false;
     return f.ok();
 }
 Bool MeshLod::loadData(File &f, CChar *path, Int lod_index) {
@@ -1358,7 +1359,8 @@ Bool MeshLod::loadData(File &f, CChar *path, Int lod_index) {
         create(f.getInt());
         f >> dist2;
         FREPA(T)
-        if (!parts[i].loadData(f, path, lod_index)) goto error;
+        if (!parts[i].loadData(f, path, lod_index))
+            goto error;
         if (f.ok())
             return true;
     } break;
@@ -1370,7 +1372,8 @@ error:
 Bool MeshLod::loadOld(File &f, CChar *path) {
     create(f.getInt());
     FREPA(T)
-    if (!parts[i].loadOld(f, path)) goto error;
+    if (!parts[i].loadOld(f, path))
+        goto error;
     if (f.ok())
         return true;
 error:
@@ -1396,7 +1399,8 @@ Bool Mesh::saveData(File &f, CChar *path) C {
         if (_variations.save(f)) {
             f.cmpUIntV(_lods.elms());
             FREP(lods())
-            if (!lod(i).saveData(f, path)) return false;
+            if (!lod(i).saveData(f, path))
+                return false;
             f.putAsset(Enums.id(drawGroupEnum())); // save after LODs, so when loading and setting 'drawGroupEnum' it can operate on LODs
             f.putAsset(Skeletons.id(skeleton()));  // save after LODs, so when loading and setting 'skeleton'      it can operate on LODs
             return f.ok();
@@ -1417,7 +1421,8 @@ Bool Mesh::loadData(File &f, CChar *path) {
             goto error;
         _lods.setNum(f.decUIntV());
         FREP(lods())
-        if (!lod(i).loadData(f, path, i)) goto error;
+        if (!lod(i).loadData(f, path, i))
+            goto error;
 
         drawGroupEnum(Enums(f.getAssetID(), path), false);
         skeleton(Skeletons(f.getAssetID(), path));
@@ -1432,7 +1437,8 @@ Bool Mesh::loadData(File &f, CChar *path) {
             goto error;
         _lods.setNum(f.decUIntV());
         FREP(lods())
-        if (!lod(i).loadData(f, path, i)) goto error;
+        if (!lod(i).loadData(f, path, i))
+            goto error;
 
         drawGroupEnum(Enums(f.getAssetID(), path), false);
         skeleton(Skeletons(f.getAssetID(), path));
@@ -1444,7 +1450,8 @@ Bool Mesh::loadData(File &f, CChar *path) {
 
         _lods.setNum(f.decUIntV());
         FREP(lods())
-        if (!lod(i).loadData(f, path, i)) goto error;
+        if (!lod(i).loadData(f, path, i))
+            goto error;
         if (!_bone_map.loadOld2(f))
             goto error;
         if (!_variations.load(f))
@@ -1460,7 +1467,8 @@ Bool Mesh::loadData(File &f, CChar *path) {
 
         _lods.setNum(f.decUIntV());
         FREP(lods())
-        if (!lod(i).loadData(f, path, i)) goto error;
+        if (!lod(i).loadData(f, path, i))
+            goto error;
         if (!_bone_map.loadOld1(f))
             goto error;
         if (!_variations.load(f))
@@ -1476,7 +1484,8 @@ Bool Mesh::loadData(File &f, CChar *path) {
 
         _lods.setNum(f.getByte());
         FREP(lods())
-        if (!lod(i).loadData(f, path, i)) goto error;
+        if (!lod(i).loadData(f, path, i))
+            goto error;
         if (!_bone_map.loadOld(f))
             goto error;
 
@@ -1490,7 +1499,8 @@ Bool Mesh::loadData(File &f, CChar *path) {
 
         _lods.setNum(f.getByte());
         FREP(lods())
-        if (!lod(i).loadData(f, path, i)) goto error;
+        if (!lod(i).loadData(f, path, i))
+            goto error;
         if (!_bone_map.loadOld(f))
             goto error;
 
@@ -1502,7 +1512,8 @@ Bool Mesh::loadData(File &f, CChar *path) {
         ext = box;
         _lods.setNum(f.getByte());
         FREP(lods())
-        if (!lod(i).loadData(f, path, i)) goto error;
+        if (!lod(i).loadData(f, path, i))
+            goto error;
     } break;
 
     case 2: {
@@ -1512,7 +1523,8 @@ Bool Mesh::loadData(File &f, CChar *path) {
         lod_center = ext.pos;
         _lods.setNum(f.getByte());
         FREP(lods())
-        if (!lod(i).loadData(f, path, i)) goto error;
+        if (!lod(i).loadData(f, path, i))
+            goto error;
     } break;
 
     case 1: {
@@ -1522,7 +1534,8 @@ Bool Mesh::loadData(File &f, CChar *path) {
         lod_center = ext.pos;
         _lods.setNum(f.getByte());
         FREP(lods())
-        if (!lod(i).loadOld(f, path)) goto error;
+        if (!lod(i).loadOld(f, path))
+            goto error;
     } break;
 
     case 0: {
@@ -1532,7 +1545,8 @@ Bool Mesh::loadData(File &f, CChar *path) {
         ext = box;
         lod_center = ext.pos;
         FREPA(parts)
-        if (!parts[i].loadOld0(f)) goto error;
+        if (!parts[i].loadOld0(f))
+            goto error;
     } break;
 
     default:
@@ -1615,7 +1629,8 @@ Bool MeshGroup::saveData(File &f, CChar *path) C {
     f.putMulti(Byte(3), ext); // version
     f.cmpUIntV(meshes.elms());
     FREPA(T)
-    if (!meshes[i].saveData(f, path)) return false;
+    if (!meshes[i].saveData(f, path))
+        return false;
     return f.ok();
 }
 /******************************************************************************/
@@ -1627,7 +1642,8 @@ Bool MeshGroup::loadData(File &f, CChar *path) {
         f >> ext;
         meshes.setNum(f.decUIntV());
         FREPA(T)
-        if (!meshes[i].loadData(f, path)) goto error;
+        if (!meshes[i].loadData(f, path))
+            goto error;
         if (f.ok())
             return true;
     } break;
@@ -1637,7 +1653,8 @@ Bool MeshGroup::loadData(File &f, CChar *path) {
         ext = box;
         meshes.setNum(f.decUIntV());
         FREPA(T)
-        if (!meshes[i].loadData(f, path)) goto error;
+        if (!meshes[i].loadData(f, path))
+            goto error;
         if (f.ok())
             return true;
     } break;
@@ -1665,7 +1682,8 @@ Bool MeshGroup::loadData(File &f, CChar *path) {
         f >> box;
         ext = box;
         FREPA(T)
-        if (!meshes[i].loadData(f, path)) goto error;
+        if (!meshes[i].loadData(f, path))
+            goto error;
         if (f.ok())
             return true;
     } break;
@@ -2020,7 +2038,8 @@ Bool Import(C Str &name, Mesh *mesh, Skeleton *skeleton, MemPtr<XAnimation> anim
                 {
                     C MeshLod &lod = mesh->lod(l);
                     FREPA(lod)
-                    if (Material *m = lod.parts[i].material()()) mesh_mtrls.include(m);
+                    if (Material *m = lod.parts[i].material()())
+                        mesh_mtrls.include(m);
                 }
                 if (materials)
                     FREPA(mesh_mtrls) // create 'XMaterial's

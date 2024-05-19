@@ -10,7 +10,8 @@ static Memc<UInt> VAOs; // list of released VAO's !! must be handled only under 
 Int BoneSplit::realToSplit0(Int bone) C { return Max(0, realToSplit(bone)); }
 Int BoneSplit::realToSplit(Int bone) C {
     REP(bones)
-    if (split_to_real[i] == bone) return i;
+    if (split_to_real[i] == bone)
+        return i;
     return -1;
 }
 /******************************************************************************/

@@ -373,7 +373,8 @@ GuiObj *GUI::objNearest(C Vec2 &pos, C Vec2 &dir, Vec2 &out_pos) C {
             if (gon.nearest.elms()) {
                 if (gon.state == 2) // if start rectangle is covered
                     REPA(gon.nearest)
-                    if (!gon.nearest[i].recalcDo(gon)) gon.nearest.remove(i); // recalc all
+                if (!gon.nearest[i].recalcDo(gon))
+                    gon.nearest.remove(i); // recalc all
 
             again:
                 if (auto *nearest = gon.findNearest()) {
@@ -539,7 +540,8 @@ static void SetWindowButtons(GuiObj &go) {
     if (go.isWindow())
         go.asWindow().setButtons();
     REP(go.childNum())
-    if (GuiObj *child = go.child(i)) SetWindowButtons(*child);
+    if (GuiObj *child = go.child(i))
+        SetWindowButtons(*child);
 }
 GUI &GUI::windowButtonsRight(Bool right) {
     if (_window_buttons_right != right) {

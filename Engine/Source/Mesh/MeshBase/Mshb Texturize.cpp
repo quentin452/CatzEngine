@@ -189,7 +189,7 @@ MeshBase &MeshBase::texMove(C Vec2 &move, Byte uv_index) {
                                                                     : vtx.tex3());
         if (tex)
             REPA(vtx)
-            (*tex++) += move;
+        (*tex++) += move;
     }
     return T;
 }
@@ -200,7 +200,7 @@ MeshBase &MeshBase::texScale(C Vec2 &scale, Byte uv_index) {
                                                                     : vtx.tex3());
         if (tex)
             REPA(vtx)
-            (*tex++) *= scale;
+        (*tex++) *= scale;
     }
     return T;
 }
@@ -213,7 +213,7 @@ MeshBase &MeshBase::texRotate(Flt angle, Byte uv_index) {
         CosSin(cos, sin, angle);
         if (tex)
             REPA(vtx)
-            (*tex++).rotateCosSin(cos, sin);
+        (*tex++).rotateCosSin(cos, sin);
     }
     return T;
 }

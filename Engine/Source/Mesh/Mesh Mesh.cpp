@@ -107,14 +107,16 @@ Int Mesh::variationFind(UInt id) C {
     if (!id)
         return 0; // #0 is default and always 0
     REP(_variations._variations)
-        if (_variations._variation[i].id == id) return i + 1;
+    if (_variations._variation[i].id == id)
+        return i + 1;
     return -1;
 }
 Int Mesh::variationFind(CChar8 *name) C {
     if (!Is(name))
         return 0; // #0 is default and always null
     REP(_variations._variations)
-        if (Equal(_variations.name(i), name)) return i + 1;
+    if (Equal(_variations.name(i), name))
+        return i + 1;
     return -1;
 }
 Int Mesh::variations() C { return _variations._variations + 1; }
@@ -387,7 +389,8 @@ Int Mesh::getDrawLodI() C {
     if (_lods.elms()) {
         Flt dist2 = GetLodDist2(lod_center);
         REPA(_lods)
-            if (dist2 >= _lods[i].dist2) return i + 1; // go from the end because most likely there will be more objects far from camera with higher LOD
+        if (dist2 >= _lods[i].dist2)
+            return i + 1; // go from the end because most likely there will be more objects far from camera with higher LOD
     }
     return 0;
 }
@@ -395,7 +398,8 @@ Int Mesh::getDrawLodI(C Matrix3 &matrix) C {
     if (_lods.elms()) {
         Flt dist2 = GetLodDist2(lod_center, matrix);
         REPA(_lods)
-            if (dist2 >= _lods[i].dist2) return i + 1; // go from the end because most likely there will be more objects far from camera with higher LOD
+        if (dist2 >= _lods[i].dist2)
+            return i + 1; // go from the end because most likely there will be more objects far from camera with higher LOD
     }
     return 0;
 }
@@ -403,7 +407,8 @@ Int Mesh::getDrawLodI(C Matrix &matrix) C {
     if (_lods.elms()) {
         Flt dist2 = GetLodDist2(lod_center, matrix);
         REPA(_lods)
-            if (dist2 >= _lods[i].dist2) return i + 1; // go from the end because most likely there will be more objects far from camera with higher LOD
+        if (dist2 >= _lods[i].dist2)
+            return i + 1; // go from the end because most likely there will be more objects far from camera with higher LOD
     }
     return 0;
 }
@@ -411,7 +416,8 @@ Int Mesh::getDrawLodI(C MatrixM &matrix) C {
     if (_lods.elms()) {
         Flt dist2 = GetLodDist2(lod_center, matrix);
         REPA(_lods)
-            if (dist2 >= _lods[i].dist2) return i + 1; // go from the end because most likely there will be more objects far from camera with higher LOD
+        if (dist2 >= _lods[i].dist2)
+            return i + 1; // go from the end because most likely there will be more objects far from camera with higher LOD
     }
     return 0;
 }
@@ -425,7 +431,8 @@ C MeshLod &Mesh::getDrawLod(Flt dist2) C {
 } // go from the end because most likely there will be more objects far from camera with higher LOD
 Int Mesh::getDrawLodI(Flt dist2) C {
     REPA(_lods)
-        if (dist2 >= _lods[i].dist2) return i + 1;
+    if (dist2 >= _lods[i].dist2)
+        return i + 1;
     return 0;
 } // go from the end because most likely there will be more objects far from camera with higher LOD
 /*Flt Mesh::lodQuality(Int i, Int base)C
@@ -752,8 +759,10 @@ Mesh &Mesh::boneRemap(C CMemPtrN<BoneType, 256> &old_to_new, Bool remap_names) {
         _bone_map.remap(old_to_new);
     return T;
 }
-void Mesh::includeUsedBones(MemPtrN<Bool, 256> bones) C { REP(lods())
-                                                          lod(i).includeUsedBones(bones); }
+void Mesh::includeUsedBones(MemPtrN<Bool, 256> bones) C {
+    REP(lods())
+    lod(i).includeUsedBones(bones);
+}
 void Mesh::setUsedBones(MemPtrN<Bool, 256> bones) C {
     bones.clear();
     includeUsedBones(bones);
@@ -1008,12 +1017,14 @@ Mesh &Mesh::clearSkeleton() {
 }
 Bool Mesh::hasDrawGroup(Int draw_group_index) C {
     REP(lods())
-    if (lod(i).hasDrawGroup(draw_group_index)) return true;
+    if (lod(i).hasDrawGroup(draw_group_index))
+        return true;
     return false;
 }
 Bool Mesh::hasDrawGroupMask(UInt draw_group_mask) C {
     REP(lods())
-    if (lod(i).hasDrawGroupMask(draw_group_mask)) return true;
+    if (lod(i).hasDrawGroupMask(draw_group_mask))
+        return true;
     return false;
 }
 Mesh &Mesh::drawGroupEnum(Enum *e, Bool reset_when_not_found) {

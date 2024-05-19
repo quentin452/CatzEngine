@@ -198,7 +198,9 @@ Bool ImportOBJ(C Str &name, Mesh *mesh, MemPtr<XMaterial> materials, MemPtr<Int>
                             {
                                 Vec cross[3] = {Cross(tri_nu, tri.p[0] - tri.p[1]), Cross(tri_nu, tri.p[1] - tri.p[2]), Cross(tri_nu, tri.p[2] - tri.p[0])};
                                 REPAD(t, fvtx)
-                                if (t < i || t > i + 2) if (Cuts(vpos[fvtx[t].pos], tri, cross)) goto cuts; // if any other vertex intersects with this triangle, then continue
+                                if (t < i || t > i + 2)
+                                    if (Cuts(vpos[fvtx[t].pos], tri, cross))
+                                        goto cuts; // if any other vertex intersects with this triangle, then continue
 
                                 {
                                     FTri &face = group.tri.New();
@@ -239,7 +241,8 @@ Bool ImportOBJ(C Str &name, Mesh *mesh, MemPtr<XMaterial> materials, MemPtr<Int>
             REPAO(materials).flip_normal_y = true;
 
         REPA(groups)
-        if (!groups[i].faces()) groups.remove(i, true); // remove empty groups
+        if (!groups[i].faces())
+            groups.remove(i, true); // remove empty groups
 
         // create mesh
         if (mesh) {

@@ -2008,7 +2008,9 @@ Int CutsEdgeBall(C Vec &edge_start, C Vec &edge_end, C Ball &ball, Vec *contact_
     if (Int hit = CutsLineBall(edge_start, dir, ball, &c[0], &c[1])) {
         Bool in[2] = {(hit >= 1), (hit >= 2)};
         REP(2)
-        if (in[i]) if (DistPointPlane(c[i], edge_start, dir) < 0 || DistPointPlane(c[i], edge_end, dir) > 0) in[i] = false;
+        if (in[i])
+            if (DistPointPlane(c[i], edge_start, dir) < 0 || DistPointPlane(c[i], edge_end, dir) > 0)
+                in[i] = false;
         if (in[0] && in[1]) {
             if (contact_a)
                 *contact_a = c[0];

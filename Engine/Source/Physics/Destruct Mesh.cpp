@@ -97,7 +97,8 @@ DestructMesh &DestructMesh::create(Mesh &mesh, Int cuts, C MaterialPtr &material
             }
         }
         REPA(temp[cur])
-        if (!temp[cur][i].is()) temp[cur].remove(i); // remove empty meshes
+        if (!temp[cur][i].is())
+            temp[cur].remove(i); // remove empty meshes
     }
 
     // separate mesh parts which aren't physically connected
@@ -149,9 +150,11 @@ DestructMesh &DestructMesh::create(Mesh &mesh, Int cuts, C MaterialPtr &material
 
                 // remove empty parts
                 REPA(connected_mesh)
-                if (!connected_mesh.parts[i].is()) connected_mesh.remove(i, false);
+                if (!connected_mesh.parts[i].is())
+                    connected_mesh.remove(i, false);
                 REPA(unknown_mesh)
-                if (!unknown_mesh.parts[i].is()) unknown_mesh.remove(i, false);
+                if (!unknown_mesh.parts[i].is())
+                    unknown_mesh.remove(i, false);
 
                 // put them into the processing container
                 Swap(src, connected_mesh);           // connected is processed so we can set it back
@@ -162,7 +165,9 @@ DestructMesh &DestructMesh::create(Mesh &mesh, Int cuts, C MaterialPtr &material
 
     // put meshes into the right container
     FREPA(temp[cur])
-    if (temp[cur][i].is()) if (!_parts.New().create(temp[cur][i], phys_vtx_limit)) _parts.removeLast();
+    if (temp[cur][i].is())
+        if (!_parts.New().create(temp[cur][i], phys_vtx_limit))
+            _parts.removeLast();
 
     // create joints
     Memc<MeshBase> phys;
@@ -236,7 +241,8 @@ void DestructMesh::drawMesh(Int highlight_part) C {
             SetHighlight(RED);
         else
             REPAD(j, _joints)
-            if ((_joints[j].a == i || _joints[j].b == i) && (_joints[j].a == highlight_part || _joints[j].b == highlight_part)) SetHighlight(BLUE);
+        if ((_joints[j].a == i || _joints[j].b == i) && (_joints[j].a == highlight_part || _joints[j].b == highlight_part))
+            SetHighlight(BLUE);
         _parts[i].mesh.draw(m);
         SetHighlight();
     }

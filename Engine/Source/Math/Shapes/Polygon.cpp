@@ -401,7 +401,9 @@ void Triangulate(C CMemPtr<Vec> &poly, MeshBase &mesh, Bool convex) {
                         if (Dot(*normal, tri_nu) > 0) {
                             Vec cross[3] = {Cross(tri_nu, tri.p[0] - tri.p[1]), Cross(tri_nu, tri.p[1] - tri.p[2]), Cross(tri_nu, tri.p[2] - tri.p[0])};
                             REPAD(t, temp)
-                            if (t < i || t > i + 2) if (Cuts(pos[temp[t]], tri, cross)) goto cuts;
+                            if (t < i || t > i + 2)
+                                if (Cuts(pos[temp[t]], tri, cross))
+                                    goto cuts;
                             {
                                 Int t = mesh.tri.elms();
                                 mesh.tri._elms++;
@@ -463,7 +465,9 @@ void Triangulate(C CMemPtr<VtxFull> &poly, MeshBase &mesh, MESH_FLAG flag_and, B
                         if (Dot(*normal, tri_nu) > 0) {
                             Vec cross[3] = {Cross(tri_nu, tri.p[0] - tri.p[1]), Cross(tri_nu, tri.p[1] - tri.p[2]), Cross(tri_nu, tri.p[2] - tri.p[0])};
                             REPAD(t, temp)
-                            if (t < i || t > i + 2) if (Cuts(pos[temp[t]], tri, cross)) goto cuts;
+                            if (t < i || t > i + 2)
+                                if (Cuts(pos[temp[t]], tri, cross))
+                                    goto cuts;
                             {
                                 Int t = mesh.tri.elms();
                                 mesh.tri._elms++;
@@ -543,7 +547,9 @@ void Triangulate(C CMemPtr<Memc<Vec>> &polys, MeshBase &mesh, Flt weld_pos_eps, 
                         if (Dot(nrm, tri_nu) > 0) {
                             Vec cross[3] = {Cross(tri_nu, tri.p[0] - tri.p[1]), Cross(tri_nu, tri.p[1] - tri.p[2]), Cross(tri_nu, tri.p[2] - tri.p[0])};
                             REPAD(t, temp)
-                            if (t < i || t > i + 2) if (Cuts(pos[temp[t]], tri, cross)) goto cuts;
+                            if (t < i || t > i + 2)
+                                if (Cuts(pos[temp[t]], tri, cross))
+                                    goto cuts;
                             {
                                 Int t = mesh.tri.elms();
                                 mesh.tri._elms++;
@@ -627,7 +633,9 @@ void Triangulate(C CMemPtr<Memc<VtxFull>> &polys, MeshBase &mesh, MESH_FLAG flag
                         if (Dot(nrm, tri_nu) > 0) {
                             Vec cross[3] = {Cross(tri_nu, tri.p[0] - tri.p[1]), Cross(tri_nu, tri.p[1] - tri.p[2]), Cross(tri_nu, tri.p[2] - tri.p[0])};
                             REPAD(t, temp)
-                            if (t < i || t > i + 2) if (Cuts(pos[temp[t]], tri, cross)) goto cuts;
+                            if (t < i || t > i + 2)
+                                if (Cuts(pos[temp[t]], tri, cross))
+                                    goto cuts;
                             {
                                 Int t = mesh.tri.elms();
                                 mesh.tri._elms++;

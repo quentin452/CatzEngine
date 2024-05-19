@@ -113,29 +113,30 @@ void MenuBar::operator()(C Str &command, Bool on, SET_MODE mode) {
     CChar *start = _GetStart(command);
     if (Is(start))
         REP(elms())
-        if (Equal(elm(i).name, start)) {
-            DEBUG_BYTE_LOCK(_used);
-            elm(i).menu(_GetStartNot(command), on, mode);
-            break;
-        }
+    if (Equal(elm(i).name, start)) {
+        DEBUG_BYTE_LOCK(_used);
+        elm(i).menu(_GetStartNot(command), on, mode);
+        break;
+    }
 }
 Bool MenuBar::operator()(C Str &command) C {
     CChar *start = _GetStart(command);
     if (Is(start))
         REP(elms())
-        if (Equal(elm(i).name, start)) return elm(i).menu(_GetStartNot(command));
+    if (Equal(elm(i).name, start))
+        return elm(i).menu(_GetStartNot(command));
     return false;
 }
 Bool MenuBar::exists(C Str &command) C {
     CChar *start = _GetStart(command);
     if (Is(start))
         REP(elms())
-        if (Equal(elm(i).name, start)) {
-            start = _GetStartNot(command);
-            if (Is(start))
-                return elm(i).menu.exists(start);
-            return true;
-        }
+    if (Equal(elm(i).name, start)) {
+        start = _GetStartNot(command);
+        if (Is(start))
+            return elm(i).menu.exists(start);
+        return true;
+    }
     return false;
 }
 /******************************************************************************/
@@ -143,21 +144,21 @@ MenuBar &MenuBar::setCommand(C Str &command, Bool visible, Bool enabled) {
     CChar *start = _GetStart(command);
     if (Is(start))
         REP(elms())
-        if (Equal(elm(i).name, start)) {
-            start = _GetStartNot(command);
-            if (!Is(start)) {
-                DEBUG_BYTE_LOCK(_used);
-                if (enabled == elm(i).menu.disabled())
-                    elm(i).menu.enabled(enabled); // toggle if needed
-                if (visible == elm(i).hidden) {
-                    elm(i).hidden ^= 1;
-                    if (elm(i).menu.contains(Gui.menu()))
-                        activate();
-                    setElms();
-                }
+    if (Equal(elm(i).name, start)) {
+        start = _GetStartNot(command);
+        if (!Is(start)) {
+            DEBUG_BYTE_LOCK(_used);
+            if (enabled == elm(i).menu.disabled())
+                elm(i).menu.enabled(enabled); // toggle if needed
+            if (visible == elm(i).hidden) {
+                elm(i).hidden ^= 1;
+                if (elm(i).menu.contains(Gui.menu()))
+                    activate();
+                setElms();
             }
-            break;
         }
+        break;
+    }
     return T;
 }
 /******************************************************************************/
@@ -203,10 +204,10 @@ void MenuBar::update(C GuiPC &gpc) {
                         deactivate();
                     else // if already activated, then deactivate
                         FREP(elms())
-                        if (!elm(i).hidden) {
-                            _push = i;
-                            break;
-                        } // find first visible and push it
+                    if (!elm(i).hidden) {
+                        _push = i;
+                        break;
+                    } // find first visible and push it
                 }
         }
 
@@ -271,10 +272,10 @@ void MenuBar::update(C GuiPC &gpc) {
         _menu_prev = -1;
         if (Gui.menu())
             REP(elms())
-            if (elm(i).menu.contains(Gui.menu())) {
-                _menu_prev = i;
-                break;
-            }
+        if (elm(i).menu.contains(Gui.menu())) {
+            _menu_prev = i;
+            break;
+        }
     }
 }
 /******************************************************************************/

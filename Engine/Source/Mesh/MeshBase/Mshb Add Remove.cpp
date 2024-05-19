@@ -829,31 +829,32 @@ MeshBase &MeshBase::weldInlineEdges(Flt cos_edge, Flt cos_vtx, Bool z_test) {
 
     // edge is
     FREPA(vtx)
-    if (vi[i].edges == 2) if (CosBetween(vtx.pos(vi[i].vtx[0]).xy, vtx.pos(i).xy,
-                                         vtx.pos(vi[i].vtx[1]).xy) <= cos_edge) {
-        if (cos_vtx > -1 && vtx.nrm() && Dot(vtx.nrm(vi[i].vtx[0]).xy, vtx.nrm(vi[i].vtx[1]).xy) < cos_vtx)
-            continue;
-        if (z_test) {
-            Flt s = LerpR(vtx.pos(vi[i].vtx[0]).xy, vtx.pos(vi[i].vtx[1]).xy, vtx.pos(i).xy);
-            if (!Equal(Lerp(vtx.pos(vi[i].vtx[0]).z, vtx.pos(vi[i].vtx[1]).z, s), vtx.pos(i).z))
+    if (vi[i].edges == 2)
+        if (CosBetween(vtx.pos(vi[i].vtx[0]).xy, vtx.pos(i).xy,
+                       vtx.pos(vi[i].vtx[1]).xy) <= cos_edge) {
+            if (cos_vtx > -1 && vtx.nrm() && Dot(vtx.nrm(vi[i].vtx[0]).xy, vtx.nrm(vi[i].vtx[1]).xy) < cos_vtx)
                 continue;
-        }
+            if (z_test) {
+                Flt s = LerpR(vtx.pos(vi[i].vtx[0]).xy, vtx.pos(vi[i].vtx[1]).xy, vtx.pos(i).xy);
+                if (!Equal(Lerp(vtx.pos(vi[i].vtx[0]).z, vtx.pos(vi[i].vtx[1]).z, s), vtx.pos(i).z))
+                    continue;
+            }
 
-        VtxEdgeLink &v = vi[i];
-        Int l_vtx = v.vtx[0],
-            r_vtx = v.vtx[1],
-            l_edge = v.edge[0],
-            r_edge = v.edge[1];
-        edge_is[r_edge] = false;
-        p = edge.ind(l_edge).c;
-        p[(p[0] != i)] = r_vtx;
-        p = vi[l_vtx].vtx;
-        p[(p[0] != i)] = r_vtx;
-        p = vi[r_vtx].vtx;
-        p[(p[0] != i)] = l_vtx;
-        p = vi[r_vtx].edge;
-        p[(p[0] != r_edge)] = l_edge;
-    }
+            VtxEdgeLink &v = vi[i];
+            Int l_vtx = v.vtx[0],
+                r_vtx = v.vtx[1],
+                l_edge = v.edge[0],
+                r_edge = v.edge[1];
+            edge_is[r_edge] = false;
+            p = edge.ind(l_edge).c;
+            p[(p[0] != i)] = r_vtx;
+            p = vi[l_vtx].vtx;
+            p[(p[0] != i)] = r_vtx;
+            p = vi[r_vtx].vtx;
+            p[(p[0] != i)] = l_vtx;
+            p = vi[r_vtx].edge;
+            p[(p[0] != r_edge)] = l_edge;
+        }
 
     // create mesh
     Int edges = CountIs(edge_is);
@@ -994,10 +995,12 @@ Bool MeshBase::weldCoplanarFaces(Flt cos_face, Flt cos_vtx, Bool safe, Flt max_f
                         Int face2 = af1[a];
                         if (face2 & SIGN_BIT) {
                             REPD(j, 4)
-                            if (quad.adjFace(face2 ^ SIGN_BIT).c[j] == face1) quad.adjFace(face2 ^ SIGN_BIT).c[j] = i;
+                            if (quad.adjFace(face2 ^ SIGN_BIT).c[j] == face1)
+                                quad.adjFace(face2 ^ SIGN_BIT).c[j] = i;
                         } else {
                             REPD(j, 3)
-                            if (tri.adjFace(face2).c[j] == face1) tri.adjFace(face2).c[j] = i;
+                            if (tri.adjFace(face2).c[j] == face1)
+                                tri.adjFace(face2).c[j] = i;
                         }
                     }
 
@@ -1140,10 +1143,12 @@ Bool MeshBase::weldCoplanarFaces(Flt cos_face, Flt cos_vtx, Bool safe, Flt max_f
                         {
                             if (face2 & SIGN_BIT) {
                                 REPD(j, 4)
-                                if (quad.adjFace(face2 ^ SIGN_BIT).c[j] == face1) quad.adjFace(face2 ^ SIGN_BIT).c[j] = (i ^ SIGN_BIT);
+                                if (quad.adjFace(face2 ^ SIGN_BIT).c[j] == face1)
+                                    quad.adjFace(face2 ^ SIGN_BIT).c[j] = (i ^ SIGN_BIT);
                             } else {
                                 REPD(j, 3)
-                                if (tri.adjFace(face2).c[j] == face1) tri.adjFace(face2).c[j] = (i ^ SIGN_BIT);
+                                if (tri.adjFace(face2).c[j] == face1)
+                                    tri.adjFace(face2).c[j] = (i ^ SIGN_BIT);
                             }
                         }
                     }

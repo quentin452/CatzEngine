@@ -174,15 +174,16 @@ void Region::setRectAndButtons() {
 }
 static void ChildrenSize(Vec2 &size, C GuiObjChildren &children) {
     REPA(children)
-    if (C GuiObj *c = children[i]) if (c->visible()) {
-        MAX(size.x, GuiMaxX(c->rect()));
-        MAX(size.y, GuiMaxY(c->rect()));
-        if (c->type() == GO_TABS) {
-            C Tabs &tabs = c->asTabs();
-            if (InRange(tabs(), tabs))
-                ChildrenSize(size, tabs.tab(tabs())._children);
+    if (C GuiObj *c = children[i])
+        if (c->visible()) {
+            MAX(size.x, GuiMaxX(c->rect()));
+            MAX(size.y, GuiMaxY(c->rect()));
+            if (c->type() == GO_TABS) {
+                C Tabs &tabs = c->asTabs();
+                if (InRange(tabs(), tabs))
+                    ChildrenSize(size, tabs.tab(tabs())._children);
+            }
         }
-    }
 }
 Vec2 Region::childrenSize() C {
     Vec2 size = 0;

@@ -392,9 +392,11 @@ Bool PanelImageParams::save(File &f) C {
       << color << color_top << color_bottom << color_left << color_right << outer_glow_color << inner_glow_color
       << images_size << top_height << bottom_height << left_right_width << top_corner_width << bottom_corner_width;
     FREPA(lights)
-    if (!lights[i].save(f)) return false;
+    if (!lights[i].save(f))
+        return false;
     FREPA(sections)
-    if (!sections[i].save(f)) return false;
+    if (!sections[i].save(f))
+        return false;
     return f.ok();
 }
 Bool PanelImageParams::load(File &f) {
@@ -402,9 +404,11 @@ Bool PanelImageParams::load(File &f) {
     case 2: {
         f >> cut_left >> cut_right >> cut_bottom >> cut_top >> cut_corners >> force_uniform_stretch >> resolution >> width >> height >> round_corners >> cut_corner_slope >> cut_corner_amount >> left_slope >> right_slope >> border_size >> outer_glow_spread >> outer_glow_radius >> inner_glow_radius >> light_ambient >> depth >> round_depth >> inner_distance >> shadow_radius >> shadow_opacity >> shadow_spread >> max_side_stretch >> min_size >> smooth_depth >> extend >> extend_inner_padd >> color >> color_top >> color_bottom >> color_left >> color_right >> outer_glow_color >> inner_glow_color >> images_size >> top_height >> bottom_height >> left_right_width >> top_corner_width >> bottom_corner_width;
         FREPA(lights)
-        if (!lights[i].load(f)) goto error;
+        if (!lights[i].load(f))
+            goto error;
         FREPA(sections)
-        if (!sections[i].load(f)) goto error;
+        if (!sections[i].load(f))
+            goto error;
         if (f.ok())
             return true;
     } break;
@@ -412,9 +416,11 @@ Bool PanelImageParams::load(File &f) {
     case 1: {
         f >> cut_left >> cut_right >> cut_bottom >> cut_top >> cut_corners >> force_uniform_stretch >> resolution >> width >> height >> round_corners >> cut_corner_slope >> cut_corner_amount >> left_slope >> right_slope >> border_size >> outer_glow_spread >> outer_glow_radius >> inner_glow_radius >> light_ambient >> depth >> round_depth >> inner_distance >> shadow_radius >> shadow_opacity >> shadow_spread >> max_side_stretch >> smooth_depth >> extend >> extend_inner_padd >> color >> color_top >> color_bottom >> color_left >> color_right >> outer_glow_color >> inner_glow_color >> images_size >> top_height >> bottom_height >> left_right_width >> top_corner_width >> bottom_corner_width;
         FREPA(lights)
-        if (!lights[i].load(f)) goto error;
+        if (!lights[i].load(f))
+            goto error;
         FREPA(sections)
-        if (!sections[i].load(f)) goto error;
+        if (!sections[i].load(f))
+            goto error;
         min_size.zero();
         if (f.ok())
             return true;
@@ -423,9 +429,11 @@ Bool PanelImageParams::load(File &f) {
     case 0: {
         f >> cut_left >> cut_right >> cut_bottom >> cut_top >> cut_corners >> force_uniform_stretch >> resolution >> width >> height >> round_corners >> cut_corner_slope >> cut_corner_amount >> left_slope >> right_slope >> border_size >> outer_glow_spread >> outer_glow_radius >> inner_glow_radius >> light_ambient >> depth >> round_depth >> inner_distance >> shadow_radius >> shadow_opacity >> shadow_spread >> max_side_stretch >> smooth_depth >> extend >> color >> color_top >> color_bottom >> color_left >> color_right >> outer_glow_color >> inner_glow_color >> images_size >> top_height >> bottom_height >> left_right_width >> top_corner_width >> bottom_corner_width;
         FREPA(lights)
-        if (!lights[i].load(f)) goto error;
+        if (!lights[i].load(f))
+            goto error;
         FREPA(sections)
-        if (!sections[i].load(f)) goto error;
+        if (!sections[i].load(f))
+            goto error;
         min_size.zero();
         extend_inner_padd.zero();
         if (f.ok())
@@ -443,9 +451,11 @@ void PanelImage::zero() {
     _same_x = _padd_any = false;
     REPAO(_force_uniform_stretch) = false;
     REPAD(y, _size_x)
-    REPAD(x, _size_x[y]) _size_x[y][x] = 0;
+    REPAD(x, _size_x[y])
+    _size_x[y][x] = 0;
     REPAD(y, _tex_x)
-    REPAD(x, _tex_x[y]) _tex_x[y][x] = 0;
+    REPAD(x, _tex_x[y])
+    _tex_x[y][x] = 0;
     REPAO(_size_y) = 0;
     REPAO(_tex_y) = 0;
     _min_size.zero();
@@ -619,10 +629,10 @@ struct PanelImageCreate {
 
             if (params.cut_top)
                 REPD(x, 2)
-                corner_line[0][x].on = false;
+            corner_line[0][x].on = false;
             if (params.cut_bottom)
                 REPD(x, 2)
-                corner_line[1][x].on = false;
+            corner_line[1][x].on = false;
             if (params.cut_left) {
                 REPD(y, 2)
                 corner_line[y][0].on = false;
@@ -696,7 +706,8 @@ struct PanelImageCreate {
 
             // set to tex
             REPAD(y, panel_image._tex_x)
-            REPAD(x, panel_image._tex_x[y]) panel_image._tex_x[y][x] = (x ? image_size.x - tex : tex);
+            REPAD(x, panel_image._tex_x[y])
+            panel_image._tex_x[y][x] = (x ? image_size.x - tex : tex);
             panel_image._tex_y[0] = tex_top;
             panel_image._tex_y[1] = image_size.y - tex;
 
@@ -852,17 +863,19 @@ struct PanelImageCreate {
 
             // if any section is empty, then copy from another, so we can use '_same_x' optimization
             REPAD(i, top_mid_bottom)
-            if (!top_mid_bottom[i])                             // empty
-                REPAD(j, top_mid_bottom) if (top_mid_bottom[j]) // valid
-            {
-                Copy(panel_image._tex_x[i], panel_image._tex_x[j]);
-                break;
-            } // copy to empty from valid, stop
+            if (!top_mid_bottom[i]) // empty
+                REPAD(j, top_mid_bottom)
+                if (top_mid_bottom[j]) // valid
+                {
+                    Copy(panel_image._tex_x[i], panel_image._tex_x[j]);
+                    break;
+                } // copy to empty from valid, stop
 
             max_scale = Max(params.max_side_stretch, 0);
             panel_image._same_x = true;
             REPAD(x, panel_image._tex_x[0])
-            if (!Equal(panel_image._tex_x[0][x], panel_image._tex_x[1][x]) || !Equal(panel_image._tex_x[1][x], panel_image._tex_x[2][x])) panel_image._same_x = false;
+            if (!Equal(panel_image._tex_x[0][x], panel_image._tex_x[1][x]) || !Equal(panel_image._tex_x[1][x], panel_image._tex_x[2][x]))
+                panel_image._same_x = false;
             panel_image._tex_left_top = 0;
             panel_image._tex_right_bottom = 1;
 
@@ -1490,7 +1503,8 @@ struct PanelImageCreate {
             Vec2 scale = Vec2(old_size) / image_size;
 
             REPAD(y, panel_image._tex_x)
-            REPAD(x, panel_image._tex_x[y]) ScaleTex(panel_image._tex_x[y][x], scale.x);
+            REPAD(x, panel_image._tex_x[y])
+            ScaleTex(panel_image._tex_x[y][x], scale.x);
             REPAD(y, panel_image._tex_y)
             ScaleTex(panel_image._tex_y[y], scale.y);
             ScaleTex(panel_image._tex_left_top, scale);
@@ -1522,13 +1536,13 @@ void PanelImage::create(C PanelImageParams &params, Image *depth_map, Int super_
             threads->process1(pic.image_size.y, SetDepth, pic);
         else
             REPD(y, pic.image_size.y)
-            pic.setDepthY(y);
+        pic.setDepthY(y);
         pic.afterDepth();
         if (threads)
             threads->process1(pic.image_size.y, SetColor, pic);
         else
             REPD(y, pic.image_size.y)
-            pic.setColorY(y);
+        pic.setColorY(y);
         pic.afterColor(filter);
     }
 }
@@ -1753,7 +1767,7 @@ void PanelImage::draw(C Color &color, C Color &color_add, C Rect &rect) C {
 
         if (image.partial())
             REP(vtxs)
-            v[i].tex *= image._part.xy;
+        v[i].tex *= image._part.xy;
 
         VI.flushIndexed(_same_x ? IndBufPanel : IndBufPanelEx, 3 * 3 * 2 * 3);
     }
@@ -1918,7 +1932,7 @@ void PanelImage::drawVertical(C Color &color, C Color &color_add, C Rect &rect) 
 
         if (image.partial())
             REP(vtxs)
-            v[i].tex *= image._part.xy;
+        v[i].tex *= image._part.xy;
 
         VI.flushIndexed(_same_x ? IndBufPanel : IndBufPanelEx, 3 * 3 * 2 * 3);
     }
@@ -2082,7 +2096,7 @@ void PanelImage::drawBorders(C Color &color, C Color &color_add, C Rect &rect) C
 
         if (image.partial())
             REP(vtxs)
-            v[i].tex *= image._part.xy;
+        v[i].tex *= image._part.xy;
 
         VI.flushIndexed(_same_x ? IndBufPanel : IndBufPanelEx, (3 * 3 - 1) * 2 * 3);
     }
@@ -2327,7 +2341,7 @@ void PanelImage::drawFrac(C Color &color, C Color &color_add, C Rect &rect, Flt 
 
         if (image.partial())
             REP(vtxs)
-            v[i].tex *= image._part.xy;
+        v[i].tex *= image._part.xy;
 
         VI.flushIndexed(_same_x ? IndBufPanel : IndBufPanelEx, 3 * 3 * 2 * 3);
     }
@@ -2542,7 +2556,7 @@ void PanelImage::drawFrac2(C Color &color, C Color &color_add, C Rect &rect, Flt
 
         if (image.partial())
             REP(vtxs)
-            v[i].tex *= image._part.xy;
+        v[i].tex *= image._part.xy;
 
         VI.flushIndexed(_same_x ? IndBufPanel : IndBufPanelEx, 3 * 3 * 2 * 3);
     }
@@ -2734,7 +2748,7 @@ void PanelImage::drawVerticalFrac(C Color &color, C Color &color_add, C Rect &re
 
         if (image.partial())
             REP(vtxs)
-            v[i].tex *= image._part.xy;
+        v[i].tex *= image._part.xy;
 
         VI.flushIndexed(_same_x ? IndBufPanel : IndBufPanelEx, 3 * 3 * 2 * 3);
     }

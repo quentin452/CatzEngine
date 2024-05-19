@@ -308,14 +308,16 @@ struct DAE {
             if (Equal(id, name))
                 return this;
             REPA(nodes)
-            if (Node *node = nodes[i].findNode(name)) return node;
+            if (Node *node = nodes[i].findNode(name))
+                return node;
             return null;
         }
         Bool hasAnim() {
             if (channels.elms()) {
                 REPA(channels)
-                if (channels[i]->anyDifferent()) return true; // check if any keyframes are different from each other
-                animate(0);                                   // animate to first frame
+                if (channels[i]->anyDifferent())
+                    return true; // check if any keyframes are different from each other
+                animate(0);      // animate to first frame
                 if (!Equal(local_matrix, anim_matrix, EPS_ANIM_ANGLE, EPS_ANIM_POS))
                     return true; // check if first frame is animated (not the same as local matrix)
             }
@@ -510,12 +512,14 @@ static void Import(Matrix &matrix, XmlNode &node) {
 /******************************************************************************/
 static DAE::Source *FindSource(Memb<DAE::Source> &source, CChar *name) {
     REPA(source)
-    if (Equal(source[i].id, name)) return &source[i];
+    if (Equal(source[i].id, name))
+        return &source[i];
     return null;
 }
 static DAE::Sampler *FindSampler(Memb<DAE::Sampler> &sampler, CChar *name) {
     REPA(sampler)
-    if (Equal(sampler[i].id, name)) return &sampler[i];
+    if (Equal(sampler[i].id, name))
+        return &sampler[i];
     return null;
 }
 /******************************************************************************/
@@ -523,7 +527,8 @@ static DAE::Sampler *FindSampler(Memb<DAE::Sampler> &sampler, CChar *name) {
 /******************************************************************************/
 Int DAE::findMaterial(CChar *name) {
     REPA(materials)
-    if (Equal(materials[i].id, name)) return i;
+    if (Equal(materials[i].id, name))
+        return i;
     return -1;
 }
 Int DAE::findMaterial(CChar *symbol, Memb<InstanceMaterial> &im) {
@@ -537,22 +542,26 @@ Int DAE::findMaterial(CChar *symbol, Memb<InstanceMaterial> &im) {
 }
 DAE::Image *DAE::findImage(CChar *name) {
     REPA(images)
-    if (Equal(images[i].id, name)) return &images[i];
+    if (Equal(images[i].id, name))
+        return &images[i];
     return null;
 }
 DAE::Geometry *DAE::findGeometry(CChar *name) {
     REPA(geometries)
-    if (Equal(geometries[i].id, name)) return &geometries[i];
+    if (Equal(geometries[i].id, name))
+        return &geometries[i];
     return null;
 }
 DAE::Controller *DAE::findController(CChar *name) {
     REPA(controllers)
-    if (Equal(controllers[i].id, name)) return &controllers[i];
+    if (Equal(controllers[i].id, name))
+        return &controllers[i];
     return null;
 }
 DAE::Node *DAE::findNode(CChar *name) {
     REPA(visual_scenes)
-    REPAD(j, visual_scenes[i].nodes) if (Node *node = visual_scenes[i].nodes[j].findNode(name)) return node;
+    REPAD(j, visual_scenes[i].nodes)
+    if (Node *node = visual_scenes[i].nodes[j].findNode(name)) return node;
     return null;
 }
 /******************************************************************************/
@@ -667,10 +676,10 @@ void DAE::NewParam::import(XmlNode &node, Memb<NewParam> &param, DAE &dae) {
         if (XmlNode *s = n->findNode("source"))
             if (s->data.elms())
                 REPA(param)
-                if (param[i].sid == s->data[0]) {
-                    image_id = param[i].image_id;
-                    break;
-                }
+    if (param[i].sid == s->data[0]) {
+        image_id = param[i].image_id;
+        break;
+    }
 }
 void DAE::Effect::import(XmlNode &node, DAE &dae) {
     if (XmlParam *id = node.findParam("id"))
@@ -680,7 +689,8 @@ void DAE::Effect::import(XmlNode &node, DAE &dae) {
 
     if (XmlNode *n = node.findNode("profile_COMMON")) {
         FREPA(n->nodes)
-        if (n->nodes[i].name == "newparam") param.New().import(n->nodes[i], param, dae);
+        if (n->nodes[i].name == "newparam")
+            param.New().import(n->nodes[i], param, dae);
         if (XmlNode *technique = n->findNode("technique")) {
             XmlNode *sub = technique->findNode("blinn");
             if (!sub)
@@ -799,10 +809,10 @@ void DAE::Input::import(XmlNode &node, Memb<Source> &source, Mesh *mesh) {
         Str s = SkipStart(src->value, '#');
         if (semantic == VERTEX && mesh)
             REPA(mesh->vertices)
-            if (Equal(s, mesh->vertices[i].id)) {
-                T.vertices = &mesh->vertices[i];
-                break;
-            }
+        if (Equal(s, mesh->vertices[i].id)) {
+            T.vertices = &mesh->vertices[i];
+            break;
+        }
         if (!T.source)
             T.source = FindSource(source, s);
     }
@@ -816,7 +826,8 @@ void DAE::Vertices::import(XmlNode &node, Mesh &mesh) {
         T.id = id->asText();
 
     FREPA(node.nodes)
-    if (node.nodes[i].name == "input") inputs.New().import(node.nodes[i], mesh.source, &mesh);
+    if (node.nodes[i].name == "input")
+        inputs.New().import(node.nodes[i], mesh.source, &mesh);
 }
 void DAE::Triangles::import(XmlNode &node, Mesh &mesh, DAE &dae) {
     if (XmlParam *material = node.findParam("material"))
@@ -825,7 +836,8 @@ void DAE::Triangles::import(XmlNode &node, Mesh &mesh, DAE &dae) {
     if (XmlNode *p = node.findNode("p"))
         Import(T.p, *p);
     FREPA(node.nodes)
-    if (node.nodes[i].name == "input") inputs.New().import(node.nodes[i], mesh.source, &mesh);
+    if (node.nodes[i].name == "input")
+        inputs.New().import(node.nodes[i], mesh.source, &mesh);
 }
 void DAE::PolyList::import(XmlNode &node, Mesh &mesh, DAE &dae) {
     if (XmlParam *material = node.findParam("material"))
@@ -836,7 +848,8 @@ void DAE::PolyList::import(XmlNode &node, Mesh &mesh, DAE &dae) {
     if (XmlNode *vcount = node.findNode("vcount"))
         Import(T.vcount, *vcount);
     FREPA(node.nodes)
-    if (node.nodes[i].name == "input") inputs.New().import(node.nodes[i], mesh.source, &mesh);
+    if (node.nodes[i].name == "input")
+        inputs.New().import(node.nodes[i], mesh.source, &mesh);
 }
 void DAE::Polygons::import(XmlNode &node, Mesh &mesh, DAE &dae) {
     if (XmlParam *material = node.findParam("material"))
@@ -872,11 +885,13 @@ void DAE::Geometry::import(XmlNode &node, DAE &dae) {
         T.name = name->asText();
 
     FREPA(node.nodes)
-    if (node.nodes[i].name == "mesh") mesh.New().import(node.nodes[i], dae);
+    if (node.nodes[i].name == "mesh")
+        mesh.New().import(node.nodes[i], dae);
 }
 void DAE::Joint::import(XmlNode &node, Memb<Source> &source) {
     FREPA(node.nodes)
-    if (node.nodes[i].name == "input") inputs.New().import(node.nodes[i], source);
+    if (node.nodes[i].name == "input")
+        inputs.New().import(node.nodes[i], source);
 }
 void DAE::VertexWeights::import(XmlNode &node, Memb<Source> &source) {
     if (XmlNode *v = node.findNode("v"))
@@ -884,17 +899,19 @@ void DAE::VertexWeights::import(XmlNode &node, Memb<Source> &source) {
     if (XmlNode *vcount = node.findNode("vcount"))
         Import(T.vcount, *vcount);
     FREPA(node.nodes)
-    if (node.nodes[i].name == "input") inputs.New().import(node.nodes[i], source);
+    if (node.nodes[i].name == "input")
+        inputs.New().import(node.nodes[i], source);
 
     REPA(inputs)
-    if (inputs[i].source) switch (inputs[i].semantic) {
-    case JOINT:
-        joint = &inputs[i];
-        break;
-    case WEIGHT:
-        weight = &inputs[i];
-        break;
-    }
+    if (inputs[i].source)
+        switch (inputs[i].semantic) {
+        case JOINT:
+            joint = &inputs[i];
+            break;
+        case WEIGHT:
+            weight = &inputs[i];
+            break;
+        }
 }
 void DAE::Skin::import(XmlNode &node, DAE &dae) {
     if (XmlParam *source = node.findParam("source"))
@@ -916,21 +933,23 @@ void DAE::Skin::import(XmlNode &node, DAE &dae) {
     REPA(joint) {
         Joint &joint = T.joint[i];
         REPA(joint.inputs)
-        if (joint.inputs[i].source) switch (joint.inputs[i].semantic) {
-        case JOINT:
-            name = joint.inputs[i].source;
-            break;
-        case INV_BIND_MATRIX:
-            matrix = joint.inputs[i].source;
-            break;
-        }
+        if (joint.inputs[i].source)
+            switch (joint.inputs[i].semantic) {
+            case JOINT:
+                name = joint.inputs[i].source;
+                break;
+            case INV_BIND_MATRIX:
+                matrix = joint.inputs[i].source;
+                break;
+            }
     }
 }
 void DAE::Controller::import(XmlNode &node, DAE &dae) {
     if (XmlParam *id = node.findParam("id"))
         T.id = id->asText();
     FREPA(node.nodes)
-    if (node.nodes[i].name == "skin") skin.New().import(node.nodes[i], dae);
+    if (node.nodes[i].name == "skin")
+        skin.New().import(node.nodes[i], dae);
 }
 void DAE::Controller::linkSkin(DAE &dae) {
     FREPA(skin) {
@@ -1035,18 +1054,19 @@ void DAE::VisualScene::import(XmlNode &node, DAE &dae) {
 
     if (XmlNode *extra = node.findNode("extra"))
         FREPA(extra->nodes)
-        if (extra->nodes[i].name == "technique") {
-            XmlNode &technique = extra->nodes[i];
-            if (XmlNode *end_time = technique.findNode("end_time")) {
-                Flt time;
-                Import(time, *end_time);
-                MAX(dae.force_duration, time);
-            }
-            if (XmlNode *frame_rate = technique.findNode("frame_rate"))
-                Import(dae.fps, *frame_rate);
+    if (extra->nodes[i].name == "technique") {
+        XmlNode &technique = extra->nodes[i];
+        if (XmlNode *end_time = technique.findNode("end_time")) {
+            Flt time;
+            Import(time, *end_time);
+            MAX(dae.force_duration, time);
         }
+        if (XmlNode *frame_rate = technique.findNode("frame_rate"))
+            Import(dae.fps, *frame_rate);
+    }
     FREPA(node.nodes)
-    if (node.nodes[i].name == "node") T.nodes.New().import(node.nodes[i], null);
+    if (node.nodes[i].name == "node")
+        T.nodes.New().import(node.nodes[i], null);
 }
 /******************************************************************************/
 void DAE::loadAsset(XmlNode &node) {
@@ -1066,31 +1086,38 @@ void DAE::loadAsset(XmlNode &node) {
 }
 void DAE::loadLibraryAnimations(XmlNode &node) {
     FREPA(node.nodes)
-    if (node.nodes[i].name == "animation") animations.New().import(node.nodes[i], T);
+    if (node.nodes[i].name == "animation")
+        animations.New().import(node.nodes[i], T);
 }
 void DAE::loadLibraryImages(XmlNode &node) {
     FREPA(node.nodes)
-    if (node.nodes[i].name == "image") images.New().import(node.nodes[i]);
+    if (node.nodes[i].name == "image")
+        images.New().import(node.nodes[i]);
 }
 void DAE::loadLibraryMaterials(XmlNode &node) {
     FREPA(node.nodes)
-    if (node.nodes[i].name == "material") materials.New().import(node.nodes[i]);
+    if (node.nodes[i].name == "material")
+        materials.New().import(node.nodes[i]);
 }
 void DAE::loadLibraryEffects(XmlNode &node) {
     FREPA(node.nodes)
-    if (node.nodes[i].name == "effect") effects.New().import(node.nodes[i], T);
+    if (node.nodes[i].name == "effect")
+        effects.New().import(node.nodes[i], T);
 }
 void DAE::loadLibraryGeometries(XmlNode &node) {
     FREPA(node.nodes)
-    if (node.nodes[i].name == "geometry") geometries.New().import(node.nodes[i], T);
+    if (node.nodes[i].name == "geometry")
+        geometries.New().import(node.nodes[i], T);
 }
 void DAE::loadLibraryControllers(XmlNode &node) {
     FREPA(node.nodes)
-    if (node.nodes[i].name == "controller") controllers.New().import(node.nodes[i], T);
+    if (node.nodes[i].name == "controller")
+        controllers.New().import(node.nodes[i], T);
 }
 void DAE::loadLibraryVisualScenes(XmlNode &node) {
     FREPA(node.nodes)
-    if (node.nodes[i].name == "visual_scene") visual_scenes.New().import(node.nodes[i], T);
+    if (node.nodes[i].name == "visual_scene")
+        visual_scenes.New().import(node.nodes[i], T);
 }
 /******************************************************************************/
 void DAE::Node::setBoneNodesFromSkin(DAE &dae) {
@@ -1103,10 +1130,10 @@ void DAE::Node::setBoneNodesFromSkin(DAE &dae) {
                 Skin &skin = ctrl.skin[i];
                 if (skin.name)
                     REPA(skin.name->name_array)
-                    if (sid == skin.name->getName(i)) {
-                        bone = true;
-                        return;
-                    }
+                if (sid == skin.name->getName(i)) {
+                    bone = true;
+                    return;
+                }
             }
         }
 }
@@ -1138,10 +1165,10 @@ void DAE::setBoneNodesFromAnim() {
 void DAE::Material::linkEffect(DAE &dae) {
     if (fx.is())
         REPA(dae.effects)
-        if (Equal(fx, dae.effects[i].id)) {
-            effect = &dae.effects[i];
-            break;
-        }
+    if (Equal(fx, dae.effects[i].id)) {
+        effect = &dae.effects[i];
+        break;
+    }
 }
 void DAE::Channel::linkNode(DAE &dae) {
     if (node = dae.findNode(target))
@@ -1152,47 +1179,56 @@ Bool DAE::Channel::anyDifferent() C {
         if (transform) {
             Matrix matrix = transform->getMatrix(0);
             REPA(time->float_array)
-            if (!Equal(matrix, transform->getMatrix(i), EPS_ANIM_ANGLE, EPS_ANIM_POS)) return true;
+            if (!Equal(matrix, transform->getMatrix(i), EPS_ANIM_ANGLE, EPS_ANIM_POS))
+                return true;
         }
         if (move) {
             Vec vec = move->getVec(0);
             REPA(time->float_array)
-            if (!Equal(vec, move->getVec(i), EPS_ANIM_POS)) return true;
+            if (!Equal(vec, move->getVec(i), EPS_ANIM_POS))
+                return true;
         }
         if (move_x) {
             Flt f = move_x->getFloat(0);
             REPA(time->float_array)
-            if (!Equal(f, move_x->getFloat(i), EPS_ANIM_POS)) return true;
+            if (!Equal(f, move_x->getFloat(i), EPS_ANIM_POS))
+                return true;
         }
         if (move_y) {
             Flt f = move_y->getFloat(0);
             REPA(time->float_array)
-            if (!Equal(f, move_y->getFloat(i), EPS_ANIM_POS)) return true;
+            if (!Equal(f, move_y->getFloat(i), EPS_ANIM_POS))
+                return true;
         }
         if (move_z) {
             Flt f = move_z->getFloat(0);
             REPA(time->float_array)
-            if (!Equal(f, move_z->getFloat(i), EPS_ANIM_POS)) return true;
+            if (!Equal(f, move_z->getFloat(i), EPS_ANIM_POS))
+                return true;
         }
         if (rot_x) {
             Flt f = rot_x->getFloat(0);
             REPA(time->float_array)
-            if (!Equal(f, rot_x->getFloat(i), EPS_ANIM_ANGLE)) return true;
+            if (!Equal(f, rot_x->getFloat(i), EPS_ANIM_ANGLE))
+                return true;
         }
         if (rot_y) {
             Flt f = rot_y->getFloat(0);
             REPA(time->float_array)
-            if (!Equal(f, rot_y->getFloat(i), EPS_ANIM_ANGLE)) return true;
+            if (!Equal(f, rot_y->getFloat(i), EPS_ANIM_ANGLE))
+                return true;
         }
         if (rot_z) {
             Flt f = rot_z->getFloat(0);
             REPA(time->float_array)
-            if (!Equal(f, rot_z->getFloat(i), EPS_ANIM_ANGLE)) return true;
+            if (!Equal(f, rot_z->getFloat(i), EPS_ANIM_ANGLE))
+                return true;
         }
         if (scale) {
             Flt f = scale->getFloat(0);
             REPA(time->float_array)
-            if (!Equal(f, scale->getFloat(i), EPS_ANIM_SCALE)) return true;
+            if (!Equal(f, scale->getFloat(i), EPS_ANIM_SCALE))
+                return true;
         }
     }
     return false;
@@ -1216,7 +1252,8 @@ void DAE::Node::linkSkin(DAE &dae) {
                 Skin &skin = ctrl.skin[i];
                 if (skin.name)
                     REPA(skin.name->name_array)
-                    if (sid == skin.name->getName(i)) skin.bone_remap(i) = bone_index;
+                if (sid == skin.name->getName(i))
+                    skin.bone_remap(i) = bone_index;
             }
         }
     REPAO(nodes).linkSkin(dae);
@@ -1925,7 +1962,8 @@ void DAE::Node::create(::Mesh &mesh, MemPtr<Int> part_material_index, ::Skeleton
 }
 void DAE::create(::Mesh &mesh, MemPtr<Int> part_material_index, ::Skeleton &skeleton) {
     FREPA(visual_scenes)
-    FREPAD(j, visual_scenes[i].nodes) visual_scenes[i].nodes[j].create(mesh, part_material_index, skeleton, T);
+    FREPAD(j, visual_scenes[i].nodes)
+    visual_scenes[i].nodes[j].create(mesh, part_material_index, skeleton, T);
     mesh.texScale(Vec2(1, -1), 0)
         .texScale(Vec2(1, -1), 1)
         .texScale(Vec2(1, -1), 2)
@@ -2019,7 +2057,7 @@ void DAE::create(XAnimation &animation, ::Skeleton &skeleton) {
                 Channel &channel = *channels[i];
                 if (channel.time)
                     FREPA(channel.time->float_array)
-                    times.include(channel.time->getFloat(i));
+                times.include(channel.time->getFloat(i));
             }
             times.sort(Compare);
 
@@ -2187,16 +2225,20 @@ Bool ImportDAE(C Str &name, Mesh *mesh, Skeleton *skeleton, XAnimation *animatio
             dae.setBoneNodesFromSkin();
             dae.setBoneNodesFromAnim(); // call after 'linkNode' and 'linkSkin' and before 'linkBone'
             FREPA(dae.visual_scenes)
-            FREPAD(j, dae.visual_scenes[i].nodes) dae.visual_scenes[i].nodes[j].linkBone(dae); // order is important, bones must be added in order in which they are in the hierarchy
+            FREPAD(j, dae.visual_scenes[i].nodes)
+            dae.visual_scenes[i].nodes[j].linkBone(dae); // order is important, bones must be added in order in which they are in the hierarchy
             FREPA(dae.visual_scenes)
-            FREPAD(j, dae.visual_scenes[i].nodes) dae.visual_scenes[i].nodes[j].setWorldMatrix();
+            FREPAD(j, dae.visual_scenes[i].nodes)
+            dae.visual_scenes[i].nodes[j].setWorldMatrix();
             FREPA(dae.visual_scenes)
-            FREPAD(j, dae.visual_scenes[i].nodes) dae.visual_scenes[i].nodes[j].defaultPose();
+            FREPAD(j, dae.visual_scenes[i].nodes)
+            dae.visual_scenes[i].nodes[j].defaultPose();
 
             dae.create(*skel, animation);
 
             FREPA(dae.visual_scenes)
-            FREPAD(j, dae.visual_scenes[i].nodes) dae.visual_scenes[i].nodes[j].linkSkin(dae); // 'linkSkin' after 'sortBones' inside "dae.create(*skel, .."
+            FREPAD(j, dae.visual_scenes[i].nodes)
+            dae.visual_scenes[i].nodes[j].linkSkin(dae); // 'linkSkin' after 'sortBones' inside "dae.create(*skel, .."
 
             if (mesh)
                 dae.create(*mesh, part_material_index, *skel); // create mesh after 'linkSkin'

@@ -464,7 +464,8 @@ error:
 }
 static Bool VisibleData(C StrData *data, Int datas) {
     REP(datas)
-    if (data[i].visible()) return true;
+    if (data[i].visible())
+        return true;
     return false;
 }
 static Bool PanelClosing(C StrData *data, Int datas) // if there are no visible elements (no text, images) until the panel (or data) ends

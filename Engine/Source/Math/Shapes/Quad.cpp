@@ -281,8 +281,11 @@ static inline Bool SameSide(Int a, Int b) { return a == b || !a || !b; } // both
 static Bool SameSide(C Int *x, Int elms) {
     Int last = 0;
     REP(elms)
-    if (Int v = *x++) if (!last) last = v;
-    else if (last != v) return false;
+    if (Int v = *x++)
+        if (!last)
+            last = v;
+        else if (last != v)
+            return false;
     return true;
 }
 Bool Quad2::convex() C // this method supports non-clockwise ordering (in such case it will treat the quad as if it's in clockwise ordering)

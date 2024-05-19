@@ -202,12 +202,14 @@ MeshLod &MeshLod::dist(Flt dist) {
 /******************************************************************************/
 Bool MeshLod::hasDrawGroup(Int draw_group_index) C {
     REPA(parts)
-    if (parts[i].drawGroup() == draw_group_index) return true;
+    if (parts[i].drawGroup() == draw_group_index)
+        return true;
     return false;
 }
 Bool MeshLod::hasDrawGroupMask(UInt draw_group_mask) C {
     REPA(parts)
-    if ((1 << parts[i].drawGroup()) & draw_group_mask) return true;
+    if ((1 << parts[i].drawGroup()) & draw_group_mask)
+        return true;
     return false;
 }
 Bool MeshLod::hasDrawGroupInVariation(Int draw_group_index, Int variation) C {

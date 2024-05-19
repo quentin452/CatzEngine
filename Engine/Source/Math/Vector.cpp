@@ -1300,7 +1300,7 @@ void Vec::rightToLeft() {
 void RightToLeft(Vec *vec, Int num) {
     if (vec)
         REP(num)
-        vec[i].rightToLeft();
+    vec[i].rightToLeft();
 }
 /******************************************************************************/
 Vec2 &Vec2::mul(C Matrix2 &m) {

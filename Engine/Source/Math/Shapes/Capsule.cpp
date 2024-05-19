@@ -448,11 +448,12 @@ Bool SweepCapsuleTri(C Capsule &capsule, C Vec &move, C TriN &tri, Flt *hit_frac
     Flt f, frac;
     Vec n, normal;
     REP(3)
-    if (SweepCapsuleEdge(capsule, move, tri.edge(i), &f, &n)) if (!hit || f < frac) {
-        hit = true;
-        frac = f;
-        normal = n;
-    }
+    if (SweepCapsuleEdge(capsule, move, tri.edge(i), &f, &n))
+        if (!hit || f < frac) {
+            hit = true;
+            frac = f;
+            normal = n;
+        }
     if (hit) {
         if (hit_frac)
             *hit_frac = frac;

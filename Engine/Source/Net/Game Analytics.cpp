@@ -1,192 +1,190 @@
 /******************************************************************************/
 #include "stdafx.h"
 #define SUPPORT_GAME_ANALYTICS 1
-#undef  GameAnalytics
+#undef GameAnalytics
 
 #include "../../../ThirdPartyLibs/begin.h"
 #if IOS && SUPPORT_GAME_ANALYTICS
-   #include "../../../ThirdPartyLibs/GameAnalytics/iOS/GameAnalytics.h"
-   ASSERT((Int)::GAResourceFlowTypeSource==EE::_GameAnalytics::GAResourceFlowTypeSource && (Int)::GAResourceFlowTypeSink==EE::_GameAnalytics::GAResourceFlowTypeSink
-       && (Int)::GAProgressionStatusStart==EE::_GameAnalytics::GAProgressionStatusStart && (Int)::GAProgressionStatusComplete==EE::_GameAnalytics::GAProgressionStatusComplete && (Int)::GAProgressionStatusFail==EE::_GameAnalytics::GAProgressionStatusFail
-       && (Int)::GAErrorSeverityDebug==EE::_GameAnalytics::GAErrorSeverityDebug && (Int)::GAErrorSeverityInfo==EE::_GameAnalytics::GAErrorSeverityInfo && (Int)::GAErrorSeverityWarning==EE::_GameAnalytics::GAErrorSeverityWarning && (Int)::GAErrorSeverityError==EE::_GameAnalytics::GAErrorSeverityError && (Int)::GAErrorSeverityCritical==EE::_GameAnalytics::GAErrorSeverityCritical);
+#include "../../../ThirdPartyLibs/GameAnalytics/iOS/GameAnalytics.h"
+ASSERT((Int)::GAResourceFlowTypeSource == EE::_GameAnalytics::GAResourceFlowTypeSource && (Int)::GAResourceFlowTypeSink == EE::_GameAnalytics::GAResourceFlowTypeSink && (Int)::GAProgressionStatusStart == EE::_GameAnalytics::GAProgressionStatusStart && (Int)::GAProgressionStatusComplete == EE::_GameAnalytics::GAProgressionStatusComplete && (Int)::GAProgressionStatusFail == EE::_GameAnalytics::GAProgressionStatusFail && (Int)::GAErrorSeverityDebug == EE::_GameAnalytics::GAErrorSeverityDebug && (Int)::GAErrorSeverityInfo == EE::_GameAnalytics::GAErrorSeverityInfo && (Int)::GAErrorSeverityWarning == EE::_GameAnalytics::GAErrorSeverityWarning && (Int)::GAErrorSeverityError == EE::_GameAnalytics::GAErrorSeverityError && (Int)::GAErrorSeverityCritical == EE::_GameAnalytics::GAErrorSeverityCritical);
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
-   #include "../../../ThirdPartyLibs/GameAnalytics/Android/GameAnalyticsJNI.h"
+#include "../../../ThirdPartyLibs/GameAnalytics/Android/GameAnalyticsJNI.h"
 #endif
 #include "../../../ThirdPartyLibs/end.h"
 
-namespace EE{namespace _GameAnalytics{
+namespace EE {
+namespace _GameAnalytics {
 /******************************************************************************/
-void configureAvailableCustomDimensions01(C CMemPtr<Str> &customDimensions)
-{
+void configureAvailableCustomDimensions01(C CMemPtr<Str> &customDimensions) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   if(NSMutableArray *array=[NSMutableArray arrayWithCapacity:customDimensions.elms()])
-   {
-      FREPA(customDimensions)[array addObject:NSStringAuto(customDimensions[i])];
-      [GameAnalytics configureAvailableCustomDimensions01:array];
-    //[array release]; NSMutableArray from 'arrayWithCapacity' can't be released
-   }
+    if (NSMutableArray *array = [NSMutableArray arrayWithCapacity:customDimensions.elms()]) {
+        FREPA(customDimensions)[array addObject:NSStringAuto(customDimensions[i])];
+        [GameAnalytics configureAvailableCustomDimensions01:array];
+        //[array release]; NSMutableArray from 'arrayWithCapacity' can't be released
+    }
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
-void configureAvailableCustomDimensions02(C CMemPtr<Str> &customDimensions)
-{
+void configureAvailableCustomDimensions02(C CMemPtr<Str> &customDimensions) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   if(NSMutableArray *array=[NSMutableArray arrayWithCapacity:customDimensions.elms()])
-   {
-      FREPA(customDimensions)[array addObject:NSStringAuto(customDimensions[i])];
-      [GameAnalytics configureAvailableCustomDimensions02:array];
-    //[array release]; NSMutableArray from 'arrayWithCapacity' can't be released
-   }
+    if (NSMutableArray *array = [NSMutableArray arrayWithCapacity:customDimensions.elms()]) {
+        FREPA(customDimensions)[array addObject:NSStringAuto(customDimensions[i])];
+        [GameAnalytics configureAvailableCustomDimensions02:array];
+        //[array release]; NSMutableArray from 'arrayWithCapacity' can't be released
+    }
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
-void configureAvailableCustomDimensions03(C CMemPtr<Str> &customDimensions)
-{
+void configureAvailableCustomDimensions03(C CMemPtr<Str> &customDimensions) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   if(NSMutableArray *array=[NSMutableArray arrayWithCapacity:customDimensions.elms()])
-   {
-      FREPA(customDimensions)[array addObject:NSStringAuto(customDimensions[i])];
-      [GameAnalytics configureAvailableCustomDimensions03:array];
-    //[array release]; NSMutableArray from 'arrayWithCapacity' can't be released
-   }
+    if (NSMutableArray *array = [NSMutableArray arrayWithCapacity:customDimensions.elms()]) {
+        FREPA(customDimensions)[array addObject:NSStringAuto(customDimensions[i])];
+        [GameAnalytics configureAvailableCustomDimensions03:array];
+        //[array release]; NSMutableArray from 'arrayWithCapacity' can't be released
+    }
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
-void configureAvailableResourceCurrencies(C CMemPtr<Str> &resourceCurrencies)
-{
+void configureAvailableResourceCurrencies(C CMemPtr<Str> &resourceCurrencies) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   if(NSMutableArray *array=[NSMutableArray arrayWithCapacity:resourceCurrencies.elms()])
-   {
-      FREPA(resourceCurrencies)[array addObject:NSStringAuto(resourceCurrencies[i])];
-      [GameAnalytics configureAvailableResourceCurrencies:array];
-    //[array release]; NSMutableArray from 'arrayWithCapacity' can't be released
-   }
+    if (NSMutableArray *array = [NSMutableArray arrayWithCapacity:resourceCurrencies.elms()]) {
+        FREPA(resourceCurrencies)[array addObject:NSStringAuto(resourceCurrencies[i])];
+        [GameAnalytics configureAvailableResourceCurrencies:array];
+        //[array release]; NSMutableArray from 'arrayWithCapacity' can't be released
+    }
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
-void configureAvailableResourceItemTypes(C CMemPtr<Str> &resourceItemTypes)
-{
+void configureAvailableResourceItemTypes(C CMemPtr<Str> &resourceItemTypes) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   if(NSMutableArray *array=[NSMutableArray arrayWithCapacity:resourceItemTypes.elms()])
-   {
-      FREPA(resourceItemTypes)[array addObject:NSStringAuto(resourceItemTypes[i])];
-      [GameAnalytics configureAvailableResourceItemTypes:array];
-    //[array release]; NSMutableArray from 'arrayWithCapacity' can't be released
-   }
+    if (NSMutableArray *array = [NSMutableArray arrayWithCapacity:resourceItemTypes.elms()]) {
+        FREPA(resourceItemTypes)[array addObject:NSStringAuto(resourceItemTypes[i])];
+        [GameAnalytics configureAvailableResourceItemTypes:array];
+        //[array release]; NSMutableArray from 'arrayWithCapacity' can't be released
+    }
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
 
-void configureBuild(C Str &build)
-{
+void configureBuild(C Str &build) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   [GameAnalytics configureBuild:NSStringAuto(build)];
+    [GameAnalytics configureBuild:NSStringAuto(build)];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
-void configureUserId(C Str &userId)
-{
+void configureUserId(C Str &userId) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   [GameAnalytics configureUserId:NSStringAuto(userId)];
+    [GameAnalytics configureUserId:NSStringAuto(userId)];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
-void configureEngineVersion(C Str &engineVersion)
-{
+void configureEngineVersion(C Str &engineVersion) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   [GameAnalytics configureEngineVersion:NSStringAuto(engineVersion)];
+    [GameAnalytics configureEngineVersion:NSStringAuto(engineVersion)];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
 
-void initialize(C Str &gameKey, C Str &gameSecret)
-{
+void initialize(C Str &gameKey, C Str &gameSecret) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   [GameAnalytics initializeWithGameKey:NSStringAuto(gameKey) gameSecret:NSStringAuto(gameSecret)];
+    [GameAnalytics initializeWithGameKey:NSStringAuto(gameKey)
+                              gameSecret:NSStringAuto(gameSecret)];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
 
-void addBusinessEventWithCurrency(C Str &currency, Int amount, C Str &itemType, C Str &itemId, C Str &cartType, C Str &receipt)
-{
+void addBusinessEventWithCurrency(C Str &currency, Int amount, C Str &itemType, C Str &itemId, C Str &cartType, C Str &receipt) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   [GameAnalytics addBusinessEventWithCurrency:NSStringAuto(currency) amount:amount itemType:NSStringAuto(itemType) itemId:NSStringAuto(itemId) cartType:NSStringAuto(cartType) receipt:NSStringAuto(receipt)];
+    [GameAnalytics addBusinessEventWithCurrency:NSStringAuto(currency)
+                                         amount:amount
+                                       itemType:NSStringAuto(itemType)
+                                         itemId:NSStringAuto(itemId)
+                                       cartType:NSStringAuto(cartType)
+                                        receipt:NSStringAuto(receipt)];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
-void addBusinessEventWithCurrency(C Str &currency, Int amount, C Str &itemType, C Str &itemId, C Str &cartType, Bool autoFetchReceipt)
-{
+void addBusinessEventWithCurrency(C Str &currency, Int amount, C Str &itemType, C Str &itemId, C Str &cartType, Bool autoFetchReceipt) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   [GameAnalytics addBusinessEventWithCurrency:NSStringAuto(currency) amount:amount itemType:NSStringAuto(itemType) itemId:NSStringAuto(itemId) cartType:NSStringAuto(cartType) autoFetchReceipt:autoFetchReceipt];
+    [GameAnalytics addBusinessEventWithCurrency:NSStringAuto(currency)
+                                         amount:amount
+                                       itemType:NSStringAuto(itemType)
+                                         itemId:NSStringAuto(itemId)
+                                       cartType:NSStringAuto(cartType)
+                               autoFetchReceipt:autoFetchReceipt];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
-void addResourceEventWithFlowType(GAResourceFlowType flowType, C Str &currency, Dbl amount, C Str &itemType, C Str &itemId)
-{
+void addResourceEventWithFlowType(GAResourceFlowType flowType, C Str &currency, Dbl amount, C Str &itemType, C Str &itemId) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   [GameAnalytics addResourceEventWithFlowType:(::GAResourceFlowType)flowType currency:NSStringAuto(currency) amount:[NSNumber numberWithDouble:amount] itemType:NSStringAuto(itemType) itemId:NSStringAuto(itemId)];
+    [GameAnalytics addResourceEventWithFlowType:(::GAResourceFlowType)flowType
+                                       currency:NSStringAuto(currency)
+                                         amount:[NSNumber numberWithDouble:amount]
+                                       itemType:NSStringAuto(itemType)
+                                         itemId:NSStringAuto(itemId)];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
-void addProgressionEventWithProgressionStatus(GAProgressionStatus progressionStatus, C Str &progression01, C Str &progression02, C Str &progression03)
-{
+void addProgressionEventWithProgressionStatus(GAProgressionStatus progressionStatus, C Str &progression01, C Str &progression02, C Str &progression03) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   [GameAnalytics addProgressionEventWithProgressionStatus:(::GAProgressionStatus)progressionStatus progression01:NSStringAuto(progression01) progression02:NSStringAuto(progression02) progression03:NSStringAuto(progression03)];
+    [GameAnalytics addProgressionEventWithProgressionStatus:(::GAProgressionStatus)progressionStatus
+                                              progression01:NSStringAuto(progression01)
+                                              progression02:NSStringAuto(progression02)
+                                              progression03:NSStringAuto(progression03)];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
-void addProgressionEventWithProgressionStatus(GAProgressionStatus progressionStatus, C Str &progression01, C Str &progression02, C Str &progression03, Int score)
-{
+void addProgressionEventWithProgressionStatus(GAProgressionStatus progressionStatus, C Str &progression01, C Str &progression02, C Str &progression03, Int score) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   [GameAnalytics addProgressionEventWithProgressionStatus:(::GAProgressionStatus)progressionStatus progression01:NSStringAuto(progression01) progression02:NSStringAuto(progression02) progression03:NSStringAuto(progression03) score:score];
+    [GameAnalytics addProgressionEventWithProgressionStatus:(::GAProgressionStatus)progressionStatus
+                                              progression01:NSStringAuto(progression01)
+                                              progression02:NSStringAuto(progression02)
+                                              progression03:NSStringAuto(progression03)
+                                                      score:score];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
-void addDesignEventWithEventId(C Str &eventId)
-{
+void addDesignEventWithEventId(C Str &eventId) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   [GameAnalytics addDesignEventWithEventId:NSStringAuto(eventId)];
+    [GameAnalytics addDesignEventWithEventId:NSStringAuto(eventId)];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
-void addDesignEventWithEventId(C Str &eventId, Dbl value)
-{
+void addDesignEventWithEventId(C Str &eventId, Dbl value) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   [GameAnalytics addDesignEventWithEventId:NSStringAuto(eventId) value:[NSNumber numberWithDouble:value]];
+    [GameAnalytics addDesignEventWithEventId:NSStringAuto(eventId)
+                                       value:[NSNumber numberWithDouble:value]];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
-void addErrorEventWithSeverity(GAErrorSeverity severity, C Str &message)
-{
+void addErrorEventWithSeverity(GAErrorSeverity severity, C Str &message) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   [GameAnalytics addErrorEventWithSeverity:(::GAErrorSeverity)severity message:NSStringAuto(message)];
+    [GameAnalytics addErrorEventWithSeverity:(::GAErrorSeverity)severity
+                                     message:NSStringAuto(message)];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
 
-Str getCommandCenterValueAsString(C Str &key)
-{
+Str getCommandCenterValueAsString(C Str &key) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   return [GameAnalytics getCommandCenterValueAsString:NSStringAuto(key)];
+    return [GameAnalytics getCommandCenterValueAsString:NSStringAuto(key)];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
-   return S;
+    return S;
 }
-Str getCommandCenterValueAsString(C Str &key, C Str &defaultValue)
-{
+Str getCommandCenterValueAsString(C Str &key, C Str &defaultValue) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   return [GameAnalytics getCommandCenterValueAsString:NSStringAuto(key) defaultValue:NSStringAuto(defaultValue)];
+    return [GameAnalytics getCommandCenterValueAsString:NSStringAuto(key) defaultValue:NSStringAuto(defaultValue)];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
-   return S;
+    return S;
 }
-Str getCommandCenterConfigurations()
-{
+Str getCommandCenterConfigurations() {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   return [GameAnalytics getCommandCenterConfigurations];
+    return [GameAnalytics getCommandCenterConfigurations];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
-   return S;
+    return S;
 }
 /*void setCommandCenterDelegate(id newDelegate)
 {
@@ -194,94 +192,83 @@ Str getCommandCenterConfigurations()
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }*/
-Bool isCommandCenterReady()
-{
+Bool isCommandCenterReady() {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   return [GameAnalytics isCommandCenterReady];
+    return [GameAnalytics isCommandCenterReady];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
-   return false;
+    return false;
 }
 
-void setEnabledInfoLog(Bool flag)
-{
+void setEnabledInfoLog(Bool flag) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   [GameAnalytics setEnabledInfoLog:flag];
+    [GameAnalytics setEnabledInfoLog:flag];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
-void setEnabledVerboseLog(Bool flag)
-{
+void setEnabledVerboseLog(Bool flag) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   [GameAnalytics setEnabledVerboseLog:flag];
+    [GameAnalytics setEnabledVerboseLog:flag];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
 
-void setEnabledManualSessionHandling(Bool flag)
-{
+void setEnabledManualSessionHandling(Bool flag) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   [GameAnalytics setEnabledManualSessionHandling:flag];
+    [GameAnalytics setEnabledManualSessionHandling:flag];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
-void startSession()
-{
+void startSession() {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   [GameAnalytics startSession];
+    [GameAnalytics startSession];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
-void endSession()
-{
+void endSession() {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   [GameAnalytics endSession];
+    [GameAnalytics endSession];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
 
-void setCustomDimension01(C Str &dimension01)
-{
+void setCustomDimension01(C Str &dimension01) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   [GameAnalytics setCustomDimension01:NSStringAuto(dimension01)];
+    [GameAnalytics setCustomDimension01:NSStringAuto(dimension01)];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
-void setCustomDimension02(C Str &dimension02)
-{
+void setCustomDimension02(C Str &dimension02) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   [GameAnalytics setCustomDimension02:NSStringAuto(dimension02)];
+    [GameAnalytics setCustomDimension02:NSStringAuto(dimension02)];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
-void setCustomDimension03(C Str &dimension03)
-{
+void setCustomDimension03(C Str &dimension03) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   [GameAnalytics setCustomDimension03:NSStringAuto(dimension03)];
+    [GameAnalytics setCustomDimension03:NSStringAuto(dimension03)];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
-void setFacebookId(C Str &facebookId)
-{
+void setFacebookId(C Str &facebookId) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   [GameAnalytics setFacebookId:NSStringAuto(facebookId)];
+    [GameAnalytics setFacebookId:NSStringAuto(facebookId)];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
-void setGender(C Str &gender)
-{
+void setGender(C Str &gender) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   [GameAnalytics setGender:NSStringAuto(gender)];
+    [GameAnalytics setGender:NSStringAuto(gender)];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
-void setBirthYear(Int birthYear)
-{
+void setBirthYear(Int birthYear) {
 #if IOS && SUPPORT_GAME_ANALYTICS
-   [GameAnalytics setBirthYear:birthYear];
+    [GameAnalytics setBirthYear:birthYear];
 #elif ANDROID && SUPPORT_GAME_ANALYTICS
 #endif
 }
 /******************************************************************************/
-}}
+} // namespace _GameAnalytics
+} // namespace EE
 /******************************************************************************/

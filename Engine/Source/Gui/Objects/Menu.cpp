@@ -426,7 +426,8 @@ Menu &Menu::skin(C GuiSkinPtr &skin, Bool sub_objects) {
     if (sub_objects) {
         list.skin(skin);
         REPA(_elms)
-        if (Menu *menu = _elms[i].menu()) menu->skin(skin, true);
+        if (Menu *menu = _elms[i].menu())
+            menu->skin(skin, true);
     }
     return T;
 }
@@ -436,7 +437,8 @@ Menu &Menu::setSize(Bool touch) {
     Flt h = (skin ? skin->menu.list_elm_height : 0.043f);
     list.elmHeight(h * (touch ? 2 : 1)).textSize(h, 0);
     REPA(_elms)
-    if (Menu *menu = _elms[i].menu()) menu->setSize(touch);
+    if (Menu *menu = _elms[i].menu())
+        menu->setSize(touch);
     return T;
 }
 /******************************************************************************/
@@ -550,7 +552,9 @@ GuiObj *Menu::test(C GuiPC &gpc, C Vec2 &pos, GuiObj *&mouse_wheel) {
     if (/*gpc.visible &&*/ visible()) {
         GuiPC gpc_this(gpc, T);
         FREPA(_elms)
-        if (Menu *menu = _elms[i].menu()) if (GuiObj *go = menu->test(gpc_this, pos, mouse_wheel)) return go;
+        if (Menu *menu = _elms[i].menu())
+            if (GuiObj *go = menu->test(gpc_this, pos, mouse_wheel))
+                return go;
         if (Cuts(pos, rect())) {
             mouse_wheel = this;
             if (GuiObj *go = list.test(gpc_this, pos, mouse_wheel))
@@ -566,7 +570,8 @@ void Menu::nearest(C GuiPC &gpc, GuiObjNearest &gon) {
         GuiPC gpc_this(gpc, T);
         list.nearest(gpc_this, gon);
         REPA(_elms)
-        if (Menu *menu = _elms[i].menu()) menu->nearest(gpc_this, gon);
+        if (Menu *menu = _elms[i].menu())
+            menu->nearest(gpc_this, gon);
     }
 }
 /******************************************************************************/
@@ -824,7 +829,8 @@ void Menu::update(C GuiPC &gpc) {
 
         // children
         REPA(_elms)
-        if (Menu *menu = _elms[i].menu()) menu->update(gpc_this);
+        if (Menu *menu = _elms[i].menu())
+            menu->update(gpc_this);
     }
 }
 /******************************************************************************/
@@ -840,7 +846,8 @@ void Menu::draw(C GuiPC &gpc) {
         GuiPC gpc_this(gpc, T);
         list.draw(gpc_this);
         REPA(_elms)
-        if (Menu *menu = _elms[i].menu()) menu->draw(gpc_this);
+        if (Menu *menu = _elms[i].menu())
+            menu->draw(gpc_this);
     }
 }
 /******************************************************************************/

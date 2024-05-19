@@ -152,9 +152,11 @@ Heightmap &Heightmap::create(Int res, Flt height, C MaterialPtr &material, Bool 
 
         // material images
         REPD(y, res)
-        REPD(x, res) _mtrl_index.pixB4(x, y) = index;
+        REPD(x, res)
+        _mtrl_index.pixB4(x, y) = index;
         REPD(y, res)
-        REPD(x, res) _mtrl_blend.pixB4(x, y) = blend;
+        REPD(x, res)
+        _mtrl_blend.pixB4(x, y) = blend;
 
         // align to neighbors
         if (!h_l && !h_r && !h_b && !h_f && !h_lb && !h_lf && !h_rb && !h_rf) // no neighbors
@@ -181,16 +183,16 @@ Heightmap &Heightmap::create(Int res, Flt height, C MaterialPtr &material, Bool 
                 // set borders from neighbors
                 if (h_l)
                     REP(res)
-                    _height.pixF(0, i) = h_l->_height.pixF(res1, i);
+                _height.pixF(0, i) = h_l->_height.pixF(res1, i);
                 if (h_r)
                     REP(res)
-                    _height.pixF(res1, i) = h_r->_height.pixF(0, i);
+                _height.pixF(res1, i) = h_r->_height.pixF(0, i);
                 if (h_b)
                     REP(res)
-                    _height.pixF(i, 0) = h_b->_height.pixF(i, res1);
+                _height.pixF(i, 0) = h_b->_height.pixF(i, res1);
                 if (h_f)
                     REP(res)
-                    _height.pixF(i, res1) = h_f->_height.pixF(i, 0);
+                _height.pixF(i, res1) = h_f->_height.pixF(i, 0);
                 if (h_lb)
                     _height.pixF(0, 0) = h_lb->_height.pixF(res1, res1);
                 if (h_lf)
@@ -1264,7 +1266,8 @@ struct Builder {
     {
         // first find existing
         REPA(mtrl_combos)
-        if (mtrl_combos[i].mtrl_index == mtrl_index) return i;
+        if (mtrl_combos[i].mtrl_index == mtrl_index)
+            return i;
 
         // add new one
         MtrlCombo &mtrl_combo = mtrl_combos.New();
@@ -2458,7 +2461,8 @@ Bool Heightmap::buildEx(Mesh &mesh, Int quality, UInt flag, BuildMem &mem, C Hei
         if (buildEx2(mesh, quality, flag, mem, h_l, h_r, h_b, h_f, h_lb, h_lf, h_rb, h_rf, sphere)) {
             // remove empty lods
             REPD(l, mesh.lods())
-            if (l && !mesh.lod(l).is()) mesh.removeLod(l);
+            if (l && !mesh.lod(l).is())
+                mesh.removeLod(l);
 
             mesh.sortByMaterials();
             return true;

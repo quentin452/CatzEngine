@@ -108,8 +108,10 @@ static void CreateSkeleton(Skeleton &skeleton, Memc<VBone> &bones) {
 
         Set(sbon.name, ubon.Name);
         REP(Length(sbon.name))
-        if (sbon.name[i] == ' ') sbon.name[i] = 0;
-        else break; // remove useless spaces
+        if (sbon.name[i] == ' ')
+            sbon.name[i] = 0;
+        else
+            break; // remove useless spaces
     }
 
     FREPA(bones)
@@ -189,7 +191,7 @@ Bool ImportPSK(C Str &name, Mesh *mesh, Skeleton *skeleton, MemPtr<XMaterial> ma
             skel->sortBones(old_to_new);
             if (VIRTUAL_ROOT_BONE)
                 REPAO(old_to_new)
-                ++;
+            ++;
         } // 'sortBones' must be called before 'SetSkin'
 
         // mesh
@@ -210,7 +212,8 @@ Bool ImportPSK(C Str &name, Mesh *mesh, Skeleton *skeleton, MemPtr<XMaterial> ma
             FREPA(faces) {
                 C VTriangle &vtri = faces[i];
                 REPA(vtri.WedgeIndex)
-                if (!InRange(vtri.WedgeIndex[i], vertexs)) return false;
+                if (!InRange(vtri.WedgeIndex[i], vertexs))
+                    return false;
                 C VVertex &vvtx0 = vertexs[vtri.WedgeIndex[0]],
                           &vvtx1 = vertexs[vtri.WedgeIndex[1]],
                           &vvtx2 = vertexs[vtri.WedgeIndex[2]];
@@ -247,7 +250,7 @@ Bool ImportPSK(C Str &name, Mesh *mesh, Skeleton *skeleton, MemPtr<XMaterial> ma
             // material indexes
             if (part_material_index)
                 FREPA(*mesh)
-                part_material_index.add(i);
+            part_material_index.add(i);
         }
 
         // materials

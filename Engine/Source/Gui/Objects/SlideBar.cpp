@@ -425,13 +425,13 @@ void SlideBar::update(C GuiPC &gpc) {
             Flt d = 0;
             if (button[SB_MIDDLE]())
                 REPA(MT)
-                if (MT.guiObj(i) == &button[SB_MIDDLE] && MT.b(i)) {
-                    if (_vertical)
-                        d -= MT.dc(i).y * lengthTotal() / (button[SB_LEFT_UP].rect().min.y - button[SB_RIGHT_DOWN].rect().max.y);
-                    else
-                        d += MT.dc(i).x * lengthTotal() / (button[SB_RIGHT_DOWN].rect().min.x - button[SB_LEFT_UP].rect().max.x);
-                    MT.disableScroll(i);
-                }
+            if (MT.guiObj(i) == &button[SB_MIDDLE] && MT.b(i)) {
+                if (_vertical)
+                    d -= MT.dc(i).y * lengthTotal() / (button[SB_LEFT_UP].rect().min.y - button[SB_RIGHT_DOWN].rect().max.y);
+                else
+                    d += MT.dc(i).x * lengthTotal() / (button[SB_RIGHT_DOWN].rect().min.x - button[SB_LEFT_UP].rect().max.x);
+                MT.disableScroll(i);
+            }
             if (button[SB_LEFT_UP]())
                 d -= Time.ad() * _scroll_button;
             if (button[SB_RIGHT_DOWN]())

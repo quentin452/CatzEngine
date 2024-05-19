@@ -10,7 +10,8 @@ GuiObjs &GuiObjs::del() {
     _objs.del();
     _names.del();
     REP(GO_NUM)
-    if (Memb<GuiObj> *objs = T.objs(GUI_OBJ_TYPE(i))) objs->del();
+    if (Memb<GuiObj> *objs = T.objs(GUI_OBJ_TYPE(i)))
+        objs->del();
     return T;
 }
 /******************************************************************************/
@@ -585,11 +586,12 @@ Bool GuiObjs::save(File &f, CChar *path) C {
     _names._saveRaw(f);
     _objs._saveRaw(f);
     FREPD(t, GO_NUM)
-    if (C Memb<GuiObj> *objs = T.objects(GUI_OBJ_TYPE(t))) FREPA(*objs) {
-        f.putByte(t);
-        if (!(*objs)[i].save(f, path))
-            return false;
-    }
+    if (C Memb<GuiObj> *objs = T.objects(GUI_OBJ_TYPE(t)))
+        FREPA(*objs) {
+            f.putByte(t);
+            if (!(*objs)[i].save(f, path))
+                return false;
+        }
     return f.ok();
 }
 Bool GuiObjs::load(File &f, CChar *path) {

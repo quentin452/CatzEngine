@@ -5,19 +5,19 @@ namespace EE {
 MeshBase &MeshBase::move(C Vec &move) {
     if (Vec *pos = vtx.pos())
         REPA(vtx)
-        (*pos++) += move;
+    (*pos++) += move;
     if (Vec *pos = vtx.hlp())
         REPA(vtx)
-        (*pos++) += move;
+    (*pos++) += move;
     return T;
 }
 MeshBase &MeshBase::scale(C Vec &scale) {
     if (Vec *pos = vtx.pos())
         REPA(vtx)
-        (*pos++) *= scale;
+    (*pos++) *= scale;
     if (Vec *pos = vtx.hlp())
         REPA(vtx)
-        (*pos++) *= scale;
+    (*pos++) *= scale;
     return T;
 }
 MeshBase &MeshBase::scaleMove(C Vec &scale, C Vec &move) {

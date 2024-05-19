@@ -219,7 +219,8 @@ void SetSkin(C MemPtrN<IndexWeight, 256> &skin, VtxBone &matrix, VecB4 &blend, C
     if (skeleton) {
         const Int max_index = skeleton->bones.elms() + VIRTUAL_ROOT_BONE;
         REPA(temp)
-        if (!InRange(temp[i].index, max_index)) temp.remove(i);
+        if (!InRange(temp[i].index, max_index))
+            temp.remove(i);
     }
 
     // merge same bones (do this before removing empty references so we can have both positive and negative weights for the same matrix, used by the editor when changing skinning)
@@ -237,7 +238,8 @@ void SetSkin(C MemPtrN<IndexWeight, 256> &skin, VtxBone &matrix, VecB4 &blend, C
 
     // remove empty references (do this after merging the same bones)
     REPA(temp)
-    if (temp[i].weight <= 0) temp.remove(i);
+    if (temp[i].weight <= 0)
+        temp.remove(i);
 
     // sort from most to least important
     temp.sort(Compare);
@@ -263,7 +265,8 @@ void SetSkin(C MemPtrN<IndexWeight, 256> &skin, VtxBone &matrix, VecB4 &blend, C
             if (closest) {
                 Flt weight = temp[i].weight / closest;
                 REPD(j, i)
-                if (skeleton->hierarchyDistance(bone, temp[j].index - VIRTUAL_ROOT_BONE) == min_distance) temp[j].weight += weight; // add weight from this bone to all closest bones equally
+                if (skeleton->hierarchyDistance(bone, temp[j].index - VIRTUAL_ROOT_BONE) == min_distance)
+                    temp[j].weight += weight; // add weight from this bone to all closest bones equally
             }
             temp.removeLast();
             if (closest)
@@ -310,7 +313,8 @@ void SetSkin(C MemPtrN<IndexWeight, 256> &skin, VtxBone &matrix, VecB4 &blend, C
         } break;
         }
         REPA(blend)
-        if (!blend.c[i]) matrix.c[i] = 0; // clear bones to 0 if they have no weight
+        if (!blend.c[i])
+            matrix.c[i] = 0; // clear bones to 0 if they have no weight
         // sort matrix/weight to list most important first, and in case weights are the same, then sort by matrix index (this is needed because even though 'temp' is already sorted, we need to sort again because weights now in byte format can be the same, and in which case we need to sort by matrix index), we do this, so in the future we can compare 2 matrix weights using fast checks like "matrix0==matrix1 && weight0==weight1" instead of checking each matrix index component separately (for cases where they are listed in different order)
         if (temp.elms() >= 3)
             FixMatrixWeight(matrix, blend); // need to check this only for 3 or more bones, because 1 and 2 will never have this (1 has always "255,0,0,0" weights, and 2 has always "w,255-w,0,0" weights, which means they are always different, because "Byte w" is always different than "255-w")
@@ -1201,80 +1205,81 @@ MeshBase &MeshBase::create(C MeshBase *src[], Int elms, MESH_FLAG flag_and, Bool
 
     // vertexes
     FREP(elms)
-    if (C MeshBase *mesh = src[i]) if (Int vtxs = mesh->vtxs()) {
-        if (vtx_pos) {
-            CopyN(vtx_pos, mesh->vtx.pos(), vtxs);
-            vtx_pos += vtxs;
-        }
-        if (vtx_nrm) {
-            CopyN(vtx_nrm, mesh->vtx.nrm(), vtxs);
-            vtx_nrm += vtxs;
-        }
-        if (vtx_tan) {
-            CopyN(vtx_tan, mesh->vtx.tan(), vtxs);
-            vtx_tan += vtxs;
-        }
-        if (vtx_bin) {
-            CopyN(vtx_bin, mesh->vtx.bin(), vtxs);
-            vtx_bin += vtxs;
-        }
-        if (vtx_hlp) {
-            CopyN(vtx_hlp, mesh->vtx.hlp(), vtxs);
-            vtx_hlp += vtxs;
-        }
-        if (vtx_tex0) {
-            CopyN(vtx_tex0, mesh->vtx.tex0(), vtxs);
-            vtx_tex0 += vtxs;
-        }
-        if (vtx_tex1) {
-            CopyN(vtx_tex1, mesh->vtx.tex1(), vtxs);
-            vtx_tex1 += vtxs;
-        }
-        if (vtx_tex2) {
-            CopyN(vtx_tex2, mesh->vtx.tex2(), vtxs);
-            vtx_tex2 += vtxs;
-        }
-        if (vtx_tex3) {
-            CopyN(vtx_tex3, mesh->vtx.tex3(), vtxs);
-            vtx_tex3 += vtxs;
-        }
-        if (vtx_matrix) {
-            CopyN(vtx_matrix, mesh->vtx.matrix(), vtxs);
-            vtx_matrix += vtxs;
-        }
-        if (vtx_size) {
-            CopyN(vtx_size, mesh->vtx.size(), vtxs);
-            vtx_size += vtxs;
-        }
-        if (vtx_flag) {
-            CopyN(vtx_flag, mesh->vtx.flag(), vtxs);
-            vtx_flag += vtxs;
-        }
-        if (vtx_blend) {
-            if (mesh->vtx.blend())
-                CopyN(vtx_blend, mesh->vtx.blend(), vtxs);
-            else
-                REP(vtxs)
+    if (C MeshBase *mesh = src[i])
+        if (Int vtxs = mesh->vtxs()) {
+            if (vtx_pos) {
+                CopyN(vtx_pos, mesh->vtx.pos(), vtxs);
+                vtx_pos += vtxs;
+            }
+            if (vtx_nrm) {
+                CopyN(vtx_nrm, mesh->vtx.nrm(), vtxs);
+                vtx_nrm += vtxs;
+            }
+            if (vtx_tan) {
+                CopyN(vtx_tan, mesh->vtx.tan(), vtxs);
+                vtx_tan += vtxs;
+            }
+            if (vtx_bin) {
+                CopyN(vtx_bin, mesh->vtx.bin(), vtxs);
+                vtx_bin += vtxs;
+            }
+            if (vtx_hlp) {
+                CopyN(vtx_hlp, mesh->vtx.hlp(), vtxs);
+                vtx_hlp += vtxs;
+            }
+            if (vtx_tex0) {
+                CopyN(vtx_tex0, mesh->vtx.tex0(), vtxs);
+                vtx_tex0 += vtxs;
+            }
+            if (vtx_tex1) {
+                CopyN(vtx_tex1, mesh->vtx.tex1(), vtxs);
+                vtx_tex1 += vtxs;
+            }
+            if (vtx_tex2) {
+                CopyN(vtx_tex2, mesh->vtx.tex2(), vtxs);
+                vtx_tex2 += vtxs;
+            }
+            if (vtx_tex3) {
+                CopyN(vtx_tex3, mesh->vtx.tex3(), vtxs);
+                vtx_tex3 += vtxs;
+            }
+            if (vtx_matrix) {
+                CopyN(vtx_matrix, mesh->vtx.matrix(), vtxs);
+                vtx_matrix += vtxs;
+            }
+            if (vtx_size) {
+                CopyN(vtx_size, mesh->vtx.size(), vtxs);
+                vtx_size += vtxs;
+            }
+            if (vtx_flag) {
+                CopyN(vtx_flag, mesh->vtx.flag(), vtxs);
+                vtx_flag += vtxs;
+            }
+            if (vtx_blend) {
+                if (mesh->vtx.blend())
+                    CopyN(vtx_blend, mesh->vtx.blend(), vtxs);
+                else
+                    REP(vtxs)
                 vtx_blend[i].set(255, 0, 0, 0);
-            vtx_blend += vtxs;
-        }
-        if (vtx_material) {
-            if (mesh->vtx.material())
-                CopyN(vtx_material, mesh->vtx.material(), vtxs);
-            else
-                REP(vtxs)
+                vtx_blend += vtxs;
+            }
+            if (vtx_material) {
+                if (mesh->vtx.material())
+                    CopyN(vtx_material, mesh->vtx.material(), vtxs);
+                else
+                    REP(vtxs)
                 vtx_material[i].set(255, 0, 0, 0);
-            vtx_material += vtxs;
-        }
-        if (vtx_color) {
-            if (mesh->vtx.color())
-                CopyN(vtx_color, mesh->vtx.color(), vtxs);
-            else
-                REP(vtxs)
+                vtx_material += vtxs;
+            }
+            if (vtx_color) {
+                if (mesh->vtx.color())
+                    CopyN(vtx_color, mesh->vtx.color(), vtxs);
+                else
+                    REP(vtxs)
                 vtx_color[i] = WHITE;
-            vtx_color += vtxs;
+                vtx_color += vtxs;
+            }
         }
-    }
 
     // edges, tris, quads
     if (elms == 1) {
@@ -1447,25 +1452,25 @@ MeshBase &MeshBase::copyFace(MeshBase &dest, C CMemPtr<Bool> &edge_is, C CMemPtr
     Memt<Int> vtx_remap;
     if (edge_is)
         FREPA(edge)
-        if (edge_is[i]) {
-            p = edge.ind(i).c;
-            REPD(j, 2)
-            vtx_is[p[j]] = true;
-        }
+    if (edge_is[i]) {
+        p = edge.ind(i).c;
+        REPD(j, 2)
+        vtx_is[p[j]] = true;
+    }
     if (tri_is)
         FREPA(tri)
-        if (tri_is[i]) {
-            p = tri.ind(i).c;
-            REPD(j, 3)
-            vtx_is[p[j]] = true;
-        }
+    if (tri_is[i]) {
+        p = tri.ind(i).c;
+        REPD(j, 3)
+        vtx_is[p[j]] = true;
+    }
     if (quad_is)
         FREPA(quad)
-        if (quad_is[i]) {
-            p = quad.ind(i).c;
-            REPD(j, 4)
-            vtx_is[p[j]] = true;
-        }
+    if (quad_is[i]) {
+        p = quad.ind(i).c;
+        REPD(j, 4)
+        vtx_is[p[j]] = true;
+    }
 
     // create copy
     MeshBase temp(CountIs(vtx_is),

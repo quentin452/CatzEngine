@@ -28,7 +28,8 @@ static void Weld(MeshBase &mshb, MESH_FLAG flag, Flt pos_eps, Flt nrm_cos, Flt r
             Memt<Int> vtx_remap;
             SetRemap(vtx_remap, is, mshb.vtxs());
             REPA(vtx_remap)
-            if (!is[i]) vtx_remap[i] = vtx_remap[vtx_dup[i]];
+            if (!is[i])
+                vtx_remap[i] = vtx_remap[vtx_dup[i]];
 
             mshb.exclude(VTX_DUP | ADJ_ALL);
             MeshBase temp(vtxs, 0, 0, 0, mshb.flag());
@@ -429,19 +430,23 @@ MeshBase &MeshBase::weldEdge() {
             include(EDGE_IND | (nrm ? EDGE_NRM : MESH_NONE) | (flag ? EDGE_FLAG : MESH_NONE) | (id ? EDGE_ID : MESH_NONE));
             edges = 0;
             FREP(num)
-            if (edge_is[i]) edge.ind(edges++) = w_edge[i].ind;
+            if (edge_is[i])
+                edge.ind(edges++) = w_edge[i].ind;
             edges = 0;
             if (nrm)
                 FREP(num)
-                if (edge_is[i]) edge.nrm(edges++) = !w_edge[i].nrm;
+            if (edge_is[i])
+                edge.nrm(edges++) = !w_edge[i].nrm;
             edges = 0;
             if (flag)
                 FREP(num)
-                if (edge_is[i]) edge.flag(edges++) = w_edge[i].flag;
+            if (edge_is[i])
+                edge.flag(edges++) = w_edge[i].flag;
             edges = 0;
             if (id)
                 FREP(num)
-                if (edge_is[i]) edge.id(edges++) = w_edge[i].id;
+            if (edge_is[i])
+                edge.id(edges++) = w_edge[i].id;
         }
     }
     return T;
@@ -1334,8 +1339,9 @@ MeshBase &MeshBase::tesselate(C CMemPtr<Bool> &vtx_sel, Flt weld_pos_eps) {
             VecI ind = tri.ind(i);
             Int tess_vtxs = 0;
             REPA(ind)
-            if (vs[i] = vtx_sel[ind.c[i]]) tess_vtxs++; // how many vertexes want to be tesselated
-            Int ofs = vtxs.elms();                      // vertex offset - how many vtxs created so far
+            if (vs[i] = vtx_sel[ind.c[i]])
+                tess_vtxs++;       // how many vertexes want to be tesselated
+            Int ofs = vtxs.elms(); // vertex offset - how many vtxs created so far
             FREPA(ind)
             vtxs.New().from(T, ind.c[i]); // copy original vtxs
             if (tess_vtxs < 2)
@@ -1408,8 +1414,9 @@ MeshBase &MeshBase::tesselate(C CMemPtr<Bool> &vtx_sel, Flt weld_pos_eps) {
             VecI4 ind = quad.ind(i);
             Int tess_vtxs = 0;
             REPA(ind)
-            if (vs[i] = vtx_sel[ind.c[i]]) tess_vtxs++; // how many vtxs want to be tesselated
-            Int ofs = vtxs.elms();                      // vertex offset - how many vtxs created so far
+            if (vs[i] = vtx_sel[ind.c[i]])
+                tess_vtxs++;       // how many vtxs want to be tesselated
+            Int ofs = vtxs.elms(); // vertex offset - how many vtxs created so far
             FREPA(ind)
             vtxs.New().from(T, ind.c[i]); // copy original vtxs
             if (tess_vtxs < 2)

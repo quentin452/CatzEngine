@@ -159,7 +159,8 @@ struct CSG // Constructive Solid Geometry
     Int getPos(C VecD &pos, C MatrixD &face_matrix) {
         // find existing
         REPA(face_pos)
-        if (Equal(face_pos[i].pos, pos)) return i;
+        if (Equal(face_pos[i].pos, pos))
+            return i;
 
         // add new
         Int i = face_pos.elms();
@@ -245,14 +246,14 @@ struct CSG // Constructive Solid Geometry
             // draw edges
             if (DrawEdges)
                 REPA(face_edgei)
-                if (E < 0 || E == i) {
-                    EdgeD edge(face_pos[face_edgei[i].index.x].pos, face_pos[face_edgei[i].index.y].pos);
-                    edge.draw(RED);
-                    if (E >= 0) {
-                        edge.p[0].draw(RED);
-                        edge.p[1].draw(RED);
-                    }
+            if (E < 0 || E == i) {
+                EdgeD edge(face_pos[face_edgei[i].index.x].pos, face_pos[face_edgei[i].index.y].pos);
+                edge.draw(RED);
+                if (E >= 0) {
+                    edge.p[0].draw(RED);
+                    edge.p[1].draw(RED);
                 }
+            }
 
             // draw polys
             if (DrawPolys) {
@@ -260,7 +261,8 @@ struct CSG // Constructive Solid Geometry
                 Meml<Poly> polys;
                 mshb.edgeToPoly(polys);
                 REPA(polys)
-                if (P < 0 || P == i) polys[i].draw3D(GREEN);
+                if (P < 0 || P == i)
+                    polys[i].draw3D(GREEN);
                 if (InRange(P, polys)) {
                     REPA(polys[P].vtx) {
                         Vec pos = mshb.vtx.pos(polys[P].vtx[i].index);

@@ -942,7 +942,8 @@ Blocks &Blocks::cleanLevels() {
         C Level &level = _levels[i];
         REPD(z, resolution())
         REPD(x, resolution())
-        if (level.map(x, z, resolution())) goto have_block;
+        if (level.map(x, z, resolution()))
+            goto have_block;
         _levels.remove(i, true); // when no blocks were found on this level then remove it
     have_block:;
     }
@@ -990,7 +991,8 @@ Blocks &Blocks::cleanMaterials() {
 
         // 'mesh.parts[i]' are mapped to 'materials[i+1]'
         REPA(_materials)
-        if (!mtrl_is[i] && i) _mesh.remove(i - 1, false); // need to go from the end
+        if (!mtrl_is[i] && i)
+            _mesh.remove(i - 1, false); // need to go from the end
 
         Byte remap[256];
 
@@ -1025,7 +1027,8 @@ Bool Blocks::save(File &f, Bool include_mesh_and_phys_body, CChar *path) C {
             f.putBool(include_mesh_and_phys_body);
             f.cmpUIntV(_levels.elms());
             FREPA(_levels)
-            if (!_levels[i].save(f, resolution(), include_mesh_and_phys_body)) return false;
+            if (!_levels[i].save(f, resolution(), include_mesh_and_phys_body))
+                return false;
             if (include_mesh_and_phys_body)
                 if (!_mesh.save(f))
                     return false;
@@ -1046,7 +1049,8 @@ Bool Blocks::load(File &f, CChar *path) {
                 Bool include_mesh_and_phys_body = f.getBool();
                 _levels.setNum(f.decUIntV());
                 FREPA(_levels)
-                if (!_levels[i].load(f, resolution(), include_mesh_and_phys_body)) goto error;
+                if (!_levels[i].load(f, resolution(), include_mesh_and_phys_body))
+                    goto error;
                 if (include_mesh_and_phys_body)
                     if (!_mesh.load(f))
                         goto error;
@@ -1067,7 +1071,8 @@ Bool Blocks::load(File &f, CChar *path) {
             Bool include_mesh_and_phys_body = f.getBool();
             _levels.setNum(f.getInt());
             FREPA(_levels)
-            if (!_levels[i].load(f, resolution(), include_mesh_and_phys_body)) goto error;
+            if (!_levels[i].load(f, resolution(), include_mesh_and_phys_body))
+                goto error;
             if (include_mesh_and_phys_body)
                 if (!_mesh.load(f))
                     goto error;

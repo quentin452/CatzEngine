@@ -67,7 +67,7 @@ Bool ImportXPSBinary(C Str &name, Mesh *mesh, Skeleton *skeleton, MemPtr<XMateri
                 skel->mirrorX().sortBones(old_to_new).setBoneTypes();
                 if (VIRTUAL_ROOT_BONE)
                     REPAO(old_to_new)
-                    ++; // 'mirrorX' must be called before 'setBoneTypes', 'sortBones' must be called before 'setBoneTypes' and 'SetSkin'
+                ++; // 'mirrorX' must be called before 'setBoneTypes', 'sortBones' must be called before 'setBoneTypes' and 'SetSkin'
             }
             MemtN<IndexWeight, 256> skin;
             UInt parts = f.getUInt();
@@ -151,7 +151,7 @@ Bool ImportXPSBinary(C Str &name, Mesh *mesh, Skeleton *skeleton, MemPtr<XMateri
                                         skin[i].index = (InRange(bone, old_to_new) ? old_to_new[bone] : -1);
                                     }
                                     FREPA(skin)
-                                        f >> skin[i].weight;
+                                    f >> skin[i].weight;
                                     SetSkin(skin, base.vtx.matrix(i), base.vtx.blend(i), skel);
                                 }
                             }
@@ -291,7 +291,7 @@ Bool ImportXPSText(C Str &name, Mesh *mesh, Skeleton *skeleton, MemPtr<XMaterial
             skel->mirrorX().sortBones(old_to_new).setBoneTypes();
             if (VIRTUAL_ROOT_BONE)
                 REPAO(old_to_new)
-                ++; // 'mirrorX' must be called before 'setBoneTypes', 'sortBones' must be called before 'setBoneTypes' and 'SetSkin'
+            ++; // 'mirrorX' must be called before 'setBoneTypes', 'sortBones' must be called before 'setBoneTypes' and 'SetSkin'
         }
         MemtN<IndexWeight, 256> skin;
         f.getLine(s);
@@ -377,14 +377,15 @@ Bool ImportXPSText(C Str &name, Mesh *mesh, Skeleton *skeleton, MemPtr<XMaterial
                             f.getLine(s);
                             Vec4 b = _TextVec4(s);
                             FREPA(m)
-                            if (b.c[i] && InRange(m.c[i], old_to_new)) skin.New().set(old_to_new[m.c[i]], b.c[i] /* /255.0f not needed because weight is normalized in 'SetSkin' */);
+                            if (b.c[i] && InRange(m.c[i], old_to_new))
+                                skin.New().set(old_to_new[m.c[i]], b.c[i] /* /255.0f not needed because weight is normalized in 'SetSkin' */);
                             SetSkin(skin, base.vtx.matrix(i), base.vtx.blend(i), skel);
                             skin.clear();
                         }
                     }
                 } else
                     REP(vtxs * (3 + uv_layers + (bones > 0) * 2))
-                    f.skipLine();
+                f.skipLine();
 
                 f.getLine(s);
                 Int tris = TextInt(s);
@@ -415,7 +416,7 @@ Bool ImportXPSText(C Str &name, Mesh *mesh, Skeleton *skeleton, MemPtr<XMaterial
                     base.weldVtx(VTX_ALL, EPSD, EPS_COL_COS, -1); // use small pos epsilon in case mesh is scaled down
                 } else
                     REP(tris)
-                    f.skipLine();
+                f.skipLine();
             }
 
         if (mesh) {

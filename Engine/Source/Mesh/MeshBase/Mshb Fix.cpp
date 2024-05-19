@@ -217,7 +217,8 @@ MeshBase &MeshBase::fixTexWrapping(Byte uv_index) {
             // get odd vtxs (tex.range >= 2/3)
             Int dups = 0;
             FREPA(vtx)
-            if (vs[i].tex_max - vs[i].tex_min >= 2.0f / 3) vs[i].dup = vtxs() + (dups++);
+            if (vs[i].tex_max - vs[i].tex_min >= 2.0f / 3)
+                vs[i].dup = vtxs() + (dups++);
 
             // copy mshb
             {

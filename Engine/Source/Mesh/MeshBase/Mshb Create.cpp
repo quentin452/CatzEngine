@@ -24,13 +24,13 @@ MeshBase &MeshBase::createPlane(Int x, Int y, MESH_FLAG flag) {
         }
     if (Vec *nrm = vtx.nrm())
         REPA(vtx)
-        (nrm++)->set(0, 0, -1);
+    (nrm++)->set(0, 0, -1);
     if (Vec *tan = vtx.tan())
         REPA(vtx)
-        (tan++)->set(1, 0, 0);
+    (tan++)->set(1, 0, 0);
     if (Vec *bin = vtx.bin())
         REPA(vtx)
-        (bin++)->set(0, -1, 0);
+    (bin++)->set(0, -1, 0);
     if (vtx.tex0())
         texMap();
 
@@ -73,9 +73,11 @@ MeshBase &MeshBase::createGrid(Int x, Int y, Bool fast) {
         (edge++)->set(0, x - 1);
     } else {
         FREPD(sy, y)
-        FREPD(sx, x - 1)(edge++)->set(sx + sy * x, sx + 1 + (sy)*x);
+        FREPD(sx, x - 1)
+        (edge++)->set(sx + sy * x, sx + 1 + (sy)*x);
         FREPD(sx, x)
-        FREPD(sy, y - 1)(edge++)->set(sx + sy * x, sx + (sy + 1) * x);
+        FREPD(sy, y - 1)
+        (edge++)->set(sx + sy * x, sx + (sy + 1) * x);
     }
     return T;
 }
@@ -912,7 +914,8 @@ struct Convex {
     Bool cutsEps(C Vec &pos) C {
         if (face.elms()) {
             REPA(face)
-            if (Dist(pos, face[i].plane) > EPS) return false;
+            if (Dist(pos, face[i].plane) > EPS)
+                return false;
             return true;
         }
         return false;
@@ -1048,38 +1051,38 @@ MeshBase &MeshBase::createConvex(C Vec *point, Int points, Int max_points) {
                         // if allowed to insert more points
                         if (max_points < 0)
                             REP(points)
-                            convex.include(point[i]);
+                        convex.include(point[i]);
                         else                                    // unlimited
                             if (max_points > convex.pos.elms()) // more than current
-                            {
-                                Memt<Int> outer;
-                                outer.setNum(points);
-                                REPAO(outer) = i; // points left to process, set all at the start
-                                for (; outer.elms() && convex.pos.elms() < max_points;) {
-                                    // find the most distant
-                                    Int disti = -1;
-                                    Flt dist = 0;
-                                    for (Int i = 0; i < outer.elms();) // order is important
+                        {
+                            Memt<Int> outer;
+                            outer.setNum(points);
+                            REPAO(outer) = i; // points left to process, set all at the start
+                            for (; outer.elms() && convex.pos.elms() < max_points;) {
+                                // find the most distant
+                                Int disti = -1;
+                                Flt dist = 0;
+                                for (Int i = 0; i < outer.elms();) // order is important
+                                {
+                                    Flt d = convex.distPlanar(point[outer[i]]);
+                                    if (d > EPS) // potentially to be added
                                     {
-                                        Flt d = convex.distPlanar(point[outer[i]]);
-                                        if (d > EPS) // potentially to be added
-                                        {
-                                            if (d > dist) {
-                                                dist = d;
-                                                disti = i;
-                                            }
-                                            i++; // continue to the next one
-                                        } else   // it's too close to convex so it can be thrown out
-                                        {
-                                            outer.remove(i);
+                                        if (d > dist) {
+                                            dist = d;
+                                            disti = i;
                                         }
+                                        i++; // continue to the next one
+                                    } else   // it's too close to convex so it can be thrown out
+                                    {
+                                        outer.remove(i);
                                     }
-                                    if (disti < 0)
-                                        break; // didn't found
-                                    convex.include(point[outer[disti]]);
-                                    outer.remove(disti);
                                 }
+                                if (disti < 0)
+                                    break; // didn't found
+                                convex.include(point[outer[disti]]);
+                                outer.remove(disti);
                             }
+                        }
 
                         // create mesh from convex data
                         create(convex.pos.elms(), 0, convex.face.elms(), 0);

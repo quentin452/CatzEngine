@@ -568,7 +568,8 @@ Bool Font::save(File &f) C {
     f.putMulti(UInt(CC4_FONT), Byte(6), _sub_pixel, _height, _padd); // version
     f.cmpUIntV(_images.elms());
     FREPA(_images)
-    if (!_images[i].saveData(f)) return false;
+    if (!_images[i].saveData(f))
+        return false;
     _chrs.saveRaw(f);
     return f.ok();
 }
@@ -581,7 +582,8 @@ Bool Font::load(File &f) {
             f.getMulti(_sub_pixel, _height, _padd);
             _images.setNum(f.decUIntV());
             FREPA(_images)
-            if (!_images[i].loadData(f)) goto error;
+            if (!_images[i].loadData(f))
+                goto error;
             _chrs.loadRaw(f);
             if (f.ok()) {
                 setRemap();
@@ -593,7 +595,8 @@ Bool Font::load(File &f) {
             f.getMulti(_sub_pixel, _height, _padd);
             _images.setNum(f.decUIntV());
             FREPA(_images)
-            if (!_images[i]._loadData(f)) goto error;
+            if (!_images[i]._loadData(f))
+                goto error;
             _chrs.loadRaw(f);
             if (f.ok() && Adjust(T, 1)) {
                 setRemap();
@@ -1003,7 +1006,8 @@ struct SystemFontDrawContext {
 #if USE_FREE_TYPE
             fonts.setNum(base.fonts.elms());
             FREPA(fonts)
-            if (!fonts[i].create(base.fonts[i])) return false;
+            if (!fonts[i].create(base.fonts[i]))
+                return false;
             return true;
 #elif WINDOWS_OLD
             if (dc = CreateCompatibleDC(null)) {
@@ -1220,7 +1224,8 @@ struct FontCreate : FontCreateBase {
             CChar8 *alternatives[] = {"Tahoma"};
             ASSERT(ELMS(alternatives) + 1 == TOTAL_CREATE_FONTS); // "Tahoma" was chosen because it has a nice version of '⏎'
             FREPA(alternatives)
-            if (!fonts.New().create(alternatives[i], scaled_size, mode, weight, scale)) fonts.removeLast();
+            if (!fonts.New().create(alternatives[i], scaled_size, mode, weight, scale))
+                fonts.removeLast();
             return true;
         }
         return false;
@@ -1228,7 +1233,8 @@ struct FontCreate : FontCreateBase {
     Bool createDrawContexts() {
         dcs.setNum(Cpu.threads());
         FREPA(dcs)
-        if (!dcs[i].create(draw_size.x, draw_size.y, T)) return false;
+        if (!dcs[i].create(draw_size.x, draw_size.y, T))
+            return false;
         return true;
     }
     Bool drawCharacters() {
@@ -1359,7 +1365,8 @@ struct FontCreate : FontCreateBase {
     Bool clean() {
         // remove those that don't exist
         REPA(chars)
-        if (!chars[i].size.x) chars.remove(i, true); // check only width, because SPECIAL_CHARS have height=0
+        if (!chars[i].size.x)
+            chars.remove(i, true); // check only width, because SPECIAL_CHARS have height=0
 
         // sort by height
         chars.sort(FontChar::Compare);
@@ -1506,8 +1513,9 @@ Bool Font::create(C Params &params) {
                                     c.width = Max(c.width - 1, 0);
                                     // c.width_padd remains the same, because width was decreased but padding increased
                                     REP(FONT_WIDTH_TEST)
-                                    if (c.widths[1][i] != 0xFF) c.widths[1][i] = Mid(c.widths[1][i] + 1, 0, 254); // here increase by 1 and not decrease, because 'widths[1]' means amount of distance from the right side
-                                                                                                                  // REP(FONT_WIDTH_TEST)if(c.widths[0][i]!=0xFF)c.widths[0][i]=Mid(c.widths[0][i]+1, 0, 254); // don't use this as that's too much
+                                    if (c.widths[1][i] != 0xFF)
+                                        c.widths[1][i] = Mid(c.widths[1][i] + 1, 0, 254); // here increase by 1 and not decrease, because 'widths[1]' means amount of distance from the right side
+                                                                                          // REP(FONT_WIDTH_TEST)if(c.widths[0][i]!=0xFF)c.widths[0][i]=Mid(c.widths[0][i]+1, 0, 254); // don't use this as that's too much
                                 }
                             }
 #endif

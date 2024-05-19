@@ -8,25 +8,28 @@ Int MeshBase::maxID() C {
     Int max = -1;
     if (edge.id())
         REPA(edge)
-        MAX(max, edge.id(i));
+    MAX(max, edge.id(i));
     if (tri.id())
         REPA(tri)
-        MAX(max, tri.id(i));
+    MAX(max, tri.id(i));
     if (quad.id())
         REPA(quad)
-        MAX(max, quad.id(i));
+    MAX(max, quad.id(i));
     return max;
 }
 Bool MeshBase::hasID(Int id) C {
     if (edge.id())
         REPA(edge)
-        if (edge.id(i) == id) return true;
+    if (edge.id(i) == id)
+        return true;
     if (tri.id())
         REPA(tri)
-        if (tri.id(i) == id) return true;
+    if (tri.id(i) == id)
+        return true;
     if (quad.id())
         REPA(quad)
-        if (quad.id(i) == id) return true;
+    if (quad.id(i) == id)
+        return true;
     return false;
 }
 /******************************************************************************/
@@ -166,7 +169,7 @@ MeshBase &MeshBase::setNormals2D(Bool flag) {
     Normalize(vtx.nrm(), vtxs());
     if (vtx.dup())
         REPA(vtx)
-        vtx.nrm(i) = vtx.nrm(vtx.dup(i));
+    vtx.nrm(i) = vtx.nrm(vtx.dup(i));
     return T;
 }
 MeshBase &MeshBase::setNormals() {
@@ -240,7 +243,7 @@ MeshBase &MeshBase::setNormals() {
     } // !! valid non-zero normal must be set because otherwise NaN might get generated in the shader due to normalization of zero vectors !!
     if (vtx.dup())
         REPA(vtx)
-        vtx.nrm(i) = vtx.nrm(vtx.dup(i));
+    vtx.nrm(i) = vtx.nrm(vtx.dup(i));
     return T;
 }
 MeshBase &MeshBase::setNormalsAuto(Flt angle, Flt pos_eps) {
@@ -544,10 +547,10 @@ MeshBase &MeshBase::setTanBinDbl() {
                 // !! Warning: here vtx.tan, vtx.bin lengths are proportional to their face areas, and aren't normalized, so 'setVtxDupEx' 'Dot' tests for those vectors will work correctly only with 0 as eps cos
                 if (set_tan)
                     REPA(vtx)
-                    vtx.tan(i) = vtx_tan[i];
+                vtx.tan(i) = vtx_tan[i];
                 if (set_bin)
                     REPA(vtx)
-                    vtx.bin(i) = vtx_bin[i];
+                vtx.bin(i) = vtx_bin[i];
                 setVtxDupEx(VTX_POS | VTX_NRM_TAN_BIN | VTX_TEX0, EPSD, EPS_COL_COS, 0, 0, true); // use small pos epsilon in case mesh is scaled down, use 0 eps cos for tan/bin to only test if they're on the same side (also only this value can work for unnormalized vectors), for tan/bin we can use tex_wrap=true
                 if (vtx.dup())
                     REPA(vtx) {
@@ -745,7 +748,7 @@ struct MeshAO {
             threads->process1(vtxs, Set, T);
         else
             REP(vtxs)
-            set(i);
+        set(i);
     }
     MeshAO(Flt strength, Flt bias, Flt max, Flt ray_length, Flt pos_eps, Int rays, MESH_AO_FUNC func) {
         switch (func) {

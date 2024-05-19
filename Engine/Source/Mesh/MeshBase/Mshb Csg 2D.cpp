@@ -523,7 +523,8 @@ static void CreateMesh(MeshBase &mshb, Memc<MC_EDGE> &medge, UInt sel) {
     mshb.include(VTX_POS);
     n = 0;
     FREPA(Csg2D.point)
-    if (is[i]) mshb.vtx.pos(n++).set(Csg2D.point[i].pos, 0);
+    if (is[i])
+        mshb.vtx.pos(n++).set(Csg2D.point[i].pos, 0);
 }
 /******************************************************************************/
 // CUT & GRID & CSG

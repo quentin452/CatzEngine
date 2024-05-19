@@ -37,7 +37,8 @@ ColorPicker &ColorPicker::mode(Bool real) {
             speed = (_real ? 0.4f : 40);
 
         REPA(_props)
-        if (i != CP_PROPS_RGBA) _props[i].range(0, range).mouseEditSpeed(speed).md.type = dt;
+        if (i != CP_PROPS_RGBA)
+            _props[i].range(0, range).mouseEditSpeed(speed).md.type = dt;
 
         toGui(true, true, true, false);
     }
@@ -57,12 +58,12 @@ void ColorPicker::update(C GuiPC &gpc) {
 void ColorPicker::toGui(Bool rgb, Bool alpha, Bool hsb, Bool rgba) {
     if (rgb)
         REP(3)
-        _props[CP_PROPS_RGB + i].toGui();
+    _props[CP_PROPS_RGB + i].toGui();
     if (alpha)
         _props[CP_PROPS_ALPHA].toGui();
     if (hsb)
         REP(3)
-        _props[CP_PROPS_HSB + i].toGui();
+    _props[CP_PROPS_HSB + i].toGui();
     if (rgba)
         _props[CP_PROPS_RGBA].toGui();
 }

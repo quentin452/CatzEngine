@@ -78,10 +78,14 @@ void MeshBase::draw2D(C Color &vtx_color, C Color &edge_color, C Color &face_col
         VI.end();
     }
 }
-void MeshLod ::draw2D(C Color &vtx_color, C Color &edge_color, C Color &face_color, Flt vtx_r, Flt side_width) C { FREPA(T)
-                                                                                                                   parts[i].base.draw2D(vtx_color, edge_color, face_color, vtx_r, side_width); }
-void MeshGroup::draw2D(C Color &vtx_color, C Color &edge_color, C Color &face_color, Flt vtx_r, Flt side_width) C { FREPA(T)
-                                                                                                                    meshes[i].draw2D(vtx_color, edge_color, face_color, vtx_r, side_width); }
+void MeshLod ::draw2D(C Color &vtx_color, C Color &edge_color, C Color &face_color, Flt vtx_r, Flt side_width) C {
+    FREPA(T)
+    parts[i].base.draw2D(vtx_color, edge_color, face_color, vtx_r, side_width);
+}
+void MeshGroup::draw2D(C Color &vtx_color, C Color &edge_color, C Color &face_color, Flt vtx_r, Flt side_width) C {
+    FREPA(T)
+    meshes[i].draw2D(vtx_color, edge_color, face_color, vtx_r, side_width);
+}
 /******************************************************************************/
 void MeshBase::drawNormals2D(Flt length, C Color &edge_color, C Color &vtx_color) C {
     C Vec *pos = vtx.pos(),
@@ -174,14 +178,22 @@ void MeshBase::drawNormals(Flt length, C Color &face_color, C Color &vtx_color, 
         }
     }
 }
-void MeshLod ::drawNormals2D(Flt length, C Color &edge_color, C Color &vtx_color) C { REPA(T)
-                                                                                      parts[i].base.drawNormals2D(length, edge_color, vtx_color); }
-void MeshGroup::drawNormals2D(Flt length, C Color &edge_color, C Color &vtx_color) C { REPA(T)
-                                                                                       meshes[i].drawNormals2D(length, edge_color, vtx_color); }
-void MeshLod ::drawNormals(Flt length, C Color &face_color, C Color &vtx_color, C Color &tangent_color, C Color &binormal_color) C { REPA(T)
-                                                                                                                                     parts[i].base.drawNormals(length, face_color, vtx_color, tangent_color, binormal_color); }
-void MeshGroup::drawNormals(Flt length, C Color &face_color, C Color &vtx_color, C Color &tangent_color, C Color &binormal_color) C { REPA(T)
-                                                                                                                                      meshes[i].drawNormals(length, face_color, vtx_color, tangent_color, binormal_color); }
+void MeshLod ::drawNormals2D(Flt length, C Color &edge_color, C Color &vtx_color) C {
+    REPA(T)
+    parts[i].base.drawNormals2D(length, edge_color, vtx_color);
+}
+void MeshGroup::drawNormals2D(Flt length, C Color &edge_color, C Color &vtx_color) C {
+    REPA(T)
+    meshes[i].drawNormals2D(length, edge_color, vtx_color);
+}
+void MeshLod ::drawNormals(Flt length, C Color &face_color, C Color &vtx_color, C Color &tangent_color, C Color &binormal_color) C {
+    REPA(T)
+    parts[i].base.drawNormals(length, face_color, vtx_color, tangent_color, binormal_color);
+}
+void MeshGroup::drawNormals(Flt length, C Color &face_color, C Color &vtx_color, C Color &tangent_color, C Color &binormal_color) C {
+    REPA(T)
+    meshes[i].drawNormals(length, face_color, vtx_color, tangent_color, binormal_color);
+}
 /******************************************************************************
 Code for testing Grass/Leaf bending
 

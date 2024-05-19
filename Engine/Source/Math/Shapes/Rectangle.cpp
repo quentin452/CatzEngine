@@ -759,7 +759,8 @@ void Rects::draw(C Color &grid_color, C Color &field_color, Index *rect_edge) C 
         VI.color(field_color);
         FREPD(y, cells.y)
         FREPD(x, cells.x)
-        if (rect_edge->group[x + y * cells.x].num) VI.rect(getRect(VecI2(x, y)));
+        if (rect_edge->group[x + y * cells.x].num)
+            VI.rect(getRect(VecI2(x, y)));
         VI.end();
     }
     draw(grid_color);

@@ -275,13 +275,13 @@ static void ProcessNodes(Memx<NODE> &nodes, Memc<MeshPart> &parts, MemPtr<Int> p
                         mshb.vtx.pos(i) = mesh.vrt[i].pos * node.global_matrix;
                         if (mesh.has_nrm)
                             REPA(mesh.vrt)
-                            mshb.vtx.nrm(i) = mesh.vrt[i].nrm * matrix3;
+                        mshb.vtx.nrm(i) = mesh.vrt[i].nrm * matrix3;
                         if (mesh.uvs >= 1)
                             REPA(mesh.vrt)
-                            mshb.vtx.tex0(i) = mesh.vrt[i].tex[0];
+                        mshb.vtx.tex0(i) = mesh.vrt[i].tex[0];
                         if (mesh.uvs >= 2)
                             REPA(mesh.vrt)
-                            mshb.vtx.tex1(i) = mesh.vrt[i].tex[1];
+                        mshb.vtx.tex1(i) = mesh.vrt[i].tex[1];
                         if (mesh.bones.elms()) {
                             REPA(mesh.bones) {
                                 MESH_BONE &mb = mesh.bones[i];
@@ -552,7 +552,7 @@ Bool ImportB3D(C Str &name, Mesh *mesh, Skeleton *skeleton, XAnimation *animatio
                 skel->sortBones(old_to_new).setBoneTypes();
                 if (VIRTUAL_ROOT_BONE)
                     REPAO(old_to_new)
-                    ++;
+                ++;
                 if (animation)
                     animation->anim.setBoneTypeIndexesFromSkeleton(*skel);
                 if (mesh) {

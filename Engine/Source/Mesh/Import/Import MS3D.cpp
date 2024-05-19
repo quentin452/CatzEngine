@@ -268,7 +268,7 @@ Bool ImportMS3D(C Str &name, Mesh *mesh, Skeleton *skeleton, XAnimation *animati
             skel->sortBones(old_to_new);
             if (VIRTUAL_ROOT_BONE)
                 REPAO(old_to_new)
-                ++;
+            ++;
         } // 'sortBones' must be called before 'SetSkin'
 
         // mesh
@@ -290,7 +290,8 @@ Bool ImportMS3D(C Str &name, Mesh *mesh, Skeleton *skeleton, XAnimation *animati
                         goto invalid;
                     ms3d_triangle_t &triangle = *ms3d.GetTriangle(t);
                     REPA(triangle.vertexIndices)
-                    if (!InRange(triangle.vertexIndices[i], vtxs)) goto invalid;
+                    if (!InRange(triangle.vertexIndices[i], vtxs))
+                        goto invalid;
                     ms3d_vertex_t &vtx0 = *ms3d.GetVertex(triangle.vertexIndices[0]);
                     ms3d_vertex_t &vtx1 = *ms3d.GetVertex(triangle.vertexIndices[1]);
                     ms3d_vertex_t &vtx2 = *ms3d.GetVertex(triangle.vertexIndices[2]);

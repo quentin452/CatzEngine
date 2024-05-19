@@ -19,7 +19,8 @@ namespace EE {
 /******************************************************************************/
 Int Number::digits() C {
     REP(NUMBER_DIGS)
-        if (d[i]) return i + 1;
+    if (d[i])
+        return i + 1;
     return 0;
 }
 Number &Number::zero() {
@@ -259,7 +260,8 @@ Int Number::absCompare(C Number &N) C {
     } else {
         if (_real) {
             REP(NUMBER_DIGS / 2)
-            if (N.d[i + NUMBER_DIGS / 2]) return -1;
+            if (N.d[i + NUMBER_DIGS / 2])
+                return -1;
             REP(NUMBER_DIGS / 2) {
                 Int d = T.d[i + NUMBER_DIGS / 2] - N.d[i];
                 if (d > 0)
@@ -268,10 +270,12 @@ Int Number::absCompare(C Number &N) C {
                     return -1;
             }
             REP(NUMBER_DIGS / 2)
-            if (T.d[i]) return +1;
+            if (T.d[i])
+                return +1;
         } else {
             REP(NUMBER_DIGS / 2)
-            if (T.d[i + NUMBER_DIGS / 2]) return +1;
+            if (T.d[i + NUMBER_DIGS / 2])
+                return +1;
             REP(NUMBER_DIGS / 2) {
                 Int d = T.d[i] - N.d[i + NUMBER_DIGS / 2];
                 if (d > 0)
@@ -280,7 +284,8 @@ Int Number::absCompare(C Number &N) C {
                     return -1;
             }
             REP(NUMBER_DIGS / 2)
-            if (N.d[i]) return -1;
+            if (N.d[i])
+                return -1;
         }
     }
     return 0;
@@ -303,7 +308,8 @@ Int Number::absCompare(UInt N) C {
         if (d < 0)
             return -1;
         REP(NUMBER_DIGS / 2)
-        if (T.d[i]) return +1;
+        if (T.d[i])
+            return +1;
     }
     return 0;
 }
@@ -399,7 +405,7 @@ Number &Number::setShrDig(C Number &N, Int digs) {
 Number &Number::shlDig(Int digs) {
     if (digs > 0)
         REP(NUMBER_DIGS)
-        T.d[i] = dig(i - digs);
+    T.d[i] = dig(i - digs);
     else if (digs < 0)
         shrDig(-digs);
     return T;
@@ -407,7 +413,7 @@ Number &Number::shlDig(Int digs) {
 Number &Number::shrDig(Int digs) {
     if (digs > 0)
         FREP(NUMBER_DIGS)
-        T.d[i] = dig(i + digs);
+    T.d[i] = dig(i + digs);
     else if (digs < 0)
         shlDig(-digs);
     return T;

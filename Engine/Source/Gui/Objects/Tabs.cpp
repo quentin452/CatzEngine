@@ -274,10 +274,10 @@ Tabs &Tabs::set(Int i, SET_MODE mode) {
             Bool lit = false;
             if (enabled())
                 REPA(MT)
-                if (MT.guiObj(i) == &tab && MT.hoverable(i)) {
-                    lit = true;
-                    break;
-                }
+            if (MT.guiObj(i) == &tab && MT.hoverable(i)) {
+                lit = true;
+                break;
+            }
             tab._lit = lit;
         }
         _sel = i;
@@ -354,7 +354,8 @@ GuiObj *Tabs::test(C GuiPC &gpc, C Vec2 &pos, GuiObj *&mouse_wheel) {
                 return go;
         if (Cuts(pos, rect() + gpc.offset)) {
             REPA(T)
-            if (GuiObj *go = tab(i).test(gpc, pos, mouse_wheel)) return go;
+            if (GuiObj *go = tab(i).test(gpc, pos, mouse_wheel))
+                return go;
             // return this; // don't return self
         }
     }
@@ -364,7 +365,7 @@ void Tabs::nearest(C GuiPC &gpc, GuiObjNearest &gon) {
     if (/*gpc.visible &&*/ visible()) {
         if (gon.test((rect() + gpc.offset) & gpc.clip))
             REPA(T)
-            tab(i).nearest(gpc, gon);
+        tab(i).nearest(gpc, gon);
         if (InRange(T(), T))
             tab(T())._children.nearest(gpc, gon);
     }
@@ -409,7 +410,8 @@ Bool Tabs::save(File &f, CChar *path) C {
         f._putAsset(_skin.name(path));
         f.cmpUIntV(_tabs.elms());
         FREPA(_tabs)
-        if (!_tabs[i].save(f, path)) return false;
+        if (!_tabs[i].save(f, path))
+            return false;
         return f.ok();
     }
     return false;
@@ -424,7 +426,8 @@ Bool Tabs::load(File &f, CChar *path) {
             _skin.require(f._getAsset(), path);
             _tabs.clear().setNum(f.decUIntV());
             FREPA(_tabs)
-            if (!_tabs[i].load(f, path)) goto error;
+            if (!_tabs[i].load(f, path))
+                goto error;
             if (f.ok()) {
                 _actual_layout = actualLayout();
                 setParams();

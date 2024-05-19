@@ -550,7 +550,8 @@ Bool MeshPart::sameMaterials(C MeshPart &part) C {
     if (material() == part.material() && _materials[0] == part._materials[0] && _materials[1] == part._materials[1] && _materials[2] == part._materials[2]) {
         Int shared_vars = Min(_variations.elms(), part._variations.elms());
         REP(shared_vars)
-        if (_variations[i].material != part._variations[i].material) return false; // check variations which both parts have
+        if (_variations[i].material != part._variations[i].material)
+            return false; // check variations which both parts have
         for (Int i = shared_vars; i < _variations.elms(); i++)
             if (_variations[i].material != material())
                 return false; // check extra variations in this  part, if it's not default, then fail

@@ -746,13 +746,15 @@ Bool CutsPointMesh(C Vec &point, C Mesh &mesh, Flt *dist) {
 Bool CutsPointMesh(C Vec2 &point, C MeshGroup &mshg, UInt test_flag) {
     if (Cuts(point, Rect(mshg.ext)))
         REPA(mshg)
-        if (CutsPointMesh(point, mshg.meshes[i], null, test_flag)) return true;
+    if (CutsPointMesh(point, mshg.meshes[i], null, test_flag))
+        return true;
     return false;
 }
 Bool CutsPointMesh(C Vec &point, C MeshGroup &mshg) {
     if (Cuts(point, mshg.ext))
         REPA(mshg)
-        if (CutsPointMesh(point, mshg.meshes[i])) return true;
+    if (CutsPointMesh(point, mshg.meshes[i]))
+        return true;
     return false;
 }
 /******************************************************************************/
@@ -1299,7 +1301,8 @@ Matrix GetRestMatrix(C Memt<C MeshBase *> &meshes, C Memt<C MeshRender *> &gpu_m
     MAX(min_dist, EPS);
 
     REPA(gpu_meshes)
-    if (C MeshRender *mesh = gpu_meshes[i]) mesh->vtxLockRead();
+    if (C MeshRender *mesh = gpu_meshes[i])
+        mesh->vtxLockRead();
 
     {
         // find first contact point 'a' located at the bottom
@@ -1574,7 +1577,8 @@ end:
     }
 
     REPA(gpu_meshes)
-    if (C MeshRender *mesh = gpu_meshes[i]) mesh->vtxUnlock();
+    if (C MeshRender *mesh = gpu_meshes[i])
+        mesh->vtxUnlock();
 
     return matrix;
 }
@@ -1603,7 +1607,7 @@ Matrix GetRestMatrix(C CMemPtr<C MeshLod *> &meshes, C Matrix *initial_matrix, C
     REPA(meshes)
     if (C MeshLod *mesh = meshes[i])
         REPA(*mesh)
-        parts.add(&mesh->parts[i]);
+    parts.add(&mesh->parts[i]);
     return GetRestMatrix(parts, initial_matrix, mass_center, min_dist, rest_box, max_steps, only_visible, only_phys);
 }
 Matrix GetRestMatrix(C MeshLod &mesh, C Matrix *initial_matrix, C Vec *mass_center, Flt min_dist, Box *rest_box, Int max_steps, Bool only_visible, Bool only_phys) {

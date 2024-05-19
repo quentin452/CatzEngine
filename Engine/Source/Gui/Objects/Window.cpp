@@ -155,7 +155,8 @@ Flt Window::defaultBarFullWidth() C {
         }
     }
     REPA(button)
-    if (button[i].visible()) width += button[i].rect().aspect() * bar_height;
+    if (button[i].visible())
+        width += button[i].rect().aspect() * bar_height;
     return width;
 }
 Panel *Window::getNormalPanel() C {
@@ -432,7 +433,8 @@ void Window::parentClientRectChanged(C Rect *old_client, C Rect *new_client) {
             old_top = old_client->max.y;
         if (parent())
             REP(parent()->childNum())
-            if (GuiObj *menu = parent()->child(i)) if (menu->isMenuBar() && menu->visible()) {
+        if (GuiObj *menu = parent()->child(i))
+            if (menu->isMenuBar() && menu->visible()) {
                 Flt h = menu->rect().h();
                 new_top -= h;
                 old_top -= h;
@@ -1093,7 +1095,8 @@ void ModalWindow::update(C GuiPC &gpc) {
     super::update(gpc);
     if (gpc.visible && visible())
         REPA(MT)
-        if (MT.bp(i) && MT.guiObj(i) == &_background) fadeOut();
+    if (MT.bp(i) && MT.guiObj(i) == &_background)
+        fadeOut();
 }
 void ModalWindow::draw(C GuiPC &gpc) {
     if (/*gpc.visible &&*/ visible()) {

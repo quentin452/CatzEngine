@@ -212,7 +212,8 @@ Int GuiObj::childNum() {
 void GuiObj::notifyChildrenOfClientRectChange(C Rect *old_client, C Rect *new_client) {
     DEBUG_BYTE_LOCK(_used);
     REP(childNum())
-    if (GuiObj *go = child(i)) go->parentClientRectChanged(old_client, new_client);
+    if (GuiObj *go = child(i))
+        go->parentClientRectChanged(old_client, new_client);
 }
 void GuiObj::notifyParentOfRectChange(C Rect &old_rect, Bool old_visible) {
     DEBUG_BYTE_LOCK(_used);
@@ -1273,28 +1274,38 @@ Bool GuiObjChildren::Switch(C GuiObj &go, Bool next) {
 }
 GuiObj *GuiObjChildren::test(C GuiPC &gpc, C Vec2 &pos, GuiObj *&mouse_wheel) {
     REPA(children)
-    if (GuiObj *go = T[i]) if (go = go->test(gpc, pos, mouse_wheel)) return go;
+    if (GuiObj *go = T[i])
+        if (go = go->test(gpc, pos, mouse_wheel))
+            return go;
     return null;
 } // order is important, go from the end (objects on top) and stop on first found
-void GuiObjChildren::nearest(C GuiPC &gpc, GuiObjNearest &gon) { FREPA(children)
-                                                                 if (GuiObj *go = T[i]) go->nearest(gpc, gon); } // order is important
-void GuiObjChildren::draw(C GuiPC &gpc) { FREPA(children)
-                                          if (GuiObj *go = T[i]) go->draw(gpc); } // order is important
+void GuiObjChildren::nearest(C GuiPC &gpc, GuiObjNearest &gon) {
+    FREPA(children)
+    if (GuiObj *go = T[i])
+        go->nearest(gpc, gon);
+} // order is important
+void GuiObjChildren::draw(C GuiPC &gpc) {
+    FREPA(children)
+    if (GuiObj *go = T[i])
+        go->draw(gpc);
+} // order is important
 void GuiObjChildren::update(C GuiPC &gpc) {
     // clear all children at start
     FREPA(children)
-    if (GuiObj *go = T[i]) go->_updated = false;
+    if (GuiObj *go = T[i])
+        go->_updated = false;
 
 again:
     changed = false; // set no change at start
     FREPA(children)
-    if (GuiObj *go = T[i]) if (!go->_updated) // if this object wasn't updated yet
-    {
-        go->_updated = true; // set as updated
-        go->update(gpc);     // update
-        if (changed)
-            goto again; // if detected any change in children container, then start again
-    }
+    if (GuiObj *go = T[i])
+        if (!go->_updated) // if this object wasn't updated yet
+        {
+            go->_updated = true; // set as updated
+            go->update(gpc);     // update
+            if (changed)
+                goto again; // if detected any change in children container, then start again
+        }
 }
 /******************************************************************************/
 CChar *GuiObjTypeName(GUI_OBJ_TYPE type) {

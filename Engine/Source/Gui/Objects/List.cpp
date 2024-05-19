@@ -325,12 +325,14 @@ Int _List::localToVirtualColumnX(Flt local_x) C {
 /******************************************************************************/
 Int _List::firstColumn(DATA_TYPE type) {
     FREP(columns())
-    if (column(i).md.type == type) return i;
+    if (column(i).md.type == type)
+        return i;
     return -1;
 }
 Int _List::firstColumnText() {
     FREP(columns())
-    if (DataIsText(column(i).md.type)) return i;
+    if (DataIsText(column(i).md.type))
+        return i;
     return -1;
 }
 _List &_List::offsetAllColumns(Bool on) {
@@ -716,7 +718,8 @@ void _List::init(Int elms, C CMemPtr<Bool> &visible, Bool keep_cur) {
         sel.clear();
     else
         REPA(sel)
-        if (sel[i] >= totalElms()) sel.remove(i);
+    if (sel[i] >= totalElms())
+        sel.remove(i);
 }
 /******************************************************************************/
 void _List::setRects() {
@@ -969,13 +972,15 @@ Ptr _List::absToData(Int absolute) C {
 Int _List::dataToVis(CPtr data) C {
     if (data)
         REP(visibleElms())
-        if (visToData(i) == data) return i;
+    if (visToData(i) == data)
+        return i;
     return -1;
 }
 Int _List::dataToAbs(CPtr data) C {
     if (data)
         REP(totalElms())
-        if (absToData(i) == data) return i;
+    if (absToData(i) == data)
+        return i;
     return -1;
 }
 /******************************************************************************/
@@ -1754,7 +1759,8 @@ GuiObj *_List::test(C GuiPC &gpc, C Vec2 &pos, GuiObj *&mouse_wheel) {
         if (columnsVisible()) {
             GuiPC gpc_col(gpc, T);
             REP(columns())
-            if (GuiObj *go = column(i).test(gpc_col, pos, mouse_wheel)) return go;
+            if (GuiObj *go = column(i).test(gpc_col, pos, mouse_wheel))
+                return go;
         }
         if (_children.children.elms()) {
             VecI2 visible_range = visibleElmsOnScreen(&gpc);
@@ -2088,10 +2094,12 @@ void _List::update(C GuiPC &gpc) {
                     if (Kb.k(KB_A) && !Kb.k.shift() && !Kb.k.alt() && (flag & LIST_MULTI_SEL)) {
                         if (Kb.k.first()) {
                             REPA(sel)
-                            if (absToVis(sel[i]) < 0) goto different; // if element is selected but not visible
+                            if (absToVis(sel[i]) < 0)
+                                goto different; // if element is selected but not visible
                             sel.sort(Compare);
                             REP(visibleElms())
-                            if (!sel.binaryHas(visToAbs(i))) goto different; // if element is visible  but not selected (sort first)
+                            if (!sel.binaryHas(visToAbs(i)))
+                                goto different; // if element is visible  but not selected (sort first)
                             if (0) {
                             different:
                                 callSelChanging();
@@ -2186,10 +2194,11 @@ void _List::update(C GuiPC &gpc) {
                             ListColumn &lc = _columns[i];
                             if (DataIsText(lc.md.type)) {
                                 FREPA(T)
-                                if (Ptr data = visToData(i)) if (Starts(lc.md.asText(data, lc.precision), _search)) {
-                                    sel_changed |= setSel(cur = i);
-                                    break;
-                                }
+                                if (Ptr data = visToData(i))
+                                    if (Starts(lc.md.asText(data, lc.precision), _search)) {
+                                        sel_changed |= setSel(cur = i);
+                                        break;
+                                    }
                                 break;
                             }
                         }

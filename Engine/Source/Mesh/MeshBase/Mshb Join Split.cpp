@@ -126,7 +126,8 @@ void MeshBase::split(MemPtr<MeshBaseIndex> meshes, C Boxes &boxes, MESH_FLAG fla
 static Int CellIndex(C Vec &pos, C Plane *plane, Int planes) {
     Int index = 0;
     REP(planes)
-    if (Dist(pos, plane[i]) >= 0) index |= (1 << i);
+    if (Dist(pos, plane[i]) >= 0)
+        index |= (1 << i);
     return index;
 }
 void MeshBase::split(MemPtr<MeshBaseIndex> meshes, C Plane *plane, Int planes, MESH_FLAG flag_and) C {

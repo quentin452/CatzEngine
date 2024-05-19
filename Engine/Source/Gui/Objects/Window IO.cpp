@@ -79,14 +79,16 @@ static void PathChanged(C CMemPtr<MenuPush> &mps, QuickPathSelector &qps) {
                     if (!QPSShortPath(path).is())
                         return;
                     REPA(WindowIOFavorites)
-                    if (EqualPath(WindowIOFavorites[i], path)) return;
+                    if (EqualPath(WindowIOFavorites[i], path))
+                        return;
                     WindowIOFavorites.add(path);
                 }
             } else if (path == QPS_REM_FAVORITE) {
                 Str path = qps.getPath();
                 if (path.is()) {
                     REPA(WindowIOFavorites)
-                    if (EqualPath(WindowIOFavorites[i], path)) WindowIOFavorites.remove(i, true);
+                    if (EqualPath(WindowIOFavorites[i], path))
+                        WindowIOFavorites.remove(i, true);
                 }
             } else if (path != QPS_FAVORITES && path != QPS_RECENT)
                 qps.setPath(QPSFullPath(path)); // custom path
@@ -249,7 +251,8 @@ WindowIO &WindowIO::ext(C Str &ext, C Str &desc) {
     Memt<Str> exts;
     Split(exts, ext, '|');
     REPA(exts)
-    if (!exts[i].is()) exts.remove(i, true); // remove empty extensions and keep order
+    if (!exts[i].is())
+        exts.remove(i, true); // remove empty extensions and keep order
     if (_dir_operate && !exts.elms())
         return T; // mode operating on directories requires at least one extension, so if none are specified and we're in that mode, then don't apply the changes
     T._ext = ext;
@@ -348,7 +351,8 @@ Bool WindowIO::goodExt(C Str &name) C {
     if (!_dot_exts.elms())
         return true; // no extensions specified -> support all of them
     FREPA(_dot_exts)
-    if (Ends(name, _dot_exts[i])) return true;
+    if (Ends(name, _dot_exts[i]))
+        return true;
     return false;
 }
 static void ProcessExt(Mems<FileParams> &fps, C WindowIO &wio) {

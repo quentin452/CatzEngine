@@ -350,35 +350,43 @@ inline Ball::Ball(C BallM &ball) { set(ball.r, ball.pos); }
 // TEMPLATES
 /******************************************************************************/
 T1(TYPE)
-DISABLE_IF_ENUM(TYPE, Bool) InRange(SByte i, C TYPE &container) {
+DISABLE_IF_ENUM(TYPE, Bool)
+InRange(SByte i, C TYPE &container) {
     return InRange(i, Elms(container));
 } // template specialization for not enum's
 T1(TYPE)
-DISABLE_IF_ENUM(TYPE, Bool) InRange(Byte i, C TYPE &container) {
+DISABLE_IF_ENUM(TYPE, Bool)
+InRange(Byte i, C TYPE &container) {
     return InRange(i, Elms(container));
 } // template specialization for not enum's
 T1(TYPE)
-DISABLE_IF_ENUM(TYPE, Bool) InRange(Short i, C TYPE &container) {
+DISABLE_IF_ENUM(TYPE, Bool)
+InRange(Short i, C TYPE &container) {
     return InRange(i, Elms(container));
 } // template specialization for not enum's
 T1(TYPE)
-DISABLE_IF_ENUM(TYPE, Bool) InRange(UShort i, C TYPE &container) {
+DISABLE_IF_ENUM(TYPE, Bool)
+InRange(UShort i, C TYPE &container) {
     return InRange(i, Elms(container));
 } // template specialization for not enum's
 T1(TYPE)
-DISABLE_IF_ENUM(TYPE, Bool) InRange(Int i, C TYPE &container) {
+DISABLE_IF_ENUM(TYPE, Bool)
+InRange(Int i, C TYPE &container) {
     return InRange(i, Elms(container));
 } // template specialization for not enum's
 T1(TYPE)
-DISABLE_IF_ENUM(TYPE, Bool) InRange(UInt i, C TYPE &container) {
+DISABLE_IF_ENUM(TYPE, Bool)
+InRange(UInt i, C TYPE &container) {
     return InRange(i, Elms(container));
 } // template specialization for not enum's
 T1(TYPE)
-DISABLE_IF_ENUM(TYPE, Bool) InRange(Long i, C TYPE &container) {
+DISABLE_IF_ENUM(TYPE, Bool)
+InRange(Long i, C TYPE &container) {
     return InRange(i, Elms(container));
 } // template specialization for not enum's
 T1(TYPE)
-DISABLE_IF_ENUM(TYPE, Bool) InRange(ULong i, C TYPE &container) {
+DISABLE_IF_ENUM(TYPE, Bool)
+InRange(ULong i, C TYPE &container) {
     return InRange(i, Elms(container));
 } // template specialization for not enum's
 /******************************************************************************/
@@ -565,7 +573,8 @@ Bool Reference<TYPE>::load(File &f) {
     return false;
 }
 T1(TYPE)
-T1(WORLD) void Reference<TYPE>::link(WORLD &world) {
+T1(WORLD)
+void Reference<TYPE>::link(WORLD &world) {
     if (!valid() && _object_id.valid())
         _object = CAST(TYPE, world.findObjById(_object_id));
 }
@@ -633,7 +642,7 @@ T1(TYPE)
 Mems<TYPE> &Mems<TYPE>::clear() {
     if (ClassFunc<TYPE>::HasDel())
         REPA(T)
-        T[i].~TYPE(); // destroy as the first step
+    T[i].~TYPE(); // destroy as the first step
     Free(_data);
     _elms = 0;
     return T;
@@ -859,11 +868,11 @@ Mems<TYPE> &Mems<TYPE>::setNumDiscard(Int num) {
     if (num != elms()) {
         if (ClassFunc<TYPE>::HasDel())
             REPA(T)
-            T[i].~TYPE(); // delete all elements, destroy as the first step
+        T[i].~TYPE(); // delete all elements, destroy as the first step
         Alloc(Free(_data), _elms = num);
         if (ClassFunc<TYPE>::HasNew())
             FREPA(T)
-            new (&T[i]) TYPE; // create new elements, create as the last step
+        new (&T[i]) TYPE; // create new elements, create as the last step
     }
     return T;
 }
@@ -874,11 +883,11 @@ void Mems<TYPE>::minNumDiscard(Int num) {
     {
         if (ClassFunc<TYPE>::HasDel())
             REPA(T)
-            T[i].~TYPE(); // delete all elements, destroy as the first step
+        T[i].~TYPE(); // delete all elements, destroy as the first step
         Alloc(Free(_data), _elms = num);
         if (ClassFunc<TYPE>::HasNew())
             FREPA(T)
-            new (&T[i]) TYPE; // create new elements, create as the last step
+        new (&T[i]) TYPE; // create new elements, create as the last step
     }
 }
 #endif
@@ -1006,7 +1015,8 @@ Bool Mems<TYPE>::operator==(C Mems<TYPE> &x) C {
     if (elms() != x.elms())
         return false;
     REPA(T)
-    if (T[i] != x[i]) return false;
+    if (T[i] != x[i])
+        return false;
     return true;
 }
 T1(TYPE)
@@ -1014,7 +1024,8 @@ Bool Mems<TYPE>::operator!=(C Mems<TYPE> &x) C {
     if (elms() != x.elms())
         return true;
     REPA(T)
-    if (T[i] != x[i]) return true;
+    if (T[i] != x[i])
+        return true;
     return false;
 }
 
@@ -1049,21 +1060,24 @@ T1(TYPE)
 Bool Mems<TYPE>::save(File &f) C {
     f.cmpUIntV(elms());
     FREPA(T)
-    if (!T[i].save(f)) return false;
+    if (!T[i].save(f))
+        return false;
     return f.ok();
 }
 T1(TYPE)
 Bool Mems<TYPE>::save(File &f) {
     f.cmpUIntV(elms());
     FREPA(T)
-    if (!T[i].save(f)) return false;
+    if (!T[i].save(f))
+        return false;
     return f.ok();
 }
 T1(TYPE)
 Bool Mems<TYPE>::load(File &f) {
     setNum(f.decUIntV());
     FREPA(T)
-    if (!T[i].load(f)) goto error;
+    if (!T[i].load(f))
+        goto error;
     if (f.ok())
         return true;
 error:
@@ -1072,17 +1086,21 @@ error:
 }
 
 T1(TYPE)
-T1(USER) Bool Mems<TYPE>::save(File &f, C USER &user) C {
+T1(USER)
+Bool Mems<TYPE>::save(File &f, C USER &user) C {
     f.cmpUIntV(elms());
     FREPA(T)
-    if (!T[i].save(f, user)) return false;
+    if (!T[i].save(f, user))
+        return false;
     return f.ok();
 }
 T1(TYPE)
-T1(USER) Bool Mems<TYPE>::load(File &f, C USER &user) {
+T1(USER)
+Bool Mems<TYPE>::load(File &f, C USER &user) {
     setNum(f.decUIntV());
     FREPA(T)
-    if (!T[i].load(f, user)) goto error;
+    if (!T[i].load(f, user))
+        goto error;
     if (f.ok())
         return true;
 error:
@@ -1095,7 +1113,8 @@ T2(USER, USER1)
 Bool Mems<TYPE>::save(File &f, C USER &user, C USER1 &user1) C {
     f.cmpUIntV(elms());
     FREPA(T)
-    if (!T[i].save(f, user, user1)) return false;
+    if (!T[i].save(f, user, user1))
+        return false;
     return f.ok();
 }
 T1(TYPE)
@@ -1103,7 +1122,8 @@ T2(USER, USER1)
 Bool Mems<TYPE>::load(File &f, C USER &user, C USER1 &user1) {
     setNum(f.decUIntV());
     FREPA(T)
-    if (!T[i].load(f, user, user1)) goto error;
+    if (!T[i].load(f, user, user1))
+        goto error;
     if (f.ok())
         return true;
 error:
@@ -1161,14 +1181,16 @@ T1(TYPE)
 Bool Mems<TYPE>::_save(File &f) C {
     f.putInt(elms());
     FREPA(T)
-    if (!T[i].save(f)) return false;
+    if (!T[i].save(f))
+        return false;
     return f.ok();
 }
 T1(TYPE)
 Bool Mems<TYPE>::_load(File &f) {
     setNum(f.getInt());
     FREPA(T)
-    if (!T[i].load(f)) goto error;
+    if (!T[i].load(f))
+        goto error;
     if (f.ok())
         return true;
 error:
@@ -1189,7 +1211,7 @@ Mems<TYPE>::Mems(Int elms) {
     Alloc(_data, _elms = Max(elms, 0));
     if (ClassFunc<TYPE>::HasNew())
         FREPA(T)
-        new (&T[i]) TYPE;
+    new (&T[i]) TYPE;
 }
 T1(TYPE)
 Mems<TYPE>::Mems(C Mems &src) : Mems() { T = src; }
@@ -1442,7 +1464,8 @@ Bool Memc<TYPE>::operator==(C Memc<TYPE> &x) C {
     if (elms() != x.elms())
         return false;
     REPA(T)
-    if (T[i] != x[i]) return false;
+    if (T[i] != x[i])
+        return false;
     return true;
 }
 T1(TYPE)
@@ -1450,24 +1473,28 @@ Bool Memc<TYPE>::operator!=(C Memc<TYPE> &x) C {
     if (elms() != x.elms())
         return true;
     REPA(T)
-    if (T[i] != x[i]) return true;
+    if (T[i] != x[i])
+        return true;
     return false;
 }
 
 T1(TYPE)
-T1(EXTENDED) Memc<TYPE> &Memc<TYPE>::replaceClass() {
+T1(EXTENDED)
+Memc<TYPE> &Memc<TYPE>::replaceClass() {
     ASSERT_BASE_EXTENDED<TYPE, EXTENDED>();
     super::_reset(SIZE(EXTENDED), ClassFunc<EXTENDED>::GetNew(),
                   ClassFunc<EXTENDED>::GetDel());
     return T;
 }
 T1(TYPE)
-T1(BASE) Memc<TYPE>::operator Memc<BASE> &() {
+T1(BASE)
+Memc<TYPE>::operator Memc<BASE> &() {
     ASSERT_BASE_EXTENDED<BASE, TYPE>();
     return *(Memc<BASE> *)this;
 }
 T1(TYPE)
-T1(BASE) Memc<TYPE>::operator C Memc<BASE> &() C {
+T1(BASE)
+Memc<TYPE>::operator C Memc<BASE> &() C {
     ASSERT_BASE_EXTENDED<BASE, TYPE>();
     return *(C Memc<BASE> *)this;
 }
@@ -1476,21 +1503,24 @@ T1(TYPE)
 Bool Memc<TYPE>::save(File &f) C {
     f.cmpUIntV(elms());
     FREPA(T)
-    if (!T[i].save(f)) return false;
+    if (!T[i].save(f))
+        return false;
     return f.ok();
 }
 T1(TYPE)
 Bool Memc<TYPE>::save(File &f) {
     f.cmpUIntV(elms());
     FREPA(T)
-    if (!T[i].save(f)) return false;
+    if (!T[i].save(f))
+        return false;
     return f.ok();
 }
 T1(TYPE)
 Bool Memc<TYPE>::load(File &f) {
     setNum(f.decUIntV());
     FREPA(T)
-    if (!T[i].load(f)) goto error;
+    if (!T[i].load(f))
+        goto error;
     if (f.ok())
         return true;
 error:
@@ -1499,17 +1529,21 @@ error:
 }
 
 T1(TYPE)
-T1(USER) Bool Memc<TYPE>::save(File &f, C USER &user) C {
+T1(USER)
+Bool Memc<TYPE>::save(File &f, C USER &user) C {
     f.cmpUIntV(elms());
     FREPA(T)
-    if (!T[i].save(f, user)) return false;
+    if (!T[i].save(f, user))
+        return false;
     return f.ok();
 }
 T1(TYPE)
-T1(USER) Bool Memc<TYPE>::load(File &f, C USER &user) {
+T1(USER)
+Bool Memc<TYPE>::load(File &f, C USER &user) {
     setNum(f.decUIntV());
     FREPA(T)
-    if (!T[i].load(f, user)) goto error;
+    if (!T[i].load(f, user))
+        goto error;
     if (f.ok())
         return true;
 error:
@@ -1522,7 +1556,8 @@ T2(USER, USER1)
 Bool Memc<TYPE>::save(File &f, C USER &user, C USER1 &user1) C {
     f.cmpUIntV(elms());
     FREPA(T)
-    if (!T[i].save(f, user, user1)) return false;
+    if (!T[i].save(f, user, user1))
+        return false;
     return f.ok();
 }
 T1(TYPE)
@@ -1530,7 +1565,8 @@ T2(USER, USER1)
 Bool Memc<TYPE>::load(File &f, C USER &user, C USER1 &user1) {
     setNum(f.decUIntV());
     FREPA(T)
-    if (!T[i].load(f, user, user1)) goto error;
+    if (!T[i].load(f, user, user1))
+        goto error;
     if (f.ok())
         return true;
 error:
@@ -1552,14 +1588,16 @@ T1(TYPE)
 Bool Memc<TYPE>::_save(File &f) C {
     f.putInt(elms());
     FREPA(T)
-    if (!T[i].save(f)) return false;
+    if (!T[i].save(f))
+        return false;
     return f.ok();
 }
 T1(TYPE)
 Bool Memc<TYPE>::_load(File &f) {
     setNum(f.getInt());
     FREPA(T)
-    if (!T[i].load(f)) goto error;
+    if (!T[i].load(f))
+        goto error;
     if (f.ok())
         return true;
 error:
@@ -1685,19 +1723,22 @@ T1(TYPE)
 Int MemcAbstract<TYPE>::addNum(Int num) { return super::addNum(num); }
 
 T1(TYPE)
-T1(EXTENDED) MemcAbstract<TYPE> &MemcAbstract<TYPE>::replaceClass() {
+T1(EXTENDED)
+MemcAbstract<TYPE> &MemcAbstract<TYPE>::replaceClass() {
     ASSERT_BASE_EXTENDED<TYPE, EXTENDED>();
     super::_reset(SIZE(EXTENDED), ClassFunc<EXTENDED>::GetNew(),
                   ClassFunc<EXTENDED>::GetDel());
     return T;
 }
 T1(TYPE)
-T1(BASE) MemcAbstract<TYPE>::operator Memc<BASE> &() {
+T1(BASE)
+MemcAbstract<TYPE>::operator Memc<BASE> &() {
     ASSERT_BASE_EXTENDED<BASE, TYPE>();
     return *(Memc<BASE> *)this;
 }
 T1(TYPE)
-T1(BASE) MemcAbstract<TYPE>::operator C Memc<BASE> &() C {
+T1(BASE)
+MemcAbstract<TYPE>::operator C Memc<BASE> &() C {
     ASSERT_BASE_EXTENDED<BASE, TYPE>();
     return *(C Memc<BASE> *)this;
 }
@@ -1943,7 +1984,8 @@ Bool MemcThreadSafe<TYPE>::save(File &f) C {
     SyncLocker locker(_lock);
     f.cmpUIntV(elms());
     FREPA(T)
-    if (!lockedElm(i).save(f)) return false;
+    if (!lockedElm(i).save(f))
+        return false;
     return f.ok();
 }
 T1(TYPE)
@@ -1951,7 +1993,8 @@ Bool MemcThreadSafe<TYPE>::save(File &f) {
     SyncLocker locker(_lock);
     f.cmpUIntV(elms());
     FREPA(T)
-    if (!lockedElm(i).save(f)) return false;
+    if (!lockedElm(i).save(f))
+        return false;
     return f.ok();
 }
 T1(TYPE)
@@ -1959,7 +2002,8 @@ Bool MemcThreadSafe<TYPE>::load(File &f) {
     SyncLocker locker(_lock);
     setNum(f.decUIntV());
     FREPA(T)
-    if (!lockedElm(i).load(f)) goto error;
+    if (!lockedElm(i).load(f))
+        goto error;
     if (f.ok())
         return true;
 error:
@@ -1987,7 +2031,7 @@ template <typename TYPE, Int size>
 Memt<TYPE, size> &Memt<TYPE, size>::clear() {
     if (ClassFunc<TYPE>::HasDel())
         REPA(T)
-        T[i].~TYPE(); // destroy as the first step
+    T[i].~TYPE(); // destroy as the first step
     _elms = 0;
     return T;
 }
@@ -2479,7 +2523,8 @@ Bool Memt<TYPE, size>::operator==(C Memt<TYPE, size> &x) C {
     if (elms() != x.elms())
         return false;
     REPA(T)
-    if (T[i] != x[i]) return false;
+    if (T[i] != x[i])
+        return false;
     return true;
 }
 template <typename TYPE, Int size>
@@ -2487,7 +2532,8 @@ Bool Memt<TYPE, size>::operator!=(C Memt<TYPE, size> &x) C {
     if (elms() != x.elms())
         return true;
     REPA(T)
-    if (T[i] != x[i]) return true;
+    if (T[i] != x[i])
+        return true;
     return false;
 }
 
@@ -2495,21 +2541,24 @@ template <typename TYPE, Int size>
 Bool Memt<TYPE, size>::save(File &f) C {
     f.cmpUIntV(elms());
     FREPA(T)
-    if (!T[i].save(f)) return false;
+    if (!T[i].save(f))
+        return false;
     return f.ok();
 }
 template <typename TYPE, Int size>
 Bool Memt<TYPE, size>::save(File &f) {
     f.cmpUIntV(elms());
     FREPA(T)
-    if (!T[i].save(f)) return false;
+    if (!T[i].save(f))
+        return false;
     return f.ok();
 }
 template <typename TYPE, Int size>
 Bool Memt<TYPE, size>::load(File &f) {
     setNum(f.decUIntV());
     FREPA(T)
-    if (!T[i].load(f)) goto error;
+    if (!T[i].load(f))
+        goto error;
     if (f.ok())
         return true;
 error:
@@ -2774,19 +2823,22 @@ Memb<TYPE> &Memb<TYPE>::operator=(Memb<TYPE> &&src) {
 }
 
 T1(TYPE)
-T1(EXTENDED) Memb<TYPE> &Memb<TYPE>::replaceClass() {
+T1(EXTENDED)
+Memb<TYPE> &Memb<TYPE>::replaceClass() {
     ASSERT_BASE_EXTENDED<TYPE, EXTENDED>();
     super::_reset(SIZE(EXTENDED), _block_elms, ClassFunc<EXTENDED>::GetNew(),
                   ClassFunc<EXTENDED>::GetDel());
     return T;
 }
 T1(TYPE)
-T1(BASE) Memb<TYPE>::operator Memb<BASE> &() {
+T1(BASE)
+Memb<TYPE>::operator Memb<BASE> &() {
     ASSERT_BASE_EXTENDED<BASE, TYPE>();
     return *(Memb<BASE> *)this;
 }
 T1(TYPE)
-T1(BASE) Memb<TYPE>::operator C Memb<BASE> &() C {
+T1(BASE)
+Memb<TYPE>::operator C Memb<BASE> &() C {
     ASSERT_BASE_EXTENDED<BASE, TYPE>();
     return *(C Memb<BASE> *)this;
 }
@@ -2795,21 +2847,24 @@ T1(TYPE)
 Bool Memb<TYPE>::save(File &f) C {
     f.cmpUIntV(elms());
     FREPA(T)
-    if (!T[i].save(f)) return false;
+    if (!T[i].save(f))
+        return false;
     return f.ok();
 }
 T1(TYPE)
 Bool Memb<TYPE>::save(File &f) {
     f.cmpUIntV(elms());
     FREPA(T)
-    if (!T[i].save(f)) return false;
+    if (!T[i].save(f))
+        return false;
     return f.ok();
 }
 T1(TYPE)
 Bool Memb<TYPE>::load(File &f) {
     setNum(f.decUIntV());
     FREPA(T)
-    if (!T[i].load(f)) goto error;
+    if (!T[i].load(f))
+        goto error;
     if (f.ok())
         return true;
 error:
@@ -2932,19 +2987,22 @@ T1(TYPE)
 Int MembAbstract<TYPE>::addNum(Int num) { return super::addNum(num); }
 
 T1(TYPE)
-T1(EXTENDED) MembAbstract<TYPE> &MembAbstract<TYPE>::replaceClass() {
+T1(EXTENDED)
+MembAbstract<TYPE> &MembAbstract<TYPE>::replaceClass() {
     ASSERT_BASE_EXTENDED<TYPE, EXTENDED>();
     super::_reset(SIZE(EXTENDED), _block_elms, ClassFunc<EXTENDED>::GetNew(),
                   ClassFunc<EXTENDED>::GetDel());
     return T;
 }
 T1(TYPE)
-T1(BASE) MembAbstract<TYPE>::operator Memb<BASE> &() {
+T1(BASE)
+MembAbstract<TYPE>::operator Memb<BASE> &() {
     ASSERT_BASE_EXTENDED<BASE, TYPE>();
     return *(Memb<BASE> *)this;
 }
 T1(TYPE)
-T1(BASE) MembAbstract<TYPE>::operator C Memb<BASE> &() C {
+T1(BASE)
+MembAbstract<TYPE>::operator C Memb<BASE> &() C {
     ASSERT_BASE_EXTENDED<BASE, TYPE>();
     return *(C Memb<BASE> *)this;
 }
@@ -2973,12 +3031,14 @@ TYPE &MembConst<TYPE>::last() C {
 }
 
 T1(TYPE)
-T1(BASE) MembConst<TYPE>::operator MembConst<BASE> &() {
+T1(BASE)
+MembConst<TYPE>::operator MembConst<BASE> &() {
     ASSERT_BASE_EXTENDED<BASE, TYPE>();
     return *(MembConst<BASE> *)this;
 }
 T1(TYPE)
-T1(BASE) MembConst<TYPE>::operator C MembConst<BASE> &() C {
+T1(BASE)
+MembConst<TYPE>::operator C MembConst<BASE> &() C {
     ASSERT_BASE_EXTENDED<BASE, TYPE>();
     return *(C MembConst<BASE> *)this;
 }
@@ -3197,19 +3257,22 @@ Memx<TYPE> &Memx<TYPE>::operator=(Memx<TYPE> &&src) {
 }
 
 T1(TYPE)
-T1(EXTENDED) Memx<TYPE> &Memx<TYPE>::replaceClass() {
+T1(EXTENDED)
+Memx<TYPE> &Memx<TYPE>::replaceClass() {
     ASSERT_BASE_EXTENDED<TYPE, EXTENDED>();
     super::_reset(SIZE(EXTENDED), _abs.blockElms(), ClassFunc<EXTENDED>::GetNew(),
                   ClassFunc<EXTENDED>::GetDel());
     return T;
 }
 T1(TYPE)
-T1(BASE) Memx<TYPE>::operator Memx<BASE> &() {
+T1(BASE)
+Memx<TYPE>::operator Memx<BASE> &() {
     ASSERT_BASE_EXTENDED<BASE, TYPE>();
     return *(Memx<BASE> *)this;
 }
 T1(TYPE)
-T1(BASE) Memx<TYPE>::operator C Memx<BASE> &() C {
+T1(BASE)
+Memx<TYPE>::operator C Memx<BASE> &() C {
     ASSERT_BASE_EXTENDED<BASE, TYPE>();
     return *(C Memx<BASE> *)this;
 }
@@ -3218,21 +3281,24 @@ T1(TYPE)
 Bool Memx<TYPE>::save(File &f) C {
     f.cmpUIntV(elms());
     FREPA(T)
-    if (!T[i].save(f)) return false;
+    if (!T[i].save(f))
+        return false;
     return f.ok();
 }
 T1(TYPE)
 Bool Memx<TYPE>::save(File &f) {
     f.cmpUIntV(elms());
     FREPA(T)
-    if (!T[i].save(f)) return false;
+    if (!T[i].save(f))
+        return false;
     return f.ok();
 }
 T1(TYPE)
 Bool Memx<TYPE>::load(File &f) {
     setNum(f.decUIntV());
     FREPA(T)
-    if (!T[i].load(f)) goto error;
+    if (!T[i].load(f))
+        goto error;
     if (f.ok())
         return true;
 error:
@@ -3370,19 +3436,22 @@ MemxAbstract<TYPE> &MemxAbstract<TYPE>::removeLast() {
 }
 
 T1(TYPE)
-T1(EXTENDED) MemxAbstract<TYPE> &MemxAbstract<TYPE>::replaceClass() {
+T1(EXTENDED)
+MemxAbstract<TYPE> &MemxAbstract<TYPE>::replaceClass() {
     ASSERT_BASE_EXTENDED<TYPE, EXTENDED>();
     super::_reset(SIZE(EXTENDED), _abs.blockElms(), ClassFunc<EXTENDED>::GetNew(),
                   ClassFunc<EXTENDED>::GetDel());
     return T;
 }
 T1(TYPE)
-T1(BASE) MemxAbstract<TYPE>::operator Memx<BASE> &() {
+T1(BASE)
+MemxAbstract<TYPE>::operator Memx<BASE> &() {
     ASSERT_BASE_EXTENDED<BASE, TYPE>();
     return *(Memx<BASE> *)this;
 }
 T1(TYPE)
-T1(BASE) MemxAbstract<TYPE>::operator C Memx<BASE> &() C {
+T1(BASE)
+MemxAbstract<TYPE>::operator C Memx<BASE> &() C {
     ASSERT_BASE_EXTENDED<BASE, TYPE>();
     return *(C Memx<BASE> *)this;
 }
@@ -3589,21 +3658,24 @@ T1(TYPE)
 Bool Meml<TYPE>::save(File &f) C {
     f.cmpUIntV(elms());
     MFREP(T)
-    if (!T[i].save(f)) return false;
+    if (!T[i].save(f))
+        return false;
     return f.ok();
 }
 T1(TYPE)
 Bool Meml<TYPE>::save(File &f) {
     f.cmpUIntV(elms());
     MFREP(T)
-    if (!T[i].save(f)) return false;
+    if (!T[i].save(f))
+        return false;
     return f.ok();
 }
 T1(TYPE)
 Bool Meml<TYPE>::load(File &f) {
     setNum(f.decUIntV());
     MFREP(T)
-    if (!T[i].load(f)) goto error;
+    if (!T[i].load(f))
+        goto error;
     if (f.ok())
         return true;
 error:
@@ -4017,7 +4089,8 @@ Bool CMemPtr<TYPE, Memt_size>::save(File &f) C {
     default:
         f.cmpUIntV(elms());
         FREPA(T)
-        if (!T[i].save(f)) return false;
+        if (!T[i].save(f))
+            return false;
         return f.ok(); // PTR
     case MEMS:
         return _mems->save(f);
@@ -4856,7 +4929,8 @@ Bool MemPtr<TYPE, Memt_size>::save(File &f) {
     default:
         f.cmpUIntV(T.elms());
         FREPA(T)
-        if (!T[i].save(f)) return false;
+        if (!T[i].save(f))
+            return false;
         return f.ok(); // PTR
     case super::MEMS:
         return ConstCast(T._mems)->save(f);
@@ -4879,7 +4953,8 @@ Bool MemPtr<TYPE, Memt_size>::load(File &f) {
         if (f.decUIntV() != T.elms())
             return false;
         FREPA(T)
-        if (!T[i].load(f)) return false;
+        if (!T[i].load(f))
+            return false;
         return f.ok(); // PTR
     case super::MEMS:
         return ConstCast(T._mems)->load(f);
@@ -5121,7 +5196,8 @@ void Cache<TYPE>::setLoadUser(Ptr user) {
 }
 
 T1(TYPE)
-T1(EXTENDED) Cache<TYPE> &Cache<TYPE>::replaceClass() {
+T1(EXTENDED)
+Cache<TYPE> &Cache<TYPE>::replaceClass() {
     ASSERT_BASE_EXTENDED<TYPE, EXTENDED>();
     lock();
     del(); /*_data_offset=OFFSET(typename Cache<EXTENDED>::Elm, data);*/
@@ -5750,7 +5826,8 @@ Bool ThreadSafeMap<KEY, DATA>::replaceKey(C KEY &src, C KEY &dest) {
 }
 
 T2(KEY, DATA)
-T1(EXTENDED) Map<KEY, DATA> &Map<KEY, DATA>::replaceClass() {
+T1(EXTENDED)
+Map<KEY, DATA> &Map<KEY, DATA>::replaceClass() {
     ASSERT_BASE_EXTENDED<DATA, EXTENDED>();
     del();
     _key_offset = UIntPtr(&((typename Map<KEY, EXTENDED>::Elm *)null)
@@ -5762,7 +5839,8 @@ T1(EXTENDED) Map<KEY, DATA> &Map<KEY, DATA>::replaceClass() {
     return T;
 }
 T2(KEY, DATA)
-T1(EXTENDED) MapEx<KEY, DATA> &MapEx<KEY, DATA>::replaceClass() {
+T1(EXTENDED)
+MapEx<KEY, DATA> &MapEx<KEY, DATA>::replaceClass() {
     ASSERT_BASE_EXTENDED<DATA, EXTENDED>();
     del();
     _key_offset =
@@ -5980,7 +6058,8 @@ Grid<TYPE> &Grid<TYPE>::fastAccess(C RectI *rect) {
   // all cells within the rectangle will be available instantly, if null is
   // provided then the optimization is disabled
 T1(TYPE)
-T1(EXTENDED) Grid<TYPE> &Grid<TYPE>::replaceClass() {
+T1(EXTENDED)
+Grid<TYPE> &Grid<TYPE>::replaceClass() {
     _Grid::replaceClass<TYPE, EXTENDED>();
     return T;
 } // replace the type of class stored in the grid, all grid cells are
@@ -6149,12 +6228,14 @@ ObjMap<TYPE> &ObjMap<TYPE>::removeObj(C TYPE *data) {
 }
 
 T1(TYPE)
-T1(BASE) ObjMap<TYPE>::operator ObjMap<BASE> &() {
+T1(BASE)
+ObjMap<TYPE>::operator ObjMap<BASE> &() {
     ASSERT_BASE_EXTENDED<BASE, TYPE>();
     return *(ObjMap<BASE> *)this;
 }
 T1(TYPE)
-T1(BASE) ObjMap<TYPE>::operator C ObjMap<BASE> &() C {
+T1(BASE)
+ObjMap<TYPE>::operator C ObjMap<BASE> &() C {
     ASSERT_BASE_EXTENDED<BASE, TYPE>();
     return *(C ObjMap<BASE> *)this;
 }
@@ -6370,7 +6451,8 @@ TYPE *Undo<TYPE>::set(Int change_type, Bool force_create, Flt extra_time) {
 }
 
 T1(TYPE)
-T1(CHANGE) Undo<TYPE> &Undo<TYPE>::replaceClass() {
+T1(CHANGE)
+Undo<TYPE> &Undo<TYPE>::replaceClass() {
     ASSERT_BASE_EXTENDED<TYPE, CHANGE>();
     _changes.replaceClass<CHANGE>();
     return T;

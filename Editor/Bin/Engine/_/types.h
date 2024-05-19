@@ -50,58 +50,58 @@ typedef U32 UIntPtr; // Unsigned Int capable of storing full memory address
 #endif
 /******************************************************************************/
 #undef SHORT_MIN
-#define SHORT_MIN                                                              \
-  (-0x7FFF - 1) // Minimum possible value of 16-bit   signed int ( Short)
+#define SHORT_MIN \
+    (-0x7FFF - 1) // Minimum possible value of 16-bit   signed int ( Short)
 #undef SHORT_MAX
-#define SHORT_MAX                                                              \
-  0x7FFF // Maximum possible value of 16-bit   signed int ( Short)
+#define SHORT_MAX \
+    0x7FFF // Maximum possible value of 16-bit   signed int ( Short)
 #undef USHORT_MAX
-#define USHORT_MAX                                                             \
-  0xFFFFu // Maximum possible value of 16-bit unsigned int (UShort)
+#define USHORT_MAX \
+    0xFFFFu // Maximum possible value of 16-bit unsigned int (UShort)
 #undef INT_MIN
-#define INT_MIN                                                                \
-  (-0x7FFFFFFF - 1) // Minimum possible value of 32-bit   signed int ( Int  )
+#define INT_MIN \
+    (-0x7FFFFFFF - 1) // Minimum possible value of 32-bit   signed int ( Int  )
 #undef INT_MAX
-#define INT_MAX                                                                \
-  0x7FFFFFFF // Maximum possible value of 32-bit   signed int ( Int  )
+#define INT_MAX \
+    0x7FFFFFFF // Maximum possible value of 32-bit   signed int ( Int  )
 #undef UINT_MAX
-#define UINT_MAX                                                               \
-  0xFFFFFFFFu // Maximum possible value of 32-bit unsigned int (UInt  )
+#define UINT_MAX \
+    0xFFFFFFFFu // Maximum possible value of 32-bit unsigned int (UInt  )
 #undef INT24_MIN
-#define INT24_MIN                                                              \
-  (-0x7FFFFF - 1) // Minimum possible value of 24-bit   signed int ( Int24)
+#define INT24_MIN \
+    (-0x7FFFFF - 1) // Minimum possible value of 24-bit   signed int ( Int24)
 #undef INT24_MAX
-#define INT24_MAX                                                              \
-  0x7FFFFF // Maximum possible value of 24-bit   signed int ( Int24)
+#define INT24_MAX \
+    0x7FFFFF // Maximum possible value of 24-bit   signed int ( Int24)
 #undef UINT24_MAX
-#define UINT24_MAX                                                             \
-  0xFFFFFFu // Maximum possible value of 24-bit unsigned int (UInt24)
+#define UINT24_MAX \
+    0xFFFFFFu // Maximum possible value of 24-bit unsigned int (UInt24)
 #undef LONG_MIN
-#define LONG_MIN                                                               \
-  (-0x7FFFFFFFFFFFFFFF -                                                       \
-   1) // Minimum possible value of 64-bit   signed int ( Long )
+#define LONG_MIN           \
+    (-0x7FFFFFFFFFFFFFFF - \
+     1) // Minimum possible value of 64-bit   signed int ( Long )
 #undef LONG_MAX
-#define LONG_MAX                                                               \
-  0x7FFFFFFFFFFFFFFF // Maximum possible value of 64-bit   signed int ( Long )
+#define LONG_MAX \
+    0x7FFFFFFFFFFFFFFF // Maximum possible value of 64-bit   signed int ( Long )
 #undef ULONG_MAX
-#define ULONG_MAX                                                              \
-  0xFFFFFFFFFFFFFFFFu // Maximum possible value of 64-bit unsigned int (ULong )
+#define ULONG_MAX \
+    0xFFFFFFFFFFFFFFFFu // Maximum possible value of 64-bit unsigned int (ULong )
 #undef HALF_MIN
-#define HALF_MIN                                                               \
-  0.00006103515625f // Minimum positive value of 16-bit real         (Half )
+#define HALF_MIN \
+    0.00006103515625f // Minimum positive value of 16-bit real         (Half )
 #undef HALF_MAX
 #define HALF_MAX 65504 // Maximum possible value of 16-bit real         (Half )
 #undef HALF_EPS
 #define HALF_EPS 0.0009765625f // smallest such that 1.0h+HALF_EPS != 1.0h
 #undef FLT_MAX
-#define FLT_MAX                                                                \
-  3.402823466e+38f // Maximum possible value of 32-bit real         ( Flt )
+#define FLT_MAX \
+    3.402823466e+38f // Maximum possible value of 32-bit real         ( Flt )
 #undef FLT_EPS
 #define FLT_EPS 1.192092896e-7f // smallest such that 1.0f+FLT_EPS != 1.0f
 #undef DBL_MAX
-#define DBL_MAX                                                                \
-  1.7976931348623158e+308 // Maximum possible value of 64-bit real         ( Dbl
-                          // )
+#define DBL_MAX \
+    1.7976931348623158e+308 // Maximum possible value of 64-bit real         ( Dbl
+                            // )
 #undef INTPTR_MAX
 #undef UINTPTR_MAX
 #if X64

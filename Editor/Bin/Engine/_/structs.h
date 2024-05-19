@@ -234,22 +234,35 @@ struct _Memc;
 struct _Memb;
 struct _Memx;
 struct MemlNode;
-T1(TYPE) struct Mems;
-T1(TYPE) struct FixedMems;
-T1(TYPE) struct Memc;
-T1(TYPE) struct Memb;
-T1(TYPE) struct Memx;
-T1(TYPE) struct Meml;
-template <typename TYPE, Int size = 64 * 1024> struct Memt;
-template <typename TYPE, Int size = 64 * 1024> struct CMemPtr;
-template <typename TYPE, Int size = 64 * 1024> struct MemPtr;
+T1(TYPE)
+struct Mems;
+T1(TYPE)
+struct FixedMems;
+T1(TYPE)
+struct Memc;
+T1(TYPE)
+struct Memb;
+T1(TYPE)
+struct Memx;
+T1(TYPE)
+struct Meml;
+template <typename TYPE, Int size = 64 * 1024>
+struct Memt;
+template <typename TYPE, Int size = 64 * 1024>
+struct CMemPtr;
+template <typename TYPE, Int size = 64 * 1024>
+struct MemPtr;
 struct _Grid;
 struct _Map;
 struct _Cache;
-T1(TYPE) struct Cache;
-T2(KEY, DATA) struct MapEx;
-template <typename TYPE, Cache<TYPE> &CACHE> struct CacheElmPtr;
-template <typename KEY, typename DATA, MapEx<KEY, DATA> &MAP> struct MapElmPtr;
+T1(TYPE)
+struct Cache;
+T2(KEY, DATA)
+struct MapEx;
+template <typename TYPE, Cache<TYPE> &CACHE>
+struct CacheElmPtr;
+template <typename KEY, typename DATA, MapEx<KEY, DATA> &MAP>
+struct MapElmPtr;
 struct Object;
 struct DataCallback;
 struct Notification;
@@ -296,7 +309,8 @@ struct Chr;
 struct Area;
 struct WorldSettings;
 struct WorldManager;
-T1(TYPE) struct ObjMap;
+T1(TYPE)
+struct ObjMap;
 } // namespace Game
 /******************************************************************************/
 // EDIT

@@ -20,7 +20,7 @@
 #undef MIN
 #undef MAX
 #undef ABS
-#elif (defined __linux__ && !defined ANDROID) ||                               \
+#elif (defined __linux__ && !defined ANDROID) || \
     defined EMSCRIPTEN // LINUX or WEB
 #undef Time
 #undef Font

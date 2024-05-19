@@ -167,5 +167,6 @@
     "editor.formatOnSave": true
   },
   "sonarlint.pathToCompileCommands": "${workspaceFolder}\\compile_commands.json",
-  "cmake.sourceDirectory": "C:/Users/iamacatfr2/Desktop/github-intellidea/CatzWorld/godot-cpp"
+  "cmake.sourceDirectory": "C:/Users/iamacatfr2/Desktop/github-intellidea/CatzWorld/godot-cpp",
+  "clang-format.style": "{BasedOnStyle: llvm, IndentWidth: 4, ColumnLimit: 0}"
 }

@@ -15,7 +15,7 @@
 #define Cursor AppleCursor
 #define FileInfo AppleFileInfo
 #define TextStyle AppleTextStyle
-#elif (defined __linux__ && !defined ANDROID) ||                               \
+#elif (defined __linux__ && !defined ANDROID) || \
     defined EMSCRIPTEN // LINUX or WEB
 #define Time LinuxTime
 #define Font LinuxFont

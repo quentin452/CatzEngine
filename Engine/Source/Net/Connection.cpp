@@ -341,7 +341,8 @@ Bool FastConnection::create(Int port) {
                 return true;
         } else
             REP(0x10000)
-            if (_socket.bind(addr.port(i))) return true; // find first available
+        if (_socket.bind(addr.port(i)))
+            return true; // find first available
     }
     del();
     return false;
@@ -420,12 +421,12 @@ Bool ConnectionServer::create(Int port) {
                     return true;
         } else
             REP(0x10000)
-            if (_server.bind(addr.port(i))) // find first available
-            {
-                if (_server.listen())
-                    return true;
-                break;
-            }
+        if (_server.bind(addr.port(i))) // find first available
+        {
+            if (_server.listen())
+                return true;
+            break;
+        }
     }
     del();
     return false;
@@ -472,7 +473,8 @@ void ConnectionServer::update() {
 
     // update clients
     REPA(clients)
-    if (!clients[i].update()) clients.remove(i);
+    if (!clients[i].update())
+        clients.remove(i);
 }
 /******************************************************************************/
 } // namespace EE

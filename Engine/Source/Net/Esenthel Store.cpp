@@ -260,7 +260,8 @@ void EsenthelStore::updatePurchases() {
                     {
                         if (TextNode *purchase_id = data.findNode("Purchase"))
                             REPA(_purchases)
-                            if (_purchases[i].id == purchase_id->value) _purchases.remove(i, true);
+                        if (_purchases[i].id == purchase_id->value)
+                            _purchases.remove(i, true);
                     } break;
                     }
         } // !! no break on purpose so it can be removed !!

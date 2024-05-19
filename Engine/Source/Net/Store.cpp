@@ -146,19 +146,22 @@ PlatformStore::PlatformStore() {
 C PlatformStore::Item *PlatformStore::findItem(C Str &item_id) C {
     if (item_id.is())
         REPA(_items)
-        if (Equal(_items[i].id, item_id, true)) return &_items[i];
+    if (Equal(_items[i].id, item_id, true))
+        return &_items[i];
     return null;
 }
 C PlatformStore::Purchase *PlatformStore::findPurchase(C Str &item_id) C {
     if (item_id.is())
         REPA(_purchases)
-        if (Equal(_purchases[i].id, item_id, true)) return &_purchases[i];
+    if (Equal(_purchases[i].id, item_id, true))
+        return &_purchases[i];
     return null;
 }
 C PlatformStore::Purchase *PlatformStore::findPurchaseByToken(C Str &token) C {
     if (token.is())
         REPA(_purchases)
-        if (Equal(_purchases[i].token, token, true)) return &_purchases[i];
+    if (Equal(_purchases[i].token, token, true))
+        return &_purchases[i];
     return null;
 }
 
@@ -281,7 +284,8 @@ Bool PlatformStore::refreshItems(C CMemPtr<Str> &item_ids) {
             REPA(item_ids) {
                 C Str &item_id = item_ids[i];
                 REPA(_get_item_details)
-                if (Equal(_get_item_details[i], item_id, true)) goto has;
+                if (Equal(_get_item_details[i], item_id, true))
+                    goto has;
                 _get_item_details.add(item_id);
                 added = true;
             has:;
@@ -504,7 +508,8 @@ PlatformStore::RESULT PlatformStore::consume(C Str &token) {
     {
         SyncLocker locker(_lock);
         REPA(_consume)
-        if (Equal(_consume[i], token, true)) return WAITING;
+        if (Equal(_consume[i], token, true))
+            return WAITING;
         _consume.add(token);
         if (!_thread.active()) {
             _thread.create(BackgroundUpdate, this);

@@ -1491,7 +1491,7 @@ Bool SQL::getCol(Int i, Flt &value) {
             case SDT_BINARY:
                 value = 0;
                 FREP(Min(col.b.elms(), SIZEI(value)))
-                (U32 &) value |= (col.b[i] << (i * 8));
+                (U32 &)value |= (col.b[i] << (i * 8));
                 return true;
             }
         }
@@ -1527,7 +1527,7 @@ Bool SQL::getCol(Int i, Dbl &value) {
             case SDT_BINARY:
                 value = 0;
                 FREP(Min(col.b.elms(), SIZEI(value)))
-                (ULong &) value |= (ULong(col.b[i]) << (i * 8));
+                (ULong &)value |= (ULong(col.b[i]) << (i * 8));
                 return true;
             }
         }

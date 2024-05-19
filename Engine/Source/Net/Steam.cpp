@@ -204,7 +204,8 @@ static Bool SetDateFromYYYYMMDD(DateTime &dt, C Str &text) {
     dt.zero();
     if (text.length() == 8) {
         REPA(text)
-        if (FlagOff(CharFlagFast(text[i]), CHARF_DIG)) goto invalid;
+        if (FlagOff(CharFlagFast(text[i]), CHARF_DIG))
+            goto invalid;
         dt.year = CharInt(text[0]) * 1000 + CharInt(text[1]) * 100 + CharInt(text[2]) * 10 + CharInt(text[3]) * 1;
         dt.month = CharInt(text[4]) * 10 + CharInt(text[5]) * 1;
         dt.day = CharInt(text[6]) * 10 + CharInt(text[7]) * 1;
@@ -406,7 +407,8 @@ LANG_TYPE SteamWorks::appLanguage() C {
     if (ISteamApps *i = SteamApps())
         if (auto text = i->GetCurrentGameLanguage())
             REPA(SteamLanguages)
-            if (Equal(text, SteamLanguages[i].code)) return SteamLanguages[i].lang;
+    if (Equal(text, SteamLanguages[i].code))
+        return SteamLanguages[i].lang;
 #endif
     return LANG_NONE;
 }

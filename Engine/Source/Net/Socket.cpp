@@ -46,10 +46,12 @@ static INLINE Int CompareV6(CPtr a, CPtr b) // assumes that a!=null && b!=null
     C UInt *A = (UInt *)a, *B = (UInt *)b;
 #if 1 // check high-order first (this is needed when 'v4Ip4' is returned as direct cast without any byte shuffle)
     REP(IPV6_UINTS)
-    if (Int c = Compare(A[i], B[i])) return c;
+    if (Int c = Compare(A[i], B[i]))
+        return c;
 #else // check low-order first
     REP(IPV6_UINTS)
-    if (Int c = Compare(*A++, *B++)) return c;
+    if (Int c = Compare(*A++, *B++))
+        return c;
 #endif
     return 0;
 }
@@ -293,7 +295,8 @@ Bool SockAddr::thisDevice() C {
     Memt<SockAddr> addrs;
     GetLocalAddresses(addrs);
     REPA(addrs)
-    if (!CompareIgnorePort(T, addrs[i])) return true;
+    if (!CompareIgnorePort(T, addrs[i]))
+        return true;
     return false;
 }
 Bool SockAddr::needsV6() C {

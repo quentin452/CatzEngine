@@ -4,7 +4,7 @@
 namespace EE{
 #include "PhysX Stream.h"
 /******************************************************************************/
-#define CC4_CLMS CC4('C','L','M','S')
+#define CC4_CLMS CC4('C', 'L', 'M', 'S')
 /******************************************************************************/
 Cache<ClothMesh> ClothMeshes("Cloth Mesh"); // ClothMesh Cache
 /******************************************************************************/
@@ -490,7 +490,7 @@ void Cloth::update()
 	if(_update_count!=Physics._update_count)
 	{
 	  _update_count=Physics._update_count;
-	#if PHYSX
+#if PHYSX
 	   if(C Particle *particles=lockRead())
 	   {
 	      if(Vtx *vtx=(Vtx*)_vtx_buf.lock(LOCK_WRITE))
@@ -518,7 +518,7 @@ void Cloth::update()
 	      }
 	      unlock();
 	   }
-	#endif
+#endif
 	}
 }
 /******************************************************************************/

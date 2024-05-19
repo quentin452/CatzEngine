@@ -550,7 +550,8 @@ Bool InternetCache::busy() C {
     if (_to_download.elms() || _to_verify.elms() || _import_images.elms())
         return true;
     REPA(_downloading)
-    if (_downloading[i].state() != DWNL_NONE) return true;
+    if (_downloading[i].state() != DWNL_NONE)
+        return true;
     return false;
 }
 InternetCache::ImportImage *InternetCache::findImport(C Image &image) {
@@ -564,7 +565,8 @@ InternetCache::ImportImage *InternetCache::findImport(C Image &image) {
 Bool InternetCache::_loading(C Str &url) C // assumes "url.is"
 {
     REPA(_downloading)
-    if (EQUAL(_downloading[i].url(), url)) return true;
+    if (EQUAL(_downloading[i].url(), url))
+        return true;
     if (_to_download.binaryHas(url, COMPARE) || _to_verify.binaryHas(url, COMPARE))
         return true;
     return false;
@@ -594,11 +596,14 @@ Bool InternetCache::loading(C ImagePtr &image) C {
                 {
                     Int l;
                     REPA(_downloading)
-                    if (EQUAL(url_to_image_lod(_downloading[i].url(), l), name)) return true;
+                    if (EQUAL(url_to_image_lod(_downloading[i].url(), l), name))
+                        return true;
                     REPA(_to_download)
-                    if (EQUAL(url_to_image_lod(_to_download[i], l), name)) return true;
+                    if (EQUAL(url_to_image_lod(_to_download[i], l), name))
+                        return true;
                     REPA(_to_verify)
-                    if (EQUAL(url_to_image_lod(_to_verify[i], l), name)) return true;
+                    if (EQUAL(url_to_image_lod(_to_verify[i], l), name))
+                        return true;
                 }
             }
 #endif
@@ -645,7 +650,8 @@ InternetCache::GET InternetCache::_getFile(C Str &url, DataSourceTime &file, CAC
         if (download) // download
         {
             REPA(_downloading)
-            if (EQUAL(_downloading[i].url(), url)) goto downloading;
+            if (EQUAL(_downloading[i].url(), url))
+                goto downloading;
             if (_to_download.binaryInclude(url, COMPARE)) {
                 enable();
                 _to_verify.binaryExclude(url, COMPARE);
@@ -665,7 +671,8 @@ InternetCache::GET InternetCache::_getFile(C Str &url, DataSourceTime &file, CAC
         if (download)    // verify
         {
             REPA(_downloading)
-            if (EQUAL(_downloading[i].url(), url)) goto verifying; // downloading now
+            if (EQUAL(_downloading[i].url(), url))
+                goto verifying; // downloading now
             if (_to_download.binaryHas(url, COMPARE))
                 goto verifying; // will download soon
             if (_to_verify.binaryInclude(url, COMPARE))
@@ -958,7 +965,8 @@ void InternetCache::resetPak(WriteLockEx *lock) {
             // this file was from Pak that failed to load, and it wasn't canceled, it means it's not available locally anymore, try to download
             // no need to check 'missing' because once it's detected then all imports for that image are canceled
             REPA(_downloading)
-            if (EQUAL(_downloading[i].url(), url)) goto downloading;
+            if (EQUAL(_downloading[i].url(), url))
+                goto downloading;
             if (_to_download.binaryInclude(url, COMPARE)) {
                 enable = true;
                 _to_verify.binaryExclude(url, COMPARE);

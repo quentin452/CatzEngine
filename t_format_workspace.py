@@ -4,26 +4,25 @@ import subprocess
 import sys
 import threading
 
+BLACKLIST_FILES = [""]
+BLACKLIST_DIRS = ["ThirdPartyLibs", "_Build_", "build", "CMakeFiles", "Animation", "Code", "Game", "Graphics", "Gui", "Math", "Mesh", "Misc", "Shaders", "Sound"]
+FORMAT_STYLE = "{BasedOnStyle: llvm, IndentWidth: 4, ColumnLimit: 0}"
+
 def format_files(files, params):
-    blacklist_files = [""]
-    blacklist_dirs = ["ThirdPartyLibs", "_Build_","build","CMakeFiles", "Animation", "Code", "Game", "Graphics", "Gui", "Math", "Mesh", "Misc", "Shaders", "Sound", "Physics"]
     for file in files:
-        if os.path.basename(file) not in blacklist_files and not any(blacklist_dir in file for blacklist_dir in blacklist_dirs):
+        if os.path.basename(file) not in BLACKLIST_FILES and not any(blacklist_dir in file for blacklist_dir in BLACKLIST_DIRS):
             print(f"Formatting {file}...")
             subprocess.run(["clang-format", "-i", "-style", params, file], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         else:
             print(f"Skipping {file}...")
 
-if len(sys.argv) > 1:
-    print(f"Formatting file(s) {sys.argv[1:]}")
-    format_thread = threading.Thread(target=format_files, args=(sys.argv[1:], "{BasedOnStyle: llvm, IndentWidth: 4, ColumnLimit: 0}"))
+def main():
+    files_to_format = sys.argv[1:] if len(sys.argv) > 1 else glob.glob("**/*.[ch]", recursive=True) + glob.glob("**/*.cpp", recursive=True) + glob.glob("**/*.cc", recursive=True)
+    print(f"Formatting file(s) {files_to_format}")
+    format_thread = threading.Thread(target=format_files, args=(files_to_format, FORMAT_STYLE))
     format_thread.start()
     format_thread.join()
     print("Done.")
-else:
-    print("Formatting...")
-    files_to_format = glob.glob("**/*.[ch]", recursive=True) + glob.glob("**/*.cpp", recursive=True) + glob.glob("**/*.cc", recursive=True)
-    format_thread = threading.Thread(target=format_files, args=(files_to_format, "{BasedOnStyle: llvm, IndentWidth: 4, ColumnLimit: 0}"))
-    format_thread.start()
-    format_thread.join()
-    print("Done.")
+
+if __name__ == "__main__":
+    main()

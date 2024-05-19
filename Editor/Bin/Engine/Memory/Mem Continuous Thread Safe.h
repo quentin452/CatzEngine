@@ -57,7 +57,8 @@ struct MemcThreadSafe : _MemcThreadSafe // Thread-Safe Continuous Memory Based C
     T1(VALUE)
     Int lockedFind(C VALUE &value) C {
         REPA(T)
-        if (lockedElm(i) == value) return i;
+        if (lockedElm(i) == value)
+            return i;
         return -1;
     } // check if 'value' is present in container and return its index, -1 if not found, container must be locked first using the 'lock' method before using this method
     T1(VALUE)

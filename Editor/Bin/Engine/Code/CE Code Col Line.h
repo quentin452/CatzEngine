@@ -64,7 +64,8 @@ struct CodeLine // Code Line
     Int length() C { return cols.elms(); }
     Bool empty() C {
         REPA(cols)
-        if (ValidType(cols[i].type)) return false;
+        if (ValidType(cols[i].type))
+            return false;
         return true;
     }
     Bool toRemove() C {
@@ -81,17 +82,20 @@ struct CodeLine // Code Line
 
     Int findPos(C VecI2 &pos) C {
         REPA(cols)
-        if (cols[i].pos == pos) return i;
+        if (cols[i].pos == pos)
+            return i;
         return -1;
     }
     Int findToken(Int token, Bool start = true) C {
         if (token >= 0) {
             if (start) {
                 FREPA(cols)
-                if (cols[i].token == token) return i;
+                if (cols[i].token == token)
+                    return i;
             } else {
                 REPA(cols)
-                if (cols[i].token == token) return i;
+                if (cols[i].token == token)
+                    return i;
             }
         }
         return -1;

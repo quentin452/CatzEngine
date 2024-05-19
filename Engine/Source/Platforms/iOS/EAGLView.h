@@ -1,21 +1,20 @@
 /******************************************************************************/
-@interface EAGLView : UIView<UIKeyInput>
-{    
-   Bool           initialized;
-   CADisplayLink *display_link;
+@interface EAGLView : UIView <UIKeyInput> {
+    Bool initialized;
+    CADisplayLink *display_link;
 }
 
--(void)update:(id)sender;
--(void)setUpdate;
--(void)keyboardVisible:(Bool)visible;
+- (void)update:(id)sender;
+- (void)setUpdate;
+- (void)keyboardVisible:(Bool)visible;
 
 @end
 /******************************************************************************/
-namespace EE{
+namespace EE {
 /******************************************************************************/
 extern void (*ResizeAdPtr)();
 
-EAGLView* GetUIView();
+EAGLView *GetUIView();
 /******************************************************************************/
-}
+} // namespace EE
 /******************************************************************************/

@@ -1,15 +1,13 @@
 /******************************************************************************/
-@interface MyAppDelegate : NSObject<NSApplicationDelegate>
-{
+@interface MyAppDelegate : NSObject <NSApplicationDelegate> {
 }
 @end
 
-@interface MyApplication : NSApplication
-{
+@interface MyApplication : NSApplication {
 }
 @end
 /******************************************************************************/
-namespace EE{
+namespace EE {
 void SetActive();
 }
 /******************************************************************************/

@@ -95,7 +95,8 @@ inline Int Compare(C CPtr &a, C CPtr &b) {
 } // compare 'a' 'b' values and return -1, 0, +1
 
 T1(TYPE)
-ENABLE_IF_ENUM(TYPE, Int) Compare(C TYPE &a, C TYPE &b) {
+ENABLE_IF_ENUM(TYPE, Int)
+Compare(C TYPE &a, C TYPE &b) {
     if (a < b)
         return -1;
     if (a > b)

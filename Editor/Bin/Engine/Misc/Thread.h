@@ -208,8 +208,10 @@ struct SyncUnlocker {
         for (_owned = 0; lock.owned(); _owned++)
             _lock.off();
     }
-    ~SyncUnlocker() { REP(_owned)
-                      _lock.on(); }
+    ~SyncUnlocker() {
+        REP(_owned)
+        _lock.on();
+    }
 
   private:
     Int _owned;

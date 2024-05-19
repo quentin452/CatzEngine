@@ -88,7 +88,8 @@ struct Memt // Temporary Memory Based Container, 'TYPE'=type of elements to be s
     T1(VALUE)
     Int find(C VALUE &value) C {
         REPA(T)
-        if (T[i] == value) return i;
+        if (T[i] == value)
+            return i;
         return -1;
     } // check if 'value' is present in container and return its index, -1 if not found
     T1(VALUE)

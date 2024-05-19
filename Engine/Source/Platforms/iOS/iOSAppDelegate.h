@@ -1,26 +1,26 @@
 /******************************************************************************/
-@interface iOSAppDelegate : NSObject<UIApplicationDelegate, CLLocationManagerDelegate
-, PHPickerViewControllerDelegate // for PHPickerViewController
-, UINavigationControllerDelegate, UIImagePickerControllerDelegate // for UIImagePickerController
+@interface iOSAppDelegate : NSObject <UIApplicationDelegate, CLLocationManagerDelegate, PHPickerViewControllerDelegate // for PHPickerViewController
+                                      ,
+                                      UINavigationControllerDelegate, UIImagePickerControllerDelegate // for UIImagePickerController
 #if SUPPORT_FACEBOOK
-, FBSDKSharingDelegate
+                                      ,
+                                      FBSDKSharingDelegate
 #endif
->
-{
-   UIWindow         *window;
-   UIViewController *controller;
+                                      > {
+    UIWindow *window;
+    UIViewController *controller;
 }
 
-@property (nonatomic, retain) IBOutlet UIWindow         *window;
-@property (nonatomic, retain) IBOutlet UIViewController *controller;
+@property(nonatomic, retain) IBOutlet UIWindow *window;
+@property(nonatomic, retain) IBOutlet UIViewController *controller;
 
 @end
 /******************************************************************************/
-namespace EE{
+namespace EE {
 /******************************************************************************/
 extern void (*InitChartboostPtr)();
 /******************************************************************************/
-iOSAppDelegate* GetAppDelegate();
+iOSAppDelegate *GetAppDelegate();
 /******************************************************************************/
-}
+} // namespace EE
 /******************************************************************************/

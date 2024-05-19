@@ -49,7 +49,8 @@ struct CMemPtr // Const Memory Container Pointer, 'Memt_size'=size of the 'Memt'
     T1(VALUE)
     Int find(C VALUE &value) C {
         REPA(T)
-        if (T[i] == value) return i;
+        if (T[i] == value)
+            return i;
         return -1;
     } // check if 'value' is present in container and return its index, -1 if not found
     T1(VALUE)
@@ -219,7 +220,8 @@ struct MemPtr : CMemPtr<TYPE, Memt_size> // Memory Container Pointer, 'Memt_size
     T1(VALUE)
     Int find(C VALUE &value) C {
         REPA(T)
-        if (T[i] == value) return i;
+        if (T[i] == value)
+            return i;
         return -1;
     } // check if 'value' is present in container and return its index, -1 if not found
     T1(VALUE)

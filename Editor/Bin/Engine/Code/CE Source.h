@@ -151,17 +151,20 @@ struct Line : Str, Text, LineMode {
 
     Int end() {
         REPA(T)
-            if (T[i] != ' ') return i + 1;
+        if (T[i] != ' ')
+            return i + 1;
         return 0;
     }
     Int start() {
         FREPA(T)
-        if (T[i] != ' ') return i;
+        if (T[i] != ' ')
+            return i;
         return 0;
     }
     Bool empty() {
         REPA(T)
-        if (T[i] != ' ') return false;
+        if (T[i] != ' ')
+            return false;
         return true;
     }
     Char chrBefore(Int x, Int *pos = null) {
@@ -334,7 +337,8 @@ const_mem_addr struct Source : Region {
     Vec2 offset() C;                      // get offset applied to code text
     Int findLine(C UID &id) C {
         REPA(lines)
-        if (lines[i].id == id) return i;
+        if (lines[i].id == id)
+            return i;
         return -1;
     }
 

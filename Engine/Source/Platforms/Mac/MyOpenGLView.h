@@ -1,14 +1,13 @@
 /******************************************************************************/
-@interface MyOpenGLView : NSView
-{
+@interface MyOpenGLView : NSView {
 }
--(void) mouseDown:(NSEvent*)theEvent;
--(void) mouseUp  :(NSEvent*)theEvent;
+- (void)mouseDown:(NSEvent *)theEvent;
+- (void)mouseUp:(NSEvent *)theEvent;
 @end
 /******************************************************************************/
-namespace EE{
+namespace EE {
 /******************************************************************************/
 extern MyOpenGLView *OpenGLView;
 /******************************************************************************/
-}
+} // namespace EE
 /******************************************************************************/

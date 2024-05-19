@@ -235,17 +235,20 @@ struct Str // Text String (16-bit per character)
     T1(TYPE)
     Str(TYPE i, ENABLE_IF_ENUM(TYPE, Ptr) dummy = null) : Str(ENUM_TYPE(TYPE)(i)) {}
     T1(TYPE)
-    ENABLE_IF_ENUM(TYPE, Str &) operator=(TYPE i) {
+    ENABLE_IF_ENUM(TYPE, Str &)
+    operator=(TYPE i) {
         T = ENUM_TYPE(TYPE)(i);
         return T;
     }
     T1(TYPE)
-    ENABLE_IF_ENUM(TYPE, Str &) operator+=(TYPE i) {
+    ENABLE_IF_ENUM(TYPE, Str &)
+    operator+=(TYPE i) {
         T += ENUM_TYPE(TYPE)(i);
         return T;
     }
     T1(TYPE)
-    ENABLE_IF_ENUM(TYPE, Str) operator+(TYPE i) C { return T + ENUM_TYPE(TYPE)(i); }
+    ENABLE_IF_ENUM(TYPE, Str)
+    operator+(TYPE i) C { return T + ENUM_TYPE(TYPE)(i); }
 
     // io
     Bool save(File &f) C; // save string using f.putStr(T), false on fail
@@ -343,5 +346,6 @@ inline Str &&operator+(Str &&a, C VecSB4 &b) { return RValue(a += b); }
 inline Str &&operator+(Str &&a, C VecUS4 &b) { return RValue(a += b); }
 inline Str &&operator+(Str &&a, C BStr &b) { return RValue(a += b); }
 T1(TYPE)
-ENABLE_IF_ENUM(TYPE, Str &&) operator+(Str &&a, TYPE b) { return RValue(a += ENUM_TYPE(TYPE)(b)); }
+ENABLE_IF_ENUM(TYPE, Str &&)
+operator+(Str &&a, TYPE b) { return RValue(a += ENUM_TYPE(TYPE)(b)); }
 /******************************************************************************/

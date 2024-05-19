@@ -109,21 +109,29 @@ T1(TYPE)
 constexpr ENABLE_IF_ENUM(TYPE, Bool) InRange(TYPE i, TYPE elms) { return InRange(ENUM_TYPE(TYPE)(i), ENUM_TYPE(TYPE)(elms)); } // template specialization for enums
 
 T1(TYPE)
-DISABLE_IF_ENUM(TYPE, Bool) InRange(SByte i, C TYPE &container); // if 'i' index is in range of container, 'container' can be of many types, for example a C++ array (x[]), memory container ('Memc', 'Memb', ..) or any other type for which 'Elms' function was defined
+DISABLE_IF_ENUM(TYPE, Bool)
+InRange(SByte i, C TYPE &container); // if 'i' index is in range of container, 'container' can be of many types, for example a C++ array (x[]), memory container ('Memc', 'Memb', ..) or any other type for which 'Elms' function was defined
 T1(TYPE)
-DISABLE_IF_ENUM(TYPE, Bool) InRange(Byte i, C TYPE &container); // if 'i' index is in range of container, 'container' can be of many types, for example a C++ array (x[]), memory container ('Memc', 'Memb', ..) or any other type for which 'Elms' function was defined
+DISABLE_IF_ENUM(TYPE, Bool)
+InRange(Byte i, C TYPE &container); // if 'i' index is in range of container, 'container' can be of many types, for example a C++ array (x[]), memory container ('Memc', 'Memb', ..) or any other type for which 'Elms' function was defined
 T1(TYPE)
-DISABLE_IF_ENUM(TYPE, Bool) InRange(Short i, C TYPE &container); // if 'i' index is in range of container, 'container' can be of many types, for example a C++ array (x[]), memory container ('Memc', 'Memb', ..) or any other type for which 'Elms' function was defined
+DISABLE_IF_ENUM(TYPE, Bool)
+InRange(Short i, C TYPE &container); // if 'i' index is in range of container, 'container' can be of many types, for example a C++ array (x[]), memory container ('Memc', 'Memb', ..) or any other type for which 'Elms' function was defined
 T1(TYPE)
-DISABLE_IF_ENUM(TYPE, Bool) InRange(UShort i, C TYPE &container); // if 'i' index is in range of container, 'container' can be of many types, for example a C++ array (x[]), memory container ('Memc', 'Memb', ..) or any other type for which 'Elms' function was defined
+DISABLE_IF_ENUM(TYPE, Bool)
+InRange(UShort i, C TYPE &container); // if 'i' index is in range of container, 'container' can be of many types, for example a C++ array (x[]), memory container ('Memc', 'Memb', ..) or any other type for which 'Elms' function was defined
 T1(TYPE)
-DISABLE_IF_ENUM(TYPE, Bool) InRange(Int i, C TYPE &container); // if 'i' index is in range of container, 'container' can be of many types, for example a C++ array (x[]), memory container ('Memc', 'Memb', ..) or any other type for which 'Elms' function was defined
+DISABLE_IF_ENUM(TYPE, Bool)
+InRange(Int i, C TYPE &container); // if 'i' index is in range of container, 'container' can be of many types, for example a C++ array (x[]), memory container ('Memc', 'Memb', ..) or any other type for which 'Elms' function was defined
 T1(TYPE)
-DISABLE_IF_ENUM(TYPE, Bool) InRange(UInt i, C TYPE &container); // if 'i' index is in range of container, 'container' can be of many types, for example a C++ array (x[]), memory container ('Memc', 'Memb', ..) or any other type for which 'Elms' function was defined
+DISABLE_IF_ENUM(TYPE, Bool)
+InRange(UInt i, C TYPE &container); // if 'i' index is in range of container, 'container' can be of many types, for example a C++ array (x[]), memory container ('Memc', 'Memb', ..) or any other type for which 'Elms' function was defined
 T1(TYPE)
-DISABLE_IF_ENUM(TYPE, Bool) InRange(Long i, C TYPE &container); // if 'i' index is in range of container, 'container' can be of many types, for example a C++ array (x[]), memory container ('Memc', 'Memb', ..) or any other type for which 'Elms' function was defined
+DISABLE_IF_ENUM(TYPE, Bool)
+InRange(Long i, C TYPE &container); // if 'i' index is in range of container, 'container' can be of many types, for example a C++ array (x[]), memory container ('Memc', 'Memb', ..) or any other type for which 'Elms' function was defined
 T1(TYPE)
-DISABLE_IF_ENUM(TYPE, Bool) InRange(ULong i, C TYPE &container); // if 'i' index is in range of container, 'container' can be of many types, for example a C++ array (x[]), memory container ('Memc', 'Memb', ..) or any other type for which 'Elms' function was defined
+DISABLE_IF_ENUM(TYPE, Bool)
+InRange(ULong i, C TYPE &container); // if 'i' index is in range of container, 'container' can be of many types, for example a C++ array (x[]), memory container ('Memc', 'Memb', ..) or any other type for which 'Elms' function was defined
 
 constexpr Bool Greater(Int a, Int b) { return a > b; }
 constexpr Bool Greater(UInt a, UInt b) { return a > b; }

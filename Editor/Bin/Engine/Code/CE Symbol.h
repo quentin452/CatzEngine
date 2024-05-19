@@ -472,7 +472,8 @@ struct SymbolDef : SymbolPtr // symbol definition (pointer to symbol which also 
                     SymbolPtr func_list;
                     if (func_list.find(GetPath(T->full_name)))
                         REPA(func_list->funcs)
-                        if (func_list->funcs[i] == T()) func_list->funcs.remove(i);
+                    if (func_list->funcs[i] == T())
+                        func_list->funcs.remove(i);
                 }
                 T->clear();
             }

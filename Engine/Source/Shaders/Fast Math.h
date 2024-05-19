@@ -28,65 +28,64 @@
 /******************************************************************************/
 Flt AcosFast(Flt cos) // 'cos'=-1..1, returns [0, PI]
 {
-   Flt x  =Abs(cos);
-   Flt res=(-0.156583*x+PI_2)*Sqrt(1-x);
-   return (cos>=0) ? res : PI-res;
+    Flt x = Abs(cos);
+    Flt res = (-0.156583 * x + PI_2) * Sqrt(1 - x);
+    return (cos >= 0) ? res : PI - res;
 }
 /******************************************************************************/
 Flt AsinFast(Flt sin) // 'sin'=-1..1, returns [-PI/2, PI/2]
 {
-   Flt x  =Abs(sin);
-   Flt res=(-0.156583*x+PI_2)*Sqrt(1-x);
-   return (sin>=0) ? PI_2-res : res-PI_2;
+    Flt x = Abs(sin);
+    Flt res = (-0.156583 * x + PI_2) * Sqrt(1 - x);
+    return (sin >= 0) ? PI_2 - res : res - PI_2;
 }
 /******************************************************************************/
 Flt AtanFastPos(Flt tan) // 'tan'=0..Inf, returns [0, PI/2]
-{ 
-   Flt t0  =(tan<=1) ? tan : 1/tan;
-   Flt t1  =t0*t0;
-   Flt poly=0.0872929;
-   poly=poly*t1-0.301895;
-   poly=poly*t1+1;
-   poly=poly*t0;
-   return (tan<=1) ? poly : PI_2-poly;
+{
+    Flt t0 = (tan <= 1) ? tan : 1 / tan;
+    Flt t1 = t0 * t0;
+    Flt poly = 0.0872929;
+    poly = poly * t1 - 0.301895;
+    poly = poly * t1 + 1;
+    poly = poly * t0;
+    return (tan <= 1) ? poly : PI_2 - poly;
 }
 Vec2 AtanFastPos(Vec2 tan) // 'tan'=0..Inf, returns [0, PI/2]
-{ 
-   Vec2 t0  =(tan<=1) ? tan : 1/tan;
-   Vec2 t1  =t0*t0;
-   Vec2 poly=0.0872929;
-   poly=poly*t1-0.301895;
-   poly=poly*t1+1;
-   poly=poly*t0;
-   return (tan<=1) ? poly : PI_2-poly;
+{
+    Vec2 t0 = (tan <= 1) ? tan : 1 / tan;
+    Vec2 t1 = t0 * t0;
+    Vec2 poly = 0.0872929;
+    poly = poly * t1 - 0.301895;
+    poly = poly * t1 + 1;
+    poly = poly * t0;
+    return (tan <= 1) ? poly : PI_2 - poly;
 }
 Flt AtanFast(Flt tan) // 'tan'=-Inf..Inf, returns [-PI/2, PI/2]
 {
-   Flt a=AtanFastPos(Abs(tan));
-   return (tan<0) ? -a : a;
+    Flt a = AtanFastPos(Abs(tan));
+    return (tan < 0) ? -a : a;
 }
 Vec2 AtanFast(Vec2 tan) // 'tan'=-Inf..Inf, returns [-PI/2, PI/2]
 {
-   Vec2 a=AtanFastPos(Abs(tan));
-   return (tan<0) ? -a : a;
+    Vec2 a = AtanFastPos(Abs(tan));
+    return (tan < 0) ? -a : a;
 }
 /******************************************************************************/
-Flt Atan2Fast(Flt y, Flt x)
-{
-   Flt t0=Max(Abs(x), Abs(y));
-   Flt t1=Min(Abs(x), Abs(y));
-   Flt t3=t1/t0;
-   Flt t4=t3*t3;
+Flt Atan2Fast(Flt y, Flt x) {
+    Flt t0 = Max(Abs(x), Abs(y));
+    Flt t1 = Min(Abs(x), Abs(y));
+    Flt t3 = t1 / t0;
+    Flt t4 = t3 * t3;
 
-   t0=     +0.0872929;
-   t0=t0*t4-0.301895;
-   t0=t0*t4+1;
-   t3=t0*t3;
+    t0 = +0.0872929;
+    t0 = t0 * t4 - 0.301895;
+    t0 = t0 * t4 + 1;
+    t3 = t0 * t3;
 
-   t3=(Abs(y)>Abs(x)) ? PI_2-t3 : t3;
-   t3=(    x <    0 ) ? PI  -t3 : t3;
-   t3=(    y <    0 ) ?     -t3 : t3;
+    t3 = (Abs(y) > Abs(x)) ? PI_2 - t3 : t3;
+    t3 = (x < 0) ? PI - t3 : t3;
+    t3 = (y < 0) ? -t3 : t3;
 
-   return t3;
+    return t3;
 }
 /******************************************************************************/

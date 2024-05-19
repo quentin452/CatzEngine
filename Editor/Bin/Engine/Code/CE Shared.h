@@ -114,7 +114,8 @@ inline Int AlignToTab(Int x) { return (x / TabLength) * TabLength; }
 
 inline Bool AllUpCase(C Str &s) {
     REPA(s)
-    if (s[i] != CaseUp(s[i])) return false;
+    if (s[i] != CaseUp(s[i]))
+        return false;
     return true;
 }
 

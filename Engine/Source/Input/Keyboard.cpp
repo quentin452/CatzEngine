@@ -735,6 +735,7 @@ void KeyboardClass::setLayout()
    switch(lang)
    {
       // conversion map was detected by changing to another keyboard layout in the OS, and observing what was received in WM_KEYDOWN while pressing keys
+      case LANG_SLOVENIAN: // QWERTZ
       case LANG_CROATIAN: // LANG_BOSNIAN, LANG_SERBIAN - QWERTZ
       {
         _qwerty[KB_Y    ]=KB_Z;
@@ -750,18 +751,6 @@ void KeyboardClass::setLayout()
         _qwerty[KB_SUB  ]=KB_EQUAL;
         _qwerty[KB_EQUAL]=KB_SLASH;
         _qwerty[KB_SLASH]=KB_SUB;
-      }break;
-
-      case LANG_DANISH: // QWERTY
-      {
-        _qwerty[KB_TILDE ]=KB_BSLASH;
-        _qwerty[KB_SUB   ]=KB_EQUAL;
-        _qwerty[KB_EQUAL ]=KB_LBR;
-        _qwerty[KB_LBR   ]=KB_RBR;
-        _qwerty[KB_RBR   ]=KB_SEMI;
-        _qwerty[KB_BSLASH]=KB_SLASH;
-        _qwerty[KB_SEMI  ]=KB_TILDE;
-        _qwerty[KB_SLASH ]=KB_SUB;
       }break;
 
       case LANG_DUTCH: // AZERTY
@@ -794,6 +783,7 @@ void KeyboardClass::setLayout()
 
       case LANG_FINNISH  : // QWERTY
       case LANG_NORWEGIAN: // QWERTY
+      case LANG_DANISH   : // QWERTY
       case LANG_SWEDISH  : // QWERTY
       {
         _qwerty[KB_TILDE ]=KB_BSLASH;
@@ -848,6 +838,7 @@ void KeyboardClass::setLayout()
         _qwerty[KB_SLASH]=KB_SUB;
       }break;
 
+      case LANG_SPANISH: // QWERTY
       case LANG_ITALIAN: // QWERTY
       {
         _qwerty[KB_TILDE ]=KB_BSLASH;
@@ -886,18 +877,6 @@ void KeyboardClass::setLayout()
         _qwerty[KB_SLASH ]=KB_SUB;
       }break;
 
-      case LANG_SPANISH: // QWERTY
-      {
-        _qwerty[KB_TILDE ]=KB_BSLASH;
-        _qwerty[KB_SUB   ]=KB_LBR;
-        _qwerty[KB_EQUAL ]=KB_RBR;
-        _qwerty[KB_LBR   ]=KB_SEMI;
-        _qwerty[KB_RBR   ]=KB_EQUAL;
-        _qwerty[KB_BSLASH]=KB_SLASH;
-        _qwerty[KB_SEMI  ]=KB_TILDE;
-        _qwerty[KB_SLASH ]=KB_SUB;
-      }break;
-
       case LANG_SLOVAK: // QWERTZ
       {
         _qwerty[KB_Y    ]=KB_Z;
@@ -906,15 +885,6 @@ void KeyboardClass::setLayout()
         _qwerty[KB_EQUAL]=KB_KEY(223); _qwerty[223]=KB_NONE; // VK_OEM_8 was received in WM_KEYDOWN when pressing '-', need to disable _qwerty[VK_OEM_8] so reverse convert will work
         _qwerty[KB_SLASH]=KB_SUB;
       }break;
-
-      case LANG_SLOVENIAN: // QWERTZ
-      {
-        _qwerty[KB_Y    ]=KB_Z;
-        _qwerty[KB_Z    ]=KB_Y;
-        _qwerty[KB_SUB  ]=KB_SLASH;
-        _qwerty[KB_SLASH]=KB_SUB;
-      }break;
-
       case LANG_TURKISH: // QWERTY
       {
         _qwerty[KB_SUB   ]=KB_KEY(223); _qwerty[223]=KB_NONE; // VK_OEM_8 was received in WM_KEYDOWN when pressing '-', need to disable _qwerty[VK_OEM_8] so reverse convert will work

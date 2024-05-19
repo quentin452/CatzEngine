@@ -1,4 +1,5 @@
-﻿/******************************************************************************
+﻿// TODO FIX ERRORS IF I FORMAT THIS FILE WITH CLANG
+/******************************************************************************
  * Copyright (c) Grzegorz Slazinski. All Rights Reserved.                     *
  * Titan Engine (https://esenthel.com) header file.                           *
 /******************************************************************************/

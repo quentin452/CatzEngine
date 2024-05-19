@@ -1022,146 +1022,147 @@ AnimKeys &AnimKeys::optimize(Bool anim_loop, Bool anim_linear, Flt anim_length, 
         if (optimized.elms() >= 2) {
             Bool same_first_last = (MaxAbsAngleBetween(orns.first().orn, orns.last().orn) <= angle_eps); // if first and last keys are the same
             REPA(optimized)
-            if (optimized.elms() >= 2) if (same_first_last || (i > 0 && i < optimized.elms() - 1)) // don't remove first-last keys, in case animation has later looping toggled which could cause issues (for example root motion turning animation, imported as non-looping, finished 90 deg turn at 50% animation time, and the last half keys are removed, then switched to looping, and turn gets reverted back to start due to loop and last keys missing), however allow removing if keys are the same
-            {                                                                                      // here ignore this 'i' key, because we want to test if keys with 'i' removed will provide similar results as with 'i' present
-                Int prev2 = optimized[Index(i - 2, anim_loop, optimized.elms(), i)],
-                    prev = optimized[Index(i - 1, anim_loop, optimized.elms(), i)],
-                    next = optimized[Index(i + 1, anim_loop, optimized.elms(), i)],
-                    next2 = optimized[Index(i + 2, anim_loop, optimized.elms(), i)],
-                    stop = (InRange(i + 1, optimized) ? optimized[Min(i + (anim_linear ? 1 : 2), optimized.elms() - 1)] : orns.elms()); // stop on the next key that wasn't removed (for non-linear use 2nd next key)
-                C Orn *p = &orns[prev], *n = &orns[next], *p2 = &orns[prev2], *n2 = &orns[next2];
-                Flt n_time = AfterTime(n->time, p->time, anim_length);
-                Orient test;
+            if (optimized.elms() >= 2)
+                if (same_first_last || (i > 0 && i < optimized.elms() - 1)) // don't remove first-last keys, in case animation has later looping toggled which could cause issues (for example root motion turning animation, imported as non-looping, finished 90 deg turn at 50% animation time, and the last half keys are removed, then switched to looping, and turn gets reverted back to start due to loop and last keys missing), however allow removing if keys are the same
+                {                                                           // here ignore this 'i' key, because we want to test if keys with 'i' removed will provide similar results as with 'i' present
+                    Int prev2 = optimized[Index(i - 2, anim_loop, optimized.elms(), i)],
+                        prev = optimized[Index(i - 1, anim_loop, optimized.elms(), i)],
+                        next = optimized[Index(i + 1, anim_loop, optimized.elms(), i)],
+                        next2 = optimized[Index(i + 2, anim_loop, optimized.elms(), i)],
+                        stop = (InRange(i + 1, optimized) ? optimized[Min(i + (anim_linear ? 1 : 2), optimized.elms() - 1)] : orns.elms()); // stop on the next key that wasn't removed (for non-linear use 2nd next key)
+                    C Orn *p = &orns[prev], *n = &orns[next], *p2 = &orns[prev2], *n2 = &orns[next2];
+                    Flt n_time = AfterTime(n->time, p->time, anim_length);
+                    Orient test;
 
-                // check between this and previous key !! this is extra important for orientations, both Linear and Cubic !!
-                {
-                    C Orn &orn = orns[i];
-                    Flt prev_time = (InRange(i - 1, orns) ? orns[i - 1].time : anim_loop ? orns.last().time - anim_length
-                                                                                         : 0);
-                    if (!Equal(prev_time, orn.time)) // if times are the same then we don't need to do the following (this can happen when first key is at the start of anim and (it's not looped or the last key is at the end))
+                    // check between this and previous key !! this is extra important for orientations, both Linear and Cubic !!
                     {
-                        anim_params.time = Avg(prev_time, orn.time); // set time between previous and this key from the source
-
-                        // calculate source orn (with 'i' key present)
-                        Int src_prev = Index(i - 1, anim_loop, orns.elms()),
-                            src_next = i; // here 'i' is included
-                        Orient orn;
-                        C Orn &src_p = orns[src_prev], &src_n = orns[src_next];
-                        Flt step = 0.5f; // here for source, step is always 0.5, because we want to test between keys
-                        if (anim_linear) {
-                            orn.dir = Lerp(src_p.orn.dir, src_n.orn.dir, step);
-                            orn.perp = Lerp(src_p.orn.perp, src_n.orn.perp, step);
-                        } else {
-#if HAS_ANIM_TANGENT
-                            orn.dir = LerpTan(src_p.orn.dir, src_n.orn.dir, step, src_p.tan.dir, src_n.tan.dir);
-                            orn.perp = LerpTan(src_p.orn.perp, src_n.orn.perp, step, src_p.tan.perp, src_n.tan.perp);
-#else
-                            Int src_prev2 = Index(i - 2, anim_loop, orns.elms()),
-                                src_next2 = Index(i + 1, anim_loop, orns.elms());
-                            C Orn &src_p2 = orns[src_prev2], &src_n2 = orns[src_next2];
-                            orn.dir = Lerp4(src_p2.orn.dir, src_p.orn.dir, src_n.orn.dir, src_n2.orn.dir, step);
-                            orn.perp = Lerp4(src_p2.orn.perp, src_p.orn.perp, src_n.orn.perp, src_n2.orn.perp, step);
-#endif
-                        }
-                        orn.fix();
-
-                        // calculate optimized orn (with 'i' key removed)
-                        step = LerpRS(p->time, n_time, AfterTime(anim_params.time, p->time, anim_length)); // use Sat in case orn.time is outside of range, or 'p' has the same time as 'n'
-                        if (anim_linear) {
-                            test.dir = Lerp(p->orn.dir, n->orn.dir, step);
-                            test.perp = Lerp(p->orn.perp, n->orn.perp, step);
-                        } else {
-#if HAS_ANIM_TANGENT
-                            test.dir = LerpTan(p->orn.dir, n->orn.dir, step, GetTangentDir(p2->orn.dir, n->orn.dir), GetTangentDir(p->orn.dir, n2->orn.dir));
-                            test.perp = LerpTan(p->orn.perp, n->orn.perp, step, GetTangentDir(p2->orn.perp, n->orn.perp), GetTangentDir(p->orn.perp, n2->orn.perp));
-#else
-                            test.dir = Lerp4(p2->orn.dir, p->orn.dir, n->orn.dir, n2->orn.dir, step);
-                            test.perp = Lerp4(p2->orn.perp, p->orn.perp, n->orn.perp, n2->orn.perp, step);
-#endif
-                        }
-                        test.fix();
-
-                        if (MaxAbsAngleBetween(test, orn) > angle_eps)
-                            goto orn_needed;
-                    }
-                }
-
-                for (Int src = i, i_next = i + 3;;) // check that all removed keyframes (including this) do not deviate, start from the left because below we're checking if we've reached the next index, we need to go only to the right, because to the left no keys have been removed yet
-                {
-                    C Orn &orn = orns[src];
-#if HAS_ANIM_TANGENT
-                    Orient tan[2];
-                    if (!anim_linear) {
-                        tan[0].dir = GetTangentDir(p2->orn.dir, n->orn.dir);
-                        tan[0].perp = GetTangentDir(p2->orn.perp, n->orn.perp);
-                        tan[1].dir = GetTangentDir(p->orn.dir, n2->orn.dir);
-                        tan[1].perp = GetTangentDir(p->orn.perp, n2->orn.perp);
-                    }
-#endif
-                    // check at key location
-                    if (src != prev) // no need to check time where both source and optimized have a keyframe
-                    {
-                        Flt step = LerpRS(p->time, n_time, AfterTime(orn.time, p->time, anim_length)); // use Sat in case orn.time is outside of range, or 'p' has the same time as 'n'
-                        if (anim_linear) {
-                            test.dir = Lerp(p->orn.dir, n->orn.dir, step);
-                            test.perp = Lerp(p->orn.perp, n->orn.perp, step);
-                        } else {
-#if HAS_ANIM_TANGENT
-                            test.dir = LerpTan(p->orn.dir, n->orn.dir, step, tan[0].dir, tan[1].dir);
-                            test.perp = LerpTan(p->orn.perp, n->orn.perp, step, tan[0].perp, tan[1].perp);
-#else
-                            test.dir = Lerp4(p2->orn.dir, p->orn.dir, n->orn.dir, n2->orn.dir, step);
-                            test.perp = Lerp4(p2->orn.perp, p->orn.perp, n->orn.perp, n2->orn.perp, step);
-#endif
-                        }
-                        test.fix();
-                        if (MaxAbsAngleBetween(test, orn.orn) > angle_eps)
-                            goto orn_needed;
-                    }
-
-                    // check between keys
-                    if (!anim_linear) // for cubic interpolation we need to check between keys, because due to cubic interpolation the values can get way off
-                    {
-                        Flt next_time = (InRange(src + 1, orns) ? orns[src + 1].time : anim_loop ? orns[0].time + anim_length
-                                                                                                 : anim_length);
-                        if (!Equal(orn.time, next_time)) // if times are the same then we don't need to do the following (this can happen when last key is at the end of anim and (it's not looped or the first key is at the start))
+                        C Orn &orn = orns[i];
+                        Flt prev_time = (InRange(i - 1, orns) ? orns[i - 1].time : anim_loop ? orns.last().time - anim_length
+                                                                                             : 0);
+                        if (!Equal(prev_time, orn.time)) // if times are the same then we don't need to do the following (this can happen when first key is at the start of anim and (it's not looped or the last key is at the end))
                         {
-                            anim_params.time = Avg(orn.time, next_time); // set time between this and next key from the source
+                            anim_params.time = Avg(prev_time, orn.time); // set time between previous and this key from the source
+
+                            // calculate source orn (with 'i' key present)
+                            Int src_prev = Index(i - 1, anim_loop, orns.elms()),
+                                src_next = i; // here 'i' is included
                             Orient orn;
-                            T.orn(orn, anim_params);
-                            Flt step = LerpRS(p->time, n_time, AfterTime(anim_params.time, p->time, anim_length)); // use Sat in case orn.time is outside of range, or 'p' has the same time as 'n'
+                            C Orn &src_p = orns[src_prev], &src_n = orns[src_next];
+                            Flt step = 0.5f; // here for source, step is always 0.5, because we want to test between keys
+                            if (anim_linear) {
+                                orn.dir = Lerp(src_p.orn.dir, src_n.orn.dir, step);
+                                orn.perp = Lerp(src_p.orn.perp, src_n.orn.perp, step);
+                            } else {
 #if HAS_ANIM_TANGENT
-                            test.dir = LerpTan(p->orn.dir, n->orn.dir, step, tan[0].dir, tan[1].dir);
-                            test.perp = LerpTan(p->orn.perp, n->orn.perp, step, tan[0].perp, tan[1].perp);
+                                orn.dir = LerpTan(src_p.orn.dir, src_n.orn.dir, step, src_p.tan.dir, src_n.tan.dir);
+                                orn.perp = LerpTan(src_p.orn.perp, src_n.orn.perp, step, src_p.tan.perp, src_n.tan.perp);
 #else
-                            test.dir = Lerp4(p2->orn.dir, p->orn.dir, n->orn.dir, n2->orn.dir, step);
-                            test.perp = Lerp4(p2->orn.perp, p->orn.perp, n->orn.perp, n2->orn.perp, step);
+                                Int src_prev2 = Index(i - 2, anim_loop, orns.elms()),
+                                    src_next2 = Index(i + 1, anim_loop, orns.elms());
+                                C Orn &src_p2 = orns[src_prev2], &src_n2 = orns[src_next2];
+                                orn.dir = Lerp4(src_p2.orn.dir, src_p.orn.dir, src_n.orn.dir, src_n2.orn.dir, step);
+                                orn.perp = Lerp4(src_p2.orn.perp, src_p.orn.perp, src_n.orn.perp, src_n2.orn.perp, step);
 #endif
+                            }
+                            orn.fix();
+
+                            // calculate optimized orn (with 'i' key removed)
+                            step = LerpRS(p->time, n_time, AfterTime(anim_params.time, p->time, anim_length)); // use Sat in case orn.time is outside of range, or 'p' has the same time as 'n'
+                            if (anim_linear) {
+                                test.dir = Lerp(p->orn.dir, n->orn.dir, step);
+                                test.perp = Lerp(p->orn.perp, n->orn.perp, step);
+                            } else {
+#if HAS_ANIM_TANGENT
+                                test.dir = LerpTan(p->orn.dir, n->orn.dir, step, GetTangentDir(p2->orn.dir, n->orn.dir), GetTangentDir(p->orn.dir, n2->orn.dir));
+                                test.perp = LerpTan(p->orn.perp, n->orn.perp, step, GetTangentDir(p2->orn.perp, n->orn.perp), GetTangentDir(p->orn.perp, n2->orn.perp));
+#else
+                                test.dir = Lerp4(p2->orn.dir, p->orn.dir, n->orn.dir, n2->orn.dir, step);
+                                test.perp = Lerp4(p2->orn.perp, p->orn.perp, n->orn.perp, n2->orn.perp, step);
+#endif
+                            }
                             test.fix();
+
                             if (MaxAbsAngleBetween(test, orn) > angle_eps)
                                 goto orn_needed;
                         }
                     }
 
-                    if (++src >= stop)
-                        break;
-                    if (src == next) // remember that 'next' can be wrapped due to looping, so use == for safety
+                    for (Int src = i, i_next = i + 3;;) // check that all removed keyframes (including this) do not deviate, start from the left because below we're checking if we've reached the next index, we need to go only to the right, because to the left no keys have been removed yet
                     {
-                        prev2 = prev;
-                        prev = next;
-                        next = next2;
-                        next2 = optimized[Index(i_next++, anim_loop, optimized.elms(), i)];
-                        p = &orns[prev];
-                        n = &orns[next];
-                        p2 = &orns[prev2];
-                        n2 = &orns[next2];
-                        n_time = AfterTime(n->time, p->time, anim_length);
-                    }
-                }
+                        C Orn &orn = orns[src];
+#if HAS_ANIM_TANGENT
+                        Orient tan[2];
+                        if (!anim_linear) {
+                            tan[0].dir = GetTangentDir(p2->orn.dir, n->orn.dir);
+                            tan[0].perp = GetTangentDir(p2->orn.perp, n->orn.perp);
+                            tan[1].dir = GetTangentDir(p->orn.dir, n2->orn.dir);
+                            tan[1].perp = GetTangentDir(p->orn.perp, n2->orn.perp);
+                        }
+#endif
+                        // check at key location
+                        if (src != prev) // no need to check time where both source and optimized have a keyframe
+                        {
+                            Flt step = LerpRS(p->time, n_time, AfterTime(orn.time, p->time, anim_length)); // use Sat in case orn.time is outside of range, or 'p' has the same time as 'n'
+                            if (anim_linear) {
+                                test.dir = Lerp(p->orn.dir, n->orn.dir, step);
+                                test.perp = Lerp(p->orn.perp, n->orn.perp, step);
+                            } else {
+#if HAS_ANIM_TANGENT
+                                test.dir = LerpTan(p->orn.dir, n->orn.dir, step, tan[0].dir, tan[1].dir);
+                                test.perp = LerpTan(p->orn.perp, n->orn.perp, step, tan[0].perp, tan[1].perp);
+#else
+                                test.dir = Lerp4(p2->orn.dir, p->orn.dir, n->orn.dir, n2->orn.dir, step);
+                                test.perp = Lerp4(p2->orn.perp, p->orn.perp, n->orn.perp, n2->orn.perp, step);
+#endif
+                            }
+                            test.fix();
+                            if (MaxAbsAngleBetween(test, orn.orn) > angle_eps)
+                                goto orn_needed;
+                        }
 
-                optimized.remove(i, true);
-            orn_needed:;
-            }
+                        // check between keys
+                        if (!anim_linear) // for cubic interpolation we need to check between keys, because due to cubic interpolation the values can get way off
+                        {
+                            Flt next_time = (InRange(src + 1, orns) ? orns[src + 1].time : anim_loop ? orns[0].time + anim_length
+                                                                                                     : anim_length);
+                            if (!Equal(orn.time, next_time)) // if times are the same then we don't need to do the following (this can happen when last key is at the end of anim and (it's not looped or the first key is at the start))
+                            {
+                                anim_params.time = Avg(orn.time, next_time); // set time between this and next key from the source
+                                Orient orn;
+                                T.orn(orn, anim_params);
+                                Flt step = LerpRS(p->time, n_time, AfterTime(anim_params.time, p->time, anim_length)); // use Sat in case orn.time is outside of range, or 'p' has the same time as 'n'
+#if HAS_ANIM_TANGENT
+                                test.dir = LerpTan(p->orn.dir, n->orn.dir, step, tan[0].dir, tan[1].dir);
+                                test.perp = LerpTan(p->orn.perp, n->orn.perp, step, tan[0].perp, tan[1].perp);
+#else
+                                test.dir = Lerp4(p2->orn.dir, p->orn.dir, n->orn.dir, n2->orn.dir, step);
+                                test.perp = Lerp4(p2->orn.perp, p->orn.perp, n->orn.perp, n2->orn.perp, step);
+#endif
+                                test.fix();
+                                if (MaxAbsAngleBetween(test, orn) > angle_eps)
+                                    goto orn_needed;
+                            }
+                        }
+
+                        if (++src >= stop)
+                            break;
+                        if (src == next) // remember that 'next' can be wrapped due to looping, so use == for safety
+                        {
+                            prev2 = prev;
+                            prev = next;
+                            next = next2;
+                            next2 = optimized[Index(i_next++, anim_loop, optimized.elms(), i)];
+                            p = &orns[prev];
+                            n = &orns[next];
+                            p2 = &orns[prev2];
+                            n2 = &orns[next2];
+                            n_time = AfterTime(n->time, p->time, anim_length);
+                        }
+                    }
+
+                    optimized.remove(i, true);
+                orn_needed:;
+                }
         }
         if (optimized.elms() == 1 && bone) // be careful when removing the only 'orn' keyframe even if it's an identity, because it may be needed for correct multi-animation blending
         {
@@ -1185,54 +1186,31 @@ AnimKeys &AnimKeys::optimize(Bool anim_loop, Bool anim_linear, Flt anim_length, 
         if (optimized.elms() >= 2) {
             Bool same_first_last = (Dist2(poss.first().pos, poss.last().pos) <= pos_eps); // if first and last keys are the same
             REPA(optimized)
-            if (optimized.elms() >= 2) if (same_first_last || (i > 0 && i < optimized.elms() - 1)) // don't remove first-last keys, in case animation has later looping toggled which could cause issues (for example root motion turning animation, imported as non-looping, finished 90 deg turn at 50% animation time, and the last half keys are removed, then switched to looping, and turn gets reverted back to start due to loop and last keys missing), however allow removing if keys are the same
-            {
-                Int prev2 = optimized[Index(i - 2, anim_loop, optimized.elms(), i)],
-                    prev = optimized[Index(i - 1, anim_loop, optimized.elms(), i)],
-                    next = optimized[Index(i + 1, anim_loop, optimized.elms(), i)],
-                    next2 = optimized[Index(i + 2, anim_loop, optimized.elms(), i)],
-                    stop = (InRange(i + 1, optimized) ? optimized[Min(i + (anim_linear ? 1 : 2), optimized.elms() - 1)] : poss.elms()); // stop on the next key that wasn't removed (for non-linear use 2nd next key)
-                C Pos *p = &poss[prev], *n = &poss[next], *p2 = &poss[prev2], *n2 = &poss[next2];
-                Flt n_time = AfterTime(n->time, p->time, anim_length);
-                for (Int src = i, i_next = i + 3;;) // check that all removed keyframes (including this) do not deviate, start from the left because below we're checking if we've reached the next index, we need to go only to the right, because to the left no keys have been removed yet
+            if (optimized.elms() >= 2)
+                if (same_first_last || (i > 0 && i < optimized.elms() - 1)) // don't remove first-last keys, in case animation has later looping toggled which could cause issues (for example root motion turning animation, imported as non-looping, finished 90 deg turn at 50% animation time, and the last half keys are removed, then switched to looping, and turn gets reverted back to start due to loop and last keys missing), however allow removing if keys are the same
                 {
-                    C Pos &pos = poss[src];
-                    Vec test;
-#if HAS_ANIM_TANGENT
-                    Vec tan[2];
-                    if (!anim_linear) {
-                        tan[0] = GetTangent(p2->pos, p->pos, n->pos);
-                        tan[1] = GetTangent(p->pos, n->pos, n2->pos);
-                    }
-#endif
-                    // check at key location
-                    if (src != prev) // no need to check time where both source and optimized have a keyframe
+                    Int prev2 = optimized[Index(i - 2, anim_loop, optimized.elms(), i)],
+                        prev = optimized[Index(i - 1, anim_loop, optimized.elms(), i)],
+                        next = optimized[Index(i + 1, anim_loop, optimized.elms(), i)],
+                        next2 = optimized[Index(i + 2, anim_loop, optimized.elms(), i)],
+                        stop = (InRange(i + 1, optimized) ? optimized[Min(i + (anim_linear ? 1 : 2), optimized.elms() - 1)] : poss.elms()); // stop on the next key that wasn't removed (for non-linear use 2nd next key)
+                    C Pos *p = &poss[prev], *n = &poss[next], *p2 = &poss[prev2], *n2 = &poss[next2];
+                    Flt n_time = AfterTime(n->time, p->time, anim_length);
+                    for (Int src = i, i_next = i + 3;;) // check that all removed keyframes (including this) do not deviate, start from the left because below we're checking if we've reached the next index, we need to go only to the right, because to the left no keys have been removed yet
                     {
-                        Flt step = LerpRS(p->time, n_time, AfterTime(pos.time, p->time, anim_length)); // use Sat in case pos.time is outside of range, or 'p' has the same time as 'n'
-                        if (anim_linear)
-                            test = Lerp(p->pos, n->pos, step);
-                        else {
+                        C Pos &pos = poss[src];
+                        Vec test;
 #if HAS_ANIM_TANGENT
-                            test = LerpTan(p->pos, n->pos, step, tan[0], tan[1]);
-#else
-                            test = Lerp4(p2->pos, p->pos, n->pos, n2->pos, step);
-#endif
+                        Vec tan[2];
+                        if (!anim_linear) {
+                            tan[0] = GetTangent(p2->pos, p->pos, n->pos);
+                            tan[1] = GetTangent(p->pos, n->pos, n2->pos);
                         }
-                        if (Dist2(test, pos.pos) > pos_eps)
-                            goto pos_needed;
-                    }
-
-                    // check between keys
-                    if (!anim_linear) // for cubic interpolation we need to check between keys, because due to cubic interpolation the values can get way off
-                    {
-                        Flt next_time = (InRange(src + 1, poss) ? poss[src + 1].time : anim_loop ? poss[0].time + anim_length
-                                                                                                 : anim_length);
-                        if (!Equal(pos.time, next_time)) // if times are the same then we don't need to do the following (this can happen when last key is at the end of anim and (it's not looped or the first key is at the start))
+#endif
+                        // check at key location
+                        if (src != prev) // no need to check time where both source and optimized have a keyframe
                         {
-                            anim_params.time = Avg(pos.time, next_time); // set time between this and next key from the source
-                            Vec pos;
-                            T.pos(pos, anim_params);
-                            Flt step = LerpRS(p->time, n_time, AfterTime(anim_params.time, p->time, anim_length)); // use Sat in case pos.time is outside of range, or 'p' has the same time as 'n'
+                            Flt step = LerpRS(p->time, n_time, AfterTime(pos.time, p->time, anim_length)); // use Sat in case pos.time is outside of range, or 'p' has the same time as 'n'
                             if (anim_linear)
                                 test = Lerp(p->pos, n->pos, step);
                             else {
@@ -1242,29 +1220,53 @@ AnimKeys &AnimKeys::optimize(Bool anim_loop, Bool anim_linear, Flt anim_length, 
                                 test = Lerp4(p2->pos, p->pos, n->pos, n2->pos, step);
 #endif
                             }
-                            if (Dist2(test, pos) > pos_eps)
+                            if (Dist2(test, pos.pos) > pos_eps)
                                 goto pos_needed;
                         }
-                    }
 
-                    if (++src >= stop)
-                        break;
-                    if (src == next) // remember that 'next' can be wrapped due to looping, so use == for safety
-                    {
-                        prev2 = prev;
-                        prev = next;
-                        next = next2;
-                        next2 = optimized[Index(i_next++, anim_loop, optimized.elms(), i)];
-                        p = &poss[prev];
-                        n = &poss[next];
-                        p2 = &poss[prev2];
-                        n2 = &poss[next2];
-                        n_time = AfterTime(n->time, p->time, anim_length);
+                        // check between keys
+                        if (!anim_linear) // for cubic interpolation we need to check between keys, because due to cubic interpolation the values can get way off
+                        {
+                            Flt next_time = (InRange(src + 1, poss) ? poss[src + 1].time : anim_loop ? poss[0].time + anim_length
+                                                                                                     : anim_length);
+                            if (!Equal(pos.time, next_time)) // if times are the same then we don't need to do the following (this can happen when last key is at the end of anim and (it's not looped or the first key is at the start))
+                            {
+                                anim_params.time = Avg(pos.time, next_time); // set time between this and next key from the source
+                                Vec pos;
+                                T.pos(pos, anim_params);
+                                Flt step = LerpRS(p->time, n_time, AfterTime(anim_params.time, p->time, anim_length)); // use Sat in case pos.time is outside of range, or 'p' has the same time as 'n'
+                                if (anim_linear)
+                                    test = Lerp(p->pos, n->pos, step);
+                                else {
+#if HAS_ANIM_TANGENT
+                                    test = LerpTan(p->pos, n->pos, step, tan[0], tan[1]);
+#else
+                                    test = Lerp4(p2->pos, p->pos, n->pos, n2->pos, step);
+#endif
+                                }
+                                if (Dist2(test, pos) > pos_eps)
+                                    goto pos_needed;
+                            }
+                        }
+
+                        if (++src >= stop)
+                            break;
+                        if (src == next) // remember that 'next' can be wrapped due to looping, so use == for safety
+                        {
+                            prev2 = prev;
+                            prev = next;
+                            next = next2;
+                            next2 = optimized[Index(i_next++, anim_loop, optimized.elms(), i)];
+                            p = &poss[prev];
+                            n = &poss[next];
+                            p2 = &poss[prev2];
+                            n2 = &poss[next2];
+                            n_time = AfterTime(n->time, p->time, anim_length);
+                        }
                     }
+                    optimized.remove(i, true);
+                pos_needed:;
                 }
-                optimized.remove(i, true);
-            pos_needed:;
-            }
         }
         if (optimized.elms() == 1 && poss[optimized[0]].pos.length2() <= pos_eps)
             optimized.clear();
@@ -1283,54 +1285,31 @@ AnimKeys &AnimKeys::optimize(Bool anim_loop, Bool anim_linear, Flt anim_length, 
         if (optimized.elms() >= 2) {
             Bool same_first_last = (MaxAbsDelta(scales.first().scale, scales.last().scale) <= scale_eps); // if first and last keys are the same
             REPA(optimized)
-            if (optimized.elms() >= 2) if (same_first_last || (i > 0 && i < optimized.elms() - 1)) // don't remove first-last keys, in case animation has later looping toggled which could cause issues (for example root motion turning animation, imported as non-looping, finished 90 deg turn at 50% animation time, and the last half keys are removed, then switched to looping, and turn gets reverted back to start due to loop and last keys missing), however allow removing if keys are the same
-            {
-                Int prev2 = optimized[Index(i - 2, anim_loop, optimized.elms(), i)],
-                    prev = optimized[Index(i - 1, anim_loop, optimized.elms(), i)],
-                    next = optimized[Index(i + 1, anim_loop, optimized.elms(), i)],
-                    next2 = optimized[Index(i + 2, anim_loop, optimized.elms(), i)],
-                    stop = (InRange(i + 1, optimized) ? optimized[Min(i + (anim_linear ? 1 : 2), optimized.elms() - 1)] : scales.elms()); // stop on the next key that wasn't removed (for non-linear use 2nd next key)
-                C Scale *p = &scales[prev], *n = &scales[next], *p2 = &scales[prev2], *n2 = &scales[next2];
-                Flt n_time = AfterTime(n->time, p->time, anim_length);
-                for (Int src = i, i_next = i + 3;;) // check that all removed keyframes (including this) do not deviate, start from the left because below we're checking if we've reached the next index, we need to go only to the right, because to the left no keys have been removed yet
+            if (optimized.elms() >= 2)
+                if (same_first_last || (i > 0 && i < optimized.elms() - 1)) // don't remove first-last keys, in case animation has later looping toggled which could cause issues (for example root motion turning animation, imported as non-looping, finished 90 deg turn at 50% animation time, and the last half keys are removed, then switched to looping, and turn gets reverted back to start due to loop and last keys missing), however allow removing if keys are the same
                 {
-                    C Scale &scale = scales[src];
-                    Vec test;
-#if HAS_ANIM_TANGENT
-                    Vec tan[2];
-                    if (!anim_linear) {
-                        tan[0] = GetTangent(p2->scale, p->scale, n->scale);
-                        tan[1] = GetTangent(p->scale, n->scale, n2->scale);
-                    }
-#endif
-                    // check at key location
-                    if (src != prev) // no need to check time where both source and optimized have a keyframe
+                    Int prev2 = optimized[Index(i - 2, anim_loop, optimized.elms(), i)],
+                        prev = optimized[Index(i - 1, anim_loop, optimized.elms(), i)],
+                        next = optimized[Index(i + 1, anim_loop, optimized.elms(), i)],
+                        next2 = optimized[Index(i + 2, anim_loop, optimized.elms(), i)],
+                        stop = (InRange(i + 1, optimized) ? optimized[Min(i + (anim_linear ? 1 : 2), optimized.elms() - 1)] : scales.elms()); // stop on the next key that wasn't removed (for non-linear use 2nd next key)
+                    C Scale *p = &scales[prev], *n = &scales[next], *p2 = &scales[prev2], *n2 = &scales[next2];
+                    Flt n_time = AfterTime(n->time, p->time, anim_length);
+                    for (Int src = i, i_next = i + 3;;) // check that all removed keyframes (including this) do not deviate, start from the left because below we're checking if we've reached the next index, we need to go only to the right, because to the left no keys have been removed yet
                     {
-                        Flt step = LerpRS(p->time, n_time, AfterTime(scale.time, p->time, anim_length)); // use Sat in case scale.time is outside of range, or 'p' has the same time as 'n'
-                        if (anim_linear)
-                            test = Lerp(p->scale, n->scale, step);
-                        else {
+                        C Scale &scale = scales[src];
+                        Vec test;
 #if HAS_ANIM_TANGENT
-                            test = LerpTan(p->scale, n->scale, step, tan[0], tan[1]);
-#else
-                            test = Lerp4(p2->scale, p->scale, n->scale, n2->scale, step);
-#endif
+                        Vec tan[2];
+                        if (!anim_linear) {
+                            tan[0] = GetTangent(p2->scale, p->scale, n->scale);
+                            tan[1] = GetTangent(p->scale, n->scale, n2->scale);
                         }
-                        if (MaxAbsDelta(test, scale.scale) > scale_eps)
-                            goto scale_needed;
-                    }
-
-                    // check between keys
-                    if (!anim_linear) // for cubic interpolation we need to check between keys, because due to cubic interpolation the values can get way off
-                    {
-                        Flt next_time = (InRange(src + 1, scales) ? scales[src + 1].time : anim_loop ? scales[0].time + anim_length
-                                                                                                     : anim_length);
-                        if (!Equal(scale.time, next_time)) // if times are the same then we don't need to do the following (this can happen when last key is at the end of anim and (it's not looped or the first key is at the start))
+#endif
+                        // check at key location
+                        if (src != prev) // no need to check time where both source and optimized have a keyframe
                         {
-                            anim_params.time = Avg(scale.time, next_time); // set time between this and next key from the source
-                            Vec scale;
-                            T.scale(scale, anim_params);
-                            Flt step = LerpRS(p->time, n_time, AfterTime(anim_params.time, p->time, anim_length)); // use Sat in case scale.time is outside of range, or 'p' has the same time as 'n'
+                            Flt step = LerpRS(p->time, n_time, AfterTime(scale.time, p->time, anim_length)); // use Sat in case scale.time is outside of range, or 'p' has the same time as 'n'
                             if (anim_linear)
                                 test = Lerp(p->scale, n->scale, step);
                             else {
@@ -1340,29 +1319,53 @@ AnimKeys &AnimKeys::optimize(Bool anim_loop, Bool anim_linear, Flt anim_length, 
                                 test = Lerp4(p2->scale, p->scale, n->scale, n2->scale, step);
 #endif
                             }
-                            if (MaxAbsDelta(test, scale) > scale_eps)
+                            if (MaxAbsDelta(test, scale.scale) > scale_eps)
                                 goto scale_needed;
                         }
-                    }
 
-                    if (++src >= stop)
-                        break;
-                    if (src == next) // remember that 'next' can be wrapped due to looping, so use == for safety
-                    {
-                        prev2 = prev;
-                        prev = next;
-                        next = next2;
-                        next2 = optimized[Index(i_next++, anim_loop, optimized.elms(), i)];
-                        p = &scales[prev];
-                        n = &scales[next];
-                        p2 = &scales[prev2];
-                        n2 = &scales[next2];
-                        n_time = AfterTime(n->time, p->time, anim_length);
+                        // check between keys
+                        if (!anim_linear) // for cubic interpolation we need to check between keys, because due to cubic interpolation the values can get way off
+                        {
+                            Flt next_time = (InRange(src + 1, scales) ? scales[src + 1].time : anim_loop ? scales[0].time + anim_length
+                                                                                                         : anim_length);
+                            if (!Equal(scale.time, next_time)) // if times are the same then we don't need to do the following (this can happen when last key is at the end of anim and (it's not looped or the first key is at the start))
+                            {
+                                anim_params.time = Avg(scale.time, next_time); // set time between this and next key from the source
+                                Vec scale;
+                                T.scale(scale, anim_params);
+                                Flt step = LerpRS(p->time, n_time, AfterTime(anim_params.time, p->time, anim_length)); // use Sat in case scale.time is outside of range, or 'p' has the same time as 'n'
+                                if (anim_linear)
+                                    test = Lerp(p->scale, n->scale, step);
+                                else {
+#if HAS_ANIM_TANGENT
+                                    test = LerpTan(p->scale, n->scale, step, tan[0], tan[1]);
+#else
+                                    test = Lerp4(p2->scale, p->scale, n->scale, n2->scale, step);
+#endif
+                                }
+                                if (MaxAbsDelta(test, scale) > scale_eps)
+                                    goto scale_needed;
+                            }
+                        }
+
+                        if (++src >= stop)
+                            break;
+                        if (src == next) // remember that 'next' can be wrapped due to looping, so use == for safety
+                        {
+                            prev2 = prev;
+                            prev = next;
+                            next = next2;
+                            next2 = optimized[Index(i_next++, anim_loop, optimized.elms(), i)];
+                            p = &scales[prev];
+                            n = &scales[next];
+                            p2 = &scales[prev2];
+                            n2 = &scales[next2];
+                            n_time = AfterTime(n->time, p->time, anim_length);
+                        }
                     }
+                    optimized.remove(i, true);
+                scale_needed:;
                 }
-                optimized.remove(i, true);
-            scale_needed:;
-            }
         }
         if (optimized.elms() == 1 && MaxAbsDelta(scales[optimized[0]].scale, VecZero) <= scale_eps)
             optimized.clear();
@@ -1592,12 +1595,16 @@ struct TimeClip {
     void find(Mems<TYPE> &keys, Int &before_start, Int &after_end) C {
         before_start = -1;
         FREPA(keys)
-        if (keys[i].time < start_time) before_start = i;
-        else break; // go from start
+        if (keys[i].time < start_time)
+            before_start = i;
+        else
+            break; // go from start
         after_end = -1;
         REPA(keys)
-        if (keys[i].time > end_time) after_end = i;
-        else break; // go from end
+        if (keys[i].time > end_time)
+            after_end = i;
+        else
+            break; // go from end
     }
     T1(TYPE)
     NOINLINE void clip(Mems<TYPE> &keys) C // use 'NOINLINE' to prevent from inlining because we're using Memt which uses lot of stack memory
@@ -1792,7 +1799,7 @@ void AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos
     if (orn_times) {
         if (orn_times.elms())
             FREPA(orns)
-            orn_times.binaryInclude(orns[i].time, CompareEps);
+        orn_times.binaryInclude(orns[i].time, CompareEps);
         else {
             orn_times.setNum(orns.elms());
             REPAO(orn_times) = orns[i].time;
@@ -1801,7 +1808,7 @@ void AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos
     if (pos_times) {
         if (pos_times.elms())
             FREPA(poss)
-            pos_times.binaryInclude(poss[i].time, CompareEps);
+        pos_times.binaryInclude(poss[i].time, CompareEps);
         else {
             pos_times.setNum(poss.elms());
             REPAO(pos_times) = poss[i].time;
@@ -1810,7 +1817,7 @@ void AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos
     if (scale_times) {
         if (scale_times.elms())
             FREPA(scales)
-            scale_times.binaryInclude(scales[i].time, CompareEps);
+        scale_times.binaryInclude(scales[i].time, CompareEps);
         else {
             scale_times.setNum(scales.elms());
             REPAO(scale_times) = scales[i].time;
@@ -2194,7 +2201,8 @@ AnimEvent *Animation::findEvent(CChar8 *name) {
 Int Animation::eventCount(CChar8 *name) C {
     Int num = 0;
     REPA(events)
-    if (Equal(events[i].name, name)) num++;
+    if (Equal(events[i].name, name))
+        num++;
     return num;
 }
 Bool Animation::eventAfter(CChar8 *name, Flt time) C // event.name==name && event.time<=time (time>=event.time)
@@ -2555,7 +2563,8 @@ void Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_t
 /******************************************************************************/
 Animation &Animation::removeUnused() {
     REPA(bones)
-    if (!bones[i].is()) bones.remove(i);
+    if (!bones[i].is())
+        bones.remove(i);
     return T;
 }
 /******************************************************************************
@@ -3344,7 +3353,8 @@ Animation &Animation::adjustForSameTransformWithDifferentSkeleton(C Skeleton &ol
                                 REPA(parent_weights) {
                                     Int old_parent_i = parent_weights[i].index;
                                     REPA(old_bones)
-                                    if (!old_skel.contains(old_parent_i, old_bones[i].index)) goto old_parent_not_contains_bone; // if at least one isn't contained, then stop this loop and keep checking next parents
+                                    if (!old_skel.contains(old_parent_i, old_bones[i].index))
+                                        goto old_parent_not_contains_bone; // if at least one isn't contained, then stop this loop and keep checking next parents
                                 }
                                 break; // all 'old_bones' are contained in this parent, so we can stop now
                             old_parent_not_contains_bone:;
@@ -4481,7 +4491,8 @@ void Animation::freezeBone(C Skeleton &skel, Int skel_bone) {
         // get root bones
         MemtN<BoneType, 32> root_bones;
         REPA(skel.bones)
-        if (skel.bones[i].parent == BONE_NULL) root_bones.add(i);
+        if (skel.bones[i].parent == BONE_NULL)
+            root_bones.add(i);
         MemtN<AnimKeys, 32> root_bone_keys;
         root_bone_keys.setNumDiscard(root_bones.elms());
         Memt<Flt, 16384> root_times; // keep outside the loop to reduce overhead
@@ -4944,7 +4955,8 @@ Bool SkelAnim::load(C Str &name, Ptr user) {
 Int SkelAnim::sbonToAbon(Int sbon) C {
     if (_animation && sbon >= 0)
         REPA(_animation->bones)
-        if (_bone[i] == sbon) return i;
+    if (_bone[i] == sbon)
+        return i;
     return -1;
 }
 /******************************************************************************/

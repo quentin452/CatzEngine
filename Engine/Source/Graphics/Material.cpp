@@ -370,7 +370,8 @@ Material &Material::validate() // #MaterialTextureLayout
     if (this == MaterialLast)
         MaterialLast = null;
     REPA(MaterialLast4)
-    if (this == MaterialLast4[i]) MaterialLast4[i] = null;
+    if (this == MaterialLast4[i])
+        MaterialLast4[i] = null;
 
     _has_alpha_test = HasAlphaTest(technique); // !! call 'HasAlphaTest'  instead of 'hasAlphaTest'  because that one just uses '_has_alpha_test' which we're setting here !!
     _depth_write = HasDepthWrite(technique);   // !! call 'HasDepthWrite' instead of 'hasDepthWrite' because that one just uses '_depth_write'    which we're setting here !!

@@ -436,13 +436,15 @@ Int BoneMap::find(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub) C 
 Int Skeleton::findBoneI(CChar8 *name) C {
     if (Is(name))
         REPA(bones)
-        if (Equal(bones[i].name, name)) return i;
+    if (Equal(bones[i].name, name))
+        return i;
     return -1;
 }
 Int Skeleton::findSlotI(CChar8 *name) C {
     if (Is(name))
         REPA(slots)
-        if (Equal(slots[i].name, name)) return i;
+    if (Equal(slots[i].name, name))
+        return i;
     return -1;
 }
 Byte Skeleton::findBoneB(CChar8 *name) C {
@@ -589,7 +591,8 @@ Int Skeleton::bonesSharedParent(MemPtrN<BoneType, 256> bones) C {
         for (;;) {
             Int parent = bone_parents.last().bone;
             REP(bone_parents.elms() - 1)
-            if (bone_parents[i].bone != parent) goto different;
+            if (bone_parents[i].bone != parent)
+                goto different;
             return parent; // all parents are the same
         different:
             if (!--min_parents)
@@ -1236,20 +1239,22 @@ Skeleton &Skeleton::setBoneTypes() {
             if (SkelBone *parent = bones.addr(bone.parent))
                 if (parent->type == BONE_UPPER_ARM) // parent is also UPPER_ARM
                     REP(bone.children_num)
-                    if (SkelBone *child = bones.addr(bone.children_offset + i)) if (child->type == BONE_HAND) // any child is a HAND
-                    {
-                        bone.type = BONE_LOWER_ARM;
-                        break;
-                    }
+            if (SkelBone *child = bones.addr(bone.children_offset + i))
+                if (child->type == BONE_HAND) // any child is a HAND
+                {
+                    bone.type = BONE_LOWER_ARM;
+                    break;
+                }
         } else if (bone.type == BONE_UPPER_LEG) {
             if (SkelBone *parent = bones.addr(bone.parent))
                 if (parent->type == BONE_UPPER_LEG) // parent is also UPPER_LEG
                     REP(bone.children_num)
-                    if (SkelBone *child = bones.addr(bone.children_offset + i)) if (child->type == BONE_FOOT) // any child is a FOOT
-                    {
-                        bone.type = BONE_LOWER_LEG;
-                        break;
-                    }
+            if (SkelBone *child = bones.addr(bone.children_offset + i))
+                if (child->type == BONE_FOOT) // any child is a FOOT
+                {
+                    bone.type = BONE_LOWER_LEG;
+                    break;
+                }
         }
     }
 
@@ -1349,12 +1354,13 @@ Skeleton &Skeleton::setBoneShapes() {
                 to_offset = to + bone.offset;
             Flt fwd = 0;
             REP(bone.children_num)
-            if (SkelBone *child = bones.addr(bone.children_offset + i)) if (Equal(to, child->pos) || always_connect && AlwaysConnect(*child)) {
-                Flt r = Min(col_rad, ColRadius(*child));
-                if (reduce_merge_by_dist)
-                    r -= Dist(to_offset, child->pos + child->offset);
-                MAX(fwd, r);
-            }
+            if (SkelBone *child = bones.addr(bone.children_offset + i))
+                if (Equal(to, child->pos) || always_connect && AlwaysConnect(*child)) {
+                    Flt r = Min(col_rad, ColRadius(*child));
+                    if (reduce_merge_by_dist)
+                        r -= Dist(to_offset, child->pos + child->offset);
+                    MAX(fwd, r);
+                }
             if (fwd > 0) {
                 length += fwd;
                 center += (fwd * 0.5) * dir;
@@ -1726,7 +1732,8 @@ CChar8 *BoneMap::name(Int i) C { return InRange(i, _bones) ? nameStart() + _bone
 
 Int BoneMap::find(CChar8 *name) C {
     REP(_bones)
-    if (Equal(T.name(i), name)) return i;
+    if (Equal(T.name(i), name))
+        return i;
     return -1;
 }
 

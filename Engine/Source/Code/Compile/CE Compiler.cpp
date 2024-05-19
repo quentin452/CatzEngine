@@ -83,7 +83,8 @@ namespace Edit {
 /******************************************************************************/
 static Int CompareConstantData(Byte *a, Int size_a, Byte *b, Int size_b) {
     REP(Min(size_a, size_b))
-    if (Int c = Compare(*a++, *b++)) return c;
+    if (Int c = Compare(*a++, *b++))
+        return c;
     return Compare(size_a, size_b);
 }
 Int CompilerContext::heapConstant(CPtr data, Int size, Int align) {
@@ -762,7 +763,8 @@ static Int LabelCommandIndex(Int label, Memc<Command> &cmds, Compiler &compiler,
 {
     if (InRange(label, compiler.labels))
         REPA(cmds)
-        if (cmds[i].type == CMD_LABEL && cmds[i].label_index == label) return i;
+    if (cmds[i].type == CMD_LABEL && cmds[i].label_index == label)
+        return i;
     compiler.msgs.New().error("Invalid label index", compiler.source, token_index);
     return -1;
 }
@@ -1129,12 +1131,12 @@ void Compiler::compile(Memc<Command> &cmds, Mems<Byte> &code, Symbol &func, Symb
                                 }
                             } else if (cond.mem.type == Expr::Memory::LOCAL && InRange(cond.mem.index, locals)) // check if the condition result is a local variable
                                 REPA(live_locals)
-                                if (live_locals[i] == cond.mem.index) // check if that local variable is live and needs to be destroyed
-                                {
-                                    if (!locals[cond.mem.index].block_scope)
-                                        cond.copyCtor(T); // if not block scope then copy it to temporary
-                                    break;
-                                }
+                            if (live_locals[i] == cond.mem.index) // check if that local variable is live and needs to be destroyed
+                            {
+                                if (!locals[cond.mem.index].block_scope)
+                                    cond.copyCtor(T); // if not block scope then copy it to temporary
+                                break;
+                            }
                         }
 
                         // first compile expression
@@ -1211,7 +1213,8 @@ void CodeEnvironment::FuncBody::create(Symbol &func, Memc<Message> &msgs, Compil
 
         // set label indexes
         REPA(func.children)
-        if (func.children[i]->type == Symbol::LABEL) func.children[i]->raw_offset = compiler.labels++;
+        if (func.children[i]->type == Symbol::LABEL)
+            func.children[i]->raw_offset = compiler.labels++;
 
         Int label_body_scope = compiler.labels++,
             label_return = compiler.labels++;

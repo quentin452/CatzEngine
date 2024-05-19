@@ -114,7 +114,8 @@ void RendererClass::rtClean() {
     SyncLocker locker(D._lock);
     rtClear();
     REPA(_rts)
-    if (_rts[i].available()) _rts.removeValid(i);
+    if (_rts[i].available())
+        _rts.removeValid(i);
 }
 void RendererClass::rtDel() {
     SyncLocker locker(D._lock);
@@ -197,7 +198,8 @@ Bool RendererClass::rtCreateMain() // !! call only under lock !!
         if (_cur_main_ds == old_ds)
             _cur_main_ds = _ptr_main_ds;
         REPA(cur)
-        if (cur[i] == old) cur[i] = _ptr_main;
+        if (cur[i] == old)
+            cur[i] = _ptr_main;
         if (cur_ds == old_ds)
             cur_ds = _ptr_main_ds;
         Renderer.set(cur[0], cur[1], cur[2], cur[3], cur_ds, true);

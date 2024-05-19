@@ -613,7 +613,7 @@ void Image::drawBorder(C Rect &rect, Flt border, Flt tex_scale, Flt tex_offset, 
 
         if (tex_scale != 1 || tex_offset != 0)
             REP(10)
-            v[i].tex.x = v[i].tex.x * tex_scale + tex_offset;
+        v[i].tex.x = v[i].tex.x * tex_scale + tex_offset;
 
         if (wrap_mode)
             VI.end();
@@ -689,7 +689,7 @@ void Image::drawBorder(C Color &color, C Color &color_add, C Rect &rect, Flt bor
 
         if (tex_scale != 1 || tex_offset != 0)
             REP(10)
-            v[i].tex.x = v[i].tex.x * tex_scale + tex_offset;
+        v[i].tex.x = v[i].tex.x * tex_scale + tex_offset;
 
         if (wrap_mode)
             VI.end();
@@ -773,7 +773,7 @@ void Image::drawFadeLR(C Color &color, C Rect &rect, Flt trans_l, Flt opaque_l, 
 
         if (partial())
             REP(16)
-            v[i].tex *= _part.xy;
+        v[i].tex *= _part.xy;
 
         VI.flushIndexed(IndBufPanel, 3 * 3 * 2 * 3);
     }
@@ -828,7 +828,7 @@ void Image::draw3x3(C Color &color, C Color &color_add, C Rect &rect, Flt border
 
         if (partial())
             REP(16)
-            v[i].tex *= _part.xy;
+        v[i].tex *= _part.xy;
 
         VI.flushIndexed(IndBufPanel, 3 * 3 * 2 * 3);
     }
@@ -882,7 +882,7 @@ void Image::draw3x3Vertical(C Color &color, C Color &color_add, C Rect &rect, Fl
 
         if (partial())
             REP(16)
-            v[i].tex *= _part.xy;
+        v[i].tex *= _part.xy;
 
         VI.flushIndexed(IndBufPanel, 3 * 3 * 2 * 3);
     }
@@ -937,7 +937,7 @@ void DisplayDraw::drawShadow(Byte alpha, C Rect &rect, Flt shadow_radius) {
 
             if (Gui.image_shadow->partial())
                 REP(16)
-                v[i].tex *= Gui.image_shadow->_part.xy;
+            v[i].tex *= Gui.image_shadow->_part.xy;
 
             VI.flushIndexed(IndBufPanel, 3 * 3 * 2 * 3);
         }
@@ -992,7 +992,7 @@ void DisplayDraw::drawShadowBorders(Byte alpha, C Rect &rect, Flt shadow_radius)
 
             if (Gui.image_shadow->partial())
                 REP(16)
-                v[i].tex *= Gui.image_shadow->_part.xy;
+            v[i].tex *= Gui.image_shadow->_part.xy;
 
             VI.flushIndexed(IndBufPanel, (3 * 3 - 1) * 2 * 3);
         }

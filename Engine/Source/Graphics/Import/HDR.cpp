@@ -113,7 +113,8 @@ Bool Image::ImportHDR(File &f) {
             if (size.x >= 0 && size.y >= 0 && createSoft(size.x, size.y, 1, IMAGE_F32_3)) {
                 Memt<Byte> buffer;
                 FREPD(y, h())
-                if (!ReadPixelsRLE(f, &pixF3(0, y), w(), buffer)) goto error;
+                if (!ReadPixelsRLE(f, &pixF3(0, y), w(), buffer))
+                    goto error;
                 return true;
             }
         }

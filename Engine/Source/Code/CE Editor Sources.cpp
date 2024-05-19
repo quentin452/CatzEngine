@@ -10,11 +10,11 @@ void Source::setOpened(Bool opened) {
             CE.code_tabs.New(loc.base_name).source = this; // create new tab
         else
             REPA(CE.code_tabs)
-            if (CE.code_tabs.tab(i).source == this) // remove     tab
-            {
-                CE.code_tabs.remove(i);
-                break;
-            }
+        if (CE.code_tabs.tab(i).source == this) // remove     tab
+        {
+            CE.code_tabs.remove(i);
+            break;
+        }
     }
 }
 void CodeEditor::cur(Source *cur) {

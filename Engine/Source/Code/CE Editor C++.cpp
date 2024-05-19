@@ -291,10 +291,13 @@ Bool CodeEditor::verifyBuildFiles(Memc<Message> &msgs) {
             } // overwrite changes in sources
     }
     REPA(build_files)
-    if (build_files[i].mode == BuildFile::TEXT) if (Source *s = findSource(build_files[i].src_loc)) if (s->modified()) if (!s->overwrite()) {
-        ok = false;
-        msgs.New().error(S + "Can't overwrite changes to file \"" + s->loc.asText() + "\".");
-    } // overwrite changes in text files
+    if (build_files[i].mode == BuildFile::TEXT)
+        if (Source *s = findSource(build_files[i].src_loc))
+            if (s->modified())
+                if (!s->overwrite()) {
+                    ok = false;
+                    msgs.New().error(S + "Can't overwrite changes to file \"" + s->loc.asText() + "\".");
+                } // overwrite changes in text files
 
     return ok;
 }
@@ -669,7 +672,8 @@ void CodeEditor::generateHeadersH(Memc<Symbol *> &sorted_classes, EXPORT_MODE ex
                 // remove starting spaces
                 REP(source.tokens[start]->col) {
                     REPA(lines)
-                    if (lines[i].cols.elms() && ValidType(lines[i].cols[0].type)) goto finished_enum_start_spaces;
+                    if (lines[i].cols.elms() && ValidType(lines[i].cols[0].type))
+                        goto finished_enum_start_spaces;
                     REPAO(lines).remove(0);
                 }
             finished_enum_start_spaces:;
@@ -887,7 +891,8 @@ Bool CodeEditor::generateCPPH(Memc<Symbol *> &sorted_classes, EXPORT_MODE export
     // count number of source files
     Int sources = 0;
     REPA(build_files)
-    if (build_files[i].mode == BuildFile::SOURCE) sources++;
+    if (build_files[i].mode == BuildFile::SOURCE)
+        sources++;
     Bool build_headers_in_cpp = (sources <= 8);
 
     // make cpp files
@@ -1113,12 +1118,12 @@ static void Add(Memb<PakFileData> &files, Pak &pak, C PakFile *pf) {
 static void AddChildren(Memb<PakFileData> &files, C PaksFile *pf) {
     if (pf)
         FREP(pf->children_num)
-        AddFile(files, &Paks.file(pf->children_offset + i));
+    AddFile(files, &Paks.file(pf->children_offset + i));
 }
 static void AddChildren(Memb<PakFileData> &files, Pak &pak, C PakFile *pf) {
     if (pf)
         FREP(pf->children_num)
-        AddFile(files, pak, pak.file(pf->children_offset + i));
+    AddFile(files, pak, pak.file(pf->children_offset + i));
 }
 static Bool CreateEngineEmbedPak(C Str &src, C Str &dest, Bool use_cipher, EXE_TYPE exe_type, Bool *changed = null) {
     if (changed)
@@ -1221,7 +1226,8 @@ static Bool CreateAppPak(C Str &name, Bool &exists, EXE_TYPE exe_type, Bool *cha
 static void DelExcept(C Str &path, CChar8 *allowed[], Int allowed_elms) {
     for (FileFind ff(path); ff();) {
         REP(allowed_elms)
-        if (ff.name == allowed[i]) goto keep;
+        if (ff.name == allowed[i])
+            goto keep;
         FDel(ff.pathName());
     keep:;
     }
@@ -1588,7 +1594,8 @@ Bool CodeEditor::generateVSProj(Int version) {
         convert.reverseOrder(); // start working from the biggest ones because they take the most time, yes this is correct
         MultiThreadedCall(convert, ImageConvert::Func);
         FREPA(convert)
-        if (!convert[i].ok) return ErrorWrite(convert[i].dest);
+        if (!convert[i].ok)
+            return ErrorWrite(convert[i].dest);
     }
 
     // resources, generate always because it may be used by WINDOWS_OLD
@@ -2356,7 +2363,8 @@ Bool CodeEditor::generateXcodeProj() {
         convert.reverseOrder(); // start working from the biggest ones because they take the most time, yes this is correct
         MultiThreadedCall(convert, ImageConvert::Func);
         FREPA(convert)
-        if (!convert[i].ok) return ErrorWrite(convert[i].dest);
+        if (!convert[i].ok)
+            return ErrorWrite(convert[i].dest);
     }
 
     Str app_package = Replace(cei().appPackage(), '_', '-'); // Apple does not support '_' but supports '-'
@@ -2367,64 +2375,65 @@ Bool CodeEditor::generateXcodeProj() {
     if (XmlNode *plist = xml.findNode("plist"))
         if (XmlNode *dict = plist->findNode("dict"))
             FREPA(dict->nodes)
-            if (dict->nodes[i].name == "key" && dict->nodes[i].data.elms() && InRange(i + 1, dict->nodes)) {
-                C Str &key = dict->nodes[i].data[0];
-                XmlNode &value = dict->nodes[i + 1];
-                if (key == "CFBundleDisplayName") {
-                    value.setName("string").nodes.del();
-                    value.data.setNum(1).first() = cei().appName();
-                } else if (key == "CFBundleVersion" || key == "CFBundleShortVersionString") {
-                    value.setName("string").nodes.del();
-                    value.data.setNum(1).first() = cei().appBuild();
-                } else if (key == "CFBundleLocalizations") {
-                    value.setName("array").nodes.del();
-                    Mems<LANG_TYPE> languages;
-                    cei().appLanguages(languages);
-                    FREPA(languages)
-                    if (CChar8 *code = LanguageCode(languages[i])) value.nodes.New().setName("string").data.add(code);
-                    if (!value.nodes.elms())
-                        value.nodes.New().setName("string").data.add("en"); // always add English if no language added
-                } else if (key == "UISupportedInterfaceOrientations") {
-                    value.setName("array").nodes.del();
-                    UInt flag = cei().appSupportedOrientations();
-                    if (flag & DIRF_UP)
-                        value.nodes.New().setName("string").data.add("UIInterfaceOrientationPortrait");
-                    if (flag & DIRF_DOWN)
-                        value.nodes.New().setName("string").data.add("UIInterfaceOrientationPortraitUpsideDown");
-                    if (flag & DIRF_LEFT)
-                        value.nodes.New().setName("string").data.add("UIInterfaceOrientationLandscapeRight");
-                    if (flag & DIRF_RIGHT)
-                        value.nodes.New().setName("string").data.add("UIInterfaceOrientationLandscapeLeft");
-                } else if (key == "NSLocationAlwaysUsageDescription" || key == "NSLocationWhenInUseUsageDescription") {
-                    value.setName("string").nodes.del();
-                    value.data.setNum(1).first() = cei().appLocationUsageReason();
-                } else if (key == "NSCalendarsUsageDescription") {
-                    value.setName("string").nodes.del();
-                    value.data.setNum(1).first() = "Unknown";
-                } else if (key == "FacebookAppID") {
-                    value.setName("string").nodes.del();
-                    value.data.setNum(1).first() = cei().appFacebookAppID();
-                } else if (key == "FacebookDisplayName") {
-                    value.setName("string").nodes.del();
-                    value.data.setNum(1).first() = cei().appName();
-                } else if (key == "GADApplicationIdentifier") {
-                    value.setName("string").nodes.del();
-                    value.data.setNum(1).first() = cei().appAdMobAppIDiOS();
-                } else if (key == "ChartboostAppID") {
-                    value.setName("string").nodes.del();
-                    value.data.setNum(1).first() = cei().appChartboostAppIDiOS();
-                } else if (key == "ChartboostAppSignature") {
-                    value.setName("string").nodes.del();
-                    value.data.setNum(1).first() = cei().appChartboostAppSignatureiOS();
-                } else if (key == "CFBundleURLTypes") {
-                    if (value.name == "array") {
-                        XmlNode &dict = value.getNode("dict");
-                        dict.nodes.setNum(2, 0); // reset previous elements
-                        dict.nodes[0].setName("key").data.add("CFBundleURLSchemes");
-                        dict.nodes[1].setName("array").nodes.New().setName("string").data.add(S + "fb" + cei().appFacebookAppID());
-                    }
-                }
+    if (dict->nodes[i].name == "key" && dict->nodes[i].data.elms() && InRange(i + 1, dict->nodes)) {
+        C Str &key = dict->nodes[i].data[0];
+        XmlNode &value = dict->nodes[i + 1];
+        if (key == "CFBundleDisplayName") {
+            value.setName("string").nodes.del();
+            value.data.setNum(1).first() = cei().appName();
+        } else if (key == "CFBundleVersion" || key == "CFBundleShortVersionString") {
+            value.setName("string").nodes.del();
+            value.data.setNum(1).first() = cei().appBuild();
+        } else if (key == "CFBundleLocalizations") {
+            value.setName("array").nodes.del();
+            Mems<LANG_TYPE> languages;
+            cei().appLanguages(languages);
+            FREPA(languages)
+            if (CChar8 *code = LanguageCode(languages[i]))
+                value.nodes.New().setName("string").data.add(code);
+            if (!value.nodes.elms())
+                value.nodes.New().setName("string").data.add("en"); // always add English if no language added
+        } else if (key == "UISupportedInterfaceOrientations") {
+            value.setName("array").nodes.del();
+            UInt flag = cei().appSupportedOrientations();
+            if (flag & DIRF_UP)
+                value.nodes.New().setName("string").data.add("UIInterfaceOrientationPortrait");
+            if (flag & DIRF_DOWN)
+                value.nodes.New().setName("string").data.add("UIInterfaceOrientationPortraitUpsideDown");
+            if (flag & DIRF_LEFT)
+                value.nodes.New().setName("string").data.add("UIInterfaceOrientationLandscapeRight");
+            if (flag & DIRF_RIGHT)
+                value.nodes.New().setName("string").data.add("UIInterfaceOrientationLandscapeLeft");
+        } else if (key == "NSLocationAlwaysUsageDescription" || key == "NSLocationWhenInUseUsageDescription") {
+            value.setName("string").nodes.del();
+            value.data.setNum(1).first() = cei().appLocationUsageReason();
+        } else if (key == "NSCalendarsUsageDescription") {
+            value.setName("string").nodes.del();
+            value.data.setNum(1).first() = "Unknown";
+        } else if (key == "FacebookAppID") {
+            value.setName("string").nodes.del();
+            value.data.setNum(1).first() = cei().appFacebookAppID();
+        } else if (key == "FacebookDisplayName") {
+            value.setName("string").nodes.del();
+            value.data.setNum(1).first() = cei().appName();
+        } else if (key == "GADApplicationIdentifier") {
+            value.setName("string").nodes.del();
+            value.data.setNum(1).first() = cei().appAdMobAppIDiOS();
+        } else if (key == "ChartboostAppID") {
+            value.setName("string").nodes.del();
+            value.data.setNum(1).first() = cei().appChartboostAppIDiOS();
+        } else if (key == "ChartboostAppSignature") {
+            value.setName("string").nodes.del();
+            value.data.setNum(1).first() = cei().appChartboostAppSignatureiOS();
+        } else if (key == "CFBundleURLTypes") {
+            if (value.name == "array") {
+                XmlNode &dict = value.getNode("dict");
+                dict.nodes.setNum(2, 0); // reset previous elements
+                dict.nodes[0].setName("key").data.add("CFBundleURLSchemes");
+                dict.nodes[1].setName("array").nodes.New().setName("string").data.add(S + "fb" + cei().appFacebookAppID());
             }
+        }
+    }
     if (!OverwriteOnChangeLoud(xml, build_path + "Assets/iOS.plist"))
         return false;
 
@@ -2434,17 +2443,17 @@ Bool CodeEditor::generateXcodeProj() {
     if (XmlNode *plist = xml.findNode("plist"))
         if (XmlNode *dict = plist->findNode("dict"))
             FREPA(dict->nodes)
-            if (dict->nodes[i].name == "key" && dict->nodes[i].data.elms() && InRange(i + 1, dict->nodes)) {
-                C Str &key = dict->nodes[i].data[0];
-                XmlNode &value = dict->nodes[i + 1];
-                if (key == "CFBundleDisplayName") {
-                    value.setName("string").nodes.del();
-                    value.data.setNum(1).first() = cei().appName();
-                } else if (key == "CFBundleVersion") {
-                    value.setName("string").nodes.del();
-                    value.data.setNum(1).first() = cei().appBuild();
-                }
-            }
+    if (dict->nodes[i].name == "key" && dict->nodes[i].data.elms() && InRange(i + 1, dict->nodes)) {
+        C Str &key = dict->nodes[i].data[0];
+        XmlNode &value = dict->nodes[i + 1];
+        if (key == "CFBundleDisplayName") {
+            value.setName("string").nodes.del();
+            value.data.setNum(1).first() = cei().appName();
+        } else if (key == "CFBundleVersion") {
+            value.setName("string").nodes.del();
+            value.data.setNum(1).first() = cei().appBuild();
+        }
+    }
     if (!OverwriteOnChangeLoud(xml, build_path + "Assets/Mac.plist"))
         return false;
 
@@ -2936,7 +2945,8 @@ Bool CodeEditor::generateAndroidProj() {
         convert.reverseOrder(); // start working from the biggest ones because they take the most time, yes this is correct
         MultiThreadedCall(convert, ImageConvert::Func);
         FREPA(convert)
-        if (!convert[i].ok) return ErrorWrite(convert[i].dest);
+        if (!convert[i].ok)
+            return ErrorWrite(convert[i].dest);
     }
 
     Str app_package = AndroidPackage(cei().appPackage()),
@@ -3539,7 +3549,8 @@ Bool CodeEditor::generateLinuxMakeProj() {
                 "libPhysXGpu_64.so",
             };
         FREPA(dlls)
-        if (!CopyFile(bin_path + dlls[i], bin_dest + dlls[i])) return false;
+        if (!CopyFile(bin_path + dlls[i], bin_dest + dlls[i]))
+            return false;
     }
 #endif
     // Steam DLL's
@@ -3551,7 +3562,8 @@ Bool CodeEditor::generateLinuxMakeProj() {
                 "libsteam_api.so",
             };
         FREPA(dlls)
-        if (!CopyFile(bin_path + dlls[i], bin_dest + dlls[i])) return false;
+        if (!CopyFile(bin_path + dlls[i], bin_dest + dlls[i]))
+            return false;
     }
     // OpenVR DLL's
     if (cei().appPublishOpenVRDll()) // this must be copied always because libs on Linux need to be hardcoded to "./Bin/", so everytime we want to start an app, it needs to have the .so files in the Bin relative to the executable
@@ -3562,7 +3574,8 @@ Bool CodeEditor::generateLinuxMakeProj() {
                 "libopenvr_api.so",
             };
         FREPA(dlls)
-        if (!CopyFile(bin_path + dlls[i], bin_dest + dlls[i])) return false;
+        if (!CopyFile(bin_path + dlls[i], bin_dest + dlls[i]))
+            return false;
     }
 #endif
 
@@ -3875,7 +3888,8 @@ void CodeEditor::build(BUILD_MODE mode) {
             build_phases = 1 + build_windows_code_sign;
             build_steps = 3 + build_windows_code_sign;
             FREPA(build_files)
-            if (build_files[i].mode == BuildFile::SOURCE) build_steps++; // stdafx.cpp, linking, wait for end, *.cpp
+            if (build_files[i].mode == BuildFile::SOURCE)
+                build_steps++; // stdafx.cpp, linking, wait for end, *.cpp
 
             Str config = (build_debug ? "Debug" : "Release");
             if (build_exe_type == EXE_UWP)
@@ -3955,7 +3969,8 @@ void CodeEditor::build(BUILD_MODE mode) {
             build_phases = 1;
             build_steps = 3;
             FREPA(build_files)
-            if (build_files[i].mode == BuildFile::SOURCE) build_steps++; // stdafx.cpp, linking, wait for end, *.cpp
+            if (build_files[i].mode == BuildFile::SOURCE)
+                build_steps++; // stdafx.cpp, linking, wait for end, *.cpp
 
             if (!build_process.create("make", LinuxBuildParams(build_path, build_debug ? "Debug" : "Release", build_threads)))
                 Error("Error launching \"make\" system command.\nPlease make sure you have C++ building available.");
@@ -3963,7 +3978,8 @@ void CodeEditor::build(BUILD_MODE mode) {
             build_phases = 1;
             build_steps = 3;
             FREPA(build_files)
-            if (build_files[i].mode == BuildFile::SOURCE) build_steps++; // stdafx.cpp, linking, wait for end, *.cpp
+            if (build_files[i].mode == BuildFile::SOURCE)
+                build_steps++; // stdafx.cpp, linking, wait for end, *.cpp
 
             if (!build_process.create("xcodebuild", XcodeBuildParams(build_project_file, build_debug ? "Debug" : "Release", (build_exe_type == EXE_MAC) ? "Mac" : "iOS"))) // sdk "iphonesimulator"
                 Error("Error launching \"xcodebuild\" system command.\nPlease make sure you have Xcode installed.");

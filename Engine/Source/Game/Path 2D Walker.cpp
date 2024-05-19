@@ -84,7 +84,8 @@ static Bool PathWalkerFind(Int start_node, Int target_node, C VecI2 &start_xy, C
                     {
                         REPD(y, target_path._map.h())
                         REPD(x, target_path._map.w())
-                        if (target_path._map.pixB(x, y) == target_pn.area.index) World._path_find.pixel(target_ofs_x + x, target_ofs_y + y).flag |= PFP_TARGET; // target is the whole node
+                        if (target_path._map.pixB(x, y) == target_pn.area.index)
+                            World._path_find.pixel(target_ofs_x + x, target_ofs_y + y).flag |= PFP_TARGET; // target is the whole node
                     }
                 }
 

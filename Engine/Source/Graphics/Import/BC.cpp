@@ -876,7 +876,8 @@ static void _CompressBC1(BC1 &bc, Vec4 (&color)[16], C Vec *weight, Bool dither_
 
         Int transparent = 0;
         REPA(color)
-        if (color[i].w < alpha_ref) transparent++;
+        if (color[i].w < alpha_ref)
+            transparent++;
         if (transparent == 16) {
             bc.rgb[0] = 0x0000;
             bc.rgb[1] = 0xFFFF;

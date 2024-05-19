@@ -22,10 +22,11 @@ void Source::setOffset() { lc_offset.set(slidebar[0].wantedOffset() / CE.ts.colW
 void Source::setRegionSize() {
     Vec2 size = 0;
     REP(childNum())
-    if (GuiObj *c = child(i)) if (c->visible() && c->isText()) {
-        MAX(size.x, GuiMaxX(c->rect()));
-        MAX(size.y, GuiMaxY(c->rect()));
-    }
+    if (GuiObj *c = child(i))
+        if (c->visible() && c->isText()) {
+            MAX(size.x, GuiMaxX(c->rect()));
+            MAX(size.y, GuiMaxY(c->rect()));
+        }
     size.x += CE.ts.colWidth() + CE.lineNumberSize();
     size.y += clientHeight() / 2;
     virtualSize(&size);
@@ -157,7 +158,8 @@ void Source::setView(Bool comments, Bool funcs, Bool func_bodies, Bool private_m
                             line.cols[i].remove();
                         else { // if we stopped removing private
                             REPD(j, i)
-                            if (ValidType(line.cols[j].type)) goto at_least_one_valid; // check if there's at least one valid character in current line before current position
+                            if (ValidType(line.cols[j].type))
+                                goto at_least_one_valid; // check if there's at least one valid character in current line before current position
                             REPD(j, i)
                             line.cols[j].type = TOKEN_NONE; // if not, then force all previous characters as spaces
                         at_least_one_valid:;
@@ -171,8 +173,11 @@ void Source::setView(Bool comments, Bool funcs, Bool func_bodies, Bool private_m
         REPA(view_lines) {
             ViewLine &line = view_lines[i];
             FREPA(line.cols)
-            if (line.cols[i].type == TOKEN_COMMENT) if (line.starts(i, SEP_LINE)) i += Length(SEP_LINE) - 1;
-            else line.cols[i].remove();
+            if (line.cols[i].type == TOKEN_COMMENT)
+                if (line.starts(i, SEP_LINE))
+                    i += Length(SEP_LINE) - 1;
+                else
+                    line.cols[i].remove();
         }
     }
 
@@ -443,7 +448,8 @@ void Source::update(C GuiPC &gpc) {
                                                 if (Kb.k.shift()) {
                                                     Int processed = 0;
                                                     REP(TabLength)
-                                                    if (lines[y].first() != ' ') break;
+                                                    if (lines[y].first() != ' ')
+                                                        break;
                                                     else {
                                                         lines[y].remove(0);
                                                         processed++;
@@ -455,7 +461,7 @@ void Source::update(C GuiPC &gpc) {
                                                 } else {
                                                     if (lines[y].length())
                                                         REP(TabLength)
-                                                        lines[y].insert(0, ' ');
+                                                    lines[y].insert(0, ' ');
                                                 }
                                             }
                                             if (!Kb.k.shift()) {

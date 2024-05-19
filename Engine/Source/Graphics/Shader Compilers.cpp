@@ -109,7 +109,7 @@ static void Compile(API api, SC_FLAG flag = SC_NONE) {
             REPD(dither, 2)
             REPD(in_gamma, 2)
             REPD(out_gamma, 2) // we need 2 gamma for in/out because here we need precise gamma conversions
-                src.New("ColorLUT", "DrawUV_VS", "ColorLUT_PS")("HDR", hdr, "DITHER", dither, "IN_GAMMA", in_gamma, "OUT_GAMMA", out_gamma);
+            src.New("ColorLUT", "DrawUV_VS", "ColorLUT_PS")("HDR", hdr, "DITHER", dither, "IN_GAMMA", in_gamma, "OUT_GAMMA", out_gamma);
 
             src.New("Draw2DCol", "Draw2DCol_VS", "Draw2DCol_PS");
             src.New("Draw3DCol", "Draw3DCol_VS", "Draw3DCol_PS");

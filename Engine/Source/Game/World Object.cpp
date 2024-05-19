@@ -328,7 +328,9 @@ Obj *WorldManager::findObjById(C UID &obj_id, Int obj_type) {
         if (obj_type < 0) // search in all containers
         {
             REPA(_obj_container)
-            if (ObjMap<Obj> *obj_map = _obj_container[i].map) if (Obj *obj = obj_map->find(obj_id)) return obj;
+            if (ObjMap<Obj> *obj_map = _obj_container[i].map)
+                if (Obj *obj = obj_map->find(obj_id))
+                    return obj;
         } else if (ObjMap<Obj> *obj_map = objMap(obj_type)) {
             return obj_map->find(obj_id);
         }

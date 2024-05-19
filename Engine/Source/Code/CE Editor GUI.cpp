@@ -364,7 +364,8 @@ void CodeEditor::Options::FontData::load(C TextNode &node) {
         Memt<Str> l;
         Split(l, p->value, ' ');
         FREPA(l)
-        if (l[i].is()) langs.include((LANG_TYPE)TextInt(l[i]));
+        if (l[i].is())
+            langs.include((LANG_TYPE)TextInt(l[i]));
     }
 }
 void CodeEditor::Options::FontParams::load(C TextNode &node) {

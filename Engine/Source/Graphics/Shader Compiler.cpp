@@ -44,7 +44,8 @@ ASSERT(ST_VS == 0 && ST_HS == 1 && ST_DS == 2 && ST_PS == 3 && ST_CS == 4 && ST_
 static Bool HasData(CPtr data, Int size) {
     if (C Byte *b = (Byte *)data)
         REP(size)
-        if (*b++) return true;
+    if (*b++)
+        return true;
     return false;
 }
 static void SaveTranslation(C Memc<ShaderParam::Translation> &translation, File &f, Int elms) {
@@ -59,7 +60,7 @@ static void SaveTranslation(C Memc<ShaderParam::Translation> &translation, File 
             cpu_offset = translation[single_translations].cpu_offset - translation[0].cpu_offset;    // cpu offset between the next array element and previous
         f.putMulti(gpu_offset, cpu_offset, single_translations);
         FREP(single_translations)
-            f << translation[i]; // save 1st element translation
+        f << translation[i]; // save 1st element translation
 
 #if DEBUG                                                                       // verify that all elements have same translation
         for (Int e = 1, co = 0, go = 0, t = single_translations; e < elms; e++) // add rest of the elements
@@ -458,7 +459,8 @@ Bool ShaderCompiler::Buffer::operator==(C Buffer &b) C {
 }
 ShaderCompiler::Param *ShaderCompiler::Buffer::findParam(C Str8 &name) {
     REPA(params)
-    if (Equal(params[i].name, name, true)) return &params[i];
+    if (Equal(params[i].name, name, true))
+        return &params[i];
     return null;
 }
 ShaderCompiler::Param &ShaderCompiler::Buffer::getParam(C Str8 &name) {
@@ -558,7 +560,8 @@ static Bool Match(C ShaderCompiler::SubShader &output, C ShaderCompiler::SubShad
         C ShaderCompiler::IO &in = input.inputs[i];
         if (in.name != "SV_SampleIndex" && in.name != "SV_IsFrontFace" && in.name != "SV_PrimitiveID") {
             REPA(output.outputs)
-            if (in == output.outputs[i]) goto found;
+            if (in == output.outputs[i])
+                goto found;
             error.line() += S + "Input " + in.name + in.index + " register:" + in.reg + " in \"" + input.func_name + "\" doesn't match output in \"" + output.func_name + '"';
             ok = false;
         found:;
@@ -569,7 +572,8 @@ static Bool Match(C ShaderCompiler::SubShader &output, C ShaderCompiler::SubShad
         C ShaderCompiler::IO &out = output.outputs[i];
         if (out.name != "SV_Position" && out.name != "SV_ClipDistance") {
             REPA(input.inputs)
-            if (out == input.inputs[i]) goto found1;
+            if (out == input.inputs[i])
+                goto found1;
             error.line() += S + "Output " + out.name + out.index + " register:" + out.reg + " in \"" + output.func_name + "\" doesn't match input in \"" + input.func_name + '"';
             ok = false;
         found1:;
@@ -1864,7 +1868,8 @@ struct BufferBindMap : Mems<ShaderCompiler::Bind> {
         setNum(elms);
         elms = 0;
         FREPA(buffers)
-        if (!buffers[i].bind_explicit) T[elms++] = buffers[i];
+        if (!buffers[i].bind_explicit)
+            T[elms++] = buffers[i];
     }
 
     Bool operator!=(C Mems<ShaderCompiler::Buffer> &buffers) C { return !(T == buffers); }
@@ -2095,10 +2100,12 @@ Bool ShaderCompiler::compileTry(Threads &threads) {
         // shaders
         f.cmpUIntV(shaders.elms());
         FREPA(shaders)
-        if (!shaders[i]->save(f, T)) goto error;
+        if (!shaders[i]->save(f, T))
+            goto error;
         f.cmpUIntV(compute_shaders.elms());
         FREPA(compute_shaders)
-        if (!compute_shaders[i]->save(f, T)) goto error;
+        if (!compute_shaders[i]->save(f, T))
+            goto error;
 
         if (f.flushOK())
             return true;

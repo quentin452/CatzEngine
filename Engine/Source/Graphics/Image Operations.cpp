@@ -446,19 +446,22 @@ void Image::crop3D(Image &dest, Int x, Int y, Int z, Int w, Int h, Int d, C Vec4
 static Bool TransparentX(C Image &image, Int x) {
     REPD(z, image.ld())
     REPD(y, image.lh())
-    if (image.color3D(x, y, z).a) return false;
+    if (image.color3D(x, y, z).a)
+        return false;
     return true;
 }
 static Bool TransparentY(C Image &image, Int y) {
     REPD(z, image.ld())
     REPD(x, image.lw())
-    if (image.color3D(x, y, z).a) return false;
+    if (image.color3D(x, y, z).a)
+        return false;
     return true;
 }
 static Bool TransparentZ(C Image &image, Int z) {
     REPD(y, image.lh())
     REPD(x, image.lw())
-    if (image.color3D(x, y, z).a) return false;
+    if (image.color3D(x, y, z).a)
+        return false;
     return true;
 }
 Image &Image::cropTransparent(Bool border) {
@@ -1277,115 +1280,116 @@ struct BlurCube {
                 Vec dir;
                 CubeFacePosToPos(face, dir, dir_fn); // convert local 'face' space to world space 'dir'
                 FREPD(face1, 6)
-                if (face1 != face) if (Dot(VecDir[face1], dir) > diag_angle_cos_min) // do a fast check for potential overlap with cone and cube face
-                {
-                    RectI rect1;
-                    Vec dir_f1;
-                    PosToCubeFacePos((DIR_ENUM)face1, dir_f1, dir); // convert world space 'dir' to local 'face1' space 'dir_f1'
+                if (face1 != face)
+                    if (Dot(VecDir[face1], dir) > diag_angle_cos_min) // do a fast check for potential overlap with cone and cube face
+                    {
+                        RectI rect1;
+                        Vec dir_f1;
+                        PosToCubeFacePos((DIR_ENUM)face1, dir_f1, dir); // convert world space 'dir' to local 'face1' space 'dir_f1'
 
 #if 0 // full
 #pragma message("!! Warning: Use this only for debugging !!")
                rect1.set(0, src_res-1); goto check;
 #endif
-                    // do a fast check for rotation along Y axis (between ->DIR_FORWARD->DIR_RIGHT->DIR_BACK->DIR_LEFT->) in this case, all Y's are the same as in test above, just have to rotate X's
-                    Flt angle_delta;
-                    switch (face) {
-                    case DIR_FORWARD:
-                        angle_delta = 0;
-                        break;
-                    case DIR_RIGHT:
-                        angle_delta = PI_2;
-                        break;
-                    case DIR_BACK:
-                        angle_delta = PI;
-                        break;
-                    case DIR_LEFT:
-                        angle_delta = -PI_2;
-                        break;
-                    default:
-                        goto full;
-                    }
-                    switch (face1) {
-                    case DIR_FORWARD: /*angle_delta-=    0;*/
-                        break;
-                    case DIR_RIGHT:
-                        angle_delta -= PI_2;
-                        break;
-                    case DIR_BACK:
-                        angle_delta -= PI;
-                        break;
-                    case DIR_LEFT:
-                        angle_delta -= -PI_2;
-                        break;
-                    default:
-                        goto full;
-                    }
-                    if (linear) {
-                        zd.set(dir_f1.x, 0, dir_f1.z);
-                        len2 = zd.length2();
-                        if (ball_r2 >= len2)
-                            rect1.setX(0, src_res - 1);
-                        else {
-                            sin2 = ball_r2 / len2;
-                            cos = CosSin2(sin2);
-                            d = CrossUp(zd);
-                            d.setLength(cos * ball_r);
-                            zd *= -sin2;
-                            zd += dir_f1;
-                            test = zd - d;
-                            if (test.z > 0) {
-                                rect1.min.x = CeilSpecial(test.x / test.z * src_DirToCubeFacePixel_mul + src_DirToCubeFacePixel_add);
-                                if (rect1.min.x < 0) {
-                                left_linear_x:
-                                    rect1.min.x = 0;
-                                }
-                            } else
-                                goto left_linear_x;
-                            test = zd + d;
-                            if (test.z > 0) {
-                                rect1.max.x = FloorSpecial(test.x / test.z * src_DirToCubeFacePixel_mul + src_DirToCubeFacePixel_add);
-                                if (rect1.max.x >= src_res) {
-                                right_linear_x:
-                                    rect1.max.x = src_res - 1;
-                                }
-                            } else
-                                goto right_linear_x;
+                        // do a fast check for rotation along Y axis (between ->DIR_FORWARD->DIR_RIGHT->DIR_BACK->DIR_LEFT->) in this case, all Y's are the same as in test above, just have to rotate X's
+                        Flt angle_delta;
+                        switch (face) {
+                        case DIR_FORWARD:
+                            angle_delta = 0;
+                            break;
+                        case DIR_RIGHT:
+                            angle_delta = PI_2;
+                            break;
+                        case DIR_BACK:
+                            angle_delta = PI;
+                            break;
+                        case DIR_LEFT:
+                            angle_delta = -PI_2;
+                            break;
+                        default:
+                            goto full;
                         }
-                    } else {
-                        zd.set(dir_f1.x, 0, dir_f1.z);
-                        len2 = zd.length2();
-                        if (ball_r2 >= len2)
-                            rect1.setX(0, src_res - 1);
-                        else {
-                            sin2 = ball_r2 / len2;
-                            cos = CosSin2(sin2);
-                            d = CrossUp(zd);
-                            d.setLength(cos * ball_r);
-                            zd *= -sin2;
-                            zd += dir_f1;
-                            test = zd - d;
-                            if (test.z > 0) {
-                                rect1.min.x = CeilSpecial(Atan(test.x / test.z) * src_AngleToCubeFacePixel_mul + src_AngleToCubeFacePixel_add);
-                                if (rect1.min.x < 0) {
-                                left_sphere_x:
-                                    rect1.min.x = 0;
-                                }
-                            } else
-                                goto left_sphere_x;
-                            test = zd + d;
-                            if (test.z > 0) {
-                                rect1.max.x = FloorSpecial(Atan(test.x / test.z) * src_AngleToCubeFacePixel_mul + src_AngleToCubeFacePixel_add);
-                                if (rect1.max.x >= src_res) {
-                                right_sphere_x:
-                                    rect1.max.x = src_res - 1;
-                                }
-                            } else
-                                goto right_sphere_x;
+                        switch (face1) {
+                        case DIR_FORWARD: /*angle_delta-=    0;*/
+                            break;
+                        case DIR_RIGHT:
+                            angle_delta -= PI_2;
+                            break;
+                        case DIR_BACK:
+                            angle_delta -= PI;
+                            break;
+                        case DIR_LEFT:
+                            angle_delta -= -PI_2;
+                            break;
+                        default:
+                            goto full;
                         }
-                    }
-                    if (rect1.validX()) {
-                        rect1.setY(rect.min.y, rect.max.y);
-                    check:
+                        if (linear) {
+                            zd.set(dir_f1.x, 0, dir_f1.z);
+                            len2 = zd.length2();
+                            if (ball_r2 >= len2)
+                                rect1.setX(0, src_res - 1);
+                            else {
+                                sin2 = ball_r2 / len2;
+                                cos = CosSin2(sin2);
+                                d = CrossUp(zd);
+                                d.setLength(cos * ball_r);
+                                zd *= -sin2;
+                                zd += dir_f1;
+                                test = zd - d;
+                                if (test.z > 0) {
+                                    rect1.min.x = CeilSpecial(test.x / test.z * src_DirToCubeFacePixel_mul + src_DirToCubeFacePixel_add);
+                                    if (rect1.min.x < 0) {
+                                    left_linear_x:
+                                        rect1.min.x = 0;
+                                    }
+                                } else
+                                    goto left_linear_x;
+                                test = zd + d;
+                                if (test.z > 0) {
+                                    rect1.max.x = FloorSpecial(test.x / test.z * src_DirToCubeFacePixel_mul + src_DirToCubeFacePixel_add);
+                                    if (rect1.max.x >= src_res) {
+                                    right_linear_x:
+                                        rect1.max.x = src_res - 1;
+                                    }
+                                } else
+                                    goto right_linear_x;
+                            }
+                        } else {
+                            zd.set(dir_f1.x, 0, dir_f1.z);
+                            len2 = zd.length2();
+                            if (ball_r2 >= len2)
+                                rect1.setX(0, src_res - 1);
+                            else {
+                                sin2 = ball_r2 / len2;
+                                cos = CosSin2(sin2);
+                                d = CrossUp(zd);
+                                d.setLength(cos * ball_r);
+                                zd *= -sin2;
+                                zd += dir_f1;
+                                test = zd - d;
+                                if (test.z > 0) {
+                                    rect1.min.x = CeilSpecial(Atan(test.x / test.z) * src_AngleToCubeFacePixel_mul + src_AngleToCubeFacePixel_add);
+                                    if (rect1.min.x < 0) {
+                                    left_sphere_x:
+                                        rect1.min.x = 0;
+                                    }
+                                } else
+                                    goto left_sphere_x;
+                                test = zd + d;
+                                if (test.z > 0) {
+                                    rect1.max.x = FloorSpecial(Atan(test.x / test.z) * src_AngleToCubeFacePixel_mul + src_AngleToCubeFacePixel_add);
+                                    if (rect1.max.x >= src_res) {
+                                    right_sphere_x:
+                                        rect1.max.x = src_res - 1;
+                                    }
+                                } else
+                                    goto right_sphere_x;
+                            }
+                        }
+                        if (rect1.validX()) {
+                            rect1.setY(rect.min.y, rect.max.y);
+                        check:
 #if 0 // test rect coverage
 #pragma message("!! Warning: Use this only for debugging !!")
                   if(!face)
@@ -1418,166 +1422,166 @@ struct BlurCube {
                      }
                   }
 #endif
-                        C Byte *src_data = T.src_data + face1 * src_face_size + rect1.min.y * src_pitch;
-                        for (Int y = rect1.min.y; y <= rect1.max.y; y++, src_data += src_pitch) {
-                            Flt dir_y = (linear ? -y * src_CubeFacePixelToDir_mul - src_CubeFacePixelToDir_add
-                                                : Tan(-y * src_CubeFacePixelToAngle_mul - src_CubeFacePixelToAngle_add));
-                            for (Int x = rect1.min.x; x <= rect1.max.x; x++) {
-                                Flt dir_x = (linear ? x * src_CubeFacePixelToDir_mul + src_CubeFacePixelToDir_add
-                                                    : Tan(x * src_CubeFacePixelToAngle_mul + src_CubeFacePixelToAngle_add));
-                                Vec dir_test(dir_x, dir_y, 1);
-                                dir_test.normalize();
-                                Flt cos = Dot(dir_f1, dir_test);
-                                if (cos > cos_min) {
-                                    Flt a = Acos(cos), w = Weight(a / angle);
-                                    // FIXME mul 'w' by texel area size
-                                    CPtr src_data_x = src_data + x * src.bytePP();
-                                    if (multi_channel)
-                                        col += w * (BLUR_CUBE_LINEAR_GAMMA ? ImageColorL : ImageColorF)(src_data_x, src.hwType());
-                                    else
-                                        col.x += w * (BLUR_CUBE_LINEAR_GAMMA ? ImagePixelL : ImagePixelF)(src_data_x, src.hwType());
-                                    weight += w;
+                            C Byte *src_data = T.src_data + face1 * src_face_size + rect1.min.y * src_pitch;
+                            for (Int y = rect1.min.y; y <= rect1.max.y; y++, src_data += src_pitch) {
+                                Flt dir_y = (linear ? -y * src_CubeFacePixelToDir_mul - src_CubeFacePixelToDir_add
+                                                    : Tan(-y * src_CubeFacePixelToAngle_mul - src_CubeFacePixelToAngle_add));
+                                for (Int x = rect1.min.x; x <= rect1.max.x; x++) {
+                                    Flt dir_x = (linear ? x * src_CubeFacePixelToDir_mul + src_CubeFacePixelToDir_add
+                                                        : Tan(x * src_CubeFacePixelToAngle_mul + src_CubeFacePixelToAngle_add));
+                                    Vec dir_test(dir_x, dir_y, 1);
+                                    dir_test.normalize();
+                                    Flt cos = Dot(dir_f1, dir_test);
+                                    if (cos > cos_min) {
+                                        Flt a = Acos(cos), w = Weight(a / angle);
+                                        // FIXME mul 'w' by texel area size
+                                        CPtr src_data_x = src_data + x * src.bytePP();
+                                        if (multi_channel)
+                                            col += w * (BLUR_CUBE_LINEAR_GAMMA ? ImageColorL : ImageColorF)(src_data_x, src.hwType());
+                                        else
+                                            col.x += w * (BLUR_CUBE_LINEAR_GAMMA ? ImagePixelL : ImagePixelF)(src_data_x, src.hwType());
+                                        weight += w;
+                                    }
                                 }
                             }
                         }
-                    }
-                    continue;
-                full:
-                    if (linear) {
-                        zd.set(dir_f1.x, 0, dir_f1.z);
-                        len2 = zd.length2();
-                        if (ball_r2 >= len2)
-                            rect1.setX(0, src_res - 1);
-                        else {
-                            sin2 = ball_r2 / len2;
-                            cos = CosSin2(sin2);
-                            d = CrossUp(zd);
-                            d.setLength(cos * ball_r);
-                            zd *= -sin2;
-                            zd += dir_f1;
-                            test = zd - d;
-                            if (test.z > 0) {
-                                rect1.min.x = CeilSpecial(test.x / test.z * src_DirToCubeFacePixel_mul + src_DirToCubeFacePixel_add);
-                                if (rect1.min.x < 0) {
-                                left_linear_1:
-                                    rect1.min.x = 0;
-                                }
-                            } else
-                                goto left_linear_1;
-                            test = zd + d;
-                            if (test.z > 0) {
-                                rect1.max.x = FloorSpecial(test.x / test.z * src_DirToCubeFacePixel_mul + src_DirToCubeFacePixel_add);
-                                if (rect1.max.x >= src_res) {
-                                right_linear_1:
-                                    rect1.max.x = src_res - 1;
-                                }
-                            } else
-                                goto right_linear_1;
-                        }
-                        if (!rect1.validX())
-                            continue;
+                        continue;
+                    full:
+                        if (linear) {
+                            zd.set(dir_f1.x, 0, dir_f1.z);
+                            len2 = zd.length2();
+                            if (ball_r2 >= len2)
+                                rect1.setX(0, src_res - 1);
+                            else {
+                                sin2 = ball_r2 / len2;
+                                cos = CosSin2(sin2);
+                                d = CrossUp(zd);
+                                d.setLength(cos * ball_r);
+                                zd *= -sin2;
+                                zd += dir_f1;
+                                test = zd - d;
+                                if (test.z > 0) {
+                                    rect1.min.x = CeilSpecial(test.x / test.z * src_DirToCubeFacePixel_mul + src_DirToCubeFacePixel_add);
+                                    if (rect1.min.x < 0) {
+                                    left_linear_1:
+                                        rect1.min.x = 0;
+                                    }
+                                } else
+                                    goto left_linear_1;
+                                test = zd + d;
+                                if (test.z > 0) {
+                                    rect1.max.x = FloorSpecial(test.x / test.z * src_DirToCubeFacePixel_mul + src_DirToCubeFacePixel_add);
+                                    if (rect1.max.x >= src_res) {
+                                    right_linear_1:
+                                        rect1.max.x = src_res - 1;
+                                    }
+                                } else
+                                    goto right_linear_1;
+                            }
+                            if (!rect1.validX())
+                                continue;
 
-                        zd.set(0, dir_f1.y, dir_f1.z);
-                        len2 = zd.length2();
-                        if (ball_r2 >= len2)
-                            rect1.setY(0, src_res - 1);
-                        else {
-                            sin2 = ball_r2 / len2;
-                            cos = CosSin2(sin2);
-                            d = CrossRight(zd);
-                            d.setLength(cos * ball_r);
-                            zd *= -sin2;
-                            zd += dir_f1;
-                            test = zd - d;
-                            if (test.z > 0) {
-                                rect1.min.y = CeilSpecial(-test.y / test.z * src_DirToCubeFacePixel_mul + src_DirToCubeFacePixel_add);
-                                if (rect1.min.y < 0) {
-                                down_linear_1:
-                                    rect1.min.y = 0;
-                                }
-                            } else
-                                goto down_linear_1;
-                            test = zd + d;
-                            if (test.z > 0) {
-                                rect1.max.y = FloorSpecial(-test.y / test.z * src_DirToCubeFacePixel_mul + src_DirToCubeFacePixel_add);
-                                if (rect1.max.y >= src_res) {
-                                up_linear_1:
-                                    rect1.max.y = src_res - 1;
-                                }
-                            } else
-                                goto up_linear_1;
-                        }
-                        if (!rect1.validY())
-                            continue;
-                    } else {
-                        zd.set(dir_f1.x, 0, dir_f1.z);
-                        len2 = zd.length2();
-                        if (ball_r2 >= len2)
-                            rect1.setX(0, src_res - 1);
-                        else {
-                            sin2 = ball_r2 / len2;
-                            cos = CosSin2(sin2);
-                            d = CrossUp(zd);
-                            d.setLength(cos * ball_r);
-                            zd *= -sin2;
-                            zd += dir_f1;
-                            test = zd - d;
-                            if (test.z > 0) {
-                                rect1.min.x = CeilSpecial(Atan(test.x / test.z) * src_AngleToCubeFacePixel_mul + src_AngleToCubeFacePixel_add);
-                                if (rect1.min.x < 0) {
-                                left_sphere_1:
-                                    rect1.min.x = 0;
-                                }
-                            } else
-                                goto left_sphere_1;
-                            test = zd + d;
-                            if (test.z > 0) {
-                                rect1.max.x = FloorSpecial(Atan(test.x / test.z) * src_AngleToCubeFacePixel_mul + src_AngleToCubeFacePixel_add);
-                                if (rect1.max.x >= src_res) {
-                                right_sphere_1:
-                                    rect1.max.x = src_res - 1;
-                                }
-                            } else
-                                goto right_sphere_1;
-                        }
-                        if (!rect1.validX())
-                            continue;
+                            zd.set(0, dir_f1.y, dir_f1.z);
+                            len2 = zd.length2();
+                            if (ball_r2 >= len2)
+                                rect1.setY(0, src_res - 1);
+                            else {
+                                sin2 = ball_r2 / len2;
+                                cos = CosSin2(sin2);
+                                d = CrossRight(zd);
+                                d.setLength(cos * ball_r);
+                                zd *= -sin2;
+                                zd += dir_f1;
+                                test = zd - d;
+                                if (test.z > 0) {
+                                    rect1.min.y = CeilSpecial(-test.y / test.z * src_DirToCubeFacePixel_mul + src_DirToCubeFacePixel_add);
+                                    if (rect1.min.y < 0) {
+                                    down_linear_1:
+                                        rect1.min.y = 0;
+                                    }
+                                } else
+                                    goto down_linear_1;
+                                test = zd + d;
+                                if (test.z > 0) {
+                                    rect1.max.y = FloorSpecial(-test.y / test.z * src_DirToCubeFacePixel_mul + src_DirToCubeFacePixel_add);
+                                    if (rect1.max.y >= src_res) {
+                                    up_linear_1:
+                                        rect1.max.y = src_res - 1;
+                                    }
+                                } else
+                                    goto up_linear_1;
+                            }
+                            if (!rect1.validY())
+                                continue;
+                        } else {
+                            zd.set(dir_f1.x, 0, dir_f1.z);
+                            len2 = zd.length2();
+                            if (ball_r2 >= len2)
+                                rect1.setX(0, src_res - 1);
+                            else {
+                                sin2 = ball_r2 / len2;
+                                cos = CosSin2(sin2);
+                                d = CrossUp(zd);
+                                d.setLength(cos * ball_r);
+                                zd *= -sin2;
+                                zd += dir_f1;
+                                test = zd - d;
+                                if (test.z > 0) {
+                                    rect1.min.x = CeilSpecial(Atan(test.x / test.z) * src_AngleToCubeFacePixel_mul + src_AngleToCubeFacePixel_add);
+                                    if (rect1.min.x < 0) {
+                                    left_sphere_1:
+                                        rect1.min.x = 0;
+                                    }
+                                } else
+                                    goto left_sphere_1;
+                                test = zd + d;
+                                if (test.z > 0) {
+                                    rect1.max.x = FloorSpecial(Atan(test.x / test.z) * src_AngleToCubeFacePixel_mul + src_AngleToCubeFacePixel_add);
+                                    if (rect1.max.x >= src_res) {
+                                    right_sphere_1:
+                                        rect1.max.x = src_res - 1;
+                                    }
+                                } else
+                                    goto right_sphere_1;
+                            }
+                            if (!rect1.validX())
+                                continue;
 
-                        zd.set(0, dir_f1.y, dir_f1.z);
-                        len2 = zd.length2();
-                        if (ball_r2 >= len2)
-                            rect1.setY(0, src_res - 1);
-                        else {
-                            sin2 = ball_r2 / len2;
-                            cos = CosSin2(sin2);
-                            d = CrossRight(zd);
-                            d.setLength(cos * ball_r);
-                            zd *= -sin2;
-                            zd += dir_f1;
-                            test = zd - d;
-                            if (test.z > 0) {
-                                rect1.min.y = CeilSpecial(-Atan(test.y / test.z) * src_AngleToCubeFacePixel_mul + src_AngleToCubeFacePixel_add);
-                                if (rect1.min.y < 0) {
-                                down_sphere_1:
-                                    rect1.min.y = 0;
-                                }
-                            } else
-                                goto down_sphere_1;
-                            test = zd + d;
-                            if (test.z > 0) {
-                                rect1.max.y = FloorSpecial(-Atan(test.y / test.z) * src_AngleToCubeFacePixel_mul + src_AngleToCubeFacePixel_add);
-                                if (rect1.max.y >= src_res) {
-                                up_sphere_1:
-                                    rect1.max.y = src_res - 1;
-                                }
-                            } else
-                                goto up_sphere_1;
+                            zd.set(0, dir_f1.y, dir_f1.z);
+                            len2 = zd.length2();
+                            if (ball_r2 >= len2)
+                                rect1.setY(0, src_res - 1);
+                            else {
+                                sin2 = ball_r2 / len2;
+                                cos = CosSin2(sin2);
+                                d = CrossRight(zd);
+                                d.setLength(cos * ball_r);
+                                zd *= -sin2;
+                                zd += dir_f1;
+                                test = zd - d;
+                                if (test.z > 0) {
+                                    rect1.min.y = CeilSpecial(-Atan(test.y / test.z) * src_AngleToCubeFacePixel_mul + src_AngleToCubeFacePixel_add);
+                                    if (rect1.min.y < 0) {
+                                    down_sphere_1:
+                                        rect1.min.y = 0;
+                                    }
+                                } else
+                                    goto down_sphere_1;
+                                test = zd + d;
+                                if (test.z > 0) {
+                                    rect1.max.y = FloorSpecial(-Atan(test.y / test.z) * src_AngleToCubeFacePixel_mul + src_AngleToCubeFacePixel_add);
+                                    if (rect1.max.y >= src_res) {
+                                    up_sphere_1:
+                                        rect1.max.y = src_res - 1;
+                                    }
+                                } else
+                                    goto up_sphere_1;
+                            }
+                            if (!rect1.validY())
+                                continue;
                         }
-                        if (!rect1.validY())
-                            continue;
+                        goto check;
                     }
-                    goto check;
-                }
             }
             if (weight) {
                 if (multi_channel)
@@ -1689,7 +1693,7 @@ struct BlurCube {
                         threads->process1(dest_res, ProcessLine, T);
                     else
                         REP(dest_res)
-                        processLine(i);
+                    processLine(i);
                     dest.unlock();
                 }
             }
@@ -4036,7 +4040,8 @@ Image &Image::transparentToNeighbor(Bool clamp, Flt step) {
             // iterate all pixels
             REPD(y, T.h())
             REPD(x, T.w())
-            if (color(x, y).a) used.pixB(x, y) = 1;
+            if (color(x, y).a)
+                used.pixB(x, y) = 1;
             else {
                 // iterate all neighbors
                 for (Int sy = y - 1; sy <= y + 1; sy++)
@@ -4281,18 +4286,19 @@ Image &Image::createShadow(C Image &src, Int blur, Flt shadow_opacity, Flt shado
     // normalize
     Int max = 0;
     REPD(y, temp.h())
-    REPD(x, temp.w()) MAX(max, temp.pixB(x, y));
+    REPD(x, temp.w())
+    MAX(max, temp.pixB(x, y));
     if (max)
         REPD(y, temp.h())
-        REPD(x, temp.w()) {
-            Flt s = Flt(temp.pixB(x, y)) / max * shadow_opacity;
-            if (shadow_spread)
-                s *= shadow_spread;
-            else if (s)
-                s = 1;
-            MIN(s, shadow_opacity);
-            temp.pixB(x, y) = RoundPos(s * 255);
-        }
+    REPD(x, temp.w()) {
+        Flt s = Flt(temp.pixB(x, y)) / max * shadow_opacity;
+        if (shadow_spread)
+            s *= shadow_spread;
+        else if (s)
+            s = 1;
+        MIN(s, shadow_opacity);
+        temp.pixB(x, y) = RoundPos(s * 255);
+    }
 
     Swap(T, temp);
     return T;
@@ -4719,13 +4725,15 @@ Bool ImageCompare::compare(C Image &a, C Image &b, Flt similar_dif, Bool alpha_w
                                         if (decompress_a) {
                                             decompress_a(sa->data() + bx * a_x_mul + by * sa->pitch(), a_col);
                                             REPD(y, ys)
-                                            REPD(x, xs) a_colf[y][x] = a_col[y][x];
+                                            REPD(x, xs)
+                                            a_colf[y][x] = a_col[y][x];
                                         } else
                                             sa->gather(a_colf[0], xo, 4, yo, ys); // always read 4 xs because we need correct alignment for y's (for example if we would read only 2, then the next row would not be set for block[1][0] but for block[0][2])
                                         if (decompress_b) {
                                             decompress_b(sb->data() + bx * b_x_mul + by * sb->pitch(), b_col);
                                             REPD(y, ys)
-                                            REPD(x, xs) b_colf[y][x] = b_col[y][x];
+                                            REPD(x, xs)
+                                            b_colf[y][x] = b_col[y][x];
                                         } else
                                             sb->gather(b_colf[0], xo, 4, yo, ys); // always read 4 xs because we need correct alignment for y's (for example if we would read only 2, then the next row would not be set for block[1][0] but for block[0][2])
 

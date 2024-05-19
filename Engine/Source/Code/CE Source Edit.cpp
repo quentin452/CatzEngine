@@ -353,7 +353,7 @@ void Source::delSel(Bool set_undo, Bool clear_suggestions) {
                 lines[min.y].clip(min.x);
                 if (0)
                     REP(min.x - lines[min.y].length())
-                    lines[min.y] += ' ';
+                lines[min.y] += ' ';
                 min.x = lines[min.y].length();
             }
             if (InRange(max.y, lines))

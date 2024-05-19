@@ -138,9 +138,8 @@ void Destructible::setPieces(Bool create_joints) {
         }
         if (mode == BREAKABLE && actors.elms() == pieces.elms())
             FREPA(actors)
-            actor_info.New().set(actors[i].matrix(), actors[i].vel(), actors[i].angVel(), actors[i].group()); // remember actor info from current object, to recreate later
-        else
-            actor_info.New().set(T.matrix(), VecZero, VecZero, actors.elms() ? actors[0].group() : 0);
+        actor_info.New().set(actors[i].matrix(), actors[i].vel(), actors[i].angVel(), actors[i].group()); // remember actor info from current object, to recreate later
+        else actor_info.New().set(T.matrix(), VecZero, VecZero, actors.elms() ? actors[0].group() : 0);
 
         // setup new objects
         joints.del(); // delete all joints of current object
@@ -319,7 +318,8 @@ Bool Destructible::save(File &f) {
 
         case PIECE: {
             REPA(joints)
-            if (joints[i].joint.broken()) joints.remove(i); // remove unused joints
+            if (joints[i].joint.broken())
+                joints.remove(i); // remove unused joints
             if (!joints.save(f))
                 return false;
             if (!actors.first().saveState(f))

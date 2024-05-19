@@ -8,7 +8,8 @@ const Int OrderUnknown = -2; // to be smaller than 'SuggestionsOrder' result for
 /******************************************************************************/
 static Int SuggestionsOrder(C Str &t) {
     REPA(Suggestions)
-    if (Equal(Suggestions[i], t, true)) return i;
+    if (Equal(Suggestions[i], t, true))
+        return i;
     return -1;
 }
 void SuggestionsUsed(C Str &t) {
@@ -172,12 +173,16 @@ Int SuggestionsPriority(C Str &s, C Str &t, Bool all_up_case) // 's'=suggestion,
 static Int CompareAlphabetical(C Source::Suggestion &a, C Source::Suggestion &b) {
     Int as = 0;
     FREPA(a.text)
-    if (a.text[i] == '_') as++;
-    else break; // level of '_' signs
+    if (a.text[i] == '_')
+        as++;
+    else
+        break; // level of '_' signs
     Int bs = 0;
     FREPA(b.text)
-    if (b.text[i] == '_') bs++;
-    else break; // level of '_' signs
+    if (b.text[i] == '_')
+        bs++;
+    else
+        break; // level of '_' signs
     return (as == bs) ? Compare(a.text, b.text, false) : (as < bs) ? -1
                                                                    : +1;
 }
@@ -465,7 +470,8 @@ void Source::suggestionsSetRect() {
     if (suggestions_region.visible()) {
         Flt w = suggestions_region.slidebarSize();
         REP(suggestions_list.columns())
-        if (suggestions_list.columnVisible(i)) w += suggestions_list.columnWidth(i);
+        if (suggestions_list.columnVisible(i))
+            w += suggestions_list.columnWidth(i);
         suggestions_textline.rect(Rect_L(posVisual(suggestions_pos) + Vec2(CE.lineNumberSize(), -0.39f * CE.ts.lineHeight()), w, CE.ts.lineHeight() * 1.4f));
         suggestions_region.rect(Rect_LU(suggestions_textline.visible() ? suggestions_textline.rect().ld() : posVisual(suggestions_pos + VecI2(0, 1)) + Vec2(CE.lineNumberSize() - 0.01f, 0), w, D.h() * 0.5f));
 
@@ -542,10 +548,10 @@ void Source::autoComplete(Bool auto_space, Bool set_undo, Bool auto_brace, Bool 
                             Bool all_no_param = true;
                             if (!ignore_params)
                                 REPA(sugg->symbol->funcs)
-                                if (sugg->symbol->funcs[i]->params.elms()) {
-                                    all_no_param = false;
-                                    break;
-                                }
+                            if (sugg->symbol->funcs[i]->params.elms()) {
+                                all_no_param = false;
+                                break;
+                            }
                             if (all_no_param)
                                 cur.x++;
                         }

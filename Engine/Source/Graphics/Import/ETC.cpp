@@ -37,7 +37,8 @@ void DecompressBlockETC1(C Byte *b, Color (&block)[4][4]) {
     SwapEndian(b1);
     ETCPACK::decompressBlockDiffFlipC(b0, b1, block[0][0].c, 4, 4, 0, 0, 4);
     FREPD(y, 4)
-    FREPD(x, 4) block[y][x].a = 255;
+    FREPD(x, 4)
+    block[y][x].a = 255;
 }
 #endif
 #if ETC2_DEC == ETC_LIB_TEXGENPACK
@@ -94,7 +95,8 @@ void DecompressBlockETC2RGB(C Byte *b, Color (&block)[4][4]) {
     SwapEndian(b1);
     ETCPACK::decompressBlockETC2c(b0, b1, block[0][0].c, 4, 4, 0, 0, 4);
     FREPD(y, 4)
-    FREPD(x, 4) block[y][x].a = 255;
+    FREPD(x, 4)
+    block[y][x].a = 255;
 }
 void DecompressBlockETC2RGBA1(C Byte *b, Color (&block)[4][4]) {
     UInt b0 = ((UInt *)b)[0], b1 = ((UInt *)b)[1];

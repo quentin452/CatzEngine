@@ -243,22 +243,26 @@ void DisplayState::texClear(GPU_API(ID3D11ShaderResourceView *, UInt) tex) {
 #if DX11
     if (tex)
         REPA(PSTex)
-        if (PSTex[i] == tex) PSTex[i] = null; // for performance reasons this clears only from Pixel Shader, to clear from all shaders use 'clearAll'
+    if (PSTex[i] == tex)
+        PSTex[i] = null; // for performance reasons this clears only from Pixel Shader, to clear from all shaders use 'clearAll'
 #elif GL
     if (tex)
         REPA(Tex)
-        if (Tex[i] == tex) Tex[i] = ~0;
+    if (Tex[i] == tex)
+        Tex[i] = ~0;
 #endif
 }
 void DisplayState::uavClear(GPU_API(ID3D11UnorderedAccessView *, UInt) tex) {
 #if DX11
     if (tex)
         REPA(CSUAV)
-        if (CSUAV[i] == tex) CSUAV[i] = null;
+    if (CSUAV[i] == tex)
+        CSUAV[i] = null;
 #elif GL
     if (tex)
         REPA(UAV)
-        if (UAV[i] == tex) UAV[i] = ~0;
+    if (UAV[i] == tex)
+        UAV[i] = ~0;
 #endif
 }
 void DisplayState::rtClear(C ImageRT &image) {
@@ -276,20 +280,26 @@ void DisplayState::texClearAll(GPU_API(ID3D11ShaderResourceView *, UInt) tex) {
 #if DX11
     if (tex) {
         REPA(VSTex)
-        if (VSTex[i] == tex) VSTex[i] = null;
+        if (VSTex[i] == tex)
+            VSTex[i] = null;
         REPA(HSTex)
-        if (HSTex[i] == tex) HSTex[i] = null;
+        if (HSTex[i] == tex)
+            HSTex[i] = null;
         REPA(DSTex)
-        if (DSTex[i] == tex) DSTex[i] = null;
+        if (DSTex[i] == tex)
+            DSTex[i] = null;
         REPA(PSTex)
-        if (PSTex[i] == tex) PSTex[i] = null;
+        if (PSTex[i] == tex)
+            PSTex[i] = null;
         REPA(CSTex)
-        if (CSTex[i] == tex) CSTex[i] = null;
+        if (CSTex[i] == tex)
+            CSTex[i] = null;
     }
 #elif GL
     if (tex)
         REPA(Tex)
-        if (Tex[i] == tex) Tex[i] = ~0;
+    if (Tex[i] == tex)
+        Tex[i] = ~0;
 #endif
 }
 #if GL
@@ -732,7 +742,8 @@ void ShaderBuffer::bindCheck(Int index) {
         if (buffer.buffer == buf)
             return;
         REPA(parts)
-        if (parts[i].buffer == buf) return;
+        if (parts[i].buffer == buf)
+            return;
     }
 #endif
     Exit(S + "ShaderBuffer was expected to be bound at slot " + index);
@@ -2585,7 +2596,7 @@ ComputeShader *ShaderFile::computeGet(C Str8 &name) {
 static INLINE void FlipY(Vtx2DTex *v, Int n) {
     if (!D.mainFBO())
         FREP(n)
-        CHS(v[i].pos.y); // in OpenGL when drawing to RenderTarget the 'dest.pos.y' must be flipped
+    CHS(v[i].pos.y); // in OpenGL when drawing to RenderTarget the 'dest.pos.y' must be flipped
 }
 #endif
 void Shader::draw(C Image *image, C Rect *rect) C {
@@ -2836,7 +2847,7 @@ static void LoadTranslation(MemPtr<ShaderParam::Translation> translation, File &
         translation.setNum(single_translations * elms);
         Int t = 0;
         FREPS(t, single_translations)
-            f >> translation[t];                       // load 1st element translation
+        f >> translation[t];                           // load 1st element translation
         for (Int e = 1, co = 0, go = 0; e < elms; e++) // add rest of the elements
         {
             co += cpu_offset; // offset between elements
@@ -3015,7 +3026,8 @@ Bool ShaderFile::load(C Str &name) {
                         if (translation.elms() != sp._full_translation.elms())
                             ExitParam(temp_str, name);
                         FREPA(translation)
-                        if (translation[i] != sp._full_translation[i]) ExitParam(temp_str, name);
+                        if (translation[i] != sp._full_translation[i])
+                            ExitParam(temp_str, name);
                     }
                 }
             }
@@ -3247,7 +3259,7 @@ void SetMatrixCount(Int num) {
             SBObjMatrix    ->bind(SBI_OBJ_MATRIX     );
             SBObjMatrixPrev->bind(SBI_OBJ_MATRIX_PREV);
 #else // bind 2 at the same time
-                // Warning: code below does not set the cached buffers as 'bind' does, as it's not needed, because those buffers have constant bind index
+      // Warning: code below does not set the cached buffers as 'bind' does, as it's not needed, because those buffers have constant bind index
                 ASSERT(SBI_OBJ_MATRIX_PREV == SBI_OBJ_MATRIX + 1); // can do this only if they're next to each other
                 ID3D11Buffer *buf[] = {SBObjMatrix->buffer.buffer, SBObjMatrixPrev->buffer.buffer};
                 D3DC->VSSetConstantBuffers(SBI_OBJ_MATRIX, 2, buf);

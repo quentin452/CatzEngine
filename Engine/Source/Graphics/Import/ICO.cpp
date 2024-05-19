@@ -120,7 +120,8 @@ Bool Image::ExportICO(File &f) C {
 
     Int images = 0;
     FREPA(mips)
-    if (mips[i].data.is()) images++;
+    if (mips[i].data.is())
+        images++;
     if (!images)
         return false;
     ICONDIR dir;

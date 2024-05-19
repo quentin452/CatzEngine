@@ -305,7 +305,8 @@ void WorldManager::path2DBuild() {
             {
                 // check if there's at least one neighbor without parent
                 REPD(n, pn.nghb_num)
-                if (_path_node[_path_neighbor[pn.nghb_ofs + n].index].parent < 0) goto has_at_least_one_parentless_neighbor;
+                if (_path_node[_path_neighbor[pn.nghb_ofs + n].index].parent < 0)
+                    goto has_at_least_one_parentless_neighbor;
 
                 temp.New() = i; // add to unassigned
                 continue;       // all neighbors are taken, so we need to test another node

@@ -306,10 +306,10 @@ void Source::preprocess(Memc<Macro> &macros, Int &line_index, Memc<Token *> &tem
                                     } else {
                                         if (token->type == TOKEN_CODE)
                                             REPA(temp)
-                                            if ((*temp[i]) == *token) {
-                                                macro.parts.New().set(token->type, i, null);
-                                                goto added;
-                                            }
+                                        if ((*temp[i]) == *token) {
+                                            macro.parts.New().set(token->type, i, null);
+                                            goto added;
+                                        }
                                         macro.parts.New().set(token->type, -1, token);
                                     added:;
                                     }

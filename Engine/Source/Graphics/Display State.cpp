@@ -967,9 +967,11 @@ void DisplayState::del() {
 #if DX11
     REPAO(BlendStates).del();
     REPAD(i, DepthStates)
-    REPAD(j, DepthStates[i]) REPAD(k, DepthStates[i][j]) REPAOD(l, DepthStates[i][j][k]).del();
+    REPAD(j, DepthStates[i])
+    REPAD(k, DepthStates[i][j]) REPAOD(l, DepthStates[i][j][k]).del();
     REPAD(i, RasterStates)
-    REPAD(j, RasterStates[i]) REPAD(k, RasterStates[i][j]) REPAD(l, RasterStates[i][j][k]) REPAD(m, RasterStates[i][j][k][l]) REPAD(n, RasterStates[i][j][k][l][m]) REPAOD(o, RasterStates[i][j][k][l][m][n]).del();
+    REPAD(j, RasterStates[i])
+    REPAD(k, RasterStates[i][j]) REPAD(l, RasterStates[i][j][k]) REPAD(m, RasterStates[i][j][k][l]) REPAD(n, RasterStates[i][j][k][l][m]) REPAOD(o, RasterStates[i][j][k][l][m][n]).del();
 #endif
 }
 void DisplayState::create() {

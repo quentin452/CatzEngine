@@ -2818,7 +2818,7 @@ void VtxIndBuf::face(C Vtx2DTex &a, C Vtx2DTex &b, C Vtx2DTex &c) {
         v[2] = c;
         if (VI._image && VI._image->partial())
             REP(3)
-            v[i].tex *= VI._image->_part.xy;
+        v[i].tex *= VI._image->_part.xy;
     }
 }
 void VtxIndBuf::face(C Vtx2DTex &a, C Vtx2DTex &b, C Vtx2DTex &c, C Vtx2DTex &d) {
@@ -2830,7 +2830,7 @@ void VtxIndBuf::face(C Vtx2DTex &a, C Vtx2DTex &b, C Vtx2DTex &c, C Vtx2DTex &d)
         v[3] = d;
         if (VI._image && VI._image->partial())
             REP(4)
-            v[i].tex *= VI._image->_part.xy;
+        v[i].tex *= VI._image->_part.xy;
     }
 }
 /******************************************************************************/
@@ -2842,7 +2842,7 @@ void VtxIndBuf::face(C Vtx2DTexCol &a, C Vtx2DTexCol &b, C Vtx2DTexCol &c) {
         v[2] = c;
         if (VI._image && VI._image->partial())
             REP(3)
-            v[i].tex *= VI._image->_part.xy;
+        v[i].tex *= VI._image->_part.xy;
     }
 }
 void VtxIndBuf::face(C Vtx2DTexCol &a, C Vtx2DTexCol &b, C Vtx2DTexCol &c, C Vtx2DTexCol &d) {
@@ -2854,7 +2854,7 @@ void VtxIndBuf::face(C Vtx2DTexCol &a, C Vtx2DTexCol &b, C Vtx2DTexCol &c, C Vtx
         v[3] = d;
         if (VI._image && VI._image->partial())
             REP(4)
-            v[i].tex *= VI._image->_part.xy;
+        v[i].tex *= VI._image->_part.xy;
     }
 }
 /******************************************************************************/
@@ -2866,7 +2866,7 @@ void VtxIndBuf::face(C Vtx3DTex &a, C Vtx3DTex &b, C Vtx3DTex &c) {
         v[2] = c;
         if (VI._image && VI._image->partial())
             REP(3)
-            v[i].tex *= VI._image->_part.xy;
+        v[i].tex *= VI._image->_part.xy;
     }
 }
 void VtxIndBuf::face(C Vtx3DTex &a, C Vtx3DTex &b, C Vtx3DTex &c, C Vtx3DTex &d) {
@@ -2878,7 +2878,7 @@ void VtxIndBuf::face(C Vtx3DTex &a, C Vtx3DTex &b, C Vtx3DTex &c, C Vtx3DTex &d)
         v[3] = d;
         if (VI._image && VI._image->partial())
             REP(4)
-            v[i].tex *= VI._image->_part.xy;
+        v[i].tex *= VI._image->_part.xy;
     }
 }
 /******************************************************************************/
@@ -2890,7 +2890,7 @@ void VtxIndBuf::face(C Vtx3DTexCol &a, C Vtx3DTexCol &b, C Vtx3DTexCol &c) {
         v[2] = c;
         if (VI._image && VI._image->partial())
             REP(3)
-            v[i].tex *= VI._image->_part.xy;
+        v[i].tex *= VI._image->_part.xy;
     }
 }
 void VtxIndBuf::face(C Vtx3DTexCol &a, C Vtx3DTexCol &b, C Vtx3DTexCol &c, C Vtx3DTexCol &d) {
@@ -2902,7 +2902,7 @@ void VtxIndBuf::face(C Vtx3DTexCol &a, C Vtx3DTexCol &b, C Vtx3DTexCol &c, C Vtx
         v[3] = d;
         if (VI._image && VI._image->partial())
             REP(4)
-            v[i].tex *= VI._image->_part.xy;
+        v[i].tex *= VI._image->_part.xy;
     }
 }
 /******************************************************************************/
@@ -2914,7 +2914,7 @@ void VtxIndBuf::face(C Vtx3DSimple &a, C Vtx3DSimple &b, C Vtx3DSimple &c) {
         v[2] = c;
         if (VI._image && VI._image->partial())
             REP(3)
-            v[i].tex *= VI._image->_part.xy;
+        v[i].tex *= VI._image->_part.xy;
     }
 }
 void VtxIndBuf::face(C Vtx3DSimple &a, C Vtx3DSimple &b, C Vtx3DSimple &c, C Vtx3DSimple &d) {
@@ -2926,7 +2926,7 @@ void VtxIndBuf::face(C Vtx3DSimple &a, C Vtx3DSimple &b, C Vtx3DSimple &c, C Vtx
         v[3] = d;
         if (VI._image && VI._image->partial())
             REP(4)
-            v[i].tex *= VI._image->_part.xy;
+        v[i].tex *= VI._image->_part.xy;
     }
 }
 /******************************************************************************/
@@ -2938,7 +2938,7 @@ void VtxIndBuf::face(C Vtx3DStandard &a, C Vtx3DStandard &b, C Vtx3DStandard &c)
         v[2] = c;
         if (VI._image && VI._image->partial())
             REP(3)
-            v[i].tex *= VI._image->_part.xy;
+        v[i].tex *= VI._image->_part.xy;
     }
 }
 void VtxIndBuf::face(C Vtx3DStandard &a, C Vtx3DStandard &b, C Vtx3DStandard &c, C Vtx3DStandard &d) {
@@ -2950,7 +2950,7 @@ void VtxIndBuf::face(C Vtx3DStandard &a, C Vtx3DStandard &b, C Vtx3DStandard &c,
         v[3] = d;
         if (VI._image && VI._image->partial())
             REP(4)
-            v[i].tex *= VI._image->_part.xy;
+        v[i].tex *= VI._image->_part.xy;
     }
 }
 /******************************************************************************/

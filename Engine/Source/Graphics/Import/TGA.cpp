@@ -198,7 +198,7 @@ struct TGA {
                         image.color(x + i, y, c);
                     } else if (image.bytePP() == 1)
                         REP(rle)
-                        image.pixel(x + i, y, pixel);
+                    image.pixel(x + i, y, pixel);
                     else {
                         Color c(pixel, pixel, pixel);
                         REP(rle)
@@ -380,7 +380,7 @@ Bool Image::ExportTGA(File &f) C {
                 f.put(src->data() + y * src->pitch(), src->w());
             else
                 FREPD(x, src->w())
-                f.putByte(FltToByte(src->pixelF(x, y)));
+            f.putByte(FltToByte(src->pixelF(x, y)));
         } break;
 
         case 3: {

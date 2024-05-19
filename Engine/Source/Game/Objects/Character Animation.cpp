@@ -49,8 +49,9 @@ void Chr::SkelAnimCache::set(AnimatedSkeleton &anim_skel, C ObjectPtr &obj) {
     if (C Skeleton *skel = anim_skel.skeleton()) {
         Int spines = 0;
         REPA(skel->bones)
-        if (skel->bones[i].type == BONE_SPINE) MAX(spines, skel->bones[i].type_sub); // skeletons may have many spine bones, calculate how many
-        body_u = anim_skel.findBoneI(BONE_SPINE, 0, (spines + 1) / 2);               // chose spine bone in the middle
+        if (skel->bones[i].type == BONE_SPINE)
+            MAX(spines, skel->bones[i].type_sub);                      // skeletons may have many spine bones, calculate how many
+        body_u = anim_skel.findBoneI(BONE_SPINE, 0, (spines + 1) / 2); // chose spine bone in the middle
     } else
         body_u = -1;
 }

@@ -294,7 +294,8 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
                 ImageRTPtr temp(rt_desc);
                 Renderer.set(temp, Renderer._ds_1s, true, NEED_DEPTH_READ);
                 REPS(Renderer._eye, Renderer._eye_num)
-                if (CurrentLightOn[Renderer._eye]) Sh.ShdBlurX[0][0]->draw(&CurrentLightRect[Renderer._eye]); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders
+                if (CurrentLightOn[Renderer._eye])
+                    Sh.ShdBlurX[0][0]->draw(&CurrentLightRect[Renderer._eye]); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders
                 Renderer._shd_1s->discard();
                 Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ);
                 Sh.ImgX[0]->set(temp); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders
@@ -602,34 +603,34 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
     static void ApplyVolumetric(LightDir & light, Int shd_map_num, Bool cloud_vol) {
         if (Renderer.hasVolLight() && light.vol > EPS_COL8_NATIVE && shd_map_num > 0)
             REPS(Renderer._eye, Renderer._eye_num)
-            if (CurrentLightOn[Renderer._eye]) {
-                StartVol();
-                VL.VolDir[shd_map_num - 1][cloud_vol]->draw(Renderer._vol, &CurrentLightRect[Renderer._eye]);
-            }
+        if (CurrentLightOn[Renderer._eye]) {
+            StartVol();
+            VL.VolDir[shd_map_num - 1][cloud_vol]->draw(Renderer._vol, &CurrentLightRect[Renderer._eye]);
+        }
     }
     static void ApplyVolumetric(LightPoint & light) {
         if (Renderer.hasVolLight() && light.vol > EPS_COL8_NATIVE)
             REPS(Renderer._eye, Renderer._eye_num)
-            if (CurrentLightOn[Renderer._eye]) {
-                StartVol();
-                VL.VolPoint->draw(Renderer._vol, &CurrentLightRect[Renderer._eye]);
-            }
+        if (CurrentLightOn[Renderer._eye]) {
+            StartVol();
+            VL.VolPoint->draw(Renderer._vol, &CurrentLightRect[Renderer._eye]);
+        }
     }
     static void ApplyVolumetric(LightLinear & light) {
         if (Renderer.hasVolLight() && light.vol > EPS_COL8_NATIVE)
             REPS(Renderer._eye, Renderer._eye_num)
-            if (CurrentLightOn[Renderer._eye]) {
-                StartVol();
-                VL.VolLinear->draw(Renderer._vol, &CurrentLightRect[Renderer._eye]);
-            }
+        if (CurrentLightOn[Renderer._eye]) {
+            StartVol();
+            VL.VolLinear->draw(Renderer._vol, &CurrentLightRect[Renderer._eye]);
+        }
     }
     static void ApplyVolumetric(LightCone & light) {
         if (Renderer.hasVolLight() && light.vol > EPS_COL8_NATIVE)
             REPS(Renderer._eye, Renderer._eye_num)
-            if (CurrentLightOn[Renderer._eye]) {
-                StartVol();
-                VL.VolCone->draw(Renderer._vol, &CurrentLightRect[Renderer._eye]);
-            }
+        if (CurrentLightOn[Renderer._eye]) {
+            StartVol();
+            VL.VolCone->draw(Renderer._vol, &CurrentLightRect[Renderer._eye]);
+        }
     }
     /******************************************************************************/
     static Bool StereoCurrentLightRect() // this relies on current Viewport, Camera Matrix and 'Frustum' (!! Actually right now 'toScreenRect' are based on 'FrustumMain' so we don't have to restore 'Frustum' !!)
@@ -1487,19 +1488,22 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         if (TEST_LIGHT_RECT) {
             D.depthUnlock();
             REPS(Renderer._eye, Renderer._eye_num)
-            if (SetLightEye()) Sh.clear(Vec4(0.3f, 0.3f, 0.3f, 0), &CurrentLight.rect);
+            if (SetLightEye())
+                Sh.clear(Vec4(0.3f, 0.3f, 0.3f, 0), &CurrentLight.rect);
             D.depthLock(true);
         }
         // Flat
         Shader *shader = GetDrawLightDir(multi_sample, light_mode, CurrentLight.shadow);
         REPS(Renderer._eye, Renderer._eye_num)
-        if (SetLightEye()) shader->draw(&CurrentLight.rect);
+        if (SetLightEye())
+            shader->draw(&CurrentLight.rect);
     }
     static void DrawLightPoint(C MatrixM & light_matrix, Int multi_sample, Int light_mode) {
         if (TEST_LIGHT_RECT) {
             D.depthUnlock();
             REPS(Renderer._eye, Renderer._eye_num)
-            if (SetLightEye()) Sh.clear(Vec4(0.3f, 0.3f, 0.3f, 0), &CurrentLight.rect);
+            if (SetLightEye())
+                Sh.clear(Vec4(0.3f, 0.3f, 0.3f, 0), &CurrentLight.rect);
             D.depthLock(true);
         }
 #if 1 // Geom
@@ -1516,14 +1520,16 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
     Shader *shader = GetDrawLightPointFlat(multi_sample, light_mode, CurrentLight.shadow);
     D.depth2DOn();
     REPS(Renderer._eye, Renderer._eye_num)
-    if (SetLightEye()) shader->draw(&CurrentLight.rect);
+    if (SetLightEye())
+        shader->draw(&CurrentLight.rect);
 #endif
     }
     static void DrawLightLinear(C MatrixM & light_matrix, Int multi_sample, Int light_mode) {
         if (TEST_LIGHT_RECT) {
             D.depthUnlock();
             REPS(Renderer._eye, Renderer._eye_num)
-            if (SetLightEye()) Sh.clear(Vec4(0.3f, 0.3f, 0.3f, 0), &CurrentLight.rect);
+            if (SetLightEye())
+                Sh.clear(Vec4(0.3f, 0.3f, 0.3f, 0), &CurrentLight.rect);
             D.depthLock(true);
         }
 #if 1 // Geom
@@ -1540,14 +1546,16 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
     Shader *shader = GetDrawLightLinearFlat(multi_sample, light_mode, CurrentLight.shadow);
     D.depth2DOn();
     REPS(Renderer._eye, Renderer._eye_num)
-    if (SetLightEye()) shader->draw(&CurrentLight.rect);
+    if (SetLightEye())
+        shader->draw(&CurrentLight.rect);
 #endif
     }
     static void DrawLightCone(C MatrixM & light_matrix, Int multi_sample, Int light_mode) {
         if (TEST_LIGHT_RECT) {
             D.depthUnlock();
             REPS(Renderer._eye, Renderer._eye_num)
-            if (SetLightEye()) Sh.clear(Vec4(0.3f, 0.3f, 0.3f, 0), &CurrentLight.rect);
+            if (SetLightEye())
+                Sh.clear(Vec4(0.3f, 0.3f, 0.3f, 0), &CurrentLight.rect);
             D.depthLock(true);
         }
 #if !DEPTH_CLIP_SUPPORTED                                           // Flat
@@ -1555,7 +1563,8 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         {                                                           // draw as Flat
             Shader *shader = GetDrawLightConeFlat(multi_sample, light_mode, CurrentLight.shadow, CurrentLight.image != null);
             REPS(Renderer._eye, Renderer._eye_num)
-            if (SetLightEye()) shader->draw(&CurrentLight.rect);
+            if (SetLightEye())
+                shader->draw(&CurrentLight.rect);
             return;
         }
 #endif
@@ -1639,7 +1648,8 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
                     Renderer.set(Renderer._shd_1s, Renderer._water_ds, true, NEED_DEPTH_READ); // use DS because it may be used for 'D.depth' optimization, 3D geometric shaders and stencil tests
                     D.depth2DOn();
                     REPS(Renderer._eye, Renderer._eye_num)
-                    if (SetLightEye(true)) GetShdDir(Mid(shd_map_num, 1, 6), cloud, false)->draw(&CurrentLight.rect);
+                    if (SetLightEye(true))
+                        GetShdDir(Mid(shd_map_num, 1, 6), cloud, false)->draw(&CurrentLight.rect);
                 }
 
                 SetWaterLum();
@@ -1659,16 +1669,19 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
                 if (!Renderer._ds->multiSample()) {
                     Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders
                     REPS(Renderer._eye, Renderer._eye_num)
-                    if (SetLightEye(true)) GetShdDir(shd_map_num, cloud, false)->draw(&CurrentLight.rect);
+                    if (SetLightEye(true))
+                        GetShdDir(shd_map_num, cloud, false)->draw(&CurrentLight.rect);
                 } else { // we can ignore 'Renderer.hasStencilAttached' because we would have to apply for all samples of '_shd_ms' and '_shd_1s' which will happen anyway below
                     Renderer.set(Renderer._shd_ms, Renderer._ds, true, NEED_DEPTH_READ);
                     D.stencil(STENCIL_MSAA_TEST, STENCIL_REF_MSAA);
                     REPS(Renderer._eye, Renderer._eye_num)
-                    if (SetLightEye(true)) GetShdDir(shd_map_num, cloud, true)->draw(&CurrentLight.rect); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders
+                    if (SetLightEye(true))
+                        GetShdDir(shd_map_num, cloud, true)->draw(&CurrentLight.rect); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders
                     Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ);
                     D.stencil(STENCIL_NONE);
                     REPS(Renderer._eye, Renderer._eye_num)
-                    if (SetLightEye(true)) GetShdDir(shd_map_num, cloud, false)->draw(&CurrentLight.rect); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders, for all stencil samples because they are needed for smoothing
+                    if (SetLightEye(true))
+                        GetShdDir(shd_map_num, cloud, false)->draw(&CurrentLight.rect); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders, for all stencil samples because they are needed for smoothing
                 }
                 RestoreViewSpaceBias(mp_z_z);
                 MapSoft(depth_func);
@@ -1720,7 +1733,8 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
                     Renderer.set(Renderer._shd_1s, Renderer._water_ds, true, NEED_DEPTH_READ); // use DS because it may be used for 'D.depth' optimization, 3D geometric shaders and stencil tests
                     D.depth2DOn();
                     REPS(Renderer._eye, Renderer._eye_num)
-                    if (SetLightEye(true)) GetShdPoint(false)->draw(&CurrentLight.rect);
+                    if (SetLightEye(true))
+                        GetShdPoint(false)->draw(&CurrentLight.rect);
                 }
 
                 SetWaterLum();
@@ -1740,16 +1754,19 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
                 if (!Renderer._ds->multiSample()) {
                     Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders
                     REPS(Renderer._eye, Renderer._eye_num)
-                    if (SetLightEye(true)) GetShdPoint(false)->draw(&CurrentLight.rect);
+                    if (SetLightEye(true))
+                        GetShdPoint(false)->draw(&CurrentLight.rect);
                 } else { // we can ignore 'Renderer.hasStencilAttached' because we would have to apply for all samples of '_shd_ms' and '_shd_1s' which will happen anyway below
                     Renderer.set(Renderer._shd_ms, Renderer._ds, true, NEED_DEPTH_READ);
                     D.stencil(STENCIL_MSAA_TEST, STENCIL_REF_MSAA);
                     REPS(Renderer._eye, Renderer._eye_num)
-                    if (SetLightEye(true)) GetShdPoint(true)->draw(&CurrentLight.rect); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders
+                    if (SetLightEye(true))
+                        GetShdPoint(true)->draw(&CurrentLight.rect); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders
                     Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ);
                     D.stencil(STENCIL_NONE);
                     REPS(Renderer._eye, Renderer._eye_num)
-                    if (SetLightEye(true)) GetShdPoint(false)->draw(&CurrentLight.rect); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders, for all stencil samples because they are needed for smoothing
+                    if (SetLightEye(true))
+                        GetShdPoint(false)->draw(&CurrentLight.rect); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders, for all stencil samples because they are needed for smoothing
                 }
                 RestoreViewSpaceBias(mp_z_z);
                 MapSoft(depth_func, &light_matrix);
@@ -1801,7 +1818,8 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
                     Renderer.set(Renderer._shd_1s, Renderer._water_ds, true, NEED_DEPTH_READ); // use DS because it may be used for 'D.depth' optimization, 3D geometric shaders and stencil tests
                     D.depth2DOn();
                     REPS(Renderer._eye, Renderer._eye_num)
-                    if (SetLightEye(true)) GetShdPoint(false)->draw(&CurrentLight.rect);
+                    if (SetLightEye(true))
+                        GetShdPoint(false)->draw(&CurrentLight.rect);
                 }
 
                 SetWaterLum();
@@ -1821,16 +1839,19 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
                 if (!Renderer._ds->multiSample()) {
                     Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders
                     REPS(Renderer._eye, Renderer._eye_num)
-                    if (SetLightEye(true)) GetShdPoint(false)->draw(&CurrentLight.rect);
+                    if (SetLightEye(true))
+                        GetShdPoint(false)->draw(&CurrentLight.rect);
                 } else { // we can ignore 'Renderer.hasStencilAttached' because we would have to apply for all samples of '_shd_ms' and '_shd_1s' which will happen anyway below
                     Renderer.set(Renderer._shd_ms, Renderer._ds, true, NEED_DEPTH_READ);
                     D.stencil(STENCIL_MSAA_TEST, STENCIL_REF_MSAA);
                     REPS(Renderer._eye, Renderer._eye_num)
-                    if (SetLightEye(true)) GetShdPoint(true)->draw(&CurrentLight.rect); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders
+                    if (SetLightEye(true))
+                        GetShdPoint(true)->draw(&CurrentLight.rect); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders
                     Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ);
                     D.stencil(STENCIL_NONE);
                     REPS(Renderer._eye, Renderer._eye_num)
-                    if (SetLightEye(true)) GetShdPoint(false)->draw(&CurrentLight.rect); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders, for all stencil samples because they are needed for smoothing
+                    if (SetLightEye(true))
+                        GetShdPoint(false)->draw(&CurrentLight.rect); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders, for all stencil samples because they are needed for smoothing
                 }
                 RestoreViewSpaceBias(mp_z_z);
                 MapSoft(depth_func, &light_matrix);
@@ -1881,7 +1902,8 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
                     Renderer.set(Renderer._shd_1s, Renderer._water_ds, true, NEED_DEPTH_READ); // use DS because it may be used for 'D.depth' optimization, 3D geometric shaders and stencil tests
                     D.depth2DOn();
                     REPS(Renderer._eye, Renderer._eye_num)
-                    if (SetLightEye(true)) GetShdCone(false)->draw(&CurrentLight.rect);
+                    if (SetLightEye(true))
+                        GetShdCone(false)->draw(&CurrentLight.rect);
                 }
 
                 SetWaterLum();
@@ -1901,16 +1923,19 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
                 if (!Renderer._ds->multiSample()) {
                     Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders
                     REPS(Renderer._eye, Renderer._eye_num)
-                    if (SetLightEye(true)) GetShdCone(false)->draw(&CurrentLight.rect);
+                    if (SetLightEye(true))
+                        GetShdCone(false)->draw(&CurrentLight.rect);
                 } else { // we can ignore 'Renderer.hasStencilAttached' because we would have to apply for all samples of '_shd_ms' and '_shd_1s' which will happen anyway below
                     Renderer.set(Renderer._shd_ms, Renderer._ds, true, NEED_DEPTH_READ);
                     D.stencil(STENCIL_MSAA_TEST, STENCIL_REF_MSAA);
                     REPS(Renderer._eye, Renderer._eye_num)
-                    if (SetLightEye(true)) GetShdCone(true)->draw(&CurrentLight.rect); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders
+                    if (SetLightEye(true))
+                        GetShdCone(true)->draw(&CurrentLight.rect); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders
                     Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ);
                     D.stencil(STENCIL_NONE);
                     REPS(Renderer._eye, Renderer._eye_num)
-                    if (SetLightEye(true)) GetShdCone(false)->draw(&CurrentLight.rect); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders, for all stencil samples because they are needed for smoothing
+                    if (SetLightEye(true))
+                        GetShdCone(false)->draw(&CurrentLight.rect); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders, for all stencil samples because they are needed for smoothing
                 }
                 RestoreViewSpaceBias(mp_z_z);
                 MapSoft(depth_func, &light_matrix);
@@ -2004,7 +2029,8 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
                     Renderer.set(Renderer._shd_1s, Renderer._water_ds, true, NEED_DEPTH_READ); // use DS because it may be used for 'D.depth' optimization, 3D geometric shaders and stencil tests
                     D.depth2DOn();
                     REPS(Renderer._eye, Renderer._eye_num)
-                    if (SetLightEye(true)) GetShdDir(Mid(shd_map_num, 1, 6), false, false)->draw(&CurrentLight.rect);
+                    if (SetLightEye(true))
+                        GetShdDir(Mid(shd_map_num, 1, 6), false, false)->draw(&CurrentLight.rect);
                 }
 
                 SetWaterLum();
@@ -2084,7 +2110,8 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
                     Renderer.set(Renderer._shd_1s, Renderer._water_ds, true, NEED_DEPTH_READ); // use DS because it may be used for 'D.depth' optimization, 3D geometric shaders and stencil tests
                     D.depth2DOn();
                     REPS(Renderer._eye, Renderer._eye_num)
-                    if (SetLightEye(true)) GetShdPoint(false)->draw(&CurrentLight.rect);
+                    if (SetLightEye(true))
+                        GetShdPoint(false)->draw(&CurrentLight.rect);
                 }
 
                 SetWaterLum();
@@ -2165,7 +2192,8 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
                     Renderer.set(Renderer._shd_1s, Renderer._water_ds, true, NEED_DEPTH_READ); // use DS because it may be used for 'D.depth' optimization, 3D geometric shaders and stencil tests
                     D.depth2DOn();
                     REPS(Renderer._eye, Renderer._eye_num)
-                    if (SetLightEye(true)) GetShdPoint(false)->draw(&CurrentLight.rect);
+                    if (SetLightEye(true))
+                        GetShdPoint(false)->draw(&CurrentLight.rect);
                 }
 
                 SetWaterLum();
@@ -2244,7 +2272,8 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
                     Renderer.set(Renderer._shd_1s, Renderer._water_ds, true, NEED_DEPTH_READ); // use DS because it may be used for 'D.depth' optimization, 3D geometric shaders and stencil tests
                     D.depth2DOn();
                     REPS(Renderer._eye, Renderer._eye_num)
-                    if (SetLightEye(true)) GetShdCone(false)->draw(&CurrentLight.rect);
+                    if (SetLightEye(true))
+                        GetShdCone(false)->draw(&CurrentLight.rect);
                 }
 
                 SetWaterLum();

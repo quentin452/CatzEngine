@@ -129,7 +129,7 @@ Bool Image::ExportBMPRaw(File &f, Byte byte_pp, Bool ico) C // assumes that Imag
 
     if (byte_pp == 1)
         FREP(256)
-        f.putUInt(VecB4(i, i, i, 255).u); // palette
+    f.putUInt(VecB4(i, i, i, 255).u); // palette
 
     REPD(y, T.h()) {
         switch (byte_pp) {
@@ -138,7 +138,7 @@ Bool Image::ExportBMPRaw(File &f, Byte byte_pp, Bool ico) C // assumes that Imag
                 f.put(data() + y * pitch(), T.w());
             else
                 FREPD(x, T.w())
-                f.putByte(FltToByte(pixelF(x, y)));
+            f.putByte(FltToByte(pixelF(x, y)));
         } break;
 
         case 3: {

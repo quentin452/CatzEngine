@@ -1189,28 +1189,28 @@ void DisplayClass::init() // make this as a method because if we put this to Dis
 
     if (!CGGetActiveDisplayList(Elms(display), display, &displays))
         FREP(displays)
-        if (auto monitor = _monitors((Ptr)display[i])) {
-            monitor->primary = (display[i] == main_display);
-            if (monitor->primary) {
-                monitor->full.set(0, App.desktop());
-                monitor->work = App.desktopArea();
-            } // else TODO:
+    if (auto monitor = _monitors((Ptr)display[i])) {
+        monitor->primary = (display[i] == main_display);
+        if (monitor->primary) {
+            monitor->full.set(0, App.desktop());
+            monitor->work = App.desktopArea();
+        } // else TODO:
 
-            // get available modes
-            MemtN<VecI2, 128> modes;
-            if (CFArrayRef display_modes = CGDisplayCopyAllDisplayModes(display[i], null)) {
-                Int count = CFArrayGetCount(display_modes);
-                FREP(count) {
-                    CGDisplayModeRef mode = (CGDisplayModeRef)CFArrayGetValueAtIndex(display_modes, i);
-                    UInt flags = CGDisplayModeGetIOFlags(mode);
-                    Bool ok = FlagOn(flags, kDisplayModeSafetyFlags);
-                    if (ok)
-                        modes.binaryInclude(VecI2(CGDisplayModeGetWidth(mode), CGDisplayModeGetHeight(mode)));
-                }
-                CFRelease(display_modes);
+        // get available modes
+        MemtN<VecI2, 128> modes;
+        if (CFArrayRef display_modes = CGDisplayCopyAllDisplayModes(display[i], null)) {
+            Int count = CFArrayGetCount(display_modes);
+            FREP(count) {
+                CGDisplayModeRef mode = (CGDisplayModeRef)CFArrayGetValueAtIndex(display_modes, i);
+                UInt flags = CGDisplayModeGetIOFlags(mode);
+                Bool ok = FlagOn(flags, kDisplayModeSafetyFlags);
+                if (ok)
+                    modes.binaryInclude(VecI2(CGDisplayModeGetWidth(mode), CGDisplayModeGetHeight(mode)));
             }
-            monitor->modes = modes;
+            CFRelease(display_modes);
         }
+        monitor->modes = modes;
+    }
 #elif LINUX
     if (XDisplay)
         if (auto monitor = _monitors(null)) {
@@ -1638,7 +1638,7 @@ found_pf:
 #if 0 // 2.0 context
          if(!(MainContext.context=glXCreateNewContext(XDisplay, GLConfig, GLX_RGBA_TYPE, null, true)))Exit("Can't create a OpenGL Context.");
 #else // 3.0+ context (this does not link on some old graphics drivers when compiling, "undefined reference to glXCreateContextAttribsARB", it would need to be accessed using 'glGetProcAddress')
-        // access 'glXCreateContextAttribsARB', on Linux we don't need an existing GL context to be able to load extensions via 'glGetProcAddress'
+      // access 'glXCreateContextAttribsARB', on Linux we don't need an existing GL context to be able to load extensions via 'glGetProcAddress'
         typedef GLXContext (*PFNGLXCREATECONTEXTATTRIBSARBPROC)(::Display *dpy, GLXFBConfig config, GLXContext share_context, Bool direct, const int *attrib_list);
         if (PFNGLXCREATECONTEXTATTRIBSARBPROC glXCreateContextAttribsARB = (PFNGLXCREATECONTEXTATTRIBSARBPROC)glGetProcAddress("glXCreateContextAttribsARB")) {
             // in tests 'glXCreateContextAttribsARB' returned higher version than what was requested (which is what we want)
@@ -2498,7 +2498,7 @@ void DisplayClass::getGamma() {
 #endif
     if (!ok)
         REP(256)
-        _gamma_array[0][i] = _gamma_array[1][i] = _gamma_array[2][i] = (i * 0xFFFF + 128) / 255;
+    _gamma_array[0][i] = _gamma_array[1][i] = _gamma_array[2][i] = (i * 0xFFFF + 128) / 255;
 }
 void DisplayClass::getCaps() {
     if (LogInit)

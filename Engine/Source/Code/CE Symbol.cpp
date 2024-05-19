@@ -80,7 +80,9 @@ SymbolPtr FindSymbol(C Str &name, Symbol *parent, Memc<SymbolPtr> &usings) {
     if (SymbolPtr s = FindSymbol(name, parent))
         return s;
     REPA(usings)
-    if (SymbolPtr s = FindChild(name, usings[i]())) if (!(s->modifiers & Symbol::MODIF_CTOR_DTOR)) return s;
+    if (SymbolPtr s = FindChild(name, usings[i]()))
+        if (!(s->modifiers & Symbol::MODIF_CTOR_DTOR))
+            return s;
     return null;
 }
 /******************************************************************************/
@@ -123,7 +125,8 @@ Bool Symbol::Modif::anyPtr() C {
     if (ptr_level > 0)
         return true;
     REPA(array_dims)
-    if (array_dims[i] == DIM_PTR) return true;
+    if (array_dims[i] == DIM_PTR)
+        return true;
     return false;
 }
 Bool Symbol::Modif::isVoidPtr() C { return ptr_level == 1 && !array_dims.elms() && T && T->var_type == VAR_VOID; }
@@ -133,7 +136,8 @@ Bool Symbol::Modif::dependable() C { return !(modifiers & MODIF_REF) && !anyPtr(
 Bool Symbol::Modif::same(Modif &modif, Bool test_const, Bool test_ref) {
     if (SCAST(SymbolPtr, T) == SCAST(SymbolPtr, modif) && ptr_level == modif.ptr_level && array_dims.elms() == modif.array_dims.elms()) {
         REPA(array_dims)
-        if (array_dims[i] != modif.array_dims[i]) return false;
+        if (array_dims[i] != modif.array_dims[i])
+            return false;
         if (test_const && const_level != modif.const_level)
             return false;
         if (test_ref && (modifiers & MODIF_REF) != (modif.modifiers & MODIF_REF))
@@ -141,29 +145,29 @@ Bool Symbol::Modif::same(Modif &modif, Bool test_const, Bool test_ref) {
 
         for (Symbol *cur = T(); cur; cur = cur->parent()) // check target templates of the symbol and its parents, for example "Memc<Byte> == Memc<Int>" (also parents because they also can have templates "<TYPE> class Main { <TYPE2> class Sub {}}" ) (bases don't need to be searched because they can depend only on the 'cur' temples only, so when checking cur we don't care about the base templates, example: "T1(TYPE) struct B : A<TYPE>")
             REPA(cur->templates)
-            if (Symbol *t = cur->templates[i]()) // get 'TYPE' from "Memc<TYPE>"
+        if (Symbol *t = cur->templates[i]()) // get 'TYPE' from "Memc<TYPE>"
+        {
+            // find that 'TYPE' in:
+            Modif *a = null;
+            REPA(templates)
+            if (templates[i].src_template == t) {
+                a = &templates[i];
+                break;
+            } // 'T'     templates
+            Modif *b = null;
+            REPA(modif.templates)
+            if (modif.templates[i].src_template == t) {
+                b = &modif.templates[i];
+                break;
+            }           // 'modif' templates
+            if (a || b) // at least one is present
             {
-                // find that 'TYPE' in:
-                Modif *a = null;
-                REPA(templates)
-                if (templates[i].src_template == t) {
-                    a = &templates[i];
-                    break;
-                } // 'T'     templates
-                Modif *b = null;
-                REPA(modif.templates)
-                if (modif.templates[i].src_template == t) {
-                    b = &modif.templates[i];
-                    break;
-                }           // 'modif' templates
-                if (a || b) // at least one is present
-                {
-                    if (!a || !b)
-                        return false; // at least one is missing
-                    if (!a->same(*b, true, true))
-                        return false; // compare both templates, here test const and ref
-                }
+                if (!a || !b)
+                    return false; // at least one is missing
+                if (!a->same(*b, true, true))
+                    return false; // compare both templates, here test const and ref
             }
+        }
         return true;
     }
     return false;
@@ -177,9 +181,11 @@ Bool Symbol::Modif::sameFuncParamValue(Modif &modif) {
     if (T() == modif() || (T->type == TYPENAME && modif->type == TYPENAME))
         if (const_level == modif.const_level && ptr_level == modif.ptr_level && array_dims.elms() == modif.array_dims.elms() && templates.elms() == modif.templates.elms() && ((modifiers & MODIF_SAME_FUNC_PARAM) == (modif.modifiers & MODIF_SAME_FUNC_PARAM)) /* && src_template==modif.src_template*/) {
             REPA(array_dims)
-            if (array_dims[i] != modif.array_dims[i]) return false;
+            if (array_dims[i] != modif.array_dims[i])
+                return false;
             REPA(templates)
-            if (!templates[i]->value.sameFuncParamValue(modif.templates[i]->value)) return false; // we need to check templates values (and not templates by themself, because they are only stored as TYPENAME or VAR, value has the actual type or null for TYPENAME, remember that TYPENAME point to different symbols because each template is created in the function location)
+            if (!templates[i]->value.sameFuncParamValue(modif.templates[i]->value))
+                return false; // we need to check templates values (and not templates by themself, because they are only stored as TYPENAME or VAR, value has the actual type or null for TYPENAME, remember that TYPENAME point to different symbols because each template is created in the function location)
             return true;
         }
     return false;
@@ -461,11 +467,13 @@ void Symbol::funcDefinition(StrEx &sx, Int highlight, C Color *col) {
         Str s = source->getText(def_range.x, def_range.y);
         Int level = 0;
         REPA(s)
-        if (s[i] == ')') level--;
-        else if (s[i] == '(') if (!++level) {
-            s.clip(i);
-            break;
-        } // remove param list
+        if (s[i] == ')')
+            level--;
+        else if (s[i] == '(')
+            if (!++level) {
+                s.clip(i);
+                break;
+            } // remove param list
         sx += source->getText(type_range.x, type_range.y) + ' ' + s;
         sx += '(';
         FREPA(params) {
@@ -654,7 +662,8 @@ Symbol::ACCESS_LEVEL Symbol::highestAccess() {
     if (type == FUNC_LIST) {
         ACCESS_LEVEL level = ACCESS_PRIVATE;
         REPA(funcs)
-        if (!(funcs[i]->modifiers & MODIF_OUTSIDE_METHOD)) MAX(level, ModifToAccessLevel(funcs[i]->modifiers)); // ignore class members defined outside of class because they are not aware of access modifiers "class X{private: void method();} void X::method() {}" - while parsing 2nd method access is unknown
+        if (!(funcs[i]->modifiers & MODIF_OUTSIDE_METHOD))
+            MAX(level, ModifToAccessLevel(funcs[i]->modifiers)); // ignore class members defined outside of class because they are not aware of access modifiers "class X{private: void method();} void X::method() {}" - while parsing 2nd method access is unknown
         return level;
     }
     return ModifToAccessLevel(modifiers);
@@ -662,7 +671,8 @@ Symbol::ACCESS_LEVEL Symbol::highestAccess() {
 Bool Symbol::fullyStatic() {
     if (type == FUNC_LIST) {
         REPA(funcs)
-        if (!(funcs[i]->modifiers & MODIF_STATIC)) return false; // if at least one is not static
+        if (!(funcs[i]->modifiers & MODIF_STATIC))
+            return false; // if at least one is not static
         return true;
     }
     return FlagOn(modifiers, MODIF_STATIC);
@@ -670,7 +680,8 @@ Bool Symbol::fullyStatic() {
 Bool Symbol::partiallyStatic() {
     if (type == FUNC_LIST) {
         REPA(funcs)
-        if (funcs[i]->modifiers & MODIF_STATIC) return true; // if at least one is static
+        if (funcs[i]->modifiers & MODIF_STATIC)
+            return true; // if at least one is static
         return false;
     }
     return FlagOn(modifiers, MODIF_STATIC);
@@ -719,10 +730,12 @@ Bool Symbol::isAbstractClass(Memc<Modif> *templates, RecTest &rt) {
     if (rt)
         return false;
     REPA(children)
-    if (Symbol *func_list = children[i]) if (func_list->type == FUNC_LIST) {
-        REPA(func_list->funcs)
-        if ((func_list->funcs[i]->modifiers & MODIF_VIRTUAL) && (func_list->funcs[i]->modifiers & MODIF_DEF_VALUE)) return true; // check all functions for 'virtual' and "=NULL"
-    }
+    if (Symbol *func_list = children[i])
+        if (func_list->type == FUNC_LIST) {
+            REPA(func_list->funcs)
+            if ((func_list->funcs[i]->modifiers & MODIF_VIRTUAL) && (func_list->funcs[i]->modifiers & MODIF_DEF_VALUE))
+                return true; // check all functions for 'virtual' and "=NULL"
+        }
     return false;
 }
 Bool Symbol::hasVirtualDestructor(Memc<Modif> *templates, RecTest &rt) // assumes 'T.children' is set
@@ -731,12 +744,14 @@ Bool Symbol::hasVirtualDestructor(Memc<Modif> *templates, RecTest &rt) // assume
     if (rt)
         return false;
     REPA(children)
-    if (Symbol *func_list = children[i]) if (func_list->modifiers & MODIF_DTOR) // if we've encountered destructor
-    {
-        REPA(func_list->funcs)
-        if (func_list->funcs[i]->modifiers & MODIF_VIRTUAL) return true; // check all functions
-        break;                                                           // don't check other function lists
-    }
+    if (Symbol *func_list = children[i])
+        if (func_list->modifiers & MODIF_DTOR) // if we've encountered destructor
+        {
+            REPA(func_list->funcs)
+            if (func_list->funcs[i]->modifiers & MODIF_VIRTUAL)
+                return true; // check all functions
+            break;           // don't check other function lists
+        }
     REPA(base) {
         Modif base = T.base[i];
         base.proceedToFinal(templates);
@@ -752,12 +767,15 @@ Bool Symbol::hasVirtualFunc(Symbol &func, Memc<Modif> *templates, RecTest &rt) /
         return false;
     C Str &func_name = ((func.parent && func.parent->type == FUNC_LIST) ? *func.parent : func); // get the name from the function list if possible
     REPA(children)
-    if (Symbol *func_list = children[i]) if (func_list->type == FUNC_LIST && *func_list == func_name()) // found function list with identical name
-    {
-        REPA(func_list->funcs)
-        if (Symbol *f = func_list->funcs[i]()) if ((f->modifiers & MODIF_VIRTUAL) && func.sameFunc(*f)) return true; // continue checking other functions because there can be multiple same (with body, or without, or multiple declarations)
-        break;
-    }
+    if (Symbol *func_list = children[i])
+        if (func_list->type == FUNC_LIST && *func_list == func_name()) // found function list with identical name
+        {
+            REPA(func_list->funcs)
+            if (Symbol *f = func_list->funcs[i]())
+                if ((f->modifiers & MODIF_VIRTUAL) && func.sameFunc(*f))
+                    return true; // continue checking other functions because there can be multiple same (with body, or without, or multiple declarations)
+            break;
+        }
     REPA(base) {
         Modif base = T.base[i];
         base.proceedToFinal(templates);
@@ -772,11 +790,13 @@ Bool Symbol::isVirtualClass(Memc<Modif> *templates, RecTest &rt) // assumes 'T.c
     if (rt)
         return false;
     REPA(children)
-    if (Symbol *func_list = children[i]) if (func_list->type == FUNC_LIST) // if we've encountered function list
-    {
-        REPA(func_list->funcs)
-        if (func_list->funcs[i]->modifiers & MODIF_VIRTUAL) return true; // check all functions
-    }
+    if (Symbol *func_list = children[i])
+        if (func_list->type == FUNC_LIST) // if we've encountered function list
+        {
+            REPA(func_list->funcs)
+            if (func_list->funcs[i]->modifiers & MODIF_VIRTUAL)
+                return true; // check all functions
+        }
     REPA(base) {
         Modif base = T.base[i];
         base.proceedToFinal(templates);
@@ -814,7 +834,8 @@ Bool Symbol::hasConstructor(Memc<Modif> *templates, RecTest &rt) // assumes 'T.c
             if (child->isVar() && (child->modifiers & MODIF_DEF_VALUE))
                 return true; // if is a variable (include function pointers) and has default value specified
             REPA(child->funcs)
-            if (child->funcs[i]->modifiers & MODIF_VIRTUAL) return true;             // if at least one function is virtual, then this class needs constructor
+            if (child->funcs[i]->modifiers & MODIF_VIRTUAL)
+                return true;                                                         // if at least one function is virtual, then this class needs constructor
             if (child->type == VAR                                                   // check variables (skip function pointers)
                 || (child->type == CLASS && (child->modifiers & MODIF_TRANSPARENT))) // transparent class
             {
@@ -844,7 +865,8 @@ Bool Symbol::hasDestructor(Memc<Modif> *templates, RecTest &rt) // assumes 'T.ch
             if (child->modifiers & MODIF_DTOR)
                 return true; // we have found destructor
             REPA(child->funcs)
-            if (child->funcs[i]->modifiers & MODIF_VIRTUAL) return true;             // if at least one function is virtual, then this class needs destructor
+            if (child->funcs[i]->modifiers & MODIF_VIRTUAL)
+                return true;                                                         // if at least one function is virtual, then this class needs destructor
             if (child->type == VAR                                                   // check variables (skip function pointers)
                 || (child->type == CLASS && (child->modifiers & MODIF_TRANSPARENT))) // transparent class
             {
@@ -1048,7 +1070,8 @@ Bool Symbol::sameFunc(Symbol &f) {
         if (params.elms() != f.params.elms())
             return false;
         REPA(params)
-        if (!(params[i]->value.sameFuncParamValue(f.params[i]->value))) return false;
+        if (!(params[i]->value.sameFuncParamValue(f.params[i]->value)))
+            return false;
         return true;
     }
     return false;
@@ -1236,7 +1259,8 @@ Bool Symbol::canBeAccessedFrom(Symbol *path, Symbol *caller, Bool precise_parent
 
     // check used namespaces
     REPA(usings)
-    if (usings[i] == Parent) return true;
+    if (usings[i] == Parent)
+        return true;
 
     // first parent of this must be included in 'path' or its parents list (this includes the case when parent==null) or their base list
     for (;;) {

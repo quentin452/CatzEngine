@@ -906,7 +906,7 @@ void AnimatedSkeleton::getMatrixes(MemPtrN<MatrixM, 256> matrixes) C {
 void AnimatedSkeleton::draw(C Color &bone_color, C Color &slot_color) C {
     if (bone_color.a && skeleton())
         REP(minBones())
-        (skeleton()->bones[i] * bones[i].matrix()).draw(bone_color);
+    (skeleton()->bones[i] * bones[i].matrix()).draw(bone_color);
     if (slot_color.a)
         REPAO(slots).draw(slot_color);
 }

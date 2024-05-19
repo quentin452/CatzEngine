@@ -561,7 +561,8 @@ DAE::Controller *DAE::findController(CChar *name) {
 DAE::Node *DAE::findNode(CChar *name) {
     REPA(visual_scenes)
     REPAD(j, visual_scenes[i].nodes)
-    if (Node *node = visual_scenes[i].nodes[j].findNode(name)) return node;
+    if (Node *node = visual_scenes[i].nodes[j].findNode(name))
+        return node;
     return null;
 }
 /******************************************************************************/

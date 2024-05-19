@@ -95,7 +95,8 @@ AreaPath2D &AreaPath2D::walkable(Int x, Int y, Bool walkable) {
 Bool AreaPath2D::fullyWalkable() {
     REPD(y, _map.h())
     REPD(x, _map.w())
-    if (!walkable(x, y)) return false;
+    if (!walkable(x, y))
+        return false;
     return true;
 }
 /******************************************************************************/
@@ -365,7 +366,8 @@ Bool Area::Data::save(File &f) {
     if (objs.elms())
         if (File *f = cw.beginChunk("Object", 1))
             FREPA(objs)
-            if (!objs[i].save(*f)) return false;
+    if (!objs[i].save(*f))
+        return false;
     if (decals.elms())
         if (File *f = cw.beginChunk("Decal", 0))
             if (!decals._save(*f))

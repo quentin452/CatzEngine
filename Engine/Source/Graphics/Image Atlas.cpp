@@ -8,19 +8,22 @@ DEFINE_CACHE(ImageAtlas, ImageAtlases, ImageAtlasPtr, "ImageAtlas");
 /******************************************************************************/
 static Bool TestCol(Image &image, Int x) {
     REPD(y, image.h())
-    if (image.color(x, y).a) return true;
+    if (image.color(x, y).a)
+        return true;
     return false;
 }
 static Bool TestRow(Image &image, Int y) {
     REPD(x, image.w())
-    if (image.color(x, y).a) return true;
+    if (image.color(x, y).a)
+        return true;
     return false;
 }
 /******************************************************************************/
 Int ImageAtlas::findPartI(C Str &name) {
     if (name.is())
         FREPA(parts)
-        if (EqualPath(parts[i].name, name)) return i;
+    if (EqualPath(parts[i].name, name))
+        return i;
     return -1;
 }
 Int ImageAtlas::getPartI(C Str &name) {
@@ -130,8 +133,10 @@ Bool ImageAtlas::create(C CMemPtr<Source> &images, IMAGE_TYPE image_type, Int mi
     T.parts.setNum(ias.elms());
     T.images.setNum(image_sizes.elms());
     REPA(T.images)
-    if (T.images[i].create(image_sizes[i].x, image_sizes[i].y, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1)) T.images[i].clear();
-    else goto error;
+    if (T.images[i].create(image_sizes[i].x, image_sizes[i].y, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1))
+        T.images[i].clear();
+    else
+        goto error;
     REPA(ias) {
         C RectIndex &pack = packed[i];
         ImageAtlasSrc &ia = ias[i];
@@ -178,13 +183,15 @@ Bool ImageAtlas::create(C CMemPtr<Source> &images, IMAGE_TYPE image_type, Int mi
     // success
     {
         REPA(images)
-        if (images[i].image) images[i].image->unlock();
+        if (images[i].image)
+            images[i].image->unlock();
         return true;
     }
 
 error:
     REPA(images)
-    if (images[i].image) images[i].image->unlock();
+    if (images[i].image)
+        images[i].image->unlock();
     del();
     return false;
 }

@@ -14,7 +14,8 @@ Bool Find::FilterScope(Source *source, UInt scope) {
 /******************************************************************************/
 static Bool FilterText(C Str &t, Memc<Str> &texts, Bool case_sensitive, WHOLE_WORD whole_word) {
     REPA(texts)
-    if (!TextPos(t, texts[i], case_sensitive, whole_word)) return false;
+    if (!TextPos(t, texts[i], case_sensitive, whole_word))
+        return false;
     return true;
 }
 /******************************************************************************/
@@ -266,7 +267,8 @@ void Find::historyAdd(C Str &text) {
     if (history.elms() >= 64)
         history.remove(0, true);
     REPA(history)
-    if (Equal(history[i], text)) history.remove(i, true);
+    if (Equal(history[i], text))
+        history.remove(i, true);
     history.add(text);
     history_pos = history.elms() - 1;
 }
@@ -420,7 +422,8 @@ void Find::ResultRegion::find(C Str &text, Bool case_sensitive, Bool whole_word,
 
         texts = Split(text, ' ');
         REPA(texts)
-        if (!texts[i].is()) texts.remove(i);
+        if (!texts[i].is())
+            texts.remove(i);
         if (texts.elms()) {
             // files
             temp.clear();
@@ -438,14 +441,17 @@ void Find::ResultRegion::find(C Str &text, Bool case_sensitive, Bool whole_word,
             }
             temp.sort(CompareResult);
             REPA(temp)
-            if (i) if (!Equal(GetPath(temp[i].text), GetPath(temp[i - 1].text), true)) temp.NewAt(i);
+            if (i)
+                if (!Equal(GetPath(temp[i].text), GetPath(temp[i - 1].text), true))
+                    temp.NewAt(i);
             FREPA(temp)
             Swap(data.New(), temp[i]);
         }
 
         texts = Split(t, ' ');
         REPA(texts)
-        if (!texts[i].is()) texts.remove(i);
+        if (!texts[i].is())
+            texts.remove(i);
         if (texts.elms()) {
             // macros
             temp.clear();
@@ -485,7 +491,9 @@ void Find::ResultRegion::find(C Str &text, Bool case_sensitive, Bool whole_word,
             }
             temp.sort(CompareResult);
             REPA(temp)
-            if (i) if (!Equal(SymbolGetPath(temp[i].text), SymbolGetPath(temp[i - 1].text), true)) temp.NewAt(i);
+            if (i)
+                if (!Equal(SymbolGetPath(temp[i].text), SymbolGetPath(temp[i - 1].text), true))
+                    temp.NewAt(i);
             FREPA(temp)
             Swap(data.New(), temp[i]);
 
@@ -507,7 +515,9 @@ void Find::ResultRegion::find(C Str &text, Bool case_sensitive, Bool whole_word,
             }
             temp.sort(CompareResult);
             REPA(temp)
-            if (i) if (!Equal(SymbolGetPath(temp[i].text), SymbolGetPath(temp[i - 1].text), true)) temp.NewAt(i);
+            if (i)
+                if (!Equal(SymbolGetPath(temp[i].text), SymbolGetPath(temp[i - 1].text), true))
+                    temp.NewAt(i);
             FREPA(temp)
             Swap(data.New(), temp[i]);
 
@@ -529,7 +539,9 @@ void Find::ResultRegion::find(C Str &text, Bool case_sensitive, Bool whole_word,
             }
             temp.sort(CompareResult);
             REPA(temp)
-            if (i) if (!Equal(SymbolGetPath(temp[i].text), SymbolGetPath(temp[i - 1].text), true)) temp.NewAt(i);
+            if (i)
+                if (!Equal(SymbolGetPath(temp[i].text), SymbolGetPath(temp[i - 1].text), true))
+                    temp.NewAt(i);
             FREPA(temp)
             Swap(data.New(), temp[i]);
 
@@ -551,7 +563,9 @@ void Find::ResultRegion::find(C Str &text, Bool case_sensitive, Bool whole_word,
             }
             temp.sort(CompareResult);
             REPA(temp)
-            if (i) if (!Equal(SymbolGetPath(temp[i].text), SymbolGetPath(temp[i - 1].text), true)) temp.NewAt(i);
+            if (i)
+                if (!Equal(SymbolGetPath(temp[i].text), SymbolGetPath(temp[i - 1].text), true))
+                    temp.NewAt(i);
             FREPA(temp)
             Swap(data.New(), temp[i]);
 
@@ -577,7 +591,9 @@ void Find::ResultRegion::find(C Str &text, Bool case_sensitive, Bool whole_word,
             }
             temp.sort(CompareResult);
             REPA(temp)
-            if (i) if (!Equal(SymbolGetPath(temp[i].text), SymbolGetPath(temp[i - 1].text), true)) temp.NewAt(i);
+            if (i)
+                if (!Equal(SymbolGetPath(temp[i].text), SymbolGetPath(temp[i - 1].text), true))
+                    temp.NewAt(i);
             FREPA(temp)
             Swap(data.New(), temp[i]);
 
@@ -601,7 +617,8 @@ void Find::ResultRegion::find(C Str &text, Bool case_sensitive, Bool whole_word,
                         // add all functions within scope
                         Memc<SymbolPtr> funcs;
                         FREPA(symbol.funcs)
-                        if (FilterScope(symbol.funcs[i]->source, scope)) funcs.add(symbol.funcs[i]);
+                        if (FilterScope(symbol.funcs[i]->source, scope))
+                            funcs.add(symbol.funcs[i]);
 
                         // remove double functions (definition/declaration)
                         REPA(funcs) {
@@ -629,7 +646,9 @@ void Find::ResultRegion::find(C Str &text, Bool case_sensitive, Bool whole_word,
             }
             temp.sort(CompareResult);
             REPA(temp)
-            if (i) if (!Equal(SymbolGetPath(temp[i].text), SymbolGetPath(temp[i - 1].text), true)) temp.NewAt(i);
+            if (i)
+                if (!Equal(SymbolGetPath(temp[i].text), SymbolGetPath(temp[i - 1].text), true))
+                    temp.NewAt(i);
             FREPA(temp)
             Swap(data.New(), temp[i]);
 
@@ -651,7 +670,9 @@ void Find::ResultRegion::find(C Str &text, Bool case_sensitive, Bool whole_word,
             }
             temp.sort(CompareResult);
             REPA(temp)
-            if (i) if (!Equal(SymbolGetPath(temp[i].text), SymbolGetPath(temp[i - 1].text), true)) temp.NewAt(i);
+            if (i)
+                if (!Equal(SymbolGetPath(temp[i].text), SymbolGetPath(temp[i - 1].text), true))
+                    temp.NewAt(i);
             FREPA(temp)
             Swap(data.New(), temp[i]);
         }
@@ -669,7 +690,8 @@ void Find::ResultRegion::find(C Str &text, Bool case_sensitive, Bool whole_word,
                                 // add all functions within scope
                                 Memc<SymbolPtr> funcs;
                                 FREPA(symbol.funcs)
-                                if (FilterScope(symbol.funcs[i]->source, scope)) funcs.add(symbol.funcs[i]);
+                                if (FilterScope(symbol.funcs[i]->source, scope))
+                                    funcs.add(symbol.funcs[i]);
 
                                 // remove double functions (definition/declaration)
                                 REPA(funcs) {

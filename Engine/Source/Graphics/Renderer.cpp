@@ -997,7 +997,8 @@ RendererClass &RendererClass::operator()(void (&render)()) {
         if (waterPostLight())
             goto finished;
         MEASURE(_t_water[1])
-        if (_t_measure) _t_water[1] += water;
+        if (_t_measure)
+            _t_water[1] += water;
 
         emissive();
         MEASURE(_t_emissive[1])
@@ -1676,7 +1677,8 @@ void RendererClass::opaque() {
             if (FUNC_DEFAULT != FUNC_LESS_EQUAL)
                 D.depthFunc(FUNC_LESS_EQUAL); // need to make sure we can apply lights on existing depth
             REPA(Lights)
-            if (i != first_light) Lights[i].drawForward(ALPHA_ADD_KEEP); // draw 0-th at the end to setup shadow maps (needed for BLEND_LIGHT), keep alpha which is glow #RTOutput
+            if (i != first_light)
+                Lights[i].drawForward(ALPHA_ADD_KEEP); // draw 0-th at the end to setup shadow maps (needed for BLEND_LIGHT), keep alpha which is glow #RTOutput
             D.clip(clip ? &T._clip : null);
             D.clipAllow(clip_allow);
             if (FUNC_DEFAULT != FUNC_LESS_EQUAL)

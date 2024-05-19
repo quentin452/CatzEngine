@@ -375,11 +375,13 @@ Particles &Particles::source(C AnimatedSkeleton *dynamic_skeleton, Bool ragdoll_
     if (ragdoll_bones_only)
         if (C Skeleton *skel = dynamic_skeleton->skeleton()) {
             REPA(skel->bones)
-            if (skel->bones[i].flag & BONE_RAGDOLL) _src_elms++;
+            if (skel->bones[i].flag & BONE_RAGDOLL)
+                _src_elms++;
             Alloc(_src_help, _src_elms);
             _src_elms = 0;
             REPA(skel->bones)
-            if (skel->bones[i].flag & BONE_RAGDOLL) _src_help[_src_elms++] = i;
+            if (skel->bones[i].flag & BONE_RAGDOLL)
+                _src_help[_src_elms++] = i;
         }
     return T;
 }

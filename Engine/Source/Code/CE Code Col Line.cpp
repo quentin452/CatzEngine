@@ -9,7 +9,8 @@ Bool CodeLine::operator==(C Str &text) C {
     if (cols.elms() != text.length())
         return false;
     REPA(cols)
-    if (!EqualCS(cols[i].c, text[i])) return false;
+    if (!EqualCS(cols[i].c, text[i]))
+        return false;
     return true;
 }
 /******************************************************************************/
@@ -110,7 +111,8 @@ void LineMap::add(C SourceLoc &src, C Memc<CodeLine> &lines) {
 /******************************************************************************/
 Int FindLineI(Memc<CodeLine> &code_lines, Int line) {
     REPA(code_lines)
-    if (code_lines[i].hasLine(line)) return i;
+    if (code_lines[i].hasLine(line))
+        return i;
     return -1;
 }
 CodeLine *FindLine(Memc<CodeLine> &code_lines, Int line) {
@@ -202,17 +204,21 @@ void Clean(Memc<CodeLine> &lines) {
                 CodeLine &next = lines[i];
                 Bool next_can_be_removed = true;
                 REPAD(c, prev)
-                if (prev.cols[c].type != TOKEN_NONE) if (prev.cols[c].c != '{') goto has_valid;
-                else {
-                    prev_can_be_removed = false;
-                    break;
-                } // allow '{'
+                if (prev.cols[c].type != TOKEN_NONE)
+                    if (prev.cols[c].c != '{')
+                        goto has_valid;
+                    else {
+                        prev_can_be_removed = false;
+                        break;
+                    } // allow '{'
                 FREPAD(c, next)
-                if (next.cols[c].type != TOKEN_NONE) if (next.cols[c].c != '}') goto has_valid;
-                else {
-                    next_can_be_removed = false;
-                    break;
-                } // allow '}'
+                if (next.cols[c].type != TOKEN_NONE)
+                    if (next.cols[c].c != '}')
+                        goto has_valid;
+                    else {
+                        next_can_be_removed = false;
+                        break;
+                    } // allow '}'
                 if (next_can_be_removed)
                     lines.remove(i, true);
                 else if (prev_can_be_removed)
@@ -264,7 +270,9 @@ void Clean(Memc<CodeLine> &lines) {
 
         // convert " ;" to "; "
         FREPA(l)
-        if (l.type(i) == TOKEN_REMOVE) if (l[i + 1] == ';') l.remove(i).insert(i + 1, ' ', TOKEN_REMOVE);
+        if (l.type(i) == TOKEN_REMOVE)
+            if (l[i + 1] == ';')
+                l.remove(i).insert(i + 1, ' ', TOKEN_REMOVE);
     }
 }
 /******************************************************************************/

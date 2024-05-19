@@ -205,7 +205,8 @@ WorldManager &WorldManager::del() {
         _grid.func(UnloadAreas, T);
 
         REPA(_obj_container)
-        if (ObjMap<Obj> *obj_map = _obj_container[i].map) obj_map->clear(); // delete objects, use 'clear' in case there are any 'Reference' objects left pointing to memory adresses inside containers
+        if (ObjMap<Obj> *obj_map = _obj_container[i].map)
+            obj_map->clear(); // delete objects, use 'clear' in case there are any 'Reference' objects left pointing to memory adresses inside containers
 
         _area_active_rect.set(0, 0, -1, -1);
         _area_loaded_rect.set(0, 0, -1, -1);
@@ -300,7 +301,8 @@ Int WorldManager::objType(Obj &obj) {
         if (obj_c_type == _obj_container[obj._type].type)
             return obj._type; // check if obj.type precisely matches the object container class
     REPA(_obj_container)
-    if (obj_c_type == _obj_container[i].type) return obj._type = i; // search all object containers for matching type
+    if (obj_c_type == _obj_container[i].type)
+        return obj._type = i; // search all object containers for matching type
     return -1;
 }
 AREA_STATE WorldManager::rangeState(C VecI2 &xzi) {
@@ -840,7 +842,8 @@ void WorldManager::areaSetVisibility(Memc<Area *> &area_draw, Bool sort) {
         Frustum.getIntersectingAreas(areas, areaSize(), true, sort, true, &_area_active_rect);
         area_draw.clear();
         FREPA(areas)
-        if (Area *area = areaActive(areas[i])) area_draw.add(area); // add in same order
+        if (Area *area = areaActive(areas[i]))
+            area_draw.add(area); // add in same order
     }
 }
 void WorldManager::areaUpdateState() {
@@ -1022,11 +1025,11 @@ void WorldManager::updateObjectAreas() {
     REPA(_obj_container)
     if (ObjMap<Obj> *obj_map = _obj_container[i].map) // update areas of all objects (active and inactive, because objects can be accessed from both area states, and they can be repositioned manually)
         REPA(*obj_map)                                // go from end to start so remove can be used
-    {
-        Obj &obj = (*obj_map)[i];
-        if (!obj.updateArea())
-            obj_map->removeObj(&obj);
-    }
+        {
+            Obj &obj = (*obj_map)[i];
+            if (!obj.updateArea())
+                obj_map->removeObj(&obj);
+        }
 }
 #if !__GNUC__ // fails to compile on GCC
 INLINE
@@ -1093,7 +1096,7 @@ void WorldManager::update(C Vec2 &xz) {
                 if (!FullPath(dataPath())) {
                     if (C PaksFile *pf = Paks.find(dataPath() + "Area"))
                         REP(pf->children_num)
-                        _grid.get(TextVecI2(Paks.file(pf->children_offset + i).file->name)); //          Pak
+                    _grid.get(TextVecI2(Paks.file(pf->children_offset + i).file->name)); //          Pak
                     if (DataPath().is())
                         for (FileFind ff(DataPath() + dataPath() + "Area"); ff();)
                             if (ff.type == FSTD_FILE)

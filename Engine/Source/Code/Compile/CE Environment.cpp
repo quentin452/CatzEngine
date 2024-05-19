@@ -343,8 +343,9 @@ Bool CodeEnvironment::VerifySymbols(Memc<Message> &msgs, Memc<Symbol *> &sorted_
         REPA(classes) {
             Symbol &symbol = *classes[i];
             REPAD(d, symbol.dependencies)
-            if (!(symbol.dependencies[d]->helper & Symbol::HELPER_PROCESSED) && symbol.dependencies[d]->type != Symbol::TYPENAME) goto not_yet; // if at least one dependency not yet available then skip (here ignore typename dependencies)
-            symbol.helper |= Symbol::HELPER_PROCESSED;                                                                                          // we list classes sequentially one-by-one (in 'to_process' container and later when writing it) so we can set HELPER_PROCESSED here already
+            if (!(symbol.dependencies[d]->helper & Symbol::HELPER_PROCESSED) && symbol.dependencies[d]->type != Symbol::TYPENAME)
+                goto not_yet;                          // if at least one dependency not yet available then skip (here ignore typename dependencies)
+            symbol.helper |= Symbol::HELPER_PROCESSED; // we list classes sequentially one-by-one (in 'to_process' container and later when writing it) so we can set HELPER_PROCESSED here already
             sorted_classes.add(&symbol);
             classes.remove(i);
             removed = true;
@@ -523,21 +524,22 @@ void CodeEditor::playEngineCompiler() {
         if (SymbolPtr main = FindSymbol("Main", null))
             if (main->type == Symbol::FUNC_LIST)
                 REPA(main->funcs)
-                if (Symbol *m = main->funcs[i]()) if (!m->hasResult() && !m->params.elms() && InRange(m->raw_offset, CEnv.func_bodies)) {
-                    Bool safe = true;
-                    Dbl run_time = Time.curTime();
-                    if (safe && InRange(0, CEnv.func_bodies))
-                        safe = CEnv.main_thread.start(CEnv.func_bodies[0]); // init global vars
-                    if (safe)
-                        safe = CEnv.main_thread.start(CEnv.func_bodies[m->raw_offset]); // func
-                    if (safe && InRange(1, CEnv.func_bodies))
-                        safe = CEnv.main_thread.start(CEnv.func_bodies[1]); // shut global vars
-                    run_time = Time.curTime() - run_time;
-                    if (!safe)
-                        CE.buildNew().set(S + "Program triggered unhandled exception!");
-                    CE.buildNew().set(S + "Codes executed in " + Flt(run_time) + "s");
-                    break;
-                }
+    if (Symbol *m = main->funcs[i]())
+        if (!m->hasResult() && !m->params.elms() && InRange(m->raw_offset, CEnv.func_bodies)) {
+            Bool safe = true;
+            Dbl run_time = Time.curTime();
+            if (safe && InRange(0, CEnv.func_bodies))
+                safe = CEnv.main_thread.start(CEnv.func_bodies[0]); // init global vars
+            if (safe)
+                safe = CEnv.main_thread.start(CEnv.func_bodies[m->raw_offset]); // func
+            if (safe && InRange(1, CEnv.func_bodies))
+                safe = CEnv.main_thread.start(CEnv.func_bodies[1]); // shut global vars
+            run_time = Time.curTime() - run_time;
+            if (!safe)
+                CE.buildNew().set(S + "Program triggered unhandled exception!");
+            CE.buildNew().set(S + "Codes executed in " + Flt(run_time) + "s");
+            break;
+        }
 
     Int errors = 0, warnings = 0;
     REPA(msgs)

@@ -6534,8 +6534,10 @@ Vec4 Image::cubeColorFCubicFast(C Vec &dir, Bool linear) C {
 /******************************************************************************/
 // GATHER
 /******************************************************************************/
-static void RangeAssert(Int *offset, Int offsets, Int size) { REP(offsets)
-                                                              RANGE_ASSERT(offset[i], size); }
+static void RangeAssert(Int *offset, Int offsets, Int size) {
+    REP(offsets)
+    RANGE_ASSERT(offset[i], size);
+}
 static INLINE void RangeAssertX(Int *x_offset, Int x_offsets, C Image &img) {
     if (DEBUG)
         RangeAssert(x_offset, x_offsets, img.lw());
@@ -8383,7 +8385,8 @@ struct CopyContext {
             src.gatherL(&c[0][0], xc, Elms(xc), yc, Elms(yc));
             REPD(x, 8)
             REPD(y, 8)
-            if (Flt w = CFSMW8[y][x]) Add(color, rgb, c[y][x], w, alpha_weight);
+            if (Flt w = CFSMW8[y][x])
+                Add(color, rgb, c[y][x], w, alpha_weight);
             Normalize(color, rgb, alpha_weight, alpha_limit);
             if (manual_linear_to_srgb)
                 color.xyz = LinearToSRGB(color.xyz);
@@ -8434,7 +8437,8 @@ struct CopyContext {
             Vec4 c[CUBIC_PLUS_SAMPLES * 2][CUBIC_PLUS_SAMPLES * 2];
             src.gather(&c[0][0], xo, Elms(xo), yo, Elms(yo)); // [y][x]
             REPD(x, CUBIC_PLUS_SAMPLES * 2)
-            REPD(y, x) Swap(c[y][x], c[x][y]); // convert [y][x] -> [x][y] so we can use later 'gather' to read a single column with new x
+            REPD(y, x)
+            Swap(c[y][x], c[x][y]); // convert [y][x] -> [x][y] so we can use later 'gather' to read a single column with new x
 
             Int x_offset = 0;
             FREPD(x, dest.lw()) // iterate forward so we can increase pointers
@@ -8475,7 +8479,8 @@ struct CopyContext {
             Flt v[CUBIC_PLUS_SAMPLES * 2][CUBIC_PLUS_SAMPLES * 2];
             src.gather(&v[0][0], xo, Elms(xo), yo, Elms(yo)); // [y][x]
             REPD(x, CUBIC_PLUS_SAMPLES * 2)
-            REPD(y, x) Swap(v[y][x], v[x][y]); // convert [y][x] -> [x][y] so we can use later 'gather' to read a single column with new x
+            REPD(y, x)
+            Swap(v[y][x], v[x][y]); // convert [y][x] -> [x][y] so we can use later 'gather' to read a single column with new x
 
             Int x_offset = 0;
             FREPD(x, dest.lw()) // iterate forward so we can increase pointers
@@ -8538,7 +8543,8 @@ struct CopyContext {
             Vec4 c[CUBIC_FAST_SAMPLES * 2][CUBIC_FAST_SAMPLES * 2];
             src.gather(&c[0][0], xo, Elms(xo), yo, Elms(yo)); // [y][x]
             REPD(x, CUBIC_FAST_SAMPLES * 2)
-            REPD(y, x) Swap(c[y][x], c[x][y]); // convert [y][x] -> [x][y] so we can use later 'gather' to read a single column with new x
+            REPD(y, x)
+            Swap(c[y][x], c[x][y]); // convert [y][x] -> [x][y] so we can use later 'gather' to read a single column with new x
 
             Int x_offset = 0;
             FREPD(x, dest.lw()) // iterate forward so we can increase pointers
@@ -8579,7 +8585,8 @@ struct CopyContext {
             Flt v[CUBIC_FAST_SAMPLES * 2][CUBIC_FAST_SAMPLES * 2];
             src.gather(&v[0][0], xo, Elms(xo), yo, Elms(yo)); // [y][x]
             REPD(x, CUBIC_FAST_SAMPLES * 2)
-            REPD(y, x) Swap(v[y][x], v[x][y]); // convert [y][x] -> [x][y] so we can use later 'gather' to read a single column with new x
+            REPD(y, x)
+            Swap(v[y][x], v[x][y]); // convert [y][x] -> [x][y] so we can use later 'gather' to read a single column with new x
 
             Int x_offset = 0;
             FREPD(x, dest.lw()) // iterate forward so we can increase pointers
@@ -8643,7 +8650,8 @@ struct CopyContext {
             Vec4 c[2][2];
             src.gather(&c[0][0], xo, Elms(xo), yo, Elms(yo)); // [y][x]
             REPD(x, 2)
-            REPD(y, x) Swap(c[y][x], c[x][y]); // convert [y][x] -> [x][y] so we can use later 'gather' to read a single column with new x
+            REPD(y, x)
+            Swap(c[y][x], c[x][y]); // convert [y][x] -> [x][y] so we can use later 'gather' to read a single column with new x
 
             Int x_offset = 0;
             FREPD(x, dest.lw()) // iterate forward so we can increase pointers
@@ -8679,7 +8687,8 @@ struct CopyContext {
             Flt v[2][2];
             src.gather(&v[0][0], xo, Elms(xo), yo, Elms(yo)); // [y][x]
             REPD(x, 2)
-            REPD(y, x) Swap(v[y][x], v[x][y]); // convert [y][x] -> [x][y] so we can use later 'gather' to read a single column with new x
+            REPD(y, x)
+            Swap(v[y][x], v[x][y]); // convert [y][x] -> [x][y] so we can use later 'gather' to read a single column with new x
 
             Int x_offset = 0;
             FREPD(x, dest.lw()) // iterate forward so we can increase pointers
@@ -8883,12 +8892,11 @@ struct CopyContext {
                                 Int yc = y * 2;
                                 if (!ignore_gamma)
                                     REPD(x, dest.lw())
-                                    dest.colorL(x, y, src.colorL(x * 2, yc));
+                                dest.colorL(x, y, src.colorL(x * 2, yc));
                                 else if (high_prec)
                                     REPD(x, dest.lw())
-                                    dest.colorF(x, y, src.colorF(x * 2, yc));
-                                else
-                                    REPD(x, dest.lw())
+                                        dest.colorF(x, y, src.colorF(x * 2, yc));
+                                else REPD(x, dest.lw())
                                     dest.color(x, y, src.color(x * 2, yc));
                             }
                             goto finish;
@@ -8944,12 +8952,11 @@ struct CopyContext {
                                     Int yc = y * 2;
                                     if (!ignore_gamma)
                                         REPD(x, dest.lw())
-                                        dest.color3DL(x, y, z, src.color3DL(x * 2, yc, zc));
+                                    dest.color3DL(x, y, z, src.color3DL(x * 2, yc, zc));
                                     else if (high_prec)
                                         REPD(x, dest.lw())
-                                        dest.color3DF(x, y, z, src.color3DF(x * 2, yc, zc));
-                                    else
-                                        REPD(x, dest.lw())
+                                            dest.color3DF(x, y, z, src.color3DF(x * 2, yc, zc));
+                                    else REPD(x, dest.lw())
                                         dest.color3D(x, y, z, src.color3D(x * 2, yc, zc));
                                 }
                             }

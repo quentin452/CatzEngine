@@ -380,7 +380,8 @@ Bool PSD::ReadHeader(File &f, HEADER_INFO &header_info) {
         Int ver = Calculate(header.Version, SIZE(header.Version));
         if (ver == 1) {
             REPA(header.Reserved)
-            if (header.Reserved[i]) return false;
+            if (header.Reserved[i])
+                return false;
             header_info.nChannels = Calculate(header.Channels, SIZE(header.Channels));
             header_info.nHeight = Calculate(header.Rows, SIZE(header.Rows));
             header_info.nWidth = Calculate(header.Columns, SIZE(header.Columns));

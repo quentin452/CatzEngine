@@ -865,11 +865,11 @@ struct PanelImageCreate {
             REPAD(i, top_mid_bottom)
             if (!top_mid_bottom[i]) // empty
                 REPAD(j, top_mid_bottom)
-                if (top_mid_bottom[j]) // valid
-                {
-                    Copy(panel_image._tex_x[i], panel_image._tex_x[j]);
-                    break;
-                } // copy to empty from valid, stop
+            if (top_mid_bottom[j]) // valid
+            {
+                Copy(panel_image._tex_x[i], panel_image._tex_x[j]);
+                break;
+            } // copy to empty from valid, stop
 
             max_scale = Max(params.max_side_stretch, 0);
             panel_image._same_x = true;

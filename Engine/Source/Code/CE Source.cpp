@@ -302,7 +302,8 @@ Bool LineMode::save(File &f, StrLibrary &sl, C Str &text) C {
     if (type.saveRaw(f)) {
         f.cmpUIntV(tokens.elms());
         FREPA(tokens)
-        if (!tokens[i].save(f, sl, text)) return false;
+        if (!tokens[i].save(f, sl, text))
+            return false;
         return f.ok();
     }
     return false;
@@ -319,7 +320,8 @@ Bool LineMode::load(File &f, StrLibrary &sl, C Str &text, Line &line, Str &temp)
     if (type.loadRaw(f)) {
         tokens.setNum(f.decUIntV());
         FREPA(tokens)
-        if (!tokens[i].load(f, sl, text, line, temp)) goto error;
+        if (!tokens[i].load(f, sl, text, line, temp))
+            goto error;
         if (f.ok())
             return true;
     }
@@ -463,7 +465,8 @@ Bool Line::save(File &f, StrLibrary &sl) C {
         if (tokens_preproc_use) {
             f.cmpUIntV(tokens_preproc.elms());
             FREPA(tokens_preproc)
-            if (!tokens_preproc[i].save(f, sl, T)) return false;
+            if (!tokens_preproc[i].save(f, sl, T))
+                return false;
         }
         return f.ok();
     }
@@ -484,7 +487,8 @@ Bool Line::load(File &f, StrLibrary &sl, Int line, Source &source, Str &temp) {
         if (tokens_preproc_use) {
             tokens_preproc.setNum(f.decUIntV());
             FREPA(tokens_preproc)
-            if (!tokens_preproc[i].load(f, sl, T, T, temp)) goto error;
+            if (!tokens_preproc[i].load(f, sl, T, T, temp))
+                goto error;
         }
         if (f.ok())
             return true;
@@ -517,7 +521,10 @@ void Line::setTextData() // must be in sync with "Source::ViewLine::setTextData"
         {
             Memc<Token> &tokens = Tokens();
             FREPA(tokens)
-            if (Symbol *symbol = tokens[i].parent) if (Symbol *func = symbol->func()) if (func->source) func->source->parseFunc(*func);
+            if (Symbol *symbol = tokens[i].parent)
+                if (Symbol *func = symbol->func())
+                    if (func->source)
+                        func->source->parseFunc(*func);
         }
 
         TOKEN_TYPE last_type = TOKEN_NONE;
@@ -598,7 +605,10 @@ void Source::ViewLine::setTextData() // must be in sync with "Line::setTextData"
             {
                 Memc<Token> &tokens = line->Tokens();
                 FREPA(tokens)
-                if (Symbol *symbol = tokens[i].parent) if (Symbol *func = symbol->func()) if (func->source) func->source->parseFunc(*func);
+                if (Symbol *symbol = tokens[i].parent)
+                    if (Symbol *func = symbol->func())
+                        if (func->source)
+                            func->source->parseFunc(*func);
             }
 
             TOKEN_TYPE last_type = TOKEN_NONE;
@@ -718,7 +728,8 @@ Bool Source::getSymbolMacroID(C VecI2 &cur, SymbolPtr &symbol_ptr, Macro *&macro
                 SymbolPtr func_list;
                 if (func_list.find(GetPath(symbol->full_name)))
                     REPA(func_list->funcs)
-                    if (symbol->sameFunc(*func_list->funcs[i])) funcs.add(func_list->funcs[i]); // gather same funcs into container
+                if (symbol->sameFunc(*func_list->funcs[i]))
+                    funcs.add(func_list->funcs[i]); // gather same funcs into container
                 Symbol *preference = null;
                 REPA(funcs)
                 if (FlagOn(funcs[i]->modifiers, Symbol::MODIF_FUNC_BODY) == prefer_definition) {
@@ -731,10 +742,10 @@ Bool Source::getSymbolMacroID(C VecI2 &cur, SymbolPtr &symbol_ptr, Macro *&macro
                     symbol = preference;
                 else
                     REPA(funcs)
-                    if (funcs[i] == symbol) {
-                        symbol = funcs[(i + 1) % funcs.elms()]();
-                        break;
-                    } // if preference is available then jump to it, if not then select next function in the list
+                if (funcs[i] == symbol) {
+                    symbol = funcs[(i + 1) % funcs.elms()]();
+                    break;
+                } // if preference is available then jump to it, if not then select next function in the list
             }
             symbol_ptr = symbol;
             if (x_range)
@@ -881,7 +892,8 @@ void Source::parseCurFunc() { parseFunc(cur); }
 /******************************************************************************/
 Bool Source::hasUnicode() C {
     REPA(lines)
-    if (HasUnicode(lines[i])) return true;
+    if (HasUnicode(lines[i]))
+        return true;
     return false;
 }
 Bool Source::used() C { return active || header; }
@@ -947,7 +959,8 @@ Bool Source::viewToReal(C VecI2 &view, VecI2 &real) C {
 }
 Int Source::realToView(Int real) C {
     REPAD(y, view_lines)
-    if (view_lines[y].line() <= real) return y;
+    if (view_lines[y].line() <= real)
+        return y;
     return 0;
 }
 VecI2 Source::realToView(C VecI2 &real) C {
@@ -1243,7 +1256,8 @@ Bool Source::load(File &f, StrLibrary &sl, Str &temp) {
 #endif
     lines.setNum(f.decUIntV());
     FREPA(lines)
-    if (!lines[i].load(f, sl, i, T, temp)) goto error;
+    if (!lines[i].load(f, sl, i, T, temp))
+        goto error;
 #if SOURCE_DEBUG_SPEED_SIZE
     F2 += Time.curTime() - t;
     t = Time.curTime();

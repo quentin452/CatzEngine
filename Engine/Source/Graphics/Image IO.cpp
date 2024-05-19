@@ -703,7 +703,8 @@ static Bool SameAlignment(C VecI &full_size, C VecI &small_size, Int shrink, Int
         return true; // mip size without pad exactly matches small size, this guarantees all mip maps will have same sizes, since they're exactly the same, then "mip_size_no_pad>>mip==small_size>>mip" for any 'mip'
     Int full_offset = shrink + offset;
     FREP(small_mips)
-    if (PaddedWidth(full_size.x, full_size.y, full_offset + i, type) != PaddedWidth(small_size.x, small_size.y, offset + i, type) || PaddedHeight(full_size.x, full_size.y, full_offset + i, type) != PaddedHeight(small_size.x, small_size.y, offset + i, type) || Max(1, full_size.z >> (full_offset + i)) != Max(1, small_size.z >> (offset + i))) return false;
+    if (PaddedWidth(full_size.x, full_size.y, full_offset + i, type) != PaddedWidth(small_size.x, small_size.y, offset + i, type) || PaddedHeight(full_size.x, full_size.y, full_offset + i, type) != PaddedHeight(small_size.x, small_size.y, offset + i, type) || Max(1, full_size.z >> (full_offset + i)) != Max(1, small_size.z >> (offset + i)))
+        return false;
     return true;
 }
 /******************************************************************************/
@@ -1344,7 +1345,8 @@ static Bool Load(Image &image, File &f, C ImageHeader &header, C Str &name) {
 
                         if (temp)
                             REP(mip_count)
-                            if (!image.injectMipMap(*dest, image_mip + i, DIR_ENUM(face), filter)) return false;
+                        if (!image.injectMipMap(*dest, image_mip + i, DIR_ENUM(face), filter))
+                            return false;
                     }
                 }
                 image_mip += mip_count;
@@ -2052,7 +2054,8 @@ void Image::cancelStream() // called when image is deleted !! WARNING: IN 'IMAGE
             {
                 MemcThreadSafeLock lock(StreamLoads);
                 REPA(StreamLoads)
-                if (StreamLoads.lockedElm(i).image == this) StreamLoads.lockedRemove(i);
+                if (StreamLoads.lockedElm(i).image == this)
+                    StreamLoads.lockedRemove(i);
             } // no need to keep order
             {
                 SyncLocker lock(StreamLoadCurLock);
@@ -2063,7 +2066,8 @@ void Image::cancelStream() // called when image is deleted !! WARNING: IN 'IMAGE
             {
                 MemcThreadSafeLock lock(StreamSets);
                 REPA(StreamSets)
-                if (StreamSets.lockedElm(i).image == this) StreamSets.lockedRemove(i);
+                if (StreamSets.lockedElm(i).image == this)
+                    StreamSets.lockedRemove(i);
             } // no need to keep order
 #else
             {

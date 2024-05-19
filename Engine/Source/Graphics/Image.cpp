@@ -2081,10 +2081,10 @@ Bool Image::createEx(Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int 
                 Ptr dummy = null;
                 if (compressed())
                     FREPD(m, mip_maps)
-                    if (!data || !data[m]) {
-                        dummy = temp.setNumZero(CeilGL(ImagePitch2(hwW(), hwH(), m, hwType()))).dataNull();
-                        break;
-                    }             // order important, start from biggest mip, find first that doesn't have data specified
+                if (!data || !data[m]) {
+                    dummy = temp.setNumZero(CeilGL(ImagePitch2(hwW(), hwH(), m, hwType()))).dataNull();
+                    break;
+                }                 // order important, start from biggest mip, find first that doesn't have data specified
 #endif
                 REPD(m, mip_maps) // order important #MipOrder
                 {
@@ -2901,7 +2901,8 @@ Bool Image::toCube(C Image &src, Int layout, Int size, Int type, Int mode, Int m
         {
             if (layout == CUBE_LAYOUT_ONE) {
                 REP(6)
-                if (!temp.injectMipMap(src, 0, DIR_ENUM(i), filter, flags)) return false;
+                if (!temp.injectMipMap(src, 0, DIR_ENUM(i), filter, flags))
+                    return false;
             } else {
                 C Image *s = &src;
                 Image decompressed;
@@ -3272,7 +3273,7 @@ Bool Image::lock(LOCK_MODE lock, Int mip_map, DIR_ENUM cube_face) {
                                     }
                                     if (_data && this == &Renderer._main) // on OpenGL main has to be flipped
                                         REPD(y, h() / 2)
-                                        Swap(_data + y * pitch, _data + (h() - 1 - y) * pitch, pitch);
+                                    Swap(_data + y * pitch, _data + (h() - 1 - y) * pitch, pitch);
                                 }
                             }
                         }

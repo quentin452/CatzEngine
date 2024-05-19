@@ -5,7 +5,8 @@ namespace Edit {
 /******************************************************************************/
 Item &GetFolder(Memx<Item> &items, C Str &name) {
     REPA(items)
-    if (items[i].base_name == name) return items[i];
+    if (items[i].base_name == name)
+        return items[i];
     return items.New().set(Item::FOLDER, name);
 }
 Item &GetFile(Memx<Item> &items, C Str &name, C Str &full_name) {
@@ -26,7 +27,8 @@ Bool Item::save(File &f, StrLibrary &sl) C {
     sl.putStr(f, full_name);
     f.cmpUIntV(children.elms());
     FREPA(children)
-    if (!children[i].save(f, sl)) return false;
+    if (!children[i].save(f, sl))
+        return false;
     return f.ok();
 }
 Bool Item::load(File &f, StrLibrary &sl) {
@@ -35,7 +37,8 @@ Bool Item::load(File &f, StrLibrary &sl) {
     sl.getStr(f, full_name);
     children.setNum(f.decUIntV());
     FREPA(children)
-    if (!children[i].load(f, sl)) goto error;
+    if (!children[i].load(f, sl))
+        goto error;
     if (f.ok())
         return true;
 error:

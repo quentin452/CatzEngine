@@ -68,7 +68,7 @@ LayeredClouds &LayeredClouds::set(Byte active_layers, C ImagePtr &image) {
     _layers = Mid(active_layers, 0, 4);
     if (image)
         REP(_layers)
-        layer[i].image = image;
+    layer[i].image = image;
     return T;
 }
 LayeredClouds &LayeredClouds::frac(Flt frac) {
@@ -232,7 +232,7 @@ void VolumetricCloud::setDensity() {
             _threads->process1(depth(), SetDensityRow, this);
         else
             REPD(z, depth())
-            setDensityRow(z);
+        setDensityRow(z);
     }
     _creating = false; // notify that finished creating
 }
@@ -462,7 +462,7 @@ void VolumetricCloud::build() {
             _threads->process1(depth(), SetImageRow, this);
         else
             REPD(z, depth())
-            setImageRow(z);
+        setImageRow(z);
     }
     _build_finished = true;
 }

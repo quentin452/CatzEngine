@@ -1339,9 +1339,10 @@ CAST_MATCH Expr::calculate(Compiler &compiler) {
                     s += ')';
                     Message &msg = compiler.msgs.New().error(s, origin);
                     FREPA(matches)
-                    if (matches[i].lowest_match == matches[0].lowest_match) if (Symbol *func = matches[i].func) {
-                        msg.children.New().set(func->definition(), func);
-                    }
+                    if (matches[i].lowest_match == matches[0].lowest_match)
+                        if (Symbol *func = matches[i].func) {
+                            msg.children.New().set(func->definition(), func);
+                        }
                 }
                 return CAST_NONE;
             }
@@ -1365,23 +1366,23 @@ CAST_MATCH Expr::calculate(Compiler &compiler) {
             // add default parameters
             if (compiler.strict)
                 FREP(f->realParams())
-                if (!InRange(i, func.params)) // order is important
+            if (!InRange(i, func.params)) // order is important
+            {
+                Symbol *defaul = f->params[i]();
+                if (defaul->modifiers & Symbol::MODIF_DEF_VALUE) // add param from default value
                 {
-                    Symbol *defaul = f->params[i]();
-                    if (defaul->modifiers & Symbol::MODIF_DEF_VALUE) // add param from default value
-                    {
-                        if (!defaul->source || compiler.compileTokens(defaul->def_val_range.x, defaul->def_val_range.y, func.params.New(), &defaul->source->tokens) != COMPILE_FULL) {
-                            if (!compiler.quiet)
-                                compiler.msgs.New().error(S + "Error compiling expression for default value", defaul);
-                            return CAST_NONE;
-                        }
-                    } else {
+                    if (!defaul->source || compiler.compileTokens(defaul->def_val_range.x, defaul->def_val_range.y, func.params.New(), &defaul->source->tokens) != COMPILE_FULL) {
                         if (!compiler.quiet)
-                            compiler.msgs.New().error(S + "Missing parameters for function call", origin);
+                            compiler.msgs.New().error(S + "Error compiling expression for default value", defaul);
                         return CAST_NONE;
-                        break; // stop on first which does not have default value
                     }
+                } else {
+                    if (!compiler.quiet)
+                        compiler.msgs.New().error(S + "Missing parameters for function call", origin);
+                    return CAST_NONE;
+                    break; // stop on first which does not have default value
                 }
+            }
 
             // verify number of parameters
             if (f->realParams() != func.params.elms() && compiler.strict) {
@@ -1419,7 +1420,8 @@ CAST_MATCH Expr::calculate(Compiler &compiler) {
             // cast parameters if needed (do this after getting all templates)
             if (compiler.strict)
                 FREP(f->realParams())
-                if (InRange(i, func.params)) if (!func.params[i].castTo(f->params[i](), func.symbol.templates, compiler)) {
+            if (InRange(i, func.params))
+                if (!func.params[i].castTo(f->params[i](), func.symbol.templates, compiler)) {
                     compiler.msgs.New().error("Can't cast", func.params[i].origin);
                     return CAST_NONE;
                 }
@@ -2202,7 +2204,8 @@ static void CastTo(Expr &expr, Symbol::Modif &dest, CAST_MATCH &max_cast, Expr &
                         Symbol *func = auto_cast->funcs[i]();
                         if (func->modifiers & Symbol::MODIF_FUNC_BODY)
                             REPAD(j, auto_cast->funcs)
-                            if (i != j && func->sameFunc(*auto_cast->funcs[j])) goto skip_auto_cast; // skip same functions with bodies (they have different templates and no default parameters)
+                        if (i != j && func->sameFunc(*auto_cast->funcs[j]))
+                            goto skip_auto_cast; // skip same functions with bodies (they have different templates and no default parameters)
 
                         {
                             // Symbol::Modif auto_cast; auto_cast=func; auto_cast.proceedToFinal(&templates); // src.templates?
@@ -2768,13 +2771,15 @@ COMPILE_RESULT Compiler::compileExpr(Memc<Expr> &expr, Symbol *space, Expr &out)
 
     // merge < < and > > into << and >> (this can be done because at this stage all < > templates should be converted to TMPL_B and TMPL_E)
     FREPA(expr)
-    if (InRange(i + 1, expr)) if (expr[i] == '<' && expr[i + 1] == '<' || expr[i] == '>' && expr[i + 1] == '>') if (expr[i]() + 1 == expr[i + 1]()) // if text pointers are after each other
-    {
-        expr[i].final |= expr[i + 1].final;
-        expr[i].extend();
-        expr[i].setPriority();
-        expr.remove(i + 1, true);
-    }
+    if (InRange(i + 1, expr))
+        if (expr[i] == '<' && expr[i + 1] == '<' || expr[i] == '>' && expr[i + 1] == '>')
+            if (expr[i]() + 1 == expr[i + 1]()) // if text pointers are after each other
+            {
+                expr[i].final |= expr[i + 1].final;
+                expr[i].extend();
+                expr[i].setPriority();
+                expr.remove(i + 1, true);
+            }
 
     Memc<Symbol::Modif> class_base_templates;
     if (Class)
@@ -2802,10 +2807,10 @@ COMPILE_RESULT Compiler::compileExpr(Memc<Expr> &expr, Symbol *space, Expr &out)
 
         if (final >= 0)
             REPA(expr)
-            if (expr[i].knownFinal(allow_func_lists)) {
-                Swap(out, expr[i]);
-                return COMPILE_FULL;
-            }
+        if (expr[i].knownFinal(allow_func_lists)) {
+            Swap(out, expr[i]);
+            return COMPILE_FULL;
+        }
 
         // detect symbols
         FREPA(expr) {
@@ -2900,7 +2905,7 @@ COMPILE_RESULT Compiler::compileExpr(Memc<Expr> &expr, Symbol *space, Expr &out)
                                     }
                                     if (!prev_is_parent)
                                         FREPA(class_base_templates)
-                                        next.symbol.templates.NewAt(i) = class_base_templates[i]; // we need to call this here for ".ROOT" cases, check above similar usage of 'class_base_templates'
+                                    next.symbol.templates.NewAt(i) = class_base_templates[i]; // we need to call this here for ".ROOT" cases, check above similar usage of 'class_base_templates'
 
                                     // setup memory layout (don't setup mem for class specification ".Class" or "obj.Base<Str>::member" because as in example 'next' "Base" may be followed by template "Str", and since there can be multiple bases "Base<Str>, Base<Int>" then don't proceed to child yet)
                                     if (strict) {

@@ -142,7 +142,8 @@ void Source::write(Memc<CodeLine> &clines, C VecI2 &start, C VecI2 &end, VecI2 *
             if (y == start.y) {
                 if (!cl.cols.elms())
                     FREP(start_x)
-                    if (l[i] == ' ') cl.append(' ', TOKEN_NONE);
+                if (l[i] == ' ')
+                    cl.append(' ', TOKEN_NONE);
                 else
                     break;
                 if (clines_start)
@@ -414,7 +415,8 @@ void Source::writeClassPath(CodeLine &line, Int col, Symbol *parent, Symbol *cur
                 Symbol *tmplt = cur->templates[i]();
                 if (templates)
                     REPA(*templates)
-                    if (Symbol::Modif &t = (*templates)[i]) if (t.src_template == tmplt) // find known template target
+                if (Symbol::Modif &t = (*templates)[i])
+                    if (t.src_template == tmplt) // find known template target
                     {
                         writeClassPath(line, col, t(), null, true, &t.templates, false); // write itself, its templates, and its class path
                         goto next;                                                       // we've already written it so don't write it manually below
@@ -879,7 +881,8 @@ Bool Source::writeClass(Memc<CodeLine> &clines, Symbol &symbol) {
             // remove starting symbols
             REP(tokens[start]->col) {
                 REPA(clines)
-                if (clines[i].cols.elms() && ValidType(clines[i].cols[0].type)) goto finished_start_spaces;
+                if (clines[i].cols.elms() && ValidType(clines[i].cols[0].type))
+                    goto finished_start_spaces;
                 REPAO(clines).remove(0);
             }
         finished_start_spaces:;
@@ -1279,7 +1282,8 @@ void Source::makeCPP(C Str &path, C Str &file, Bool include_headers) {
 
     // remove double separators
     REPA(clines)
-    if (i && clines[i] == SEP_LINE && clines[i - 1] == SEP_LINE) clines.remove(i, true);
+    if (i && clines[i] == SEP_LINE && clines[i - 1] == SEP_LINE)
+        clines.remove(i, true);
 
     // write file
     FCreateDirs(GetPath(file));

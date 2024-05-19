@@ -24,9 +24,13 @@ Tipsify           20.9          0.005
       #undef NDEBUG
    #endif
    #include "../../../../ThirdPartyLibs/begin.h"
+   //
    #include "../../../../ThirdPartyLibs/DirectXMath/include.h"
+   //
    #include "../../../../ThirdPartyLibs/DirectXMesh/DirectXMeshOptimizeTVC.cpp"
+   //
    #include "../../../../ThirdPartyLibs/DirectXMesh/DirectXMeshUtil.cpp"
+   //
    #include "../../../../ThirdPartyLibs/end.h"
 #endif
 /******************************************************************************/

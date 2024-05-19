@@ -565,8 +565,10 @@ void MouseClass::eatWheel() {
     _wheel.zero();
     _wheel_i.zero();
 } // don't clear '_wheel_f' because it should continue to be accumulated
-void MouseClass::eat() { REPA(_button)
-                         eat(i); }
+void MouseClass::eat() {
+    REPA(_button)
+    eat(i);
+}
 /******************************************************************************/
 void MouseClass::acquire(Bool on) {
 #if WINDOWS_OLD

@@ -1,94 +1,101 @@
 /******************************************************************************/
 #include "stdafx.h"
-namespace EE{
+namespace EE {
 /******************************************************************************/
-static Flt InterpolatorFrac(Flt frac)
-{
-   // allow prediction for frac 1..2
+static Flt InterpolatorFrac(Flt frac) {
+    // allow prediction for frac 1..2
 #if 0 // linear
    if(frac>2) // but when frac goes beyond that
    {
-   #if 1 // then go back to last known position in frac 2..3
+#if 1 // then go back to last known position in frac 2..3
       frac=((frac>=3) ? 1 : 2*2-frac); // go back
-   #else
+#else
       frac=2; // limit prediction
-   #endif
-   }
-#else // quadratic
-   if(frac>1) // convert frac from 1 .. 2 .. 3 to: 1 .. 1.5 .. 1 using quadratic function
-   {
-      // x-x*x/2, where x=frac-1
-      //frac=frac-1 - (frac-1)*(frac-1)/2+1;
-      //frac=frac - (frac*frac + 1 - 2*frac)/2;
-      frac=((frac>=3) ? 1 : -0.5f*frac*frac + 2*frac - 0.5f); // -0.5*x*x + 2*x - 0.5
-   }
 #endif
-   return frac;
-}
-InterpolatorTime& InterpolatorTime::reset()
-{
-  _elms=_count=0;
-  _time=_cur_duration=_next_duration=0;
-  _left=FLT_MAX;
-   return T;
-}
-void InterpolatorTime::add(Flt duration, InterpolatorTemp &temp)
-{
-   // check this first
- //if(_elms>=2) check not needed since in worst case the value will be negative and ignored
-   {
-      Flt left=_next_duration+_cur_duration-_time-Time.rd(); // calculate how much time we had left without this call
-      MIN(_left, left); // minimize time left
-     _count=Min(_count+1, 255); // increase counter
    }
+#else             // quadratic
+    if (frac > 1) // convert frac from 1 .. 2 .. 3 to: 1 .. 1.5 .. 1 using quadratic function
+    {
+        // x-x*x/2, where x=frac-1
+        // frac=frac-1 - (frac-1)*(frac-1)/2+1;
+        // frac=frac - (frac*frac + 1 - 2*frac)/2;
+        frac = ((frac >= 3) ? 1 : -0.5f * frac * frac + 2 * frac - 0.5f); // -0.5*x*x + 2*x - 0.5
+    }
+#endif
+    return frac;
+}
+InterpolatorTime &InterpolatorTime::reset() {
+    _elms = _count = 0;
+    _time = _cur_duration = _next_duration = 0;
+    _left = FLT_MAX;
+    return T;
+}
+void InterpolatorTime::add(Flt duration, InterpolatorTemp &temp) {
+    // check this first
+    // if(_elms>=2) check not needed since in worst case the value will be negative and ignored
+    {
+        Flt left = _next_duration + _cur_duration - _time - Time.rd(); // calculate how much time we had left without this call
+        MIN(_left, left);                                              // minimize time left
+        _count = Min(_count + 1, 255);                                 // increase counter
+    }
 
-   switch(_elms)
-   {
-      case 0: _elms=1; temp.op=0; break; // we now have 'prev'
-      case 1: _elms=2; _time=0; _cur_duration=duration; temp.op=1; break; // we now have 'prev'+'cur', we can start interpolation, so reset time
-      case 2:
-      {
-         if(_time>_cur_duration) // check if we're currently predicting (we don't have 'next' and we've exceeded 'cur')
-         {
-           _time=0; _cur_duration=duration; temp.op=2; // reset time progress
-         }else
-         {
-           _elms=3; _next_duration=duration; temp.op=3;
-         }
-      }break;
-      case 3: _next_duration+=duration; temp.op=3; break;
-   }
+    switch (_elms) {
+    case 0:
+        _elms = 1;
+        temp.op = 0;
+        break; // we now have 'prev'
+    case 1:
+        _elms = 2;
+        _time = 0;
+        _cur_duration = duration;
+        temp.op = 1;
+        break; // we now have 'prev'+'cur', we can start interpolation, so reset time
+    case 2: {
+        if (_time > _cur_duration) // check if we're currently predicting (we don't have 'next' and we've exceeded 'cur')
+        {
+            _time = 0;
+            _cur_duration = duration;
+            temp.op = 2; // reset time progress
+        } else {
+            _elms = 3;
+            _next_duration = duration;
+            temp.op = 3;
+        }
+    } break;
+    case 3:
+        _next_duration += duration;
+        temp.op = 3;
+        break;
+    }
 }
-void InterpolatorTime::update(InterpolatorTemp &temp)
-{
-   temp.op=0;
-  _time+=Time.rd();
-   if(_elms==3 && _time>_cur_duration)
-   {
-      temp.op=1;
-     _elms =2;
-     _time-=_cur_duration;
-     _cur_duration=_next_duration; _next_duration=0;
-      if(_count>=4) // higher number increases smoothness, but is slower to respond to network delays
-      {
-        _count=0;
-         if(_left>0) // if we're too slow, then speedup
-         {
-            Flt time=_cur_duration-_time; // actual time left
-            if( time>0)
+void InterpolatorTime::update(InterpolatorTemp &temp) {
+    temp.op = 0;
+    _time += Time.rd();
+    if (_elms == 3 && _time > _cur_duration) {
+        temp.op = 1;
+        _elms = 2;
+        _time -= _cur_duration;
+        _cur_duration = _next_duration;
+        _next_duration = 0;
+        if (_count >= 4) // higher number increases smoothness, but is slower to respond to network delays
+        {
+            _count = 0;
+            if (_left > 0) // if we're too slow, then speedup
             {
-               Flt target=Max(0, time-_left), // desired time left
-                   mul=target/time; // scale factor
-                      _time*=mul;
-              _cur_duration*=mul;
+                Flt time = _cur_duration - _time; // actual time left
+                if (time > 0) {
+                    Flt target = Max(0, time - _left), // desired time left
+                        mul = target / time;           // scale factor
+                    _time *= mul;
+                    _cur_duration *= mul;
+                }
             }
-         }
-        _left=FLT_MAX;
-      }
-   }
+            _left = FLT_MAX;
+        }
+    }
 
-   // do this last
-   temp.frac=(_cur_duration ? InterpolatorFrac(_time/_cur_duration) : 0);
+    // do this last
+    temp.frac = (_cur_duration ? InterpolatorFrac(_time / _cur_duration) : 0);
 }
 /******************************************************************************
 struct HistoryInterpolator2
@@ -481,5 +488,5 @@ void _Interpolator::_get4(Flt x, Int &prev2, Int &prev, Int &next, Int &next2, F
    }
 }
 /******************************************************************************/
-}
+} // namespace EE
 /******************************************************************************/

@@ -52,12 +52,14 @@ static EventRegistrationToken GamepadAddedToken, GamepadRemovedToken, RawGameCon
 
 static Int FindJoypadI(ABI::Windows::Gaming::Input::IGamepad *gamepad) {
     REPA(Joypads)
-    if (Joypads[i]._gamepad.Get() == gamepad) return i;
+    if (Joypads[i]._gamepad.Get() == gamepad)
+        return i;
     return -1;
 }
 static Int FindJoypadI(ABI::Windows::Gaming::Input::IRawGameController *raw_game_controller) {
     REPA(Joypads)
-    if (Joypads[i]._raw_game_controller.Get() == raw_game_controller) return i;
+    if (Joypads[i]._raw_game_controller.Get() == raw_game_controller)
+        return i;
     return -1;
 }
 
@@ -802,13 +804,13 @@ void Joypad::zero() {
         } else if (_raw_game_controller) {
             if (state.button)
                 REP(state.button->Length)
-                state.button->Data[i] = false;
+            state.button->Data[i] = false;
             if (state.Switch)
                 REP(state.Switch->Length)
-                state.Switch->Data[i] = Windows::Gaming::Input::GameControllerSwitchPosition::Center;
+            state.Switch->Data[i] = Windows::Gaming::Input::GameControllerSwitchPosition::Center;
             if (state.axis)
                 REP(state.axis->Length)
-                state.axis->Data[i] = ((i < 4) ? 0.5f : 0);
+            state.axis->Data[i] = ((i < 4) ? 0.5f : 0);
         }
 #endif
     }
@@ -1702,7 +1704,8 @@ void ListJoypads() {
 #endif
 
     REPA(Joypads)
-    if (!Joypads[i]._connected) Joypads.remove(i); // remove disconnected joypads
+    if (!Joypads[i]._connected)
+        Joypads.remove(i); // remove disconnected joypads
 #elif MAC
     if (HidManager = IOHIDManagerCreate(kCFAllocatorDefault, kIOHIDOptionsTypeNone)) {
         NSMutableDictionary *criteria[] =

@@ -4,162 +4,182 @@
 #if IOS
 #include "../Platforms/iOS/iOS.h"
 
-static void ChartboostCall(ChartboostClass::RESULT result)
-{
-   if(void (*callback)(ChartboostClass::RESULT)=EE::Chartboost.callback)callback(result);
+static void ChartboostCall(ChartboostClass::RESULT result) {
+    if (void (*callback)(ChartboostClass::RESULT) = EE::Chartboost.callback)
+        callback(result);
 }
 
-@interface EsenthelChartboostDelegate : NSObject<ChartboostDelegate>
-{
-   // following methods must use 'AppVolume.muteEx' instead of 'PauseSound/ResumeSound' because it's possible that the app is still running while the video is displayed, and new sounds could be started by the app
+@interface EsenthelChartboostDelegate : NSObject <ChartboostDelegate> {
+    // following methods must use 'AppVolume.muteEx' instead of 'PauseSound/ResumeSound' because it's possible that the app is still running while the video is displayed, and new sounds could be started by the app
 }
 @end
 @implementation EsenthelChartboostDelegate
- //- (BOOL)shouldRequestInterstitial:(CBLocation)location {return YES;}
- //- (BOOL)shouldDisplayInterstitial:(CBLocation)location {return YES;}
-   - (void)didCacheInterstitial:(CBLocation)location {ChartboostCall(ChartboostClass::INTERSTITIAL_LOADED);}
-   - (void)didFailToLoadInterstitial:(CBLocation)location withError:(CBLoadError)error {ChartboostCall(ChartboostClass::INTERSTITIAL_LOAD_FAIL);}
-   - (void)didDisplayInterstitial:(CBLocation)location {ChartboostCall(ChartboostClass::INTERSTITIAL_DISPLAYED);}
-   - (void)didDismissInterstitial:(CBLocation)location {AppVolume.muteEx(false); ChartboostCall(ChartboostClass::INTERSTITIAL_CLOSED);}
- //- (void)didCloseInterstitial:(CBLocation)location {AppVolume.muteEx(false); ChartboostCall(ChartboostClass::INTERSTITIAL_CLOSED);}
-   - (void)didClickInterstitial:(CBLocation)location {ChartboostCall(ChartboostClass::INTERSTITIAL_CLICKED);}
+//- (BOOL)shouldRequestInterstitial:(CBLocation)location {return YES;}
+//- (BOOL)shouldDisplayInterstitial:(CBLocation)location {return YES;}
+- (void)didCacheInterstitial:(CBLocation)location {
+    ChartboostCall(ChartboostClass::INTERSTITIAL_LOADED);
+}
+- (void)didFailToLoadInterstitial:(CBLocation)location withError:(CBLoadError)error {
+    ChartboostCall(ChartboostClass::INTERSTITIAL_LOAD_FAIL);
+}
+- (void)didDisplayInterstitial:(CBLocation)location {
+    ChartboostCall(ChartboostClass::INTERSTITIAL_DISPLAYED);
+}
+- (void)didDismissInterstitial:(CBLocation)location {
+    AppVolume.muteEx(false);
+    ChartboostCall(ChartboostClass::INTERSTITIAL_CLOSED);
+}
+//- (void)didCloseInterstitial:(CBLocation)location {AppVolume.muteEx(false); ChartboostCall(ChartboostClass::INTERSTITIAL_CLOSED);}
+- (void)didClickInterstitial:(CBLocation)location {
+    ChartboostCall(ChartboostClass::INTERSTITIAL_CLICKED);
+}
 
- //- (BOOL)shouldDisplayRewardedVideo:(CBLocation)location {return YES;}
-   - (void)didCacheRewardedVideo:(CBLocation)location {ChartboostCall(ChartboostClass::REWARDED_VIDEO_LOADED);}
-   - (void)didFailToLoadRewardedVideo:(CBLocation)location withError:(CBLoadError)error {ChartboostCall(ChartboostClass::REWARDED_VIDEO_LOAD_FAIL);}
-   - (void)didDisplayRewardedVideo:(CBLocation)location {AppVolume.muteEx(true); ChartboostCall(ChartboostClass::REWARDED_VIDEO_DISPLAYED);}
-   - (void)willDisplayVideo:(CBLocation)location {AppVolume.muteEx(true); /*ChartboostCall(ChartboostClass::REWARDED_VIDEO_DISPLAYED);*/}
-   - (void)didDismissRewardedVideo:(CBLocation)location {AppVolume.muteEx(false); ChartboostCall(ChartboostClass::REWARDED_VIDEO_CLOSED);}
- //- (void)didCloseRewardedVideo:(CBLocation)location {AppVolume.muteEx(false); ChartboostCall(ChartboostClass::REWARDED_VIDEO_CLOSED);}
-   - (void)didCompleteRewardedVideo:(CBLocation)location withReward:(int)reward {AppVolume.muteEx(false); ChartboostCall(ChartboostClass::REWARDED_VIDEO_COMPLETED);}
-   - (void)didClickRewardedVideo:(CBLocation)location {ChartboostCall(ChartboostClass::REWARDED_VIDEO_CLICKED);}
+//- (BOOL)shouldDisplayRewardedVideo:(CBLocation)location {return YES;}
+- (void)didCacheRewardedVideo:(CBLocation)location {
+    ChartboostCall(ChartboostClass::REWARDED_VIDEO_LOADED);
+}
+- (void)didFailToLoadRewardedVideo:(CBLocation)location withError:(CBLoadError)error {
+    ChartboostCall(ChartboostClass::REWARDED_VIDEO_LOAD_FAIL);
+}
+- (void)didDisplayRewardedVideo:(CBLocation)location {
+    AppVolume.muteEx(true);
+    ChartboostCall(ChartboostClass::REWARDED_VIDEO_DISPLAYED);
+}
+- (void)willDisplayVideo:(CBLocation)location {
+    AppVolume.muteEx(true); /*ChartboostCall(ChartboostClass::REWARDED_VIDEO_DISPLAYED);*/
+}
+- (void)didDismissRewardedVideo:(CBLocation)location {
+    AppVolume.muteEx(false);
+    ChartboostCall(ChartboostClass::REWARDED_VIDEO_CLOSED);
+}
+//- (void)didCloseRewardedVideo:(CBLocation)location {AppVolume.muteEx(false); ChartboostCall(ChartboostClass::REWARDED_VIDEO_CLOSED);}
+- (void)didCompleteRewardedVideo:(CBLocation)location withReward:(int)reward {
+    AppVolume.muteEx(false);
+    ChartboostCall(ChartboostClass::REWARDED_VIDEO_COMPLETED);
+}
+- (void)didClickRewardedVideo:(CBLocation)location {
+    ChartboostCall(ChartboostClass::REWARDED_VIDEO_CLICKED);
+}
 @end
 #endif
-namespace EE{
+namespace EE {
 /******************************************************************************/
 ChartboostClass Chartboost;
 /******************************************************************************/
 #if IOS
 static EsenthelChartboostDelegate *EsenthelChartboostDelegatePtr;
-static void InitChartboost()
-{
-   if(NSString *app_id       =[[[NSBundle mainBundle] infoDictionary] objectForKey:@"ChartboostAppID"       ])if(app_id       .length)
-   if(NSString *app_signature=[[[NSBundle mainBundle] infoDictionary] objectForKey:@"ChartboostAppSignature"])if(app_signature.length)
-   {
-      EsenthelChartboostDelegatePtr=[[EsenthelChartboostDelegate alloc] init];
-      [::Chartboost startWithAppId:app_id
-                      appSignature:app_signature
-                          delegate:EsenthelChartboostDelegatePtr];
-   }
+static void InitChartboost() {
+    if (NSString *app_id = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"ChartboostAppID"])
+        if (app_id.length)
+            if (NSString *app_signature = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"ChartboostAppSignature"])
+                if (app_signature.length) {
+                    EsenthelChartboostDelegatePtr = [[EsenthelChartboostDelegate alloc] init];
+                    [::Chartboost startWithAppId:app_id
+                                    appSignature:app_signature
+                                        delegate:EsenthelChartboostDelegatePtr];
+                }
 }
 #endif
-ChartboostClass::~ChartboostClass()
-{
+ChartboostClass::~ChartboostClass() {
 #if IOS
-   [::Chartboost setDelegate:nil];
-   [EsenthelChartboostDelegatePtr release]; EsenthelChartboostDelegatePtr=null; // have to release only after we will not use Chartboost anymore, and we've cleared the delegate, if we would release inside 'InitChartboost' then it would get destroyed immediately as chartboost does not increase the ref cound for it
+    [::Chartboost setDelegate:nil];
+    [EsenthelChartboostDelegatePtr release];
+    EsenthelChartboostDelegatePtr = null; // have to release only after we will not use Chartboost anymore, and we've cleared the delegate, if we would release inside 'InitChartboost' then it would get destroyed immediately as chartboost does not increase the ref cound for it
 #endif
 }
-ChartboostClass::ChartboostClass()
-{
+ChartboostClass::ChartboostClass() {
 #if IOS
-   InitChartboostPtr=InitChartboost;
+    InitChartboostPtr = InitChartboost;
 #endif
 }
 /******************************************************************************/
-Bool ChartboostClass::visible()C // this does not work on Android, most likely it's not compatible with OpenGL and 'Chartboost.setImpressionsUseActivities'
+Bool ChartboostClass::visible() C // this does not work on Android, most likely it's not compatible with OpenGL and 'Chartboost.setImpressionsUseActivities'
 {
 #if ANDROID
-   JNI jni;
-   if(jni && ActivityClass)
-   if(JMethodID chartboostVisible=jni.staticFunc(ActivityClass, "chartboostVisible", "()Z"))
-      return jni->CallStaticBooleanMethod(ActivityClass, chartboostVisible);
+    JNI jni;
+    if (jni && ActivityClass)
+        if (JMethodID chartboostVisible = jni.staticFunc(ActivityClass, "chartboostVisible", "()Z"))
+            return jni->CallStaticBooleanMethod(ActivityClass, chartboostVisible);
 #elif IOS
-   return [::Chartboost isAnyViewVisible];
+    return [::Chartboost isAnyViewVisible];
 #endif
-   return false;
+    return false;
 }
 /******************************************************************************/
-ChartboostClass& ChartboostClass::interstitialLoad()
-{
+ChartboostClass &ChartboostClass::interstitialLoad() {
 #if ANDROID
-   JNI jni;
-   if(jni && ActivityClass)
-      if(JMethodID chartboostInterstitialLoad=jni.staticFunc(ActivityClass, "chartboostInterstitialLoad", "()V"))
-         jni->CallStaticVoidMethod(ActivityClass, chartboostInterstitialLoad);
+    JNI jni;
+    if (jni && ActivityClass)
+        if (JMethodID chartboostInterstitialLoad = jni.staticFunc(ActivityClass, "chartboostInterstitialLoad", "()V"))
+            jni->CallStaticVoidMethod(ActivityClass, chartboostInterstitialLoad);
 #elif IOS
-   [::Chartboost cacheInterstitial:CBLocationDefault];
+    [::Chartboost cacheInterstitial:CBLocationDefault];
 #endif
-   return T;
+    return T;
 }
-ChartboostClass& ChartboostClass::interstitialShow()
-{
+ChartboostClass &ChartboostClass::interstitialShow() {
 #if ANDROID
-   JNI jni;
-   if(jni && ActivityClass)
-      if(JMethodID chartboostInterstitialShow=jni.staticFunc(ActivityClass, "chartboostInterstitialShow", "()V"))
-         jni->CallStaticVoidMethod(ActivityClass, chartboostInterstitialShow);
+    JNI jni;
+    if (jni && ActivityClass)
+        if (JMethodID chartboostInterstitialShow = jni.staticFunc(ActivityClass, "chartboostInterstitialShow", "()V"))
+            jni->CallStaticVoidMethod(ActivityClass, chartboostInterstitialShow);
 #elif IOS
-   [::Chartboost showInterstitial:CBLocationDefault];
+    [::Chartboost showInterstitial:CBLocationDefault];
 #endif
-   return T;
+    return T;
 }
-Bool ChartboostClass::interstitialAvailable()C
-{
+Bool ChartboostClass::interstitialAvailable() C {
 #if ANDROID
-   JNI jni;
-   if(jni && ActivityClass)
-      if(JMethodID chartboostInterstitialAvailable=jni.staticFunc(ActivityClass, "chartboostInterstitialAvailable", "()Z"))
-         return jni->CallStaticBooleanMethod(ActivityClass, chartboostInterstitialAvailable);
+    JNI jni;
+    if (jni && ActivityClass)
+        if (JMethodID chartboostInterstitialAvailable = jni.staticFunc(ActivityClass, "chartboostInterstitialAvailable", "()Z"))
+            return jni->CallStaticBooleanMethod(ActivityClass, chartboostInterstitialAvailable);
 #elif IOS
-   return [::Chartboost hasInterstitial:CBLocationDefault];
+    return [::Chartboost hasInterstitial:CBLocationDefault];
 #endif
-   return false;
+    return false;
 }
 /******************************************************************************/
-ChartboostClass& ChartboostClass::rewardedVideoLoad()
-{
+ChartboostClass &ChartboostClass::rewardedVideoLoad() {
 #if ANDROID
-   JNI jni;
-   if(jni && ActivityClass)
-      if(JMethodID chartboostRewardedVideoLoad=jni.staticFunc(ActivityClass, "chartboostRewardedVideoLoad", "()V"))
-         jni->CallStaticVoidMethod(ActivityClass, chartboostRewardedVideoLoad);
+    JNI jni;
+    if (jni && ActivityClass)
+        if (JMethodID chartboostRewardedVideoLoad = jni.staticFunc(ActivityClass, "chartboostRewardedVideoLoad", "()V"))
+            jni->CallStaticVoidMethod(ActivityClass, chartboostRewardedVideoLoad);
 #elif IOS
-   [::Chartboost cacheRewardedVideo:CBLocationDefault];
+    [::Chartboost cacheRewardedVideo:CBLocationDefault];
 #endif
-   return T;
+    return T;
 }
-ChartboostClass& ChartboostClass::rewardedVideoShow()
-{
+ChartboostClass &ChartboostClass::rewardedVideoShow() {
 #if ANDROID
-   JNI jni;
-   if(jni && ActivityClass)
-      if(JMethodID chartboostRewardedVideoShow=jni.staticFunc(ActivityClass, "chartboostRewardedVideoShow", "()V"))
-         jni->CallStaticVoidMethod(ActivityClass, chartboostRewardedVideoShow);
+    JNI jni;
+    if (jni && ActivityClass)
+        if (JMethodID chartboostRewardedVideoShow = jni.staticFunc(ActivityClass, "chartboostRewardedVideoShow", "()V"))
+            jni->CallStaticVoidMethod(ActivityClass, chartboostRewardedVideoShow);
 #elif IOS
-   [::Chartboost showRewardedVideo:CBLocationDefault];
+    [::Chartboost showRewardedVideo:CBLocationDefault];
 #endif
-   return T;
+    return T;
 }
-Bool ChartboostClass::rewardedVideoAvailable()C
-{
+Bool ChartboostClass::rewardedVideoAvailable() C {
 #if ANDROID
-   JNI jni;
-   if(jni && ActivityClass)
-      if(JMethodID chartboostRewardedVideoAvailable=jni.staticFunc(ActivityClass, "chartboostRewardedVideoAvailable", "()Z"))
-         return jni->CallStaticBooleanMethod(ActivityClass, chartboostRewardedVideoAvailable);
+    JNI jni;
+    if (jni && ActivityClass)
+        if (JMethodID chartboostRewardedVideoAvailable = jni.staticFunc(ActivityClass, "chartboostRewardedVideoAvailable", "()Z"))
+            return jni->CallStaticBooleanMethod(ActivityClass, chartboostRewardedVideoAvailable);
 #elif IOS
-   return [::Chartboost hasRewardedVideo:CBLocationDefault];
+    return [::Chartboost hasRewardedVideo:CBLocationDefault];
 #endif
-   return false;
+    return false;
 }
 /******************************************************************************/
 } // namespace EE
 /******************************************************************************/
 #if ANDROID
-extern "C" JNIEXPORT void JNICALL Java_com_esenthel_Native_chartboost(JNIEnv *env, jclass clazz, jint result)
-{
-   if(void (*callback)(ChartboostClass::RESULT)=Chartboost.callback)callback(ChartboostClass::RESULT(result));
+extern "C" JNIEXPORT void JNICALL Java_com_esenthel_Native_chartboost(JNIEnv *env, jclass clazz, jint result) {
+    if (void (*callback)(ChartboostClass::RESULT) = Chartboost.callback)
+        callback(ChartboostClass::RESULT(result));
 }
 #endif
 /******************************************************************************/

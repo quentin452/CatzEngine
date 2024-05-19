@@ -841,12 +841,14 @@ XmlData::XmlData(C TextData &text) {
 static Bool EmptyNames(C Memc<TextNode> &nodes) // this can ignore checking for children because it's not necessary
 {
     REPA(nodes)
-    if (nodes[i].name.is()) return false;
+    if (nodes[i].name.is())
+        return false;
     return true;
 }
 static Bool HasChildren(C Memc<TextNode> &nodes) {
     REPA(nodes)
-    if (nodes[i].nodes.elms()) return true;
+    if (nodes[i].nodes.elms())
+        return true;
     return false;
 }
 /******************************************************************************/
@@ -911,7 +913,8 @@ Bool TextNode::save(FileText &f, Bool just_values) C {
                 f.putChar('{').endLine();
                 f.depth++;
                 FREPA(nodes)
-                if (!nodes[i].save(f, false)) return false;
+                if (!nodes[i].save(f, false))
+                    return false;
                 f.depth--;
                 f.startLine().putChar('}');
             }
@@ -983,7 +986,8 @@ Bool TextNode::saveJSON(FileText &f, Bool just_values, Bool last) C {
                 f.putChar('{').endLine();
                 f.depth++;
                 FREPA(nodes)
-                if (!nodes[i].saveJSON(f, false, i == nodes.elms() - 1)) return false;
+                if (!nodes[i].saveJSON(f, false, i == nodes.elms() - 1))
+                    return false;
                 f.depth--;
                 f.startLine().putChar('}');
             }
@@ -1188,12 +1192,14 @@ Char TextNode::loadYAML(FileText &f, Bool just_values, Char c, const Int node_sp
 /******************************************************************************/
 Bool TextData::save(FileText &f) C {
     FREPA(nodes)
-    if (!nodes[i].save(f, false)) return false;
+    if (!nodes[i].save(f, false))
+        return false;
     return f.ok();
 }
 Bool TextData::saveJSON(FileText &f) C {
     FREPA(nodes)
-    if (!nodes[i].saveJSON(f, false, i == nodes.elms() - 1)) return false;
+    if (!nodes[i].saveJSON(f, false, i == nodes.elms() - 1))
+        return false;
     return f.ok();
 }
 Bool TextData::save(C Str &name, ENCODING encoding, INDENT indent, Cipher *cipher) C {
@@ -1425,7 +1431,8 @@ Bool XmlNode::save(FileText &f, Bool params_in_separate_lines) C {
             f.putLine(s);
             f.depth++;
             FREPA(nodes)
-            if (!nodes[i].save(f, params_in_separate_lines)) return false;
+            if (!nodes[i].save(f, params_in_separate_lines))
+                return false;
             f.depth--;
             f.putLine(S + "</" + name + '>');
         }
@@ -1435,7 +1442,8 @@ Bool XmlNode::save(FileText &f, Bool params_in_separate_lines) C {
 }
 Bool XmlData::save(FileText &f, Bool params_in_separate_lines) C {
     FREPA(nodes)
-    if (!nodes[i].save(f, params_in_separate_lines)) return false;
+    if (!nodes[i].save(f, params_in_separate_lines))
+        return false;
     return f.ok();
 }
 Bool XmlData::save(C Str &name, Bool params_in_separate_lines, ENCODING encoding) C {
@@ -1760,14 +1768,14 @@ Bool XmlData::loadAndroidBinary(File &f) {
                         XmlParam &param = node.params.New();
                         if (attr_ns != 0XFFFFFFFF)
                             REPA(namespaces)
-                            if (namespaces[i].x == attr_ns) {
-                                Int ns = namespaces[i].y;
-                                if (InRange(ns, strings)) {
-                                    param.name = strings[ns];
-                                    param.name += ':';
-                                }
-                                break;
+                        if (namespaces[i].x == attr_ns) {
+                            Int ns = namespaces[i].y;
+                            if (InRange(ns, strings)) {
+                                param.name = strings[ns];
+                                param.name += ':';
                             }
+                            break;
+                        }
                         if (InRange(attr_name, strings))
                             param.name += strings[attr_name];
                         if (InRange(attr_raw_val, strings))

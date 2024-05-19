@@ -300,7 +300,8 @@ struct Build {
             {
                 SyncLocker locker(lock);
                 FREPA(outs)
-                if (outs[i].is()) Swap(data_new.New(), outs[i]);
+                if (outs[i].is())
+                    Swap(data_new.New(), outs[i]);
             }
 
             cp.del();
@@ -336,8 +337,11 @@ void CopyOutput(Ptr) {
     ClipSet(s);
 }
 void Clear(Ptr) { list.setData(data.clear()); }
-void DoSelected(Ptr) { FREPA(Tasks)
-                       if (Tasks[i].cb()) Tasks[i].queue(); }
+void DoSelected(Ptr) {
+    FREPA(Tasks)
+    if (Tasks[i].cb())
+        Tasks[i].queue();
+}
 void BuildRun(Build &build, Ptr user, Int thread_index) { build.run(); }
 static void Copy(C Str &src, C Str &dest, FILE_OVERWRITE_MODE overwrite = FILE_OVERWRITE_DIFFERENT) {
     if (!FCopy(src, dest, overwrite)) {

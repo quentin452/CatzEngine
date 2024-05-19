@@ -33,12 +33,14 @@ static Windows::Devices::Enumeration::DeviceWatcher ^ DeviceWatcher;
 #if JP_GAMEPAD_INPUT
 static Int FindJoypadI(Windows::Gaming::Input::Gamepad ^ gamepad) {
     REPA(Joypads)
-    if (Joypads[i]._gamepad == gamepad) return i;
+    if (Joypads[i]._gamepad == gamepad)
+        return i;
     return -1;
 }
 static Int FindJoypadI(Windows::Gaming::Input::RawGameController ^ raw_game_controller) {
     REPA(Joypads)
-    if (Joypads[i]._raw_game_controller == raw_game_controller) return i;
+    if (Joypads[i]._raw_game_controller == raw_game_controller)
+        return i;
     return -1;
 }
 static Int FindJoypadI(Windows::Gaming::Input::IGameController ^ controller) {

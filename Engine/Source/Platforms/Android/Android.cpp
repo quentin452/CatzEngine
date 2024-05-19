@@ -333,8 +333,11 @@ static int32_t InputCallback(android_app *app, AInputEvent *event) {
                     Ms.push(0);
             } // this is a tap so push the button and it will be released line below because 'button_state' is 0
             REPA(Ms._button)
-            if (FlagOn(button_state, 1 << i) != Ms.b(i)) if (Ms.b(i)) Ms.release(i);
-            else Ms.push(i);
+            if (FlagOn(button_state, 1 << i) != Ms.b(i))
+                if (Ms.b(i))
+                    Ms.release(i);
+                else
+                    Ms.push(i);
 
             // get scrolling and cursor position
             if (action_type != AMOTION_EVENT_ACTION_UP // this can happen on release of TouchPad scroll, where the position is still at the dragged position
@@ -669,13 +672,15 @@ static void DeviceAdded(Ptr device_id_ptr) {
                                     {
                                         SetMAD(joypad._axis_trigger_mad[0], MIN(joypad._axis_trigger_l), MAX(joypad._axis_trigger_l)); // this is needed because Sony has triggers in range -1..1
                                         REPA(joypad._remap)
-                                        if (joypad._remap[i] == JB_L2) joypad._remap[i] = 254; // use 254 as out of range to disable auto-convert
+                                        if (joypad._remap[i] == JB_L2)
+                                            joypad._remap[i] = 254; // use 254 as out of range to disable auto-convert
                                     }
                                     if (joypad._axis_trigger_r != 0xFF) // has trigger axis
                                     {
                                         SetMAD(joypad._axis_trigger_mad[1], MIN(joypad._axis_trigger_r), MAX(joypad._axis_trigger_r)); // this is needed because Sony has triggers in range -1..1
                                         REPA(joypad._remap)
-                                        if (joypad._remap[i] == JB_R2) joypad._remap[i] = 254; // use 254 as out of range to disable auto-convert
+                                        if (joypad._remap[i] == JB_R2)
+                                            joypad._remap[i] = 254; // use 254 as out of range to disable auto-convert
                                     }
 
 #undef HAS
@@ -1602,7 +1607,8 @@ static void ProcessFiles() {
     auto receive = App.receive_file;
     File f;
     FREPA(Files)
-    if (f.readFD(Files[i]) && receive) receive(f);
+    if (f.readFD(Files[i]) && receive)
+        receive(f);
     Files.clear(); // !! PROCESS IN ORDER, MUST CALL 'readFD' FOR ALL 'Files' EVEN IF 'receive'==null TO CLOSE THEM !!
 }
 JNIEXPORT void JNICALL Java_com_esenthel_Native_drop(JNIEnv *env, jclass clazz, jint fd) {

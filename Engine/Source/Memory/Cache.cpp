@@ -184,7 +184,8 @@ _Cache::Elm *_Cache::findElm(CChar *file, CChar *path) C {
 /******************************************************************************/
 Int _Cache::findDelayRemove(Elm &elm) {
     REPA(_delay_remove)
-    if (_delay_remove[i].elm == &elm) return i;
+    if (_delay_remove[i].elm == &elm)
+        return i;
     return -1;
 }
 /******************************************************************************/

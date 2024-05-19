@@ -38,7 +38,7 @@ void _Memx::del() {
 void _Memx::clear() {
     if (_del)
         REPA(_valid)
-        _del(validElm(i)); // destroy as the first step
+    _del(validElm(i)); // destroy as the first step
     _abs.clear();
     _valid.clear();
     _invalid.clear();

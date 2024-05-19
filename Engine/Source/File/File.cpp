@@ -2222,7 +2222,8 @@ Str File::getStr() {
 File &File::putAsset(C UID &id) {
     Int used;
     REPAS(used, id.b)
-    if (id.b[used]) break;
+    if (id.b[used])
+        break;
     used++;
     putByte(used).put(id.b, used);
     return T;
@@ -2362,7 +2363,8 @@ Bool File::copy(File &dest, Long max_size) {
         Ptr buf = temp.data();
         Int buf_size = temp.elms();
         REP(max_size / buf_size)
-        if (!getFast(buf, buf_size) || !dest.put(buf, buf_size)) return false;
+        if (!getFast(buf, buf_size) || !dest.put(buf, buf_size))
+            return false;
         buf_size = max_size % buf_size;
         if (!getFast(buf, buf_size) || !dest.put(buf, buf_size))
             return false;

@@ -23,7 +23,7 @@ void _Memc::del() {
 void _Memc::clear() {
     if (_del)
         REPA(T)
-        _del(T[i]); // destroy as the first step
+    _del(T[i]); // destroy as the first step
     _elms = 0;
 }
 /******************************************************************************/
@@ -127,7 +127,7 @@ void _Memc::setNumDiscard(Int num) {
             _elms = num; // set '_elms' before accessing new elements to avoid range assert
             if (_new)
                 FREPA(T)
-                _new(T[i]);      // create new elements, create as the last step
+            _new(T[i]);          // create new elements, create as the last step
         } else if (num > elms()) // add elements in existing memory
         {
             Int old_elms = elms();
@@ -215,7 +215,7 @@ void _Memc::removeNum(Int i, Int n, Bool keep_order) {
         MIN(n, elms() - i); // minimize what we can actually remove
         if (_del)
             REPD(j, n)
-            _del(T[i + j]); // delete those elements, destroy as the first step
+        _del(T[i + j]);     // delete those elements, destroy as the first step
         if (i < elms() - n) // if there are any elements after those being removed
         {
             if (keep_order)

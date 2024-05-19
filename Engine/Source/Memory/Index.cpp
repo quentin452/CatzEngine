@@ -2,10 +2,16 @@
 #include "stdafx.h"
 namespace EE {
 /******************************************************************************/
-void IndexGroup ::changeVal(Int from, Int to) { REP(num)
-                                                if (elm[i] == from) elm[i] = to; }
-void IndexPtrGroup::changeVal(Ptr from, Ptr to) { REP(num)
-                                                  if (elm[i] == from) elm[i] = to; }
+void IndexGroup ::changeVal(Int from, Int to) {
+    REP(num)
+    if (elm[i] == from)
+        elm[i] = to;
+}
+void IndexPtrGroup::changeVal(Ptr from, Ptr to) {
+    REP(num)
+    if (elm[i] == from)
+        elm[i] = to;
+}
 void IndexGroup ::remVal(Int value) {
     for (Int i = 0; i < num;)
         if (elm[i] == value)
@@ -119,7 +125,7 @@ Index &Index::set(Int *elm_group) {
         elm_group = T.elm_group;
     if (elm_group)
         FREP(elms)
-        addElm(*elm_group++, i);
+    addElm(*elm_group++, i);
     return T;
 }
 IndexPtr &IndexPtr::set() {

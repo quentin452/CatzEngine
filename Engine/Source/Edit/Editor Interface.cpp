@@ -388,8 +388,8 @@ created:
             message.clear();
             Swap(_conn, SCAST(Connection, c[i]));
             return true;
-        }
-        else if (c[i].state() != CONNECT_INVALID) connecting = true;
+        } else if (c[i].state() != CONNECT_INVALID)
+            connecting = true;
         if (!connecting)
             break;
         if ((Time.curTimeMs() - start_time) >= timeout)
@@ -512,7 +512,8 @@ Bool EditorInterface::getElms(MemPtr<Elm> elms, Bool include_removed) {
                             Finalize(elms[i], elms); // setup full values for convenience
                             if (!include_removed)    // call this at the end, once all elements have been setup, so we won't remove an element that still has unprocessed children, do this on the client, to avoid overloading the server
                                 REPA(elms)
-                                if (elms[i].removedFull()) elms.remove(i, true); // need to keep order because elements are sorted by ID
+                            if (elms[i].removedFull())
+                                elms.remove(i, true); // need to keep order because elements are sorted by ID
                             return true;
                         }
                     goto fail;

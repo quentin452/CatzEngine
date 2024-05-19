@@ -37,7 +37,8 @@ namespace EE {
 void _Cell::del(_Grid &grid) {
     // delete children
     REPA(_g)
-    if (_g[i]) _g[i]->del(grid);
+    if (_g[i])
+        _g[i]->del(grid);
 
     // first delete the data because as they exist in this area, they still can reference the area
     if (_data) {
@@ -449,7 +450,8 @@ void _Cell::func(void func(_Cell &cell, Ptr user), Ptr user) {
         func(T, user);
     else
         FREPA(_g)
-        if (_g[i]) _g[i]->func(func, user); // FREPA is faster in this case
+    if (_g[i])
+        _g[i]->func(func, user); // FREPA is faster in this case
 }
 void _Cell::func(C RectI &rect, void func(_Cell &cell, Ptr user), Ptr user) {
     if (rect.min.x <= T._x[3] && rect.max.x >= T._x[0] && rect.min.y <= T._y[3] && rect.max.y >= T._y[0]) {
@@ -457,7 +459,8 @@ void _Cell::func(C RectI &rect, void func(_Cell &cell, Ptr user), Ptr user) {
             func(T, user);
         else
             FREPA(_g)
-            if (_g[i]) _g[i]->func(rect, func, user); // FREPA is faster in this case
+        if (_g[i])
+            _g[i]->func(rect, func, user); // FREPA is faster in this case
     }
 }
 void _Cell::funcCreate(C RectI &rect, void func(_Cell &cell, Ptr user), Ptr user, _Grid &grid) {

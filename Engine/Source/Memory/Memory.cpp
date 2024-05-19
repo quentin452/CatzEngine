@@ -283,10 +283,12 @@ void Free(Ptr &data) {
 #if MEM_GUARD
         before += MEM_GUARD; // make room for guard
         FREP(MEM_GUARD)
-        if (*guard++ != MemGuard(i)) Exit("Mem Guard was modified");
+        if (*guard++ != MemGuard(i))
+            Exit("Mem Guard was modified");
         guard += data_size;
         FREP(MEM_GUARD)
-        if (*guard++ != MemGuard(i)) Exit("Mem Guard was modified");
+        if (*guard++ != MemGuard(i))
+            Exit("Mem Guard was modified");
 #endif
 
 #if MEM_LEAK_FULL
@@ -416,8 +418,8 @@ Ptr Alloc(UIntPtr size) {
 #if ALLOC16
             DEBUG_ASSERT((UIntPtr(data) & 15) == 0, "Memory is not 16-byte aligned");
 #else // other platforms should have at least 8-byte alignment
-            // https://msdn.microsoft.com/en-us/library/ycsb6wwf.aspx
-            // http://www.gnu.org/software/libc/manual/html_node/Aligned-Memory-Blocks.html
+      // https://msdn.microsoft.com/en-us/library/ycsb6wwf.aspx
+      // http://www.gnu.org/software/libc/manual/html_node/Aligned-Memory-Blocks.html
             DEBUG_ASSERT((UIntPtr(data) & 7) == 0, "Memory is not 8-byte aligned");
 #endif
 
@@ -752,19 +754,19 @@ void Copy8To16(Ptr dest, CPtr src, Int elms) {
     if (U16 *d = (U16 *)dest)
         if (U8 *s = (U8 *)src)
             REP(elms)
-            d[i] = s[i];
+    d[i] = s[i];
 }
 void Copy8To32(Ptr dest, CPtr src, Int elms) {
     if (U32 *d = (U32 *)dest)
         if (U8 *s = (U8 *)src)
             REP(elms)
-            d[i] = s[i];
+    d[i] = s[i];
 }
 void Copy16To32(Ptr dest, CPtr src, Int elms) {
     if (U32 *d = (U32 *)dest)
         if (U16 *s = (U16 *)src)
             REP(elms)
-            d[i] = s[i];
+    d[i] = s[i];
 }
 void Copy24To32(Ptr dest, CPtr src, Int elms) {
     if (U32 *d = (U32 *)dest)
@@ -785,19 +787,19 @@ void Copy16To8(Ptr dest, CPtr src, Int elms) {
     if (U8 *d = (U8 *)dest)
         if (U16 *s = (U16 *)src)
             FREP(elms)
-            d[i] = s[i] & 0xFF;
+    d[i] = s[i] & 0xFF;
 }
 void Copy32To8(Ptr dest, CPtr src, Int elms) {
     if (U8 *d = (U8 *)dest)
         if (U32 *s = (U32 *)src)
             FREP(elms)
-            d[i] = s[i];
+    d[i] = s[i];
 }
 void Copy32To16(Ptr dest, CPtr src, Int elms) {
     if (U16 *d = (U16 *)dest)
         if (U32 *s = (U32 *)src)
             FREP(elms)
-            d[i] = s[i];
+    d[i] = s[i];
 }
 void Copy32To24(Ptr dest, CPtr src, Int elms) {
     if (U8 *d = (U8 *)dest)

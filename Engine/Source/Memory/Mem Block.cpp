@@ -20,7 +20,7 @@ _Memb::_Memb(Int elm_size, Int block_elms, void (*_new)(Ptr elm), void (*_del)(P
 void _Memb::clear() {
     if (_del)
         REPA(T)
-        _del(T[i]); // destroy as the first step
+    _del(T[i]); // destroy as the first step
     _elms = 0;
 }
 void _Memb::del() {

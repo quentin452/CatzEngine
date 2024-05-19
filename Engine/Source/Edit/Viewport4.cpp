@@ -120,7 +120,8 @@ void Viewport4::Cube::update(C GuiPC &gpc) {
                 VecD d = cam.at - at;
                 if (v4->lock())
                     REPA(v4->view)
-                    if (&v4->view[i] != view) v4->view[i].camera += d;
+                if (&v4->view[i] != view)
+                    v4->view[i].camera += d;
             }
             if ((touch ? touch->rs() : Ms.br(0)) && !possible_drag && mesh && InRange(part, *mesh)) {
                 Flt y = 0, p = 0;
@@ -843,13 +844,15 @@ Int Viewport4::getViewType(View *view) C {
 Int Viewport4::getViewType(GuiObj *go) C {
     if (go)
         REPA(view)
-        if (go == &view[i].viewport) return i;
+    if (go == &view[i].viewport)
+        return i;
     return -1;
 }
 Viewport4::View *Viewport4::getView(GuiObj *go) {
     if (go)
         REPA(view)
-        if (go == &view[i].viewport) return &view[i];
+    if (go == &view[i].viewport)
+        return &view[i];
     return null;
 }
 Viewport4::View *Viewport4::getViewCtrl(GuiObj *go) {
@@ -864,7 +867,8 @@ Flt Viewport4::maxDist() C { return _last->viewport.range * 0.5f; }
 Flt Viewport4::moveScale(View &view, Bool time) C { return (fpp() ? fppSpeed() : 1.3f * (perspective() ? Max(horizontal() ? 2.5f : 0.0f, view.camera.dist) * Tan(view.viewport.fov / 2) : view.viewport.fov)) * (time ? Time.d() : 1) * (Kb.shift() ? 4 : 1); }
 Bool Viewport4::visible() C {
     REPA(view)
-    if (view[i].viewport.visible()) return true;
+    if (view[i].viewport.visible())
+        return true;
     return false;
 }
 /******************************************************************************/
@@ -1237,7 +1241,8 @@ void Viewport4::update() {
         VecD d = cam.at - at;
         if (lock())
             REPA(view)
-            if (&view[i] != _focus) view[i].camera += d;
+        if (&view[i] != _focus)
+            view[i].camera += d;
     }
 
     // finalize cameras

@@ -20,7 +20,8 @@ static Flt _DelayRemoveTime, DelayRemoveCheck;
 /******************************************************************************/
 static Int FindDelayRemove(Ptr data) {
     REPA(DelayRemoves)
-    if (DelayRemoves[i].data == data) return i;
+    if (DelayRemoves[i].data == data)
+        return i;
     return -1;
 }
 static void RemoveFromDelayRemove(Ptr data) { DelayRemoves.remove(FindDelayRemove(data)); }

@@ -348,7 +348,8 @@ static void AddAbs(MemPtr<DataRangeAbs> &ranges, Long start, Long end) {
 #if DEBUG && 0
 #pragma message("!! Warning: Use this only for debugging !!")
             REPA(ranges)
-            if (Overlaps(ranges[i], start, end)) Break();
+            if (Overlaps(ranges[i], start, end))
+                Break();
 #endif
         }
         ranges.New().set(start, end);
@@ -365,7 +366,8 @@ static void AddAbs(Memt<DataRangeAbs> &ranges, Long start, Long end) {
 #if DEBUG && 0
 #pragma message("!! Warning: Use this only for debugging !!")
             REPA(ranges)
-            if (Overlaps(ranges[i], start, end)) Break();
+            if (Overlaps(ranges[i], start, end))
+                Break();
 #endif
         }
         ranges.New().set(start, end);
@@ -1313,7 +1315,8 @@ struct PakCreator {
         void sort() {
             files.sort(ComparePath);
             REP(files.elms() - 1)
-            if (EqualPath(files[i].name, files[i + 1].name)) files.remove(i + 1, true); // remove files with same names (in case someone provides incorrect input)
+            if (EqualPath(files[i].name, files[i + 1].name))
+                files.remove(i + 1, true); // remove files with same names (in case someone provides incorrect input)
         }
     };
 
@@ -1514,7 +1517,7 @@ struct PakCreator {
     Long updated_size; // size after in_place update
     PakProgress *progress;
     PakInPlace *in_place;
-    COMPRESS_MODE (*CompressMode)
+    COMPRESS_MODE(*CompressMode)
     (C Str &name);
     Str *error_message;
     Memc<PakFileEx> files;
@@ -1596,7 +1599,7 @@ struct PakCreator {
         case FileTemp::NODE:
             if (parent.node->exists)
                 FREPA(parent.node->children)
-                ftc.add(parent.node->children[i]);
+            ftc.add(parent.node->children[i]);
             break; // don't add children for nodes that are marked as removed
         }
         ftc.sort();
@@ -1982,11 +1985,11 @@ struct PakCreator {
                             stopThreads(); // stop the threads first
                             if (error_message)
                                 REPA(compressors)
-                                if (compressors[i].error_message.is()) // grab any first error found
-                                {
-                                    Swap(*error_message, compressors[i].error_message);
-                                    break;
-                                }
+                            if (compressors[i].error_message.is()) // grab any first error found
+                            {
+                                Swap(*error_message, compressors[i].error_message);
+                                break;
+                            }
                             goto error;
                         }
 
@@ -2213,7 +2216,8 @@ Bool Pak::create(C CMemPtr<PakNode> &files, C Str &pak_name, UInt flag, Cipher *
 // TODO: use binarySearch, make sure Editor passes files sorted in order and that name from UID is sorted too
 static PakNode *FindElm(Memb<PakNode> &nodes, C Str &name) {
     REPA(nodes)
-    if (nodes[i].name == name) return &nodes[i];
+    if (nodes[i].name == name)
+        return &nodes[i];
     return null;
 }
 static Memb<PakNode> *FindNodeChildren(Memb<PakNode> &nodes, C Str &path) // find 'children' container of 'path' node, null if not found (don't create new elements)

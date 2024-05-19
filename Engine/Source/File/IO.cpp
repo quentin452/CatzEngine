@@ -411,7 +411,7 @@ Bool BackgroundFileFind::update() {
                 new_paths.clear();
             else
                 FREPA(_paths)
-                new_paths.add(_paths[i]);
+            new_paths.add(_paths[i]);
             locker.off();
             new_paths.sort(BackgroundFileFindComparePath);
             locker.on();

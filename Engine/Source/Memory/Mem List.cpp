@@ -155,12 +155,14 @@ Ptr _Meml::_element(Int j) C {
     if (InRange(j, _elms)) {
         if (j < (_elms >> 1)) {
             MFREP(T)
-            if (!j--) return i->data();
+            if (!j--)
+                return i->data();
         } // first  half
         else {
             j = _elms - j - 1;
             MREP(T)
-            if (!j--) return i->data();
+            if (!j--)
+                return i->data();
         } // second half
     }
     return null;

@@ -477,7 +477,8 @@ void _MapEx::delayRemove(Flt time) {
 /******************************************************************************/
 Int _MapEx::findDelayRemove(Elm &elm) {
     REPA(_delay_remove)
-    if (_delay_remove[i].elm == &elm) return i;
+    if (_delay_remove[i].elm == &elm)
+        return i;
     return -1;
 }
 /******************************************************************************/

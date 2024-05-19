@@ -130,7 +130,8 @@ Long FileText::charsLeft() C {
 FileText &FileText::startLine() {
     if (indent)
         REP(depth)
-        if (indent == INDENT_TABS) putChar('\t');
+    if (indent == INDENT_TABS)
+        putChar('\t');
     else
         putText("   ");
     return T;

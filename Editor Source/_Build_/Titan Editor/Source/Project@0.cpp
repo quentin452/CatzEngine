@@ -4199,7 +4199,7 @@ void DrawProject()
          {
             n.New().create("Replace Name Part", ReplaceName, T);
          }
-         if(remove       )n.New().create("Remove"       , Remove      , T);
+         if(remove       )n.New().create("Remove"       , Remove      , T).kbsc(KbSc(KB_DEL));
          if(restore      )n.New().create("Restore"      , Restore     , T);
                           n.New().create("Reload"       , Reload      , T).kbsc(KbSc(KB_R, KBSC_CTRL_CMD)).desc(reload_desc);
          if(cancel_reload)n.New().create("Cancel Reload", CancelReload, T);

@@ -15,15 +15,15 @@ def format_files(files, params):
             print(f"Skipping {file}...")
 
 if len(sys.argv) > 1:
-    print(f"formatting file(s) {sys.argv[1:]}")
+    print(f"Formatting file(s) {sys.argv[1:]}")
     format_thread = threading.Thread(target=format_files, args=(sys.argv[1:], "{BasedOnStyle: llvm, IndentWidth: 4, ColumnLimit: 0}"))
     format_thread.start()
     format_thread.join()
-    print("done.")
+    print("Done.")
 else:
-    print("formatting...")
-    files_to_format = glob.glob("**/*.[chin]", recursive=True)
+    print("Formatting...")
+    files_to_format = glob.glob("**/*.[ch]", recursive=True) + glob.glob("**/*.cpp", recursive=True) + glob.glob("**/*.cc", recursive=True)
     format_thread = threading.Thread(target=format_files, args=(files_to_format, "{BasedOnStyle: llvm, IndentWidth: 4, ColumnLimit: 0}"))
     format_thread.start()
     format_thread.join()
-    print("done.")
+    print("Done.")

@@ -3258,8 +3258,8 @@ void SetMatrixCount(Int num) {
 #if 0
             SBObjMatrix    ->bind(SBI_OBJ_MATRIX     );
             SBObjMatrixPrev->bind(SBI_OBJ_MATRIX_PREV);
-#else // bind 2 at the same time
-      // Warning: code below does not set the cached buffers as 'bind' does, as it's not needed, because those buffers have constant bind index
+#else                                                              // bind 2 at the same time
+                                                                   // Warning: code below does not set the cached buffers as 'bind' does, as it's not needed, because those buffers have constant bind index
                 ASSERT(SBI_OBJ_MATRIX_PREV == SBI_OBJ_MATRIX + 1); // can do this only if they're next to each other
                 ID3D11Buffer *buf[] = {SBObjMatrix->buffer.buffer, SBObjMatrixPrev->buffer.buffer};
                 D3DC->VSSetConstantBuffers(SBI_OBJ_MATRIX, 2, buf);

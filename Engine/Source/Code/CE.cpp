@@ -86,7 +86,9 @@
 #if WINDOWS_OLD
 #include "../../../ThirdPartyLibs/begin.h"
 
+#ifndef MAXUINT
 #define MAXUINT ((UINT) ~((UINT)0))
+#endif
 #include "../../../ThirdPartyLibs/VS/Setup.Configuration.h"
 
 #include "../../../ThirdPartyLibs/end.h"
@@ -784,7 +786,8 @@ static FILE_LIST_MODE AddEEHeader(C FileFind &ff, CodeEditor &ce) {
             target_path = relative_path,
             base = ff.name;
         REPA(ExcludeHeaders)
-        if (base == ExcludeHeaders[i]) return FILE_LIST_CONTINUE;
+        if (base == ExcludeHeaders[i])
+            return FILE_LIST_CONTINUE;
         // REPA(ReplaceHeaders)if(base==ReplaceHeaders[i][0]){target_path=S+ReplaceHeaders[i][1]+'\\'+base; break;}
         if (StartsPath(target_path, "Code"))
             return FILE_LIST_CONTINUE;                            // skip all from "Code" folders
@@ -907,13 +910,15 @@ static void OutputExport(C Str &name, CodeEditor &ce) {
     FileText ft;
     if (ft.write(name))
         FREPA(ce.build_list)
-        if (CodeEditor::BuildResult *line = ce.build_list.visToData(i)) ft.putLine(line->text);
+    if (CodeEditor::BuildResult *line = ce.build_list.visToData(i))
+        ft.putLine(line->text);
 }
 static void DevlogExport(C Str &name, CodeEditor &ce) {
     FileText ft;
     if (ft.write(name))
         FREPA(ce.devlog_list)
-        if (CodeEditor::DeviceLog *dl = ce.devlog_list.visToData(i)) ft.putLine(dl->asText());
+    if (CodeEditor::DeviceLog *dl = ce.devlog_list.visToData(i))
+        ft.putLine(dl->asText());
 }
 static void DevlogFilter(CodeEditor &ce) {
     Memt<Bool> visible;
@@ -1320,10 +1325,14 @@ void CodeEditor::genSymbols(C Str &editor_bin) {
     };
 #if 1
     REPAD(d, remove_macros)
-    REPA(EEMacros) if (Equal(EEMacros[i].name, remove_macros[d], true)) EEMacros.remove(i, true);
+    REPA(EEMacros)
+    if (Equal(EEMacros[i].name, remove_macros[d], true))
+        EEMacros.remove(i, true);
 #else
     REPAD(d, disable_macros)
-    REPA(EEMacros) if (Equal(EEMacros[i].name, disable_macros[d], true)) EEMacros[i].use_for_suggestions = false;
+    REPA(EEMacros)
+    if (Equal(EEMacros[i].name, disable_macros[d], true))
+        EEMacros[i].use_for_suggestions = false;
 #endif
 
     // disable Engine basic data types suggestions
@@ -1439,7 +1448,8 @@ Rect CodeEditor::sourceRect() {
 Source *CodeEditor::findSource(C SourceLoc &loc) {
     if (loc.is())
         REPA(sources)
-        if (sources[i].loc == loc) return &sources[i];
+    if (sources[i].loc == loc)
+        return &sources[i];
     return null;
 }
 Source *CodeEditor::getSource(C SourceLoc &loc, ERROR_TYPE *error) {
@@ -1462,7 +1472,8 @@ Source *CodeEditor::cur() { return _cur; }
 
 static Int TabI() {
     REPA(CE.code_tabs)
-    if (CE.code_tabs.tab(i).source == CE.cur()) return i;
+    if (CE.code_tabs.tab(i).source == CE.cur())
+        return i;
     return -1;
 }
 
@@ -1883,7 +1894,7 @@ void CodeEditor::update(Bool active) {
                             {
                                 if (was_log)
                                     FREPA(build_data)
-                                    build_output.line() += build_data[i].text;
+                                build_output.line() += build_data[i].text;
                                 build_output.line();
                             }
                         } else if (build_exe_type == EXE_AAB) // gradlew bundle*
@@ -2210,7 +2221,8 @@ void CodeEditor::rebuild3rdPartyHeaders() {
 
     // remove system macros incompatible with EE
     REPA(LibMacros)
-    if (LibMacros[i] == "min" || LibMacros[i] == "max") LibMacros.remove(i, true);
+    if (LibMacros[i] == "min" || LibMacros[i] == "max")
+        LibMacros.remove(i, true);
 
     // add stuff from EE
     REPA(EEUsings)
@@ -2353,9 +2365,8 @@ void CodeEditorInterface::paste(C CMemPtr<UID> &elms, GuiObj *obj, C Vec2 &scree
                 if (i) {
                     if (Kb.ctrlCmd())
                         REP(src->cur.x)
-                        text += ' ';
-                    else
-                        text += ", ";
+                    text += ' ';
+                    else text += ", ";
                 }
                 text += elms[i].asCString();
                 if (Kb.ctrlCmd())
@@ -2746,4 +2757,4 @@ CChar8 *ShortName(EXE_TYPE type) {
 /******************************************************************************/
 } // namespace Edit
 } // namespace EE
-/******************************************************************************/
+  /******************************************************************************/

@@ -158,11 +158,13 @@ static Bool LockedMipHasAlpha(C Image &image) // assumes that image is not compr
         if (image.highPrecision()) {
             REPD(y, image.lh())
             REPD(x, image.lw())
-            if (!Equal(image.colorF(x, y).w, 1.0f, 0.5f / 255)) return true;
+            if (!Equal(image.colorF(x, y).w, 1.0f, 0.5f / 255))
+                return true;
         } else {
             REPD(y, image.lh())
             REPD(x, image.lw())
-            if (image.color(x, y).a != 255) return true;
+            if (image.color(x, y).a != 255)
+                return true;
         }
     }
     return false;

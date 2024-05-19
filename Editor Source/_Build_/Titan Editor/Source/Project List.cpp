@@ -336,27 +336,35 @@ void DrawProjectList()
       name=CleanFileName(name);
       if(!ValidFileName(name))Gui.msgBox(S, "Project name can't be empty, can't start with dot and can't contain following symbols \\ / : * ? \" < > |");else
       {
-         Project proj; Str error; switch(proj.open(proj_id, name, ProjectsPath+EncodeFileName(proj_id), error))
+         Project proj; Str error; 
+         Elm* elm = findProj(proj_id); // Find the project
+         if (elm == nullptr) return false; // If the project is not found, return false
+         Str path = elm->path; // Use Complete Project Path
+        switch(proj.open(proj_id, name, path, error))
          {
-            case LOAD_NEWER : Gui.msgBox(S,   "This project was created with a newer version of " ENGINE_NAME " Engine.\nPlease upgrade your " ENGINE_NAME " software and try again."); break;
-            case LOAD_LOCKED: Gui.msgBox(S,   "This project appears to be already opened in another instance of the Editor.\nIf it isn't, then please try re-opening it manually first."); break;
-            case LOAD_ERROR : Gui.msgBox(S, S+"This project failed to load."+(error.is() ? "\n" : null)+error); break;
+               case LOAD_NEWER : Gui.msgBox(S,   "This project was created with a newer version of " ENGINE_NAME " Engine.\nPlease upgrade your " ENGINE_NAME " software and try again."); break;
+               case LOAD_LOCKED: Gui.msgBox(S,   "This project appears to be already opened in another instance of the Editor.\nIf it isn't, then please try re-opening it manually first."); break;
+               case LOAD_ERROR : Gui.msgBox(S, S+"This project failed to load."+(error.is() ? "\n" : null)+error); break;
 
-            case LOAD_OK    :
-            case LOAD_EMPTY : proj.name=name; proj.close(); refresh(); selectProj(proj_id); return true;
+               case LOAD_OK    :
+               case LOAD_EMPTY : proj.name=name; proj.close(); refresh(); selectProj(proj_id); return true;
          }
       }
       return false;
    }
+
    bool Projects::removeProj(C UID &proj_id)
    {
-      Str path=ProjectsPath+EncodeFileName(proj_id);
+      Elm* elm = findProj(proj_id); // Find the project
+      if (elm == nullptr) return false; // If the project is not found, return false
+      Str path = elm->path; // Use Complete Project Path
       if(!FRecycle(path))Gui.msgBox(S, "Error when removing the project");else
       {
          refresh(); return true;
       }
       return false;
    }
+
    bool Projects::open(Elm &proj, bool ignore_lock)
    {
       Str path = proj.path; // Use Complete Project Path

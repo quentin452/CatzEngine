@@ -1623,118 +1623,53 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
 #include "LightUtilities.hpp"
 
     void Light::draw() {
-        // !! Here process water lum first, because after drawing all lights, we still have to apply ambient from meshes, so if we process water lum first, and then lum, then we don't need to change RT's to lum again when drawing ambient from meshes !!
         SetShadowOpacity(shadow_opacity);
-
         CurrentLight = T;
+
         switch (CurrentLight.type) {
-        case LIGHT_DIR: {
-            processLightDir_CASE_LIGHT_DIR(CurrentLight);
-        } break;
+        case LIGHT_DIR:
+            processDirectionalLight(CurrentLight);
+            break;
 
-        case LIGHT_POINT: {
-            Flt range = CurrentLight.point.range();
-            Vec pos = CurrentLight.point.pos;
-            Flt z_center = DistPointActiveCamPlaneZ(pos);
-            CurrentLightZRange.set(z_center - range, z_center + range);
+        case LIGHT_POINT:
+            processPointLight(CurrentLight);
+            break;
 
-            Bool front_face = LightFrontFaceBall(range, pos);
-            UInt depth_func = (front_face ? FUNC_LESS : FUNC_GREATER);
+        case LIGHT_LINEAR:
+            processLinearLight(CurrentLight);
+            break;
 
-            SetDepthAndShadow_CASE_LIGHT_POINT(CurrentLight, range, pos, front_face);
-            SetMatrixCount();
-
-            DrawWaterLum_CASE_LIGHT_POINT(CurrentLight, range, pos, front_face, depth_func);
-            SetLightShadow_CASE_LIGHT_POINT(CurrentLight, range, pos, front_face);
-            DrawLum_CASE_LIGHT_POINT(CurrentLight, range, pos, front_face, depth_func);
-        } break;
-
-        case LIGHT_LINEAR: {
-            Flt range = CurrentLight.linear.range,
-                z_center = DistPointActiveCamPlaneZ(CurrentLight.linear.pos); // Z relative to camera position
-            CurrentLightZRange.set(z_center - range, z_center + range);       // use for DX12 OMSetDepthBounds
-            Bool front_face = LightFrontFaceBall(range, CurrentLight.linear.pos);
-            UInt depth_func = (front_face ? FUNC_LESS : FUNC_GREATER);
-            MatrixM light_matrix(front_face ? range : -range, CurrentLight.linear.pos); // reverse faces
-            D.depthClip(front_face);                                                    // Warning: not available on GL ES
-            SetMatrixCount();                                                           // needed for drawing light mesh
-
-            process_CASE_LIGHT_LINEAR(CurrentLight, depth_func, light_matrix);
-        } break;
-
-        case LIGHT_CONE: {
-            SetLightZRangeCone();
-
-            if (CurrentLight.shadow) {
-                ProcessShadowMapForCone_CASE_LIGHT_CONE();
-            }
-
-            Bool front_face = LightFrontFace(CurrentLight.cone.pyramid);
-            UInt depth_func = (front_face ? FUNC_LESS : FUNC_GREATER);
-            MatrixM light_matrix;
-            SetLightMatrixCone(light_matrix, front_face);
-            SetMatrixCount();
-
-            if (Renderer._water_nrm) {
-                RenderWaterLum_CASE_LIGHT_CONE(light_matrix);
-            }
-
-            RenderLum_CASE_LIGHT_CONE(front_face, light_matrix);
-
-            if (CurrentLight.image) {
-                SetLightImage_CASE_LIGHT_CONE();
-            }
-
-            Bool clear = SetLum2_CASE_LIGHT_CONE(light_matrix);
-            RenderMultiSample_CASE_LIGHT_CONE(light_matrix, depth_func);
-
-        } break;
+        case LIGHT_CONE:
+            processConeLight(CurrentLight);
+            break;
         }
-        D.depth2DOff();
-        Renderer._shd_1s.clear();
-        Renderer._shd_ms.clear();
+
+        finalizeDrawing();
     }
+
     void Light::drawForward(ALPHA_MODE alpha) {
         SetShadowOpacity(shadow_opacity);
-
         CurrentLight = T;
+
         switch (CurrentLight.type) {
-        case LIGHT_DIR: {
-            DrawLightDirForward_CASE_LIGHT_DIR(alpha);
-            if (Renderer._water_nrm) {
-                DrawWaterLumDir_CASE_LIGHT_DIR();
-            }
-        } break;
-        case LIGHT_POINT: {
-            Flt range = CurrentLight.point.range(),
-                z_center = DistPointActiveCamPlaneZ(CurrentLight.point.pos); // Z relative to camera position
-            CurrentLightZRange.set(z_center - range, z_center + range);      // use for DX12 OMSetDepthBounds
+        case LIGHT_DIR:
+            processDirectionalLightForward(CurrentLight, alpha);
+            break;
 
-            if (CurrentLight.shadow) {
-                ShadowMap(range, CurrentLight.point.pos);
-                Renderer._frst_light_offset = OFFSET(FRST, point_shd);
-            } else {
-                Renderer._frst_light_offset = OFFSET(FRST, point);
-            }
+        case LIGHT_POINT:
+            processPointLightForward(CurrentLight, alpha);
+            break;
 
-            DrawLightPointForward_CASE_LIGHT_POINT(alpha, range);
-            DrawWaterLumPoint_CASE_LIGHT_POINT(range);
-            D.set2D();
-        } break;
+        case LIGHT_LINEAR:
+            processLinearLightForward(CurrentLight, alpha);
+            break;
 
-        case LIGHT_LINEAR: {
-            process_FORWARD_CASE_LIGHT_LINEAR(alpha);
-            if (Renderer._water_nrm) {
-                drawWaterLumLinear_CASE_LIGHT_LINEAR();
-            }
-        } break;
-
-        case LIGHT_CONE: {
-            process_FORWARD_CASE_LIGHT_CONE(alpha); // Z relative to camera position
-        } break;
+        case LIGHT_CONE:
+            processConeLightForward(CurrentLight, alpha);
+            break;
         }
-        Renderer._shd_1s.clear();
-        Renderer._shd_ms.clear();
+
+        finalizeDrawing();
     }
     static Bool CreateLightFade(Flt & fade, C CPtr & key, Ptr user) {
         fade = 0;

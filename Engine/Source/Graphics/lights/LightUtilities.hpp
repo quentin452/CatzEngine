@@ -260,7 +260,7 @@ INLINE void processLighting_CASE_LIGHT_DIR(Light &CurrentLight, int shd_map_num,
     }
 }
 
-INLINE void processLightDir_CASE_LIGHT_DIR(Light &CurrentLight) {
+INLINE void processDirectionalLight(Light &CurrentLight) {
     int shd_map_num = 0;
     bool cloud = false;
     UInt depth_func = 0;
@@ -372,6 +372,66 @@ INLINE void process_CASE_LIGHT_LINEAR(Light &CurrentLight, UInt depth_func, Matr
 
     // lum
     DrawLum_CASE_LIGHT_LINEAR(CurrentLight, depth_func, light_matrix);
+}
+
+INLINE void processPointLight(Light &CurrentLight) {
+    Flt range = CurrentLight.point.range();
+    Vec pos = CurrentLight.point.pos;
+    Flt z_center = DistPointActiveCamPlaneZ(pos);
+    CurrentLightZRange.set(z_center - range, z_center + range);
+
+    Bool front_face = LightFrontFaceBall(range, pos);
+    UInt depth_func = (front_face ? FUNC_LESS : FUNC_GREATER);
+
+    SetDepthAndShadow_CASE_LIGHT_POINT(CurrentLight, range, pos, front_face);
+    SetMatrixCount();
+
+    DrawWaterLum_CASE_LIGHT_POINT(CurrentLight, range, pos, front_face, depth_func);
+    SetLightShadow_CASE_LIGHT_POINT(CurrentLight, range, pos, front_face);
+    DrawLum_CASE_LIGHT_POINT(CurrentLight, range, pos, front_face, depth_func);
+}
+
+INLINE void processLinearLight(Light &CurrentLight) {
+    Flt range = CurrentLight.linear.range;
+    Flt z_center = DistPointActiveCamPlaneZ(CurrentLight.linear.pos);
+    CurrentLightZRange.set(z_center - range, z_center + range);
+
+    Bool front_face = LightFrontFaceBall(range, CurrentLight.linear.pos);
+    UInt depth_func = (front_face ? FUNC_LESS : FUNC_GREATER);
+    MatrixM light_matrix(front_face ? range : -range, CurrentLight.linear.pos);
+
+    D.depthClip(front_face);
+    SetMatrixCount();
+
+    process_CASE_LIGHT_LINEAR(CurrentLight, depth_func, light_matrix);
+}
+
+INLINE void processConeLight(Light &CurrentLight) {
+    SetLightZRangeCone();
+
+    if (CurrentLight.shadow) {
+        ProcessShadowMapForCone_CASE_LIGHT_CONE();
+    }
+
+    Bool front_face = LightFrontFace(CurrentLight.cone.pyramid);
+    UInt depth_func = (front_face ? FUNC_LESS : FUNC_GREATER);
+    MatrixM light_matrix;
+
+    SetLightMatrixCone(light_matrix, front_face);
+    SetMatrixCount();
+
+    if (Renderer._water_nrm) {
+        RenderWaterLum_CASE_LIGHT_CONE(light_matrix);
+    }
+
+    RenderLum_CASE_LIGHT_CONE(front_face, light_matrix);
+
+    if (CurrentLight.image) {
+        SetLightImage_CASE_LIGHT_CONE();
+    }
+
+    Bool clear = SetLum2_CASE_LIGHT_CONE(light_matrix);
+    RenderMultiSample_CASE_LIGHT_CONE(light_matrix, depth_func);
 }
 
 // FINISHED UTILITIES METHODS FOR Light::draw()
@@ -687,6 +747,53 @@ INLINE void process_FORWARD_CASE_LIGHT_CONE(ALPHA_MODE alpha) {
     }
 }
 
+INLINE void processDirectionalLightForward(Light &CurrentLight, ALPHA_MODE alpha) {
+    DrawLightDirForward_CASE_LIGHT_DIR(alpha);
+
+    if (Renderer._water_nrm) {
+        DrawWaterLumDir_CASE_LIGHT_DIR();
+    }
+}
+
+INLINE void processPointLightForward(Light &CurrentLight, ALPHA_MODE alpha) {
+    Flt range = CurrentLight.point.range();
+    Flt z_center = DistPointActiveCamPlaneZ(CurrentLight.point.pos);
+    CurrentLightZRange.set(z_center - range, z_center + range);
+
+    if (CurrentLight.shadow) {
+        ShadowMap(range, CurrentLight.point.pos);
+        Renderer._frst_light_offset = OFFSET(FRST, point_shd);
+    } else {
+        Renderer._frst_light_offset = OFFSET(FRST, point);
+    }
+
+    DrawLightPointForward_CASE_LIGHT_POINT(alpha, range);
+    DrawWaterLumPoint_CASE_LIGHT_POINT(range);
+    D.set2D();
+}
+
+INLINE void processLinearLightForward(Light &CurrentLight, ALPHA_MODE alpha) {
+    process_FORWARD_CASE_LIGHT_LINEAR(alpha);
+
+    if (Renderer._water_nrm) {
+        drawWaterLumLinear_CASE_LIGHT_LINEAR();
+    }
+}
+
+INLINE void processConeLightForward(Light &CurrentLight, ALPHA_MODE alpha) {
+    process_FORWARD_CASE_LIGHT_CONE(alpha);
+}
+
 // FINISHED UTILITIES METHODS FOR Light::drawForward(ALPHA_MODE alpha)
+
+// STARTED COMMON CODE
+
+INLINE void finalizeDrawing() {
+    D.depth2DOff();
+    Renderer._shd_1s.clear();
+    Renderer._shd_ms.clear();
+}
+
+// FINISHED COMMON CODE
 
 #endif // LIGHT_UTILITIES_HPP

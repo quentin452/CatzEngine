@@ -4,7 +4,7 @@
 #include "stdafx.h"
 
 // TODO IMPROVE AGAIN MAINTAINABILITY
-// TODO MADE SAME FOR Light::drawForward(ALPHA_MODE alpha)
+
 // STARTED UTILITIES METHODS FOR Light::draw()
 
 INLINE void SetDepthAndShadow_CASE_LIGHT_POINT(Light &CurrentLight, Flt range, Vec &pos, Bool front_face) {

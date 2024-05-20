@@ -407,7 +407,8 @@
         <itemPath>../Source/Graphics/Image Pixel.cpp</itemPath>
         <itemPath>../Source/Graphics/Image RT.cpp</itemPath>
         <itemPath>../Source/Graphics/Image.cpp</itemPath>
-        <itemPath>../Source/Graphics/Light.cpp</itemPath>
+        <itemPath>../Source/Graphics/lights/Light.cpp</itemPath>
+        <!--<itemPath>../Source/Graphics/lights/LightUtilities.hpp</itemPath> -->
         <itemPath>../Source/Graphics/Material.cpp</itemPath>
         <itemPath>../Source/Graphics/Particle.cpp</itemPath>
         <itemPath>../Source/Graphics/Renderer Instancing.cpp</itemPath>
@@ -1534,7 +1535,9 @@
       </item>
       <item path="../Source/Graphics/Import/WEBP.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../Source/Graphics/Light.cpp" ex="false" tool="1" flavor2="0">
+      <item path="../Source/Graphics/lights/Light.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <!--<item path="../Source/Graphics/lights/LightUtilities.hpp" ex="false" tool="1" flavor2="0">-->
       </item>
       <item path="../Source/Graphics/Material.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -2970,7 +2973,9 @@
       </item>
       <item path="../Source/Graphics/Import/WEBP.cpp" ex="false" tool="1" flavor2="0">
       </item>
-      <item path="../Source/Graphics/Light.cpp" ex="false" tool="1" flavor2="0">
+      <item path="../Source/Graphics/lights/Light.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <!--<item path="../Source/Graphics/lights/LightUtilities.hpp" ex="false" tool="1" flavor2="0">-->
       </item>
       <item path="../Source/Graphics/Material.cpp" ex="false" tool="1" flavor2="0">
       </item>

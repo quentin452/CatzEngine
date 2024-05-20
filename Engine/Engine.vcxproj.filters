@@ -1697,9 +1697,12 @@
     <ClCompile Include="Source\Graphics\Image.cpp">
       <Filter>Source\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Source\Graphics\Light.cpp">
+    <ClCompile Include="Source\Graphics\lights\Light.cpp">
       <Filter>Source\Graphics</Filter>
     </ClCompile>
+    <!--<ClCompile Include="Source\Graphics\lights\LightUtilities.hpp">
+      <Filter>Source\Graphics</Filter>
+    </ClCompile> -->
     <ClCompile Include="Source\Graphics\Material.cpp">
       <Filter>Source\Graphics</Filter>
     </ClCompile>

@@ -1484,6 +1484,9 @@ void Application::del() {
         Paks.del();         // !! delete after deleting sound  !! because sound streaming can still use file data
         InputDevices.del(); // !! delete after deleting window !! because releasing some joypads may take some time and window would be left visible
         HideNotifications();
+        GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+            LogLevel::INFO, __FILE__, __LINE__,
+            "4 del call from Application");
 #if WINDOWS_OLD
         RELEASE(TaskbarList);
         if (ShutCOM) {

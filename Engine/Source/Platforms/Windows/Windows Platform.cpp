@@ -180,7 +180,7 @@ void InitThreadedLoggerForCPP() {
                                    "\\.CatzEngine\\logging\\";
     LoggerGlobals::LogFilePath =
         "C:\\Users\\" + LoggerGlobals::UsernameDirectory +
-        "\\.CatzEngine\\logging\\CatzEngine2.log";
+        "\\.CatzEngine\\logging\\CatzEngine.log";
     LoggerGlobals::LogFolderBackupPath =
         "C:\\Users\\" + LoggerGlobals::UsernameDirectory +
         "\\.CatzEngine\\logging\\LogBackup";
@@ -1158,13 +1158,6 @@ INT WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     if (App.create())
         App.loop();
     App.del();
-
-    // Exit Logger Thread And Save logs to file
-    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
-        LogLevel::INFO, __FILE__, __LINE__,
-        "Stop Logger Thread + Game exited in wWinMain method");
-    GlobalsLoggerInstance::LoggerInstance.ExitLoggerThread();
-
     return 0;
 }
 
@@ -1192,13 +1185,6 @@ INT WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     }
 
     Windows::ApplicationModel::Core::CoreApplication::Run(ref new FrameworkViewSource());
-
-    // Exit Logger Thread And Save logs to file
-    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
-        LogLevel::INFO, __FILE__, __LINE__,
-        "Stop Logger Thread + Game exited in main method");
-    GlobalsLoggerInstance::LoggerInstance.ExitLoggerThread();
-
     return 0;
 }
 #endif

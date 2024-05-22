@@ -298,7 +298,9 @@ void Shut() {
         Run(RunAtExit, S, false, App.elevated());
     GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
         LogLevel::INFO, __FILE__, __LINE__,
-        "Finish Shut method from Main.cpp");
+        "Finish Shut method from Main.cpp + Exit Logger Thread");
+    GlobalsLoggerInstance::LoggerInstance.ExitLoggerThread();
+    //FOR NOW NEED TO CALL EXIT LOGGER THREAD HERE BECAUSE MEMORY CRASH AT GAME EXIT TODO NEED TO FIX
 }
 /******************************************************************************/
 bool Update() { return false; }

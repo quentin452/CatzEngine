@@ -18,13 +18,13 @@ void InitThreadedLoggerForCPP() {
                                    "\\.CatzEngine\\logging\\";
     LoggerGlobals::LogFilePath =
         "C:\\Users\\" + LoggerGlobals::UsernameDirectory +
-        "\\.CatzEngine\\logging\\ThreadedLoggerForCPP.log";
+        "\\.CatzEngine\\logging\\CatzEngine.log";
     LoggerGlobals::LogFolderBackupPath =
         "C:\\Users\\" + LoggerGlobals::UsernameDirectory +
         "\\.CatzEngine\\logging\\LogBackup";
     LoggerGlobals::LogFileBackupPath =
         "C:\\Users\\" + LoggerGlobals::UsernameDirectory +
-        "\\.CatzEngine\\logging\\LogBackup\\ThreadedLoggerForCPP-";
+        "\\.CatzEngine\\logging\\LogBackup\\CatzEngine-";
 
     GlobalsLoggerInstance::LoggerInstance.StartLoggerThread(
         LoggerGlobals::LogFolderPath, LoggerGlobals::LogFilePath,

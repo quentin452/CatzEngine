@@ -278,6 +278,9 @@ bool Init() {
     return true;
 }
 void Shut() {
+    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+        LogLevel::INFO, __FILE__, __LINE__,
+        "Start Shut method from Main.cpp");
     // delete threaded objects
     NewLod.del();
     MeshAO.del();
@@ -288,12 +291,14 @@ void Shut() {
     Proj.close();
     if (Initialized)
         SaveSettings(); // save before deletion
-    CodeEdit.del();
     WorkerThreads.del();
     BuilderThreads.del();
     BackgroundThreads.del();
     if (RunAtExit.is())
         Run(RunAtExit, S, false, App.elevated());
+    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+        LogLevel::INFO, __FILE__, __LINE__,
+        "Finish Shut method from Main.cpp");
 }
 /******************************************************************************/
 bool Update() { return false; }

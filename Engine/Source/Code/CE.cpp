@@ -985,9 +985,15 @@ CodeEditor::CodeEditor() {
 #endif
 }
 void CodeEditor::del() {
+    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+        LogLevel::INFO, __FILE__, __LINE__,
+        "Start CodeEditor::del");
     sources.del();    // delete before 'Symbols' container
     SymbolDefs.del(); // delete before 'Symbols' container
     items.del();
+    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+        LogLevel::INFO, __FILE__, __LINE__,
+        "Finish CodeEditor::del");
 }
 /******************************************************************************/
 void CodeEditor::replacePath(C Str &src, C Str &dest) {
@@ -1202,7 +1208,6 @@ void CodeEditor::create(GuiObj *parent, Bool menu_on_top) {
     SystemMacros.New().set("__cplusplus");
     SystemMacros.New().set("_WIN32"); // for constant behavior across platforms, define _WIN32 everywhere
     SystemMacros.sort(CompareCS);     // macros need to be sorted
-
     // setup gui
     if (T.parent) // only if we're adding it to parent, so we can create Code Editor in Engine Builder without using GUI at all
     {
@@ -1223,6 +1228,7 @@ void CodeEditor::create(GuiObj *parent, Bool menu_on_top) {
         b_close.image = "Gui/close.img";
         b_close.skin = &EmptyGuiSkin;
 
+        // TODO FIX MEMORY CRASH WHEN EXITING THE APP
         Node<MenuElm> view_what_elms;
         view_what_elms.New().create("Element Names", ViewElmNames).flag(MENU_TOGGLABLE).setOn(view_elm_names).desc("Display project element names on top of their ID in the codes\nKeyboard Shortcut: Alt+E");
         view_what_elms++;
@@ -1230,7 +1236,6 @@ void CodeEditor::create(GuiObj *parent, Bool menu_on_top) {
         view_what_elms.New().create("Functions", ViewFuncs).flag(MENU_TOGGLABLE | MENU_HIDDEN).setOn(view_funcs).desc("Show Functions");
         view_what_elms.New().create("Function Bodies", ViewFuncBodies).flag(MENU_TOGGLABLE).setOn(view_func_bodies).desc("Show Function Bodies\nKeyboard Shortcut: Alt+B");
         view_what_elms.New().create("Private Members", ViewPrivateMembers).flag(MENU_TOGGLABLE).setOn(view_private_members).desc("Show Class Private Members");
-
         *parent += view_mode.create("View Mode").func(RefreshSourceLines, T).focusable(false).desc("Keyboard Shortcut: Alt+V");
         *parent += view_what.create().setData(view_what_elms);
         view_what.menu_align = -1;
@@ -1293,6 +1298,7 @@ void CodeEditor::create(GuiObj *parent, Bool menu_on_top) {
         visibleOpenedFiles(false);
         visibleAndroidDevLog(false);
         resize();
+        // FINISH
     }
 
     if (!loadSymbols(CodeEditorDat, false)) {
@@ -2274,12 +2280,19 @@ static void CloseAll(Bool all_saved = true, Ptr user = null) { CE.closeAll(); }
 
 void CodeEditorInterface::del() { CE.del(); }
 void CodeEditorInterface::clear() {
+    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+        LogLevel::INFO, __FILE__, __LINE__,
+        "Start CodeEditorInterface::clear");
     CE.closeAll();
     CE.sources.removeData(CE.findSource(Str(AutoSource)), true);
     clearActiveSources();
     activateApp(true);
+    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+        LogLevel::INFO, __FILE__, __LINE__,
+        "Finish CodeEditorInterface::clear");
 }
 void CodeEditorInterface::create(GuiObj &parent, Bool menu_on_top) {
+    // return;
     CE.cei(T);
     CE.create(&parent, menu_on_top);
 }
@@ -2713,6 +2726,7 @@ Str MSBuildParams(C Str &project, C Str &config, C Str &platform) {
     // optional params: /target:clean /target:rebuild /FileLogger /nologo /Verbosity:(quiet, minimal, normal, detailed, or diagnostic) /p:AppxPackageSigningEnabled=false
     return S + '"' + NormalizePath(MakeFullPath(project)) + "\" /Verbosity:minimal /nologo" + (config.is() ? S + " /p:Configuration=\"" + config + '"' : S) + (platform.is() ? S + " /p:Platform=\"" + platform + '"' : S);
 }
+
 Str VSBuildParams(C Str &project, C Str &config, C Str &platform, C Str &log) {
     return S + "/Build \"" + config + (platform.is() ? S + '|' + platform : S) + "\" \"" + NormalizePath(MakeFullPath(project)) + '"' + (log.is() ? S + " /Out \"" + NormalizePath(MakeFullPath(log)) + '"' : S);
 }

@@ -831,11 +831,20 @@ void Application::detectMemLeaks() {
         _cexit();
         if (Int m = Abs(_mem_leaks)) {
             ListMemLeaks();
+
+            // Log the number of memory leaks detected
+            GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+                LogLevel::ERRORING, __FILE__, __LINE__,
+                std::string("Memory leaks detected: ") + std::to_string(m));
+
             showError(S + m + " Memory Leak(s)");
         }
         _exit(-1); // manual exit after cleaning with '_cexit'
 #elif 0 && MAC
         LogN("Application Memory Leaks Remaining:");
+        // GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+        //     LogLevel::ERRORING, __FILE__, __LINE__,
+        //    "Application Memory Leaks Remaining:");
 #endif
     }
 }

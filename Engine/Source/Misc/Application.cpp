@@ -826,6 +826,7 @@ void Application::deleteSelfAtExit() {
     _del_self_at_exit = true;
 }
 void Application::detectMemLeaks() {
+#if DEBUG
     if ((flag & APP_MEM_LEAKS) && _mem_leaks) {
 #if WINDOWS
         //_cexit();
@@ -847,6 +848,7 @@ void Application::detectMemLeaks() {
         //    "Application Memory Leaks Remaining:");
 #endif
     }
+#endif
 }
 #if WINDOWS_NEW
 ref struct Exiter sealed {

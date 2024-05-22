@@ -64,32 +64,38 @@ LONG DisableMemoryCrashDump() {
 }*/
 
 bool elevatePrivileges(const char *exePath) {
-    bool isElevated = false;
-    HANDLE hToken = nullptr;
-    if (OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
-        TOKEN_ELEVATION Elevation;
-        DWORD dwSize;
-        if (GetTokenInformation(hToken, TokenElevation, &Elevation, sizeof(Elevation), &dwSize)) {
-            isElevated = Elevation.TokenIsElevated;
+    // Check if the exePath ends with "Titan Editor.exe"
+    std::string fileName = exePath;
+    if (fileName.size() >= 15 && fileName.substr(fileName.size() - 15) == "Titan Editor.exe") {
+        bool isElevated = false;
+        HANDLE hToken = nullptr;
+        if (OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
+            TOKEN_ELEVATION Elevation;
+            DWORD dwSize;
+            if (GetTokenInformation(hToken, TokenElevation, &Elevation, sizeof(Elevation), &dwSize)) {
+                isElevated = Elevation.TokenIsElevated;
+            }
         }
-    }
-    if (!isElevated) {
-        SHELLEXECUTEINFOA shExInfo = {0};
-        shExInfo.cbSize = sizeof(SHELLEXECUTEINFOA);
-        shExInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
-        shExInfo.lpVerb = "runas";
-        shExInfo.lpFile = exePath;
-        shExInfo.lpParameters = "";
-        shExInfo.nShow = SW_SHOW;
-        if (ShellExecuteExA(&shExInfo)) {
-            WaitForSingleObject(shExInfo.hProcess, INFINITE);
-            CloseHandle(shExInfo.hProcess);
-            return true;
+        if (!isElevated) {
+            SHELLEXECUTEINFOA shExInfo = {0};
+            shExInfo.cbSize = sizeof(SHELLEXECUTEINFOA);
+            shExInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
+            shExInfo.lpVerb = "runas";
+            shExInfo.lpFile = exePath;
+            shExInfo.lpParameters = "";
+            shExInfo.nShow = SW_SHOW;
+            if (ShellExecuteExA(&shExInfo)) {
+                WaitForSingleObject(shExInfo.hProcess, INFINITE);
+                CloseHandle(shExInfo.hProcess);
+                return true;
+            }
         }
+        return isElevated;
+    } else {
+        // If the filename does not match, assume already elevated
+        return true;
     }
-    return isElevated;
 }
-
 void InitThreadedLoggerForCPP() {
 #ifdef _WIN32
     LoggerGlobals::UsernameDirectory = std::getenv("USERNAME");
@@ -1061,6 +1067,7 @@ void Application::wait(SyncEvent &event) {
 /******************************************************************************/
 } // namespace EE
 /******************************************************************************/
+
 #if WINDOWS_OLD
 INT WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
     InitThreadedLoggerForCPP();
@@ -1072,45 +1079,41 @@ INT WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
         GlobalsLoggerInstance::LoggerInstance.ExitLoggerThread();
         return EXIT_FAILURE;
     }
-    LONG result = DisableMemoryCrashDump();
-    if (result == ERROR_SUCCESS) {
-
-        GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
-            LogLevel::INFO, __FILE__, __LINE__,
-            "Init Logger Thread in wWinMain method");
-#if JP_GAMEPAD_INPUT
-        RoInitialize(RO_INIT_MULTITHREADED);
-#endif
-#if 1
-        const Int start = 1; // start from #1, because #0 is always the executable name (if file name has spaces, then they're included in the #0 argv)
-        App.cmd_line.setNum(__argc - start);
-        FREPAO(App.cmd_line) = __wargv[start + i];
-#else
-        int argc;
-        if (PWSTR *argv = CommandLineToArgvW(pCmdLine, &argc)) // there's also 'GetCommandLineW'
-        {
-            const Int start = 1; // start from #1, because #0 is always the executable name (if file name has spaces, then they're included in the #0 argv)
-            App.cmd_line.setNum(argc - start);
-            FREPAO(App.cmd_line) = argv[start + i];
-            LocalFree(argv);
+    if (strcmp(exePath, "Titan Editor.exe") == 0) {
+        LONG result = DisableMemoryCrashDump();
+        if (result == ERROR_SUCCESS) {
+            GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+                LogLevel::INFO, __FILE__, __LINE__,
+                "Init Logger Thread in wWinMain method");
+        } else {
+            GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+                LogLevel::INFO, __FILE__, __LINE__,
+                "Cannot Create Reg values to disable Memory Crash Dump");
+            GlobalsLoggerInstance::LoggerInstance.ExitLoggerThread();
         }
-#endif
-        App._hinstance = hinstance;
-        if (App.create())
-            App.loop();
-        App.del();
-        // Exit Logger Thread And Save logs to file
-        GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
-            LogLevel::INFO, __FILE__, __LINE__,
-            "Stop Logger Thread + Game exited in wWinMain method");
-    } else {
-        GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
-            LogLevel::INFO, __FILE__, __LINE__,
-            "Cannot Create Reg values to disable Memory Crash Dump");
-        GlobalsLoggerInstance::LoggerInstance.ExitLoggerThread();
     }
+
+#if JP_GAMEPAD_INPUT
+    RoInitialize(RO_INIT_MULTITHREADED);
+#endif
+
+    const Int start = 1; // start from #1, because #0 is always the executable name (if file name has spaces, then they're included in the #0 argv)
+    App.cmd_line.setNum(__argc - start);
+    FREPAO(App.cmd_line) = __wargv[start + i];
+
+    App._hinstance = hinstance;
+    if (App.create())
+        App.loop();
+    App.del();
+
+    // Exit Logger Thread And Save logs to file
+    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+        LogLevel::INFO, __FILE__, __LINE__,
+        "Stop Logger Thread + Game exited in wWinMain method");
+
     return 0;
 }
+
 #elif WINDOWS_NEW
 [Platform::MTAThread] int main(Platform::Array<Platform::String ^> ^ args) {
     InitThreadedLoggerForCPP();
@@ -1122,34 +1125,42 @@ INT WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
         GlobalsLoggerInstance::LoggerInstance.ExitLoggerThread();
         return EXIT_FAILURE;
     }
-    LONG result = DisableMemoryCrashDump();
-    if (result == ERROR_SUCCESS) {
-        GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
-            LogLevel::INFO, __FILE__, __LINE__,
-            "Init Logger Thread in main method");
-        /* TODO: WINDOWS_NEW setting initial window size and fullscreen mode - check in the future
-           changing these didn't make any difference at this launch, only next launch got affected
-           if(1)ApplicationView::PreferredLaunchViewSize = Size(300, 300);
-           else ApplicationView::PreferredLaunchViewSize = Size(600, 600);
-           ApplicationView::PreferredLaunchWindowingMode = ApplicationViewWindowingMode::PreferredLaunchViewSize;
-         //ApplicationView::PreferredLaunchWindowingMode = ApplicationViewWindowingMode::Auto;
-         //ApplicationView::PreferredLaunchWindowingMode = ApplicationViewWindowingMode::FullScreen;*/
-        if (args) {
-            const Int start = 1; // start from #1, because #0 is always the executable name (if file name has spaces, then they're included in the #0 argv)
-            App.cmd_line.setNum(args->Length - start);
-            FREPAO(App.cmd_line) = args->get(start + i)->Data();
+    // Appel à DisableMemoryCrashDump seulement si le nom de fichier est "Titan Editor.exe"
+    if (strcmp(exePath, "Titan Editor.exe") == 0) {
+        LONG result = DisableMemoryCrashDump();
+        if (result == ERROR_SUCCESS) {
+            GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+                LogLevel::INFO, __FILE__, __LINE__,
+                "Init Logger Thread in main method");
+        } else {
+            GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+                LogLevel::INFO, __FILE__, __LINE__,
+                "Cannot Create Reg values to disable Memory Crash Dump");
+            GlobalsLoggerInstance::LoggerInstance.ExitLoggerThread();
         }
-        Windows::ApplicationModel::Core::CoreApplication::Run(ref new FrameworkViewSource());
-        // Exit Logger Thread And Save logs to file
-        GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
-            LogLevel::INFO, __FILE__, __LINE__,
-            "Stop Logger Thread + Game exited in main method");
-    } else {
-        GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
-            LogLevel::INFO, __FILE__, __LINE__,
-            "Cannot Create Reg values to disable Memory Crash Dump");
-        GlobalsLoggerInstance::LoggerInstance.ExitLoggerThread();
     }
+
+    /* TODO: WINDOWS_NEW setting initial window size and fullscreen mode - check in the future
+          changing these didn't make any difference at this launch, only next launch got affected
+          if(1)ApplicationView::PreferredLaunchViewSize = Size(300, 300);
+          else ApplicationView::PreferredLaunchViewSize = Size(600, 600);
+          ApplicationView::PreferredLaunchWindowingMode = ApplicationViewWindowingMode::PreferredLaunchViewSize;
+        //ApplicationView::PreferredLaunchWindowingMode = ApplicationViewWindowingMode::Auto;
+        //ApplicationView::PreferredLaunchWindowingMode = ApplicationViewWindowingMode::FullScreen;*/
+
+    if (args) {
+        const Int start = 1; // start from #1, because #0 is always the executable name (if file name has spaces, then they're included in the #0 argv)
+        App.cmd_line.setNum(args->Length - start);
+        FREPAO(App.cmd_line) = args->get(start + i)->Data();
+    }
+
+    Windows::ApplicationModel::Core::CoreApplication::Run(ref new FrameworkViewSource());
+
+    // Exit Logger Thread And Save logs to file
+    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+        LogLevel::INFO, __FILE__, __LINE__,
+        "Stop Logger Thread + Game exited in main method");
+
     return 0;
 }
 #endif

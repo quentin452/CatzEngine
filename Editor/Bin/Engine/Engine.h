@@ -30,8 +30,13 @@
       #endif
 
 /******************************************************************************/
+// FIX /RTCc rejects conformant code, so it is not supported by the C++ Standard Library. Either remove this compiler option, or define _ALLOW_RTCc_IN_STL to suppress this error
+/******************************************************************************/
+#define _ALLOW_RTCc_IN_STL
+/******************************************************************************/
 // DETECT PLATFORM
 /******************************************************************************/
+
 // 32/64-bit
 #if defined _WIN64 || defined __LP64__
 #define X64 1 // 64-bit
@@ -133,9 +138,10 @@
 // ThreadedLoggerForCPP
 /******************************************************************************/
 #include "threaded_logger_for_cpp/GlobalsLoggerInstance.h"
-#include "threaded_logger_for_cpp/LoggerThread.hpp"
-#include "threaded_logger_for_cpp/LoggerGlobals.hpp"
 #include "threaded_logger_for_cpp/LoggerFileSystem.hpp"
+#include "threaded_logger_for_cpp/LoggerGlobals.hpp"
+#include "threaded_logger_for_cpp/LoggerThread.hpp"
+
 /******************************************************************************/
 #if EE_PRIVATE >= 2
 #include "Engine Config.h" // include Engine configuration created by "Engine Builder" or the default one if not available, this needs to be done after platform detection

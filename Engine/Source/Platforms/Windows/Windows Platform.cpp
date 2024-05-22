@@ -13,88 +13,157 @@ namespace EE {
 /******************************************************************************/
 // Avoid making 70 mb of crash dump "every time" you close the app (avoid https://github.com/quentin452/CatzEngine/issues/24)
 LONG DisableMemoryCrashDump() {
-    HKEY hKey;
+    HKEY hKey1 = nullptr, hKey2 = nullptr;
     LONG result;
     DWORD dwDisposition;
     DWORD CustomDumpFlags = 0x41000200;
     DWORD DumpCount = 0;
     DWORD DumpType = 0;
 
+    std::wstring registryPath1 = L"SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting\\LocalDumps\\Titan Editor.exe";
     result = RegCreateKeyEx(
         HKEY_LOCAL_MACHINE,
-        L"SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting\\LocalDumps\\Titan Editor.exe",
+        registryPath1.c_str(),
         0,
         NULL,
         REG_OPTION_NON_VOLATILE,
         KEY_WRITE,
         NULL,
-        &hKey,
+        &hKey1,
         &dwDisposition);
 
-    if (result == ERROR_SUCCESS) {
-        result = RegSetValueEx(hKey, L"CustomDumpFlags", 0, REG_DWORD, (BYTE *)&CustomDumpFlags, sizeof(DWORD));
-        result = RegSetValueEx(hKey, L"DumpCount", 0, REG_DWORD, (BYTE *)&DumpCount, sizeof(DWORD));
-        result = RegSetValueEx(hKey, L"DumpType", 0, REG_DWORD, (BYTE *)&DumpType, sizeof(DWORD));
-        RegCloseKey(hKey);
+    if (result != ERROR_SUCCESS) {
+        return result;
     }
 
+    result = RegSetValueEx(hKey1, L"CustomDumpFlags", 0, REG_DWORD, (BYTE *)&CustomDumpFlags, sizeof(DWORD));
+    if (result != ERROR_SUCCESS) {
+        RegCloseKey(hKey1);
+        return result;
+    }
+
+    result = RegSetValueEx(hKey1, L"DumpCount", 0, REG_DWORD, (BYTE *)&DumpCount, sizeof(DWORD));
+    if (result != ERROR_SUCCESS) {
+        RegCloseKey(hKey1);
+        return result;
+    }
+
+    result = RegSetValueEx(hKey1, L"DumpType", 0, REG_DWORD, (BYTE *)&DumpType, sizeof(DWORD));
+    if (result != ERROR_SUCCESS) {
+        RegCloseKey(hKey1);
+        return result;
+    }
+
+    RegCloseKey(hKey1);
+
+    // Registry path for Project.exe
+    std::wstring registryPath2 = L"SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting\\LocalDumps\\Project.exe";
+    result = RegCreateKeyEx(
+        HKEY_LOCAL_MACHINE,
+        registryPath2.c_str(),
+        0,
+        NULL,
+        REG_OPTION_NON_VOLATILE,
+        KEY_WRITE,
+        NULL,
+        &hKey2,
+        &dwDisposition);
+
+    if (result != ERROR_SUCCESS) {
+        return result;
+    }
+
+    // Set values for Project.exe
+    result = RegSetValueEx(hKey2, L"CustomDumpFlags", 0, REG_DWORD, (BYTE *)&CustomDumpFlags, sizeof(DWORD));
+    if (result != ERROR_SUCCESS) {
+        RegCloseKey(hKey2);
+        return result;
+    }
+
+    result = RegSetValueEx(hKey2, L"DumpCount", 0, REG_DWORD, (BYTE *)&DumpCount, sizeof(DWORD));
+    if (result != ERROR_SUCCESS) {
+        RegCloseKey(hKey2);
+        return result;
+    }
+
+    result = RegSetValueEx(hKey2, L"DumpType", 0, REG_DWORD, (BYTE *)&DumpType, sizeof(DWORD));
+    if (result != ERROR_SUCCESS) {
+        RegCloseKey(hKey2);
+        return result;
+    }
+
+    RegCloseKey(hKey2);
     return result;
 }
 
-/*void terminatePreviousInstances() {
-    DWORD currentProcessId = GetCurrentProcessId();
-    HANDLE hSnapShot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-    PROCESSENTRY32 pe32;
-    pe32.dwSize = sizeof(PROCESSENTRY32);
-    if (Process32First(hSnapShot, &pe32)) {
-        do {
-            wchar_t szExeFileW[MAX_PATH];
-            MultiByteToWideChar(CP_ACP, 0, pe32.szExeFile, -1, szExeFileW, MAX_PATH);
-            if (_wcsicmp(szExeFileW, L"Titan Editor.exe") == 0 &&
-                pe32.th32ProcessID != currentProcessId) {
-                HANDLE hProcess = OpenProcess(PROCESS_TERMINATE, FALSE, pe32.th32ProcessID);
-                if (hProcess != NULL) {
-                    TerminateProcess(hProcess, 1);
-                    CloseHandle(hProcess);
-                }
-            }
-        } while (Process32Next(hSnapShot, &pe32));
-    }
-    CloseHandle(hSnapShot);
-}*/
-
 bool elevatePrivileges(const char *exePath) {
-    // Check if the exePath ends with "Titan Editor.exe"
-    std::string fileName = exePath;
-    if (fileName.size() >= 15 && fileName.substr(fileName.size() - 15) == "Titan Editor.exe") {
-        bool isElevated = false;
-        HANDLE hToken = nullptr;
-        if (OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
-            TOKEN_ELEVATION Elevation;
-            DWORD dwSize;
-            if (GetTokenInformation(hToken, TokenElevation, &Elevation, sizeof(Elevation), &dwSize)) {
-                isElevated = Elevation.TokenIsElevated;
-            }
+    bool isElevated = false;
+    HANDLE hToken = nullptr;
+    if (OpenProcessToken(GetCurrentProcess(), TOKEN_QUERY, &hToken)) {
+        TOKEN_ELEVATION Elevation;
+        DWORD dwSize;
+        if (GetTokenInformation(hToken, TokenElevation, &Elevation, sizeof(Elevation), &dwSize)) {
+            isElevated = Elevation.TokenIsElevated;
         }
-        if (!isElevated) {
-            SHELLEXECUTEINFOA shExInfo = {0};
-            shExInfo.cbSize = sizeof(SHELLEXECUTEINFOA);
-            shExInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
-            shExInfo.lpVerb = "runas";
-            shExInfo.lpFile = exePath;
-            shExInfo.lpParameters = "";
-            shExInfo.nShow = SW_SHOW;
-            if (ShellExecuteExA(&shExInfo)) {
-                WaitForSingleObject(shExInfo.hProcess, INFINITE);
-                CloseHandle(shExInfo.hProcess);
-                return true;
-            }
-        }
-        return isElevated;
-    } else {
-        // If the filename does not match, assume already elevated
-        return true;
+        CloseHandle(hToken);
     }
+
+    if (!isElevated) {
+        SHELLEXECUTEINFOA shExInfo = {0};
+        shExInfo.cbSize = sizeof(SHELLEXECUTEINFOA);
+        shExInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
+        shExInfo.lpVerb = "runas";
+        shExInfo.lpFile = exePath;
+        shExInfo.lpParameters = "";
+        shExInfo.nShow = SW_SHOW;
+
+        // Attempt to run the process as an elevated user
+        if (ShellExecuteExA(&shExInfo)) {
+            // Wait for the elevation process to complete
+            WaitForSingleObject(shExInfo.hProcess, INFINITE);
+
+            // Check the exit code of the elevation process to determine if it was successful
+            DWORD exitCode;
+            if (GetExitCodeProcess(shExInfo.hProcess, &exitCode)) {
+                CloseHandle(shExInfo.hProcess);
+                return exitCode == 0; // Elevation succeeded if exit code is 0
+            }
+
+            CloseHandle(shExInfo.hProcess);
+        }
+        return false; // Elevation failed or was cancelled
+    }
+
+    return isElevated;
+}
+
+Bool Init_elevatePrivile_DisableMemoryCrashDumpg_For_Main() {
+    char exePath[MAX_PATH];
+    GetModuleFileNameA(nullptr, exePath, MAX_PATH);
+
+    // Extract file name from path
+    char exeName[MAX_PATH];
+    _splitpath_s(exePath, NULL, 0, NULL, 0, exeName, MAX_PATH, NULL, 0);
+
+    if (strcmp(exeName, "Titan Editor") == 0) {
+        if (!elevatePrivileges(exePath)) {
+            GlobalsLoggerInstance::LoggerInstance
+                .logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Failed to get admin privileges");
+            return false;
+        }
+
+        LONG result = DisableMemoryCrashDump();
+        if (result == ERROR_SUCCESS) {
+            GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+                LogLevel::INFO, __FILE__, __LINE__,
+                "Init Logger Thread in main method");
+        } else {
+            GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+                LogLevel::INFO, __FILE__, __LINE__,
+                "Cannot Create Reg values to disable Memory Crash Dump");
+        }
+    }
+    return true;
 }
 void InitThreadedLoggerForCPP() {
 #ifdef _WIN32
@@ -111,7 +180,7 @@ void InitThreadedLoggerForCPP() {
                                    "\\.CatzEngine\\logging\\";
     LoggerGlobals::LogFilePath =
         "C:\\Users\\" + LoggerGlobals::UsernameDirectory +
-        "\\.CatzEngine\\logging\\CatzEngine.log";
+        "\\.CatzEngine\\logging\\CatzEngine2.log";
     LoggerGlobals::LogFolderBackupPath =
         "C:\\Users\\" + LoggerGlobals::UsernameDirectory +
         "\\.CatzEngine\\logging\\LogBackup";
@@ -1071,28 +1140,12 @@ void Application::wait(SyncEvent &event) {
 #if WINDOWS_OLD
 INT WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
     InitThreadedLoggerForCPP();
-    char exePath[MAX_PATH];
-    GetModuleFileNameA(nullptr, exePath, MAX_PATH);
-    if (!elevatePrivileges(exePath)) {
+    if (!Init_elevatePrivile_DisableMemoryCrashDumpg_For_Main()) {
         GlobalsLoggerInstance::LoggerInstance
             .logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Failed to get admin privileges");
         GlobalsLoggerInstance::LoggerInstance.ExitLoggerThread();
         return EXIT_FAILURE;
     }
-    if (strcmp(exePath, "Titan Editor.exe") == 0) {
-        LONG result = DisableMemoryCrashDump();
-        if (result == ERROR_SUCCESS) {
-            GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
-                LogLevel::INFO, __FILE__, __LINE__,
-                "Init Logger Thread in wWinMain method");
-        } else {
-            GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
-                LogLevel::INFO, __FILE__, __LINE__,
-                "Cannot Create Reg values to disable Memory Crash Dump");
-            GlobalsLoggerInstance::LoggerInstance.ExitLoggerThread();
-        }
-    }
-
 #if JP_GAMEPAD_INPUT
     RoInitialize(RO_INIT_MULTITHREADED);
 #endif
@@ -1110,6 +1163,7 @@ INT WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
         LogLevel::INFO, __FILE__, __LINE__,
         "Stop Logger Thread + Game exited in wWinMain method");
+    GlobalsLoggerInstance::LoggerInstance.ExitLoggerThread();
 
     return 0;
 }
@@ -1117,29 +1171,12 @@ INT WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 #elif WINDOWS_NEW
 [Platform::MTAThread] int main(Platform::Array<Platform::String ^> ^ args) {
     InitThreadedLoggerForCPP();
-    char exePath[MAX_PATH];
-    GetModuleFileNameA(nullptr, exePath, MAX_PATH);
-    if (!elevatePrivileges(exePath)) {
+    if (!Init_elevatePrivile_DisableMemoryCrashDumpg_For_Main(exePath)) {
         GlobalsLoggerInstance::LoggerInstance
             .logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Failed to get admin privileges");
         GlobalsLoggerInstance::LoggerInstance.ExitLoggerThread();
         return EXIT_FAILURE;
     }
-    // Appel à DisableMemoryCrashDump seulement si le nom de fichier est "Titan Editor.exe"
-    if (strcmp(exePath, "Titan Editor.exe") == 0) {
-        LONG result = DisableMemoryCrashDump();
-        if (result == ERROR_SUCCESS) {
-            GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
-                LogLevel::INFO, __FILE__, __LINE__,
-                "Init Logger Thread in main method");
-        } else {
-            GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
-                LogLevel::INFO, __FILE__, __LINE__,
-                "Cannot Create Reg values to disable Memory Crash Dump");
-            GlobalsLoggerInstance::LoggerInstance.ExitLoggerThread();
-        }
-    }
-
     /* TODO: WINDOWS_NEW setting initial window size and fullscreen mode - check in the future
           changing these didn't make any difference at this launch, only next launch got affected
           if(1)ApplicationView::PreferredLaunchViewSize = Size(300, 300);
@@ -1160,6 +1197,7 @@ INT WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
         LogLevel::INFO, __FILE__, __LINE__,
         "Stop Logger Thread + Game exited in main method");
+    GlobalsLoggerInstance::LoggerInstance.ExitLoggerThread();
 
     return 0;
 }

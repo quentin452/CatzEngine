@@ -31,7 +31,7 @@ class LoggerThread {
 #ifndef EMSCRIPTEN
 #ifndef TARGET_OS_IPHONE
   public:
-    LoggerThread() : Done_Logger_Thread(false), AppClosing(false) {
+    LoggerThread() : Done_Logger_Thread(false) {
         workerThread = std::thread(&LoggerThread::logWorker, this);
     }
 
@@ -71,7 +71,6 @@ class LoggerThread {
         {
             std::unique_lock<std::mutex> lock(mtx);
             Done_Logger_Thread = true;
-            AppClosing = true;
             Unlock_Logger_Thread.notify_one(); // Notify worker thread to stop
         }
         if (LogThread.joinable()) {
@@ -114,7 +113,6 @@ class LoggerThread {
     std::mutex mtx;
     std::condition_variable Unlock_Logger_Thread;
     bool Done_Logger_Thread;
-    bool AppClosing;
     std::ofstream logFile;
     std::string logFilePath_;
     std::string LogFolderPathForTheThread;
@@ -125,24 +123,18 @@ class LoggerThread {
     std::thread LogThread;
 
     void logWorker() {
-        while (AppClosing == false) {
+        while (true) {
             std::function<void()> task;
             {
                 std::unique_lock<std::mutex> lock(mtx);
                 Unlock_Logger_Thread.wait(lock, [this] {
-                    return !tasks.empty() || Done_Logger_Thread || AppClosing;
+                    return !tasks.empty() || Done_Logger_Thread;
                 });
-                if (Done_Logger_Thread || AppClosing) {
+                if (Done_Logger_Thread && tasks.empty()) {
                     break;
-                }
-                if (tasks.empty()) {
-                    continue;
                 }
                 task = std::move(tasks.front());
                 tasks.pop();
-            }
-            if (AppClosing) {
-                break;
             }
             task();
         }

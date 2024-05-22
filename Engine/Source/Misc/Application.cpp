@@ -828,7 +828,7 @@ void Application::deleteSelfAtExit() {
 void Application::detectMemLeaks() {
     if ((flag & APP_MEM_LEAKS) && _mem_leaks) {
 #if WINDOWS
-        _cexit();
+        //_cexit();
         if (Int m = Abs(_mem_leaks)) {
             ListMemLeaks();
 
@@ -839,7 +839,7 @@ void Application::detectMemLeaks() {
 
             showError(S + m + " Memory Leak(s)");
         }
-        _exit(-1); // manual exit after cleaning with '_cexit'
+        //_exit(-1); // manual exit after cleaning with '_cexit'
 #elif 0 && MAC
         LogN("Application Memory Leaks Remaining:");
         // GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
@@ -1511,7 +1511,13 @@ void Application::del() {
         _back_text.del();
 #endif
     }
+    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+        LogLevel::INFO, __FILE__, __LINE__,
+        "5 del call from Application");
     _closed = true; // !! this needs to be set before 'detectMemLeaks' because that may trigger calling destructors !!
+    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+        LogLevel::INFO, __FILE__, __LINE__,
+        "6 del call from Application");
     detectMemLeaks();
     GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
         LogLevel::INFO, __FILE__, __LINE__,

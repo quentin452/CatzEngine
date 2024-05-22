@@ -1001,6 +1001,11 @@ INT WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     if (App.create())
         App.loop();
     App.del();
+    // Exit Logger Thread And Save logs to file
+    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+        LogLevel::INFO, __FILE__, __LINE__,
+        "Stop Logger Thread + Game exited in wWinMain method");
+    GlobalsLoggerInstance::LoggerInstance.ExitLoggerThread();
     return 0;
 }
 #elif WINDOWS_NEW
@@ -1022,6 +1027,11 @@ INT WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
         FREPAO(App.cmd_line) = args->get(start + i)->Data();
     }
     Windows::ApplicationModel::Core::CoreApplication::Run(ref new FrameworkViewSource());
+    // Exit Logger Thread And Save logs to file
+    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+        LogLevel::INFO, __FILE__, __LINE__,
+        "Stop Logger Thread + Game exited in main method");
+    GlobalsLoggerInstance::LoggerInstance.ExitLoggerThread();
     return 0;
 }
 #endif

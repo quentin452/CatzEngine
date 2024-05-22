@@ -294,12 +294,6 @@ void Shut() {
     BackgroundThreads.del();
     if (RunAtExit.is())
         Run(RunAtExit, S, false, App.elevated());
-
-    // Exit Logger Thread And Save logs to file
-    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
-        LogLevel::INFO, __FILE__, __LINE__,
-        "Stop Logger Thread");
-    GlobalsLoggerInstance::LoggerInstance.ExitLoggerThread();
 }
 /******************************************************************************/
 bool Update() { return false; }

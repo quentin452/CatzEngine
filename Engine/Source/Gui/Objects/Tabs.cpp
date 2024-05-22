@@ -47,14 +47,14 @@ Tab &Tab::setCornerTab(Bool right, Bool top) {
     return T;
 }
 Tab &Tab::text(C Str &text) {
+    if (!is() || !parent() || !parent()->isTabs())
+        return T;
+
     if (!Equal(super::text, text, true)) {
         super::text = text;
-        if (parent() && parent()->isTabs()) // Tab rect may depend on text width
-        {
-            Tabs &tabs = parent()->asTabs();
-            if (tabs.autoSize() && tabs.actualLayout() == TABS_HORIZONTAL)
-                tabs.setRect();
-        }
+        Tabs &tabs = parent()->asTabs();
+        if (tabs.autoSize() && tabs.actualLayout() == TABS_HORIZONTAL)
+            tabs.setRect();
     }
     return T;
 }

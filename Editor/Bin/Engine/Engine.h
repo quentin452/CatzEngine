@@ -130,6 +130,13 @@
 #error Unsupported platform detected
 #endif
 /******************************************************************************/
+// ThreadedLoggerForCPP
+/******************************************************************************/
+#include "threaded_logger_for_cpp/GlobalsLoggerInstance.h"
+#include "threaded_logger_for_cpp/LoggerThread.hpp"
+#include "threaded_logger_for_cpp/LoggerGlobals.hpp"
+#include "threaded_logger_for_cpp/LoggerFileSystem.hpp"
+/******************************************************************************/
 #if EE_PRIVATE >= 2
 #include "Engine Config.h" // include Engine configuration created by "Engine Builder" or the default one if not available, this needs to be done after platform detection
 #endif

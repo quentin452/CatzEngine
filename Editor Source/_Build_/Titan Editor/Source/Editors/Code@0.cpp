@@ -516,7 +516,9 @@ if(appGuiSkin().valid())data+="   Gui.default_skin=APP_GUI_SKIN; // set default 
    void CodeView::create(GuiObj &parent)
    {
       parent+=Region::create();
+      // TODO FIX MEMORY CRASH WHEN EXITING THE APP
       CodeEditorInterface::create(parent, CodeMenuOnTop);
+      // FINISH
       EEItem &ee=items.New();
       ee.base_name=ENGINE_NAME " Engine";
       ee.type=ELM_LIB;

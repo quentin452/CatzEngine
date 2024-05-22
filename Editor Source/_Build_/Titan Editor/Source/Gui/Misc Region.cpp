@@ -262,6 +262,7 @@ MiscRegion Misc;
 
       online_ts.reset().size=0.036f;
       flt w=0.55f, h=0.06f;
+      // TODO FIX MEMORY CRASH WHEN EXITING THE APP
       Gui+=super    ::create(Rect_LU(0, 0,                      w,    h)).skin(&DarkSkin, false).hide().disabled(true); kb_lit=false;
       T  +=hide_proj.create(Rect_LU(0, 0,                  0.090f, 0.06f), "<<").func(HideProj, T).focusable(false).desc("Hide Project\nKeyboard Shortcut: Alt+1"); hide_proj.mode=BUTTON_TOGGLE;
       T  +=menu     .create(Rect_LU(hide_proj.rect().ru(), 0.060f, 0.06f), menu_menu).skin(&NoComboBoxImage).focusable(false).desc("Menu"); menu.text="M"; menu.text_align=0; menu.flag|=COMBOBOX_CONST_TEXT;
@@ -270,6 +271,7 @@ MiscRegion Misc;
       T  +=play     .create(Rect_LU(online   .rect().ru(), 0.060f, 0.06f)).func(Play, T).focusable(false).desc("Play active application\nKeyboard Shortcut: F5"); play.image="Gui/arrow_right_big.img";
       T  +=build    .create(Rect_LU(play     .rect().ru(), 0.125f, 0.06f)).setData(build_menu).focusable(false); build.text="Build"; build.text_size*=0.64f; FlagDisable(build.flag, COMBOBOX_MOUSE_WHEEL); build.flag|=COMBOBOX_CONST_TEXT;
       Gui+=move_misc.create(Rect_LU(0, 0, h, h)).func(Move, T).hide().focusable(false).desc("Move bar around the screen"); move_misc.image="Gui/Misc/move.img"; move_misc.mode=BUTTON_CONTINUOUS;
+      // FINISH
       CodeEdit.configChangedDebug();
       CodeEdit.configChanged32Bit();
       CodeEdit.configChangedAPI  ();

@@ -3,6 +3,33 @@
 /******************************************************************************/
 namespace EE {
 /******************************************************************************/
+void InitThreadedLoggerForCPP() {
+#ifdef _WIN32
+    LoggerGlobals::UsernameDirectory = std::getenv("USERNAME");
+#else
+    LoggerGlobals::UsernameDirectory = std::getenv("USER");
+#endif
+
+    // this is the folder that contain your src files like main.cpp
+    LoggerGlobals::SrcProjectDirectory = "CatzEngine";
+    // Create Log File and folder
+    LoggerGlobals::LogFolderPath = "C:\\Users\\" +
+                                   LoggerGlobals::UsernameDirectory +
+                                   "\\.CatzEngine\\logging\\";
+    LoggerGlobals::LogFilePath =
+        "C:\\Users\\" + LoggerGlobals::UsernameDirectory +
+        "\\.CatzEngine\\logging\\ThreadedLoggerForCPP.log";
+    LoggerGlobals::LogFolderBackupPath =
+        "C:\\Users\\" + LoggerGlobals::UsernameDirectory +
+        "\\.CatzEngine\\logging\\LogBackup";
+    LoggerGlobals::LogFileBackupPath =
+        "C:\\Users\\" + LoggerGlobals::UsernameDirectory +
+        "\\.CatzEngine\\logging\\LogBackup\\ThreadedLoggerForCPP-";
+
+    GlobalsLoggerInstance::LoggerInstance.StartLoggerThread(
+        LoggerGlobals::LogFolderPath, LoggerGlobals::LogFilePath,
+        LoggerGlobals::LogFolderBackupPath, LoggerGlobals::LogFileBackupPath);
+}
 #if WINDOWS_NEW
 using namespace concurrency;
 using namespace Windows::ApplicationModel;
@@ -949,6 +976,10 @@ void Application::wait(SyncEvent &event) {
 /******************************************************************************/
 #if WINDOWS_OLD
 INT WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
+    InitThreadedLoggerForCPP();
+    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+        LogLevel::INFO, __FILE__, __LINE__,
+        "Init Logger Thread in wWinMain method");
 #if JP_GAMEPAD_INPUT
     RoInitialize(RO_INIT_MULTITHREADED);
 #endif
@@ -974,6 +1005,10 @@ INT WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 }
 #elif WINDOWS_NEW
 [Platform::MTAThread] int main(Platform::Array<Platform::String ^> ^ args) {
+    InitThreadedLoggerForCPP();
+    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+        LogLevel::INFO, __FILE__, __LINE__,
+        "Init Logger Thread in main method");
     /* TODO: WINDOWS_NEW setting initial window size and fullscreen mode - check in the future
        changing these didn't make any difference at this launch, only next launch got affected
        if(1)ApplicationView::PreferredLaunchViewSize = Size(300, 300);

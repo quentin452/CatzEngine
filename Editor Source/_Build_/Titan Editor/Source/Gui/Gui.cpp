@@ -646,13 +646,15 @@ ConvertToDeAtlas.drag(elms, obj, screen_pos);
    {
       Gui+=super::create(ModeText, Elms(ModeText)).func(Changed, T).valid(true).hide();
       Gui+=close.create().func(CloseActive, T).desc("Keyboard Shortcut: Alt+F3"); close.image="Gui/close.img"; close.skin=&EmptyGuiSkin;
+      // TODO FIX MEMORY CRASH WHEN EXITING THE APP
       tab(MODE_OBJ     )+=    ObjEdit.create();
       tab(MODE_ANIM    )+=   AnimEdit.create();
       tab(MODE_WORLD   )+=  WorldEdit.create();
       tab(MODE_TEX_DOWN)+=TexDownsize.create();
-   GuiSkinEdit.create(tab(MODE_GUI_SKIN));
-       GuiEdit.create(tab(MODE_GUI     ));
+      GuiSkinEdit.create(tab(MODE_GUI_SKIN));
+      GuiEdit.create(tab(MODE_GUI     ));
       CodeEdit.create(tab(MODE_CODE    ));
+      // FINISH
       setTabs();
       changed(); // call to setup initial settings
    }
@@ -662,6 +664,7 @@ ConvertToDeAtlas.drag(elms, obj, screen_pos);
    }
    void ModeTabs::setTabs()
    {
+      if (this == nullptr) return;
       flt        x=rect().min.x; if(Misc.visible() && Misc.pos==VecI2(0, 1)){x+=rect().h()*0.1f; if(Misc.move_misc.visible())x+=Misc.move_misc.rect().w();}
       bool visible=visibleTabs();
       int v=0; FREPA(T)if(tab(i).visible(visible && available[i]).visible()){tab(i).pos(Vec2(x, rect().max.y)); v++; tab(i).desc(S+"Keyboard Shortcut: "+Kb.ctrlCmdName()+"+F"+v); x+=tab(i).rect().w();}

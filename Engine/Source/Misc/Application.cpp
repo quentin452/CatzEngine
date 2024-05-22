@@ -1444,6 +1444,9 @@ static void FadeOut() {
 #endif
 }
 void Application::del() {
+    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+        LogLevel::INFO, __FILE__, __LINE__,
+        "Start del call from Application");
     { // do brackets to make sure that any temp objects created here are destroyed before 'detectMemLeaks' is called
         if (LogInit)
             LogN("ShutState");
@@ -1464,6 +1467,9 @@ void Application::del() {
         ShutEnum();
         ShutAnimation();
         ShutStream();
+        GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+            LogLevel::INFO, __FILE__, __LINE__,
+            "Middle del call from Application");
         ShutSocket();
         windowDel();
         Paks.del();         // !! delete after deleting sound  !! because sound streaming can still use file data
@@ -1495,6 +1501,9 @@ void Application::del() {
     }
     _closed = true; // !! this needs to be set before 'detectMemLeaks' because that may trigger calling destructors !!
     detectMemLeaks();
+    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+        LogLevel::INFO, __FILE__, __LINE__,
+        "Finish del call from Application");
 }
 /******************************************************************************/
 void Application::update() {

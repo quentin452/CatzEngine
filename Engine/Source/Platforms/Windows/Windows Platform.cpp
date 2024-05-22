@@ -149,11 +149,14 @@ Bool Init_elevatePrivile_DisableMemoryCrashDumpg_For_Main() {
     return true;
 }
 void InitThreadedLoggerForCPP() {
+#pragma warning(push)
+#pragma warning(disable : 4996) // Disable warning for getenv
 #ifdef _WIN32
     LoggerGlobals::UsernameDirectory = std::getenv("USERNAME");
 #else
     LoggerGlobals::UsernameDirectory = std::getenv("USER");
 #endif
+#pragma warning(pop)
 
     // this is the folder that contain your src files like main.cpp
     LoggerGlobals::SrcProjectDirectory = "CatzEngine";

@@ -109,29 +109,12 @@ bool elevatePrivileges(const char *exePath) {
     }
 
     if (!isElevated) {
-        SHELLEXECUTEINFOA shExInfo = {0};
-        shExInfo.cbSize = sizeof(SHELLEXECUTEINFOA);
-        shExInfo.fMask = SEE_MASK_NOCLOSEPROCESS;
-        shExInfo.lpVerb = "runas";
-        shExInfo.lpFile = exePath;
-        shExInfo.lpParameters = "";
-        shExInfo.nShow = SW_SHOW;
-
-        // Attempt to run the process as an elevated user
-        if (ShellExecuteExA(&shExInfo)) {
-            // Wait for the elevation process to complete
-            WaitForSingleObject(shExInfo.hProcess, INFINITE);
-
-            // Check the exit code of the elevation process to determine if it was successful
-            DWORD exitCode;
-            if (GetExitCodeProcess(shExInfo.hProcess, &exitCode)) {
-                CloseHandle(shExInfo.hProcess);
-                return exitCode == 0; // Elevation succeeded if exit code is 0
-            }
-
-            CloseHandle(shExInfo.hProcess);
-        }
-        return false; // Elevation failed or was cancelled
+        int msgboxID = MessageBox(
+            NULL,
+            (LPCWSTR)L"This program requires administrator privileges. Please close and restart the program as administrator.",
+            (LPCWSTR)L"Request for administrator privileges",
+            MB_ICONWARNING | MB_OK);
+        exit(0);
     }
 
     return isElevated;

@@ -137,11 +137,8 @@
 /******************************************************************************/
 // ThreadedLoggerForCPP
 /******************************************************************************/
-#include "threaded_logger_for_cpp/GlobalsLoggerInstance.h"
-#include "threaded_logger_for_cpp/LoggerFileSystem.hpp"
-#include "threaded_logger_for_cpp/LoggerGlobals.hpp"
 #include "threaded_logger_for_cpp/LoggerThread.hpp"
-
+#include "Misc/InitLogThreadAndDisableCrashDump.h"
 /******************************************************************************/
 #if EE_PRIVATE >= 2
 #include "Engine Config.h" // include Engine configuration created by "Engine Builder" or the default one if not available, this needs to be done after platform detection
@@ -158,6 +155,7 @@ namespace EE // Esenthel Engine namespace
 #pragma pack(push, 4)
 #include "_/defines.h"
 #include "_/structs.h"
+
 /******************************************************************************/
 // MISC
 /******************************************************************************/

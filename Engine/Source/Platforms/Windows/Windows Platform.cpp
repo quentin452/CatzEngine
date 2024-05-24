@@ -1,12 +1,5 @@
 /******************************************************************************/
 #include "stdafx.h"
-#include <Windows.h>
-#include <cstdlib>
-#include <iostream>
-#include <shellapi.h>
-#include <stdexcept>
-#include <tlhelp32.h>
-#include <windows.h>
 
 /******************************************************************************/
 namespace EE {
@@ -95,7 +88,6 @@ LONG DisableMemoryCrashDump() {
     RegCloseKey(hKey2);
     return result;
 }
-
 bool elevatePrivileges(const char *exePath) {
     bool isElevated = false;
     HANDLE hToken = nullptr;
@@ -130,21 +122,9 @@ Bool Init_elevatePrivile_DisableMemoryCrashDumpg_For_Main() {
 
     if (strcmp(exeName, "Titan Editor") == 0) {
         if (!elevatePrivileges(exePath)) {
-            GlobalsLoggerInstance::LoggerInstance
-                .logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Failed to get admin privileges");
             return false;
         }
-
-        LONG result = DisableMemoryCrashDump();
-        if (result == ERROR_SUCCESS) {
-            GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
-                LogLevel::INFO, __FILE__, __LINE__,
-                "Init Logger Thread in main method");
-        } else {
-            GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
-                LogLevel::INFO, __FILE__, __LINE__,
-                "Cannot Create Reg values to disable Memory Crash Dump");
-        }
+        DisableMemoryCrashDump();
     }
     return true;
 }
@@ -173,8 +153,7 @@ void InitThreadedLoggerForCPP() {
     LoggerGlobals::LogFileBackupPath =
         "C:\\Users\\" + LoggerGlobals::UsernameDirectory +
         "\\.CatzEngine\\logging\\LogBackup\\CatzEngine-";
-
-    GlobalsLoggerInstance::LoggerInstance.StartLoggerThread(
+    LoggerThread::GetLoggerThread().StartLoggerThread(
         LoggerGlobals::LogFolderPath, LoggerGlobals::LogFilePath,
         LoggerGlobals::LogFolderBackupPath, LoggerGlobals::LogFileBackupPath);
 }
@@ -1125,13 +1104,12 @@ void Application::wait(SyncEvent &event) {
 
 #if WINDOWS_OLD
 INT WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, PWSTR pCmdLine, int nCmdShow) {
-    InitThreadedLoggerForCPP();
     if (!Init_elevatePrivile_DisableMemoryCrashDumpg_For_Main()) {
-        GlobalsLoggerInstance::LoggerInstance
-            .logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Failed to get admin privileges");
-        GlobalsLoggerInstance::LoggerInstance.ExitLoggerThread();
         return EXIT_FAILURE;
     }
+    InitThreadedLoggerForCPP();
+    LoggerThread::GetLoggerThread()
+        .logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Initialize Main For WINDOWS_OLD");
 #if JP_GAMEPAD_INPUT
     RoInitialize(RO_INIT_MULTITHREADED);
 #endif
@@ -1149,13 +1127,12 @@ INT WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
 
 #elif WINDOWS_NEW
 [Platform::MTAThread] int main(Platform::Array<Platform::String ^> ^ args) {
-    InitThreadedLoggerForCPP();
     if (!Init_elevatePrivile_DisableMemoryCrashDumpg_For_Main(exePath)) {
-        GlobalsLoggerInstance::LoggerInstance
-            .logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Failed to get admin privileges");
-        GlobalsLoggerInstance::LoggerInstance.ExitLoggerThread();
         return EXIT_FAILURE;
     }
+    InitThreadedLoggerForCPP();
+    LoggerThread::GetLoggerThread()
+        .logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Initialize Main For WINDOWS_NEW");
     /* TODO: WINDOWS_NEW setting initial window size and fullscreen mode - check in the future
           changing these didn't make any difference at this launch, only next launch got affected
           if(1)ApplicationView::PreferredLaunchViewSize = Size(300, 300);

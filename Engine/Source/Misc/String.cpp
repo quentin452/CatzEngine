@@ -1542,25 +1542,29 @@ Bool Contains(CChar8 *src, Char c) {
     return false;
 } // break before checking to prevent returning true for '\0' chars, 'Char16To8' may not support all characters, so we have to check if it's a direct mapping in both ways
 /****************************************************************************/
-Bool Contains(CChar8 *src, CChar8 *t, Bool case_sensitive, WHOLE_WORD whole_word) {
-    if (!Is(t))
+Bool ContainsTemplate(CChar *src, CChar *t, Bool case_sensitive, WHOLE_WORD whole_word) {
+    if (!Is(t)) {
         return true;
+    }
+
     if (src) {
         I();
-        Char8 last = '\0';
+        Char last = '\0';
         Int order = CharOrderFast(*t),
             t_length = Length(t);
         Bool dont_check[2];
         if (whole_word) {
             dont_check[0] = !CharWholeWord(t[0], whole_word);
             dont_check[1] = !CharWholeWord(t[t_length - 1], whole_word);
-            if (dont_check[0] && dont_check[1])
+            if (dont_check[0] && dont_check[1]) {
                 whole_word = WHOLE_WORD_NO;
+            }
         }
         for (;;) {
-            Char8 c = *src;
-            if (!c)
+            Char c = *src;
+            if (!c) {
                 break;
+            }
             if (CharOrderFast(c) == order && Starts(src, t, case_sensitive) && (whole_word ? (dont_check[0] || !CharWholeWord(last, whole_word)) && (dont_check[1] || !CharWholeWord(src[t_length], whole_word)) : true)) {
                 return true;
             }
@@ -1570,92 +1574,24 @@ Bool Contains(CChar8 *src, CChar8 *t, Bool case_sensitive, WHOLE_WORD whole_word
     }
     return false;
 }
+
 Bool Contains(CChar *src, CChar *t, Bool case_sensitive, WHOLE_WORD whole_word) {
-    if (!Is(t))
-        return true;
-    if (src) {
-        I();
-        Char last = '\0';
-        Int order = CharOrderFast(*t),
-            t_length = Length(t);
-        Bool dont_check[2];
-        if (whole_word) {
-            dont_check[0] = !CharWholeWord(t[0], whole_word);
-            dont_check[1] = !CharWholeWord(t[t_length - 1], whole_word);
-            if (dont_check[0] && dont_check[1])
-                whole_word = WHOLE_WORD_NO;
-        }
-        for (;;) {
-            Char c = *src;
-            if (!c)
-                break;
-            if (CharOrderFast(c) == order && Starts(src, t, case_sensitive) && (whole_word ? (dont_check[0] || !CharWholeWord(last, whole_word)) && (dont_check[1] || !CharWholeWord(src[t_length], whole_word)) : true)) {
-                return true;
-            }
-            last = c;
-            src++;
-        }
-    }
-    return false;
+    return ContainsTemplate(src, t, case_sensitive, whole_word);
 }
+
+Bool Contains(CChar8 *src, CChar8 *t, Bool case_sensitive, WHOLE_WORD whole_word) {
+    return ContainsTemplate((CChar *)src, (CChar *)t, case_sensitive, whole_word);
+}
+
 Bool Contains(CChar *src, CChar8 *t, Bool case_sensitive, WHOLE_WORD whole_word) {
-    if (!Is(t))
-        return true;
-    if (src) {
-        I();
-        Char last = '\0';
-        Int order = CharOrderFast(*t),
-            t_length = Length(t);
-        Bool dont_check[2];
-        if (whole_word) {
-            dont_check[0] = !CharWholeWord(t[0], whole_word);
-            dont_check[1] = !CharWholeWord(t[t_length - 1], whole_word);
-            if (dont_check[0] && dont_check[1])
-                whole_word = WHOLE_WORD_NO;
-        }
-        for (;;) {
-            Char c = *src;
-            if (!c)
-                break;
-            if (CharOrderFast(c) == order && Starts(src, t, case_sensitive) && (whole_word ? (dont_check[0] || !CharWholeWord(last, whole_word)) && (dont_check[1] || !CharWholeWord(src[t_length], whole_word)) : true)) {
-                return true;
-            }
-            last = c;
-            src++;
-        }
-    }
-    return false;
+    return ContainsTemplate(src, (CChar *)t, case_sensitive, whole_word);
 }
+
 Bool Contains(CChar8 *src, CChar *t, Bool case_sensitive, WHOLE_WORD whole_word) {
-    if (!Is(t))
-        return true;
-    if (src) {
-        I();
-        Char8 last = '\0';
-        Int order = CharOrderFast(*t),
-            t_length = Length(t);
-        Bool dont_check[2];
-        if (whole_word) {
-            dont_check[0] = !CharWholeWord(t[0], whole_word);
-            dont_check[1] = !CharWholeWord(t[t_length - 1], whole_word);
-            if (dont_check[0] && dont_check[1])
-                whole_word = WHOLE_WORD_NO;
-        }
-        for (;;) {
-            Char8 c = *src;
-            if (!c)
-                break;
-            if (CharOrderFast(c) == order && Starts(src, t, case_sensitive) && (whole_word ? (dont_check[0] || !CharWholeWord(last, whole_word)) && (dont_check[1] || !CharWholeWord(src[t_length], whole_word)) : true)) {
-                return true;
-            }
-            last = c;
-            src++;
-        }
-    }
-    return false;
+    return ContainsTemplate((CChar *)src, t, case_sensitive, whole_word);
 }
 /****************************************************************************/
-Bool ContainsAny(CChar *src, CChar *t, Bool case_sensitive, WHOLE_WORD whole_word) // always return true if 't' is null or has no words
+Bool ContainsAnyTemplate(CChar *src, CChar *t, Bool case_sensitive, WHOLE_WORD whole_word) // always return true if 't' is null or has no words
 {
     Bool ok = true; // assume ok at the start if there are no words to test
     if (t) {
@@ -1679,84 +1615,27 @@ Bool ContainsAny(CChar *src, CChar *t, Bool case_sensitive, WHOLE_WORD whole_wor
         }
     }
     return ok;
+}
+Bool ContainsAny(CChar *src, CChar *t, Bool case_sensitive, WHOLE_WORD whole_word) // always return true if 't' is null or has no words
+{
+    return ContainsAnyTemplate(src, t, case_sensitive, whole_word);
 }
 Bool ContainsAny(CChar *src, CChar8 *t, Bool case_sensitive, WHOLE_WORD whole_word) // always return true if 't' is null or has no words
 {
-    Bool ok = true; // assume ok at the start if there are no words to test
-    if (t) {
-        Memt<Char8> word;
-        for (CChar8 *start = t;;) {
-            Char8 c = *t++;
-            if (c == ' ' || c == '\0') {
-                Int len_1 = t - start; // this will include SPACE/NUL char
-                if (len_1 > 1)         // ignore empty words (in case 't' has "  ")
-                {
-                    word.setNumDiscard(len_1);
-                    Set(word.data(), start, word.elms());
-                    if (Contains(src, word.data(), case_sensitive, whole_word))
-                        return true;
-                    ok = false; // encountered a word to test, but it failed
-                }
-                if (c == '\0')
-                    break;
-                start = t;
-            }
-        }
-    }
-    return ok;
+    return ContainsAnyTemplate(src, (CChar *)t, case_sensitive, whole_word);
 }
+
 Bool ContainsAny(CChar8 *src, CChar *t, Bool case_sensitive, WHOLE_WORD whole_word) // always return true if 't' is null or has no words
 {
-    Bool ok = true; // assume ok at the start if there are no words to test
-    if (t) {
-        Memt<Char> word;
-        for (CChar *start = t;;) {
-            Char c = *t++;
-            if (c == ' ' || c == '\0') {
-                Int len_1 = t - start; // this will include SPACE/NUL char
-                if (len_1 > 1)         // ignore empty words (in case 't' has "  ")
-                {
-                    word.setNumDiscard(len_1);
-                    Set(word.data(), start, word.elms());
-                    if (Contains(src, word.data(), case_sensitive, whole_word))
-                        return true;
-                    ok = false; // encountered a word to test, but it failed
-                }
-                if (c == '\0')
-                    break;
-                start = t;
-            }
-        }
-    }
-    return ok;
+    return ContainsAnyTemplate((CChar *)src, t, case_sensitive, whole_word);
 }
+
 Bool ContainsAny(CChar8 *src, CChar8 *t, Bool case_sensitive, WHOLE_WORD whole_word) // always return true if 't' is null or has no words
 {
-    Bool ok = true; // assume ok at the start if there are no words to test
-    if (t) {
-        Memt<Char8> word;
-        for (CChar8 *start = t;;) {
-            Char8 c = *t++;
-            if (c == ' ' || c == '\0') {
-                Int len_1 = t - start; // this will include SPACE/NUL char
-                if (len_1 > 1)         // ignore empty words (in case 't' has "  ")
-                {
-                    word.setNumDiscard(len_1);
-                    Set(word.data(), start, word.elms());
-                    if (Contains(src, word.data(), case_sensitive, whole_word))
-                        return true;
-                    ok = false; // encountered a word to test, but it failed
-                }
-                if (c == '\0')
-                    break;
-                start = t;
-            }
-        }
-    }
-    return ok;
+    return ContainsAnyTemplate((CChar *)src, (CChar *)t, case_sensitive, whole_word);
 }
 /****************************************************************************/
-Bool ContainsAll(CChar *src, CChar *t, Bool case_sensitive, WHOLE_WORD whole_word) // always return true if 't' is null or has no words
+Bool ContainsAllTemplate(CChar *src, CChar *t, Bool case_sensitive, WHOLE_WORD whole_word) // always return true if 't' is null or has no words
 {
     if (t) {
         Memt<Char> word;
@@ -1778,75 +1657,22 @@ Bool ContainsAll(CChar *src, CChar *t, Bool case_sensitive, WHOLE_WORD whole_wor
         }
     }
     return true;
+}
+Bool ContainsAll(CChar *src, CChar *t, Bool case_sensitive, WHOLE_WORD whole_word) // always return true if 't' is null or has no words
+{
+    return ContainsAllTemplate(src, t, case_sensitive, whole_word);
 }
 Bool ContainsAll(CChar *src, CChar8 *t, Bool case_sensitive, WHOLE_WORD whole_word) // always return true if 't' is null or has no words
 {
-    if (t) {
-        Memt<Char8> word;
-        for (CChar8 *start = t;;) {
-            Char8 c = *t++;
-            if (c == ' ' || c == '\0') {
-                Int len_1 = t - start; // this will include SPACE/NUL char
-                if (len_1 > 1)         // ignore empty words (in case 't' has "  ")
-                {
-                    word.setNumDiscard(len_1);
-                    Set(word.data(), start, word.elms());
-                    if (!Contains(src, word.data(), case_sensitive, whole_word))
-                        return false;
-                }
-                if (c == '\0')
-                    break;
-                start = t;
-            }
-        }
-    }
-    return true;
+    return ContainsAllTemplate(src, (CChar *)t, case_sensitive, whole_word);
 }
 Bool ContainsAll(CChar8 *src, CChar *t, Bool case_sensitive, WHOLE_WORD whole_word) // always return true if 't' is null or has no words
 {
-    if (t) {
-        Memt<Char> word;
-        for (CChar *start = t;;) {
-            Char c = *t++;
-            if (c == ' ' || c == '\0') {
-                Int len_1 = t - start; // this will include SPACE/NUL char
-                if (len_1 > 1)         // ignore empty words (in case 't' has "  ")
-                {
-                    word.setNumDiscard(len_1);
-                    Set(word.data(), start, word.elms());
-                    if (!Contains(src, word.data(), case_sensitive, whole_word))
-                        return false;
-                }
-                if (c == '\0')
-                    break;
-                start = t;
-            }
-        }
-    }
-    return true;
+    return ContainsAllTemplate((CChar *)src, t, case_sensitive, whole_word);
 }
 Bool ContainsAll(CChar8 *src, CChar8 *t, Bool case_sensitive, WHOLE_WORD whole_word) // always return true if 't' is null or has no words
 {
-    if (t) {
-        Memt<Char8> word;
-        for (CChar8 *start = t;;) {
-            Char8 c = *t++;
-            if (c == ' ' || c == '\0') {
-                Int len_1 = t - start; // this will include SPACE/NUL char
-                if (len_1 > 1)         // ignore empty words (in case 't' has "  ")
-                {
-                    word.setNumDiscard(len_1);
-                    Set(word.data(), start, word.elms());
-                    if (!Contains(src, word.data(), case_sensitive, whole_word))
-                        return false;
-                }
-                if (c == '\0')
-                    break;
-                start = t;
-            }
-        }
-    }
-    return true;
+    return ContainsAllTemplate((CChar *)src, (CChar *)t, case_sensitive, whole_word);
 }
 /****************************************************************************/
 CChar *_SkipWhiteChars(CChar *t) {

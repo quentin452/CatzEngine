@@ -1154,6 +1154,9 @@
     <ClCompile Include="Source\Misc\Member.cpp">
       <Filter>Source\Misc</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Misc\InitLogThreadAndDisableCrashDump.cpp">
+      <Filter>Source\Misc</Filter>
+    </ClCompile>
     <ClCompile Include="Source\Misc\Misc.cpp">
       <Filter>Source\Misc</Filter>
     </ClCompile>

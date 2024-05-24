@@ -278,7 +278,7 @@ bool Init() {
     return true;
 }
 void Shut() {
-    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+    LoggerThread::GetLoggerThread().logMessageAsync(
         LogLevel::INFO, __FILE__, __LINE__,
         "Start Shut method from Main.cpp");
     // delete threaded objects
@@ -296,10 +296,10 @@ void Shut() {
     BackgroundThreads.del();
     if (RunAtExit.is())
         Run(RunAtExit, S, false, App.elevated());
-    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+    LoggerThread::GetLoggerThread().logMessageAsync(
         LogLevel::INFO, __FILE__, __LINE__,
         "Finish Shut method from Main.cpp + Exit Logger Thread");
-    GlobalsLoggerInstance::LoggerInstance.ExitLoggerThread();
+    LoggerThread::GetLoggerThread().ExitLoggerThread();
     //FOR NOW NEED TO CALL EXIT LOGGER THREAD HERE BECAUSE MEMORY CRASH AT GAME EXIT TODO NEED TO FIX
 }
 /******************************************************************************/

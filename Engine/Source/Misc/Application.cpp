@@ -361,7 +361,7 @@ Application &Application::flash() {
     [NSApp requestUserAttention:NSInformationalRequest];
 #elif LINUX
     if (XDisplay && window() && _NET_WM_STATE && _NET_WM_STATE_DEMANDS_ATTENTION) {
-#if 0   // this doesn't work at all
+#if 0 // this doesn't work at all
       XClientMessageEvent event; Zero(event);
       event.type        =ClientMessage;
       event.message_type=_NET_WM_STATE;
@@ -385,7 +385,7 @@ Application &Application::flash() {
         e.xclient.data.l[2] = 0;
         e.xclient.data.l[3] = 1;
         XSendEvent(XDisplay, DefaultRootWindow(XDisplay), false, SubstructureRedirectMask | SubstructureNotifyMask, &e);
-#else   // more complex code but works
+#else // more complex code but works
         Atom type = NULL;
         int format = 0;
         unsigned long items = 0, bytes_after = 0;
@@ -608,7 +608,8 @@ void Application::setStayAwake() {
                 else
                     DisplayRequest->RequestActive();
                 StayAwake ^= 1; // !! CHANGE AFTER CALL !! because if failed then exception is thrown and this is not called
-            } catch (...) {
+            }
+            catch (...) {
             }
         }
 #elif MAC
@@ -834,7 +835,7 @@ void Application::detectMemLeaks() {
             ListMemLeaks();
 
             // Log the number of memory leaks detected
-            GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+            LoggerThread::GetLoggerThread().logMessageAsync(
                 LogLevel::ERRORING, __FILE__, __LINE__,
                 std::string("Memory leaks detected: ") + std::to_string(m));
 
@@ -843,7 +844,7 @@ void Application::detectMemLeaks() {
         //_exit(-1); // manual exit after cleaning with '_cexit'
 #elif 0 && MAC
         LogN("Application Memory Leaks Remaining:");
-        // GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+        // LoggerThread::GetLoggerThread().logMessageAsync(
         //     LogLevel::ERRORING, __FILE__, __LINE__,
         //    "Application Memory Leaks Remaining:");
 #endif
@@ -877,7 +878,7 @@ void Application::showError(CChar *error) {
         if (D.full() && App.window()) {
             if (!ANDROID)
                 hide();
-#if DX11 // hiding window on DX10+ is not enough, try disabling Fullscreen
+#if DX11 // hiding window on DX10+ is not enough, try disabling Fullscreen \
          // ChangeDisplaySettings(null, 0); this didn't help
             if (SwapChain
 #if WINDOWS_OLD
@@ -1333,7 +1334,7 @@ Bool Application::create0() {
     try {
         DisplayRequest = ref new Windows::System::Display::DisplayRequest;
     } catch (...) {
-    }                          // need try/catch because can throw
+    } // need try/catch because can throw
 #elif MAC
     [MyApplication sharedApplication]; // this allocates 'NSApp' application as our custom class
     [NSApp setActivationPolicy:NSApplicationActivationPolicyRegular];
@@ -1424,7 +1425,7 @@ static void FadeOut() {
         SystemParametersInfo(SPI_GETANIMATION, SIZE(ai), &ai, 0);
         if (ai.iMinAnimate)
             fade_window = false; // if Windows has animations enabled, then don't fade manually
-#elif WINDOWS_NEW || LINUX       // WindowsNew and Linux don't support 'App.opacity'
+#elif WINDOWS_NEW || LINUX // WindowsNew and Linux don't support 'App.opacity'
         fade_window = false;
 #endif
         if (!fade_window)
@@ -1441,7 +1442,7 @@ static void FadeOut() {
                 }
                 if (fade_window)
                     App.opacity(alpha * frac);
-#if MAC                                                                                                                                                       // on Mac we have to update events, otherwise 'App.opacity' won't do anything. We have to do it even when not fading window (when exiting from fullscreen mode) because without it, the window will be drawn as a restored window
+#if MAC // on Mac we have to update events, otherwise 'App.opacity' won't do anything. We have to do it even when not fading window (when exiting from fullscreen mode) because without it, the window will be drawn as a restored window
                 for (; NSEvent *event = [NSApp nextEventMatchingMask:NSEventMaskAny untilDate:[NSDate distantPast] inMode:NSDefaultRunLoopMode dequeue:YES];) // 'distantPast' will not wait for any new events but return those that happened already
                     [NSApp sendEvent:event];
 #endif
@@ -1455,7 +1456,7 @@ static void FadeOut() {
 #endif
 }
 void Application::del() {
-    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+    LoggerThread::GetLoggerThread().logMessageAsync(
         LogLevel::INFO, __FILE__, __LINE__,
         "Start del call from Application");
     { // do brackets to make sure that any temp objects created here are destroyed before 'detectMemLeaks' is called
@@ -1478,7 +1479,7 @@ void Application::del() {
         ShutEnum();
         ShutAnimation();
         ShutStream();
-        GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+        LoggerThread::GetLoggerThread().logMessageAsync(
             LogLevel::INFO, __FILE__, __LINE__,
             "Middle del call from Application");
         ShutSocket();
@@ -1486,7 +1487,7 @@ void Application::del() {
         Paks.del();         // !! delete after deleting sound  !! because sound streaming can still use file data
         InputDevices.del(); // !! delete after deleting window !! because releasing some joypads may take some time and window would be left visible
         HideNotifications();
-        GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+        LoggerThread::GetLoggerThread().logMessageAsync(
             LogLevel::INFO, __FILE__, __LINE__,
             "4 del call from Application");
 #if WINDOWS_OLD
@@ -1513,15 +1514,15 @@ void Application::del() {
         _back_text.del();
 #endif
     }
-    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+    LoggerThread::GetLoggerThread().logMessageAsync(
         LogLevel::INFO, __FILE__, __LINE__,
         "5 del call from Application");
     _closed = true; // !! this needs to be set before 'detectMemLeaks' because that may trigger calling destructors !!
-    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+    LoggerThread::GetLoggerThread().logMessageAsync(
         LogLevel::INFO, __FILE__, __LINE__,
         "6 del call from Application");
     detectMemLeaks();
-    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+    LoggerThread::GetLoggerThread().logMessageAsync(
         LogLevel::INFO, __FILE__, __LINE__,
         "Finish del call from Application");
 }

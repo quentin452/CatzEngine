@@ -384,6 +384,7 @@
 		0B189B5B12DA3FED00499CA9 /* Date Time.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B189B1A12DA3FED00499CA9 /* Date Time.cpp */; };
 		0B189B5C12DA3FED00499CA9 /* Enum.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B189B1B12DA3FED00499CA9 /* Enum.cpp */; };
 		0B189B5D12DA3FED00499CA9 /* Member.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B189B1C12DA3FED00499CA9 /* Member.cpp */; };
+		0B189B5D12DA3FED00499CA9 /* InitLogThreadAndDisableCrashDump.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B189B1C12DA3FED00499CA9 /* InitLogThreadAndDisableCrashDump.cpp */; };
 		0B189B5E12DA3FED00499CA9 /* Misc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B189B1D12DA3FED00499CA9 /* Misc.cpp */; };
 		0B189B5F12DA3FED00499CA9 /* Param.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B189B1E12DA3FED00499CA9 /* Param.cpp */; };
 		0B189B6112DA3FED00499CA9 /* Pathfind.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B189B2012DA3FED00499CA9 /* Pathfind.cpp */; };
@@ -435,6 +436,7 @@
 		0B189B9B12DA3FED00499CA9 /* Date Time.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B189B1A12DA3FED00499CA9 /* Date Time.cpp */; };
 		0B189B9C12DA3FED00499CA9 /* Enum.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B189B1B12DA3FED00499CA9 /* Enum.cpp */; };
 		0B189B9D12DA3FED00499CA9 /* Member.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B189B1C12DA3FED00499CA9 /* Member.cpp */; };
+		0B189B5D12DA3FED00499CA9 /* InitLogThreadAndDisableCrashDump.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B189B1C12DA3FED00499CA9 /* InitLogThreadAndDisableCrashDump.cpp */; };
 		0B189B9E12DA3FED00499CA9 /* Misc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B189B1D12DA3FED00499CA9 /* Misc.cpp */; };
 		0B189B9F12DA3FED00499CA9 /* Param.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B189B1E12DA3FED00499CA9 /* Param.cpp */; };
 		0B189BA112DA3FED00499CA9 /* Pathfind.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B189B2012DA3FED00499CA9 /* Pathfind.cpp */; };
@@ -486,6 +488,7 @@
 		0B189BDB12DA3FED00499CA9 /* Date Time.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B189B1A12DA3FED00499CA9 /* Date Time.cpp */; };
 		0B189BDC12DA3FED00499CA9 /* Enum.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B189B1B12DA3FED00499CA9 /* Enum.cpp */; };
 		0B189BDD12DA3FED00499CA9 /* Member.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B189B1C12DA3FED00499CA9 /* Member.cpp */; };
+		0B189B5D12DA3FED00499CA9 /* InitLogThreadAndDisableCrashDump.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B189B1C12DA3FED00499CA9 /* InitLogThreadAndDisableCrashDump.cpp */; };
 		0B189BDE12DA3FED00499CA9 /* Misc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B189B1D12DA3FED00499CA9 /* Misc.cpp */; };
 		0B189BDF12DA3FED00499CA9 /* Param.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B189B1E12DA3FED00499CA9 /* Param.cpp */; };
 		0B189BE112DA3FED00499CA9 /* Pathfind.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B189B2012DA3FED00499CA9 /* Pathfind.cpp */; };
@@ -1226,6 +1229,7 @@
 		0B189B1A12DA3FED00499CA9 /* Date Time.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "Date Time.cpp"; sourceTree = "<group>"; };
 		0B189B1B12DA3FED00499CA9 /* Enum.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Enum.cpp; sourceTree = "<group>"; };
 		0B189B1C12DA3FED00499CA9 /* Member.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Member.cpp; sourceTree = "<group>"; };
+		0B189B5D12DA3FED00499CA9 /* InitLogThreadAndDisableCrashDump.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 0B189B1C12DA3FED00499CA9 /* InitLogThreadAndDisableCrashDump.cpp */; };
 		0B189B1D12DA3FED00499CA9 /* Misc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Misc.cpp; sourceTree = "<group>"; };
 		0B189B1E12DA3FED00499CA9 /* Param.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Param.cpp; sourceTree = "<group>"; };
 		0B189B2012DA3FED00499CA9 /* Pathfind.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Pathfind.cpp; sourceTree = "<group>"; };
@@ -2293,6 +2297,7 @@
 				0B189B1A12DA3FED00499CA9 /* Date Time.cpp */,
 				0B189B1B12DA3FED00499CA9 /* Enum.cpp */,
 				0B189B1C12DA3FED00499CA9 /* Member.cpp */,
+				0B189B5D12DA3FED00499CA9 /* InitLogThreadAndDisableCrashDump.cpp */,
 				0B189B1D12DA3FED00499CA9 /* Misc.cpp */,
 				3706B2E91E972C400057BFB5 /* MP4.cpp */,
 				379084A81B3E624C00B8E7DC /* Object.cpp */,
@@ -3377,6 +3382,7 @@
 				0B189BDB12DA3FED00499CA9 /* Date Time.cpp in Sources */,
 				0B189BDC12DA3FED00499CA9 /* Enum.cpp in Sources */,
 				0B189BDD12DA3FED00499CA9 /* Member.cpp in Sources */,
+				0B189B5D12DA3FED00499CA9 /* InitLogThreadAndDisableCrashDump.cpp in Sources */,
 				0B189BDE12DA3FED00499CA9 /* Misc.cpp in Sources */,
 				0B189BDF12DA3FED00499CA9 /* Param.cpp in Sources */,
 				37916A51282D5CA0009EAF63 /* ASTC.cpp in Sources */,
@@ -3699,6 +3705,7 @@
 				0B189B5C12DA3FED00499CA9 /* Enum.cpp in Sources */,
 				3706B2EC1E9733A60057BFB5 /* MP4.cpp in Sources */,
 				0B189B5D12DA3FED00499CA9 /* Member.cpp in Sources */,
+				0B189B5D12DA3FED00499CA9 /* InitLogThreadAndDisableCrashDump.cpp in Sources */,
 				0B189B5E12DA3FED00499CA9 /* Misc.cpp in Sources */,
 				0B189B5F12DA3FED00499CA9 /* Param.cpp in Sources */,
 				0B189B6112DA3FED00499CA9 /* Pathfind.cpp in Sources */,
@@ -4008,6 +4015,7 @@
 				0B189B9C12DA3FED00499CA9 /* Enum.cpp in Sources */,
 				37916A50282D5CA0009EAF63 /* ASTC.cpp in Sources */,
 				0B189B9D12DA3FED00499CA9 /* Member.cpp in Sources */,
+				0B189B5D12DA3FED00499CA9 /* InitLogThreadAndDisableCrashDump.cpp in Sources */,
 				37877F121DD9AFA000A62A86 /* Import XPS.cpp in Sources */,
 				0B189B9E12DA3FED00499CA9 /* Misc.cpp in Sources */,
 				0B189B9F12DA3FED00499CA9 /* Param.cpp in Sources */,

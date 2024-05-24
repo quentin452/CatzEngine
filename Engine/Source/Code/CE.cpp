@@ -985,13 +985,13 @@ CodeEditor::CodeEditor() {
 #endif
 }
 void CodeEditor::del() {
-    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+    LoggerThread::GetLoggerThread().logMessageAsync(
         LogLevel::INFO, __FILE__, __LINE__,
         "Start CodeEditor::del");
     sources.del();    // delete before 'Symbols' container
     SymbolDefs.del(); // delete before 'Symbols' container
     items.del();
-    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+    LoggerThread::GetLoggerThread().logMessageAsync(
         LogLevel::INFO, __FILE__, __LINE__,
         "Finish CodeEditor::del");
 }
@@ -2280,14 +2280,14 @@ static void CloseAll(Bool all_saved = true, Ptr user = null) { CE.closeAll(); }
 
 void CodeEditorInterface::del() { CE.del(); }
 void CodeEditorInterface::clear() {
-    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+    LoggerThread::GetLoggerThread().logMessageAsync(
         LogLevel::INFO, __FILE__, __LINE__,
         "Start CodeEditorInterface::clear");
     CE.closeAll();
     CE.sources.removeData(CE.findSource(Str(AutoSource)), true);
     clearActiveSources();
     activateApp(true);
-    GlobalsLoggerInstance::LoggerInstance.logMessageAsync(
+    LoggerThread::GetLoggerThread().logMessageAsync(
         LogLevel::INFO, __FILE__, __LINE__,
         "Finish CodeEditorInterface::clear");
 }

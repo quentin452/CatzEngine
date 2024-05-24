@@ -80,10 +80,6 @@ class LoggerThread {
         return *LoggerInstanceT;
     }
 
-    static void SetLoggerThread(LoggerThread &&thread) {
-        LoggerInstanceT = std::make_unique<LoggerThread>(std::move(thread));
-    }
-
     void logMessageAsync(LogLevel level, const std::string &sourceFile, int line, const std::string &message) {
         logMessageAsync(level, sourceFile, line, {message});
     }

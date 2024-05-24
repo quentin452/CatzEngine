@@ -1107,8 +1107,6 @@ INT WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     if (!Init_elevatePrivile_DisableMemoryCrashDumpg_For_Main()) {
         return EXIT_FAILURE;
     }
-    LoggerThread NewLoggerInstance;
-    LoggerThread::SetLoggerThread(std::move(NewLoggerInstance));
     InitThreadedLoggerForCPP();
     LoggerThread::GetLoggerThread()
         .logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Initialize Main For WINDOWS_OLD");
@@ -1132,8 +1130,6 @@ INT WINAPI wWinMain(HINSTANCE hinstance, HINSTANCE hPrevInstance, PWSTR pCmdLine
     if (!Init_elevatePrivile_DisableMemoryCrashDumpg_For_Main(exePath)) {
         return EXIT_FAILURE;
     }
-    LoggerThread NewLoggerInstance;
-    LoggerThread::SetLoggerThread(std::move(NewLoggerInstance));
     InitThreadedLoggerForCPP();
     LoggerThread::GetLoggerThread()
         .logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Initialize Main For WINDOWS_NEW");

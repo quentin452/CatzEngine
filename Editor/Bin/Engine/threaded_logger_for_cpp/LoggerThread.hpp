@@ -33,6 +33,15 @@ class LoggerThread {
         cleanup();
     }
 
+    /*
+    Usage example:
+    auto newLoggerInstance = std::make_unique<LoggerThread>();
+     LoggerThread::SetLoggerThread(std::move(newLoggerInstance));
+    */
+    static void SetLoggerThread(std::unique_ptr<LoggerThread> newLoggerInstance) {
+        LoggerInstanceT = std::move(newLoggerInstance);
+    }
+
     static LoggerThread &GetLoggerThread() {
         if (LoggerInstanceT == nullptr) {
             LoggerInstanceT = std::unique_ptr<LoggerThread>(new LoggerThread());

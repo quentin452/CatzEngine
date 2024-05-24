@@ -1,5 +1,5 @@
 #include "stdafx.h"
-LoggerThread LoggerThread::LoggerInstanceT;
+std::unique_ptr<LoggerThread> LoggerThread::LoggerInstanceT;
 std::wstring InitThreadAndDisableDump::ConvertToWideString(const std::string &narrow_str) {
     if (narrow_str.empty())
         return std::wstring();

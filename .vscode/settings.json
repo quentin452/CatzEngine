@@ -96,7 +96,8 @@
     "typeindex": "cpp",
     "valarray": "cpp",
     "variant": "cpp",
-    "regex": "cpp"
+    "regex": "cpp",
+    "csetjmp": "cpp"
   },
   "git.ignoreLimitWarning": true,
   "[cpp]": {

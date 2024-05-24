@@ -8,10 +8,13 @@
 #include <filesystem>
 #include <fstream>
 #include <functional>
+#include <iostream>
 #include <mutex>
 #include <queue>
+#include <sstream>
 #include <string>
 #include <thread>
+#include <utility>
 
 enum class LogLevel { INFO,
                       WARNING,
@@ -19,7 +22,7 @@ enum class LogLevel { INFO,
                       LOGICERROR };
 
 class LoggerThread {
-#if defined(_WIN32) || (defined(__linux__) || !defined(__ANDROID__) || !defined(EMSCRIPTEN) || !defined(__NINTENDO__) || !defined(TARGET_OS_IPHONE))
+#if defined(_WIN32) || defined(__linux__) || !defined(__ANDROID__) || !defined(EMSCRIPTEN) || !defined(__NINTENDO__) || !defined(TARGET_OS_IPHONE)
 
   public:
     LoggerThread() : Done_Logger_Thread(false) {
@@ -27,20 +30,58 @@ class LoggerThread {
     }
 
     ~LoggerThread() {
-        {
-            std::unique_lock<std::mutex> lock(mtx);
-            Done_Logger_Thread = true;
-            Unlock_Logger_Thread.notify_one(); // Notify worker thread to stop
-        }
-        if (workerThread.joinable()) {
-            workerThread.join(); // Wait for worker thread to finish
-        }
-        if (logFile.is_open()) {
-            logFile.close();
+        cleanup();
+    }
+
+    LoggerThread(LoggerThread &&other) noexcept
+        : workerThread(std::move(other.workerThread)),
+          tasks(std::move(other.tasks)),
+          mtx(),
+          Unlock_Logger_Thread(),
+          Done_Logger_Thread(other.Done_Logger_Thread.load()), // use load for atomic bool
+          logFile(std::move(other.logFile)),
+          logFilePath_(std::move(other.logFilePath_)),
+          LogFolderPathForTheThread(std::move(other.LogFolderPathForTheThread)),
+          LogFilePathForTheThread(std::move(other.LogFilePathForTheThread)),
+          LogFolderBackupPathForTheThread(std::move(other.LogFolderBackupPathForTheThread)),
+          LogFileBackupPathForTheThread(std::move(other.LogFileBackupPathForTheThread)),
+          TimeStamp(std::move(other.TimeStamp)) {
+        other.Done_Logger_Thread = true;
+        if (!workerThread.joinable()) {
+            workerThread = std::thread(&LoggerThread::logWorker, this);
         }
     }
+
+    LoggerThread &operator=(LoggerThread &&other) noexcept {
+        if (this != &other) {
+            cleanup();
+            workerThread = std::move(other.workerThread);
+            tasks = std::move(other.tasks);
+            Done_Logger_Thread = other.Done_Logger_Thread.load(); // use load for atomic bool
+            logFile = std::move(other.logFile);
+            logFilePath_ = std::move(other.logFilePath_);
+            LogFolderPathForTheThread = std::move(other.LogFolderPathForTheThread);
+            LogFilePathForTheThread = std::move(other.LogFilePathForTheThread);
+            LogFolderBackupPathForTheThread = std::move(other.LogFolderBackupPathForTheThread);
+            LogFileBackupPathForTheThread = std::move(other.LogFileBackupPathForTheThread);
+            TimeStamp = std::move(other.TimeStamp);
+            other.Done_Logger_Thread = true;
+            if (!workerThread.joinable()) {
+                workerThread = std::thread(&LoggerThread::logWorker, this);
+            }
+        }
+        return *this;
+    }
+
     static LoggerThread &GetLoggerThread() {
-        return LoggerInstanceT;
+        if (LoggerInstanceT == nullptr) {
+            LoggerInstanceT = std::unique_ptr<LoggerThread>(new LoggerThread());
+        }
+        return *LoggerInstanceT;
+    }
+
+    static void SetLoggerThread(LoggerThread &&thread) {
+        LoggerInstanceT = std::make_unique<LoggerThread>(std::move(thread));
     }
 
     void logMessageAsync(LogLevel level, const std::string &sourceFile, int line, const std::string &message) {
@@ -62,17 +103,7 @@ class LoggerThread {
     }
 
     void ExitLoggerThread() {
-        {
-            std::unique_lock<std::mutex> lock(mtx);
-            Done_Logger_Thread = true;
-            Unlock_Logger_Thread.notify_one(); // Notify worker thread to stop
-        }
-        if (workerThread.joinable()) {
-            workerThread.join(); // Wait for worker thread to finish
-        }
-        if (logFile.is_open()) {
-            logFile.close();
-        }
+        cleanup();
         // Perform cleanup tasks
         TimeStamp = getTimestamp();
         std::string src = LogFilePathForTheThread;
@@ -96,13 +127,12 @@ class LoggerThread {
     }
 
   private:
-    static LoggerThread LoggerInstanceT;
-
+    static std::unique_ptr<LoggerThread> LoggerInstanceT;
     std::thread workerThread;
     std::queue<std::function<void()>> tasks;
     std::mutex mtx;
     std::condition_variable Unlock_Logger_Thread;
-    bool Done_Logger_Thread;
+    std::atomic<bool> Done_Logger_Thread;
     std::ofstream logFile;
     std::string logFilePath_;
     std::string LogFolderPathForTheThread;
@@ -214,32 +244,40 @@ class LoggerThread {
 
         return std::string(buffer);
     }
+
+    void cleanup() {
+        {
+            std::unique_lock<std::mutex> lock(mtx);
+            Done_Logger_Thread = true;
+            Unlock_Logger_Thread.notify_one(); // Notify worker thread to stop
+        }
+        if (workerThread.joinable()) {
+            workerThread.join(); // Wait for worker thread to finish
+        }
+        if (logFile.is_open()) {
+            logFile.close();
+        }
+    }
+
 #else
   public:
     LoggerThread() {}
 
     ~LoggerThread() {}
 
-    void logMessageAsync(LogLevel level, const std::string &sourceFile, int line,
-                         const std::string &message) {}
+    void logMessageAsync(LogLevel level, const std::string &sourceFile, int line, const std::string &message) {}
 
-    void logMessageAsync(LogLevel level, const std::string &sourceFile, int line,
-                         const std::initializer_list<std::string> &messageParts) {
-    }
+    void logMessageAsync(LogLevel level, const std::string &sourceFile, int line, const std::initializer_list<std::string> &messageParts) {}
 
     void ExitLoggerThread() {}
 
-    void StartLoggerThread(const std::string &LogFolderPath,
-                           const std::string &LogFilePath,
-                           const std::string &LogFolderBackupPath,
-                           const std::string &LogFileBackupPath) {}
+    void StartLoggerThread(const std::string &LogFolderPath, const std::string &LogFilePath, const std::string &LogFolderBackupPath, const std::string &LogFileBackupPath) {}
 
   private:
     void logWorker() {}
 
     template <typename... Args>
-    void logMessage(LogLevel level, const std::string &sourceFile, int line,
-                    const Args &...args) {}
+    void logMessage(LogLevel level, const std::string &sourceFile, int line, const Args &...args) {}
 
     template <typename T>
     void append(std::ostringstream &oss, const T &arg) {}
@@ -250,5 +288,4 @@ class LoggerThread {
     void copyFile(const std::string &source, const std::string &dest) {}
 #endif
 };
-
 #endif // LOGGER_THREAD_HPP

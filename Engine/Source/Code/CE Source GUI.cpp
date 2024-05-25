@@ -300,616 +300,616 @@ void Source::update(C GuiPC &gpc) {
 
                 // overwrite
                 if (Kb.kf(KB_INS) && !Kb.k.ctrlCmd() && !Kb.k.shift() && !Kb.k.alt())
-                    Overwrite ^= 1;
+                Overwrite ^= 1;
+            else
+
+                // escape
+                if (KbSc(KB_ESC).pd() || Kb.k(KB_NAV_BACK)) {
+                if (suggestions_region.visible())
+                    clearSuggestions();
+                else // hide suggestions
+                    if (CE.visibleOutput() || CE.visibleAndroidDevLog()) {
+                    CE.visibleOutput(false);
+                    CE.visibleAndroidDevLog(false);
+                } else
+                    break; // don't eat the key when not processed
+            } else
+
+                // enter
+                if (Kb.k(KB_ENTER) && Kb.k.ctrlCmd() && !Kb.k.shift()) {
+                if (Kb.k.alt())
+                    findAllReferences();
                 else
+                    jumpToCur();
+            } else if (Kb.k(KB_ENTER) && !Const) {
+                if (Kb.k.ctrlCmd() && Kb.k.shift())
+                    separator();
+                else {
+                    delSel(true, false); // sets undo
+                    if (cur.y >= lines.elms())
+                        lines.setNum(cur.y + 1);
 
-                    // escape
-                    if (KbSc(KB_ESC).pd() || Kb.k(KB_NAV_BACK)) {
-                        if (suggestions_region.visible())
-                            clearSuggestions();
-                        else // hide suggestions
-                            if (CE.visibleOutput() || CE.visibleAndroidDevLog()) {
-                                CE.visibleOutput(false);
-                                CE.visibleAndroidDevLog(false);
-                            } else
-                                break; // don't eat the key when not processed
-                    } else
+                    if (!Kb.k.ctrlCmd() && Kb.k.alt() && Kb.k.shift()) {
+                        curNextBracket();
+                        curRight();
+                    } // on Shift+Alt+Enter, used for writing new methods
+                    if (Kb.k.ctrlCmd() && !Kb.k.alt()) {
+                        cur.x = lines[cur.y].length();
+                        clearSuggestions();
+                    } // Ctrl+Enter = move to end of line and press enter
 
-                        // enter
-                        if (Kb.k(KB_ENTER) && Kb.k.ctrlCmd() && !Kb.k.shift()) {
-                            if (Kb.k.alt())
-                                findAllReferences();
-                            else
-                                jumpToCur();
-                        } else if (Kb.k(KB_ENTER) && !Const) {
-                            if (Kb.k.ctrlCmd() && Kb.k.shift())
-                                separator();
-                            else {
-                                delSel(true, false); // sets undo
-                                if (cur.y >= lines.elms())
-                                    lines.setNum(cur.y + 1);
-
-                                if (!Kb.k.ctrlCmd() && Kb.k.alt() && Kb.k.shift()) {
-                                    curNextBracket();
-                                    curRight();
-                                } // on Shift+Alt+Enter, used for writing new methods
-                                if (Kb.k.ctrlCmd() && !Kb.k.alt()) {
-                                    cur.x = lines[cur.y].length();
-                                    clearSuggestions();
-                                } // Ctrl+Enter = move to end of line and press enter
-
-                                Int pos;
-                                Line &prev = lines[cur.y];
-                                if (suggestions_list()) // use suggestion
-                                {
-                                    autoComplete(true, false);
-                                } else if (CE.options.guided() &&
-                                           ((prev.chrNext(cur.x, &pos) == '{' && prev.chrBefore(pos)) // detect if we're before '{' and there's something before '{'
-                                            || prev.chrBefore(cur.x, &pos) == '{'                     // or               after '{'
-                                            )) {
-                                    if (prev.chrBefore(pos)) // if there's something before '{'
-                                    {
-                                        // move '{' to next line
-                                        Line &next = lines.NewAt(cur.y + 1);
-                                        REP(AlignToTab(prev.start()))
-                                        next += ' ';
-                                        next += '{'; // set "{"
-                                        Line &next2 = lines.NewAt(cur.y + 2);
-                                        REP(AlignToTab(prev.start()) + TabLength)
-                                        next2 += ' ';
-                                        Int pos2;
-                                        if (prev.chrNext(pos + 1, &pos2))
-                                            for (Int i = pos2; i < prev.length(); i++)
-                                                next2.append(prev[i], prev.Type(i));  // set "   remains"
-                                        cur.x = AlignToTab(prev.start()) + TabLength; // set cursor to "   |remains"
-                                        Int level = 0;
-                                        FREPAD(end, next2) // find any loose '}' in remainings, then move it to next line
-                                        {
-                                            if (next2[end] == '{' && next2.Type(end) == TOKEN_OPERATOR)
-                                                level++;
-                                            if (next2[end] == '}' && next2.Type(end) == TOKEN_OPERATOR)
-                                                level--;
-                                            if (level < 0) {
-                                                Line &next3 = lines.NewAt(cur.y + 3);
-                                                REP(AlignToTab(prev.start()))
-                                                next3 += ' ';
-                                                for (Int i = end; i < next2.length(); i++)
-                                                    next3 += next2[i]; // set "}"
-                                                next2.clip(end);
-                                                exist(0, cur.y + 4); // make sure that there is at least 1 line after newly added '}'
-                                                break;
-                                            }
-                                        }
-                                        cur.y += 2;
-                                        prev.clip(pos);
-                                        prev.clipSpaces();
-                                    } else {
-                                        Line &next = lines.NewAt(cur.y + 1);
-                                        REP(AlignToTab(prev.start()) + TabLength)
-                                        next += ' ';
-                                        Int pos2;
-                                        if (prev.chrNext(pos + 1, &pos2))
-                                            for (Int i = pos2; i < prev.length(); i++)
-                                                next.append(prev[i], prev.Type(i));   // set "   remains"
-                                        cur.x = AlignToTab(prev.start()) + TabLength; // set cursor to "   |remains"
-                                        Int level = 0;
-                                        FREPAD(end, next) // find any loose '}' in remainings, then move it to next line
-                                        {
-                                            if (next[end] == '{' && next.Type(end) == TOKEN_OPERATOR)
-                                                level++;
-                                            if (next[end] == '}' && next.Type(end) == TOKEN_OPERATOR)
-                                                level--;
-                                            if (level < 0) {
-                                                Line &next2 = lines.NewAt(cur.y + 2);
-                                                REP(AlignToTab(prev.start()))
-                                                next2 += ' ';
-                                                for (Int i = end; i < next.length(); i++)
-                                                    next2 += next[i]; // set "}"
-                                                next.clip(end);
-                                                exist(0, cur.y + 3); // make sure that there is at least 1 line after newly added '}'
-                                                break;
-                                            }
-                                        }
-                                        cur.y++;
-                                        prev.clip(pos + 1);
-                                        prev.clipSpaces();
-                                    }
-                                    changed(cur.y - 4, 5);
-                                } else {
-                                    Line &next = lines.NewAt(cur.y + 1);
-                                    Int start = (prev.empty() ? prev.length() : prev.start());
-                                    MIN(start, cur.x);
-                                    FREP(start)
-                                    next += ' ';
-                                    for (Int i = cur.x; i < prev.length(); i++)
-                                        next += prev[i];
-                                    prev.clip(cur.x);
-                                    cur.x = start;
-                                    cur.y++;
-                                    changed(cur.y - 1, 2);
+                    Int pos;
+                    Line &prev = lines[cur.y];
+                    if (suggestions_list()) // use suggestion
+                    {
+                        autoComplete(true, false);
+                    } else if (CE.options.guided() &&
+                               ((prev.chrNext(cur.x, &pos) == '{' && prev.chrBefore(pos)) // detect if we're before '{' and there's something before '{'
+                                || prev.chrBefore(cur.x, &pos) == '{'                     // or               after '{'
+                                )) {
+                        if (prev.chrBefore(pos)) // if there's something before '{'
+                        {
+                            // move '{' to next line
+                            Line &next = lines.NewAt(cur.y + 1);
+                            REP(AlignToTab(prev.start()))
+                            next += ' ';
+                            next += '{'; // set "{"
+                            Line &next2 = lines.NewAt(cur.y + 2);
+                            REP(AlignToTab(prev.start()) + TabLength)
+                            next2 += ' ';
+                            Int pos2;
+                            if (prev.chrNext(pos + 1, &pos2))
+                                for (Int i = pos2; i < prev.length(); i++)
+                                    next2.append(prev[i], prev.Type(i));  // set "   remains"
+                            cur.x = AlignToTab(prev.start()) + TabLength; // set cursor to "   |remains"
+                            Int level = 0;
+                            FREPAD(end, next2) // find any loose '}' in remainings, then move it to next line
+                            {
+                                if (next2[end] == '{' && next2.Type(end) == TOKEN_OPERATOR)
+                                    level++;
+                                if (next2[end] == '}' && next2.Type(end) == TOKEN_OPERATOR)
+                                    level--;
+                                if (level < 0) {
+                                    Line &next3 = lines.NewAt(cur.y + 3);
+                                    REP(AlignToTab(prev.start()))
+                                    next3 += ' ';
+                                    for (Int i = end; i < next2.length(); i++)
+                                        next3 += next2[i]; // set "}"
+                                    next2.clip(end);
+                                    exist(0, cur.y + 4); // make sure that there is at least 1 line after newly added '}'
+                                    break;
                                 }
-                                clearSuggestions();
-                                makeCurVisible();
                             }
-                        } else
+                            cur.y += 2;
+                            prev.clip(pos);
+                            prev.clipSpaces();
+                        } else {
+                            Line &next = lines.NewAt(cur.y + 1);
+                            REP(AlignToTab(prev.start()) + TabLength)
+                            next += ' ';
+                            Int pos2;
+                            if (prev.chrNext(pos + 1, &pos2))
+                                for (Int i = pos2; i < prev.length(); i++)
+                                    next.append(prev[i], prev.Type(i));   // set "   remains"
+                            cur.x = AlignToTab(prev.start()) + TabLength; // set cursor to "   |remains"
+                            Int level = 0;
+                            FREPAD(end, next) // find any loose '}' in remainings, then move it to next line
+                            {
+                                if (next[end] == '{' && next.Type(end) == TOKEN_OPERATOR)
+                                    level++;
+                                if (next[end] == '}' && next.Type(end) == TOKEN_OPERATOR)
+                                    level--;
+                                if (level < 0) {
+                                    Line &next2 = lines.NewAt(cur.y + 2);
+                                    REP(AlignToTab(prev.start()))
+                                    next2 += ' ';
+                                    for (Int i = end; i < next.length(); i++)
+                                        next2 += next[i]; // set "}"
+                                    next.clip(end);
+                                    exist(0, cur.y + 3); // make sure that there is at least 1 line after newly added '}'
+                                    break;
+                                }
+                            }
+                            cur.y++;
+                            prev.clip(pos + 1);
+                            prev.clipSpaces();
+                        }
+                        changed(cur.y - 4, 5);
+                    } else {
+                        Line &next = lines.NewAt(cur.y + 1);
+                        Int start = (prev.empty() ? prev.length() : prev.start());
+                        MIN(start, cur.x);
+                        FREP(start)
+                        next += ' ';
+                        for (Int i = cur.x; i < prev.length(); i++)
+                            next += prev[i];
+                        prev.clip(cur.x);
+                        cur.x = start;
+                        cur.y++;
+                        changed(cur.y - 1, 2);
+                    }
+                    clearSuggestions();
+                    makeCurVisible();
+                }
+            } else
 
-                            // tab
-                            if (Kb.k(KB_TAB) && !Kb.k.ctrlCmd() && !Kb.k.alt()) {
-                                if (!Const)
-                                    if (!CE.options.ac_on_enter() && suggestions_list())
-                                        autoComplete();
+                // tab
+                if (Kb.k(KB_TAB) && !Kb.k.ctrlCmd() && !Kb.k.alt()) {
+                if (!Const)
+                    if (!CE.options.ac_on_enter() && suggestions_list())
+                        autoComplete();
+                    else {
+                        setUndo();
+                        if (sel.y >= 0) // move whole selection
+                        {
+                            VecI2 min, max;
+                            curSel(min, max);
+                            for (Int y = min.y; y < Min(max.y + (max.x != 0), lines.elms()); y++) {
+                                if (Kb.k.shift()) {
+                                    Int processed = 0;
+                                    REP(TabLength)
+                                    if (lines[y].first() != ' ')
+                                        break;
                                     else {
-                                        setUndo();
-                                        if (sel.y >= 0) // move whole selection
-                                        {
-                                            VecI2 min, max;
-                                            curSel(min, max);
-                                            for (Int y = min.y; y < Min(max.y + (max.x != 0), lines.elms()); y++) {
-                                                if (Kb.k.shift()) {
-                                                    Int processed = 0;
-                                                    REP(TabLength)
-                                                    if (lines[y].first() != ' ')
-                                                        break;
-                                                    else {
-                                                        lines[y].remove(0);
-                                                        processed++;
-                                                    }
-                                                    if (sel.y == y)
-                                                        MAX(sel.x -= processed, 0);
-                                                    if (cur.y == y)
-                                                        MAX(cur.x -= processed, 0);
-                                                } else {
-                                                    if (lines[y].length())
-                                                        REP(TabLength)
-                                                    lines[y].insert(0, ' ');
-                                                }
-                                            }
-                                            if (!Kb.k.shift()) {
-                                                if (sel.x)
-                                                    sel.x += TabLength;
-                                                if (cur.x)
-                                                    cur.x += TabLength;
-                                            }
-                                            if (sel == cur)
-                                                sel = -1;
-                                            changed(min.y, max.y - min.y + 1);
-                                            clearSuggestions();
-                                        } else // in single line only (at cursor)
-                                        {
-                                            if (Kb.k.shift()) // backward
-                                            {
-                                                if (!InRange(cur.y, lines))
-                                                    cur.x = 0;
-                                                else if (cur.x > lines[cur.y].length())
-                                                    cur.x = lines[cur.y].length();
-                                                else {
-                                                    Int dest_x = Max(0, (cur.x - 1) / TabLength * TabLength);
-                                                    for (; cur.x > dest_x; cur.x--) {
-                                                        if (lines[cur.y][cur.x - 1] != ' ')
-                                                            break;
-                                                        lines[cur.y].remove(cur.x - 1);
-                                                    }
-                                                }
-                                            } else // forward
-                                            {
-                                                exist(cur.x, cur.y);
-                                                Int dest_x = (cur.x + TabLength) / TabLength * TabLength,
-                                                    num = dest_x - cur.x;
-                                                if (Overwrite)
-                                                    lines[cur.y].remove(cur.x, num);
-                                                REP(num)
-                                                lines[cur.y].insert(cur.x, ' ');
-                                                cur.x = dest_x;
-                                            }
-                                            changed(cur.y);
-                                            clearSuggestions();
-                                            makeCurVisible();
-                                        }
+                                        lines[y].remove(0);
+                                        processed++;
                                     }
-                            } else
-
-                                // insert single character
-                                if (Kb.k.c && !Kb.k.ctrlCmd() && !Kb.k.lalt() && !Const) {
-                                    CE.markCurPos();
-
-                                    if (Suggestion *sugg = suggestions_list())
-                                        if (CodeCharType(Kb.k.c) != CHART_CHAR) {
-                                            Bool ac = !CE.options.ac_on_enter(); // if want to auto-complete
-                                            if (ac) {
-                                                // check if we typed a label (for which auto-complete should be disabled)
-                                                if (Kb.k(':')) {
-                                                    Int i;
-                                                    if (Token *token = findPrevToken(cur, i))
-                                                        if (token->type == TOKEN_CODE && !(token->parent && token->parent->type == Symbol::CLASS) && InRange(i - 1, tokens)) // labels can't be declared inside class (there private/protected/public can be used)
-                                                        {
-                                                            Token &token = *tokens[i - 1];
-                                                            if (token == ';' || token == '{' || token == '}')
-                                                                ac = false;
-                                                        }
-                                                }
-                                            }
-                                            if (ac) {
-                                                autoComplete(false, true, !Kb.k('('), false, Kb.k('.') || Kb.k('?'));
-                                            } else {
-                                                if (InRange(suggestions_pos.y, lines)) {
-                                                    Str &src = lines[suggestions_pos.y];
-                                                    if (InRange(suggestions_pos.x, src)) {
-                                                        Str s = src() + suggestions_pos.x;
-                                                        s.clip(cur.x - suggestions_pos.x);
-                                                        if (Equal(s, sugg->text, true))
-                                                            SuggestionsUsed(s);
-                                                    }
-                                                }
-                                            }
-                                        }
-
-                                    Bool space = false;
-                                char_loop : {
-                                    space |= Kb.k(' ');
-
-                                    Bool has_sel = (sel.x >= 0);
-
-                                    if (has_sel)
-                                        delSel(); // already calls undo
-                                    else
-                                        setUndo((Kb.k('{') || Kb.k('(') || Kb.k('[') || Kb.k(';') || Kb.k(',') || Kb.k('"') || Kb.k('\'') || Kb.k('?') || Kb.k(':')) ? INS_CHRS : INS_CHR);
-
-                                    exist(cur.x, cur.y);
-                                    Line &prev = lines[cur.y];
-
-                                    // add to suggestions a word we typed before
-                                    if (CodeCharType(Kb.k.c) != CHART_CHAR && !Overwrite) {
-                                        if (CodeCharType(prev[cur.x - 1]) == CHART_CHAR) {
-                                            Str w;
-                                            Int s = prev.wordStart(cur.x - 1);
-                                            for (; s < cur.x; s++)
-                                                w += prev[s];
-                                            SuggestionsUsed(w);
-                                        }
-                                    }
-
-                                    if (CE.options.guided()) {
-                                        if (Kb.k('{')) // automatically place cursor at the end of the line when adding new bracket
-                                        {
-                                            if (!prev.empty() && !TextType(prev.Type(cur.x))) {
-                                                if (prev.chrBefore(cur.x) == ')' && prev.chrNext(cur.x) != ')') // we're in "if(x)|y=2;" situation -> change to "if(x){|y=2;}", support also "if(x)|if(x)x;else x;" -> "if(x){|if(x)x;else x;}"
-                                                {
-                                                    for (Int i = cur.x, brackets = 0, level = 0; i < prev.length(); i++) // if(prev[i]==';' && prev.Type(i)==TOKEN_OPERATOR) // find first ';'
-                                                    {
-                                                        TOKEN_TYPE type = prev.Type(i);
-                                                        if (type != TOKEN_COMMENT && !TextType(type)) {
-                                                            Char c = prev[i];
-                                                            if (c == '(')
-                                                                brackets++;
-                                                            else if (c == ')')
-                                                                brackets--;
-                                                            else if (!brackets) {
-                                                                if (c == '{')
-                                                                    level++;
-                                                                else if (c == '}')
-                                                                    level--;
-                                                                if (!level) {
-                                                                    if (c == '}' || c == ';') {
-                                                                        Bool next_else = false; // check if we're followed by else
-                                                                        for (Int j = i + 1; j < prev.length(); j++) {
-                                                                            TOKEN_TYPE type = prev.Type(j);
-                                                                            if (type != TOKEN_COMMENT && type != TOKEN_NONE) {
-                                                                                if (type == TOKEN_KEYWORD && prev[j] == 'e' && prev[j + 1] == 'l' && prev[j + 2] == 's' && prev[j + 3] == 'e')
-                                                                                    next_else = true;
-                                                                                break;
-                                                                            }
-                                                                        }
-                                                                        if (!next_else) {
-                                                                            prev.insert(i + 1, '}', TOKEN_OPERATOR); // insert } after ; -> ";}"
-                                                                            break;
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                } else // we're in "void func(masndas|)" situation -> move to "void func(masndas)|"
-                                                    if (insideRSTBrackets(cur)) {
-                                                        cur.x = prev.end() + 1;
-                                                        exist(cur.x, cur.y);
-                                                    }
-                                            }
-                                        } else if (Kb.k(';')) // automatically place cursor at the end of params "|..)" -> "..)|"
-                                        {
-                                            Int bottom_level = 0, level = 0;
-                                            if (!TextType(prev.Type(cur.x)))
-                                                if (!Contains(prev, "for", true, WHOLE_WORD_STRICT)) // 'for' is the only keyword that allows ';' inside "()" brackets
-                                                    for (Int i = cur.x; i < prev.length(); i++) {
-                                                        if ((prev[i] == '(' || prev[i] == '[') && prev.Type(i) == TOKEN_OPERATOR)
-                                                            level++;
-                                                        if ((prev[i] == ')' || prev[i] == ']') && prev.Type(i) == TOKEN_OPERATOR)
-                                                            level--;
-                                                        if (level < bottom_level) {
-                                                            bottom_level = level;
-                                                            cur.x = i + 1;
-                                                        }
-                                                    }
-                                        }
-                                    }
-
-                                    if (Overwrite && !has_sel)
-                                        prev.remove(cur.x); // don't use overwrite if we have selection
-                                    prev.insert(cur.x, Kb.k.c);
-
-                                    if (CE.options.guided() && !Overwrite) {
-                                        prev.resetType(); // this will help detect the TOKEN_TYPE of inserted character
-
-                                        if (!Kb.k(':') && !Kb.k(' ') && !Kb.k(';') && prev[cur.x - 1] == ':' && prev.Type(cur.x - 1) == TOKEN_OPERATOR && prev[cur.x - 2] != ':') // convert X:|X -> X : |X   (';' because of labels "label:;")
-                                        {
-                                            if (prev[cur.x - 2] != ' ')
-                                                prev.insert(cur.x++ - 1, ' ');
-                                            if (prev[cur.x + 1] != ' ')
-                                                prev.insert(cur.x++, ' ');
-                                        }
-
-                                        if (Kb.k('{')) {
-                                            if (prev.start() == cur.x && prev.end() == cur.x + 1) // if line consists only of '{'
-                                            {
-                                                if (!(InRange(cur.y + 1, lines) && (lines[cur.y + 1][cur.x] == '}' || lines[cur.y + 1].start() > cur.x))) {
-                                                    lines.NewAt(cur.y + 1);
-                                                    lines.NewAt(cur.y + 2);
-                                                    exist(cur.x, cur.y + 2);
-                                                    lines[cur.y + 2].insert(cur.x, '}');
-                                                    exist(0, cur.y + 3); // make sure that there is at least 1 line after newly added '}'
-                                                    cur.y++;
-                                                    cur.x += TabLength - 1;
-                                                    REP(cur.x + 1)
-                                                    lines[cur.y].insert(0, ' ');
-                                                }
-                                            } else {
-                                                if (prev.end() == cur.x + 1)
-                                                    prev.append('}');
-                                            }
-                                        } else if (Kb.k('}')) {
-                                            // align to previous '{'
-                                            Int level = 0;
-                                            for (VecI2 p = cur - VecI2(1, 0); lineValid(p); dec(p)) {
-                                                if (T[p] == '{' && Type(p) == TOKEN_OPERATOR)
-                                                    level++;
-                                                if (T[p] == '}' && Type(p) == TOKEN_OPERATOR)
-                                                    level--;
-                                                if (level > 0) {
-                                                    for (; cur.x > p.x && prev[cur.x - 1] == ' ';)
-                                                        prev.remove(--cur.x);
-                                                    // overwrite any existing '}' that shouldn't be there
-                                                    if (prev[cur.x + 1] == '}')
-                                                        prev.remove(cur.x);
-                                                    break;
-                                                }
-                                            }
-                                        } else if (Kb.k('(')) {
-                                            prev.insert(cur.x + 1, ')');
-                                            // if(prev.Type(cur.x+1)==TOKEN_NONE || prev[cur.x+1]==';' || prev[cur.x+1]==',')prev.insert(cur.x+1, ')');
-                                        } else if (Kb.k(')')) {
-                                            if (prev[cur.x + 1] == ')') // if there's another ')' after the one we just wrote to, then check if we can remove it
-                                            {
-                                                Int left = 0;
-                                                for (VecI2 p = cur; lineValid(p); dec(p))
-                                                    if (Type(p) == TOKEN_OPERATOR) {
-                                                        Char c = T[p];
-                                                        if (c == '{' || c == '}' || c == ';')
-                                                            break;
-                                                        if (c == '(')
-                                                            left++;
-                                                        if (c == ')')
-                                                            left--;
-                                                    }
-                                                Int right = 0;
-                                                for (VecI2 p = cur + VecI2(1, 0); lineValid(p); inc(p))
-                                                    if (Type(p) == TOKEN_OPERATOR) {
-                                                        Char c = T[p];
-                                                        if (c == '{' || c == '}' || c == ';')
-                                                            break;
-                                                        if (c == '(')
-                                                            right++;
-                                                        if (c == ')')
-                                                            right--;
-                                                    }
-                                                if (left <= -right)
-                                                    prev.remove(cur.x); // right side already has enough brackets, we can remove this one
-                                            }
-                                        } else if (Kb.k('[')) {
-                                            prev.insert(cur.x + 1, ']');
-                                        } else if (Kb.k(']')) {
-                                            if (prev[cur.x + 1] == ']') // if there's another ']' after the one we just wrote to, then check if we can remove it
-                                            {
-                                                Int left = 0;
-                                                for (VecI2 p = cur; lineValid(p); dec(p))
-                                                    if (Type(p) == TOKEN_OPERATOR) {
-                                                        Char c = T[p];
-                                                        if (c == '{' || c == '}' || c == ';')
-                                                            break;
-                                                        if (c == '[')
-                                                            left++;
-                                                        if (c == ']')
-                                                            left--;
-                                                    }
-                                                Int right = 0;
-                                                for (VecI2 p = cur + VecI2(1, 0); lineValid(p); inc(p))
-                                                    if (Type(p) == TOKEN_OPERATOR) {
-                                                        Char c = T[p];
-                                                        if (c == '{' || c == '}' || c == ';')
-                                                            break;
-                                                        if (c == '[')
-                                                            right++;
-                                                        if (c == ']')
-                                                            right--;
-                                                    }
-                                                if (left <= -right)
-                                                    prev.remove(cur.x); // right side already has enough brackets, we can remove this one
-                                            }
-                                        } else if (Kb.k('"')) {
-                                            if (prev[cur.x + 1] == '"')
-                                                prev.remove(cur.x);
-                                            else // if we're already followed by '"'
-                                            {
-                                                TOKEN_TYPE t = prev.Type(cur.x - 1);
-                                                if (!TextType(t))
-                                                    prev.insert(cur.x + 1, '"');
-                                            }
-                                        } else if (Kb.k('\'')) {
-                                            if (prev[cur.x + 1] == '\'')
-                                                prev.remove(cur.x);
-                                            else // if we're already followed by '\''
-                                            {
-                                                TOKEN_TYPE t = prev.Type(cur.x - 1);
-                                                if (!TextType(t) && t != TOKEN_COMMENT)
-                                                    prev.insert(cur.x + 1, '\'');
-                                            }
-                                        } else if (Kb.k('.')) {
-                                            // overwrite any existing '.' that shouldn't be there
-                                            TOKEN_TYPE t = prev.Type(cur.x - 1);
-                                            if (!TextType(t))
-                                                if (prev[cur.x + 1] == '.')
-                                                    prev.remove(cur.x);
-                                        } else if (Kb.k(',')) {
-                                            if (prev.Type(cur.x) == TOKEN_OPERATOR) // if this became an operator
-                                            {
-                                                if (prev.Type(cur.x + 1) != TOKEN_NONE)
-                                                    prev.insert(cur.x + 1, ' ');
-                                                cur.x++; // after ','
-                                            }
-                                        } else if (Kb.k('?')) {
-                                            if (prev.Type(cur.x) == TOKEN_OPERATOR) // if this became an operator
-                                            {
-                                                if (prev.Type(cur.x - 1) != TOKEN_NONE)
-                                                    prev.insert(cur.x++, ' '); // before '?'
-                                                if (prev.Type(cur.x + 1) != TOKEN_NONE)
-                                                    prev.insert(cur.x + 1, ' ');
-                                                cur.x++; // after  '?'
-                                            }
-                                        } else if (Kb.k(':')) // "case X:", "label:", "a ? b : c"
-                                        {
-                                            if (prev.Type(cur.x) == TOKEN_OPERATOR) // if this became an operator
-                                                for (VecI2 p = cur - VecI2(1, 0); lineValid(p); dec(p)) {
-                                                    if (Type(p) == TOKEN_OPERATOR) {
-                                                        Char c = T[p];
-                                                        if (c == '?') {
-                                                            if (prev.Type(cur.x - 1) != TOKEN_NONE)
-                                                                prev.insert(cur.x++, ' '); // before ':'
-                                                            if (prev.Type(cur.x + 1) != TOKEN_NONE)
-                                                                prev.insert(cur.x + 1, ' ');
-                                                            cur.x++; // after  ':'
-                                                            break;
-                                                        }
-                                                        if (c == '{' || c == '}' || c == ';')
-                                                            break;
-                                                    } else if (Type(p) == TOKEN_KEYWORD) {
-                                                        CChar *s = lines[p.y]() + p.x;
-                                                        if (Starts(s, "case", true, WHOLE_WORD_STRICT) || Starts(s, "default", true, WHOLE_WORD_STRICT)) {
-                                                            if (prev.Type(cur.x + 1) != TOKEN_NONE)
-                                                                prev.insert(cur.x + 1, ' ');
-                                                            cur.x++; // after  ':'
-                                                            break;
-                                                        }
-                                                    }
-                                                }
-                                        } else if (Kb.k('&')) // check for '&&'
-                                        {
-                                            if (prev[cur.x - 1] == '&' && prev.Type(cur.x - 1) == TOKEN_OPERATOR) {
-                                                if (prev.Type(cur.x - 2) != TOKEN_NONE)
-                                                    prev.insert(cur.x++ - 1, ' '); // before "&&"
-                                                if (prev.Type(cur.x + 1) != TOKEN_NONE)
-                                                    prev.insert(cur.x + 1, ' ');
-                                                cur.x++; // after  "&&"
-                                            }
-                                        } else if (Kb.k('|')) // check for '||'
-                                        {
-                                            if (prev[cur.x - 1] == '|' && prev.Type(cur.x - 1) == TOKEN_OPERATOR) {
-                                                if (prev.Type(cur.x - 2) != TOKEN_NONE)
-                                                    prev.insert(cur.x++ - 1, ' '); // before "||"
-                                                if (prev.Type(cur.x + 1) != TOKEN_NONE)
-                                                    prev.insert(cur.x + 1, ' ');
-                                                cur.x++; // after  "||"
-                                            }
-                                        }
-                                    }
-
-                                    cur.x++;
-                                    CE.markCurPos();
-
-                                    if (CE.options.guided()) {
-                                        if (Kb.k(';') && prev.Type(cur.x) != TOKEN_NONE && prev[cur.x] != '}' && prev.Type(cur.x - 1) == TOKEN_OPERATOR)
-                                            prev.insert(cur.x++, ' ');
-                                        else // if we typed ';' which is followed by something then add space
-                                            if (prev[cur.x - 2] == ',' && prev.Type(cur.x - 1) != TOKEN_NONE && prev.Type(cur.x - 2) == TOKEN_OPERATOR)
-                                                prev.insert(cur.x++ - 1, ' ');
-                                            else // if we typed something after ',' then insert space between that
-                                                if (prev[cur.x - 2] == ';' && !Kb.k(' ') && !Kb.k('}'))
-                                                    prev.insert(cur.x++ - 1, ' '); // if we typed something after ';' then insert space between that
-
-                                        if (Kb.k(':')) // if we typed ':' after private,protected,public then convert "   private:|" to "private:\n   |"
-                                        {
-                                            Int start = prev.start();
-                                            CChar *s = prev() + start;
-                                            if (Starts(s, "public", true, WHOLE_WORD_STRICT) || Starts(s, "protected", true, WHOLE_WORD_STRICT) || Starts(s, "private", true, WHOLE_WORD_STRICT)) {
-                                                if (prev[cur.x - 2] == ' ') {
-                                                    prev.remove(cur.x - 2);
-                                                    cur.x--;
-                                                } // remove any space between keyword and ':' ("private :|" -> "private:|")
-                                                Int rem = Min(start, TabLength);
-                                                prev.remove(0, rem);
-                                                start -= rem;
-                                                start += TabLength;
-                                                Line &l = lines.NewAt(cur.y + 1);
-                                                REP(start)
-                                                l.insert(0, ' ');
-                                                cur.y++;
-                                                cur.x = start;
-                                            }
-                                        }
-                                        if (Kb.k('/') && prev[cur.x - 2] == '/' && prev[cur.x - 3] != '/' && prev.Type(cur.x - 3) != TOKEN_NONE && !TextType(prev.Type(cur.x - 2))) {
-                                            prev.insert(cur.x - 2, ' ');
-                                            cur.x++;
-                                        } // if we started typing a     comment then make sure it's separated with at least one space
-                                        if (!Kb.k('/') && !Kb.k(' ') && prev[cur.x - 2] == '/' && prev[cur.x - 3] == '/' && !TextType(prev.Type(cur.x - 2))) {
-                                            prev.insert(cur.x - 1, ' ');
-                                            cur.x++;
-                                        } // if we started typing after comment then make sure it's separated with at least one space
-                                    }
-
-                                    KeyboardKey *k = Kb.nextKeyPtr();
-                                    if (k && k->c && !k->ctrlCmd() && !k->lalt()) {
-                                        Kb.nextKey();
-                                        goto char_loop;
+                                    if (sel.y == y)
+                                        MAX(sel.x -= processed, 0);
+                                    if (cur.y == y)
+                                        MAX(cur.x -= processed, 0);
+                                } else {
+                                    if (lines[y].length())
+                                        REP(TabLength)
+                                    lines[y].insert(0, ' ');
+                                }
+                            }
+                            if (!Kb.k.shift()) {
+                                if (sel.x)
+                                    sel.x += TabLength;
+                                if (cur.x)
+                                    cur.x += TabLength;
+                            }
+                            if (sel == cur)
+                                sel = -1;
+                            changed(min.y, max.y - min.y + 1);
+                            clearSuggestions();
+                        } else // in single line only (at cursor)
+                        {
+                            if (Kb.k.shift()) // backward
+                            {
+                                if (!InRange(cur.y, lines))
+                                    cur.x = 0;
+                                else if (cur.x > lines[cur.y].length())
+                                    cur.x = lines[cur.y].length();
+                                else {
+                                    Int dest_x = Max(0, (cur.x - 1) / TabLength * TabLength);
+                                    for (; cur.x > dest_x; cur.x--) {
+                                        if (lines[cur.y][cur.x - 1] != ' ')
+                                            break;
+                                        lines[cur.y].remove(cur.x - 1);
                                     }
                                 }
+                            } else // forward
+                            {
+                                exist(cur.x, cur.y);
+                                Int dest_x = (cur.x + TabLength) / TabLength * TabLength,
+                                    num = dest_x - cur.x;
+                                if (Overwrite)
+                                    lines[cur.y].remove(cur.x, num);
+                                REP(num)
+                                lines[cur.y].insert(cur.x, ' ');
+                                cur.x = dest_x;
+                            }
+                            changed(cur.y);
+                            clearSuggestions();
+                            makeCurVisible();
+                        }
+                    }
+            } else
 
-                                    changed(cur.y - 1, 3);
-                                    makeCurVisible();
-                                    listSuggestions(space ? -1 : 0);
-                                    CE.markCurPos();
-                                } else
+                // insert single character
+                if (Kb.k.c && !Kb.k.ctrlCmd() && !Kb.k.lalt() && !Const) {
+                CE.markCurPos();
 
-                                    break; // stop and don't eat using 'nextKey' in the 'for' loop
+                if (Suggestion *sugg = suggestions_list())
+                    if (CodeCharType(Kb.k.c) != CHART_CHAR) {
+                        Bool ac = !CE.options.ac_on_enter(); // if want to auto-complete
+                        if (ac) {
+                            // check if we typed a label (for which auto-complete should be disabled)
+                            if (Kb.k(':')) {
+                                Int i;
+                                if (Token *token = findPrevToken(cur, i))
+                                    if (token->type == TOKEN_CODE && !(token->parent && token->parent->type == Symbol::CLASS) && InRange(i - 1, tokens)) // labels can't be declared inside class (there private/protected/public can be used)
+                                    {
+                                        Token &token = *tokens[i - 1];
+                                        if (token == ';' || token == '{' || token == '}')
+                                            ac = false;
+                                    }
+                            }
+                        }
+                        if (ac) {
+                            autoComplete(false, true, !Kb.k('('), false, Kb.k('.') || Kb.k('?'));
+                        } else {
+                            if (InRange(suggestions_pos.y, lines)) {
+                                Str &src = lines[suggestions_pos.y];
+                                if (InRange(suggestions_pos.x, src)) {
+                                    Str s = src() + suggestions_pos.x;
+                                    s.clip(cur.x - suggestions_pos.x);
+                                    if (Equal(s, sugg->text, true))
+                                        SuggestionsUsed(s);
+                                }
+                            }
+                        }
+                    }
+
+                Bool space = false;
+            char_loop : {
+                space |= Kb.k(' ');
+
+                Bool has_sel = (sel.x >= 0);
+
+                if (has_sel)
+                    delSel(); // already calls undo
+                else
+                    setUndo((Kb.k('{') || Kb.k('(') || Kb.k('[') || Kb.k(';') || Kb.k(',') || Kb.k('"') || Kb.k('\'') || Kb.k('?') || Kb.k(':')) ? INS_CHRS : INS_CHR);
+
+                exist(cur.x, cur.y);
+                Line &prev = lines[cur.y];
+
+                // add to suggestions a word we typed before
+                if (CodeCharType(Kb.k.c) != CHART_CHAR && !Overwrite) {
+                    if (CodeCharType(prev[cur.x - 1]) == CHART_CHAR) {
+                        Str w;
+                        Int s = prev.wordStart(cur.x - 1);
+                        for (; s < cur.x; s++)
+                            w += prev[s];
+                        SuggestionsUsed(w);
+                    }
+                }
+
+                if (CE.options.guided()) {
+                    if (Kb.k('{')) // automatically place cursor at the end of the line when adding new bracket
+                    {
+                        if (!prev.empty() && !TextType(prev.Type(cur.x))) {
+                            if (prev.chrBefore(cur.x) == ')' && prev.chrNext(cur.x) != ')') // we're in "if(x)|y=2;" situation -> change to "if(x){|y=2;}", support also "if(x)|if(x)x;else x;" -> "if(x){|if(x)x;else x;}"
+                            {
+                                for (Int i = cur.x, brackets = 0, level = 0; i < prev.length(); i++) // if(prev[i]==';' && prev.Type(i)==TOKEN_OPERATOR) // find first ';'
+                                {
+                                    TOKEN_TYPE type = prev.Type(i);
+                                    if (type != TOKEN_COMMENT && !TextType(type)) {
+                                        Char c = prev[i];
+                                        if (c == '(')
+                                            brackets++;
+                                        else if (c == ')')
+                                            brackets--;
+                                        else if (!brackets) {
+                                            if (c == '{')
+                                                level++;
+                                            else if (c == '}')
+                                                level--;
+                                            if (!level) {
+                                                if (c == '}' || c == ';') {
+                                                    Bool next_else = false; // check if we're followed by else
+                                                    for (Int j = i + 1; j < prev.length(); j++) {
+                                                        TOKEN_TYPE type = prev.Type(j);
+                                                        if (type != TOKEN_COMMENT && type != TOKEN_NONE) {
+                                                            if (type == TOKEN_KEYWORD && prev[j] == 'e' && prev[j + 1] == 'l' && prev[j + 2] == 's' && prev[j + 3] == 'e')
+                                                                next_else = true;
+                                                            break;
+                                                        }
+                                                    }
+                                                    if (!next_else) {
+                                                        prev.insert(i + 1, '}', TOKEN_OPERATOR); // insert } after ; -> ";}"
+                                                        break;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            } else // we're in "void func(masndas|)" situation -> move to "void func(masndas)|"
+                                if (insideRSTBrackets(cur)) {
+                                cur.x = prev.end() + 1;
+                                exist(cur.x, cur.y);
+                            }
+                        }
+                    } else if (Kb.k(';')) // automatically place cursor at the end of params "|..)" -> "..)|"
+                    {
+                        Int bottom_level = 0, level = 0;
+                        if (!TextType(prev.Type(cur.x)))
+                            if (!Contains(prev, "for", true, WHOLE_WORD_STRICT)) // 'for' is the only keyword that allows ';' inside "()" brackets
+                                for (Int i = cur.x; i < prev.length(); i++) {
+                                    if ((prev[i] == '(' || prev[i] == '[') && prev.Type(i) == TOKEN_OPERATOR)
+                                        level++;
+                                    if ((prev[i] == ')' || prev[i] == ']') && prev.Type(i) == TOKEN_OPERATOR)
+                                        level--;
+                                    if (level < bottom_level) {
+                                        bottom_level = level;
+                                        cur.x = i + 1;
+                                    }
+                                }
+                    }
+                }
+
+                if (Overwrite && !has_sel)
+                    prev.remove(cur.x); // don't use overwrite if we have selection
+                prev.insert(cur.x, Kb.k.c);
+
+                if (CE.options.guided() && !Overwrite) {
+                    prev.resetType(); // this will help detect the TOKEN_TYPE of inserted character
+
+                    if (!Kb.k(':') && !Kb.k(' ') && !Kb.k(';') && prev[cur.x - 1] == ':' && prev.Type(cur.x - 1) == TOKEN_OPERATOR && prev[cur.x - 2] != ':') // convert X:|X -> X : |X   (';' because of labels "label:;")
+                    {
+                        if (prev[cur.x - 2] != ' ')
+                            prev.insert(cur.x++ - 1, ' ');
+                        if (prev[cur.x + 1] != ' ')
+                            prev.insert(cur.x++, ' ');
+                    }
+
+                    if (Kb.k('{')) {
+                        if (prev.start() == cur.x && prev.end() == cur.x + 1) // if line consists only of '{'
+                        {
+                            if (!(InRange(cur.y + 1, lines) && (lines[cur.y + 1][cur.x] == '}' || lines[cur.y + 1].start() > cur.x))) {
+                                lines.NewAt(cur.y + 1);
+                                lines.NewAt(cur.y + 2);
+                                exist(cur.x, cur.y + 2);
+                                lines[cur.y + 2].insert(cur.x, '}');
+                                exist(0, cur.y + 3); // make sure that there is at least 1 line after newly added '}'
+                                cur.y++;
+                                cur.x += TabLength - 1;
+                                REP(cur.x + 1)
+                                lines[cur.y].insert(0, ' ');
+                            }
+                        } else {
+                            if (prev.end() == cur.x + 1)
+                                prev.append('}');
+                        }
+                    } else if (Kb.k('}')) {
+                        // align to previous '{'
+                        Int level = 0;
+                        for (VecI2 p = cur - VecI2(1, 0); lineValid(p); dec(p)) {
+                            if (T[p] == '{' && Type(p) == TOKEN_OPERATOR)
+                                level++;
+                            if (T[p] == '}' && Type(p) == TOKEN_OPERATOR)
+                                level--;
+                            if (level > 0) {
+                                for (; cur.x > p.x && prev[cur.x - 1] == ' ';)
+                                    prev.remove(--cur.x);
+                                // overwrite any existing '}' that shouldn't be there
+                                if (prev[cur.x + 1] == '}')
+                                    prev.remove(cur.x);
+                                break;
+                            }
+                        }
+                    } else if (Kb.k('(')) {
+                        prev.insert(cur.x + 1, ')');
+                        // if(prev.Type(cur.x+1)==TOKEN_NONE || prev[cur.x+1]==';' || prev[cur.x+1]==',')prev.insert(cur.x+1, ')');
+                    } else if (Kb.k(')')) {
+                        if (prev[cur.x + 1] == ')') // if there's another ')' after the one we just wrote to, then check if we can remove it
+                        {
+                            Int left = 0;
+                            for (VecI2 p = cur; lineValid(p); dec(p))
+                                if (Type(p) == TOKEN_OPERATOR) {
+                                    Char c = T[p];
+                                    if (c == '{' || c == '}' || c == ';')
+                                        break;
+                                    if (c == '(')
+                                        left++;
+                                    if (c == ')')
+                                        left--;
+                                }
+                            Int right = 0;
+                            for (VecI2 p = cur + VecI2(1, 0); lineValid(p); inc(p))
+                                if (Type(p) == TOKEN_OPERATOR) {
+                                    Char c = T[p];
+                                    if (c == '{' || c == '}' || c == ';')
+                                        break;
+                                    if (c == '(')
+                                        right++;
+                                    if (c == ')')
+                                        right--;
+                                }
+                            if (left <= -right)
+                                prev.remove(cur.x); // right side already has enough brackets, we can remove this one
+                        }
+                    } else if (Kb.k('[')) {
+                        prev.insert(cur.x + 1, ']');
+                    } else if (Kb.k(']')) {
+                        if (prev[cur.x + 1] == ']') // if there's another ']' after the one we just wrote to, then check if we can remove it
+                        {
+                            Int left = 0;
+                            for (VecI2 p = cur; lineValid(p); dec(p))
+                                if (Type(p) == TOKEN_OPERATOR) {
+                                    Char c = T[p];
+                                    if (c == '{' || c == '}' || c == ';')
+                                        break;
+                                    if (c == '[')
+                                        left++;
+                                    if (c == ']')
+                                        left--;
+                                }
+                            Int right = 0;
+                            for (VecI2 p = cur + VecI2(1, 0); lineValid(p); inc(p))
+                                if (Type(p) == TOKEN_OPERATOR) {
+                                    Char c = T[p];
+                                    if (c == '{' || c == '}' || c == ';')
+                                        break;
+                                    if (c == '[')
+                                        right++;
+                                    if (c == ']')
+                                        right--;
+                                }
+                            if (left <= -right)
+                                prev.remove(cur.x); // right side already has enough brackets, we can remove this one
+                        }
+                    } else if (Kb.k('"')) {
+                        if (prev[cur.x + 1] == '"')
+                            prev.remove(cur.x);
+                        else // if we're already followed by '"'
+                        {
+                            TOKEN_TYPE t = prev.Type(cur.x - 1);
+                            if (!TextType(t))
+                                prev.insert(cur.x + 1, '"');
+                        }
+                    } else if (Kb.k('\'')) {
+                        if (prev[cur.x + 1] == '\'')
+                            prev.remove(cur.x);
+                        else // if we're already followed by '\''
+                        {
+                            TOKEN_TYPE t = prev.Type(cur.x - 1);
+                            if (!TextType(t) && t != TOKEN_COMMENT)
+                                prev.insert(cur.x + 1, '\'');
+                        }
+                    } else if (Kb.k('.')) {
+                        // overwrite any existing '.' that shouldn't be there
+                        TOKEN_TYPE t = prev.Type(cur.x - 1);
+                        if (!TextType(t))
+                            if (prev[cur.x + 1] == '.')
+                                prev.remove(cur.x);
+                    } else if (Kb.k(',')) {
+                        if (prev.Type(cur.x) == TOKEN_OPERATOR) // if this became an operator
+                        {
+                            if (prev.Type(cur.x + 1) != TOKEN_NONE)
+                                prev.insert(cur.x + 1, ' ');
+                            cur.x++; // after ','
+                        }
+                    } else if (Kb.k('?')) {
+                        if (prev.Type(cur.x) == TOKEN_OPERATOR) // if this became an operator
+                        {
+                            if (prev.Type(cur.x - 1) != TOKEN_NONE)
+                                prev.insert(cur.x++, ' '); // before '?'
+                            if (prev.Type(cur.x + 1) != TOKEN_NONE)
+                                prev.insert(cur.x + 1, ' ');
+                            cur.x++; // after  '?'
+                        }
+                    } else if (Kb.k(':')) // "case X:", "label:", "a ? b : c"
+                    {
+                        if (prev.Type(cur.x) == TOKEN_OPERATOR) // if this became an operator
+                            for (VecI2 p = cur - VecI2(1, 0); lineValid(p); dec(p)) {
+                                if (Type(p) == TOKEN_OPERATOR) {
+                                    Char c = T[p];
+                                    if (c == '?') {
+                                        if (prev.Type(cur.x - 1) != TOKEN_NONE)
+                                            prev.insert(cur.x++, ' '); // before ':'
+                                        if (prev.Type(cur.x + 1) != TOKEN_NONE)
+                                            prev.insert(cur.x + 1, ' ');
+                                        cur.x++; // after  ':'
+                                        break;
+                                    }
+                                    if (c == '{' || c == '}' || c == ';')
+                                        break;
+                                } else if (Type(p) == TOKEN_KEYWORD) {
+                                    CChar *s = lines[p.y]() + p.x;
+                                    if (Starts(s, "case", true, WHOLE_WORD_STRICT) || Starts(s, "default", true, WHOLE_WORD_STRICT)) {
+                                        if (prev.Type(cur.x + 1) != TOKEN_NONE)
+                                            prev.insert(cur.x + 1, ' ');
+                                        cur.x++; // after  ':'
+                                        break;
+                                    }
+                                }
+                            }
+                    } else if (Kb.k('&')) // check for '&&'
+                    {
+                        if (prev[cur.x - 1] == '&' && prev.Type(cur.x - 1) == TOKEN_OPERATOR) {
+                            if (prev.Type(cur.x - 2) != TOKEN_NONE)
+                                prev.insert(cur.x++ - 1, ' '); // before "&&"
+                            if (prev.Type(cur.x + 1) != TOKEN_NONE)
+                                prev.insert(cur.x + 1, ' ');
+                            cur.x++; // after  "&&"
+                        }
+                    } else if (Kb.k('|')) // check for '||'
+                    {
+                        if (prev[cur.x - 1] == '|' && prev.Type(cur.x - 1) == TOKEN_OPERATOR) {
+                            if (prev.Type(cur.x - 2) != TOKEN_NONE)
+                                prev.insert(cur.x++ - 1, ' '); // before "||"
+                            if (prev.Type(cur.x + 1) != TOKEN_NONE)
+                                prev.insert(cur.x + 1, ' ');
+                            cur.x++; // after  "||"
+                        }
+                    }
+                }
+
+                cur.x++;
+                CE.markCurPos();
+
+                if (CE.options.guided()) {
+                    if (Kb.k(';') && prev.Type(cur.x) != TOKEN_NONE && prev[cur.x] != '}' && prev.Type(cur.x - 1) == TOKEN_OPERATOR)
+                        prev.insert(cur.x++, ' ');
+                    else // if we typed ';' which is followed by something then add space
+                        if (prev[cur.x - 2] == ',' && prev.Type(cur.x - 1) != TOKEN_NONE && prev.Type(cur.x - 2) == TOKEN_OPERATOR)
+                        prev.insert(cur.x++ - 1, ' ');
+                    else // if we typed something after ',' then insert space between that
+                        if (prev[cur.x - 2] == ';' && !Kb.k(' ') && !Kb.k('}'))
+                        prev.insert(cur.x++ - 1, ' '); // if we typed something after ';' then insert space between that
+
+                    if (Kb.k(':')) // if we typed ':' after private,protected,public then convert "   private:|" to "private:\n   |"
+                    {
+                        Int start = prev.start();
+                        CChar *s = prev() + start;
+                        if (Starts(s, "public", true, WHOLE_WORD_STRICT) || Starts(s, "protected", true, WHOLE_WORD_STRICT) || Starts(s, "private", true, WHOLE_WORD_STRICT)) {
+                            if (prev[cur.x - 2] == ' ') {
+                                prev.remove(cur.x - 2);
+                                cur.x--;
+                            } // remove any space between keyword and ':' ("private :|" -> "private:|")
+                            Int rem = Min(start, TabLength);
+                            prev.remove(0, rem);
+                            start -= rem;
+                            start += TabLength;
+                            Line &l = lines.NewAt(cur.y + 1);
+                            REP(start)
+                            l.insert(0, ' ');
+                            cur.y++;
+                            cur.x = start;
+                        }
+                    }
+                    if (Kb.k('/') && prev[cur.x - 2] == '/' && prev[cur.x - 3] != '/' && prev.Type(cur.x - 3) != TOKEN_NONE && !TextType(prev.Type(cur.x - 2))) {
+                        prev.insert(cur.x - 2, ' ');
+                        cur.x++;
+                    } // if we started typing a     comment then make sure it's separated with at least one space
+                    if (!Kb.k('/') && !Kb.k(' ') && prev[cur.x - 2] == '/' && prev[cur.x - 3] == '/' && !TextType(prev.Type(cur.x - 2))) {
+                        prev.insert(cur.x - 1, ' ');
+                        cur.x++;
+                    } // if we started typing after comment then make sure it's separated with at least one space
+                }
+
+                KeyboardKey *k = Kb.nextKeyPtr();
+                if (k && k->c && !k->ctrlCmd() && !k->lalt()) {
+                    Kb.nextKey();
+                    goto char_loop;
+                }
+            }
+
+                changed(cur.y - 1, 3);
+                makeCurVisible();
+                listSuggestions(space ? -1 : 0);
+                CE.markCurPos();
+            } else
+
+                break; // stop and don't eat using 'nextKey' in the 'for' loop
         }
     } else if (Gui.kb() == &suggestions_textline) {
         if (Kb.ctrlCmd() && Kb.b(KB_UP))
             scrollUp();
         else // scroll up
             if (Kb.ctrlCmd() && Kb.b(KB_DOWN))
-                scrollDown();
-            else // scroll down
-                if (Kb.k(KB_ESC) || Kb.k(KB_NAV_BACK)) {
-                    clearSuggestions();
-                    Kb.eatKey();
-                } else // hide suggestions
-                    if (Kb.k(KB_ENTER)) {
-                        autoComplete();
-                        Kb.eatKey();
-                    } else if (Kb.k(KB_PGUP))
-                        setSuggestion(suggestions_list.cur - Trunc(suggestions_region.slidebar[1].length() / CE.ts.lineHeight()));
-                    else if (Kb.k(KB_PGDN))
-                        setSuggestion(suggestions_list.cur + Trunc(suggestions_region.slidebar[1].length() / CE.ts.lineHeight()));
-                    else if (Kb.k(KB_UP))
-                        setSuggestion(suggestions_list.cur - 1);
-                    else if (Kb.k(KB_DOWN))
-                        setSuggestion(suggestions_list.cur + 1);
+            scrollDown();
+        else // scroll down
+            if (Kb.k(KB_ESC) || Kb.k(KB_NAV_BACK)) {
+            clearSuggestions();
+            Kb.eatKey();
+        } else // hide suggestions
+            if (Kb.k(KB_ENTER)) {
+            autoComplete();
+            Kb.eatKey();
+        } else if (Kb.k(KB_PGUP))
+            setSuggestion(suggestions_list.cur - Trunc(suggestions_region.slidebar[1].length() / CE.ts.lineHeight()));
+        else if (Kb.k(KB_PGDN))
+            setSuggestion(suggestions_list.cur + Trunc(suggestions_region.slidebar[1].length() / CE.ts.lineHeight()));
+        else if (Kb.k(KB_UP))
+            setSuggestion(suggestions_list.cur - 1);
+        else if (Kb.k(KB_DOWN))
+            setSuggestion(suggestions_list.cur + 1);
     }
 
     REPA(MT)

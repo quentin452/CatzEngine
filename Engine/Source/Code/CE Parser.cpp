@@ -9,9 +9,9 @@ static void SetTokenSymbol(Token &token, Str &temp) {
             token.symbol.find("char8");
         else // treat 'char' as 'char8' on C++ files
             if (token.line->source->cpp && token == "long")
-                token.symbol.find("int");
-            else // treat 'long' as 'int  ' on C++ files
-                token.symbol.find(temp = token);
+            token.symbol.find("int");
+        else // treat 'long' as 'int  ' on C++ files
+            token.symbol.find(temp = token);
     }
 }
 /******************************************************************************/
@@ -595,9 +595,9 @@ Symbol *GetFullSymbol(Memc<Token *> &tokens, Int &i, Str &temp, Symbol *set_pare
                         token.symbol = parent;
                     else // constructor "class X{X();} X::X(){}"
                         if (precise_parent && parent)
-                            token.symbol = FindChild(temp = token, parent, null, true, allow_self);
-                        else // if there's no parent then allow usings too (go to next line)
-                            token.symbol = FindSymbol(temp = token, parent, ProjectUsings);
+                        token.symbol = FindChild(temp = token, parent, null, true, allow_self);
+                    else // if there's no parent then allow usings too (go to next line)
+                        token.symbol = FindSymbol(temp = token, parent, ProjectUsings);
                 }
                 allow_self = true;
                 precise_parent = true;
@@ -2093,19 +2093,19 @@ void ReadVarFunc(Symbol *type, Memc<SymbolDef> &symbols, Memc<Token *> &tokens, 
                                 modifiers_in_bracket |= Symbol::MODIF_FUNC_CONST;
                             } else // ()const
                                 if (token == "final") {
-                                    token.symbol = "final";
-                                    token.parent = start_parent; /*modifiers_in_bracket|=Symbol::MODIF_FUNC_FINAL   ;*/
-                                } else                           // ()final
-                                    if (token == "override") {
-                                        token.symbol = "override";
-                                        token.parent = start_parent; /*modifiers_in_bracket|=Symbol::MODIF_FUNC_OVERRIDE;*/
-                                    } else                           // ()override
-                                        if (token == "throw") {
-                                            token.symbol = "throw";
-                                            token.parent = start_parent;
-                                            SkipThrow(tokens, i, set_parent_var_func);
-                                        } else // throw(..)
-                                            break;
+                                token.symbol = "final";
+                                token.parent = start_parent; /*modifiers_in_bracket|=Symbol::MODIF_FUNC_FINAL   ;*/
+                            } else                           // ()final
+                                if (token == "override") {
+                                token.symbol = "override";
+                                token.parent = start_parent; /*modifiers_in_bracket|=Symbol::MODIF_FUNC_OVERRIDE;*/
+                            } else                           // ()override
+                                if (token == "throw") {
+                                token.symbol = "throw";
+                                token.parent = start_parent;
+                                SkipThrow(tokens, i, set_parent_var_func);
+                            } else // throw(..)
+                                break;
                         }
                     } else // Flt (*Func(Byte type)) (Flt s) {} - function which returns function, "Func(Byte type)" -> "Flt f(Flt s)"
                     {

@@ -1712,9 +1712,9 @@ void CodeEditor::update(Bool active) {
                         build_output += '\'';
                     else // occurs on Linux
                         if (c == u'’')
-                            build_output += '\'';
-                        else // occurs on Linux
-                            build_output += c;
+                        build_output += '\'';
+                    else // occurs on Linux
+                        build_output += c;
                 }
                 refresh = true;
             }
@@ -1803,17 +1803,17 @@ void CodeEditor::update(Bool active) {
                         ok = (exit_code == 0);
                     else                       // exit code known
                         if (build_data.elms()) // detect success
-                        {
-                            C Str &last = build_data.last().text;
-                            if (Starts(last, "===")) {
-                                // only on success
-                                ok = (((Contains(last, "1 succeeded") || Contains(last, "1 up-to-date")) && Contains(last, "0 failed"))                 // English (========== Build: 1 succeeded, 0 failed, 0 up-to-date, 0 skipped ==========)
-                                      || ((Contains(last, "1 erfolgreich") || Contains(last, "1 aktuell")) && Contains(last, "Fehler bei 0"))           // German  (========== Build: 1 erfolgreich, Fehler bei 0, 0 aktuell, 0 übersprungen ==========)
-                                      || ((Contains(last, u"1 a réussi") || Contains(last, u"1 mis à jour")) && Contains(last, u"0 a échoué"))          // French  (========== Génération : 1 a réussi, 0 a échoué, 0 mis à jour, 0 a été ignoré ==========)
-                                      || ((Contains(last, "1 completate") || Contains(last, "1 aggiornate")) && Contains(last, "0 non riuscite"))       // Italian (========== Compilazione: 1 completate, 0 non riuscite, 0 aggiornate, 0 ignorate ==========)
-                                      || ((Contains(last, u"успешно: 1") || Contains(last, u"без изменений: 1")) && Contains(last, u"с ошибками: 0"))); // Russian (========== Построение: успешно: 1, с ошибками: 0, без изменений: 0, пропущено: 0 ==========)
-                            }
+                    {
+                        C Str &last = build_data.last().text;
+                        if (Starts(last, "===")) {
+                            // only on success
+                            ok = (((Contains(last, "1 succeeded") || Contains(last, "1 up-to-date")) && Contains(last, "0 failed"))                 // English (========== Build: 1 succeeded, 0 failed, 0 up-to-date, 0 skipped ==========)
+                                  || ((Contains(last, "1 erfolgreich") || Contains(last, "1 aktuell")) && Contains(last, "Fehler bei 0"))           // German  (========== Build: 1 erfolgreich, Fehler bei 0, 0 aktuell, 0 übersprungen ==========)
+                                  || ((Contains(last, u"1 a réussi") || Contains(last, u"1 mis à jour")) && Contains(last, u"0 a échoué"))          // French  (========== Génération : 1 a réussi, 0 a échoué, 0 mis à jour, 0 a été ignoré ==========)
+                                  || ((Contains(last, "1 completate") || Contains(last, "1 aggiornate")) && Contains(last, "0 non riuscite"))       // Italian (========== Compilazione: 1 completate, 0 non riuscite, 0 aggiornate, 0 ignorate ==========)
+                                  || ((Contains(last, u"успешно: 1") || Contains(last, u"без изменений: 1")) && Contains(last, u"с ошибками: 0"))); // Russian (========== Построение: успешно: 1, с ошибками: 0, без изменений: 0, пропущено: 0 ==========)
                         }
+                    }
                     if (1 && ok)          // store hash, !! have to do this before Code Signing, because we modify the EXE file, otherwise it would make the signature invalid !!
                         if (!build_debug) // skip for DEBUG because it interferes with incremental linking
                             if (build_exe_type == EXE_EXE || build_exe_type == EXE_DLL) {
@@ -1869,14 +1869,14 @@ void CodeEditor::update(Bool active) {
                                                     error = "Can't edit EXE";
                                                 else // modify hash
                                                     if (!f.pos(section_hash_ptr->offset))
-                                                        error = "Seek failed";
-                                                    else {
-                                                        f.putULong(hash);
-                                                        if (!f.flushOK())
-                                                            error = "Flush failed";
-                                                        else
-                                                            goto hash_ok;
-                                                    }
+                                                    error = "Seek failed";
+                                                else {
+                                                    f.putULong(hash);
+                                                    if (!f.flushOK())
+                                                        error = "Flush failed";
+                                                    else
+                                                        goto hash_ok;
+                                                }
                                             }
                                         }
                                     }
@@ -2724,7 +2724,8 @@ Str MSBuildPath(C Str &vs_path, C VecI4 &vs_ver) {
 }
 Str MSBuildParams(C Str &project, C Str &config, C Str &platform) {
     // optional params: /target:clean /target:rebuild /FileLogger /nologo /Verbosity:(quiet, minimal, normal, detailed, or diagnostic) /p:AppxPackageSigningEnabled=false
-    return S + '"' + NormalizePath(MakeFullPath(project)) + "\" /Verbosity:minimal /nologo" + (config.is() ? S + " /p:Configuration=\"" + config + '"' : S) + (platform.is() ? S + " /p:Platform=\"" + platform + '"' : S);
+    int maxThreads = 1; // Spécifiez le nombre maximal de threads ici
+    return S + '"' + NormalizePath(MakeFullPath(project)) + "\" /Verbosity:minimal /nologo /m:" + maxThreads + (config.is() ? S + " /p:Configuration=\"" + config + '"' : S) + (platform.is() ? S + " /p:Platform=\"" + platform + '"' : S);
 }
 
 Str VSBuildParams(C Str &project, C Str &config, C Str &platform, C Str &log) {

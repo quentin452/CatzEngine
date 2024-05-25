@@ -20,6 +20,7 @@ const Str LinuxEngineProject = "Linux/"; // if not empty then should include tai
 const Str LinuxEditorProject = "";       // if not empty then should include tail slash
 const Str AndroidProject = "Android/";   // if not empty then should include tail slash
 const Str OptionsFileName = "Engine Builder.txt";
+std::string doselectedyesornot = "No";
 /******************************************************************************/
 struct TaskBase;
 MemcThreadSafe<TaskBase *> Todo;
@@ -337,12 +338,22 @@ void CopyOutput(Ptr) {
     ClipSet(s);
 }
 void Clear(Ptr) { list.setData(data.clear()); }
-void DoSelected(Ptr) {
-    FREPA(Tasks)
-    if (Tasks[i].cb())
-        Tasks[i].queue();
+
+void ClearLogs() {
+    data.clear();
+    list.setData(data);
 }
-void BuildRun(Build &build, Ptr user, Int thread_index) { build.run(); }
+void DoSelected(Ptr) {
+    doselectedyesornot = "Yes";
+    ClearLogs();
+    FREPA(Tasks)
+    if (Tasks[i].cb()) {
+        Tasks[i].queue();
+    }
+}
+void BuildRun(Build &build, Ptr user, Int thread_index) {
+    build.run();
+}
 static void Copy(C Str &src, C Str &dest, FILE_OVERWRITE_MODE overwrite = FILE_OVERWRITE_DIFFERENT) {
     if (!FCopy(src, dest, overwrite)) {
         Gui.msgBox("Error", S + "Can't copy:\n\"" + src + "\"\nto \n\"" + dest + "\".\nTasks aborted.");
@@ -628,6 +639,9 @@ void CreateEditorPak() {
 }
 /******************************************************************************/
 void CompileVS(C Str &project, C Str &config, C Str &platform, void func() = null, void pre() = null) {
+    if (doselectedyesornot == "No") {
+        ClearLogs();
+    }
     if (Contains(platform, "Web", false, WHOLE_WORD_STRICT)) // WEB requires VS 2010
     {
         Str devenv = DevEnvPath(VSPath2010);
@@ -1065,6 +1079,7 @@ Bool Update() {
         done = 0;
         App.stateNormal().flash();
         App.stayAwake(AWAKE_OFF); // allow sleeping
+        doselectedyesornot = "No";
     }
 
     if (data_new.elms()) {

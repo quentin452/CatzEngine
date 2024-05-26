@@ -1010,7 +1010,7 @@ void GuiView::clean() // clean all references which point to invalid files
         REP(GO_NUM)
         if (Memx<GuiObj> *container = objs.container(GUI_OBJ_TYPE(i)))
             REPA(*container)
-            Clean((*container)[i]);
+        Clean((*container)[i]);
         setChanged();
     }
 }

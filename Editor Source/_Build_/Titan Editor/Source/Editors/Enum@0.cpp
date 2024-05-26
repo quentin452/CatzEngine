@@ -303,10 +303,11 @@ void EnumEditor::dragEnums(GuiObj *obj, C Vec2 &screen_pos) {
                 }
             FREPA(enum_id)
             REPD(a, list.totalElms())
-            if (Enum *e = list.absToData(a)) if (e->enum_id == enum_id[i]) {
-                list.sel.include(a);
-                break;
-            }
+            if (Enum *e = list.absToData(a))
+                if (e->enum_id == enum_id[i]) {
+                    list.sel.include(a);
+                    break;
+                }
         }
     }
 }

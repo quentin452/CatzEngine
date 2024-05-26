@@ -810,7 +810,7 @@ bool ImportFunc(Thread &thread) // 'ObjType' must be initialized because loading
                     REP(GO_NUM)
                     if (C MembConst<const_mem_addr GuiObj> *objs = game.objects(GUI_OBJ_TYPE(i)))
                         REPA(*objs)
-                        Adjust((*objs)[i]);
+                    Adjust((*objs)[i]);
                     Elm &elm = Proj.Project::newElm(name, Proj.getPathID(path), ELM_GUI);
                     Save(game, Proj.gamePath(elm));
                     elm.guiData()->newData();

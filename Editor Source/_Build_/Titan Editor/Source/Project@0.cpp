@@ -174,19 +174,19 @@ bool UpdateProject() {
                 if (go->type() == GO_WINDOW && go->visible())
                     if (Elm *elm = GuiObjToElm(go)) // start from top most visible children
                         REPA(elms)
-                        if (elms[i] == elm) {
-                            last = i;
-                            goto found;
-                        }
+            if (elms[i] == elm) {
+                last = i;
+                goto found;
+            }
 
             REPA(Mode.order)
             if (Mode.available[Mode.order[i]])
                 if (Elm *elm = Mode.elm(Mode.order[i]))
                     REPA(elms)
-                    if (elms[i] == elm) {
-                        last = i;
-                        goto found;
-                    }
+            if (elms[i] == elm) {
+                last = i;
+                goto found;
+            }
 
         found:
             Proj.elmActivate(elms[Mod(last + 1, elms.elms())]);
@@ -4257,10 +4257,10 @@ void ProjectEx::dragElmsStart() {
     REPAD(i, elm_types)
     if (!elm_types[i])
         REPAD(j, elm_types)
-        if (elm_types[j] && ElmCompatible(ELM_TYPE(i), ELM_TYPE(j))) {
-            elm_types[i] = true;
-            break;
-        }
+    if (elm_types[j] && ElmCompatible(ELM_TYPE(i), ELM_TYPE(j))) {
+        elm_types[i] = true;
+        break;
+    }
 
     REPAO(PropEx::props).dragStart(elm_types);
 }

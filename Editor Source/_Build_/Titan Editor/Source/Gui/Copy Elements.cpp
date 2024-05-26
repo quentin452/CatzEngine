@@ -677,7 +677,7 @@ void CopyElements::includeDep(C UID &elm_id) {
                                 REP(GO_NUM)
                                 if (C Memb<const_mem_addr GuiObj> *o = objs.objects(GUI_OBJ_TYPE(i)))
                                     REPA(*o)
-                                    includeDep((*o)[i]);
+                                includeDep((*o)[i]);
                             }
                         }
                     }

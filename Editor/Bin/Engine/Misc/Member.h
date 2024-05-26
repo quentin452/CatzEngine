@@ -58,7 +58,7 @@ struct MemberDesc // Member Description - Description of a Member in a C++ class
     } // set data to text custom function
     T1(TYPE)
     MemberDesc &setTextToDataFunc(void (*text_to_data)(TYPE &object, C Str &text)) {
-        T._text_to_data = (void (*)(Ptr object, C Str &text))text_to_data;
+        T._text_to_data = (void (*)(Ptr object, C Str & text)) text_to_data;
         return T;
     } // set text to data custom function
     T1(TYPE)

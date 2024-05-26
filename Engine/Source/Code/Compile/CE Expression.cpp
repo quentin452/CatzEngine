@@ -220,351 +220,351 @@ void Expr::calculateKnown(Expr &op, Expr &a, Expr &b, Compiler &compiler) {
             setBorrowed(((a.known() && !a.asBool(compiler) || b.known() && !b.asBool(compiler)) ? false : (a.asBool(compiler) && b.asBool(compiler))) ? u"true" : u"false");
         else // if at least one is false then the result is false
             if (op == "||")
-                setBorrowed(((a.known() && a.asBool(compiler) || b.known() && b.asBool(compiler)) ? true : (a.asBool(compiler) || b.asBool(compiler))) ? u"true" : u"false");
-            else // if at least one is true  then the result is true
-                if (op == "^^")
-                    setBorrowed((a.asBool(compiler) != b.asBool(compiler)) ? u"true" : u"false");
-                else if (op == "==") {
-                    Bool r = false;
-                    if (RealType(a.symbol->var_type) || RealType(b.symbol->var_type))
-                        r = (a.asDbl(compiler) == b.asDbl(compiler));
-                    else if (a.symbol->var_type == VAR_ULONG) {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            r = (a.asULong(compiler) == b.asULong(compiler));
-                        else
-                            r = (a.asULong(compiler) == b.asLong(compiler));
-                    } else {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            r = (a.asLong(compiler) == b.asULong(compiler));
-                        else
-                            r = (a.asLong(compiler) == b.asLong(compiler));
-                    }
-                    setBorrowed(r ? u"true" : u"false");
-                } else if (op == "!=") {
-                    Bool r = false;
-                    if (RealType(a.symbol->var_type) || RealType(b.symbol->var_type))
-                        r = (a.asDbl(compiler) != b.asDbl(compiler));
-                    else if (a.symbol->var_type == VAR_ULONG) {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            r = (a.asULong(compiler) != b.asULong(compiler));
-                        else
-                            r = (a.asULong(compiler) != b.asLong(compiler));
-                    } else {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            r = (a.asLong(compiler) != b.asULong(compiler));
-                        else
-                            r = (a.asLong(compiler) != b.asLong(compiler));
-                    }
-                    setBorrowed(r ? u"true" : u"false");
-                } else if (op == "<=") {
-                    Bool r = false;
-                    if (RealType(a.symbol->var_type) || RealType(b.symbol->var_type))
-                        r = (a.asDbl(compiler) <= b.asDbl(compiler));
-                    else if (a.symbol->var_type == VAR_ULONG) {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            r = (a.asULong(compiler) <= b.asULong(compiler));
-                        else
-                            r = (a.asULong(compiler) <= b.asLong(compiler));
-                    } else {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            r = (a.asLong(compiler) <= b.asULong(compiler));
-                        else
-                            r = (a.asLong(compiler) <= b.asLong(compiler));
-                    }
-                    setBorrowed(r ? u"true" : u"false");
-                } else if (op == ">=") {
-                    Bool r = false;
-                    if (RealType(a.symbol->var_type) || RealType(b.symbol->var_type))
-                        r = (a.asDbl(compiler) >= b.asDbl(compiler));
-                    else if (a.symbol->var_type == VAR_ULONG) {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            r = (a.asULong(compiler) >= b.asULong(compiler));
-                        else
-                            r = (a.asULong(compiler) >= b.asLong(compiler));
-                    } else {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            r = (a.asLong(compiler) >= b.asULong(compiler));
-                        else
-                            r = (a.asLong(compiler) >= b.asLong(compiler));
-                    }
-                    setBorrowed(r ? u"true" : u"false");
-                } else if (op == '<') {
-                    Bool r = false;
-                    if (RealType(a.symbol->var_type) || RealType(b.symbol->var_type))
-                        r = (a.asDbl(compiler) < b.asDbl(compiler));
-                    else if (a.symbol->var_type == VAR_ULONG) {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            r = (a.asULong(compiler) < b.asULong(compiler));
-                        else
-                            r = (a.asULong(compiler) < b.asLong(compiler));
-                    } else {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            r = (a.asLong(compiler) < b.asULong(compiler));
-                        else
-                            r = (a.asLong(compiler) < b.asLong(compiler));
-                    }
-                    setBorrowed(r ? u"true" : u"false");
-                } else if (op == '>') {
-                    Bool r = false;
-                    if (RealType(a.symbol->var_type) || RealType(b.symbol->var_type))
-                        r = (a.asDbl(compiler) > b.asDbl(compiler));
-                    else if (a.symbol->var_type == VAR_ULONG) {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            r = (a.asULong(compiler) > b.asULong(compiler));
-                        else
-                            r = (a.asULong(compiler) > b.asLong(compiler));
-                    } else {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            r = (a.asLong(compiler) > b.asULong(compiler));
-                        else
-                            r = (a.asLong(compiler) > b.asLong(compiler));
-                    }
-                    setBorrowed(r ? u"true" : u"false");
-                } else if (op == '*') {
-                    if (RealType(a.symbol->var_type) || RealType(b.symbol->var_type))
-                        setCustom(S + (a.asDbl(compiler) * b.asDbl(compiler)));
-                    else if (a.symbol->var_type == VAR_ULONG) {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            setCustom(S + (a.asULong(compiler) * b.asULong(compiler)));
-                        else
-                            setCustom(S + (a.asULong(compiler) * b.asLong(compiler)));
-                    } else {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            setCustom(S + (a.asLong(compiler) * b.asULong(compiler)));
-                        else
-                            setCustom(S + (a.asLong(compiler) * b.asLong(compiler)));
-                    }
-                } else if (op == '/') {
-                    if (RealType(a.symbol->var_type) || RealType(b.symbol->var_type))
-                        setCustom(S + (a.asDbl(compiler) / b.asDbl(compiler)));
-                    else if (a.symbol->var_type == VAR_ULONG) {
-                        if (b.symbol->var_type == VAR_ULONG) {
-                            ULong v = b.asULong(compiler);
-                            if (v)
-                                setCustom(S + (a.asULong(compiler) / v));
-                            else
-                                compiler.msgs.New().error("Division by zero", b.origin);
-                        } else {
-                            Long v = b.asLong(compiler);
-                            if (v)
-                                setCustom(S + (a.asULong(compiler) / v));
-                            else
-                                compiler.msgs.New().error("Division by zero", b.origin);
-                        }
-                    } else {
-                        if (b.symbol->var_type == VAR_ULONG) {
-                            ULong v = b.asULong(compiler);
-                            if (v)
-                                setCustom(S + (a.asLong(compiler) / v));
-                            else
-                                compiler.msgs.New().error("Division by zero", b.origin);
-                        } else {
-                            Long v = b.asLong(compiler);
-                            if (v)
-                                setCustom(S + (a.asLong(compiler) / v));
-                            else
-                                compiler.msgs.New().error("Division by zero", b.origin);
-                        }
-                    }
-                } else if (op == '%') {
-                    if (a.symbol->var_type == VAR_ULONG) {
-                        if (b.symbol->var_type == VAR_ULONG) {
-                            ULong v = b.asULong(compiler);
-                            if (v)
-                                setCustom(S + (a.asULong(compiler) % v));
-                            else
-                                compiler.msgs.New().error("Modulo by zero", b.origin);
-                        } else {
-                            Long v = b.asLong(compiler);
-                            if (v)
-                                setCustom(S + (a.asULong(compiler) % v));
-                            else
-                                compiler.msgs.New().error("Modulo by zero", b.origin);
-                        }
-                    } else {
-                        if (b.symbol->var_type == VAR_ULONG) {
-                            ULong v = b.asULong(compiler);
-                            if (v)
-                                setCustom(S + (a.asLong(compiler) % v));
-                            else
-                                compiler.msgs.New().error("Modulo by zero", b.origin);
-                        } else {
-                            Long v = b.asLong(compiler);
-                            if (v)
-                                setCustom(S + (a.asLong(compiler) % v));
-                            else
-                                compiler.msgs.New().error("Modulo by zero", b.origin);
-                        }
-                    }
-                } else if (op == '+') {
-                    if (RealType(a.symbol->var_type) || RealType(b.symbol->var_type))
-                        setCustom(S + (a.asDbl(compiler) + b.asDbl(compiler)));
-                    else if (a.symbol->var_type == VAR_ULONG) {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            setCustom(S + (a.asULong(compiler) + b.asULong(compiler)));
-                        else
-                            setCustom(S + (a.asULong(compiler) + b.asLong(compiler)));
-                    } else {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            setCustom(S + (a.asLong(compiler) + b.asULong(compiler)));
-                        else
-                            setCustom(S + (a.asLong(compiler) + b.asLong(compiler)));
-                    }
-                } else if (op == '-') {
-                    if (RealType(a.symbol->var_type) || RealType(b.symbol->var_type))
-                        setCustom(S + (a.asDbl(compiler) - b.asDbl(compiler)));
-                    else if (a.symbol->var_type == VAR_ULONG) {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            setCustom(S + (a.asULong(compiler) - b.asULong(compiler)));
-                        else
-                            setCustom(S + (a.asULong(compiler) - b.asLong(compiler)));
-                    } else {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            setCustom(S + (a.asLong(compiler) - b.asULong(compiler)));
-                        else
-                            setCustom(S + (a.asLong(compiler) - b.asLong(compiler)));
-                    }
-                } else if (op == "<<") {
-                    if (a.symbol->var_type == VAR_ULONG)
-                        setCustom(S + (a.asULong(compiler) << b.asInt(compiler)));
+            setBorrowed(((a.known() && a.asBool(compiler) || b.known() && b.asBool(compiler)) ? true : (a.asBool(compiler) || b.asBool(compiler))) ? u"true" : u"false");
+        else // if at least one is true  then the result is true
+            if (op == "^^")
+            setBorrowed((a.asBool(compiler) != b.asBool(compiler)) ? u"true" : u"false");
+        else if (op == "==") {
+            Bool r = false;
+            if (RealType(a.symbol->var_type) || RealType(b.symbol->var_type))
+                r = (a.asDbl(compiler) == b.asDbl(compiler));
+            else if (a.symbol->var_type == VAR_ULONG) {
+                if (b.symbol->var_type == VAR_ULONG)
+                    r = (a.asULong(compiler) == b.asULong(compiler));
+                else
+                    r = (a.asULong(compiler) == b.asLong(compiler));
+            } else {
+                if (b.symbol->var_type == VAR_ULONG)
+                    r = (a.asLong(compiler) == b.asULong(compiler));
+                else
+                    r = (a.asLong(compiler) == b.asLong(compiler));
+            }
+            setBorrowed(r ? u"true" : u"false");
+        } else if (op == "!=") {
+            Bool r = false;
+            if (RealType(a.symbol->var_type) || RealType(b.symbol->var_type))
+                r = (a.asDbl(compiler) != b.asDbl(compiler));
+            else if (a.symbol->var_type == VAR_ULONG) {
+                if (b.symbol->var_type == VAR_ULONG)
+                    r = (a.asULong(compiler) != b.asULong(compiler));
+                else
+                    r = (a.asULong(compiler) != b.asLong(compiler));
+            } else {
+                if (b.symbol->var_type == VAR_ULONG)
+                    r = (a.asLong(compiler) != b.asULong(compiler));
+                else
+                    r = (a.asLong(compiler) != b.asLong(compiler));
+            }
+            setBorrowed(r ? u"true" : u"false");
+        } else if (op == "<=") {
+            Bool r = false;
+            if (RealType(a.symbol->var_type) || RealType(b.symbol->var_type))
+                r = (a.asDbl(compiler) <= b.asDbl(compiler));
+            else if (a.symbol->var_type == VAR_ULONG) {
+                if (b.symbol->var_type == VAR_ULONG)
+                    r = (a.asULong(compiler) <= b.asULong(compiler));
+                else
+                    r = (a.asULong(compiler) <= b.asLong(compiler));
+            } else {
+                if (b.symbol->var_type == VAR_ULONG)
+                    r = (a.asLong(compiler) <= b.asULong(compiler));
+                else
+                    r = (a.asLong(compiler) <= b.asLong(compiler));
+            }
+            setBorrowed(r ? u"true" : u"false");
+        } else if (op == ">=") {
+            Bool r = false;
+            if (RealType(a.symbol->var_type) || RealType(b.symbol->var_type))
+                r = (a.asDbl(compiler) >= b.asDbl(compiler));
+            else if (a.symbol->var_type == VAR_ULONG) {
+                if (b.symbol->var_type == VAR_ULONG)
+                    r = (a.asULong(compiler) >= b.asULong(compiler));
+                else
+                    r = (a.asULong(compiler) >= b.asLong(compiler));
+            } else {
+                if (b.symbol->var_type == VAR_ULONG)
+                    r = (a.asLong(compiler) >= b.asULong(compiler));
+                else
+                    r = (a.asLong(compiler) >= b.asLong(compiler));
+            }
+            setBorrowed(r ? u"true" : u"false");
+        } else if (op == '<') {
+            Bool r = false;
+            if (RealType(a.symbol->var_type) || RealType(b.symbol->var_type))
+                r = (a.asDbl(compiler) < b.asDbl(compiler));
+            else if (a.symbol->var_type == VAR_ULONG) {
+                if (b.symbol->var_type == VAR_ULONG)
+                    r = (a.asULong(compiler) < b.asULong(compiler));
+                else
+                    r = (a.asULong(compiler) < b.asLong(compiler));
+            } else {
+                if (b.symbol->var_type == VAR_ULONG)
+                    r = (a.asLong(compiler) < b.asULong(compiler));
+                else
+                    r = (a.asLong(compiler) < b.asLong(compiler));
+            }
+            setBorrowed(r ? u"true" : u"false");
+        } else if (op == '>') {
+            Bool r = false;
+            if (RealType(a.symbol->var_type) || RealType(b.symbol->var_type))
+                r = (a.asDbl(compiler) > b.asDbl(compiler));
+            else if (a.symbol->var_type == VAR_ULONG) {
+                if (b.symbol->var_type == VAR_ULONG)
+                    r = (a.asULong(compiler) > b.asULong(compiler));
+                else
+                    r = (a.asULong(compiler) > b.asLong(compiler));
+            } else {
+                if (b.symbol->var_type == VAR_ULONG)
+                    r = (a.asLong(compiler) > b.asULong(compiler));
+                else
+                    r = (a.asLong(compiler) > b.asLong(compiler));
+            }
+            setBorrowed(r ? u"true" : u"false");
+        } else if (op == '*') {
+            if (RealType(a.symbol->var_type) || RealType(b.symbol->var_type))
+                setCustom(S + (a.asDbl(compiler) * b.asDbl(compiler)));
+            else if (a.symbol->var_type == VAR_ULONG) {
+                if (b.symbol->var_type == VAR_ULONG)
+                    setCustom(S + (a.asULong(compiler) * b.asULong(compiler)));
+                else
+                    setCustom(S + (a.asULong(compiler) * b.asLong(compiler)));
+            } else {
+                if (b.symbol->var_type == VAR_ULONG)
+                    setCustom(S + (a.asLong(compiler) * b.asULong(compiler)));
+                else
+                    setCustom(S + (a.asLong(compiler) * b.asLong(compiler)));
+            }
+        } else if (op == '/') {
+            if (RealType(a.symbol->var_type) || RealType(b.symbol->var_type))
+                setCustom(S + (a.asDbl(compiler) / b.asDbl(compiler)));
+            else if (a.symbol->var_type == VAR_ULONG) {
+                if (b.symbol->var_type == VAR_ULONG) {
+                    ULong v = b.asULong(compiler);
+                    if (v)
+                        setCustom(S + (a.asULong(compiler) / v));
                     else
-                        setCustom(S + (a.asLong(compiler) << b.asInt(compiler)));
-                } else if (op == ">>") {
-                    if (a.symbol->var_type == VAR_ULONG)
-                        setCustom(S + (a.asULong(compiler) >> b.asInt(compiler)));
+                        compiler.msgs.New().error("Division by zero", b.origin);
+                } else {
+                    Long v = b.asLong(compiler);
+                    if (v)
+                        setCustom(S + (a.asULong(compiler) / v));
                     else
-                        setCustom(S + (a.asLong(compiler) >> b.asInt(compiler)));
-                } else if (op == '&') {
-                    if (a.symbol->var_type == VAR_ULONG) {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            setCustom(S + (a.asULong(compiler) & b.asULong(compiler)));
-                        else if (b.symbol->var_type == VAR_LONG)
-                            setCustom(S + (a.asULong(compiler) & b.asLong(compiler)));
-                        else if (b.symbol->var_type == VAR_UINT)
-                            setCustom(S + (a.asULong(compiler) & b.asUInt(compiler)));
-                        else
-                            setCustom(S + (a.asULong(compiler) & b.asInt(compiler)));
-                    } else if (a.symbol->var_type == VAR_LONG) {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            setCustom(S + (a.asLong(compiler) & b.asULong(compiler)));
-                        else if (b.symbol->var_type == VAR_LONG)
-                            setCustom(S + (a.asLong(compiler) & b.asLong(compiler)));
-                        else if (b.symbol->var_type == VAR_UINT)
-                            setCustom(S + (a.asLong(compiler) & b.asUInt(compiler)));
-                        else
-                            setCustom(S + (a.asLong(compiler) & b.asInt(compiler)));
-                    } else if (a.symbol->var_type == VAR_UINT) {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            setCustom(S + (a.asUInt(compiler) & b.asULong(compiler)));
-                        else if (b.symbol->var_type == VAR_LONG)
-                            setCustom(S + (a.asUInt(compiler) & b.asLong(compiler)));
-                        else if (b.symbol->var_type == VAR_UINT)
-                            setCustom(S + (a.asUInt(compiler) & b.asUInt(compiler)));
-                        else
-                            setCustom(S + (a.asUInt(compiler) & b.asInt(compiler)));
-                    } else {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            setCustom(S + (a.asInt(compiler) & b.asULong(compiler)));
-                        else if (b.symbol->var_type == VAR_LONG)
-                            setCustom(S + (a.asInt(compiler) & b.asLong(compiler)));
-                        else if (b.symbol->var_type == VAR_UINT)
-                            setCustom(S + (a.asInt(compiler) & b.asUInt(compiler)));
-                        else
-                            setCustom(S + (a.asInt(compiler) & b.asInt(compiler)));
-                    }
-                } else if (op == '^') {
-                    if (a.symbol->var_type == VAR_ULONG) {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            setCustom(S + (a.asULong(compiler) ^ b.asULong(compiler)));
-                        else if (b.symbol->var_type == VAR_LONG)
-                            setCustom(S + (a.asULong(compiler) ^ b.asLong(compiler)));
-                        else if (b.symbol->var_type == VAR_UINT)
-                            setCustom(S + (a.asULong(compiler) ^ b.asUInt(compiler)));
-                        else
-                            setCustom(S + (a.asULong(compiler) ^ b.asInt(compiler)));
-                    } else if (a.symbol->var_type == VAR_LONG) {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            setCustom(S + (a.asLong(compiler) ^ b.asULong(compiler)));
-                        else if (b.symbol->var_type == VAR_LONG)
-                            setCustom(S + (a.asLong(compiler) ^ b.asLong(compiler)));
-                        else if (b.symbol->var_type == VAR_UINT)
-                            setCustom(S + (a.asLong(compiler) ^ b.asUInt(compiler)));
-                        else
-                            setCustom(S + (a.asLong(compiler) ^ b.asInt(compiler)));
-                    } else if (a.symbol->var_type == VAR_UINT) {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            setCustom(S + (a.asUInt(compiler) ^ b.asULong(compiler)));
-                        else if (b.symbol->var_type == VAR_LONG)
-                            setCustom(S + (a.asUInt(compiler) ^ b.asLong(compiler)));
-                        else if (b.symbol->var_type == VAR_UINT)
-                            setCustom(S + (a.asUInt(compiler) ^ b.asUInt(compiler)));
-                        else
-                            setCustom(S + (a.asUInt(compiler) ^ b.asInt(compiler)));
-                    } else {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            setCustom(S + (a.asInt(compiler) ^ b.asULong(compiler)));
-                        else if (b.symbol->var_type == VAR_LONG)
-                            setCustom(S + (a.asInt(compiler) ^ b.asLong(compiler)));
-                        else if (b.symbol->var_type == VAR_UINT)
-                            setCustom(S + (a.asInt(compiler) ^ b.asUInt(compiler)));
-                        else
-                            setCustom(S + (a.asInt(compiler) ^ b.asInt(compiler)));
-                    }
-                } else if (op == '|') {
-                    if (a.symbol->var_type == VAR_ULONG) {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            setCustom(S + (a.asULong(compiler) | b.asULong(compiler)));
-                        else if (b.symbol->var_type == VAR_LONG)
-                            setCustom(S + (a.asULong(compiler) | b.asLong(compiler)));
-                        else if (b.symbol->var_type == VAR_UINT)
-                            setCustom(S + (a.asULong(compiler) | b.asUInt(compiler)));
-                        else
-                            setCustom(S + (a.asULong(compiler) | b.asInt(compiler)));
-                    } else if (a.symbol->var_type == VAR_LONG) {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            setCustom(S + (a.asLong(compiler) | b.asULong(compiler)));
-                        else if (b.symbol->var_type == VAR_LONG)
-                            setCustom(S + (a.asLong(compiler) | b.asLong(compiler)));
-                        else if (b.symbol->var_type == VAR_UINT)
-                            setCustom(S + (a.asLong(compiler) | b.asUInt(compiler)));
-                        else
-                            setCustom(S + (a.asLong(compiler) | b.asInt(compiler)));
-                    } else if (a.symbol->var_type == VAR_UINT) {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            setCustom(S + (a.asUInt(compiler) | b.asULong(compiler)));
-                        else if (b.symbol->var_type == VAR_LONG)
-                            setCustom(S + (a.asUInt(compiler) | b.asLong(compiler)));
-                        else if (b.symbol->var_type == VAR_UINT)
-                            setCustom(S + (a.asUInt(compiler) | b.asUInt(compiler)));
-                        else
-                            setCustom(S + (a.asUInt(compiler) | b.asInt(compiler)));
-                    } else {
-                        if (b.symbol->var_type == VAR_ULONG)
-                            setCustom(S + (a.asInt(compiler) | b.asULong(compiler)));
-                        else if (b.symbol->var_type == VAR_LONG)
-                            setCustom(S + (a.asInt(compiler) | b.asLong(compiler)));
-                        else if (b.symbol->var_type == VAR_UINT)
-                            setCustom(S + (a.asInt(compiler) | b.asUInt(compiler)));
-                        else
-                            setCustom(S + (a.asInt(compiler) | b.asInt(compiler)));
-                    }
-                } else if (op == '=') {
-                    if (a.symbol.isPtr()) {
-                        if (b == "null")
-                            setBorrowed(u"null");
-                        else
-                            setCustom(S + b.asULong(compiler));
-                    } else if (RealType(a.symbol->var_type))
-                        setCustom(S + b.asDbl(compiler));
-                    else if (a.symbol->var_type == VAR_ULONG)
-                        setCustom(S + b.asULong(compiler));
+                        compiler.msgs.New().error("Division by zero", b.origin);
+                }
+            } else {
+                if (b.symbol->var_type == VAR_ULONG) {
+                    ULong v = b.asULong(compiler);
+                    if (v)
+                        setCustom(S + (a.asLong(compiler) / v));
                     else
-                        setCustom(S + b.asLong(compiler));
-                } else
-                    /*if(op=="*=" || op=="/=" || op=="%=" || op=="+=" || op=="-=" || op=="<<=" || op==">>=" || op=="&=" || op=="|=" || op=="^=")
+                        compiler.msgs.New().error("Division by zero", b.origin);
+                } else {
+                    Long v = b.asLong(compiler);
+                    if (v)
+                        setCustom(S + (a.asLong(compiler) / v));
+                    else
+                        compiler.msgs.New().error("Division by zero", b.origin);
+                }
+            }
+        } else if (op == '%') {
+            if (a.symbol->var_type == VAR_ULONG) {
+                if (b.symbol->var_type == VAR_ULONG) {
+                    ULong v = b.asULong(compiler);
+                    if (v)
+                        setCustom(S + (a.asULong(compiler) % v));
+                    else
+                        compiler.msgs.New().error("Modulo by zero", b.origin);
+                } else {
+                    Long v = b.asLong(compiler);
+                    if (v)
+                        setCustom(S + (a.asULong(compiler) % v));
+                    else
+                        compiler.msgs.New().error("Modulo by zero", b.origin);
+                }
+            } else {
+                if (b.symbol->var_type == VAR_ULONG) {
+                    ULong v = b.asULong(compiler);
+                    if (v)
+                        setCustom(S + (a.asLong(compiler) % v));
+                    else
+                        compiler.msgs.New().error("Modulo by zero", b.origin);
+                } else {
+                    Long v = b.asLong(compiler);
+                    if (v)
+                        setCustom(S + (a.asLong(compiler) % v));
+                    else
+                        compiler.msgs.New().error("Modulo by zero", b.origin);
+                }
+            }
+        } else if (op == '+') {
+            if (RealType(a.symbol->var_type) || RealType(b.symbol->var_type))
+                setCustom(S + (a.asDbl(compiler) + b.asDbl(compiler)));
+            else if (a.symbol->var_type == VAR_ULONG) {
+                if (b.symbol->var_type == VAR_ULONG)
+                    setCustom(S + (a.asULong(compiler) + b.asULong(compiler)));
+                else
+                    setCustom(S + (a.asULong(compiler) + b.asLong(compiler)));
+            } else {
+                if (b.symbol->var_type == VAR_ULONG)
+                    setCustom(S + (a.asLong(compiler) + b.asULong(compiler)));
+                else
+                    setCustom(S + (a.asLong(compiler) + b.asLong(compiler)));
+            }
+        } else if (op == '-') {
+            if (RealType(a.symbol->var_type) || RealType(b.symbol->var_type))
+                setCustom(S + (a.asDbl(compiler) - b.asDbl(compiler)));
+            else if (a.symbol->var_type == VAR_ULONG) {
+                if (b.symbol->var_type == VAR_ULONG)
+                    setCustom(S + (a.asULong(compiler) - b.asULong(compiler)));
+                else
+                    setCustom(S + (a.asULong(compiler) - b.asLong(compiler)));
+            } else {
+                if (b.symbol->var_type == VAR_ULONG)
+                    setCustom(S + (a.asLong(compiler) - b.asULong(compiler)));
+                else
+                    setCustom(S + (a.asLong(compiler) - b.asLong(compiler)));
+            }
+        } else if (op == "<<") {
+            if (a.symbol->var_type == VAR_ULONG)
+                setCustom(S + (a.asULong(compiler) << b.asInt(compiler)));
+            else
+                setCustom(S + (a.asLong(compiler) << b.asInt(compiler)));
+        } else if (op == ">>") {
+            if (a.symbol->var_type == VAR_ULONG)
+                setCustom(S + (a.asULong(compiler) >> b.asInt(compiler)));
+            else
+                setCustom(S + (a.asLong(compiler) >> b.asInt(compiler)));
+        } else if (op == '&') {
+            if (a.symbol->var_type == VAR_ULONG) {
+                if (b.symbol->var_type == VAR_ULONG)
+                    setCustom(S + (a.asULong(compiler) & b.asULong(compiler)));
+                else if (b.symbol->var_type == VAR_LONG)
+                    setCustom(S + (a.asULong(compiler) & b.asLong(compiler)));
+                else if (b.symbol->var_type == VAR_UINT)
+                    setCustom(S + (a.asULong(compiler) & b.asUInt(compiler)));
+                else
+                    setCustom(S + (a.asULong(compiler) & b.asInt(compiler)));
+            } else if (a.symbol->var_type == VAR_LONG) {
+                if (b.symbol->var_type == VAR_ULONG)
+                    setCustom(S + (a.asLong(compiler) & b.asULong(compiler)));
+                else if (b.symbol->var_type == VAR_LONG)
+                    setCustom(S + (a.asLong(compiler) & b.asLong(compiler)));
+                else if (b.symbol->var_type == VAR_UINT)
+                    setCustom(S + (a.asLong(compiler) & b.asUInt(compiler)));
+                else
+                    setCustom(S + (a.asLong(compiler) & b.asInt(compiler)));
+            } else if (a.symbol->var_type == VAR_UINT) {
+                if (b.symbol->var_type == VAR_ULONG)
+                    setCustom(S + (a.asUInt(compiler) & b.asULong(compiler)));
+                else if (b.symbol->var_type == VAR_LONG)
+                    setCustom(S + (a.asUInt(compiler) & b.asLong(compiler)));
+                else if (b.symbol->var_type == VAR_UINT)
+                    setCustom(S + (a.asUInt(compiler) & b.asUInt(compiler)));
+                else
+                    setCustom(S + (a.asUInt(compiler) & b.asInt(compiler)));
+            } else {
+                if (b.symbol->var_type == VAR_ULONG)
+                    setCustom(S + (a.asInt(compiler) & b.asULong(compiler)));
+                else if (b.symbol->var_type == VAR_LONG)
+                    setCustom(S + (a.asInt(compiler) & b.asLong(compiler)));
+                else if (b.symbol->var_type == VAR_UINT)
+                    setCustom(S + (a.asInt(compiler) & b.asUInt(compiler)));
+                else
+                    setCustom(S + (a.asInt(compiler) & b.asInt(compiler)));
+            }
+        } else if (op == '^') {
+            if (a.symbol->var_type == VAR_ULONG) {
+                if (b.symbol->var_type == VAR_ULONG)
+                    setCustom(S + (a.asULong(compiler) ^ b.asULong(compiler)));
+                else if (b.symbol->var_type == VAR_LONG)
+                    setCustom(S + (a.asULong(compiler) ^ b.asLong(compiler)));
+                else if (b.symbol->var_type == VAR_UINT)
+                    setCustom(S + (a.asULong(compiler) ^ b.asUInt(compiler)));
+                else
+                    setCustom(S + (a.asULong(compiler) ^ b.asInt(compiler)));
+            } else if (a.symbol->var_type == VAR_LONG) {
+                if (b.symbol->var_type == VAR_ULONG)
+                    setCustom(S + (a.asLong(compiler) ^ b.asULong(compiler)));
+                else if (b.symbol->var_type == VAR_LONG)
+                    setCustom(S + (a.asLong(compiler) ^ b.asLong(compiler)));
+                else if (b.symbol->var_type == VAR_UINT)
+                    setCustom(S + (a.asLong(compiler) ^ b.asUInt(compiler)));
+                else
+                    setCustom(S + (a.asLong(compiler) ^ b.asInt(compiler)));
+            } else if (a.symbol->var_type == VAR_UINT) {
+                if (b.symbol->var_type == VAR_ULONG)
+                    setCustom(S + (a.asUInt(compiler) ^ b.asULong(compiler)));
+                else if (b.symbol->var_type == VAR_LONG)
+                    setCustom(S + (a.asUInt(compiler) ^ b.asLong(compiler)));
+                else if (b.symbol->var_type == VAR_UINT)
+                    setCustom(S + (a.asUInt(compiler) ^ b.asUInt(compiler)));
+                else
+                    setCustom(S + (a.asUInt(compiler) ^ b.asInt(compiler)));
+            } else {
+                if (b.symbol->var_type == VAR_ULONG)
+                    setCustom(S + (a.asInt(compiler) ^ b.asULong(compiler)));
+                else if (b.symbol->var_type == VAR_LONG)
+                    setCustom(S + (a.asInt(compiler) ^ b.asLong(compiler)));
+                else if (b.symbol->var_type == VAR_UINT)
+                    setCustom(S + (a.asInt(compiler) ^ b.asUInt(compiler)));
+                else
+                    setCustom(S + (a.asInt(compiler) ^ b.asInt(compiler)));
+            }
+        } else if (op == '|') {
+            if (a.symbol->var_type == VAR_ULONG) {
+                if (b.symbol->var_type == VAR_ULONG)
+                    setCustom(S + (a.asULong(compiler) | b.asULong(compiler)));
+                else if (b.symbol->var_type == VAR_LONG)
+                    setCustom(S + (a.asULong(compiler) | b.asLong(compiler)));
+                else if (b.symbol->var_type == VAR_UINT)
+                    setCustom(S + (a.asULong(compiler) | b.asUInt(compiler)));
+                else
+                    setCustom(S + (a.asULong(compiler) | b.asInt(compiler)));
+            } else if (a.symbol->var_type == VAR_LONG) {
+                if (b.symbol->var_type == VAR_ULONG)
+                    setCustom(S + (a.asLong(compiler) | b.asULong(compiler)));
+                else if (b.symbol->var_type == VAR_LONG)
+                    setCustom(S + (a.asLong(compiler) | b.asLong(compiler)));
+                else if (b.symbol->var_type == VAR_UINT)
+                    setCustom(S + (a.asLong(compiler) | b.asUInt(compiler)));
+                else
+                    setCustom(S + (a.asLong(compiler) | b.asInt(compiler)));
+            } else if (a.symbol->var_type == VAR_UINT) {
+                if (b.symbol->var_type == VAR_ULONG)
+                    setCustom(S + (a.asUInt(compiler) | b.asULong(compiler)));
+                else if (b.symbol->var_type == VAR_LONG)
+                    setCustom(S + (a.asUInt(compiler) | b.asLong(compiler)));
+                else if (b.symbol->var_type == VAR_UINT)
+                    setCustom(S + (a.asUInt(compiler) | b.asUInt(compiler)));
+                else
+                    setCustom(S + (a.asUInt(compiler) | b.asInt(compiler)));
+            } else {
+                if (b.symbol->var_type == VAR_ULONG)
+                    setCustom(S + (a.asInt(compiler) | b.asULong(compiler)));
+                else if (b.symbol->var_type == VAR_LONG)
+                    setCustom(S + (a.asInt(compiler) | b.asLong(compiler)));
+                else if (b.symbol->var_type == VAR_UINT)
+                    setCustom(S + (a.asInt(compiler) | b.asUInt(compiler)));
+                else
+                    setCustom(S + (a.asInt(compiler) | b.asInt(compiler)));
+            }
+        } else if (op == '=') {
+            if (a.symbol.isPtr()) {
+                if (b == "null")
+                    setBorrowed(u"null");
+                else
+                    setCustom(S + b.asULong(compiler));
+            } else if (RealType(a.symbol->var_type))
+                setCustom(S + b.asDbl(compiler));
+            else if (a.symbol->var_type == VAR_ULONG)
+                setCustom(S + b.asULong(compiler));
+            else
+                setCustom(S + b.asLong(compiler));
+        } else
+            /*if(op=="*=" || op=="/=" || op=="%=" || op=="+=" || op=="-=" || op=="<<=" || op==">>=" || op=="&=" || op=="|=" || op=="^=")
                     {
                     }else*/
-                    compiler.msgs.New().error("Uknown operator", op.origin);
+            compiler.msgs.New().error("Uknown operator", op.origin);
     }
 }
 CAST_MATCH Expr::calculate(Compiler &compiler) {
@@ -914,9 +914,9 @@ CAST_MATCH Expr::calculate(Compiler &compiler) {
                             memNew(a.known() && !a.asBool(compiler) || b.known() && !b.asBool(compiler), compiler);
                         else // if at least one is false
                             if (func == "||")
-                                memNew(a.known() && a.asBool(compiler) || b.known() && b.asBool(compiler), compiler);
-                            else // if at least one is true
-                                memNew(a.known() && b.known(), compiler);
+                            memNew(a.known() && a.asBool(compiler) || b.known() && b.asBool(compiler), compiler);
+                        else // if at least one is true
+                            memNew(a.known() && b.known(), compiler);
                         calculateKnown(func, a, b, compiler);
                         Symbol::Modif pa = a.symbol, pb = b.symbol;
 
@@ -928,26 +928,26 @@ CAST_MATCH Expr::calculate(Compiler &compiler) {
                                 ConvertPtrToUIntPtr(pb);
                         } else                              // "==", "===", "!=", "!!=", "<", ">", "<=", ">="
                             if (!pa.isObj() && !pb.isObj()) // ptr or array
-                            {
-                                Bool a_is_void_ptr = a.symbol.isVoidPtr(),
-                                     b_is_void_ptr = b.symbol.isVoidPtr();
-                                if (pa.isPtr() && pb.isPtr() && (pa.same(pb, false, false) || pa == "null" || pb == "null" || a_is_void_ptr || b_is_void_ptr)) {
-                                    ConvertPtrToUIntPtr(pa);
-                                    ConvertPtrToUIntPtr(pb);
-                                } else {
-                                    // TODO: test for "class Base {} class Ext : Image, Base, Sound {}  {Base *b; Ext *e; b==e;}" - WORKS OK in C++, Watch out for different offsets !! (don't forget about possible vfunc_table)
-                                    // if(pa && pa->hasBase(pb..) || pb && pb->hasBase(pa..)) and compare if base's are the 'same' use 'same' func 'Base<int>' vs 'Ext' which has 'Base<float>'
-                                    /*if(pa pb .isPtr())
+                        {
+                            Bool a_is_void_ptr = a.symbol.isVoidPtr(),
+                                 b_is_void_ptr = b.symbol.isVoidPtr();
+                            if (pa.isPtr() && pb.isPtr() && (pa.same(pb, false, false) || pa == "null" || pb == "null" || a_is_void_ptr || b_is_void_ptr)) {
+                                ConvertPtrToUIntPtr(pa);
+                                ConvertPtrToUIntPtr(pb);
+                            } else {
+                                // TODO: test for "class Base {} class Ext : Image, Base, Sound {}  {Base *b; Ext *e; b==e;}" - WORKS OK in C++, Watch out for different offsets !! (don't forget about possible vfunc_table)
+                                // if(pa && pa->hasBase(pb..) || pb && pb->hasBase(pa..)) and compare if base's are the 'same' use 'same' func 'Base<int>' vs 'Ext' which has 'Base<float>'
+                                /*if(pa pb .isPtr())
                                     {
                                     }else // array
                                     {
                                     }*/
-                                    if (compiler.strict) {
-                                        compiler.msgs.New().error("Can't compare pointers of different types", origin);
-                                        return CAST_NONE;
-                                    }
+                                if (compiler.strict) {
+                                    compiler.msgs.New().error("Can't compare pointers of different types", origin);
+                                    return CAST_NONE;
                                 }
                             }
+                        }
 
                         if (func == "&&" || func == "^^" || func == "||") {
                             if (pa.isObj() && pa)
@@ -1495,7 +1495,7 @@ Expr &Template(Memc<Expr> &expr, Int templ_i, Int params) {
                 dest.src_template_i = i;
             else // we operate on FUNC_LIST so we don't know which exactly function we're going to call (as there can be "<TYPE> func(int a, TYPE b)", "<TYPE> func(float a, TYPE b)" , so instead of storing 'src_template' store its index 'src_template_i'
                 if (InRange(i, templ.symbol->templates))
-                    dest.src_template = templ.symbol->templates[i];
+                dest.src_template = templ.symbol->templates[i];
         }
     }
 
@@ -2143,26 +2143,26 @@ static void CastTo(Expr &expr, Symbol::Modif &dest, CAST_MATCH &max_cast, Expr &
             }  // 'Swap' can be used because 'result' is local variable
         } else // try class constructor
             if (dest.isObj() && compiler.allow_cast) {
-                // class Test { Test(Str str); Test(int x); }; void func(Test t); - func(0.0f) is GOOD, but func("") is BAD (here only direct match, or basic type conversions are allowed)
-                Expr result, &func = result.func.New();
-                func.origin = expr.origin;
-                func.symbol = dest;
-                func.symbol.setConst(false);                           // disable const so it can be modified for further purpose
-                FlagDisable(func.symbol.modifiers, Symbol::MODIF_REF); // disable reference (we're calling ctor)
-                func.params.New() = expr;                              // this is the original expression
+            // class Test { Test(Str str); Test(int x); }; void func(Test t); - func(0.0f) is GOOD, but func("") is BAD (here only direct match, or basic type conversions are allowed)
+            Expr result, &func = result.func.New();
+            func.origin = expr.origin;
+            func.symbol = dest;
+            func.symbol.setConst(false);                           // disable const so it can be modified for further purpose
+            FlagDisable(func.symbol.modifiers, Symbol::MODIF_REF); // disable reference (we're calling ctor)
+            func.params.New() = expr;                              // this is the original expression
 
-                Bool quiet = compiler.quiet, allow_cast = compiler.allow_cast;
-                compiler.quiet = true;
-                compiler.allow_cast = false; // make sure error messages are not generated
-                CAST_MATCH cast = result.calculate(compiler);
-                MIN(cast, CAST_CTOR);
-                compiler.quiet = quiet;
-                compiler.allow_cast = allow_cast; // restore quiet and allow cast
-                if (cast > max_cast) {
-                    max_cast = cast;
-                    Swap(max_result, result);
-                } // 'Swap' can be used because 'result' is local variable
-            }
+            Bool quiet = compiler.quiet, allow_cast = compiler.allow_cast;
+            compiler.quiet = true;
+            compiler.allow_cast = false; // make sure error messages are not generated
+            CAST_MATCH cast = result.calculate(compiler);
+            MIN(cast, CAST_CTOR);
+            compiler.quiet = quiet;
+            compiler.allow_cast = allow_cast; // restore quiet and allow cast
+            if (cast > max_cast) {
+                max_cast = cast;
+                Swap(max_result, result);
+            } // 'Swap' can be used because 'result' is local variable
+        }
         // expr.copyCtor
         /*if(Symbol *ctor=FindChild(*dest, dest(), null, false)())
            if(ctor->type==Symbol::FUNC_LIST)
@@ -2492,16 +2492,16 @@ Bool Expr::copyCtor(Compiler &compiler) {
         a.memNew(b.known(), compiler);
     } else // class ctor call
         if (!symbol.basicType() && symbol.isObj()) {
-            func.symbol = symbol;
-            func.symbol.setConst(false);                           // disable const so it can be modified for further purpose
-            FlagDisable(func.symbol.modifiers, Symbol::MODIF_REF); // disable reference (we're calling ctor)
-            Expr &a = func.params.New();
-            Swap(T, a);
-            func.memNew(false, compiler);
-        } else {
-            compiler.msgs.New().error("Can't copy object", origin);
-            return false;
-        }
+        func.symbol = symbol;
+        func.symbol.setConst(false);                           // disable const so it can be modified for further purpose
+        FlagDisable(func.symbol.modifiers, Symbol::MODIF_REF); // disable reference (we're calling ctor)
+        Expr &a = func.params.New();
+        Swap(T, a);
+        func.memNew(false, compiler);
+    } else {
+        compiler.msgs.New().error("Can't copy object", origin);
+        return false;
+    }
     Swap(result, T);
     return calculate(compiler) > CAST_NONE;
 }
@@ -2887,7 +2887,7 @@ COMPILE_RESULT Compiler::compileExpr(Memc<Expr> &expr, Symbol *space, Expr &out)
                                             s = prev->symbol();
                                         else // check "X::X"
                                             if (Equal(temp, "super", true) || Equal(temp, "__super", true))
-                                                s = Symbols("super");
+                                            s = Symbols("super");
                                 }
                                 if (s) {
                                     if (prev_is_parent) {

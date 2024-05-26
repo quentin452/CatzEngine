@@ -871,53 +871,53 @@ HSData HSConstant(InputPatch<Data, 3> I) { return GetHSData(I[0].pos, I[1].pos, 
         InputPatch<Data, 3> I,
         UInt cp_id
         : SV_OutputControlPointID) {
-        Data O;
-        O.pos = I[cp_id].pos;
+    Data O;
+    O.pos = I[cp_id].pos;
 
 #if BUMP_MODE > SBUMP_FLAT && PIXEL_NORMAL
-        O.mtrx = I[cp_id].mtrx;
+    O.mtrx = I[cp_id].mtrx;
 #else
-        O.nrm = I[cp_id].nrm;
+    O.nrm = I[cp_id].nrm;
 #endif
 
 #if SET_UV
-        O.uv = I[cp_id].uv;
+    O.uv = I[cp_id].uv;
 #endif
 
 #if MATERIALS > 1
-        O.material = I[cp_id].material;
+    O.material = I[cp_id].material;
 #endif
 
 #if SET_COL
-        O.col = I[cp_id].col;
+    O.col = I[cp_id].col;
 #endif
 
 #if GRASS_FADE
-        O.fade_out = I[cp_id].fade_out;
+    O.fade_out = I[cp_id].fade_out;
 #endif
 
 #if VTX_REFLECT
-        O.reflect_dir = I[cp_id].reflect_dir;
+    O.reflect_dir = I[cp_id].reflect_dir;
 #endif
 
 #if SET_LUM
-        O.lum = I[cp_id].lum;
+    O.lum = I[cp_id].lum;
 #endif
 
 #if ALPHA_TEST == ALPHA_TEST_DITHER
-        O.face_id = I[cp_id].face_id;
+    O.face_id = I[cp_id].face_id;
 #endif
 
-        return O;
-    }
-        /******************************************************************************/
-        [domain("tri")] void DS(
-            HSData hs_data, const OutputPatch<Data, 3> I, Vec B
-            : SV_DomainLocation,
+    return O;
+}
+/******************************************************************************/
+[domain("tri")] void DS(
+    HSData hs_data, const OutputPatch<Data, 3> I, Vec B
+    : SV_DomainLocation,
 
-              out Data O,
-              out Vec4 pixel
-            : POSITION) {
+      out Data O,
+      out Vec4 pixel
+    : POSITION) {
 #if BUMP_MODE > SBUMP_FLAT && PIXEL_NORMAL
     O.mtrx[0] = I[0].mtrx[0] * B.z + I[1].mtrx[0] * B.x + I[2].mtrx[0] * B.y;
     O.mtrx[1] = I[0].mtrx[1] * B.z + I[1].mtrx[1] * B.x + I[2].mtrx[1] * B.y;

@@ -22,7 +22,7 @@ namespace EE {
 /******************************************************************************/
 DisplayClass D;
 
-#if DX11                 // DirectX 10/11
+#if DX11 // DirectX 10/11
 #define GDI_COMPATIBLE 0 // requires DXGI_FORMAT_B8G8R8A8_UNORM or DXGI_FORMAT_B8G8R8A8_UNORM_SRGB
 static Bool AllowTearing;
 static UInt PresentFlags;
@@ -212,7 +212,7 @@ void RequestDisplayMode(Int w, Int h, Int full) {
 #endif
 
 #if WINDOWS && GL
-static void glewSafe(){
+static void glewSafe() {
 #define V(x, y, z)                                                                                                         \
     {                                                                                                                      \
         if (!x)                                                                                                            \
@@ -221,28 +221,28 @@ static void glewSafe(){
             Exit("OpenGL " z " function not supported.\nGraphics Driver not installed or better video card is required."); \
     }
     V(glGenRenderbuffers, glGenRenderbuffersEXT, "glGenRenderbuffers")
-        V(glDeleteRenderbuffers, glDeleteRenderbuffersEXT, "glDeleteRenderbuffers")
-            V(glRenderbufferStorage, glRenderbufferStorageEXT, "glRenderbufferStorage")
-                V(glGetRenderbufferParameteriv, glGetRenderbufferParameterivEXT, "glGetRenderbufferParameteriv")
-                    V(glBindRenderbuffer, glBindRenderbufferEXT, "glBindRenderbuffer")
+    V(glDeleteRenderbuffers, glDeleteRenderbuffersEXT, "glDeleteRenderbuffers")
+    V(glRenderbufferStorage, glRenderbufferStorageEXT, "glRenderbufferStorage")
+    V(glGetRenderbufferParameteriv, glGetRenderbufferParameterivEXT, "glGetRenderbufferParameteriv")
+    V(glBindRenderbuffer, glBindRenderbufferEXT, "glBindRenderbuffer")
 
-                        V(glGenFramebuffers, glGenFramebuffersEXT, "glGenFramebuffers")
-                            V(glDeleteFramebuffers, glDeleteFramebuffersEXT, "glDeleteFramebuffers")
-                                V(glBindFramebuffer, glBindFramebufferEXT, "glBindFramebuffer")
-                                    V(glBlitFramebuffer, glBlitFramebufferEXT, "glBlitFramebuffer")
+    V(glGenFramebuffers, glGenFramebuffersEXT, "glGenFramebuffers")
+    V(glDeleteFramebuffers, glDeleteFramebuffersEXT, "glDeleteFramebuffers")
+    V(glBindFramebuffer, glBindFramebufferEXT, "glBindFramebuffer")
+    V(glBlitFramebuffer, glBlitFramebufferEXT, "glBlitFramebuffer")
 #if DEBUG
-                                        V(glCheckFramebufferStatus, glCheckFramebufferStatusEXT, "glCheckFramebufferStatus")
+    V(glCheckFramebufferStatus, glCheckFramebufferStatusEXT, "glCheckFramebufferStatus")
 #endif
 
-                                            V(glFramebufferTexture2D, glFramebufferTexture2DEXT, "glFramebufferTexture2D")
-                                                V(glFramebufferRenderbuffer, glFramebufferRenderbufferEXT, "glFramebufferRenderbuffer")
+    V(glFramebufferTexture2D, glFramebufferTexture2DEXT, "glFramebufferTexture2D")
+    V(glFramebufferRenderbuffer, glFramebufferRenderbufferEXT, "glFramebufferRenderbuffer")
 
-                                                    V(glBlendColor, glBlendColorEXT, "glBlendColor")
-                                                        V(glBlendEquation, glBlendEquationEXT, "glBlendEquation")
-                                                            V(glBlendEquationSeparate, glBlendEquationSeparateEXT, "glBlendEquationSeparate")
-                                                                V(glBlendFuncSeparate, glBlendFuncSeparateEXT, "glBlendFuncSeparate")
+    V(glBlendColor, glBlendColorEXT, "glBlendColor")
+    V(glBlendEquation, glBlendEquationEXT, "glBlendEquation")
+    V(glBlendEquationSeparate, glBlendEquationSeparateEXT, "glBlendEquationSeparate")
+    V(glBlendFuncSeparate, glBlendFuncSeparateEXT, "glBlendFuncSeparate")
 
-                                                                    V(glColorMaski, glColorMaskIndexedEXT, "glColorMaski")
+    V(glColorMaski, glColorMaskIndexedEXT, "glColorMaski")
 #undef V
 }
 #endif
@@ -340,21 +340,21 @@ Bool GLContext::createSecondary() {
     EGLint attribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE}; // end of list
     if (surface = eglCreatePbufferSurface(GLDisplay, GLConfig, attribs)) {
         EGLint ctx_attribs[] =
-            {
+        {
 #if GL_ES
-                EGL_CONTEXT_MAJOR_VERSION,
-                3,
-                EGL_CONTEXT_MINOR_VERSION,
-                2,
+            EGL_CONTEXT_MAJOR_VERSION,
+            3,
+            EGL_CONTEXT_MINOR_VERSION,
+            2,
 #else
-                EGL_CONTEXT_MAJOR_VERSION,
-                4,
-                EGL_CONTEXT_MINOR_VERSION,
-                5,
+            EGL_CONTEXT_MAJOR_VERSION,
+            4,
+            EGL_CONTEXT_MINOR_VERSION,
+            5,
 #endif
-                // EGL_CONTEXT_FLAGS_KHR, EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR,
-                EGL_NONE // end of list
-            };
+            // EGL_CONTEXT_FLAGS_KHR, EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR,
+            EGL_NONE // end of list
+        };
         context = eglCreateContext(GLDisplay, GLConfig, MainContext.context, ctx_attribs);
     }
 #elif IOS
@@ -566,7 +566,7 @@ Str8 DisplayClass::apiName() C {
     return "Metal";
 #elif VULKAN
     return "Vulkan";
-#elif WEB   // check this first before 'GL' and 'GL_ES'
+#elif WEB // check this first before 'GL' and 'GL_ES'
     return "Web GL";
 #elif GL_ES // check this first before 'GL'
     return "OpenGL ES";
@@ -1508,7 +1508,7 @@ again:
     const VecB2 ctx_vers[] = {{3, 2}, {4, 0}, {4, 2}, {4, 3}, {4, 6}}; // set highest at the end, 4.6 needed for SPIR-V, 4.3 needed for compute shaders, 4.2 needed for 'glGetInternalformativ', 4.0 needed for 'TexGather', 3.2 needed for 'glDrawElementsBaseVertex', 3.1 needed for instancing, 3.0 needed for 'glColorMaski', 'gl_ClipDistance', 'glClearBufferfv', 'glGenVertexArrays', 'glMapBufferRange'
 
 #if WINDOWS
-                                                                       // setup dummy functions to prevent null exceptions when GL context failed to create, but we still want to continue
+        // setup dummy functions to prevent null exceptions when GL context failed to create, but we still want to continue
     glBlendEquation = _glBlendEquation;
     glBlendFuncSeparate = _glBlendFuncSeparate;
     glBlendColor = _glBlendColor;
@@ -1638,9 +1638,9 @@ found_pf:
     if (XDisplay) {
 #if 0 // 2.0 context
          if(!(MainContext.context=glXCreateNewContext(XDisplay, GLConfig, GLX_RGBA_TYPE, null, true)))Exit("Can't create a OpenGL Context.");
-#else // 3.0+ context (this does not link on some old graphics drivers when compiling, "undefined reference to glXCreateContextAttribsARB", it would need to be accessed using 'glGetProcAddress')
+#else // 3.0+ context (this does not link on some old graphics drivers when compiling, "undefined reference to glXCreateContextAttribsARB", it would need to be accessed using 'glGetProcAddress') \
       // access 'glXCreateContextAttribsARB', on Linux we don't need an existing GL context to be able to load extensions via 'glGetProcAddress'
-        typedef GLXContext (*PFNGLXCREATECONTEXTATTRIBSARBPROC)(::Display *dpy, GLXFBConfig config, GLXContext share_context, Bool direct, const int *attrib_list);
+        typedef GLXContext (*PFNGLXCREATECONTEXTATTRIBSARBPROC)(::Display * dpy, GLXFBConfig config, GLXContext share_context, Bool direct, const int *attrib_list);
         if (PFNGLXCREATECONTEXTATTRIBSARBPROC glXCreateContextAttribsARB = (PFNGLXCREATECONTEXTATTRIBSARBPROC)glGetProcAddress("glXCreateContextAttribsARB")) {
             // in tests 'glXCreateContextAttribsARB' returned higher version than what was requested (which is what we want)
             REPA(ctx_vers) // go from the end, to try highest first
@@ -1682,13 +1682,13 @@ found_pf:
     Byte samples = 1;
     IMAGE_TYPE ds_type = IMAGE_NONE;
     EGLint win_attribs[] =
-        {
+    {
 #if LINEAR_GAMMA
-            EGL_GL_COLORSPACE_KHR,
-            LINEAR_GAMMA ? EGL_GL_COLORSPACE_SRGB_KHR : EGL_GL_COLORSPACE_LINEAR_KHR,
+        EGL_GL_COLORSPACE_KHR,
+        LINEAR_GAMMA ? EGL_GL_COLORSPACE_SRGB_KHR : EGL_GL_COLORSPACE_LINEAR_KHR,
 #endif
-            EGL_NONE // end of list
-        };
+        EGL_NONE // end of list
+    };
     for (GLCtxVer = 3; GLCtxVer >= 3; GLCtxVer--) // start from OpenGL ES 3
     {
         EGLint ctx_attribs[] =
@@ -1927,13 +1927,13 @@ void DisplayClass::androidOpen() {
     androidClose();
     if (GLDisplay && MainContext.context) {
         EGLint win_attribs[] =
-            {
+        {
 #if LINEAR_GAMMA
-                EGL_GL_COLORSPACE_KHR,
-                LINEAR_GAMMA ? EGL_GL_COLORSPACE_SRGB_KHR : EGL_GL_COLORSPACE_LINEAR_KHR,
+            EGL_GL_COLORSPACE_KHR,
+            LINEAR_GAMMA ? EGL_GL_COLORSPACE_SRGB_KHR : EGL_GL_COLORSPACE_LINEAR_KHR,
 #endif
-                EGL_NONE // end of list
-            };
+            EGL_NONE // end of list
+        };
         EGLint format;
         eglGetConfigAttrib(GLDisplay, GLConfig, EGL_NATIVE_VISUAL_ID, &format);
         ANativeWindow_setBuffersGeometry(AndroidApp->window, 0, 0, format);
@@ -1942,7 +1942,7 @@ void DisplayClass::androidOpen() {
             Exit("Can't create EGLSurface.");
         MainContext.lock();
         setDeviceSettings(); // reset device state, also needed because of thread ID change
-    } // else Exit("OpenGL Display and MainContext not available."); don't exit because this might be called in 'LoadAndroidAssetPacks' while display is still not created
+    }                        // else Exit("OpenGL Display and MainContext not available."); don't exit because this might be called in 'LoadAndroidAssetPacks' while display is still not created
 #endif
 }
 Bool DisplayClass::create() {
@@ -2185,7 +2185,7 @@ MIN(_res.y, max_normal_win_client_size.y);
             SwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
         else // DXGI_SWAP_EFFECT_FLIP_DISCARD    is available on Windows 10
             if (Compare(ver, VecI4(6, 2, 0, 0)) >= 0)
-                SwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL; // DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL is available on Windows 8 - https://msdn.microsoft.com/en-us/library/windows/desktop/bb173077(v=vs.85).aspx
+            SwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL; // DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL is available on Windows 8 - https://msdn.microsoft.com/en-us/library/windows/desktop/bb173077(v=vs.85).aspx
     }
 #else
     SwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD; // DXGI_SWAP_EFFECT_FLIP_DISCARD is available on Windows 10
@@ -2721,8 +2721,8 @@ void DisplayClass::getCaps() {
 void DisplayClass::after(Bool resize_callback) {
     if (LogInit)
         LogN("Display.after");
-    if (!full()             // if we're setting window
-#if !WEB                    // for WEB set size even if we're maximized, because for WEB 'App.maximized' means the browser window and not the canvas size
+    if (!full() // if we're setting window
+#if !WEB        // for WEB set size even if we're maximized, because for WEB 'App.maximized' means the browser window and not the canvas size
         && !App.maximized() // which is not maximized
 #endif
     )
@@ -2961,14 +2961,14 @@ DisplayClass &DisplayClass::toggle(Bool window_size) {
             mode(App._window_size.x, App._window_size.y, false, false);
         else // if app was in fullscreen then set windowed mode based on last known window size
             if (window_size)
-                mode(App._window_size.x, App._window_size.y, true, false);
-            else // if set        fullscreen using                           last known window size
-            {    // set full screen based on resolution of the monitor
-                RectI full, work;
-                VecI2 max_normal_win_client_size, maximized_win_client_size;
-                getMonitor(full, work, max_normal_win_client_size, maximized_win_client_size);
-                mode(full.w(), full.h(), true, false);
-            }
+            mode(App._window_size.x, App._window_size.y, true, false);
+        else // if set        fullscreen using                           last known window size
+        {    // set full screen based on resolution of the monitor
+            RectI full, work;
+            VecI2 max_normal_win_client_size, maximized_win_client_size;
+            getMonitor(full, work, max_normal_win_client_size, maximized_win_client_size);
+            mode(full.w(), full.h(), true, false);
+        }
     }
     return T;
 }
@@ -3063,7 +3063,7 @@ void DisplayClass::getScreenInfo() {
                 if (_hdr = (desc.ColorSpace == DXGI_COLOR_SPACE_RGB_FULL_G2084_NONE_P2020)) {
                     _screen_max_lum = desc.MaxLuminance / 80.0f; // "color value of (1.0, 1.0, 1.0) corresponds to a luminance level of 80 nits" - https://www.khronos.org/registry/EGL/extensions/EXT/EGL_EXT_gl_colorspace_scrgb_linear.txt
                     _white_lum = Min(3.5f, _screen_max_lum);     // first set default value (this value was obtained when using "HDR/SDR brightness balance" at 50% in Windows Settings, on Samsung Odyssey G7 HDR Monitor)
-#if WINDOWS_NEW                                                  // on UWP we can get a precise value
+#if WINDOWS_NEW // on UWP we can get a precise value
                     if (auto display_info = Windows::Graphics::Display::DisplayInformation::GetForCurrentView())
                         if (auto color_info = display_info->GetAdvancedColorInfo())
                             _white_lum = color_info->SdrWhiteLevelInNits / 80.0f;
@@ -3779,7 +3779,7 @@ void DisplayClass::gammaSet() {
 DisplayClass &DisplayClass::diffuseMode(DIFFUSE_MODE mode) {
     if (InRange(mode, DIFFUSE_NUM) && _diffuse_mode != mode) {
         _diffuse_mode = mode; /*setShader();*/
-    } // RT_FORWARD always uses lambert, so 'setShader' not needed
+    }                         // RT_FORWARD always uses lambert, so 'setShader' not needed
     return T;
 }
 /******************************************************************************/
@@ -4785,7 +4785,7 @@ void DisplayClass::setFade(Flt seconds, Bool previous_frame, Bool auto_draw) {
         if (seconds <= 0) {
             clearFade();
         } else if (previous_frame) {
-#if 0                          // copy 'Renderer._main' from previous frame (not supported on GL ES or when calling 'discard' after 'D.flip')
+#if 0 // copy 'Renderer._main' from previous frame (not supported on GL ES or when calling 'discard' after 'D.flip')
          if(Renderer._main.is())
          {
             SyncLocker locker(_lock);
@@ -4796,7 +4796,7 @@ void DisplayClass::setFade(Flt seconds, Bool previous_frame, Bool auto_draw) {
            _fade_speed=FadeSpeed(seconds);
            _fade_auto_draw=auto_draw;
          }
-#else                          // draw now
+#else // draw now
             _fade_get = false; // disable before calling 'fadeDraw'
             if (created() && StateActive && StateActive->draw) {
                 SyncLocker locker(_lock);
@@ -4815,7 +4815,7 @@ void DisplayClass::setFade(Flt seconds, Bool previous_frame, Bool auto_draw) {
                     _fade_speed = FadeSpeed(seconds);
                     _fade_auto_draw = auto_draw; // set after calling 'fadeDraw'
                     Swap(Renderer._fade, temp);  // swap RT as new fade
-                } // <- 'discard' will be called for 'temp' and 'ds'
+                }                                // <- 'discard' will be called for 'temp' and 'ds'
                 Renderer._cur_main = cur_main;
                 Renderer._ui = ui;
                 Renderer._cur_main_ds = cur_main_ds;

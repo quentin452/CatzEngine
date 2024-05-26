@@ -5,8 +5,8 @@
 Input: QUALITY, JITTER, NORMALS
 Img=Nrm, Depth=depth
 /******************************************************************************/
-#include "Ambient Occlusion.h"
 #include "!Header.h"
+#include "Ambient Occlusion.h"
 /******************************************************************************/
 #ifndef NORMALS
 #define NORMALS 1
@@ -269,17 +269,17 @@ Half AO_PS(
             max_steps = 3;
         } else // 12 (Better than angles= 3; max_steps=4;)
             if (QUALITY == 1) {
-                angles = 6;
-                max_steps = 5;
-            } else // 30
-                if (QUALITY == 2) {
-                    angles = 8;
-                    max_steps = 7;
-                } else // 56 (Better than angles= 9; max_steps=6; AND angles=8; max_steps=6;)
-                {
-                    angles = 10;
-                    max_steps = 9;
-                }    // 90 (Better than angles=10; max_steps=8; AND angles=9; max_steps=9;)
+            angles = 6;
+            max_steps = 5;
+        } else // 30
+            if (QUALITY == 2) {
+            angles = 8;
+            max_steps = 7;
+        } else // 56 (Better than angles= 9; max_steps=6; AND angles=8; max_steps=6;)
+        {
+            angles = 10;
+            max_steps = 9;
+        }            // 90 (Better than angles=10; max_steps=8; AND angles=9; max_steps=9;)
         angles /= 2; // because we process 2 at the same time
         LOOP for (Int a = 0; a < angles; a++) {
             Flt angle = a;
@@ -375,17 +375,17 @@ Half AO_PS(
             max_steps = 3;
         } else // 12 (Better than angles= 3; max_steps=4;)
             if (QUALITY == 1) {
-                angles = 6;
-                max_steps = 5;
-            } else // 30
-                if (QUALITY == 2) {
-                    angles = 8;
-                    max_steps = 7;
-                } else // 56 (Better than angles= 9; max_steps=6; AND angles=8; max_steps=6;)
-                {
-                    angles = 10;
-                    max_steps = 9;
-                } // 90 (Better than angles=10; max_steps=8; AND angles=9; max_steps=9;)
+            angles = 6;
+            max_steps = 5;
+        } else // 30
+            if (QUALITY == 2) {
+            angles = 8;
+            max_steps = 7;
+        } else // 56 (Better than angles= 9; max_steps=6; AND angles=8; max_steps=6;)
+        {
+            angles = 10;
+            max_steps = 9;
+        } // 90 (Better than angles=10; max_steps=8; AND angles=9; max_steps=9;)
         /*{ // disable this because it actually decreases performance
            Int pixel_range=W ? (E ? Round(Sum(offs_scale*RTSize.zw)) : Ceil(Sum(offs_scale*RTSize.zw))) : (E ? Sum(Round(offs_scale*RTSize.zw)) : Sum(Ceil(offs_scale*RTSize.zw)));
            max_steps=Min(max_steps, pixel_range);
@@ -411,7 +411,7 @@ Half AO_PS(
             Flt base_sin = Dot(projected_nrm, plane_tan) * Rsqrt(projected_nrm_len2 + EPS_RSQRT); // EPS_RSQRT to skip "base_sin=Mid(base_sin, -1, 1);"
 #endif
 #if COS_SIN
-            Flt base_cos = CosSin(base_sin);                                                      // Warning: NaN
+            Flt base_cos = CosSin(base_sin); // Warning: NaN
 #else
             Flt base_angle = Asin(base_sin); // Warning: NaN
 #endif
@@ -465,7 +465,7 @@ Half AO_PS(
                     Vec plane_nrm = Normalize(Cross(eye_dir, test_dir));
                     Vec projected_nrm = PointOnPlane(nrm, plane_nrm);
                     Flt projected_nrm_len2 = Length2(projected_nrm);
-#if 0              // slower
+#if 0 // slower
 	            Vec projected_dir     =Normalize(test_dir-eye_dir);
                Flt base_sin          =Dot(projected_dir, projected_nrm/projected_nrm_len);
                    base_sin          =Mid(base_sin, -1, 1);
@@ -474,7 +474,7 @@ Half AO_PS(
                     Flt base_sin = Dot(projected_dir, projected_nrm) * Rsqrt(projected_nrm_len2 * Length2(projected_dir) + EPS_RSQRT); // EPS_RSQRT to skip "base_sin=Mid(base_sin, -1, 1);"
 #endif
 #if COS_SIN
-                    Flt base_cos = CosSin(base_sin);                                                                                   // Warning: NaN
+                    Flt base_cos = CosSin(base_sin); // Warning: NaN
 #else
                     Flt base_angle = Asin(base_sin); // Warning: NaN
 #endif

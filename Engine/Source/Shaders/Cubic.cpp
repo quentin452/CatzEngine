@@ -7,8 +7,8 @@
 #define FAST_GAMMA (IN_GAMMA && OUT_GAMMA) // can use fast gamma only if we do both conversions in the shader
 #define MAX_0 (!DITHER)                    // can do Max(0, in !DITHER because dither is always used only for low precision 0..1 RTs so Max is not needed
 /******************************************************************************/
-#include "Cubic.h"
 #include "!Header.h"
+#include "Cubic.h"
 /******************************************************************************/
 #define CUBIC_SAMPLES 3
 #define CUBIC_RANGE 2
@@ -134,7 +134,7 @@ VecH4 TexCubicPlus(Vec2 uv, Bool max0 = true) {
 #if CUBIC_QUALITY >= 1 // medium quality
     UNROLL for (int y = 0; y < CUBIC_SAMPLES * 2; y++)
         UNROLL for (int x = 0; x < CUBIC_SAMPLES * 2; x += 2) color += TexLerp(offset[x].x, offset[x + 1].x, offset[y].y, weights[y][x], weights[y][x + 1]);
-#else                  // low quality
+#else // low quality
     UNROLL for (int y = 0; y < CUBIC_SAMPLES * 2; y += 2)
         UNROLL for (int x = 0; x < CUBIC_SAMPLES * 2; x += 2) color += TexLerp(Vec2(offset[x].x, offset[y].y), Vec2(offset[x + 1].x, offset[y + 1].y), weights[y][x], weights[y][x + 1], weights[y + 1][x], weights[y + 1][x + 1]);
 #endif
@@ -182,7 +182,7 @@ VecH TexCubicPlusRGB(Vec2 uv, Bool max0 = true) // ignores alpha channel
 #if CUBIC_QUALITY >= 1 // medium quality
     UNROLL for (int y = 0; y < CUBIC_SAMPLES * 2; y++)
         UNROLL for (int x = 0; x < CUBIC_SAMPLES * 2; x += 2) color += TexLerpRGB(offset[x].x, offset[x + 1].x, offset[y].y, weights[y][x], weights[y][x + 1]);
-#else                  // low quality
+#else // low quality
     UNROLL for (int y = 0; y < CUBIC_SAMPLES * 2; y += 2)
         UNROLL for (int x = 0; x < CUBIC_SAMPLES * 2; x += 2) color += TexLerpRGB(Vec2(offset[x].x, offset[y].y), Vec2(offset[x + 1].x, offset[y + 1].y), weights[y][x], weights[y][x + 1], weights[y + 1][x], weights[y + 1][x + 1]);
 #endif
@@ -228,7 +228,7 @@ VecH4 DrawTexCubicPlus_PS(
     VecH4 col = VecH4(TexCubicPlusRGB(uv, MAX_0), 1);
 #endif
 
-#if DITHER                                 // ideally this should be done after 'COLORS', however for performance reasons it's done here, because at this stage color is in gamma space, and we can skip gamma conversions
+#if DITHER // ideally this should be done after 'COLORS', however for performance reasons it's done here, because at this stage color is in gamma space, and we can skip gamma conversions
     ApplyDither(col.rgb, pixel.xy, false); // here 'col' is already in gamma space
 #endif
 

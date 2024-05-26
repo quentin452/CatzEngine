@@ -5,11 +5,11 @@
 #if EE_PRIVATE
 namespace Edit {
 /******************************************************************************/
-#define TMPL_B u"<T"    // begin template operator
-#define TMPL_E u"T>"    // end   template operator
+#define TMPL_B u"<T" // begin template operator
+#define TMPL_E u"T>" // end   template operator
 #define ELLIPSIS u"(…)" // character known as "Ellipsis" surrounded by brackets
 #define UNIQUE_NAME '@' // used for distinguishing files of same names, also for special headers
-#define DIV '`'         // used instead of '/'
+#define DIV '`' // used instead of '/'
 #define SEP '\\'
 #define SEP_FILE '.'
 #define SEP_LINE "/******************************************************************************/"

@@ -59,7 +59,7 @@ VecH4 SunRays_PS(NOPERSP Vec2 uv
 #if ALPHA
         Flt occl = 0; // use HP because we're iterating lot of samples
 #else
-        Flt back = 0;                                      // use HP because we're iterating lot of samples
+        Flt back = 0; // use HP because we're iterating lot of samples
 #endif
 
         UNROLL for (Int i = 0; i < steps; i++) {

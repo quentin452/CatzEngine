@@ -171,7 +171,7 @@ void ImageRT::discard() {
         clearHw(PURPLE);
     else if (D3DC1)
         D3DC1->DiscardView(_rtv ? &SCAST(ID3D11View, *_rtv) : &SCAST(ID3D11View, *_dsv)); // will not crash if parameter is null
-#elif GL && !MAC && !LINUX                                                                // Mac doesn't have GL 4.3 'glInvalidateFramebuffer', Linux GeForce drivers have bugs (TODO: check again in the future)
+#elif GL && !MAC && !LINUX // Mac doesn't have GL 4.3 'glInvalidateFramebuffer', Linux GeForce drivers have bugs (TODO: check again in the future)
     if (DEBUG_DISCARD) {
         if (Renderer._cur_ds == this && Renderer._cur_ds_id == _txtr)
             D.clearDS();
@@ -217,21 +217,21 @@ void ImageRT::discard() {
                 attachment = (hwTypeInfo().s ? GL_DEPTH_STENCIL_ATTACHMENT : GL_DEPTH_ATTACHMENT);
             else // check both '_cur_ds' and '_cur_ds_id' because '_cur_ds_id' will be 0 when Image is a RenderBuffer or temporarily unbound Texture (only Textures can be temporarily unbound), this will work OK for RenderBuffers because both '_cur_ds_id' and '_txtr' will be zero
                 if (Renderer._cur[0] == this)
-                    attachment = GL_COLOR_ATTACHMENT0;
-                else // check '_cur' because '_txtr' can be 0 for RenderBuffers
-                    if (Renderer._cur[1] == this)
-                        attachment = GL_COLOR_ATTACHMENT1;
-                    else // check '_cur' because '_txtr' can be 0 for RenderBuffers
-                        if (Renderer._cur[2] == this)
-                            attachment = GL_COLOR_ATTACHMENT2;
-                        else // check '_cur' because '_txtr' can be 0 for RenderBuffers
-                            if (Renderer._cur[3] == this)
-                                attachment = GL_COLOR_ATTACHMENT3;
-                            else // check '_cur' because '_txtr' can be 0 for RenderBuffers
-                            {
-                                _discard = true;
-                                return;
-                            } // discard at next opportunity when we want to attach it to FBO
+                attachment = GL_COLOR_ATTACHMENT0;
+            else // check '_cur' because '_txtr' can be 0 for RenderBuffers
+                if (Renderer._cur[1] == this)
+                attachment = GL_COLOR_ATTACHMENT1;
+            else // check '_cur' because '_txtr' can be 0 for RenderBuffers
+                if (Renderer._cur[2] == this)
+                attachment = GL_COLOR_ATTACHMENT2;
+            else // check '_cur' because '_txtr' can be 0 for RenderBuffers
+                if (Renderer._cur[3] == this)
+                attachment = GL_COLOR_ATTACHMENT3;
+            else // check '_cur' because '_txtr' can be 0 for RenderBuffers
+            {
+                _discard = true;
+                return;
+            } // discard at next opportunity when we want to attach it to FBO
             glInvalidateFramebuffer(GL_FRAMEBUFFER, 1, &attachment);
             _discard = false; // discarded
         }
@@ -508,11 +508,11 @@ void ImageRT::unmap() {
 #if DX11
     del();
 #elif IOS
-   if (_rb) {
-       glBindRenderbuffer(GL_RENDERBUFFER, _rb);
-       [MainContext.context renderbufferStorage:GL_RENDERBUFFER fromDrawable:nil]; // detach existing renderbuffer from the drawable object
-       del();
-   }
+    if (_rb) {
+        glBindRenderbuffer(GL_RENDERBUFFER, _rb);
+        [MainContext.context renderbufferStorage:GL_RENDERBUFFER fromDrawable:nil]; // detach existing renderbuffer from the drawable object
+        del();
+    }
 #else
     // on other platforms we're not responsible for the 'Renderer._main' as the system creates it and deletes it, don't delete it here, to preserve info about IMAGE_TYPE and samples
 #endif
@@ -523,14 +523,14 @@ void ImageRT::swapSRV() {
     Swap(_srv, _srv_srgb);
     D.texClear(_srv_srgb); // we have to remove from tex cache, because if we're going to try to bind this as Render Target later, then DX automatically unbinds its SRVs, engine already clears cache in that case, however only for current '_srv' and not the secondary '_srv_srgb'
 #elif GL
-   Swap(_txtr, _txtr_srgb);
+    Swap(_txtr, _txtr_srgb);
 #endif
 }
 void ImageRT::swapRTV() {
 #if DX11
     Swap(_rtv, _rtv_srgb);
 #elif GL
-   Swap(_txtr, _txtr_srgb);
+    Swap(_txtr, _txtr_srgb);
 #endif
 }
 void ImageRT::swapSRGB() {
@@ -538,7 +538,7 @@ void ImageRT::swapSRGB() {
     swapSRV();
     swapRTV();
 #elif GL
-   Swap(_txtr, _txtr_srgb);
+    Swap(_txtr, _txtr_srgb);
 #endif
     _hw_type = ImageTypeToggleSRGB(hwType()); // !! have to toggle 'hwType' and not 'type' because 'CompareDesc' and 'Set' expect that !!
 }
@@ -622,9 +622,9 @@ Bool ImageRTPtr::find(C ImageRTDesc &desc) {
 #if KNOWN_IMAGE_TYPE_USAGE
     ConstCast(desc._type) = ImageRTTypesOK[multi_sample][desc.rt_type];
 #else
-   ImageRTType &types = ImageRTTypesOK[multi_sample][desc.rt_type];
+    ImageRTType &types = ImageRTTypesOK[multi_sample][desc.rt_type];
 again:
-   ConstCast(desc._type) = types.types[0];
+    ConstCast(desc._type) = types.types[0];
 #endif
 
     IMAGE_TYPE want_type = desc._type;
@@ -682,21 +682,21 @@ again:
         Exit(S + "Can't create Render Target " + desc.size.x + 'x' + desc.size.y + ' ' + ImageRTName[desc.rt_type] + ", samples:" + desc.samples);
     }
 #else
-   ImageRTC temp; // try to create first as a standalone variable (not in 'Renderer._rts') in case it fails so we don't have to remove it
-   if (temp.create(desc.size, desc._type, ImageTI[desc._type].d ? IMAGE_DS : IMAGE_RT, desc.samples)) {
-       ImageRTC &rt = Renderer._rts.NewAt(_last_index);
-       Swap(rt, temp);
-       Set(T, rt, want_type);
-       return true;
-   }
-   // fail
-   if (desc._type != IMAGE_NONE) // try another type, and don't try this again
-   {
-       MoveFastN(&types.types[0], &types.types[1], ELMS(types.types) - 1); // move all elements from index 1 and right, to the left by 1, to index 0..
-       types.types[ELMS(types.types) - 1] = IMAGE_NONE;                    // set last type as none
-       if (types.types[0] != IMAGE_NONE)
-           goto again; // try the new type
-   }
+    ImageRTC temp; // try to create first as a standalone variable (not in 'Renderer._rts') in case it fails so we don't have to remove it
+    if (temp.create(desc.size, desc._type, ImageTI[desc._type].d ? IMAGE_DS : IMAGE_RT, desc.samples)) {
+        ImageRTC &rt = Renderer._rts.NewAt(_last_index);
+        Swap(rt, temp);
+        Set(T, rt, want_type);
+        return true;
+    }
+    // fail
+    if (desc._type != IMAGE_NONE) // try another type, and don't try this again
+    {
+        MoveFastN(&types.types[0], &types.types[1], ELMS(types.types) - 1); // move all elements from index 1 and right, to the left by 1, to index 0..
+        types.types[ELMS(types.types) - 1] = IMAGE_NONE;                    // set last type as none
+        if (types.types[0] != IMAGE_NONE)
+            goto again; // try the new type
+    }
 #endif
     return false;
 }

@@ -4,8 +4,8 @@ import subprocess
 import sys
 import threading
 # TODO format without _Build_ blacklist but for that i need to fix errors .....
-BLACKLIST_FILES = [""]
-BLACKLIST_DIRS = ["ThirdPartyLibs", "_Build_", "build", "CMakeFiles"]
+BLACKLIST_FILES = ["@@headers.h"]
+BLACKLIST_DIRS = ["ThirdPartyLibs", "build", "CMakeFiles"]
 FORMAT_STYLE = "{BasedOnStyle: llvm, IndentWidth: 4, ColumnLimit: 0}"
 
 def format_files(files, params):

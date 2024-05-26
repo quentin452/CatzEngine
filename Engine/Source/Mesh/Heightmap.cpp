@@ -18,8 +18,8 @@ namespace EE {
 #define MATERIAL4_EPS 0.01f // was 0.055f but smaller value is needed now because of multi-material per-pixel blending, low value is also important for 2 materials different in brightness, for example dark dirt vs bright snow
 #define VTX_HEIGHTMAP 1
 #define VTX_COMPRESS 1
-#define MTRL_BLEND_HP 0   // 0-faster and smaller memory usage
-#define VMC_CONTINUOUS 0  // 0-faster !! enabling makes building slower 22fps vs 20fps so keep at zero !! this was an attempt to remove dynamic memory allocation by holding one continuous buffer for vtx mtrl combos
+#define MTRL_BLEND_HP 0 // 0-faster and smaller memory usage
+#define VMC_CONTINUOUS 0 // 0-faster !! enabling makes building slower 22fps vs 20fps so keep at zero !! this was an attempt to remove dynamic memory allocation by holding one continuous buffer for vtx mtrl combos
 #define ALLOW_SAME_MTRL 0 // 0-faster building, but requires materials to be unique. Don't enable, just use 'setMaterialSafe' when needed.
 /******************************************************************************/
 ASSERT(MAX_HM_RES <= 129); // various places use UShort to limit for 16-bit (including 'MtrlCombo.vtxs,tris', 'VtxMtrlCombo.mc_vtx_index')
@@ -1312,14 +1312,14 @@ struct Builder {
                 mtrl_index.c[1] = mtrl_index.c[2] = mtrl_index.c[3] = 0;
             else // if #1 is much smaller than #0      , then remove #1,#2,#3
                 if (mtrl_index.c[2]) {
-                    if (mtrl_blend.c[2] <= mtrl_blend.xy.sum() * MATERIAL3_EPS)
-                        mtrl_index.c[2] = mtrl_index.c[3] = 0;
-                    else // if #2 is much smaller than #0+#1   , then remove    #2,#3
-                        if (mtrl_index.c[3]) {
-                            if (mtrl_blend.c[3] <= mtrl_blend.xyz.sum() * MATERIAL4_EPS)
-                                mtrl_index.c[3] = 0;
-                        }
+                if (mtrl_blend.c[2] <= mtrl_blend.xy.sum() * MATERIAL3_EPS)
+                    mtrl_index.c[2] = mtrl_index.c[3] = 0;
+                else // if #2 is much smaller than #0+#1   , then remove    #2,#3
+                    if (mtrl_index.c[3]) {
+                    if (mtrl_blend.c[3] <= mtrl_blend.xyz.sum() * MATERIAL4_EPS)
+                        mtrl_index.c[3] = 0;
                 }
+            }
         } // if #3 is much smaller than #0+#1+#2, then remove       #3
 
         // sort by indexes (required by 'getMtrlComboIndex')
@@ -1881,7 +1881,7 @@ NOINLINE Bool Heightmap::buildEx2(Mesh &mesh, Int quality, UInt flag, BuildMem &
     Box box;
     box.min = FLT_MAX;
     box.max = -FLT_MAX;
-    VecB4 (*const NrmToByte4)(C Vec &v) = (true ? NrmToSByte4 : NrmToUByte4);
+    VecB4 (*const NrmToByte4)(C Vec & v) = (true ? NrmToSByte4 : NrmToUByte4);
 
     if (sphere) {
         DEBUG_ASSERT(InRange(sphere->area.x, sphere->areas) && InRange(sphere->area.y, sphere->areas), "Heightmap.sphere.area out of range");
@@ -2044,12 +2044,12 @@ NOINLINE Bool Heightmap::buildEx2(Mesh &mesh, Int quality, UInt flag, BuildMem &
                                         th = _height.pixF(tx, y) - (_height.pixF(tx, 0) - _height.pixF(tx, 1)) * dy;
                                 } else // here 'dy' is negative
                                     if (ty >= res) {
-                                        if (hf)
-                                            th = hf->pixF(tx, ty - res1);
-                                        else
-                                            th = _height.pixF(tx, y) + (_height.pixF(tx, res1) - _height.pixF(tx, res1 - 1)) * dy;
-                                    } else // here 'dy' is positive
-                                        th = _height.pixF(tx, ty);
+                                    if (hf)
+                                        th = hf->pixF(tx, ty - res1);
+                                    else
+                                        th = _height.pixF(tx, y) + (_height.pixF(tx, res1) - _height.pixF(tx, res1 - 1)) * dy;
+                                } else // here 'dy' is positive
+                                    th = _height.pixF(tx, ty);
                             }
                             Flt d = th - h - dx * ddh.x - dy * ddh.y,
                                 o = Sat(d * ao_mul);
@@ -2162,7 +2162,7 @@ NOINLINE Bool Heightmap::buildEx2(Mesh &mesh, Int quality, UInt flag, BuildMem &
                 mesh_flag |= VTX_MATERIAL;
             else // 'mtrl_index' in 'mtrl_combo' is always sorted, so we only need to check if 2nd material is not null
                 if (!mtrl_combo.mtrl_index.x && !build_null_mtrl)
-                    mtrl_combo.reset(); // prevent creating null material
+                mtrl_combo.reset(); // prevent creating null material
 
             if (soft) {
                 MeshBase &mshb = part.base;

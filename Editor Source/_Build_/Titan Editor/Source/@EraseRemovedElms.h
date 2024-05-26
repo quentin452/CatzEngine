@@ -1,31 +1,29 @@
 ﻿/******************************************************************************/
 /******************************************************************************/
-class EraseRemovedElms : ClosableWindow
-{
-   static void OK  (EraseRemovedElms &ere);
-   static void Full(EraseRemovedElms &ere);
+class EraseRemovedElms : ClosableWindow {
+    static void OK(EraseRemovedElms &ere);
+    static void Full(EraseRemovedElms &ere);
 
-   class Elm
-   {
-      Str name;
-      UID id;
-      
-      void create(C ::Elm &src);
+    class Elm {
+        Str name;
+        UID id;
 
-public:
-   Elm();
-   };
+        void create(C ::Elm &src);
 
-   TextNoTest text;
-   Button     ok, full, cancel;
-   Region     region;
-   Memc<Elm>  data;
-   List<Elm>  list;
+      public:
+        Elm();
+    };
 
-   void create();
-   virtual EraseRemovedElms& show()override;
-   virtual EraseRemovedElms& hide()override;
-   virtual void update(C GuiPC &gpc)override;
+    TextNoTest text;
+    Button ok, full, cancel;
+    Region region;
+    Memc<Elm> data;
+    List<Elm> list;
+
+    void create();
+    virtual EraseRemovedElms &show() override;
+    virtual EraseRemovedElms &hide() override;
+    virtual void update(C GuiPC &gpc) override;
 };
 /******************************************************************************/
 /******************************************************************************/

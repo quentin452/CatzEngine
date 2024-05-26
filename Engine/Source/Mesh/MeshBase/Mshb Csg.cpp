@@ -226,7 +226,7 @@ struct CSG // Constructive Solid Geometry
                 face_edgei_i.flag |= ETQ_LR;
             else // if there's  no side , then add both of them
                 if (face_edgei_i.flag & ETQ_L && face_edgei_i.flag & ETQ_R)
-                    face_edgei_i.flag &= ~ETQ_LR; // if it has both sides, then remove them
+                face_edgei_i.flag &= ~ETQ_LR; // if it has both sides, then remove them
         }
 
         // create triangles

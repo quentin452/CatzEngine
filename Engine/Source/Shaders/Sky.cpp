@@ -1,7 +1,7 @@
 /******************************************************************************/
-#include "Sky.h"
 #include "!Header.h"
 #include "Layered Clouds.h"
+#include "Sky.h"
 /******************************************************************************/
 VecH4 SkyColor(Vec uvw) {
     Half hor = Pow(1 - Sat(uvw.y), SkyHorExp);

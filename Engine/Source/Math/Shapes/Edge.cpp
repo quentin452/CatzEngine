@@ -214,9 +214,9 @@ void PixelWalker::step() {
                         _side_step = true;
                     } else // move in  _axis first
                         if (d0 > d1) {
-                            _pos_temp.y = pos_next.y;
-                            _side_step = true;
-                        } // move in !_axis first
+                        _pos_temp.y = pos_next.y;
+                        _side_step = true;
+                    } // move in !_axis first
                 }
             } else // vertical
             {
@@ -235,9 +235,9 @@ void PixelWalker::step() {
                         _side_step = true;
                     } else // move in  _axis first
                         if (d0 > d1) {
-                            _pos_temp.x = pos_next.x;
-                            _side_step = true;
-                        } // move in !_axis first
+                        _pos_temp.x = pos_next.x;
+                        _side_step = true;
+                    } // move in !_axis first
                 }
             }
             _posr = posr_next;
@@ -745,9 +745,9 @@ void VoxelWalker::step() {
                     _side_step = true;
                 } else // move in main_axis first
                     if (d0 > d1) {
-                        _pos_temp.c[sec_axis] = pos_next.c[sec_axis];
-                        _side_step = true;
-                    } // move in  sec_axis first
+                    _pos_temp.c[sec_axis] = pos_next.c[sec_axis];
+                    _side_step = true;
+                } // move in  sec_axis first
             }
             _posr = posr_next;
             _pos = pos_next;

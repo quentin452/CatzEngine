@@ -417,8 +417,8 @@ Ptr Alloc(UIntPtr size) {
             // test alignment to verify that EE codes haven't messed up required alignment by the system (in case some codes or the system make assumption about alignment)
 #if ALLOC16
             DEBUG_ASSERT((UIntPtr(data) & 15) == 0, "Memory is not 16-byte aligned");
-#else // other platforms should have at least 8-byte alignment
-      // https://msdn.microsoft.com/en-us/library/ycsb6wwf.aspx
+#else // other platforms should have at least 8-byte alignment  \
+      // https://msdn.microsoft.com/en-us/library/ycsb6wwf.aspx \
       // http://www.gnu.org/software/libc/manual/html_node/Aligned-Memory-Blocks.html
             DEBUG_ASSERT((UIntPtr(data) & 7) == 0, "Memory is not 8-byte aligned");
 #endif
@@ -474,7 +474,7 @@ void _ReallocZero(Ptr &data, ULong size_new, ULong size_old) {
 // ALIGNED
 /******************************************************************************/
 #if MEM_CUSTOM || (WINDOWS && !X64) // Win 32-bit has only 8-byte alignment (for it always use this version instead of the one below, because '_aligned_malloc' and '_aligned_free' are just wrappers for 'malloc' and 'free')
-typedef Byte AAOffs;                // Byte is enough to store 0..16 offset
+typedef Byte AAOffs; // Byte is enough to store 0..16 offset
 Ptr AllocAlign16(IntPtr size) {
     if (size > 0) {
         Int padd = 15 + SIZE(AAOffs); // 15 for alignment and AAOffs for offset to the original pointer
@@ -539,7 +539,7 @@ void FreeAlign16(Ptr &data) {
 #endif
 /******************************************************************************/
 #if MEM_CUSTOM || WINDOWS // on Windows always use this version instead of the one below, because '_aligned_malloc' and '_aligned_free' are just wrappers for 'malloc' and 'free'
-typedef U16 AAOffs2;      // U16 is enough to store 0..32768 offset
+typedef U16 AAOffs2; // U16 is enough to store 0..32768 offset
 Ptr AllocAlign(IntPtr size, Int align) {
     if (size > 0) {
         DYNAMIC_ASSERT(align >= 1 && align <= 32768, "Invalid alignment");
@@ -955,7 +955,7 @@ void _MoveElmLeftUnsafe(Ptr data, UInt elm_size, Int elm, Int new_index, Ptr tem
     if (new_index != elm) {
         Byte *d = (Byte *)data;
         CopyFast(temp, d + elm * elm_size, elm_size); // copy element from data to temp memory
-#if 0                                                 // not needed since we're always moving left in this function
+#if 0                                                 // not needed since we're always moving left in this function \
                                                       //                                                                                       E N        E N
       if(elm<new_index) // element is on the left, and we're moving it to the right, move the data to the left "0X123" -> "012X3"
       {

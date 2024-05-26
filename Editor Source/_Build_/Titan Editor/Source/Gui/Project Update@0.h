@@ -1,6 +1,6 @@
 ﻿/******************************************************************************/
 extern ProjectUpdate ProjUpdate;
-extern State         StateProjectUpdate;
+extern State StateProjectUpdate;
 /******************************************************************************/
 bool InitProjectUpdate();
 void ShutProjectUpdate();

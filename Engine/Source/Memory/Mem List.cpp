@@ -209,33 +209,33 @@ void _Meml::swapOrder(Int i, Int j) {
                 a = node;
             else                // 'i' is 1st
                 if (j == index) // 'j' is 2nd (now we already have 'a')
+            {
+                b = node;
+
+                if (_first == a)
+                    _first = b;
+                if (_last == b)
+                    _last = a;
+
+                if (a->_prev)
+                    a->_prev->_next = b; // the one before 'a' now should point to 'b'
+                if (b->_next)
+                    b->_next->_prev = a; // the one after  'b' now should point to 'a'
+
+                if (a->_next == b) // watch out if 'a' and 'b' are neighbors
                 {
-                    b = node;
-
-                    if (_first == a)
-                        _first = b;
-                    if (_last == b)
-                        _last = a;
-
-                    if (a->_prev)
-                        a->_prev->_next = b; // the one before 'a' now should point to 'b'
-                    if (b->_next)
-                        b->_next->_prev = a; // the one after  'b' now should point to 'a'
-
-                    if (a->_next == b) // watch out if 'a' and 'b' are neighbors
-                    {
-                        a->_next = b->_next;
-                        b->_prev = a->_prev;
-                        b->_next = a;
-                        a->_prev = b;
-                    } else {
-                        a->_next->_prev = b; // the one after  'a' now should point to 'b'
-                        b->_prev->_next = a; // the one before 'b' now should point to 'a'
-                        Swap(a->_prev, b->_prev);
-                        Swap(a->_next, b->_next);
-                    }
-                    return;
+                    a->_next = b->_next;
+                    b->_prev = a->_prev;
+                    b->_next = a;
+                    a->_prev = b;
+                } else {
+                    a->_next->_prev = b; // the one after  'a' now should point to 'b'
+                    b->_prev->_next = a; // the one before 'b' now should point to 'a'
+                    Swap(a->_prev, b->_prev);
+                    Swap(a->_next, b->_next);
                 }
+                return;
+            }
             index++;
         }
     }

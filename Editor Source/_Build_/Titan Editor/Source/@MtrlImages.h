@@ -1,30 +1,28 @@
 ﻿/******************************************************************************/
 /******************************************************************************/
-class MtrlImages
-{
-   class ImageResize : Image
-   {
-      VecI2 size; // if >0 then image should be resized
-      int   filter;
-      bool  clamp , alpha_weight, keep_edges;
+class MtrlImages {
+    class ImageResize : Image {
+        VecI2 size; // if >0 then image should be resized
+        int filter;
+        bool clamp, alpha_weight, keep_edges;
 
-      ImageResize& clearParams();
-      ImageResize& del();
-      bool create(C VecI2 &size, IMAGE_TYPE type);
-      ImageResize& resize(C VecI2 &size);
-      ImageResize& setFrom(C TextParam &param);
-      void apply();
-      operator ImageSource()C;
+        ImageResize &clearParams();
+        ImageResize &del();
+        bool create(C VecI2 &size, IMAGE_TYPE type);
+        ImageResize &resize(C VecI2 &size);
+        ImageResize &setFrom(C TextParam &param);
+        void apply();
+        operator ImageSource() C;
 
-public:
-   ImageResize();
-   };
-   bool        flip_normal_y, smooth_is_rough;
-   int         tex;
-   ImageResize color, alpha, bump, normal, smooth, metal, glow;
-   
-   MtrlImages& del();
-   /*bool create(C VecI2 &size)
+      public:
+        ImageResize();
+    };
+    bool flip_normal_y, smooth_is_rough;
+    int tex;
+    ImageResize color, alpha, bump, normal, smooth, metal, glow;
+
+    MtrlImages &del();
+    /*bool create(C VecI2 &size)
    {
       del();
       return color .create(size, IMAGE_R8G8B8_SRGB)
@@ -122,13 +120,13 @@ public:
       metal .apply();
       glow  .apply();
    }*/
-   void fromMaterial(C EditMaterial &material, C Project &proj, bool changed_flip_normal_y=false, bool changed_smooth_is_rough=false);
-   void fromMaterial(C EditWaterMtrl &material, C Project &proj, bool changed_flip_normal_y=false, bool changed_smooth_is_rough=false);
-   TEX_FLAG createBaseTextures(Image &base_0, Image &base_1, Image &base_2)C;
-   TEX_FLAG createWaterBaseTextures(Image &base_0, Image &base_1, Image &base_2)C;
-   void baseTextureSizes(VecI2 *size0, VecI2 *size1, VecI2 *size2);
-   void waterBaseTextureSizes(VecI2 *size0, VecI2 *size1, VecI2 *size2);
-   /*void processAlpha()
+    void fromMaterial(C EditMaterial &material, C Project &proj, bool changed_flip_normal_y = false, bool changed_smooth_is_rough = false);
+    void fromMaterial(C EditWaterMtrl &material, C Project &proj, bool changed_flip_normal_y = false, bool changed_smooth_is_rough = false);
+    TEX_FLAG createBaseTextures(Image &base_0, Image &base_1, Image &base_2) C;
+    TEX_FLAG createWaterBaseTextures(Image &base_0, Image &base_1, Image &base_2) C;
+    void baseTextureSizes(VecI2 *size0, VecI2 *size1, VecI2 *size2);
+    void waterBaseTextureSizes(VecI2 *size0, VecI2 *size1, VecI2 *size2);
+    /*void processAlpha()
    {
       if(!alpha.is() && color.typeInfo().a) // if we have no alpha map but it's possible it's in color
       { // set alpha from color
@@ -154,8 +152,8 @@ public:
       }
    }*/
 
-public:
-   MtrlImages();
+  public:
+    MtrlImages();
 };
 /******************************************************************************/
 /******************************************************************************/

@@ -252,7 +252,7 @@ CPU::CPU() {
             t += 8;
         else // Length("Hardware" ) -> 8
             if (t = TextPos(data, "Processor", false, WHOLE_WORD_STRICT))
-                t += 9; // Length("Processor") -> 9, if "Hardware" not available, then try using "Processor", because in the past sample output was: "Processor: ARMv7 Processor rev 9 (v7l)"
+            t += 9; // Length("Processor") -> 9, if "Hardware" not available, then try using "Processor", because in the past sample output was: "Processor: ARMv7 Processor rev 9 (v7l)"
         if (t) {
             for (; *t == ' ' || *t == ':' || *t == '\t';)
                 t++; // skip spaces

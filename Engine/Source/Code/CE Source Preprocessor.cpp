@@ -151,7 +151,7 @@ void Source::replaceMacro(Int macro_index, Memc<Macro> &macros, TokenSource &ts,
         } else
             // TODO: can 'setCustom' be replaced with 'set' ? remember that Macro can be defined in one source, part.text BStr points to string data from that source, then other source uses this macro and its token BStr will point to string data from macro source
             if (part.text.is())
-                ts.tokens->NewAt(token_index++).setCustom(part.text, col, line, part.type).macroPos(col, line).macroDepth(depth);
+            ts.tokens->NewAt(token_index++).setCustom(part.text, col, line, part.type).macroPos(col, line).macroDepth(depth);
 
         for (; start < token_index; start++)
             if (Token *token = ts.tokens->addr(start)) // process all new tokens

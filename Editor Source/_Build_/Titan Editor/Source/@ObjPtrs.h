@@ -1,22 +1,23 @@
 ﻿/******************************************************************************/
 // hide and set keyboard focus to the Edit     view
 /******************************************************************************/
-template<typename TYPE> class ObjPtrs // warning: this must be stored only in global space
+template <typename TYPE>
+class ObjPtrs // warning: this must be stored only in global space
 {
-   bool         deleted;
-   Memc<TYPE*> *objs; //=null; do not set this to null because this may have been already used before the constructor was called
+    bool deleted;
+    Memc<TYPE *> *objs; //=null; do not set this to null because this may have been already used before the constructor was called
 
-  ~ObjPtrs();
+    ~ObjPtrs();
 
-   static int ComparePtr(TYPE*C &a, TYPE*C &b);
+    static int ComparePtr(TYPE *C &a, TYPE *C &b);
 
-   void include(TYPE &obj);
-   void exclude(TYPE &obj);
+    void include(TYPE &obj);
+    void exclude(TYPE &obj);
 
-   TYPE& operator[](int i);
+    TYPE &operator[](int i);
 
-public:
-   ObjPtrs();
+  public:
+    ObjPtrs();
 };
 /******************************************************************************/
 /******************************************************************************/

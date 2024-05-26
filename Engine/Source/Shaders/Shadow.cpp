@@ -131,7 +131,7 @@ void Process(inout Half color, inout Half weight, Half c, Flt raw_z, Flt base_z,
 /******************************************************************************/
 Half ShdBlurJitter_PS(
 #if GL_ES && GEOM // doesn't support NOPERSP
-    PIXEL         // 3D
+    PIXEL // 3D
 #else
     NOPERSP Vec2 uv
     : UV

@@ -1,110 +1,104 @@
 ﻿/******************************************************************************/
 /******************************************************************************/
-class TransformRegion : Region
-{
-   enum ANCHOR
-   {
-      SEL_CENTER,
-      SEL_LEFT,
-      SEL_RIGHT,
-      SEL_DOWN,
-      SEL_UP,
-      SEL_BACK,
-      SEL_FRONT,
-      WORLD_CENTER,
-      CAM_TARGET,
-   };
-   static cchar8 *AnchorName[]
-;
+class TransformRegion : Region {
+    enum ANCHOR {
+        SEL_CENTER,
+        SEL_LEFT,
+        SEL_RIGHT,
+        SEL_DOWN,
+        SEL_UP,
+        SEL_BACK,
+        SEL_FRONT,
+        WORLD_CENTER,
+        CAM_TARGET,
+    };
+    static cchar8 *AnchorName[];
 
-   bool           full, scale_normal, keep_uv;
-   Property      *move_p[3];
-   Memx<Property> props;
-   TextWhite      ts;
-   Button         rescale_width, rescale_height, rescale_depth, move_bottom, move_back, move_center, move_center_xz, rest_bottom, rot_y_min_box, ok, reset, cancel, close, original,
-                  rot[3][2]; // [xyz][dec/inc]
-   TextLine       rescale_width_value, rescale_height_value, rescale_depth_value;
-   Pose           trans;
-   flt            move_along_normal;
-   Vec            trans_scale, anchor_pos;
-   Vec2           move_uv, scale_uv;
-   Matrix         matrix;
-   ANCHOR         anchor;
+    bool full, scale_normal, keep_uv;
+    Property *move_p[3];
+    Memx<Property> props;
+    TextWhite ts;
+    Button rescale_width, rescale_height, rescale_depth, move_bottom, move_back, move_center, move_center_xz, rest_bottom, rot_y_min_box, ok, reset, cancel, close, original,
+        rot[3][2]; // [xyz][dec/inc]
+    TextLine rescale_width_value, rescale_height_value, rescale_depth_value;
+    Pose trans;
+    flt move_along_normal;
+    Vec trans_scale, anchor_pos;
+    Vec2 move_uv, scale_uv;
+    Matrix matrix;
+    ANCHOR anchor;
 
-   static void RescaleWidth(TransformRegion &tr);
-   static void RescaleHeight(TransformRegion &tr);
-   static void RescaleDepth(TransformRegion &tr);
-   static void MoveBottom  (TransformRegion &tr);
-   static void MoveBack    (TransformRegion &tr);
-   static void MoveCenter  (TransformRegion &tr);
-   static void MoveCenterXZ(TransformRegion &tr);
-   static void RestBottom  (TransformRegion &tr);
-   static void RotYMinBox  (TransformRegion &tr);
-   static void OK          (TransformRegion &tr);
-   static void Reset       (TransformRegion &tr);
-   static void Cancel      (TransformRegion &tr);
-   static void Original    (TransformRegion &tr);
+    static void RescaleWidth(TransformRegion &tr);
+    static void RescaleHeight(TransformRegion &tr);
+    static void RescaleDepth(TransformRegion &tr);
+    static void MoveBottom(TransformRegion &tr);
+    static void MoveBack(TransformRegion &tr);
+    static void MoveCenter(TransformRegion &tr);
+    static void MoveCenterXZ(TransformRegion &tr);
+    static void RestBottom(TransformRegion &tr);
+    static void RotYMinBox(TransformRegion &tr);
+    static void OK(TransformRegion &tr);
+    static void Reset(TransformRegion &tr);
+    static void Cancel(TransformRegion &tr);
+    static void Original(TransformRegion &tr);
 
-   static void RotX(  TransformRegion &tr, C Str &text);
-   static void RotY(  TransformRegion &tr, C Str &text);
-   static void RotZ(  TransformRegion &tr, C Str &text);
-   static Str  RotX(C TransformRegion &tr             );
-   static Str  RotY(C TransformRegion &tr             );
-   static Str  RotZ(C TransformRegion &tr             );
+    static void RotX(TransformRegion &tr, C Str &text);
+    static void RotY(TransformRegion &tr, C Str &text);
+    static void RotZ(TransformRegion &tr, C Str &text);
+    static Str RotX(C TransformRegion &tr);
+    static Str RotY(C TransformRegion &tr);
+    static Str RotZ(C TransformRegion &tr);
 
-   static void Dec90(Property &prop);
-   static void Inc90(Property &prop);
+    static void Dec90(Property &prop);
+    static void Inc90(Property &prop);
 
-   void moveBottom  ();
-   void moveBack    ();
-   void moveCenter  ();
-   void moveCenterXZ();
-   void restBottom  ();
-   void rotYMinBox();
+    void moveBottom();
+    void moveBack();
+    void moveCenter();
+    void moveCenterXZ();
+    void restBottom();
+    void rotYMinBox();
 
-   void toGui();
+    void toGui();
 
-   static void Changed  (C Property &prop);
-          void setMatrix();
+    static void Changed(C Property &prop);
+    void setMatrix();
 
-   Matrix drawMatrix()C;
-   void setAnchorPos(); 
-   Vec anchorPos()C;
-   void resetDo();
-   void hideDo();
-   void cancelDo();
-   class KeepUV
-   {
-      class Vtx
-      {
-         bool adjust;
-         Vec  pos;
-         Vec2 uv;
-         flt  weight;
+    Matrix drawMatrix() C;
+    void setAnchorPos();
+    Vec anchorPos() C;
+    void resetDo();
+    void hideDo();
+    void cancelDo();
+    class KeepUV {
+        class Vtx {
+            bool adjust;
+            Vec pos;
+            Vec2 uv;
+            flt weight;
 
-         void create(C Vec &pos);
-      };
+            void create(C Vec &pos);
+        };
 
-      class Part
-      {
-         Mems<Vtx> vtxs;
+        class Part {
+            Mems<Vtx> vtxs;
 
-         void create(C MeshPart &src);
-         void keepUV(MeshPart &part);
-      };
+            void create(C MeshPart &src);
+            void keepUV(MeshPart &part);
+        };
 
-      Mems<Part> parts;
+        Mems<Part> parts;
 
-      void create(C MeshLod &src);
-      void keepUV(MeshLod &lod);
-   };
-   void apply();
-   virtual void update(C GuiPC &gpc)override;
+        void create(C MeshLod &src);
+        void keepUV(MeshLod &lod);
+    };
+    void apply();
+    virtual void update(C GuiPC &gpc) override;
 
-   TransformRegion& create(bool full);
+    TransformRegion &create(bool full);
 
-public:
-   TransformRegion();
+  public:
+    TransformRegion();
 };
 /******************************************************************************/
 /******************************************************************************/

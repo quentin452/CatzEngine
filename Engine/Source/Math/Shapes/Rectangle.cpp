@@ -1055,16 +1055,16 @@ Vec2 Delta(C Rect &a, C Rect &b) {
         delta.x = b.min.x - a.max.x;
     else // +
         if (b.max.x < a.min.x)
-            delta.x = b.max.x - a.min.x;
-        else             // -
-            delta.x = 0; // 0
+        delta.x = b.max.x - a.min.x;
+    else             // -
+        delta.x = 0; // 0
     if (b.min.y > a.max.y)
         delta.y = b.min.y - a.max.y;
     else // +
         if (b.max.y < a.min.y)
-            delta.y = b.max.y - a.min.y;
-        else             // -
-            delta.y = 0; // 0
+        delta.y = b.max.y - a.min.y;
+    else             // -
+        delta.y = 0; // 0
     return delta;
 }
 Flt DeltaX(C Rect &a, C Rect &b) {

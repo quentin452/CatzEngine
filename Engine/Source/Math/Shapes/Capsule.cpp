@@ -405,9 +405,9 @@ Bool SweepCapsuleEdge(C Capsule &capsule, C Vec &move, C Edge &edge, Flt *hit_fr
                 check = 1;
             else // upper
                 if (max_h < pos_h - ihh)
-                    check = 0;
-                else // lower
-                    hitd = true;
+                check = 0;
+            else // lower
+                hitd = true;
         } else {
             Vec2 hit_point = frac * move2 - capsule.r * normal2;
             Flt edge_step = Sat(DistPointPlane(hit_point, edge2.p[0], edge2_d) / DistPointPlane(edge2.p[1], edge2.p[0], edge2_d));

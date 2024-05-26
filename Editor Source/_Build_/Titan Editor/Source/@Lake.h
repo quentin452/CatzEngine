@@ -1,12 +1,11 @@
 ﻿/******************************************************************************/
 /******************************************************************************/
-class Lake : LakeBase
-{
-   WaterMesh water_mesh;
+class Lake : LakeBase {
+    WaterMesh water_mesh;
 
-   void setMesh(C Project &proj);
-   Lake& checkMesh(C Project &proj); // set mesh if not set yet
-   void render();
+    void setMesh(C Project &proj);
+    Lake &checkMesh(C Project &proj); // set mesh if not set yet
+    void render();
 };
 /******************************************************************************/
 /******************************************************************************/

@@ -6,9 +6,9 @@
       However 'obj_in_front' can't be ignored and forced to 1, because that would cause major flickering on foliage in FPP, which is much more distracting than this problem.
 
 /******************************************************************************/
-#include "Temporal.h"
 #include "!Header.h"
 #include "Motion Blur.h"
+#include "Temporal.h"
 /******************************************************************************
 MODE, VIEW_FULL, ALPHA, DUAL_HISTORY, GATHER, FILTER_MIN_MAX
 
@@ -296,11 +296,11 @@ Flt NearestDepthRaw4x4(out Flt depth_center, out VecI2 ofs, Vec2 uv, bool gather
       TestDepth(depth, ru.y, ofs, VecI2( 2,  2));
       TestDepth(depth, ru.z, ofs, VecI2( 2,  1));
       TestDepth(depth, ru.w, ofs, VecI2( 1,  1)); if(all(VecI2(1, 1)==sub_offset))depth_center=ru.w;
-#else                                                                           // test center pixels first, this is for cases where multiple pixels have the same depth and we want to prioritize selecting offset closer to the center
-        Vec4 ld = TexDepthRawGather(uv);                                        // get -1,-1 to 0,0 texels
-        Vec4 rd = TexDepthRawGatherOfs(uv, VecI2(2, 0));                        // get  1,-1 to 2,0 texels
-        Vec4 lu = TexDepthRawGatherOfs(uv, VecI2(0, 2));                        // get -1, 1 to 0,2 texels
-        Vec4 ru = TexDepthRawGatherOfs(uv, VecI2(2, 2));                        // get  1, 1 to 2,2 texels
+#else // test center pixels first, this is for cases where multiple pixels have the same depth and we want to prioritize selecting offset closer to the center
+        Vec4 ld = TexDepthRawGather(uv);                 // get -1,-1 to 0,0 texels
+        Vec4 rd = TexDepthRawGatherOfs(uv, VecI2(2, 0)); // get  1,-1 to 2,0 texels
+        Vec4 lu = TexDepthRawGatherOfs(uv, VecI2(0, 2)); // get -1, 1 to 0,2 texels
+        Vec4 ru = TexDepthRawGatherOfs(uv, VecI2(2, 2)); // get  1, 1 to 2,2 texels
 
         depth = ld.y;
         ofs = VecI2(0, 0);   /*if(all(VecI2(0, 0)==sub_offset))*/
@@ -569,20 +569,20 @@ Half OldWeight(Vec2 old_uv, VecH2 uv_motion, Flt depth) {
     if (min_pixel_motion < 0 || screen_motion_len2 > Sqr(ImgSize.y * min_pixel_motion) || any(dilated_uv_motion.xy)) // #DilatedMotionZero
     {
 #endif
-        Half screen_motion_len2_bias = screen_motion_len2 + Sqr(ImgSize.y * MOTION_BIAS); // this pixel movement, add some bias which helps for slowly moving pixels on static background (example FPS view+walking+tree leafs on static sky), "+bias" works better than "Max(, bias)"
+    Half screen_motion_len2_bias = screen_motion_len2 + Sqr(ImgSize.y * MOTION_BIAS); // this pixel movement, add some bias which helps for slowly moving pixels on static background (example FPS view+walking+tree leafs on static sky), "+bias" works better than "Max(, bias)"
 
-        // TODO: slower but higher quality version would take more samples, for example on the line of 0..dilated_uv_motion.xy
-        // because 'dilated_uv_motion' don't point to the moving pixel, they just mean that there is some movement in this neighborhood
-        // taken samples in many cases will have valid hits, but there will be misses too, in between moving pixels
+    // TODO: slower but higher quality version would take more samples, for example on the line of 0..dilated_uv_motion.xy
+    // because 'dilated_uv_motion' don't point to the moving pixel, they just mean that there is some movement in this neighborhood
+    // taken samples in many cases will have valid hits, but there will be misses too, in between moving pixels
 
-        // 2x2 works much better than 1x1
-        TestSample2x2(old_weight, screen_motion, screen_motion_len2_bias, depth, old_uv, dilated_uv_motion.xy); // check primary   motion
-        TestSample2x2(old_weight, screen_motion, screen_motion_len2_bias, depth, old_uv, dilated_uv_motion.zw); // check secondary motion, check this for both DUAL_MOTION on/off
+    // 2x2 works much better than 1x1
+    TestSample2x2(old_weight, screen_motion, screen_motion_len2_bias, depth, old_uv, dilated_uv_motion.xy); // check primary   motion
+    TestSample2x2(old_weight, screen_motion, screen_motion_len2_bias, depth, old_uv, dilated_uv_motion.zw); // check secondary motion, check this for both DUAL_MOTION on/off
 
-        // here use 4x4 samples
-        TestSample4x4(old_weight, screen_motion, screen_motion_len2_bias, depth, old_uv, 0, false); // for performance reasons ignore 'cover' here, because this is at 'old' location, so assume it covers already. Don't try to ignore depth here, that will increase flickering
-    }
-    return old_weight;
+    // here use 4x4 samples
+    TestSample4x4(old_weight, screen_motion, screen_motion_len2_bias, depth, old_uv, 0, false); // for performance reasons ignore 'cover' here, because this is at 'old' location, so assume it covers already. Don't try to ignore depth here, that will increase flickering
+}
+return old_weight;
 }
 /******************************************************************************/
 Half OldWeight_PS(NOPERSP Vec2 uv

@@ -2,13 +2,13 @@
 /******************************************************************************/
 class Code // Source Code File
 {
-   Str current, base;
+    Str current, base;
 
-   void del();
+    void del();
 
-   bool save(File &f)C;
-   bool load(File &f);
-   bool load(C Str &name);
+    bool save(File &f) C;
+    bool load(File &f);
+    bool load(C Str &name);
 };
 /******************************************************************************/
 /******************************************************************************/

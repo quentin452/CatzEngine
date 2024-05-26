@@ -1376,7 +1376,7 @@ Flt PerlinNoise::tiledNoise3Bloom(Dbl x, Dbl y, Dbl z, VecI tile, Int octaves, F
     return result;
 }
 /******************************************************************************/
-#if 0                   // so so, Open Simplex is much better
+#if 0 // so so, Open Simplex is much better
 /******************************************************************************/
 // SIMPLEX NOISE
 /******************************************************************************
@@ -1734,11 +1734,11 @@ Flt PerlinSimplexNoise::noise(Dbl x, Dbl y, Dbl z, Dbl w)C
 // Ported by Stephen M. Cameron from Kurt Spencer's Java implementation
 /******************************************************************************/
 #define STRETCH_CONSTANT_2D (-0.211324865405187) // (1 / Sqrt(2 + 1) - 1 ) / 2
-#define SQUISH_CONSTANT_2D (0.366025403784439)   // (Sqrt(2 + 1) -1) / 2
-#define STRETCH_CONSTANT_3D (-1.0 / 6.0)         // (1 / Sqrt(3 + 1) - 1) / 3
-#define SQUISH_CONSTANT_3D (1.0 / 3.0)           // (Sqrt(3+1)-1)/3
+#define SQUISH_CONSTANT_2D (0.366025403784439) // (Sqrt(2 + 1) -1) / 2
+#define STRETCH_CONSTANT_3D (-1.0 / 6.0) // (1 / Sqrt(3 + 1) - 1) / 3
+#define SQUISH_CONSTANT_3D (1.0 / 3.0) // (Sqrt(3+1)-1)/3
 #define STRETCH_CONSTANT_4D (-0.138196601125011) // (1 / Sqrt(4 + 1) - 1) / 4
-#define SQUISH_CONSTANT_4D (0.309016994374947)   // (Sqrt(4 + 1) - 1) / 4
+#define SQUISH_CONSTANT_4D (0.309016994374947) // (Sqrt(4 + 1) - 1) / 4
 
 // Gradients for 2D. They approximate the directions to the vertices of an octagon from the center
 static const I8 gradients2D[] =

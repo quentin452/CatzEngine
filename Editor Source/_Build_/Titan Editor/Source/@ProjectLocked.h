@@ -1,17 +1,16 @@
 ﻿/******************************************************************************/
 /******************************************************************************/
-class ProjectLocked : ClosableWindow
-{
-   static void OK(ProjectLocked &pl);
+class ProjectLocked : ClosableWindow {
+    static void OK(ProjectLocked &pl);
 
-   TextNoTest text;
-   Button     ok, cancel;
-   UID        proj_id;
+    TextNoTest text;
+    Button ok, cancel;
+    UID proj_id;
 
-   void create(C UID &proj_id);
+    void create(C UID &proj_id);
 
-public:
-   ProjectLocked();
+  public:
+    ProjectLocked();
 };
 /******************************************************************************/
 /******************************************************************************/

@@ -123,14 +123,14 @@ static void (*glDrawElementsBaseVertex)(GLenum mode, GLsizei count, GLenum type,
    https://msdn.microsoft.com/en-us/library/windows/desktop/bb322868%28v=vs.85%29.aspx
 The following correspond to 8-bit mapping of -1..1 float
 /******************************************************************************/
-#define UNSIGNED_N1 0                      // -1
-#define UNSIGNED_0 128                     // ~0, there is no exact zero, because 127/255.0=0.498039216, 128/255.0=0.501960784, and both are offsetted by -0.5, giving -0.001960784 and 0.001960784, however 128 is chosen to achieve same value as signed version, because converting signed/unsigned is done by adding 128, then Byte(UNSIGNED_0+128)==0 give signed zero, an exact match
-#define UNSIGNED_1 255                     // +1
+#define UNSIGNED_N1 0 // -1
+#define UNSIGNED_0 128 // ~0, there is no exact zero, because 127/255.0=0.498039216, 128/255.0=0.501960784, and both are offsetted by -0.5, giving -0.001960784 and 0.001960784, however 128 is chosen to achieve same value as signed version, because converting signed/unsigned is done by adding 128, then Byte(UNSIGNED_0+128)==0 give signed zero, an exact match
+#define UNSIGNED_1 255 // +1
 #define UNSIGNED_ZP(x) ((x) >= UNSIGNED_0) // if zero or positive
 
-#define SIGNED_N1 128                  // -1, this could also be 129 because both values give -1, however we want same value as unsigned version, because converting signed/unsigned is done by adding 128
-#define SIGNED_0 0                     //  0
-#define SIGNED_1 127                   // +1
+#define SIGNED_N1 128 // -1, this could also be 129 because both values give -1, however we want same value as unsigned version, because converting signed/unsigned is done by adding 128
+#define SIGNED_0 0 //  0
+#define SIGNED_1 127 // +1
 #define SIGNED_ZP(x) ((x) <= SIGNED_1) // if zero or positive
 
 Vec UByte4ToNrm(C VecB4 &v) { return !Vec(UByteToSFlt(v.x), UByteToSFlt(v.y), UByteToSFlt(v.z)); }
@@ -2123,7 +2123,7 @@ void VtxIndBuf::setType(VI_TYPE vtx_type, UInt flag) {
         VI_vb->_vtx_num = VI._vb._vtx_num;   // copy current settings
         VI_vb->set();                        // make sure that it's active (some other vtx buffer could have been activated in the meantime)
 #if GL
-        D.vf(VF);                            // set VF after VBO on OpenGL
+        D.vf(VF); // set VF after VBO on OpenGL
 #endif
     }
 #endif

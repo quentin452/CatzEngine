@@ -1,17 +1,16 @@
 ﻿/******************************************************************************/
 /******************************************************************************/
-class ExportWindow : WindowIO
-{
-   UID elm_id;
-   Str ext;
+class ExportWindow : WindowIO {
+    UID elm_id;
+    Str ext;
 
-   static void Save(C Str &name, ptr);
-          void save(C Str &name);
+    static void Save(C Str &name, ptr);
+    void save(C Str &name);
 
-   void activate(C UID &elm_id);
+    void activate(C UID &elm_id);
 
-public:
-   ExportWindow();
+  public:
+    ExportWindow();
 };
 /******************************************************************************/
 /******************************************************************************/

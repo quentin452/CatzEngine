@@ -259,8 +259,8 @@ void SetSkin(C MemPtrN<IndexWeight, 256> &skin, VtxBone &matrix, VecB4 &blend, C
                     closest = 1;
                 } else // if found smaller distance than previous then set it, and set closest bones to 1
                     if (distance == min_distance) {
-                        closest++;
-                    } // if distance found is equal to min then another bone is close, so increase it by 1
+                    closest++;
+                } // if distance found is equal to min then another bone is close, so increase it by 1
             }
             if (closest) {
                 Flt weight = temp[i].weight / closest;

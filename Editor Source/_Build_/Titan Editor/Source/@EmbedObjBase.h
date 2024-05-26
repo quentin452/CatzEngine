@@ -1,17 +1,16 @@
 ﻿/******************************************************************************/
 /******************************************************************************/
-class EmbedObjBase
-{
-   UID      elm_obj_id; // ID of project element ELM_OBJ
-   Matrix   matrix;
-   bool     ovr_path, ovr_mesh_variation_id;
-   uint     mesh_variation_id;
-   OBJ_PATH path;
+class EmbedObjBase {
+    UID elm_obj_id; // ID of project element ELM_OBJ
+    Matrix matrix;
+    bool ovr_path, ovr_mesh_variation_id;
+    uint mesh_variation_id;
+    OBJ_PATH path;
 
-   void operator=(ObjVer &obj);
+    void operator=(ObjVer &obj);
 
-public:
-   EmbedObjBase();
+  public:
+    EmbedObjBase();
 };
 /******************************************************************************/
 /******************************************************************************/

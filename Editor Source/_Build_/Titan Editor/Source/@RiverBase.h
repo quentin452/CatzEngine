@@ -1,53 +1,51 @@
 ﻿/******************************************************************************/
 /******************************************************************************/
-class RiverBase
-{
-   class Vtx
-   {
-      flt radius;
-      Vec pos;
+class RiverBase {
+    class Vtx {
+        flt radius;
+        Vec pos;
 
-      void set(flt radius, C Vec &pos);
+        void set(flt radius, C Vec &pos);
 
-public:
-   Vtx();
-   };
+      public:
+        Vtx();
+    };
 
-   bool        removed;
-   byte        smooth;
-   flt         depth;
-   Vec2        uv_scale;
-   UID         material;
-   Memc<Vtx  > vtxs;
-   Memc<VecI2> edges;
-   TimeStamp   removed_time, smooth_time, depth_time, uv_scale_time, material_time, vtx_edge_time;
+    bool removed;
+    byte smooth;
+    flt depth;
+    Vec2 uv_scale;
+    UID material;
+    Memc<Vtx> vtxs;
+    Memc<VecI2> edges;
+    TimeStamp removed_time, smooth_time, depth_time, uv_scale_time, material_time, vtx_edge_time;
 
-   // get
-   bool equal(C RiverBase &src)C;
-   bool newer(C RiverBase &src)C;
+    // get
+    bool equal(C RiverBase &src) C;
+    bool newer(C RiverBase &src) C;
 
-   bool getRect(Rect &rect)C;
+    bool getRect(Rect &rect) C;
 
-   uint memUsage()C;
+    uint memUsage() C;
 
-   // operations
-   void setSmooth (byte    smooth  );
-   void setDepth  (flt     depth   );
-   void setUVScale(C Vec2 &uv_scale);
+    // operations
+    void setSmooth(byte smooth);
+    void setDepth(flt depth);
+    void setUVScale(C Vec2 &uv_scale);
 
-   bool sync(C RiverBase &src);
-   bool undo(C RiverBase &src);
+    bool sync(C RiverBase &src);
+    bool undo(C RiverBase &src);
 
-   // draw
-   void draw(C Color &color, C Color &depth_color=TRANSPARENT)C;
+    // draw
+    void draw(C Color &color, C Color &depth_color = TRANSPARENT) C;
 
-   // io
-   bool save(File &f)C;
-   bool load(File &f);
-   bool load(C Str &name);
+    // io
+    bool save(File &f) C;
+    bool load(File &f);
+    bool load(C Str &name);
 
-public:
-   RiverBase();
+  public:
+    RiverBase();
 };
 /******************************************************************************/
 /******************************************************************************/

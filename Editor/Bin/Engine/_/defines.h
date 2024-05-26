@@ -60,7 +60,7 @@
     ULong(sizeof(x)) // get raw size of C++ element in bytes as 'ULong' type
 #define MEMBER(Class, member) \
     (((Class *)null)          \
-         ->member) // null based Class::member, this macro is used to obtain
+         ->member) // null based Class::member, this macro is used to obtain \
                    // member information by many other macros/functions
 #define OFFSET(Class, member) \
     UIntPtr(&MEMBER(Class, member)) // get offset   of member in class
@@ -75,8 +75,8 @@
     static_cast<Class &>(    \
         object) // perform a  static cast of 'object' to 'Class' class
 #define ELMS(Array) \
-    UInt(SIZE(Array) / SIZE(Array[0])) // get number of elements in array (this is
-                                       // the compile-time version, use 'Elms'
+    UInt(SIZE(Array) / SIZE(Array[0])) // get number of elements in array (this is \
+                                       // the compile-time version, use 'Elms'     \
                                        // instead of 'ELMS' whenever possible)
 #define ENUM_TYPE(Enum) \
     std::underlying_type_t<Enum> // get the actual type of an enum
@@ -93,7 +93,7 @@ TYPE *ConstCast(C TYPE *x) {
 T1(TYPE)
 TYPE &NoTemp(TYPE &&x) { return x; }
 T1(TYPE)
-TYPE &&RValue(TYPE &x) { return (TYPE &&)x; }
+TYPE &&RValue(TYPE &x) { return (TYPE &&) x; }
 /******************************************************************************/
 // ITERATION MACROS
 /******************************************************************************/
@@ -127,11 +127,11 @@ TYPE &&RValue(TYPE &x) { return (TYPE &&)x; }
     (a)[i] //         repeat all with definition and operate: Elms(a)-1 .. 0
 #define FREPAO(a)                     \
     for (Int i = 0; i < Elms(a); i++) \
-    (a)[i] // forward repeat all                 and operate:         0 ..
+    (a)[i] // forward repeat all                 and operate:         0 .. \
            // Elms(a)-1
 #define FREPAOD(i, a)                 \
     for (Int i = 0; i < Elms(a); i++) \
-    (a)[i] // forward repeat all with definition and operate:         0 ..
+    (a)[i] // forward repeat all with definition and operate:         0 .. \
            // Elms(a)-1
 
 #define REPS(i, n)  \
@@ -365,7 +365,7 @@ operator+(ENUM0 a, ENUM1 b) {
 /******************************************************************************/
 // ASSERTIONS
 /******************************************************************************/
-#define ASSERT_CONCAT2(a, b) a##b                // don't use this
+#define ASSERT_CONCAT2(a, b) a##b // don't use this
 #define ASSERT_CONCAT(a, b) ASSERT_CONCAT2(a, b) // don't use this
 
 #define EXIT(error)                              \
@@ -374,8 +374,8 @@ operator+(ENUM0 a, ENUM1 b) {
 #define ASSERT(value)          \
     typedef Int ASSERT_CONCAT( \
         _AssertDummyName,      \
-        __LINE__)[(value) ? 1 : -1] // compile time assertion, alternative to
-                                    // static_assert(value, "assert failed");
+        __LINE__)[(value) ? 1 : -1] // compile time assertion, alternative to \
+                                    // static_assert(value, "assert failed"); \
                                     // which is more flexible on Clang/GCC
 #define DYNAMIC_ASSERT(value, error) \
     {                                \
@@ -385,7 +385,7 @@ operator+(ENUM0 a, ENUM1 b) {
 #if DEBUG
 #define DEBUG_ASSERT(value, error) \
     DYNAMIC_ASSERT(                \
-        value, error)                 // debug        assertion   available only in debug   mode
+        value, error) // debug        assertion   available only in debug   mode
 #define DEBUG_EXIT(error) EXIT(error) // Exit in debug only
 #else
 #define DEBUG_ASSERT(value, error) \
@@ -395,23 +395,23 @@ operator+(ENUM0 a, ENUM1 b) {
 #endif
 #define DEBUG_RANGE_ASSERT(index, elms) \
     DEBUG_ASSERT(InRange(index, elms),  \
-                 "Element out of range") // out of range assertion, asserts that
+                 "Element out of range") // out of range assertion, asserts that \
                                          // 'index' is in range "0..elms-1"
 #define RANGE_ASSERT(index, elms)        \
     DYNAMIC_ASSERT(InRange(index, elms), \
-                   "Element out of range") // out of range assertion, asserts that
+                   "Element out of range") // out of range assertion, asserts that \
                                            // 'index' is in range "0..elms-1"
 #define RANGE_ASSERT_ERROR(index, elms, error) \
     DYNAMIC_ASSERT(InRange(index, elms),       \
-                   error) // out of range assertion, asserts that 'index' is in
+                   error) // out of range assertion, asserts that 'index' is in \
                           // range "0..elms-1"
 #define ALIGN_ASSERT(Class, member)  \
     ASSERT(!(OFFSET(Class, member) & \
-             (SIZE(Ptr) - 1))) // assert that class member has alignment native to
+             (SIZE(Ptr) - 1))) // assert that class member has alignment native to \
                                // the target platform
 #define ALIGN_ASSERT_X(Class, member, x) \
     ASSERT(!(OFFSET(Class, member) &     \
-             (x - 1))) // assert that class member has alignment native to the
+             (x - 1))) // assert that class member has alignment native to the \
                        // target platform
 
 ASSERT(SIZE(Bool) == 1);  // size of Bool  must be 1 byte
@@ -419,17 +419,17 @@ ASSERT(SIZE(Char8) == 1); // size of Char8 must be 1 byte
 /******************************************************************************/
 // STRUCT DECLARATION
 /******************************************************************************/
-#define const_mem_addr // custom keyword specifying that the struct/class must
-                       // be stored in constant memory address, if you see this
-                       // keyword next to a struct/class declaration you must
-                       // ensure that when defining objects of that struct/class
-                       // you will store them in constant memory address (this
-                       // can be either global namespace or inside 'Memx' 'Meml'
+#define const_mem_addr // custom keyword specifying that the struct/class must   \
+                       // be stored in constant memory address, if you see this  \
+                       // keyword next to a struct/class declaration you must    \
+                       // ensure that when defining objects of that struct/class \
+                       // you will store them in constant memory address (this   \
+                       // can be either global namespace or inside 'Memx' 'Meml' \
                        // containers)
 
 #define NO_COPY_CONSTRUCTOR(Class)         \
     void operator=(C Class &src) = delete; \
-    Class(C Class &src) = delete; // when declared inside a class this macro
+    Class(C Class &src) = delete; // when declared inside a class this macro \
                                   // disables the use of copy constructors
 
 // alignment
@@ -439,12 +439,12 @@ ASSERT(SIZE(Char8) == 1); // size of Char8 must be 1 byte
 // FUNCTION DECLARATION
 /******************************************************************************/
 #if WINDOWS
-#define INLINE __forceinline          // force   inlining, this is stronger than 'inline'
+#define INLINE __forceinline // force   inlining, this is stronger than 'inline'
 #define NOINLINE __declspec(noinline) // disable inlining
 #else
 #define INLINE             \
     inline __attribute__(( \
-        always_inline))                    // force   inlining, this is stronger than 'inline'
+        always_inline)) // force   inlining, this is stronger than 'inline'
 #define NOINLINE __attribute__((noinline)) // disable inlining
 #endif
 
@@ -461,12 +461,12 @@ ASSERT(SIZE(Char8) == 1); // size of Char8 must be 1 byte
 #define TILE_BASED_GPU \
     (MOBILE && !SWITCH) // assume all mobile GPU's are tile-based
 #define SUPPORT_EARLY_Z \
-    (!TILE_BASED_GPU) // disable on tile-based GPU's because it's discouraged by
+    (!TILE_BASED_GPU) // disable on tile-based GPU's because it's discouraged by \
                       // Mali, PowerVR, ..
 #define SUPPORT_EMISSIVE 1
 #define COUNT_MATERIAL_USAGE \
-    0 // never use "DEBUG" here, because it affects Material class size/members,
-      // which needs to remain constant
+    0 // never use "DEBUG" here, because it affects Material class size/members, \
+        // which needs to remain constant
 #define SUPPORT_MATERIAL_CHANGE_IN_RENDERING 0
 #define SUPPORT_MLAA 0
 
@@ -487,11 +487,11 @@ ASSERT(SIZE(Char8) == 1); // size of Char8 must be 1 byte
 #define SUPPORT_SAMPLERATE (WINDOWS)
 
 #define OPUS_DEC_NINTENDO \
-    0 // if use Opus Decoder from Nintendo Switch SDK (disable because it fails on
-      // some sounds)
+    0 // if use Opus Decoder from Nintendo Switch SDK (disable because it fails on \
+        // some sounds)
 #define OPUS_ENC_NINTENDO \
-    0 // if use Opus Encoder from Nintendo Switch SDK (disable because default is
-      // 10% faster)
+    0 // if use Opus Encoder from Nintendo Switch SDK (disable because default is \
+        // 10% faster)
 
 // Image
 #define SUPPORT_JPG 1
@@ -518,9 +518,9 @@ ASSERT(SIZE(Char8) == 1); // size of Char8 must be 1 byte
 
 #define DEPTH_FLUSH          \
     (GL && TILE_BASED_GPU && \
-     !WEB) // some GPUs store RTs (including depth buffer) on fast on-chip memory
-           // and to be able to read from them, we need to flush them to the
-           // texture memory first. No need to do on WEB because there we can
+     !WEB) // some GPUs store RTs (including depth buffer) on fast on-chip memory \
+           // and to be able to read from them, we need to flush them to the      \
+           // texture memory first. No need to do on WEB because there we can     \
            // never read from depth while writing to it.
 
 #if LINUX

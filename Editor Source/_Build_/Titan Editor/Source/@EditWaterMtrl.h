@@ -1,32 +1,31 @@
 ﻿/******************************************************************************/
 /******************************************************************************/
-class EditWaterMtrl : EditMaterial
-{
-   flt density, density_add,
-       scale_color, scale_normal, scale_bump,
-       refract, refract_reflection,
-       wave_scale;
-   Vec color_underwater0,
-       color_underwater1;
+class EditWaterMtrl : EditMaterial {
+    flt density, density_add,
+        scale_color, scale_normal, scale_bump,
+        refract, refract_reflection,
+        wave_scale;
+    Vec color_underwater0,
+        color_underwater1;
 
-   TimeStamp density_time,
-             scale_color_time, scale_normal_time, scale_bump_time,
-             refract_time, refract_reflection_time,
-             wave_scale_time,
-             color_underwater_time;
+    TimeStamp density_time,
+        scale_color_time, scale_normal_time, scale_bump_time,
+        refract_time, refract_reflection_time,
+        wave_scale_time,
+        color_underwater_time;
 
-   EditWaterMtrl();
+    EditWaterMtrl();
 
-   // get
-   bool usesTexBump()C;
+    // get
+    bool usesTexBump() C;
 
-   bool equal(C EditWaterMtrl &src)C;
-   bool newer(C EditWaterMtrl &src)C;
+    bool equal(C EditWaterMtrl &src) C;
+    bool newer(C EditWaterMtrl &src) C;
 
-   // operations
-   void reset();                
-   void newData(C Project&proj);
-   /*void create(C WaterMtrl &src, C TimeStamp &time=TimeStamp().getUTC())
+    // operations
+    void reset();
+    void newData(C Project &proj);
+    /*void create(C WaterMtrl &src, C TimeStamp &time=TimeStamp().getUTC())
    {
       super.create(Material(), time); // call super to setup times for all values
       color_s               =Vec4(src.colorS(), 1); color_time=time;
@@ -47,16 +46,16 @@ class EditWaterMtrl : EditMaterial
       base_1_tex=src.normalMap().id();
       base_2_tex=src.  bumpMap().id();
    }*/
-   void copyTo(WaterMtrl &dest, C Project&proj)C;
-   uint sync(C EditMaterial  &src);           
-   uint sync(C EditWaterMtrl &src);
-   uint undo(C EditWaterMtrl &src);
-   void adjustParams(uint changed, TEX_FLAG old_textures, TEX_FLAG has_textures, TEX_FLAG known_textures); // 'old_textures'=textures() before making any change, 'has_textures'=used textures based on per-pixel data (if known), 'known_textures'=what textures in 'has_textures' are known
+    void copyTo(WaterMtrl &dest, C Project &proj) C;
+    uint sync(C EditMaterial &src);
+    uint sync(C EditWaterMtrl &src);
+    uint undo(C EditWaterMtrl &src);
+    void adjustParams(uint changed, TEX_FLAG old_textures, TEX_FLAG has_textures, TEX_FLAG known_textures); // 'old_textures'=textures() before making any change, 'has_textures'=used textures based on per-pixel data (if known), 'known_textures'=what textures in 'has_textures' are known
 
-   // io
-   bool save(File &f)C;
-   bool load(File &f);
-   bool load(C Str &name);
+    // io
+    bool save(File &f) C;
+    bool load(File &f);
+    bool load(C Str &name);
 };
 /******************************************************************************/
 /******************************************************************************/

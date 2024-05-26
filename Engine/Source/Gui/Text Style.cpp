@@ -1639,7 +1639,7 @@ struct TextDrawerHW : TextDrawer {
             MaterialClear();
         } else // if drawing text while rendering, then decrease the alpha channel (glow), for sub-pixel we will be changing 'D.alphaFactor' for which we have to call 'MaterialClear'
             if (Renderer.inside())
-                D.alpha(ALPHA_RENDER_BLEND); // if drawing text while rendering, set special alpha mode, but don't bother to restore it, as in Rendering, alpha blending is always set for each call
+            D.alpha(ALPHA_RENDER_BLEND); // if drawing text while rendering, set special alpha mode, but don't bother to restore it, as in Rendering, alpha blending is always set for each call
 
         // font depth
         if (D._text_depth) // apply new state

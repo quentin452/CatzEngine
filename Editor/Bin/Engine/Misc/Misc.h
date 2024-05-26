@@ -6,7 +6,7 @@
    Here is a list of miscellaneous helper functions.
 
 /******************************************************************************/
-enum ALIGN_TYPE    // Align Type
+enum ALIGN_TYPE // Align Type
 {
     ALIGN_NONE,   // no align
     ALIGN_MIN,    // align to minimum

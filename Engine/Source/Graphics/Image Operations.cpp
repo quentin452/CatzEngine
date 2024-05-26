@@ -1722,9 +1722,9 @@ struct BlurContext {
                 func = 0;
             else // HP 1F, here check 'hwType' because we will access memory directly using 'pixF' method
                 if (src.typeChannels() == 1)
-                    func = 1;
-                else          // HP 1C
-                    func = 2; // HP MC
+                func = 1;
+            else          // HP 1C
+                func = 2; // HP MC
         } else {
             C ImageTypeInfo &ti = src.hwTypeInfo(); // here check 'hwType' because we will access memory directly using 'pixB' method
             if (ti.bit_pp == 8 && ti.channels == 1)
@@ -4027,7 +4027,7 @@ Image &Image::transparentToNeighbor(Bool clamp, Flt step) {
         }
     }
     return T; // ok;
-#else         // old method
+#else // old method
     IMAGE_TYPE type;
     IMAGE_MODE mode;
     Int mip_maps;
@@ -4650,8 +4650,8 @@ Bool ImageCompare::compare(C Image &a, C Image &b, Flt similar_dif, Bool alpha_w
             {
                 Image temp_a, temp_b;
                 C Image *sa = &a, *sb = &b;
-                void (*decompress_a)(C Byte *b, Color(&block)[4][4]) = DecompressBlock(sa->hwType());
-                void (*decompress_b)(C Byte *b, Color(&block)[4][4]) = DecompressBlock(sb->hwType());
+                void (*decompress_a)(C Byte * b, Color(&block)[4][4]) = DecompressBlock(sa->hwType());
+                void (*decompress_b)(C Byte * b, Color(&block)[4][4]) = DecompressBlock(sb->hwType());
                 if (!decompress_a && sa->compressed()) {
                     if (!sa->extractMipMap(temp_a, ImageTypeUncompressed(sa->type()), a_mip))
                         return false;

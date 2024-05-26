@@ -43,9 +43,9 @@ Symbol *GetFinalSymbol(Symbol *symbol, Memc<Symbol::Modif> *templates) // simpli
             break;
         else // we can't proceed to the value of the function without calling it
             if (symbol->value)
-                symbol = symbol->value();
-            else
-                break;
+            symbol = symbol->value();
+        else
+            break;
     }
     return symbol;
 }

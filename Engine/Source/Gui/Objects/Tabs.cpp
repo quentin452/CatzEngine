@@ -334,7 +334,7 @@ Tabs &Tabs::remove(Int i) {
             notifyParentOfRectChange();
         } else // children attached to tabs might affect rects
             if (_sel > i)
-                _sel--;
+            _sel--;
         setRect();
     }
     return T;

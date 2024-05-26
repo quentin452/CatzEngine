@@ -1,12 +1,11 @@
 ﻿/******************************************************************************/
 /******************************************************************************/
-class River : RiverBase
-{
-   WaterMesh water_mesh;
+class River : RiverBase {
+    WaterMesh water_mesh;
 
-   void setMesh(C Project &proj);
-   River& checkMesh(C Project &proj); // set mesh if not set yet
-   void render();
+    void setMesh(C Project &proj);
+    River &checkMesh(C Project &proj); // set mesh if not set yet
+    void render();
 };
 /******************************************************************************/
 /******************************************************************************/

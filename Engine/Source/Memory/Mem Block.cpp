@@ -202,7 +202,7 @@ void _Memb::moveElmLeftUnsafe(Int elm, Int new_index, Ptr temp) // !! assumes in
 {
     if (new_index != elm) {
         CopyFast(temp, T[elm], elmSize()); // copy element from data to temp memory
-#if 0                                      // not needed since we're always moving left in this function
+#if 0                                      // not needed since we're always moving left in this function \
                                            //                                                                                       E N        E N
       if(elm<new_index) // element is on the left, and we're moving it to the right, move the data to the left "0X123" -> "012X3"
       {

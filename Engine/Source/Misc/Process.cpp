@@ -510,7 +510,7 @@ if (same_process && active)
 #if WINDOWS
 CloseHandle(out_read); // we won't use this handle any more
 #else
-                close(out_read);               // we won't use this handle any more
+                close(out_read); // we won't use this handle any more
 #endif
 if (!same_process)
     goto start; // if started a different process, then process it instead of exiting thread
@@ -792,10 +792,10 @@ Str ConsoleProcess::get() {
                     skip = 1;
                 else // 110xxxxx, missing
                     if ((last & 0xF0) == 0xE0)
-                        skip = 1;
-                    else // 1110xxxx, missing, missing
-                        if ((_data[_data.length() - 2] & 0xF0) == 0xE0)
-                            skip = 2; // 1110xxxx, available, missing
+                    skip = 1;
+                else // 1110xxxx, missing, missing
+                    if ((_data[_data.length() - 2] & 0xF0) == 0xE0)
+                    skip = 2; // 1110xxxx, available, missing
                 REP(skip) {
                     temp[i] = _data.last();
                     _data.removeLast();
@@ -932,9 +932,9 @@ Bool GetProcessesAccessingThisProcess(MemPtr<ProcessAccess> proc, Bool write_onl
             HANDLE_TYPE_PROCESS = 7;
         else // Win7/8/10 - https://cybercoding.wordpress.com/2011/08/20/delphi-process-detection-handle-table-enumeration/ "In Windows 7 Sp1 ObjectTypeNumber = 7 is Process!"
             if (Compare(ver, VecI4(6, 0, 0, 0)) >= 0)
-                HANDLE_TYPE_PROCESS = 6;
-            else                         // Vista
-                HANDLE_TYPE_PROCESS = 5; // WinXP
+            HANDLE_TYPE_PROCESS = 6;
+        else                         // Vista
+            HANDLE_TYPE_PROCESS = 5; // WinXP
 
         // HANDLE_TYPE_FILE - Windows XP 28, Windows Vista 28, Windows 7 28, Windows 8 31, Windows 8.1 30 - https://www.codeproject.com/Tips/992827/Section-Handles-Enumeration-Extending-File-Unlocki
     }

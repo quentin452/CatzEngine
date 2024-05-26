@@ -1287,9 +1287,9 @@ inline void InternetCache::update() {
                         missing.access_time = downloaded->access_time;
                     else // reuse from 'downloaded'
                         if (C PakFile *pf = _pak.find(link, true))
-                            missing.access_time = pakFile(*pf).access_time;
-                        else                                           // reuse from 'pak'
-                            missing.access_time = missing.verify_time; // set as new
+                        missing.access_time = pakFile(*pf).access_time;
+                    else                                           // reuse from 'pak'
+                        missing.access_time = missing.verify_time; // set as new
                 }
                 // codes below cannot be inside 'just_created' because expired (not verified) '_missing' can be created in 'changed'
                 ImagePtr img;

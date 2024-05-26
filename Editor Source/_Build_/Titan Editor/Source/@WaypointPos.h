@@ -1,14 +1,13 @@
 ﻿/******************************************************************************/
 /******************************************************************************/
-class WaypointPos : Region
-{
-   Memx<Property> props;
-   TextBlack      ts;
+class WaypointPos : Region {
+    Memx<Property> props;
+    TextBlack ts;
 
-   static void Changed(WaypointPos &wp);
-   WaypointPos& create(C Vec2 &up);
-   void toGui();
-   virtual void update(C GuiPC &gpc)override;
+    static void Changed(WaypointPos &wp);
+    WaypointPos &create(C Vec2 &up);
+    void toGui();
+    virtual void update(C GuiPC &gpc) override;
 };
 /******************************************************************************/
 /******************************************************************************/

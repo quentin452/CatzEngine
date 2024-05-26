@@ -1,20 +1,20 @@
 ﻿/******************************************************************************/
 /******************************************************************************/
 void NewObjs(C Vec &pos);
-Obj* NewObj(C Vec &pos, Elm &elm);
+Obj *NewObj(C Vec &pos, Elm &elm);
 void DeleteObj();
 void DeleteObj(Obj &obj);
 void ScaleOrgObj();
-void ObjAlignTer ();
-void ObjAlignNrm ();
+void ObjAlignTer();
+void ObjAlignNrm();
 void ObjAlignGrid();
-void ObjRandomRot  ();
+void ObjRandomRot();
 void ObjRandomRot90();
-void ObjResetRot   ();
+void ObjResetRot();
 void ObjRotX();
 void ObjRotY();
 void ObjRotZ();
-void EditObj          ();
+void EditObj();
 void CopyObjInstanceID();
-void OpenObjMaterial  ();
+void OpenObjMaterial();
 /******************************************************************************/

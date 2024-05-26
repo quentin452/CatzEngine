@@ -1,18 +1,17 @@
 ﻿/******************************************************************************/
 /******************************************************************************/
-class RemoveProjWin : ClosableWindow
-{
-   Text   t_name;
-   Button     ok;
-   UID   proj_id;
+class RemoveProjWin : ClosableWindow {
+    Text t_name;
+    Button ok;
+    UID proj_id;
 
-   static void OK(RemoveProjWin &rpw);
+    static void OK(RemoveProjWin &rpw);
 
-   void activate(Projects::Elm &proj);
-   void create();
+    void activate(Projects::Elm &proj);
+    void create();
 
-public:
-   RemoveProjWin();
+  public:
+    RemoveProjWin();
 };
 /******************************************************************************/
 /******************************************************************************/

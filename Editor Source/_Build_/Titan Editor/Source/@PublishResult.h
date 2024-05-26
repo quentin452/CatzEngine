@@ -1,17 +1,16 @@
 ﻿/******************************************************************************/
 /******************************************************************************/
-class PublishResult : ClosableWindow
-{
-   TextNoTest text;
-   Button     ok, size_stats;
-   Str        path;
+class PublishResult : ClosableWindow {
+    TextNoTest text;
+    Button ok, size_stats;
+    Str path;
 
-   static void OK       (PublishResult &pr);
-   static void SizeStats(PublishResult &pr);
+    static void OK(PublishResult &pr);
+    static void SizeStats(PublishResult &pr);
 
-   void display(C Str &text);
+    void display(C Str &text);
 };
 /******************************************************************************/
 /******************************************************************************/
-extern PublishResult       PublishRes;
+extern PublishResult PublishRes;
 /******************************************************************************/

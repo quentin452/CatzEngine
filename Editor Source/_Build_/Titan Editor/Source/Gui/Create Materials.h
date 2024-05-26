@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-extern State           CreateMaterialsState;
+extern State CreateMaterialsState;
 /******************************************************************************/
 bool InitCreateMaterials();
 void ShutCreateMaterials();

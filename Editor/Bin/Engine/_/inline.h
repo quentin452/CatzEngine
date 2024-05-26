@@ -6071,42 +6071,42 @@ Grid<TYPE> &Grid<TYPE>::replaceClass() {
 // call custom function on grid cells
 T1(TYPE)
 void Grid<TYPE>::func(void func(Cell<TYPE> &cell, Ptr user)) {
-    super::func((void (*)(_Cell &cell, Ptr user))func, null);
+    super::func((void (*)(_Cell & cell, Ptr user)) func, null);
 } // call 'func' on all existing grid cells
 T1(TYPE)
 T1(USER_DATA)
 void Grid<TYPE>::func(void func(Cell<TYPE> &cell, USER_DATA *user),
                       USER_DATA *user) {
-    super::func((void (*)(_Cell &cell, Ptr user))func, user);
+    super::func((void (*)(_Cell & cell, Ptr user)) func, user);
 } // call 'func' on all existing grid cells
 T1(TYPE)
 T1(USER_DATA)
 void Grid<TYPE>::func(void func(Cell<TYPE> &cell, USER_DATA &user),
                       USER_DATA &user) {
-    super::func((void (*)(_Cell &cell, Ptr user))func, &user);
+    super::func((void (*)(_Cell & cell, Ptr user)) func, &user);
 } // call 'func' on all existing grid cells
 T1(TYPE)
 void Grid<TYPE>::func(C RectI &rect, void func(Cell<TYPE> &cell, Ptr user)) {
-    super::func(rect, (void (*)(_Cell &cell, Ptr user))func, null);
+    super::func(rect, (void (*)(_Cell & cell, Ptr user)) func, null);
 } // call 'func' on all existing grid cells in specified rectangle
 T1(TYPE)
 T1(USER_DATA)
 void Grid<TYPE>::func(C RectI &rect,
                       void func(Cell<TYPE> &cell, USER_DATA *user),
                       USER_DATA *user) {
-    super::func(rect, (void (*)(_Cell &cell, Ptr user))func, user);
+    super::func(rect, (void (*)(_Cell & cell, Ptr user)) func, user);
 } // call 'func' on all existing grid cells in specified rectangle
 T1(TYPE)
 T1(USER_DATA)
 void Grid<TYPE>::func(C RectI &rect,
                       void func(Cell<TYPE> &cell, USER_DATA &user),
                       USER_DATA &user) {
-    super::func(rect, (void (*)(_Cell &cell, Ptr user))func, &user);
+    super::func(rect, (void (*)(_Cell & cell, Ptr user)) func, &user);
 } // call 'func' on all existing grid cells in specified rectangle
 T1(TYPE)
 void Grid<TYPE>::funcCreate(C RectI &rect,
                             void func(Cell<TYPE> &cell, Ptr user)) {
-    super::funcCreate(rect, (void (*)(_Cell &cell, Ptr user))func, null);
+    super::funcCreate(rect, (void (*)(_Cell & cell, Ptr user)) func, null);
 } // call 'func' on all          grid cells in specified rectangle (this method
   // creates grid cells if they don't exist yet)
 T1(TYPE)
@@ -6114,7 +6114,7 @@ T1(USER_DATA)
 void Grid<TYPE>::funcCreate(C RectI &rect,
                             void func(Cell<TYPE> &cell, USER_DATA *user),
                             USER_DATA *user) {
-    super::funcCreate(rect, (void (*)(_Cell &cell, Ptr user))func, user);
+    super::funcCreate(rect, (void (*)(_Cell & cell, Ptr user)) func, user);
 } // call 'func' on all          grid cells in specified rectangle (this method
   // creates grid cells if they don't exist yet)
 T1(TYPE)
@@ -6122,7 +6122,7 @@ T1(USER_DATA)
 void Grid<TYPE>::funcCreate(C RectI &rect,
                             void func(Cell<TYPE> &cell, USER_DATA &user),
                             USER_DATA &user) {
-    super::funcCreate(rect, (void (*)(_Cell &cell, Ptr user))func, &user);
+    super::funcCreate(rect, (void (*)(_Cell & cell, Ptr user)) func, &user);
 } // call 'func' on all          grid cells in specified rectangle (this method
   // creates grid cells if they don't exist yet)
 
@@ -6131,7 +6131,7 @@ T1(TYPE)
 void Grid<TYPE>::mtFunc(Threads &threads, void func(Cell<TYPE> &cell, Ptr user,
                                                     Int thread_index)) {
     super::mtFunc(threads,
-                  (void (*)(_Cell &cell, Ptr user, Int thread_index))func, null);
+                  (void (*)(_Cell & cell, Ptr user, Int thread_index)) func, null);
 } // call 'func' on all existing grid cells
 T1(TYPE)
 T1(USER_DATA)
@@ -6140,7 +6140,7 @@ void Grid<TYPE>::mtFunc(Threads &threads,
                                   Int thread_index),
                         USER_DATA *user) {
     super::mtFunc(threads,
-                  (void (*)(_Cell &cell, Ptr user, Int thread_index))func, user);
+                  (void (*)(_Cell & cell, Ptr user, Int thread_index)) func, user);
 } // call 'func' on all existing grid cells
 T1(TYPE)
 T1(USER_DATA)
@@ -6149,14 +6149,14 @@ void Grid<TYPE>::mtFunc(Threads &threads,
                                   Int thread_index),
                         USER_DATA &user) {
     super::mtFunc(threads,
-                  (void (*)(_Cell &cell, Ptr user, Int thread_index))func, &user);
+                  (void (*)(_Cell & cell, Ptr user, Int thread_index)) func, &user);
 } // call 'func' on all existing grid cells
 T1(TYPE)
 void Grid<TYPE>::mtFunc(Threads &threads, C RectI &rect,
                         void func(Cell<TYPE> &cell, Ptr user,
                                   Int thread_index)) {
     super::mtFunc(threads, rect,
-                  (void (*)(_Cell &cell, Ptr user, Int thread_index))func, null);
+                  (void (*)(_Cell & cell, Ptr user, Int thread_index)) func, null);
 } // call 'func' on all existing grid cells in specified rectangle
 T1(TYPE)
 T1(USER_DATA)
@@ -6165,7 +6165,7 @@ void Grid<TYPE>::mtFunc(Threads &threads, C RectI &rect,
                                   Int thread_index),
                         USER_DATA *user) {
     super::mtFunc(threads, rect,
-                  (void (*)(_Cell &cell, Ptr user, Int thread_index))func, user);
+                  (void (*)(_Cell & cell, Ptr user, Int thread_index)) func, user);
 } // call 'func' on all existing grid cells in specified rectangle
 T1(TYPE)
 T1(USER_DATA)
@@ -6174,7 +6174,7 @@ void Grid<TYPE>::mtFunc(Threads &threads, C RectI &rect,
                                   Int thread_index),
                         USER_DATA &user) {
     super::mtFunc(threads, rect,
-                  (void (*)(_Cell &cell, Ptr user, Int thread_index))func, &user);
+                  (void (*)(_Cell & cell, Ptr user, Int thread_index)) func, &user);
 } // call 'func' on all existing grid cells in specified rectangle
 /******************************************************************************/
 // GAME::OBJ_MEMX
@@ -6468,11 +6468,11 @@ inline C ObjData::Param *ObjData::findParam(C Str &name, PARAM_TYPE type,
 #if EE_PRIVATE
 
 #if X86 || (ARM && X64) || \
-    WEB // x86 32/64 and ARM 64 can do unaligned reads. When using WebAssembly
-        // (WASM) for WEB platform, unaligned access is supported, however when
-        // executed on platforms without native unaligned access support (Arm32)
-        // it will be extremely slow, however since Arm32 is in extinction then
-        // it's better to enable unaligned access to get better performance on
+    WEB // x86 32/64 and ARM 64 can do unaligned reads. When using WebAssembly   \
+        // (WASM) for WEB platform, unaligned access is supported, however when  \
+        // executed on platforms without native unaligned access support (Arm32) \
+        // it will be extremely slow, however since Arm32 is in extinction then  \
+        // it's better to enable unaligned access to get better performance on   \
         // majority of platforms that support it.
 T1(TYPE)
 C TYPE &Unaligned(C TYPE &src) { return src; }

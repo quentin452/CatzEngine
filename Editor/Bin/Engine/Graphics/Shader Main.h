@@ -231,9 +231,9 @@ struct MainShaderClass {
 
 // BLUR
 #define SHADER_BLUR_RANGE 5 // 5 pixel range in both directions
-        *BlurX[2],          // [High]
-        *BlurY[2],          // [High]
-                            /**BlurX_X,
+        *BlurX[2], // [High]
+        *BlurY[2], // [High]
+                   /**BlurX_X,
                              *BlurY_X,*/
 
         // MAX

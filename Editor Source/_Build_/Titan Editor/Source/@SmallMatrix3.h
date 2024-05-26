@@ -23,16 +23,16 @@
 }*/
 class SmallMatrix3 // Matrix3 stored using 2xVec (2*3xFlt, 2*3*4xByte, 24 bytes)
 {
-   Vec angle,
-       scale;
+    Vec angle,
+        scale;
 
-   bool operator==(C SmallMatrix3 &m)C;
-   bool operator!=(C SmallMatrix3 &m)C;
+    bool operator==(C SmallMatrix3 &m) C;
+    bool operator!=(C SmallMatrix3 &m) C;
 
-   void set(Matrix3 &matrix)C;
+    void set(Matrix3 &matrix) C;
 
-   SmallMatrix3();  
-   SmallMatrix3(C Matrix3 &matrix);
+    SmallMatrix3();
+    SmallMatrix3(C Matrix3 &matrix);
 };
 /******************************************************************************/
 /******************************************************************************/

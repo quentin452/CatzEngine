@@ -130,28 +130,28 @@ HSData HSConstant(InputPatch<Data, 3> I) { return GetHSData(I[0].pos, I[1].pos, 
     [outputcontrolpoints(3)] Data
     HS(InputPatch<Data, 3> I, UInt cp_id
        : SV_OutputControlPointID) {
-        Data O;
-        O.pos = I[cp_id].pos;
-        O.nrm = I[cp_id].nrm;
+    Data O;
+    O.pos = I[cp_id].pos;
+    O.nrm = I[cp_id].nrm;
 #if SET_ALPHA
-        O.alpha = I[cp_id].alpha;
+    O.alpha = I[cp_id].alpha;
 #endif
 #if ALPHA_TEST
-        O.uv = I[cp_id].uv;
+    O.uv = I[cp_id].uv;
 #endif
 #if ALPHA_TEST == ALPHA_TEST_DITHER
-        O.face_id = I[cp_id].face_id;
+    O.face_id = I[cp_id].face_id;
 #endif
-        return O;
-    }
-        /******************************************************************************/
-        [domain("tri")] void DS(
-            HSData hs_data, const OutputPatch<Data, 3> I, Vec B
-            : SV_DomainLocation,
+    return O;
+}
+/******************************************************************************/
+[domain("tri")] void DS(
+    HSData hs_data, const OutputPatch<Data, 3> I, Vec B
+    : SV_DomainLocation,
 
-              out Data O,
-              out Vec4 pixel
-            : POSITION) {
+      out Data O,
+      out Vec4 pixel
+    : POSITION) {
 #if SET_ALPHA
     O.alpha = I[0].alpha * B.z + I[1].alpha * B.x + I[2].alpha * B.y;
 #endif

@@ -1,7 +1,7 @@
 /******************************************************************************/
 // GLOW, VIEW_FULL, HALF_RES, DITHER, PRECOMPUTED, EXPOSURE, TONE_MAP, CONTRAST
-#include "Bloom.h"
 #include "!Header.h"
+#include "Bloom.h"
 #include "Hdr.h"
 
 #ifndef GLOW
@@ -120,12 +120,12 @@ VecH4 Bloom_PS(
     // final=src*original + Sat((src-cut)*scale)
     VecH4 col;
 
-#if ALPHA == 2                     // separate
+#if ALPHA == 2 // separate
     col.rgb = TexLod(Img, uv).rgb; // original, can't use 'TexPoint' because 'Img'  can be supersampled
     col.a = TexLod(ImgX, uv);      //           can't use 'TexPoint' because 'ImgX' can be supersampled
-#elif ALPHA == 1                   // use alpha
+#elif ALPHA == 1 // use alpha
     col = TexLod(Img, uv); // original, can't use 'TexPoint' because 'Img' can be supersampled
-#else                              // no alpha
+#else // no alpha
     col.rgb = TexLod(Img, uv).rgb; // original, can't use 'TexPoint' because 'Img' can be supersampled
     col.a = 1;                     // force full alpha so back buffer effects can work ok
 #endif
@@ -146,9 +146,9 @@ VecH4 Bloom_PS(
         col.rgb = LinearToSRGB(col.rgb);
     else // preserves sRGB 0.5 and overall brightness
         if (gamma == 1)
-            col.rgb = LinearToSRGB1(col.rgb);
-        else                         // preserves sRGB 0.5 and overall brightness, dark colors darkened too much
-            col.rgb = Sqrt(col.rgb); // darkens everything
+        col.rgb = LinearToSRGB1(col.rgb);
+    else                         // preserves sRGB 0.5 and overall brightness, dark colors darkened too much
+        col.rgb = Sqrt(col.rgb); // darkens everything
 
     // col.rgb=col.rgb*2-1; col.rgb=SigmoidSqr(col.rgb*contrast)/SigmoidSqr(contrast); col.rgb=col.rgb*0.5+0.5;
     col.rgb = SigmoidSqr(col.rgb * Contrast.x + Contrast.y);

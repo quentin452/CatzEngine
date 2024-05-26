@@ -238,7 +238,7 @@ struct RendererClass // handles rendering
     void cleanup1();
 
     // render target methods
-#if DX11                       // needed on DX11 because it doesn't allow reading and writing to RT's and Depth Buffer at the same time
+#if DX11 // needed on DX11 because it doesn't allow reading and writing to RT's and Depth Buffer at the same time
     static void setDSLookup(); // !! needs to be called after 'set' !! this needs to be called if we plan to call methods below
     static void setDS(ID3D11DepthStencilView *dsv);
     static void needDepthTest(); // !! needs to be called after 'D.depthWrite' !! set only if we need depth writing, or there's no depth buffer attached, otherwise keep current to avoid unnecessary state changes

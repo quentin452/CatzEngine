@@ -497,7 +497,7 @@ static Bool LZMA2Decompress(File &src, File &dest, Long compressed_size, Long de
 /******************************************************************************/
 #if SUPPORT_SNAPPY
 
-#define SNAPPY_BUF_SIZE 65536                        // chunks to support streaming !! don't change in the future !!
+#define SNAPPY_BUF_SIZE 65536 // chunks to support streaming !! don't change in the future !!
 #define SNAPPY_COMPRESSBOUND(x) (32 + (x) + (x) / 6) // taken from Snappy source code
 
 static UIntPtr SNAPPYSize(UIntPtr src_size) { return snappy_max_compressed_length(src_size); }

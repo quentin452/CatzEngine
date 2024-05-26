@@ -839,7 +839,7 @@ void DisplayState::linearGamma(Bool on) {
         Sh.FontCur = Sh.Font[false][on];
         Sh.FontCurSP = Sh.FontSP[false][on];
         // alpha factor depends on gamma, have to reset it
-#if 1                              // keep old value
+#if 1 // keep old value
         if (D._alpha_factor.any()) // we can do it only if 'any' because all zeroes have the same value for all gammas and don't need reset
         {
             Color old = D._alpha_factor;
@@ -973,7 +973,10 @@ void DisplayState::del() {
     REPAD(i, RasterStates)
     REPAD(j, RasterStates[i])
     REPAD(k, RasterStates[i][j])
-    REPAD(l, RasterStates[i][j][k]) REPAD(m, RasterStates[i][j][k][l]) REPAD(n, RasterStates[i][j][k][l][m]) REPAOD(o, RasterStates[i][j][k][l][m][n]).del();
+    REPAD(l, RasterStates[i][j][k])
+    REPAD(m, RasterStates[i][j][k][l])
+    REPAD(n, RasterStates[i][j][k][l][m])
+    REPAOD(o, RasterStates[i][j][k][l][m][n]).del();
 #endif
 }
 void DisplayState::create() {

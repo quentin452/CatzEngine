@@ -65,20 +65,20 @@ HSData HSConstant(InputPatch<Data, 3> I) { return GetHSData(I[0].pos, I[1].pos, 
         InputPatch<Data, 3> I,
         UInt cp_id
         : SV_OutputControlPointID) {
-        Data O;
-        O.pos = I[cp_id].pos;
-        O.nrm = I[cp_id].nrm;
-        O.uv = I[cp_id].uv;
-        return O;
-    }
-        /******************************************************************************/
-        [domain("tri")] void DS(
-            HSData hs_data, const OutputPatch<Data, 3> I, Vec B
-            : SV_DomainLocation,
+    Data O;
+    O.pos = I[cp_id].pos;
+    O.nrm = I[cp_id].nrm;
+    O.uv = I[cp_id].uv;
+    return O;
+}
+/******************************************************************************/
+[domain("tri")] void DS(
+    HSData hs_data, const OutputPatch<Data, 3> I, Vec B
+    : SV_DomainLocation,
 
-              out Data O,
-              out Vec4 pixel
-            : POSITION) {
+      out Data O,
+      out Vec4 pixel
+    : POSITION) {
     O.uv = I[0].uv * B.z + I[1].uv * B.x + I[2].uv * B.y;
 
     SetDSPosNrm(O.pos, O.nrm, I[0].pos, I[1].pos, I[2].pos, I[0].nrm, I[1].nrm, I[2].nrm, B, hs_data, false, 0);

@@ -1042,11 +1042,11 @@ void IDGenerator::Return(UInt id) // return ID so it can be re-used later
             _created--;
         else                                      // if this is the one that was created most recently
             if (_returned.elms() == _created - 1) // if returned all that were created
-            {                                     // reset counter
-                _created = 0;
-                _returned.clear();
-            } else
-                _returned.add(id); // add to the list of returned ID's
+        {                                         // reset counter
+            _created = 0;
+            _returned.clear();
+        } else
+            _returned.add(id); // add to the list of returned ID's
     }
 }
 /******************************************************************************/
@@ -1228,7 +1228,7 @@ void Log(C Str &text) {
             Str8 line = UTF8(lines[i]);
             if (line.is())
                 __android_log_write(ANDROID_LOG_INFO, ENGINE_NAME, line.is() ? line : " ");
-        }                                           // '__android_log_write' will crash if text is null or ""
+        } // '__android_log_write' will crash if text is null or ""
 #elif SWITCH
         NS::Log(false, UTF8(t));
 #elif WEB
@@ -1379,7 +1379,7 @@ Int BitHi(UShort x) {
     _BitScanReverse(&i, x);
     return i;
 #elif 1
-    return x ? 31 ^ __builtin_clz(x) : 0;   // 31^__builtin_clz(x)==31-__builtin_clz(x), 31 because '__builtin_clz' operates on 'UInt'
+    return x ? 31 ^ __builtin_clz(x) : 0; // 31^__builtin_clz(x)==31-__builtin_clz(x), 31 because '__builtin_clz' operates on 'UInt'
 #else
     Int i = 0;
     for (UInt bit = 8; bit; bit >>= 1)
@@ -1398,7 +1398,7 @@ Int BitHi(UInt x) {
     _BitScanReverse(&i, x);
     return i;
 #elif 1
-    return x ? 31 ^ __builtin_clz(x) : 0;   // 31^__builtin_clz(x)==31-__builtin_clz(x)
+    return x ? 31 ^ __builtin_clz(x) : 0; // 31^__builtin_clz(x)==31-__builtin_clz(x)
 #else
     Int i = 0;
     for (UInt bit = 16; bit; bit >>= 1)
@@ -1487,7 +1487,7 @@ UInt CeilPow2(UInt x) {
     if (x > p2)
         p2 <<= 1;
     return p2;
-#else   // slowest
+#else // slowest
     UInt p2 = 1;
     for (; p2 < x;)
         p2 <<= 1;
@@ -1581,7 +1581,8 @@ Bool ClipSet(C Str &text) {
                 event.on();
             });
             App.wait(event);
-        } catch (...) {
+        }
+        catch (...) {
         }
     }
     return ok;
@@ -1671,7 +1672,8 @@ Str ClipGet() {
         try // can crash if app not focused
         {
             content = Windows::ApplicationModel::DataTransfer::Clipboard::GetContent();
-        } catch (...) {
+        }
+        catch (...) {
         }
     } else {
         try // can crash if app not yet initialized
@@ -1680,7 +1682,8 @@ Str ClipGet() {
                                                                                                                        try // can crash if app not focused
                                                                                                                        {
                                                                                                                            content = Windows::ApplicationModel::DataTransfer::Clipboard::GetContent();
-                                                                                                                       } catch (...) {
+                                                                                                                       }
+                                                                                                                       catch (...) {
                                                                                                                        }
                                                                                                                    }));
             SyncEvent event;
@@ -1688,7 +1691,8 @@ Str ClipGet() {
                 event.on();
             });
             App.wait(event);
-        } catch (...) {
+        }
+        catch (...) {
         }
     }
     if (content && content->Contains(Windows::ApplicationModel::DataTransfer::StandardDataFormats::Text)) {
@@ -5123,8 +5127,8 @@ struct std__string {
             length = size() - offset;
         size_type c = wmemcmp(c_str() + offset, s, (length < length2) ? length : length2);
         return (c ? (int)c : (length < length2) ? -1
-                         : (length == length2)  ? 0
-                                                : +1);
+                         : (length == length2) ? 0
+                                               : +1);
     }
 
     void swap(std__string &s) { Swap(T, s); }
@@ -5309,8 +5313,8 @@ struct std__wstring {
             length = size() - offset;
         size_type c = wmemcmp(c_str() + offset, s, (length < length2) ? length : length2);
         return (c ? (int)c : (length < length2) ? -1
-                         : (length == length2)  ? 0
-                                                : +1);
+                         : (length == length2) ? 0
+                                               : +1);
     }
 
     void swap(std__wstring &s) { Swap(T, s); }
@@ -5464,10 +5468,10 @@ Bool ErrorMove(C Str &src, C Str &dest) { return Error(S + "Error moving\n\"" + 
    It's important to note, that Code Signing does not modify section offsets, sizes or data.
 
 /******************************************************************************/
-#if WINDOWS_OLD                   // create a Hash section for verification purposes
-#define EE_SECTION_NAME "Hash"    // name will be clamped to 8 chars
+#if WINDOWS_OLD // create a Hash section for verification purposes
+#define EE_SECTION_NAME "Hash" // name will be clamped to 8 chars
 #pragma data_seg(EE_SECTION_NAME) // this will create a custom 'ExeSection'
-ULong Hash = 0;                   // have to specify a value (=0), because otherwise the section will not be created, and can't do "static" because it will be removed
+ULong Hash = 0; // have to specify a value (=0), because otherwise the section will not be created, and can't do "static" because it will be removed
 #pragma data_seg()
 static void Set(ExeSection &section, C IMAGE_SECTION_HEADER &img_section, Bool x64) {
     ASSERT(SIZE(img_section.Name) == 8 && ELMS(img_section.Name) == 8 && SIZE(section.name) == 9);
@@ -5479,9 +5483,9 @@ static void Set(ExeSection &section, C IMAGE_SECTION_HEADER &img_section, Bool x
         section.type = ExeSection::CONST_PROCESS;
     else // most likely this changes because of virtual function table reallocation during EXE loading
         if (Equal(section.name, EE_SECTION_NAME, true))
-            section.type = ExeSection::HASH;
-        else // EE storage of hash
-            section.type = ExeSection::CONSTANT;
+        section.type = ExeSection::HASH;
+    else // EE storage of hash
+        section.type = ExeSection::CONSTANT;
 }
 #endif
 Bool ParseProcess(MemPtr<ExeSection> sections) {
@@ -5506,7 +5510,7 @@ Bool ParseProcess(MemPtr<ExeSection> sections) {
 }
 Bool ParseExe(File &f, MemPtr<ExeSection> sections) {
 #if WINDOWS_OLD
-#define IMAGE_DOS_SIGNATURE 0x5A4D    // MZ
+#define IMAGE_DOS_SIGNATURE 0x5A4D // MZ
 #define IMAGE_NT_SIGNATURE 0x00004550 // PE00
 
     ULong offset = f.pos();

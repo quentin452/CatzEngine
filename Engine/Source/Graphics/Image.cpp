@@ -1946,7 +1946,7 @@ Bool Image::createEx(Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int 
                         Alloc(_data_all, CeilGL(memUsage()));
                     Byte *dest = _data_all; // create a software copy only if we want it
 #endif
-                    REPD(m, mipMaps())      // order important #MipOrder
+                    REPD(m, mipMaps()) // order important #MipOrder
                     {
                         // if(m==mipMaps()-2 && glGetError()!=GL_NO_ERROR)goto error; // check at the start 2nd mip-map to skip this when there's only one mip-map, if first mip failed, then fail #MipOrder
                         VecI2 mip_size(Max(1, hwW() >> m), Max(1, hwH() >> m));
@@ -2023,7 +2023,7 @@ Bool Image::createEx(Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int 
                         Alloc(_data_all, CeilGL(memUsage()));
                     Byte *dest = _data_all; // create a software copy only if we want it
 #endif
-                    REPD(m, mipMaps())      // order important #MipOrder
+                    REPD(m, mipMaps()) // order important #MipOrder
                     {
                         // if(m==mipMaps()-2 && glGetError()!=GL_NO_ERROR)goto error; // check at the start 2nd mip-map to skip this when there's only one mip-map, if first mip failed, then fail #MipOrder
                         VecI mip_size(Max(1, hwW() >> m), Max(1, hwH() >> m), Max(1, hwD() >> m));
@@ -2084,7 +2084,7 @@ Bool Image::createEx(Int w, Int h, Int d, IMAGE_TYPE type, IMAGE_MODE mode, Int 
                 if (!data || !data[m]) {
                     dummy = temp.setNumZero(CeilGL(ImagePitch2(hwW(), hwH(), m, hwType()))).dataNull();
                     break;
-                }                 // order important, start from biggest mip, find first that doesn't have data specified
+                } // order important, start from biggest mip, find first that doesn't have data specified
 #endif
                 REPD(m, mip_maps) // order important #MipOrder
                 {
@@ -2256,10 +2256,10 @@ Bool Image::createHWfromSoft(C Image &soft, IMAGE_TYPE type, IMAGE_MODE mode, UI
 /******************************************************************************/
 static Bool Decompress(C Image &src, Image &dest, Int max_mip_maps = INT_MAX) // assumes that 'src' and 'dest' are 2 different objects, 'src' is compressed, and 'dest' not compressed or not yet created, this always ignores gamma
 {
-    void (*decompress_block)(C Byte *b, Color(&block)[4][4]) = null, (*decompress_block_pitch)(C Byte * b, Color * dest, Int pitch) = null;
-    void (*decompress_block_SByte)(C Byte *b, SByte(&block)[4][4]) = null, (*decompress_block_pitch_SByte)(C Byte * b, SByte * dest, Int pitch) = null;
-    void (*decompress_block_VecSB2)(C Byte *b, VecSB2(&block)[4][4]) = null, (*decompress_block_pitch_VecSB2)(C Byte * b, VecSB2 * dest, Int pitch) = null;
-    void (*decompress_block_VecH)(C Byte *b, VecH(&block)[4][4]) = null, (*decompress_block_pitch_VecH)(C Byte * b, VecH * dest, Int pitch) = null;
+    void (*decompress_block)(C Byte * b, Color(&block)[4][4]) = null, (*decompress_block_pitch)(C Byte * b, Color * dest, Int pitch) = null;
+    void (*decompress_block_SByte)(C Byte * b, SByte(&block)[4][4]) = null, (*decompress_block_pitch_SByte)(C Byte * b, SByte * dest, Int pitch) = null;
+    void (*decompress_block_VecSB2)(C Byte * b, VecSB2(&block)[4][4]) = null, (*decompress_block_pitch_VecSB2)(C Byte * b, VecSB2 * dest, Int pitch) = null;
+    void (*decompress_block_VecH)(C Byte * b, VecH(&block)[4][4]) = null, (*decompress_block_pitch_VecH)(C Byte * b, VecH * dest, Int pitch) = null;
     switch (src.hwType()) {
     default:
         return false;
@@ -2723,12 +2723,12 @@ Bool Image::copy(Image &dest, Int w, Int h, Int d, Int type, Int mode, Int mip_m
             mip_maps = src->mipMaps();
         else // same size
             if (src->mipMaps() < TotalMipMaps(src->w(), src->h(), src->d()))
-                mip_maps = src->mipMaps();
-            else // less than total
-                if (src->mipMaps() == 1)
-                    mip_maps = 1;
-                else              // use  only one
-                    mip_maps = 0; // auto-detect mip maps
+            mip_maps = src->mipMaps();
+        else // less than total
+            if (src->mipMaps() == 1)
+            mip_maps = 1;
+        else              // use  only one
+            mip_maps = 0; // auto-detect mip maps
     }
     Int dest_total_mip_maps = TotalMipMaps(w, h, d);
     if (mip_maps <= 0)
@@ -3896,8 +3896,8 @@ void Image::copyHw(ImageRT &dest, Bool restore_rt, C RectI *rect_src, C RectI *r
                     restore_viewport = !D._view_active.full;
                 }
 
-                Renderer.set(&dest, null, false);             // put 'dest' to FBO
-#if IOS                                                       // there is no default frame buffer on iOS
+                Renderer.set(&dest, null, false); // put 'dest' to FBO
+#if IOS // there is no default frame buffer on iOS
                 glBindFramebuffer(GL_READ_FRAMEBUFFER, FBO1); // for unknown reason we can't use 'FBO' here, needs to be different
                 glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, _rb);
 #else

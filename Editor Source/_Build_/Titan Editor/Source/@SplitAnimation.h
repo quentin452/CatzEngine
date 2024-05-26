@@ -1,43 +1,41 @@
 ﻿/******************************************************************************/
 /******************************************************************************/
-class SplitAnimation : ClosableWindow
-{
-   class Anim
-   {
-      Button   remove;
-      CheckBox loop;
-      TextLine name, from, to;
-      
-      static void Remove(Anim &anim);
+class SplitAnimation : ClosableWindow {
+    class Anim {
+        Button remove;
+        CheckBox loop;
+        TextLine name, from, to;
 
-      Anim();
-      void pos(flt y);
-   };
-   UID        anim_id;
-   Text       text, t_name, t_start, t_end, t_loop;
-   Button     clipboard, split, clear, add_new;
-   Region     region;
-   Memx<Anim> anims;
+        static void Remove(Anim &anim);
 
-   static void Clipboard(SplitAnimation &sa);
-   static void Split    (SplitAnimation &sa);
-   static void New      (SplitAnimation &sa);
-   static void Clear    (SplitAnimation &sa);
-   static void Hide     (SplitAnimation &sa);
+        Anim();
+        void pos(flt y);
+    };
+    UID anim_id;
+    Text text, t_name, t_start, t_end, t_loop;
+    Button clipboard, split, clear, add_new;
+    Region region;
+    Memx<Anim> anims;
 
-   void splitDo();
-   void clearDo();
-   void addNew ();
-   void setList();
-   void create();
-   void activate(C UID &elm_id);
-   static bool Create(int &data, C Str&key, ptr user); // initial occurence is zero
-   static bool IsNumber(C Str &str);                
-   void add(C Str &text);
-   void drop(Memc<Str> &names, GuiObj *obj, C Vec2 &screen_pos);
+    static void Clipboard(SplitAnimation &sa);
+    static void Split(SplitAnimation &sa);
+    static void New(SplitAnimation &sa);
+    static void Clear(SplitAnimation &sa);
+    static void Hide(SplitAnimation &sa);
 
-public:
-   SplitAnimation();
+    void splitDo();
+    void clearDo();
+    void addNew();
+    void setList();
+    void create();
+    void activate(C UID &elm_id);
+    static bool Create(int &data, C Str &key, ptr user); // initial occurence is zero
+    static bool IsNumber(C Str &str);
+    void add(C Str &text);
+    void drop(Memc<Str> &names, GuiObj *obj, C Vec2 &screen_pos);
+
+  public:
+    SplitAnimation();
 };
 /******************************************************************************/
 /******************************************************************************/

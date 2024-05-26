@@ -1,7 +1,7 @@
 /******************************************************************************/
-#include "Hdr.h"
 #include "!Header.h"
 #include "Bloom.h"
+#include "Hdr.h"
 /******************************************************************************/
 #define BRIGHT 1 // if apply adjustment for scenes where half pixels are bright, and other half are dark, in that case prefer focus on brighter, to avoid making already bright pixels too bright
 /******************************************************************************/
@@ -16,7 +16,7 @@ Flt HdrDS_PS(NOPERSP Vec2 uv
     // use linear filtering because we're downsampling, for the first step use half precision for high performance, because there's a lot of data
     VecH sum = TexLod(Img, Vec2(tex_min.x, tex_min.y)).rgb + TexLod(Img, Vec2(tex_max.x, tex_min.y)).rgb + TexLod(Img, Vec2(tex_min.x, tex_max.y)).rgb + TexLod(Img, Vec2(tex_max.x, tex_max.y)).rgb;
 
-#if !LINEAR_GAMMA                    // convert from sRGB to linear
+#if !LINEAR_GAMMA // convert from sRGB to linear
     sum = SRGBToLinearFast(sum) / 4; // SRGBToLinearFast(sum/4)*4
 #endif
 

@@ -449,14 +449,14 @@ static void TextSelCopy(C Str &str, TextEdit &edit) // assumes that 'sel' and 'c
         ClipSet(str);
     else                                           // copy all
         if (Int length = Abs(edit.sel - edit.cur)) // copy part
-        {
-            Memt<Char> temp;
-            temp.setNum(length + 1);
-            CopyFastN(temp.data(), str() + Min(edit.sel, edit.cur), length);
-            temp[length] = 0;
-            ClipSet(temp.data());
-        } else
-            ClipSet(S); // copy nothing
+    {
+        Memt<Char> temp;
+        temp.setNum(length + 1);
+        CopyFastN(temp.data(), str() + Min(edit.sel, edit.cur), length);
+        temp[length] = 0;
+        ClipSet(temp.data());
+    } else
+        ClipSet(S); // copy nothing
 }
 static Bool TextSelRem(Str &str, TextEdit &edit) // assumes that 'sel' and 'cur' are in 'str' range (or sel<0)
 {
@@ -518,24 +518,24 @@ static Bool Processed(Str &str, TextEdit &edit, Bool multi_line, C KeyboardKey &
                 edit.sel = -1;
             } else // cancel selection
                 if (edit.cur) {
-                    if (key.shift() && edit.sel < 0)
-                        edit.sel = edit.cur; // start selection from cursor
-                    edit.cur--;
-                    SkipLeft(str, edit);
-                    if (key.ctrlCmd())
-                        if (edit.password)
-                            edit.cur = 0;
-                        else
-                            for (CHAR_TYPE ct = CharType(str[edit.cur]); edit.cur;) {
-                                CHAR_TYPE nt = CharType(str[edit.cur - 1]);
-                                if (ct == CHART_SPACE)
-                                    ct = nt;
-                                if (ct != nt)
-                                    break;
-                                edit.cur--;
-                                SkipLeft(str, edit);
-                            }
-                }
+                if (key.shift() && edit.sel < 0)
+                    edit.sel = edit.cur; // start selection from cursor
+                edit.cur--;
+                SkipLeft(str, edit);
+                if (key.ctrlCmd())
+                    if (edit.password)
+                        edit.cur = 0;
+                    else
+                        for (CHAR_TYPE ct = CharType(str[edit.cur]); edit.cur;) {
+                            CHAR_TYPE nt = CharType(str[edit.cur - 1]);
+                            if (ct == CHART_SPACE)
+                                ct = nt;
+                            if (ct != nt)
+                                break;
+                            edit.cur--;
+                            SkipLeft(str, edit);
+                        }
+            }
             return true;
         } break;
 
@@ -545,25 +545,25 @@ static Bool Processed(Str &str, TextEdit &edit, Bool multi_line, C KeyboardKey &
                 edit.sel = -1;
             } else // cancel selection
                 if (edit.cur < str.length()) {
-                    if (key.shift() && edit.sel < 0)
-                        edit.sel = edit.cur; // start selection from cursor
-                    edit.cur++;
-                    SkipRight(str, edit);
-                    if (key.ctrlCmd())
-                        if (edit.password)
-                            edit.cur = str.length();
-                        else
-                            for (CHAR_TYPE ct = CharType(str[edit.cur - 1]); edit.cur < str.length();) {
-                                CHAR_TYPE nt = CharType(str[edit.cur]);
-                                if (ct != nt) {
-                                    for (; edit.cur < str.length() && str[edit.cur] == ' ';)
-                                        edit.cur++;
-                                    break;
-                                }
-                                edit.cur++;
-                                SkipRight(str, edit);
+                if (key.shift() && edit.sel < 0)
+                    edit.sel = edit.cur; // start selection from cursor
+                edit.cur++;
+                SkipRight(str, edit);
+                if (key.ctrlCmd())
+                    if (edit.password)
+                        edit.cur = str.length();
+                    else
+                        for (CHAR_TYPE ct = CharType(str[edit.cur - 1]); edit.cur < str.length();) {
+                            CHAR_TYPE nt = CharType(str[edit.cur]);
+                            if (ct != nt) {
+                                for (; edit.cur < str.length() && str[edit.cur] == ' ';)
+                                    edit.cur++;
+                                break;
                             }
-                }
+                            edit.cur++;
+                            SkipRight(str, edit);
+                        }
+            }
             return true;
         } break;
 

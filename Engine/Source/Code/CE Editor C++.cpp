@@ -307,16 +307,16 @@ static void CleanNameForLinux(Str &s) {
         s = "All";
     else // compiling app named "all"   will result in endless loop on Linux
         if (Equal(s, "build", true))
-            s = "Build";
-        else // compiling app named "build" will result in endless loop on Linux
-            if (Equal(s, "clean", true))
-                s = "Clean";
-            else // compiling app named "clean" will result in endless loop on Linux
-                if (Equal(s, "help", true))
-                    s = "Help";
-                else // compiling app named "help"  will result in endless loop on Linux
-                    if (Equal(s, "test", true))
-                        s = "Test"; // compiling app named "test"  will result in endless loop on Linux
+        s = "Build";
+    else // compiling app named "build" will result in endless loop on Linux
+        if (Equal(s, "clean", true))
+        s = "Clean";
+    else // compiling app named "clean" will result in endless loop on Linux
+        if (Equal(s, "help", true))
+        s = "Help";
+    else // compiling app named "help"  will result in endless loop on Linux
+        if (Equal(s, "test", true))
+        s = "Test"; // compiling app named "test"  will result in endless loop on Linux
 }
 static Str CleanNameForMakefile(C Str &s) {
     Str o;
@@ -1945,8 +1945,8 @@ Bool CodeEditor::generateVSProj(Int version) {
                                 sdk = "10.0.14393.795";
                             else // latest SDK available for VS 2015
                                 if (version == 15)
-                                    sdk = "10.0.17763.0"; // latest SDK available for VS 2017
-                                                          // VS 2019 does not require "WindowsTargetPlatformVersion" - when it's empty, then "latest SDK" is used, so don't specify it
+                                sdk = "10.0.17763.0"; // latest SDK available for VS 2017
+                                                      // VS 2019 does not require "WindowsTargetPlatformVersion" - when it's empty, then "latest SDK" is used, so don't specify it
                             if (sdk)
                                 prop->getNode("WindowsTargetPlatformVersion").data.setNum(1).first() = sdk;
 
@@ -2086,9 +2086,9 @@ Bool CodeEditor::generateVSProj(Int version) {
                     platform_toolset_xp = "v141_xp";
                 } else // VS 2019 uses v141_xp from VS 2017
                     if (version == 17) {
-                        platform_toolset = "v143";
-                        platform_toolset_xp = "v141_xp";
-                    } // VS 2022 uses v141_xp from VS 2017
+                    platform_toolset = "v143";
+                    platform_toolset_xp = "v141_xp";
+                } // VS 2022 uses v141_xp from VS 2017
 
                 if (platform_toolset)
                     for (Int i = 0; XmlNode *prop = proj->findNode("PropertyGroup", i); i++)
@@ -2989,17 +2989,17 @@ Bool CodeEditor::generateAndroidProj() {
                                     orn = "user";
                                 else // up/left/right no down, use instead of "sensor" because that one ignores "auto-rotate" option
                                     if ((flag & DIRF_X) == DIRF_RIGHT)
-                                        orn = "landscape";
-                                    else // only one horizontal
-                                        if ((flag & DIRF_Y) == DIRF_UP)
-                                            orn = "portrait";
-                                        else // only one vertical
-                                            if (landscape && !portrait)
-                                                orn = "sensorLandscape";
-                                            else if (!landscape && portrait)
-                                                orn = "sensorPortrait";
-                                            else
-                                                orn = "fullUser"; // use instead of "fullSensor" because that one ignores "auto-rotate" option
+                                    orn = "landscape";
+                                else // only one horizontal
+                                    if ((flag & DIRF_Y) == DIRF_UP)
+                                    orn = "portrait";
+                                else // only one vertical
+                                    if (landscape && !portrait)
+                                    orn = "sensorLandscape";
+                                else if (!landscape && portrait)
+                                    orn = "sensorPortrait";
+                                else
+                                    orn = "fullUser"; // use instead of "fullSensor" because that one ignores "auto-rotate" option
                                 node.getParam("android:screenOrientation").value = orn;
                             }
                         }
@@ -3540,7 +3540,7 @@ Bool CodeEditor::generateLinuxMakeProj() {
 
 #if LINUX // do this only on Linux because only on Linux SDK the *.so files are available
     Str bin_dest = build_path + "Bin/";
-#if PHYSX_DLL                       // PhysX DLL's
+#if PHYSX_DLL // PhysX DLL's
     if (cei().appPublishPhysxDll()) // this must be copied always (unlike for Windows where it's copied only for publishing), because on Windows we can specify a custom path for the DLL's, however on Linux it needs to be hardcoded to "./Bin/", so everytime we want to start an app, it needs to have the .so files in the Bin relative to the executable
     {
         FCreateDir(bin_dest);
@@ -3899,15 +3899,15 @@ void CodeEditor::build(BUILD_MODE mode) {
                 config += " DX11";
             else // always use the same config for APK because it uses    GL
                 if (build_exe_type == EXE_NS)
-                    config += " DX11";
-                else // always use the same config for NS  because it uses    GL, warning: this must match codes above: (build_debug ? "Debug DX11/" : "Release DX11/")
-                    if (build_exe_type == EXE_WEB)
-                        config += " DX11";
-                    else // always use the same config for WEB because it uses WebGL, warning: this must match codes above: (build_debug ? "Debug DX11/" : "Release DX11/")
-                        if (build_exe_type == EXE_UWP)
-                            config += " DX11";
-                        else
-                            config += " DX11"; // config_api
+                config += " DX11";
+            else // always use the same config for NS  because it uses    GL, warning: this must match codes above: (build_debug ? "Debug DX11/" : "Release DX11/")
+                if (build_exe_type == EXE_WEB)
+                config += " DX11";
+            else // always use the same config for WEB because it uses WebGL, warning: this must match codes above: (build_debug ? "Debug DX11/" : "Release DX11/")
+                if (build_exe_type == EXE_UWP)
+                config += " DX11";
+            else
+                config += " DX11"; // config_api
 
             Str platform = ((build_exe_type == EXE_APK || build_exe_type == EXE_AAB) ? "5) Android" : (build_exe_type == EXE_NS) ? "4) Nintendo Switch"
                                                                                                   : (build_exe_type == EXE_WEB)  ? "3) Web"
@@ -3961,9 +3961,9 @@ void CodeEditor::build(BUILD_MODE mode) {
                     build_phases = 2;
                 else // build + "gradlew bundle*" #AndroidEnablePackaging
                     if (build_exe_type == EXE_APK && build_mode == BUILD_PLAY) {
-                        build_package = AndroidPackage(cei().appPackage());
-                        build_phases = 2; // build + adb(install)
-                    }
+                    build_package = AndroidPackage(cei().appPackage());
+                    build_phases = 2; // build + adb(install)
+                }
             }
         } else if (build_exe_type == EXE_LINUX) {
             build_phases = 1;

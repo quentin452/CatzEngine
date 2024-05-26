@@ -371,27 +371,27 @@ struct ETCContext {
 #endif
 #if ETC1_ENC == ETC_LIB_RG // RG
                             if (etc1) {
-                                REPD(by, y_blocks) {
-                                    Int py = by * 4, yo[4];
-                                    REPAO(yo) = Min(py + i, s->lh() - 1); // use clamping to avoid black borders
-                                    Byte *dest_data = dest_data_z + by * dest.pitch();
-                                    REPD(bx, x_blocks) {
-                                        Int px = bx * 4, xo[4];
-                                        REPAO(xo) = Min(px + i, s->lw() - 1); // use clamping to avoid black borders
-                                        Color rgba[4][4];
-                                        s->gather(&rgba[0][0], xo, Elms(xo), yo, Elms(yo), &sz, 1);
-                                        rg_etc1::pack_etc1_block((UInt *)(dest_data + bx * 8), (UInt *)rgba, pack);
-                                    }
+                            REPD(by, y_blocks) {
+                                Int py = by * 4, yo[4];
+                                REPAO(yo) = Min(py + i, s->lh() - 1); // use clamping to avoid black borders
+                                Byte *dest_data = dest_data_z + by * dest.pitch();
+                                REPD(bx, x_blocks) {
+                                    Int px = bx * 4, xo[4];
+                                    REPAO(xo) = Min(px + i, s->lw() - 1); // use clamping to avoid black borders
+                                    Color rgba[4][4];
+                                    s->gather(&rgba[0][0], xo, Elms(xo), yo, Elms(yo), &sz, 1);
+                                    rg_etc1::pack_etc1_block((UInt *)(dest_data + bx * 8), (UInt *)rgba, pack);
                                 }
-                            } else
+                            }
+                        } else
 #endif
 #if ETC1_ENC == ETC_LIB_ETCPACK || ETC2_ENC == ETC_LIB_ETCPACK // ETCPACK
-                                if (etc1 ? ETC1_ENC == ETC_LIB_ETCPACK : ETC2_ENC == ETC_LIB_ETCPACK) {
-                                    ImageThreads.process(y_blocks, Process, T);
-                                } else
+                            if (etc1 ? ETC1_ENC == ETC_LIB_ETCPACK : ETC2_ENC == ETC_LIB_ETCPACK) {
+                            ImageThreads.process(y_blocks, Process, T);
+                        } else
 #endif
-                                {
-                                }
+                        {
+                        }
                     }
                     dest.unlock();
                     if (read_from_src)

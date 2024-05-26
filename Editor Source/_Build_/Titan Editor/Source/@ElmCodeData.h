@@ -2,14 +2,13 @@
 /******************************************************************************/
 // CS_SET_CODE_DATA
 /******************************************************************************/
-class ElmCodeData : ElmTypeVer
-{
-   Code   code; // valid for ELM_CODE
-   ElmApp app ; // valid for ELM_APP
+class ElmCodeData : ElmTypeVer {
+    Code code;  // valid for ELM_CODE
+    ElmApp app; // valid for ELM_APP
 
-   void set(Elm &elm, Code *code=null);
-   bool save(File &f)C;
-   bool load(File &f);
+    void set(Elm &elm, Code *code = null);
+    bool save(File &f) C;
+    bool load(File &f);
 };
 /******************************************************************************/
 /******************************************************************************/

@@ -183,7 +183,7 @@ ASSERT(CEIL(1.1f) == 2);
 
 #define CUBIC_FAST_RANGE 2
 #define CUBIC_FAST_SAMPLES CEIL(CUBIC_FAST_RANGE)
-#define CUBIC_PLUS_SHARPNESS (2 / 2.5f)       // (2/2.65f) is smooth and correctly works with gradients, but (2/2.5f) is sharper and looks like JincJinc for regular images
+#define CUBIC_PLUS_SHARPNESS (2 / 2.5f) // (2/2.65f) is smooth and correctly works with gradients, but (2/2.5f) is sharper and looks like JincJinc for regular images
 #define CUBIC_PLUS_SHARP_SHARPNESS (2 / 2.5f) // (2/2.65f) is smooth and correctly works with gradients, but (2/2.5f) is sharper and looks like JincJinc for regular images
 #define CUBIC_PLUS_RANGE (2 / CUBIC_PLUS_SHARPNESS)
 #define CUBIC_PLUS_SHARP_RANGE (2 / CUBIC_PLUS_SHARP_SHARPNESS)
@@ -6370,11 +6370,11 @@ Flt Image::cubePixelFLinear(C Vec &dir, Bool linear) C {
                     d = y_data + sa.x * byte_pp;
                 else                                // if both coords in range then use main face
                     if (in_range_x || in_range_y) { // if at least one coord in range then wrap
-                        SphereArea sa1;
-                        WrapCubeFacePixel(sa1, sa, w());
-                        d = data + sa1.side * face_size + sa1.y * pitch + sa1.x * byte_pp;
-                    } else
-                        continue; // if both coords out of range then skip
+                    SphereArea sa1;
+                    WrapCubeFacePixel(sa1, sa, w());
+                    d = data + sa1.side * face_size + sa1.y * pitch + sa1.x * byte_pp;
+                } else
+                    continue; // if both coords out of range then skip
 
                 Flt weight_x = weights_x[sx];
                 Flt w = weight_x * weight_y;
@@ -6416,11 +6416,11 @@ Vec4 Image::cubeColorFLinear(C Vec &dir, Bool linear) C {
                     d = y_data + sa.x * byte_pp;
                 else                                // if both coords in range then use main face
                     if (in_range_x || in_range_y) { // if at least one coord in range then wrap
-                        SphereArea sa1;
-                        WrapCubeFacePixel(sa1, sa, w());
-                        d = data + sa1.side * face_size + sa1.y * pitch + sa1.x * byte_pp;
-                    } else
-                        continue; // if both coords out of range then skip
+                    SphereArea sa1;
+                    WrapCubeFacePixel(sa1, sa, w());
+                    d = data + sa1.side * face_size + sa1.y * pitch + sa1.x * byte_pp;
+                } else
+                    continue; // if both coords out of range then skip
 
                 Flt weight_x = weights_x[sx];
                 Flt w = weight_x * weight_y;
@@ -6467,11 +6467,11 @@ Flt Image::cubePixelFCubicFast(C Vec &dir, Bool linear) C {
                         d = y_data + sa.x * byte_pp;
                     else                                // if both coords in range then use main face
                         if (in_range_x || in_range_y) { // if at least one coord in range then wrap
-                            SphereArea sa1;
-                            WrapCubeFacePixel(sa1, sa, w());
-                            d = data + sa1.side * face_size + sa1.y * pitch + sa1.x * byte_pp;
-                        } else
-                            continue; // if both coords out of range then skip
+                        SphereArea sa1;
+                        WrapCubeFacePixel(sa1, sa, w());
+                        d = data + sa1.side * face_size + sa1.y * pitch + sa1.x * byte_pp;
+                    } else
+                        continue; // if both coords out of range then skip
                     wgt = CubicFast2(wgt);
                     color += wgt * ImagePixelF(d, hwType());
                     weight += wgt;
@@ -6516,11 +6516,11 @@ Vec4 Image::cubeColorFCubicFast(C Vec &dir, Bool linear) C {
                         d = y_data + sa.x * byte_pp;
                     else                                // if both coords in range then use main face
                         if (in_range_x || in_range_y) { // if at least one coord in range then wrap
-                            SphereArea sa1;
-                            WrapCubeFacePixel(sa1, sa, w());
-                            d = data + sa1.side * face_size + sa1.y * pitch + sa1.x * byte_pp;
-                        } else
-                            continue; // if both coords out of range then skip
+                        SphereArea sa1;
+                        WrapCubeFacePixel(sa1, sa, w());
+                        d = data + sa1.side * face_size + sa1.y * pitch + sa1.x * byte_pp;
+                    } else
+                        continue; // if both coords out of range then skip
                     wgt = CubicFast2(wgt);
                     color += wgt * ImageColorF(d, hwType());
                     weight += wgt;
@@ -8047,21 +8047,21 @@ void CopyNoStretch(C Image &src, Image &dest, Bool clamp, Bool ignore_gamma) // 
              }
           }else*/
         if (!ignore_gamma) {
-            REPD(z, dest.ld())
-            REPD(y, dest.lh())
-            REPD(x, dest.lw())
-            dest.color3DL(x, y, z, clamp ? src.color3DL(Min(x, src.lw() - 1), Min(y, src.lh() - 1), Min(z, src.ld() - 1)) : src.color3DL(x % src.lw(), y % src.lh(), z % src.ld()));
-        } else if (high_precision) {
-            REPD(z, dest.ld())
-            REPD(y, dest.lh())
-            REPD(x, dest.lw())
-            dest.color3DF(x, y, z, clamp ? src.color3DF(Min(x, src.lw() - 1), Min(y, src.lh() - 1), Min(z, src.ld() - 1)) : src.color3DF(x % src.lw(), y % src.lh(), z % src.ld()));
-        } else {
-            REPD(z, dest.ld())
-            REPD(y, dest.lh())
-            REPD(x, dest.lw())
-            dest.color3D(x, y, z, clamp ? src.color3D(Min(x, src.lw() - 1), Min(y, src.lh() - 1), Min(z, src.ld() - 1)) : src.color3D(x % src.lw(), y % src.lh(), z % src.ld()));
-        }
+        REPD(z, dest.ld())
+        REPD(y, dest.lh())
+        REPD(x, dest.lw())
+        dest.color3DL(x, y, z, clamp ? src.color3DL(Min(x, src.lw() - 1), Min(y, src.lh() - 1), Min(z, src.ld() - 1)) : src.color3DL(x % src.lw(), y % src.lh(), z % src.ld()));
+    } else if (high_precision) {
+        REPD(z, dest.ld())
+        REPD(y, dest.lh())
+        REPD(x, dest.lw())
+        dest.color3DF(x, y, z, clamp ? src.color3DF(Min(x, src.lw() - 1), Min(y, src.lh() - 1), Min(z, src.ld() - 1)) : src.color3DF(x % src.lw(), y % src.lh(), z % src.ld()));
+    } else {
+        REPD(z, dest.ld())
+        REPD(y, dest.lh())
+        REPD(x, dest.lw())
+        dest.color3D(x, y, z, clamp ? src.color3D(Min(x, src.lw() - 1), Min(y, src.lh() - 1), Min(z, src.ld() - 1)) : src.color3D(x % src.lw(), y % src.lh(), z % src.ld()));
+    }
 }
 struct CopyContext {
     C Image &src;
@@ -8829,53 +8829,53 @@ struct CopyContext {
                         // RGB -> BGRA, very common case for exporting to WEBP from RGB
                         if (src_hwType == IMAGE_R8G8B8 && dest_hwType == IMAGE_B8G8R8A8 && dest_type == IMAGE_B8G8R8A8                    // check 'type' too in case we have to perform color adjustment
                             || src_hwType == IMAGE_R8G8B8_SRGB && dest_hwType == IMAGE_B8G8R8A8_SRGB && dest_type == IMAGE_B8G8R8A8_SRGB) // check 'type' too in case we have to perform color adjustment
-                        {
-                            FREPD(z, src.ld()) {
-                                C Byte *sz = src.data() + z * src.pitch2();
-                                Byte *dz = dest.data() + z * dest.pitch2();
-                                FREPD(y, src.lh()) {
-                                    C VecB *s = (VecB *)(sz + y * src.pitch());
-                                    VecB4 *d = (VecB4 *)(dz + y * dest.pitch());
-                                    REPD(x, src.lw()) {
-                                        (d++)->set(s->z, s->y, s->x, 255);
-                                        s++;
-                                    }
+                    {
+                        FREPD(z, src.ld()) {
+                            C Byte *sz = src.data() + z * src.pitch2();
+                            Byte *dz = dest.data() + z * dest.pitch2();
+                            FREPD(y, src.lh()) {
+                                C VecB *s = (VecB *)(sz + y * src.pitch());
+                                VecB4 *d = (VecB4 *)(dz + y * dest.pitch());
+                                REPD(x, src.lw()) {
+                                    (d++)->set(s->z, s->y, s->x, 255);
+                                    s++;
                                 }
                             }
-                        } else
-                            // RGBA -> BGRA, very common case for exporting to WEBP from RGBA
-                            if (src_hwType == IMAGE_R8G8B8A8 && dest_hwType == IMAGE_B8G8R8A8 && dest_type == IMAGE_B8G8R8A8                    // check 'type' too in case we have to perform color adjustment
-                                || src_hwType == IMAGE_R8G8B8A8_SRGB && dest_hwType == IMAGE_B8G8R8A8_SRGB && dest_type == IMAGE_B8G8R8A8_SRGB) // check 'type' too in case we have to perform color adjustment
-                            {
-                                FREPD(z, src.ld()) {
-                                    C Byte *sz = src.data() + z * src.pitch2();
-                                    Byte *dz = dest.data() + z * dest.pitch2();
-                                    FREPD(y, src.lh()) {
-                                        C VecB4 *s = (VecB4 *)(sz + y * src.pitch());
-                                        VecB4 *d = (VecB4 *)(dz + y * dest.pitch());
-                                        REPD(x, src.lw()) {
-                                            (d++)->set(s->z, s->y, s->x, s->w);
-                                            s++;
-                                        }
-                                    }
+                        }
+                    } else
+                        // RGBA -> BGRA, very common case for exporting to WEBP from RGBA
+                        if (src_hwType == IMAGE_R8G8B8A8 && dest_hwType == IMAGE_B8G8R8A8 && dest_type == IMAGE_B8G8R8A8                    // check 'type' too in case we have to perform color adjustment
+                            || src_hwType == IMAGE_R8G8B8A8_SRGB && dest_hwType == IMAGE_B8G8R8A8_SRGB && dest_type == IMAGE_B8G8R8A8_SRGB) // check 'type' too in case we have to perform color adjustment
+                    {
+                        FREPD(z, src.ld()) {
+                            C Byte *sz = src.data() + z * src.pitch2();
+                            Byte *dz = dest.data() + z * dest.pitch2();
+                            FREPD(y, src.lh()) {
+                                C VecB4 *s = (VecB4 *)(sz + y * src.pitch());
+                                VecB4 *d = (VecB4 *)(dz + y * dest.pitch());
+                                REPD(x, src.lw()) {
+                                    (d++)->set(s->z, s->y, s->x, s->w);
+                                    s++;
                                 }
-                            } else if (!ignore_gamma) {
-                                REPD(z, src.ld())
-                                REPD(y, src.lh())
-                                REPD(x, src.lw())
-                                dest.color3DL(x, y, z, src.color3DL(x, y, z));
-                            } else if (high_prec) // high precision requires FP
-                            {
-                                REPD(z, src.ld())
-                                REPD(y, src.lh())
-                                REPD(x, src.lw())
-                                dest.color3DF(x, y, z, src.color3DF(x, y, z));
-                            } else {
-                                REPD(z, src.ld())
-                                REPD(y, src.lh())
-                                REPD(x, src.lw())
-                                dest.color3D(x, y, z, src.color3D(x, y, z));
                             }
+                        }
+                    } else if (!ignore_gamma) {
+                        REPD(z, src.ld())
+                        REPD(y, src.lh())
+                        REPD(x, src.lw())
+                        dest.color3DL(x, y, z, src.color3DL(x, y, z));
+                    } else if (high_prec) // high precision requires FP
+                    {
+                        REPD(z, src.ld())
+                        REPD(y, src.lh())
+                        REPD(x, src.lw())
+                        dest.color3DF(x, y, z, src.color3DF(x, y, z));
+                    } else {
+                        REPD(z, src.ld())
+                        REPD(y, src.lh())
+                        REPD(x, src.lw())
+                        dest.color3D(x, y, z, src.color3D(x, y, z));
+                    }
                 }
             } else if (filter == FILTER_NO_STRETCH) {
                 CopyNoStretch(src, dest, clamp, ignore_gamma);
@@ -9015,39 +9015,39 @@ struct CopyContext {
                         // !! Codes below operate on Source Image Native Gamma !! because upscaling sRGB images looks better if they're not sRGB, and linear images (such as normal maps) need linear anyway
                         if ((filter == FILTER_BEST || filter == FILTER_WAIFU || filter == FILTER_EASU || filter == FILTER_CUBIC_PLUS || filter == FILTER_CUBIC_PLUS_SHARP) // optimized Cubic+ upscale, check FILTER_BEST/FILTER_WAIFU/FILTER_EASU again in case Waifu/EASU was not available
                             && src.ld() == 1) {
-                            alpha_limit = (no_alpha_limit ? ALPHA_LIMIT_NONE : (filter == FILTER_CUBIC_PLUS_SHARP) ? ALPHA_LIMIT_CUBIC_PLUS_SHARP
-                                                                                                                   : ALPHA_LIMIT_CUBIC_PLUS);
-                            Weight = ((filter == FILTER_CUBIC_PLUS_SHARP) ? CubicPlusSharp2 : CubicPlusMed2);
-                            ASSERT(CUBIC_PLUS_SAMPLES == CUBIC_PLUS_SHARP_SAMPLES && CUBIC_PLUS_RANGE == CUBIC_PLUS_SHARP_RANGE && CUBIC_PLUS_SHARPNESS == CUBIC_PLUS_SHARP_SHARPNESS);
-                            ImageThreads.init().process(dest.lh() * dest.ld(), UpsizeCubicPlus, T);
-                        } else if ((filter == FILTER_CUBIC_FAST || filter == FILTER_CUBIC_FAST_SMOOTH || filter == FILTER_CUBIC_FAST_MED || filter == FILTER_CUBIC_FAST_SHARP) // optimized CubicFast upscale
-                                   && src.ld() == 1) {
-                            alpha_limit = (no_alpha_limit ? ALPHA_LIMIT_NONE : (filter == FILTER_CUBIC_FAST)      ? ALPHA_LIMIT_CUBIC_FAST
-                                                                           : (filter == FILTER_CUBIC_FAST_SMOOTH) ? ALPHA_LIMIT_CUBIC_FAST_SMOOTH
-                                                                           : (filter == FILTER_CUBIC_FAST_MED)    ? ALPHA_LIMIT_CUBIC_FAST_MED
-                                                                                                                  : ALPHA_LIMIT_CUBIC_FAST_SHARP);
-                            Weight = ((filter == FILTER_CUBIC_FAST) ? CubicFast2 : (filter == FILTER_CUBIC_FAST_SMOOTH) ? CubicFastSmooth2
-                                                                               : (filter == FILTER_CUBIC_FAST_MED)      ? CubicFastMed2
-                                                                                                                        : CubicFastSharp2);
-                            ImageThreads.init().process(dest.lh() * dest.ld(), UpsizeCubicFast, T);
-                        } else if (filter == FILTER_LINEAR // optimized Linear upscale, this is used for Texture Sharpness calculation
-                                   && src.ld() == 1) {
-                            alpha_limit = (no_alpha_limit ? ALPHA_LIMIT_NONE : ALPHA_LIMIT_LINEAR);
-                            ImageThreads.init().process(dest.lh() * dest.ld(), UpsizeLinear, T);
+                        alpha_limit = (no_alpha_limit ? ALPHA_LIMIT_NONE : (filter == FILTER_CUBIC_PLUS_SHARP) ? ALPHA_LIMIT_CUBIC_PLUS_SHARP
+                                                                                                               : ALPHA_LIMIT_CUBIC_PLUS);
+                        Weight = ((filter == FILTER_CUBIC_PLUS_SHARP) ? CubicPlusSharp2 : CubicPlusMed2);
+                        ASSERT(CUBIC_PLUS_SAMPLES == CUBIC_PLUS_SHARP_SAMPLES && CUBIC_PLUS_RANGE == CUBIC_PLUS_SHARP_RANGE && CUBIC_PLUS_SHARPNESS == CUBIC_PLUS_SHARP_SHARPNESS);
+                        ImageThreads.init().process(dest.lh() * dest.ld(), UpsizeCubicPlus, T);
+                    } else if ((filter == FILTER_CUBIC_FAST || filter == FILTER_CUBIC_FAST_SMOOTH || filter == FILTER_CUBIC_FAST_MED || filter == FILTER_CUBIC_FAST_SHARP) // optimized CubicFast upscale
+                               && src.ld() == 1) {
+                        alpha_limit = (no_alpha_limit ? ALPHA_LIMIT_NONE : (filter == FILTER_CUBIC_FAST)      ? ALPHA_LIMIT_CUBIC_FAST
+                                                                       : (filter == FILTER_CUBIC_FAST_SMOOTH) ? ALPHA_LIMIT_CUBIC_FAST_SMOOTH
+                                                                       : (filter == FILTER_CUBIC_FAST_MED)    ? ALPHA_LIMIT_CUBIC_FAST_MED
+                                                                                                              : ALPHA_LIMIT_CUBIC_FAST_SHARP);
+                        Weight = ((filter == FILTER_CUBIC_FAST) ? CubicFast2 : (filter == FILTER_CUBIC_FAST_SMOOTH) ? CubicFastSmooth2
+                                                                           : (filter == FILTER_CUBIC_FAST_MED)      ? CubicFastMed2
+                                                                                                                    : CubicFastSharp2);
+                        ImageThreads.init().process(dest.lh() * dest.ld(), UpsizeCubicFast, T);
+                    } else if (filter == FILTER_LINEAR // optimized Linear upscale, this is used for Texture Sharpness calculation
+                               && src.ld() == 1) {
+                        alpha_limit = (no_alpha_limit ? ALPHA_LIMIT_NONE : ALPHA_LIMIT_LINEAR);
+                        ImageThreads.init().process(dest.lh() * dest.ld(), UpsizeLinear, T);
+                    } else {
+                        if (NeedMultiChannel(src.type(), dest.type())) {
+                            if (src.ld() <= 1)
+                                ptr_color = GetImageColorF(filter); // 2D
+                            else
+                                ptr_color_3D = GetImageColor3DF(filter); // 3D
                         } else {
-                            if (NeedMultiChannel(src.type(), dest.type())) {
-                                if (src.ld() <= 1)
-                                    ptr_color = GetImageColorF(filter); // 2D
-                                else
-                                    ptr_color_3D = GetImageColor3DF(filter); // 3D
-                            } else {
-                                if (src.ld() <= 1)
-                                    ptr_pixel = GetImagePixelF(filter); // 2D
-                                else
-                                    ptr_pixel_3D = GetImagePixel3DF(filter); // 3D
-                            }
-                            ImageThreads.init().process(dest.lh() * dest.ld(), Upsize, T);
+                            if (src.ld() <= 1)
+                                ptr_pixel = GetImagePixelF(filter); // 2D
+                            else
+                                ptr_pixel_3D = GetImagePixel3DF(filter); // 3D
                         }
+                        ImageThreads.init().process(dest.lh() * dest.ld(), Upsize, T);
+                    }
                 }
             }
 

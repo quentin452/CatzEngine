@@ -493,4 +493,4 @@ extern Cache<Skeleton> Skeletons; // Skeleton Cache
 CChar8 *BoneName(BONE_TYPE type); // get name of the specified bone type
 /******************************************************************************/
 #define VIRTUAL_ROOT_BONE 1 // if set to 1, then: mesh.vtx.matrix=0 is a special virtual root bone, and bone indexes start from 1, matrix=bone+1 -> matrix=1 is bone=0, matrix=2 is bone=1, ..; if VIRTUAL_ROOT_BONE set to 0, then there's no virtual root bone, and vtx matrix is the same as bone index, currently only VIRTUAL_ROOT_BONE==1 is supported so don't change !!
-                            /******************************************************************************/
+/******************************************************************************/

@@ -1,36 +1,34 @@
 ﻿/******************************************************************************/
 /******************************************************************************/
-class FileSizeGetter
-{
-   class Elm
-   {
-      UID  id;
-      uint file_size;
-   };
-   Memc<Elm> elms;
+class FileSizeGetter {
+    class Elm {
+        UID id;
+        uint file_size;
+    };
+    Memc<Elm> elms;
 
-   // get
-   bool created()C;
-   bool busy   (); 
-   bool get    ();
+    // get
+    bool created() C;
+    bool busy();
+    bool get();
 
-   // manage
-   void clear();
-   void stop ();
-   void del  ();
-   void get(C Str &path);
-  ~FileSizeGetter();   
+    // manage
+    void clear();
+    void stop();
+    void del();
+    void get(C Str &path);
+    ~FileSizeGetter();
 
-private:
-   Str       path;
-   Memc<Elm> elms_thread;
-   SyncLock  lock;
-   Thread    thread;
+  private:
+    Str path;
+    Memc<Elm> elms_thread;
+    SyncLock lock;
+    Thread thread;
 
-   void cleanup();
+    void cleanup();
 
-   static bool Func(Thread &thread);
-          bool func();
+    static bool Func(Thread &thread);
+    bool func();
 };
 /******************************************************************************/
 /******************************************************************************/

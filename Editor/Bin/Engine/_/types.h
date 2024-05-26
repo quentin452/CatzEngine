@@ -100,7 +100,7 @@ typedef U32 UIntPtr; // Unsigned Int capable of storing full memory address
 #define FLT_EPS 1.192092896e-7f // smallest such that 1.0f+FLT_EPS != 1.0f
 #undef DBL_MAX
 #define DBL_MAX \
-    1.7976931348623158e+308 // Maximum possible value of 64-bit real         ( Dbl
+    1.7976931348623158e+308 // Maximum possible value of 64-bit real         ( Dbl \
                             // )
 #undef INTPTR_MAX
 #undef UINTPTR_MAX

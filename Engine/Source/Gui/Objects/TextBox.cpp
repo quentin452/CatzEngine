@@ -531,7 +531,7 @@ GuiObj *TextBox::test(C GuiPC &gpc, C Vec2 &pos, GuiObj *&mouse_wheel) {
             mouse_wheel = &slidebar[priority];
         else // check  priority slidebar first
             if (slidebar[!priority]._usable)
-                mouse_wheel = &slidebar[!priority]; // check !priority slidebar next
+            mouse_wheel = &slidebar[!priority]; // check !priority slidebar next
 
         GuiPC gpc_this(gpc, visible(), enabled());
         if (GuiObj *go = slidebar[0].test(gpc_this, pos, mouse_wheel))

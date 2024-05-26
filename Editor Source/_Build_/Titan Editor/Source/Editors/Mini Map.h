@@ -1,7 +1,7 @@
 ﻿/******************************************************************************/
-extern bool          MiniMapBuilding, MiniMapOk;
-extern int           MiniMapAreasLeft;
-extern State         StateMiniMap;
+extern bool MiniMapBuilding, MiniMapOk;
+extern int MiniMapAreasLeft;
+extern State StateMiniMap;
 /******************************************************************************/
 bool InitMiniMap();
 void ShutMiniMap();

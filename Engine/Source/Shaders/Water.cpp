@@ -1,6 +1,6 @@
 /******************************************************************************/
-#include "Water.h"
 #include "!Header.h"
+#include "Water.h"
 /******************************************************************************
 This code calculates lighting by taking samples along the view ray, which is refracted by water
 -calculate view direction
@@ -109,7 +109,7 @@ void Surface_VS(VtxInput vtx,
 #if FLAT
     posXY = UVToPosXY(vtx.uv());
     pixel = Vec4(vtx.pos2(), Z_BACK, 1); // set Z to be at the end of the viewport, this enables optimizations by processing only foreground pixels (no sky/background)
-#else                                    // GEOM
+#else // GEOM
     pixel = Project(TransformPos(vtx.pos()));
 
 #if !GL_ES
@@ -399,7 +399,7 @@ void Surface_PS(
 #if BALL
     Vec nrm = Normalize(Vec(Transform(nrm_flat, tex_mtrx))); // convert to HP before Normalize
 #else
-    Vec nrm = Normalize(Vec(TransformDir(nrm_flat.xzy)));                                           // convert to view space, convert to HP before Normalize
+    Vec nrm = Normalize(Vec(TransformDir(nrm_flat.xzy))); // convert to view space, convert to HP before Normalize
 #endif
 
     VecH4 water_col;
@@ -468,7 +468,7 @@ void Surface_PS(
 #if GATHER
         // potentially could use FilterMinMax instead of TexGather, however we need both DEPTH_MIN/DEPTH_MAX, so that would need 2 tex reads, so better skip
         Vec4 back_z_raw4 = TexGather(ImgXF, back_uv);
-#else  // simulate gather
+#else // simulate gather
         Vec2 pixel = back_uv * RTSize.zw + 0.5,
              pixeli = Floor(pixel),
              tex_min = (pixeli - 0.5) * RTSize.xy,
@@ -560,7 +560,7 @@ VecH4 Apply_PS(NOPERSP Vec2 uv
 #if GATHER
         // potentially could use FilterMinMax instead of 'TexDepthRawGather', however we need both DEPTH_MIN/DEPTH_MAX, so that would need 2 tex reads, so better skip
         Vec4 test_z_raw4 = TexDepthRawGather(test_tex);
-#else                                                           // simulate gather
+#else // simulate gather
         Vec2 pixel = test_tex * RTSize.zw + 0.5,
              pixeli = Floor(pixel),
              tex_min = (pixeli - 0.5) * RTSize.xy,
@@ -569,13 +569,13 @@ VecH4 Apply_PS(NOPERSP Vec2 uv
                                 TexPoint(Depth, Vec2(tex_max.x, tex_min.y)),
                                 TexPoint(Depth, Vec2(tex_min.x, tex_max.y)),
                                 TexPoint(Depth, Vec2(tex_max.x, tex_max.y)));
-#endif                                                          // GATHER
+#endif // GATHER
         if (DEPTH_SMALLER(water_z_raw, DEPTH_MIN(test_z_raw4))) // if refracted sample is behind water (not leaking), use DEPTH_MIN to check if all samples are behind
         {                                                       // use refracted sample
             back_uv = test_tex;
             back_z_raw = DEPTH_MAX(test_z_raw4); // use DEPTH_MAX to check if any depth sample is Z_BACK (not set) to force full opacity
         }
-#endif                                    // REFRACT
+#endif // REFRACT
         if (DEPTH_FOREGROUND(back_z_raw)) // always force full opacity when there's no background pixel set to ignore discarded pixels in RenderTarget (they could cause artifacts)
         {
             Flt back_z = LinearizeDepth(back_z_raw);

@@ -57,8 +57,8 @@ namespace EE {
 constexpr Byte TexSmooth(Byte tx) { return TEX_IS_ROUGH ? 255 - tx : tx; } // convert between texture and smoothness
 
 #define TEX_DEFAULT_SMOOTH 0 // 0..255
-#define TEX_DEFAULT_METAL 0  // 0..255
-#define TEX_DEFAULT_BUMP 0   // 0..255, normally this should be 128, but 0 will allow to use BC4/BC5 (for Mtrl.base_2 tex if there's no Glow) and always set Material.bump=0 when bump is not used #MaterialTextureLayout
+#define TEX_DEFAULT_METAL 0 // 0..255
+#define TEX_DEFAULT_BUMP 0 // 0..255, normally this should be 128, but 0 will allow to use BC4/BC5 (for Mtrl.base_2 tex if there's no Glow) and always set Material.bump=0 when bump is not used #MaterialTextureLayout
 /******************************************************************************/
 static Int Compare(C UniqueMultiMaterialKey &a, C UniqueMultiMaterialKey &b) {
     if (a.m[0] < b.m[0])
@@ -1187,23 +1187,23 @@ TEX_FLAG CreateBaseTextures(Image &base_0, Image &base_1, Image &base_2, C Image
             }
         } else                            // if there's no alpha map
             if (color.image.typeInfo().a) // but there is alpha channel in color map
-            {
-                Byte min_alpha = 255;
-                alpha_src = &alpha_temp.mustCreate(color_src->w(), color_src->h(), 1, IMAGE_A8, IMAGE_SOFT, 1);
-                if (color_src->lockRead()) {
-                    REPD(y, color_src->h())
-                    REPD(x, color_src->w()) {
-                        Byte a = color_src->color(x, y).a;
-                        alpha_temp.pixel(x, y, a);
-                        MIN(min_alpha, a);
-                    }
-                    color_src->unlock();
+        {
+            Byte min_alpha = 255;
+            alpha_src = &alpha_temp.mustCreate(color_src->w(), color_src->h(), 1, IMAGE_A8, IMAGE_SOFT, 1);
+            if (color_src->lockRead()) {
+                REPD(y, color_src->h())
+                REPD(x, color_src->w()) {
+                    Byte a = color_src->color(x, y).a;
+                    alpha_temp.pixel(x, y, a);
+                    MIN(min_alpha, a);
                 }
-                if (min_alpha >= 254)
-                    alpha_temp.del(); // alpha channel in color map is fully white
-                else
-                    alpha_from_col = true;
+                color_src->unlock();
             }
+            if (min_alpha >= 254)
+                alpha_temp.del(); // alpha channel in color map is fully white
+            else
+                alpha_from_col = true;
+        }
         FILTER_TYPE alpha_filter = Filter((alpha_from_col && alpha.filter < 0) ? color.filter : alpha.filter);
         VecI2 alpha_size;
         if (!alpha_src->is())
@@ -1274,8 +1274,8 @@ TEX_FLAG CreateBaseTextures(Image &base_0, Image &base_1, Image &base_2, C Image
             bump_to_normal = bump_src;
         else // if bump available and normal not, then create normal from bump
             if (normal_src->is() && (normal.image.typeChannels() == 1 || normal_src->monochromaticRG()))
-                bump_to_normal = normal_src; // if normal is provided as monochromatic, then treat it as bump and convert to normal
-        if (bump_to_normal)                  // create normal from bump
+            bump_to_normal = normal_src; // if normal is provided as monochromatic, then treat it as bump and convert to normal
+        if (bump_to_normal)              // create normal from bump
         {
             // it's best to resize bump instead of normal
             Int w = ((normal.size.x > 0) ? normal.size.x : (bump_to_normal == bump_src && bump.size.x > 0) ? bump.size.x
@@ -1530,8 +1530,8 @@ TEX_FLAG CreateDetailTexture(Image &detail, C ImageSource &color, C ImageSource 
             bump_to_normal = bump_src;
         else // if bump available and normal not, then create normal from bump
             if (normal_src->is() && (normal.image.typeChannels() == 1 || normal_src->monochromaticRG()))
-                bump_to_normal = normal_src; // if normal is provided as monochromatic, then treat it as bump and convert to normal
-        if (bump_to_normal)                  // create normal from bump
+            bump_to_normal = normal_src; // if normal is provided as monochromatic, then treat it as bump and convert to normal
+        if (bump_to_normal)              // create normal from bump
         {
             // it's best to resize bump instead of normal
             MAX(w, (normal.size.x > 0) ? normal.size.x : (bump_to_normal == bump_src && bump.size.x > 0) ? bump.size.x
@@ -1728,8 +1728,8 @@ TEX_FLAG CreateWaterBaseTextures(Image &base_0, Image &base_1, Image &base_2, C 
             bump_to_normal = bump_src;
         else // if bump available and normal not, then create normal from bump
             if (normal_src->is() && (normal.image.typeChannels() == 1 || normal_src->monochromaticRG()))
-                bump_to_normal = normal_src; // if normal is provided as monochromatic, then treat it as bump and convert to normal
-        if (bump_to_normal)                  // create normal from bump
+            bump_to_normal = normal_src; // if normal is provided as monochromatic, then treat it as bump and convert to normal
+        if (bump_to_normal)              // create normal from bump
         {
             // it's best to resize bump instead of normal
             Int w = ((normal.size.x > 0) ? normal.size.x : (bump_to_normal == bump_src && bump.size.x > 0) ? bump.size.x

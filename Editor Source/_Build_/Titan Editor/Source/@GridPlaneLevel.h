@@ -1,15 +1,14 @@
 ﻿/******************************************************************************/
 /******************************************************************************/
-class GridPlaneLevel : ClosableWindow
-{
-   Tabs           mode;
-   Memx<Property> props;
-   TextBlack      ts;
+class GridPlaneLevel : ClosableWindow {
+    Tabs mode;
+    Memx<Property> props;
+    TextBlack ts;
 
-   void create();
-   virtual Window& show()override;
-   virtual void update(C GuiPC &gpc)override;
-   void set();
+    void create();
+    virtual Window &show() override;
+    virtual void update(C GuiPC &gpc) override;
+    void set();
 };
 /******************************************************************************/
 /******************************************************************************/

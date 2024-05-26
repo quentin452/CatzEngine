@@ -1,10 +1,9 @@
 ﻿/******************************************************************************/
-class Rename : SrcDest
-{
-   bool operator==(C Rename &rename)C;
-   bool operator!=(C Rename &rename)C;
-   
-   /*enum CHECK
+class Rename : SrcDest {
+    bool operator==(C Rename &rename) C;
+    bool operator!=(C Rename &rename) C;
+
+    /*enum CHECK
    {
       SAME,
       REVERSE,

@@ -1,6 +1,6 @@
 /******************************************************************************/
-#include "Fur.h"
 #include "!Header.h"
+#include "Fur.h"
 /******************************************************************************/
 #define USE_VEL 1
 #define FACTOR (-0.7) // prevents complete darkness at the bottom layers, gives ambient=0.3, it will match the 'size' version

@@ -24,7 +24,7 @@ VecH4 Outline_PS(NOPERSP Vec2 uv
     if (Length2(col * 4 - TexLod(Img, Vec2(t0.x, t0.y)) - TexLod(Img, Vec2(t0.x, t1.y)) - TexLod(Img, Vec2(t1.x, t0.y)) - TexLod(Img, Vec2(t1.x, t1.y))) <= EPS_COL)
         col.a = 0; // if all neighbors are the same then make this pixel transparent
 #endif
-        /* old code used for super sampling
+    /* old code used for super sampling
              {
            Flt pos=TexDepthPoint(uv);
            if(Dist2(col, TexLod(Img, uv+ImgSize.xy*Vec2(-1,  0)))*(TexDepthPoint(uv+ImgSize.xy*Vec2(-1,  0))>=pos)

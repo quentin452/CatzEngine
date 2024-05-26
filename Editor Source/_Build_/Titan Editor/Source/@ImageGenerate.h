@@ -16,14 +16,13 @@
       Project.pak (will contain only app specific data when "!appPublishProjData")
 
 /******************************************************************************/
-class ImageGenerate
-{
-   Str      src_mtrl, dest_base_0;
-   DateTime time;
+class ImageGenerate {
+    Str src_mtrl, dest_base_0;
+    DateTime time;
 
-   void set(C Str &src_mtrl, C Str &dest_base_0, C DateTime &time);
+    void set(C Str &src_mtrl, C Str &dest_base_0, C DateTime &time);
 
-   void process();
+    void process();
 };
 /******************************************************************************/
 /******************************************************************************/

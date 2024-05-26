@@ -11,19 +11,18 @@
    Upon saving a mesh, it's saved as both "Edit" and "Game" versions.
 
 /******************************************************************************/
-class SlotMesh
-{
-   MeshPtr mesh;
-   Str8    name;
-   flt     scale;
+class SlotMesh {
+    MeshPtr mesh;
+    Str8 name;
+    flt scale;
 
-   void set(C MeshPtr &mesh, C Str &name);
-   void draw(C Skeleton &skel);
-   void draw(C AnimSkel &skel);
-   static void Set(MemPtr<SlotMesh> slot_meshes, cchar8 *name, C MeshPtr &mesh);
+    void set(C MeshPtr &mesh, C Str &name);
+    void draw(C Skeleton &skel);
+    void draw(C AnimSkel &skel);
+    static void Set(MemPtr<SlotMesh> slot_meshes, cchar8 *name, C MeshPtr &mesh);
 
-public:
-   SlotMesh();
+  public:
+    SlotMesh();
 };
 /******************************************************************************/
 /******************************************************************************/

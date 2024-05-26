@@ -161,7 +161,7 @@ struct CubicFastSampler {
     {
         VecH2 F = setUV(uv, img_size);
 
-#if 1     // faster
+#if 1 // faster
         { /* ((A*F+B)*F+C)*F+D
               (A*F*F + B*F + C)*F+D
                A*F*F*F + B*F*F + C*F + D */

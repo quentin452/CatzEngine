@@ -34,38 +34,38 @@ struct Mtrl : XMaterial {
                 // if(f.cur("*MATERIAL_SHINE"       ))shine    =  f.getFlt ();else
                 // if(f.cur("*MATERIAL_TRANSPARENCY"))color.w  =1-f.getFlt ();else
                 if (f.cur("*MAP_GENERIC") && f.getIn()) {
-                    for (; f.level();) {
-                        if (f.cur("*BITMAP") && !color_map.is())
-                            color_map = f.getName();
-                    }
-                } else if (f.cur("*MAP_DIFFUSE") && f.getIn()) {
-                    for (; f.level();) {
-                        if (f.cur("*BITMAP"))
-                            color_map = f.getName();
-                    }
-                } else if (f.cur("*MAP_SHINE") && f.getIn()) {
-                    for (; f.level();) {
-                        if (f.cur("*BITMAP"))
-                            smooth_map = f.getName();
-                    }
-                } else if (f.cur("*MAP_OPACITY") && f.getIn()) {
-                    for (; f.level();) {
-                        if (f.cur("*BITMAP"))
-                            alpha_map = f.getName();
-                    }
-                } else if (f.cur("*MAP_BUMP") && f.getIn()) {
-                    for (; f.level();) {
-                        if (f.cur("*BITMAP"))
-                            normal_map = f.getName();
-                        else if (f.cur("*MAP_GENERIC") && f.getIn()) {
-                            for (; f.level();) {
-                                if (f.cur("*BITMAP") && !normal_map.is())
-                                    normal_map = f.getName();
-                            }
+                for (; f.level();) {
+                    if (f.cur("*BITMAP") && !color_map.is())
+                        color_map = f.getName();
+                }
+            } else if (f.cur("*MAP_DIFFUSE") && f.getIn()) {
+                for (; f.level();) {
+                    if (f.cur("*BITMAP"))
+                        color_map = f.getName();
+                }
+            } else if (f.cur("*MAP_SHINE") && f.getIn()) {
+                for (; f.level();) {
+                    if (f.cur("*BITMAP"))
+                        smooth_map = f.getName();
+                }
+            } else if (f.cur("*MAP_OPACITY") && f.getIn()) {
+                for (; f.level();) {
+                    if (f.cur("*BITMAP"))
+                        alpha_map = f.getName();
+                }
+            } else if (f.cur("*MAP_BUMP") && f.getIn()) {
+                for (; f.level();) {
+                    if (f.cur("*BITMAP"))
+                        normal_map = f.getName();
+                    else if (f.cur("*MAP_GENERIC") && f.getIn()) {
+                        for (; f.level();) {
+                            if (f.cur("*BITMAP") && !normal_map.is())
+                                normal_map = f.getName();
                         }
                     }
-                } else if (f.cur("*SUBMATERIAL") && f.getIn())
-                    sub_mtrl.New().import(f, path);
+                }
+            } else if (f.cur("*SUBMATERIAL") && f.getIn())
+                sub_mtrl.New().import(f, path);
         }
         fixPath(path);
     }

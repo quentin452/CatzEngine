@@ -139,84 +139,84 @@ void Viewport4::Cube::update(C GuiPC &gpc) {
                     p = -PI_2;
                 } else // v4->_default_yaw
                     if (Equal(name, "d")) {
-                        y = AlignRound(view->camera.yaw, PI_2);
-                        p = PI_2;
-                    } else
+                    y = AlignRound(view->camera.yaw, PI_2);
+                    p = PI_2;
+                } else
 
-                        if (Equal(name, "lb"))
-                        y = -PI_4;
-                    else if (Equal(name, "lf"))
-                        y = -PI_4 - PI_2;
-                    else if (Equal(name, "rf"))
-                        y = PI_4 + PI_2;
-                    else if (Equal(name, "rb"))
-                        y = PI_4;
-                    else
+                    if (Equal(name, "lb"))
+                    y = -PI_4;
+                else if (Equal(name, "lf"))
+                    y = -PI_4 - PI_2;
+                else if (Equal(name, "rf"))
+                    y = PI_4 + PI_2;
+                else if (Equal(name, "rb"))
+                    y = PI_4;
+                else
 
-                        if (Equal(name, "lu")) {
-                        y = -PI_2;
-                        p = -PI_4;
-                    } else if (Equal(name, "ru")) {
-                        y = PI_2;
-                        p = -PI_4;
-                    } else if (Equal(name, "uf")) {
-                        y = PI;
-                        p = -PI_4;
-                    } else if (Equal(name, "ub")) {
-                        y = 0;
-                        p = -PI_4;
-                    } else
+                    if (Equal(name, "lu")) {
+                    y = -PI_2;
+                    p = -PI_4;
+                } else if (Equal(name, "ru")) {
+                    y = PI_2;
+                    p = -PI_4;
+                } else if (Equal(name, "uf")) {
+                    y = PI;
+                    p = -PI_4;
+                } else if (Equal(name, "ub")) {
+                    y = 0;
+                    p = -PI_4;
+                } else
 
-                        if (Equal(name, "ld")) {
-                        y = -PI_2;
-                        p = PI_4;
-                    } else if (Equal(name, "rd")) {
-                        y = PI_2;
-                        p = PI_4;
-                    } else if (Equal(name, "df")) {
-                        y = PI;
-                        p = PI_4;
-                    } else if (Equal(name, "db")) {
-                        y = 0;
-                        p = PI_4;
-                    } else
+                    if (Equal(name, "ld")) {
+                    y = -PI_2;
+                    p = PI_4;
+                } else if (Equal(name, "rd")) {
+                    y = PI_2;
+                    p = PI_4;
+                } else if (Equal(name, "df")) {
+                    y = PI;
+                    p = PI_4;
+                } else if (Equal(name, "db")) {
+                    y = 0;
+                    p = PI_4;
+                } else
 
-                        if (Equal(name, "lub")) {
-                        y = -PI_4;
-                        p = -PI_4;
-                    } else if (Equal(name, "luf")) {
-                        y = -PI_4 - PI_2;
-                        p = -PI_4;
-                    } else if (Equal(name, "ruf")) {
-                        y = PI_4 + PI_2;
-                        p = -PI_4;
-                    } else if (Equal(name, "rub")) {
-                        y = PI_4;
-                        p = -PI_4;
-                    } else
+                    if (Equal(name, "lub")) {
+                    y = -PI_4;
+                    p = -PI_4;
+                } else if (Equal(name, "luf")) {
+                    y = -PI_4 - PI_2;
+                    p = -PI_4;
+                } else if (Equal(name, "ruf")) {
+                    y = PI_4 + PI_2;
+                    p = -PI_4;
+                } else if (Equal(name, "rub")) {
+                    y = PI_4;
+                    p = -PI_4;
+                } else
 
-                        if (Equal(name, "ldb")) {
-                        y = -PI_4;
-                        p = PI_4;
-                    } else if (Equal(name, "ldf")) {
-                        y = -PI_4 - PI_2;
-                        p = PI_4;
-                    } else if (Equal(name, "rdf")) {
-                        y = PI_4 + PI_2;
-                        p = PI_4;
-                    } else if (Equal(name, "rdb")) {
-                        y = PI_4;
-                        p = PI_4;
-                    }
+                    if (Equal(name, "ldb")) {
+                    y = -PI_4;
+                    p = PI_4;
+                } else if (Equal(name, "ldf")) {
+                    y = -PI_4 - PI_2;
+                    p = PI_4;
+                } else if (Equal(name, "rdf")) {
+                    y = PI_4 + PI_2;
+                    p = PI_4;
+                } else if (Equal(name, "rdb")) {
+                    y = PI_4;
+                    p = PI_4;
+                }
 
                 if (Kb.ctrlCmd() && Kb.shift())
                     p = SignBool(p > 0) * (PI_4 * 2.0f / 3);
                 else // 0.66
                     if (Kb.shift())
-                        p = SignBool(p > 0) * (PI_4 * 0.75f);
-                    else // 0.75
-                        if (Kb.ctrlCmd())
-                            p = SignBool(p > 0) * (PI_4 * 0.5f); // 0.50
+                    p = SignBool(p > 0) * (PI_4 * 0.75f);
+                else // 0.75
+                    if (Kb.ctrlCmd())
+                    p = SignBool(p > 0) * (PI_4 * 0.5f); // 0.50
 
                 if (!v4->lock())
                     v4->_rotate_view = view;

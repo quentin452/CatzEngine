@@ -346,9 +346,9 @@ Bool SoundRecord::create(Device *device, Int bits, Int channels, Int frequency) 
                 if (_handle) {
                     UInt32 zero = 0, one = 1;
 #if MAC
-                    status = AudioUnitSetProperty(_handle, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Output, kOutputBus, &zero, SIZE(zero));                        // disable output
+                    status = AudioUnitSetProperty(_handle, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Output, kOutputBus, &zero, SIZE(zero)); // disable output
 #endif
-                    if (AudioUnitSetProperty(_handle, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Input, kInputBus, &one, SIZE(one)) == noErr)                        // enable  input
+                    if (AudioUnitSetProperty(_handle, kAudioOutputUnitProperty_EnableIO, kAudioUnitScope_Input, kInputBus, &one, SIZE(one)) == noErr) // enable  input
 #if MAC
                         if (AudioUnitSetProperty(_handle, kAudioOutputUnitProperty_CurrentDevice, kAudioUnitScope_Global, kOutputBus, &device_id, SIZE(device_id)) == noErr) // set device
 #endif

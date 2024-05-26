@@ -1331,7 +1331,7 @@ VecI2 _List::nearest2(C Vec2 &screen_pos, C Vec2 &dir) C {
                     v = Min(v - 1, visibleElms() - 1);
                 else // move up
                     if (dir.y < 0)
-                        v = Max(v + 1, 0); // move down
+                    v = Max(v + 1, 0); // move down
                 if (InRange(v, visibleElms())) {
                     Int c = localToVirtualColumnX(local_pos.x);
                     if (dir.x > 0) // move right
@@ -1358,9 +1358,9 @@ VecI2 _List::nearest2(C Vec2 &screen_pos, C Vec2 &dir) C {
                         }
                     } else // if not moving, then clamp to nearest visible column
                         if (c < 0)
-                            goto right;
-                        else if (c >= columns())
-                            goto left;
+                        goto right;
+                    else if (c >= columns())
+                        goto left;
                     return VecI2(c, v);
                 }
             }
@@ -1529,10 +1529,10 @@ void _List::sort() {
             LCmp.memx = _memx;
             LCmp.map = _map;
 
-            Int (&compare)(C Int &i0, C Int &i1) = (_abs_to_data ? ListComparePtr : _data ? ListCompareContinuous
-                                                                                : _memb   ? ListCompareMemb
-                                                                                : _memx   ? ListCompareMemx
-                                                                                          : ListCompareMap);
+            Int (&compare)(C Int & i0, C Int & i1) = (_abs_to_data ? ListComparePtr : _data ? ListCompareContinuous
+                                                                                  : _memb   ? ListCompareMemb
+                                                                                  : _memx   ? ListCompareMemx
+                                                                                            : ListCompareMap);
             Sort(_vis_to_abs, visibleElms(), compare);
         }
 
@@ -1617,7 +1617,7 @@ void _List::childRectChanged(C Rect *old_rect, C Rect *new_rect, GuiObj &child) 
                     setRects();
                 else // if decreasing then we need to recalculate fully
                     if (x > rect().w() + EPS)
-                        size(Vec2(x, rect().h()));
+                    size(Vec2(x, rect().h()));
             }
         } else // assume that it was removed and belonged to last column
         {

@@ -1,23 +1,21 @@
 ﻿/******************************************************************************/
 /******************************************************************************/
-class EE1EditRiver : EE1ObjGlobal
-{
-   class Vtx
-   {
-      flt radius;
-      Vec pos;
-   };
+class EE1EditRiver : EE1ObjGlobal {
+    class Vtx {
+        flt radius;
+        Vec pos;
+    };
 
-   UID         id;
-   flt         depth;
-   Memc<Vtx  > vtxs;
-   Memc<VecI2> edges;
-   Str         material;
+    UID id;
+    flt depth;
+    Memc<Vtx> vtxs;
+    Memc<VecI2> edges;
+    Str material;
 
-   bool load(File &f, C Str &name);
+    bool load(File &f, C Str &name);
 
-public:
-   EE1EditRiver();
+  public:
+    EE1EditRiver();
 };
 /******************************************************************************/
 /******************************************************************************/

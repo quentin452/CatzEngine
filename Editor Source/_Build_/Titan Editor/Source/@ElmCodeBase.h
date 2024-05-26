@@ -2,15 +2,14 @@
 /******************************************************************************/
 // CS_CODE_SYNC_STATUS
 /******************************************************************************/
-class ElmCodeBase
-{
-   UID id;
-   Str data;
+class ElmCodeBase {
+    UID id;
+    Str data;
 
-   void set(C UID &id, C Str &data);
+    void set(C UID &id, C Str &data);
 
-   bool save(File &f)C;
-   bool load(File &f); 
+    bool save(File &f) C;
+    bool load(File &f);
 };
 /******************************************************************************/
 /******************************************************************************/

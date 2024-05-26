@@ -415,7 +415,8 @@ void _SetVoxelTris(C VecI &pos, TYPE (&Voxel)(C VecI &pos), MemPtr<Tri> tris) {
                 t1.p[0] = d;
                 t1.p[1] = b;
                 t1.p[2] = c;
-            } else {
+            }
+            else {
                 t0.p[0] = a;
                 t0.p[1] = b;
                 t0.p[2] = c;
@@ -872,7 +873,7 @@ void SetVoxelTris(Flt *data, C VecI &dims, MemPtr<Vec> vtxs, MemPtr<VecI4> quads
                             v.c[j] += (a ? 1 - d : d);
                         else // if sides are different, then we need to interpolate
                             if (a)
-                                v.c[j]++; // if sides are the same, then just check which side is it
+                            v.c[j]++; // if sides are the same, then just check which side is it
                     }
                 }
 

@@ -1,16 +1,15 @@
 ﻿/******************************************************************************/
 /******************************************************************************/
-class LodView : GuiCustom
-{
-   int    lod_index;
-   Button disable, erase;
+class LodView : GuiCustom {
+    int lod_index;
+    Button disable, erase;
 
-   static Str TextSimple(flt x);
+    static Str TextSimple(flt x);
 
-   virtual void draw(C GuiPC &gpc)override;
+    virtual void draw(C GuiPC &gpc) override;
 
-public:
-   LodView();
+  public:
+    LodView();
 };
 /******************************************************************************/
 /******************************************************************************/

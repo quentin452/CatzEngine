@@ -953,11 +953,11 @@ struct FreeTypeDrawContext {
 #else // this gives same result as Windows
                 if (!FT_Set_Char_Size(face, 0, font.size * 64, 0, 64))
 #endif
-                {
-                    // ok
-                    font.setBaseLine(DivRound(face->ascender * font.size, face->height));
-                    return true;
-                }
+            {
+                // ok
+                font.setBaseLine(DivRound(face->ascender * font.size, face->height));
+                return true;
+            }
         }
         return false;
     }
@@ -1306,7 +1306,7 @@ struct FontCreate : FontCreateBase {
 #if USE_FREE_TYPE
                     // FreeType doesn't have gamma applied
 #elif WINDOWS_OLD
-                    intensity = WinGDIGamma[intensity];                                                                // remove gamma applied by WinGDI
+                    intensity = WinGDIGamma[intensity]; // remove gamma applied by WinGDI
 #endif
                     c.set(intensity, clear_shadow ? 0 : intensity, 0, 0); // R=font, G=shadow #FontImageLayout
                 }
@@ -1505,7 +1505,7 @@ Bool Font::create(C Params &params) {
                         if (fc.setImages(T)) {
 #if USE_FREE_TYPE
 #elif WINDOWS_OLD
-                            if (fc.mode == Font::SMOOTHED)                                                             // font with extra smoothing uses anti-aliasing, 2 pixels with half transparency are used instead of 1, this means that widths are 1 extra pixel bigger
+                            if (fc.mode == Font::SMOOTHED) // font with extra smoothing uses anti-aliasing, 2 pixels with half transparency are used instead of 1, this means that widths are 1 extra pixel bigger
                             {
                                 _padd.z++; // since we'll decrease the width by 1, then we need to increase the right padding by 1
                                 REPA(_chrs) {

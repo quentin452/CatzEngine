@@ -1,6 +1,6 @@
 ﻿/******************************************************************************/
-extern Str      ProjectsPath;
-extern State    StateProjectList;
+extern Str ProjectsPath;
+extern State StateProjectList;
 /******************************************************************************/
 bool InitProjectList();
 void ShutProjectList();

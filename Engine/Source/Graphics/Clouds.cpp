@@ -251,7 +251,7 @@ void VolumetricCloud::cancelCreate() {
 static Flt AOFunc(Flt density) { return 1 - SqrtFast(density) * 0.31f; }
 #elif 1 // contrast too strong
 static Flt AOFunc(Flt density) { return 1 - (1 - Sqr(1 - density)) * 0.31f; }
-#else   // contrast way too strong
+#else // contrast way too strong
 static Flt AOFunc(Flt density) { return 1 - density * 0.5f; }
 #endif
 static void SetImageRow(IntPtr elm_index, Ptr user, Int thread_index) {

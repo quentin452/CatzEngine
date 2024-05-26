@@ -42,10 +42,10 @@ struct _Cell // Cell - Do not use this class, use 'Cell' instead
 
     void func(void func(_Cell &cell, Ptr user), Ptr user);
     T1(USER_DATA)
-    void func(void func(_Cell &cell, USER_DATA &user), USER_DATA &user) { T.func((void (*)(_Cell &cell, Ptr user))func, &user); }
+    void func(void func(_Cell &cell, USER_DATA &user), USER_DATA &user) { T.func((void (*)(_Cell & cell, Ptr user)) func, &user); }
     void func(C RectI &rect, void func(_Cell &cell, Ptr user), Ptr user);
     T1(USER_DATA)
-    void func(C RectI &rect, void func(_Cell &cell, USER_DATA &user), USER_DATA &user) { T.func(rect, (void (*)(_Cell &cell, Ptr user))func, &user); }
+    void func(C RectI &rect, void func(_Cell &cell, USER_DATA &user), USER_DATA &user) { T.func(rect, (void (*)(_Cell & cell, Ptr user)) func, &user); }
     void funcCreate(C RectI &rect, void func(_Cell &cell, Ptr user), Ptr user, _Grid &grid);
 #endif
 
@@ -88,8 +88,8 @@ struct _Grid // Grid - Do not use this class, use 'Grid' instead
         };
         ASSERT_BASE_EXTENDED<TYPE, EXTENDED>();
         del();
-        _new = (void (*)(Ptr &elm, C VecI2 &xy, Ptr grid_user))Helper::New;
-        _del = (void (*)(Ptr &elm))Helper::Del;
+        _new = (void (*)(Ptr & elm, C VecI2 & xy, Ptr grid_user)) Helper::New;
+        _del = (void (*)(Ptr & elm)) Helper::Del;
     }
 
     ~_Grid() { del(); }

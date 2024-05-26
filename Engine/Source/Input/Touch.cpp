@@ -274,12 +274,12 @@ void TouchesUpdate() {
                     ReleasedTouches.remove(i);
                 else                                                                                                       // too long ago
                     if (Dist2(rt.pos, t.pos()) * Sqr(D.scale() * (D.smallSize() ? 0.5f : 1.0f)) <= TouchDoubleClickRange2) // within range
-                    {
-                        t._state |= BS_DOUBLE;
-                        t._first = false; // disable further double clicks for this touch to prevent 2xDbl from 3xTap (2nd release would be stored, and 3rd tap could trigger additional double)
-                        ReleasedTouches.remove(i);
-                        break;
-                    }
+                {
+                    t._state |= BS_DOUBLE;
+                    t._first = false; // disable further double clicks for this touch to prevent 2xDbl from 3xTap (2nd release would be stored, and 3rd tap could trigger additional double)
+                    ReleasedTouches.remove(i);
+                    break;
+                }
             }
 #endif
     }

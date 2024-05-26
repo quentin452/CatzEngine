@@ -1,10 +1,9 @@
 ﻿/******************************************************************************/
-class EditObjTypeClass : Enum
-{
-   Memc<Memc<GuiEditParam>> params;
+class EditObjTypeClass : Enum {
+    Memc<Memc<GuiEditParam>> params;
 
-   EditObjTypeClass();
- C Memc<GuiEditParam>* findParams(C UID &type_id);
+    EditObjTypeClass();
+    C Memc<GuiEditParam> *findParams(C UID &type_id);
 };
 /******************************************************************************/
 /******************************************************************************/

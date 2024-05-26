@@ -135,7 +135,7 @@ struct EventCallbackClass : PxSimulationEventCallback {
     virtual void onSleep(PxActor **actors, PxU32 count) override {}
     virtual void onAdvance(const PxRigidBody *const *bodyBuffer, const PxTransform *poseBuffer, const PxU32 count) override {}
     virtual void onContact(const PxContactPairHeader &pairHeader, const PxContactPair *pairs, PxU32 nbPairs) override {
-        void (*func)(ActorInfo &actor_a, ActorInfo &actor_b, C PhysContact *contact, Int contacts) = Physics._report_contact; // assign to temporary variable in order to avoid multi-threading issues
+        void (*func)(ActorInfo & actor_a, ActorInfo & actor_b, C PhysContact * contact, Int contacts) = Physics._report_contact; // assign to temporary variable in order to avoid multi-threading issues
         if (func)
             if (!(pairHeader.flags & (PxContactPairHeaderFlag::eREMOVED_ACTOR_0 | PxContactPairHeaderFlag::eREMOVED_ACTOR_1))) // if both still exist
                 if (PxRigidActor *actor0 = pairHeader.actors[0]->is<PxRigidActor>())
@@ -171,7 +171,7 @@ struct EventCallbackClass : PxSimulationEventCallback {
                     }
     }
     virtual void onTrigger(PxTriggerPair *pairs, PxU32 count) override {
-        void (*func)(ActorInfo &trigger, ActorInfo &actor, PHYS_CONTACT contact) = Physics._report_trigger; // assign to temporary variable in order to avoid multi-threading issues
+        void (*func)(ActorInfo & trigger, ActorInfo & actor, PHYS_CONTACT contact) = Physics._report_trigger; // assign to temporary variable in order to avoid multi-threading issues
         if (func)
             FREP(count) {
                 C PxTriggerPair &pair = pairs[i];

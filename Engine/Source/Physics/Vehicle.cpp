@@ -820,9 +820,7 @@ struct PhysXVehicle // Physical actor of vehicle type (this class is available o
       Wheel shapes have disabled collision (eSIMULATION_SHAPE)
 
 /******************************************************************************/
-using 'PhysXVehicle'
-    requires calling
-'PxInitVehicleSDK' in 'PhysxClass::create'
+using 'PhysXVehicle' requires calling 'PxInitVehicleSDK' in 'PhysxClass::create'
 
     PhysXVehicle::PhysXVehicle() {
     _vehicle = null;

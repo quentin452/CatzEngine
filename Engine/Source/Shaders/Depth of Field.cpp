@@ -195,7 +195,7 @@ VecH4 DofBlurX_PS(NOPERSP Vec2 uv
 #if ALPHA
     outBlur = ((blur >= 0) ? blur_abs : -blur_abs); // blur/weight>=0 -> blur>=0*weight -> blur>=0
 #else
-    color.a = ((color.a >= 0.5 * weight) ? 0.5 + blur_abs * 0.5 : 0.5 - blur_abs * 0.5);   // color.a/weight>=0.5 -> color.a>=0.5*weight
+    color.a = ((color.a >= 0.5 * weight) ? 0.5 + blur_abs * 0.5 : 0.5 - blur_abs * 0.5); // color.a/weight>=0.5 -> color.a>=0.5*weight
 #endif
     return color;
 }
@@ -245,7 +245,7 @@ VecH4 DofBlurY_PS(NOPERSP Vec2 uv
 #if ALPHA
     outBlur = (FINAL_MODE ? ((blur >= 0) ? 0 : blur_abs) : blur_abs); // blur/weight>=0 -> blur>=0*weight -> blur>=0, Warning: here RT is -1..1 but we store 0..1 so 1-bit of precision is lost
 #else
-    color.a = (FINAL_MODE ? ((color.a >= 0.5 * weight) ? 0 : blur_abs) : blur_abs);        // color.a/weight>=0.5 -> color.a>=0.5*weight
+    color.a = (FINAL_MODE ? ((color.a >= 0.5 * weight) ? 0 : blur_abs) : blur_abs); // color.a/weight>=0.5 -> color.a>=0.5*weight
 #endif
     return color;
 }

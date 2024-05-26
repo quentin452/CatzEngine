@@ -778,13 +778,13 @@ void WindowIO::update(C GuiPC &gpc) {
             renameDo();
         } else // rename
             if (Kb.kf(KB_DEL) && Gui.kb() != &textline) {
-                Kb.eatKey();
-                removeAsk();
-            } else // remove
-                if (Kb.kf(KB_F4)) {
-                    Kb.eatKey();
-                    exploreDo();
-                } // explore
+            Kb.eatKey();
+            removeAsk();
+        } else // remove
+            if (Kb.kf(KB_F4)) {
+            Kb.eatKey();
+            exploreDo();
+        } // explore
 
         // enter/save/load
         if (_mode == WIN_IO_DIR) {

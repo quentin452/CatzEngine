@@ -291,7 +291,7 @@ GuiObj *Region::test(C GuiPC &gpc, C Vec2 &pos, GuiObj *&mouse_wheel) {
                 mouse_wheel = &slidebar[priority];
             else // check  priority slidebar first
                 if (slidebar[!priority]._usable)
-                    mouse_wheel = &slidebar[!priority]; // check !priority slidebar next
+                mouse_wheel = &slidebar[!priority]; // check !priority slidebar next
         }
 
         GuiPC gpc_children(gpc, T);

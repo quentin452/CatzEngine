@@ -498,15 +498,15 @@ void MouseClass::resetCursor() {
         cur = -1;
     else // for example: not on the window
         if (hidden())
-            cur = 0;
-        else // for example: want to be hidden
-            if (CanUseHWCursor())
-                cur = 1;
-            else // for example: our own custom hardware cursor
-                if (_cursor && _cursor->_image)
-                    cur = 0;
-                else          // for example: our own custom non-hardware cursor
-                    cur = -1; // use default
+        cur = 0;
+    else // for example: want to be hidden
+        if (CanUseHWCursor())
+        cur = 1;
+    else // for example: our own custom hardware cursor
+        if (_cursor && _cursor->_image)
+        cur = 0;
+    else          // for example: our own custom non-hardware cursor
+        cur = -1; // use default
 
 #if WINDOWS_OLD
     if (!_on_client)
@@ -663,7 +663,7 @@ void MouseClass::move(C Vec2 &screen_d) {
         Vec2 pixel_d = D.screenToWindowPixelSize(screen_d); // convert to pixel delta
         _delta_rel_sm += pixel_d * _speed;                  // adjust by speed
         if (!frozen()) {
-#if 1                                                            // pixel align (needed because all Operating Systems internally store mouse position as 'int')
+#if 1 // pixel align (needed because all Operating Systems internally store mouse position as 'int')
             pixel_d += _move_offset;                             // add what we've accumulated before
             VecI2 pixel_di = Round(pixel_d);                     // round to nearest pixel
             _move_offset = pixel_d - pixel_di;                   // calculate what we want - what we've got

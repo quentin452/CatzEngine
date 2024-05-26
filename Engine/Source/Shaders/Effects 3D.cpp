@@ -324,7 +324,7 @@ VecH4 Decal_PS(
     col *= Material.color * Color[0];
     alpha = col.a;
     return col;
-#else           // palette
+#else // palette
     return (col.a * Material.color.a) * Color[0];
 #endif
 }

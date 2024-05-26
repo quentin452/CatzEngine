@@ -2325,11 +2325,11 @@ Str FromUTF8(CChar8 *text) {
                                 c = u;
                             else // if(u<=0xD7FF || u>=0xE000 && u<=0xFFFF)c=u; ranges U+0000 to U+D7FF and U+E000 to U+FFFF are represented natively
                                 if (u <= 0x10FFFF) {
-                                    u -= 0x10000;
-                                    out += Char(0xD800 + (u >> 10)); // MULTI0
-                                    c = 0xDC00 + (u & 0x3FF);        // MULTI1
-                                } else
-                                    c = '?'; // unsupported
+                                u -= 0x10000;
+                                out += Char(0xD800 + (u >> 10)); // MULTI0
+                                c = 0xDC00 + (u & 0x3FF);        // MULTI1
+                            } else
+                                c = '?'; // unsupported
                         } else
                             c = '?'; // unsupported
                     }
@@ -2390,11 +2390,11 @@ CChar *Str::fromUTF8Safe(CChar *text) // returns pointer where it stopped readin
                                 c = u;
                             else // if(u<=0xD7FF || u>=0xE000 && u<=0xFFFF)c=u; ranges U+0000 to U+D7FF and U+E000 to U+FFFF are represented natively
                                 if (u <= 0x10FFFF) {
-                                    u -= 0x10000;
-                                    T += Char(0xD800 + (u >> 10)); // MULTI0
-                                    c = 0xDC00 + (u & 0x3FF);      // MULTI1
-                                } else
-                                    c = '?'; // unsupported
+                                u -= 0x10000;
+                                T += Char(0xD800 + (u >> 10)); // MULTI0
+                                c = 0xDC00 + (u & 0x3FF);      // MULTI1
+                            } else
+                                c = '?'; // unsupported
                         } else
                             c = '?'; // unsupported
                     }
@@ -2455,11 +2455,11 @@ CChar8 *Str::fromUTF8Safe(CChar8 *text) // returns pointer where it stopped read
                                 c = u;
                             else // if(u<=0xD7FF || u>=0xE000 && u<=0xFFFF)c=u; ranges U+0000 to U+D7FF and U+E000 to U+FFFF are represented natively
                                 if (u <= 0x10FFFF) {
-                                    u -= 0x10000;
-                                    T += Char(0xD800 + (u >> 10)); // MULTI0
-                                    c = 0xDC00 + (u & 0x3FF);      // MULTI1
-                                } else
-                                    c = '?'; // unsupported
+                                u -= 0x10000;
+                                T += Char(0xD800 + (u >> 10)); // MULTI0
+                                c = 0xDC00 + (u & 0x3FF);      // MULTI1
+                            } else
+                                c = '?'; // unsupported
                         } else
                             c = '?'; // unsupported
                     }
@@ -2492,26 +2492,26 @@ Str8 UTF8(C Str &text) {
             out += Char8(0xC0 | (c >> 6));
             out += Char8(0x80 | (c & 0x3F));
         } else
-#if 1                                       // since we operate on Char we must treat it as UTF-16, there 0xD800..0xDBFF are used to encode 2 Chars
+#if 1 // since we operate on Char we must treat it as UTF-16, there 0xD800..0xDBFF are used to encode 2 Chars
             if (c >= 0xD800 && c <= 0xDBFF) // MULTI0
-            {
-                /* U32 -> 2x U16 formula:
+        {
+            /* U32 -> 2x U16 formula:
                    u-=0x10000;
                    c0=0xD800+(u>>10  ); MULTI0
                    c1=0xDC00+(u&0x3FF); MULTI1 */
-                auto c1 = Unsigned(text[++i]);
-                U32 u = (((c - 0xD800) << 10) | (c1 - 0xDC00)) + 0x10000; // decode U16 c c1 -> U32 u
-                out += Char8(0xF0 | (u >> 18));
-                out += Char8(0x80 | ((u >> 12) & 0x3F));
-                out += Char8(0x80 | ((u >> 6) & 0x3F));
-                out += Char8(0x80 | (u & 0x3F));
-            } else
+            auto c1 = Unsigned(text[++i]);
+            U32 u = (((c - 0xD800) << 10) | (c1 - 0xDC00)) + 0x10000; // decode U16 c c1 -> U32 u
+            out += Char8(0xF0 | (u >> 18));
+            out += Char8(0x80 | ((u >> 12) & 0x3F));
+            out += Char8(0x80 | ((u >> 6) & 0x3F));
+            out += Char8(0x80 | (u & 0x3F));
+        } else
 #endif
-            {
-                out += Char8(0xE0 | (c >> 12));
-                out += Char8(0x80 | ((c >> 6) & 0x3F));
-                out += Char8(0x80 | (c & 0x3F));
-            }
+        {
+            out += Char8(0xE0 | (c >> 12));
+            out += Char8(0x80 | ((c >> 6) & 0x3F));
+            out += Char8(0x80 | (c & 0x3F));
+        }
     }
     return out;
 }
@@ -2527,26 +2527,26 @@ void Str::appendUTF8Safe(C Str &text) // this ignores unsafe characters
                 T += Char(0xC0 | (c >> 6));
                 T += Char(0x80 | (c & 0x3F));
             } else
-#if 1                                           // since we operate on Char we must treat it as UTF-16, there 0xD800..0xDBFF are used to encode 2 Chars
+#if 1 // since we operate on Char we must treat it as UTF-16, there 0xD800..0xDBFF are used to encode 2 Chars
                 if (c >= 0xD800 && c <= 0xDBFF) // MULTI0
-                {
-                    /* U32 -> 2x U16 formula:
+            {
+                /* U32 -> 2x U16 formula:
                        u-=0x10000;
                        c0=0xD800+(u>>10  ); MULTI0
                        c1=0xDC00+(u&0x3FF); MULTI1 */
-                    auto c1 = Unsigned(text[++i]);
-                    U32 u = (((c - 0xD800) << 10) | (c1 - 0xDC00)) + 0x10000; // decode U16 c c1 -> U32 u
-                    T += Char(0xF0 | (u >> 18));
-                    T += Char(0x80 | ((u >> 12) & 0x3F));
-                    T += Char(0x80 | ((u >> 6) & 0x3F));
-                    T += Char(0x80 | (u & 0x3F));
-                } else
+                auto c1 = Unsigned(text[++i]);
+                U32 u = (((c - 0xD800) << 10) | (c1 - 0xDC00)) + 0x10000; // decode U16 c c1 -> U32 u
+                T += Char(0xF0 | (u >> 18));
+                T += Char(0x80 | ((u >> 12) & 0x3F));
+                T += Char(0x80 | ((u >> 6) & 0x3F));
+                T += Char(0x80 | (u & 0x3F));
+            } else
 #endif
-                {
-                    T += Char(0xE0 | (c >> 12));
-                    T += Char(0x80 | ((c >> 6) & 0x3F));
-                    T += Char(0x80 | (c & 0x3F));
-                }
+            {
+                T += Char(0xE0 | (c >> 12));
+                T += Char(0x80 | ((c >> 6) & 0x3F));
+                T += Char(0x80 | (c & 0x3F));
+            }
     }
 }
 Str8 MultiByte(Int code_page, C Str &text) {
@@ -5982,17 +5982,17 @@ Str Str::operator+(C wchar_t *t) C {
     return s;
 }
 /******************************************************************************/
-#define SBYTEC (1 + 3)            // sbyte  chars "-128"
-#define BYTEC 3                   // byte   chars "255"
-#define USHORTC 5                 // ushort chars "65535"
-#define INTC (1 + 10)             // int    chars "-2147483647"
-#define UINTC 10                  // uint   chars "4294967295"
-#define LONGC (1 + 19)            // long   chars "-9223372036854775807"
-#define ULONGC 20                 // ulong  chars "18446744073709551615"
-#define FLTC (1 + 5 + 1 + 3)      // float  chars "-65535.123"            (approximation)
-#define DBLC (1 + 10 + 1 + 9)     // double chars "-2147483647.123456789" (approximation)
+#define SBYTEC (1 + 3) // sbyte  chars "-128"
+#define BYTEC 3 // byte   chars "255"
+#define USHORTC 5 // ushort chars "65535"
+#define INTC (1 + 10) // int    chars "-2147483647"
+#define UINTC 10 // uint   chars "4294967295"
+#define LONGC (1 + 19) // long   chars "-9223372036854775807"
+#define ULONGC 20 // ulong  chars "18446744073709551615"
+#define FLTC (1 + 5 + 1 + 3) // float  chars "-65535.123"            (approximation)
+#define DBLC (1 + 10 + 1 + 9) // double chars "-2147483647.123456789" (approximation)
 #define PTRC (2 + (X64 ? 16 : 8)) // Ptr    chars X64 ? "0x1234567812345678" : "0x12345678"
-#define COMMA 2                   // comma  chars ", "
+#define COMMA 2 // comma  chars ", "
 
 Str8 Str8::operator+(C Str8 &s) C { return RValue(Str8(T, s.length()) += s); }
 Str Str8::operator+(C Str &s) C { return RValue(Str(T, s.length()) += s); }
@@ -6084,7 +6084,7 @@ void StrLibrary::create(C CMemPtr<Str> &strings, Bool case_sensitive, Bool paths
     T._case_sensitive = case_sensitive;
     T._paths = paths;
 
-    Int (&compare)(C Str &a, C Str &b) = GetCompare(case_sensitive, paths);
+    Int (&compare)(C Str & a, C Str & b) = GetCompare(case_sensitive, paths);
     Memt<Str> cleaned;
 #if 0 // check if already added during adding (requires all vs all checking)
    cleaned.New(); // insert empty string at start so saving empty strings will require only 1 byte
@@ -6151,8 +6151,8 @@ static Int _CompareCS(CChar *a, C Str &b) { return Compare(a, b, true); }
 static Int _CompareCS(CChar8 *a, C Str &b) { return Compare(a, b, true); }
 
 void StrLibrary::putStr(File &f, C Str &str) C {
-    Int (*compare8)(CChar8 *a, C Str &b);
-    Int (*compare)(CChar *a, C Str &b);
+    Int (*compare8)(CChar8 * a, C Str & b);
+    Int (*compare)(CChar * a, C Str & b);
     if (_paths) {
         if (_case_sensitive) {
             compare8 = _ComparePathCS;
@@ -6413,7 +6413,7 @@ static void GenMap() {
 }
 #endif
 static void InitStr() {
-#if USE_STD || LINUX       // Linux needs this for Unicode Keyboard Input 'XwcLookupString'
+#if USE_STD || LINUX // Linux needs this for Unicode Keyboard Input 'XwcLookupString'
     setlocale(LC_ALL, ""); // needed for 'towlower', 'towupper', 'iswalpha', ..
 #endif
 

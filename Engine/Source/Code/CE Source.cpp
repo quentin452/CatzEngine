@@ -221,37 +221,37 @@ void LineMode::resetType(Line &line) // this just resets the 'type' without chan
                         i++;
                     } else // process 2 chars at a time
                         if (c == '/' && s[i + 1] == '/') {
-                            t = TOKEN_COMMENT;
-                            ignore_rest = true;
-                        } else if (c == ' ')
-                            t = TOKEN_NONE;
-                        else if (c == '"') {
-                            Char p = s[i - 1];
-                            if (p == 'L' || p == 'u' || p == 'U')
-                                type.last() = t = TOKEN_TEXT16;
-                            else
-                                t = (line.source->cpp ? TOKEN_TEXT8 : _HasUnicode(s() + i + 1, c) ? TOKEN_TEXT16
-                                                                                                  : TOKEN_TEXT8);
-                        } else if (c == '\'') {
-                            Char p = s[i - 1];
-                            if (p == 'L' || p == 'u' || p == 'U')
-                                type.last() = t = TOKEN_CHAR16;
-                            else
-                                t = (line.source->cpp ? TOKEN_CHAR8 : _HasUnicode(s() + i + 1, c) ? TOKEN_CHAR16
-                                                                                                  : TOKEN_CHAR8);
-                        } else if (CodeCharType(c) == CHART_SIGN) {
-                            if (c == '.' && (t == TOKEN_NUMBER || CharFlagFast(s[i + 1]) & CHARF_DIG)) {
-                                t = TOKEN_NUMBER;
-                                real = true;
-                            } else // was already a number or the next char is a digit
-                                if ((c == '-' || c == '+') && t == TOKEN_NUMBER && real && s[i - 1] == 'e')
-                                    t = TOKEN_NUMBER;
-                                else // 1.2e-3, 1.2e+3
-                                    t = ((c == '#' && s[i + 1] != '#' && s[i - 1] != '#') ? TOKEN_PREPROC : TOKEN_OPERATOR);
-                        } else if (t != TOKEN_CODE && t != TOKEN_KEYWORD && CharFlagFast(c) & CHARF_DIG)
+                        t = TOKEN_COMMENT;
+                        ignore_rest = true;
+                    } else if (c == ' ')
+                        t = TOKEN_NONE;
+                    else if (c == '"') {
+                        Char p = s[i - 1];
+                        if (p == 'L' || p == 'u' || p == 'U')
+                            type.last() = t = TOKEN_TEXT16;
+                        else
+                            t = (line.source->cpp ? TOKEN_TEXT8 : _HasUnicode(s() + i + 1, c) ? TOKEN_TEXT16
+                                                                                              : TOKEN_TEXT8);
+                    } else if (c == '\'') {
+                        Char p = s[i - 1];
+                        if (p == 'L' || p == 'u' || p == 'U')
+                            type.last() = t = TOKEN_CHAR16;
+                        else
+                            t = (line.source->cpp ? TOKEN_CHAR8 : _HasUnicode(s() + i + 1, c) ? TOKEN_CHAR16
+                                                                                              : TOKEN_CHAR8);
+                    } else if (CodeCharType(c) == CHART_SIGN) {
+                        if (c == '.' && (t == TOKEN_NUMBER || CharFlagFast(s[i + 1]) & CHARF_DIG)) {
                             t = TOKEN_NUMBER;
-                        else if (t != TOKEN_CODE && t != TOKEN_KEYWORD && t != TOKEN_NUMBER && CodeCharType(s[i - 1]) != CHART_CHAR)
-                            t = TOKEN_CODE;
+                            real = true;
+                        } else // was already a number or the next char is a digit
+                            if ((c == '-' || c == '+') && t == TOKEN_NUMBER && real && s[i - 1] == 'e')
+                            t = TOKEN_NUMBER;
+                        else // 1.2e-3, 1.2e+3
+                            t = ((c == '#' && s[i + 1] != '#' && s[i - 1] != '#') ? TOKEN_PREPROC : TOKEN_OPERATOR);
+                    } else if (t != TOKEN_CODE && t != TOKEN_KEYWORD && CharFlagFast(c) & CHARF_DIG)
+                        t = TOKEN_NUMBER;
+                    else if (t != TOKEN_CODE && t != TOKEN_KEYWORD && t != TOKEN_NUMBER && CodeCharType(s[i - 1]) != CHART_CHAR)
+                        t = TOKEN_CODE;
                 }
             }
 
@@ -268,11 +268,11 @@ void LineMode::resetType(Line &line) // this just resets the 'type' without chan
                     t = TOKEN_NONE;
                 } else // process 2 chars at a time
                     if ((p == TOKEN_TEXT8 || p == TOKEN_TEXT16) && c == '"')
-                        t = TOKEN_NONE;
-                    else if ((p == TOKEN_CHAR8 || p == TOKEN_CHAR16) && c == '\'')
-                        t = TOKEN_NONE;
-                    else if (t == TOKEN_OPERATOR)
-                        t = TOKEN_NONE;
+                    t = TOKEN_NONE;
+                else if ((p == TOKEN_CHAR8 || p == TOKEN_CHAR16) && c == '\'')
+                    t = TOKEN_NONE;
+                else if (t == TOKEN_OPERATOR)
+                    t = TOKEN_NONE;
             }
         }
     }

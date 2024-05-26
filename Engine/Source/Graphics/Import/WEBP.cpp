@@ -101,14 +101,14 @@ Bool Image::ExportWEBP(File &f, Flt rgb_quality, Flt alpha_quality) C {
                     q = 100;
                 else // default to 100=lossless
                     if (q > 100)
-                        q = 100;
+                    q = 100;
 
                 Flt aq = alpha_quality * 100;
                 if (aq < 0)
                     aq = q;
                 else // default to 'q'=rgb_quality
                     if (aq > 100)
-                        aq = 100;
+                    aq = 100;
 
                 // config .pass         =10; // very little difference, not sure if better or worse
                 // config .method       =6; // don't turn this on, because for lossless it can be too slow for camera photographs (91s for 4K x 2K photo, default method=4 is 7.5s), for lossy it's not as slow, it makes file smaller but at lower quality so just skip too
@@ -126,7 +126,7 @@ Bool Image::ExportWEBP(File &f, Flt rgb_quality, Flt alpha_quality) C {
                 picture.use_argb = true;
                 picture.argb = (uint32_t *)src->data();
                 picture.argb_stride = src->pitch() / src->bytePP(); // in pixel units
-#else                                                               // YUVA, this didn't improve the quality, we could use it mainly if we had the source already in YUV format
+#else // YUVA, this didn't improve the quality, we could use it mainly if we had the source already in YUV format
                 Image Y, U, V, A;
                 Y.createSoft(src->w(), src->h(), 1, IMAGE_L8);
                 U.createSoft(src->w(), src->h(), 1, IMAGE_L8);

@@ -1188,7 +1188,7 @@ INLINE Int _GetCPU() { return PLATFORM(GetCurrentProcessorNumber(), sched_getcpu
 INLINE Int _GetCPU() { return 0; }
 #endif
 #define GetThreadID _GetThreadID // use this macro so all engine functions access '_GetThreadID' directly
-#define GetCPU _GetCPU           // use this macro so all engine functions access '_GetCPU'      directly
+#define GetCPU _GetCPU // use this macro so all engine functions access '_GetCPU'      directly
 
 INLINE void Yield() { std::this_thread::yield(); }
 #endif

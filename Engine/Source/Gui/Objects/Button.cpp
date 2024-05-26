@@ -507,9 +507,9 @@ void Button::draw(C GuiPC &gpc) {
                         image->draw(col, highlight, r);
                     else // if there's no 'panel_image' then there's no way to determine the button boundaries, so let's stretch the custom image to entire rect
                         if (hasData())
-                            image->draw(col, highlight, Rect(text_rect.min.x, text_rect.min.y, text_rect.min.x + image->aspect() * text_rect.h(), text_rect.max.y));
-                        else // draw on the left if there's text available
-                            image->drawFit(col, highlight, r);
+                        image->draw(col, highlight, Rect(text_rect.min.x, text_rect.min.y, text_rect.min.x + image->aspect() * text_rect.h(), text_rect.max.y));
+                    else // draw on the left if there's text available
+                        image->drawFit(col, highlight, r);
                 }
 
                 // draw text

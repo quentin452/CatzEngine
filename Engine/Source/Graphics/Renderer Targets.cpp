@@ -236,7 +236,7 @@ Bool RendererClass::rtCreate() {
                             if (!_main_ds.create(_main.size(), IMAGE_D24X8, IMAGE_GL_RB, _main.samples()))
                                 if (!_main_ds.create(_main.size(), IMAGE_D16, IMAGE_GL_RB, _main.samples()))
                                     return false;
-#else     // other platforms have '_main_ds' linked with '_main' provided by the system
+#else // other platforms have '_main_ds' linked with '_main' provided by the system
     _main_ds.forceInfo(_main.w(), _main.h(), 1, _main_ds.type() ? _main_ds.type() : IMAGE_D24S8, IMAGE_GL_RB, _main.samples()); // if we know the type then use it, otherwise assume the default IMAGE_D24S8
 #endif
 
@@ -324,86 +324,86 @@ void RendererClass::setMain() // !! requires 'D._lock' !! this is called after R
    set(_cur_main, _cur_main_ds, false);
 }
 Bool RendererClass::mapMain() {
-   return _main.map();
+    return _main.map();
 }
 void RendererClass::unmapMain() {
-   _main.unmap();
-   _cur[0] = null;
-   _cur_id[0] = NULL;
+    _main.unmap();
+    _cur[0] = null;
+    _cur_id[0] = NULL;
 }
 /******************************************************************************/
 void RendererClass::setPixelSize() {
-   C VecI2 &res = _res;
-   _pixel_size.set(D.w2() / res.x, D.h2() / res.y);
-   _pixel_size_inv.set(res.x / D.w2(), res.y / D.h2());
+    C VecI2 &res = _res;
+    _pixel_size.set(D.w2() / res.x, D.h2() / res.y);
+    _pixel_size_inv.set(res.x / D.w2(), res.y / D.h2());
 }
 Rect RendererClass::pixelToScreen(C RectI &pixel) {
-   return Rect(pixel.min.x * Renderer._pixel_size.x - D.w(), D.h() - pixel.max.y * Renderer._pixel_size.y,
-               pixel.max.x * Renderer._pixel_size.x - D.w(), D.h() - pixel.min.y * Renderer._pixel_size.y);
+    return Rect(pixel.min.x * Renderer._pixel_size.x - D.w(), D.h() - pixel.max.y * Renderer._pixel_size.y,
+                pixel.max.x * Renderer._pixel_size.x - D.w(), D.h() - pixel.min.y * Renderer._pixel_size.y);
 }
 Vec2 RendererClass::screenToPixelSize(C Vec2 &screen) { return screen * Renderer._pixel_size_inv; }
 Vec2 RendererClass::pixelToScreenSize(Flt pixel) { return pixel * Renderer._pixel_size; }
 /******************************************************************************/
 #if GL
 static void SwitchedFBO() {
-   // update settings that depend on main FBO being active
-   D.setFrontFace(); // adjust culling according to Y axis
-   SetProjMatrix();  // flip Y 3D coords when Rendering To Texture
+    // update settings that depend on main FBO being active
+    D.setFrontFace(); // adjust culling according to Y axis
+    SetProjMatrix();  // flip Y 3D coords when Rendering To Texture
 }
 static inline Bool EqualRT(C Image *a, C Image *b) {
-   UInt a_txtr, a_rb;
-   if (a) {
-       a_txtr = a->_txtr;
-       a_rb = a->_rb;
-   } else
-       a_txtr = a_rb = 0;
-   UInt b_txtr, b_rb;
-   if (b) {
-       b_txtr = b->_txtr;
-       b_rb = b->_rb;
-   } else
-       b_txtr = b_rb = 0;
-   return a_txtr == b_txtr && a_rb == b_rb;
+    UInt a_txtr, a_rb;
+    if (a) {
+        a_txtr = a->_txtr;
+        a_rb = a->_rb;
+    } else
+        a_txtr = a_rb = 0;
+    UInt b_txtr, b_rb;
+    if (b) {
+        b_txtr = b->_txtr;
+        b_rb = b->_rb;
+    } else
+        b_txtr = b_rb = 0;
+    return a_txtr == b_txtr && a_rb == b_rb;
 }
 static inline Bool EqualDS(C Image *a, C Image *b, UInt a_txtr) {
-   UInt a_rb;
-   if (a) {
-       a_rb = a->_rb;
-   } else
-       a_rb = 0;
-   UInt b_txtr, b_rb;
-   if (b) {
-       b_txtr = b->_txtr;
-       b_rb = b->_rb;
-   } else
-       b_txtr = b_rb = 0;
-   return a_txtr == b_txtr && a_rb == b_rb;
+    UInt a_rb;
+    if (a) {
+        a_rb = a->_rb;
+    } else
+        a_rb = 0;
+    UInt b_txtr, b_rb;
+    if (b) {
+        b_txtr = b->_txtr;
+        b_rb = b->_rb;
+    } else
+        b_txtr = b_rb = 0;
+    return a_txtr == b_txtr && a_rb == b_rb;
 }
 static Bool EqualTxtr(C Image *a, C Image *b) { return (a ? a->_txtr : 0) == (b ? b->_txtr : 0); } // simpler version that checks texture ID's only, this can be used for #1+ RT's which never use RenderBuffers but only textures
 #endif
 #define R Renderer
 #if DX11
 void RendererClass::setDSLookup() {
-   if (R._cur_ds) {
-       R._cur_ds_ids[NO_DEPTH_READ] = R._cur_ds->_dsv;
-       R._cur_ds_ids[NEED_DEPTH_READ] = R._cur_ds->_rdsv;
-       R._cur_ds_ids[WANT_DEPTH_READ] = R._cur_ds_ids[R._cur_ds_ids[NEED_DEPTH_READ] ? NEED_DEPTH_READ : NO_DEPTH_READ]; // use RDSV if available, if not then DSV
-   } else {
-       R._cur_ds_ids[NO_DEPTH_READ] = null;
-       R._cur_ds_ids[WANT_DEPTH_READ] = null;
-       R._cur_ds_ids[NEED_DEPTH_READ] = null;
-   }
+    if (R._cur_ds) {
+        R._cur_ds_ids[NO_DEPTH_READ] = R._cur_ds->_dsv;
+        R._cur_ds_ids[NEED_DEPTH_READ] = R._cur_ds->_rdsv;
+        R._cur_ds_ids[WANT_DEPTH_READ] = R._cur_ds_ids[R._cur_ds_ids[NEED_DEPTH_READ] ? NEED_DEPTH_READ : NO_DEPTH_READ]; // use RDSV if available, if not then DSV
+    } else {
+        R._cur_ds_ids[NO_DEPTH_READ] = null;
+        R._cur_ds_ids[WANT_DEPTH_READ] = null;
+        R._cur_ds_ids[NEED_DEPTH_READ] = null;
+    }
 }
 void RendererClass::setDS(ID3D11DepthStencilView *dsv) {
-   if (R._cur_ds_id != dsv) {
-       if (dsv == R._cur_ds_ids[NO_DEPTH_READ])
-           D.texClear(R._cur_ds->_srv); // if we're writing to depth then we need to unbind it from reading (because DirectX will do it)
-       D3DC->OMSetRenderTargets(Elms(R._cur_id), R._cur_id, R._cur_ds_id = dsv);
-   }
+    if (R._cur_ds_id != dsv) {
+        if (dsv == R._cur_ds_ids[NO_DEPTH_READ])
+            D.texClear(R._cur_ds->_srv); // if we're writing to depth then we need to unbind it from reading (because DirectX will do it)
+        D3DC->OMSetRenderTargets(Elms(R._cur_id), R._cur_id, R._cur_ds_id = dsv);
+    }
 }
 void RendererClass::needDepthTest() {
-   if (D._depth_write || !R._cur_ds_id)
-       setDS(R._cur_ds_ids[NO_DEPTH_READ]);
+    if (D._depth_write || !R._cur_ds_id)
+        setDS(R._cur_ds_ids[NO_DEPTH_READ]);
 }
 void RendererClass::wantDepthRead() { setDS(R._cur_ds_ids[WANT_DEPTH_READ]); }
 void RendererClass::needDepthRead() { setDS(R._cur_ds_ids[NEED_DEPTH_READ]); }
@@ -438,44 +438,44 @@ void RendererClass::needDepthRead() {
 #pragma message("!! Warning: Use this only for debugging !!")
 #endif
 void RendererClass::set(ImageRT *t0, ImageRT *t1, ImageRT *t2, ImageRT *t3, ImageRT *ds, Bool custom_viewport, DEPTH_READ_MODE depth_read_mode) {
-   Bool changed = false;
+    Bool changed = false;
 #if DX11
-   ID3D11RenderTargetView *id0 = (t0 ? t0->_rtv : null),
-                          *id1 = (t1 ? t1->_rtv : null),
-                          *id2 = (t2 ? t2->_rtv : null),
-                          *id3 = (t3 ? t3->_rtv : null);
-   ID3D11DepthStencilView *ids = (ds ? (depth_read_mode == NEED_DEPTH_READ || depth_read_mode == WANT_DEPTH_READ && ds->_rdsv) ? ds->_rdsv : ds->_dsv : null);
+    ID3D11RenderTargetView *id0 = (t0 ? t0->_rtv : null),
+                           *id1 = (t1 ? t1->_rtv : null),
+                           *id2 = (t2 ? t2->_rtv : null),
+                           *id3 = (t3 ? t3->_rtv : null);
+    ID3D11DepthStencilView *ids = (ds ? (depth_read_mode == NEED_DEPTH_READ || depth_read_mode == WANT_DEPTH_READ && ds->_rdsv) ? ds->_rdsv : ds->_dsv : null);
 
-   if (_cur_id[0] != id0 || _cur_id[1] != id1 || _cur_id[2] != id2 || _cur_id[3] != id3 || _cur_ds_id != ids) { // on DX11 when setting RT, it automatically unbinds it from SRVs, so have to clear it manually (UAVs are unbound too, however engine always resets them)
-       if (id0 && _cur_id[0] != id0)
-           D.texClear(t0->_srv);
-       if (id1 && _cur_id[1] != id1)
-           D.texClear(t1->_srv);
-       if (id2 && _cur_id[2] != id2)
-           D.texClear(t2->_srv);
-       if (id3 && _cur_id[3] != id3)
-           D.texClear(t3->_srv);
-       if (ids && ids == ds->_dsv && _cur_ds_id != ids)
-           D.texClear(ds->_srv); // if we're writing to depth then we need to unbind it from reading (because DirectX will do it)
+    if (_cur_id[0] != id0 || _cur_id[1] != id1 || _cur_id[2] != id2 || _cur_id[3] != id3 || _cur_ds_id != ids) { // on DX11 when setting RT, it automatically unbinds it from SRVs, so have to clear it manually (UAVs are unbound too, however engine always resets them)
+        if (id0 && _cur_id[0] != id0)
+            D.texClear(t0->_srv);
+        if (id1 && _cur_id[1] != id1)
+            D.texClear(t1->_srv);
+        if (id2 && _cur_id[2] != id2)
+            D.texClear(t2->_srv);
+        if (id3 && _cur_id[3] != id3)
+            D.texClear(t3->_srv);
+        if (ids && ids == ds->_dsv && _cur_ds_id != ids)
+            D.texClear(ds->_srv); // if we're writing to depth then we need to unbind it from reading (because DirectX will do it)
 
-       changed = true;
-       _cur[0] = t0;
-       _cur_id[0] = id0;
-       _cur[1] = t1;
-       _cur_id[1] = id1;
-       _cur[2] = t2;
-       _cur_id[2] = id2;
-       _cur[3] = t3;
-       _cur_id[3] = id3;
-       _cur_ds = ds;
-       _cur_ds_id = ids;
-       D3DC->OMSetRenderTargets(Elms(_cur_id), _cur_id, _cur_ds_id);
-       ASSERT(ELMS(_cur_id) <= D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT);
-   } else if (_cur_ds != ds) // even if we're not changing RenderTargetView it's still possible we're changing RenderTarget Image, this can happen on DX10 when using NEED_DEPTH_READ, '_rdsv' null and last '_cur_ds_id' also null
-   {
-       changed = true;
-       _cur_ds = ds;
-   }
+        changed = true;
+        _cur[0] = t0;
+        _cur_id[0] = id0;
+        _cur[1] = t1;
+        _cur_id[1] = id1;
+        _cur[2] = t2;
+        _cur_id[2] = id2;
+        _cur[3] = t3;
+        _cur_id[3] = id3;
+        _cur_ds = ds;
+        _cur_ds_id = ids;
+        D3DC->OMSetRenderTargets(Elms(_cur_id), _cur_id, _cur_ds_id);
+        ASSERT(ELMS(_cur_id) <= D3D11_SIMULTANEOUS_RENDER_TARGET_COUNT);
+    } else if (_cur_ds != ds) // even if we're not changing RenderTargetView it's still possible we're changing RenderTarget Image, this can happen on DX10 when using NEED_DEPTH_READ, '_rdsv' null and last '_cur_ds_id' also null
+    {
+        changed = true;
+        _cur_ds = ds;
+    }
 #elif GL
     // !! '_cur_id' is not set for GL, only '_cur_ds_id' is !!
     Image *set_ds = ((WEB && depth_read_mode == NEED_DEPTH_READ) ? null : ds); // if we require reading from the depth buffer, then we can't set it
@@ -505,8 +505,8 @@ void RendererClass::set(ImageRT *t0, ImageRT *t1, ImageRT *t2, ImageRT *t3, Imag
         D.colWriteAllow((main_fbo && t0 != &_main) ? 0 : COL_WRITE_RGBA); // on desktop OpenGL and OpenGL ES (except iOS) '_main' is always linked with '_main_ds', when setting null RT and '_main_ds' DS, '_main' is set either way but with color writes disabled
         D.depthAllow(!main_fbo || ds == &_main_ds);                       // check 'ds' and not 'set_ds' !!
         if (main_fbo) {
-            D.fbo(0);                    // set default frame buffer
-            _cur_ds_id = 0;              // main FBO always has 0 depth txtr ID
+            D.fbo(0);       // set default frame buffer
+            _cur_ds_id = 0; // main FBO always has 0 depth txtr ID
 #if !MAC
 #if WINDOWS
             if (glInvalidateFramebuffer) // requires GL 4.3, GL ES 3.0
@@ -700,148 +700,148 @@ void RendererClass::set(ImageRT *t0, ImageRT *t1, ImageRT *t2, ImageRT *t3, Imag
     }
 #endif
 
-   if (changed) {
-       if (Image *main = (t0 ? t0 : ds)) {
-           _res = main->size();
-           setPixelSize();
-           Sh.rtSize(*main);
-       }
+    if (changed) {
+        if (Image *main = (t0 ? t0 : ds)) {
+            _res = main->size();
+            setPixelSize();
+            Sh.rtSize(*main);
+        }
 
 #if GL
-       if (was_main_fbo != main_fbo)
-           SwitchedFBO();
+        if (was_main_fbo != main_fbo)
+            SwitchedFBO();
 #endif
-       D._view_active.setRect(custom_viewport ? screenToPixelI(D.viewRect()) : RectI(0, 0, resW(), resH())).setViewport();
-       D.clipAllow(_cur[0] == _cur_main);
-       D.validateCoords(); // viewport was changed, also for OpenGL (flip Y 2D coords when Rendering To Texture)
-   } else                  // render targets weren't changed, so set viewport only
-   {
-       RectI recti(custom_viewport ? screenToPixelI(D.viewRect()) : RectI(0, 0, resW(), resH()));
-       if (recti != D._view_active.recti) // over here we can do a quick != check first, because the Render Targets haven't changed (Renderer.resW(), resH() is the same, and that affects 'setRect')
-       {
-           D._view_active.setRect(recti).setViewport();
-           D.validateCoords(); // viewport was changed, also for OpenGL (flip Y 2D coords when Rendering To Texture)
-       }
-   }
+        D._view_active.setRect(custom_viewport ? screenToPixelI(D.viewRect()) : RectI(0, 0, resW(), resH())).setViewport();
+        D.clipAllow(_cur[0] == _cur_main);
+        D.validateCoords(); // viewport was changed, also for OpenGL (flip Y 2D coords when Rendering To Texture)
+    } else                  // render targets weren't changed, so set viewport only
+    {
+        RectI recti(custom_viewport ? screenToPixelI(D.viewRect()) : RectI(0, 0, resW(), resH()));
+        if (recti != D._view_active.recti) // over here we can do a quick != check first, because the Render Targets haven't changed (Renderer.resW(), resH() is the same, and that affects 'setRect')
+        {
+            D._view_active.setRect(recti).setViewport();
+            D.validateCoords(); // viewport was changed, also for OpenGL (flip Y 2D coords when Rendering To Texture)
+        }
+    }
 }
 /******************************************************************************/
 void RendererClass::setMainViewportCam() {
-   if (_stereo) {
-       D._view_active.setRect(Renderer.screenToPixelI(D._view_rect)).setViewport().setShader();
-       SetProjMatrix();
-       SetCam(ActiveCam.matrix, ActiveCam._matrix_prev); // 'Frustum' remains the same
-       D.validateCoords();
-       D.setViewFovTan();
-   }
+    if (_stereo) {
+        D._view_active.setRect(Renderer.screenToPixelI(D._view_rect)).setViewport().setShader();
+        SetProjMatrix();
+        SetCam(ActiveCam.matrix, ActiveCam._matrix_prev); // 'Frustum' remains the same
+        D.validateCoords();
+        D.setViewFovTan();
+    }
 }
 void RendererClass::setEyeViewportCam() {
-   if (_stereo) {
-       D._view_active.setRect(Renderer.screenToPixelI(D._view_eye_rect[_eye])).setViewport().setShader(&ProjMatrixEyeOffset[_eye]); // 'setShader' needed for 'PosToScreen' and 'fur'
-       SetProjMatrix(ProjMatrixEyeOffset[_eye]);
-       SetCam(EyeMatrix[_eye], EyeMatrixPrev[_eye]); // 'Frustum' remains the same
-       D.validateCoords(_eye);
-       D.setViewFovTan();
-   }
+    if (_stereo) {
+        D._view_active.setRect(Renderer.screenToPixelI(D._view_eye_rect[_eye])).setViewport().setShader(&ProjMatrixEyeOffset[_eye]); // 'setShader' needed for 'PosToScreen' and 'fur'
+        SetProjMatrix(ProjMatrixEyeOffset[_eye]);
+        SetCam(EyeMatrix[_eye], EyeMatrixPrev[_eye]); // 'Frustum' remains the same
+        D.validateCoords(_eye);
+        D.setViewFovTan();
+    }
 }
 Rect *RendererClass::setEyeParams() {
-   if (_stereo) {
-       RectI recti = D._view_active.recti;
-       D._view_active.setRect(Renderer.screenToPixelI(D._view_eye_rect[_eye])).setShader(&ProjMatrixEyeOffset[_eye]).setRect(recti); // set rect temporarily to set shader params and restore it afterwards
-       return &D._view_eye_rect[_eye];
-   }
-   return &D._view_rect;
+    if (_stereo) {
+        RectI recti = D._view_active.recti;
+        D._view_active.setRect(Renderer.screenToPixelI(D._view_eye_rect[_eye])).setShader(&ProjMatrixEyeOffset[_eye]).setRect(recti); // set rect temporarily to set shader params and restore it afterwards
+        return &D._view_eye_rect[_eye];
+    }
+    return &D._view_rect;
 }
 /******************************************************************************/
 void RendererClass::hasGlow() { _has |= HAS_GLOW; }
 void RendererClass::finalizeGlow() {
-   _has_glow = ((_has & HAS_GLOW) && _col->typeInfo().a && D.glowAllow() && D.bloomAllow() && D.bloomGlow() > EPS_COL8_NATIVE && !fastCombine()); // glow can be done only if we have Alpha Channel in the RT, if we're allowing bloom processing (because it's done together in the same shader), if we're allowing glow, and if 'fastCombine' is not active
+    _has_glow = ((_has & HAS_GLOW) && _col->typeInfo().a && D.glowAllow() && D.bloomAllow() && D.bloomGlow() > EPS_COL8_NATIVE && !fastCombine()); // glow can be done only if we have Alpha Channel in the RT, if we're allowing bloom processing (because it's done together in the same shader), if we're allowing glow, and if 'fastCombine' is not active
 }
 /******************************************************************************/
 Bool RendererClass::capture(Image &image, Int w, Int h, Int type, Int mode, Int mip_maps, Bool alpha) {
-   if (image.capture(*_ptr_main)) {
-       if (type <= 0)
-           type = image.type();
-       else
-           MIN(type, IMAGE_TYPES);
-       if (!_ds_1s)
-           alpha = false;
+    if (image.capture(*_ptr_main)) {
+        if (type <= 0)
+            type = image.type();
+        else
+            MIN(type, IMAGE_TYPES);
+        if (!_ds_1s)
+            alpha = false;
 
-       if (ImageTI[type].a && image.typeInfo().a && !alpha && image.lock()) // dest has alpha and src has alpha, and don't want to manually set alpha
-       {
-           REPD(y, image.h())
-           REPD(x, image.w()) {
-               Color color = image.color(x, y);
-               color.a = 255; // force full alpha
-               image.color(x, y, color);
-           }
-           image.unlock();
-       }
+        if (ImageTI[type].a && image.typeInfo().a && !alpha && image.lock()) // dest has alpha and src has alpha, and don't want to manually set alpha
+        {
+            REPD(y, image.h())
+            REPD(x, image.w()) {
+                Color color = image.color(x, y);
+                color.a = 255; // force full alpha
+                image.color(x, y, color);
+            }
+            image.unlock();
+        }
 
-       if (image.copy(image, w, h, 1, type, mode, mip_maps)) {
-           if (alpha && image.typeInfo().a && image.lock()) // set alpha from depth
-           {
-               Image depth;
-               if (depth.capture(*_ds_1s) && depth.lockRead()) {
-                   Image alpha(depth.w(), depth.h(), 1, IMAGE_A8, IMAGE_SOFT, 1);
-                   REPD(y, depth.h())
-                   REPD(x, depth.w()) {
-                       Flt w = depth.pixelF(x, y);
+        if (image.copy(image, w, h, 1, type, mode, mip_maps)) {
+            if (alpha && image.typeInfo().a && image.lock()) // set alpha from depth
+            {
+                Image depth;
+                if (depth.capture(*_ds_1s) && depth.lockRead()) {
+                    Image alpha(depth.w(), depth.h(), 1, IMAGE_A8, IMAGE_SOFT, 1);
+                    REPD(y, depth.h())
+                    REPD(x, depth.w()) {
+                        Flt w = depth.pixelF(x, y);
 #if REVERSE_DEPTH
-                       alpha.pixB(x, y) = ((w > 0.0f) ? 0xFF : 0);
+                        alpha.pixB(x, y) = ((w > 0.0f) ? 0xFF : 0);
 #else
                         alpha.pixB(x, y) = ((w < 1.0f) ? 0xFF : 0);
 #endif
-                   }
-                   depth.unlock();
+                    }
+                    depth.unlock();
 
-                   alpha.resize(image.w(), image.h(), FILTER_LINEAR);
-                   REPD(y, image.h())
-                   REPD(x, image.w()) {
-                       Color color = image.color(x, y);
-                       color.a = alpha.pixB(x, y);
-                       image.color(x, y, color);
-                   }
-               } else {
-                   REPD(y, image.h())
-                   REPD(x, image.w()) {
-                       Color color = image.color(x, y);
-                       color.a = 255; // force full alpha
-                       image.color(x, y, color);
-                   }
-               }
-               image.unlock().updateMipMaps();
-           }
-           return true;
-       }
-   }
-   image.del();
-   return false;
+                    alpha.resize(image.w(), image.h(), FILTER_LINEAR);
+                    REPD(y, image.h())
+                    REPD(x, image.w()) {
+                        Color color = image.color(x, y);
+                        color.a = alpha.pixB(x, y);
+                        image.color(x, y, color);
+                    }
+                } else {
+                    REPD(y, image.h())
+                    REPD(x, image.w()) {
+                        Color color = image.color(x, y);
+                        color.a = 255; // force full alpha
+                        image.color(x, y, color);
+                    }
+                }
+                image.unlock().updateMipMaps();
+            }
+            return true;
+        }
+    }
+    image.del();
+    return false;
 }
 Bool RendererClass::screenShot(C Str &name, Bool alpha) {
-   FCreateDirs(GetPath(name));
-   Image temp;
-   if (alpha) // with alpha
-   {
-       if (capture(temp, -1, -1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1, true))
-           return temp.Export(name);
-   } else if (temp.capture(*_ptr_main)) // no alpha
-   {
-       if (temp.typeInfo().a)
-           temp.copy(temp, -1, -1, -1, IMAGE_R8G8B8_SRGB, IMAGE_SOFT, 1); // if captured image has alpha channel then let's remove it
-       return temp.Export(name);
-   }
-   return false;
+    FCreateDirs(GetPath(name));
+    Image temp;
+    if (alpha) // with alpha
+    {
+        if (capture(temp, -1, -1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1, true))
+            return temp.Export(name);
+    } else if (temp.capture(*_ptr_main)) // no alpha
+    {
+        if (temp.typeInfo().a)
+            temp.copy(temp, -1, -1, -1, IMAGE_R8G8B8_SRGB, IMAGE_SOFT, 1); // if captured image has alpha channel then let's remove it
+        return temp.Export(name);
+    }
+    return false;
 }
 Bool RendererClass::screenShots(C Str &name, C Str &ext, Bool alpha) {
-   Str n = FFirst(name, ext);
-   return n.is() ? screenShot(n, alpha) : false;
+    Str n = FFirst(name, ext);
+    return n.is() ? screenShot(n, alpha) : false;
 }
 /******************************************************************************/
 void RendererClass::timeMeasure(Bool on) {
-   if (_t_measure != on) {
-       _t_measure = on;
-       _t_last_measure = Time.curTime();
-   }
+    if (_t_measure != on) {
+        _t_measure = on;
+        _t_last_measure = Time.curTime();
+    }
 }
 /******************************************************************************/
 } // namespace EE

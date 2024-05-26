@@ -687,7 +687,7 @@ struct DisplayClass : DisplayState, DisplayDraw // Display Control
     IMAGE_PRECISION _output_prec, _lit_col_rt_prec, _color_prec;
     FILTER_TYPE _density_filter;
     COLOR_SPACE _color_space;
-    Bool _full, _sync,_autosavescript, _exclusive, _hdr,
+    Bool _full, _sync, _autosavescript, _exclusive, _hdr,
         _hp_col_rt, _hp_nrm_rt, _hp_lum_rt, _hp_pal_rt,
         _particles_soft, _particles_smooth,
         _tex_mip_filter, _tex_macro, _tex_detail_lod,

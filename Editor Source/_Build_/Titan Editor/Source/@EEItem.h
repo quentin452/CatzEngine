@@ -1,16 +1,15 @@
 ﻿/******************************************************************************/
-class EEItem
-{
-   bool         opened;
-   byte         flag; // ELM_FLAG
-   ELM_TYPE     type;
-   ImagePtr     icon;
-   Str          base_name, full_name;
-   EEItem      *parent;
-   Memx<EEItem> children;
+class EEItem {
+    bool opened;
+    byte flag; // ELM_FLAG
+    ELM_TYPE type;
+    ImagePtr icon;
+    Str base_name, full_name;
+    EEItem *parent;
+    Memx<EEItem> children;
 
-public:
-   EEItem();
+  public:
+    EEItem();
 };
 /******************************************************************************/
 /******************************************************************************/

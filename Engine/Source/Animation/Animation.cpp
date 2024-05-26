@@ -1588,7 +1588,7 @@ struct TimeClip {
             t = 0;
         else // it's important to align to start
             if (t > length_eps)
-                t = length; //                        and end, because looped root motion is calculated at time=0 and time=length, so if times are slightly offsetted, we could get root motion start that is actually end
+            t = length; //                        and end, because looped root motion is calculated at time=0 and time=length, so if times are slightly offsetted, we could get root motion start that is actually end
         time = t;
     }
     T1(TYPE)
@@ -1636,93 +1636,93 @@ AnimKeys &AnimKeys::clip(Bool anim_loop, Bool anim_linear, Flt anim_length, Flt 
         tc.adjust(orns[0].time);
     else                     // if there is only 1 frame, then keep it
         if (orns.elms() > 1) // otherwise check for before start and after end
-        {
-            tc.find(orns, before_start, after_end);
+    {
+        tc.find(orns, before_start, after_end);
 
-            // check for keyframes after end
-            if (after_end >= 0)                                                                      // there is a keyframe after end
-                if (!InRange(after_end - 1, orns) || orns[after_end - 1].time < end_time - TIME_EPS) // previous keyframe doesn't exist or isn't at the end
-                {                                                                                    // adjust 'after_end' keyframe so it's positioned at the end
-                    Orn &next = orns[after_end];
-                    params.time = end_time;
-                    orn(next.orn, params);
-                    next.time = end_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
-                }
+        // check for keyframes after end
+        if (after_end >= 0)                                                                      // there is a keyframe after end
+            if (!InRange(after_end - 1, orns) || orns[after_end - 1].time < end_time - TIME_EPS) // previous keyframe doesn't exist or isn't at the end
+            {                                                                                    // adjust 'after_end' keyframe so it's positioned at the end
+                Orn &next = orns[after_end];
+                params.time = end_time;
+                orn(next.orn, params);
+                next.time = end_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
+            }
 
-            // check for keyframes before start
-            if (before_start >= 0)                                                                           // there is a keyframe before start
-                if (!InRange(before_start + 1, orns) || orns[before_start + 1].time > start_time + TIME_EPS) // next keyframe doesn't exist or isn't at the start
-                {                                                                                            // adjust 'before_start' keyframe so it's positioned at the start
-                    Orn &prev = orns[before_start];
-                    params.time = start_time;
-                    orn(prev.orn, params);
-                    prev.time = start_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
-                }
+        // check for keyframes before start
+        if (before_start >= 0)                                                                           // there is a keyframe before start
+            if (!InRange(before_start + 1, orns) || orns[before_start + 1].time > start_time + TIME_EPS) // next keyframe doesn't exist or isn't at the start
+            {                                                                                            // adjust 'before_start' keyframe so it's positioned at the start
+                Orn &prev = orns[before_start];
+                params.time = start_time;
+                orn(prev.orn, params);
+                prev.time = start_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
+            }
 
-            tc.clip(orns); // remove keyframes out of range and adjust time
-        }
+        tc.clip(orns); // remove keyframes out of range and adjust time
+    }
 
     // positions
     if (poss.elms() == 1)
         tc.adjust(poss[0].time);
     else                     // if there is only 1 frame, then keep it
         if (poss.elms() > 1) // otherwise check for before start and after end
-        {
-            tc.find(poss, before_start, after_end);
+    {
+        tc.find(poss, before_start, after_end);
 
-            // check for keyframes after end
-            if (after_end >= 0)                                                                      // there is a keyframe after end
-                if (!InRange(after_end - 1, poss) || poss[after_end - 1].time < end_time - TIME_EPS) // previous keyframe doesn't exist or isn't at the end
-                {                                                                                    // adjust 'after_end' keyframe so it's positioned at the end
-                    Pos &next = poss[after_end];
-                    params.time = end_time;
-                    pos(next.pos, params);
-                    next.time = end_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
-                }
+        // check for keyframes after end
+        if (after_end >= 0)                                                                      // there is a keyframe after end
+            if (!InRange(after_end - 1, poss) || poss[after_end - 1].time < end_time - TIME_EPS) // previous keyframe doesn't exist or isn't at the end
+            {                                                                                    // adjust 'after_end' keyframe so it's positioned at the end
+                Pos &next = poss[after_end];
+                params.time = end_time;
+                pos(next.pos, params);
+                next.time = end_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
+            }
 
-            // check for keyframes before start
-            if (before_start >= 0)                                                                           // there is a keyframe before start
-                if (!InRange(before_start + 1, poss) || poss[before_start + 1].time > start_time + TIME_EPS) // next keyframe doesn't exist or isn't at the start
-                {                                                                                            // adjust 'before_start' keyframe so it's positioned at the start
-                    Pos &prev = poss[before_start];
-                    params.time = start_time;
-                    pos(prev.pos, params);
-                    prev.time = start_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
-                }
+        // check for keyframes before start
+        if (before_start >= 0)                                                                           // there is a keyframe before start
+            if (!InRange(before_start + 1, poss) || poss[before_start + 1].time > start_time + TIME_EPS) // next keyframe doesn't exist or isn't at the start
+            {                                                                                            // adjust 'before_start' keyframe so it's positioned at the start
+                Pos &prev = poss[before_start];
+                params.time = start_time;
+                pos(prev.pos, params);
+                prev.time = start_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
+            }
 
-            tc.clip(poss); // remove keyframes out of range and adjust time
-        }
+        tc.clip(poss); // remove keyframes out of range and adjust time
+    }
 
     // scales
     if (scales.elms() == 1)
         tc.adjust(scales[0].time);
     else                       // if there is only 1 frame, then keep it
         if (scales.elms() > 1) // otherwise check for before start and after end
-        {
-            tc.find(scales, before_start, after_end);
+    {
+        tc.find(scales, before_start, after_end);
 
-            // check for keyframes after end
-            if (after_end >= 0)                                                                          // there is a keyframe after end
-                if (!InRange(after_end - 1, scales) || scales[after_end - 1].time < end_time - TIME_EPS) // previous keyframe doesn't exist or isn't at the end
-                {                                                                                        // adjust 'after_end' keyframe so it's positioned at the end
-                    Scale &next = scales[after_end];
-                    params.time = end_time;
-                    scale(next.scale, params);
-                    next.time = end_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
-                }
+        // check for keyframes after end
+        if (after_end >= 0)                                                                          // there is a keyframe after end
+            if (!InRange(after_end - 1, scales) || scales[after_end - 1].time < end_time - TIME_EPS) // previous keyframe doesn't exist or isn't at the end
+            {                                                                                        // adjust 'after_end' keyframe so it's positioned at the end
+                Scale &next = scales[after_end];
+                params.time = end_time;
+                scale(next.scale, params);
+                next.time = end_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
+            }
 
-            // check for keyframes before start
-            if (before_start >= 0)                                                                               // there is a keyframe before start
-                if (!InRange(before_start + 1, scales) || scales[before_start + 1].time > start_time + TIME_EPS) // next keyframe doesn't exist or isn't at the start
-                {                                                                                                // adjust 'before_start' keyframe so it's positioned at the start
-                    Scale &prev = scales[before_start];
-                    params.time = start_time;
-                    scale(prev.scale, params);
-                    prev.time = start_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
-                }
+        // check for keyframes before start
+        if (before_start >= 0)                                                                               // there is a keyframe before start
+            if (!InRange(before_start + 1, scales) || scales[before_start + 1].time > start_time + TIME_EPS) // next keyframe doesn't exist or isn't at the start
+            {                                                                                                // adjust 'before_start' keyframe so it's positioned at the start
+                Scale &prev = scales[before_start];
+                params.time = start_time;
+                scale(prev.scale, params);
+                prev.time = start_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
+            }
 
-            tc.clip(scales); // remove keyframes out of range and adjust time
-        }
+        tc.clip(scales); // remove keyframes out of range and adjust time
+    }
 
 #if HAS_ANIM_ROT
     // rotations
@@ -1730,31 +1730,31 @@ AnimKeys &AnimKeys::clip(Bool anim_loop, Bool anim_linear, Flt anim_length, Flt 
         tc.adjust(rots[0].time);
     else                     // if there is only 1 frame, then keep it
         if (rots.elms() > 1) // otherwise check for before start and after end
-        {
-            tc.find(rots, before_start, after_end);
+    {
+        tc.find(rots, before_start, after_end);
 
-            // check for keyframes after end
-            if (after_end >= 0)                                                                      // there is a keyframe after end
-                if (!InRange(after_end - 1, rots) || rots[after_end - 1].time < end_time - TIME_EPS) // previous keyframe doesn't exist or isn't at the end
-                {                                                                                    // adjust 'after_end' keyframe so it's positioned at the end
-                    Rot &next = rots[after_end];
-                    params.time = end_time;
-                    rot(next.rot, params);
-                    next.time = end_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
-                }
+        // check for keyframes after end
+        if (after_end >= 0)                                                                      // there is a keyframe after end
+            if (!InRange(after_end - 1, rots) || rots[after_end - 1].time < end_time - TIME_EPS) // previous keyframe doesn't exist or isn't at the end
+            {                                                                                    // adjust 'after_end' keyframe so it's positioned at the end
+                Rot &next = rots[after_end];
+                params.time = end_time;
+                rot(next.rot, params);
+                next.time = end_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
+            }
 
-            // check for keyframes before start
-            if (before_start >= 0)                                                                           // there is a keyframe before start
-                if (!InRange(before_start + 1, rots) || rots[before_start + 1].time > start_time + TIME_EPS) // next keyframe doesn't exist or isn't at the start
-                {                                                                                            // adjust 'before_start' keyframe so it's positioned at the start
-                    Rot &prev = rots[before_start];
-                    params.time = start_time;
-                    rot(prev.rot, params);
-                    prev.time = start_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
-                }
+        // check for keyframes before start
+        if (before_start >= 0)                                                                           // there is a keyframe before start
+            if (!InRange(before_start + 1, rots) || rots[before_start + 1].time > start_time + TIME_EPS) // next keyframe doesn't exist or isn't at the start
+            {                                                                                            // adjust 'before_start' keyframe so it's positioned at the start
+                Rot &prev = rots[before_start];
+                params.time = start_time;
+                rot(prev.rot, params);
+                prev.time = start_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
+            }
 
-            tc.clip(rots); // remove keyframes out of range and adjust time
-        }
+        tc.clip(rots); // remove keyframes out of range and adjust time
+    }
 #endif
 
 #if HAS_ANIM_COLOR
@@ -1763,31 +1763,31 @@ AnimKeys &AnimKeys::clip(Bool anim_loop, Bool anim_linear, Flt anim_length, Flt 
         tc.adjust(colors[0].time);
     else                       // if there is only 1 frame, then keep it
         if (colors.elms() > 1) // otherwise check for before start and after end
-        {
-            tc.find(colors, before_start, after_end);
+    {
+        tc.find(colors, before_start, after_end);
 
-            // check for keyframes after end
-            if (after_end >= 0)                                                                          // there is a keyframe after end
-                if (!InRange(after_end - 1, colors) || colors[after_end - 1].time < end_time - TIME_EPS) // previous keyframe doesn't exist or isn't at the end
-                {                                                                                        // adjust 'after_end' keyframe so it's positioned at the end
-                    Color &next = colors[after_end];
-                    params.time = end_time;
-                    color(next.color, params);
-                    next.time = end_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
-                }
+        // check for keyframes after end
+        if (after_end >= 0)                                                                          // there is a keyframe after end
+            if (!InRange(after_end - 1, colors) || colors[after_end - 1].time < end_time - TIME_EPS) // previous keyframe doesn't exist or isn't at the end
+            {                                                                                        // adjust 'after_end' keyframe so it's positioned at the end
+                Color &next = colors[after_end];
+                params.time = end_time;
+                color(next.color, params);
+                next.time = end_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
+            }
 
-            // check for keyframes before start
-            if (before_start >= 0)                                                                               // there is a keyframe before start
-                if (!InRange(before_start + 1, colors) || colors[before_start + 1].time > start_time + TIME_EPS) // next keyframe doesn't exist or isn't at the start
-                {                                                                                                // adjust 'before_start' keyframe so it's positioned at the start
-                    Color &prev = colors[before_start];
-                    params.time = start_time;
-                    color(prev.color, params);
-                    prev.time = start_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
-                }
+        // check for keyframes before start
+        if (before_start >= 0)                                                                               // there is a keyframe before start
+            if (!InRange(before_start + 1, colors) || colors[before_start + 1].time > start_time + TIME_EPS) // next keyframe doesn't exist or isn't at the start
+            {                                                                                                // adjust 'before_start' keyframe so it's positioned at the start
+                Color &prev = colors[before_start];
+                params.time = start_time;
+                color(prev.color, params);
+                prev.time = start_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
+            }
 
-            tc.clip(colors); // remove keyframes out of range and adjust time
-        }
+        tc.clip(colors); // remove keyframes out of range and adjust time
+    }
 #endif
 
     if (reverse)
@@ -2019,7 +2019,7 @@ static void LoadColorTan(File &f, Mems<AnimKeys::Color> &colors) {
 #endif
 }
 #else
-static void LoadColorTan(File &f, Int colors) { f.skip((SIZE(Flt) + SIZE(Vec4) + SIZE(Vec4)) * colors); }   // (time+color+tan)*color
+static void LoadColorTan(File &f, Int colors) { f.skip((SIZE(Flt) + SIZE(Vec4) + SIZE(Vec4)) * colors); } // (time+color+tan)*color
 #endif
 /******************************************************************************/
 Bool AnimKeys::saveData(File &f) C {
@@ -2425,7 +2425,7 @@ void Animation::getRootMatrixCumulative(Matrix &matrix, Flt time) C {
             Matrix root_round; // this is root matrix at the start of the round
 #if 0
       rootStart().mulTimes(rounds  , rootTransform(), root_round);
-#else                                                                    // prefer this version, because most likely we're playing animations forward, and this way we save 1 matrix multiplication
+#else // prefer this version, because most likely we're playing animations forward, and this way we save 1 matrix multiplication
             rootEnd().mulTimes(rounds - 1, rootTransform(), root_round); // use "rounds-1" because we start from 'rootEnd' which is end of the loop (1 round already)
 #endif
             RevMatrix rm;
@@ -3210,302 +3210,302 @@ Animation &Animation::adjustForSameTransformWithDifferentSkeleton(C Skeleton &ol
                 if (old_bones.elms() == 1                                                                             // bone maps to only 1 old bone
                     && SameSet(old_bone, new_bone, old_parent, new_parent, weights, old_bone.parent, new_bone.parent) // it has the same set of bones/parents
                     && (old_parent || root_not_changed))                                                              // and there are parents or (when there are no parents, which means that parent is root) we preserve root animations
-                {
+            {
 #if FIND_ANIM_BY_NAME_ONLY
-                    if (C AnimBone *old_anim = findBone(old_bone.name))
+                if (C AnimBone *old_anim = findBone(old_bone.name))
 #else
-                    if (C AnimBone *old_anim = findBone(old_bone.name, old_bone.type, old_bone.type_index, old_bone.type_sub))
+                if (C AnimBone *old_anim = findBone(old_bone.name, old_bone.type, old_bone.type_index, old_bone.type_sub))
 #endif
-                    {
-                        OrientD new_bone_d = new_bone;
-                        MatrixD3 old_bone_m = old_bone, old_bone_m_inv, old_parent_m, new_parent_m_inv;
-                        old_bone.inverse(old_bone_m_inv); // in the simple version we HAVE TO ignore positions of bones and process only orientations, yes this was tested
-                        if (old_parent)
-                            old_parent_m = *old_parent;
-                        if (new_parent)
-                            new_parent->inverse(new_parent_m_inv);
-                        AnimBone &new_anim = anim_out.bones.New();
-                        new_anim = *old_anim;
-                        new_anim.id() = new_bone;
+                {
+                    OrientD new_bone_d = new_bone;
+                    MatrixD3 old_bone_m = old_bone, old_bone_m_inv, old_parent_m, new_parent_m_inv;
+                    old_bone.inverse(old_bone_m_inv); // in the simple version we HAVE TO ignore positions of bones and process only orientations, yes this was tested
+                    if (old_parent)
+                        old_parent_m = *old_parent;
+                    if (new_parent)
+                        new_parent->inverse(new_parent_m_inv);
+                    AnimBone &new_anim = anim_out.bones.New();
+                    new_anim = *old_anim;
+                    new_anim.id() = new_bone;
 
-                        REPA(new_anim.orns) // orientation
-                        {
-                            OrientD orn = new_anim.orns[i].orn;
-                            if (old_parent)
-                                orn.mul(old_parent_m, true); // convert to world space from old parent space
-                            MatrixD3 anim_transform;
+                    REPA(new_anim.orns) // orientation
+                    {
+                        OrientD orn = new_anim.orns[i].orn;
+                        if (old_parent)
+                            orn.mul(old_parent_m, true); // convert to world space from old parent space
+                        MatrixD3 anim_transform;
 #if 0
                   GetTransform(anim_transform, old_bone_m, MatrixD3(orn)); // transform which animates skel bone into animated bone
 #else
-                            anim_transform = old_bone_m_inv;
-                            anim_transform *= MatrixD3(orn); // transform which animates skel bone into animated bone
+                        anim_transform = old_bone_m_inv;
+                        anim_transform *= MatrixD3(orn); // transform which animates skel bone into animated bone
 #endif
-                            orn = new_bone_d;              // get new bone
-                            orn.mul(anim_transform, true); // apply animation transform
-                            if (new_parent)
-                                orn.mul(new_parent_m_inv, true); // convert to new parent space
-                            new_anim.orns[i].orn = orn;
-                        }
-                        // if(!new_anim.orns.elms()).. any code like that is not needed, because here we preserve transformations, so if source keyframe is not found, then it means transformation was identity
+                        orn = new_bone_d;              // get new bone
+                        orn.mul(anim_transform, true); // apply animation transform
+                        if (new_parent)
+                            orn.mul(new_parent_m_inv, true); // convert to new parent space
+                        new_anim.orns[i].orn = orn;
+                    }
+                    // if(!new_anim.orns.elms()).. any code like that is not needed, because here we preserve transformations, so if source keyframe is not found, then it means transformation was identity
 
-                        // position
-                        // if(!new_anim.poss.elms()){AnimKeys::Pos &pos=new_anim.poss.New(); pos.pos.zero(); pos.time=0;} any code like that is not needed, because we operate only on rotating existing positions here in the simple version
-                        if (new_anim.poss.elms()) {
-                            Bool pos_transform = (old_parent || new_parent); // if transform pos
-                            MatrixD3 pos_matrix;
-                            if (old_parent && new_parent)
-                                old_parent_m.mul(new_parent_m_inv, pos_matrix);
-                            else // both present, pos_matrix=old_parent_m*new_parent_m_inv
-                                if (old_parent)
-                                    pos_matrix = old_parent_m;
-                                else // only old_parent
-                                    if (new_parent)
-                                        pos_matrix = new_parent_m_inv; // only new_parent
-                            REPA(new_anim.poss)                        // position
-                            {
-                                VecD pos = new_anim.poss[i].pos;
+                    // position
+                    // if(!new_anim.poss.elms()){AnimKeys::Pos &pos=new_anim.poss.New(); pos.pos.zero(); pos.time=0;} any code like that is not needed, because we operate only on rotating existing positions here in the simple version
+                    if (new_anim.poss.elms()) {
+                        Bool pos_transform = (old_parent || new_parent); // if transform pos
+                        MatrixD3 pos_matrix;
+                        if (old_parent && new_parent)
+                            old_parent_m.mul(new_parent_m_inv, pos_matrix);
+                        else // both present, pos_matrix=old_parent_m*new_parent_m_inv
+                            if (old_parent)
+                            pos_matrix = old_parent_m;
+                        else // only old_parent
+                            if (new_parent)
+                            pos_matrix = new_parent_m_inv; // only new_parent
+                        REPA(new_anim.poss)                // position
+                        {
+                            VecD pos = new_anim.poss[i].pos;
 #if 0
                      if(old_parent)pos*=old_parent_m    ; // convert to world space from old parent space
                      if(new_parent)pos*=new_parent_m_inv; // convert to new parent space
 #else // optimized
-                                if (pos_transform)
-                                    pos *= pos_matrix;
+                            if (pos_transform)
+                                pos *= pos_matrix;
 #endif
-                                new_anim.poss[i].pos = pos;
-                            }
+                            new_anim.poss[i].pos = pos;
                         }
-
-                        // scale
-                        if (new_anim.scales.elms()) {                             // Warning: Scale conversion is not perfect, because scales are possible only on each axis separately, so if new bone is not rotated by 90 deg, then artifacts may occur
-                            MatrixD3 new_bone_in_old_bone_space = new_bone_d;     // get the new bone
-                            new_bone_in_old_bone_space.divNormalized(old_bone_m); // put it into old bone space
-                            REPA(new_anim.scales) {
-                                VecD scale = new_anim.scales[i].scale;
-                                MatrixD3 scaled_new_bone = new_bone_in_old_bone_space;
-                                scaled_new_bone.scale(ScaleFactor(scale));                        // apply old bone scale (we're in old bone space, so scaling in XYZ scales along old bone cross perp and dir)
-                                new_anim.scales[i].scale = ScaleFactorR(scaled_new_bone.scale()); // calculate new bone scale which is simply each axis length
-                            }
-                        }
-                        new_anim.setTangents(loop(), length());
                     }
-                } else // complex/advanced
+
+                    // scale
+                    if (new_anim.scales.elms()) {                             // Warning: Scale conversion is not perfect, because scales are possible only on each axis separately, so if new bone is not rotated by 90 deg, then artifacts may occur
+                        MatrixD3 new_bone_in_old_bone_space = new_bone_d;     // get the new bone
+                        new_bone_in_old_bone_space.divNormalized(old_bone_m); // put it into old bone space
+                        REPA(new_anim.scales) {
+                            VecD scale = new_anim.scales[i].scale;
+                            MatrixD3 scaled_new_bone = new_bone_in_old_bone_space;
+                            scaled_new_bone.scale(ScaleFactor(scale));                        // apply old bone scale (we're in old bone space, so scaling in XYZ scales along old bone cross perp and dir)
+                            new_anim.scales[i].scale = ScaleFactorR(scaled_new_bone.scale()); // calculate new bone scale which is simply each axis length
+                        }
+                    }
+                    new_anim.setTangents(loop(), length());
+                }
+            } else // complex/advanced
+            {
+                REPA(old_bones)
+                for (Int old_parent_i = old_bones[i].index;;) // iterate all old parents until one of them is an ancestor of new bone
                 {
-                    REPA(old_bones)
-                    for (Int old_parent_i = old_bones[i].index;;) // iterate all old parents until one of them is an ancestor of new bone
-                    {
-                        old_parent_i = old_skel.boneParent(old_parent_i);
-                        if (old_parent_i < 0) {
-                            keys.includeTimes(orn_times, pos_times, scale_times);
-                            break;
-                        }
-                        C SkelBone &old_parent = old_skel.bones[old_parent_i];
+                    old_parent_i = old_skel.boneParent(old_parent_i);
+                    if (old_parent_i < 0) {
+                        keys.includeTimes(orn_times, pos_times, scale_times);
+                        break;
+                    }
+                    C SkelBone &old_parent = old_skel.bones[old_parent_i];
 
 #if FIND_ANIM_BY_NAME_ONLY
-                        if (AnimBone *abon = findBone(old_parent.name))
+                    if (AnimBone *abon = findBone(old_parent.name))
 #else
-                        if (AnimBone *abon = findBone(old_parent.name, old_parent.type, old_parent.type_index, old_parent.type_sub))
+                    if (AnimBone *abon = findBone(old_parent.name, old_parent.type, old_parent.type_index, old_parent.type_sub))
 #endif
-                            abon->includeTimes(orn_times, pos_times, scale_times);
+                        abon->includeTimes(orn_times, pos_times, scale_times);
 
-                        if (!weights) {
-                            Int new_parent_i = new_skel.findBoneI(old_parent.name);
-                            if (new_parent_i >= 0 && new_skel.contains(new_parent_i, new_bone_i))
-                                break; // if the parent contains the bone in the new skeleton
-                        } else {
-                            Bool found = false;
-                            REPAD(new_parent_i, weights) // iterate all new bones to check which are connected to 'old_parent_i'
+                    if (!weights) {
+                        Int new_parent_i = new_skel.findBoneI(old_parent.name);
+                        if (new_parent_i >= 0 && new_skel.contains(new_parent_i, new_bone_i))
+                            break; // if the parent contains the bone in the new skeleton
+                    } else {
+                        Bool found = false;
+                        REPAD(new_parent_i, weights) // iterate all new bones to check which are connected to 'old_parent_i'
+                        {
+                            C Mems<IndexWeight> &weight = weights[new_parent_i];
+                            REPA(weight)
+                            if (weight[i].index == old_parent_i) // if this bone points to 'old_parent_i'
                             {
-                                C Mems<IndexWeight> &weight = weights[new_parent_i];
-                                REPA(weight)
-                                if (weight[i].index == old_parent_i) // if this bone points to 'old_parent_i'
-                                {
-                                    if (!new_skel.contains(new_parent_i, new_bone_i))
-                                        goto new_parent_not_contains_bone; // if at least one parent doesn't contain the bone, then stop this loop and keep checking next parents
-                                    found = true;                          // we've found bones connected with 'old_parent_i'
-                                    break;
-                                }
+                                if (!new_skel.contains(new_parent_i, new_bone_i))
+                                    goto new_parent_not_contains_bone; // if at least one parent doesn't contain the bone, then stop this loop and keep checking next parents
+                                found = true;                          // we've found bones connected with 'old_parent_i'
+                                break;
                             }
-                            if (found)
-                                break; // found a parent and all parents contain 'new_bone_i', so we can stop now
-                        new_parent_not_contains_bone:;
                         }
+                        if (found)
+                            break; // found a parent and all parents contain 'new_bone_i', so we can stop now
+                    new_parent_not_contains_bone:;
                     }
-                    for (Int new_parent_i = new_bone_i;;) // iterate all new parents until one of them is an ancestor of old bone
-                    {
-                        new_parent_i = new_skel.boneParent(new_parent_i);
-                        if (new_parent_i < 0) {
-                            anim_out.keys.includeTimes(orn_times, pos_times, scale_times);
-                            break;
-                        }
-                        C SkelBone &new_parent = new_skel.bones[new_parent_i];
-
-                        if (AnimBone *abon = anim_out.findBone(new_parent.name)) // here we're looking in 'anim_out' which already has names set according to 'new_skel'
-                            abon->includeTimes(orn_times, pos_times, scale_times);
-
-                        if (!weights) {
-                            Int old_parent_i = old_skel.findBoneI(new_parent.name);
-                            if (old_parent_i >= 0 && old_skel.contains(old_parent_i, old_bones[0].index))
-                                break; // if the parent contains the bone in the old skeleton
-                        } else if (InRange(new_parent_i, weights)) {
-                            C Mems<IndexWeight> &parent_weights = weights[new_parent_i];
-                            if (parent_weights.elms()) // if this bone has any links
-                            {
-                                REPA(parent_weights) {
-                                    Int old_parent_i = parent_weights[i].index;
-                                    REPA(old_bones)
-                                    if (!old_skel.contains(old_parent_i, old_bones[i].index))
-                                        goto old_parent_not_contains_bone; // if at least one isn't contained, then stop this loop and keep checking next parents
-                                }
-                                break; // all 'old_bones' are contained in this parent, so we can stop now
-                            old_parent_not_contains_bone:;
-                            }
-                        }
+                }
+                for (Int new_parent_i = new_bone_i;;) // iterate all new parents until one of them is an ancestor of old bone
+                {
+                    new_parent_i = new_skel.boneParent(new_parent_i);
+                    if (new_parent_i < 0) {
+                        anim_out.keys.includeTimes(orn_times, pos_times, scale_times);
+                        break;
                     }
+                    C SkelBone &new_parent = new_skel.bones[new_parent_i];
 
-                    // step 1, normally this could be done after step 2, because this orientations/scales normally don't affect this positions, unless this bone was moved
-                    REPA(old_bones) {
-                        C SkelBone &old_bone = *old_bones[i].bone;
-#if FIND_ANIM_BY_NAME_ONLY
-                        if (AnimBone *old_anim = findBone(old_bone.name))
-#else
-                        if (AnimBone *old_anim = findBone(old_bone.name, old_bone.type, old_bone.type_index, old_bone.type_sub))
-#endif
-                            old_anim->includeTimes(orn_times, pos_times, scale_times);
-                    }
-                    // step 2
-                    IncludeTimes(orn_times, pos_times);   // parent orientations affect this position
-                    IncludeTimes(scale_times, pos_times); // parent scales       affect this position
+                    if (AnimBone *abon = anim_out.findBone(new_parent.name)) // here we're looking in 'anim_out' which already has names set according to 'new_skel'
+                        abon->includeTimes(orn_times, pos_times, scale_times);
 
-                    // step 3, make sure we have at least 1 keyframe to process (after including orn times in pos times, in case orn is empty, but pos has something, in which case we would always add a useless key at time 0 for pos since it already has another)
-                    if (!orn_times.elms())
-                        orn_times.add(0);
-                    if (!pos_times.elms())
-                        pos_times.add(0);
-
-                    if (orn_times.elms() || pos_times.elms() || scale_times.elms()) {
-                        C AnimSkelBone &new_abon = new_askel.bones[new_bone_i];
-                        SkelAnim new_skela(new_skel, anim_out); // this needs to be created here and not once at the start, because we're dynamically adding new AnimBones to 'anim_out'
-                        AnimBone *added = null, anim;
-                        anim.id() = new_bone;
-                        Bool root_has_orn_scale = (anim_out.keys.orns.elms() || anim_out.keys.scales.elms());
-
-                        if (orn_times.elms()) // orientation
+                    if (!weights) {
+                        Int old_parent_i = old_skel.findBoneI(new_parent.name);
+                        if (old_parent_i >= 0 && old_skel.contains(old_parent_i, old_bones[0].index))
+                            break; // if the parent contains the bone in the old skeleton
+                    } else if (InRange(new_parent_i, weights)) {
+                        C Mems<IndexWeight> &parent_weights = weights[new_parent_i];
+                        if (parent_weights.elms()) // if this bone has any links
                         {
-                            MatrixD3 new_bone_m = new_bone, new_parent_m;
-                            if (new_parent)
-                                new_parent_m = *new_parent;
-                            anim.orns.setNumDiscard(orn_times.elms());
-                            REPA(anim.orns) {
-                                AnimKeys::Orn &orn = anim.orns[i];
-                                orn.time = orn_times[i];
-                                old_askel.clear().animateEx(old_skela, orn.time);
-                                if (old_bones.elms() == 1)
-                                    old_askel.updateMatrixParents(MatrixMIdentity, old_bones[0].index);
-                                else
-                                    old_askel.updateMatrix();
-                                new_askel.clear().animateEx(new_skela, orn.time);
-                                new_askel.updateMatrixParents(MatrixMIdentity, new_bone_i);
-
-                                MatrixD3 new_bone_transformed = new_bone_m;
-                                new_bone_transformed *= BoneWeightOrn(old_bones); // bone world orientation at the current time
-                                if (new_parent) {
-                                    MatrixD3 new_parent_transformed;
-                                    new_parent_m.mul(new_askel.bones[new_bone.parent].matrix(), new_parent_transformed); // parent bone world orientation at the current time, new_parent_transformed=new_parent_m*new_askel.bones[new_bone.parent].matrix()
-                                    new_bone_transformed *= new_parent_transformed.inverseNonOrthogonal();               // new_bone_transformed/=new_parent_transformed with non-orthogonal support (needed because of possible scale keyframes)
-                                } else if (root_has_orn_scale)
-                                    new_bone_transformed /= new_askel.root.matrix().orn();
-                                OrientD o = new_bone_transformed;
-                                o.fix();
-                                orn.orn = o;
+                            REPA(parent_weights) {
+                                Int old_parent_i = parent_weights[i].index;
+                                REPA(old_bones)
+                                if (!old_skel.contains(old_parent_i, old_bones[i].index))
+                                    goto old_parent_not_contains_bone; // if at least one isn't contained, then stop this loop and keep checking next parents
                             }
-                            orn_times.clear();
-                            // add orientations to the animation only after everything was setup
-                            anim.setTangents(loop(), length());
-                            if (added)
-                                Swap(anim.orns, added->orns);
-                            else {
-                                added = &anim_out.bones.New();
-                                Swap(anim, *added);
-                            }
-                            new_skela.create(new_skel, anim_out); // need to re-create because we have added orientations
-                        }
-
-                        if (scale_times.elms()) // scale
-                        {
-                            anim.scales.setNumDiscard(scale_times.elms());
-                            REPA(anim.scales) { // Warning: Scale conversion is not perfect, because scales are possible only on each axis separately, so if new bone is not rotated by 90 deg, then artifacts may occur
-                                AnimKeys::Scale &scale = anim.scales[i];
-                                scale.time = scale_times[i];
-                                old_askel.clear().animateEx(old_skela, scale.time);
-                                if (old_bones.elms() == 1)
-                                    old_askel.updateMatrixParents(MatrixMIdentity, old_bones[0].index);
-                                else
-                                    old_askel.updateMatrix();
-                                new_askel.clear().animateEx(new_skela, scale.time);
-                                new_askel.updateMatrixParents(MatrixMIdentity, new_bone_i);
-
-                                Matrix3 old_abon_matrix___orn = BoneWeightOrn(old_bones);
-                                Vec new_bone_cross = new_bone.cross(),
-                                    old_scale((new_bone_cross * old_abon_matrix___orn).length(), // desired scale (yes here should be 'new_bone' too, because we want to calculate the scale for new bone using old transformation matrix)
-                                              (new_bone.perp * old_abon_matrix___orn).length(),
-                                              (new_bone.dir * old_abon_matrix___orn).length()),
-                                    new_scale((new_bone_cross * new_abon.matrix().orn()).length(), // current scale
-                                              (new_bone.perp * new_abon.matrix().orn()).length(),
-                                              (new_bone.dir * new_abon.matrix().orn()).length()),
-                                    rel_scale = old_scale / new_scale; // relative scale that should be applied
-                                scale.scale = ScaleFactorR(rel_scale);
-                            }
-                            scale_times.clear();
-                            // add scales to the animation only after everything was setup
-                            anim.setTangents(loop(), length());
-                            if (added)
-                                Swap(anim.scales, added->scales);
-                            else {
-                                added = &anim_out.bones.New();
-                                Swap(anim, *added);
-                            }
-                            new_skela.create(new_skel, anim_out); // need to re-create because we have added scales
-                        }
-
-                        if (pos_times.elms()) // position
-                        {
-                            MatrixD3 new_parent_m;
-                            if (new_parent)
-                                new_parent_m = *new_parent;
-                            anim.poss.setNumDiscard(pos_times.elms());
-                            REPA(anim.poss) {
-                                AnimKeys::Pos &pos = anim.poss[i];
-                                pos.time = pos_times[i];
-                                old_askel.clear().animateEx(old_skela, pos.time);
-                                if (old_bones.elms() == 1)
-                                    old_askel.updateMatrixParents(MatrixMIdentity, old_bones[0].index);
-                                else
-                                    old_askel.updateMatrix();
-                                new_askel.clear().animateEx(new_skela, pos.time);
-                                new_askel.updateMatrixParents(MatrixMIdentity, new_bone_i);
-
-                                pos.pos = BoneWeightPos(old_bones) // desired mesh transform offset
-                                          - new_abon.matrix().pos; // current mesh transform offset
-                                if (new_parent) {
-                                    MatrixD3 new_parent_transformed;
-                                    new_parent_m.mul(new_askel.bones[new_bone.parent].matrix(), new_parent_transformed); // parent bone world orientation at the current time, new_parent_transformed=new_parent_m*new_askel.bones[new_bone.parent].matrix()
-                                    pos.pos *= new_parent_transformed.inverseNonOrthogonal();                            // pos.pos/=new_parent_transformed with non-orthogonal support (needed because of possible scale keyframes)
-                                } else if (root_has_orn_scale)
-                                    pos.pos /= new_askel.root.matrix().orn();
-                            }
-                            pos_times.clear();
-                            // add positions to the animation only after everything was setup
-                            anim.setTangents(loop(), length());
-                            if (added)
-                                Swap(anim.poss, added->poss);
-                            else {
-                                added = &anim_out.bones.New();
-                                Swap(anim, *added);
-                            }
-                            // new_skela.create(new_skel, anim_out); // need to re-create because we have added positions, won't be used for anything
+                            break; // all 'old_bones' are contained in this parent, so we can stop now
+                        old_parent_not_contains_bone:;
                         }
                     }
                 }
+
+                // step 1, normally this could be done after step 2, because this orientations/scales normally don't affect this positions, unless this bone was moved
+                REPA(old_bones) {
+                    C SkelBone &old_bone = *old_bones[i].bone;
+#if FIND_ANIM_BY_NAME_ONLY
+                    if (AnimBone *old_anim = findBone(old_bone.name))
+#else
+                    if (AnimBone *old_anim = findBone(old_bone.name, old_bone.type, old_bone.type_index, old_bone.type_sub))
+#endif
+                        old_anim->includeTimes(orn_times, pos_times, scale_times);
+                }
+                // step 2
+                IncludeTimes(orn_times, pos_times);   // parent orientations affect this position
+                IncludeTimes(scale_times, pos_times); // parent scales       affect this position
+
+                // step 3, make sure we have at least 1 keyframe to process (after including orn times in pos times, in case orn is empty, but pos has something, in which case we would always add a useless key at time 0 for pos since it already has another)
+                if (!orn_times.elms())
+                    orn_times.add(0);
+                if (!pos_times.elms())
+                    pos_times.add(0);
+
+                if (orn_times.elms() || pos_times.elms() || scale_times.elms()) {
+                    C AnimSkelBone &new_abon = new_askel.bones[new_bone_i];
+                    SkelAnim new_skela(new_skel, anim_out); // this needs to be created here and not once at the start, because we're dynamically adding new AnimBones to 'anim_out'
+                    AnimBone *added = null, anim;
+                    anim.id() = new_bone;
+                    Bool root_has_orn_scale = (anim_out.keys.orns.elms() || anim_out.keys.scales.elms());
+
+                    if (orn_times.elms()) // orientation
+                    {
+                        MatrixD3 new_bone_m = new_bone, new_parent_m;
+                        if (new_parent)
+                            new_parent_m = *new_parent;
+                        anim.orns.setNumDiscard(orn_times.elms());
+                        REPA(anim.orns) {
+                            AnimKeys::Orn &orn = anim.orns[i];
+                            orn.time = orn_times[i];
+                            old_askel.clear().animateEx(old_skela, orn.time);
+                            if (old_bones.elms() == 1)
+                                old_askel.updateMatrixParents(MatrixMIdentity, old_bones[0].index);
+                            else
+                                old_askel.updateMatrix();
+                            new_askel.clear().animateEx(new_skela, orn.time);
+                            new_askel.updateMatrixParents(MatrixMIdentity, new_bone_i);
+
+                            MatrixD3 new_bone_transformed = new_bone_m;
+                            new_bone_transformed *= BoneWeightOrn(old_bones); // bone world orientation at the current time
+                            if (new_parent) {
+                                MatrixD3 new_parent_transformed;
+                                new_parent_m.mul(new_askel.bones[new_bone.parent].matrix(), new_parent_transformed); // parent bone world orientation at the current time, new_parent_transformed=new_parent_m*new_askel.bones[new_bone.parent].matrix()
+                                new_bone_transformed *= new_parent_transformed.inverseNonOrthogonal();               // new_bone_transformed/=new_parent_transformed with non-orthogonal support (needed because of possible scale keyframes)
+                            } else if (root_has_orn_scale)
+                                new_bone_transformed /= new_askel.root.matrix().orn();
+                            OrientD o = new_bone_transformed;
+                            o.fix();
+                            orn.orn = o;
+                        }
+                        orn_times.clear();
+                        // add orientations to the animation only after everything was setup
+                        anim.setTangents(loop(), length());
+                        if (added)
+                            Swap(anim.orns, added->orns);
+                        else {
+                            added = &anim_out.bones.New();
+                            Swap(anim, *added);
+                        }
+                        new_skela.create(new_skel, anim_out); // need to re-create because we have added orientations
+                    }
+
+                    if (scale_times.elms()) // scale
+                    {
+                        anim.scales.setNumDiscard(scale_times.elms());
+                        REPA(anim.scales) { // Warning: Scale conversion is not perfect, because scales are possible only on each axis separately, so if new bone is not rotated by 90 deg, then artifacts may occur
+                            AnimKeys::Scale &scale = anim.scales[i];
+                            scale.time = scale_times[i];
+                            old_askel.clear().animateEx(old_skela, scale.time);
+                            if (old_bones.elms() == 1)
+                                old_askel.updateMatrixParents(MatrixMIdentity, old_bones[0].index);
+                            else
+                                old_askel.updateMatrix();
+                            new_askel.clear().animateEx(new_skela, scale.time);
+                            new_askel.updateMatrixParents(MatrixMIdentity, new_bone_i);
+
+                            Matrix3 old_abon_matrix___orn = BoneWeightOrn(old_bones);
+                            Vec new_bone_cross = new_bone.cross(),
+                                old_scale((new_bone_cross * old_abon_matrix___orn).length(), // desired scale (yes here should be 'new_bone' too, because we want to calculate the scale for new bone using old transformation matrix)
+                                          (new_bone.perp * old_abon_matrix___orn).length(),
+                                          (new_bone.dir * old_abon_matrix___orn).length()),
+                                new_scale((new_bone_cross * new_abon.matrix().orn()).length(), // current scale
+                                          (new_bone.perp * new_abon.matrix().orn()).length(),
+                                          (new_bone.dir * new_abon.matrix().orn()).length()),
+                                rel_scale = old_scale / new_scale; // relative scale that should be applied
+                            scale.scale = ScaleFactorR(rel_scale);
+                        }
+                        scale_times.clear();
+                        // add scales to the animation only after everything was setup
+                        anim.setTangents(loop(), length());
+                        if (added)
+                            Swap(anim.scales, added->scales);
+                        else {
+                            added = &anim_out.bones.New();
+                            Swap(anim, *added);
+                        }
+                        new_skela.create(new_skel, anim_out); // need to re-create because we have added scales
+                    }
+
+                    if (pos_times.elms()) // position
+                    {
+                        MatrixD3 new_parent_m;
+                        if (new_parent)
+                            new_parent_m = *new_parent;
+                        anim.poss.setNumDiscard(pos_times.elms());
+                        REPA(anim.poss) {
+                            AnimKeys::Pos &pos = anim.poss[i];
+                            pos.time = pos_times[i];
+                            old_askel.clear().animateEx(old_skela, pos.time);
+                            if (old_bones.elms() == 1)
+                                old_askel.updateMatrixParents(MatrixMIdentity, old_bones[0].index);
+                            else
+                                old_askel.updateMatrix();
+                            new_askel.clear().animateEx(new_skela, pos.time);
+                            new_askel.updateMatrixParents(MatrixMIdentity, new_bone_i);
+
+                            pos.pos = BoneWeightPos(old_bones) // desired mesh transform offset
+                                      - new_abon.matrix().pos; // current mesh transform offset
+                            if (new_parent) {
+                                MatrixD3 new_parent_transformed;
+                                new_parent_m.mul(new_askel.bones[new_bone.parent].matrix(), new_parent_transformed); // parent bone world orientation at the current time, new_parent_transformed=new_parent_m*new_askel.bones[new_bone.parent].matrix()
+                                pos.pos *= new_parent_transformed.inverseNonOrthogonal();                            // pos.pos/=new_parent_transformed with non-orthogonal support (needed because of possible scale keyframes)
+                            } else if (root_has_orn_scale)
+                                pos.pos /= new_askel.root.matrix().orn();
+                        }
+                        pos_times.clear();
+                        // add positions to the animation only after everything was setup
+                        anim.setTangents(loop(), length());
+                        if (added)
+                            Swap(anim.poss, added->poss);
+                        else {
+                            added = &anim_out.bones.New();
+                            Swap(anim, *added);
+                        }
+                        // new_skela.create(new_skel, anim_out); // need to re-create because we have added positions, won't be used for anything
+                    }
+                }
+            }
             old_bones.clear();
         }
     }
@@ -4338,7 +4338,7 @@ Animation &Animation::transform(C Matrix &matrix, C Skeleton &source, Bool skel_
 #endif
 
             // position
-#if 1                       // optimized
+#if 1 // optimized
             if (skel_const) // as explained below, the more complex formula has to be done only for ANIM_TRANSFORM_SKEL_CONST, because for other cases, 'temp.pos' is zero
             {
                 Vec bone = source.bones[sbon_index].pos;

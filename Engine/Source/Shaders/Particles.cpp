@@ -92,7 +92,7 @@ void Particle_VS(VtxInput vtx,
 #endif
     if (ANIM != ANIM_NONE) {
         Flt frame = vtx.uv1().x;
-#if 0                   // integer version
+#if 0 // integer version
       UInt frames=UInt(Round(ParticleFrames.x*ParticleFrames.y));
       UInt f     =UInt(Trunc(frame))%frames;
 #if ANIM == ANIM_SMOOTH // frame blending

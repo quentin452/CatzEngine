@@ -2,17 +2,16 @@
 /******************************************************************************/
 // CS_GET_CODE_VER
 /******************************************************************************/
-class ElmTypeVer
-{
-   UID      id;
-   ELM_TYPE type;
-   Version  ver;
+class ElmTypeVer {
+    UID id;
+    ELM_TYPE type;
+    Version ver;
 
-   void set(C UID &id, ELM_TYPE type, C Version &ver);
-   void set(C Elm &elm                              );
+    void set(C UID &id, ELM_TYPE type, C Version &ver);
+    void set(C Elm &elm);
 
-   bool save(File &f)C;
-   bool load(File &f); 
+    bool save(File &f) C;
+    bool load(File &f);
 };
 /******************************************************************************/
 /******************************************************************************/

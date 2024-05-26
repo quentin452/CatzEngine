@@ -534,7 +534,7 @@ void _Sound::setBufferData(Byte *buffer, Int size) // no extra care needed
                 clear = -raw_pos;
             else // if data position is before the available data then clear
                 if (raw_pos >= raw_size && !kill)
-                    kill = buffers(); // if data position is after  the available data then kill
+                kill = buffers(); // if data position is after  the available data then kill
         }
         if (kill)
             clear = size; // if killing then clear
@@ -743,8 +743,8 @@ Bool _Sound::update(Flt dt) // !! requires 'SoundAPILock' !!
             _fade_d = 0;
         } else               // don't check for >=1 in case '_fade_d' is <0 (want to fade out) however 'dt'=0
             if (_fade < 0) { /*_fade=0; _fade_d=0;*/
-                del();
-            } // !! requires 'SoundAPILock' !! don't clear members because we're deleting, check for <0 instead of <=0, in case we want to fade in from zero, '_fade_d' is >0 however 'dt'=0
+            del();
+        } // !! requires 'SoundAPILock' !! don't clear members because we're deleting, check for <0 instead of <=0, in case we want to fade in from zero, '_fade_d' is >0 however 'dt'=0
         AtomicOr(flag, SOUND_CHANGED_VOLUME);
     }
 
@@ -1212,7 +1212,7 @@ again:
 #elif CUSTOM_AUDIO
                 AudioThread.pause();
 #else
-                REPAO(SoundMemxPlaying)->_buffer.pause();    // !! requires 'SoundAPILock' !! pause all playing sounds
+                REPAO(SoundMemxPlaying)->_buffer.pause(); // !! requires 'SoundAPILock' !! pause all playing sounds
 #endif
                 AtomicOr(SoundPause, SOUND_PAUSED);
             } else {

@@ -1038,7 +1038,7 @@ Mesh &Mesh::drawGroupEnum(Enum *e, Bool reset_when_not_found) {
                 part._draw_mask = IndexToFlag(enum_index);
             else // if enum found then adjust the draw mask
                 if (reset_when_not_found)
-                    part._draw_mask = IndexToFlag(0); // otherwise reset or keep
+                part._draw_mask = IndexToFlag(0); // otherwise reset or keep
         }
     }
     return T;

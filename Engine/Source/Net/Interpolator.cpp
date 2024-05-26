@@ -13,7 +13,7 @@ static Flt InterpolatorFrac(Flt frac) {
       frac=2; // limit prediction
 #endif
    }
-#else             // quadratic
+#else // quadratic
     if (frac > 1) // convert frac from 1 .. 2 .. 3 to: 1 .. 1.5 .. 1 using quadratic function
     {
         // x-x*x/2, where x=frac-1

@@ -1344,10 +1344,10 @@ struct PakCreator {
                 f = &processed;
             else // if we've de/compressed data for storage, then we have to use it (this will be valid only if decompressed or compressed)
                 if (data)
-                    f = data->openRaw(temp);
-                else // open without decompressing, because we expect files as they are, and if they're compressed, it should be speicified with 'compression'
-                    if (temp.read(data_name, src_cipher))
-                        f = &temp;
+                f = data->openRaw(temp);
+            else // open without decompressing, because we expect files as they are, and if they're compressed, it should be speicified with 'compression'
+                if (temp.read(data_name, src_cipher))
+                f = &temp;
             if (f)
                 f->pos(0);
             return f;
@@ -2464,7 +2464,7 @@ Bool Pak::replaceInPlace(Memb<DataRangeAbs> &used_file_ranges, C CMemPtr<PakFile
                         file.xxHash64_32 = src_file->data_xxHash64_32;
                     else // only if not specified
                         if (!src_file->data_xxHash64_32)
-                            changed = true; // if user specified hash that wasn't available in the source, then it means we have to write it
+                        changed = true; // if user specified hash that wasn't available in the source, then it means we have to write it
                     file.modify_time_utc = src_file->modify_time_utc;
                     file.data.set(*src_file, T);
                 }

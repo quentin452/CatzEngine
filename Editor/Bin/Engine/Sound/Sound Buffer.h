@@ -15,12 +15,12 @@ enum VIRTUALIZATION_MODE // 2D Sound Virtualization Mode
 inline Flt SoundSpeed(Flt speed) { return Mid(speed, 0.0f, (Flt)MAX_SOUND_SPEED); }
 
 #if HAS_THREADS
-#define SOUND_TIMER 25                                     // 25 ms which is 40 Hz/FPS, recommended value to be between 16.666 ms (60 Hz/FPS) .. 33.333 ms (30 Hz/FPS), also the callback will be triggered at least once per frame (due to 'SoundEvent' being triggered at the end of each frame to immediately process any changes), shorter timers result in smaller memory usage at the cost of additional overhead on the CPU
+#define SOUND_TIMER 25 // 25 ms which is 40 Hz/FPS, recommended value to be between 16.666 ms (60 Hz/FPS) .. 33.333 ms (30 Hz/FPS), also the callback will be triggered at least once per frame (due to 'SoundEvent' being triggered at the end of each frame to immediately process any changes), shorter timers result in smaller memory usage at the cost of additional overhead on the CPU
 #define SOUND_TIME (SOUND_TIMER * 2 * 2 * MAX_SOUND_SPEED) // 2 (2 half buffers) * 2 (safety due to sounds being started at different times) * MAX_SOUND_SPEED
-#define SOUND_TIME_RECORD (SOUND_TIMER * 2 * 2)            // 2 (2 half buffers) * 2 (safety due to sounds being started at different times), this doesn't need MAX_SOUND_SPEED because sounds are always recorded with speed=1
+#define SOUND_TIME_RECORD (SOUND_TIMER * 2 * 2) // 2 (2 half buffers) * 2 (safety due to sounds being started at different times), this doesn't need MAX_SOUND_SPEED because sounds are always recorded with speed=1
 #else
 #define SOUND_TIMER 50
-#define SOUND_TIME 1200       // when there are no threads available, set a big sound buffer, to allow some tolerance for pauses during loading
+#define SOUND_TIME 1200 // when there are no threads available, set a big sound buffer, to allow some tolerance for pauses during loading
 #define SOUND_TIME_RECORD 500 // when there are no threads available, set a big sound buffer, to allow some tolerance for pauses during loading
 #endif
 

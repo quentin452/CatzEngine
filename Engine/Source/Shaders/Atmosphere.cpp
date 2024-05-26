@@ -214,7 +214,7 @@ void VS(VtxInput vtx,
 #if FLAT
     posXY = UVToPosXY(vtx.uv());
     pixel = Vec4(vtx.pos2(), Z_BACK, 1); // set Z to be at the end of the viewport, this enables optimizations by processing only foreground pixels (no sky/background)
-#else                                    // GEOM
+#else // GEOM
     pixel = Project(TransformPos(vtx.pos()));
 
 #if !GL_ES

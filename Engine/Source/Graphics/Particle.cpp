@@ -527,9 +527,9 @@ Bool Particles::update(Flt dt) {
                 _fade = emitter_life / fade_in;
             else // fade in
                 if (left < fade_out)
-                    _fade = left / fade_out;
-                else           // fade out
-                    _fade = 1; // middle
+                _fade = left / fade_out;
+            else           // fade out
+                _fade = 1; // middle
         } else {
             _fade = 1;
         }

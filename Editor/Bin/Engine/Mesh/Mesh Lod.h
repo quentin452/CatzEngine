@@ -179,7 +179,7 @@ struct MeshLod // Level of Detail, array of Mesh Part's
 
 // draw
 #if EE_PRIVATE
-                                                                                                                                  // helper drawing
+        // helper drawing
     void draw2D(C Color &vtx_color, C Color &edge_color, C Color &face_color, Flt vtx_r = 0.04f, Flt side_width = 0.01f) C;                                             // draw 2D
     void drawNormals2D(Flt length, C Color &edge_color, C Color &vtx_color = TRANSPARENT) C;                                                                            // draw 2D normals
     void drawNormals(Flt length, C Color &face_color, C Color &vtx_color = TRANSPARENT, C Color &tangent_color = TRANSPARENT, C Color &binormal_color = TRANSPARENT) C; // draw 3D normals

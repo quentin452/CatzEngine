@@ -901,17 +901,17 @@ Bool Blocks::raycast(C Vec &start, C Vec &move, Vec *hit_pos, Vec *hit_normal, C
                                         MIN(frac, LerpR(local_start.x, local_end.x, (Flt)pos.x));
                                     else // moving right
                                         if (pos.x < last_pos.x)
-                                            MIN(frac, LerpR(local_start.x, local_end.x, (Flt)last_pos.x)); // moving left
+                                        MIN(frac, LerpR(local_start.x, local_end.x, (Flt)last_pos.x)); // moving left
                                     if (pos.y > last_pos.y)
                                         MIN(frac, LerpR(local_start.y, local_end.y, (Flt)pos.y));
                                     else // moving up
                                         if (pos.y < last_pos.y)
-                                            MIN(frac, LerpR(local_start.y, local_end.y, (Flt)last_pos.y)); // moving down
+                                        MIN(frac, LerpR(local_start.y, local_end.y, (Flt)last_pos.y)); // moving down
                                     if (pos.z > last_pos.z)
                                         MIN(frac, LerpR(local_start.z, local_end.z, (Flt)pos.z));
                                     else // moving forward
                                         if (pos.z < last_pos.z)
-                                            MIN(frac, LerpR(local_start.z, local_end.z, (Flt)last_pos.z)); // moving back
+                                        MIN(frac, LerpR(local_start.z, local_end.z, (Flt)last_pos.z)); // moving back
                                     *hit_pos = start + move * frac;
                                 }
                             }

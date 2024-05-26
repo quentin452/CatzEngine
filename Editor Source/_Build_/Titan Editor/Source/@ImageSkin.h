@@ -1,12 +1,11 @@
 ﻿/******************************************************************************/
-class ImageSkin : GuiImage
-{
-   static ObjPtrs<ImageSkin> images;
+class ImageSkin : GuiImage {
+    static ObjPtrs<ImageSkin> images;
 
-   void skinChanged();
+    void skinChanged();
 
-   ImageSkin();
-  ~ImageSkin();
+    ImageSkin();
+    ~ImageSkin();
 };
 /******************************************************************************/
 /******************************************************************************/

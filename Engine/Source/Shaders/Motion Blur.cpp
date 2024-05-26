@@ -5,9 +5,9 @@
       then find biggest motion along Perp(first biggest motion), using Dot(motion, perp)
 
 /******************************************************************************/
-#include "Motion Blur.h"
 #include "!Header.h"
 #include "Bloom.h"
+#include "Motion Blur.h"
 #include "Temporal.h"
 /******************************************************************************
 
@@ -179,7 +179,7 @@ VecH4 Convert_PS(NOPERSP Vec2 uv
     }
 
     // find secondary
-    Half dist2 = -1;         // -1 to always update
+    Half dist2 = -1; // -1 to always update
 #if RANGE <= (GL ? 16 : 256) // for GL limit to 16 because compilation is very slow
     UNROLL for (Int y = min; y < max; y += 2)
         UNROLL for (Int x = min; x < max; x += 2)
@@ -208,7 +208,7 @@ VecH4 Convert_PS(NOPERSP Vec2 uv
     VecH4 motion;
     if (min_pixel_motion > 0)
         motion.xy = 0; // XY=biggest, ZW=smallest
-#if 0                        // process samples individually
+#if 0 // process samples individually
    // for RANGE=1 (no scale  ) uv should remain unmodified              , because it's already at the center of 1x1 texel
    // for RANGE>1 (downsample) uv should be moved to the center of texel, because it's         at the center of 2x2 texels
    if(RANGE>1)uv+=ImgSize.xy*0.5;
@@ -216,7 +216,7 @@ VecH4 Convert_PS(NOPERSP Vec2 uv
    UNROLL for(Int y=min; y<max; y++)
    UNROLL for(Int x=min; x<max; x++)
       DilateMaxMin(motion, length2, TexPoint(ImgXY, UVInView(uv+Vec2(x, y)*ImgSize.xy, VIEW_FULL)));
-#else                        // process samples in 2x2 blocks using linear filtering
+#else // process samples in 2x2 blocks using linear filtering
     // for RANGE=1 (no scale          ) offset should be 0, because uv is already at the center of 1x1 texel
     // for RANGE=2 (2x downsample, 2x2) offset should be 0, because uv is already at the center of 2x2 texels (linear filtering is used)
     // for RANGE=4 (4x downsample, 4x4) offset should be 1, because uv is already at the center of 4x4 texels, however we want to process (2x2 2x2) so have to position at the center of top left 2x2
@@ -693,7 +693,7 @@ struct Pixel { // normally this should be done in full precision because we oper
         Half glow_a = tex.a;
         glow_a = SRGBToLinearFast(glow_a);                               // have to convert to linear because small glow of 1/255 would give 12.7/255 sRGB (Glow was sampled from non-sRGB texture and stored in RT alpha channel without any gamma conversions)
         glow = rgb * ((glow_a * BloomGlow()) / Max(Max(rgb), HALF_MIN)); // #Glow
-#if ALPHA                                                                // alpha stored separately
+#if ALPHA // alpha stored separately
         alpha = (filter ? TexLod(ImgX, uv) : TexPoint(ImgX, uv));
 #endif
 #elif ALPHA // alpha channel=alpha

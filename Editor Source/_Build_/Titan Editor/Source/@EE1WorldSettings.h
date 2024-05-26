@@ -1,14 +1,13 @@
 ﻿/******************************************************************************/
 // doesn't need to be thread-safe
 /******************************************************************************/
-class EE1WorldSettings : Game::WorldSettings
-{
-   PathSettings path;
+class EE1WorldSettings : Game::WorldSettings {
+    PathSettings path;
 
-   EE1WorldSettings& reset();
+    EE1WorldSettings &reset();
 
-   bool load(C Str  &name);
-   bool load(  File &f   );
+    bool load(C Str &name);
+    bool load(File &f);
 };
 /******************************************************************************/
 /******************************************************************************/

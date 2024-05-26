@@ -70,7 +70,7 @@ struct Data {
     centroid MatrixH3 mtrx : MATRIX; // !! may not be Normalized !! have to use 'centroid' to prevent values from getting outside of range, without centroid values can get MUCH different which might cause normals to be very big (very big vectors can't be normalized well, making them (0,0,0), which later causes NaN on normalization in other shaders)
     VecH Nrm() { return mtrx[2]; }
 #elif BUMP_MODE == SBUMP_FLAT
-    centroid VecH nrm : NORMAL;                               // !! may not be Normalized !! have to use 'centroid' to prevent values from getting outside of range, without centroid values can get MUCH different which might cause normals to be very big (very big vectors can't be normalized well, making them (0,0,0), which later causes NaN on normalization in other shaders)
+    centroid VecH nrm : NORMAL; // !! may not be Normalized !! have to use 'centroid' to prevent values from getting outside of range, without centroid values can get MUCH different which might cause normals to be very big (very big vectors can't be normalized well, making them (0,0,0), which later causes NaN on normalization in other shaders)
     VecH Nrm() { return nrm; }
 #else
     VecH Nrm() { return 0; }
@@ -319,7 +319,7 @@ void PS(
         Half scale = Material.bump / (steps * Lerp(1, tpos.z, Sat(tpos.z / 0.5))); // Material.bump/steps/Lerp(1, tpos.z, tpos.z);
 #elif PARALLAX_MODE == 3 // introduces a bit too much aliasing/artifacts on surfaces perpendicular to view direction
         Half scale = Material.bump / steps * (2 - tpos.z); // Material.bump/steps*Lerp(1, 1/tpos.z, tpos.z)
-#else                    // correct however introduces way too much aliasing/artifacts on surfaces perpendicular to view direction
+#else // correct however introduces way too much aliasing/artifacts on surfaces perpendicular to view direction
         Half scale = Material.bump / (steps * tpos.z);
 #endif
         tpos.xy *= scale;
@@ -335,7 +335,7 @@ void PS(
         Half scale = Material.bump / Lerp(1, tpos.z, Sat(tpos.z / RELIEF_Z_LIMIT));
 #elif RELIEF_MODE == 2 // produces slight aliasing/artifacts on surfaces perpendicular to view direction
         Half scale = Material.bump / Max(tpos.z, RELIEF_Z_LIMIT);
-#else                  // correct however introduces way too much aliasing/artifacts on surfaces perpendicular to view direction
+#else // correct however introduces way too much aliasing/artifacts on surfaces perpendicular to view direction
         Half scale = Material.bump / tpos.z;
 #endif
 
@@ -359,9 +359,9 @@ void PS(
         Half steps = Mid(length, 1, RELIEF_STEPS_MAX),
              stp = 1.0 / steps,
              ray = 1;
-        Vec2 uv_step = tpos.xy * stp;        // keep as HP to avoid conversions several times in the loop below
+        Vec2 uv_step = tpos.xy * stp; // keep as HP to avoid conversions several times in the loop below
 
-#if 1 // linear + interval search (faster)
+#if 1 // linear + interval search (faster) \
       // linear search
         Half height_next, height_prev = 0.5; // use 0.5 as approximate average value, we could do "RTexLodI(BUMP_IMAGE, I.uv, lod).BASE_CHANNEL_BUMP", however in tests that wasn't needed but only reduced performance
         LOOP for (;;) {
@@ -404,7 +404,7 @@ void PS(
                 I.uv -= uv_step * frac;
             }
         }
-#else // linear + binary search (slower because requires 3 tex reads in binary to get the same results as with only 0-1 tex reads in interval)
+#else // linear + binary search (slower because requires 3 tex reads in binary to get the same results as with only 0-1 tex reads in interval) \
       // linear search
         LOOP for (Int i = 0;; i++) {
             ray -= stp;
@@ -520,7 +520,7 @@ void PS(
     nrm = Transform(nrm, I.mtrx);
 #endif
 
-#else                                                                  // MATERIALS>1
+#else // MATERIALS>1
     // on GeForce with Half support (GeForce 1150+) it was verified that these values can get outside of 0..1 range, which might cause infinite loop in Relief=crash and cause normals to be very big and after Normalization make them equal to 0,0,0 which later causes NaN on normalization in other shaders
     if (MATERIALS == 1)
         I.material.x = Sat(I.material.x);
@@ -555,15 +555,15 @@ void PS(
         const Int steps = BUMP_MODE - SBUMP_PARALLAX0;
 
         VecH tpos = I.tpos();
-#if PARALLAX_MODE == 0                                                 // too flat
+#if PARALLAX_MODE == 0 // too flat
         Half scale = (1.0 / steps);
-#elif PARALLAX_MODE == 1                                               // best results (not as flat, and not much aliasing)
+#elif PARALLAX_MODE == 1 // best results (not as flat, and not much aliasing)
         Half scale = (1.0 / steps) / Lerp(1, tpos.z, tpos.z);
-#elif PARALLAX_MODE == 2                                               // generates too steep walls (not good for parallax)
+#elif PARALLAX_MODE == 2 // generates too steep walls (not good for parallax)
         Half scale = (1.0 / steps) / Lerp(1, tpos.z, Sat(tpos.z / 0.5));
-#elif PARALLAX_MODE == 3                                               // introduces a bit too much aliasing/artifacts on surfaces perpendicular to view direction
+#elif PARALLAX_MODE == 3 // introduces a bit too much aliasing/artifacts on surfaces perpendicular to view direction
         Half scale = (1.0 / steps) * (2 - tpos.z); // 1/steps*Lerp(1, 1/tpos.z, tpos.z)
-#else                                                                  // correct however introduces way too much aliasing/artifacts on surfaces perpendicular to view direction
+#else // correct however introduces way too much aliasing/artifacts on surfaces perpendicular to view direction
         Half scale = (1.0 / steps) / tpos.z;
 #endif
         tpos.xy *= scale;
@@ -639,7 +639,7 @@ void PS(
         Half scale = avg_bump / Lerp(1, tpos.z, Sat(tpos.z / RELIEF_Z_LIMIT));
 #elif RELIEF_MODE == 2 // produces slight aliasing/artifacts on surfaces perpendicular to view direction
         Half scale = avg_bump / Max(tpos.z, RELIEF_Z_LIMIT);
-#else                  // correct however introduces way too much aliasing/artifacts on surfaces perpendicular to view direction
+#else // correct however introduces way too much aliasing/artifacts on surfaces perpendicular to view direction
         Half scale = avg_bump / tpos.z;
 #endif
 
@@ -715,9 +715,9 @@ void PS(
         Half steps = Mid(length, 1, RELIEF_STEPS_MAX),
              stp = 1.0 / steps,
              ray = 1;
-        Vec2 uv_step = tpos.xy * stp;        // keep as HP to avoid conversions several times in the loop below
+        Vec2 uv_step = tpos.xy * stp; // keep as HP to avoid conversions several times in the loop below
 
-#if 1 // linear + interval search (faster)
+#if 1 // linear + interval search (faster) \
       // linear search
         Half height_next, height_prev = 0.5; // use 0.5 as approximate average value, we could do "RTexLodI(BUMP_IMAGE, I.uv, lod).BASE_CHANNEL_BUMP", however in tests that wasn't needed but only reduced performance
         LOOP for (;;) {
@@ -1049,58 +1049,58 @@ HSData HSConstant(InputPatch<Data, 3> I) { return GetHSData(I[0].pos, I[1].pos, 
         InputPatch<Data, 3> I,
         UInt cp_id
         : SV_OutputControlPointID) {
-        Data O;
+    Data O;
 
-        O.pos = I[cp_id].pos;
+    O.pos = I[cp_id].pos;
 
 #if USE_VEL
-        O.projected_prev_pos_xyw = I[cp_id].projected_prev_pos_xyw;
+    O.projected_prev_pos_xyw = I[cp_id].projected_prev_pos_xyw;
 #endif
 
 #if TESSELATE_VEL
-        O.nrm_prev = I[cp_id].nrm_prev;
+    O.nrm_prev = I[cp_id].nrm_prev;
 #endif
 
 #if SET_UV
-        O.uv = I[cp_id].uv;
+    O.uv = I[cp_id].uv;
 #endif
 
 #if BUMP_MODE > SBUMP_FLAT
-        O.mtrx = I[cp_id].mtrx;
+    O.mtrx = I[cp_id].mtrx;
 #elif BUMP_MODE == SBUMP_FLAT
-        O.nrm = I[cp_id].nrm;
+    O.nrm = I[cp_id].nrm;
 #endif
 
 #if MATERIALS > 1
-        O.material = I[cp_id].material;
+    O.material = I[cp_id].material;
 #endif
 
 #if COLORS
-        O.col = I[cp_id].col;
+    O.col = I[cp_id].col;
 #endif
 
 #if FAST_TPOS
-        O._tpos = I[cp_id]._tpos;
+    O._tpos = I[cp_id]._tpos;
 #endif
 
 #if GRASS_FADE
-        O.fade_out = I[cp_id].fade_out;
+    O.fade_out = I[cp_id].fade_out;
 #endif
 
 #if ALPHA_TEST == ALPHA_TEST_DITHER
-        O.face_id = I[cp_id].face_id;
+    O.face_id = I[cp_id].face_id;
 #endif
 
-        return O;
-    }
-        /******************************************************************************/
-        [domain("tri")] void DS(
-            HSData hs_data, const OutputPatch<Data, 3> I, Vec B
-            : SV_DomainLocation,
+    return O;
+}
+/******************************************************************************/
+[domain("tri")] void DS(
+    HSData hs_data, const OutputPatch<Data, 3> I, Vec B
+    : SV_DomainLocation,
 
-              out Data O,
-              out Vec4 pixel
-            : POSITION) {
+      out Data O,
+      out Vec4 pixel
+    : POSITION) {
 #if BUMP_MODE > SBUMP_FLAT
     O.mtrx[0] = I[0].mtrx[0] * B.z + I[1].mtrx[0] * B.x + I[2].mtrx[0] * B.y;
     O.mtrx[1] = I[0].mtrx[1] * B.z + I[1].mtrx[1] * B.x + I[2].mtrx[1] * B.y;

@@ -737,29 +737,29 @@ void GUI::update() {
             dragCancel();
         else                                                                       // if mouse dragging and RMB pressed then cancel dragging
             if (_drag_touch_id ? (!touch || touch->rs()) : (!Ms.b(0) || Ms.br(0))) // finish dragging
-            {
-                if (dragging())
-                    if (GuiObj *lit = (touch ? objAtPos(touch->pos()) : msLit())) {
-                        if (_drag_name.is() && App.drop) {
-                            Memc<Str> names;
-                            names.add(_drag_name);
-                            App.drop(names, lit, touch ? touch->pos() : Ms.pos());
-                        } // don't use 'Memt' here, because that would reduce the stack memory, and in this method all gui object updates are called, so it's best to give them as much as possible, and also this is called only on drag finish, so once in a long time
-                        if (_drag_finish)
-                            _drag_finish(_drag_user, lit, touch ? touch->pos() : Ms.pos());
-                        _drag_cancel = null; // clear cancel so we won't call it, because we've already called finish
+        {
+            if (dragging())
+                if (GuiObj *lit = (touch ? objAtPos(touch->pos()) : msLit())) {
+                    if (_drag_name.is() && App.drop) {
+                        Memc<Str> names;
+                        names.add(_drag_name);
+                        App.drop(names, lit, touch ? touch->pos() : Ms.pos());
+                    } // don't use 'Memt' here, because that would reduce the stack memory, and in this method all gui object updates are called, so it's best to give them as much as possible, and also this is called only on drag finish, so once in a long time
+                    if (_drag_finish)
+                        _drag_finish(_drag_user, lit, touch ? touch->pos() : Ms.pos());
+                    _drag_cancel = null; // clear cancel so we won't call it, because we've already called finish
 
-                        if (!menu())                                              // if menu was not activated during custom function calls
-                            if (lit = (touch ? objAtPos(touch->pos()) : msLit())) // detect lit again because previous may got deleted during custom function calls
-                                lit->activate();                                  // activate object at which we've drag and dropped
-                    }
-                dragCancel(); // clear drag related members
-            } else            // start dragging
-                if (!dragging() && (touch ? touch->dragging() : Ms.dragging())) {
-                    _dragging = true;
-                    if (_drag_start)
-                        _drag_start(_drag_user);
+                    if (!menu())                                              // if menu was not activated during custom function calls
+                        if (lit = (touch ? objAtPos(touch->pos()) : msLit())) // detect lit again because previous may got deleted during custom function calls
+                            lit->activate();                                  // activate object at which we've drag and dropped
                 }
+            dragCancel(); // clear drag related members
+        } else            // start dragging
+            if (!dragging() && (touch ? touch->dragging() : Ms.dragging())) {
+            _dragging = true;
+            if (_drag_start)
+                _drag_start(_drag_user);
+        }
     }
 
     _update_time = Time.curTime() - t;

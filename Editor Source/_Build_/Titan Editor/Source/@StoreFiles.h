@@ -1,14 +1,13 @@
 ﻿/******************************************************************************/
 /******************************************************************************/
-class StoreFiles : InternetCache
-{
-   bool initialized;
+class StoreFiles : InternetCache {
+    bool initialized;
 
-   void init();
-   ImagePtr getImage(C Str &url);
+    void init();
+    ImagePtr getImage(C Str &url);
 
-public:
-   StoreFiles();
+  public:
+    StoreFiles();
 };
 /******************************************************************************/
 /******************************************************************************/

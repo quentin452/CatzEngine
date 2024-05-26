@@ -62,7 +62,7 @@ static void SaveTranslation(C Memc<ShaderParam::Translation> &translation, File 
         FREP(single_translations)
         f << translation[i]; // save 1st element translation
 
-#if DEBUG                                                                       // verify that all elements have same translation
+#if DEBUG // verify that all elements have same translation
         for (Int e = 1, co = 0, go = 0, t = single_translations; e < elms; e++) // add rest of the elements
         {
             co += cpu_offset; // offset between elements

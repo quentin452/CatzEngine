@@ -18,7 +18,7 @@ enum JOINT_TYPE : Byte {
 
 #define PROJECT 1
 #define PROJECT_POS 0.01f // 0..FLT_MAX
-#define PROJECT_ANG PI    // 0..PI
+#define PROJECT_ANG PI // 0..PI
 
 /*struct SphericalJoint : PxJoint, PxConstraintConnector
 {
@@ -724,15 +724,15 @@ Bool Joint::save(File &f) C // !! IF MAKING ANY CHANGE, UPDATE TO NEW VERSION BE
             type = JOINT_DISTANCE;
         else // this must be checked as first, because 'btDistanceConstraint' extends 'btPoint2PointConstraint' checked below
             if (CAST(btGeneric6DofConstraint, _joint))
-                type = JOINT_FIXED;
-            else if (CAST(btHingeConstraint, _joint))
-                type = JOINT_HINGE;
-            else if (CAST(btPoint2PointConstraint, _joint))
-                type = JOINT_SPHERICAL;
-            else if (CAST(btConeTwistConstraint, _joint))
-                type = JOINT_SPHERICAL;
-            else if (CAST(btSliderConstraint, _joint))
-                type = JOINT_SLIDER;
+            type = JOINT_FIXED;
+        else if (CAST(btHingeConstraint, _joint))
+            type = JOINT_HINGE;
+        else if (CAST(btPoint2PointConstraint, _joint))
+            type = JOINT_SPHERICAL;
+        else if (CAST(btConeTwistConstraint, _joint))
+            type = JOINT_SPHERICAL;
+        else if (CAST(btSliderConstraint, _joint))
+            type = JOINT_SLIDER;
 #endif
     }
 

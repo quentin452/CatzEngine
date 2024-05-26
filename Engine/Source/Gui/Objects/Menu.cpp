@@ -181,7 +181,7 @@ void Menu::push(Int abs) {
                     mp.name = ((MenuElm *)data)->name;
                 else // prefer this, because below uses 'display_name'
                     if (ListColumn *lc = listColumn())
-                        mp.name = lc->md.asText(data, lc->precision);
+                    mp.name = lc->md.asText(data, lc->precision);
 
                 GuiObj *menu = this,
                        *parent = menu->parent();
@@ -631,12 +631,12 @@ void Menu::update(C GuiPC &gpc) {
                         activate();
                     } else // activate self on mouse    action
                         if (Kb.k(KB_LEFT) && Gui.menu() == _kb) {
-                            Int c = list.cur;
-                            activate();
-                            list.cur = c;
-                            Kb.eatKey();
-                            _no_child_draw = true;
-                        } // activate self on keyboard action
+                        Int c = list.cur;
+                        activate();
+                        list.cur = c;
+                        Kb.eatKey();
+                        _no_child_draw = true;
+                    } // activate self on keyboard action
                 }
             }
 
@@ -670,19 +670,19 @@ void Menu::update(C GuiPC &gpc) {
                     }
                 } else // use detection basing on the 'list.cur'
                     if (InRange(list.cur, list.visibleElms())) {
-                        Flt y = list.visToLocalY(list.cur) + gpc_this.offset.y,
-                            d = D.rectUI().max.y - (y + paddingT());
-                        if (d < 0) // top of the screen (check this before bottom of the screen)
+                    Flt y = list.visToLocalY(list.cur) + gpc_this.offset.y,
+                        d = D.rectUI().max.y - (y + paddingT());
+                    if (d < 0) // top of the screen (check this before bottom of the screen)
+                    {
+                        T.move(Vec2(0, Max(d, -ScrollSpeed(T))));
+                    } else {
+                        d = D.rectUI().min.y - (y - list.elmHeight() - paddingB());
+                        if (d > 0) // bottom of the screen
                         {
-                            T.move(Vec2(0, Max(d, -ScrollSpeed(T))));
-                        } else {
-                            d = D.rectUI().min.y - (y - list.elmHeight() - paddingB());
-                            if (d > 0) // bottom of the screen
-                            {
-                                T.move(Vec2(0, Min(d, ScrollSpeed(T))));
-                            }
+                            T.move(Vec2(0, Min(d, ScrollSpeed(T))));
                         }
                     }
+                }
 
                 // input
                 Bool enter_only = Kb.k(KB_RIGHT), by_touch = false;

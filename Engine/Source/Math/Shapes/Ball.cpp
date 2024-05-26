@@ -1371,14 +1371,14 @@ void SphereConvert::drawCell(C Color &color, C SphereArea &area, Flt radius) C {
         }
 }
 /******************************************************************************/
-#define Z0(i) (i)               // zero
-#define Z1(i) (res - 1 - i)     // zero     mirror
-#define N0(i) (i + res)         // negative
-#define N1(i) (-1 - i)          // negative mirror
-#define P0(i) (i - res)         // positive
+#define Z0(i) (i) // zero
+#define Z1(i) (res - 1 - i) // zero     mirror
+#define N0(i) (i + res) // negative
+#define N1(i) (-1 - i) // negative mirror
+#define P0(i) (i - res) // positive
 #define P1(i) (res * 2 - 1 - i) // positive mirror
 
-#define X(x) ((x + 1) * 6)     // -1..1
+#define X(x) ((x + 1) * 6) // -1..1
 #define Y(y) ((y + 1) * 6 * 3) // -1..1
 #define V(face, x, y) (face + X(x) + Y(y))
 
@@ -1890,7 +1890,7 @@ Bool Cuts(C Box &box, C Ball &ball) {
     }
 
     return true;
-#else   // slowest
+#else // slowest
     Flt dist2 = 0, d;
 
     if (ball.pos.x < box.min.x) {

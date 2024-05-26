@@ -1,31 +1,30 @@
 ﻿/******************************************************************************/
 /******************************************************************************/
-class CompareProjects : PropWin
-{
-   class ElmListElm // project element as list element
-   {
-      cchar8  *type_name;
-      Str      name;
-      UID      id;
-      ELM_TYPE type;
+class CompareProjects : PropWin {
+    class ElmListElm // project element as list element
+    {
+        cchar8 *type_name;
+        Str name;
+        UID id;
+        ELM_TYPE type;
 
-      void setElm(C Project &proj, C Elm &elm);
+        void setElm(C Project &proj, C Elm &elm);
 
-public:
-   ElmListElm();
-   };
+      public:
+        ElmListElm();
+    };
 
-   bool test_data, test_name, test_parent, test_publish, display_new;
+    bool test_data, test_name, test_parent, test_publish, display_new;
 
-   flt              prop_min_y;
-   Button           select_selected, select_all;
-   Memc<Project   > projects;
-   Memc<ElmListElm> data;
-   List<ElmListElm> list;
-   Region           region;
- //ViewportSkin     preview;
+    flt prop_min_y;
+    Button select_selected, select_all;
+    Memc<Project> projects;
+    Memc<ElmListElm> data;
+    List<ElmListElm> list;
+    Region region;
+    //ViewportSkin     preview;
 
- /*static void DrawPreview(Viewport &viewport) {SizeStats.drawPreview();}
+    /*static void DrawPreview(Viewport &viewport) {SizeStats.drawPreview();}
           void drawPreview()
    {
       if(ElmListElm *list_elm=list())
@@ -54,24 +53,24 @@ public:
       }
    }*/
 
-   static void Changed(C Property &prop);     
-   static void SelectSel(CompareProjects &cp);
-   static void SelectAll(CompareProjects &cp);
+    static void Changed(C Property &prop);
+    static void SelectSel(CompareProjects &cp);
+    static void SelectAll(CompareProjects &cp);
 
-   void release();
-   virtual CompareProjects& del ()override;
-   virtual CompareProjects& hide()override;
+    void release();
+    virtual CompareProjects &del() override;
+    virtual CompareProjects &hide() override;
 
-   virtual CompareProjects& rect(C Rect &rect)override;
-   void create();
-   static bool DiffElm(C Project &proj_a, C Elm &elm_a, C Project &proj_b, C Elm &elm_b);
-   void refresh();
-   void changed(C UID &proj_id); // project with 'proj_id' has changed
-   void compare(C MemPtr<UID> &proj_ids);
-   virtual void update(C GuiPC &gpc)override;
+    virtual CompareProjects &rect(C Rect &rect) override;
+    void create();
+    static bool DiffElm(C Project &proj_a, C Elm &elm_a, C Project &proj_b, C Elm &elm_b);
+    void refresh();
+    void changed(C UID &proj_id); // project with 'proj_id' has changed
+    void compare(C MemPtr<UID> &proj_ids);
+    virtual void update(C GuiPC &gpc) override;
 
-public:
-   CompareProjects();
+  public:
+    CompareProjects();
 };
 /******************************************************************************/
 /******************************************************************************/

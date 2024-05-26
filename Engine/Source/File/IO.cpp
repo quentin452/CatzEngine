@@ -530,34 +530,34 @@ Bool FCopy(Pak &pak, C PakFile &src, C Str &dest, FILE_OVERWRITE_MODE overwrite,
                 }
         } else // file
             if (overwrite != FILE_OVERWRITE_NEVER || !FExistSystem(dest)) {
-                // check
-                if (overwrite == FILE_OVERWRITE_DIFFERENT && FileInfo(src) == FileInfoSystem(dest))
-                    return true;
+            // check
+            if (overwrite == FILE_OVERWRITE_DIFFERENT && FileInfo(src) == FileInfoSystem(dest))
+                return true;
 
-                File s, d;
-                if (!s.read(src, pak))
+            File s, d;
+            if (!s.read(src, pak))
+                ok = false;
+            else {
+#if APPLE || LINUX
+                if (src.flag & PF_STD_LINK) {
+                    FDelFile(dest); // delete first because 'CreateSymLink' will fail if file already exists
+                    if (CreateSymLink(dest, DecodeSymLink(s)))
+                        FTimeUTC(dest, src.modify_time_utc);
+                    else
+                        ok = false;
+                } else
+#endif
+                    if (Is(safe_overwrite_suffix)) {
+                    if (!SafeOverwrite(s, dest, &src.modify_time_utc, dest_cipher, safe_overwrite_suffix))
+                        return false;
+                } else if (!d.write(dest, dest_cipher) || !s.copy(d) || !d.flush())
                     ok = false;
                 else {
-#if APPLE || LINUX
-                    if (src.flag & PF_STD_LINK) {
-                        FDelFile(dest); // delete first because 'CreateSymLink' will fail if file already exists
-                        if (CreateSymLink(dest, DecodeSymLink(s)))
-                            FTimeUTC(dest, src.modify_time_utc);
-                        else
-                            ok = false;
-                    } else
-#endif
-                        if (Is(safe_overwrite_suffix)) {
-                        if (!SafeOverwrite(s, dest, &src.modify_time_utc, dest_cipher, safe_overwrite_suffix))
-                            return false;
-                    } else if (!d.write(dest, dest_cipher) || !s.copy(d) || !d.flush())
-                        ok = false;
-                    else {
-                        d.del(); // release handle so we can apply file params
-                        FTimeUTC(dest, src.modify_time_utc);
-                    }
+                    d.del(); // release handle so we can apply file params
+                    FTimeUTC(dest, src.modify_time_utc);
                 }
             }
+        }
     }
     return ok;
 }
@@ -816,7 +816,7 @@ Bool FRename(C Str &src, C Str &dest) {
     case EXDEV:
         if (FCopy(s, d))
             return FDel(s);
-        break;  // located on another drive
+        break; // located on another drive
 
 #if SWITCH
     case EPERM: // Nintendo Switch fails to replace existing files - https://developer.nintendo.com/html/online-docs/nx-en/g1kr9vj6-en/Packages/SDK/NintendoSDK/Documents/Package/contents/Pages/Page_106358756.html
@@ -1175,7 +1175,7 @@ Bool GetDriveSize(C Str &path, Long *free, Long *total) {
             *total = _total.QuadPart;
         return true;
     }
-#elif IOS && 0                        // no need to use this, as 'statvfs' works fine
+#elif IOS && 0 // no need to use this, as 'statvfs' works fine
     if (NSStringAuto _path = UnixPath(path))
         if (NSDictionary *dict = [[NSFileManager defaultManager] attributesOfFileSystemForPath:_path error:nil]) {
             if (free)
@@ -1293,8 +1293,8 @@ void InitIO() {
 #endif
 
     // Data Path
-    _DataPath._d.setNumZero(MAX_LONG_PATH);                              // allocate string memory up-front, so when changing it later, the CChar* pointer will not be different (to avoid multi-threading issues), use '_d.setNumZero' instead of 'reserve' so that all characters are zero at start
-#if WINDOWS_OLD && DEBUG                                                 // automatically set data path when building engine in debug mode
+    _DataPath._d.setNumZero(MAX_LONG_PATH); // allocate string memory up-front, so when changing it later, the CChar* pointer will not be different (to avoid multi-threading issues), use '_d.setNumZero' instead of 'reserve' so that all characters are zero at start
+#if WINDOWS_OLD && DEBUG                    // automatically set data path when building engine in debug mode
     DataPath(GetPath(_GetPath(_GetPath(GetPath(__FILE__)))) + "\\Data"); // set 'DataPath' to the "Engine.pak" "Data" folder which is detected based on relative location of this CPP file
 #endif
 

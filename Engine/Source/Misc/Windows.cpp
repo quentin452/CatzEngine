@@ -1436,7 +1436,7 @@ static LRESULT CALLBACK WindowMsg(HWND window, UInt msg, WPARAM wParam, LPARAM l
             }
         }
 
-#if SUPPORT_WINDOWS_XP            // additional check for WinXP
+#if SUPPORT_WINDOWS_XP // additional check for WinXP
         if (OSVerNumber().x <= 5) // WinXP and below (WinXP is 5.1, Vista is 6.0, Win7 is 6.1, Win8 is 6.2, Win8.1 is 6.3, Win10 is 10)
             UpdateCandidates();   // must be called here as well because of Chinese NeiMa on WinXP (NeiMa doesn't call IMN_CHANGECANDIDATE), however this can't be called for Vista or newer because it causes disappearing of candidates for QuanPin when typing "q6"
 #endif
@@ -2259,7 +2259,7 @@ static Bool WaitForEvent(Int time) // assumes "time>0", false on timeout
     return false; // timeout
 }
 #elif LINUX && 0 // this doesn't work
-static Bool WaitForEvent(Int time)                                                        // assumes "time>0", false on timeout
+static Bool WaitForEvent(Int time) // assumes "time>0", false on timeout
 {
     if (XPending(XDisplay))
         return true;

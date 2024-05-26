@@ -204,27 +204,27 @@ Bool IsClearCoat(Flt value) { return IsPSM(value, PSM_CLEAR_COAT); }
 #define TexDepthRawMax(uv) TexMax(Depth, uv).x
 #endif
 /******************************************************************************/
-#define RTex(image, uv) image.Sample(SamplerRender, uv)                    // access 2D texture                               using Render Sampler
-#if GL                                                                     // for GL use 'SamplerRender' to avoid mixing different samplers, because on GL it would require to use a separate glsl 'sampler2D' which would increase CPU overhead for setting images/samplers and possibly exceed the MAX_SHADER_IMAGES
-#define RTexLod(image, uv) image.SampleLevel(SamplerRender, uv, 0)         // access 2D texture   0-th MipMap (LOD level=  0) using Render Sampler (however since 'SampleLevel' makes Anisotropy disabled then for possible better performance use 'SamplerLinearWrap')
+#define RTex(image, uv) image.Sample(SamplerRender, uv) // access 2D texture                               using Render Sampler
+#if GL // for GL use 'SamplerRender' to avoid mixing different samplers, because on GL it would require to use a separate glsl 'sampler2D' which would increase CPU overhead for setting images/samplers and possibly exceed the MAX_SHADER_IMAGES
+#define RTexLod(image, uv) image.SampleLevel(SamplerRender, uv, 0) // access 2D texture   0-th MipMap (LOD level=  0) using Render Sampler (however since 'SampleLevel' makes Anisotropy disabled then for possible better performance use 'SamplerLinearWrap')
 #define RTexLodI(image, uv, lod) image.SampleLevel(SamplerRender, uv, lod) // access 2D texture lod-th MipMap (LOD level=lod) using Render Sampler (however since 'SampleLevel' makes Anisotropy disabled then for possible better performance use 'SamplerLinearWrap')
 #else
-#define RTexLod(image, uv) image.SampleLevel(SamplerLinearWrap, uv, 0)         // access 2D texture   0-th MipMap (LOD level=  0) using Render Sampler (however since 'SampleLevel' makes Anisotropy disabled then for possible better performance use 'SamplerLinearWrap')
+#define RTexLod(image, uv) image.SampleLevel(SamplerLinearWrap, uv, 0) // access 2D texture   0-th MipMap (LOD level=  0) using Render Sampler (however since 'SampleLevel' makes Anisotropy disabled then for possible better performance use 'SamplerLinearWrap')
 #define RTexLodI(image, uv, lod) image.SampleLevel(SamplerLinearWrap, uv, lod) // access 2D texture lod-th MipMap (LOD level=lod) using Render Sampler (however since 'SampleLevel' makes Anisotropy disabled then for possible better performance use 'SamplerLinearWrap')
 #endif
-#define Tex(image, uv) image.Sample(SamplerLinearClamp, uv)                    // access 2D texture
-#define TexLod(image, uv) image.SampleLevel(SamplerLinearClamp, uv, 0)         // access 2D texture   0-th MipMap (LOD level=  0)
+#define Tex(image, uv) image.Sample(SamplerLinearClamp, uv) // access 2D texture
+#define TexLod(image, uv) image.SampleLevel(SamplerLinearClamp, uv, 0) // access 2D texture   0-th MipMap (LOD level=  0)
 #define TexLodI(image, uv, lod) image.SampleLevel(SamplerLinearClamp, uv, lod) // access 2D texture lod-th MipMap (LOD level=lod)
 
-#define Tex3D(image, uvw) image.Sample(SamplerLinearClamp, uvw)            // access 3D texture
+#define Tex3D(image, uvw) image.Sample(SamplerLinearClamp, uvw) // access 3D texture
 #define Tex3DLod(image, uvw) image.SampleLevel(SamplerLinearClamp, uvw, 0) // access 3D texture 0-th MipMap (LOD level=0)
 
-#define TexCube(image, uvw) image.Sample(SamplerRender, uvw)                    // access Cube texture
-#if GL                                                                          // for GL use 'SamplerRender' to avoid mixing different samplers, because on GL it would require to use a separate glsl 'sampler2D' which would increase CPU overhead for setting images/samplers and possibly exceed the MAX_SHADER_IMAGES
-#define TexCubeLod(image, uvw) image.SampleLevel(SamplerRender, uvw, 0)         // access Cube texture   0-th MipMap (LOD level=  0), since 'SampleLevel' makes Anisotropy disabled then for possible better performance instead of 'SamplerRender' use 'SamplerLinearWrap'
+#define TexCube(image, uvw) image.Sample(SamplerRender, uvw) // access Cube texture
+#if GL // for GL use 'SamplerRender' to avoid mixing different samplers, because on GL it would require to use a separate glsl 'sampler2D' which would increase CPU overhead for setting images/samplers and possibly exceed the MAX_SHADER_IMAGES
+#define TexCubeLod(image, uvw) image.SampleLevel(SamplerRender, uvw, 0) // access Cube texture   0-th MipMap (LOD level=  0), since 'SampleLevel' makes Anisotropy disabled then for possible better performance instead of 'SamplerRender' use 'SamplerLinearWrap'
 #define TexCubeLodI(image, uvw, lod) image.SampleLevel(SamplerRender, uvw, lod) // access Cube texture lod-th MipMap (LOD level=lod), since 'SampleLevel' makes Anisotropy disabled then for possible better performance instead of 'SamplerRender' use 'SamplerLinearWrap'
 #else
-#define TexCubeLod(image, uvw) image.SampleLevel(SamplerLinearWrap, uvw, 0)         // access Cube texture   0-th MipMap (LOD level=  0), since 'SampleLevel' makes Anisotropy disabled then for possible better performance instead of 'SamplerRender' use 'SamplerLinearWrap'
+#define TexCubeLod(image, uvw) image.SampleLevel(SamplerLinearWrap, uvw, 0) // access Cube texture   0-th MipMap (LOD level=  0), since 'SampleLevel' makes Anisotropy disabled then for possible better performance instead of 'SamplerRender' use 'SamplerLinearWrap'
 #define TexCubeLodI(image, uvw, lod) image.SampleLevel(SamplerLinearWrap, uvw, lod) // access Cube texture lod-th MipMap (LOD level=lod), since 'SampleLevel' makes Anisotropy disabled then for possible better performance instead of 'SamplerRender' use 'SamplerLinearWrap'
 #endif
 #define TexCubeClamp(image, uvw) image.Sample(SamplerLinearClamp, uvw) // access Cube texture
@@ -232,26 +232,26 @@ Bool IsClearCoat(Flt value) { return IsPSM(value, PSM_CLEAR_COAT); }
 #define TexPoint(image, uv) image.SampleLevel(SamplerPoint, uv, 0)
 #define TexPointOfs(image, uv, ofs) image.SampleLevel(SamplerPoint, uv, 0, ofs)
 
-#define TexMin(image, uv) image.SampleLevel(SamplerMinimum, uv, 0)              // returns minimum out of all samples
+#define TexMin(image, uv) image.SampleLevel(SamplerMinimum, uv, 0) // returns minimum out of all samples
 #define TexMinOfs(image, uv, ofs) image.SampleLevel(SamplerMinimum, uv, 0, ofs) // returns minimum out of all samples
 
-#define TexMax(image, uv) image.SampleLevel(SamplerMaximum, uv, 0)              // returns maximum out of all samples
+#define TexMax(image, uv) image.SampleLevel(SamplerMaximum, uv, 0) // returns maximum out of all samples
 #define TexMaxOfs(image, uv, ofs) image.SampleLevel(SamplerMaximum, uv, 0, ofs) // returns maximum out of all samples
 
 /* TEXTURE ACCESSING                 (Y^)
    GATHER returns in following order: V1 X  Y
                                       V0 W  Z
                                        + U0 U1 (X>) */
-#define TexGather(image, uv) image.Gather(SamplerPoint, uv)              // gather available since SM_4_1, GL 4.0, GL ES 3.1
+#define TexGather(image, uv) image.Gather(SamplerPoint, uv) // gather available since SM_4_1, GL 4.0, GL ES 3.1
 #define TexGatherOfs(image, uv, ofs) image.Gather(SamplerPoint, uv, ofs) // gather available since SM_4_1, GL 4.0, GL ES 3.1
 
-#define TexGatherR(image, uv) image.GatherRed(SamplerPoint, uv)                // gather channel available since SM_5, GL 4.0, GL ES 3.1
-#define TexGatherG(image, uv) image.GatherGreen(SamplerPoint, uv)              // gather channel available since SM_5, GL 4.0, GL ES 3.1
-#define TexGatherB(image, uv) image.GatherBlue(SamplerPoint, uv)               // gather channel available since SM_5, GL 4.0, GL ES 3.1
-#define TexGatherA(image, uv) image.GatherAlpha(SamplerPoint, uv)              // gather channel available since SM_5, GL 4.0, GL ES 3.1
-#define TexGatherROfs(image, uv, ofs) image.GatherRed(SamplerPoint, uv, ofs)   // gather channel available since SM_5, GL 4.0, GL ES 3.1
+#define TexGatherR(image, uv) image.GatherRed(SamplerPoint, uv) // gather channel available since SM_5, GL 4.0, GL ES 3.1
+#define TexGatherG(image, uv) image.GatherGreen(SamplerPoint, uv) // gather channel available since SM_5, GL 4.0, GL ES 3.1
+#define TexGatherB(image, uv) image.GatherBlue(SamplerPoint, uv) // gather channel available since SM_5, GL 4.0, GL ES 3.1
+#define TexGatherA(image, uv) image.GatherAlpha(SamplerPoint, uv) // gather channel available since SM_5, GL 4.0, GL ES 3.1
+#define TexGatherROfs(image, uv, ofs) image.GatherRed(SamplerPoint, uv, ofs) // gather channel available since SM_5, GL 4.0, GL ES 3.1
 #define TexGatherGOfs(image, uv, ofs) image.GatherGreen(SamplerPoint, uv, ofs) // gather channel available since SM_5, GL 4.0, GL ES 3.1
-#define TexGatherBOfs(image, uv, ofs) image.GatherBlue(SamplerPoint, uv, ofs)  // gather channel available since SM_5, GL 4.0, GL ES 3.1
+#define TexGatherBOfs(image, uv, ofs) image.GatherBlue(SamplerPoint, uv, ofs) // gather channel available since SM_5, GL 4.0, GL ES 3.1
 #define TexGatherAOfs(image, uv, ofs) image.GatherAlpha(SamplerPoint, uv, ofs) // gather channel available since SM_5, GL 4.0, GL ES 3.1
 
 #define TexSample(image, pixel, i) image.Load(pixel, i) // access i-th sample of a multi-sampled texture
@@ -985,41 +985,41 @@ Half Dist2PointEdge(VecH2 pos, VecH2 edge_a, VecH2 edge_b) // safe in case 'edge
     return Dist2PointLine(pos, edge_a, Normalize(d));
 }
 /******************************************************************************/
-#if 1                                                                                   // faster (1.6 fps) tested on GeForce 1050 Ti
+#if 1 // faster (1.6 fps) tested on GeForce 1050 Ti
 Vec Transform(Vec v, Matrix3 m) { return v.x * m[0] + (v.y * m[1] + (v.z * m[2])); }    // transform 'v' vector by 'm' orientation-scale matrix
 VecH Transform(VecH v, MatrixH3 m) { return v.x * m[0] + (v.y * m[1] + (v.z * m[2])); } // transform 'v' vector by 'm' orientation-scale matrix
-#else                                                                                   // slower (1.0 fps)
-Vec Transform(Vec v, Matrix3 m) { return mul(v, m); }                                          // transform 'v' vector by 'm' orientation-scale matrix
-VecH Transform(VecH v, MatrixH3 m) { return mul(v, m); }                                       // transform 'v' vector by 'm' orientation-scale matrix
+#else // slower (1.0 fps)
+Vec Transform(Vec v, Matrix3 m) { return mul(v, m); }    // transform 'v' vector by 'm' orientation-scale matrix
+VecH Transform(VecH v, MatrixH3 m) { return mul(v, m); } // transform 'v' vector by 'm' orientation-scale matrix
 #endif
 
-#if 1                                                                                         // was faster on GeForce 650m, but on GeForce 1050 Ti performance is the same, however keep this version as in other cases 'mul' is slower
+#if 1 // was faster on GeForce 650m, but on GeForce 1050 Ti performance is the same, however keep this version as in other cases 'mul' is slower
 Vec Transform(Vec v, Matrix m) { return v.x * m[0] + (v.y * m[1] + (v.z * m[2] + m[3])); }    // transform 'v' vector by 'm' orientation-scale-translation matrix, faster version of "mul(Vec4 (v, 1), m)"
 VecH Transform(VecH v, Matrix m) { return v.x * m[0] + (v.y * m[1] + (v.z * m[2] + m[3])); }  // transform 'v' vector by 'm' orientation-scale-translation matrix, faster version of "mul(Vec4 (v, 1), m)"
 VecH Transform(VecH v, MatrixH m) { return v.x * m[0] + (v.y * m[1] + (v.z * m[2] + m[3])); } // transform 'v' vector by 'm' orientation-scale-translation matrix, faster version of "mul(VecH4(v, 1), m)"
 Vec4 Transform(Vec v, Matrix4 m) { return v.x * m[0] + (v.y * m[1] + (v.z * m[2] + m[3])); }  // transform 'v' vector by 'm' 4x4                           matrix, faster version of "mul(Vec4 (v, 1), m)"
 #else
-Vec Transform(Vec v, Matrix m) { return mul(Vec4(v, 1), m); }                                  // transform 'v' vector by 'm' orientation-scale-translation matrix
-VecH Transform(VecH v, Matrix m) { return mul(VecH4(v, 1), m); }                               // transform 'v' vector by 'm' orientation-scale-translation matrix
-VecH Transform(VecH v, MatrixH m) { return mul(VecH4(v, 1), m); }                              // transform 'v' vector by 'm' orientation-scale-translation matrix
-Vec4 Transform(Vec v, Matrix4 m) { return mul(Vec4(v, 1), m); }                                // transform 'v' vector by 'm' 4x4                           matrix
+Vec Transform(Vec v, Matrix m) { return mul(Vec4(v, 1), m); }     // transform 'v' vector by 'm' orientation-scale-translation matrix
+VecH Transform(VecH v, Matrix m) { return mul(VecH4(v, 1), m); }  // transform 'v' vector by 'm' orientation-scale-translation matrix
+VecH Transform(VecH v, MatrixH m) { return mul(VecH4(v, 1), m); } // transform 'v' vector by 'm' orientation-scale-translation matrix
+Vec4 Transform(Vec v, Matrix4 m) { return mul(Vec4(v, 1), m); }   // transform 'v' vector by 'm' 4x4                           matrix
 #endif
 
-#if 1                                                                                   // faster (1.6 fps) tested on GeForce 1050 Ti
+#if 1 // faster (1.6 fps) tested on GeForce 1050 Ti
 Vec Transform3(Vec v, Matrix m) { return v.x * m[0] + (v.y * m[1] + (v.z * m[2])); }    // transform 'v' vector by 'm' orientation-scale matrix
 VecH Transform3(VecH v, MatrixH m) { return v.x * m[0] + (v.y * m[1] + (v.z * m[2])); } // transform 'v' vector by 'm' orientation-scale matrix
 VecH Transform3(VecH v, Matrix m) { return v.x * m[0] + (v.y * m[1] + (v.z * m[2])); }  // transform 'v' vector by 'm' orientation-scale matrix, TODO: #ShaderHalf would it be faster to cast 'v' to 'Vec' first? Mixing precisions is not perfect however alternative would require to store matrixes in additional half precision but that would slow down (calculating on CPU side and uploading to GPU)
-#else                                                                                   // slower (1.0 fps)
-Vec Transform3(Vec v, Matrix m) { return mul(v, (Matrix3)m); }                                 // transform 'v' vector by 'm' orientation-scale matrix
-VecH Transform3(VecH v, MatrixH m) { return mul(v, (MatrixH3)m); }                             // transform 'v' vector by 'm' orientation-scale matrix
-VecH Transform3(VecH v, Matrix m) { return mul(v, (MatrixH3)m); }                              // transform 'v' vector by 'm' orientation-scale matrix
+#else // slower (1.0 fps)
+Vec Transform3(Vec v, Matrix m) { return mul(v, (Matrix3)m); }     // transform 'v' vector by 'm' orientation-scale matrix
+VecH Transform3(VecH v, MatrixH m) { return mul(v, (MatrixH3)m); } // transform 'v' vector by 'm' orientation-scale matrix
+VecH Transform3(VecH v, Matrix m) { return mul(v, (MatrixH3)m); }  // transform 'v' vector by 'm' orientation-scale matrix
 #endif
 
-#if 1                                                      // faster 4.3 fps
+#if 1 // faster 4.3 fps
 Vec TransformTP(Vec v, Matrix3 m) { return mul(m, v); }    // transform 'v' vector by transposed 'm' orientation-scale matrix
 VecH TransformTP(VecH v, MatrixH3 m) { return mul(m, v); } // transform 'v' vector by transposed 'm' orientation-scale matrix
 Vec TransformTP(Vec v, MatrixH3 m) { return mul(m, v); }   // transform 'v' vector by transposed 'm' orientation-scale matrix
-#else                                                      // slower 3.2 fps
+#else // slower 3.2 fps
 Vec TransformTP(Vec v, Matrix3 m) { return Vec(Dot(v, m[0]), Dot(v, m[1]), Dot(v, m[2])); }    // transform 'v' vector by transposed 'm' orientation-scale matrix
 VecH TransformTP(VecH v, MatrixH3 m) { return Vec(Dot(v, m[0]), Dot(v, m[1]), Dot(v, m[2])); } // transform 'v' vector by transposed 'm' orientation-scale matrix
 Vec TransformTP(Vec v, MatrixH3 m) { return Vec(Dot(v, m[0]), Dot(v, m[1]), Dot(v, m[2])); }   // transform 'v' vector by transposed 'm' orientation-scale matrix
@@ -1061,8 +1061,8 @@ Vec ViewMatrixPrevPos(UInt mtrx = 0) { return ViewMatrixPrev[mtrx][3]; }
 Matrix GetViewMatrix() { return ViewMatrix[0]; }
 #else // Mac currently has no known workaround and must use this
 #include "!Set Prec Struct.h"
-BUFFER_I(ObjMatrix, SBI_OBJ_MATRIX)                                                            // !! WARNING: this CB is dynamically resized, do not add other members !!
-Vec4 ViewMatrix[MAX_MATRIX * 3];                                                               // object transformation matrixes relative to view space (this is object matrix * inversed camera matrix = object matrix / camera matrix)
+BUFFER_I(ObjMatrix, SBI_OBJ_MATRIX) // !! WARNING: this CB is dynamically resized, do not add other members !!
+Vec4 ViewMatrix[MAX_MATRIX * 3];    // object transformation matrixes relative to view space (this is object matrix * inversed camera matrix = object matrix / camera matrix)
 BUFFER_END
 
 BUFFER_I(ObjMatrixPrev, SBI_OBJ_MATRIX_PREV) // !! WARNING: this CB is dynamically resized, do not add other members !!
@@ -1183,7 +1183,7 @@ Vec ObjWorldPos(UInt mtrx = 0) { return Transform(ViewMatrixPos(mtrx), CamMatrix
 Vec ObjWorldPosPrev(UInt mtrx = 0) { return Transform(ViewMatrixPrevPos(mtrx), CamMatrixPrev); } // get the world position of the object matrix in previous frame
 /******************************************************************************/
 Vec4 Project(Vec pos) {
-#if 1                                                              // 2x faster on Intel (made no difference for GeForce)
+#if 1 // 2x faster on Intel (made no difference for GeForce)
     return Vec4(pos.x * ProjMatrix[0].x + pos.z * ProjMatrix[2].x, // "pos.z*ProjMatrix[2].x" only needed for Stereo or Temporal
                 pos.y * ProjMatrix[1].y + pos.z * ProjMatrix[2].y, // "pos.z*ProjMatrix[2].y" only needed for           Temporal
                 pos.z * ProjMatrix[2].z + ProjMatrix[3].z,
@@ -1193,7 +1193,7 @@ Vec4 Project(Vec pos) {
 #endif
 }
 Vec ProjectXYW(Vec pos) {
-#if 1                                                             // 2x faster on Intel (made no difference for GeForce)
+#if 1 // 2x faster on Intel (made no difference for GeForce)
     return Vec(pos.x * ProjMatrix[0].x + pos.z * ProjMatrix[2].x, // "pos.z*ProjMatrix[2].x" only needed for Stereo or Temporal
                pos.y * ProjMatrix[1].y + pos.z * ProjMatrix[2].y, // "pos.z*ProjMatrix[2].y" only needed for           Temporal
                                                                   // pos.z*ProjMatrix[2].z + ProjMatrix[3].z,
@@ -1203,7 +1203,7 @@ Vec ProjectXYW(Vec pos) {
 #endif
 }
 Vec ProjectPrevXYW(Vec pos) {
-#if 1                                                                     // 2x faster on Intel (made no difference for GeForce)
+#if 1 // 2x faster on Intel (made no difference for GeForce)
     return Vec(pos.x * ProjMatrixPrev[0].x + pos.z * ProjMatrixPrev[2].x, // "pos.z*ProjMatrixPrev[2].x" only needed for Stereo or Temporal
                pos.y * ProjMatrixPrev[1].y + pos.z * ProjMatrixPrev[2].y, // "pos.z*ProjMatrixPrev[2].y" only needed for           Temporal
                                                                           // pos.z*ProjMatrixPrev[2].z + ProjMatrixPrev[3].z,
@@ -1385,7 +1385,7 @@ Vec GetPosLinear(Vec2 uv, Vec2 pos_xy) { return GetPos(TexDepthLinear(uv), pos_x
 /******************************************************************************/
 // sRGB
 /******************************************************************************/
-#define SRGBToLinearFast Sqr  // simple and fast sRGB -> Linear conversion
+#define SRGBToLinearFast Sqr // simple and fast sRGB -> Linear conversion
 #define LinearToSRGBFast Sqrt // simple and fast Linear -> sRGB conversion
 
 Half SRGBToLinear(Half s) { return (s <= 0.04045) ? s / 12.92 : Pow(s / 1.055 + 0.055 / 1.055, 2.4); } // convert 0..1 srgb   to 0..1 linear, (s+0.055)/1.055
@@ -1432,7 +1432,7 @@ Half Noise1D_Blue(VecI2 pixel) // many steps, -1.0 .. 1.0
 }
 Half Noise1D(Vec2 pixel) // many steps, -0.5 .. 0.5
 {
-#if 0   // low
+#if 0 // low
    return Frac(Dot(pixel, Vec2(1.0, 0.5)/3))-0.5;
 #elif 0 // medium
     return Frac(Dot(pixel, Vec2(3, 1) / 8)) - 0.5;
@@ -1550,11 +1550,11 @@ struct VtxInput // Vertex Input, use this class to access vertex data in vertex 
     VecH colorFast3() { return SRGBToLinearFast(_color.rgb); }                  // sRGB vertex color (fast)
     Half colorFastA() { return _color.a; }                                      // sRGB vertex color (fast)
 #else
-    VecH4 color() { return _color; }                                 // sRGB vertex color (precise)
-    VecH color3() { return _color.rgb; }                             // sRGB vertex color (precise)
-    VecH4 colorFast() { return _color; }                             // sRGB vertex color (fast)
-    VecH colorFast3() { return _color.rgb; }                         // sRGB vertex color (fast)
-    Half colorFastA() { return _color.a; }                           // sRGB vertex color (fast)
+    VecH4 color() { return _color; }         // sRGB vertex color (precise)
+    VecH color3() { return _color.rgb; }     // sRGB vertex color (precise)
+    VecH4 colorFast() { return _color; }     // sRGB vertex color (fast)
+    VecH colorFast3() { return _color.rgb; } // sRGB vertex color (fast)
+    Half colorFastA() { return _color.a; }   // sRGB vertex color (fast)
 #endif
     VecH4 colorF() { return _color; }     // linear vertex color
     VecH colorF3() { return _color.rgb; } // linear vertex color
@@ -1896,7 +1896,7 @@ void MaterialAlphaTestDither(Half alpha, VecI2 pixel, VecU2 face, bool noise_off
     Half scale = 1 - 1.0 / 1024;                             // this is needed to preserve fully opaque =1 alphas
 #if 0                                                        // 64-step cbuffer
    alpha=alpha+(Noise1D_64  (pixel)*     scale -0.5);
-#else                                                        // blue noise image
+#else // blue noise image
     alpha = alpha + (Noise1D_Blue(pixel) * (0.5 * scale) - 0.5);
 #endif
     if (alpha <= 0)
@@ -2139,7 +2139,7 @@ void BackFlip(inout VecH dir, Bool front) {
 /******************************************************************************/
 Half MultiMaterialWeight(Half weight, Half alpha) // 'weight'=weight of this material, 'alpha'=color texture alpha (opacity or bump)
 {
-#if 0   // linear
+#if 0 // linear
    return weight;
 #elif 0 // Pinch (not sharp enough)
     const Half sharpen = 32;
@@ -2162,7 +2162,7 @@ Half MultiMaterialWeight(Half weight, Half alpha) // 'weight'=weight of this mat
     const Half sharpen = 8;
     return Max(0, weight                                                            // base
                       + weight * (1 - weight) * (alpha * sharpen - 0.5 * sharpen)); // "weight"=ignore alpha at start "1-weight" ignore alpha at end, "(alpha-0.5)*sharpen" alpha
-#else   // Flippable Pow - best
+#else // Flippable Pow - best
     const Half sharpen = 12;
 #if 0
       return (alpha<=0.5) ?   Pow(  weight, 1+(0.5-alpha)*sharpen)
@@ -2345,7 +2345,7 @@ struct LightParams {
       Vec H=Normalize(L-nV); // L+V
       NdotH_HP=Dot(N, H);
       VdotH   =Dot(L, H);
-#else // faster
+#else // faster \
       // VdotL=2*VdotH*VdotH-1
         Flt VL = Rsqrt(VdotL_HP * 2 + 2);
         NdotH_HP = (NdotL_HP + NdotV_HP) * VL;
@@ -2530,7 +2530,7 @@ VecH ReflectEnv(Half rough, Half reflectivity, VecH reflect_col, Half NdotV, Boo
         mad = EnvDFGLazarovKaris(rough, NdotV);
 
         // energy compensation, increase reflectivity if it's close to 1 to account for multi-bounce https://google.github.io/filament/Filament.html#materialsystem/improvingthebrdfs/energylossinspecularreflectance
-#if 1                                                     // Esenthel version
+#if 1 // Esenthel version
     VecH mul = mad.x + (1 - mad.y - mad.x) * reflect_col; // mad.x=Lerp(mad.x, 1-mad.y, reflect_col);
     return reflect_col * mul + mad.y * (REFLECT_OCCL ? Sat(reflectivity * 50) : 1);
 #else // same results but slower

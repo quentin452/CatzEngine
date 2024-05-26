@@ -1,13 +1,12 @@
 ﻿/******************************************************************************/
-class ElmName
-{
-   UID       id;
-   TimeStamp time;
-   Str       name;
-   
-   void set (Elm  &elm);
-   bool save(File &f  );
-   bool load(File &f  );
+class ElmName {
+    UID id;
+    TimeStamp time;
+    Str name;
+
+    void set(Elm &elm);
+    bool save(File &f);
+    bool load(File &f);
 };
 /******************************************************************************/
 /******************************************************************************/

@@ -1,18 +1,17 @@
 ﻿/******************************************************************************/
 /******************************************************************************/
-class WaterVer
-{
-   Version ver;
-   RectI   areas; // set invalid at start
+class WaterVer {
+    Version ver;
+    RectI areas; // set invalid at start
 
-   bool removed()C;
+    bool removed() C;
 
-   // io
-   bool save(File &f)C;
-   bool load(File &f);
+    // io
+    bool save(File &f) C;
+    bool load(File &f);
 
-public:
-   WaterVer();
+  public:
+    WaterVer();
 };
 /******************************************************************************/
 /******************************************************************************/

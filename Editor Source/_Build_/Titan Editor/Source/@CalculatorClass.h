@@ -1,14 +1,13 @@
 ﻿/******************************************************************************/
 /******************************************************************************/
-class CalculatorClass : ClosableWindow
-{
-   TextLine expression;
+class CalculatorClass : ClosableWindow {
+    TextLine expression;
 
-   void visibleToggleActivate();
+    void visibleToggleActivate();
 
-   CalculatorClass& create(C Rect &rect);
-   virtual void update(C GuiPC &gpc)override;
-   virtual void draw(C GuiPC &gpc)override;
+    CalculatorClass &create(C Rect &rect);
+    virtual void update(C GuiPC &gpc) override;
+    virtual void draw(C GuiPC &gpc) override;
 };
 /******************************************************************************/
 /******************************************************************************/

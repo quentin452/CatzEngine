@@ -118,9 +118,9 @@ const_mem_addr struct SoundRecord // !! must be stored in constant memory addres
     NO_COPY_CONSTRUCTOR(SoundRecord);
 };
 /******************************************************************************/
-#define OPUS_FREQUENCY 48000            // Opus Audio highest supported frequency 48kHz
-#define OPUS_BYTES 2                    // Opus Audio is always stored using  2-byte samples
-#define OPUS_BITS 16                    // Opus Audio is always stored using 16-bit  samples
+#define OPUS_FREQUENCY 48000 // Opus Audio highest supported frequency 48kHz
+#define OPUS_BYTES 2 // Opus Audio is always stored using  2-byte samples
+#define OPUS_BITS 16 // Opus Audio is always stored using 16-bit  samples
 #define OPUS_FRAME_SIZE_BEST_QUALITY 20 // Opus Audio frame size that provides the best quality, according to the documentation https://wiki.xiph.org/OpusFAQ#What_frame_size_should_I_use.3F - For file encoding, using a frame size larger than 20 ms will usually result in worse quality for the same bitrate because it constrains the encoder in the decisions it can make.
 /******************************************************************************/
 struct OpusEncoder {

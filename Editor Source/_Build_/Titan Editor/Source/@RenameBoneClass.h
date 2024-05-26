@@ -1,13 +1,12 @@
 ﻿/******************************************************************************/
 /******************************************************************************/
-class RenameBoneClass : ClosableWindow
-{
-   Str      bone_name;
-   TextLine textline;
+class RenameBoneClass : ClosableWindow {
+    Str bone_name;
+    TextLine textline;
 
-   void create();
-   void activate(int bone);
-   virtual void update(C GuiPC &gpc)override;
+    void create();
+    void activate(int bone);
+    virtual void update(C GuiPC &gpc) override;
 };
 /******************************************************************************/
 /******************************************************************************/

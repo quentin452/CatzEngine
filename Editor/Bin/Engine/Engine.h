@@ -138,6 +138,7 @@
 // ThreadedLoggerForCPP
 /******************************************************************************/
 #include "threaded_logger_for_cpp/LoggerThread.hpp"
+//
 #include "Misc/InitLogThreadAndDisableCrashDump.h"
 /******************************************************************************/
 #if EE_PRIVATE >= 2

@@ -163,17 +163,17 @@ Bool Image::ExportBMPRaw(File &f, Byte byte_pp, Bool ico) C // assumes that Imag
                 f.put(data() + y * pitch(), T.w() * 4);
             else // BMP uses BGRA order
                 if (ignore_gamma)
-                    FREPD(x, T.w()) {
-                        Color c = color(x, y);
-                        Swap(c.r, c.b);
-                        f << c;
-                    }
-                else
-                    FREPD(x, T.w()) {
-                        Color c = colorS(x, y);
-                        Swap(c.r, c.b);
-                        f << c;
-                    }
+                FREPD(x, T.w()) {
+                    Color c = color(x, y);
+                    Swap(c.r, c.b);
+                    f << c;
+                }
+            else
+                FREPD(x, T.w()) {
+                    Color c = colorS(x, y);
+                    Swap(c.r, c.b);
+                    f << c;
+                }
         } break;
         }
         f.put(null, zeros);

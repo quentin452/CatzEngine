@@ -1,12 +1,11 @@
 ﻿/******************************************************************************/
-class ViewportSkin : Viewport
-{
-   static ObjPtrs<ViewportSkin> viewports;
+class ViewportSkin : Viewport {
+    static ObjPtrs<ViewportSkin> viewports;
 
-   void skinChanged();
+    void skinChanged();
 
-   ViewportSkin();
-  ~ViewportSkin();
+    ViewportSkin();
+    ~ViewportSkin();
 };
 /******************************************************************************/
 /******************************************************************************/

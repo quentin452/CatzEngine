@@ -2,44 +2,46 @@
 #include "stdafx.h"
 /******************************************************************************/
 Mems<int> ElmOrderArray;
-int       ElmOrder(ELM_TYPE type) {return InRange(type, ElmOrderArray) ? ElmOrderArray[type] : ElmOrderArray.elms()+type;}
-void  InitElmOrder()
-{
-   Memt<ELM_TYPE> elms;
-   elms.add(ELM_NONE       );
-   elms.add(ELM_FOLDER     );
-   elms.add(ELM_ENUM       );
-   elms.add(ELM_IMAGE      );
-   elms.add(ELM_IMAGE_ATLAS);
-   elms.add(ELM_FONT       );
-   elms.add(ELM_TEXT_STYLE );
-   elms.add(ELM_PANEL_IMAGE);
-   elms.add(ELM_PANEL      );
-   elms.add(ELM_GUI_SKIN   );
-   elms.add(ELM_GUI        );
-   elms.add(ELM_SHADER     );
-   elms.add(ELM_MTRL       );
-   elms.add(ELM_WATER_MTRL );
-   elms.add(ELM_PHYS_MTRL  );
-   elms.add(ELM_ANIM       );
-   elms.add(ELM_OBJ_CLASS  );
-   elms.add(ELM_OBJ        );
-   elms.add(ELM_MESH       );
-   elms.add(ELM_SKEL       );
-   elms.add(ELM_PHYS       );
-   elms.add(ELM_ICON_SETTS );
-   elms.add(ELM_ICON       );
-   elms.add(ELM_ENV        );
-   elms.add(ELM_WORLD      );
-   elms.add(ELM_MINI_MAP   );
-   elms.add(ELM_SOUND      );
-   elms.add(ELM_VIDEO      );
-   elms.add(ELM_FILE       );
-   elms.add(ELM_CODE       );
-   elms.add(ELM_LIB        );
-   elms.add(ELM_APP        );
-   FREP(ELM_NUM)elms.include(ELM_TYPE(i)); // include elements that were not listed above (just in case)
-   ElmOrderArray.setNum(elms.elms()); REPA(elms)ElmOrderArray(elms[i])=i;
+int ElmOrder(ELM_TYPE type) { return InRange(type, ElmOrderArray) ? ElmOrderArray[type] : ElmOrderArray.elms() + type; }
+void InitElmOrder() {
+    Memt<ELM_TYPE> elms;
+    elms.add(ELM_NONE);
+    elms.add(ELM_FOLDER);
+    elms.add(ELM_ENUM);
+    elms.add(ELM_IMAGE);
+    elms.add(ELM_IMAGE_ATLAS);
+    elms.add(ELM_FONT);
+    elms.add(ELM_TEXT_STYLE);
+    elms.add(ELM_PANEL_IMAGE);
+    elms.add(ELM_PANEL);
+    elms.add(ELM_GUI_SKIN);
+    elms.add(ELM_GUI);
+    elms.add(ELM_SHADER);
+    elms.add(ELM_MTRL);
+    elms.add(ELM_WATER_MTRL);
+    elms.add(ELM_PHYS_MTRL);
+    elms.add(ELM_ANIM);
+    elms.add(ELM_OBJ_CLASS);
+    elms.add(ELM_OBJ);
+    elms.add(ELM_MESH);
+    elms.add(ELM_SKEL);
+    elms.add(ELM_PHYS);
+    elms.add(ELM_ICON_SETTS);
+    elms.add(ELM_ICON);
+    elms.add(ELM_ENV);
+    elms.add(ELM_WORLD);
+    elms.add(ELM_MINI_MAP);
+    elms.add(ELM_SOUND);
+    elms.add(ELM_VIDEO);
+    elms.add(ELM_FILE);
+    elms.add(ELM_CODE);
+    elms.add(ELM_LIB);
+    elms.add(ELM_APP);
+    FREP(ELM_NUM)
+    elms.include(ELM_TYPE(i)); // include elements that were not listed above (just in case)
+    ElmOrderArray.setNum(elms.elms());
+    REPA(elms)
+    ElmOrderArray(elms[i]) = i;
 }
 /******************************************************************************
 class TexInfoGetter
@@ -135,161 +137,209 @@ TexInfoGetter TIG;
 /******************************************************************************/
 
 /******************************************************************************/
-   int ListElm::CompareIndex(C ListElm &a, C ListElm &b) {return Compare(ptr(&a), ptr(&b));}
-   int ListElm::CompareName(C ListElm &a, C ListElm &b)
-   {
-      MemtN<C ListElm*, 128> as, bs;
-      for(C ListElm *p=&a; ; ){as.add(p); p=p->vis_parent; if(!p)break;}
-      for(C ListElm *p=&b; ; ){bs.add(p); p=p->vis_parent; if(!p)break;}
-      int  shared_parents=Min(as.elms(), bs.elms());
-      FREP(shared_parents)
-      {
-       C ListElm &a=*as[as.elms()-1-i],
-                 &b=*bs[bs.elms()-1-i];
-         if(int c=CompareNumber(a.name, b.name))return c;
-         if(int c=CompareIndex (a     , b     ))return c;
-      }
-      return CompareIndex(a, b); // compare by index instead of returning 0, because only shared parents were checked, if 'a' is child of 'b' then we need to make sure that 'a' is listed after
-   }
-   int ListElm::CompareSize(C ListElm &a, C ListElm &b)
-   {
-      MemtN<C ListElm*, 128> as, bs;
-      for(C ListElm *p=&a; ; ){as.add(p); p=p->vis_parent; if(!p)break;}
-      for(C ListElm *p=&b; ; ){bs.add(p); p=p->vis_parent; if(!p)break;}
-      int  shared_parents=Min(as.elms(), bs.elms());
-      FREP(shared_parents)
-      {
-       C ListElm &a=*as[as.elms()-1-i],
-                 &b=*bs[bs.elms()-1-i];
-         if(int c=Compare     (b.fileSize(), a.fileSize()))return c; // swap order, because most likely we'll be interested in biggest file sizes
-         if(int c=CompareIndex(a           , b           ))return c;
-      }
-      return CompareIndex(a, b); // compare by index instead of returning 0, because only shared parents were checked, if 'a' is child of 'b' then we need to make sure that 'a' is listed after
-   }
-   Str ListElm::Size(C ListElm &data)
-   {
-      long size=data.fileSize(); if(!size)return S;
-      Str    s=SizeBytes(size); if(!data.size_known)s+='+';
-      return s;
-   }
-   void ListElm::IncludeTex(Memt<UID> &texs, C UID &tex_id) {if(tex_id.valid())texs.binaryInclude(tex_id);}
-   void ListElm::IncludeTex(Memt<UID> &texs, C Elm &elm)
-   {
-      // material
-      if(C ElmMaterial *mtrl_data=elm.mtrlData())
-      {
-         IncludeTex(texs, mtrl_data->base_0_tex);
-         IncludeTex(texs, mtrl_data->base_1_tex);
-         IncludeTex(texs, mtrl_data->base_2_tex);
-      }
+int ListElm::CompareIndex(C ListElm &a, C ListElm &b) { return Compare(ptr(&a), ptr(&b)); }
+int ListElm::CompareName(C ListElm &a, C ListElm &b) {
+    MemtN<C ListElm *, 128> as, bs;
+    for (C ListElm *p = &a;;) {
+        as.add(p);
+        p = p->vis_parent;
+        if (!p)
+            break;
+    }
+    for (C ListElm *p = &b;;) {
+        bs.add(p);
+        p = p->vis_parent;
+        if (!p)
+            break;
+    }
+    int shared_parents = Min(as.elms(), bs.elms());
+    FREP(shared_parents) {
+        C ListElm &a = *as[as.elms() - 1 - i],
+                  &b = *bs[bs.elms() - 1 - i];
+        if (int c = CompareNumber(a.name, b.name))
+            return c;
+        if (int c = CompareIndex(a, b))
+            return c;
+    }
+    return CompareIndex(a, b); // compare by index instead of returning 0, because only shared parents were checked, if 'a' is child of 'b' then we need to make sure that 'a' is listed after
+}
+int ListElm::CompareSize(C ListElm &a, C ListElm &b) {
+    MemtN<C ListElm *, 128> as, bs;
+    for (C ListElm *p = &a;;) {
+        as.add(p);
+        p = p->vis_parent;
+        if (!p)
+            break;
+    }
+    for (C ListElm *p = &b;;) {
+        bs.add(p);
+        p = p->vis_parent;
+        if (!p)
+            break;
+    }
+    int shared_parents = Min(as.elms(), bs.elms());
+    FREP(shared_parents) {
+        C ListElm &a = *as[as.elms() - 1 - i],
+                  &b = *bs[bs.elms() - 1 - i];
+        if (int c = Compare(b.fileSize(), a.fileSize()))
+            return c; // swap order, because most likely we'll be interested in biggest file sizes
+        if (int c = CompareIndex(a, b))
+            return c;
+    }
+    return CompareIndex(a, b); // compare by index instead of returning 0, because only shared parents were checked, if 'a' is child of 'b' then we need to make sure that 'a' is listed after
+}
+Str ListElm::Size(C ListElm &data) {
+    long size = data.fileSize();
+    if (!size)
+        return S;
+    Str s = SizeBytes(size);
+    if (!data.size_known)
+        s += '+';
+    return s;
+}
+void ListElm::IncludeTex(Memt<UID> &texs, C UID &tex_id) {
+    if (tex_id.valid())
+        texs.binaryInclude(tex_id);
+}
+void ListElm::IncludeTex(Memt<UID> &texs, C Elm &elm) {
+    // material
+    if (C ElmMaterial *mtrl_data = elm.mtrlData()) {
+        IncludeTex(texs, mtrl_data->base_0_tex);
+        IncludeTex(texs, mtrl_data->base_1_tex);
+        IncludeTex(texs, mtrl_data->base_2_tex);
+    }
 
-      // object
-      if(Proj.list.include_texture_size_in_object)
-         if(C ElmObj *obj_data=elm.objData())if(C Elm *mesh=Proj.findElm(obj_data->mesh_id))if(C ElmMesh *mesh_data=mesh->meshData()) // check for Obj->Mesh, and not directly Mesh, because ELM_MESH are always hidden, and wouldn't be processed for ICS_NEVER
-            FREPA(mesh_data->mtrl_ids)if(C Elm *mtrl=Proj.findElm(mesh_data->mtrl_ids[i]))IncludeTex(texs, *mtrl);
-   }
-   void ListElm::IncludeTex(Memt<UID> &texs, C ElmNode &node)
-   {
-      FREPA(node.children)
-      {
-         int child_i=node.children[i];
-       C Elm &elm=Proj.elms[child_i];
-         if( elm.      exists() || Proj.show_removed())
-         if( elm.finalPublish() || Proj.list.include_unpublished_elm_size) // could use 'publish' instead of 'finalPublish' because if this function is called, then the parent was already checked, however we need platform
-         {
-            IncludeTex(texs, elm);
-            IncludeTex(texs, Proj.hierarchy[child_i]); // we shouldn't check for ICS_ALWAYS or ICS_FOLDED here
-         }
-      }
-   }
-   void ListElm::calcTexSize() // because texture size calculation is slow, it is calculated only on demand, it is slow because first we need to get all unique texture ID's, and then sum sizes of those textures, if we would sum all encountered texture ID's then we would get bigger values because the same texture ID's could be encountered multiple times
-   {
-      if(!tex_size_calculated)
-      {
-         tex_size_calculated=true;
-         if(Proj.list.its && elm)
-         if(elm->finalPublish() || Proj.list.include_unpublished_elm_size) // have to use 'finalPublish' because it's not called recursively, but can be called for any element at any time, also we need platform
-         {
-            Memt<UID> texs;
-            IncludeTex(texs, *elm);
-            if(Proj.list.ics)
-               if(Proj.list.ics==Proj.list.ICS_ALWAYS || !(elm->opened() || Proj.list.list_all_children)) // ICS_ALWAYS or ICS_FOLDED
+    // object
+    if (Proj.list.include_texture_size_in_object)
+        if (C ElmObj *obj_data = elm.objData())
+            if (C Elm *mesh = Proj.findElm(obj_data->mesh_id))
+                if (C ElmMesh *mesh_data = mesh->meshData()) // check for Obj->Mesh, and not directly Mesh, because ELM_MESH are always hidden, and wouldn't be processed for ICS_NEVER
+                    FREPA(mesh_data->mtrl_ids)
+    if (C Elm *mtrl = Proj.findElm(mesh_data->mtrl_ids[i]))
+        IncludeTex(texs, *mtrl);
+}
+void ListElm::IncludeTex(Memt<UID> &texs, C ElmNode &node) {
+    FREPA(node.children) {
+        int child_i = node.children[i];
+        C Elm &elm = Proj.elms[child_i];
+        if (elm.exists() || Proj.show_removed())
+            if (elm.finalPublish() || Proj.list.include_unpublished_elm_size) // could use 'publish' instead of 'finalPublish' because if this function is called, then the parent was already checked, however we need platform
             {
-               int i=Proj.elms.validIndex(elm); if(InRange(i, Proj.hierarchy))IncludeTex(texs, Proj.hierarchy[i]);
+                IncludeTex(texs, elm);
+                IncludeTex(texs, Proj.hierarchy[child_i]); // we shouldn't check for ICS_ALWAYS or ICS_FOLDED here
             }
-            REPA(texs)includeValidTexSize(texs[i]);
-         }
-      }
-   }
-   long ListElm::fileSize()C {ConstCast(T).calcTexSize(); return size;}
-   void ListElm::resetColor() {color=color_temp;}
-   void ListElm::highlight() {color.g=255;}
-   bool ListElm::hasVisibleChildren()C {return opened_icon!=null;}
-   void ListElm::hasVisibleChildren(bool has, bool opened)
-   {
-      if(!has  )opened_icon=null;else
-      if(opened)opened_icon=Proj.arrow_down ();else
-                opened_icon=Proj.arrow_right();
-   }
-   bool ListElm::close()
-   {
-      if(hasVisibleChildren())
-      {
-         if(item && item->opened  ){item->opened=false ; return true;}
-         if(elm  && elm ->opened()){elm ->opened(false); return true;}
-      }
-      return false;
-   }
-   void ListElm::includeValidTexSize(C UID &tex_id) // assumes that 'tex_id' is valid
-   {
-      if(C TextureInfo *tex_info=TexInfos.find(tex_id))if(tex_info->knownFileSize()){size+=tex_info->file_size; return;}
-      size_known=false;
-   }
-   void ListElm::includeSize(Elm &elm)
-   {
-      if(Proj.list.its!=Proj.list.ITS_TEX) // add element size
-      {
-         if(elm.file_size<0) // if element file size is unknown
-         {
+    }
+}
+void ListElm::calcTexSize() // because texture size calculation is slow, it is calculated only on demand, it is slow because first we need to get all unique texture ID's, and then sum sizes of those textures, if we would sum all encountered texture ID's then we would get bigger values because the same texture ID's could be encountered multiple times
+{
+    if (!tex_size_calculated) {
+        tex_size_calculated = true;
+        if (Proj.list.its && elm)
+            if (elm->finalPublish() || Proj.list.include_unpublished_elm_size) // have to use 'finalPublish' because it's not called recursively, but can be called for any element at any time, also we need platform
+            {
+                Memt<UID> texs;
+                IncludeTex(texs, *elm);
+                if (Proj.list.ics)
+                    if (Proj.list.ics == Proj.list.ICS_ALWAYS || !(elm->opened() || Proj.list.list_all_children)) // ICS_ALWAYS or ICS_FOLDED
+                    {
+                        int i = Proj.elms.validIndex(elm);
+                        if (InRange(i, Proj.hierarchy))
+                            IncludeTex(texs, Proj.hierarchy[i]);
+                    }
+                REPA(texs)
+                includeValidTexSize(texs[i]);
+            }
+    }
+}
+long ListElm::fileSize() C {
+    ConstCast(T).calcTexSize();
+    return size;
+}
+void ListElm::resetColor() { color = color_temp; }
+void ListElm::highlight() { color.g = 255; }
+bool ListElm::hasVisibleChildren() C { return opened_icon != null; }
+void ListElm::hasVisibleChildren(bool has, bool opened) {
+    if (!has)
+        opened_icon = null;
+    else if (opened)
+        opened_icon = Proj.arrow_down();
+    else
+        opened_icon = Proj.arrow_right();
+}
+bool ListElm::close() {
+    if (hasVisibleChildren()) {
+        if (item && item->opened) {
+            item->opened = false;
+            return true;
+        }
+        if (elm && elm->opened()) {
+            elm->opened(false);
+            return true;
+        }
+    }
+    return false;
+}
+void ListElm::includeValidTexSize(C UID &tex_id) // assumes that 'tex_id' is valid
+{
+    if (C TextureInfo *tex_info = TexInfos.find(tex_id))
+        if (tex_info->knownFileSize()) {
+            size += tex_info->file_size;
+            return;
+        }
+    size_known = false;
+}
+void ListElm::includeSize(Elm &elm) {
+    if (Proj.list.its != Proj.list.ITS_TEX) // add element size
+    {
+        if (elm.file_size < 0) // if element file size is unknown
+        {
             // TODO: what about 'ElmInFolder' (Worlds and MiniMaps)
-            if(!ElmGame(elm.type))elm.file_size=0; // if doesn't have a game file, then currently we won't detect it, so set it as known
-         }
-         if(elm.file_size<0)size_known=false; // if at least one element has unknown size, then mark this as unknown too
-         else               size+=elm.file_size; // increase the size
-      }
-   }
-   void ListElm::includeSize(C ListElm &src)
-   {
-      size_known&=src.size_known;
-      size      +=src.size;
-   }
-   ListElm& ListElm::set(ELM_TYPE type, C Str &name, bool edited, bool importing, bool removed, int depth, int vis_parent)
-   {
-      T.name  =name;
-      T.depth =depth;
-      T.offset=(Proj.list.flat_is ? 0 : depth*Proj.list.textSize()*0.6f);
-      T.vis_parent_i=vis_parent;
+            if (!ElmGame(elm.type))
+                elm.file_size = 0; // if doesn't have a game file, then currently we won't detect it, so set it as known
+        }
+        if (elm.file_size < 0)
+            size_known = false; // if at least one element has unknown size, then mark this as unknown too
+        else
+            size += elm.file_size; // increase the size
+    }
+}
+void ListElm::includeSize(C ListElm &src) {
+    size_known &= src.size_known;
+    size += src.size;
+}
+ListElm &ListElm::set(ELM_TYPE type, C Str &name, bool edited, bool importing, bool removed, int depth, int vis_parent) {
+    T.name = name;
+    T.depth = depth;
+    T.offset = (Proj.list.flat_is ? 0 : depth * Proj.list.textSize() * 0.6f);
+    T.vis_parent_i = vis_parent;
 
-      // icon
-      icon=Proj.elmIcon(type)();
+    // icon
+    icon = Proj.elmIcon(type)();
 
-      // color
-      if(edited )color=(importing ? PURPLE : RED);else if(importing)color.set(0, 128, 255, 255);else if(TextStyle *text_style=Proj.list.getTextStyle())color=text_style->color;else color=BLACK;
-      if(removed)color.a=128;
-      color_temp=color; // remember color in temp for fast restoring in 'elmHighlight'
-      return T;
-   }
-   ListElm& ListElm::set(Elm &elm, ElmNode &node, int depth, int vis_parent) // !! assumes that 'finalRemoved'/FINAL is available !!
-   {
-      T.elm=&elm;
-      return set(elm.type, elm.name, FlagOn(node.flag, ELM_EDITED), elm.importing(), elm.finalRemoved(), depth, vis_parent);
-   }
-   ListElm& ListElm::set(EEItem &item, bool opened, int depth)
-   {
-      T.item=&item;
-      hasVisibleChildren(item.children.elms()>0, opened);
-      return set(item.type, item.base_name, FlagOn(item.flag, ELM_EDITED), false, false, depth, -1);
-   }
+    // color
+    if (edited)
+        color = (importing ? PURPLE : RED);
+    else if (importing)
+        color.set(0, 128, 255, 255);
+    else if (TextStyle *text_style = Proj.list.getTextStyle())
+        color = text_style->color;
+    else
+        color = BLACK;
+    if (removed)
+        color.a = 128;
+    color_temp = color; // remember color in temp for fast restoring in 'elmHighlight'
+    return T;
+}
+ListElm &ListElm::set(Elm &elm, ElmNode &node, int depth, int vis_parent) // !! assumes that 'finalRemoved'/FINAL is available !!
+{
+    T.elm = &elm;
+    return set(elm.type, elm.name, FlagOn(node.flag, ELM_EDITED), elm.importing(), elm.finalRemoved(), depth, vis_parent);
+}
+ListElm &ListElm::set(EEItem &item, bool opened, int depth) {
+    T.item = &item;
+    hasVisibleChildren(item.children.elms() > 0, opened);
+    return set(item.type, item.base_name, FlagOn(item.flag, ELM_EDITED), false, false, depth, -1);
+}
 ListElm::ListElm() : size_known(true), tex_size_calculated(false), depth(0), offset(0), color(BLACK), color_temp(BLACK), elm(null), item(null), opened_icon(null), icon(null), size(0) {}
 
 /******************************************************************************/

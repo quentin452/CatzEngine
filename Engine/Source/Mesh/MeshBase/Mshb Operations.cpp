@@ -51,13 +51,13 @@ static void Weld(MeshBase &mshb, MESH_FLAG flag, Flt pos_eps, Flt nrm_cos, Flt r
                             quad_tri.New().set(f.c[0], f.c[1], f.c[3], i);
                         else // 013
                             if (r.c[0] != r.c[1] && r.c[1] != r.c[2] && r.c[0] != r.c[2])
-                                quad_tri.New().set(f.c[0], f.c[1], f.c[2], i);
-                            else // 012
-                                if (r.c[1] != r.c[2] && r.c[2] != r.c[3] && r.c[1] != r.c[3])
-                                    quad_tri.New().set(f.c[1], f.c[2], f.c[3], i);
-                                else // 123
-                                    if (r.c[2] != r.c[3] && r.c[3] != r.c[0] && r.c[2] != r.c[0])
-                                        quad_tri.New().set(f.c[2], f.c[3], f.c[0], i); // 230
+                            quad_tri.New().set(f.c[0], f.c[1], f.c[2], i);
+                        else // 012
+                            if (r.c[1] != r.c[2] && r.c[2] != r.c[3] && r.c[1] != r.c[3])
+                            quad_tri.New().set(f.c[1], f.c[2], f.c[3], i);
+                        else // 123
+                            if (r.c[2] != r.c[3] && r.c[3] != r.c[0] && r.c[2] != r.c[0])
+                            quad_tri.New().set(f.c[2], f.c[3], f.c[0], i); // 230
                     }
                 }
                 temp.quad._elms = CountIs(is);

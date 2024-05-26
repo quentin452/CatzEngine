@@ -362,8 +362,7 @@ const_mem_addr struct _List : GuiObj // Gui List !! must be stored in constant m
 #endif
 };
 /******************************************************************************/
-const_mem_addr T1(TYPE)
-struct List : _List // Gui List Template !! must be stored in constant memory address !!
+const_mem_addr T1(TYPE) struct List : _List // Gui List Template !! must be stored in constant memory address !!
 {
     TYPE *operator()() C { return visToData(cur); }                                // convert visible  index to data
     TYPE *operator()(Int visible) C { return visToData(visible); }                 // convert visible  index to data

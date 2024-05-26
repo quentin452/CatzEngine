@@ -130,7 +130,7 @@ Bool Image::ExportHEIF(File &f, Flt quality) C {
                     q = 100;
                 else // default to 100=lossless
                     if (q > 100)
-                        q = 100;
+                    q = 100;
                 Bool lossless = (q >= 100);
 
                 heif_encoder_set_lossy_quality(encoder, q);

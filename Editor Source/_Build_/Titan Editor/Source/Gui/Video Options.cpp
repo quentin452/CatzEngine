@@ -43,7 +43,7 @@ FILTER_TYPE VideoOptions::Advanced::DensityFilter_v[] =
         FILTER_LINEAR,
         FILTER_CUBIC_FAST,
         FILTER_EASU,
-        //FILTER_CUBIC_PLUS,
+        // FILTER_CUBIC_PLUS,
 };
 cchar8 *VideoOptions::Advanced::TexUse_t[] =
     {
@@ -381,12 +381,12 @@ void VideoOptions::Advanced::create() {
     props.New().create("Upscale Filtering", MemberDesc().setFunc(DensityFilter, DensityFilter)).setEnum(DensityFilter_t, Elms(DensityFilter_t)).desc("Set Pixel Density Filtering when Upscaling");
     props.New().create("Sharpen", MemberDesc(DATA_BOOL).setFunc(Sharpen, Sharpen));
     props.New().create(MLTC(u"Grass Range", PL, u"Zasięg Trawy", DE, u"Gras Reichweite", RU, u"Диапазон травы", PO, u"Alcance da relva"), MemberDesc(DATA_INT).setFunc(GrassRange, GrassRange)).range(0, 2000).desc("Set visible grass range\nvalue of 0 hides grass objects");
-    //props.New().create("Grass Density"        , MemberDesc(DATA_REAL).setFunc(GrassDensity, GrassDensity)).range(0, 1).desc("Set visible grass density");
+    // props.New().create("Grass Density"        , MemberDesc(DATA_REAL).setFunc(GrassDensity, GrassDensity)).range(0, 1).desc("Set visible grass density");
     props.New().create("Soft Particles", MemberDesc(DATA_BOOL).setFunc(SoftParticle, SoftParticle)).desc("Enable Soft Particles");
     // TODO: use ELM ID IMAGE for color palette
-    //props.New().create("Color Palette"        , MemberDesc(DATA_IMAGEPTR).setFunc(ColorPalette , ColorPalette )).setFile(SUPPORTED_IMAGE_EXT, "image").desc("Specify Color Palette used for RM_PALETTE rendering,\nsuch as palette based particles.\nClear to empty to speedup rendering.");
-    //props.New().create("Color Palette 1"      , MemberDesc(DATA_IMAGEPTR).setFunc(ColorPalette1, ColorPalette1)).setFile(SUPPORTED_IMAGE_EXT, "image").desc("Specify Color Palette used for RM_PALETTE1 rendering,\nsuch as palette based particles.\nClear to empty to speedup rendering.");
-    //props.New().create("Volumetric Lighting"  , MemberDesc(DATA_BOOL).setFunc(VolLight, VolLight)).desc("Enable Volumetric Lighting for Ligts");
+    // props.New().create("Color Palette"        , MemberDesc(DATA_IMAGEPTR).setFunc(ColorPalette , ColorPalette )).setFile(SUPPORTED_IMAGE_EXT, "image").desc("Specify Color Palette used for RM_PALETTE rendering,\nsuch as palette based particles.\nClear to empty to speedup rendering.");
+    // props.New().create("Color Palette 1"      , MemberDesc(DATA_IMAGEPTR).setFunc(ColorPalette1, ColorPalette1)).setFile(SUPPORTED_IMAGE_EXT, "image").desc("Specify Color Palette used for RM_PALETTE1 rendering,\nsuch as palette based particles.\nClear to empty to speedup rendering.");
+    // props.New().create("Volumetric Lighting"  , MemberDesc(DATA_BOOL).setFunc(VolLight, VolLight)).desc("Enable Volumetric Lighting for Ligts");
     props.New().create("Max Lights", MemberDesc(DATA_INT).setFunc(MaxLights, MaxLights)).range(0, 255).desc("Limit number of lights on the scene (0=unlimited)");
     props.New().create("Reduce Shadow Flickering", MemberDesc(DATA_BOOL).setFunc(ShadowFlicker, ShadowFlicker)) /*.setEnum(ShadowReduceFlicker_t, Elms(ShadowReduceFlicker_t))*/.desc("This option reduces directional light shadow map flickering when rotating the camera,\nhowever at the expense of slightly increasing the shadow map blockiness.\nEnable only when the flickering is really disturbing.");
     props.New().create("Shadow Range Fraction", MemberDesc(DATA_REAL).setFunc(ShadowFrac, ShadowFrac)).range(0, 1).desc("This option can limit directional lights shadowing range to a fraction of the viewport range.");
@@ -394,14 +394,14 @@ void VideoOptions::Advanced::create() {
     props.New().create("Edge Detect", MemberDesc().setFunc(EdgeDetect, EdgeDetect)).setEnum(EdgeDetect_t, Elms(EdgeDetect_t)).desc("Detect Edges");
     props.New().create("Rendering Stage", MemberDesc().setFunc(Stage, Stage)).setEnum(Stage_t, Elms(Stage_t)).desc("Display specified rendering stage.\nSome options are available only in Deferred Renderer.");
     props.New().create("Dither", MemberDesc(DATA_BOOL).setFunc(Dither, Dither)).desc("If enable color dithering, which smoothens color gradients.");
-    //props.New().create("Monitor Precision"          , MemberDesc(         ).setFunc(MonitorPrec  , MonitorPrec  )).setEnum(Precision_t, Elms(Precision_t)).desc("Specify the exact precision of your Monitor Screen.\n8 bit per channel = 24 bit total\n10 bit per channel = 30 bit total\nIf you're not sure what your monitor supports, leave this option at \"8 bit\"\n\nAvoid setting higher precision than what your screen can actually support,\nbecause instead of getting higher quality results you will get lower quality.");
+    // props.New().create("Monitor Precision"          , MemberDesc(         ).setFunc(MonitorPrec  , MonitorPrec  )).setEnum(Precision_t, Elms(Precision_t)).desc("Specify the exact precision of your Monitor Screen.\n8 bit per channel = 24 bit total\n10 bit per channel = 30 bit total\nIf you're not sure what your monitor supports, leave this option at \"8 bit\"\n\nAvoid setting higher precision than what your screen can actually support,\nbecause instead of getting higher quality results you will get lower quality.");
     props.New().create("HDR", MemberDesc(DATA_BOOL).setFunc(Hdr, Hdr));
     props.New().create("High Precision Lit Color RT", MemberDesc(DATA_BOOL).setFunc(LitColRTPrec, LitColRTPrec)).desc("Enable high precision lit color render target\nThis increases precision of colors adjusted by lighting.");
     props.New().create("High Precision Color RT", MemberDesc(DATA_BOOL).setFunc(ColRTPrec, ColRTPrec)).desc("Enable high precision color render target\nThis increases precision of material color textures in Deferred Renderer.");
     props.New().create("High Precision Normal RT", MemberDesc(DATA_BOOL).setFunc(NrmRTPrec, NrmRTPrec)).desc("Enable high precision normal render target\nThis increases precision of specular lighting in Deferred Renderer.");
     props.New().create("High Precision Light RT", MemberDesc(DATA_BOOL).setFunc(LumRTPrec, LumRTPrec)).desc("Enable high precision light render target\nThis increases lighting precision in Deferred Renderer.");
     props.New().create("Eye Adaptation Brightness", MemberDesc(DATA_REAL).setFunc(EyeAdaptBrigh, EyeAdaptBrigh)).range(0, 2).desc("Total light scale for Eye Adaptation Effect");
-    //props.New().create("Tone Mapping"               , MemberDesc(         ).setFunc(ToneMap      , ToneMap      )).setEnum(ToneMap_t, Elms(ToneMap_t));
+    // props.New().create("Tone Mapping"               , MemberDesc(         ).setFunc(ToneMap      , ToneMap      )).setEnum(ToneMap_t, Elms(ToneMap_t));
     props.New().create("Tone Mapping", MemberDesc(DATA_BOOL).setFunc(ToneMap, ToneMap));
     props.New().create("Contrast", MemberDesc(DATA_REAL).setFunc(Contrast, Contrast)).range(0, 1);
     props.New().create("Bloom Scale", MemberDesc(DATA_REAL).setFunc(BloomScale, BloomScale)).range(0, 2);
@@ -439,6 +439,8 @@ Str VideoOptions::Sync(C VideoOptions &vo) { return D.sync(); }
 void VideoOptions::Sync(VideoOptions &vo, C Str &t) { D.sync(TextBool(t)); }
 Str VideoOptions::ScriptSave(C VideoOptions &vo) { return D.autosavescript(); }
 void VideoOptions::ScriptSave(VideoOptions &vo, C Str &t) { D.autosavescript(TextBool(t)); }
+Str VideoOptions::ClangFormat(C VideoOptions &vo) { return D.clangformat(); }
+void VideoOptions::ClangFormat(VideoOptions &vo, C Str &t) { D.clangformat(TextBool(t)); }
 Str VideoOptions::Render(C VideoOptions &vo) { return Renderer.type(); }
 void VideoOptions::Render(VideoOptions &vo, C Str &t) {
     Renderer.type(RENDER_TYPE(TextInt(t)));
@@ -554,8 +556,9 @@ void VideoOptions::create() {
     props.New().create("Motion Blur", MemberDesc().setFunc(MotionMode, MotionMode)).setEnum(MotionMode_t, Elms(MotionMode_t)).desc("Blur fast moving objects");
     props.New().create("Ambient Occlusion", MemberDesc().setFunc(AO, AO)).setEnum(AO_t, Elms(AO_t)).desc("Darkens occluded areas");
     props.New().create("Eye Adaptation", MemberDesc(DATA_BOOL).setFunc(EyeAdapt, EyeAdapt)).desc("Enables automatic screen brightness adjustment");
-    //if(D.shaderModel()>=SM_5)props.New().create("Tesselation", MemberDesc(DATA_BOOL).setFunc(Tesselation, Tesselation))                                  ;
-    props.New().create("AutoSaveScript", MemberDesc(DATA_BOOL).setFunc(ScriptSave, ScriptSave)).desc("Auto Save (Currently loaded) Script every time you click on a key");
+    // if(D.shaderModel()>=SM_5)props.New().create("Tesselation", MemberDesc(DATA_BOOL).setFunc(Tesselation, Tesselation))                                  ;
+    props.New().create("Auto Save Script", MemberDesc(DATA_BOOL).setFunc(ScriptSave, ScriptSave)).desc("Auto Save (Currently loaded) Script every time you click on a key");
+    props.New().create("Clang Format", MemberDesc(DATA_BOOL).setFunc(ClangFormat, ClangFormat)).desc("Format Files with Clang Format when script saving with CTRL+S");
     props.New().create("Gui Scale", MemberDesc(DATA_REAL).setFunc(Scale, Scale)).mouseEditSpeed(0.5f)
 #if MOBILE
         .range(0.9f, 3.0f);

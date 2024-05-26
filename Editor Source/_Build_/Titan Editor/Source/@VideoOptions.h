@@ -47,10 +47,10 @@ class VideoOptions : PropWin {
         static void GrassDensity(Advanced &adv, C Str &text);
         static Str SoftParticle(C Advanced &adv);
         static void SoftParticle(Advanced &adv, C Str &text);
-        //static Str  ColorPalette (C Advanced &adv             ) {return Renderer.color_palette.name();}
-        //static void ColorPalette (  Advanced &adv, C Str &text) {Renderer.color_palette.get(ImageName(text));}
-        //static Str  ColorPalette1(C Advanced &adv             ) {return Renderer.color_palette1.name();}
-        //static void ColorPalette1(  Advanced &adv, C Str &text) {Renderer.color_palette1.get(ImageName(text));}
+        // static Str  ColorPalette (C Advanced &adv             ) {return Renderer.color_palette.name();}
+        // static void ColorPalette (  Advanced &adv, C Str &text) {Renderer.color_palette.get(ImageName(text));}
+        // static Str  ColorPalette1(C Advanced &adv             ) {return Renderer.color_palette1.name();}
+        // static void ColorPalette1(  Advanced &adv, C Str &text) {Renderer.color_palette1.get(ImageName(text));}
         static Str VolLight(C Advanced &adv);
         static void VolLight(Advanced &adv, C Str &text);
         static Str MaxLights(C Advanced &adv);
@@ -177,6 +177,8 @@ class VideoOptions : PropWin {
     static void Sync(VideoOptions &vo, C Str &t);
     static Str ScriptSave(C VideoOptions &vo);
     static void ScriptSave(VideoOptions &vo, C Str &t);
+    static Str ClangFormat(C VideoOptions &vo);
+    static void ClangFormat(VideoOptions &vo, C Str &t);
     static Str Render(C VideoOptions &vo);
     static void Render(VideoOptions &vo, C Str &t);
     static Str TAA(C VideoOptions &vo);

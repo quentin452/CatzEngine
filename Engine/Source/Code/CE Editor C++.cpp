@@ -68,6 +68,11 @@ void CodeEditor::setVSPath(C Str &path) {
     options.vs_path.set(path, QUIET);
     validateDevEnv();
 }
+void CodeEditor::setClangFormatPath(C Str &path) {
+    clang_format_path = path;
+    options.clang_format_path.set(path, QUIET);
+    validateDevEnv();
+}
 void CodeEditor::setNetBeansPath(C Str &path) {
     netbeans_path = path;
     options.netbeans_path.set(path, QUIET);

@@ -510,6 +510,7 @@ Window &CodeEditor::Options::show() {
 }
 Window &CodeEditor::Options::hide() {
     w_vs_path.hide();
+    w_clang_format.hide();
     w_netbeans_path.hide();
     w_android_sdk.hide();
     w_android_ndk.hide();
@@ -531,6 +532,10 @@ static void AppleTeamIDGet(CodeEditor::Options &op) { Explore("https://developer
 static void VSChanged(CodeEditor::Options &op) {
     if (op.ce)
         op.ce->setVSPath(op.vs_path());
+}
+static void ClangFormatChanged(CodeEditor::Options &op) {
+    if (op.ce)
+        op.ce->setClangFormatPath(op.clang_format_path());
 }
 static void NetBeansChanged(CodeEditor::Options &op) {
     if (op.ce)
@@ -561,6 +566,7 @@ static void AppleTeamIDChanged(CodeEditor::Options &op) {
         op.ce->setAppleTeamID(op.apple_team_id());
 }
 static void VSSelect(CodeEditor::Options &op) { op.w_vs_path.activate(); }
+static void ClangFormatSelect(CodeEditor::Options &op) { op.w_clang_format.activate(); }
 static void NetBeansSelect(CodeEditor::Options &op) { op.w_netbeans_path.activate(); }
 static void AndroidSDKSelect(CodeEditor::Options &op) { op.w_android_sdk.activate(); }
 static void AndroidNDKSelect(CodeEditor::Options &op) { op.w_android_ndk.activate(); }
@@ -569,6 +575,10 @@ static void AndroidCertSelect(CodeEditor::Options &op) { op.w_android_cert_file.
 static void VSLoad(C Str &path, CodeEditor::Options &op) {
     if (op.ce)
         op.ce->setVSPath(path);
+}
+static void ClangFormatLoad(C Str &path, CodeEditor::Options &op) {
+    if (op.ce)
+        op.ce->setClangFormatPath(path);
 }
 static void NetBeansLoad(C Str &path, CodeEditor::Options &op) {
     if (op.ce)
@@ -771,6 +781,12 @@ void CodeEditor::Options::create(CodeEditor &ce) {
     {
         Tab &tab = tabs.tab(1);
         Flt y = Y - 0.05f, w = 1.0f, h = 0.05f, s = 0.13f;
+
+        tab += clang_format_path.create(Rect_C(clientWidth() / 2, y, w, h), ce.clang_format_path).func(ClangFormatChanged, T);
+        y -= s;
+        tab += t_clang_format_path.create(clang_format_path.rect().lu(), "Clang Format Path", &ts);
+        tab += b_clang_format_path.create(Rect_LU(clang_format_path.rect().ru(), h, h), "...").func(ClangFormatSelect, T);
+
 #if WINDOWS
         tab += vs_path.create(Rect_C(clientWidth() / 2, y, w, h), ce.vs_path).func(VSChanged, T);
         y -= s;
@@ -786,7 +802,6 @@ void CodeEditor::Options::create(CodeEditor &ce) {
         tab += d_netbeans.create(Rect_RD(netbeans_path.rect().ru(), 0.22f, h), "Download").func(NetBeansDownload, T);
         // tab+=  netbeans_path_auto.create(Rect_RU(d_netbeans.rect().lu(), 0.26f, h), "Auto-Detect").func(NBAutodetect, T);
 #endif
-
         tab += android_sdk.create(Rect_C(clientWidth() / 2, y, w, h), ce.android_sdk).func(AndroidSDKChanged, T);
         y -= s;
         tab += t_android_sdk.create(android_sdk.rect().lu(), "Android SDK Path", &ts);
@@ -812,7 +827,6 @@ void CodeEditor::Options::create(CodeEditor &ce) {
         tab += d_jdk.create(Rect_RD(Rect_C(clientWidth() / 2, y, w, h).ru(), 0.22f, h), "Download").func(JDKDownload, T);
 #endif
     }
-
     // certificates
     {
         Tab &tab = tabs.tab(2);
@@ -859,6 +873,7 @@ void CodeEditor::Options::create(CodeEditor &ce) {
     }
 
     w_vs_path.create().modeDirSelect().io(VSLoad, VSLoad, T);
+    w_clang_format.create().modeDirSelect().io(ClangFormatLoad, ClangFormatLoad, T);
     w_netbeans_path.create().modeDirSelect().io(NetBeansLoad, NetBeansLoad, T);
     w_android_sdk.create().modeDirSelect().io(AndroidSDKLoad, AndroidSDKLoad, T);
     w_android_ndk.create().modeDirSelect().io(AndroidNDKLoad, AndroidNDKLoad, T);

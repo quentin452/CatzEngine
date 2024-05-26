@@ -955,6 +955,7 @@ DisplayClass::DisplayClass() : _monitors(Compare, null, null, 4) {
     _full = MOBILE; // by default request fullscreen for MOBILE
     _sync = true;
     _autosavescript = false;
+    _clangformat = false;
     //_exclusive       =false;
     //_hdr             =false;
     _color_space = COLOR_SPACE_NONE;
@@ -3350,6 +3351,11 @@ DisplayClass &DisplayClass::sync(Bool sync) {
 
 DisplayClass &DisplayClass::autosavescript(Bool autosavescript) {
     T._autosavescript = autosavescript;
+    return T;
+}
+
+DisplayClass &DisplayClass::clangformat(Bool clangformat) {
+    T._clangformat = clangformat;
     return T;
 }
 

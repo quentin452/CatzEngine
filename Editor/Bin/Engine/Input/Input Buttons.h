@@ -358,7 +358,7 @@ enum VirtualKey : Byte
 #define VK_LBUTTON 0x01
 #define VK_RBUTTON 0x02
 #define VK_CANCEL 0x03
-#define VK_MBUTTON 0x04 /* NOT contiguous with L & RBUTTON */
+#define VK_MBUTTON 0x04  /* NOT contiguous with L & RBUTTON */
 #define VK_XBUTTON1 0x05 /* NOT contiguous with L & RBUTTON */
 #define VK_XBUTTON2 0x06 /* NOT contiguous with L & RBUTTON */
 #define VK_BACK 0x08
@@ -460,12 +460,12 @@ enum VirtualKey : Byte
 #define VK_NUMLOCK 0x90
 #define VK_SCROLL 0x91
 
-#define VK_OEM_NEC_EQUAL 0x92 // '=' key on numpad
-#define VK_OEM_FJ_JISHO 0x92 // 'Dictionary' key
+#define VK_OEM_NEC_EQUAL 0x92  // '=' key on numpad
+#define VK_OEM_FJ_JISHO 0x92   // 'Dictionary' key
 #define VK_OEM_FJ_MASSHOU 0x93 // 'Unregister word' key
 #define VK_OEM_FJ_TOUROKU 0x94 // 'Register word' key
-#define VK_OEM_FJ_LOYA 0x95 // 'Left OYAYUBI' key
-#define VK_OEM_FJ_ROYA 0x96 // 'Right OYAYUBI' key
+#define VK_OEM_FJ_LOYA 0x95    // 'Left OYAYUBI' key
+#define VK_OEM_FJ_ROYA 0x96    // 'Right OYAYUBI' key
 
 #define VK_LSHIFT 0xA0
 #define VK_RSHIFT 0xA1
@@ -494,13 +494,13 @@ enum VirtualKey : Byte
 #define VK_LAUNCH_APP1 0xB6
 #define VK_LAUNCH_APP2 0xB7
 
-#define VK_OEM_1 0xBA // ';:' for US
-#define VK_OEM_PLUS 0xBB // '+' any country
-#define VK_OEM_COMMA 0xBC // ',' any country
-#define VK_OEM_MINUS 0xBD // '-' any country
+#define VK_OEM_1 0xBA      // ';:' for US
+#define VK_OEM_PLUS 0xBB   // '+' any country
+#define VK_OEM_COMMA 0xBC  // ',' any country
+#define VK_OEM_MINUS 0xBD  // '-' any country
 #define VK_OEM_PERIOD 0xBE // '.' any country
-#define VK_OEM_2 0xBF // '/?' for US
-#define VK_OEM_3 0xC0 // '`~' for US
+#define VK_OEM_2 0xBF      // '/?' for US
+#define VK_OEM_3 0xC0      // '`~' for US
 
 #define VK_GAMEPAD_A 0xC3
 #define VK_GAMEPAD_B 0xC4
@@ -532,10 +532,10 @@ enum VirtualKey : Byte
 #define VK_OEM_6 0xDD //  ']}' for US
 #define VK_OEM_7 0xDE //  ''"' for US
 #define VK_OEM_8 0xDF
-#define VK_OEM_AX 0xE1 //  'AX' key on Japanese AX kbd
-#define VK_OEM_102 0xE2 //  "<>" or "\|" on RT 102-key kbd.
+#define VK_OEM_AX 0xE1   //  'AX' key on Japanese AX kbd
+#define VK_OEM_102 0xE2  //  "<>" or "\|" on RT 102-key kbd.
 #define VK_ICO_HELP 0xE3 //  Help key on ICO
-#define VK_ICO_00 0xE4 //  00 key on ICO
+#define VK_ICO_00 0xE4   //  00 key on ICO
 #define VK_PROCESSKEY 0xE5
 #define VK_ICO_CLEAR 0xE6
 #define VK_PACKET 0xE7

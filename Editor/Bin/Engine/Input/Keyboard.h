@@ -74,7 +74,7 @@ struct KeyboardClass // Keyboard Input
     Bool anyShift() C { return ButtonOn(_button[KB_LSHIFT] | _button[KB_RSHIFT]); }
     Bool anyAlt() C { return ButtonOn(_button[KB_LALT] | _button[KB_RALT]); }
     Bool anyWin() C { return ButtonOn(_button[KB_LWIN] | _button[KB_RWIN]); }
-    bool anyKeyWasPressed() {
+    bool anyKeyWasPressed() C {
         // Iterate over the range of KB_KEY values and check if any button is pressed
         for (int i = KB_NONE; i <= KB_ZOOM_OUT; ++i) {
             if (_button[i]) {

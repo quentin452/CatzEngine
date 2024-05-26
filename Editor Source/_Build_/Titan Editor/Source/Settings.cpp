@@ -64,8 +64,8 @@ bool SaveSettings(C Str &name) {
         colors.nodes.New().set("Color", ColorBrush.col[i].col);
 
         TextNode &general = world.getNode("General");
-        //general.nodes.New().set("CursorCollidesWithHeightmaps", MainMenu("WE Edit/Cursor Collides with Heightmaps"));
-        //general.nodes.New().set("CursorCollidesWithObjects"   , MainMenu("WE Edit/Cursor Collides with Objects"));
+        // general.nodes.New().set("CursorCollidesWithHeightmaps", MainMenu("WE Edit/Cursor Collides with Heightmaps"));
+        // general.nodes.New().set("CursorCollidesWithObjects"   , MainMenu("WE Edit/Cursor Collides with Objects"));
         general.nodes.New().set("VisibleRadius", WorldEdit.visibleRadius());
         general.nodes.New().set("ActiveViewport", WorldEdit.v4.sel());
         general.nodes.New().set("CameraMoveMode", WorldEdit.v4.moveMode());
@@ -87,6 +87,7 @@ bool SaveSettings(C Str &name) {
         video.nodes.New().set("ColorSpace", D.colorSpace());
         video.nodes.New().set("Synchronization", D.sync());
         video.nodes.New().set("AutoSaveScript", D.autosavescript());
+        video.nodes.New().set("ClangFormat", D.clangformat());
         video.nodes.New().set("Renderer", Renderer.type());
         video.nodes.New().set("TemporalAntiAliasing", D.temporalAntiAlias());
         video.nodes.New().set("TemporalSuperRes", D.temporalSuperRes());
@@ -169,6 +170,8 @@ void ApplyVideoSettings(C TextData &data) {
             D.sync(p->asBool());
         if (C TextParam *p = video->findNode("AutoSaveScript"))
             D.autosavescript(p->asBool());
+        if (C TextParam *p = video->findNode("ClangFormat"))
+            D.clangformat(p->asBool());
         if (C TextParam *p = video->findNode("Renderer"))
             Renderer.type(RENDER_TYPE(p->asInt()));
         if (C TextParam *p = video->findNode("TemporalAntiAliasing"))
@@ -347,8 +350,8 @@ void ApplySettings(C TextData &data) {
                 ColorBrush.col[i].col = TextVec(p->value);
         }
         if (C TextNode *general = world->findNode("General")) {
-            //if(C TextParam *p=general.findNode("CursorCollidesWithHeightmaps"))MainMenu("WE Edit/Cursor Collides with Heightmaps", p.asBool());
-            //if(C TextParam *p=general.findNode("CursorCollidesWithObjects"   ))MainMenu("WE Edit/Cursor Collides with Objects"   , p.asBool());
+            // if(C TextParam *p=general.findNode("CursorCollidesWithHeightmaps"))MainMenu("WE Edit/Cursor Collides with Heightmaps", p.asBool());
+            // if(C TextParam *p=general.findNode("CursorCollidesWithObjects"   ))MainMenu("WE Edit/Cursor Collides with Objects"   , p.asBool());
             if (C TextParam *p = general->findNode("VisibleRadius"))
                 WorldEdit.visibleRadius(p->asInt());
             if (C TextParam *p = general->findNode("ActiveViewport"))

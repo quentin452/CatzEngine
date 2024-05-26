@@ -242,7 +242,9 @@ struct DisplayClass : DisplayState, DisplayDraw // Display Control
     DisplayClass &sync(Bool sync);
     Bool sync() C { return _sync; } // set/get Screen Synchronization                 (true/false
     DisplayClass &autosavescript(Bool autosavescript);
-    Bool autosavescript() C { return _autosavescript; } // set/get Auto Save Script                 (true/false                         , default=             true                             ), the change is NOT instant, avoid calling real-time
+    Bool autosavescript() C { return _autosavescript; } // set/get Auto Save Script                 (true/false                         , default=             false                             ),
+    DisplayClass &clangformat(Bool clangformat);
+    Bool clangformat() C { return _clangformat; } // set/get Clang Format                 (true/false                         , default=             false                             ),
     DisplayClass &maxLights(Byte max_lights);
     Byte maxLights() C { return _max_lights; } // set/get Maximum Number of Lights               (0=unlimited, 1..255                , default=                0                             ), this will automatically limit the number of lights on the scene, the change is instant, you can call it real-time
     DisplayClass &maxLightsSoft(Bool on);
@@ -687,7 +689,7 @@ struct DisplayClass : DisplayState, DisplayDraw // Display Control
     IMAGE_PRECISION _output_prec, _lit_col_rt_prec, _color_prec;
     FILTER_TYPE _density_filter;
     COLOR_SPACE _color_space;
-    Bool _full, _sync, _autosavescript, _exclusive, _hdr,
+    Bool _full, _sync, _autosavescript,_clangformat, _exclusive, _hdr,
         _hp_col_rt, _hp_nrm_rt, _hp_lum_rt, _hp_pal_rt,
         _particles_soft, _particles_smooth,
         _tex_mip_filter, _tex_macro, _tex_detail_lod,

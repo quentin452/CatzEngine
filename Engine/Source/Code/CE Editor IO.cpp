@@ -86,6 +86,7 @@ Bool CodeEditor::loadSymbols(C Str &file, Bool all) {
 /******************************************************************************/
 void CodeEditor::saveSettings(TextNode &code) {
     TextNode &paths = code.nodes.New().setName("Paths");
+    paths.nodes.New().set("ClangFormat", clang_format_path);
     paths.nodes.New().set("VisualStudio", vs_path);
     paths.nodes.New().set("NetBeans", netbeans_path);
     paths.nodes.New().set("AndroidSDK", android_sdk);
@@ -196,6 +197,8 @@ void CodeEditor::loadSettings(C TextNode &code) {
             setAndroidNDKPath(p->value);
         if (C TextNode *p = paths->findNode("JavaDevelopmentKit"))
             setJDKPath(p->value);
+        if (C TextNode *p = paths->findNode("ClangFormat"))
+            setClangFormatPath(p->value);
     }
     if (C TextNode *certificates = code.findNode("Certificates")) {
         if (C TextNode *windows = certificates->findNode("Windows")) {
@@ -314,6 +317,10 @@ void CodeEditor::overwrite() {
         else
             cur()->save();
     }
+}
+
+void CodeEditor::formatfileswithclang() {
+    // return;
 }
 void CodeEditor::save() {
     if (cur())

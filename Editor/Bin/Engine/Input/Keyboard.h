@@ -74,6 +74,16 @@ struct KeyboardClass // Keyboard Input
     Bool anyShift() C { return ButtonOn(_button[KB_LSHIFT] | _button[KB_RSHIFT]); }
     Bool anyAlt() C { return ButtonOn(_button[KB_LALT] | _button[KB_RALT]); }
     Bool anyWin() C { return ButtonOn(_button[KB_LWIN] | _button[KB_RWIN]); }
+    bool anyKeyWasPressed() {
+        // Iterate over the range of KB_KEY values and check if any button is pressed
+        for (int i = KB_NONE; i <= KB_ZOOM_OUT; ++i) {
+            if (_button[i]) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 #endif
 
     Char keyChar(KB_KEY key) C;     // get key character, example: keyChar  (KB_SPACE) -> ' '    , keyChar  (KB_UP) -> '\0'

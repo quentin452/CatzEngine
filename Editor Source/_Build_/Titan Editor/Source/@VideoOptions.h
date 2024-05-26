@@ -190,6 +190,8 @@ public:
    static void Full        (  VideoOptions &vo, C Str &t);
    static Str  Sync        (C VideoOptions &vo          );
    static void Sync        (  VideoOptions &vo, C Str &t);
+   static Str ScriptSave(C VideoOptions &vo);
+   static void ScriptSave(VideoOptions &vo, C Str &t);
    static Str  Render      (C VideoOptions &vo          );
    static void Render      (  VideoOptions &vo, C Str &t);
    static Str  TAA         (C VideoOptions &vo          );

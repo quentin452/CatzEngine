@@ -212,7 +212,7 @@ void RequestDisplayMode(Int w, Int h, Int full) {
 #endif
 
 #if WINDOWS && GL
-static void glewSafe() {
+static void glewSafe(){
 #define V(x, y, z)                                                                                                         \
     {                                                                                                                      \
         if (!x)                                                                                                            \
@@ -221,28 +221,28 @@ static void glewSafe() {
             Exit("OpenGL " z " function not supported.\nGraphics Driver not installed or better video card is required."); \
     }
     V(glGenRenderbuffers, glGenRenderbuffersEXT, "glGenRenderbuffers")
-    V(glDeleteRenderbuffers, glDeleteRenderbuffersEXT, "glDeleteRenderbuffers")
-    V(glRenderbufferStorage, glRenderbufferStorageEXT, "glRenderbufferStorage")
-    V(glGetRenderbufferParameteriv, glGetRenderbufferParameterivEXT, "glGetRenderbufferParameteriv")
-    V(glBindRenderbuffer, glBindRenderbufferEXT, "glBindRenderbuffer")
+        V(glDeleteRenderbuffers, glDeleteRenderbuffersEXT, "glDeleteRenderbuffers")
+            V(glRenderbufferStorage, glRenderbufferStorageEXT, "glRenderbufferStorage")
+                V(glGetRenderbufferParameteriv, glGetRenderbufferParameterivEXT, "glGetRenderbufferParameteriv")
+                    V(glBindRenderbuffer, glBindRenderbufferEXT, "glBindRenderbuffer")
 
-    V(glGenFramebuffers, glGenFramebuffersEXT, "glGenFramebuffers")
-    V(glDeleteFramebuffers, glDeleteFramebuffersEXT, "glDeleteFramebuffers")
-    V(glBindFramebuffer, glBindFramebufferEXT, "glBindFramebuffer")
-    V(glBlitFramebuffer, glBlitFramebufferEXT, "glBlitFramebuffer")
+                        V(glGenFramebuffers, glGenFramebuffersEXT, "glGenFramebuffers")
+                            V(glDeleteFramebuffers, glDeleteFramebuffersEXT, "glDeleteFramebuffers")
+                                V(glBindFramebuffer, glBindFramebufferEXT, "glBindFramebuffer")
+                                    V(glBlitFramebuffer, glBlitFramebufferEXT, "glBlitFramebuffer")
 #if DEBUG
-    V(glCheckFramebufferStatus, glCheckFramebufferStatusEXT, "glCheckFramebufferStatus")
+                                        V(glCheckFramebufferStatus, glCheckFramebufferStatusEXT, "glCheckFramebufferStatus")
 #endif
 
-    V(glFramebufferTexture2D, glFramebufferTexture2DEXT, "glFramebufferTexture2D")
-    V(glFramebufferRenderbuffer, glFramebufferRenderbufferEXT, "glFramebufferRenderbuffer")
+                                            V(glFramebufferTexture2D, glFramebufferTexture2DEXT, "glFramebufferTexture2D")
+                                                V(glFramebufferRenderbuffer, glFramebufferRenderbufferEXT, "glFramebufferRenderbuffer")
 
-    V(glBlendColor, glBlendColorEXT, "glBlendColor")
-    V(glBlendEquation, glBlendEquationEXT, "glBlendEquation")
-    V(glBlendEquationSeparate, glBlendEquationSeparateEXT, "glBlendEquationSeparate")
-    V(glBlendFuncSeparate, glBlendFuncSeparateEXT, "glBlendFuncSeparate")
+                                                    V(glBlendColor, glBlendColorEXT, "glBlendColor")
+                                                        V(glBlendEquation, glBlendEquationEXT, "glBlendEquation")
+                                                            V(glBlendEquationSeparate, glBlendEquationSeparateEXT, "glBlendEquationSeparate")
+                                                                V(glBlendFuncSeparate, glBlendFuncSeparateEXT, "glBlendFuncSeparate")
 
-    V(glColorMaski, glColorMaskIndexedEXT, "glColorMaski")
+                                                                    V(glColorMaski, glColorMaskIndexedEXT, "glColorMaski")
 #undef V
 }
 #endif
@@ -340,21 +340,21 @@ Bool GLContext::createSecondary() {
     EGLint attribs[] = {EGL_WIDTH, 1, EGL_HEIGHT, 1, EGL_NONE}; // end of list
     if (surface = eglCreatePbufferSurface(GLDisplay, GLConfig, attribs)) {
         EGLint ctx_attribs[] =
-        {
+            {
 #if GL_ES
-            EGL_CONTEXT_MAJOR_VERSION,
-            3,
-            EGL_CONTEXT_MINOR_VERSION,
-            2,
+                EGL_CONTEXT_MAJOR_VERSION,
+                3,
+                EGL_CONTEXT_MINOR_VERSION,
+                2,
 #else
-            EGL_CONTEXT_MAJOR_VERSION,
-            4,
-            EGL_CONTEXT_MINOR_VERSION,
-            5,
+                EGL_CONTEXT_MAJOR_VERSION,
+                4,
+                EGL_CONTEXT_MINOR_VERSION,
+                5,
 #endif
-            // EGL_CONTEXT_FLAGS_KHR, EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR,
-            EGL_NONE // end of list
-        };
+                // EGL_CONTEXT_FLAGS_KHR, EGL_CONTEXT_OPENGL_DEBUG_BIT_KHR,
+                EGL_NONE // end of list
+            };
         context = eglCreateContext(GLDisplay, GLConfig, MainContext.context, ctx_attribs);
     }
 #elif IOS
@@ -636,7 +636,7 @@ Bool DisplayClass::gatherAvailable() C {
 #elif GL_ES
     return shaderModel() >= SM_GL_ES_3_1; // 3.1+ GLES required
 #elif GL
-    return shaderModel() >= SM_GL_4;   // 4.0+ GL required
+    return shaderModel() >= SM_GL_4; // 4.0+ GL required
 #endif
 }
 Bool DisplayClass::gatherChannelAvailable() C {
@@ -645,7 +645,7 @@ Bool DisplayClass::gatherChannelAvailable() C {
 #elif GL_ES
     return shaderModel() >= SM_GL_ES_3_1; // 3.1+ GLES required
 #elif GL
-    return shaderModel() >= SM_GL_4;   // 4.0+ GL required
+    return shaderModel() >= SM_GL_4; // 4.0+ GL required
 #endif
 }
 Bool DisplayClass::conservativeDepthAvailable() C {
@@ -682,7 +682,7 @@ Bool DisplayClass::independentBlendAvailable() C {
 #elif GL_ES
     return shaderModel() >= SM_GL_ES_3_2; // 3.2+ GLES required
 #elif GL
-    return shaderModel() >= SM_GL_4;   // 4.0+ GL required
+    return shaderModel() >= SM_GL_4; // 4.0+ GL required
 #endif
 }
 Bool DisplayClass::SpirVAvailable() C {
@@ -690,7 +690,7 @@ Bool DisplayClass::SpirVAvailable() C {
     return true;
 #elif GL_ES
 #elif GL
-                                       // return Compare(_gl_ver, VecB2(4, 6))>=0; // 4.6+ GL required, currently crashes on Nvidia, broken on Intel
+    // return Compare(_gl_ver, VecB2(4, 6))>=0; // 4.6+ GL required, currently crashes on Nvidia, broken on Intel
 #endif
     return false;
 }
@@ -759,7 +759,7 @@ VecI2 DisplayClass::Monitor::mode() C {
     }
     return mode;
 #else
-    return D.screen();                 // TODO:
+    return D.screen(); // TODO:
 #endif
 }
 Str DisplayClass::Monitor::standardColorProfilePath() C {
@@ -954,6 +954,7 @@ DisplayClass::DisplayClass() : _monitors(Compare, null, null, 4) {
     // there's only one 'DisplayClass' global 'D' and it doesn't need clearing members to zero
     _full = MOBILE; // by default request fullscreen for MOBILE
     _sync = true;
+    _autosavescript = false;
     //_exclusive       =false;
     //_hdr             =false;
     _color_space = COLOR_SPACE_NONE;
@@ -1681,13 +1682,13 @@ found_pf:
     Byte samples = 1;
     IMAGE_TYPE ds_type = IMAGE_NONE;
     EGLint win_attribs[] =
-    {
+        {
 #if LINEAR_GAMMA
-        EGL_GL_COLORSPACE_KHR,
-        LINEAR_GAMMA ? EGL_GL_COLORSPACE_SRGB_KHR : EGL_GL_COLORSPACE_LINEAR_KHR,
+            EGL_GL_COLORSPACE_KHR,
+            LINEAR_GAMMA ? EGL_GL_COLORSPACE_SRGB_KHR : EGL_GL_COLORSPACE_LINEAR_KHR,
 #endif
-        EGL_NONE // end of list
-    };
+            EGL_NONE // end of list
+        };
     for (GLCtxVer = 3; GLCtxVer >= 3; GLCtxVer--) // start from OpenGL ES 3
     {
         EGLint ctx_attribs[] =
@@ -1926,13 +1927,13 @@ void DisplayClass::androidOpen() {
     androidClose();
     if (GLDisplay && MainContext.context) {
         EGLint win_attribs[] =
-        {
+            {
 #if LINEAR_GAMMA
-            EGL_GL_COLORSPACE_KHR,
-            LINEAR_GAMMA ? EGL_GL_COLORSPACE_SRGB_KHR : EGL_GL_COLORSPACE_LINEAR_KHR,
+                EGL_GL_COLORSPACE_KHR,
+                LINEAR_GAMMA ? EGL_GL_COLORSPACE_SRGB_KHR : EGL_GL_COLORSPACE_LINEAR_KHR,
 #endif
-            EGL_NONE // end of list
-        };
+                EGL_NONE // end of list
+            };
         EGLint format;
         eglGetConfigAttrib(GLDisplay, GLConfig, EGL_NATIVE_VISUAL_ID, &format);
         ANativeWindow_setBuffersGeometry(AndroidApp->window, 0, 0, format);
@@ -1941,7 +1942,7 @@ void DisplayClass::androidOpen() {
             Exit("Can't create EGLSurface.");
         MainContext.lock();
         setDeviceSettings(); // reset device state, also needed because of thread ID change
-    }                        // else Exit("OpenGL Display and MainContext not available."); don't exit because this might be called in 'LoadAndroidAssetPacks' while display is still not created
+    } // else Exit("OpenGL Display and MainContext not available."); don't exit because this might be called in 'LoadAndroidAssetPacks' while display is still not created
 #endif
 }
 Bool DisplayClass::create() {
@@ -3184,7 +3185,7 @@ void DisplayClass::setRectUI() {
 #elif ANDROID
     if (Jni && ActivityClass && Activity)
         if (JMethodID getRects = Jni.func(ActivityClass, "getRects", "()V"))
-            Jni->CallVoidMethod(Activity, getRects);             // this will call 'setRects' above
+            Jni->CallVoidMethod(Activity, getRects); // this will call 'setRects' above
 #endif
 }
 void DisplayClass::sizeChanged() {
@@ -3319,7 +3320,7 @@ void DisplayClass::setSync() {
         if (findMode())
             Reset();
 #elif GL
-        Bool sync = (T.sync() && !VR.active());                  // if using VR then we have to disable screen sync, because HMD will handle this according to its own refresh rate
+        Bool sync = (T.sync() && !VR.active()); // if using VR then we have to disable screen sync, because HMD will handle this according to its own refresh rate
 #if WINDOWS
         wglSwapIntervalEXT(sync);
 #elif MAC
@@ -3346,6 +3347,12 @@ DisplayClass &DisplayClass::sync(Bool sync) {
     }
     return T;
 }
+
+DisplayClass &DisplayClass::autosavescript(Bool autosavescript) {
+    T._autosavescript = autosavescript;
+    return T;
+}
+
 /******************************************************************************/
 DisplayClass &DisplayClass::dither(Bool dither) { /*if(T._dither          !=dither   )*/
     { T._dither = dither; }
@@ -3772,7 +3779,7 @@ void DisplayClass::gammaSet() {
 DisplayClass &DisplayClass::diffuseMode(DIFFUSE_MODE mode) {
     if (InRange(mode, DIFFUSE_NUM) && _diffuse_mode != mode) {
         _diffuse_mode = mode; /*setShader();*/
-    }                         // RT_FORWARD always uses lambert, so 'setShader' not needed
+    } // RT_FORWARD always uses lambert, so 'setShader' not needed
     return T;
 }
 /******************************************************************************/
@@ -4808,7 +4815,7 @@ void DisplayClass::setFade(Flt seconds, Bool previous_frame, Bool auto_draw) {
                     _fade_speed = FadeSpeed(seconds);
                     _fade_auto_draw = auto_draw; // set after calling 'fadeDraw'
                     Swap(Renderer._fade, temp);  // swap RT as new fade
-                }                                // <- 'discard' will be called for 'temp' and 'ds'
+                } // <- 'discard' will be called for 'temp' and 'ds'
                 Renderer._cur_main = cur_main;
                 Renderer._ui = ui;
                 Renderer._cur_main_ds = cur_main_ds;

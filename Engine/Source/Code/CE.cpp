@@ -1631,6 +1631,11 @@ static Str FindPath(C Str &registry, C Str &sub_path) {
 }
 void CodeEditor::update(Bool active) {
     if (active) {
+        // Auto Save Script if key is pressed
+        if (D.autosavescript() && Kb.anyKeyWasPressed()) {
+            CE.overwrite();
+        }
+
         if (Gui.kb() == &build_list)
             if (cur())
                 cur()->activate();

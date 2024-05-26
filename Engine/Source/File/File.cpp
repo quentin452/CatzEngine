@@ -423,7 +423,7 @@ Bool File::decompress(COMPRESS_TYPE compression, ULong decompressed_size, Bool s
             goto error;
         }
     }
-mem : {
+mem: {
     File temp;
     if (DecompressRaw(T, temp, compression, left(), decompressed_size, true) && temp.pos(0)) {
         Swap(T, temp);
@@ -1543,7 +1543,7 @@ File &File::cmpDir3(C Vec &v) {
 }
 File &File::decDir2(Vec &v) {
     UShort c = getUShort();
-    Int x = ((c)&255),
+    Int x = ((c) & 255),
         y = ((c >> 8) & 127);
     Bool z = ((c >> 15) & 1);
     v.x = (x - 128) / 127.0f;
@@ -1558,7 +1558,7 @@ File &File::decDir3(Vec &v) {
     UInt c;
     get(&c, 3);
     ASSERT(SIZE(c) >= 3); // clearing 'c' to zero first is not needed, since we're reading bits only from first 3 bytes below
-    Int x = ((c)&4095),
+    Int x = ((c) & 4095),
         y = ((c >> 12) & 2047);
     Bool z = ((c >> 23) & 1);
     v.x = (x - 2048) / 2047.0f;
@@ -1692,9 +1692,26 @@ Bool File::sync() {
         return _commit(_handle) == 0;
 #endif
 #elif SWITCH
-        return true;     // return true because this is required by SQLite
+        return true; // return true because this is required by SQLite
 #else
         return fsync(_handle) == 0;
+#endif
+    }
+    return true;
+}
+Bool File::autosavescript() {
+    if (_writable && (_type == FILE_STD_WRITE || _type == FILE_STD_READ)) // check 'FILE_STD_READ' too, because we may have written data previously in FILE_STD_WRITE, and later switched to FILE_STD_READ
+    {
+#if WINDOWS
+#if 1 // faster
+        return FlushFileBuffers((HANDLE)_get_osfhandle(_handle));
+#else // internally calls 'FlushFileBuffers' which means this has bigger overhead
+        return _commit(_handle) == 0;
+#endif
+#elif SWITCH
+        return true; // return true because this is required by SQLite
+#else
+        return autosavescript(_handle) == 0;
 #endif
     }
     return true;
@@ -1779,7 +1796,7 @@ Int File::getReturnSize(Ptr data, Int size) {
                 if (!discardBuf(true))
                     break;             // if this fails then we can't read, because we're expecting to read at the current position
                 _type = FILE_STD_READ; // set new mode and fall down for reading
-            }                          // !! no break on purpose !!
+            } // !! no break on purpose !!
             case FILE_STD_READ: {
                 if (_buf_len) // have data in the buffer
                 {
@@ -1883,7 +1900,7 @@ Int File::putReturnSize(CPtr data, Int size) {
             if (!_writable || !discardBuf(false))
                 break;              // if this fails then we can't write, because we're expecting to write at the current position, no need for flush because FILE_STD_READ doesn't need flush
             _type = FILE_STD_WRITE; // set new mode and fall down for writing
-        }                           // !! no break on purpose !!
+        } // !! no break on purpose !!
         case FILE_STD_WRITE: {
             if (!_cipher && data) // buffering optional (check for 'data' because it's allowed to be null and write zeros)
             {

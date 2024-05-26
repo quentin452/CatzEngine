@@ -175,7 +175,8 @@ void VideoOptions::Advanced::Fov(Advanced &adv, C Str &text) { adv.setFov(DegToR
 Str VideoOptions::Advanced::TexFilter(C Advanced &adv) {
     Str f = D.texFilter();
     REPA(TexFilter_t)
-    if (f == TexFilter_t[i]) return i;
+    if (f == TexFilter_t[i])
+        return i;
     return -1;
 }
 void VideoOptions::Advanced::TexFilter(Advanced &adv, C Str &text) {
@@ -211,7 +212,8 @@ void VideoOptions::Advanced::Density(Advanced &adv, C Str &text) {
 }
 Str VideoOptions::Advanced::DensityFilter(C Advanced &adv) {
     REPA(DensityFilter_v)
-    if (D.densityFilter() == DensityFilter_v[i]) return i;
+    if (D.densityFilter() == DensityFilter_v[i])
+        return i;
     return S;
 }
 void VideoOptions::Advanced::DensityFilter(Advanced &adv, C Str &text) {
@@ -435,6 +437,8 @@ Str VideoOptions::Full(C VideoOptions &vo) { return D.full(); }
 void VideoOptions::Full(VideoOptions &vo, C Str &t) { D.full(TextBool(t)); }
 Str VideoOptions::Sync(C VideoOptions &vo) { return D.sync(); }
 void VideoOptions::Sync(VideoOptions &vo, C Str &t) { D.sync(TextBool(t)); }
+Str VideoOptions::ScriptSave(C VideoOptions &vo) { return D.autosavescript(); }
+void VideoOptions::ScriptSave(VideoOptions &vo, C Str &t) { D.autosavescript(TextBool(t)); }
 Str VideoOptions::Render(C VideoOptions &vo) { return Renderer.type(); }
 void VideoOptions::Render(VideoOptions &vo, C Str &t) {
     Renderer.type(RENDER_TYPE(TextInt(t)));
@@ -453,7 +457,8 @@ void VideoOptions::Shadow(VideoOptions &vo, C Str &t) {
 }
 Str VideoOptions::ShadowSize(C VideoOptions &vo) {
     REPA(ShadowSize_t)
-    if (D.shadowMapSize() >= TextInt(ShadowSize_t[i])) return i;
+    if (D.shadowMapSize() >= TextInt(ShadowSize_t[i]))
+        return i;
     return "2";
 }
 void VideoOptions::ShadowSize(VideoOptions &vo, C Str &t) {
@@ -500,12 +505,14 @@ void VideoOptions::setScaleWin(bool scale) {
 }
 UID VideoOptions::skinID(C Str &name) C {
     REPA(skins)
-    if (skins[i].name == name) return skins[i].id;
+    if (skins[i].name == name)
+        return skins[i].id;
     return UIDZero;
 }
 int VideoOptions::skinIndex(C UID &id) C {
     REPA(skins)
-    if (skins[i].id == id) return i;
+    if (skins[i].id == id)
+        return i;
     return -1;
 }
 Str VideoOptions::skinName() C { return skin ? skin->combobox.text : S; }
@@ -548,6 +555,7 @@ void VideoOptions::create() {
     props.New().create("Ambient Occlusion", MemberDesc().setFunc(AO, AO)).setEnum(AO_t, Elms(AO_t)).desc("Darkens occluded areas");
     props.New().create("Eye Adaptation", MemberDesc(DATA_BOOL).setFunc(EyeAdapt, EyeAdapt)).desc("Enables automatic screen brightness adjustment");
     //if(D.shaderModel()>=SM_5)props.New().create("Tesselation", MemberDesc(DATA_BOOL).setFunc(Tesselation, Tesselation))                                  ;
+    props.New().create("AutoSaveScript", MemberDesc(DATA_BOOL).setFunc(ScriptSave, ScriptSave)).desc("Auto Save (Currently loaded) Script every time you click on a key");
     props.New().create("Gui Scale", MemberDesc(DATA_REAL).setFunc(Scale, Scale)).mouseEditSpeed(0.5f)
 #if MOBILE
         .range(0.9f, 3.0f);

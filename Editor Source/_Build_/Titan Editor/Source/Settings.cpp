@@ -159,7 +159,7 @@ void ApplyVideoSettings(C TextData &data)
       if(C TextParam *p=video->findNode("Exclusive"               ))D.exclusive(p->asBool());
       if(C TextParam *p=video->findNode("ColorSpace"              ))D.colorSpace((COLOR_SPACE)p->asInt());
       if(C TextParam *p=video->findNode("Synchronization"         ))D.sync(p->asBool());
-      if(C TextParam *p=video->findNode("AutoSaveScript "         ))D.autosavescript(p->asBool());
+      if(C TextParam *p=video->findNode("AutoSaveScript"         ))D.autosavescript(p->asBool());
       if(C TextParam *p=video->findNode("Renderer"                ))Renderer.type(RENDER_TYPE(p->asInt()));
       if(C TextParam *p=video->findNode("TemporalAntiAliasing"    ))D.temporalAntiAlias(p->asBool());
       if(C TextParam *p=video->findNode("TemporalSuperRes"        ))D.temporalSuperRes(p->asBool());

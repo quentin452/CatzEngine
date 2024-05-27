@@ -1394,9 +1394,13 @@ Bool Source::formatfileswithclang() {
         } else {
             exe = "clang-format.exe";
         }
-        // std::string command_line = clang_format_path + exe + " -style=file -i " + path.toCString();
+
         std::string command_line = "\"" + clang_format_path + exe + "\" -style=file -i \"" + path.toCString() + "\"";
-        LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Command specified: " + std::string(command_line));
+        LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Command specified: " + command_line);
+
+        // Convert command line to LPCWSTR
+        std::wstring command_line_wide(command_line.begin(), command_line.end());
+        LPCWSTR command_line_wide_ptr = command_line_wide.c_str();
 
         // Prepare the startup info and process information structures.
         STARTUPINFO si;
@@ -1405,17 +1409,22 @@ Bool Source::formatfileswithclang() {
         si.cb = sizeof(si);
         ZeroMemory(&pi, sizeof(pi));
 
-        // Convert the command and arguments to LPCWSTR for CreateProcess.
-        std::wstring command_wide(command_line.begin(), command_line.end());
-        LPWSTR command_line_wide = const_cast<LPWSTR>(command_wide.c_str());
-
         // Create the process.
-        if (!CreateProcess(NULL, command_line_wide, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
+        if (!CreateProcess(NULL,                                      // No module name (use command line)
+                           const_cast<LPWSTR>(command_line_wide_ptr), // Command line
+                           NULL,                                      // Process handle not inheritable
+                           NULL,                                      // Thread handle not inheritable
+                           FALSE,                                     // Set handle inheritance to FALSE
+                           0,                                         // No creation flags
+                           NULL,                                      // Use parent's environment block
+                           NULL,                                      // Use parent's starting directory
+                           &si,                                       // Pointer to STARTUPINFO structure
+                           &pi)) {                                    // Pointer to PROCESS_INFORMATION structure
             Gui.msgBox("Error", "Failed to create process.");
             return false;
         }
 
-        // Wait for the process to finish.
+        // Wait until child process exits.
         WaitForSingleObject(pi.hProcess, INFINITE);
 
         // Close process and thread handles.

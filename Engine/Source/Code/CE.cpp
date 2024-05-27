@@ -1643,9 +1643,9 @@ void CodeEditor::update(Bool active) {
                 Source &src = sources[i];
                 if (src.getOpened()) { // todo do not format files if there are in READ ONLY MODE
                     src.formatfileswithclang();
-                    CE.overwrite();
                 }
             }
+            CE.overwrite();
         }
 #endif
 

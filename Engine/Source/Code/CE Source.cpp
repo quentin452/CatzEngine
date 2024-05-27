@@ -1409,6 +1409,10 @@ Bool Source::formatfileswithclang() {
         si.cb = sizeof(si);
         ZeroMemory(&pi, sizeof(pi));
 
+        // Set STARTUPINFO to hide the window
+        si.dwFlags |= STARTF_USESHOWWINDOW;
+        si.wShowWindow = SW_HIDE;
+
         // Create the process.
         if (!CreateProcess(NULL,                                      // No module name (use command line)
                            const_cast<LPWSTR>(command_line_wide_ptr), // Command line
@@ -1423,9 +1427,6 @@ Bool Source::formatfileswithclang() {
             Gui.msgBox("Error", "Failed to create process.");
             return false;
         }
-
-        // Wait until child process exits.
-        WaitForSingleObject(pi.hProcess, INFINITE);
 
         // Close process and thread handles.
         CloseHandle(pi.hProcess);

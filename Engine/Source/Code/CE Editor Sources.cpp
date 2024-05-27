@@ -17,6 +17,15 @@ void Source::setOpened(Bool opened) {
         }
     }
 }
+Source *Source::getOpened() {
+    REPA(CE.code_tabs)
+    if (CE.code_tabs.tab(i).source == this && T.opened) // if this source is opened
+    {
+        return this;
+    }
+    return nullptr; // if no opened source is found
+}
+
 void CodeEditor::cur(Source *cur) {
     if (T._cur != cur && parent) {
         if (T._cur)

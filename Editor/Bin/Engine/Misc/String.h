@@ -34,7 +34,15 @@ struct Str // Text String (16-bit per character)
     operator CChar *() C { return _d.data(); }  // cast to CChar*
     CChar *operator()() C { return _d.data(); } // get  text data
     Char operator[](Int i) C;                   // get  i-th character, returns '\0' if 'i' is out of range
-
+    #ifdef _WIN32
+    std::string toCString() {
+        std::string buffer(_length, '\0');
+        for (int i = 0; i < _length; ++i) {
+            buffer[i] = static_cast<char>(_d[i]);
+        }
+        return buffer;
+    }
+    #endif
     Bool is() C { return _length > 0; }                        // if  contains any data
     Int length() C { return _length; }                         // get current length
     Char first() C { return _length ? _d[0] : '\0'; }          // get first character present in the string, '\0' if empty
@@ -347,5 +355,5 @@ inline Str &&operator+(Str &&a, C VecUS4 &b) { return RValue(a += b); }
 inline Str &&operator+(Str &&a, C BStr &b) { return RValue(a += b); }
 T1(TYPE)
 ENABLE_IF_ENUM(TYPE, Str &&)
-operator+(Str &&a, TYPE b) { return RValue(a += ENUM_TYPE(TYPE)(b)); }
+operator+(Str && a, TYPE b) { return RValue(a += ENUM_TYPE(TYPE)(b)); }
 /******************************************************************************/

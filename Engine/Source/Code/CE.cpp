@@ -1629,16 +1629,25 @@ static Str FindPath(C Str &registry, C Str &sub_path) {
     }
     return S;
 }
+
 void CodeEditor::update(Bool active) {
     if (active) {
         // Auto Save Script if key is pressed
         if (D.autosavescript() && Kb.anyKeyWasPressed()) {
             CE.overwrite();
         }
-        // TODO SUPPORT CLANG FORMAT
-       // if (D.clangformat() && Kb.b(KB_LCTRL) && Kb.b(KB_S)) {
-       //     CE.formatfileswithclang();
-       // }
+
+#ifdef _WIN32
+        if (D.clangformat() && Kb.b(KB_LCTRL) && Kb.b(KB_S)) {
+            REPA(sources) {
+                Source &src = sources[i];
+                if (src.getOpened()) { // todo do not format files if there are in READ ONLY MODE
+                    src.formatfileswithclang();
+                    CE.overwrite();
+                }
+            }
+        }
+#endif
 
         if (Gui.kb() == &build_list)
             if (cur())

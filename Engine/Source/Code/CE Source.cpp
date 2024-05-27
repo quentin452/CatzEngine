@@ -1373,15 +1373,62 @@ Bool Source::overwrite() // returns true if saved successfully (immediately)
     save();
     return false;
 }
-
+#if WINDOWS // TODO SUPPORT MORE OS
 Bool Source::formatfileswithclang() {
-    //return false;
-    if (CE.clang_format_path != "") {
-        Gui.msgBox(S, "Clang Format Was Not Found.\n");
+    if (CE.clang_format_path == "") {
+        Gui.msgBox("Error", "Clang Format Was Not Found.");
+        return false;
+    } else if (CodeEditorInterface::sourceCurIs()) {
+        Str path = loc.file_name;
+        path = "C:/Users/iamacatfr2/Documents/GitHub/TitanEngineProject/CatzWorldUsingCatzEngine/a71t1tp448x47e!2wda4ckg9/Code/c!4om-cp0g750z09g7!-^2qt.cpp";
+        if (path == "") {
+            Gui.msgBox("Error", "File path is empty.");
+            return false;
+        }
+
+        std::string exe;
+        std::string clang_format_path = CE.clang_format_path.toCString();
+        size_t pos = clang_format_path.rfind("clang-format.exe");
+        if (pos != std::string::npos && pos == clang_format_path.length() - 16) {
+            exe = "";
+        } else {
+            exe = "clang-format.exe";
+        }
+        // std::string command_line = clang_format_path + exe + " -style=file -i " + path.toCString();
+        std::string command_line = "\"" + clang_format_path + exe + "\" -style=file -i \"" + path.toCString() + "\"";
+        LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Command specified: " + std::string(command_line));
+
+        // Prepare the startup info and process information structures.
+        STARTUPINFO si;
+        PROCESS_INFORMATION pi;
+        ZeroMemory(&si, sizeof(si));
+        si.cb = sizeof(si);
+        ZeroMemory(&pi, sizeof(pi));
+
+        // Convert the command and arguments to LPCWSTR for CreateProcess.
+        std::wstring command_wide(command_line.begin(), command_line.end());
+        LPWSTR command_line_wide = const_cast<LPWSTR>(command_wide.c_str());
+
+        // Create the process.
+        if (!CreateProcess(NULL, command_line_wide, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
+            Gui.msgBox("Error", "Failed to create process.");
+            return false;
+        }
+
+        // Wait for the process to finish.
+        WaitForSingleObject(pi.hProcess, INFINITE);
+
+        // Close process and thread handles.
+        CloseHandle(pi.hProcess);
+        CloseHandle(pi.hThread);
+
+        return true;
+    } else {
         return false;
     }
-    return false;
 }
+#endif
+
 /******************************************************************************/
 static void SuggestionChanged(Source &src) { src.refreshSuggestions(); }
 Source::Source() : undos(true, this, 15) {

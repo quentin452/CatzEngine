@@ -77,8 +77,8 @@ struct CodeEditorInterface {
     void sourceRename(C UID &id);               // call this when source code file was renamed in the project
     Bool sourceCur(C Str &name);                // set current source
     Bool sourceCur(C UID &id);                  // set current source
-    Bool sourceCurIs();                         // if there is a current source
-    Str sourceCurName();                        // get current source
+    static Bool sourceCurIs();                         // if there is a current source
+    static Str sourceCurName();                        // get current source
     UID sourceCurId();                          // get current source
     Bool sourceCurModified();                   // get current source modified state
     Bool sourceCurConst();                      // get current source const    state
@@ -693,6 +693,7 @@ const_mem_addr struct CodeEditor {
     void create(GuiObj *parent, Bool menu_on_top);
     void init();
     void update(Bool active);
+
     void draw();
 
     void rebuild3rdPartyHeaders();
@@ -864,7 +865,6 @@ const_mem_addr struct CodeEditor {
     Bool load(C SourceLoc &loc, Bool quiet = false, Bool Const = false);
     void save(Source *source, C SourceLoc &loc);
     void overwrite();
-    void formatfileswithclang();
     void save();
     void load();
 

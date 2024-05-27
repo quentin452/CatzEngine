@@ -174,6 +174,10 @@ struct SourceLoc // Source Location
         clear();
         setID(id);
     }
+
+    Str SourceLoc::getFilePath() C {
+        return file_name;
+    }
 };
 /******************************************************************************/
 struct LineMap {

@@ -316,7 +316,9 @@ const_mem_addr struct Source : Region {
     Bool saveTxt(C Str &name);
     void save();
     Bool overwrite();
+#if WINDOWS // TODO SUPPORT MORE OS
     Bool formatfileswithclang();
+#endif
     // get
     Bool hasUnicode() C;
     Bool used() C;
@@ -508,6 +510,7 @@ const_mem_addr struct Source : Region {
     void validateView();
     void setView(Bool comments, Bool funcs, Bool func_bodies, Bool private_members);
     void setOpened(Bool opened);
+    Source *getOpened();
 
     virtual GuiObj &hide() override {
         clearSuggestions();

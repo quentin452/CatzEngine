@@ -319,9 +319,6 @@ void CodeEditor::overwrite() {
     }
 }
 
-void CodeEditor::formatfileswithclang() {
-    // return;
-}
 void CodeEditor::save() {
     if (cur())
         cur()->save();

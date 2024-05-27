@@ -782,12 +782,11 @@ void CodeEditor::Options::create(CodeEditor &ce) {
         Tab &tab = tabs.tab(1);
         Flt y = Y - 0.05f, w = 1.0f, h = 0.05f, s = 0.13f;
 
+#if WINDOWS // TODO SUPPORT MORE OS
         tab += clang_format_path.create(Rect_C(clientWidth() / 2, y, w, h), ce.clang_format_path).func(ClangFormatChanged, T);
         y -= s;
         tab += t_clang_format_path.create(clang_format_path.rect().lu(), "Clang Format Path", &ts);
         tab += b_clang_format_path.create(Rect_LU(clang_format_path.rect().ru(), h, h), "...").func(ClangFormatSelect, T);
-
-#if WINDOWS
         tab += vs_path.create(Rect_C(clientWidth() / 2, y, w, h), ce.vs_path).func(VSChanged, T);
         y -= s;
         tab += t_vs_path.create(vs_path.rect().lu(), "Visual Studio Path", &ts);

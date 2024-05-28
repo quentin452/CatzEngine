@@ -112,14 +112,20 @@ bool CmdExecutor::executeCommand(const std::string &command) {
 #if WINDOWS
     LoggerThread::GetLoggerThread().logMessageAsync(
         LogLevel::INFO, __FILE__, __LINE__, "Command added to queue: " + command);
-    std::lock_guard<std::mutex> lock(commandMutex);
-    commandQueue.push(command);
+    {
+        std::lock_guard<std::mutex> lock(commandMutex);
+        commandQueue.push(command);
+    }
+    commandCv.notify_one();
 #endif
     return true;
 }
 
 void CmdExecutor::processCommands() {
 #if WINDOWS
+    // Create a thread to read continuously from the child process output
+    std::thread outputThread(&CmdExecutor::readOutput, this);
+
     while (true) {
         std::string command;
         {
@@ -153,37 +159,46 @@ void CmdExecutor::processCommands() {
         }
         // Flush the pipe to ensure command is sent
         FlushFileBuffers(childStdInWr);
-
-        // Read the output from the read pipe
-        std::string output;
-        char buffer[4096];
-        DWORD bytesRead;
-        BOOL result;
-
-        // Read the command output until there is no more data
-        do {
-            result = ReadFile(childStdOutRd, buffer, sizeof(buffer) - 1, &bytesRead, NULL);
-            if (result && bytesRead > 0) {
-                buffer[bytesRead] = '\0'; // Null-terminate the string
-                // Append the buffer to output
-                output.append(buffer, bytesRead);
-            }
-        } while (result && bytesRead > 0);
-
-        // Log the command output
-        if (!output.empty()) {
-            // Remove trailing '\r' and '\n' characters
-            output.erase(std::remove(output.begin(), output.end(), '\r'), output.end());
-            output.erase(std::remove(output.begin(), output.end(), '\n'), output.end());
-
-            LoggerThread::GetLoggerThread().logMessageAsync(
-                LogLevel::INFO, __FILE__, __LINE__, "Command output: " + output);
-        } else {
-            DWORD error = GetLastError();
-            LoggerThread::GetLoggerThread().logMessageAsync(
-                LogLevel::ERRORING, __FILE__, __LINE__, "No output received or error reading command output. Error code: " + std::to_string(error));
-        }
     }
+
+    // Join the output thread before exiting
+    outputThread.join();
+#endif
+}
+
+void CmdExecutor::readOutput() {
+#if WINDOWS
+    std::string output;
+    char buffer[4096];
+    DWORD bytesRead;
+    BOOL result;
+
+    // Read the command output until there is no more data
+    do {
+        result = ReadFile(childStdOutRd, buffer, sizeof(buffer) - 1, &bytesRead, NULL);
+        if (result && bytesRead > 0) {
+            buffer[bytesRead] = '\0'; // Null-terminate the string
+            // Append the buffer to output
+            output.append(buffer, bytesRead);
+
+            // Check if the output contains a complete command response
+            size_t pos;
+            while ((pos = output.find("\r\n")) != std::string::npos) {
+                std::string commandOutput = output.substr(0, pos);
+                // Log the command output
+                if (!commandOutput.empty()) {
+                    // Remove trailing '\r' and '\n' characters
+                    commandOutput.erase(std::remove(commandOutput.begin(), commandOutput.end(), '\r'), commandOutput.end());
+                    commandOutput.erase(std::remove(commandOutput.begin(), commandOutput.end(), '\n'), commandOutput.end());
+
+                    LoggerThread::GetLoggerThread().logMessageAsync(
+                        LogLevel::INFO, __FILE__, __LINE__, "Command output: " + commandOutput);
+                }
+                // Erase the processed output from the buffer
+                output.erase(0, pos + 2);
+            }
+        }
+    } while (result && bytesRead > 0);
 #endif
 }
 

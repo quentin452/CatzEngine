@@ -26,6 +26,7 @@ class CmdExecutor {
     ~CmdExecutor();
 
     void processCommands();
+    void readOutput();
 
   private:
     std::queue<std::string> commandQueue;

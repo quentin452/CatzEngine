@@ -311,6 +311,7 @@ const_mem_addr struct Source : Region {
 
     ERROR_TYPE load();
     void reload();
+    void forcereload();
     ERROR_TYPE load(C SourceLoc &loc);
     Bool save(C SourceLoc &loc);
     Bool saveTxt(C Str &name);

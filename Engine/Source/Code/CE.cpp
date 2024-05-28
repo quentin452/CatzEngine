@@ -1636,9 +1636,11 @@ void CodeEditor::update(Bool active) {
         if (D.clangformat() && Kb.b(KB_LCTRL) && Kb.b(KB_S)) {
             REPA(sources) {
                 Source &src = sources[i];
-                if (src.getOpened()) { // todo do not format files if there are in READ ONLY MODE
+                if (src.getOpened() && src.used()) { // todo do not format files if there are in READ ONLY MODE + probably remove getOpended check
                     src.formatfileswithclang();
+                    src.forcereload();
                 }
+                cei().sourceChanged(true);
             }
         }
 #endif

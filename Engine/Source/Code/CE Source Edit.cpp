@@ -708,10 +708,10 @@ void Source::fromText(C Str &data) {
             lines.last() += ' ';
         } else // tab
             if (c == 0xA)
-            lines.New();
-        else // new line
-            if (c >= 32)
-            lines.last() += c; // any valid char
+                lines.New();
+            else // new line
+                if (c >= 32)
+                    lines.last() += c; // any valid char
     }
     changed(0, -1);
     clearSuggestions();

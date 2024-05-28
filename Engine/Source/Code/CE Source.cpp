@@ -1311,6 +1311,12 @@ void Source::reload() {
     if (modified)
         load();
 }
+
+void Source::forcereload(){
+   delUndo(); 
+   load();
+}
+
 ERROR_TYPE Source::load(C SourceLoc &loc) {
     if (lines.elms())
         setUndo();

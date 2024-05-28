@@ -1273,7 +1273,11 @@ error:
     return false;
 }
 /******************************************************************************/
-ERROR_TYPE Source::load() {
+void Source::resetSelectionAndCursor() {
+    sel = -1;
+    cur = 0;
+}
+ERROR_TYPE Source::load(bool _resetSelectionAndCursor) {
     ERROR_TYPE error;
     cpp = false;
     Str data;
@@ -1293,8 +1297,9 @@ ERROR_TYPE Source::load() {
             error = CE.cei().sourceDataLoad(loc.id, data);
         }
     }
-    sel = -1;
-    cur = 0;
+    if (_resetSelectionAndCursor) {
+        resetSelectionAndCursor();
+    }
     fromText(data);
     if (error == EE_ERR_NONE && loc.file) {
         FileInfo fi;
@@ -1305,6 +1310,7 @@ ERROR_TYPE Source::load() {
     } // adjust modification time after 'changed'
     return error;
 }
+
 void Source::reload() {
     Bool modified = T.modified();
     delUndo();
@@ -1314,7 +1320,7 @@ void Source::reload() {
 
 void Source::forcereload() {
     delUndo();
-    load();
+    load(false);
 }
 
 ERROR_TYPE Source::load(C SourceLoc &loc) {

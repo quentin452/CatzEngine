@@ -309,7 +309,8 @@ const_mem_addr struct Source : Region {
     Bool save(File &f, StrLibrary &sl) C;
     Bool load(File &f, StrLibrary &sl, Str &temp);
 
-    ERROR_TYPE load();
+    ERROR_TYPE load(bool resetSelectionAndCursor = true);
+    void resetSelectionAndCursor();
     void reload();
     void forcereload();
     ERROR_TYPE load(C SourceLoc &loc);

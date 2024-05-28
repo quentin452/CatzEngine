@@ -77,8 +77,8 @@ struct CodeEditorInterface {
     void sourceRename(C UID &id);               // call this when source code file was renamed in the project
     Bool sourceCur(C Str &name);                // set current source
     Bool sourceCur(C UID &id);                  // set current source
-    static Bool sourceCurIs();                         // if there is a current source
-    static Str sourceCurName();                        // get current source
+    static Bool sourceCurIs();                  // if there is a current source
+    static Str sourceCurName();                 // get current source
     UID sourceCurId();                          // get current source
     Bool sourceCurModified();                   // get current source modified state
     Bool sourceCurConst();                      // get current source const    state
@@ -590,7 +590,6 @@ const_mem_addr struct CodeEditor {
             virtual FontEditor &hide();
             virtual FontEditor &show();
         };
-
         TextStyle ts;
         Tabs tabs;
         Text t_vs_path, t_clang_format_path, t_netbeans_path, t_android_sdk, t_android_ndk, t_jdk_path, t_android_cert_file, t_android_cert_pass, t_apple_team_id, t_font_size, t_color_theme, t_export_path_mode, t_import_path_mode;

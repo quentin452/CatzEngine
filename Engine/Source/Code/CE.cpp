@@ -991,6 +991,11 @@ void CodeEditor::del() {
     sources.del();    // delete before 'Symbols' container
     SymbolDefs.del(); // delete before 'Symbols' container
     items.del();
+#if WINDOWS // TODO SUPPORT MORE OS
+    //auto &executor = EE::Edit::CmdExecutor::GetInstance();
+    //delete executor;
+    //executor = nullptr;
+#endif
     LoggerThread::GetLoggerThread().logMessageAsync(
         LogLevel::INFO, __FILE__, __LINE__,
         "Finish CodeEditor::del");
@@ -1639,7 +1644,6 @@ void CodeEditor::update(Bool active) {
                 if (src.getOpened() && src.used()) { // todo do not format files if there are in READ ONLY MODE
                     src.formatfileswithclang();
                     src.forcereload();
-                    //cei().sourceChanged(true);
                 }
             }
         }

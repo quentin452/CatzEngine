@@ -1312,9 +1312,9 @@ void Source::reload() {
         load();
 }
 
-void Source::forcereload(){
-   delUndo(); 
-   load();
+void Source::forcereload() {
+    delUndo();
+    load();
 }
 
 ERROR_TYPE Source::load(C SourceLoc &loc) {
@@ -1379,69 +1379,41 @@ Bool Source::overwrite() // returns true if saved successfully (immediately)
     save();
     return false;
 }
+
 #if WINDOWS // TODO SUPPORT MORE OS
 Bool Source::formatfileswithclang() {
     if (CE.clang_format_path == "") {
         Gui.msgBox("Error", "Clang Format Was Not Found.");
         return false;
-    } else if (CodeEditorInterface::sourceCurIs()) {
-        Str path = loc.file_name;
-        path = "C:/Users/iamacatfr2/Documents/GitHub/TitanEngineProject/CatzWorldUsingCatzEngine/a71t1tp448x47e!2wda4ckg9/Code/c!4om-cp0g750z09g7!-^2qt.cpp";
-        if (path == "") {
-            Gui.msgBox("Error", "File path is empty.");
-            return false;
-        }
+    }
 
-        std::string exe;
-        std::string clang_format_path = CE.clang_format_path.toCString();
-        size_t pos = clang_format_path.rfind("clang-format.exe");
-        if (pos != std::string::npos && pos == clang_format_path.length() - 16) {
-            exe = "";
-        } else {
-            exe = "clang-format.exe";
-        }
-
-        std::string command_line = "\"" + clang_format_path + exe + "\" -style=file -i \"" + path.toCString() + "\"";
-        LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Command specified: " + command_line);
-
-        // Convert command line to LPCWSTR
-        std::wstring command_line_wide(command_line.begin(), command_line.end());
-        LPCWSTR command_line_wide_ptr = command_line_wide.c_str();
-
-        // Prepare the startup info and process information structures.
-        STARTUPINFO si;
-        PROCESS_INFORMATION pi;
-        ZeroMemory(&si, sizeof(si));
-        si.cb = sizeof(si);
-        ZeroMemory(&pi, sizeof(pi));
-
-        // Set STARTUPINFO to hide the window
-        si.dwFlags |= STARTF_USESHOWWINDOW;
-        si.wShowWindow = SW_HIDE;
-
-        // Create the process.
-        if (!CreateProcess(NULL,                                      // No module name (use command line)
-                           const_cast<LPWSTR>(command_line_wide_ptr), // Command line
-                           NULL,                                      // Process handle not inheritable
-                           NULL,                                      // Thread handle not inheritable
-                           FALSE,                                     // Set handle inheritance to FALSE
-                           0,                                         // No creation flags
-                           NULL,                                      // Use parent's environment block
-                           NULL,                                      // Use parent's starting directory
-                           &si,                                       // Pointer to STARTUPINFO structure
-                           &pi)) {                                    // Pointer to PROCESS_INFORMATION structure
-            Gui.msgBox("Error", "Failed to create process.");
-            return false;
-        }
-
-        // Close process and thread handles.
-        CloseHandle(pi.hProcess);
-        CloseHandle(pi.hThread);
-
-        return true;
-    } else {
+    if (!CodeEditorInterface::sourceCurIs()) {
         return false;
     }
+
+    Str path = loc.file_name;
+    path = "C:/Users/iamacatfr2/Documents/GitHub/TitanEngineProject/CatzWorldUsingCatzEngine/a71t1tp448x47e!2wda4ckg9/Code/c!4om-cp0g750z09g7!-^2qt.cpp";
+    if (path == "") {
+        Gui.msgBox("Error", "File path is empty.");
+        return false;
+    }
+    std::string exe;
+    std::string clang_format_path = CE.clang_format_path.toCString();
+    size_t pos = clang_format_path.rfind("clang-format.exe");
+    if (pos != std::string::npos && pos == clang_format_path.length() - 16) {
+        exe = "";
+    } else {
+        exe = "clang-format.exe";
+    }
+    std::string command_line = "\"" + clang_format_path + exe + "\" -style=file -i \"" + path.toCString() + "\"";
+    LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Command specified: " + command_line);
+    auto &executor = EE::Edit::CmdExecutor::GetInstance();
+    if (!executor.executeCommand(command_line)) {
+        Gui.msgBox("Error", "Failed to execute command.");
+        return false;
+    }
+
+    return true;
 }
 #endif
 

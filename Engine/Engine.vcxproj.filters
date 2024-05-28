@@ -1136,6 +1136,9 @@
     <ClCompile Include="Source\Misc\Application.cpp">
       <Filter>Source\Misc</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Misc\CMDExecutor.cpp">
+      <Filter>Source\Misc</Filter>
+    </ClCompile>
     <ClCompile Include="Source\Misc\Callback.cpp">
       <Filter>Source\Misc</Filter>
     </ClCompile>

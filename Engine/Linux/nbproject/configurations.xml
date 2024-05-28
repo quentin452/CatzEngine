@@ -565,6 +565,7 @@
       </logicalFolder>
       <logicalFolder name="Misc" displayName="Misc" projectFiles="true">
         <itemPath>../Source/Misc/Application.cpp</itemPath>
+        <itemPath>../Source/Misc/CMDExecutor.cpp</itemPath>
         <itemPath>../Source/Misc/Call Stack.cpp</itemPath>
         <itemPath>../Source/Misc/Callback.cpp</itemPath>
         <itemPath>../Source/Misc/Compress.cpp</itemPath>
@@ -1932,6 +1933,8 @@
       <item path="../Source/Misc/Application.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Misc/Call Stack.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../Source/Misc/CMDExecutor.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Misc/Callback.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -3372,6 +3375,8 @@
       <item path="../Source/Misc/Application.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Misc/Call Stack.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../Source/Misc/CMDExecutor.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Misc/Callback.cpp" ex="false" tool="1" flavor2="0">
       </item>

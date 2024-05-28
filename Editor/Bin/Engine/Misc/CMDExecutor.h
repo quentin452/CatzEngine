@@ -21,6 +21,9 @@ class CmdExecutor {
     CmdExecutor(CmdExecutor const &) = delete;
     void operator=(CmdExecutor const &) = delete;
 
+    Bool DoForceReload = false;
+    std::mutex forceReloadMutex;
+
   private:
     CmdExecutor();
     ~CmdExecutor();
@@ -28,7 +31,6 @@ class CmdExecutor {
     void processCommands();
     void readOutput();
 
-  private:
     std::queue<std::string> commandQueue;
     std::mutex commandMutex;
     std::thread cmdThread;

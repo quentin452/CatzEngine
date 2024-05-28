@@ -162,6 +162,7 @@ void CmdExecutor::processCommands() {
     }
 
     // Join the output thread before exiting
+    DoForceReload = false;
     outputThread.join();
 #endif
 }

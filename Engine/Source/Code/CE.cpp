@@ -992,9 +992,9 @@ void CodeEditor::del() {
     SymbolDefs.del(); // delete before 'Symbols' container
     items.del();
 #if WINDOWS // TODO SUPPORT MORE OS
-    //auto &executor = EE::Edit::CmdExecutor::GetInstance();
-    //delete executor;
-    //executor = nullptr;
+    // auto &executor = EE::Edit::CmdExecutor::GetInstance();
+    // delete executor;
+    // executor = nullptr;
 #endif
     LoggerThread::GetLoggerThread().logMessageAsync(
         LogLevel::INFO, __FILE__, __LINE__,
@@ -1638,12 +1638,33 @@ static Str FindPath(C Str &registry, C Str &sub_path) {
 void CodeEditor::update(Bool active) {
     if (active) {
 #if WINDOWS
-        if (D.clangformat() && Kb.b(KB_LCTRL) && Kb.b(KB_S)) {
-            REPA(sources) {
-                Source &src = sources[i];
-                if (src.getOpened() && src.used()) { // todo do not format files if there are in READ ONLY MODE
-                    src.formatfileswithclang();
-                    src.forcereload();
+        {
+            auto &executor = EE::Edit::CmdExecutor::GetInstance();
+            if (D.clangformat() && Kb.b(KB_LCTRL) && Kb.b(KB_S)) {
+                {
+                    std::lock_guard<std::mutex> lock(executor.forceReloadMutex);
+                    executor.DoForceReload = true;
+                }
+                std::vector<size_t> sourcesToReload;
+                REPA(sources) {
+                    Source &src = sources[i];
+                    if (src.getOpened() && src.used()) {
+                        src.formatfileswithclang();
+                        sourcesToReload.push_back(i);
+                    }
+                }
+
+                {
+                    std::lock_guard<std::mutex> lock(executor.forceReloadMutex);
+                    if (executor.DoForceReload == true) {
+                        for (size_t index : sourcesToReload) {
+                            Source &src = sources[index];
+                            src.forcereload();
+                        }
+                        LoggerThread::GetLoggerThread().logMessageAsync(
+                            LogLevel::INFO, __FILE__, __LINE__, "Call src.forcereload()");
+                        executor.DoForceReload = false;
+                    }
                 }
             }
         }
@@ -1651,7 +1672,9 @@ void CodeEditor::update(Bool active) {
 
         // Auto Save Script if key is pressed
         if (D.autosavescript() && Kb.anyKeyWasPressed()) {
-            CE.overwrite();
+            if (!Kb.b(KB_LCTRL)) {
+                CE.overwrite();
+            }
         }
 
         if (Gui.kb() == &build_list)
@@ -2217,7 +2240,7 @@ void CodeEditor::update(Bool active) {
             }
         }
     }
-}
+} // namespace Edit
 /******************************************************************************/
 void CodeEditor::draw() {
     D.clearCol(cur() ? Theme.colors[TOKEN_NONE] : GREY);

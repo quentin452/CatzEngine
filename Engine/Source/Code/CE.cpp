@@ -1644,6 +1644,10 @@ void CodeEditor::update(Bool active) {
                 std::vector<size_t> sourcesToReload;
                 REPA(sources) {
                     Source &src = sources[i];
+                    // Do not try to format Read Only Codes
+                    if (cur()->Const) {
+                        return;
+                    }
                     if (src.getOpened() && src.used()) {
                         src.formatfileswithclang();
                         sourcesToReload.push_back(i);

@@ -1393,11 +1393,9 @@ Bool Source::formatfileswithclang() {
         Gui.msgBox("Error", "Clang Format Was Not Found.");
         return false;
     }
-
     if (!CodeEditorInterface::sourceCurIs()) {
         return false;
     }
-
     Str path = loc.getFilePath();
     path = "C:/Users/iamacatfr2/Documents/GitHub/TitanEngineProject/CatzWorldUsingCatzEngine/a71t1tp448x47e!2wda4ckg9/Code/c!4om-cp0g750z09g7!-^2qt.cpp";
     if (path == "") {

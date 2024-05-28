@@ -87,24 +87,7 @@ CmdExecutor::CmdExecutor() {
 
 CmdExecutor::~CmdExecutor() {
 #if WINDOWS
-    // Close the command processing thread
-    if (cmdThread.joinable()) {
-        // Add a command to stop cmd.exe
-        executeCommand("exit");
-        // Wait for the command thread to finish
-        cmdThread.join();
-    }
-
-    // Close handles
-    if (pi.hProcess) {
-        TerminateProcess(pi.hProcess, 1);
-        CloseHandle(pi.hProcess);
-    }
-    CloseHandle(pi.hThread);
-    CloseHandle(childStdOutRd);
-    CloseHandle(childStdOutWr);
-    CloseHandle(childStdInRd);
-    CloseHandle(childStdInWr);
+    stopCmdProcess();
 #endif
 }
 
@@ -203,5 +186,17 @@ void CmdExecutor::readOutput() {
 #endif
 }
 
+void CmdExecutor::stopCmdProcess() {
+#if WINDOWS
+    if (pi.hProcess) {
+        TerminateProcess(pi.hProcess, 1);
+        CloseHandle(pi.hProcess);
+        pi.hProcess = NULL;
+    }
+    if (pi.hThread) {
+        CloseHandle(pi.hThread);
+    }
+#endif
+}
 } // namespace Edit
 } // namespace EE

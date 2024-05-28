@@ -991,11 +991,6 @@ void CodeEditor::del() {
     sources.del();    // delete before 'Symbols' container
     SymbolDefs.del(); // delete before 'Symbols' container
     items.del();
-#if WINDOWS // TODO SUPPORT MORE OS
-    // auto &executor = EE::Edit::CmdExecutor::GetInstance();
-    // delete executor;
-    // executor = nullptr;
-#endif
     LoggerThread::GetLoggerThread().logMessageAsync(
         LogLevel::INFO, __FILE__, __LINE__,
         "Finish CodeEditor::del");

@@ -16,6 +16,7 @@ class CmdExecutor {
     }
 
     bool executeCommand(const std::string &command);
+    void stopCmdProcess();
 
     // Delete copy and move constructors, assignment operators
     CmdExecutor(CmdExecutor const &) = delete;

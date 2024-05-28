@@ -294,6 +294,10 @@ void Shut() {
     WorkerThreads.del();
     BuilderThreads.del();
     BackgroundThreads.del();
+#if WINDOWS // TODO SUPPORT MORE OS
+    auto &executor = EE::Edit::CmdExecutor::GetInstance();
+    executor.stopCmdProcess();
+#endif
     if (RunAtExit.is())
         Run(RunAtExit, S, false, App.elevated());
     LoggerThread::GetLoggerThread().logMessageAsync(

@@ -15,7 +15,7 @@ const_mem_addr struct TextLine : GuiObj // Gui TextLine !! must be stored in con
     TextLine &create(C Rect &rect, C Str &text = S) {
         create(text).rect(rect);
         return T;
-    }                                  // create
+    } // create
     TextLine &create(C TextLine &src); // create from 'src'
 
     // get / set

@@ -2,6 +2,7 @@
 #include "stdafx.h"
 namespace EE {
 namespace Edit {
+std::string clang_format_exe = "/clang-format.exe";
 /******************************************************************************/
 void LineMode::setTokens(Line &line) {
     C Str &s = line;
@@ -1397,21 +1398,14 @@ Bool Source::formatfileswithclang() {
         return false;
     }
 
-    Str path = loc.file_name;
+    Str path = loc.getFilePath();
     path = "C:/Users/iamacatfr2/Documents/GitHub/TitanEngineProject/CatzWorldUsingCatzEngine/a71t1tp448x47e!2wda4ckg9/Code/c!4om-cp0g750z09g7!-^2qt.cpp";
     if (path == "") {
         Gui.msgBox("Error", "File path is empty.");
         return false;
     }
-    std::string exe;
     std::string clang_format_path = CE.clang_format_path.toCString();
-    size_t pos = clang_format_path.rfind("clang-format.exe");
-    if (pos != std::string::npos && pos == clang_format_path.length() - 16) {
-        exe = "";
-    } else {
-        exe = "clang-format.exe";
-    }
-    std::string command_line = "\"" + clang_format_path + exe + "\" -style=file -i \"" + path.toCString() + "\"";
+    std::string command_line = "\"" + clang_format_path + clang_format_exe + "\" -style=file -i \"" + path.toCString() + "\"";
     LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Command specified: " + command_line);
     auto &executor = EE::Edit::CmdExecutor::GetInstance();
     if (!executor.executeCommand(command_line)) {

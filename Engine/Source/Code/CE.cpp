@@ -1632,6 +1632,7 @@ static Str FindPath(C Str &registry, C Str &sub_path) {
 
 void CodeEditor::update(Bool active) {
     if (active) {
+        // TODO REDUCE BOTTLENECK CAUSED BY save/format with clang
 #if WINDOWS
         {
             auto &executor = EE::Edit::CmdExecutor::GetInstance();

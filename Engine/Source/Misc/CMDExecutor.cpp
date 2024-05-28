@@ -50,7 +50,7 @@ CmdExecutor::CmdExecutor() {
     ZeroMemory(&si, sizeof(si));
     si.cb = sizeof(si);
     si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
-    si.wShowWindow = SW_SHOW;
+    si.wShowWindow = SW_HIDE;
     si.hStdOutput = childStdOutWr;
     si.hStdInput = childStdInRd;
     si.hStdError = childStdOutWr;

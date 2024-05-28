@@ -1632,15 +1632,15 @@ static Str FindPath(C Str &registry, C Str &sub_path) {
 
 void CodeEditor::update(Bool active) {
     if (active) {
-#ifdef _WIN32
+#if WINDOWS
         if (D.clangformat() && Kb.b(KB_LCTRL) && Kb.b(KB_S)) {
             REPA(sources) {
                 Source &src = sources[i];
-                if (src.getOpened() && src.used()) { // todo do not format files if there are in READ ONLY MODE + probably remove getOpended check
+                if (src.getOpened() && src.used()) { // todo do not format files if there are in READ ONLY MODE
                     src.formatfileswithclang();
                     src.forcereload();
+                    //cei().sourceChanged(true);
                 }
-                cei().sourceChanged(true);
             }
         }
 #endif

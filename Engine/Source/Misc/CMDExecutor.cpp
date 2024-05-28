@@ -5,47 +5,59 @@ namespace Edit {
 
 #if WINDOWS
 
-HANDLE readPipe = NULL;
-HANDLE writePipe = NULL;
-HANDLE hSemaphore = NULL;
+HANDLE childStdOutRd = NULL;
+HANDLE childStdOutWr = NULL;
+HANDLE childStdInRd = NULL;
+HANDLE childStdInWr = NULL;
 PROCESS_INFORMATION pi = {};
 
 #endif
+
 CmdExecutor::CmdExecutor() {
 #if WINDOWS
-    // Setup startup info for cmd.exe
-    STARTUPINFO si;
-    ZeroMemory(&si, sizeof(si));
-    si.cb = sizeof(si);
-    si.dwFlags = STARTF_USESHOWWINDOW;
-    si.wShowWindow = SW_SHOW;
-
     // Setup security attributes for pipes
     SECURITY_ATTRIBUTES sa;
     sa.nLength = sizeof(SECURITY_ATTRIBUTES);
     sa.bInheritHandle = TRUE;
     sa.lpSecurityDescriptor = NULL;
 
-    // Create pipes
-    if (!CreatePipe(&readPipe, &writePipe, &sa, 0)) {
+    // Create pipes for STDOUT
+    if (!CreatePipe(&childStdOutRd, &childStdOutWr, &sa, 0)) {
         LoggerThread::GetLoggerThread().logMessageAsync(
-            LogLevel::ERRORING, __FILE__, __LINE__, "Error: Failed to create pipe.");
+            LogLevel::ERRORING, __FILE__, __LINE__, "Error: Failed to create pipe for STDOUT.");
+    }
+    if (!SetHandleInformation(childStdOutRd, HANDLE_FLAG_INHERIT, 0)) {
+        CloseHandle(childStdOutRd);
+        CloseHandle(childStdOutWr);
+        LoggerThread::GetLoggerThread().logMessageAsync(
+            LogLevel::ERRORING, __FILE__, __LINE__, "Error: Failed to set handle information for STDOUT.");
     }
 
-    // Ensure the read handle to the pipe for STDOUT is not inherited.
-    if (!SetHandleInformation(readPipe, HANDLE_FLAG_INHERIT, 0)) {
-        CloseHandle(readPipe);
-        CloseHandle(writePipe);
+    // Create pipes for STDIN
+    if (!CreatePipe(&childStdInRd, &childStdInWr, &sa, 0)) {
         LoggerThread::GetLoggerThread().logMessageAsync(
-            LogLevel::ERRORING, __FILE__, __LINE__, "Error: Failed to set handle information.");
+            LogLevel::ERRORING, __FILE__, __LINE__, "Error: Failed to create pipe for STDIN.");
+    }
+    if (!SetHandleInformation(childStdInWr, HANDLE_FLAG_INHERIT, 0)) {
+        CloseHandle(childStdInRd);
+        CloseHandle(childStdInWr);
+        LoggerThread::GetLoggerThread().logMessageAsync(
+            LogLevel::ERRORING, __FILE__, __LINE__, "Error: Failed to set handle information for STDIN.");
     }
 
-    // Create a semaphore to notify processCommands thread of new commands
-    hSemaphore = CreateSemaphore(NULL, 0, 1, NULL);
-    if (hSemaphore == NULL) {
-        LoggerThread::GetLoggerThread().logMessageAsync(
-            LogLevel::ERRORING, __FILE__, __LINE__, "Error: Failed to create semaphore.");
-    }
+    // Setup startup info for cmd.exe
+    STARTUPINFO si;
+    ZeroMemory(&si, sizeof(si));
+    si.cb = sizeof(si);
+    si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
+    si.wShowWindow = SW_SHOW;
+    si.hStdOutput = childStdOutWr;
+    si.hStdInput = childStdInRd;
+    si.hStdError = childStdOutWr;
+
+    // Get the current directory
+    wchar_t currentDirectory[MAX_PATH];
+    GetCurrentDirectory(MAX_PATH, currentDirectory);
 
     // Launch cmd.exe
     wchar_t cmdExe[] = L"cmd.exe";
@@ -56,37 +68,29 @@ CmdExecutor::CmdExecutor() {
                        TRUE,
                        0,
                        NULL,
-                       NULL,
+                       currentDirectory,
                        &si,
                        &pi)) {
         DWORD errorCode = GetLastError();
-        CloseHandle(readPipe);
-        CloseHandle(writePipe);
-        CloseHandle(hSemaphore);
+        CloseHandle(childStdOutRd);
+        CloseHandle(childStdOutWr);
+        CloseHandle(childStdInRd);
+        CloseHandle(childStdInWr);
         LoggerThread::GetLoggerThread().logMessageAsync(
             LogLevel::ERRORING, __FILE__, __LINE__, "Error: Failed to create process. Error code: " + std::to_string(errorCode));
     }
 
     // Start the processCommands thread
     cmdThread = std::thread(&CmdExecutor::processCommands, this);
-    if (!cmdThread.joinable()) {
-        CloseHandle(readPipe);
-        CloseHandle(writePipe);
-        CloseHandle(hSemaphore);
-        LoggerThread::GetLoggerThread().logMessageAsync(
-            LogLevel::ERRORING, __FILE__, __LINE__, "Error: Failed to create cmdThread.");
-    }
 #endif
 }
+
 CmdExecutor::~CmdExecutor() {
 #if WINDOWS
     // Close the command processing thread
     if (cmdThread.joinable()) {
         // Add a command to stop cmd.exe
         executeCommand("exit");
-        // Notify processCommands thread that there are new commands to process
-        ReleaseSemaphore(hSemaphore, 1, NULL);
-
         // Wait for the command thread to finish
         cmdThread.join();
     }
@@ -96,99 +100,92 @@ CmdExecutor::~CmdExecutor() {
         TerminateProcess(pi.hProcess, 1);
         CloseHandle(pi.hProcess);
     }
-
-    if (pi.hThread) {
-        CloseHandle(pi.hThread);
-    }
-
-    if (readPipe) {
-        CloseHandle(readPipe);
-    }
-
-    if (writePipe) {
-        CloseHandle(writePipe);
-    }
-
-    if (hSemaphore) {
-        CloseHandle(hSemaphore);
-    }
+    CloseHandle(pi.hThread);
+    CloseHandle(childStdOutRd);
+    CloseHandle(childStdOutWr);
+    CloseHandle(childStdInRd);
+    CloseHandle(childStdInWr);
 #endif
 }
+
 bool CmdExecutor::executeCommand(const std::string &command) {
 #if WINDOWS
-    if (!cmdThread.joinable()) {
-        LoggerThread::GetLoggerThread().logMessageAsync(
-            LogLevel::ERRORING, __FILE__, __LINE__, "Error: cmdThread is not running.");
-        return false;
-    }
-
     LoggerThread::GetLoggerThread().logMessageAsync(
         LogLevel::INFO, __FILE__, __LINE__, "Command added to queue: " + command);
     std::lock_guard<std::mutex> lock(commandMutex);
     commandQueue.push(command);
-
-    // Notify processCommands thread that there are new commands to process
-    ReleaseSemaphore(hSemaphore, 1, NULL);
 #endif
     return true;
 }
+
 void CmdExecutor::processCommands() {
 #if WINDOWS
     while (true) {
-        // Wait for commands to process
-        WaitForSingleObject(hSemaphore, INFINITE);
-
         std::string command;
-        // Check if there are commands in the queue
         {
-            std::lock_guard<std::mutex> lock(commandMutex);
-            if (!commandQueue.empty()) {
-                command = commandQueue.front();
-                commandQueue.pop();
+            std::unique_lock<std::mutex> lock(commandMutex);
+            if (commandQueue.empty()) {
+                // Wait for new commands to be added to the queue
+                commandCv.wait(lock, [this] { return !commandQueue.empty(); });
             }
+            command = std::move(commandQueue.front());
+            commandQueue.pop();
         }
 
-        if (!command.empty()) {
-            // Write the command to the pipe
-            DWORD written;
-            // Use cmd.exe /C to ensure the command gets executed
-            std::string fullCommand = "cmd.exe /C " + command + "\r\n";
-            if (!WriteFile(writePipe, fullCommand.c_str(), static_cast<DWORD>(fullCommand.size()), &written, NULL)) {
-                LoggerThread::GetLoggerThread().logMessageAsync(
-                    LogLevel::ERRORING, __FILE__, __LINE__, "Error: Failed to write command to pipe.");
-                continue; // Skip to the next command if writing fails
-            } else {
-                LoggerThread::GetLoggerThread().logMessageAsync(
-                    LogLevel::INFO, __FILE__, __LINE__, "Command written to pipe: " + command);
-            }
-            // Flush the pipe to ensure command is sent
-            FlushFileBuffers(writePipe);
+        if (command == "exit") {
+            break;
+        }
 
-            // Read the output from the read pipe
-            std::string output;
-            char buffer[4096];
-            DWORD bytesRead;
-            while (true) {
-                BOOL result = ReadFile(readPipe, buffer, sizeof(buffer) - 1, &bytesRead, NULL);
-                if (result && bytesRead > 0) {
-                    buffer[bytesRead] = '\0'; // Null-terminate the string
-                    output += buffer;
-                } else {
-                    break;
-                }
-            }
+        // Write the command to the pipe
+        DWORD written;
+        std::string fullCommand = command + "\r\n";
+        if (!WriteFile(childStdInWr, fullCommand.c_str(), static_cast<DWORD>(fullCommand.size()), &written, NULL)) {
+            LoggerThread::GetLoggerThread().logMessageAsync(
+                LogLevel::ERRORING, __FILE__, __LINE__, "Error: Failed to write command to pipe.");
+            // Log the command that failed to be written
+            LoggerThread::GetLoggerThread().logMessageAsync(
+                LogLevel::ERRORING, __FILE__, __LINE__, "Failed command: " + command);
+            continue; // Skip to the next command if writing fails
+        } else {
+            // Log that the command was successfully written
+            LoggerThread::GetLoggerThread().logMessageAsync(
+                LogLevel::INFO, __FILE__, __LINE__, "Command written to pipe: " + command);
+        }
+        // Flush the pipe to ensure command is sent
+        FlushFileBuffers(childStdInWr);
 
-            if (!output.empty()) {
-                LoggerThread::GetLoggerThread().logMessageAsync(
-                    LogLevel::INFO, __FILE__, __LINE__, "Command output: " + output);
-            } else {
-                DWORD error = GetLastError();
-                LoggerThread::GetLoggerThread().logMessageAsync(
-                    LogLevel::ERRORING, __FILE__, __LINE__, "No output received or error reading command output. Error code: " + std::to_string(error));
+        // Read the output from the read pipe
+        std::string output;
+        char buffer[4096];
+        DWORD bytesRead;
+        BOOL result;
+
+        // Read the command output until there is no more data
+        do {
+            result = ReadFile(childStdOutRd, buffer, sizeof(buffer) - 1, &bytesRead, NULL);
+            if (result && bytesRead > 0) {
+                buffer[bytesRead] = '\0'; // Null-terminate the string
+                // Append the buffer to output
+                output.append(buffer, bytesRead);
             }
+        } while (result && bytesRead > 0);
+
+        // Log the command output
+        if (!output.empty()) {
+            // Remove trailing '\r' and '\n' characters
+            output.erase(std::remove(output.begin(), output.end(), '\r'), output.end());
+            output.erase(std::remove(output.begin(), output.end(), '\n'), output.end());
+
+            LoggerThread::GetLoggerThread().logMessageAsync(
+                LogLevel::INFO, __FILE__, __LINE__, "Command output: " + output);
+        } else {
+            DWORD error = GetLastError();
+            LoggerThread::GetLoggerThread().logMessageAsync(
+                LogLevel::ERRORING, __FILE__, __LINE__, "No output received or error reading command output. Error code: " + std::to_string(error));
         }
     }
 #endif
 }
+
 } // namespace Edit
 } // namespace EE

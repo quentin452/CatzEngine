@@ -31,6 +31,7 @@ class CmdExecutor {
     std::queue<std::string> commandQueue;
     std::mutex commandMutex;
     std::thread cmdThread;
+    std::condition_variable commandCv;
 };
 
 } // namespace Edit

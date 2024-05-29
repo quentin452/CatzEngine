@@ -93,8 +93,6 @@ CmdExecutor::~CmdExecutor() {
 
 bool CmdExecutor::executeCommand(const std::string &command) {
 #if WINDOWS
-    LoggerThread::GetLoggerThread().logMessageAsync(
-        LogLevel::INFO, __FILE__, __LINE__, "Command added to queue: " + command);
     {
         std::lock_guard<std::mutex> lock(commandMutex);
         commandQueue.push(command);

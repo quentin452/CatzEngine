@@ -427,7 +427,7 @@ const_mem_addr struct Source : Region {
     void redo();
 
     Str asText() C;
-    void fromText(C Str &data);
+    void fromText(C Str &data,Bool _move_cur_sor_to_visible_location = true);
 
     // preprocessor
     /*Memc<Macro>& macrosForLine(Int y)

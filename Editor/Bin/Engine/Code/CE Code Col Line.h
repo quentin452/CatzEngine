@@ -175,8 +175,17 @@ struct SourceLoc // Source Location
         setID(id);
     }
 
-    Str SourceLoc::getFilePath() C {
-        return file_name;
+    Str getFileFullPath() {
+        FileInfo fi;
+        if (file) {
+            if (fi.getSystem(file_name)) {
+                return file_name;
+            } else {
+                return "File not found";
+            }
+        } else {
+            return "No file path for embedded source";
+        }
     }
 };
 /******************************************************************************/

@@ -1301,7 +1301,7 @@ ERROR_TYPE Source::load(bool _resetSelectionAndCursor) {
     if (_resetSelectionAndCursor) {
         resetSelectionAndCursor();
     }
-    fromText(data);
+    fromText(data, false);
     if (error == EE_ERR_NONE && loc.file) {
         FileInfo fi;
         if (fi.getSystem(loc.file_name)) {
@@ -1393,19 +1393,25 @@ Bool Source::formatfileswithclang() {
         Gui.msgBox("Error", "Clang Format Was Not Found.");
         return false;
     }
-    if (!CodeEditorInterface::sourceCurIs()) {
-        return false;
-    }
-    Str path = loc.getFilePath();
+    Str path;
+    // path = source.file_name;
+    // path = CE.cei().sourceCur(loc.id);
+    // path = CodeEditor.getCurrentProjectPath();
+    // path = Proj.projectsPath();
+    // path = currentProject->path;         // Use the complete project path
+    // path = CE.cei().sourceProjPath(loc.id); // Append the relative path to the project path
+    // path = CE.cei().sourceProjPath(loc.id);
+    // path = GetPath(loc.file);
+    // path = MakeFullPath(path, FILE_CUR, true); // Convert to full path
+    // path = loc.getFileFullPath();
+    // path = loc.file_name;
     path = "C:/Users/iamacatfr2/Documents/GitHub/TitanEngineProject/CatzWorldUsingCatzEngine/a71t1tp448x47e!2wda4ckg9/Code/c!4om-cp0g750z09g7!-^2qt.cpp";
     if (path == "") {
-        Gui.msgBox("Error", "File path is empty.");
+        Gui.msgBox("Error", "Failed to find source file.");
         return false;
     }
-    std::string clang_format_path = CE.clang_format_path.toCString();
-    std::string command_line = "\"" + clang_format_path + clang_format_exe + "\" -style=file -i \"" + path.toCString() + "\"";
-    LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Command specified: " + command_line);
-    auto &executor = EE::Edit::CmdExecutor::GetInstance();
+    std::string command_line = "\"" + std::string(CE.clang_format_path.toCString()) + clang_format_exe + "\" -style=file -i \"" + path.toCString() + "\"";
+    auto &executor = CmdExecutor::GetInstance();
     if (!executor.executeCommand(command_line)) {
         Gui.msgBox("Error", "Failed to execute command.");
         return false;

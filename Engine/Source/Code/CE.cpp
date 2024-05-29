@@ -1632,51 +1632,44 @@ static Str FindPath(C Str &registry, C Str &sub_path) {
 
 void CodeEditor::update(Bool active) {
     if (active) {
-        // TODO REDUCE BOTTLENECK CAUSED BY save/format with clang
 #if WINDOWS
+        auto &executor = EE::Edit::CmdExecutor::GetInstance();
         {
-            auto &executor = EE::Edit::CmdExecutor::GetInstance();
             if (D.clangformat() && Kb.b(KB_LCTRL) && Kb.b(KB_S)) {
                 {
                     std::lock_guard<std::mutex> lock(executor.forceReloadMutex);
                     executor.DoForceReload = true;
                 }
                 std::vector<size_t> sourcesToReload;
-                REPA(sources) {
-                    Source &src = sources[i];
-                    // Do not try to format Read Only Codes
-                    if (cur()->Const) {
-                        return;
-                    }
-                    if (src.getOpened() && src.used()) {
-                        src.formatfileswithclang();
-                        sourcesToReload.push_back(i);
-                    }
+                if (!cur()->Const) { //  Do not format Read Only Codes
+                    cur()->formatfileswithclang();
                 }
-
-                {
-                    std::lock_guard<std::mutex> lock(executor.forceReloadMutex);
-                    if (executor.DoForceReload == true) {
-                        for (size_t index : sourcesToReload) {
-                            Source &src = sources[index];
-                            src.forcereload();
-                        }
-                        LoggerThread::GetLoggerThread().logMessageAsync(
-                            LogLevel::INFO, __FILE__, __LINE__, "Call src.forcereload()");
-                        executor.DoForceReload = false;
-                    }
+            }
+            {
+                std::lock_guard<std::mutex> lock(executor.forceReloadMutex);
+                if (executor.DoForceReload == true) {
+                    cur()->forcereload();
+                    executor.DoForceReload = false;
                 }
             }
         }
 #endif
 
-        // Auto Save Script if key is pressed
-        if (D.autosavescript() && Kb.anyKeyWasPressed()) {
-            if (!Kb.b(KB_LCTRL)) {
+// Auto Save Script if key is pressed
+#if WINDOWS
+        {
+            std::lock_guard<std::mutex> lock(executor.forceReloadMutex);
+#endif
+            if (
+#if WINDOWS
+                executor.DoForceReload == false &&
+#endif
+                D.autosavescript() && Kb.anyKeyWasPressed()) {
                 CE.overwrite();
             }
+#if WINDOWS
         }
-
+#endif
         if (Gui.kb() == &build_list)
             if (cur())
                 cur()->activate();

@@ -697,7 +697,7 @@ Str Source::asText() C {
     }
     return data;
 }
-void Source::fromText(C Str &data) {
+void Source::fromText(C Str &data, Bool _move_cur_sor_to_visible_location) {
     lines.clear();
     FREPA(data) {
         if (!lines.elms())
@@ -715,7 +715,9 @@ void Source::fromText(C Str &data) {
     }
     changed(0, -1);
     clearSuggestions();
-    makeCurVisible();
+    if (_move_cur_sor_to_visible_location == true) {
+        makeCurVisible();
+    }
 }
 /******************************************************************************/
 } // namespace Edit

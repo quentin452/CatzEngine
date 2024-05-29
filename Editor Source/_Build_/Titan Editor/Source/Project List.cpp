@@ -171,7 +171,7 @@ void Projects::create() {
         menu_menu.New().create("Fullscreen", MiscRegion::Fullscreen, Misc).kbsc(KbSc(KB_F11)).display(MLTC(null, PL, u"Pełny Ekran", DE, u"Vollbild", RU, u"Полноэкранный", PO, u"Ecrã inteiro")).desc(MLTC(u"Toggle fullscreen mode", PL, u"Zmień pełny ekran", DE, u"Wechseln zu Fullscreen Modus", RU, u"Переключить полноэкранный режим", PO, u"Accionar modo de ecrã inteiro"));
         menu_menu.New().create("Screenshot", MiscRegion::Screenshot, Misc).kbsc(KbSc(KB_PRINT)).display(MLTC(null, RU, u"Скриншот")).desc("Take a screenshot and save it on the Desktop" /*MLTC(u"Take a screenshot and save it to \"ScreenShot\" folder inside the Editor", PL, u"Pobierz ekran oraz zapisz go do katalogu \"ScreenShot\"", DE, u"Macht einen Screenshot und speichert ihn in \"ScreenShot\"", RU, u"Сделать скриншот и сохранить в \"ScreenShot\"", PO, u"Captar um screenshot e guardar em \"ScreenShot\"")*/);
         menu_menu.New().create("Calculator", MiscRegion::CalcShow, Misc).kbsc(KbSc(KB_EQUAL, KBSC_CTRL_CMD));
-        //menu_menu.New().create(STEAM ? "License Key / Steam Subscription" : "License Key", MiscRegion.SetLicense, Misc).desc("Set Your License Key");
+        // menu_menu.New().create(STEAM ? "License Key / Steam Subscription" : "License Key", MiscRegion.SetLicense, Misc).desc("Set Your License Key");
 #if !STEAM // Valve doesn't allow this
         menu_menu.New().create("Esenthel Store", MiscRegion::AppStore, Misc).desc("Open Esenthel Store where you can buy and sell items");
 #endif
@@ -466,7 +466,6 @@ bool Projects::open(Elm &proj, bool ignore_lock) {
     }
     return false;
 }
-
 void Projects::show() {
     Gui += t_proj_path;
     Gui += t_server_login;

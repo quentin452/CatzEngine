@@ -4359,6 +4359,7 @@ void ProjectEx::update() {
                                 if (MT.tappedFirst(i)) {
                                     CurrentlyOpenedFilePath = Proj.codePath(elm->id);
                                     LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "CurrentlyOpenedFilePath2: " + std::string(CurrentlyOpenedFilePath.toCString()));
+                                    SaveSettings();
                                     elmToggle(elm);
                                     list.tapped_vis = list.cur;
                                     list.tapped_time = Time.appTime() + Time.ad() + (MT.mouse(i) ? DoubleClickTime : TouchDoubleClickTime); // disable mouse buttons during this time

@@ -1717,7 +1717,7 @@ void CodeEditor::update(Bool active) {
 #if WINDOWS
                 executor.DoForceReload == false &&
 #endif
-                D.autosavescript() && Kb.anyKeyWasPressed(Kb.KeyState::RELEASED)) {
+                !Kb.bp(KB_LCTRL) && D.autosavescript() && Kb.anyKeyWasPressed(Kb.KeyState::DOWN)) {
                 CE.overwrite();
             }
 #if WINDOWS

@@ -2,7 +2,6 @@
 #include "stdafx.h"
 namespace EE {
 namespace Edit {
-std::string clang_format_exe = "/clang-format.exe";
 /******************************************************************************/
 void LineMode::setTokens(Line &line) {
     C Str &s = line;
@@ -1386,40 +1385,6 @@ Bool Source::overwrite() // returns true if saved successfully (immediately)
     save();
     return false;
 }
-
-#if WINDOWS // TODO SUPPORT MORE OS
-Bool Source::formatfileswithclang() {
-    if (CE.clang_format_path == "") {
-        Gui.msgBox("Error", "Clang Format Was Not Found.");
-        return false;
-    }
-    Str path;
-    // path = source.file_name;
-    // path = CE.cei().sourceCur(loc.id);
-    // path = CodeEditor.getCurrentProjectPath();
-    // path = Proj.projectsPath();
-    // path = currentProject->path;         // Use the complete project path
-    // path = CE.cei().sourceProjPath(loc.id); // Append the relative path to the project path
-    // path = CE.cei().sourceProjPath(loc.id);
-    // path = GetPath(loc.file);
-    // path = MakeFullPath(path, FILE_CUR, true); // Convert to full path
-    // path = loc.getFileFullPath();
-    // path = loc.file_name;
-    path = "C:/Users/iamacatfr2/Documents/GitHub/TitanEngineProject/CatzWorldUsingCatzEngine/a71t1tp448x47e!2wda4ckg9/Code/c!4om-cp0g750z09g7!-^2qt.cpp";
-    if (path == "") {
-        Gui.msgBox("Error", "Failed to find source file.");
-        return false;
-    }
-    std::string command_line = "\"" + std::string(CE.clang_format_path.toCString()) + clang_format_exe + "\" -style=file -i \"" + path.toCString() + "\"";
-    auto &executor = CmdExecutor::GetInstance();
-    if (!executor.executeCommand(command_line)) {
-        Gui.msgBox("Error", "Failed to execute command.");
-        return false;
-    }
-
-    return true;
-}
-#endif
 
 /******************************************************************************/
 static void SuggestionChanged(Source &src) { src.refreshSuggestions(); }

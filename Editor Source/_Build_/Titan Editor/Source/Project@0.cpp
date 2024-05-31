@@ -214,7 +214,7 @@ void DrawProject() {
     Proj.draw();
     GuiEdit.draw();
     WorldEdit.higlight();
-    //if(Importer.busy())D.text(0, D.h()-0.05, S+"Importing.. "+Importer.totalLeft());
+    // if(Importer.busy())D.text(0, D.h()-0.05, S+"Importing.. "+Importer.totalLeft());
     Draw();
 }
 /******************************************************************************/
@@ -254,10 +254,10 @@ void ProjectEx::OuterRegion::update(C GuiPC &gpc) {
                 resize_on = true;
         } else             // button pressed
             if (resize_on) // resize
-        {
-            Vec2 pos = Ms.pos() - gpc.offset;
-            setRegionWidth(pos.x - rect().min.x);
-        }
+            {
+                Vec2 pos = Ms.pos() - gpc.offset;
+                setRegionWidth(pos.x - rect().min.x);
+            }
     } else
         resize_on = false;
 }
@@ -1665,7 +1665,7 @@ void ProjectEx::remove(ElmNode &node, Memc<UID> &sorted_ids, Memc<UID> &removed,
                 if (time > elm.removed_time) {
                     elm.setRemoved(true, time);
                     removed.add(elm.id);
-                }  // remove self, but skip the children
+                } // remove self, but skip the children
             } else // continue checking children
             {
                 remove(hierarchy[child_i], sorted_ids, removed, time);
@@ -1744,7 +1744,7 @@ void ProjectEx::_setElmPublish(ElmNode &node, Memc<UID> &sorted_ids, uint test, 
                     FlagCopy(elm.flag, set, test);
                     elm.publish_time = time;
                     processed.add(elm.id);
-                }  // disable self, but skip children
+                } // disable self, but skip children
             } else // continue checking children
             {
                 _setElmPublish(hierarchy[child_i], sorted_ids, test, set, processed, time);
@@ -1914,7 +1914,7 @@ bool ProjectEx::forceImageSize(Str &file, C VecI2 &size, bool relative) {
     Mems<FileParams> files = FileParams::Decode(file);
     if (files.elms()) {
         Str resize_name;
-        //if(relative) // for relative we need to remove any existing "resize" before calling 'loadImages', actually do this always, because there are now many "resize" commands and we want to remove all of them
+        // if(relative) // for relative we need to remove any existing "resize" before calling 'loadImages', actually do this always, because there are now many "resize" commands and we want to remove all of them
         REPA(files) // go from end
         {
             FileParams &file = files[i];
@@ -2277,7 +2277,7 @@ void ProjectEx::mtrlFlipNrmY(C MemPtr<UID> &elm_ids, bool on) {
                         edit.flip_normal_y = on;
                         edit.flip_normal_y_time.now();
                         Save(edit, editPath(mtrl->id));
-                        //makeGameVer(*mtrl); not needed because 'flip_normal_y' is not stored in game, however if tex ID is changed, then it's handled by 'mtrlReloadTextures' below
+                        // makeGameVer(*mtrl); not needed because 'flip_normal_y' is not stored in game, however if tex ID is changed, then it's handled by 'mtrlReloadTextures' below
                         if (!mtrlReloadTextures(mtrl->id, true, false, false, false))
                             Server.setElmLong(mtrl->id); // 'Server.setElmLong' will be called by 'mtrlReloadTextures' unless it failed
                     }
@@ -2297,7 +2297,7 @@ void ProjectEx::mtrlSmoothIsRough(C MemPtr<UID> &elm_ids, bool on) {
                         edit.smooth_is_rough = on;
                         edit.smooth_is_rough_time.now();
                         Save(edit, editPath(mtrl->id));
-                        //makeGameVer(*mtrl); not needed because 'smooth_is_rough' is not stored in game, however if tex ID is changed, then it's handled by 'mtrlReloadTextures' below
+                        // makeGameVer(*mtrl); not needed because 'smooth_is_rough' is not stored in game, however if tex ID is changed, then it's handled by 'mtrlReloadTextures' below
                         if (!mtrlReloadTextures(mtrl->id, true, false, false, false))
                             Server.setElmLong(mtrl->id); // 'Server.setElmLong' will be called by 'mtrlReloadTextures' unless it failed
                     }
@@ -2370,7 +2370,7 @@ void ProjectEx::mtrlTexDownsize(C MemPtr<UID> &elm_ids, TEX_SIZE_PLATFORM tsp, b
                         mtrl_data->tex_downsize[tsp] = edit.tex_downsize[tsp] = downsize;
                         edit.tex_downsize_time.now();
                         Save(edit, editPath(mtrl->id));
-                        //makeGameVer(*mtrl); this is not needed because 'tex_downsize' is not stored in the game version, instead textures are downsized during publishing
+                        // makeGameVer(*mtrl); this is not needed because 'tex_downsize' is not stored in the game version, instead textures are downsized during publishing
                         Server.setElmLong(mtrl->id); // Long is needed because 'tex_downsize_time' is only in edit
                     }
                 }
@@ -2673,7 +2673,7 @@ bool ProjectEx::mtrlSync(C UID &elm_id, C EditMaterial &mtrl, bool reload_textur
                 }
                 WaterMtrlEdit.toGui();
                 WaterMtrlEdit.setChanged();
-                //D.setShader(WaterMtrlEdit.game());
+                // D.setShader(WaterMtrlEdit.game());
             }
             return true;
         }
@@ -2744,7 +2744,7 @@ bool ProjectEx::mtrlSync(C UID &elm_id, C EditMaterial &mtrl, bool reload_textur
                 WaterMtrlPtr game = gamePath(elm_id);
                 if (!game)
                     return false;
-                //bool         want_tan_bin=game->needTanBin();
+                // bool         want_tan_bin=game->needTanBin();
                 TEX_FLAG has_textures = TEXF_NONE, known_textures = TEXF_NONE;
 
                 if (reload_textures) {
@@ -2781,10 +2781,10 @@ bool ProjectEx::mtrlSync(C UID &elm_id, C EditMaterial &mtrl, bool reload_textur
                 Server.setElmLong(elm_id);
 
                 // process dependencies
-                //if(want_tan_bin!=game->needTanBin())mtrlSetAutoTanBin(elm_id);
+                // if(want_tan_bin!=game->needTanBin())mtrlSetAutoTanBin(elm_id);
                 if (changed & (EditMaterial::CHANGED_BASE | TEXF_DET | TEXF_MACRO | TEXF_EMISSIVE))
                     mtrlTexChanged();
-                //D.setShader(game());
+                // D.setShader(game());
             }
         }
             return true;
@@ -2813,7 +2813,7 @@ bool ProjectEx::mtrlSync(C UID &elm_id, C EditWaterMtrl &mtrl, bool reload_textu
                 }
                 WaterMtrlEdit.toGui();
                 WaterMtrlEdit.setChanged();
-                //D.setShader(WaterMtrlEdit.game());
+                // D.setShader(WaterMtrlEdit.game());
             }
             return true;
         }
@@ -2827,7 +2827,7 @@ bool ProjectEx::mtrlSync(C UID &elm_id, C EditWaterMtrl &mtrl, bool reload_textu
             WaterMtrlPtr game = gamePath(elm_id);
             if (!game)
                 return false;
-            //bool         want_tan_bin=game->needTanBin();
+            // bool         want_tan_bin=game->needTanBin();
             TEX_FLAG has_textures = TEXF_NONE, known_textures = TEXF_NONE;
 
             if (reload_textures) {
@@ -2864,10 +2864,10 @@ bool ProjectEx::mtrlSync(C UID &elm_id, C EditWaterMtrl &mtrl, bool reload_textu
             Server.setElmLong(elm_id);
 
             // process dependencies
-            //if(want_tan_bin!=game->needTanBin())mtrlSetAutoTanBin(elm_id);
+            // if(want_tan_bin!=game->needTanBin())mtrlSetAutoTanBin(elm_id);
             if (changed & (EditMaterial::CHANGED_BASE | TEXF_DET | TEXF_MACRO | TEXF_EMISSIVE))
                 mtrlTexChanged();
-            //D.setShader(game());
+            // D.setShader(game());
         }
         return true;
     }
@@ -3843,7 +3843,7 @@ void ProjectEx::duplicate(Memc<UID> &ids, MemPtr<UID> duplicated, C Str &suffix)
                                                 if (f.read(gamePath(*src_skel)) && SafeOverwrite(f, gamePath(*dup_skel))) {
                                                     SavedSkel(gamePath(*dup_skel));
                                                     savedGame(*dup_skel);
-                                                }                                // copy skel game file
+                                                } // copy skel game file
                                                 Server.setElmFull(dup_skel->id); // send skel to server
                                             }
                                         }
@@ -3859,7 +3859,7 @@ void ProjectEx::duplicate(Memc<UID> &ids, MemPtr<UID> duplicated, C Str &suffix)
                                                 if (f.read(gamePath(*src_phys)) && SafeOverwrite(f, gamePath(*dup_phys))) {
                                                     SavedPhys(gamePath(*dup_phys));
                                                     savedGame(*dup_phys);
-                                                }                                // copy phys game file
+                                                } // copy phys game file
                                                 Server.setElmFull(dup_phys->id); // send phys to server
                                             }
                                         }
@@ -4342,47 +4342,49 @@ void ProjectEx::update() {
                         elmToggle(item);
             } else // use 'else' because after 'setList' the 'elm' pointer may be invalid
                 if (Elm *elm = elm_gui->elm) {
-                if (MT.bp(i))
-                    Gui.drag(DragElmsFinish, T, MT.touch(i), DragElmsStart, DragElmsCancel);
-                if ((list.flag & LIST_MULTI_SEL) ? list.selMode() == LSM_SET : true) {
-                    if (elm_gui->hasVisibleChildren() && MT.pos(i).x <= list.screenPos().x + elm_gui->offset + list.columnWidth(0)) // open arrow
-                    {
-                        if (MT.bp(i) && !MT.bd(i)) {
-                            elm->opened(!elm->opened());
-                            refresh(false, false);
-                        }
-                    } else
-                        switch (elm->type) {
-                        case ELM_FOLDER:
-                        case ELM_LIB:
-                        case ELM_CODE: {
-                            if (MT.tappedFirst(i)) {
-                                elmToggle(elm);
-                                list.tapped_vis = list.cur;
-                                list.tapped_time = Time.appTime() + Time.ad() + (MT.mouse(i) ? DoubleClickTime : TouchDoubleClickTime); // disable mouse buttons during this time
-                                list.tapped_open = false;                                                                               // disable
+                    if (MT.bp(i))
+                        Gui.drag(DragElmsFinish, T, MT.touch(i), DragElmsStart, DragElmsCancel);
+                    if ((list.flag & LIST_MULTI_SEL) ? list.selMode() == LSM_SET : true) {
+                        if (elm_gui->hasVisibleChildren() && MT.pos(i).x <= list.screenPos().x + elm_gui->offset + list.columnWidth(0)) // open arrow
+                        {
+                            if (MT.bp(i) && !MT.bd(i)) {
+                                elm->opened(!elm->opened());
+                                refresh(false, false);
                             }
-                        } break;
+                        } else
+                            switch (elm->type) {
+                            case ELM_FOLDER:
+                            case ELM_LIB:
+                            case ELM_CODE: {
+                                if (MT.tappedFirst(i)) {
+                                    CurrentlyOpenedFilePath = Proj.codePath(elm->id);
+                                    LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "CurrentlyOpenedFilePath2: " + std::string(CurrentlyOpenedFilePath.toCString()));
+                                    elmToggle(elm);
+                                    list.tapped_vis = list.cur;
+                                    list.tapped_time = Time.appTime() + Time.ad() + (MT.mouse(i) ? DoubleClickTime : TouchDoubleClickTime); // disable mouse buttons during this time
+                                    list.tapped_open = false;                                                                               // disable
+                                }
+                            } break;
 
-                        case ELM_APP: {
-                            if (MT.tappedFirst(i)) {
-                                list.tapped_vis = list.cur;
-                                list.tapped_time = Time.appTime() + Time.ad() + (MT.mouse(i) ? DoubleClickTime : TouchDoubleClickTime); // wait until potential double click, if it won't occur, then open element
-                                list.tapped_open = true;                                                                                // open
-                            } else if (MT.bd(i)) {
-                                list.tapped_vis = -1; // cancel checking for tap open
-                                elmToggle(elm);
-                                MT.eat(i, 0); // eat so tap won't be called
+                            case ELM_APP: {
+                                if (MT.tappedFirst(i)) {
+                                    list.tapped_vis = list.cur;
+                                    list.tapped_time = Time.appTime() + Time.ad() + (MT.mouse(i) ? DoubleClickTime : TouchDoubleClickTime); // wait until potential double click, if it won't occur, then open element
+                                    list.tapped_open = true;                                                                                // open
+                                } else if (MT.bd(i)) {
+                                    list.tapped_vis = -1; // cancel checking for tap open
+                                    elmToggle(elm);
+                                    MT.eat(i, 0); // eat so tap won't be called
+                                }
+                            } break;
+
+                            default:
+                                if (MT.bd(i))
+                                    elmToggle(elm);
+                                break;
                             }
-                        } break;
-
-                        default:
-                            if (MT.bd(i))
-                                elmToggle(elm);
-                            break;
-                        }
+                    }
                 }
-            }
         }
     if (region.contains(Gui.ms())) {
         if (Ms.bp(1)) {
@@ -4472,7 +4474,7 @@ uint ProjectEx::PublishableFlag(Edit::EXE_TYPE exe_type) {
     case Edit::EXE_AAB:
     case Edit::EXE_IOS:
     case Edit::EXE_WEB:
-        //case Edit.EXE_NS : Nintendo Switch excluded because its game sizes can be big
+        // case Edit.EXE_NS : Nintendo Switch excluded because its game sizes can be big
         flag |= Elm::NO_PUBLISH_MOBILE;
         break;
     }
@@ -4625,7 +4627,7 @@ void ProjectEx::setList(ElmNode &node, int depth, int vis_parent, bool parent_co
                         setList(child, depth + 1, list.flat_is ? -1 : elm_list_index, filter_is_id ? false : (parent_contains_name || this_contains_name), no_publish_all);
                     else // list children, don't set 'parent_contains_name' when filter is by ID to make sure that desired element is listed last and its children are not listed at all
                         if (publish && !invalid)
-                        invalid = hasInvalid(child); // if not listing children, then check if any of them are invalid and mark self as invalid
+                            invalid = hasInvalid(child); // if not listing children, then check if any of them are invalid and mark self as invalid
 
                     ListElm &e = list.data[elm_list_index];                                                                                    // !! get reference after calling 'setList' which may invalidate it if it was called after getting the ref !!
                     e.hasVisibleChildren(list.flat_is ? false : (list.data.elms() > elm_list_index + 1 || hasVisibleChildren(child)), opened); // first check if any new elements were listed after this one, because this check is faster than 'hasVisibleChildren'
@@ -5136,7 +5138,7 @@ void ProjectEx::resize() {
     setListPadding();
     list.columnWidth(0, text_size * 0.8f);
     list.columnWidth(1, text_size * 0.8f);
-    //list.columnWidth (2, region.minClientWidth()-list.columnWidth(1)-list.columnWidth(0)); don't set fixed column width
+    // list.columnWidth (2, region.minClientWidth()-list.columnWidth(1)-list.columnWidth(0)); don't set fixed column width
     list.sound_play.size(list.elmHeight());
 }
 void ProjectEx::elmMenu(C Vec2 &pos, bool touch) {
@@ -5750,7 +5752,7 @@ void ProjectEx::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, boo
         Server.setElmLong(elm.id);
     else // if local has newer file version than server then send it
         if (elm.newerData(src))
-        Server.setElmShort(elm.id); // if local has any data newer     than server then send it
+            Server.setElmShort(elm.id); // if local has any data newer     than server then send it
 }
 bool ProjectEx::syncWaypoint(C UID &world_id, C UID &waypoint_id, Version &src_ver, EditWaypoint &src) {
     // if belongs to currently edited world
@@ -6169,7 +6171,7 @@ bool ProjectEx::meshSet(C UID &elm_id, File &data) {
         {
             Mesh mesh;
             if (mesh.load(data, game_path)) {
-                //mesh.setBase(); don't set base in case some mesh parts were deliberately deleted
+                // mesh.setBase(); don't set base in case some mesh parts were deliberately deleted
                 mesh.delRender().keepOnly(EditMeshFlagAnd).skeleton(null);
                 CleanMesh(mesh);
                 mesh_data->draw_group_id = findElmID(Enums.id(mesh.drawGroupEnum()), ELM_ENUM);
@@ -6191,7 +6193,7 @@ bool ProjectEx::meshSet(C UID &elm_id, File &data) {
                 makeGameVer(*elm);
                 mesh_data->file_time.getUTC();
                 mesh_data->draw_group_time.getUTC();
-                //mesh_data.from(mesh); already called through 'makeGameVer'
+                // mesh_data.from(mesh); already called through 'makeGameVer'
                 mesh_data->newVer();
                 if (ObjEdit.mesh_elm == elm)
                     ObjEdit.reloadMeshSkel();
@@ -6497,7 +6499,7 @@ LOAD_RESULT ProjectEx::open(C UID &id, C Str &name, C Str &path, Str &error, boo
                 worldVerGet(elm.id);
         }
         getFileSizes();
-        //if(list.tex_sharpness)TIG.getTexSharpnessFromProject();
+        // if(list.tex_sharpness)TIG.getTexSharpnessFromProject();
     }
     ProjSettings.toGui();
     return result;
@@ -6508,7 +6510,7 @@ bool ProjectEx::save(SAVE_MODE save_mode) {
 }
 ProjectEx &ProjectEx::del() {
     file_size_getter.stop();
-    //TIG.stop();
+    // TIG.stop();
     HideProject();
 
     elm_undos.del();

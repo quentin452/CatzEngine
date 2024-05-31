@@ -2,7 +2,9 @@
 #include "stdafx.h"
 /******************************************************************************/
 Projects Projs;
-Str ProjectsPath; // must include tailSlash
+Str ProjectsPath;    // must include tailSlash
+Str MainProjectPath; // must include tailSlash
+Str CurrentlyOpenedFilePath; // must include tailSlash
 State StateProjectList(UpdateProjectList, DrawProjectList, InitProjectList, ShutProjectList);
 /******************************************************************************/
 NewProjWin NewProj;
@@ -356,6 +358,8 @@ bool Projects::newProj(C Str &name) {
     proj.id.randomizeValid();
     proj.name = CleanFileName(name);
     proj.path = ProjectsPath + EncodeFileName(proj.id).tailSlash(true);
+    LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "proj.name: " + std::string(proj.name.toCString()));
+    LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "proj.path: " + std::string(proj.path.toCString()));
     if (!ProjectsPath.is())
         Gui.msgBox(S, "Path for Projects is invalid");
     else if (!ValidFileName(proj.name))
@@ -448,6 +452,7 @@ bool Projects::removeProj(C UID &proj_id) {
 
 bool Projects::open(Elm &proj, bool ignore_lock) {
     Str path = proj.path; // Use Complete Project Path
+    MainProjectPath = path;
     if (!FCreateDirs(path))
         Gui.msgBox(S, S + "Can't write to \"" + GetPath(path) + "\"");
     else {

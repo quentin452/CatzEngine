@@ -9,6 +9,8 @@ bool SaveSettings(C Str &name) {
     TextNode &main = data.getNode("Main");
     {
         main.getNode("ProjectsPath").value = RelativePath(ProjectsPath);
+        main.getNode("MainProjectPath").value = RelativePath(MainProjectPath);
+        main.getNode("CurrentlyOpenedFilePath").value = RelativePath(CurrentlyOpenedFilePath);
         main.getNode("ServerAddress").value = Projs.server();
         main.getNode("Email").value = Projs.email();
         main.getNode("NetworkInterface").value = Projs.editor_network_interface();
@@ -275,6 +277,10 @@ void ApplyVideoSettings(C TextData &data) {
 }
 void ApplySettings(C TextData &data) {
     if (C TextNode *main = data.findNode("Main")) {
+        if (C TextParam *p = main->findNode("MainProjectPath"))
+            Projs.proj_path.set(MakeFullPath(p->value));
+        if (C TextParam *p = main->findNode("CurrentlyOpenedFilePath"))
+            Projs.proj_path.set(MakeFullPath(p->value));
         if (C TextParam *p = main->findNode("ProjectsPath"))
             Projs.proj_path.set(MakeFullPath(p->value));
         if (C TextParam *p = main->findNode("ServerAddress"))

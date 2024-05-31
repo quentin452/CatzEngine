@@ -318,9 +318,6 @@ const_mem_addr struct Source : Region {
     Bool saveTxt(C Str &name);
     void save();
     Bool overwrite();
-#if WINDOWS // TODO SUPPORT MORE OS
-    Bool formatfileswithclang();
-#endif
     // get
     Bool hasUnicode() C;
     Bool used() C;

@@ -57,7 +57,7 @@ void CodeView::configChanged32Bit() {
     Misc.build.menu("64-bit", !config32Bit(), QUIET);
 }
 void CodeView::configChangedAPI() {
-    //Misc.build.menu("DirectX 11", configAPI(), QUIET);
+    // Misc.build.menu("DirectX 11", configAPI(), QUIET);
 }
 void CodeView::configChangedEXE() {
     Misc.build.menu("Windows EXE", configEXE() == Edit::EXE_EXE, QUIET);
@@ -502,14 +502,17 @@ Str CodeView::sourceProjPath(C UID &id) {
         {
             if (elm->type != ELM_APP && elm->type != ELM_LIB && elm->type != ELM_FOLDER)
                 continue; // don't add name of a parent if it's not a folder
-            if (elm->type == ELM_APP)
+            if (elm->type == ELM_APP) {
                 return path; // return before adding app name
+            }
             path = CleanFileName(elm->name).tailSlash(true) + path;
-            if (elm->type == ELM_LIB)
+            if (elm->type == ELM_LIB) {
                 return path; // return after  adding lib name
+            }
         }
     return S; // parent is not app and not lib, then return empty string
 }
+
 Edit::ERROR_TYPE CodeView::sourceDataLoad(C UID &id, Str &data) {
     if (Elm *elm = Proj.findElm(id)) {
         if (ElmCode *code_data = elm->codeData()) {
@@ -548,12 +551,15 @@ Str CodeView::elmBaseName(C UID &id) {
         return CleanFileName(elm->name);
     return S;
 }
+
 Str CodeView::elmFullName(C UID &id) { return Proj.elmFullName(id); }
 void CodeView::elmHighlight(C UID &id, C Str &name) { Proj.elmHighlight(id, name); }
 void CodeView::elmOpen(C UID &id) {
-    if (Elm *elm = Proj.findElm(id))
-        if (!(selected() && id == sourceCurId()))
+    if (Elm *elm = Proj.findElm(id)) {
+        if (!(selected() && id == sourceCurId())) {
             Proj.elmToggle(elm);
+        }
+    }
 }
 void CodeView::elmLocate(C UID &id) { Proj.elmLocate(id); }
 void CodeView::elmPreview(C UID &id, C Vec2 &pos, bool mouse, C Rect &clip) {
@@ -618,8 +624,9 @@ void CodeView::selectedChanged() { menuEnabled(selected()); }
 void CodeView::flush() {}
 void CodeView::overwriteChanges() {
     REPA(Proj.elms)
-    if (Proj.elms[i].type == ELM_CODE)
+    if (Proj.elms[i].type == ELM_CODE) {
         sourceOverwrite(Proj.elms[i].id);
+    }
 }
 void CodeView::sourceTitleChanged(C UID &id) // call if name or "modified state" changed
 {
@@ -665,15 +672,15 @@ void CodeView::makeAuto(bool publish) {
         data += S + "#define    OPEN_VR " + appPublishOpenVRDll() + " // if Application properties have OpenVR enabled\n"; // display it here even if it's just Auto.cpp and doesn't affect other codes, so that the user sees the macro and can be aware of it
         data += S + "const bool PUBLISH          =" + TextBool(publish) + "; // this is set to true when compiling for publishing\n";
         data += S + "const bool EMBED_ENGINE_DATA=(" + TextBool(appEmbedEngineData() != 0) + " && !WINDOWS_NEW && !MOBILE && !WEB); // this is set to true when \"Embed Engine Data\" was enabled in application settings, this is always disabled for WindowsNew, Mobile and Web builds\n";
-        //data+=S+"cchar *C   EE_SDK_PATH      =                                     \""+Replace(SDKPath()                             , '\\', '/').tailSlash(false)+"\";\n";
-        //data+=S+"cchar *C   EE_PHYSX_DLL_PATH=((WINDOWS_NEW || MOBILE || WEB) ? null             : PUBLISH ? u\"Bin\"             : u\""+Replace(BinPath()             , '\\', '/').tailSlash(false)+"\");\n";
+        // data+=S+"cchar *C   EE_SDK_PATH      =                                     \""+Replace(SDKPath()                             , '\\', '/').tailSlash(false)+"\";\n";
+        // data+=S+"cchar *C   EE_PHYSX_DLL_PATH=((WINDOWS_NEW || MOBILE || WEB) ? null             : PUBLISH ? u\"Bin\"             : u\""+Replace(BinPath()             , '\\', '/').tailSlash(false)+"\");\n";
         data += S + "cchar *C    ENGINE_DATA_PATH=((WINDOWS_NEW || MOBILE || WEB) ? u\"Engine.pak\"  : PUBLISH ? u\"Bin/Engine.pak\"  : u\"" + Replace(BinPath() + "Engine.pak", '\\', '/').tailSlash(false) + "\");\n";
         data += S + "cchar *C   PROJECT_DATA_PATH=((WINDOWS_NEW || MOBILE || WEB) ? u\"Project.pak\" : PUBLISH ? u\"Bin/Project.pak\" : u\"" + Replace(Proj.game_path, '\\', '/').tailSlash(false) + "\");\n";
         data += S + "cchar *C   PROJECT_NAME     =u\"" + CString(Proj.name) + "\";\n";
         data += S + "cchar *C   APP_NAME         =u\"" + CString(appName()) + "\";\n";
         data += S + "const int  APP_BUILD        =" + appBuild() + ";\n";
         data += S + "const UID  APP_GUI_SKIN     =" + appGuiSkin().asCString() + ";\n";
-        //data+=S+"const bool GOOGLE_PLAY_ASSET_DELIVERY="+TextBool(appGooglePlayAssetDelivery())+"; // this is set to true when project data is managed by Google Play Asset Delivery\n";
+        // data+=S+"const bool GOOGLE_PLAY_ASSET_DELIVERY="+TextBool(appGooglePlayAssetDelivery())+"; // this is set to true when project data is managed by Google Play Asset Delivery\n";
         if (cchar8 *cipher_class = (InRange(Proj.cipher, CIPHER_NUM) ? CipherText[Proj.cipher].clazz : null)) {
             data += S + cipher_class + "   _PROJECT_CIPHER   (";
             FREPA(Proj.cipher_key) {
@@ -930,7 +937,7 @@ void CodeView::erasing(C UID &elm_id) { sourceRemove(elm_id); }
 void CodeView::kbSet() { CodeEditorInterface::kbSet(); }
 GuiObj *CodeView::test(C GuiPC &gpc, C Vec2 &pos, GuiObj *&mouse_wheel) { return null; }
 void CodeView::update(C GuiPC &gpc) {
-    //Region             .update(gpc);
+    // Region             .update(gpc);
     CodeEditorInterface::update(StateActive == &StateProject);
 }
 void CodeView::draw(C GuiPC &gpc) {
@@ -1731,10 +1738,10 @@ void AppPropsEditor::create() {
     embed.combobox.setColumns(NameDescListColumn, Elms(NameDescListColumn)).setData(EmbedEngine, Elms(EmbedEngine)).menu.list.setElmDesc(MEMBER(NameDesc, desc));
     add("Publish Project Data", MemberDesc(DATA_BOOL).setFunc(PublishProjData, PublishProjData)).desc("If include project data when publishing the application.\nDisable this if your application will not initially include the data, but will download it manually later.\nDefault value for this option is true.");
     add("Publish Data as PAK", MemberDesc(DATA_BOOL).setFunc(PublishDataAsPak, PublishDataAsPak)).desc("If archive data files into a singe PAK file.\nDisable this option if you plan to upload the application using Uploader tool, in which case it's better that the files are stored separately (instead of archived).\nThen you can make your Game/Installer to download files from the server, and optionally archive them as PAK.\nDefault value for this option is true.");
-    //add("Publish PhysX DLLs"         , MemberDesc(DATA_BOOL                              ).setFunc(PublishPhysxDll             , PublishPhysxDll             )).desc("If include PhysX DLL files when publishing the application.\nDisable this if your application doesn't use physics, or it will download the files manually later.\nThis option is used only for EXE and DLL targets.\nDefault value for this option is true.");
+    // add("Publish PhysX DLLs"         , MemberDesc(DATA_BOOL                              ).setFunc(PublishPhysxDll             , PublishPhysxDll             )).desc("If include PhysX DLL files when publishing the application.\nDisable this if your application doesn't use physics, or it will download the files manually later.\nThis option is used only for EXE and DLL targets.\nDefault value for this option is true.");
     add("Publish Steam DLL", MemberDesc(DATA_BOOL).setFunc(PublishSteamDll, PublishSteamDll)).desc("If include Steam DLL file when publishing the application.\nEnable this only if your application uses Steam API.\nDefault value for this option is false.\nBased on this option, \"STEAM\" C++ macro will be set to 0 or 1.");
     add("Publish OpenVR DLL", MemberDesc(DATA_BOOL).setFunc(PublishOpenVRDll, PublishOpenVRDll)).desc("If include OpenVR DLL file when publishing the application.\nEnable this only if your application uses OpenVR API.\nDefault value for this option is false.\nBased on this option, \"OPEN_VR\" C++ macro will be set to 0 or 1.");
-    //add("Windows Code Sign"          , MemberDesc(DATA_BOOL                              ).setFunc(WindowsCodeSign             , WindowsCodeSign             )).desc("If automatically sign the application when publishing for Windows EXE platform.\nWindows signtool.exe must be installed together with your Microsoft Windows Authenticode Digital Signature in the Certificate Store.\nSign tool will be used with the /a option making it to choose the best certificate out of all available.");
+    // add("Windows Code Sign"          , MemberDesc(DATA_BOOL                              ).setFunc(WindowsCodeSign             , WindowsCodeSign             )).desc("If automatically sign the application when publishing for Windows EXE platform.\nWindows signtool.exe must be installed together with your Microsoft Windows Authenticode Digital Signature in the Certificate Store.\nSign tool will be used with the /a option making it to choose the best certificate out of all available.");
     p_icon = &add("Icon");
     p_image_portrait = &add("Portrait Image");
     p_image_landscape = &add("Landscape Image");
@@ -1900,7 +1907,7 @@ AppPropsEditor &AppPropsEditor::hide() {
 }
 void AppPropsEditor::flush() {
     if (elm && changed) {
-        //if(ElmApp *data=elm.appData())data.newVer(); Server.setElmLong(elm.id); // modify just before saving/sending in case we've received data from server after edit, don't send to server as apps/codes are synchronized on demand
+        // if(ElmApp *data=elm.appData())data.newVer(); Server.setElmLong(elm.id); // modify just before saving/sending in case we've received data from server after edit, don't send to server as apps/codes are synchronized on demand
         if (changed_headers && elm_id == Proj.curApp())
             Proj.activateSources(1); // if changed headers on active app then rebuild symbols
     }

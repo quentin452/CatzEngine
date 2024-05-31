@@ -79,7 +79,7 @@ struct CodeEditorInterface {
     Bool sourceCur(C UID &id);                  // set current source
     static Bool sourceCurIs();                  // if there is a current source
     static Str sourceCurName();                 // get current source
-    UID sourceCurId();                          // get current source
+    static UID sourceCurId();                          // get current source
     Bool sourceCurModified();                   // get current source modified state
     Bool sourceCurConst();                      // get current source const    state
     void sourceDrawPreview(C Str &name);        // draw preview of source
@@ -689,6 +689,9 @@ const_mem_addr struct CodeEditor {
     void del();
     void replacePath(C Str &src, C Str &dest);
     void setMenu(Node<MenuElm> &menu);
+#if WINDOWS // TODO SUPPORT MORE OS
+    Bool formatfileswithclang();
+#endif
     void create(GuiObj *parent, Bool menu_on_top);
     void init();
     void update(Bool active);

@@ -83,6 +83,9 @@
 
 /******************************************************************************/
 #include "stdafx.h"
+#if WINDOWS
+std::string clang_format_exe = "/clang-format.exe";
+#endif
 #if WINDOWS_OLD
 #include "../../../ThirdPartyLibs/begin.h"
 
@@ -795,6 +798,56 @@ static FILE_LIST_MODE AddEEHeader(C FileFind &ff, CodeEditor &ce) {
     }
     return FILE_LIST_CONTINUE;
 }
+/******************************************************************************/
+#if WINDOWS // TODO SUPPORT MORE OS
+std::string getMainProjectPath() {
+    std::string path = CurDir().tailSlash(true).toCString();
+    path += "Settings.txt";
+    std::ifstream settingsFile(path);
+    std::string line;
+    while (std::getline(settingsFile, line)) {
+        if (line.find("MainProjectPath=") != std::string::npos) {
+            std::string mainProjectPath = line.substr(line.find("=") + 1);
+            mainProjectPath = mainProjectPath.substr(1, mainProjectPath.length() - 2);
+            return mainProjectPath;
+        }
+    }
+    return "";
+}
+std::string getCurrentlyOpenedFile() {
+    std::string path = CurDir().tailSlash(true).toCString();
+    path += "Settings.txt";
+    std::ifstream settingsFile(path);
+    std::string line;
+    while (std::getline(settingsFile, line)) {
+        if (line.find("CurrentlyOpenedFilePath=") != std::string::npos) {
+            std::string mainProjectPath = line.substr(line.find("=") + 1);
+            mainProjectPath = mainProjectPath.substr(1, mainProjectPath.length() - 2);
+            return mainProjectPath;
+        }
+    }
+    return "";
+}
+Bool CodeEditor::formatfileswithclang() {
+    if (CE.clang_format_path == "") {
+        Gui.msgBox("Error", "Clang Format Was Not Found.");
+        return false;
+    }
+    std::string path;
+    path = getCurrentlyOpenedFile();
+    if (path == "") {
+        Gui.msgBox("Error", "Failed to find source file.");
+        return false;
+    }
+    std::string command_line = "\"" + std::string(CE.clang_format_path.toCString()) + clang_format_exe + "\" -style=file -i \"" + path + "\"";
+    auto &executor = CmdExecutor::GetInstance();
+    if (!executor.executeCommand(command_line)) {
+        Gui.msgBox("Error", "Failed to execute command.");
+        return false;
+    }
+    return true;
+}
+#endif
 /******************************************************************************/
 void CodeEditor::setMenu(Node<MenuElm> &menu) {
     {
@@ -1642,7 +1695,7 @@ void CodeEditor::update(Bool active) {
                 }
                 std::vector<size_t> sourcesToReload;
                 if (!cur()->Const) { //  Do not format Read Only Codes
-                    cur()->formatfileswithclang();
+                    CE.formatfileswithclang();
                 }
             }
             {

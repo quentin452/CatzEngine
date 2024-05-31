@@ -190,7 +190,7 @@ void ElmData::setSrcFile(C Str &src_file, C TimeStamp &time) {
 uint ElmData::undoSrcFile(C ElmData &src) { return Undo(src_file_time, src.src_file_time, src_file, src.src_file) * CHANGE_NORMAL; }
 uint ElmData::undo(C ElmData &src) {
     uint changed = 0;
-    //changed|=undoSrcFile(src); // this should not be undone here, because this method is called inside the element editors, however none of these editors provide GUI for the 'src_file', instead the 'src_file' is changed using a separate 'ReloadElm' GUI. So if Element is opened in its Editor, some change is made, then it's reloaded from different source file, and in Editor some change is made, and undos presed to the start, then original source file would be restored, which is not what we want
+    // changed|=undoSrcFile(src); // this should not be undone here, because this method is called inside the element editors, however none of these editors provide GUI for the 'src_file', instead the 'src_file' is changed using a separate 'ReloadElm' GUI. So if Element is opened in its Editor, some change is made, then it's reloaded from different source file, and in Editor some change is made, and undos presed to the start, then original source file would be restored, which is not what we want
     return changed;
 }
 uint ElmData::sync(C ElmData &src) {
@@ -419,7 +419,7 @@ uint ElmMesh::undo(C ElmMesh &src) {
     changed |= UndoID(phys_id, src.phys_id) * CHANGE_AFFECT_OBJ;                        // PHYS ID is not stored in the MESH file but OBJ file
     changed |= Undo(body_time, src.body_time, body_id, src.body_id) * CHANGE_AFFECT_FILE;
     changed |= Undo(draw_group_time, src.draw_group_time, draw_group_id, src.draw_group_id) * CHANGE_AFFECT_FILE;
-    //changed|=Undo( transform_time, src. transform_time, transform    , src.transform    )*CHANGE_AFFECT_FILE; transform is not undone here
+    // changed|=Undo( transform_time, src. transform_time, transform    , src.transform    )*CHANGE_AFFECT_FILE; transform is not undone here
 
     if (changed)
         newVer();
@@ -3127,7 +3127,7 @@ uint ElmApp::undo(C ElmApp &src) {
             ch = true;
             playAssetDelivery(src.playAssetDelivery());
         }
-        //if(Undo(windows_code_sign_time  , src.windows_code_sign_time  )){ch=true; windowsCodeSign  (src.windowsCodeSign  ());}
+        // if(Undo(windows_code_sign_time  , src.windows_code_sign_time  )){ch=true; windowsCodeSign  (src.windowsCodeSign  ());}
     }
     ch |= Undo(supported_orientations_time, src.supported_orientations_time, supported_orientations, src.supported_orientations);
     ch |= Undo(supported_languages_time, src.supported_languages_time, supported_languages, src.supported_languages);
@@ -3217,7 +3217,7 @@ uint ElmApp::sync(C ElmApp &src, bool manual) {
             ch = true;
             playAssetDelivery(src.playAssetDelivery());
         }
-        //if(Sync(windows_code_sign_time  , src.windows_code_sign_time  )){ch=true; windowsCodeSign  (src.windowsCodeSign  ());}
+        // if(Sync(windows_code_sign_time  , src.windows_code_sign_time  )){ch=true; windowsCodeSign  (src.windowsCodeSign  ());}
     }
     ch |= Sync(supported_orientations_time, src.supported_orientations_time, supported_orientations, src.supported_orientations);
     ch |= Sync(supported_languages_time, src.supported_languages_time, supported_languages, src.supported_languages);
@@ -4363,96 +4363,96 @@ Elm &Elm::copyParams(C Elm &src, bool set_parent) // copy parameters from 'src',
             Delete(data);
         else                            // if source has no data then delete it
             if (ElmData *data = Data()) // if created data then copy it
-        {
-            switch (type) {
-            case ELM_OBJ_CLASS:
-                *objClassData() = *src.objClassData();
-                break;
-            case ELM_OBJ:
-                *objData() = *src.objData();
-                break;
-            case ELM_MESH:
-                *meshData() = *src.meshData();
-                break;
-            case ELM_MTRL:
-                *mtrlData() = *src.mtrlData();
-                break;
-            case ELM_WATER_MTRL:
-                *waterMtrlData() = *src.waterMtrlData();
-                break;
-            case ELM_PHYS_MTRL:
-                *physMtrlData() = *src.physMtrlData();
-                break;
-            case ELM_SKEL:
-                *skelData() = *src.skelData();
-                break;
-            case ELM_PHYS:
-                *physData() = *src.physData();
-                break;
-            case ELM_ANIM:
-                *animData() = *src.animData();
-                break;
-            case ELM_PANEL_IMAGE:
-                *panelImageData() = *src.panelImageData();
-                break;
-            case ELM_ENV:
-                *envData() = *src.envData();
-                break;
-            case ELM_WORLD:
-                *worldData() = *src.worldData();
-                break;
-            case ELM_MINI_MAP:
-                *miniMapData() = *src.miniMapData();
-                break;
-            case ELM_ENUM:
-                *enumData() = *src.enumData();
-                break;
-            case ELM_IMAGE:
-                *imageData() = *src.imageData();
-                break;
-            case ELM_IMAGE_ATLAS:
-                *imageAtlasData() = *src.imageAtlasData();
-                break;
-            case ELM_ICON_SETTS:
-                *iconSettsData() = *src.iconSettsData();
-                break;
-            case ELM_ICON:
-                *iconData() = *src.iconData();
-                break;
-            case ELM_FONT:
-                *fontData() = *src.fontData();
-                break;
-            case ELM_TEXT_STYLE:
-                *textStyleData() = *src.textStyleData();
-                break;
-            case ELM_PANEL:
-                *panelData() = *src.panelData();
-                break;
-            case ELM_GUI_SKIN:
-                *guiSkinData() = *src.guiSkinData();
-                break;
-            case ELM_GUI:
-                *guiData() = *src.guiData();
-                break;
-            case ELM_SOUND:
-                *soundData() = *src.soundData();
-                break;
-            case ELM_VIDEO:
-                *videoData() = *src.videoData();
-                break;
-            case ELM_FILE:
-                *fileData() = *src.fileData();
-                break;
-            case ELM_CODE:
-                *codeData() = *src.codeData();
-                break;
-            case ELM_APP:
-                *appData() = *src.appData();
-                break;
+            {
+                switch (type) {
+                case ELM_OBJ_CLASS:
+                    *objClassData() = *src.objClassData();
+                    break;
+                case ELM_OBJ:
+                    *objData() = *src.objData();
+                    break;
+                case ELM_MESH:
+                    *meshData() = *src.meshData();
+                    break;
+                case ELM_MTRL:
+                    *mtrlData() = *src.mtrlData();
+                    break;
+                case ELM_WATER_MTRL:
+                    *waterMtrlData() = *src.waterMtrlData();
+                    break;
+                case ELM_PHYS_MTRL:
+                    *physMtrlData() = *src.physMtrlData();
+                    break;
+                case ELM_SKEL:
+                    *skelData() = *src.skelData();
+                    break;
+                case ELM_PHYS:
+                    *physData() = *src.physData();
+                    break;
+                case ELM_ANIM:
+                    *animData() = *src.animData();
+                    break;
+                case ELM_PANEL_IMAGE:
+                    *panelImageData() = *src.panelImageData();
+                    break;
+                case ELM_ENV:
+                    *envData() = *src.envData();
+                    break;
+                case ELM_WORLD:
+                    *worldData() = *src.worldData();
+                    break;
+                case ELM_MINI_MAP:
+                    *miniMapData() = *src.miniMapData();
+                    break;
+                case ELM_ENUM:
+                    *enumData() = *src.enumData();
+                    break;
+                case ELM_IMAGE:
+                    *imageData() = *src.imageData();
+                    break;
+                case ELM_IMAGE_ATLAS:
+                    *imageAtlasData() = *src.imageAtlasData();
+                    break;
+                case ELM_ICON_SETTS:
+                    *iconSettsData() = *src.iconSettsData();
+                    break;
+                case ELM_ICON:
+                    *iconData() = *src.iconData();
+                    break;
+                case ELM_FONT:
+                    *fontData() = *src.fontData();
+                    break;
+                case ELM_TEXT_STYLE:
+                    *textStyleData() = *src.textStyleData();
+                    break;
+                case ELM_PANEL:
+                    *panelData() = *src.panelData();
+                    break;
+                case ELM_GUI_SKIN:
+                    *guiSkinData() = *src.guiSkinData();
+                    break;
+                case ELM_GUI:
+                    *guiData() = *src.guiData();
+                    break;
+                case ELM_SOUND:
+                    *soundData() = *src.soundData();
+                    break;
+                case ELM_VIDEO:
+                    *videoData() = *src.videoData();
+                    break;
+                case ELM_FILE:
+                    *fileData() = *src.fileData();
+                    break;
+                case ELM_CODE:
+                    *codeData() = *src.codeData();
+                    break;
+                case ELM_APP:
+                    *appData() = *src.appData();
+                    break;
+                }
+                if (id != src.id)
+                    data->clearLinked(); // if we're copying as a different object (duplicating) then we need to clear linked
             }
-            if (id != src.id)
-                data->clearLinked(); // if we're copying as a different object (duplicating) then we need to clear linked
-        }
     }
     return T;
 }

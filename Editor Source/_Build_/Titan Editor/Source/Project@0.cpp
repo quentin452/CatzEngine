@@ -4358,7 +4358,6 @@ void ProjectEx::update() {
                             case ELM_CODE: {
                                 if (MT.tappedFirst(i)) {
                                     CurrentlyOpenedFilePath = Proj.codePath(elm->id);
-                                    LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "CurrentlyOpenedFilePath2: " + std::string(CurrentlyOpenedFilePath.toCString()));
                                     SaveSettings();
                                     elmToggle(elm);
                                     list.tapped_vis = list.cur;

@@ -74,11 +74,35 @@ struct KeyboardClass // Keyboard Input
     Bool anyShift() C { return ButtonOn(_button[KB_LSHIFT] | _button[KB_RSHIFT]); }
     Bool anyAlt() C { return ButtonOn(_button[KB_LALT] | _button[KB_RALT]); }
     Bool anyWin() C { return ButtonOn(_button[KB_LWIN] | _button[KB_RWIN]); }
-    bool anyKeyWasPressed() C {
-        // Iterate over the range of KB_KEY values and check if any button is pressed
+    enum KeyState { PRESSED,
+                    RELEASED,
+                    DOWN,
+                    FIRST_PRESS,
+                    DOUBLE_CLICKED };
+
+    bool anyKeyWasPressed(KeyState state) C {
+        // Iterate over the range of KB_KEY values and check if any button is in the specified state
         for (int i = KB_NONE; i <= KB_ZOOM_OUT; ++i) {
-            if (_button[i]) {
-                return true;
+            switch (state) {
+            case DOUBLE_CLICKED:
+                if (Kb.bd((KB_KEY)i))
+                    return true;
+                break;
+            case PRESSED:
+                if (Kb.bp((KB_KEY)i))
+                    return true;
+                break;
+            case RELEASED:
+                if (Kb.br((KB_KEY)i))
+                    return true;
+                break;
+            case DOWN:
+                if (Kb.b((KB_KEY)i))
+                    return true;
+            case FIRST_PRESS:
+                if (Kb.kf((KB_KEY)i))
+                    return true;
+                break;
             }
         }
         return false;

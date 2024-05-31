@@ -84,7 +84,7 @@
 /******************************************************************************/
 #include "stdafx.h"
 #if WINDOWS
-std::string clang_format_exe = "/clang-format.exe";
+std::string clang_format_exe = "\\clang-format.exe";
 #endif
 #if WINDOWS_OLD
 #include "../../../ThirdPartyLibs/begin.h"
@@ -1717,7 +1717,7 @@ void CodeEditor::update(Bool active) {
 #if WINDOWS
                 executor.DoForceReload == false &&
 #endif
-                D.autosavescript() && Kb.anyKeyWasPressed()) {
+                D.autosavescript() && Kb.anyKeyWasPressed(Kb.KeyState::RELEASED)) {
                 CE.overwrite();
             }
 #if WINDOWS

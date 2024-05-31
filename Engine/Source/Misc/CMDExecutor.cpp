@@ -104,9 +104,6 @@ bool CmdExecutor::executeCommand(const std::string &command) {
 
 void CmdExecutor::processCommands() {
 #if WINDOWS
-    // Create a thread to read continuously from the child process output
-    std::thread outputThread(&CmdExecutor::readOutput, this);
-
     while (true) {
         std::string command;
         {
@@ -144,43 +141,6 @@ void CmdExecutor::processCommands() {
 
     // Join the output thread before exiting
     DoForceReload = false;
-    outputThread.join();
-#endif
-}
-
-void CmdExecutor::readOutput() {
-#if WINDOWS
-    std::string output;
-    char buffer[4096];
-    DWORD bytesRead;
-    BOOL result;
-
-    // Read the command output until there is no more data
-    do {
-        result = ReadFile(childStdOutRd, buffer, sizeof(buffer) - 1, &bytesRead, NULL);
-        if (result && bytesRead > 0) {
-            buffer[bytesRead] = '\0'; // Null-terminate the string
-            // Append the buffer to output
-            output.append(buffer, bytesRead);
-
-            // Check if the output contains a complete command response
-            size_t pos;
-            while ((pos = output.find("\r\n")) != std::string::npos) {
-                std::string commandOutput = output.substr(0, pos);
-                // Log the command output
-                if (!commandOutput.empty()) {
-                    // Remove trailing '\r' and '\n' characters
-                    commandOutput.erase(std::remove(commandOutput.begin(), commandOutput.end(), '\r'), commandOutput.end());
-                    commandOutput.erase(std::remove(commandOutput.begin(), commandOutput.end(), '\n'), commandOutput.end());
-
-                    LoggerThread::GetLoggerThread().logMessageAsync(
-                        LogLevel::INFO, __FILE__, __LINE__, "Command output: " + commandOutput);
-                }
-                // Erase the processed output from the buffer
-                output.erase(0, pos + 2);
-            }
-        }
-    } while (result && bytesRead > 0);
 #endif
 }
 

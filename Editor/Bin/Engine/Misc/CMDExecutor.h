@@ -30,7 +30,6 @@ class CmdExecutor {
     ~CmdExecutor();
 
     void processCommands();
-    void readOutput();
 
     std::queue<std::string> commandQueue;
     std::mutex commandMutex;

@@ -36,6 +36,8 @@ class CmdExecutor {
     std::queue<std::string> commandQueue;
     std::thread cmdThread;
     std::condition_variable commandCv;
+
+    Bool isCommandExecuting;
 };
 
 } // namespace Edit

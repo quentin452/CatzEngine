@@ -13,7 +13,7 @@ PROCESS_INFORMATION pi = {};
 
 #endif
 
-CmdExecutor::CmdExecutor() {
+CmdExecutor::CmdExecutor() : isCommandExecuting(false) {
 #if WINDOWS
     // Setup security attributes for pipes
     SECURITY_ATTRIBUTES sa;
@@ -79,7 +79,6 @@ CmdExecutor::CmdExecutor() {
         LoggerThread::GetLoggerThread().logMessageAsync(
             LogLevel::ERRORING, __FILE__, __LINE__, "Error: Failed to create process. Error code: " + std::to_string(errorCode));
     }
-
     // Start the processCommands thread
     cmdThread = std::thread(&CmdExecutor::processCommands, this);
 #endif
@@ -93,6 +92,11 @@ CmdExecutor::~CmdExecutor() {
 
 Bool CmdExecutor::executeCommand(C std::string &command) {
 #if WINDOWS
+    if (isCommandExecuting) {
+        LoggerThread::GetLoggerThread().logMessageAsync(
+            LogLevel::INFO, __FILE__, __LINE__, "Command execution is already in progress.");
+        return false;
+    }
     {
         std::lock_guard<std::mutex> lock(commandMutex);
         commandQueue.push(command);
@@ -131,51 +135,64 @@ void CmdExecutor::processCommands() {
         {
             std::unique_lock<std::mutex> lock(commandMutex);
             if (commandQueue.empty()) {
-                // Wait for new commands to be added to the queue
+                LoggerThread::GetLoggerThread().logMessageAsync(
+                    LogLevel::INFO, __FILE__, __LINE__, "Command queue is empty. Waiting for new commands.");
                 commandCv.wait(lock, [this] { return !commandQueue.empty(); });
             }
+            isCommandExecuting = true;
             command = std::move(commandQueue.front());
             commandQueue.pop();
+            LoggerThread::GetLoggerThread().logMessageAsync(
+                LogLevel::INFO, __FILE__, __LINE__, "Command dequeued: " + command);
         }
 
         if (command == "exit") {
+            LoggerThread::GetLoggerThread().logMessageAsync(
+                LogLevel::INFO, __FILE__, __LINE__, "Exit command received. Breaking the loop.");
             break;
         }
+        try {
+            // Write the command to the pipe
+            DWORD written;
+            std::string fullCommand = command + "\r\n";
+            if (!WriteFile(childStdInWr, fullCommand.c_str(), static_cast<DWORD>(fullCommand.size()), &written, NULL)) {
+                LoggerThread::GetLoggerThread().logMessageAsync(
+                    LogLevel::ERRORING, __FILE__, __LINE__, "Error: Failed to write command to pipe.");
+                // Log the command that failed to be written
+                LoggerThread::GetLoggerThread().logMessageAsync(
+                    LogLevel::ERRORING, __FILE__, __LINE__, "Failed command: " + command);
+                continue; // Skip to the next command if writing fails
+            } else {
+                // Log that the command was successfully written
+                LoggerThread::GetLoggerThread().logMessageAsync(
+                    LogLevel::INFO, __FILE__, __LINE__, "Command written to pipe: " + command);
+            }
 
-        // Check if the process is still running
-        DWORD exitCode;
-        if (!GetExitCodeProcess(pi.hProcess, &exitCode)) {
+            // Flush the pipe to ensure command is sent
+            FlushFileBuffers(childStdInWr);
             LoggerThread::GetLoggerThread().logMessageAsync(
-                LogLevel::ERRORING, __FILE__, __LINE__, "Error: Failed to get exit code of process.");
-            continue;
-        }
-        if (exitCode != STILL_ACTIVE) {
-            LoggerThread::GetLoggerThread().logMessageAsync(
-                LogLevel::ERRORING, __FILE__, __LINE__, "Error: Process is no longer running.");
-            break;
-        }
+                LogLevel::INFO, __FILE__, __LINE__, "Pipe flushed after writing command.");
 
-        // Write the command to the pipe
-        DWORD written;
-        std::string fullCommand = command + "\r\n";
-        if (!WriteFile(childStdInWr, fullCommand.c_str(), static_cast<DWORD>(fullCommand.size()), &written, NULL)) {
-            LoggerThread::GetLoggerThread().logMessageAsync(
-                LogLevel::ERRORING, __FILE__, __LINE__, "Error: Failed to write command to pipe.");
-            // Log the command that failed to be written
-            LoggerThread::GetLoggerThread().logMessageAsync(
-                LogLevel::ERRORING, __FILE__, __LINE__, "Failed command: " + command);
-            continue; // Skip to the next command if writing fails
-        } else {
-            // Log that the command was successfully written
-            LoggerThread::GetLoggerThread().logMessageAsync(
-                LogLevel::INFO, __FILE__, __LINE__, "Command written to pipe: " + command);
+            // Attendre que le processus se termine
+            DWORD exitCode;
+            if (!GetExitCodeProcess(pi.hProcess, &exitCode)) {
+                LoggerThread::GetLoggerThread().logMessageAsync(
+                    LogLevel::ERRORING, __FILE__, __LINE__, "Error: Failed to get exit code of process.");
+                continue;
+            }
+            if (exitCode != STILL_ACTIVE) {
+                LoggerThread::GetLoggerThread().logMessageAsync(
+                    LogLevel::ERRORING, __FILE__, __LINE__, "Error: Process is no longer running.");
+                break;
+            }
+
+        } catch (...) {
+            isCommandExecuting = false;
+            throw;
         }
-        // Flush the pipe to ensure command is sent
-        FlushFileBuffers(childStdInWr);
     }
 #endif
 }
-
 void CmdExecutor::stopCmdProcess() {
 #if WINDOWS
     if (pi.hProcess) {

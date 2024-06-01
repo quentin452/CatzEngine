@@ -837,27 +837,33 @@ std::string getCurrentlyOpenedFile() {
     return "";
 }
 Bool CodeEditor::formatfileswithclang() {
-    if (cur()->Const) { //  Do not format Read Only Codes
+    if (cur()->Const) { // Do not format Read Only Codes
+        LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Code is read-only, skipping formatting.");
         return false;
     }
     if (CE.clang_format_path == "") {
+        LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::ERRORING, __FILE__, __LINE__, "Clang Format Was Not Found.");
         Gui.msgBox("Error", "Clang Format Was Not Found.");
         return false;
     }
     std::string path;
     path = getCurrentlyOpenedFile();
     if (path == "") {
+        LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::ERRORING, __FILE__, __LINE__, "Failed to find source file.");
         Gui.msgBox("Error", "Failed to find source file.");
         return false;
     }
-    std::string command_line = "\"" + std::string(CE.clang_format_path.toCString()) + clang_format_exe + "\" -style=file -i \"" + path + "\"";
+    std::string command_line = "\"" + std::string(CE.clang_format_path.toCString()) + clang_format_exe + "\" -style=file i \"" + path + "\"";
+    LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Executing command: " + command_line);
     auto &executor = CmdExecutor::GetInstance();
     if (!executor.executeCommand(command_line)) {
+        LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::ERRORING, __FILE__, __LINE__, "Failed to execute command.");
         Gui.msgBox("Error", "Failed to execute command.");
         return false;
     }
     return true;
 }
+
 #endif
 /******************************************************************************/
 void CodeEditor::setMenu(Node<MenuElm> &menu) {

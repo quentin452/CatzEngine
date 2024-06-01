@@ -853,7 +853,7 @@ Bool CodeEditor::formatfileswithclang() {
         Gui.msgBox("Error", "Failed to find source file.");
         return false;
     }
-    std::string command_line = "\"" + std::string(CE.clang_format_path.toCString()) + clang_format_exe + "\" -style=file i \"" + path + "\"";
+    std::string command_line = "\"" + std::string(CE.clang_format_path.toCString()) + clang_format_exe + "\" -style=file -i \"" + path + "\"";
     LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Executing command: " + command_line);
     auto &executor = CmdExecutor::GetInstance();
     if (!executor.executeCommand(command_line)) {

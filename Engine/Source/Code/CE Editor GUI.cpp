@@ -726,7 +726,7 @@ void CodeEditor::Options::create(CodeEditor &ce) {
         };
 
     T.ce = &ce;
-    Gui += super::create(Rect_C(0, 0, 1.2f, 0.954f), "Editor Options").hide();
+    Gui += super::create(Rect_C(0, 0, 1.2f, 1.2f), "Editor Options").hide();
     button[2].show();
     CChar8 *tabs_t[] = {"Code Editor", "Paths", "Certificates", "Importing"};
     Flt Y = -0.05f;
@@ -752,11 +752,11 @@ void CodeEditor::Options::create(CodeEditor &ce) {
         tab += save_during_write.create(Rect_C(clientWidth() / 2, y, w, h), "Auto Save during Writing(Dangerous)");
         save_during_write.mode = BUTTON_TOGGLE;
         y -= s;
-        #if WINDOWS // TODO SUPPORT MORE OS
+#if WINDOWS // TODO SUPPORT MORE OS
         tab += clang_format_during_save.create(Rect_C(clientWidth() / 2, y, w, h), "Format With Clang during Saving(Dangerous)");
         clang_format_during_save.mode = BUTTON_TOGGLE;
         y -= s;
-        #endif
+#endif
         tab += simple.create(Rect_C(clientWidth() / 2, y, w, h), "Simple Edit Mode").desc("Editing text will not perform any additional helper operations.");
         simple.mode = BUTTON_TOGGLE;
         y -= s;

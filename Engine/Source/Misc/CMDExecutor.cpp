@@ -171,7 +171,7 @@ void CmdExecutor::processCommands() {
                 LogLevel::INFO, __FILE__, __LINE__, "Command written to pipe: " + command);
         }
         // Flush the pipe to ensure command is sent
-        // FlushFileBuffers(childStdInWr);
+        FlushFileBuffers(childStdInWr);
     }
 #endif
 }

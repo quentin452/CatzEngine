@@ -120,6 +120,19 @@ void CmdExecutor::processCommands() {
             break;
         }
 
+        // Check if the process is still running
+        DWORD exitCode;
+        if (!GetExitCodeProcess(pi.hProcess, &exitCode)) {
+            LoggerThread::GetLoggerThread().logMessageAsync(
+                LogLevel::ERRORING, __FILE__, __LINE__, "Error: Failed to get exit code of process.");
+            continue;
+        }
+        if (exitCode != STILL_ACTIVE) {
+            LoggerThread::GetLoggerThread().logMessageAsync(
+                LogLevel::ERRORING, __FILE__, __LINE__, "Error: Process is no longer running.");
+            break;
+        }
+
         // Write the command to the pipe
         DWORD written;
         std::string fullCommand = command + "\r\n";
@@ -139,8 +152,7 @@ void CmdExecutor::processCommands() {
         FlushFileBuffers(childStdInWr);
     }
 
-    // Join the output thread before exiting
-    DoForceReload = false;
+    DoForceReload.store(false);
 #endif
 }
 

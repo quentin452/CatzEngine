@@ -558,9 +558,9 @@ void VideoOptions::create() {
     props.New().create("Eye Adaptation", MemberDesc(DATA_BOOL).setFunc(EyeAdapt, EyeAdapt)).desc("Enables automatic screen brightness adjustment");
     // if(D.shaderModel()>=SM_5)props.New().create("Tesselation", MemberDesc(DATA_BOOL).setFunc(Tesselation, Tesselation))                                  ;
     props.New().create("Auto Save Script(DANGEROUS BETA)", MemberDesc(DATA_BOOL).setFunc(ScriptSave, ScriptSave)).desc("Auto Save (Currently loaded) Script every time you click on a key");
-    #if WINDOWS // TODO SUPPORT MORE OS
+#if WINDOWS // TODO SUPPORT MORE OS
     props.New().create("Clang Format(DANGEROUS BETA)", MemberDesc(DATA_BOOL).setFunc(ClangFormat, ClangFormat)).desc("Format Files with Clang Format when script saving with CTRL+S");
-    #endif
+#endif
     props.New().create("Gui Scale", MemberDesc(DATA_REAL).setFunc(Scale, Scale)).mouseEditSpeed(0.5f)
 #if MOBILE
         .range(0.9f, 3.0f);

@@ -22,8 +22,7 @@ class CmdExecutor {
     CmdExecutor(CmdExecutor const &) = delete;
     void operator=(CmdExecutor const &) = delete;
 
-    Bool DoForceReload = false;
-    std::mutex forceReloadMutex;
+    std::atomic<bool> DoForceReload;
 
   private:
     CmdExecutor();

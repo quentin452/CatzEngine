@@ -1689,40 +1689,24 @@ void CodeEditor::update(Bool active) {
         auto &executor = EE::Edit::CmdExecutor::GetInstance();
         {
             if (D.clangformat() && Kb.b(KB_LCTRL) && Kb.b(KB_S)) {
-                {
-                    std::lock_guard<std::mutex> lock(executor.forceReloadMutex);
-                    executor.DoForceReload = true;
-                }
+                executor.DoForceReload.store(true);
                 std::vector<size_t> sourcesToReload;
                 if (!cur()->Const) { //  Do not format Read Only Codes
                     CE.formatfileswithclang();
-                }
-            }
-            {
-                std::lock_guard<std::mutex> lock(executor.forceReloadMutex);
-                if (executor.DoForceReload == true) {
                     cur()->forcereload();
-                    executor.DoForceReload = false;
                 }
             }
         }
 #endif
 
-// Auto Save Script if key is pressed
+        // Auto Save Script if key is pressed
+        if (
 #if WINDOWS
-        {
-            std::lock_guard<std::mutex> lock(executor.forceReloadMutex);
+            !executor.DoForceReload.load() &&
 #endif
-            if (
-#if WINDOWS
-                executor.DoForceReload == false &&
-#endif
-                !Kb.bp(KB_LCTRL) && D.autosavescript() && Kb.anyKeyWasPressed(Kb.KeyState::DOWN)) {
-                CE.overwrite();
-            }
-#if WINDOWS
+            !Kb.bp(KB_LCTRL) && D.autosavescript() && Kb.anyKeyWasPressed(Kb.KeyState::DOWN)) {
+            CE.overwrite();
         }
-#endif
         if (Gui.kb() == &build_list)
             if (cur())
                 cur()->activate();

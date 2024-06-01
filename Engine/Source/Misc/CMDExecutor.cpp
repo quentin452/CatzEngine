@@ -151,8 +151,6 @@ void CmdExecutor::processCommands() {
         // Flush the pipe to ensure command is sent
         FlushFileBuffers(childStdInWr);
     }
-
-    DoForceReload.store(false);
 #endif
 }
 

@@ -22,8 +22,6 @@ class CmdExecutor {
     CmdExecutor(CmdExecutor const &) = delete;
     void operator=(CmdExecutor const &) = delete;
 
-    std::atomic<bool> DoForceReload;
-
   private:
     CmdExecutor();
     ~CmdExecutor();

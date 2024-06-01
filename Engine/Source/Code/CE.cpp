@@ -1689,8 +1689,6 @@ void CodeEditor::update(Bool active) {
         auto &executor = EE::Edit::CmdExecutor::GetInstance();
         {
             if (D.clangformat() && Kb.b(KB_LCTRL) && Kb.b(KB_S)) {
-                executor.DoForceReload.store(true);
-                std::vector<size_t> sourcesToReload;
                 if (!cur()->Const) { //  Do not format Read Only Codes
                     CE.formatfileswithclang();
                     cur()->forcereload();
@@ -1701,9 +1699,6 @@ void CodeEditor::update(Bool active) {
 
         // Auto Save Script if key is pressed
         if (
-#if WINDOWS
-            !executor.DoForceReload.load() &&
-#endif
             !Kb.bp(KB_LCTRL) && D.autosavescript() && Kb.anyKeyWasPressed(Kb.KeyState::DOWN)) {
             CE.overwrite();
         }

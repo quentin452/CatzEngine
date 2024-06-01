@@ -115,3 +115,4 @@ Editor/Bin/EngineUniversal64DX11.lib
 Editor/Bin/Engine64DX11.lib
 compile_commands.json
 Editor/Bin/Store.dat
+/Editor Data/Code/Android/.gradle

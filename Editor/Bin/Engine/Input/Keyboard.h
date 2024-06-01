@@ -80,9 +80,13 @@ struct KeyboardClass // Keyboard Input
                     FIRST_PRESS,
                     DOUBLE_CLICKED };
 
-    bool anyKeyWasPressed(KeyState state) C {
+    Bool anyKeyWasPressed(KeyState state, C std::unordered_map<KB_KEY, bool> &blacklist) C {
         // Iterate over the range of KB_KEY values and check if any button is in the specified state
         for (int i = KB_NONE; i <= KB_ZOOM_OUT; ++i) {
+            // If the key is in the blacklist, skip it
+            if (blacklist.find((KB_KEY)i) != blacklist.end() && blacklist.at((KB_KEY)i))
+                continue;
+
             switch (state) {
             case DOUBLE_CLICKED:
                 if (Kb.bd((KB_KEY)i))
@@ -99,6 +103,7 @@ struct KeyboardClass // Keyboard Input
             case DOWN:
                 if (Kb.b((KB_KEY)i))
                     return true;
+                break;
             case FIRST_PRESS:
                 if (Kb.kf((KB_KEY)i))
                     return true;

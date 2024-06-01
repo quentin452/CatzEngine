@@ -624,11 +624,14 @@ Memc<Str> GetFiles(C Str &files) {
 // MENU
 /******************************************************************************/
 static void MenuNew() { CE.New(); }
-static void MenuOverwrite() {
-    if (D.clangformat()) {
+static void MenuOverwrite(Bool ClangFormating = false) {
+    if (ClangFormating == true && D.clangformat()) {
         CE.formatfileswithclang();
     }
     CE.overwrite();
+}
+static void MenuOverwriteWrapper() {
+    MenuOverwrite(true);
 }
 static void MenuSave() { CE.save(); }
 static void MenuLoad() { CE.load(); }
@@ -853,7 +856,6 @@ Bool CodeEditor::formatfileswithclang() {
         Gui.msgBox("Error", "Failed to execute command.");
         return false;
     }
-    cur()->forcereload();
     return true;
 }
 #endif
@@ -864,7 +866,8 @@ void CodeEditor::setMenu(Node<MenuElm> &menu) {
             Node<MenuElm> &f = (menu += "File");
             /*f.New().create("New"      , MenuNew      ).kbsc(KbSc(KB_N, KBSC_CTRL_CMD));
               f++;*/
-            f.New().create("Save", MenuOverwrite).kbsc(KbSc(KB_F2)).kbsc1(KbSc(KB_S, KBSC_CTRL_CMD));
+            f.New().create("Save", MenuOverwriteWrapper).kbsc(KbSc(KB_F2)).kbsc1(KbSc(KB_S, KBSC_CTRL_CMD));
+
             /*f.New().create("Save"     , MenuSave     ).kbsc(KbSc(KB_F2, KBSC_CTRL_CMD)).kbsc1(KbSc(KB_S, KBSC_CTRL_CMD|KBSC_SHIFT));
               f++;
               f.New().create("Load"     , MenuLoad     ).kbsc(KbSc(KB_F3                      )).kbsc1(KbSc(KB_O, KBSC_CTRL_CMD));*/
@@ -1691,16 +1694,18 @@ static Str FindPath(C Str &registry, C Str &sub_path) {
     }
     return S;
 }
-
+std::unordered_map<KB_KEY, bool> key_blacklist_for_auto_save = {
+    {KB_LCTRL, true},
+    {KB_S, true}};
 void CodeEditor::update(Bool active) {
     if (active) {
         // Auto Save Script if key is pressed
-        if (
-#if WINDOWS
-            !D.clangformat() &&
-#endif
-            D.autosavescript() && Kb.anyKeyWasPressed(Kb.KeyState::DOWN)) {
-            CE.overwrite();
+        auto &executor = EE::Edit::CmdExecutor::GetInstance();
+        {
+            std::lock_guard<std::mutex> lock(executor.commandMutex);
+            if (executor.isCmdIdle() && D.autosavescript() && Kb.anyKeyWasPressed(Kb.KeyState::DOWN, key_blacklist_for_auto_save)) {
+                MenuOverwrite(false);
+            }
         }
         if (Gui.kb() == &build_list)
             if (cur())

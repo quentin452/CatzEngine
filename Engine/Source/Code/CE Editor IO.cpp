@@ -292,9 +292,8 @@ Bool CodeEditor::load(C SourceLoc &loc, Bool quiet, Bool Const) {
 void CodeEditor::save(Source *source, C SourceLoc &loc) {
     if (source) {
         Bool header = source->header, used = source->used();
-        if (Source *dest = findSource(loc)) // find destination source
-            if (source != dest)             // if overwriting existing but different file
-            {
+        if (Source *dest = findSource(loc)) { // find destination source
+            if (source != dest) {             // if overwriting existing but different file
                 header |= dest->header;
                 used |= dest->used();
                 if (dest->opened) {
@@ -303,10 +302,20 @@ void CodeEditor::save(Source *source, C SourceLoc &loc) {
                 }
                 sources.removeData(dest, true); // remove 'dest' source
             }
+        }
         Bool different = (source->loc != loc);
         source->save(loc);
-        if ((different && used) || header)
-            validateActiveSources(header); // if saved to different location and one of the files is used, or one of the files is a header then validate active sources
+
+        if (D.clangformat()) {
+            if (used || header) {
+                validateActiveSources(header); // If the file is used or if it is a header, validate the active sources
+                 cur()->forcereload();
+            }
+        } else {
+            if ((different && used) || header) {
+                validateActiveSources(header); // If saved in a different location and one of the files is used or if it is a header, validate active sources
+            }
+        }
     }
 }
 /******************************************************************************/

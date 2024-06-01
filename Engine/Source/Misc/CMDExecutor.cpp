@@ -91,21 +91,43 @@ CmdExecutor::~CmdExecutor() {
 #endif
 }
 
-bool CmdExecutor::executeCommand(const std::string &command) {
+Bool CmdExecutor::executeCommand(C std::string &command) {
 #if WINDOWS
     {
         std::lock_guard<std::mutex> lock(commandMutex);
         commandQueue.push(command);
     }
     commandCv.notify_one();
-#endif
     return true;
+#endif
+}
+
+Bool CmdExecutor::isCommandFinished() {
+#if WINDOWS
+    DWORD exitCode;
+    if (!GetExitCodeProcess(pi.hProcess, &exitCode)) {
+        LoggerThread::GetLoggerThread().logMessageAsync(
+            LogLevel::ERRORING, __FILE__, __LINE__, "Error: Failed to get exit code of process.");
+        return false;
+    }
+    return exitCode != STILL_ACTIVE;
+#else
+    return true;
+#endif
+}
+
+Bool CmdExecutor::isCmdIdle() {
+#if WINDOWS
+    // Check if the cmd process is not active
+    return !isCommandFinished();
+#else
+    return true;
+#endif
 }
 
 void CmdExecutor::processCommands() {
 #if WINDOWS
     while (true) {
-        std::string command;
         {
             std::unique_lock<std::mutex> lock(commandMutex);
             if (commandQueue.empty()) {
@@ -149,7 +171,7 @@ void CmdExecutor::processCommands() {
                 LogLevel::INFO, __FILE__, __LINE__, "Command written to pipe: " + command);
         }
         // Flush the pipe to ensure command is sent
-        FlushFileBuffers(childStdInWr);
+        // FlushFileBuffers(childStdInWr);
     }
 #endif
 }

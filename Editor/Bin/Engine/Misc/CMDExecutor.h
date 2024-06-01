@@ -15,12 +15,16 @@ class CmdExecutor {
         return instance;
     }
 
-    bool executeCommand(const std::string &command);
+    Bool executeCommand(C std::string &command);
+    Bool isCommandFinished();
+    Bool isCmdIdle();
     void stopCmdProcess();
 
     // Delete copy and move constructors, assignment operators
-    CmdExecutor(CmdExecutor const &) = delete;
-    void operator=(CmdExecutor const &) = delete;
+    CmdExecutor(CmdExecutor C &) = delete;
+    void operator=(CmdExecutor C &) = delete;
+
+    std::mutex commandMutex;
 
   private:
     CmdExecutor();
@@ -28,8 +32,8 @@ class CmdExecutor {
 
     void processCommands();
 
+    std::string command;
     std::queue<std::string> commandQueue;
-    std::mutex commandMutex;
     std::thread cmdThread;
     std::condition_variable commandCv;
 };

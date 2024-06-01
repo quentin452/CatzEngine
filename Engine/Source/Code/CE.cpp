@@ -625,7 +625,7 @@ Memc<Str> GetFiles(C Str &files) {
 /******************************************************************************/
 static void MenuNew() { CE.New(); }
 static void MenuOverwrite(Bool ClangFormating = false) {
-    if (ClangFormating == true && D.clangformat()) {
+    if (ClangFormating == true && CE.options.clang_format_during_save()) {
         CE.formatfileswithclang();
     }
     CE.overwrite();
@@ -1703,7 +1703,7 @@ void CodeEditor::update(Bool active) {
         auto &executor = EE::Edit::CmdExecutor::GetInstance();
         {
             std::lock_guard<std::mutex> lock(executor.commandMutex);
-            if (executor.isCmdIdle() && D.autosavescript() && Kb.anyKeyWasPressed(Kb.KeyState::DOWN, key_blacklist_for_auto_save)) {
+            if (executor.isCmdIdle() && CE.options.save_during_write() && Kb.anyKeyWasPressed(Kb.KeyState::DOWN, key_blacklist_for_auto_save)) {
                 MenuOverwrite(false);
             }
         }

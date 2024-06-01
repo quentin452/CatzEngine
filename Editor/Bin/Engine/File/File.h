@@ -422,8 +422,6 @@ struct File {
 
     Bool copyToAndDiscard(Mems<Byte> &dest); // copy remaining contents of this file to 'dest' and discard this file data after, false on fail
     Bool sync();
-    Bool autosavescript();
-    Bool clangformat();
     Bool flushDo();
     void clearBuf();
     Bool discardBuf(Bool flush);

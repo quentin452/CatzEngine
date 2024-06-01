@@ -115,6 +115,10 @@ void CodeEditor::saveSettings(TextNode &code) {
 
     TextNode &edit = code.nodes.New().setName("Edit");
     edit.nodes.New().set("AutocompleteOnEnterOnly", options.ac_on_enter());
+    #if WINDOWS // TODO SUPPORT MORE OS
+    edit.nodes.New().set("FormatWithClangOnSave", options.clang_format_during_save());
+    #endif
+    edit.nodes.New().set("AutoSaveDuringWriting", options.save_during_write());
     edit.nodes.New().set("SimpleMode", options.simple());
     edit.nodes.New().set("ImmediateScroll", options.imm_scroll());
     edit.nodes.New().set("EndOfLineClip", options.eol_clip());
@@ -169,6 +173,10 @@ void CodeEditor::loadSettings(C TextNode &code) {
     {
         if (C TextNode *p = edit->findNode("AutocompleteOnEnterOnly"))
             options.ac_on_enter.set(p->asBool1());
+        if (C TextNode *p = edit->findNode("FormatWithClangOnSave"))
+            options.clang_format_during_save.set(p->asBool1());
+        if (C TextNode *p = edit->findNode("AutoSaveDuringWriting"))
+            options.save_during_write.set(p->asBool1());
         if (C TextNode *p = edit->findNode("SimpleMode"))
             options.simple.set(p->asBool1());
         if (C TextNode *p = edit->findNode("ImmediateScroll"))
@@ -306,10 +314,10 @@ void CodeEditor::save(Source *source, C SourceLoc &loc) {
         Bool different = (source->loc != loc);
         source->save(loc);
 
-        if (D.clangformat()) {
+        if (CE.options.clang_format_during_save()) {
             if (used || header) {
                 validateActiveSources(header); // If the file is used or if it is a header, validate the active sources
-                 cur()->forcereload();
+                cur()->forcereload();
             }
         } else {
             if ((different && used) || header) {

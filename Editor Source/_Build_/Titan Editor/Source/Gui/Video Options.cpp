@@ -437,10 +437,6 @@ Str VideoOptions::Full(C VideoOptions &vo) { return D.full(); }
 void VideoOptions::Full(VideoOptions &vo, C Str &t) { D.full(TextBool(t)); }
 Str VideoOptions::Sync(C VideoOptions &vo) { return D.sync(); }
 void VideoOptions::Sync(VideoOptions &vo, C Str &t) { D.sync(TextBool(t)); }
-Str VideoOptions::ScriptSave(C VideoOptions &vo) { return D.autosavescript(); }
-void VideoOptions::ScriptSave(VideoOptions &vo, C Str &t) { D.autosavescript(TextBool(t)); }
-Str VideoOptions::ClangFormat(C VideoOptions &vo) { return D.clangformat(); }
-void VideoOptions::ClangFormat(VideoOptions &vo, C Str &t) { D.clangformat(TextBool(t)); }
 Str VideoOptions::Render(C VideoOptions &vo) { return Renderer.type(); }
 void VideoOptions::Render(VideoOptions &vo, C Str &t) {
     Renderer.type(RENDER_TYPE(TextInt(t)));
@@ -557,10 +553,6 @@ void VideoOptions::create() {
     props.New().create("Ambient Occlusion", MemberDesc().setFunc(AO, AO)).setEnum(AO_t, Elms(AO_t)).desc("Darkens occluded areas");
     props.New().create("Eye Adaptation", MemberDesc(DATA_BOOL).setFunc(EyeAdapt, EyeAdapt)).desc("Enables automatic screen brightness adjustment");
     // if(D.shaderModel()>=SM_5)props.New().create("Tesselation", MemberDesc(DATA_BOOL).setFunc(Tesselation, Tesselation))                                  ;
-    props.New().create("Auto Save Script(DANGEROUS BETA)", MemberDesc(DATA_BOOL).setFunc(ScriptSave, ScriptSave)).desc("Auto Save (Currently loaded) Script every time you click on a key");
-#if WINDOWS // TODO SUPPORT MORE OS
-    props.New().create("Clang Format On Save(DANGEROUS BETA)", MemberDesc(DATA_BOOL).setFunc(ClangFormat, ClangFormat)).desc("Format Files with Clang Format when script saving with CTRL+S");
-#endif
     props.New().create("Gui Scale", MemberDesc(DATA_REAL).setFunc(Scale, Scale)).mouseEditSpeed(0.5f)
 #if MOBILE
         .range(0.9f, 3.0f);

@@ -1699,40 +1699,6 @@ Bool File::sync() {
     }
     return true;
 }
-Bool File::autosavescript() {
-    if (_writable && (_type == FILE_STD_WRITE || _type == FILE_STD_READ)) // check 'FILE_STD_READ' too, because we may have written data previously in FILE_STD_WRITE, and later switched to FILE_STD_READ
-    {
-#if WINDOWS
-#if 1 // faster
-        return FlushFileBuffers((HANDLE)_get_osfhandle(_handle));
-#else // internally calls 'FlushFileBuffers' which means this has bigger overhead
-        return _commit(_handle) == 0;
-#endif
-#elif SWITCH
-        return true; // return true because this is required by SQLite
-#else
-        return autosavescript(_handle) == 0;
-#endif
-    }
-    return true;
-}
-Bool File::clangformat() {
-    if (_writable && (_type == FILE_STD_WRITE || _type == FILE_STD_READ)) // check 'FILE_STD_READ' too, because we may have written data previously in FILE_STD_WRITE, and later switched to FILE_STD_READ
-    {
-#if WINDOWS
-#if 1 // faster
-        return FlushFileBuffers((HANDLE)_get_osfhandle(_handle));
-#else // internally calls 'FlushFileBuffers' which means this has bigger overhead
-        return _commit(_handle) == 0;
-#endif
-#elif SWITCH
-        return true; // return true because this is required by SQLite
-#else
-        return clangformat(_handle) == 0;
-#endif
-    }
-    return true;
-}
 /******************************************************************************/
 void File::cipher(Cipher *cipher) {
     if (T._cipher != cipher) {

@@ -749,6 +749,14 @@ void CodeEditor::Options::create(CodeEditor &ce) {
         tab += ac_on_enter.create(Rect_C(clientWidth() / 2, y, w, h), "Autocomplete on Enter only");
         ac_on_enter.mode = BUTTON_TOGGLE;
         y -= s;
+        tab += save_during_write.create(Rect_C(clientWidth() / 2, y, w, h), "Auto Save during Writing");
+        save_during_write.mode = BUTTON_TOGGLE;
+        y -= s;
+        #if WINDOWS // TODO SUPPORT MORE OS
+        tab += clang_format_during_save.create(Rect_C(clientWidth() / 2, y, w, h), "Format With Clang during Saving");
+        clang_format_during_save.mode = BUTTON_TOGGLE;
+        y -= s;
+        #endif
         tab += simple.create(Rect_C(clientWidth() / 2, y, w, h), "Simple Edit Mode").desc("Editing text will not perform any additional helper operations.");
         simple.mode = BUTTON_TOGGLE;
         y -= s;

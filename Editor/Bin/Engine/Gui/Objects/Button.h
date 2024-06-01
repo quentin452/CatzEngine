@@ -8,6 +8,7 @@ enum BUTTON_MODE : Byte // Button Mode
     BUTTON_CONTINUOUS, // callback function gets called every frame while the pointer is enabled  on the button
     BUTTON_TOGGLE,     // callback function gets called when                  pointer is pushed   on the button which toggles its state (enabled <-> disabled)
     BUTTON_IMMEDIATE,  // callback function gets called when                  pointer is pushed   on the button
+    BUTTON_LABEL,      // do nothing ,only display infos
 };
 enum BUTTON_TYPE : Byte // Button Type
 {
@@ -57,7 +58,7 @@ const_mem_addr struct Button : GuiObj // Gui Button !! must be stored in constan
     Button &create(C Rect &rect, C Str &text = S) {
         create(text).rect(rect);
         return T;
-    }                              // create and set rectangle
+    } // create and set rectangle
     Button &create(C Button &src); // create from 'src'
 
     // get / set

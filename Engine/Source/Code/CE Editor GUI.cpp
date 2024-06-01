@@ -726,7 +726,7 @@ void CodeEditor::Options::create(CodeEditor &ce) {
         };
 
     T.ce = &ce;
-    Gui += super::create(Rect_C(0, 0, 1.2f, 1.2f), "Editor Options").hide();
+    Gui += super::create(Rect_C(0, 0, 1.4f, 1.2f), "Editor Options").hide();
     button[2].show();
     CChar8 *tabs_t[] = {"Code Editor", "Paths", "Certificates", "Importing"};
     Flt Y = -0.05f;
@@ -749,12 +749,16 @@ void CodeEditor::Options::create(CodeEditor &ce) {
         tab += ac_on_enter.create(Rect_C(clientWidth() / 2, y, w, h), "Autocomplete on Enter only");
         ac_on_enter.mode = BUTTON_TOGGLE;
         y -= s;
-        tab += save_during_write.create(Rect_C(clientWidth() / 2, y, w, h), "Auto Save during Writing(Dangerous)");
+        tab += save_during_write.create(Rect_C(clientWidth() / 2, y, w, h), "Auto Save During Writing");
         save_during_write.mode = BUTTON_TOGGLE;
+        tab += info_label2.create(Rect_R(clientWidth() / 2 + w / 2 + 0.35f, y, w / 2 , h), "DANGEROUS");
+        info_label2.mode = BUTTON_LABEL;
         y -= s;
 #if WINDOWS // TODO SUPPORT MORE OS
-        tab += clang_format_during_save.create(Rect_C(clientWidth() / 2, y, w, h), "Format With Clang during Saving(Dangerous)");
+        tab += clang_format_during_save.create(Rect_C(clientWidth() / 2, y, w, h), "Format Using Clang Before Saving");
         clang_format_during_save.mode = BUTTON_TOGGLE;
+        tab += info_label.create(Rect_R(clientWidth() / 2 + w / 2 + 0.35f, y, w / 2, h), "DANGEROUS");
+        info_label.mode = BUTTON_LABEL;
         y -= s;
 #endif
         tab += simple.create(Rect_C(clientWidth() / 2, y, w, h), "Simple Edit Mode").desc("Editing text will not perform any additional helper operations.");

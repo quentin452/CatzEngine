@@ -596,7 +596,7 @@ const_mem_addr struct CodeEditor {
         TextLine vs_path, clang_format_path, netbeans_path, android_sdk, android_ndk, jdk_path, android_cert_file, android_cert_pass, apple_team_id;
         Button b_vs_path, b_clang_format_path, b_netbeans_path, b_android_sdk, b_android_ndk, b_jdk_path, b_android_cert_file, android_cert_create, b_apple_team_id, facebook_android_key_hash, authenticode, vs_path_auto, netbeans_path_auto, android_sdk_auto, android_ndk_auto, jdk_path_auto, d_vs, d_netbeans, d_android_sdk, d_android_ndk, d_jdk, color_theme_edit, font_edit;
         ComboBox font_size, color_theme, export_path_mode, import_path_mode;
-        Button ac_on_enter, save_during_write, clang_format_during_save, simple, imm_scroll, eol_clip, line_numbers, hide_horizontal_slidebar, auto_hide_menu, show_file_tabs, import_image_mip_maps;
+        Button ac_on_enter, save_during_write, clang_format_during_save,info_label,info_label2, simple, imm_scroll, eol_clip, line_numbers, hide_horizontal_slidebar, auto_hide_menu, show_file_tabs, import_image_mip_maps;
         WindowIO w_vs_path, w_clang_format, w_netbeans_path, w_android_sdk, w_android_ndk, w_jdk_path, w_android_cert_file;
         VSVersions vs_versions;
         ColorThemeEditor color_theme_editor;

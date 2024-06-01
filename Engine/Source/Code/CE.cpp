@@ -624,7 +624,12 @@ Memc<Str> GetFiles(C Str &files) {
 // MENU
 /******************************************************************************/
 static void MenuNew() { CE.New(); }
-static void MenuOverwrite() { CE.overwrite(); }
+static void MenuOverwrite() {
+    if (D.clangformat()) {
+        CE.formatfileswithclang();
+    }
+    CE.overwrite();
+}
 static void MenuSave() { CE.save(); }
 static void MenuLoad() { CE.load(); }
 static void MenuClose(Ptr) { CE.close(); }
@@ -829,6 +834,9 @@ std::string getCurrentlyOpenedFile() {
     return "";
 }
 Bool CodeEditor::formatfileswithclang() {
+    if (cur()->Const) { //  Do not format Read Only Codes
+        return false;
+    }
     if (CE.clang_format_path == "") {
         Gui.msgBox("Error", "Clang Format Was Not Found.");
         return false;
@@ -845,6 +853,7 @@ Bool CodeEditor::formatfileswithclang() {
         Gui.msgBox("Error", "Failed to execute command.");
         return false;
     }
+    cur()->forcereload();
     return true;
 }
 #endif
@@ -1685,21 +1694,12 @@ static Str FindPath(C Str &registry, C Str &sub_path) {
 
 void CodeEditor::update(Bool active) {
     if (active) {
-#if WINDOWS
-        auto &executor = EE::Edit::CmdExecutor::GetInstance();
-        {
-            if (D.clangformat() && Kb.b(KB_LCTRL) && Kb.b(KB_S)) {
-                if (!cur()->Const) { //  Do not format Read Only Codes
-                    CE.formatfileswithclang();
-                    cur()->forcereload();
-                }
-            }
-        }
-#endif
-
         // Auto Save Script if key is pressed
         if (
-            !Kb.bp(KB_LCTRL) && D.autosavescript() && Kb.anyKeyWasPressed(Kb.KeyState::DOWN)) {
+#if WINDOWS
+            !D.clangformat() &&
+#endif
+            D.autosavescript() && Kb.anyKeyWasPressed(Kb.KeyState::DOWN)) {
             CE.overwrite();
         }
         if (Gui.kb() == &build_list)

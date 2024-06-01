@@ -559,7 +559,7 @@ void VideoOptions::create() {
     // if(D.shaderModel()>=SM_5)props.New().create("Tesselation", MemberDesc(DATA_BOOL).setFunc(Tesselation, Tesselation))                                  ;
     props.New().create("Auto Save Script(DANGEROUS BETA)", MemberDesc(DATA_BOOL).setFunc(ScriptSave, ScriptSave)).desc("Auto Save (Currently loaded) Script every time you click on a key");
 #if WINDOWS // TODO SUPPORT MORE OS
-    props.New().create("Clang Format(DANGEROUS BETA)", MemberDesc(DATA_BOOL).setFunc(ClangFormat, ClangFormat)).desc("Format Files with Clang Format when script saving with CTRL+S");
+    props.New().create("Clang Format On Save(DANGEROUS BETA)", MemberDesc(DATA_BOOL).setFunc(ClangFormat, ClangFormat)).desc("Format Files with Clang Format when script saving with CTRL+S");
 #endif
     props.New().create("Gui Scale", MemberDesc(DATA_REAL).setFunc(Scale, Scale)).mouseEditSpeed(0.5f)
 #if MOBILE

@@ -90,7 +90,7 @@ CmdExecutor::~CmdExecutor() {
 #endif
 }
 
-Bool CmdExecutor::executeCommand(C std::string &command) {
+Bool CmdExecutor::executeCommand(C std::string& command, bool outputEnabled) {
 #if WINDOWS
     if (isCommandExecuting) {
         LoggerThread::GetLoggerThread().logMessageAsync(
@@ -99,7 +99,7 @@ Bool CmdExecutor::executeCommand(C std::string &command) {
     }
     {
         std::lock_guard<std::mutex> lock(commandMutex);
-        commandQueue.push(command);
+        commandQueue.push(std::make_pair(command, outputEnabled));
     }
     commandCv.notify_one();
     return true;
@@ -132,27 +132,32 @@ Bool CmdExecutor::isCmdIdle() {
 void CmdExecutor::processCommands() {
 #if WINDOWS
     while (true) {
-        {
-            std::unique_lock<std::mutex> lock(commandMutex);
-            if (commandQueue.empty()) {
-                LoggerThread::GetLoggerThread().logMessageAsync(
-                    LogLevel::INFO, __FILE__, __LINE__, "Command queue is empty. Waiting for new commands.");
-                commandCv.wait(lock, [this] { return !commandQueue.empty(); });
-            }
-            isCommandExecuting = true;
-            command = std::move(commandQueue.front());
-            commandQueue.pop();
-            LoggerThread::GetLoggerThread().logMessageAsync(
-                LogLevel::INFO, __FILE__, __LINE__, "Command dequeued: " + command);
-        }
-
-        if (command == "exit") {
-            LoggerThread::GetLoggerThread().logMessageAsync(
-                LogLevel::INFO, __FILE__, __LINE__, "Exit command received. Breaking the loop.");
-            break;
-        }
         try {
-            // Write the command to the pipe
+            bool outputEnabled = false;
+            {
+                std::unique_lock<std::mutex> lock(commandMutex);
+                if (commandQueue.empty()) {
+                    LoggerThread::GetLoggerThread().logMessageAsync(
+                        LogLevel::INFO, __FILE__, __LINE__, "Command queue is empty. Waiting for new commands.");
+                    commandCv.wait(lock, [this] { return !commandQueue.empty(); });
+                }
+                if (isCommandExecuting) {
+                    continue;
+                }
+                isCommandExecuting = true;
+                std::pair<std::string, bool> commandPair = std::move(commandQueue.front());
+                commandQueue.pop();
+                command = commandPair.first;
+                bool outputEnabled = commandPair.second;
+                LoggerThread::GetLoggerThread().logMessageAsync(
+                    LogLevel::INFO, __FILE__, __LINE__, "Command dequeued: " + command);
+            }
+
+            if (command == "exit") {
+                LoggerThread::GetLoggerThread().logMessageAsync(
+                    LogLevel::INFO, __FILE__, __LINE__, "Exit command received. Breaking the loop.");
+                break;
+            } // Write the command to the pipe
             DWORD written;
             std::string fullCommand = command + "\r\n";
             if (!WriteFile(childStdInWr, fullCommand.c_str(), static_cast<DWORD>(fullCommand.size()), &written, NULL)) {
@@ -161,6 +166,7 @@ void CmdExecutor::processCommands() {
                 // Log the command that failed to be written
                 LoggerThread::GetLoggerThread().logMessageAsync(
                     LogLevel::ERRORING, __FILE__, __LINE__, "Failed command: " + command);
+                isCommandExecuting = false;
                 continue; // Skip to the next command if writing fails
             } else {
                 // Log that the command was successfully written
@@ -173,11 +179,11 @@ void CmdExecutor::processCommands() {
             LoggerThread::GetLoggerThread().logMessageAsync(
                 LogLevel::INFO, __FILE__, __LINE__, "Pipe flushed after writing command.");
 
-            // Attendre que le processus se termine
             DWORD exitCode;
             if (!GetExitCodeProcess(pi.hProcess, &exitCode)) {
                 LoggerThread::GetLoggerThread().logMessageAsync(
                     LogLevel::ERRORING, __FILE__, __LINE__, "Error: Failed to get exit code of process.");
+                isCommandExecuting = false;
                 continue;
             }
             if (exitCode != STILL_ACTIVE) {
@@ -185,7 +191,24 @@ void CmdExecutor::processCommands() {
                     LogLevel::ERRORING, __FILE__, __LINE__, "Error: Process is no longer running.");
                 break;
             }
+            DWORD bytesRead = 0;
+            BOOL success = FALSE;
+            C int BUFFER_SIZE = 4096;
+            char buffer[BUFFER_SIZE];
+            while (PeekNamedPipe(childStdOutRd, NULL, 0, NULL, &bytesRead, NULL) && bytesRead > 0) {
+                success = ReadFile(childStdOutRd, buffer, BUFFER_SIZE, &bytesRead, NULL);
+                if (!success || bytesRead == 0) {
+                    break;
+                }
 
+                if (outputEnabled) {
+                    std::string output(buffer, bytesRead);
+                    LoggerThread::GetLoggerThread().logMessageAsync(
+                        LogLevel::INFO, __FILE__, __LINE__, "Command output: " + output);
+                }
+            }
+
+            isCommandExecuting = false;
         } catch (...) {
             isCommandExecuting = false;
             throw;

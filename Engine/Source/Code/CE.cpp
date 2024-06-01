@@ -856,7 +856,7 @@ Bool CodeEditor::formatfileswithclang() {
     std::string command_line = "\"" + std::string(CE.clang_format_path.toCString()) + clang_format_exe + "\" -style=file -i \"" + path + "\"";
     LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Executing command: " + command_line);
     auto &executor = CmdExecutor::GetInstance();
-    if (!executor.executeCommand(command_line)) {
+    if (!executor.executeCommand(command_line,false)) {
         LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::ERRORING, __FILE__, __LINE__, "Failed to execute command.");
         Gui.msgBox("Error", "Failed to execute command.");
         return false;

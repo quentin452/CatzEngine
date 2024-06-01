@@ -15,7 +15,7 @@ class CmdExecutor {
         return instance;
     }
 
-    Bool executeCommand(C std::string &command);
+    Bool executeCommand(C std::string &command, bool outputEnabled = true);
     Bool isCommandFinished();
     Bool isCmdIdle();
     void stopCmdProcess();
@@ -33,7 +33,7 @@ class CmdExecutor {
     void processCommands();
 
     std::string command;
-    std::queue<std::string> commandQueue;
+    std::queue<std::pair<std::string, bool>> commandQueue;
     std::thread cmdThread;
     std::condition_variable commandCv;
 

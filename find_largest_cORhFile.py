@@ -13,7 +13,7 @@ def find_largest_files(files, n):
         size = os.path.getsize(file)
         with open(file, encoding="ISO-8859-1") as f:
             num_lines = len(f.readlines())
-        ratio = size / num_lines if num_lines > 0 else 0
+        ratio = size * num_lines / 10000 if num_lines > 0 else 0
         sizes_files.append((ratio, size, file))
     return heapq.nlargest(n, sizes_files)
 

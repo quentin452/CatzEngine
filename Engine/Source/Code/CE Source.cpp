@@ -1319,7 +1319,6 @@ void Source::reload() {
 }
 
 void Source::forcereload() {
-    delUndo();
     load(false);
 }
 

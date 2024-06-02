@@ -6,12 +6,21 @@ import logging
 # Liste des dossiers et fichiers à ignorer
 blacklist = ["ThirdPartyLibs", "CMakeFiles"]
 
+
 def find_largest_files(files, n=100):
-    sizes_files = [(os.path.getsize(file), file) for file in files]
+    sizes_files = []
+    for file in files:
+        size = os.path.getsize(file)
+        with open(file, encoding="ISO-8859-1") as f:
+            num_lines = len(f.readlines())
+        ratio = size / num_lines if num_lines > 0 else 0
+        sizes_files.append((ratio, size, file))
     return heapq.nlargest(n, sizes_files)
+
 
 def is_blacklisted(file, blacklist):
     return any(blacklisted in file for blacklisted in blacklist)
+
 
 # Récupérer le nom du script sans l'extension
 script_name = os.path.splitext(os.path.basename(__file__))[0]
@@ -36,7 +45,7 @@ directories = [
     "**/*.hxx",  # C++ header files
     "**/*.H",  # C++ header files (case sensitive)
     "**/*.inl",  # Inline include files
-    "**/*.tcc"  # Model definition files
+    "**/*.tcc",  # Model definition files
 ]
 
 all_files = []
@@ -52,17 +61,20 @@ largest_files = find_largest_files(all_files, n=100)
 # Logging des fichiers classés par taille décroissante
 logged_files = set()
 logging.info("Largest files:")
-for size, file in sorted(largest_files, reverse=True, key=lambda x: x[0]):
+for ratio, size, file in sorted(largest_files, reverse=True, key=lambda x: x[0]):
     if file not in logged_files:
         logged_files.add(file)
-        directory = next((d for d in directories if glob.fnmatch.fnmatch(file, d)), None)
+        directory = next(
+            (d for d in directories if glob.fnmatch.fnmatch(file, d)), None
+        )
         logging.info(f"Directory: {directory}")
         logging.info(f"File: {file}")
         logging.info(f"Size: {size} bytes")
         try:
-            with open(file, encoding='utf-8') as f:
+            with open(file, encoding="utf-8") as f:
                 num_lines = len(f.readlines())
             logging.info(f"Number of lines: {num_lines}")
+            logging.info(f"Size/Line ratio: {ratio}")
         except UnicodeDecodeError:
             logging.warning(f"Could not decode file: {file}")
         logging.info("")

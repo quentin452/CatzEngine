@@ -3,31 +3,31 @@ import json
 import os
 
 # Set compilations ids/version (useless)
-CMAKE_CXX_STANDARD = "11"
-CMAKE_CXX_COMPILER_ID = "GNU"
-CMAKE_CXX_COMPILER_VERSION = "10.2.0"
+CMAKE_CXX_STANDARD = "17"
+CMAKE_CXX_COMPILER_ID = "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.40.33807/bin/Hostx64/x64/cl.exe"
+CMAKE_CXX_COMPILER_VERSION = "19.40.33808.0"
 
 # Common compilation options
 common_compile_options = [
     "-std=c++" + CMAKE_CXX_STANDARD,
     "-Wall",
-    "-compilerandversion=" + CMAKE_CXX_COMPILER_ID + "-" + CMAKE_CXX_COMPILER_VERSION,
+    "-compilerandversion=" + CMAKE_CXX_COMPILER_VERSION,
     "-Wmicrosoft",
     "-Wno-invalid-token-paste",
     "-Wno-unknown-pragmas",
     "-Wno-unused-value",
     "-fsyntax-only",
-    "\\\"-D_MT\\\"",
-    "\\\"-D_DLL\\\"",
-    "\\\"-DWIN32\\\"",
-    "\\\"-D_WINDOWS\\\"",
-    "\\\"-DCMAKE_INTDIR=/\\\"Debug/\\\"\\\"",
-    "\\\"-D_DEBUG_FUNCTIONAL_MACHINERY\\\""
+    "-D_MT",
+    "-D_DLL",
+    "-DWIN32",
+    "-D_WINDOWS",
+    "-DCMAKE_INTDIR=\"/Debug/\"",
+    "-D_DEBUG_FUNCTIONAL_MACHINERY"
 ]
 
 # Add each include directory to the compilation options
 ALL_INCLUDE_DIR = [os.getcwd() + "/include/"]
-common_compile_options.extend(['-I\\\"' + include_dir + '\\\"' for include_dir in ALL_INCLUDE_DIR])
+common_compile_options.extend(['-I"' + include_dir + '"' for include_dir in ALL_INCLUDE_DIR])
 
 # Convert the list to a string with spaces between the options
 common_compile_options_string = " ".join(common_compile_options)
@@ -46,7 +46,7 @@ compile_commands = []
 for source_file in sources:
     compile_command = {
         "directory": str(PROJECT_SOURCE_DIR),
-        "command": "\\\"" + str(CMAKE_CXX_COMPILER_ID) + "\\\" -x c++ \\\"" + source_file + "\\\" " + common_compile_options_string,
+        "command": "\"" + str(CMAKE_CXX_COMPILER_ID) + "\" -x c++ \"" + source_file + "\" " + common_compile_options_string,
         "file": str(source_file)
     }
     compile_commands.append(compile_command)

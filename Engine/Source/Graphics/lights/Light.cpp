@@ -280,7 +280,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
             ImageRTDesc rt_desc(Renderer._shd_1s->w(), Renderer._shd_1s->h(), IMAGERT_ONE);
             // Sh.imgSize(*Renderer._shd_1s); we can just use 'RTSize' instead of 'ImgSize' since there's no scale
             Bool geom = (CurrentLight.type != LIGHT_DIR);
-#if !DEPTH_CLIP_SUPPORTED // Flat
+#if !DEPTH_CLIP_SUPPORTED                                                                                  // Flat
             if (CurrentLight.type == LIGHT_CONE && !D._depth_clip && CurrentLightZRange.y > D.viewRange()) // if light is behind far plane
                 geom = false;                                                                              // draw as Flat
 #endif
@@ -1558,7 +1558,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
                 Sh.clear(Vec4(0.3f, 0.3f, 0.3f, 0), &CurrentLight.rect);
             D.depthLock(true);
         }
-#if !DEPTH_CLIP_SUPPORTED // Flat
+#if !DEPTH_CLIP_SUPPORTED                                           // Flat
         if (!D._depth_clip && CurrentLightZRange.y > D.viewRange()) // if light is behind far plane
         {                                                           // draw as Flat
             Shader *shader = GetDrawLightConeFlat(multi_sample, light_mode, CurrentLight.shadow, CurrentLight.image != null);
@@ -1829,7 +1829,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
 
         mshb.create(Cone(0, LIGHT_MESH_CONE_RADIUS, 1, VecZero, Vec(0, 0, 1)), MESH_NONE, LIGHT_MESH_CONE_RES);
         LightMeshCone.create(mshb);
-#if DEBUG && 0 // calculate actual distance
+#if DEBUG && 0                                                  // calculate actual distance
         mshb.createEdge(Circle(1), false, LIGHT_MESH_CONE_RES); // use a circle
         Flt dist = 1;
         C Vec *pos = mshb.vtx.pos();

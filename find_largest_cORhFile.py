@@ -7,7 +7,7 @@ import logging
 blacklist = ["ThirdPartyLibs", "CMakeFiles"]
 
 
-def find_largest_files(files, n=100):
+def find_largest_files(files, n):
     sizes_files = []
     for file in files:
         size = os.path.getsize(file)
@@ -26,12 +26,8 @@ def is_blacklisted(file, blacklist):
 script_name = os.path.splitext(os.path.basename(__file__))[0]
 log_filename = f"{script_name}.txt"
 
-# Supprimer le fichier de log s'il existe
-if os.path.exists(log_filename):
-    os.remove(log_filename)
-
 # Configurer le logger pour écrire dans un fichier .txt
-logging.basicConfig(filename=log_filename, level=logging.INFO)
+logging.basicConfig(filename=log_filename, filemode="w", level=logging.INFO)
 
 directories = [
     "**/*.c",  # C source files

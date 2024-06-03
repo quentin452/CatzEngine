@@ -117,3 +117,7 @@ compile_commands.json
 Editor/Bin/Store.dat
 /Editor Data/Code/Android/.gradle
 find_largest_cORhFile.txt
+/Project/Android/.gradle
+Project/x64/Debug DX11/resource.res
+Project/x64/Release DX11/resource.res
+Project/Project.exe

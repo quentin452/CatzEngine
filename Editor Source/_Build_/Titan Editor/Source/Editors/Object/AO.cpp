@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 MeshAOClass MeshAO;
 /******************************************************************************/
@@ -20,7 +20,7 @@ void MeshAOClass::PreviewToggle(MeshAOClass &editor) {
         editor.preview_prop->set(!editor.preview_prop->asBool());
 }
 void MeshAOClass::OK(MeshAOClass &editor) {
-    //if(!editor.finished)Gui.msgBox(S, "Processing not finished yet");else
+    // if(!editor.finished)Gui.msgBox(S, "Processing not finished yet");else
     {
         editor.hide();
         if (ObjEdit.mesh_elm) {
@@ -32,7 +32,7 @@ void MeshAOClass::OK(MeshAOClass &editor) {
             flt ray_length = editor.ray_length * ObjEdit.posScale();
 #endif
             mesh.setVtxAO(editor.strength, editor.bias, editor.max, ray_length, ObjEdit.posEps(), 1024, editor.func, &WorkerThreads).setRender();
-            //Swap(mesh.newLod(), editor.baked);
+            // Swap(mesh.newLod(), editor.baked);
             ObjEdit.setChangedMesh(true, false);
         }
     }
@@ -71,7 +71,7 @@ bool MeshAOClass::process() {
         locker.on();
         if (baked_src_id == src_id) {
             Swap(temp, src);
-            //if(baked_change_id==change_id)
+            // if(baked_change_id==change_id)
             {
                 Swap(processed, T.processed);
                 processed_ready = true;
@@ -130,8 +130,8 @@ MeshAOClass &MeshAOClass::create() {
     props.New().create("Strength", MEMBER(MeshAOClass, strength)).range(0, 2).mouseEditSpeed(0.4f).desc("AO Intensity");
     props.New().create("Bias", MEMBER(MeshAOClass, bias)).range(0, 1).mouseEditSpeed(0.4f).setSlider();
     props.New().create("Limit", MEMBER(MeshAOClass, max)).range(0, 1).mouseEditSpeed(0.4f).setSlider().desc("Max limit for applying AO");
-    //props.New().create("Ray Length"      , MEMBER(MeshAOClass, ray_length)).range(0, 1024).mouseEditMode(PROP_MOUSE_EDIT_SCALAR);
-    //props.New().create("Falloff Function", MEMBER(MeshAOClass, func      )).setEnum(Func_t, Elms(Func_t));
+    // props.New().create("Ray Length"      , MEMBER(MeshAOClass, ray_length)).range(0, 1024).mouseEditMode(PROP_MOUSE_EDIT_SCALAR);
+    // props.New().create("Falloff Function", MEMBER(MeshAOClass, func      )).setEnum(Func_t, Elms(Func_t));
     info = &props.New().create(S);
     ts.reset().size = 0.045f;
     ts.align.set(1, 0);

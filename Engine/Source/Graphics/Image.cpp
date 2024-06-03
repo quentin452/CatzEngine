@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 #include "Import/BC.h"
@@ -1477,7 +1477,7 @@ Bool Image::setSRV() {
             D.texClearAll(_srv);
             _srv->Release();
             _srv = null;
-        }                                                   // delete old
+        } // delete old
         D3D->CreateShaderResourceView(_txtr, &srvd, &_srv); // create new
         if (!_srv && mode() != IMAGE_DS)
             return false; // allow SRV optional in IMAGE_DS (for example it can fail for multi-sampled DS on FeatureLevel 10.0)
@@ -2256,10 +2256,10 @@ Bool Image::createHWfromSoft(C Image &soft, IMAGE_TYPE type, IMAGE_MODE mode, UI
 /******************************************************************************/
 static Bool Decompress(C Image &src, Image &dest, Int max_mip_maps = INT_MAX) // assumes that 'src' and 'dest' are 2 different objects, 'src' is compressed, and 'dest' not compressed or not yet created, this always ignores gamma
 {
-    void (*decompress_block)(C Byte * b, Color(&block)[4][4]) = null, (*decompress_block_pitch)(C Byte * b, Color * dest, Int pitch) = null;
-    void (*decompress_block_SByte)(C Byte * b, SByte(&block)[4][4]) = null, (*decompress_block_pitch_SByte)(C Byte * b, SByte * dest, Int pitch) = null;
-    void (*decompress_block_VecSB2)(C Byte * b, VecSB2(&block)[4][4]) = null, (*decompress_block_pitch_VecSB2)(C Byte * b, VecSB2 * dest, Int pitch) = null;
-    void (*decompress_block_VecH)(C Byte * b, VecH(&block)[4][4]) = null, (*decompress_block_pitch_VecH)(C Byte * b, VecH * dest, Int pitch) = null;
+    void (*decompress_block)(C Byte *b, Color(&block)[4][4]) = null, (*decompress_block_pitch)(C Byte * b, Color * dest, Int pitch) = null;
+    void (*decompress_block_SByte)(C Byte *b, SByte(&block)[4][4]) = null, (*decompress_block_pitch_SByte)(C Byte * b, SByte * dest, Int pitch) = null;
+    void (*decompress_block_VecSB2)(C Byte *b, VecSB2(&block)[4][4]) = null, (*decompress_block_pitch_VecSB2)(C Byte * b, VecSB2 * dest, Int pitch) = null;
+    void (*decompress_block_VecH)(C Byte *b, VecH(&block)[4][4]) = null, (*decompress_block_pitch_VecH)(C Byte * b, VecH * dest, Int pitch) = null;
     switch (src.hwType()) {
     default:
         return false;
@@ -2723,12 +2723,12 @@ Bool Image::copy(Image &dest, Int w, Int h, Int d, Int type, Int mode, Int mip_m
             mip_maps = src->mipMaps();
         else // same size
             if (src->mipMaps() < TotalMipMaps(src->w(), src->h(), src->d()))
-            mip_maps = src->mipMaps();
-        else // less than total
-            if (src->mipMaps() == 1)
-            mip_maps = 1;
-        else              // use  only one
-            mip_maps = 0; // auto-detect mip maps
+                mip_maps = src->mipMaps();
+            else // less than total
+                if (src->mipMaps() == 1)
+                    mip_maps = 1;
+                else              // use  only one
+                    mip_maps = 0; // auto-detect mip maps
     }
     Int dest_total_mip_maps = TotalMipMaps(w, h, d);
     if (mip_maps <= 0)
@@ -3064,7 +3064,7 @@ Bool Image::lock(LOCK_MODE lock, Int mip_map, DIR_ENUM cube_face) {
             if (lMipMap() == mip_map && lCubeFace() == cube_face) {
                 _lock_count++;
                 return true;
-            }            // we want the same mip-map and cube-face that's already locked
+            } // we want the same mip-map and cube-face that's already locked
         } else if (lock) // we want to set a proper lock
         {
             SyncLocker locker(D._lock);
@@ -3257,7 +3257,7 @@ Bool Image::lock(LOCK_MODE lock, Int mip_map, DIR_ENUM cube_face) {
                                         else {
                                             src = &temp;
                                             Swap(T, SCAST(Image, temp));
-                                        }                               // we can do a swap because on OpenGL 'ImageRT' doesn't have anything extra, this swap is only to allow this method to belong to 'Image' instead of having to use 'ImageRT'
+                                        } // we can do a swap because on OpenGL 'ImageRT' doesn't have anything extra, this swap is only to allow this method to belong to 'Image' instead of having to use 'ImageRT'
                                         Renderer.set(src, null, false); // put 'this' to FBO
                                         glGetError();                   // clear any previous errors
                                         glReadPixels(0, 0, PaddedWidth(src->hwW(), src->hwH(), mip_map, src->hwType()),
@@ -3896,8 +3896,8 @@ void Image::copyHw(ImageRT &dest, Bool restore_rt, C RectI *rect_src, C RectI *r
                     restore_viewport = !D._view_active.full;
                 }
 
-                Renderer.set(&dest, null, false); // put 'dest' to FBO
-#if IOS // there is no default frame buffer on iOS
+                Renderer.set(&dest, null, false);             // put 'dest' to FBO
+#if IOS                                                       // there is no default frame buffer on iOS
                 glBindFramebuffer(GL_READ_FRAMEBUFFER, FBO1); // for unknown reason we can't use 'FBO' here, needs to be different
                 glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, _rb);
 #else

@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 
 #define SUPPORT_XBOX_LIVE (WINDOWS_NEW && 1)
 

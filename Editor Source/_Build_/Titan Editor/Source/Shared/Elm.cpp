@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 cchar8 *ElmTypeName[] = // !! these names are saved in Project TextData, do not change !!
     {

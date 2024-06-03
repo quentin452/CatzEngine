@@ -1,9 +1,9 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 Projects Projs;
-Str ProjectsPath;    // must include tailSlash
-Str MainProjectPath; // must include tailSlash
+Str ProjectsPath;            // must include tailSlash
+Str MainProjectPath;         // must include tailSlash
 Str CurrentlyOpenedFilePath; // must include tailSlash
 State StateProjectList(UpdateProjectList, DrawProjectList, InitProjectList, ShutProjectList);
 /******************************************************************************/

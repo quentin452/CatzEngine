@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 #if 0
 namespace EE{
 #include "PhysX Stream.h"

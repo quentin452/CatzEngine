@@ -1,35 +1,35 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 
 /******************************************************************************/
 EditMaterial::EditMaterial() : tech(MTECH_OPAQUE), tex_quality(Edit::Material::MEDIUM), flip_normal_y(false), smooth_is_rough(false), cull(true), detail_all_lod(false), color_s(1, 1, 1, 1), emissive_s(0, 0, 0), emissive_glow(0), smooth(0), reflect_min(MATERIAL_REFLECT), reflect_max(1), glow(0), normal(0), bump(0), uv_scale(1), det_uv_scale(4), det_power(0.3f), base_0_tex(UIDZero), base_1_tex(UIDZero), base_2_tex(UIDZero), detail_tex(UIDZero), macro_tex(UIDZero), emissive_tex(UIDZero) { REPAO(tex_downsize) = 0; }
 flt EditMaterial::smoothMul() C {
     if (smooth_map.is()) {
-        //if(tweak)return 1-Min(Abs(smooth_tweak), 1); // 'smooth_tweak' is -1..1
+        // if(tweak)return 1-Min(Abs(smooth_tweak), 1); // 'smooth_tweak' is -1..1
         return smooth;
     }
     return 0;
 }
 flt EditMaterial::smoothAdd() C {
     if (smooth_map.is()) {
-        //if(tweak)return Sat(smooth_tweak); // 'smooth_tweak' is -1..1
+        // if(tweak)return Sat(smooth_tweak); // 'smooth_tweak' is -1..1
         return 0;
     }
     return smooth;
 }
 flt EditMaterial::roughMul() C {
-    //return smoothMul();
+    // return smoothMul();
     if (smooth_map.is()) {
-        //if(tweak)return 1-Min(Abs(smooth_tweak), 1); // 'smooth_tweak' is -1..1
+        // if(tweak)return 1-Min(Abs(smooth_tweak), 1); // 'smooth_tweak' is -1..1
         return smooth;
     }
     return 0;
 }
 flt EditMaterial::roughAdd() C {
-    //return 1-smoothMul()-smoothAdd();
+    // return 1-smoothMul()-smoothAdd();
     if (smooth_map.is()) {
-        //if(tweak)return Sat(-smooth_tweak); // 'smooth_tweak' is -1..1
+        // if(tweak)return Sat(-smooth_tweak); // 'smooth_tweak' is -1..1
         return 1 - smooth;
     }
     return Sat(1 - smooth);
@@ -41,7 +41,7 @@ void EditMaterial::setAbsRough(flt rough) // without texture
 void EditMaterial::setRoughMulAdd(flt rough_mul, flt rough_add) // with texture
 {
     // it's best to calculate from average roughness: flt avg_rough=0.5*src.rough_mul+src.rough_add (0..1), rough_tweak=avg_rough*2-1 (-1..1), smooth_tweak=-rough_tweak;
-    //smooth_tweak=1-src.rough_mul-src.rough_add*2; // optimized
+    // smooth_tweak=1-src.rough_mul-src.rough_add*2; // optimized
     smooth = Avg(rough_mul, 1 - rough_add);
 }
 bool EditMaterial::hasBumpMap() C { return bump_map.is() /*|| bump_from_color && color_map.is()*/; }
@@ -145,26 +145,26 @@ void EditMaterial::expandMap(Str &map, C MemPtr<FileParams> &color, C MemPtr<Fil
             file.name.clear();
         else                      // if source is empty
             if (src->elms() == 1) // if source has only one file
-        {
-            C FileParams &first = (*src)[0];
-            file.name = first.name; // replace name with original
-            FREPA(first.params)
-            file.params.NewAt(i) = first.params[i]; // insert original parameters at the start
-            if (normal) {
-                file.params.NewAt(first.params.elms()).set("bumpToNormal");
-                flip_normal_y = false;
-            }              // need to force conversion to normal map
-        } else if (i == 0) // if source has multiple files, then we can add only if we're processing the first file (so all transforms from source will not affect anything already loaded)
-        {
-            file.name.clear(); // clear file name, but leave params/transforms to operate globally
-            FREPA(*src)
-            files.NewAt(i) = (*src)[i]; // add all files from source at the start
-            if (normal) {
-                files.NewAt(src->elms()).params.New().set("bumpToNormal");
-                flip_normal_y = false;
-            } // need to force conversion to normal map
-              // !! here can't access 'file' anymore because its memory address could be invalid !!
-        }
+            {
+                C FileParams &first = (*src)[0];
+                file.name = first.name; // replace name with original
+                FREPA(first.params)
+                file.params.NewAt(i) = first.params[i]; // insert original parameters at the start
+                if (normal) {
+                    file.params.NewAt(first.params.elms()).set("bumpToNormal");
+                    flip_normal_y = false;
+                } // need to force conversion to normal map
+            } else if (i == 0) // if source has multiple files, then we can add only if we're processing the first file (so all transforms from source will not affect anything already loaded)
+            {
+                file.name.clear(); // clear file name, but leave params/transforms to operate globally
+                FREPA(*src)
+                files.NewAt(i) = (*src)[i]; // add all files from source at the start
+                if (normal) {
+                    files.NewAt(src->elms()).params.New().set("bumpToNormal");
+                    flip_normal_y = false;
+                } // need to force conversion to normal map
+                  // !! here can't access 'file' anymore because its memory address could be invalid !!
+            }
     }
     map = FileParams::Encode(files);
 }

@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 static Color ColorArray[] =
@@ -336,7 +336,7 @@ Flt ColorDiffMax(C Vec &x, C Vec &y) {
 /******************************************************************************/
 Color Blend(C Color &base, C Color &color) {
     Color out;
-#if 1 // faster Int version
+#if 1                                       // faster Int version
     UInt base_w = (255 - color.a) * base.a, // "1-color.w" because of standard 'Lerp' (to make base insignificant if new color is fully opaque and covers the base), mul by 'base.w' because if the 'base' is mostly transparent, then we want to make it even more insignificant - for example transparent red 'base' (1, 0, 0, 0) blended with half transparent black 'color' (0, 0, 0, 0.5) would normally blend into (0.5, 0, 0, 0.5)
         color_w = color.a * 255;            //   'color.w' because of standard 'Lerp', this shouldn't be multiplied by additional 'color.w' because if base.w is 1, and color.w is 0.5 then we would blend it by 0.25 which is not what we want, mul by 255 to match the scale of 'base_w'
     if (UInt sum = base_w + color_w) {
@@ -434,7 +434,7 @@ Flt AlphaToDisplay(Flt alpha) {
     return alpha;
 #elif 0 // targets full luminance
     return 1 - SRGBToDisplay(1 - alpha);
-#else // targets custom luminance
+#else   // targets custom luminance
     /* col_lin*opacity_lin=SRGBToLinear(LinearToSRGB(col_lin)*opacity_srgb)
                opacity_lin=SRGBToLinear(LinearToSRGB(col_lin)*opacity_srgb)/col_lin
 
@@ -502,22 +502,22 @@ again:
 static Flt SRGBToLinearApprox(Byte s)
 {
    Flt f=s/255.0f;
-#if SRGB_MODE == 0 // average error = 0.023
+#if SRGB_MODE == 0   // average error = 0.023
    return Sqr(f);
 #elif SRGB_MODE == 1 // average error = 0.004
    return Pow(f, 2.2f);
-#else // average error = 0.001
+#else                // average error = 0.001
    return f*(f*(f*0.305306011f+0.682171111f)+0.012522878f);
 #endif
 }
 static Byte LinearToSRGBApprox(Flt l)
 {
    if(l<=0)return 0;
-#if SRGB_MODE == 0 // average error = 0.023
+#if SRGB_MODE == 0   // average error = 0.023
    Flt s=SqrtFast(l);
 #elif SRGB_MODE == 1 // average error = 0.004
    Flt s=Pow(l, 1/2.2f);
-#else // average error = 0.001
+#else                // average error = 0.001
    Flt s1=SqrtFast(l),
        s2=SqrtFast(s1),
        s3=SqrtFast(s2),

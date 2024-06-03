@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************
 
@@ -236,7 +236,7 @@ Bool RendererClass::rtCreate() {
                             if (!_main_ds.create(_main.size(), IMAGE_D24X8, IMAGE_GL_RB, _main.samples()))
                                 if (!_main_ds.create(_main.size(), IMAGE_D16, IMAGE_GL_RB, _main.samples()))
                                     return false;
-#else // other platforms have '_main_ds' linked with '_main' provided by the system
+#else     // other platforms have '_main_ds' linked with '_main' provided by the system
     _main_ds.forceInfo(_main.w(), _main.h(), 1, _main_ds.type() ? _main_ds.type() : IMAGE_D24S8, IMAGE_GL_RB, _main.samples()); // if we know the type then use it, otherwise assume the default IMAGE_D24S8
 #endif
 

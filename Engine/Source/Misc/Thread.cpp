@@ -6,7 +6,7 @@
       -it's Write-preferring (all new readers blocked when a writer was requested), 'shared_mutex' preference is unspecified
 
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 #define STACK_SIZE (1024 * 1024) // set 1MB stack size
@@ -56,7 +56,7 @@ Int AtomicInc(Int &x) { return _InterlockedIncrement((LONG *)&x) - 1; }      // 
 Int AtomicDec(Int &x) { return _InterlockedDecrement((LONG *)&x) + 1; }      // 'InterlockedDecrement'   returns the new value
 
 #pragma warning(push)
-#pragma warning(disable : 4146) // unary minus operator applied to unsigned type, result still unsigned
+#pragma warning(disable : 4146)                                                      // unary minus operator applied to unsigned type, result still unsigned
 Byte AtomicAdd(Byte &x, Byte y) { return _InterlockedExchangeAdd8((char *)&x, y); }  // 'InterlockedExchangeAdd' returns the old value
 Int AtomicAdd(Int &x, Int y) { return _InterlockedExchangeAdd((LONG *)&x, y); }      // 'InterlockedExchangeAdd' returns the old value
 UInt AtomicAdd(UInt &x, UInt y) { return _InterlockedExchangeAdd((LONG *)&x, y); }   // 'InterlockedExchangeAdd' returns the old value

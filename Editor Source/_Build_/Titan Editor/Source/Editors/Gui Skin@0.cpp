@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 GuiSkinEditor GuiSkinEdit;
 /******************************************************************************/
@@ -1181,7 +1181,7 @@ GuiSkinEditor &GuiSkinEditor::create(GuiObj &parent) {
     props.New().create("Multi Panel Image", MemberDesc(MEMBER(EditGuiSkin, base.checkbox.multi_id)).setFunc(CheckBoxMulti, CheckBoxMulti)).elmType(ELM_PANEL_IMAGE);
     props.New().create("Normal Color", MemberDesc(MEMBER(EditGuiSkin, checkbox.normal_color)).setTextToDataFunc(CheckBoxNormalColor)).setColor();
     props.New().create("Disabled Color", MemberDesc(MEMBER(EditGuiSkin, checkbox.disabled_color)).setTextToDataFunc(CheckBoxDisabledColor)).setColor();
-    //props.New().create("Rect Color"       , MemberDesc(MEMBER(EditGuiSkin, checkbox.rect_color)).setTextToDataFunc(CheckBoxRectColor)).setColor();
+    // props.New().create("Rect Color"       , MemberDesc(MEMBER(EditGuiSkin, checkbox.rect_color)).setTextToDataFunc(CheckBoxRectColor)).setColor();
     props.New();
     props.New().create("ComboBox:");
     props.New().create("Normal Panel Image", MemberDesc(MEMBER(EditGuiSkin, base.combobox.normal_id)).setFunc(ComboBoxNormal, ComboBoxNormal)).elmType(ELM_PANEL_IMAGE);
@@ -1197,7 +1197,7 @@ GuiSkinEditor &GuiSkinEditor::create(GuiObj &parent) {
     props.New().create("Text Style", MemberDesc(MEMBER(EditGuiSkin, base.combobox.text_style_id)).setFunc(ComboBoxTextStyle, ComboBoxTextStyle)).elmType(ELM_TEXT_STYLE);
     props.New().create("Side Image", MemberDesc(MEMBER(EditGuiSkin, base.combobox.image_id)).setFunc(ComboBoxSide, ComboBoxSide)).elmType(ELM_IMAGE);
     props.New().create("Side Color", MemberDesc(MEMBER(EditGuiSkin, combobox.image_color)).setTextToDataFunc(ComboBoxSideColor)).setColor();
-    //props.New().create("Side Color Add"             , MemberDesc(MEMBER(EditGuiSkin, combobox.image_color_add)).setTextToDataFunc(ComboBoxSideColorAdd)).setColor();
+    // props.New().create("Side Color Add"             , MemberDesc(MEMBER(EditGuiSkin, combobox.image_color_add)).setTextToDataFunc(ComboBoxSideColorAdd)).setColor();
     props.New();
     props.New().create("Description:");
     props.New().create("Normal Panel", MemberDesc(MEMBER(EditGuiSkin, base.desc.normal_id)).setFunc(DescNormal, DescNormal)).elmType(ELM_PANEL);
@@ -1264,7 +1264,7 @@ GuiSkinEditor &GuiSkinEditor::create(GuiObj &parent) {
     props.New().create("Value Pushed Color", MemberDesc(MEMBER(EditGuiSkin, property.value.pushed_color)).setTextToDataFunc(PropertyValuePushedColor)).setColor();
     props.New().create("Value Image", MemberDesc(MEMBER(EditGuiSkin, base.property.value.image_id)).setFunc(PropertyValueImage, PropertyValueImage)).elmType(ELM_IMAGE);
     props.New().create("Value Image Color", MemberDesc(MEMBER(EditGuiSkin, property.value.image_color)).setTextToDataFunc(PropertyValueImageColor)).setColor();
-    //props.New().create("Value Image Color Add"   , MemberDesc(MEMBER(EditGuiSkin, property.value.image_color_add)).setTextToDataFunc(PropertyValueImageColorAdd)).setColor();
+    // props.New().create("Value Image Color Add"   , MemberDesc(MEMBER(EditGuiSkin, property.value.image_color_add)).setTextToDataFunc(PropertyValueImageColorAdd)).setColor();
     props.New();
     props.New().create("Region:");
     props.New().create("Normal Panel", MemberDesc(MEMBER(EditGuiSkin, base.region.normal_id)).setFunc(RegionNormal, RegionNormal)).elmType(ELM_PANEL);
@@ -1275,7 +1275,7 @@ GuiSkinEditor &GuiSkinEditor::create(GuiObj &parent) {
     props.New().create("View Pushed Color", MemberDesc(MEMBER(EditGuiSkin, region.view.pushed_color)).setTextToDataFunc(RegionViewPushedColor)).setColor();
     props.New().create("View Image", MemberDesc(MEMBER(EditGuiSkin, base.region.view.image_id)).setFunc(RegionViewImage, RegionViewImage)).elmType(ELM_IMAGE);
     props.New().create("View Image Color", MemberDesc(MEMBER(EditGuiSkin, region.view.image_color)).setTextToDataFunc(RegionViewImageColor)).setColor();
-    //props.New().create("View Image Color Add"   , MemberDesc(MEMBER(EditGuiSkin, region.view.image_color_add)).setTextToDataFunc(RegionViewImageColorAdd)).setColor();
+    // props.New().create("View Image Color Add"   , MemberDesc(MEMBER(EditGuiSkin, region.view.image_color_add)).setTextToDataFunc(RegionViewImageColorAdd)).setColor();
     props.New();
     props.New().create("SlideBar:");
     props.New().create("Background Panel Image", MemberDesc(MEMBER(EditGuiSkin, base.slidebar.background_id)).setFunc(SlideBarBackground, SlideBarBackground)).elmType(ELM_PANEL_IMAGE);
@@ -1286,21 +1286,21 @@ GuiSkinEditor &GuiSkinEditor::create(GuiObj &parent) {
     props.New().create("Left Pushed Color", MemberDesc(MEMBER(EditGuiSkin, slidebar.left.pushed_color)).setTextToDataFunc(SlideBarLeftPushedColor)).setColor();
     props.New().create("Left Image", MemberDesc(MEMBER(EditGuiSkin, base.slidebar.left.image_id)).setFunc(SlideBarLeftImage, SlideBarLeftImage)).elmType(ELM_IMAGE);
     props.New().create("Left Image Color", MemberDesc(MEMBER(EditGuiSkin, slidebar.left.image_color)).setTextToDataFunc(SlideBarLeftImageColor)).setColor();
-    //props.New().create("Left Image Color Add"     , MemberDesc(MEMBER(EditGuiSkin, slidebar.left.image_color_add)).setTextToDataFunc(SlideBarLeftImageColorAdd)).setColor();
+    // props.New().create("Left Image Color Add"     , MemberDesc(MEMBER(EditGuiSkin, slidebar.left.image_color_add)).setTextToDataFunc(SlideBarLeftImageColorAdd)).setColor();
     props.New().create("Right Normal Panel Image", MemberDesc(MEMBER(EditGuiSkin, base.slidebar.right.normal_id)).setFunc(SlideBarRightNormal, SlideBarRightNormal)).elmType(ELM_PANEL_IMAGE);
     props.New().create("Right Normal Color", MemberDesc(MEMBER(EditGuiSkin, slidebar.right.normal_color)).setTextToDataFunc(SlideBarRightNormalColor)).setColor();
     props.New().create("Right Pushed Panel Image", MemberDesc(MEMBER(EditGuiSkin, base.slidebar.right.pushed_id)).setFunc(SlideBarRightPushed, SlideBarRightPushed)).elmType(ELM_PANEL_IMAGE);
     props.New().create("Right Pushed Color", MemberDesc(MEMBER(EditGuiSkin, slidebar.right.pushed_color)).setTextToDataFunc(SlideBarRightPushedColor)).setColor();
     props.New().create("Right Image", MemberDesc(MEMBER(EditGuiSkin, base.slidebar.right.image_id)).setFunc(SlideBarRightImage, SlideBarRightImage)).elmType(ELM_IMAGE);
     props.New().create("Right Image Color", MemberDesc(MEMBER(EditGuiSkin, slidebar.right.image_color)).setTextToDataFunc(SlideBarRightImageColor)).setColor();
-    //props.New().create("Right Image Color Add"    , MemberDesc(MEMBER(EditGuiSkin, slidebar.right.image_color_add)).setTextToDataFunc(SlideBarRightImageColorAdd)).setColor();
+    // props.New().create("Right Image Color Add"    , MemberDesc(MEMBER(EditGuiSkin, slidebar.right.image_color_add)).setTextToDataFunc(SlideBarRightImageColorAdd)).setColor();
     props.New().create("Center Normal Panel Image", MemberDesc(MEMBER(EditGuiSkin, base.slidebar.center.normal_id)).setFunc(SlideBarCenterNormal, SlideBarCenterNormal)).elmType(ELM_PANEL_IMAGE);
     props.New().create("Center Normal Color", MemberDesc(MEMBER(EditGuiSkin, slidebar.center.normal_color)).setTextToDataFunc(SlideBarCenterNormalColor)).setColor();
     props.New().create("Center Pushed Panel Image", MemberDesc(MEMBER(EditGuiSkin, base.slidebar.center.pushed_id)).setFunc(SlideBarCenterPushed, SlideBarCenterPushed)).elmType(ELM_PANEL_IMAGE);
     props.New().create("Center Pushed Color", MemberDesc(MEMBER(EditGuiSkin, slidebar.center.pushed_color)).setTextToDataFunc(SlideBarCenterPushedColor)).setColor();
     props.New().create("Center Image", MemberDesc(MEMBER(EditGuiSkin, base.slidebar.center.image_id)).setFunc(SlideBarCenterImage, SlideBarCenterImage)).elmType(ELM_IMAGE);
     props.New().create("Center Image Color", MemberDesc(MEMBER(EditGuiSkin, slidebar.center.image_color)).setTextToDataFunc(SlideBarCenterImageColor)).setColor();
-    //props.New().create("Center Image Color Add"   , MemberDesc(MEMBER(EditGuiSkin, slidebar.center.image_color_add)).setTextToDataFunc(SlideBarCenterImageColorAdd)).setColor();
+    // props.New().create("Center Image Color Add"   , MemberDesc(MEMBER(EditGuiSkin, slidebar.center.image_color_add)).setTextToDataFunc(SlideBarCenterImageColorAdd)).setColor();
     props.New();
     props.New().create("Slider:");
     props.New().create("Background Panel Image", MemberDesc(MEMBER(EditGuiSkin, base.slider.background_id)).setFunc(SliderBackground, SliderBackground)).elmType(ELM_PANEL_IMAGE);
@@ -1374,7 +1374,7 @@ GuiSkinEditor &GuiSkinEditor::create(GuiObj &parent) {
     props.New().create("Minimize Disabled Color", MemberDesc(MEMBER(EditGuiSkin, window.minimize.disabled_color)).setTextToDataFunc(WindowMinimizeDisabledColor)).setColor();
     props.New().create("Minimize Image", MemberDesc(MEMBER(EditGuiSkin, base.window.minimize.image_id)).setFunc(WindowMinimizeImage, WindowMinimizeImage)).elmType(ELM_IMAGE);
     props.New().create("Minimize Image Color", MemberDesc(MEMBER(EditGuiSkin, window.minimize.image_color)).setTextToDataFunc(WindowMinimizeImageColor)).setColor();
-    //props.New().create("Minimize Image Color Add"   , MemberDesc(MEMBER(EditGuiSkin, window.minimize.image_color_add)).setTextToDataFunc(WindowMinimizeImageColorAdd)).setColor();
+    // props.New().create("Minimize Image Color Add"   , MemberDesc(MEMBER(EditGuiSkin, window.minimize.image_color_add)).setTextToDataFunc(WindowMinimizeImageColorAdd)).setColor();
     props.New().create("Maximize Normal Panel Image", MemberDesc(MEMBER(EditGuiSkin, base.window.maximize.normal_id)).setFunc(WindowMaximizeNormal, WindowMaximizeNormal)).elmType(ELM_PANEL_IMAGE);
     props.New().create("Maximize Normal Color", MemberDesc(MEMBER(EditGuiSkin, window.maximize.normal_color)).setTextToDataFunc(WindowMaximizeNormalColor)).setColor();
     props.New().create("Maximize Pushed Panel Image", MemberDesc(MEMBER(EditGuiSkin, base.window.maximize.pushed_id)).setFunc(WindowMaximizePushed, WindowMaximizePushed)).elmType(ELM_PANEL_IMAGE);
@@ -1382,7 +1382,7 @@ GuiSkinEditor &GuiSkinEditor::create(GuiObj &parent) {
     props.New().create("Maximize Disabled Color", MemberDesc(MEMBER(EditGuiSkin, window.maximize.disabled_color)).setTextToDataFunc(WindowMaximizeDisabledColor)).setColor();
     props.New().create("Maximize Image", MemberDesc(MEMBER(EditGuiSkin, base.window.maximize.image_id)).setFunc(WindowMaximizeImage, WindowMaximizeImage)).elmType(ELM_IMAGE);
     props.New().create("Maximize Image Color", MemberDesc(MEMBER(EditGuiSkin, window.maximize.image_color)).setTextToDataFunc(WindowMaximizeImageColor)).setColor();
-    //props.New().create("Maximize Image Color Add"   , MemberDesc(MEMBER(EditGuiSkin, window.maximize.image_color_add)).setTextToDataFunc(WindowMaximizeImageColorAdd)).setColor();
+    // props.New().create("Maximize Image Color Add"   , MemberDesc(MEMBER(EditGuiSkin, window.maximize.image_color_add)).setTextToDataFunc(WindowMaximizeImageColorAdd)).setColor();
     props.New().create("Close Normal Panel Image", MemberDesc(MEMBER(EditGuiSkin, base.window.close.normal_id)).setFunc(WindowCloseNormal, WindowCloseNormal)).elmType(ELM_PANEL_IMAGE);
     props.New().create("Close Normal Color", MemberDesc(MEMBER(EditGuiSkin, window.close.normal_color)).setTextToDataFunc(WindowCloseNormalColor)).setColor();
     props.New().create("Close Pushed Panel Image", MemberDesc(MEMBER(EditGuiSkin, base.window.close.pushed_id)).setFunc(WindowClosePushed, WindowClosePushed)).elmType(ELM_PANEL_IMAGE);
@@ -1390,7 +1390,7 @@ GuiSkinEditor &GuiSkinEditor::create(GuiObj &parent) {
     props.New().create("Close Disabled Color", MemberDesc(MEMBER(EditGuiSkin, window.close.disabled_color)).setTextToDataFunc(WindowCloseDisabledColor)).setColor();
     props.New().create("Close Image", MemberDesc(MEMBER(EditGuiSkin, base.window.close.image_id)).setFunc(WindowCloseImage, WindowCloseImage)).elmType(ELM_IMAGE);
     props.New().create("Close Image Color", MemberDesc(MEMBER(EditGuiSkin, window.close.image_color)).setTextToDataFunc(WindowCloseImageColor)).setColor();
-    //props.New().create("Close Image Color Add"      , MemberDesc(MEMBER(EditGuiSkin, window.close.image_color_add)).setTextToDataFunc(WindowCloseImageColorAdd)).setColor();
+    // props.New().create("Close Image Color Add"      , MemberDesc(MEMBER(EditGuiSkin, window.close.image_color_add)).setTextToDataFunc(WindowCloseImageColorAdd)).setColor();
     props.New().create("Button Offset", MemberDesc(MEMBER(EditGuiSkin, window.button_offset)).setTextToDataFunc(WindowButtonOffset)).range(-1, 1).mouseEditSpeed(0.2f);
 
     REPAO(props).autoData(&edit).changed(Changed, PreChanged);
@@ -1426,7 +1426,7 @@ void GuiSkinEditor::flush() {
         if (ElmGuiSkin *data = elm->guiSkinData()) {
             data->newVer();
             data->from(edit);
-        }                                // modify just before saving/sending in case we've received data from server after edit
+        } // modify just before saving/sending in case we've received data from server after edit
         Save(edit, Proj.editPath(*elm)); // edit
         Save(*game, Proj.gamePath(*elm));
         Proj.savedGame(*elm); // game

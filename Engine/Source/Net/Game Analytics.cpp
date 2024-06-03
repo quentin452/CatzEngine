@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 #define SUPPORT_GAME_ANALYTICS 1
 #undef GameAnalytics
 

@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 HeightBrushClass HeightBrush;
 /******************************************************************************/
@@ -12,19 +12,19 @@ void HeightBrushClass::AlignWaypoint::set(EditWaypoint &wp, EditWaypointPoint &p
 void HeightBrushClass::ModeChanged(HeightBrushClass &hb) { SetHmOp((hb.mode() >= 0) ? OP_HM_HEIGHT : OP_HM_NONE); }
 HeightBrushClass &HeightBrushClass::create() {
     cchar *text[HB_NUM] =
-    {
+        {
 #if MOBILE
-        MLTC(u"Up", PL, u"Wyżej", DE, u"Höher", RU, u"Вверх", PO, u"Aumentar", CN, u"上"),
-        MLTC(u"Down", PL, u"Niżej", DE, u"Tiefer", RU, u"Вниз", PO, u"Diminuir", CN, u"下"),
+            MLTC(u"Up", PL, u"Wyżej", DE, u"Höher", RU, u"Вверх", PO, u"Aumentar", CN, u"上"),
+            MLTC(u"Down", PL, u"Niżej", DE, u"Tiefer", RU, u"Вниз", PO, u"Diminuir", CN, u"下"),
 #else
-        MLTC(u"Down / Up", PL, u"Niżej / Wyżej", DE, u"Tiefer / Höher", RU, u"Вниз/Вверх", PO, u"Diminuir/Aumentar", CN, u"下/上"),
+            MLTC(u"Down / Up", PL, u"Niżej / Wyżej", DE, u"Tiefer / Höher", RU, u"Вниз/Вверх", PO, u"Diminuir/Aumentar", CN, u"下/上"),
 #endif
-        MLTC(u"Level", PL, u"Wyrównaj", DE, u"Ebnen", RU, u"Уровень", PO, u"Nivelar", CN, u"级别"),
-        MLTC(u"Flatten", PL, u"Spłaszcz", DE, u"Flach Ebnen", RU, u"Выравнивать", PO, u"Nivelar Plano", CN, u"平的级别"),
-        MLTC(u"Average", PL, u"Uśrednij", DE, u"Average", RU, u"Усреднение", PO, u"Média", CN, u"平均值"),
-        MLTC(u"Soften", PL, u"Zmiękcz", DE, u"Soften", RU, u"Мягкость", PO, u"Suavizar", CN, u"变柔软"),
-        MLTC(u"Noise", PL, u"Szum", DE, u"Noise", RU, u"шум", PO, u"Desnivelar", CN, u"干扰"),
-    };
+            MLTC(u"Level", PL, u"Wyrównaj", DE, u"Ebnen", RU, u"Уровень", PO, u"Nivelar", CN, u"级别"),
+            MLTC(u"Flatten", PL, u"Spłaszcz", DE, u"Flach Ebnen", RU, u"Выравнивать", PO, u"Nivelar Plano", CN, u"平的级别"),
+            MLTC(u"Average", PL, u"Uśrednij", DE, u"Average", RU, u"Усреднение", PO, u"Média", CN, u"平均值"),
+            MLTC(u"Soften", PL, u"Zmiękcz", DE, u"Soften", RU, u"Мягкость", PO, u"Suavizar", CN, u"变柔软"),
+            MLTC(u"Noise", PL, u"Szum", DE, u"Noise", RU, u"шум", PO, u"Desnivelar", CN, u"干扰"),
+        };
 
     super::create("Height" /*MLTC(u"Height Brush", PL,u"Wysokość", DE,u"Höhen Pinsel", RU,u"Высота кисти", PO,u"Pincel do Heightmap")*/);
     clientRect(Rect_RU(WorldEdit.rect().w(), -defaultBarHeight(), 0.22f, 0.32f));
@@ -296,7 +296,7 @@ void HeightBrushClass::updateHeight(Area &area) {
 void HeightBrushClass::detectWaypoints(C RectI &rect) {
     REPA(WorldEdit.visible_waypoints) {
         EditWaypoint &wp = *WorldEdit.visible_waypoints[i];
-        if (!wp.removed) //if(Cuts(wp.area, rect))
+        if (!wp.removed) // if(Cuts(wp.area, rect))
         {
             REPA(wp) {
                 EditWaypointPoint &p = wp[i];

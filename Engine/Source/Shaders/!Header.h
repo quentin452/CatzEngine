@@ -15,6 +15,7 @@
 
 /******************************************************************************/
 #include "!Header CPU.h"
+#include "../../../Editor/Bin/Engine/Math/Vector.h"
 #define LINEAR_GAMMA 1
 #define CONCAT(a, b) a##b
 #if DX_SHADER_COMPILER
@@ -133,12 +134,6 @@
 #define EPS_LUM (LINEAR_GAMMA ? 1.0 / 512 : EPS_COL) // light epsilon (need a little extra precision for linear gamma)
 #define EPS_RSQRT HALF_MIN                           // rsqrt epsilon, makes sure that vec*rsqrt(Length2(vec)+EPS_RSQRT) gives range -1..1
 
-#define PI_6 0.5235987755982988    // PI/6 ( 30 deg) Flt
-#define PI_4 0.7853981633974483    // PI/4 ( 45 deg) Flt
-#define PI_3 1.0471975511965977    // PI/3 ( 60 deg) Flt
-#define PI_2 1.5707963267948966    // PI/2 ( 90 deg) Flt
-#define PI 3.1415926535897932      // PI   (180 deg) Flt
-#define PI2 6.2831853071795864     // PI*2 (360 deg) Flt
 #define SQRT2 1.4142135623730950   // Sqrt(2)
 #define SQRT3 1.7320508075688773   // Sqrt(3)
 #define SQRT2_2 0.7071067811865475 // Sqrt(2)/2

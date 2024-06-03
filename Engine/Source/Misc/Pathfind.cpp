@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************
 
@@ -973,7 +973,7 @@ void PathWorld::del() {
     if (_build.elms()) {
         SyncLocker lock(_lock);
         _build.del();
-    }            // cancel build requests
+    } // cancel build requests
     _event.on(); // wake up thread
     _thread.del();
 

@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 
 #define ETC_LIB_TEXGENPACK 1 // only decompression, faster than ETC_LIB_RG and ETC_LIB_ETCPACK
 #define ETC_LIB_RG 2         // only ETC1

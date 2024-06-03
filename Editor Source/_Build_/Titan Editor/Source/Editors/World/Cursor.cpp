@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 void UpdateButtonState(BS_FLAG *dest, byte *on, int num) {
     REP(num) {
@@ -51,7 +51,7 @@ void RayTest::test(::Area &area) // !! this function should be multi-threaded sa
                     if (!gpu_ctx) {
                         gpu_ctx = true;
                         ThreadMayUseGPUData();
-                    }                     // we're about to test mesh
+                    } // we're about to test mesh
                     if (MtrlBrush.hole()) // in hole mode we can't use mesh testing, because the mesh keeps on being removed as we operate it which generates incorrect results
                     {
                         if (hm->heightImage().raycast(T.from, T.move, &Matrix((Vec)area.xy.xy0(), WorldEdit.areaSize()).swapYZ(), &frac))
@@ -136,7 +136,7 @@ void Cursor::update(C Vec2 &screen_pos, GuiObj *go, bool on, bool db, WorldView 
     _pos_prev = _pos;
     _ray_test.clear();
     if (_view = we.v4.getView(go))
-    //if(!(we.mode()==WorldView.OBJECT && we.obj_drag_view)) // don't detect cursor when dragging
+    // if(!(we.mode()==WorldView.OBJECT && we.obj_drag_view)) // don't detect cursor when dragging
     {
         _view->setViewportCamera();
 

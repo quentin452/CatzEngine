@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 Str ServerLicenseKey;
 /******************************************************************************
@@ -368,7 +368,7 @@ class BuyClass : Window
    {
       if(gpc.visible && visible())
       {
-         GuiObj *go=super.test(gpc, pos, mouse_wheel); if(!contains(go)){mouse_wheel=null; go=this;} 
+         GuiObj *go=super.test(gpc, pos, mouse_wheel); if(!contains(go)){mouse_wheel=null; go=this;}
          return  go;
       }
       return null;

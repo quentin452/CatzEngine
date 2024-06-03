@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 bool LoadEditHeightmap(C Str &name, Heightmap &hm, C Str &game_path) {
     ReadLock rl(WorldAreaSync);

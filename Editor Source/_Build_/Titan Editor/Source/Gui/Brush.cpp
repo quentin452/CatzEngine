@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 
 /******************************************************************************/
@@ -34,7 +34,7 @@ void BrushClass::Slope::draw(C GuiPC &gpc) {
     if (gpc.visible && visible()) {
         Rect r = rect() + gpc.offset;
         D.clip(gpc.clip);
-        //if(Brush.slope_checkbox() && OpHm==OP_HM_MTRL)r.draw(ColorAlpha(RED, 0.15)); if active (hm mtrl, hm color, obj paint)
+        // if(Brush.slope_checkbox() && OpHm==OP_HM_MTRL)r.draw(ColorAlpha(RED, 0.15)); if active (hm mtrl, hm color, obj paint)
         r.draw(Gui.borderColor(), false);
         VI.color(GREY);
         FREP(8) {

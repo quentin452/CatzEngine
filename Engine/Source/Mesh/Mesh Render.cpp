@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 #define VAO_EXCLUSIVE HAS_THREADS // if VAO's can be processed only on the main thread - https://www.khronos.org/opengl/wiki/Vertex_Specification#Vertex_Array_Object "Note: VAOs cannot be shared between OpenGL contexts"
 /******************************************************************************/
 namespace EE {

@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 ObjClassEditor ObjClassEdit;
 /******************************************************************************/
@@ -887,7 +887,7 @@ void ParamEditor::ChangedOMeshVariation(ParamEditor &pe) {
         }
     } else
         ChangedOMeshVariation(pe, *pe.p);
-    //pe.multiFunc(ChangedOMeshVariation); this can't be 'multi' because each object mesh has its unique mesh variation ID's
+    // pe.multiFunc(ChangedOMeshVariation); this can't be 'multi' because each object mesh has its unique mesh variation ID's
     pe.setChanged();
 }
 bool ParamEditor::ChangedMeshVariation(ParamEditor &pe, EditObject &obj, cptr user) {
@@ -923,7 +923,7 @@ void ParamEditor::ChangedMeshVariation(ParamEditor &pe) {
         }
     } else
         ChangedMeshVariation(pe, *pe.p);
-    //pe.multiFunc(ChangedMeshVariation); this can't be 'multi' because each object mesh has its unique mesh variation ID's
+    // pe.multiFunc(ChangedMeshVariation); this can't be 'multi' because each object mesh has its unique mesh variation ID's
     pe.setChanged();
 }
 void ParamEditor::ToBase(ParamEditor &pe) {
@@ -999,11 +999,11 @@ void ParamEditor::toGui(bool params) {
             bool omesh_var = FlagOn(obj.flag, EditObject::OVR_MESH_VARIATION), momesh_var = false, mmesh_var = false;
             uint mesh_var = obj.mesh_variation_id;
             cchar8 *mesh_var_name = obj_full.variationName();
-            //bool oscale   =FlagOn(obj.flag, OBJ_OVR_SCALE                ), moscale   =false, mscale   =false; Vec           scale   =obj.scale3  ()  ;
-            //bool omesh    =FlagOn(obj.flag, OBJ_OVR_MESH                 ), momesh    =false, mmesh    =false; Mesh         *mesh    =obj.mesh    ()();
-            //bool ophys    =FlagOn(obj.flag, OBJ_OVR_PHYS                 ), mophys    =false, mphys    =false; PhysBody     *phys    =obj.phys    ()();
-            //bool omtrl    =FlagOn(obj.flag, OBJ_OVR_MATERIAL             ), momtrl    =false, mmtrl    =false; Material     *material=obj.material()();
-            //bool oalign   =FlagOn(obj.flag, OBJ_OVR_ALIGN                ), moalign   =false, malign   =false; UInt          align   =(obj.alignX()|(obj.alignY()<<2)|(obj.alignZ()<<4));
+            // bool oscale   =FlagOn(obj.flag, OBJ_OVR_SCALE                ), moscale   =false, mscale   =false; Vec           scale   =obj.scale3  ()  ;
+            // bool omesh    =FlagOn(obj.flag, OBJ_OVR_MESH                 ), momesh    =false, mmesh    =false; Mesh         *mesh    =obj.mesh    ()();
+            // bool ophys    =FlagOn(obj.flag, OBJ_OVR_PHYS                 ), mophys    =false, mphys    =false; PhysBody     *phys    =obj.phys    ()();
+            // bool omtrl    =FlagOn(obj.flag, OBJ_OVR_MATERIAL             ), momtrl    =false, mmtrl    =false; Material     *material=obj.material()();
+            // bool oalign   =FlagOn(obj.flag, OBJ_OVR_ALIGN                ), moalign   =false, malign   =false; UInt          align   =(obj.alignX()|(obj.alignY()<<2)|(obj.alignZ()<<4));
             REPA(Selection) {
                 Obj &obj_full = Selection[i];
                 EditObject &obj = obj_full.params;
@@ -1041,12 +1041,12 @@ void ParamEditor::toGui(bool params) {
                 }
                 if (mesh_var != obj.mesh_variation_id && !Equal(mesh_var_name, obj_full.variationName()))
                     mmesh_var = true;
-                //if(oscale   !=FlagOn(obj.flag, OBJ_OVR_SCALE                )){oscale   =false; moscale   =true;} if(!Equal(scale   , obj.scale3  () ))mscale =true;
-                //if(omesh    !=FlagOn(obj.flag, OBJ_OVR_MESH                 )){omesh    =false; momesh    =true;} if(       mesh    !=obj.mesh    ()())mmesh  =true;
-                //if(ophys    !=FlagOn(obj.flag, OBJ_OVR_PHYS                 )){ophys    =false; mophys    =true;} if(       phys    !=obj.phys    ()())mphys  =true;
-                //if(omtrl    !=FlagOn(obj.flag, OBJ_OVR_MATERIAL             )){omtrl    =false; momtrl    =true;} if(       material!=obj.material()())mmtrl  =true;
-                //if(oalign   !=FlagOn(obj.flag, OBJ_OVR_ALIGN                )){oalign   =false; moalign   =true;} if(       align   !=(obj.alignX()|(obj.alignY()<<2)|(obj.alignZ()<<4)))malign=true;
-                //                                                          force default |false| in above codes so next first click will toggle to true
+                // if(oscale   !=FlagOn(obj.flag, OBJ_OVR_SCALE                )){oscale   =false; moscale   =true;} if(!Equal(scale   , obj.scale3  () ))mscale =true;
+                // if(omesh    !=FlagOn(obj.flag, OBJ_OVR_MESH                 )){omesh    =false; momesh    =true;} if(       mesh    !=obj.mesh    ()())mmesh  =true;
+                // if(ophys    !=FlagOn(obj.flag, OBJ_OVR_PHYS                 )){ophys    =false; mophys    =true;} if(       phys    !=obj.phys    ()())mphys  =true;
+                // if(omtrl    !=FlagOn(obj.flag, OBJ_OVR_MATERIAL             )){omtrl    =false; momtrl    =true;} if(       material!=obj.material()())mmtrl  =true;
+                // if(oalign   !=FlagOn(obj.flag, OBJ_OVR_ALIGN                )){oalign   =false; moalign   =true;} if(       align   !=(obj.alignX()|(obj.alignY()<<2)|(obj.alignZ()<<4)))malign=true;
+                //                                                           force default |false| in above codes so next first click will toggle to true
             }
             T.t_obj.set(mbase ? MultipleName : Proj.elmFullName(base.id()), QUIET);
             T.o_const.set(oconst, QUIET);
@@ -1088,11 +1088,11 @@ void ParamEditor::toGui(bool params) {
                 else
                     T.v_class.set(-1, QUIET);
             }
-            //T.oscale.set(oscale, QUIET); if(moscale)T.oscale.setMulti(); T.scale   .set(mscale ? MultipleName :       TextScale(scale   ), QUIET).disabled(!oscale && !moscale);
-            //T.omesh .set(omesh , QUIET); if(momesh )T.omesh .setMulti(); T.mesh    .set(mmesh  ? MultipleName : Meshes    .name(mesh    ), QUIET);
-            //T.ophys .set(ophys , QUIET); if(mophys )T.ophys .setMulti(); T.phys    .set(mphys  ? MultipleName : PhysBodies.name(phys    ), QUIET); make_phys.hide();
-            //T.omtrl .set(omtrl , QUIET); if(momtrl )T.omtrl .setMulti(); T.mtrl    .set(mmtrl  ? MultipleName : Materials .name(material), QUIET);
-            //T.oalign.set(oalign, QUIET); if(moalign)T.oalign.setMulti(); T.align[0].set((align&3)-1, QUIET); T.align[1].set(((align>>2)&3)-1, QUIET); T.align[2].set(((align>>4)&3)-1, QUIET);
+            // T.oscale.set(oscale, QUIET); if(moscale)T.oscale.setMulti(); T.scale   .set(mscale ? MultipleName :       TextScale(scale   ), QUIET).disabled(!oscale && !moscale);
+            // T.omesh .set(omesh , QUIET); if(momesh )T.omesh .setMulti(); T.mesh    .set(mmesh  ? MultipleName : Meshes    .name(mesh    ), QUIET);
+            // T.ophys .set(ophys , QUIET); if(mophys )T.ophys .setMulti(); T.phys    .set(mphys  ? MultipleName : PhysBodies.name(phys    ), QUIET); make_phys.hide();
+            // T.omtrl .set(omtrl , QUIET); if(momtrl )T.omtrl .setMulti(); T.mtrl    .set(mmtrl  ? MultipleName : Materials .name(material), QUIET);
+            // T.oalign.set(oalign, QUIET); if(moalign)T.oalign.setMulti(); T.align[0].set((align&3)-1, QUIET); T.align[1].set(((align>>2)&3)-1, QUIET); T.align[2].set(((align>>4)&3)-1, QUIET);
         }
     } else {
         UID base_id = p->base.id();
@@ -1832,7 +1832,7 @@ void ParamEditor::drag(Memc<UID> &elms, GuiObj *&obj, C Vec2 &screen_pos) {
             }
         } else // set object base
         {
-            //if(obj==&t_obj || v_class.contains(obj)) any place is good to set the base
+            // if(obj==&t_obj || v_class.contains(obj)) any place is good to set the base
             {
                 undos.set("setBase");
                 FREPA(elms)

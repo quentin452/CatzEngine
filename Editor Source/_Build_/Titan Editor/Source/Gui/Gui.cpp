@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 Progress UpdateProgress;
 Thread UpdateThread;
@@ -629,7 +629,7 @@ void NewWorldClass::create() {
             "32",
             "64 (default)",
             "128",
-        }; //ASSERT(MIN_HM_RES==33 && MAX_HM_RES==129);
+        }; // ASSERT(MIN_HM_RES==33 && MAX_HM_RES==129);
 
     ts.reset().align.set(1, 0);
 

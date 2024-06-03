@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 MenuBar::Elm::Elm() {
@@ -198,17 +198,17 @@ void MenuBar::update(C GuiPC &gpc) {
                 _alt = false;
             else                                      // if any action happened, then cancel activating
                 if (Kb.br(KB_LALT) || Kb.br(KB_MENU)) // if menu key released
-            {
-                _alt = false; // finished
-                if (_menu_prev >= 0)
-                    deactivate();
-                else // if already activated, then deactivate
-                    FREP(elms())
-                if (!elm(i).hidden) {
-                    _push = i;
-                    break;
-                } // find first visible and push it
-            }
+                {
+                    _alt = false; // finished
+                    if (_menu_prev >= 0)
+                        deactivate();
+                    else // if already activated, then deactivate
+                        FREP(elms())
+                    if (!elm(i).hidden) {
+                        _push = i;
+                        break;
+                    } // find first visible and push it
+                }
         }
 
         // get highlight

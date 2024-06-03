@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 #define LIGHT_DENSITY_FACTOR 0.5f // 0..1, 0.5 gives good results, should be 1 however because volume rendering is not perfect (when iterating samples, voxel texture coordinates may be chosen between between voxels, which may make them look blurry, darker, or brighter)
@@ -190,7 +190,7 @@ static Vec LightPos(C VolumetricCloud::Settings &s) // !! assumes that 's.light_
     if (pos.y < SQRT2_2) {
         pos.y = SQRT2_2;
         pos.normalize();
-    }                           // this is how build works, it treats all light positions as if they were above the clouds
+    } // this is how build works, it treats all light positions as if they were above the clouds
     return pos * s.light_power; // apply light power already
 }
 static Byte Difference(C VolumetricCloud::Settings &a, C VolumetricCloud::Settings &b) // 0=can be ignored, 1=medium difference (schedule a new build, and use it when finished), 2=big difference (schedule a new build and wait for it to finish)
@@ -251,7 +251,7 @@ void VolumetricCloud::cancelCreate() {
 static Flt AOFunc(Flt density) { return 1 - SqrtFast(density) * 0.31f; }
 #elif 1 // contrast too strong
 static Flt AOFunc(Flt density) { return 1 - (1 - Sqr(1 - density)) * 0.31f; }
-#else // contrast way too strong
+#else   // contrast way too strong
 static Flt AOFunc(Flt density) { return 1 - density * 0.5f; }
 #endif
 static void SetImageRow(IntPtr elm_index, Ptr user, Int thread_index) {
@@ -698,7 +698,7 @@ void VolumetricClouds::draw() {
         if (swap) {
             gamma = false;
             Renderer._col->swapRTV();
-        }                                                                     // if we have a non-sRGB access, then just use it instead of doing the more expensive shader, later we have to restore it
+        } // if we have a non-sRGB access, then just use it instead of doing the more expensive shader, later we have to restore it
         Renderer.set(Renderer._col, Renderer._alpha, null, null, null, true); // #RTOutput.Blend
         D.alpha(ALPHA_RENDER_BLEND);
 

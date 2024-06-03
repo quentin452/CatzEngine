@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 static inline Bool EqualTex(C Vec2 &a, C Vec2 &b, Bool wrap = false) { return wrap ? EqualWrap(a, b) : Equal(a, b); }
@@ -990,15 +990,15 @@ MeshBase &MeshBase::setAdjacencies(Bool faces, Bool edges) {
                                 adj.New().set(f1, 0, f1i.c[2]);
                         } else // add adjacency to other face only if it's not yet connected to anything !! THIS IS IMPORTANT AS WITHOUT THIS DIRECTX MESH OPTIMIZER MAY CRASH !!
                             if (f1i.c[1] == f0v1 && f1i.c[2] == f0v0) {
-                            if (f1a.c[1] == -1)
-                                adj.New().set(f1, 1, f1i.c[3]);
-                        } else if (f1i.c[2] == f0v1 && f1i.c[3] == f0v0) {
-                            if (f1a.c[2] == -1)
-                                adj.New().set(f1, 2, f1i.c[0]);
-                        } else if (f1i.c[3] == f0v1 && f1i.c[0] == f0v0) {
-                            if (f1a.c[3] == -1)
-                                adj.New().set(f1, 3, f1i.c[1]);
-                        }
+                                if (f1a.c[1] == -1)
+                                    adj.New().set(f1, 1, f1i.c[3]);
+                            } else if (f1i.c[2] == f0v1 && f1i.c[3] == f0v0) {
+                                if (f1a.c[2] == -1)
+                                    adj.New().set(f1, 2, f1i.c[0]);
+                            } else if (f1i.c[3] == f0v1 && f1i.c[0] == f0v0) {
+                                if (f1a.c[3] == -1)
+                                    adj.New().set(f1, 3, f1i.c[1]);
+                            }
                     } else {
                         VecI f1a = (faces ? tri.adjFace(f1) : tri.adjEdge(f1)); // get current f1 face adjacency (this can be either face or edge, because we're only checking if it's not set yet by comparing to -1)
                         VecI f1i = tri.ind(f1);
@@ -1008,12 +1008,12 @@ MeshBase &MeshBase::setAdjacencies(Bool faces, Bool edges) {
                                 adj.New().set(f1, 0, f1i.c[2]);
                         } else // add adjacency to other face only if it's not yet connected to anything !! THIS IS IMPORTANT AS WITHOUT THIS DIRECTX MESH OPTIMIZER MAY CRASH !!
                             if (f1i.c[1] == f0v1 && f1i.c[2] == f0v0) {
-                            if (f1a.c[1] == -1)
-                                adj.New().set(f1, 1, f1i.c[0]);
-                        } else if (f1i.c[2] == f0v1 && f1i.c[0] == f0v0) {
-                            if (f1a.c[2] == -1)
-                                adj.New().set(f1, 2, f1i.c[1]);
-                        }
+                                if (f1a.c[1] == -1)
+                                    adj.New().set(f1, 1, f1i.c[0]);
+                            } else if (f1i.c[2] == f0v1 && f1i.c[0] == f0v0) {
+                                if (f1a.c[2] == -1)
+                                    adj.New().set(f1, 2, f1i.c[1]);
+                            }
                     }
                 }
                 if (adj.elms()) {
@@ -1076,15 +1076,15 @@ MeshBase &MeshBase::setAdjacencies(Bool faces, Bool edges) {
                                 adj.New().set(f1, 0, f1i.c[2]);
                         } else // add adjacency to other face only if it's not yet connected to anything !! THIS IS IMPORTANT AS WITHOUT THIS DIRECTX MESH OPTIMIZER MAY CRASH !!
                             if (f1i.c[1] == f0v1 && f1i.c[2] == f0v0) {
-                            if (f1a.c[1] == -1)
-                                adj.New().set(f1, 1, f1i.c[3]);
-                        } else if (f1i.c[2] == f0v1 && f1i.c[3] == f0v0) {
-                            if (f1a.c[2] == -1)
-                                adj.New().set(f1, 2, f1i.c[0]);
-                        } else if (f1i.c[3] == f0v1 && f1i.c[0] == f0v0) {
-                            if (f1a.c[3] == -1)
-                                adj.New().set(f1, 3, f1i.c[1]);
-                        }
+                                if (f1a.c[1] == -1)
+                                    adj.New().set(f1, 1, f1i.c[3]);
+                            } else if (f1i.c[2] == f0v1 && f1i.c[3] == f0v0) {
+                                if (f1a.c[2] == -1)
+                                    adj.New().set(f1, 2, f1i.c[0]);
+                            } else if (f1i.c[3] == f0v1 && f1i.c[0] == f0v0) {
+                                if (f1a.c[3] == -1)
+                                    adj.New().set(f1, 3, f1i.c[1]);
+                            }
                     } else {
                         VecI f1a = (faces ? tri.adjFace(f1) : tri.adjEdge(f1)); // get current f1 face adjacency (this can be either face or edge, because we're only checking if it's not set yet by comparing to -1)
                         VecI f1i = tri.ind(f1);
@@ -1094,12 +1094,12 @@ MeshBase &MeshBase::setAdjacencies(Bool faces, Bool edges) {
                                 adj.New().set(f1, 0, f1i.c[2]);
                         } else // add adjacency to other face only if it's not yet connected to anything !! THIS IS IMPORTANT AS WITHOUT THIS DIRECTX MESH OPTIMIZER MAY CRASH !!
                             if (f1i.c[1] == f0v1 && f1i.c[2] == f0v0) {
-                            if (f1a.c[1] == -1)
-                                adj.New().set(f1, 1, f1i.c[0]);
-                        } else if (f1i.c[2] == f0v1 && f1i.c[0] == f0v0) {
-                            if (f1a.c[2] == -1)
-                                adj.New().set(f1, 2, f1i.c[1]);
-                        }
+                                if (f1a.c[1] == -1)
+                                    adj.New().set(f1, 1, f1i.c[0]);
+                            } else if (f1i.c[2] == f0v1 && f1i.c[0] == f0v0) {
+                                if (f1a.c[2] == -1)
+                                    adj.New().set(f1, 2, f1i.c[1]);
+                            }
                     }
                 }
                 if (adj.elms()) {

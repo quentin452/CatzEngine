@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 
 #include "../../../ThirdPartyLibs/begin.h"
 
@@ -1663,7 +1663,7 @@ Bool SQL::getCol(Int i, Str &value) {
                 if (type == SQL_BIT) {
                     value = (temp[0] ? "1" : "0");
                     return true;
-                }        // MySQL returns incorrectly 0 or 1 for SQL_BIT instead of "0" or "1"
+                } // MySQL returns incorrectly 0 or 1 for SQL_BIT instead of "0" or "1"
             if (len > 0) // 'len' can be -1 for null
             {
                 value = temp;
@@ -1731,7 +1731,7 @@ Bool SQL::getCol(Int i, Str8 &value) {
                 if (type == SQL_BIT) {
                     value = (temp[0] ? "1" : "0");
                     return true;
-                }        // MySQL returns incorrectly 0 or 1 for SQL_BIT instead of "0" or "1"
+                } // MySQL returns incorrectly 0 or 1 for SQL_BIT instead of "0" or "1"
             if (len > 0) // 'len' can be -1 for null
             {
                 value = temp;

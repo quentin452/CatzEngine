@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 MtrlBrushClass MtrlBrush;
 /******************************************************************************/
@@ -29,7 +29,7 @@ MtrlBrushClass &MtrlBrushClass::create() {
                                                              PL, u"Przeciągnij i upuść tutaj materiał\nNaciśnij LMB aby wybrać\nNaciśnij LMBx2 aby edytować", //\nNaciśnij RMB aby zmienić",
                                                              DE, u"LMB zum Auswählen drücken\nLMBx2 zum edit",                                                //\nRMB zum Ändern drücken",
                                                              RU, u"Нажмите LMB чтобы выбрать\nНажмите LMBx2 чтобы править",                                   //\nНажмите RMB чтобы изменить",
-                                                                                                                                                              //PO,u"Pressione o Botão Esquerdo do Rato para seleccionar\nPressione o Botão Direito do Rato para mudar",
+                                                                                                                                                              // PO,u"Pressione o Botão Esquerdo do Rato para seleccionar\nPressione o Botão Direito do Rato para mudar",
                                                              CN, u"按鼠标左键为选择\n2x按鼠标左键为编辑\n按鼠标右键修改"));
         image[i].alpha_mode = ALPHA_NONE;
         x += s + e;

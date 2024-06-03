@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 // MANAGE
@@ -323,7 +323,7 @@ MeshLod &MeshLod::setVtxColorAlphaAsTesselationIntensity(Bool tesselate_edges) {
                     base.include(VTX_COLOR);
                     REPA(base.vtx)
                     base.vtx.color(i) = WHITE;
-                }                                 // create vtx colors
+                } // create vtx colors
                 base.vtx.color(vi.index.x).a = 0; // set alpha to zero
             }
         }
@@ -445,7 +445,7 @@ MeshLod &MeshLod::joinAll(Bool test_material, Bool test_draw_group, Bool test_na
             if (!(parts[i].part_flag & MSHP_HIDDEN)) {
                 FlagDisable(first.part_flag, MSHP_HIDDEN);
                 break;
-            }                     // if at least one part is visible then set all as visible
+            } // if at least one part is visible then set all as visible
             first.base.create(T); // create from all
             parts.setNum(1);      // set only one part
             if (weld_pos_eps >= 0)

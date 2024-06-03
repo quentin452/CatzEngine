@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 MeshBase &MeshBase::addVtx(C Vec &pos) {
@@ -700,15 +700,15 @@ MeshBase &MeshBase::removeDegenerateFaces(Flt eps) {
                     tri_from_quad.New().from(i, p1, p2, p3);
             } else // second tri can also be valid, this can happen for <--| case when 2 tris are valid but quad is not
                 if (Tri(vp0, vp1, vp2).valid(eps)) {
-                tri_from_quad.New().from(i, p0, p1, p2);
-                if (Tri(vp2, vp3, vp0).valid(eps))
-                    tri_from_quad.New().from(i, p2, p3, p0);
-            } else //                                                    \ |
-                if (Tri(vp1, vp2, vp3).valid(eps))
-                tri_from_quad.New().from(i, p1, p2, p3);
-            else // no need to check for 013 because it was checked at start                                                                    \|
-                if (Tri(vp2, vp3, vp0).valid(eps))
-                tri_from_quad.New().from(i, p2, p3, p0); // no need to check for 012 because it was checked at start
+                    tri_from_quad.New().from(i, p0, p1, p2);
+                    if (Tri(vp2, vp3, vp0).valid(eps))
+                        tri_from_quad.New().from(i, p2, p3, p0);
+                } else //                                                    \ |
+                    if (Tri(vp1, vp2, vp3).valid(eps))
+                        tri_from_quad.New().from(i, p1, p2, p3);
+                    else // no need to check for 013 because it was checked at start                                                                    \|
+                        if (Tri(vp2, vp3, vp0).valid(eps))
+                            tri_from_quad.New().from(i, p2, p3, p0); // no need to check for 012 because it was checked at start
         }
     }
 

@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 flt GetDist(C Box &box) {
     Box b = box - box.center();          // center
@@ -531,7 +531,7 @@ void PreviewClass::draw(C GuiPC &gpc) {
     if (MaterialRegion::Texture *tex = CAST(MaterialRegion::Texture, Gui.ms())) {
         D.clip();
         Vec2 size(D.w(), D.h());
-        size = size.avg(); //if(tex.type==MaterialRegion.TEX_RFL_ALL)size.x*=4.0/3;
+        size = size.avg(); // if(tex.type==MaterialRegion.TEX_RFL_ALL)size.x*=4.0/3;
         flt x = D.w();
         if (MtrlEdit.visible())
             MIN(x, MtrlEdit.rect().min.x);

@@ -5,8 +5,9 @@
       which would remove it from container making the reference invalid.
 
 /******************************************************************************/
+#include "../../stdafx.h"
 #include "../Platforms/iOS/iOS.h"
-#include "stdafx.h"
+
 #if DEBUG
 #define WIN_STORE Windows::ApplicationModel::Store::CurrentAppSimulator
 #else
@@ -116,8 +117,7 @@ PlatformStore::PlatformStore() {
     try // exception may occur when using 'CurrentApp' instead of 'CurrentAppSimulator' on a debug build
     {
         _supports_items = (WIN_STORE::LicenseInformation->IsActive && !WIN_STORE::LicenseInformation->IsTrial); // purchases are unavailable for trial according to this page, https://msdn.microsoft.com/en-us/windows/uwp/monetize/enable-in-app-product-purchases "In-app products cannot be offered from a trial version of an app"
-    }
-    catch (...) {
+    } catch (...) {
     }
 
 // list purchases
@@ -274,8 +274,7 @@ Bool PlatformStore::refreshItems(C CMemPtr<Str> &item_ids) {
                         }
                     }
             });
-        }
-        catch (...) {
+        } catch (...) {
             return false;
         }
         return true;
@@ -354,8 +353,7 @@ Bool PlatformStore::refreshPurchases() {
                         callback(REFRESHED_PURCHASES, null);
                 }
         });
-    }
-    catch (...) {
+    } catch (...) {
         return false;
     }
 #elif ANDROID

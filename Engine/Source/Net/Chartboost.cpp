@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 
 #if IOS
 #include "../Platforms/iOS/iOS.h"

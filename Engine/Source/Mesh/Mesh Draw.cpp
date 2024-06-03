@@ -1,7 +1,7 @@
 /******************************************************************************/
 // TODO: reusing another MeshPart variation for drawing shadows when shadow shader doesn't use material, the best way would be to use Int MeshPart.last_shadow_instance, last_shadow_instance_no_cull and process that instead of MeshPart.Variation.last_instance when 'ReuseDefaultMaterialForNonSkinnedShadowShader' is detected, however it would require additional memory usage in MeshPart and extra overhead in 'drawShadow'
 // TODO: consider drawing alpha tested materials after opaque, to implement: add new AlphaShaderDraws, process them in Mesh.draw if(material.hasAlphaTest - may need Bool member for fast access), this could potentially improve performance, probably more on mobile tile-based renderers
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 static INLINE void SetViewMatrix(Matrix &view_matrix) { view_matrix = CamMatrixInv; }

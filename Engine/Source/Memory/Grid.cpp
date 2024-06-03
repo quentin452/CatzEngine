@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 #define MAX_NORMAL 1743392200 // -MAX_NORMAL .. MAX_NORMAL is the biggest normal cell that doesn't overflow
 /******************************************************************************

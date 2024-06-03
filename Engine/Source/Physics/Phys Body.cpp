@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 #include "PhysX Stream.h"
 /******************************************************************************
@@ -119,8 +119,8 @@ void PhysMesh::freeHelperData() {
         _physx_cooked_data.del();
     } else // delete helpers only if we've created data from them
         if (_physx_cooked_data.elms()) {
-        Delete(_base);
-    }
+            Delete(_base);
+        }
 #else
     _physx_cooked_data.del();
     // don't delete '_base' and '_bullet_cooked_data' since Bullet Phys Meshes uses them (bullet mesh vtx/tri is directly mapped to '_base', while '_bullet_cooked_data' contains some extra precomputed data)
@@ -896,13 +896,13 @@ static Bool ImportPhysX(MeshBase &mesh, File &f) // import MeshBase from PhysX c
                         }
                     else //  8-bit indexes
                         if (flags & 16)
-                        FREPA(mesh.tri) {
-                            VecUS t;
-                            f >> t;
-                            mesh.tri.ind(i) = t;
-                        }
-                    else                                     // 16-bit indexes
-                        f.getN(mesh.tri.ind(), mesh.tris()); // 32-bit indexes
+                            FREPA(mesh.tri) {
+                                VecUS t;
+                                f >> t;
+                                mesh.tri.ind(i) = t;
+                            }
+                        else                                     // 16-bit indexes
+                            f.getN(mesh.tri.ind(), mesh.tris()); // 32-bit indexes
                     return true;
                 }
             } break;
@@ -925,13 +925,13 @@ static Bool ImportPhysX(MeshBase &mesh, File &f) // import MeshBase from PhysX c
                         }
                     else //  8-bit indexes
                         if (flags & 8)
-                        FREPA(mesh.tri) {
-                            VecUS t;
-                            f >> t;
-                            mesh.tri.ind(i) = t;
-                        }
-                    else                                     // 16-bit indexes
-                        f.getN(mesh.tri.ind(), mesh.tris()); // 32-bit indexes
+                            FREPA(mesh.tri) {
+                                VecUS t;
+                                f >> t;
+                                mesh.tri.ind(i) = t;
+                            }
+                        else                                     // 16-bit indexes
+                            f.getN(mesh.tri.ind(), mesh.tris()); // 32-bit indexes
                     return true;
                 }
             } break;
@@ -952,13 +952,13 @@ static Bool ImportPhysX(MeshBase &mesh, File &f) // import MeshBase from PhysX c
                         }
                     else //  8-bit indexes
                         if (flags & 8)
-                        FREPA(mesh.tri) {
-                            VecUS t;
-                            f >> t;
-                            mesh.tri.ind(i) = t;
-                        }
-                    else                                     // 16-bit indexes
-                        f.getN(mesh.tri.ind(), mesh.tris()); // 32-bit indexes
+                            FREPA(mesh.tri) {
+                                VecUS t;
+                                f >> t;
+                                mesh.tri.ind(i) = t;
+                            }
+                        else                                     // 16-bit indexes
+                            f.getN(mesh.tri.ind(), mesh.tris()); // 32-bit indexes
                     return true;
                 }
             } break;

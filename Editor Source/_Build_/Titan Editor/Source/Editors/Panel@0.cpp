@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 PanelEditor PanelEdit;
 /******************************************************************************/
@@ -337,7 +337,7 @@ void PanelEditor::flush() {
         if (ElmPanel *data = elm->panelData()) {
             data->newVer();
             data->from(edit);
-        }                                // modify just before saving/sending in case we've received data from server after edit
+        } // modify just before saving/sending in case we've received data from server after edit
         Save(edit, Proj.editPath(*elm)); // edit
         Save(*game, Proj.gamePath(*elm));
         Proj.savedGame(*elm); // game

@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 #define MAX_DENSITY 0.98f // was "1-EPS_GPU" but big values generate unnatural focus points in the FogBall Center

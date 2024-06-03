@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 
 /******************************************************************************/
@@ -112,14 +112,14 @@ bool EditGuiSkin::ButtonImage::sync(GuiSkin::ButtonImage &val, C ButtonImage &sr
     bool changed = super::sync(val, src, src_val);
     changed |= Sync(image, src.image, image_id, src.image_id);
     changed |= Sync(image_color, src.image_color, val.image_color, src_val.image_color);
-    //changed|=Sync(image_color_add, src.image_color_add, val.image_color_add, src_val.image_color_add);
+    // changed|=Sync(image_color_add, src.image_color_add, val.image_color_add, src_val.image_color_add);
     return changed;
 }
 bool EditGuiSkin::ButtonImage::undo(GuiSkin::ButtonImage &val, C ButtonImage &src, C GuiSkin::ButtonImage &src_val) {
     bool changed = super::undo(val, src, src_val);
     changed |= Undo(image, src.image, image_id, src.image_id);
     changed |= Undo(image_color, src.image_color, val.image_color, src_val.image_color);
-    //changed|=Undo(image_color_add, src.image_color_add, val.image_color_add, src_val.image_color_add);
+    // changed|=Undo(image_color_add, src.image_color_add, val.image_color_add, src_val.image_color_add);
     return changed;
 }
 bool EditGuiSkin::ButtonImage::save(File &f) C {

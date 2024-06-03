@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 namespace Edit {
 /******************************************************************************/
@@ -659,7 +659,7 @@ void Source::writeForcedCtor(Memc<CodeLine> &clines, Symbol &Class, Symbol *&Nam
         line.append(' ', TOKEN_NONE);
         expandName(line, line.cols.elms(), Class, &Class, Namespace); // X::X
         line.append("()", TOKEN_OPERATOR);                            // X::X()
-    }                                                                 // braces so that we won't use 'line' after 'writeCtorInit' because that may change its address
+    } // braces so that we won't use 'line' after 'writeCtorInit' because that may change its address
 
     Int line_i = clines.elms() - 1;
     FREPA(Class.ctor_inits)

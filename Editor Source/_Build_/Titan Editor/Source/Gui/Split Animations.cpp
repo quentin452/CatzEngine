@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 SplitAnimation SplitAnim;
 /******************************************************************************/
@@ -84,17 +84,17 @@ void SplitAnimation::splitDo() {
                                 Server.setElmShort(base->id);
                             } else // next are created as new anim elements
                                 if (Elm *anim_elm = Proj.newElm(ELM_ANIM, base->parent_id, &anim.name(), false))
-                                if (ElmAnim *anim_data = anim_elm->animData()) {
-                                    anim_data->newVer();
-                                    anim_data->skel_id = base_data->skel_id;
-                                    anim_data->skel_time = time;
-                                    anim_data->transform = base_data->transform;
-                                    anim_data->linear(base_data->linear()); // set linear to the same value as the main animation, this will make reload use that value
-                                    anim_data->fps = base_data->fps;
-                                    anim_data->setSrcFile(FileParams::Encode(files), time);
-                                    Proj.elmReload(anim_elm->id, false, false);
-                                    // sending to Server was already queued in 'Proj.newElm'
-                                }
+                                    if (ElmAnim *anim_data = anim_elm->animData()) {
+                                        anim_data->newVer();
+                                        anim_data->skel_id = base_data->skel_id;
+                                        anim_data->skel_time = time;
+                                        anim_data->transform = base_data->transform;
+                                        anim_data->linear(base_data->linear()); // set linear to the same value as the main animation, this will make reload use that value
+                                        anim_data->fps = base_data->fps;
+                                        anim_data->setSrcFile(FileParams::Encode(files), time);
+                                        Proj.elmReload(anim_elm->id, false, false);
+                                        // sending to Server was already queued in 'Proj.newElm'
+                                    }
                         }
                         Proj.refresh(); // names were changed, elements added and importing set
                         hide();
@@ -236,7 +236,7 @@ void SplitAnimation::add(C Str &text) {
                     left = false;
                 else // there are no name tokens on the left  side
                     if (name_range_right.y < name_range_right.x)
-                    left = true; // there are no name tokens on the right side
+                        left = true; // there are no name tokens on the right side
 
                 VecI2 name_range = (left ? name_range_left : name_range_right);
                 Str name;

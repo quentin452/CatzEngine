@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 MiscRegion Misc;
 /******************************************************************************/
@@ -180,12 +180,12 @@ void MiscRegion::create() {
         menu_menu.New().create("Fullscreen", Fullscreen, T).kbsc(KbSc(KB_F11)).display(MLTC(null, PL, u"Pełny Ekran", DE, u"Vollbild", RU, u"Полноэкранный", PO, u"Ecrã inteiro")).desc(MLT("Toggle fullscreen mode", PL, u"Zmień pełny ekran", DE, "Wechseln zu Fullscreen Modus", RU, u"Переключить полноэкранный режим", PO, u"Accionar modo de ecrã inteiro"));
         menu_menu.New().create("Screenshot", Screenshot, T).kbsc(KbSc(KB_PRINT)).display(MLTC(null, RU, u"Скриншот")).desc("Take a screenshot and save it on the Desktop" /*MLTC(u"Take a screenshot and save it to \"ScreenShot\" folder inside the Editor", PL, u"Pobierz ekran oraz zapisz go do katalogu \"ScreenShot\"", DE, u"Macht einen Screenshot und speichert ihn in \"ScreenShot\"", RU, u"Сделать скриншот и сохранить в \"ScreenShot\"", PO, u"Captar um screenshot e guardar em \"ScreenShot\"")*/);
         menu_menu.New().create("Calculator", CalcShow, T).kbsc(KbSc(KB_EQUAL, KBSC_CTRL_CMD));
-        //menu_menu.New().create("Verify Elements", VerifyElms, T).desc("Verify if project elemets are accessing elements that haven't been removed.");
-        //menu_menu.New().create(STEAM ? "License Key / Steam Subscription" : "License Key", SetLicense, T).desc("Set Your License Key");
+        // menu_menu.New().create("Verify Elements", VerifyElms, T).desc("Verify if project elemets are accessing elements that haven't been removed.");
+        // menu_menu.New().create(STEAM ? "License Key / Steam Subscription" : "License Key", SetLicense, T).desc("Set Your License Key");
 #if !STEAM // Valve doesn't allow this
         menu_menu.New().create("Esenthel Store", AppStore, T).desc("Open Esenthel Store where you can buy and sell items");
 #endif
-        //menu_menu.New().create("Opened Files"   , ViewOpened, T).kbsc(KbSc(KB_3, KBSC_ALT)).flag(MENU_TOGGLABLE);
+        // menu_menu.New().create("Opened Files"   , ViewOpened, T).kbsc(KbSc(KB_3, KBSC_ALT)).flag(MENU_TOGGLABLE);
         menu_menu++;
         menu_menu.New().create("Editor Options", EditorOptions, T).kbsc(KbSc(KB_F9));
         menu_menu.New().create("Project Settings", ProjSettings, T);
@@ -220,12 +220,12 @@ void MiscRegion::create() {
 #if WINDOWS
         build_menu.New().create("Debug", Debug, T).kbsc(KbSc(KB_F5, KBSC_CTRL_CMD)).desc("Play active application from within Visual Studio allowing to debug when needed");
 #elif MAC
-        //build_menu.New().create("Debug"        , Debug, T).kbsc(KbSc(KB_F5 , KBSC_CTRL_CMD)).desc("Play active application from within Xcode allowing to debug when needed");
+        // build_menu.New().create("Debug"        , Debug, T).kbsc(KbSc(KB_F5 , KBSC_CTRL_CMD)).desc("Play active application from within Xcode allowing to debug when needed");
 #elif LINUX
-        //build_menu.New().create("Debug"        , Debug, T).kbsc(KbSc(KB_F5 , KBSC_CTRL_CMD)).desc("Play active application from within NetBeans allowing to debug when needed");
+        // build_menu.New().create("Debug"        , Debug, T).kbsc(KbSc(KB_F5 , KBSC_CTRL_CMD)).desc("Play active application from within NetBeans allowing to debug when needed");
 #endif
         // TODO:
-        //build_menu.New().create("Run To Cursor", RunToCursor, T).kbsc(KbSc(KB_F10, KBSC_CTRL_CMD));
+        // build_menu.New().create("Run To Cursor", RunToCursor, T).kbsc(KbSc(KB_F10, KBSC_CTRL_CMD));
         build_menu.New().create("Build", Build, T).kbsc(KbSc(KB_F7)).desc("Build application but don't start it");
         build_menu.New().create("Rebuild", Rebuild, T).kbsc(KbSc(KB_F7, KBSC_CTRL_CMD)).desc("Delete all temporary files that were created during building process and build again");
         build_menu.New().create("Clean", Clean, T).kbsc(KbSc(KB_F7, KBSC_CTRL_CMD | KBSC_ALT)).desc("Delete all temporary files that were created during building process of this project");
@@ -287,7 +287,7 @@ void MiscRegion::create() {
 #endif
         build_menu.New().create("Windows EXE", ConfigEXE, T).flag(MENU_TOGGLABLE);
         build_menu.New().create("Windows DLL", ConfigDLL, T).flag(MENU_TOGGLABLE);
-        //build_menu.New().create("Windows LIB"      , ConfigLIB  , T).flag(MENU_TOGGLABLE);
+        // build_menu.New().create("Windows LIB"      , ConfigLIB  , T).flag(MENU_TOGGLABLE);
         build_menu.New().create("Windows Universal", ConfigUWP, T).flag(MENU_TOGGLABLE);
 #if WINDOWS
         build_menu.New().create("Android APK", ConfigAPK, T).flag(MENU_TOGGLABLE);
@@ -371,7 +371,7 @@ void MiscRegion::draw(C GuiPC &gpc) {
                 D.clip(gpc.clip);
                 Rect r = rect();
                 r.setX(r.max.x, Proj.rect().max.x);
-                Color col = BackgroundColor(); //if(GuiSkin *skin=getSkin()){col=skin.region.normal_color; col.a=255;}
+                Color col = BackgroundColor(); // if(GuiSkin *skin=getSkin()){col=skin.region.normal_color; col.a=255;}
                 r.draw(col);
             }
         super::draw(gpc);

@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 #define CC4_TXDS CC4('T', 'X', 'D', 'S') // TextStyle (formerly TextDrawSettings)
@@ -1038,7 +1038,7 @@ struct TextProcessor {
                 goto aln_next_data;
             }
 
-        aln_have_char : {
+        aln_have_char: {
             Char n = text.n();
             offset++;
             if (chr == '\n') {
@@ -1149,7 +1149,7 @@ struct TextProcessor {
                 goto next_data;
             }
 
-        have_char : {
+        have_char: {
             Int offset_start = offset; // 'offset_start' is located at 'chr'
 
             if (prev_chr)
@@ -1234,7 +1234,7 @@ struct TextProcessor {
             if (prev_chr) {
                 advanceSplit('\0');
                 prev_chr = '\0';
-            }                  // make sure to clear 'prev_chr', because this class can still be used after this function, BEFORE 'width'
+            } // make sure to clear 'prev_chr', because this class can still be used after this function, BEFORE 'width'
             split.length = -1; // unlimited, end(offset);
             if (split_width)
                 *split_width = fastWidth(width, split);
@@ -1318,7 +1318,7 @@ struct TextProcessor {
                     goto aln_next_data;
                 }
 
-            aln_have_char : {
+            aln_have_char: {
                 Char n = text.n();
                 offset++;
                 if (chr == '\n') {
@@ -1433,7 +1433,7 @@ struct TextProcessor {
                     goto next_data;
                 }
 
-            have_char : {
+            have_char: {
                 Int offset_start = offset; // 'offset_start' is located at 'chr'
 
                 if (prev_chr)
@@ -1639,7 +1639,7 @@ struct TextDrawerHW : TextDrawer {
             MaterialClear();
         } else // if drawing text while rendering, then decrease the alpha channel (glow), for sub-pixel we will be changing 'D.alphaFactor' for which we have to call 'MaterialClear'
             if (Renderer.inside())
-            D.alpha(ALPHA_RENDER_BLEND); // if drawing text while rendering, set special alpha mode, but don't bother to restore it, as in Rendering, alpha blending is always set for each call
+                D.alpha(ALPHA_RENDER_BLEND); // if drawing text while rendering, set special alpha mode, but don't bother to restore it, as in Rendering, alpha blending is always set for each call
 
         // font depth
         if (D._text_depth) // apply new state
@@ -2067,7 +2067,7 @@ struct TextDrawerHW : TextDrawer {
         if (cur == offset && cur != next_offset) {
             cur_x = pos.x;
             cur_w = size.y / 2;
-        }                                                  // allow drawing cursor at the end only if it's not going to be drawn in the next line
+        } // allow drawing cursor at the end only if it's not going to be drawn in the next line
         if (cur_w >= 0 && !Kb._cur_hidden && App.active()) // it's faster to check 'App.active' here instead of adjusting 'Kb._cur_hidden' all the time based on 'App.active'
         {
             VI.flush();

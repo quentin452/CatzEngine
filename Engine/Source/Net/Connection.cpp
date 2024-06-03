@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 #define CONNECTION_CC4 CC4('E', 'E', 'N', 'C') // Esenthel Engine Network Connection
@@ -178,7 +178,7 @@ CONNECT_RECEIVE Connection::update(Int timeout, Bool read) {
                 goto error; // set '_state' to prevent calling 'flush' in the 'del' method
             }
             return CONNECT_RECEIVE_FULL; // 'updateState' expects CONNECT_RECEIVE_FULL when having CONNECT_GREETED
-        }                                // otherwise continue below
+        } // otherwise continue below
     case CONNECT_AWAIT_GREET:
         // in this section only 'end_time' and 'adjust_time' should be set
         if (timeout > 0) {
@@ -212,7 +212,7 @@ CONNECT_RECEIVE Connection::update(Int timeout, Bool read) {
             if (_state == CONNECT_GREETED) {
                 _cipher.decrypt(&b, &b, 1, _in_offset);
                 _in_offset++;
-            }                                                     // decrypt
+            } // decrypt
             _msg_size |= ((b & 127) << (_msg_size_progress * 7)); // each step grants knowledge of 7 bits
             if (b & 128)
                 _msg_size_progress++;
@@ -312,7 +312,7 @@ Bool Connection::send(File &f, Int size, Bool flush) {
                 _out.pos(out_pos);
                 _out.size(out_size);
                 return false;
-            }                 // if failed to read from file, then cancel this entire 'send' call, by restoring both position and size, and return false
+            } // if failed to read from file, then cancel this entire 'send' call, by restoring both position and size, and return false
             _out.put(buf, l); // write data
             size -= l;
         }

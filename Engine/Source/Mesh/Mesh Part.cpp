@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 #define LEAF_RANDOM_BEND_RANGE 1024
@@ -748,19 +748,19 @@ MeshPart &MeshPart::variation(Int variation, C MaterialPtr &material, Int lod_in
         T.material(material, lod_index);
     else // 0-th is stored in MeshPart
         if (InRange(--variation, _variations)) {
-        Variation &var = _variations[variation];
-        if (var.material != material) {
+            Variation &var = _variations[variation];
+            if (var.material != material) {
 #if SUPPORT_MATERIAL_CHANGE_IN_RENDERING
-            var.unlink();
+                var.unlink();
 #else
-            if (var.drawn())
-                Exit("Changing Mesh Material after it was already requested to be drawn with a different Material is not supported");
+                if (var.drawn())
+                    Exit("Changing Mesh Material after it was already requested to be drawn with a different Material is not supported");
 #endif
-            var.material = material;
-            if (lod_index >= 0)
-                setShader(lod_index, var); // set shader only if valid lod specified (negative can be used for special case when we don't want to set shaders yet, for example because they may require locking D._lock)
+                var.material = material;
+                if (lod_index >= 0)
+                    setShader(lod_index, var); // set shader only if valid lod specified (negative can be used for special case when we don't want to set shaders yet, for example because they may require locking D._lock)
+            }
         }
-    }
     return T;
 }
 C MaterialPtr &MeshPart::variationNull(Int variation) C {

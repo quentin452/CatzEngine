@@ -112,12 +112,12 @@ enum DIR_ENUM : Byte // Direction Enums
 };
 enum DIR_FLAG // Direction Flags
 {
-    DIRF_RIGHT = 1 << DIR_RIGHT,     // right
-    DIRF_LEFT = 1 << DIR_LEFT,       // left
-    DIRF_UP = 1 << DIR_UP,           // up
-    DIRF_DOWN = 1 << DIR_DOWN,       // down
-    DIRF_FORWARD = 1 << DIR_FORWARD, // forward
-    DIRF_BACK = 1 << DIR_BACK,       // backward
+    DIRF_RIGHT = 1 << DIR_ENUM::DIR_RIGHT,     // right
+    DIRF_LEFT = 1 << DIR_ENUM::DIR_LEFT,       // left
+    DIRF_UP = 1 << DIR_ENUM::DIR_UP,           // up
+    DIRF_DOWN = 1 << DIR_ENUM::DIR_DOWN,       // down
+    DIRF_FORWARD = 1 << DIR_ENUM::DIR_FORWARD, // forward
+    DIRF_BACK = 1 << DIR_ENUM::DIR_BACK,       // backward
 
     DIRF_X = DIRF_RIGHT | DIRF_LEFT,
     DIRF_Y = DIRF_UP | DIRF_DOWN,

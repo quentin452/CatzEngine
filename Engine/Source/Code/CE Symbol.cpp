@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 namespace Edit {
 /******************************************************************************/
@@ -43,9 +43,9 @@ Symbol *GetFinalSymbol(Symbol *symbol, Memc<Symbol::Modif> *templates) // simpli
             break;
         else // we can't proceed to the value of the function without calling it
             if (symbol->value)
-            symbol = symbol->value();
-        else
-            break;
+                symbol = symbol->value();
+            else
+                break;
     }
     return symbol;
 }
@@ -159,7 +159,7 @@ Bool Symbol::Modif::same(Modif &modif, Bool test_const, Bool test_ref) {
             if (modif.templates[i].src_template == t) {
                 b = &modif.templates[i];
                 break;
-            }           // 'modif' templates
+            } // 'modif' templates
             if (a || b) // at least one is present
             {
                 if (!a || !b)

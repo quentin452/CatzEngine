@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 
 #define ZERO_BUFFERS 0 // if zero helper buffers after hash calculation, to clear sensitive information
 

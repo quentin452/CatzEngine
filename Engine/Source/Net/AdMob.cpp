@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 #if IOS
 
 #include "../../../ThirdPartyLibs/begin.h"

@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 #if !WINDOWS
 #include <dlfcn.h>
 #endif

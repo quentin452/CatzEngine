@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 const Rect RectZero(0, 0, 0, 0);
@@ -1055,16 +1055,16 @@ Vec2 Delta(C Rect &a, C Rect &b) {
         delta.x = b.min.x - a.max.x;
     else // +
         if (b.max.x < a.min.x)
-        delta.x = b.max.x - a.min.x;
-    else             // -
-        delta.x = 0; // 0
+            delta.x = b.max.x - a.min.x;
+        else             // -
+            delta.x = 0; // 0
     if (b.min.y > a.max.y)
         delta.y = b.min.y - a.max.y;
     else // +
         if (b.max.y < a.min.y)
-        delta.y = b.max.y - a.min.y;
-    else             // -
-        delta.y = 0; // 0
+            delta.y = b.max.y - a.min.y;
+        else             // -
+            delta.y = 0; // 0
     return delta;
 }
 Flt DeltaX(C Rect &a, C Rect &b) {
@@ -1107,7 +1107,7 @@ Rect Fit(Flt src_aspect, C Rect &dest_rect, FIT_MODE fit) {
         goto fit_height;
 
     case FIT_WIDTH:
-    fit_width : {
+    fit_width: {
         Flt size = w / src_aspect, d = h - size;
         switch (fit & (FIT_UP | FIT_DOWN)) {
         default:
@@ -1123,7 +1123,7 @@ Rect Fit(Flt src_aspect, C Rect &dest_rect, FIT_MODE fit) {
     } break;
 
     default:
-    fit_height : {
+    fit_height: {
         Flt size = h * src_aspect, d = w - size;
         switch (fit & (FIT_LEFT | FIT_RIGHT)) {
         default:
@@ -1277,7 +1277,7 @@ Bool PackRectsKnownLimit(C CMemPtr<RectSizeAnchor> &sizes, MemPtr<RectI> rects, 
         return true;
     }
 
-max_rects : { // try "max rects" next, because it has best occupancy rate
+max_rects: { // try "max rects" next, because it has best occupancy rate
     RP::MaxRectsBinPack pack(limit.x, limit.y, allow_rotate);
     rp_src.setNum(sizes.elms());
     REPA(rp_src) {

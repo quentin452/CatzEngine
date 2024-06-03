@@ -4,7 +4,7 @@
       please read comments in Animation.cpp file.
 
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 #if DEBUG && 0
 #define FBX_LINK_TYPE FBX_LINK_LIB
 #endif

@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 int Compare(C Enum::Elm &a, C Enum::Elm &b) { return Compare(a.name, b.name, true); }
 CodeView CodeEdit;

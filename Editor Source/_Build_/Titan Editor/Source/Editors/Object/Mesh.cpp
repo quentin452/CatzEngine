@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 void ObjView::meshDelete() {
     if (mesh_parts.edit_selected()) {
@@ -541,7 +541,7 @@ void ObjView::meshCreateFace() {
                             Swap(quad.p[0], quad.p[1]);
                         }
                     }
-                    //quad.setNormal(); not needed since it's called below
+                    // quad.setNormal(); not needed since it's called below
                 }
                 REPAO(quad.p) *= mesh_matrix;
                 Vec quad_n = quad.getNormal();
@@ -772,9 +772,9 @@ void ObjView::meshTesselate() {
     if (partOp(i)) {
         MeshPart &part = lod.parts[i];
         MeshBase &base = part.base;
-        //base.setVtxDup();
+        // base.setVtxDup();
         base.tesselate(pos_eps);
-        //base.exclude(VTX_DUP);
+        // base.exclude(VTX_DUP);
         part.setRender();
         changed = true;
     }
@@ -953,7 +953,7 @@ void ObjView::meshSeparate1() {
                 mesh_data->transform = mesh_matrix;
                 if (T.mesh_elm)
                     if (ElmMesh *src_mesh_data = T.mesh_elm->meshData()) {
-                        mesh_data->body_id = T.mesh_elm->id; //src_mesh_data.body_id;
+                        mesh_data->body_id = T.mesh_elm->id; // src_mesh_data.body_id;
                         mesh_data->draw_group_id = src_mesh_data->draw_group_id;
                     }
                 Mesh mesh_edit;
@@ -1023,7 +1023,7 @@ void ObjView::meshSeparateN() {
                     mesh_data->transform = mesh_matrix;
                     if (T.mesh_elm)
                         if (ElmMesh *src_mesh_data = T.mesh_elm->meshData()) {
-                            mesh_data->body_id = T.mesh_elm->id; //src_mesh_data.body_id;
+                            mesh_data->body_id = T.mesh_elm->id; // src_mesh_data.body_id;
                             mesh_data->draw_group_id = src_mesh_data->draw_group_id;
                         }
                     Mesh mesh_edit;

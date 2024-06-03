@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 namespace EE {
 /******************************************************************************
 void MeshBase::corridor(MeshBase &mshb, Int e0, Int e1) // add 'mshb' and create en edged corridor between 'e0' (from self) and 'e1' (from 'mshb') edges

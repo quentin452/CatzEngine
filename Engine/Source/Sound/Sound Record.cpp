@@ -6,7 +6,7 @@
       -objects can be processed on the main thread by the user, and on the sound thread by the engine
 
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 #if APPLE
 #if MAC

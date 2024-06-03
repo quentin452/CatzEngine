@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 #define SUPPORT_OCULUS (WINDOWS_OLD && DX11)
 
 #if SUPPORT_OCULUS

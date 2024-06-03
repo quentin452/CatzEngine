@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 #define CC4_SKEL CC4('S', 'K', 'E', 'L')
@@ -942,7 +942,7 @@ static Bool BoneName(C SkelBone &bone, CChar8 *name) // this works as 'Contains'
             if (!Upper(start[i])) {
                 all_upper = false;
                 break;
-            }                       // check if name is all uppercase character
+            } // check if name is all uppercase character
             if (start != bone.name) // check previous character (if there's any)
             {
                 if (all_upper && Upper(start[-1]))
@@ -958,7 +958,7 @@ static Bool BoneName(C SkelBone &bone, CChar8 *name) // this works as 'Contains'
                 if (Lower(start[i])) {
                     lower = true;
                     break;
-                }          // check if there's at least one lowercase character
+                } // check if there's at least one lowercase character
                 if (lower) // check only if at least one lowercase, don't check if all uppercase
                     REP(length)
                 if (Upper(start[i])    // if this is an uppercase character
@@ -1128,76 +1128,76 @@ Skeleton &Skeleton::setBoneTypes() {
         else // "Wings" used by "Bat", check this at the start because there are many wings that have hand/finger, but we want the type to be Wing
 
             if (BoneName(bone, "Spine") || BoneName(bone, "Pelvis") || BoneName(bone, "Hips") || BoneName(bone, "Chest") || BoneName(bone, "Torso") || BoneName(bone, "Body") || BoneName(bone, "Ribs") || BoneName(bone, "RibCage") || BoneName(bone, "Rib Cage") || BoneName(bone, "Rib_Cage"))
-            type = BONE_SPINE;
-        else
+                type = BONE_SPINE;
+            else
 
-            if (BoneName(bone, "Shoulder") || BoneName(bone, "Clavicle") || BoneName(bone, "CollarBone"))
-            type = BONE_SHOULDER;
-        else if (BoneName(bone, "ForeArm") || BoneName(bone, "LowerArm") || BoneName(bone, "Elbow"))
-            type = BONE_LOWER_ARM;
-        else if (BoneName(bone, "Finger") || BoneName(bone, "Fingers"))
-            type = BONE_FINGER;
-        else // "Fingers" used by "Troll"
-            if (BoneName(bone, "Hand") || BoneName(bone, "Wrist") || BoneName(bone, "Palm") && !BoneName(bone, "LegPalm"))
-            type = BONE_HAND;
-        else
+                if (BoneName(bone, "Shoulder") || BoneName(bone, "Clavicle") || BoneName(bone, "CollarBone"))
+                type = BONE_SHOULDER;
+            else if (BoneName(bone, "ForeArm") || BoneName(bone, "LowerArm") || BoneName(bone, "Elbow"))
+                type = BONE_LOWER_ARM;
+            else if (BoneName(bone, "Finger") || BoneName(bone, "Fingers"))
+                type = BONE_FINGER;
+            else // "Fingers" used by "Troll"
+                if (BoneName(bone, "Hand") || BoneName(bone, "Wrist") || BoneName(bone, "Palm") && !BoneName(bone, "LegPalm"))
+                    type = BONE_HAND;
+                else
 
-            if (BoneName(bone, "Calf") || BoneName(bone, "Crus") || BoneName(bone, "Shin") || BoneName(bone, "LowerLeg") || BoneName(bone, "HorseLink") || BoneName(bone, "Knee"))
-            type = BONE_LOWER_LEG;
-        else if (BoneName(bone, "Toe") || BoneName(bone, "Toes") || Equal(bone.name, "FootL0") || Equal(bone.name, "FootR0"))
-            type = BONE_TOE;
-        else // "Toes" used by "Cyclop", "FootL0/FootR0" is from the EE recommended naming system
-            if (BoneName(bone, "Foot") || BoneName(bone, "Feet") || BoneName(bone, "Ankle") || BoneName(bone, "LegPalm"))
-            type = BONE_FOOT;
-        else // "LegPalm" used by "Wolf"
+                    if (BoneName(bone, "Calf") || BoneName(bone, "Crus") || BoneName(bone, "Shin") || BoneName(bone, "LowerLeg") || BoneName(bone, "HorseLink") || BoneName(bone, "Knee"))
+                    type = BONE_LOWER_LEG;
+                else if (BoneName(bone, "Toe") || BoneName(bone, "Toes") || Equal(bone.name, "FootL0") || Equal(bone.name, "FootR0"))
+                    type = BONE_TOE;
+                else // "Toes" used by "Cyclop", "FootL0/FootR0" is from the EE recommended naming system
+                    if (BoneName(bone, "Foot") || BoneName(bone, "Feet") || BoneName(bone, "Ankle") || BoneName(bone, "LegPalm"))
+                        type = BONE_FOOT;
+                    else // "LegPalm" used by "Wolf"
 
-            if (BoneName(bone, "Neck"))
-            type = BONE_NECK;
-        else if (BoneName(bone, "Jaw"))
-            type = BONE_JAW;
-        else if (BoneName(bone, "Tongue"))
-            type = BONE_TONGUE;
-        else if (BoneName(bone, "Nose") || BoneName(bone, "Snout"))
-            type = BONE_NOSE;
-        else
-            // if(BoneName(bone, "Mouth") || BoneName(bone, "Lips") || BoneName(bone, "Lip"))type=BONE_MOUTH;else
-            if (BoneName(bone, "EyeLid") || BoneName(bone, "EyeLids"))
-            type = BONE_EYELID;
-        else if (BoneName(bone, "EyeBrow") || BoneName(bone, "EyeBrows") || BoneName(bone, "Brows"))
-            type = BONE_EYEBROW;
-        else // "brows" used by BitGem animals
-            if (BoneName(bone, "Ear"))
-            type = BONE_EAR;
-        else if (BoneName(bone, "Hair"))
-            type = BONE_HAIR;
-        else
+                        if (BoneName(bone, "Neck"))
+                            type = BONE_NECK;
+                        else if (BoneName(bone, "Jaw"))
+                            type = BONE_JAW;
+                        else if (BoneName(bone, "Tongue"))
+                            type = BONE_TONGUE;
+                        else if (BoneName(bone, "Nose") || BoneName(bone, "Snout"))
+                            type = BONE_NOSE;
+                        else
+                            // if(BoneName(bone, "Mouth") || BoneName(bone, "Lips") || BoneName(bone, "Lip"))type=BONE_MOUTH;else
+                            if (BoneName(bone, "EyeLid") || BoneName(bone, "EyeLids"))
+                                type = BONE_EYELID;
+                            else if (BoneName(bone, "EyeBrow") || BoneName(bone, "EyeBrows") || BoneName(bone, "Brows"))
+                                type = BONE_EYEBROW;
+                            else // "brows" used by BitGem animals
+                                if (BoneName(bone, "Ear"))
+                                    type = BONE_EAR;
+                                else if (BoneName(bone, "Hair"))
+                                    type = BONE_HAIR;
+                                else
 
-            if (BoneName(bone, "Breast") || BoneName(bone, "Boob") || BoneName(bone, "Boobs"))
-            type = BONE_BREAST;
-        else if (BoneName(bone, "Butt") || BoneName(bone, "Buttock") || BoneName(bone, "Buttocks"))
-            type = BONE_BUTT;
-        else
+                                    if (BoneName(bone, "Breast") || BoneName(bone, "Boob") || BoneName(bone, "Boobs"))
+                                    type = BONE_BREAST;
+                                else if (BoneName(bone, "Butt") || BoneName(bone, "Buttock") || BoneName(bone, "Buttocks"))
+                                    type = BONE_BUTT;
+                                else
 
-            if (BoneName(bone, "Tail") && !BoneName(bone, "PonyTail") && !BoneName(bone, "Pony Tail") && !BoneName(bone, "Pony_Tail"))
-            type = BONE_TAIL;
-        else if (BoneName(bone, "Cape") || BoneName(bone, "Cloak"))
-            type = BONE_CAPE;
-        else
+                                    if (BoneName(bone, "Tail") && !BoneName(bone, "PonyTail") && !BoneName(bone, "Pony Tail") && !BoneName(bone, "Pony_Tail"))
+                                    type = BONE_TAIL;
+                                else if (BoneName(bone, "Cape") || BoneName(bone, "Cloak"))
+                                    type = BONE_CAPE;
+                                else
 
-            // not unique names
-            if (BoneName(bone, "Eye"))
-            type = BONE_EYE;
-        else if (BoneName(bone, "Head"))
-            type = BONE_HEAD;
-        else // this can be "HeadJaw"
-            if (BoneName(bone, "Arm") || BoneName(bone, "UpArm") || BoneName(bone, "UpperArm"))
-            type = BONE_UPPER_ARM;
-        else // this can be both BONE_UPPER_ARM and BONE_LOWER_ARM
-            if (BoneName(bone, "Thigh") || BoneName(bone, "Leg") || BoneName(bone, "UpLeg") || BoneName(bone, "UpperLeg") || BoneName(bone, "Hip"))
-            type = BONE_UPPER_LEG;
-        else // this can be both BONE_UPPER_LEG and BONE_LOWER_LEG
-        {
-        }
+                                    // not unique names
+                                    if (BoneName(bone, "Eye"))
+                                        type = BONE_EYE;
+                                    else if (BoneName(bone, "Head"))
+                                        type = BONE_HEAD;
+                                    else // this can be "HeadJaw"
+                                        if (BoneName(bone, "Arm") || BoneName(bone, "UpArm") || BoneName(bone, "UpperArm"))
+                                            type = BONE_UPPER_ARM;
+                                        else // this can be both BONE_UPPER_ARM and BONE_LOWER_ARM
+                                            if (BoneName(bone, "Thigh") || BoneName(bone, "Leg") || BoneName(bone, "UpLeg") || BoneName(bone, "UpperLeg") || BoneName(bone, "Hip"))
+                                                type = BONE_UPPER_LEG;
+                                            else // this can be both BONE_UPPER_LEG and BONE_LOWER_LEG
+                                            {
+                                            }
 
         bone.type = type;
     }

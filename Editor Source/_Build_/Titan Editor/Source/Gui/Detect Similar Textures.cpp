@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 DetectSimilarTextures DST;
 /******************************************************************************/
@@ -80,8 +80,8 @@ bool DetectSimilarTextures::ioThread() {
         if (!loaded_texs.find(tex_id)) // if not yet loaded
         {
             // no need for 'ThreadMayUseGPUData' because we use only IMAGE_SOFT
-            Images.lock();                                                                            // lock because other threads may modify 'image_load_shrink' too
-            int (*image_load_shrink)(ImageHeader & image_header, C Str & name) = D.image_load_shrink; // remember current
+            Images.lock();                                                                          // lock because other threads may modify 'image_load_shrink' too
+            int (*image_load_shrink)(ImageHeader &image_header, C Str &name) = D.image_load_shrink; // remember current
             D.image_load_shrink = ImageLoad;
             bool ok = img.load(Proj.texPath(tex_id));
             D.image_load_shrink = image_load_shrink; // restore

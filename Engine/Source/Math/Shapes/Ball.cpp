@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 #define SCALE 1.5f // max assumed stretch (for example if the original box is set to a character in rest pose, but due to animation it moves its arms around, then the box after animation might be bigger than original non-animated box, this allows to specify max allowed scale of the original box)
@@ -1371,14 +1371,14 @@ void SphereConvert::drawCell(C Color &color, C SphereArea &area, Flt radius) C {
         }
 }
 /******************************************************************************/
-#define Z0(i) (i) // zero
-#define Z1(i) (res - 1 - i) // zero     mirror
-#define N0(i) (i + res) // negative
-#define N1(i) (-1 - i) // negative mirror
-#define P0(i) (i - res) // positive
+#define Z0(i) (i)               // zero
+#define Z1(i) (res - 1 - i)     // zero     mirror
+#define N0(i) (i + res)         // negative
+#define N1(i) (-1 - i)          // negative mirror
+#define P0(i) (i - res)         // positive
 #define P1(i) (res * 2 - 1 - i) // positive mirror
 
-#define X(x) ((x + 1) * 6) // -1..1
+#define X(x) ((x + 1) * 6)     // -1..1
 #define Y(y) ((y + 1) * 6 * 3) // -1..1
 #define V(face, x, y) (face + X(x) + Y(y))
 
@@ -1890,7 +1890,7 @@ Bool Cuts(C Box &box, C Ball &ball) {
     }
 
     return true;
-#else // slowest
+#else   // slowest
     Flt dist2 = 0, d;
 
     if (ball.pos.x < box.min.x) {

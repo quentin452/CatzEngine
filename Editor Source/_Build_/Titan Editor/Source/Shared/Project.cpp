@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 
 uint CC4_PRDT = CC4('P', 'R', 'D', 'T'); // Project Data
@@ -230,7 +230,7 @@ Str Project::elmFullName(C Elm *elm, int max_elms) C {
                 processed.removeLast();
                 name.reserve(length + 3) = "..\\";
                 break;
-            }                                 // if reached the allowed limit
+            } // if reached the allowed limit
             length += elm->name.length() + 1; // 1 extra for '\\'
         }
         elm = findElm(elm->parent_id);
@@ -540,7 +540,7 @@ bool Project::idToValid(C UID &id) // if target is valid (not removed)
             WorldVer &world_ver = world_vers.lockedData(i);
             if (ObjVer *obj_ver = world_ver.obj.find(id))
                 return !obj_ver->removed();
-            //if(                  world_ver.waypoints.find(id))return ;
+            // if(                  world_ver.waypoints.find(id))return ;
         }
     }
     return true;
@@ -589,7 +589,7 @@ bool Project::invalidSrc(C Mems<FileParams> &files, Str *invalid) C // if specif
                     if (invalid)
                         *invalid = name;
                     return true;
-                }  // INVALID
+                } // INVALID
             } else // source file
             {
                 if (FileInfoSystem(name).type != FSTD_FILE
@@ -633,7 +633,7 @@ bool Project::invalidTexSrc(C Mems<FileParams> &files, Str *invalid) C // if spe
                     if (invalid)
                         *invalid = name;
                     return true;
-                }  // INVALID
+                } // INVALID
             } else // source file
             {
                 if (FileInfoSystem(name).type != FSTD_FILE
@@ -683,7 +683,7 @@ bool Project::invalidRefs(Elm &elm) // check if this element has invalid referen
 
     case ELM_MESH:
         if (ElmMesh *data = elm.meshData()) {
-            //if(Elm * obj_elm=findElm(data. obj_id))if(invalidRefs(* obj_elm))return true; here we don't do this because 'obj' is a parent and is visible
+            // if(Elm * obj_elm=findElm(data. obj_id))if(invalidRefs(* obj_elm))return true; here we don't do this because 'obj' is a parent and is visible
             if (Elm *skel_elm = findElm(data->skel_id))
                 if (invalidRefs(*skel_elm))
                     return true; // process skel because it's hidden
@@ -2028,7 +2028,7 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
                 else if (data_changed || file_changed)
                     mtrl_data.newVer();
                 elm_newer_src = mtrl.newer(src_mtrl);
-                //src_newer_elm=src_mtrl.newer(mtrl); no need to set because we already have everything
+                // src_newer_elm=src_mtrl.newer(mtrl); no need to set because we already have everything
             }
         } break;
 
@@ -2049,7 +2049,7 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
                 else if (data_changed || file_changed)
                     mtrl_data.newVer();
                 elm_newer_src = mtrl.newer(src_mtrl);
-                //src_newer_elm=src_mtrl.newer(mtrl); no need to set because we already have everything
+                // src_newer_elm=src_mtrl.newer(mtrl); no need to set because we already have everything
             }
         } break;
 
@@ -2070,7 +2070,7 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
                 else if (data_changed || file_changed)
                     mtrl_data.newVer();
                 elm_newer_src = mtrl.newer(src_mtrl);
-                //src_newer_elm=src_mtrl.newer(mtrl); no need to set because we already have everything
+                // src_newer_elm=src_mtrl.newer(mtrl); no need to set because we already have everything
             }
         } break;
 
@@ -2112,7 +2112,7 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
                 else if (data_changed || file_changed)
                     icon_data.newVer();
                 elm_newer_src = icon.newer(src_icon);
-                //src_newer_elm=src_icon.newer(icon); no need to set because we already have everything
+                // src_newer_elm=src_icon.newer(icon); no need to set because we already have everything
             }
         } break;
 
@@ -2200,7 +2200,7 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
                 else if (data_changed || file_changed)
                     ts_data.newVer();
                 elm_newer_src = ts.newer(src_ts);
-                //src_newer_elm=src_ts.newer(ts); no need to set because we already have everything
+                // src_newer_elm=src_ts.newer(ts); no need to set because we already have everything
             }
         } break;
 
@@ -2221,7 +2221,7 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
                 else if (data_changed || file_changed)
                     panel_data.newVer();
                 elm_newer_src = panel.newer(src_panel);
-                //src_newer_elm=src_panel.newer(panel); no need to set because we already have everything
+                // src_newer_elm=src_panel.newer(panel); no need to set because we already have everything
             }
         } break;
 
@@ -2242,7 +2242,7 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
                 else if (data_changed || file_changed)
                     gui_skin_data.newVer();
                 elm_newer_src = gui_skin.newer(src_gui_skin);
-                //src_newer_elm=src_gui_skin.newer(gui_skin); no need to set because we already have everything
+                // src_newer_elm=src_gui_skin.newer(gui_skin); no need to set because we already have everything
             }
         } break;
 
@@ -2263,7 +2263,7 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
                 else if (data_changed || file_changed)
                     env_data.newVer();
                 elm_newer_src = env.newer(src_env);
-                //src_newer_elm=src_env.newer(env); no need to set because we already have everything
+                // src_newer_elm=src_env.newer(env); no need to set because we already have everything
             }
         } break;
 
@@ -2375,7 +2375,7 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
             else if (data_changed || file_changed)
                 enum_data.newVer();
             elm_newer_src = enums.newer(src_enums);
-            //src_newer_elm=src_enums.newer(enums); no need to set because we already have everything
+            // src_newer_elm=src_enums.newer(enums); no need to set because we already have everything
         } break;
 
         case ELM_OBJ: {
@@ -2397,7 +2397,7 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
             else if (data_changed || file_changed)
                 obj_data.newVer();
             elm_newer_src = params.newer(src_params);
-            //src_newer_elm=src_params.newer(params); no need to set because we already have everything
+            // src_newer_elm=src_params.newer(params); no need to set because we already have everything
         } break;
 
         case ELM_OBJ_CLASS: {
@@ -2419,7 +2419,7 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
             else if (data_changed || file_changed)
                 obj_data.newVer();
             elm_newer_src = params.newer(src_params);
-            //src_newer_elm=src_params.newer(params); no need to set because we already have everything
+            // src_newer_elm=src_params.newer(params); no need to set because we already have everything
         } break;
 
         case ELM_GUI: {
@@ -2450,8 +2450,8 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
             }
         } break;
 
-            //case ELM_CODE: break; // this is synchronized manually elsewhere
-            //case ELM_APP : break; // this is synchronized manually elsewhere
+            // case ELM_CODE: break; // this is synchronized manually elsewhere
+            // case ELM_APP : break; // this is synchronized manually elsewhere
         }
     return data_changed || file_changed;
 }
@@ -2610,7 +2610,7 @@ bool Project::syncObj(C UID &world_id, C VecI2 &area_xy, Memc<ObjData> &objs, Ma
                         world_ver->rebuildPaths(obj.id, target_area->xy); // don't check for 'physPath' on server because loading 'Object' may fail (doesn't need to be performed on the server)
                 } else                                                    // present in some area
                     if (AreaSyncObj *cur_area = areas(obj_ver->area_xy))  // load that area
-                    REPA(cur_area->objs)
+                        REPA(cur_area->objs)
                 if (cur_area->objs[i].id == obj.id) // found that object
                 {
                     ObjData &cur_obj = cur_area->objs[i];
@@ -3316,7 +3316,7 @@ void Project::save(MemPtr<TextNode> nodes) C {
 LOAD_RESULT Project::load(C MemPtr<TextNode> &nodes, int &ver, Str &error) // !! this assumes that binary was already loaded and 'ver' already set !!
 {
     error.clear();
-    //del(); don't delete, instead let text values override existing members from binary, so we can keep settings not saved in text files, such as element IMPORTING/OPENED, and local user Project Settings (current heightmap material, etc.)
+    // del(); don't delete, instead let text values override existing members from binary, so we can keep settings not saved in text files, such as element IMPORTING/OPENED, and local user Project Settings (current heightmap material, etc.)
     FREPA(nodes) {
         C TextNode &node = nodes[i];
         if (node.name == "Version") {
@@ -3803,7 +3803,7 @@ void ProjectHierarchy::eraseRemoved(bool full) {
     erased |= eraseElms(remove, full);
     erased |= eraseTexs(full);
     erased |= eraseWorlds(full);
-    //if(full)eraseMiniMaps(full); TODO:
+    // if(full)eraseMiniMaps(full); TODO:
     if (erased)
         save(); // save immediately after erase, just in case
 }

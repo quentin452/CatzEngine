@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 
 #define SUPPORT_TONE_MAP_AMD_LPM 0 // doesn't handle saturation well for high values
 #if SUPPORT_TONE_MAP_AMD_LPM

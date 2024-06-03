@@ -14,7 +14,7 @@
       time+=1.0f/60; // does not modify 'time'
 
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 const Half HalfZero = false, HalfOne = true;
@@ -619,10 +619,10 @@ void AdjustValTarget(Flt &value, Flt target, Flt dv) {
             value = target;
     } else // move towards 'target' by increasing 'value' by 'dv'
         if (value < target) {
-        value += dv;
-        if (value > target)
-            value = target;
-    } // move towards 'target' by decreasing 'value' by 'dv'
+            value += dv;
+            if (value > target)
+                value = target;
+        } // move towards 'target' by decreasing 'value' by 'dv'
 }
 void AdjustValTarget(Dbl &value, Dbl target, Dbl dv) {
     if (value > target) {
@@ -631,10 +631,10 @@ void AdjustValTarget(Dbl &value, Dbl target, Dbl dv) {
             value = target;
     } else // move towards 'target' by increasing 'value' by 'dv'
         if (value < target) {
-        value += dv;
-        if (value > target)
-            value = target;
-    } // move towards 'target' by decreasing 'value' by 'dv'
+            value += dv;
+            if (value > target)
+                value = target;
+        } // move towards 'target' by decreasing 'value' by 'dv'
 }
 void AdjustValTarget(Flt &value, Flt target, Flt inc, Flt dec) {
     if (value > target) {
@@ -643,10 +643,10 @@ void AdjustValTarget(Flt &value, Flt target, Flt inc, Flt dec) {
             value = target;
     } else // move towards 'target' by increasing 'value' by 'inc'
         if (value < target) {
-        value += inc;
-        if (value > target)
-            value = target;
-    } // move towards 'target' by decreasing 'value' by 'dec'
+            value += inc;
+            if (value > target)
+                value = target;
+        } // move towards 'target' by decreasing 'value' by 'dec'
 }
 void AdjustValTarget(Vec2 &value, C Vec2 &target, Flt dv) {
     AdjustValTarget(value.x, target.x, dv);
@@ -1021,10 +1021,10 @@ Half::operator Flt() C {
         xem += 0x38000000;
     else             // Inf/NaN
         if (xe == 0) // Zero/Denormal
-    {
-        xem += 0x800000;
-        ((Flt &)xem) -= 6.10351563e-05f; // (Flt&)(0x38800000) renormalize
-    }
+        {
+            xem += 0x800000;
+            ((Flt &)xem) -= 6.10351563e-05f; // (Flt&)(0x38800000) renormalize
+        }
     xs |= xem;
     return (Flt &)xs;
 }

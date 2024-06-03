@@ -41,7 +41,7 @@
    For example, the Java method:     long f(int n, String s, int[] arr);
    has the following type signature: (ILjava/lang/String;[I)J
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 #if ANDROID
 
 #include "../../../../ThirdPartyLibs/begin.h"
@@ -326,7 +326,7 @@ static int32_t InputCallback(android_app *app, AInputEvent *event) {
                 PossibleTapTime = Time.appTime();
             } else // 'getButtonState' does not detect tapping on the touchpad, so we need to detect it according to 'AMOTION_EVENT_ACTION_DOWN', also proceed only if no buttons are pressed in case this event is triggered by secondary mouse button
                 if (PossibleTap && (button_state || (LastMousePos - Ms.desktopPos()).abs().max() >= 6))
-                PossibleTap = false; // if we've pressed a button or moved away too much then it's definitely not a tap
+                    PossibleTap = false; // if we've pressed a button or moved away too much then it's definitely not a tap
             if (action_type == AMOTION_EVENT_ACTION_UP && PossibleTap) {
                 PossibleTap = false;
                 if (Time.appTime() <= PossibleTapTime + DoubleClickTime + Time.ad())

@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 #define TEXTLINE_OFFSET 0.16f // set >=0.06 (at this value cursor is aligned with the TextLine rect left edge)

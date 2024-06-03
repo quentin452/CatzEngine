@@ -3,7 +3,7 @@
    !! KEEP THIS AS SEPARATE CPP, SO WHEN UNUSED IT WON'T INCREASE BINARY SIZE !!
 
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 
 /******************************************************************************/
 #include "../../../../ThirdPartyLibs/begin.h"

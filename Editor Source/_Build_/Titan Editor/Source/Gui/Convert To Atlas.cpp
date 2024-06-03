@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 ConvertToAtlasClass ConvertToAtlas;
 /******************************************************************************/
@@ -343,7 +343,7 @@ bool ConvertToAtlasClass::AddMap(bool &forced, Str &dest, C Str &src, bool force
         Mems<FileParams> fps_src = FileParams::Decode(src);
         TextParam src_resize;
         for (; ExtractResize(fps_src, src_resize);) {
-        }                   // remove any resizes if present, we replace it with a custome one below
+        } // remove any resizes if present, we replace it with a custome one below
         if (fps_src.elms()) // have source map
         {
             FileParams &fp = fps_dest.New();
@@ -380,16 +380,16 @@ bool ConvertToAtlasClass::AddMap(bool &forced, Str &dest, C Str &src, bool force
             if (mtrl.packed_rect.min.any())
                 fp.params.New().set("position", S + mtrl.packed_rect.min.x + ',' + mtrl.packed_rect.min.y);
             added = true;
-        } else                                                           // don't have source map
-            if (force)                                                   // but we need to write based on params (because there are other materials that need this texture to be generated, so we have to write something)
-        {                                                                // #MaterialTextureLayout
-            flt src = ((tex_flag & (TEXF_SMOOTH | TEXF_METAL)) ? 0 : 1); // for smooth/metal if there's no source map, then source is treated as no smooth/metal (0)
-            Vec set = src * mul + add;
-            FileParams &fp = fps_dest.New();
-            fp.params.New().set("setRGB", TextVecEx(set) + '@' + mtrl.packed_rect.min.x + ',' + mtrl.packed_rect.min.y + ',' + mtrl.packed_rect.w() + ',' + mtrl.packed_rect.h());
-            added = true;
-            forced = true;
-        }
+        } else                                                               // don't have source map
+            if (force)                                                       // but we need to write based on params (because there are other materials that need this texture to be generated, so we have to write something)
+            {                                                                // #MaterialTextureLayout
+                flt src = ((tex_flag & (TEXF_SMOOTH | TEXF_METAL)) ? 0 : 1); // for smooth/metal if there's no source map, then source is treated as no smooth/metal (0)
+                Vec set = src * mul + add;
+                FileParams &fp = fps_dest.New();
+                fp.params.New().set("setRGB", TextVecEx(set) + '@' + mtrl.packed_rect.min.x + ',' + mtrl.packed_rect.min.y + ',' + mtrl.packed_rect.w() + ',' + mtrl.packed_rect.h());
+                added = true;
+                forced = true;
+            }
         if (added) {
             dest = FileParams::Encode(fps_dest);
             return true;

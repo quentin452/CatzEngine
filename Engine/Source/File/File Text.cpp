@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 #define BOM_UTF_8 0xBBEF
@@ -249,26 +249,26 @@ FileText &FileText::putText(C Str &text) {
                 temp[temp_pos++] = (0xC0 | (c >> 6));
                 temp[temp_pos++] = (0x80 | (c & 0x3F));
             } else
-#if 1 // since we operate on Char we must treat it as UTF-16, there 0xD800..0xDBFF are used to encode 2 Chars
+#if 1                                           // since we operate on Char we must treat it as UTF-16, there 0xD800..0xDBFF are used to encode 2 Chars
                 if (c >= 0xD800 && c <= 0xDBFF) // MULTI0
-            {
-                /* U32 -> 2x U16 formula:
-                       u-=0x10000;
-                       c0=0xD800+(u>>10  ); MULTI0
-                       c1=0xDC00+(u&0x3FF); MULTI1 */
-                U16 c1 = text[i++];
-                U32 u = (((c - 0xD800) << 10) | (c1 - 0xDC00)) + 0x10000; // decode U16 c c1 -> U32 u
-                temp[temp_pos++] = (0xF0 | (u >> 18));
-                temp[temp_pos++] = (0x80 | ((u >> 12) & 0x3F));
-                temp[temp_pos++] = (0x80 | ((u >> 6) & 0x3F));
-                temp[temp_pos++] = (0x80 | (u & 0x3F));
-            } else
+                {
+                    /* U32 -> 2x U16 formula:
+                           u-=0x10000;
+                           c0=0xD800+(u>>10  ); MULTI0
+                           c1=0xDC00+(u&0x3FF); MULTI1 */
+                    U16 c1 = text[i++];
+                    U32 u = (((c - 0xD800) << 10) | (c1 - 0xDC00)) + 0x10000; // decode U16 c c1 -> U32 u
+                    temp[temp_pos++] = (0xF0 | (u >> 18));
+                    temp[temp_pos++] = (0x80 | ((u >> 12) & 0x3F));
+                    temp[temp_pos++] = (0x80 | ((u >> 6) & 0x3F));
+                    temp[temp_pos++] = (0x80 | (u & 0x3F));
+                } else
 #endif
-            {
-                temp[temp_pos++] = (0xE0 | (c >> 12));
-                temp[temp_pos++] = (0x80 | ((c >> 6) & 0x3F));
-                temp[temp_pos++] = (0x80 | (c & 0x3F));
-            }
+                {
+                    temp[temp_pos++] = (0xE0 | (c >> 12));
+                    temp[temp_pos++] = (0x80 | ((c >> 6) & 0x3F));
+                    temp[temp_pos++] = (0x80 | (c & 0x3F));
+                }
         }
 #endif
     } break;
@@ -290,7 +290,7 @@ Char FileText::getChar() {
     case ANSI: {
         Char8 c[2];
         c[0] = _f.getByte();
-#if WINDOWS // Code Pages are used on Windows
+#if WINDOWS                             // Code Pages are used on Windows
         if ((c[0] & 0x80) && !_f.end()) // this may be a 2-character multi-byte wide char
         {
             c[1] = _f.getByte();
@@ -357,11 +357,11 @@ Char FileText::getChar() {
                         c = u;
                     else // if(u<=0xD7FF || u>=0xE000 && u<=0xFFFF)c=u; ranges U+0000 to U+D7FF and U+E000 to U+FFFF are represented natively
                         if (u <= 0x10FFFF) {
-                        u -= 0x10000;
-                        c = 0xD800 + (u >> 10);      // MULTI0
-                        _get = 0xDC00 + (u & 0x3FF); // MULTI1
-                    } else
-                        c = '?'; // unsupported
+                            u -= 0x10000;
+                            c = 0xD800 + (u >> 10);      // MULTI0
+                            _get = 0xDC00 + (u & 0x3FF); // MULTI1
+                        } else
+                            c = '?'; // unsupported
                 } else
                     c = '?'; // unsupported
             }
@@ -443,7 +443,7 @@ FileText &FileText::getAll(Str &s) {
                     temp._length += i; // copy everything up to this point
 #if 0                                  // simple iteration (slower)
                   for(; ++i<length; ){Char c=t[i]; if(Safe(c))temp._d[temp._length++]=c;}
-#else // batched copying
+#else                                  // batched copying
                     Int last_ok = i + 1;
                     for (; ++i < length;) {
                         Char c = t[i];
@@ -475,7 +475,7 @@ FileText &FileText::getAll(Str &s) {
             FREP(length) {
                 Char8 c = t8[i];
                 if (Safe(c)) {
-#if WINDOWS // Code Pages are used on Windows
+#if WINDOWS                       // Code Pages are used on Windows
                     if (c & 0x80) // this may be a 2-character multi-byte wide char
                     {
                         s._length = MultiByteToWideChar(CP_ACP, 0, t8, length, WChar(s._d.data()), chars); // let OS handle multi-byte conversion

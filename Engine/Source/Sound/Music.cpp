@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************
 
@@ -157,29 +157,29 @@ Int Playlist::nextSong(Bool shuffle, Randomizer &random) {
         song = -1;
     else // no       songs available
         if (_songs.elms() == 1)
-        song = 0;
-    else // only one song  available
-        if (_cur < 0)
-        song = (shuffle ? random(_songs.elms()) : 0);
-    else // there was no previous so use random or first
-    {
-        if (shuffle) {
-#if 1 // works with 'prevSong'
-            REP(16) // 16 attempts to find a next different song
+            song = 0;
+        else // only one song  available
+            if (_cur < 0)
+                song = (shuffle ? random(_songs.elms()) : 0);
+            else // there was no previous so use random or first
             {
-                song = random(_songs.elms());
-                if (song != _cur)
-                    break; // found a different one then stop looking
-            }
+                if (shuffle) {
+#if 1                       // works with 'prevSong'
+                    REP(16) // 16 attempts to find a next different song
+                    {
+                        song = random(_songs.elms());
+                        if (song != _cur)
+                            break; // found a different one then stop looking
+                    }
 #else // simpler but doesn't work with 'prevSong'
-            song = random(_songs.elms() - 1);
-            if (song == _cur)
-                song = _songs.elms() - 1; // if selected the same song again then switch to last one
+                    song = random(_songs.elms() - 1);
+                    if (song == _cur)
+                        song = _songs.elms() - 1; // if selected the same song again then switch to last one
 #endif
-        } else {
-            song = (_cur + 1) % _songs.elms(); // get next in order
-        }
-    }
+                } else {
+                    song = (_cur + 1) % _songs.elms(); // get next in order
+                }
+            }
     _cur = song;
 
     // !! now we have to lock !!
@@ -197,29 +197,29 @@ Int Playlist::prevSong(Bool shuffle, Randomizer &random) {
         song = -1;
     else // no       songs available
         if (_songs.elms() == 1)
-        song = 0;
-    else // only one song  available
-        if (_cur < 0)
-        song = (shuffle ? random.back().back()(_songs.elms()) : 0);
-    else // there was no previous so use random or first
-    {
-        if (shuffle) {
-#if 1 // works with 'nextSong'
-            REP(16) // 16 attempts to find a previous different song
+            song = 0;
+        else // only one song  available
+            if (_cur < 0)
+                song = (shuffle ? random.back().back()(_songs.elms()) : 0);
+            else // there was no previous so use random or first
             {
-                song = random.back().back()(_songs.elms());
-                if (song != _cur)
-                    break; // found a different one then stop looking
-            }
+                if (shuffle) {
+#if 1                       // works with 'nextSong'
+                    REP(16) // 16 attempts to find a previous different song
+                    {
+                        song = random.back().back()(_songs.elms());
+                        if (song != _cur)
+                            break; // found a different one then stop looking
+                    }
 #else // simpler but doesn't work with 'nextSong'
-            song = random.back().back()(_songs.elms() - 1);
-            if (song == _cur)
-                song = _songs.elms() - 1; // if selected the same song again then switch to last one
+                    song = random.back().back()(_songs.elms() - 1);
+                    if (song == _cur)
+                        song = _songs.elms() - 1; // if selected the same song again then switch to last one
 #endif
-        } else {
-            song = (_cur + _songs.elms() - 1) % _songs.elms(); // get previous in order
-        }
-    }
+                } else {
+                    song = (_cur + _songs.elms() - 1) % _songs.elms(); // get previous in order
+                }
+            }
     _cur = song;
 
     // !! now we have to lock !!
@@ -464,7 +464,7 @@ void MusicManager::prev() {
                     playSong(song);
                 else // if it's different than what playing now, or it stopped playing, then play it but don't change history position
                     if (_history_pos > 1)
-                    playSong(_history[--_history_pos - 1]); // play the one before that and change history position !! it's important to decrease '_history_pos' before calling 'playSong' so it can detect that previous song is the same !!
+                        playSong(_history[--_history_pos - 1]); // play the one before that and change history position !! it's important to decrease '_history_pos' before calling 'playSong' so it can detect that previous song is the same !!
             }
         }
         // if want history, but history not available, then do nothing

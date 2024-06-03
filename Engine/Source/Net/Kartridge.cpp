@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 #define SUPPORT_KARTRIDGE WINDOWS_OLD
 #if SUPPORT_KARTRIDGE
 // #define KONG_STATIC_LIBRARY 1

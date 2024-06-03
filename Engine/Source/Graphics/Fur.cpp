@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 #define FUR_LAYERS 48 // this was the smallest value that produced good results when zoomed to a fur object

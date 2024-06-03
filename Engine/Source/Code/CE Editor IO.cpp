@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 namespace Edit {
 /******************************************************************************/
@@ -115,9 +115,9 @@ void CodeEditor::saveSettings(TextNode &code) {
 
     TextNode &edit = code.nodes.New().setName("Edit");
     edit.nodes.New().set("AutocompleteOnEnterOnly", options.ac_on_enter());
-    #if WINDOWS // TODO SUPPORT MORE OS
+#if WINDOWS // TODO SUPPORT MORE OS
     edit.nodes.New().set("FormatWithClangOnSave", options.clang_format_during_save());
-    #endif
+#endif
     edit.nodes.New().set("AutoSaveDuringWriting", options.save_during_write());
     edit.nodes.New().set("SimpleMode", options.simple());
     edit.nodes.New().set("ImmediateScroll", options.imm_scroll());

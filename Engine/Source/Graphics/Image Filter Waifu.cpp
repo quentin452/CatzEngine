@@ -4,7 +4,7 @@
    Because it's linked separately, its name can't include spaces (due to Android building toolchain).
 
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 
 #include "../../../ThirdPartyLibs/begin.h"
 //

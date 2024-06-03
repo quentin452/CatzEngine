@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "../../stdafx.h"
 std::unique_ptr<LoggerThread> LoggerThread::LoggerInstanceT;
 std::wstring InitThreadAndDisableDump::ConvertToWideString(const std::string &narrow_str) {
     if (narrow_str.empty())

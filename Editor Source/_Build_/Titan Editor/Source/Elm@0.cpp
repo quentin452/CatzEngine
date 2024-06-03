@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 Mems<int> ElmOrderArray;
 int ElmOrder(ELM_TYPE type) { return InRange(type, ElmOrderArray) ? ElmOrderArray[type] : ElmOrderArray.elms() + type; }

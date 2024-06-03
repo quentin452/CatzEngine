@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 ASSERT(WHEEL_LEFT_FRONT == 0 && WHEEL_RIGHT_FRONT == 1 && WHEEL_LEFT_REAR == 2 && WHEEL_RIGHT_REAR == 3); // used by 'IsFront', 'IsRear', 'IsLeft', 'IsRight'
@@ -820,7 +820,9 @@ struct PhysXVehicle // Physical actor of vehicle type (this class is available o
       Wheel shapes have disabled collision (eSIMULATION_SHAPE)
 
 /******************************************************************************/
-using 'PhysXVehicle' requires calling 'PxInitVehicleSDK' in 'PhysxClass::create'
+using 'PhysXVehicle'
+    requires calling
+'PxInitVehicleSDK' in 'PhysxClass::create'
 
     PhysXVehicle::PhysXVehicle() {
     _vehicle = null;

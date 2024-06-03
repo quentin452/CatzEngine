@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 
 #define ALLOW_VTX_MOVE 2    // 0=off, 1=based on edge center, 2=edge center and custom quadric calculation
 #define ALLOW_PLANES 1      // 0=off, 1=store multiple planes per each vertex
@@ -152,7 +152,7 @@ struct QuadricMatrix {
                       (error(pos+Vec(0, 0, d))-f)/d); */
 
         Real x = pos.x, y = pos.y, z = pos.z;
-#if 0 // formula assuming we don't use 2* in 'error2'
+#if 0   // formula assuming we don't use 2* in 'error2'
       return Vec(2*a*x + d*y + e*z + g,
                  2*b*y + d*x + f*z + h,
                  2*c*z + e*x + f*y + i);
@@ -1364,7 +1364,7 @@ struct Simplify // must be used for a single 'simplify', after that it cannot be
                     {
                         if (InRange(i + 1, vtx.tri_num)) // if there is an element after the one being removed
                         {
-#if 1 // faster
+#if 1                                                                    // faster
                             ref = refs[vtx.ref_start + vtx.tri_num - 1]; // move the last one to the removed one
 #else
                             refs.moveElm(vtx.ref_start + i, vtx.ref_start + vtx.tri_num - 1); // move ref to the last position

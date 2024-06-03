@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 void WaterPreChanged(C Property &prop) {
     if (WorldEdit.sel_lake)
@@ -333,12 +333,12 @@ void WorldView::updateWater() {
                     lakeDel(sel_lake, sel_lake_poly, sel_lake_point);
                 else // don't use RMB to delete selected
                     if (sel_river && !sel_river->removed && !Ms.bp(1))
-                    riverDel(sel_river, sel_river_point);
-                else // don't use RMB to delete selected
-                    if (lit_lake && !lit_lake->removed)
-                    lakeDel(lit_lake, lit_lake_poly, lit_lake_point);
-                else if (lit_river && !lit_river->removed)
-                    riverDel(lit_river, lit_river_point);
+                        riverDel(sel_river, sel_river_point);
+                    else // don't use RMB to delete selected
+                        if (lit_lake && !lit_lake->removed)
+                            lakeDel(lit_lake, lit_lake_poly, lit_lake_point);
+                        else if (lit_river && !lit_river->removed)
+                            riverDel(lit_river, lit_river_point);
             }
 
             switch (water_op()) {
@@ -499,10 +499,10 @@ void WorldView::updateWater() {
         last_water_flush_time = Time.realTime();
     else                                                                // if there are no elements then set last time to current time so after adding an element it won't be sent right away
         if (Time.realTime() - last_water_flush_time >= FlushWaterDelay) // if enough time has passed
-    {
-        last_water_flush_time = Time.realTime();
-        flushWater();
-    }
+        {
+            last_water_flush_time = Time.realTime();
+            flushWater();
+        }
 }
 /******************************************************************************/
 

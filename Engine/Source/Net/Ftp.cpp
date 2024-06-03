@@ -1,8 +1,8 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 #define FTP_WAIT_TIME (8 * 1000) // 8 seconds
-#define FTP_INTERRUPT 1 // if separate long transfers into few smaller ones
+#define FTP_INTERRUPT 1          // if separate long transfers into few smaller ones
 /******************************************************************************/
 enum {
     LO = -2,      // logged in

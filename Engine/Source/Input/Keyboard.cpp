@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 #if IOS
 #include "../Platforms/iOS/iOS.h"
 #endif
@@ -1406,40 +1406,40 @@ void KeyboardClass::update() {
             }
         } else            // if most recent state wasn't checked
             if (_special) // if we're forcing keys, then check if any got released
-        {
-            if ((_special & 1) && GetKeyState(VK_LCONTROL) >= 0) {
-                release(KB_LCTRL);
-                FlagDisable(_special, 1);
+            {
+                if ((_special & 1) && GetKeyState(VK_LCONTROL) >= 0) {
+                    release(KB_LCTRL);
+                    FlagDisable(_special, 1);
+                }
+                if ((_special & 2) && GetKeyState(VK_RCONTROL) >= 0) {
+                    release(KB_RCTRL);
+                    FlagDisable(_special, 2);
+                }
+                if ((_special & 4) && GetKeyState(VK_LSHIFT) >= 0) {
+                    release(KB_LSHIFT);
+                    FlagDisable(_special, 4);
+                }
+                if ((_special & 8) && GetKeyState(VK_RSHIFT) >= 0) {
+                    release(KB_RSHIFT);
+                    FlagDisable(_special, 8);
+                }
+                if ((_special & 16) && GetKeyState(VK_LMENU) >= 0) {
+                    release(KB_LALT);
+                    FlagDisable(_special, 16);
+                }
+                if ((_special & 32) && GetKeyState(VK_RMENU) >= 0) {
+                    release(KB_RALT);
+                    FlagDisable(_special, 32);
+                }
+                if ((_special & 64) && GetKeyState(VK_LWIN) >= 0) {
+                    release(KB_LWIN);
+                    FlagDisable(_special, 64);
+                }
+                if ((_special & 128) && GetKeyState(VK_RWIN) >= 0) {
+                    release(KB_RWIN);
+                    FlagDisable(_special, 128);
+                }
             }
-            if ((_special & 2) && GetKeyState(VK_RCONTROL) >= 0) {
-                release(KB_RCTRL);
-                FlagDisable(_special, 2);
-            }
-            if ((_special & 4) && GetKeyState(VK_LSHIFT) >= 0) {
-                release(KB_LSHIFT);
-                FlagDisable(_special, 4);
-            }
-            if ((_special & 8) && GetKeyState(VK_RSHIFT) >= 0) {
-                release(KB_RSHIFT);
-                FlagDisable(_special, 8);
-            }
-            if ((_special & 16) && GetKeyState(VK_LMENU) >= 0) {
-                release(KB_LALT);
-                FlagDisable(_special, 16);
-            }
-            if ((_special & 32) && GetKeyState(VK_RMENU) >= 0) {
-                release(KB_RALT);
-                FlagDisable(_special, 32);
-            }
-            if ((_special & 64) && GetKeyState(VK_LWIN) >= 0) {
-                release(KB_LWIN);
-                FlagDisable(_special, 64);
-            }
-            if ((_special & 128) && GetKeyState(VK_RWIN) >= 0) {
-                release(KB_RWIN);
-                FlagDisable(_special, 128);
-            }
-        }
     }
 #endif
 #elif WINDOWS_NEW
@@ -1851,7 +1851,7 @@ void KeyboardClass::setVisible() {
 #if WINDOWS_OLD
     imm(visible); // here ignore 'hardware'
 #endif
-#if !SWITCH // on Switch always show, because hardware keyboard is limited to \
+#if !SWITCH                 // on Switch always show, because hardware keyboard is limited to \
             // simple US-QWERTY without support of other languages
     visible &= !hardware(); // show only if hardware unavailable
 #endif

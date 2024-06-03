@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 /******************************************************************************
 
@@ -287,25 +287,25 @@ void SynchronizerClass::sync(Project &local, Project &server) {
                 get_names.add(l.id);
             else // get from server
                 if (l.name_time > s->name_time)
-                set_names.add(&l); // set to   server
+                    set_names.add(&l); // set to   server
 
             if (l.parent_time < s->parent_time)
                 l.setParent(s->parent_id, s->parent_time);
             else // get from server
                 if (l.parent_time > s->parent_time)
-                set_parents.add(&l); // set to   server
+                    set_parents.add(&l); // set to   server
 
             if (l.removed_time < s->removed_time)
                 l.setRemoved(s->removed(), s->removed_time);
             else // get from server
                 if (l.removed_time > s->removed_time)
-                set_removed.add(&l); // set to   server
+                    set_removed.add(&l); // set to   server
 
             if (l.publish_time < s->publish_time)
                 l.setPublish(s->publish(), s->publishMobile(), s->publish_time);
             else // get from server
                 if (l.publish_time > s->publish_time)
-                set_publish.add(&l); // set to   server
+                    set_publish.add(&l); // set to   server
 
             // data
             if (s->type == l.type) // just in case
@@ -522,21 +522,21 @@ void SynchronizerClass::update() {
         last_delayed_time = Time.realTime();
     else                                                           // if there are no elements then set last time to current time so after adding an element it won't be sent right away
         if (Time.realTime() - last_delayed_time >= SendAreasDelay) // if enough time has passed
-    {
-        last_delayed_time = Time.realTime();
-        MapLock ml(delayed_world_sync);
-        FREPA(delayed_world_sync) {
-            UID world_id = delayed_world_sync.lockedKey(i);
-            if (WorldSync *ws = world_sync.get(world_id)) {
-                WorldSync &dws = delayed_world_sync.lockedData(i);
-                FREPA(dws.set_area)
-                ws->set_area.binaryInclude(dws.set_area[i]);
-                FREPA(dws.set_obj)
-                ws->set_obj.binaryInclude(dws.set_obj[i]);
+        {
+            last_delayed_time = Time.realTime();
+            MapLock ml(delayed_world_sync);
+            FREPA(delayed_world_sync) {
+                UID world_id = delayed_world_sync.lockedKey(i);
+                if (WorldSync *ws = world_sync.get(world_id)) {
+                    WorldSync &dws = delayed_world_sync.lockedData(i);
+                    FREPA(dws.set_area)
+                    ws->set_area.binaryInclude(dws.set_area[i]);
+                    FREPA(dws.set_obj)
+                    ws->set_obj.binaryInclude(dws.set_obj[i]);
+                }
             }
+            delayed_world_sync.del();
         }
-        delayed_world_sync.del();
-    }
 
     // if we have any elements to send
     if (set_elm_full.elms() || set_elm_long.elms() || set_elm_short.elms() || world_sync.elms() || mini_map_sync.elms()) {

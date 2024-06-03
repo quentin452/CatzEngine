@@ -3,7 +3,7 @@ MLT("", DE, "", FR, "", IT, "", SP, "", PO, "", PL, "", RU, "", JP, "", KO, "", 
 MLTC(u"", DE, u"", FR, u"", IT, u"", SP, u"", PO, u"", PL, u"", RU, u"", JP, u"", KO, u"", CN, u"", TH, u"")
 CChar* T() {return MLTC(u"", DE, u"", FR, u"", IT, u"", SP, u"", PO, u"", PL, u"", RU, u"", JP, u"", KO, u"", CN, u"", TH, u"");}
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 Bool LangStr::save(File &f) C {

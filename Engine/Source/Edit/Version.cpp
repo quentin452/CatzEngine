@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 static Int Compare(C Edit::FileVersion &a, C Edit::FileVersion &b) { return Compare(b.time, a.time); } // compare in reversed order so dates are stored from latest to oldest
 namespace Edit {

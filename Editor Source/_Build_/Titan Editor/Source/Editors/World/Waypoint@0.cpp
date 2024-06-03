@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 void WaypointRol() {
     if (WorldEdit.sel_waypoint) {
@@ -284,10 +284,10 @@ void WorldView::updateWaypoint() {
         last_waypoint_flush_time = Time.realTime();
     else                                                                       // if there are no elements then set last time to current time so after adding an element it won't be sent right away
         if (Time.realTime() - last_waypoint_flush_time >= FlushWaypointsDelay) // if enough time has passed
-    {
-        last_waypoint_flush_time = Time.realTime();
-        flushWaypoints();
-    }
+        {
+            last_waypoint_flush_time = Time.realTime();
+            flushWaypoints();
+        }
 }
 /******************************************************************************/
 

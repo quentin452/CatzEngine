@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 #define SUPPORT_OPEN_VR (WINDOWS_OLD || MAC || LINUX)
 #if SUPPORT_OPEN_VR
 #if LINUX

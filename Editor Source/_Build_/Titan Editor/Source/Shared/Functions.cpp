@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 // FILE
 /******************************************************************************/
@@ -525,7 +525,7 @@ bool Load(EditObject &obj, C Str &name, C Str &resource_path) {
 // other assets either don't use sub-assets, or are stored in game path and don't require "edit->game" path change
 
 bool SaveCode(C Str &code, C Str &name) {
-    //FileText f; f.writeMem(HasUnicode(code) ? UTF_16 : ANSI); // avoid UTF_8 because it's slower to write/read, and as there can be lot of codes, we don't want to sacrifice performance when opening big projects
+    // FileText f; f.writeMem(HasUnicode(code) ? UTF_16 : ANSI); // avoid UTF_8 because it's slower to write/read, and as there can be lot of codes, we don't want to sacrifice performance when opening big projects
     FileText f;
     f.writeMem(HasUnicode(code) ? UTF_8 : ANSI); // FIXME restore above UTF_16 once GitHub supports it, because now it can corrupt files
     f.putText(code);
@@ -844,12 +844,12 @@ void ImageProps(C Image &image, UID *hash, IMAGE_TYPE *best_type, uint flags, Ed
                     REPD(x, src->w()) {
                         Color c = src->color3D(x, y, z);
                         byte bc2_a = ((c.a * 15 + 128) / 255) * 255 / 15;
-                        //if(c.a> 1 && c.a<254                    // BC1 supports only 0 and 255 alpha #BC1RGB
+                        // if(c.a> 1 && c.a<254                    // BC1 supports only 0 and 255 alpha #BC1RGB
                         //|| c.a<=1 && c.lum()>1      )bc1=false; // BC1 supports only black color at 0 alpha
                         if (Abs(c.a - bc2_a) > 1)
                             bc2 = false;
-                        //if(c.g>1 || c.b>1 || c.a<254)bc4=false;
-                        //if(         c.b>1 || c.a<254)bc5=false;
+                        // if(c.g>1 || c.b>1 || c.a<254)bc4=false;
+                        // if(         c.b>1 || c.a<254)bc5=false;
                         MIN(min.r, c.r);
                         MIN(min.g, c.g);
                         MIN(min.b, c.b);
@@ -879,28 +879,28 @@ void ImageProps(C Image &image, UID *hash, IMAGE_TYPE *best_type, uint flags, Ed
                         type = IMAGE_R8G8B8A8_SRGB;
                     else // sRGB or has Alpha or has Blue
                         if (max.g > 1)
-                        type = IMAGE_R8G8;
-                    else // has Green
-                        type = IMAGE_R8;
+                            type = IMAGE_R8G8;
+                        else // has Green
+                            type = IMAGE_R8;
                 } else {
                     if (bc4 && !srgb)
                         type = IMAGE_BC4;
                     else // BC4 is 4-bit HQ so use it always if possible (doesn't support sRGB)
                         if (bc1 && quality < Edit::Material::HIGH)
-                        type = (srgb ? IMAGE_BC1_SRGB : IMAGE_BC1);
-                    else // use BC1 only if we don't want HQ
-                        if (bc5 && !srgb)
-                        type = IMAGE_BC5;
-                    else // BC5 has better quality for RG than BC7 so check it first (doesn't support sRGB)
-                        if (SupportBC7)
-                        type = (srgb ? IMAGE_BC7_SRGB : IMAGE_BC7);
-                    else if (bc1)
-                        type = (srgb ? IMAGE_BC1_SRGB : IMAGE_BC1);
-                    else // check BC1 again, now without HQ
-                        if (bc2)
-                        type = (srgb ? IMAGE_BC2_SRGB : IMAGE_BC2);
-                    else
-                        type = (srgb ? IMAGE_BC3_SRGB : IMAGE_BC3);
+                            type = (srgb ? IMAGE_BC1_SRGB : IMAGE_BC1);
+                        else // use BC1 only if we don't want HQ
+                            if (bc5 && !srgb)
+                                type = IMAGE_BC5;
+                            else // BC5 has better quality for RG than BC7 so check it first (doesn't support sRGB)
+                                if (SupportBC7)
+                                    type = (srgb ? IMAGE_BC7_SRGB : IMAGE_BC7);
+                                else if (bc1)
+                                    type = (srgb ? IMAGE_BC1_SRGB : IMAGE_BC1);
+                                else // check BC1 again, now without HQ
+                                    if (bc2)
+                                        type = (srgb ? IMAGE_BC2_SRGB : IMAGE_BC2);
+                                    else
+                                        type = (srgb ? IMAGE_BC3_SRGB : IMAGE_BC3);
                 }
             }
             if (best_type)
@@ -1451,7 +1451,7 @@ void ContrastHue(Image &image, flt contrast, C Vec &avg_col, C BoxI &box, bool p
             for (int y = box.min.y; y < box.max.y; y++)
                 for (int x = box.min.x; x < box.max.x; x++) {
                     Vec4 c = image.color3DF(x, y, z);
-                    //flt  lin_lum; if(photo)lin_lum=LinearLumOfSRGBColor(c.xyz);
+                    // flt  lin_lum; if(photo)lin_lum=LinearLumOfSRGBColor(c.xyz);
                     flt lum;
                     if (photo)
                         lum = SRGBLumOfSRGBColor(c.xyz);
@@ -1462,7 +1462,7 @@ void ContrastHue(Image &image, flt contrast, C Vec &avg_col, C BoxI &box, bool p
                     c.x = d_hue + avg_hue;
                     c.xyz = HsbToRgb(c.xyz);
                     if (photo) {
-                        //c.xyz=SRGBToLinear(c.xyz); if(flt cur_lin_lum=LinearLumOfLinearColor(c.xyz))c.xyz*=lin_lum/cur_lin_lum; c.xyz=LinearToSRGB(c.xyz);
+                        // c.xyz=SRGBToLinear(c.xyz); if(flt cur_lin_lum=LinearLumOfLinearColor(c.xyz))c.xyz*=lin_lum/cur_lin_lum; c.xyz=LinearToSRGB(c.xyz);
                         if (flt cur_lum = SRGBLumOfSRGBColor(c.xyz))
                             c.xyz *= lum / cur_lum; // prefer multiplications in sRGB space, as linear mul may change perceptual contrast and saturation
                     }
@@ -1478,7 +1478,7 @@ void AddHue(Image &image, flt hue, C BoxI &box, bool photo) {
             for (int y = box.min.y; y < box.max.y; y++)
                 for (int x = box.min.x; x < box.max.x; x++) {
                     Vec4 c = image.color3DF(x, y, z);
-                    //flt  lin_lum; if(photo)lin_lum=LinearLumOfSRGBColor(c.xyz);
+                    // flt  lin_lum; if(photo)lin_lum=LinearLumOfSRGBColor(c.xyz);
                     flt lum;
                     if (photo)
                         lum = SRGBLumOfSRGBColor(c.xyz);
@@ -1486,7 +1486,7 @@ void AddHue(Image &image, flt hue, C BoxI &box, bool photo) {
                     c.x += hue;
                     c.xyz = HsbToRgb(c.xyz);
                     if (photo) {
-                        //c.xyz=SRGBToLinear(c.xyz); if(flt cur_lin_lum=LinearLumOfLinearColor(c.xyz))c.xyz*=lin_lum/cur_lin_lum; c.xyz=LinearToSRGB(c.xyz);
+                        // c.xyz=SRGBToLinear(c.xyz); if(flt cur_lin_lum=LinearLumOfLinearColor(c.xyz))c.xyz*=lin_lum/cur_lin_lum; c.xyz=LinearToSRGB(c.xyz);
                         if (flt cur_lum = SRGBLumOfSRGBColor(c.xyz))
                             c.xyz *= lum / cur_lum; // prefer multiplications in sRGB space, as linear mul may change perceptual contrast and saturation
                     }
@@ -1501,7 +1501,7 @@ void ContrastSat(Image &image, flt contrast, flt avg_sat, C BoxI &box, bool phot
             for (int y = box.min.y; y < box.max.y; y++)
                 for (int x = box.min.x; x < box.max.x; x++) {
                     Vec4 c = image.color3DF(x, y, z);
-                    //flt  lin_lum; if(photo)lin_lum=LinearLumOfSRGBColor(c.xyz);
+                    // flt  lin_lum; if(photo)lin_lum=LinearLumOfSRGBColor(c.xyz);
                     flt lum;
                     if (photo)
                         lum = SRGBLumOfSRGBColor(c.xyz);
@@ -1509,7 +1509,7 @@ void ContrastSat(Image &image, flt contrast, flt avg_sat, C BoxI &box, bool phot
                     c.y = (c.y - avg_sat) * contrast + avg_sat;
                     c.xyz = HsbToRgb(c.xyz);
                     if (photo) {
-                        //c.xyz=SRGBToLinear(c.xyz); if(flt cur_lin_lum=LinearLumOfLinearColor(c.xyz))c.xyz*=lin_lum/cur_lin_lum; c.xyz=LinearToSRGB(c.xyz);
+                        // c.xyz=SRGBToLinear(c.xyz); if(flt cur_lin_lum=LinearLumOfLinearColor(c.xyz))c.xyz*=lin_lum/cur_lin_lum; c.xyz=LinearToSRGB(c.xyz);
                         if (flt cur_lum = SRGBLumOfSRGBColor(c.xyz))
                             c.xyz *= lum / cur_lum; // prefer multiplications in sRGB space, as linear mul may change perceptual contrast and saturation
                     }
@@ -1564,7 +1564,7 @@ void GammaSat(Image &image, flt gamma, C BoxI &box, bool photo) {
             for (int y = box.min.y; y < box.max.y; y++)
                 for (int x = box.min.x; x < box.max.x; x++) {
                     Vec4 c = image.color3DF(x, y, z);
-                    //flt  lin_lum; if(photo)lin_lum=LinearLumOfSRGBColor(c.xyz);
+                    // flt  lin_lum; if(photo)lin_lum=LinearLumOfSRGBColor(c.xyz);
                     flt lum;
                     if (photo)
                         lum = SRGBLumOfSRGBColor(c.xyz);
@@ -1573,7 +1573,7 @@ void GammaSat(Image &image, flt gamma, C BoxI &box, bool photo) {
                     c.y = Pow(c.y, gamma);
                     c.xyz = HsbToRgb(c.xyz);
                     if (photo) {
-                        //c.xyz=SRGBToLinear(c.xyz); if(flt cur_lin_lum=LinearLumOfLinearColor(c.xyz))c.xyz*=lin_lum/cur_lin_lum; c.xyz=LinearToSRGB(c.xyz);
+                        // c.xyz=SRGBToLinear(c.xyz); if(flt cur_lin_lum=LinearLumOfLinearColor(c.xyz))c.xyz*=lin_lum/cur_lin_lum; c.xyz=LinearToSRGB(c.xyz);
                         if (flt cur_lum = SRGBLumOfSRGBColor(c.xyz))
                             c.xyz *= lum / cur_lum; // prefer multiplications in sRGB space, as linear mul may change perceptual contrast and saturation
                     }
@@ -1588,7 +1588,7 @@ void MulAddSat(Image &image, flt mul, flt add, C BoxI &box, bool photo) {
             for (int y = box.min.y; y < box.max.y; y++)
                 for (int x = box.min.x; x < box.max.x; x++) {
                     Vec4 c = image.color3DF(x, y, z);
-                    //flt  lin_lum; if(photo)lin_lum=LinearLumOfSRGBColor(c.xyz);
+                    // flt  lin_lum; if(photo)lin_lum=LinearLumOfSRGBColor(c.xyz);
                     flt lum;
                     if (photo)
                         lum = SRGBLumOfSRGBColor(c.xyz);
@@ -1597,7 +1597,7 @@ void MulAddSat(Image &image, flt mul, flt add, C BoxI &box, bool photo) {
                     c.y = c.y * mul + add;
                     c.xyz = HsbToRgb(c.xyz);
                     if (photo) {
-                        //c.xyz=SRGBToLinear(c.xyz); if(flt cur_lin_lum=LinearLumOfLinearColor(c.xyz))c.xyz*=lin_lum/cur_lin_lum; c.xyz=LinearToSRGB(c.xyz);
+                        // c.xyz=SRGBToLinear(c.xyz); if(flt cur_lin_lum=LinearLumOfLinearColor(c.xyz))c.xyz*=lin_lum/cur_lin_lum; c.xyz=LinearToSRGB(c.xyz);
                         if (flt cur_lum = SRGBLumOfSRGBColor(c.xyz))
                             c.xyz *= lum / cur_lum; // prefer multiplications in sRGB space, as linear mul may change perceptual contrast and saturation
                     }
@@ -1612,7 +1612,7 @@ void MinSat(Image &image, flt min, C BoxI &box, bool photo) {
             for (int y = box.min.y; y < box.max.y; y++)
                 for (int x = box.min.x; x < box.max.x; x++) {
                     Vec4 c = image.color3DF(x, y, z);
-                    //flt  lin_lum; if(photo)lin_lum=LinearLumOfSRGBColor(c.xyz);
+                    // flt  lin_lum; if(photo)lin_lum=LinearLumOfSRGBColor(c.xyz);
                     flt lum;
                     if (photo)
                         lum = SRGBLumOfSRGBColor(c.xyz);
@@ -1621,7 +1621,7 @@ void MinSat(Image &image, flt min, C BoxI &box, bool photo) {
                     MIN(c.y, min);
                     c.xyz = HsbToRgb(c.xyz);
                     if (photo) {
-                        //c.xyz=SRGBToLinear(c.xyz); if(flt cur_lin_lum=LinearLumOfLinearColor(c.xyz))c.xyz*=lin_lum/cur_lin_lum; c.xyz=LinearToSRGB(c.xyz);
+                        // c.xyz=SRGBToLinear(c.xyz); if(flt cur_lin_lum=LinearLumOfLinearColor(c.xyz))c.xyz*=lin_lum/cur_lin_lum; c.xyz=LinearToSRGB(c.xyz);
                         if (flt cur_lum = SRGBLumOfSRGBColor(c.xyz))
                             c.xyz *= lum / cur_lum; // prefer multiplications in sRGB space, as linear mul may change perceptual contrast and saturation
                     }
@@ -1641,7 +1641,7 @@ mul:
         for (int y = box.min.y; y < box.max.y; y++)
             for (int x = box.min.x; x < box.max.x; x++) {
                 Vec4 c = image.color3DF(x, y, z);
-                //flt  lin_lum; if(photo)lin_lum=LinearLumOfSRGBColor(c.xyz);
+                // flt  lin_lum; if(photo)lin_lum=LinearLumOfSRGBColor(c.xyz);
                 flt lum;
                 if (photo)
                     lum = SRGBLumOfSRGBColor(c.xyz);
@@ -1655,7 +1655,7 @@ mul:
                 hsb.y *= sat_mul;
                 c.xyz = HsbToRgb(hsb);
                 if (photo) {
-                    //c.xyz=SRGBToLinear(c.xyz); if(flt cur_lin_lum=LinearLumOfLinearColor(c.xyz))c.xyz*=lin_lum/cur_lin_lum; c.xyz=LinearToSRGB(c.xyz);
+                    // c.xyz=SRGBToLinear(c.xyz); if(flt cur_lin_lum=LinearLumOfLinearColor(c.xyz))c.xyz*=lin_lum/cur_lin_lum; c.xyz=LinearToSRGB(c.xyz);
                     if (flt cur_lum = SRGBLumOfSRGBColor(c.xyz))
                         c.xyz *= lum / cur_lum; // prefer multiplications in sRGB space, as linear mul may change perceptual contrast and saturation
                 }
@@ -2894,71 +2894,71 @@ void TransformImage(Image &image, TextParam param, bool clamp, C Color &backgrou
       }
    }else*/
         if (param.name == "channel") // Warning: this loses sRGB for 1..2 channels, because there are no IMAGE_R8_SRGB, IMAGE_R8G8_SRGB, IMAGE_F32_SRGB, IMAGE_F32_2_SRGB
-    {
-        int channels = param.value.length();
-        if (channels >= 1 && channels <= 4) {
-            int chn[4];
-            REPAO(chn) = ChannelIndex(param.value[i]);
-            if (!(chn[0] == 0 && chn[1] == 1 && chn[2] == 2 && (chn[3] == 3 || chn[3] == -1 && !image.typeInfo().a))) // ignore identity RGBA and (RGB when image doesn't have alpha)
-            {
-                Image temp;
-                bool srgb = image.sRGB();
-                if (image.highPrecision()) {
-                    temp.createSoft(image.w(), image.h(), image.d(), channels == 1 ? IMAGE_F32 : channels == 2 ? IMAGE_F32_2
-                                                                                             : channels == 3   ? (srgb ? IMAGE_F32_3_SRGB : IMAGE_F32_3)
-                                                                                                               : (srgb ? IMAGE_F32_4_SRGB : IMAGE_F32_4));
-                    Vec4 d(0, 0, 0, 1);
-                    REPD(z, image.d())
-                    REPD(y, image.h())
-                    REPD(x, image.w()) {
-                        Vec4 c = image.color3DF(x, y, z);
-                        REPA(d.c) {
-                            int ch = chn[i];
-                            if (InRange(ch, c.c))
-                                d.c[i] = c.c[ch];
+        {
+            int channels = param.value.length();
+            if (channels >= 1 && channels <= 4) {
+                int chn[4];
+                REPAO(chn) = ChannelIndex(param.value[i]);
+                if (!(chn[0] == 0 && chn[1] == 1 && chn[2] == 2 && (chn[3] == 3 || chn[3] == -1 && !image.typeInfo().a))) // ignore identity RGBA and (RGB when image doesn't have alpha)
+                {
+                    Image temp;
+                    bool srgb = image.sRGB();
+                    if (image.highPrecision()) {
+                        temp.createSoft(image.w(), image.h(), image.d(), channels == 1 ? IMAGE_F32 : channels == 2 ? IMAGE_F32_2
+                                                                                                 : channels == 3   ? (srgb ? IMAGE_F32_3_SRGB : IMAGE_F32_3)
+                                                                                                                   : (srgb ? IMAGE_F32_4_SRGB : IMAGE_F32_4));
+                        Vec4 d(0, 0, 0, 1);
+                        REPD(z, image.d())
+                        REPD(y, image.h())
+                        REPD(x, image.w()) {
+                            Vec4 c = image.color3DF(x, y, z);
+                            REPA(d.c) {
+                                int ch = chn[i];
+                                if (InRange(ch, c.c))
+                                    d.c[i] = c.c[ch];
+                            }
+                            temp.color3DF(x, y, z, d);
                         }
-                        temp.color3DF(x, y, z, d);
-                    }
-                } else {
-                    temp.createSoft(image.w(), image.h(), image.d(), channels == 1 ? IMAGE_R8 : channels == 2 ? IMAGE_R8G8
-                                                                                            : channels == 3   ? (srgb ? IMAGE_R8G8B8_SRGB : IMAGE_R8G8B8)
-                                                                                                              : (srgb ? IMAGE_R8G8B8A8_SRGB : IMAGE_R8G8B8A8));
-                    Color d(0, 0, 0, 255);
-                    REPD(z, image.d())
-                    REPD(y, image.h())
-                    REPD(x, image.w()) {
-                        Color c = image.color3D(x, y, z);
-                        REPA(d.c) {
-                            int ch = chn[i];
-                            if (InRange(ch, c.c))
-                                d.c[i] = c.c[ch];
+                    } else {
+                        temp.createSoft(image.w(), image.h(), image.d(), channels == 1 ? IMAGE_R8 : channels == 2 ? IMAGE_R8G8
+                                                                                                : channels == 3   ? (srgb ? IMAGE_R8G8B8_SRGB : IMAGE_R8G8B8)
+                                                                                                                  : (srgb ? IMAGE_R8G8B8A8_SRGB : IMAGE_R8G8B8A8));
+                        Color d(0, 0, 0, 255);
+                        REPD(z, image.d())
+                        REPD(y, image.h())
+                        REPD(x, image.w()) {
+                            Color c = image.color3D(x, y, z);
+                            REPA(d.c) {
+                                int ch = chn[i];
+                                if (InRange(ch, c.c))
+                                    d.c[i] = c.c[ch];
+                            }
+                            temp.color3D(x, y, z, d);
                         }
-                        temp.color3D(x, y, z, d);
                     }
+                    Swap(temp, image);
                 }
-                Swap(temp, image);
             }
-        }
-    } else if (param.name == "alphaFromBrightness" || param.name == "alphaFromLum" || param.name == "alphaFromLuminance") {
-        image.alphaFromBrightness();
-    } else if (param.name == "bump" || param.name == "bumpClamp") {
-        Vec2 blur = -1; // x=min, y=max, -1=auto
-        if (param.value.is()) {
-            UNIT_TYPE unit = GetUnitType(param.value);
-            flt full = image.size().avgF();
-            if (Contains(param.value, ',')) {
-                blur = param.asVec2(); // use 2 values if specified
-                blur.x = ConvertUnitType(blur.x, full, unit);
-                blur.y = ConvertUnitType(blur.y, full, unit);
-            } else {
-                blur.y = param.asFlt(); // if 1 value specified then use as max
-                blur.y = ConvertUnitType(blur.y, full, unit);
+        } else if (param.name == "alphaFromBrightness" || param.name == "alphaFromLum" || param.name == "alphaFromLuminance") {
+            image.alphaFromBrightness();
+        } else if (param.name == "bump" || param.name == "bumpClamp") {
+            Vec2 blur = -1; // x=min, y=max, -1=auto
+            if (param.value.is()) {
+                UNIT_TYPE unit = GetUnitType(param.value);
+                flt full = image.size().avgF();
+                if (Contains(param.value, ',')) {
+                    blur = param.asVec2(); // use 2 values if specified
+                    blur.x = ConvertUnitType(blur.x, full, unit);
+                    blur.y = ConvertUnitType(blur.y, full, unit);
+                } else {
+                    blur.y = param.asFlt(); // if 1 value specified then use as max
+                    blur.y = ConvertUnitType(blur.y, full, unit);
+                }
             }
-        }
-        CreateBumpFromColor(image, image, blur.x, blur.y, param.name == "bumpClamp");
-    } else if (param.name == "bumpToNormal") {
-        image.bumpToNormal(image, param.value.is() ? param.asFlt() : image.size().avgF() * BUMP_TO_NORMAL_SCALE);
-    }                          //else TODO: FIX FOR "fatal error C1061: compiler limit: blocks nested too deeply"
+            CreateBumpFromColor(image, image, blur.x, blur.y, param.name == "bumpClamp");
+        } else if (param.name == "bumpToNormal") {
+            image.bumpToNormal(image, param.value.is() ? param.asFlt() : image.size().avgF() * BUMP_TO_NORMAL_SCALE);
+        } // else TODO: FIX FOR "fatal error C1061: compiler limit: blocks nested too deeply"
     if (param.name == "scale") // the formula is ok (for normal too), it works as if the bump was scaled vertically by 'scale' factor
     {
         flt scale = param.asFlt();
@@ -2967,24 +2967,24 @@ void TransformImage(Image &image, TextParam param, bool clamp, C Color &backgrou
                 image.mulAdd(Vec4(Vec(scale), 1), Vec4(Vec(-0.5f * scale + 0.5f), 0), &box);
             else // if image is 1-channel or monochromatic then we need to transform all RGB together
                 if (!scale)
-                image.mulAdd(Vec4(Vec(0), 1), Vec4(0.5f, 0.5f, 1, 0), &box);
-            else // if zero scale then set Vec(0.5, 0.5, 1)
-                if (image.lock()) {
-                scale = 1 / scale;
-                for (int z = box.min.z; z < box.max.z; z++)
-                    for (int y = box.min.y; y < box.max.y; y++)
-                        for (int x = box.min.x; x < box.max.x; x++) {
-                            Vec4 c = image.color3DF(x, y, z);
-                            Vec &n = c.xyz;
-                            n = n * 2 - 1;
-                            n.normalize();
-                            n.z *= scale;
-                            n.normalize();
-                            n = n * 0.5f + 0.5f;
-                            image.color3DF(x, y, z, c);
-                        }
-                image.unlock();
-            }
+                    image.mulAdd(Vec4(Vec(0), 1), Vec4(0.5f, 0.5f, 1, 0), &box);
+                else // if zero scale then set Vec(0.5, 0.5, 1)
+                    if (image.lock()) {
+                        scale = 1 / scale;
+                        for (int z = box.min.z; z < box.max.z; z++)
+                            for (int y = box.min.y; y < box.max.y; y++)
+                                for (int x = box.min.x; x < box.max.x; x++) {
+                                    Vec4 c = image.color3DF(x, y, z);
+                                    Vec &n = c.xyz;
+                                    n = n * 2 - 1;
+                                    n.normalize();
+                                    n.z *= scale;
+                                    n.normalize();
+                                    n = n * 0.5f + 0.5f;
+                                    image.color3DF(x, y, z, c);
+                                }
+                        image.unlock();
+                    }
         }
     } else if (param.name == "scaleXY") {
         Vec2 r = TextVec2Ex(param.value);
@@ -3004,28 +3004,28 @@ void TransformImage(Image &image, TextParam param, bool clamp, C Color &backgrou
                 image.mulAdd(Vec4(Vec(scale), 1), Vec4(Vec(-0.5f * scale + 0.5f), 0), &box);
             else // if image is 1-channel or monochromatic then we need to transform all RGB together
                 if (!scale)
-                image.mulAdd(Vec4(Vec(0), 1), Vec4(0.5f, 0.5f, 1, 0), &box);
-            else // if zero scale then set Vec(0.5, 0.5, 1)
-                if (image.lock()) {
-                for (int z = box.min.z; z < box.max.z; z++)
-                    for (int y = box.min.y; y < box.max.y; y++)
-                        for (int x = box.min.x; x < box.max.x; x++) {
-                            Vec4 c = image.color3DF(x, y, z);
-                            Vec &n = c.xyz;
-                            n = n * 2 - 1;
-                            n.normalize();
-                            Vec2 p(n.z, n.xy.length());
-                            flt angle = Angle(p);
-                            angle *= scale;
-                            Clamp(angle, -PI_2, PI_2);
-                            CosSin(p.x, p.y, angle);
-                            n.z = p.x;
-                            n.xy.setLength(p.y);
-                            n = n * 0.5f + 0.5f;
-                            image.color3DF(x, y, z, c);
-                        }
-                image.unlock();
-            }
+                    image.mulAdd(Vec4(Vec(0), 1), Vec4(0.5f, 0.5f, 1, 0), &box);
+                else // if zero scale then set Vec(0.5, 0.5, 1)
+                    if (image.lock()) {
+                        for (int z = box.min.z; z < box.max.z; z++)
+                            for (int y = box.min.y; y < box.max.y; y++)
+                                for (int x = box.min.x; x < box.max.x; x++) {
+                                    Vec4 c = image.color3DF(x, y, z);
+                                    Vec &n = c.xyz;
+                                    n = n * 2 - 1;
+                                    n.normalize();
+                                    Vec2 p(n.z, n.xy.length());
+                                    flt angle = Angle(p);
+                                    angle *= scale;
+                                    Clamp(angle, -PI_2, PI_2);
+                                    CosSin(p.x, p.y, angle);
+                                    n.z = p.x;
+                                    n.xy.setLength(p.y);
+                                    n = n * 0.5f + 0.5f;
+                                    image.color3DF(x, y, z, c);
+                                }
+                        image.unlock();
+                    }
         }
     } else if (param.name == "fixTransparent") {
         image.transparentToNeighbor(true, param.value.is() ? param.asFlt() : 1);
@@ -3071,50 +3071,50 @@ bool LoadImage(C Project *proj, Image &image, TextParam *image_resize, C FilePar
         }
     } else // if have info about resize for source image, then if can store it in 'image_resize' then store and if not then resize now
         if (name == "|smooth|") {
-        if (smooth) {
-            smooth->copy(image);
-            if (smooth_resize) {
-                if (image_resize)
-                    *image_resize = *smooth_resize;
-                else
-                    TransformImage(image, *smooth_resize, clamp, background, background_size);
+            if (smooth) {
+                smooth->copy(image);
+                if (smooth_resize) {
+                    if (image_resize)
+                        *image_resize = *smooth_resize;
+                    else
+                        TransformImage(image, *smooth_resize, clamp, background, background_size);
+                }
+                goto imported;
             }
-            goto imported;
-        }
-    } else // if have info about resize for source image, then if can store it in 'image_resize' then store and if not then resize now
-        if (name == "|bump|") {
-        if (bump) {
-            bump->copy(image);
-            if (bump_resize) {
-                if (image_resize)
-                    *image_resize = *bump_resize;
-                else
-                    TransformImage(image, *bump_resize, clamp, background, background_size);
-            }
-            goto imported;
-        }
-    } else // if have info about resize for source image, then if can store it in 'image_resize' then store and if not then resize now
-    {
-        if (proj) // check for element ID
-        {
-            UID image_id;
-            if (DecodeFileName(name, image_id)) {
-                name = proj->editPath(image_id); // if the filename is in UID format then it's ELM_IMAGE
-                if (C Elm *image = proj->findElm(image_id))
-                    if (C ElmImage *data = image->imageData())
-                        lum_to_alpha = data->alphaLum();
-            }
-        }
+        } else // if have info about resize for source image, then if can store it in 'image_resize' then store and if not then resize now
+            if (name == "|bump|") {
+                if (bump) {
+                    bump->copy(image);
+                    if (bump_resize) {
+                        if (image_resize)
+                            *image_resize = *bump_resize;
+                        else
+                            TransformImage(image, *bump_resize, clamp, background, background_size);
+                    }
+                    goto imported;
+                }
+            } else // if have info about resize for source image, then if can store it in 'image_resize' then store and if not then resize now
+            {
+                if (proj) // check for element ID
+                {
+                    UID image_id;
+                    if (DecodeFileName(name, image_id)) {
+                        name = proj->editPath(image_id); // if the filename is in UID format then it's ELM_IMAGE
+                        if (C Elm *image = proj->findElm(image_id))
+                            if (C ElmImage *data = image->imageData())
+                                lum_to_alpha = data->alphaLum();
+                    }
+                }
 
-        if (ImportImage(image, name, -1, IMAGE_SOFT, 1, true)) {
-        imported:
-            image.copy(image, -1, -1, -1, srgb ? ImageTypeIncludeSRGB(image.type()) : ImageTypeExcludeSRGB(image.type())); // set desired sRGB
-            if (lum_to_alpha)
-                image.alphaFromBrightness().divRgbByAlpha();
-            TransformImage(image, ConstCast(fp.params), clamp, background, background_size);
-            return true;
-        }
-    }
+                if (ImportImage(image, name, -1, IMAGE_SOFT, 1, true)) {
+                imported:
+                    image.copy(image, -1, -1, -1, srgb ? ImageTypeIncludeSRGB(image.type()) : ImageTypeExcludeSRGB(image.type())); // set desired sRGB
+                    if (lum_to_alpha)
+                        image.alphaFromBrightness().divRgbByAlpha();
+                    TransformImage(image, ConstCast(fp.params), clamp, background, background_size);
+                    return true;
+                }
+            }
     image.del();
     return false;
 }
@@ -3166,7 +3166,7 @@ force_src_resize:
         if (p->value != "set" && p->value != "skip" && p->value != "ignore") {
             hp = true;
             break;
-        }        // if there's at least one apply mode that's not "set" then use high precision
+        } // if there's at least one apply mode that's not "set" then use high precision
     FREPA(files) // process in order
     {
         FileParams &file = files[i];
@@ -3472,7 +3472,7 @@ force_src_resize:
                                         flt hue = l.xyz.max();
                                         bool photo = (mode == APPLY_ADD_HUE_PHOTO);
                                         c = base;
-                                        //flt  lin_lum; if(photo)lin_lum=LinearLumOfSRGBColor(c.xyz);
+                                        // flt  lin_lum; if(photo)lin_lum=LinearLumOfSRGBColor(c.xyz);
                                         flt lum;
                                         if (photo)
                                             lum = SRGBLumOfSRGBColor(c.xyz);
@@ -3480,7 +3480,7 @@ force_src_resize:
                                         c.x += hue;
                                         c.xyz = HsbToRgb(c.xyz);
                                         if (photo) {
-                                            //c.xyz=SRGBToLinear(c.xyz); if(flt cur_lin_lum=LinearLumOfLinearColor(c.xyz))c.xyz*=lin_lum/cur_lin_lum; c.xyz=LinearToSRGB(c.xyz);
+                                            // c.xyz=SRGBToLinear(c.xyz); if(flt cur_lin_lum=LinearLumOfLinearColor(c.xyz))c.xyz*=lin_lum/cur_lin_lum; c.xyz=LinearToSRGB(c.xyz);
                                             if (flt cur_lum = SRGBLumOfSRGBColor(c.xyz))
                                                 c.xyz *= lum / cur_lum; // prefer multiplications in sRGB space, as linear mul may change perceptual contrast and saturation
                                         }
@@ -3491,7 +3491,7 @@ force_src_resize:
                                         flt hue = l.xyz.max();
                                         bool photo = (mode == APPLY_SET_HUE_PHOTO);
                                         c = base;
-                                        //flt  lin_lum; if(photo)lin_lum=LinearLumOfSRGBColor(c.xyz);
+                                        // flt  lin_lum; if(photo)lin_lum=LinearLumOfSRGBColor(c.xyz);
                                         flt lum;
                                         if (photo)
                                             lum = SRGBLumOfSRGBColor(c.xyz);
@@ -3499,14 +3499,14 @@ force_src_resize:
                                         c.x = hue;
                                         c.xyz = HsbToRgb(c.xyz);
                                         if (photo) {
-                                            //c.xyz=SRGBToLinear(c.xyz); if(flt cur_lin_lum=LinearLumOfLinearColor(c.xyz))c.xyz*=lin_lum/cur_lin_lum; c.xyz=LinearToSRGB(c.xyz);
+                                            // c.xyz=SRGBToLinear(c.xyz); if(flt cur_lin_lum=LinearLumOfLinearColor(c.xyz))c.xyz*=lin_lum/cur_lin_lum; c.xyz=LinearToSRGB(c.xyz);
                                             if (flt cur_lum = SRGBLumOfSRGBColor(c.xyz))
                                                 c.xyz *= lum / cur_lum; // prefer multiplications in sRGB space, as linear mul may change perceptual contrast and saturation
                                         }
                                     } break;
 
                                     case APPLY_SET_LUM: {
-                                        //c.xyz=SRGBToLinear(base.xyz); flt lum=SRGBToLinear(l.xyz).max(); if(flt cur_lin_lum=   c.xyz.max())c.xyz*=          lum/cur_lin_lum;else c.xyz=lum; c.xyz=LinearToSRGB(c.xyz);
+                                        // c.xyz=SRGBToLinear(base.xyz); flt lum=SRGBToLinear(l.xyz).max(); if(flt cur_lin_lum=   c.xyz.max())c.xyz*=          lum/cur_lin_lum;else c.xyz=lum; c.xyz=LinearToSRGB(c.xyz);
                                         flt lum = l.xyz.max();
                                         if (flt cur_lum = base.xyz.max())
                                             c.xyz = base.xyz * (lum / cur_lum);
@@ -3516,7 +3516,7 @@ force_src_resize:
                                     } break;
 
                                     case APPLY_SET_LUM_PHOTO: {
-                                        //c.xyz=SRGBToLinear(base.xyz); flt lum=LinearLumOfSRGBColor(l.xyz); if(flt cur_lin_lum=LinearLumOfLinearColor(   c.xyz))c.xyz*=          lum/cur_lin_lum ;else c.xyz=lum; c.xyz=LinearToSRGB(c.xyz);
+                                        // c.xyz=SRGBToLinear(base.xyz); flt lum=LinearLumOfSRGBColor(l.xyz); if(flt cur_lin_lum=LinearLumOfLinearColor(   c.xyz))c.xyz*=          lum/cur_lin_lum ;else c.xyz=lum; c.xyz=LinearToSRGB(c.xyz);
                                         flt lum = SRGBLumOfSRGBColor(l.xyz);
                                         if (flt cur_lum = SRGBLumOfSRGBColor(base.xyz))
                                             c.xyz = base.xyz * (lum / cur_lum);
@@ -3781,39 +3781,39 @@ Str Plural(Str name) // convert to plural name
         name += "ren";
     else // child  -> children
         if (name == "potato")
-        name += "es";
-    else // potato -> potatoes
-        if (name == "hero")
-        name += "es";
-    else // hero   -> heroes
-        if (name == "mouse")
-        name.remove(1, 4) += "ice";
-    else // mouse  -> mice
-        if (name == "man")
-        name.remove(1, 2) += "en";
-    else // man    -> men
-        if (name == "woman")
-        name.remove(3, 2) += "en";
-    else // woman  -> women
-        if (name == "goose")
-        name.remove(1, 4) += "eese";
-    else // goose  -> geese
-        if (name == "person")
-        name.remove(1, 5) += "eople";
-    else // person -> people
-        if (last == 'y')
-        name.removeLast() += "ies";
-    else // body   -> bodies
-        if (last == 'x' || last == 'h' || last == 's')
-        name += "es";
-    else // box    -> boxes, mesh -> meshes, bus -> buses
-        if (last == 'f') {
-        if (name != "dwarf" && name != "roof")
-            name.removeLast() += "ves"; // leaf -> leaves, elf -> elves (dwarf -> dwarfs, roof -> roofs)
-    } else if (Ends(name, "fe"))
-        name.removeLast().removeLast() += "ves";
-    else // life -> lives, knife -> knives
-        name += 's';
+            name += "es";
+        else // potato -> potatoes
+            if (name == "hero")
+                name += "es";
+            else // hero   -> heroes
+                if (name == "mouse")
+                    name.remove(1, 4) += "ice";
+                else // mouse  -> mice
+                    if (name == "man")
+                        name.remove(1, 2) += "en";
+                    else // man    -> men
+                        if (name == "woman")
+                            name.remove(3, 2) += "en";
+                        else // woman  -> women
+                            if (name == "goose")
+                                name.remove(1, 4) += "eese";
+                            else // goose  -> geese
+                                if (name == "person")
+                                    name.remove(1, 5) += "eople";
+                                else // person -> people
+                                    if (last == 'y')
+                                        name.removeLast() += "ies";
+                                    else // body   -> bodies
+                                        if (last == 'x' || last == 'h' || last == 's')
+                                            name += "es";
+                                        else // box    -> boxes, mesh -> meshes, bus -> buses
+                                            if (last == 'f') {
+                                                if (name != "dwarf" && name != "roof")
+                                                    name.removeLast() += "ves"; // leaf -> leaves, elf -> elves (dwarf -> dwarfs, roof -> roofs)
+                                            } else if (Ends(name, "fe"))
+                                                name.removeLast().removeLast() += "ves";
+                                            else // life -> lives, knife -> knives
+                                                name += 's';
     return case_up ? CaseUp(name) : name;
 }
 /******************************************************************************/
@@ -4227,7 +4227,7 @@ void FixMesh(Mesh &mesh) {
                     base.explodeVtxs();
                     FixVtxNrm(base);
                     if (!base.vtx.tan() || !base.vtx.bin())
-                        base.setTanBinDbl();                      //if(!base.vtx.tan())base.setTangents(); if(!base.vtx.bin())base.setBinormals(); // set in case mesh doesn't have them yet, need to call before 'weldVtx'
+                        base.setTanBinDbl();                      // if(!base.vtx.tan())base.setTangents(); if(!base.vtx.bin())base.setBinormals(); // set in case mesh doesn't have them yet, need to call before 'weldVtx'
                     base.weldVtx(VTX_ALL, EPSD, EPS_COL_COS, -1); // use small epsilon in case mesh is scaled down, do not remove degenerate faces because they're not needed because we're doing this only because of 'explodeVtxs'
                 }
                 break;
@@ -4374,7 +4374,7 @@ void SetRootMoveRot(Animation &anim, C Vec *root_move, C Vec *root_rot) {
                             pos += dir;
                             dir *= rot;
                             pos += dir;
-                        }                                                                                     // much more precise
+                        } // much more precise
                         anim.keys.poss[i].time = ((i == num) ? anim.length() : flt(i) / num * anim.length()); // !! have to set precise time for last keyframe to make sure root movement is calculated properly !!
                         anim.keys.poss[i].pos = pos;
                     }
@@ -4411,7 +4411,7 @@ bool DelEndKeys(Animation &anim) // return if any change was made
             changed = true;
         }
     }
-    //anim.setRootMatrix(); we don't change root, only bones
+    // anim.setRootMatrix(); we don't change root, only bones
     return changed;
 }
 /******************************************************************************/

@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 
 /******************************************************************************/
@@ -167,7 +167,7 @@ Str EditSkeleton::nodeUID(int node_i) C // unique string identifying a node !! n
         if (child_index) {
             uid += CharAlpha;
             uid += child_index;
-        }           // node child index in parent (only children with same names are counted)
+        } // node child index in parent (only children with same names are counted)
         uid += '/'; // separator
         node_i = parent;
     }
@@ -319,9 +319,9 @@ void EditSkeleton::add(C EditSkeleton &src_skel, bool replace) // assumes that '
             parents.New().set(src_node.parent, src_skel);
         } else // if not found
             if (replace) {
-            nodes[node_i] = src_node;
-            parents[node_i].set(src_node.parent, src_skel);
-        } // found and replace
+                nodes[node_i] = src_node;
+                parents[node_i].set(src_node.parent, src_skel);
+            } // found and replace
     }
     // add rest after all nodes have been copied
 

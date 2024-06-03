@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 #if MAC
 #include "../Platforms/Mac/MyApplication.h"
 #elif IOS
@@ -361,7 +361,7 @@ Application &Application::flash() {
     [NSApp requestUserAttention:NSInformationalRequest];
 #elif LINUX
     if (XDisplay && window() && _NET_WM_STATE && _NET_WM_STATE_DEMANDS_ATTENTION) {
-#if 0 // this doesn't work at all
+#if 0   // this doesn't work at all
       XClientMessageEvent event; Zero(event);
       event.type        =ClientMessage;
       event.message_type=_NET_WM_STATE;
@@ -385,7 +385,7 @@ Application &Application::flash() {
         e.xclient.data.l[2] = 0;
         e.xclient.data.l[3] = 1;
         XSendEvent(XDisplay, DefaultRootWindow(XDisplay), false, SubstructureRedirectMask | SubstructureNotifyMask, &e);
-#else // more complex code but works
+#else   // more complex code but works
         Atom type = NULL;
         int format = 0;
         unsigned long items = 0, bytes_after = 0;
@@ -608,8 +608,7 @@ void Application::setStayAwake() {
                 else
                     DisplayRequest->RequestActive();
                 StayAwake ^= 1; // !! CHANGE AFTER CALL !! because if failed then exception is thrown and this is not called
-            }
-            catch (...) {
+            } catch (...) {
             }
         }
 #elif MAC
@@ -1425,7 +1424,7 @@ static void FadeOut() {
         SystemParametersInfo(SPI_GETANIMATION, SIZE(ai), &ai, 0);
         if (ai.iMinAnimate)
             fade_window = false; // if Windows has animations enabled, then don't fade manually
-#elif WINDOWS_NEW || LINUX // WindowsNew and Linux don't support 'App.opacity'
+#elif WINDOWS_NEW || LINUX       // WindowsNew and Linux don't support 'App.opacity'
         fade_window = false;
 #endif
         if (!fade_window)
@@ -1442,7 +1441,7 @@ static void FadeOut() {
                 }
                 if (fade_window)
                     App.opacity(alpha * frac);
-#if MAC // on Mac we have to update events, otherwise 'App.opacity' won't do anything. We have to do it even when not fading window (when exiting from fullscreen mode) because without it, the window will be drawn as a restored window
+#if MAC                                                                                                                                                       // on Mac we have to update events, otherwise 'App.opacity' won't do anything. We have to do it even when not fading window (when exiting from fullscreen mode) because without it, the window will be drawn as a restored window
                 for (; NSEvent *event = [NSApp nextEventMatchingMask:NSEventMaskAny untilDate:[NSDate distantPast] inMode:NSDefaultRunLoopMode dequeue:YES];) // 'distantPast' will not wait for any new events but return those that happened already
                     [NSApp sendEvent:event];
 #endif

@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 namespace EE {
 /******************************************************************************
 MeshBase& fixSolid      (Bool swapped           ); // fix edge winding according to ETQ_FLAG

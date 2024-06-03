@@ -6,7 +6,7 @@
       because in that mode, RGB will have more precision.
 
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 
 #include "../../../../ThirdPartyLibs/begin.h"
 

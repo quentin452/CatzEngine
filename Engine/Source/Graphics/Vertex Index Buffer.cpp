@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************
 
@@ -123,14 +123,14 @@ static void (*glDrawElementsBaseVertex)(GLenum mode, GLsizei count, GLenum type,
    https://msdn.microsoft.com/en-us/library/windows/desktop/bb322868%28v=vs.85%29.aspx
 The following correspond to 8-bit mapping of -1..1 float
 /******************************************************************************/
-#define UNSIGNED_N1 0 // -1
-#define UNSIGNED_0 128 // ~0, there is no exact zero, because 127/255.0=0.498039216, 128/255.0=0.501960784, and both are offsetted by -0.5, giving -0.001960784 and 0.001960784, however 128 is chosen to achieve same value as signed version, because converting signed/unsigned is done by adding 128, then Byte(UNSIGNED_0+128)==0 give signed zero, an exact match
-#define UNSIGNED_1 255 // +1
+#define UNSIGNED_N1 0                      // -1
+#define UNSIGNED_0 128                     // ~0, there is no exact zero, because 127/255.0=0.498039216, 128/255.0=0.501960784, and both are offsetted by -0.5, giving -0.001960784 and 0.001960784, however 128 is chosen to achieve same value as signed version, because converting signed/unsigned is done by adding 128, then Byte(UNSIGNED_0+128)==0 give signed zero, an exact match
+#define UNSIGNED_1 255                     // +1
 #define UNSIGNED_ZP(x) ((x) >= UNSIGNED_0) // if zero or positive
 
-#define SIGNED_N1 128 // -1, this could also be 129 because both values give -1, however we want same value as unsigned version, because converting signed/unsigned is done by adding 128
-#define SIGNED_0 0 //  0
-#define SIGNED_1 127 // +1
+#define SIGNED_N1 128                  // -1, this could also be 129 because both values give -1, however we want same value as unsigned version, because converting signed/unsigned is done by adding 128
+#define SIGNED_0 0                     //  0
+#define SIGNED_1 127                   // +1
 #define SIGNED_ZP(x) ((x) <= SIGNED_1) // if zero or positive
 
 Vec UByte4ToNrm(C VecB4 &v) { return !Vec(UByteToSFlt(v.x), UByteToSFlt(v.y), UByteToSFlt(v.z)); }
@@ -1557,50 +1557,50 @@ void VtxIndBuf::create() {
     }
     {
         D3D11_INPUT_ELEMENT_DESC ve[] =
-        {
-            {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, OFFSET(Vtx3DBilb, pos), D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"POSITION", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {
+                {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, OFFSET(Vtx3DBilb, pos), D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"POSITION", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
 #if GPU_HALF_SUPPORTED
-            {"TANGENT", 0, DXGI_FORMAT_R16G16B16A16_FLOAT, 0, OFFSET(Vtx3DBilb, vel_angle), D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"TANGENT", 0, DXGI_FORMAT_R16G16B16A16_FLOAT, 0, OFFSET(Vtx3DBilb, vel_angle), D3D11_INPUT_PER_VERTEX_DATA, 0},
 #else
-            {"TANGENT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, OFFSET(Vtx3DBilb, vel_angle), D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"TANGENT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, OFFSET(Vtx3DBilb, vel_angle), D3D11_INPUT_PER_VERTEX_DATA, 0},
 #endif
-            {"UV", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, OFFSET(Vtx3DBilb, tex), D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"UV", 1, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"UV", 2, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"UV", 3, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"PSIZE", 0, DXGI_FORMAT_R32_FLOAT, 0, OFFSET(Vtx3DBilb, size), D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"BLENDINDICES", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"BLENDWEIGHT", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"COLOR", 1, DXGI_FORMAT_R8G8B8A8_UNORM, 0, OFFSET(Vtx3DBilb, color), D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"FACE_ID", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        };
+                {"UV", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, OFFSET(Vtx3DBilb, tex), D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"UV", 1, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"UV", 2, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"UV", 3, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"PSIZE", 0, DXGI_FORMAT_R32_FLOAT, 0, OFFSET(Vtx3DBilb, size), D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"BLENDINDICES", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"BLENDWEIGHT", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"COLOR", 1, DXGI_FORMAT_R8G8B8A8_UNORM, 0, OFFSET(Vtx3DBilb, color), D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"FACE_ID", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            };
         _vf3D_bilb.create(ve, Elms(ve));
     }
     {
         D3D11_INPUT_ELEMENT_DESC ve[] =
-        {
-            {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, OFFSET(Vtx3DBilbAnim, pos), D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"POSITION", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            {
+                {"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, OFFSET(Vtx3DBilbAnim, pos), D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"POSITION", 1, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
 #if GPU_HALF_SUPPORTED
-            {"TANGENT", 0, DXGI_FORMAT_R16G16B16A16_FLOAT, 0, OFFSET(Vtx3DBilbAnim, vel_angle), D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"TANGENT", 0, DXGI_FORMAT_R16G16B16A16_FLOAT, 0, OFFSET(Vtx3DBilbAnim, vel_angle), D3D11_INPUT_PER_VERTEX_DATA, 0},
 #else
-            {"TANGENT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, OFFSET(Vtx3DBilbAnim, vel_angle), D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"TANGENT", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, OFFSET(Vtx3DBilbAnim, vel_angle), D3D11_INPUT_PER_VERTEX_DATA, 0},
 #endif
-            {"UV", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, OFFSET(Vtx3DBilbAnim, tex), D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"UV", 1, DXGI_FORMAT_R32_FLOAT, 0, OFFSET(Vtx3DBilbAnim, frame), D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"UV", 2, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"UV", 3, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"PSIZE", 0, DXGI_FORMAT_R32_FLOAT, 0, OFFSET(Vtx3DBilbAnim, size), D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"BLENDINDICES", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"BLENDWEIGHT", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"COLOR", 1, DXGI_FORMAT_R8G8B8A8_UNORM, 0, OFFSET(Vtx3DBilbAnim, color), D3D11_INPUT_PER_VERTEX_DATA, 0},
-            {"FACE_ID", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
-        };
+                {"UV", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, OFFSET(Vtx3DBilbAnim, tex), D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"UV", 1, DXGI_FORMAT_R32_FLOAT, 0, OFFSET(Vtx3DBilbAnim, frame), D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"UV", 2, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"UV", 3, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"PSIZE", 0, DXGI_FORMAT_R32_FLOAT, 0, OFFSET(Vtx3DBilbAnim, size), D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"BLENDINDICES", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"BLENDWEIGHT", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"COLOR", 0, DXGI_FORMAT_R8G8B8A8_UNORM, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"COLOR", 1, DXGI_FORMAT_R8G8B8A8_UNORM, 0, OFFSET(Vtx3DBilbAnim, color), D3D11_INPUT_PER_VERTEX_DATA, 0},
+                {"FACE_ID", 0, DXGI_FORMAT_R8G8B8A8_UINT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0},
+            };
         _vf3D_bilb_anim.create(ve, Elms(ve));
     }
     {

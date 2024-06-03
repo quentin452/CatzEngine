@@ -4,7 +4,7 @@
       (not that clearing Spectrometer from Sound is not immediate, in case it's using it during the clear call)
 
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 #define SUPPORT_FFTW 0    // fastest for all sizes, supports all       sizes, but needs a commercial license
 #define SUPPORT_KISS 0    // fast only for pow2   , supports all       sizes, can be slow on non pow2 (especially prime numbers)
 #define SUPPORT_FFTREAL 1 // faster than KISS     , supports only pow2 sizes

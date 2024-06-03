@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 MaterialRegion MtrlEdit;
 /******************************************************************************/
@@ -187,7 +187,7 @@ void MaterialRegion::Texture::setFile(Str file, bool set_undo) {
             mr->undos.set(null, true);
         EditMaterial &mtrl = mr->getEditMtrl();
         TEX_FLAG textures = mtrl.textures(); // get current state of textures before making any change
-                                             //if(type>=TEX_RFL_L && type<=TEX_RFL_U)file=SetCubeFile(md_file.asText(&mtrl), type-TEX_RFL_L, file);
+                                             // if(type>=TEX_RFL_L && type<=TEX_RFL_U)file=SetCubeFile(md_file.asText(&mtrl), type-TEX_RFL_L, file);
         md_time.as<TimeStamp>(&mtrl).now();
         md_file.fromText(&mtrl, file);
 
@@ -237,13 +237,13 @@ void MaterialRegion::Texture::setFile(Str file, bool set_undo) {
             mr->setChanged();
 
         // if adjusting reflection texture, then adjust parameters of all other relfection slots, because they are connected
-        //if(type>=TEX_RFL_L && type<=TEX_RFL_ALL)REPA(mr.texs)if(mr.texs[i].type>=TEX_RFL_L && mr.texs[i].type<=TEX_RFL_ALL)mr.texs[i].toGui();
+        // if(type>=TEX_RFL_L && type<=TEX_RFL_ALL)REPA(mr.texs)if(mr.texs[i].type>=TEX_RFL_L && mr.texs[i].type<=TEX_RFL_ALL)mr.texs[i].toGui();
     }
 }
 void MaterialRegion::Texture::toGui() {
     if (mr) {
         EditMaterial &mtrl = mr->getEditMtrl();
-        file = md_file.asText(&mtrl); //if(type>=TEX_RFL_L && type<=TEX_RFL_U)file=GetCubeFile(file, type-TEX_RFL_L);
+        file = md_file.asText(&mtrl); // if(type>=TEX_RFL_L && type<=TEX_RFL_U)file=GetCubeFile(file, type-TEX_RFL_L);
         if (type == TEX_SMOOTH)
             text = (mtrl.smooth_is_rough ? "Rough" : "Smooth");
         setDesc();
@@ -1115,7 +1115,7 @@ void MaterialRegion::resizeBase2(C VecI2 &size, bool relative) {
     time.getUTC();
     VecI2 size2 = size;
 
-    //if(relative || game && game->base_1 && game->base_1->size()!=size2)edit.separateNormalMap(time); // separate if needed (normal can be from bump), and before reverting
+    // if(relative || game && game->base_1 && game->base_1->size()!=size2)edit.separateNormalMap(time); // separate if needed (normal can be from bump), and before reverting
 
     if (relative && size.any())                                                           // if we want to have relative size and not original, then first revert to original size
         if (Proj.forceImageSize(edit.smooth_map, 0, relative, edit.smooth_map_time, time) // !! use '|' because all need to be processed !!
@@ -1157,7 +1157,7 @@ void MaterialRegion::setBottom(C Rect &prop_rect) {
 void MaterialRegion::setSmoothParam() {
     if (smooth) {
         if (edit.smooth_map.is()) {
-            //if(tweak){smooth.display("Smooth Tweak"); smooth.range(-1, 1);}else
+            // if(tweak){smooth.display("Smooth Tweak"); smooth.range(-1, 1);}else
             {
                 smooth->display("Smoothness");
                 smooth->range(0, 4);
@@ -1217,11 +1217,11 @@ void MaterialRegion::create() {
     green = &props.New().create("Green", MemberDesc(DATA_REAL).setFunc(Green, Green)).range(0, 4).mouseEditSpeed(0.4f);
     blue = &props.New().create("Blue", MemberDesc(DATA_REAL).setFunc(Blue, Blue)).range(0, 4).mouseEditSpeed(0.4f);
     alpha = &props.New().create("Alpha", MemberDesc(DATA_REAL).setFunc(Alpha, Alpha)).range(0, 1);
-    //props.New();
+    // props.New();
     props.New().create("Bump", MemberDesc(DATA_REAL).setFunc(Bump, Bump)).range(0, 1);
     props.New().create("Normal", MemberDesc(DATA_REAL).setFunc(NrmScale, NrmScale)).range(0, 2);
     props.New().create("Flip Normal Y", MemberDesc(DATA_BOOL).setFunc(FNY, FNY));
-    //props.New();
+    // props.New();
 
     props.New().create("Use Roughness", MemberDesc(DATA_BOOL).setFunc(RoughImage, RoughImage)).desc("If source Image is a Roughness Texture instead of Smoothness");
     smooth = &props.New().create("Smoothness", MemberDesc(DATA_REAL).setFunc(Smooth, Smooth)); // range depends on smooth texture presence
@@ -1233,12 +1233,12 @@ void MaterialRegion::create() {
     emit_green = &props.New().create("Emit Green", MemberDesc(DATA_REAL).setFunc(EmissiveG, EmissiveG)).range(0, 4).mouseEditSpeed(0.4f);
     emit_blue = &props.New().create("Emit Blue", MemberDesc(DATA_REAL).setFunc(EmissiveB, EmissiveB)).range(0, 4).mouseEditSpeed(0.4f);
     props.New().create("Emit Glow", MemberDesc(DATA_REAL).setFunc(EmissiveGlow, EmissiveGlow)).range(0, 4).mouseEditSpeed(0.4f);
-    //props.New();
-    //props.New().create("Subsurf Scatter", MemberDesc(DATA_REAL).setFunc(SSS , SSS )).range(0, 1);
+    // props.New();
+    // props.New().create("Subsurf Scatter", MemberDesc(DATA_REAL).setFunc(SSS , SSS )).range(0, 1);
     props.New().create("Detail UV Scale", MemberDesc(DATA_REAL).setFunc(DetUVScale, DetUVScale)).range(0.01f, 1024).mouseEditMode(PROP_MOUSE_EDIT_SCALAR);
     props.New().create("Detail Power", MemberDesc(DATA_REAL).setFunc(DetPower, DetPower)).range(0, 1);
     props.New().create("Detail All LODs", MemberDesc(DATA_BOOL).setFunc(DetLOD, DetLOD)).desc(S + "If use Detail for all Mesh LODs.\nIf disabled then only 1st Mesh LOD will use Detail.");
-    //props.New();
+    // props.New();
 
     props.New().create("Cull", MemberDesc(DATA_BOOL).setFunc(Cull, Cull));
     props.New().create("UV Scale", MemberDesc(DATA_REAL).setFunc(UVScale, UVScale)).range(0.01f, 1024).mouseEditMode(PROP_MOUSE_EDIT_SCALAR);
@@ -1419,7 +1419,7 @@ void MaterialRegion::create() {
     }
     {
         Node<MenuElm> &bump = (n += "Set Bump from Color");
-        //bump.New().create("Blur Auto", BumpFromCol  , T);
+        // bump.New().create("Blur Auto", BumpFromCol  , T);
         bump.New().create("Blur 2", BumpFromCol2, T);
         bump.New().create("Blur 3", BumpFromCol3, T);
         bump.New().create("Blur 4", BumpFromCol4, T);
@@ -1687,10 +1687,10 @@ void MaterialRegion::ImageSource::process() {
         order = 2;
     else // check AO first in case it's multi-channel because it's most popular
         if (channel[TC_GLOW] >= 0)
-        order = 3;
-    else // then glow
-        if (channel[TC_METAL] >= 0)
-        order = 1; //
+            order = 3;
+        else // then glow
+            if (channel[TC_METAL] >= 0)
+                order = 1; //
 
     REPA(channel)
     if (channel[i] >= 0)
@@ -1760,7 +1760,7 @@ void MaterialRegion::ImageSource::process(TEX_TYPE tex_type, EditMaterial &mtrl,
             params.New().set("resize", "full");
         } else // check Metal
             if (multi_channel && InRange(channel[TC_METAL], 4) && need_metal_channel)
-            params.New().set("channel", IndexChannel(channel[TC_METAL]));
+                params.New().set("channel", IndexChannel(channel[TC_METAL]));
     } else if (tex_type == TEX_GLOW) {
         if (multi_channel && InRange(channel[TC_GLOW], 4))
             params.New().set("channel", IndexChannel(channel[TC_GLOW]));

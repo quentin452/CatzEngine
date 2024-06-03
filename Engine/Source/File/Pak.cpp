@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 #define CONSISTENT_CIPHER 0 // if 1 then both 'PakPostHeader.save' and 'PakPostHeader.load' will have the same 'File.cipher' (this is more consistent, however slower)
@@ -1344,10 +1344,10 @@ struct PakCreator {
                 f = &processed;
             else // if we've de/compressed data for storage, then we have to use it (this will be valid only if decompressed or compressed)
                 if (data)
-                f = data->openRaw(temp);
-            else // open without decompressing, because we expect files as they are, and if they're compressed, it should be speicified with 'compression'
-                if (temp.read(data_name, src_cipher))
-                f = &temp;
+                    f = data->openRaw(temp);
+                else // open without decompressing, because we expect files as they are, and if they're compressed, it should be speicified with 'compression'
+                    if (temp.read(data_name, src_cipher))
+                        f = &temp;
             if (f)
                 f->pos(0);
             return f;
@@ -2094,7 +2094,7 @@ struct PakCreator {
                             if (error_message)
                                 *error_message = CantFlush(pak.pakFileName());
                             goto error;
-                        }                          // no need to adjust 'updated_size' for pre-header, as header data will always be after. 'used_file_ranges' was already adjusted in constructor
+                        } // no need to adjust 'updated_size' for pre-header, as header data will always be after. 'used_file_ranges' was already adjusted in constructor
                         f_dest.size(updated_size); // trim to used data only, this can ignore checking for errors, as Pak will work with or without this call
                     } else {
                         if (used_file_ranges)
@@ -2464,7 +2464,7 @@ Bool Pak::replaceInPlace(Memb<DataRangeAbs> &used_file_ranges, C CMemPtr<PakFile
                         file.xxHash64_32 = src_file->data_xxHash64_32;
                     else // only if not specified
                         if (!src_file->data_xxHash64_32)
-                        changed = true; // if user specified hash that wasn't available in the source, then it means we have to write it
+                            changed = true; // if user specified hash that wasn't available in the source, then it means we have to write it
                     file.modify_time_utc = src_file->modify_time_utc;
                     file.data.set(*src_file, T);
                 }

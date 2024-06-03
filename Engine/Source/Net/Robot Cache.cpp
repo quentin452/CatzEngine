@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 #define SUPPORT_ROBOT_CACHE WINDOWS_OLD
 #if SUPPORT_ROBOT_CACHE
 #include "../../../ThirdPartyLibs/RobotCache/circuitry_api.h"

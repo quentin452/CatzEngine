@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 namespace Edit {
 /******************************************************************************/
@@ -392,20 +392,20 @@ void Source::listSuggestions(Int force) {
             }
         } else // list preproc  keywords
             if (cur_text.is()) {
-            REPA(Symbols) {
-                Symbol &s = Symbols.lockedData(i);
-                if (!(s.modifiers & Symbol::MODIF_SKIP_SUGGESTIONS) && (s.valid || s.valid_decl) && s.type != Symbol::PREPROC && ((precise_parent && parent.symbol) ? s.isMemberOf(parent.symbol(), parent.symbol.templates, caller, parent_instance, ctor_init, allow_self, false) : s.canBeAccessedFrom(parent.symbol(), caller, precise_parent, ProjectUsings)))
-                    if (Int p = SuggestionsPriority(s, cur_text, FlagOn(s.modifiers, Symbol::MODIF_ALL_UP_CASE)))
-                        suggestions.New().set(p, s, s);
-            }
-        } else // list matching symbols
-            if (force) {
-            REPA(Symbols) {
-                Symbol &s = Symbols.lockedData(i);
-                if (!(s.modifiers & Symbol::MODIF_SKIP_SUGGESTIONS) && (s.valid || s.valid_decl) && s.type != Symbol::PREPROC && ((precise_parent && parent.symbol) ? s.isMemberOf(parent.symbol(), parent.symbol.templates, caller, parent_instance, ctor_init, allow_self, false) : s.canBeAccessedFrom(parent.symbol(), caller, precise_parent, ProjectUsings)))
-                    suggestions.New().set(1, s, s);
-            }
-        } // list all      symbols
+                REPA(Symbols) {
+                    Symbol &s = Symbols.lockedData(i);
+                    if (!(s.modifiers & Symbol::MODIF_SKIP_SUGGESTIONS) && (s.valid || s.valid_decl) && s.type != Symbol::PREPROC && ((precise_parent && parent.symbol) ? s.isMemberOf(parent.symbol(), parent.symbol.templates, caller, parent_instance, ctor_init, allow_self, false) : s.canBeAccessedFrom(parent.symbol(), caller, precise_parent, ProjectUsings)))
+                        if (Int p = SuggestionsPriority(s, cur_text, FlagOn(s.modifiers, Symbol::MODIF_ALL_UP_CASE)))
+                            suggestions.New().set(p, s, s);
+                }
+            } else // list matching symbols
+                if (force) {
+                    REPA(Symbols) {
+                        Symbol &s = Symbols.lockedData(i);
+                        if (!(s.modifiers & Symbol::MODIF_SKIP_SUGGESTIONS) && (s.valid || s.valid_decl) && s.type != Symbol::PREPROC && ((precise_parent && parent.symbol) ? s.isMemberOf(parent.symbol(), parent.symbol.templates, caller, parent_instance, ctor_init, allow_self, false) : s.canBeAccessedFrom(parent.symbol(), caller, precise_parent, ProjectUsings)))
+                            suggestions.New().set(1, s, s);
+                    }
+                } // list all      symbols
 
         if (suggestions.elms()) {
             suggestions.sort(CompareAlphabeticalCS); // first sort alphabetically, to remove suggestions with the same base names (but from different symbols)
@@ -426,17 +426,17 @@ void Source::listSuggestions(Int force) {
                                 b_level = b.symbol->level;
                             } else // if this is the same class then it's possible we're accessing local variable "class A {int x; void met() {int x;}}"
                                 if (b_class->hasBase(a_class)) {
-                                a_level = 0;
-                                b_level = 1;
-                            } else // "class A {}   class B : A {}" remove A and keep B
-                                if (a_class->hasBase(b_class)) {
-                                a_level = 1;
-                                b_level = 0;
-                            } else // "class B {}   class A : B {}" remove B and keep A
-                            {
-                                a_level = 0;
-                                b_level = 0;
-                            }
+                                    a_level = 0;
+                                    b_level = 1;
+                                } else // "class A {}   class B : A {}" remove A and keep B
+                                    if (a_class->hasBase(b_class)) {
+                                        a_level = 1;
+                                        b_level = 0;
+                                    } else // "class B {}   class A : B {}" remove B and keep A
+                                    {
+                                        a_level = 0;
+                                        b_level = 0;
+                                    }
                         } else // maybe one does not belong to class "namespace N {int x;}   class X {int x; void method() {x|}}" in such case most probably we're accessing class member, since this suggestion was returned it means we have permission to do so (most likely we're in the class)
                         {
                             a_level = (a_class != null);
@@ -528,9 +528,9 @@ void Source::autoComplete(Bool auto_space, Bool set_undo, Bool auto_brace, Bool 
                         cur.x++;
                     else // if we've typed 'else' which is followed by (space or nothing), then just increase cursor position without inserting space, this is needed in case we're typing else at the end of line
                         if (auto_space) {
-                        line.insert(cur.x++, ' ');
-                        changed_called = false;
-                    }
+                            line.insert(cur.x++, ' ');
+                            changed_called = false;
+                        }
                 }
             }
             if (auto_brace && (Equal(text, "if", true) || Equal(text, "for", true) || Equal(text, "while", true) || Equal(text, "switch", true) || sugg->symbol && (sugg->symbol->type == Symbol::FUNC || sugg->symbol->type == Symbol::FUNC_LIST) || sugg->is_macro && sugg->macro_params)) {

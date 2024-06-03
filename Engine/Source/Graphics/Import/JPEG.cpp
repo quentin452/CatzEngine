@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 
 #if SUPPORT_JPG && !SWITCH
 #include "../../../../ThirdPartyLibs/begin.h"
@@ -66,9 +66,9 @@ static Int Orientation(JOCTET *data, Int size) {
             big_endian = false;
         else // Little endian TIFF header
             if (!memcmp(data + i, BETH, 4))
-            big_endian = true;
-        else // Big    endian TIFF header
-            continue;
+                big_endian = true;
+            else // Big    endian TIFF header
+                continue;
         // We have found either big or little endian TIFF header
         U16 orient_tag_id = 0x112;
         if (big_endian)

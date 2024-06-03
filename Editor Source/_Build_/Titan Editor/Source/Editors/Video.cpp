@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 VideoEditor VideoEdit;
 /******************************************************************************/
@@ -21,7 +21,7 @@ void VideoEditor::Locate(VideoEditor &editor) { Proj.elmLocate(editor.elm_id); }
 void VideoEditor::create() {
     width = &add();
     height = &add();
-    //kbps  =&add(); don't create because Theora and VP9 fail to detect it correctly
+    // kbps  =&add(); don't create because Theora and VP9 fail to detect it correctly
     fps = &add();
     codec = &add();
     autoData(this);
@@ -65,7 +65,7 @@ VideoEditor &VideoEditor::rect(C Rect &rect) {
     super::rect(rect);
     flt x = 0;
     if (props.elms())
-        x = 0.22f; //props[0].button.rect().max.x;
+        x = 0.22f; // props[0].button.rect().max.x;
     Rect r(x, -clientHeight(), clientWidth(), 0);
     r.extend(-0.02f);
     custom.rect(r);

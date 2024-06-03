@@ -6,7 +6,7 @@
    3. client
 
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 #if WINDOWS_OLD
 
 #include <Dbt.h>
@@ -1436,7 +1436,7 @@ static LRESULT CALLBACK WindowMsg(HWND window, UInt msg, WPARAM wParam, LPARAM l
             }
         }
 
-#if SUPPORT_WINDOWS_XP // additional check for WinXP
+#if SUPPORT_WINDOWS_XP            // additional check for WinXP
         if (OSVerNumber().x <= 5) // WinXP and below (WinXP is 5.1, Vista is 6.0, Win7 is 6.1, Win8 is 6.2, Win8.1 is 6.3, Win10 is 10)
             UpdateCandidates();   // must be called here as well because of Chinese NeiMa on WinXP (NeiMa doesn't call IMN_CHANGECANDIDATE), however this can't be called for Vista or newer because it causes disappearing of candidates for QuanPin when typing "q6"
 #endif
@@ -1891,35 +1891,35 @@ void Application::windowCreate() {
 
     // GL Config
     int attribs[] =
-    {
-        GLX_X_RENDERABLE,
-        true,
-        GLX_DRAWABLE_TYPE,
-        GLX_WINDOW_BIT,
-        GLX_RENDER_TYPE,
-        GLX_RGBA_BIT,
-        GLX_X_VISUAL_TYPE,
-        GLX_TRUE_COLOR,
-        GLX_RED_SIZE,
-        8,
-        GLX_GREEN_SIZE,
-        8,
-        GLX_BLUE_SIZE,
-        8,
-        GLX_ALPHA_SIZE,
-        8,
-        GLX_DEPTH_SIZE,
-        24,
-        GLX_STENCIL_SIZE,
-        8,
-        GLX_DOUBLEBUFFER,
-        true,
+        {
+            GLX_X_RENDERABLE,
+            true,
+            GLX_DRAWABLE_TYPE,
+            GLX_WINDOW_BIT,
+            GLX_RENDER_TYPE,
+            GLX_RGBA_BIT,
+            GLX_X_VISUAL_TYPE,
+            GLX_TRUE_COLOR,
+            GLX_RED_SIZE,
+            8,
+            GLX_GREEN_SIZE,
+            8,
+            GLX_BLUE_SIZE,
+            8,
+            GLX_ALPHA_SIZE,
+            8,
+            GLX_DEPTH_SIZE,
+            24,
+            GLX_STENCIL_SIZE,
+            8,
+            GLX_DOUBLEBUFFER,
+            true,
 #if LINEAR_GAMMA && 0 // disable because this fails on Ubuntu 21.04
-        GLX_FRAMEBUFFER_SRGB_CAPABLE_EXT,
-        LINEAR_GAMMA,
+            GLX_FRAMEBUFFER_SRGB_CAPABLE_EXT,
+            LINEAR_GAMMA,
 #endif
-        NULL // end of list
-    };
+            NULL // end of list
+        };
     int count = 0;
     if (GLXFBConfig *fbc = glXChooseFBConfig(XDisplay, DefaultScreen(XDisplay), attribs, &count)) {
         if (count >= 1)

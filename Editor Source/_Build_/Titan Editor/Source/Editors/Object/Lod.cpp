@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 NewLodClass NewLod;
 /******************************************************************************/
@@ -265,7 +265,7 @@ void NewLodClass::ImportEx(C Str &name, int lod_index) {
                     MeshPart &part = lod.parts[i];
                     MeshBase &base = part.base;
                     if (!base.vtx.tan() || !base.vtx.bin())
-                        base.setTanBinDbl(); //if(!base.vtx.tan())base.setTangents(); if(!base.vtx.bin())base.setBinormals(); // set in case mesh doesn't have them yet
+                        base.setTanBinDbl(); // if(!base.vtx.tan())base.setTangents(); if(!base.vtx.bin())base.setBinormals(); // set in case mesh doesn't have them yet
                     if (InRange(i, pmi))     // set materials
                     {
                         int mtrl_index = pmi[i];
@@ -367,7 +367,7 @@ NewLodClass &NewLodClass::create() {
     props.New().create("Max Distance", MEMBER(NewLodClass, max_distance)).min(0).mouseEditSpeed(0.01f).precision(4).desc("Max distance between elements to merge them");
     props.New().create("Max UV", MEMBER(NewLodClass, max_uv)).range(0, 1).mouseEditSpeed(0.01f).precision(4).desc("Max allowed vertex texture UV deviations (0..1)");
     props.New().create("Max Color", MEMBER(NewLodClass, max_color)).range(0, 1).mouseEditSpeed(0.1f).desc("Max allowed vertex color deviations (0..1)");
-    //props.New().create("Max Material"    , MEMBER(NewLodClass, max_material    )).range(0,   1).mouseEditSpeed(0.1).desc("Max allowed vertex material deviations (0..1)");  // this is not used since most likely there won't be any models with per-vertex materials over here
+    // props.New().create("Max Material"    , MEMBER(NewLodClass, max_material    )).range(0,   1).mouseEditSpeed(0.1).desc("Max allowed vertex material deviations (0..1)");  // this is not used since most likely there won't be any models with per-vertex materials over here
     props.New().create("Max Skin", MEMBER(NewLodClass, max_skin)).range(0, 1).mouseEditSpeed(0.1f).desc("Max allowed vertex skin deviations (0..1)");
     props.New().create("Max Normal", MEMBER(NewLodClass, max_normal)).range(0, 180).mouseEditSpeed(5.5f).desc("Max allowed vertex normal angle deviations (0..180)");
     props.New().create("Keep Border", MEMBER(NewLodClass, keep_border)).desc("If always keep border edges (edges that have faces only on one side)");

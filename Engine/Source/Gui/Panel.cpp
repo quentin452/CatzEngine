@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************
 
@@ -15,7 +15,7 @@ namespace EE {
 
 // TODO: these could be set as Panel members
 #define side_fade_ext -0.03f // when side image fading starts relative to rect border, example: fade_right_start=panel_rect.max.x+side_fade_ext (<0 means that fading starts already inside the rectangle)
-#define side_max_ext 0.01f // when side image fading ends   relative to rect border, example: fade_right_end  =panel_rect.max.x+side_max_ext
+#define side_max_ext 0.01f   // when side image fading ends   relative to rect border, example: fade_right_end  =panel_rect.max.x+side_max_ext
 /******************************************************************************/
 DEFINE_CACHE(Panel, Panels, PanelPtr, "Panel");
 /******************************************************************************/
@@ -345,7 +345,7 @@ void Panel::drawSide(C Color &color, C Rect &rect) C {
     }
 }
 void Panel::draw(C Rect &rect) C {
-#if !MOBILE // too slow
+#if !MOBILE              // too slow
     if (blur_color.any() // fast check
                          //&& (blur_color.r || blur_color.g || blur_color.b) // precise check, because 'blur_color.a' is ignored !! can ignore this check because Editor always clears 'blur_color.a' !!
     ) {
@@ -419,7 +419,7 @@ void Panel::draw(C Color &color, C Rect &rect) C {
           border_color = ColorMul(T.border_color, color),
           side_color = ColorMul(T.side_color, color);
 
-#if !MOBILE // too slow
+#if !MOBILE                                                    // too slow
     Color blur_color = ColorMulZeroAlpha(T.blur_color, color); // !! because of 'ColorMulZeroAlpha' we can ignore precise check below !!
     if (blur_color.any()                                       // fast check
                                                                //&&   (blur_color.r || blur_color.g || blur_color.b) // precise check, because 'blur_color.a' is ignored !! can ignore this check because of 'ColorMulZeroAlpha' above !!

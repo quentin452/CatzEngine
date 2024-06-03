@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************
 !! WARNING: all 'ToScreenRect' functions use 'FrustumMain' instead of 'Frustum' so they can't be used when drawing shadows !! this is so we don't have to restore 'Frustum' after every drawing light, see ALWAYS_RESTORE_FRUSTUM

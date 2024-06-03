@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 void _Memc::_reset(Int elm_size, void (*_new)(Ptr elm), void (*_del)(Ptr elm)) {
@@ -209,7 +209,7 @@ void _Memc::removeNum(Int i, Int n, Bool keep_order) {
     if (i < 0) {
         n += i;
         i = 0;
-    }                           // if 'i' is before the start, then move it to start and reduce number of elements to remove
+    } // if 'i' is before the start, then move it to start and reduce number of elements to remove
     if (n > 0 && InRange(i, T)) // if we want to remove elements and the index fits
     {
         MIN(n, elms() - i); // minimize what we can actually remove

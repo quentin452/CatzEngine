@@ -1,7 +1,7 @@
 #ifndef LIGHT_UTILITIES_HPP
 #define LIGHT_UTILITIES_HPP
 
-#include "stdafx.h"
+#include "../../stdafx.h"
 
 // TODO IMPROVE AGAIN MAINTAINABILITY
 

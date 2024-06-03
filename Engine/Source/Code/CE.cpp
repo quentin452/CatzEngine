@@ -82,7 +82,7 @@
       1. ptr_level, 2. array_dims (those can be both array and pointer) - 1 pointer to array of 3 pointer-pointers "int** (*)x[3]" is handled like this - 'ptr_level'=2 (describes "**"), 'array_dims'={3 (describes "[3]"), DIM_PTR (describes "(*)")}
 
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 #if WINDOWS
 std::string clang_format_exe = "\\clang-format.exe";
 #endif

@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 int Compare(C IDReplace &a, C IDReplace &b) { return Compare(a.from, b.from); }
 int Compare(C IDReplace &a, C UID &b) { return Compare(a.from, b); }
@@ -136,7 +136,7 @@ bool UpdateIDReplace() {
 
     App.stateProgress(UpdateProgress());
     Time.wait(1000 / 30);
-    //Gui.update(); this may cause conflicts with 'Proj.elmChanged'
+    // Gui.update(); this may cause conflicts with 'Proj.elmChanged'
     Server.update(null, true);
     if (Ms.bp(MS_MAXIMIZE))
         App.window().toggle();

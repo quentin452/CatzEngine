@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 Cache<EditObject> EditObjects;
 /******************************************************************************/
@@ -501,7 +501,7 @@ void EditObject::newData() {
     const_time++;
     path_time++;
     mesh_variation_time++;
-    //editor_type_time++; don't set this
+    // editor_type_time++; don't set this
 }
 void EditObject::create(C EditObject &src) {
     super::create(src);
@@ -813,7 +813,7 @@ bool EditObject::modify(C MemPtr<Edit::ObjChange> &changes, Project &proj) {
                 if (param->removed) {
                     changed = true;
                     param->setRemoved(false);
-                }  // restore
+                } // restore
             } else // create new one
             {
                 changed = true;

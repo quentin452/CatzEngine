@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 static void MenuPushed(C CMemPtr<MenuPush> &path, ComboBox &cb) {

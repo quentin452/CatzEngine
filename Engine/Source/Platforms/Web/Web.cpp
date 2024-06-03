@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 #if WEB
 namespace EE {
 /******************************************************************************/
@@ -395,9 +395,7 @@ int main() // initialize the FileSystem first
             {
                 FS.chdir('/data');
                 ccall('FileSystemReady', 'v', '', []); // call once the filesystem is ready
-            });
-    },
-           FileSystemReady);
+            }); }, FileSystemReady);
     emscripten_exit_with_live_runtime(); // this will prevent the app from exiting and calling destructors, instead we'll just wait until the FS is ready
     return 0;
 }

@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 #define TUBE_RES 4
 #define TUBE_MASS_FACTOR (1.5708f / TUBE_RES) // because we operate on boxes we need to adjust for tube/box volume factor, calculated comparing Boxed Actor mass to desired Tube volume

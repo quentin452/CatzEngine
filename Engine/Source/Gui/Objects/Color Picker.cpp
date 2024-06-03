@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 #define CP_PROPS_RGB 0
 #define CP_PROPS_ALPHA 3
 #define CP_PROPS_RGBA 4

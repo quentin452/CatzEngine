@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 static Int Compare(C Edit::Elm &elm, C UID &id) { return Compare(elm.id, id); }
 namespace Edit {

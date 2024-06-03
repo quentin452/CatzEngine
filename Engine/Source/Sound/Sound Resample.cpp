@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 #if SUPPORT_SAMPLERATE // TODO: add support on all platforms
 #include "../../../ThirdPartyLibs/SampleRate/lib/src/samplerate.h"
 #include "../../../ThirdPartyLibs/begin.h"
@@ -518,7 +518,7 @@ Bool SoundResample(Int src_samples, Int src_channels, I16 *src_data, MemPtr<I16>
 #if 0                                       // process all in one go, not good because Flt sample positions will lose precision for large data (minor precision loss at few second sounds and very noticeable for 2 minute sounds)
          resampler.setSrc(src_samples, src_data);
          resampler.set();
-#elif 1 // limit per src (best)
+#elif 1                                     // limit per src (best)
             resampler.setSrc(src_samples, src_data);
             for (;;) {
                 Int src_samples = resampler.src_samples;

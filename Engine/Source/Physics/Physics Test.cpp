@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 #if !PHYSX                            // Bullet
 #define CONVEX_RAY_TEST_SUB_SIMPLEX 0 // precision: low , performance: fastest
 #define CONVEX_RAY_TEST_GJK 1         // precision: high, performance: medium

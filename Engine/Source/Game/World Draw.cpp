@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 namespace Game {
 #define EPS_GRASS_RANGE 0.01f

@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 TextStyleEditor TextStyleEdit;
 /******************************************************************************/
@@ -142,7 +142,7 @@ TextStyleEditor &TextStyleEditor::rect(C Rect &rect) {
     if (props.elms())
         x = props[0].button.rect().max.x;
     Rect r(x, -clientHeight(), clientWidth(), 0);
-    r.extend(-0.05f); //r.setC(r.center(), Min(r.w(), 0.8), Min(r.h(), 0.7));
+    r.extend(-0.05f); // r.setC(r.center(), Min(r.w(), 0.8), Min(r.h(), 0.7));
     text.rect(r);
     return T;
 }
@@ -151,7 +151,7 @@ void TextStyleEditor::flush() {
         if (ElmTextStyle *data = elm->textStyleData()) {
             data->newVer();
             data->from(edit);
-        }                                // modify just before saving/sending in case we've received data from server after edit
+        } // modify just before saving/sending in case we've received data from server after edit
         Save(edit, Proj.editPath(*elm)); // edit
         Save(*game, Proj.gamePath(*elm));
         Proj.savedGame(*elm); // game

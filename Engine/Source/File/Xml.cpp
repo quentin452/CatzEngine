@@ -1,9 +1,9 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
-#define TEXTDATA_NAMELESS_SUB 1 // if allow saving/loading {} without name if it's empty
+#define TEXTDATA_NAMELESS_SUB 1  // if allow saving/loading {} without name if it's empty
 #define XML_NODE_DATA_SUB_NODE 1 // if keep 'XmlNode.data' as a sub-node when converting it to 'TextNode'
-#define FILE_PARAMS_INLINE 1 // if store simple children inline
+#define FILE_PARAMS_INLINE 1     // if store simple children inline
 /******************************************************************************/
 // TEXT DATA
 /******************************************************************************
@@ -242,8 +242,8 @@ Bool DecodeTextReal(CChar* &src, Dbl &real)
 #define BINARY_BEGIN '<'
 #define BINARY_END '>'
 #define BINARY_ZERO '?' // optimization to store UInt(0) as only one character
-#define BINARY_TRIM 0 // because binary data comes from Str and will be loaded into Str, then it will always be aligned to 2 bytes (size of wide Char), this will enable optimizations to reduce the binary size, however it works on assumption that this data will be loaded into Str, if in the future that would be changed, then binary data length may not be preserved
-#define RAW_BEGIN '\1' // used only when receiving data from server, assumes data is saved per-byte (not per-char)
+#define BINARY_TRIM 0   // because binary data comes from Str and will be loaded into Str, then it will always be aligned to 2 bytes (size of wide Char), this will enable optimizations to reduce the binary size, however it works on assumption that this data will be loaded into Str, if in the future that would be changed, then binary data length may not be preserved
+#define RAW_BEGIN '\1'  // used only when receiving data from server, assumes data is saved per-byte (not per-char)
 #define RAW_END '\1'
 #define ERROR '\2' // avoid '\0' because that one means end of file and success
 
@@ -441,15 +441,15 @@ static Char LoadText(FileText &f, Str &t, Char c) {
             } else
 #if 1 // don't allow special characters
                 if (Safe(c))
-                t += c;
-            else //   valid char, '\n' here is allowed
-                if (!Skip(c))
-                return ERROR; // invalid char
-#else // allow all characters
+                    t += c;
+                else //   valid char, '\n' here is allowed
+                    if (!Skip(c))
+                        return ERROR; // invalid char
+#else                                 // allow all characters
                 if (f.ok())
-                t += c; // add all possible characters because this data can be received from server and we need exact match
-            else
-                return ERROR;
+                    t += c; // add all possible characters because this data can be received from server and we need exact match
+                else
+                    return ERROR;
 #endif
         }
         c = f.getChar(); // read next char after the name, so we're at the same situation as with the "simple name" case
@@ -538,22 +538,22 @@ static Char LoadTextJSON(FileText &f, Str &t, Char c) {
                     t += '\t';
                 else // just in case
                     if (c == '"')
-                    t += '"';
-                else if (c == '\\')
-                    t += '\\';
-                else if (c == 'u' || c == 'U') {
-                    Byte a = CharInt(f.getChar());
-                    Byte b = CharInt(f.getChar());
-                    Byte c = CharInt(f.getChar());
-                    Byte d = CharInt(f.getChar());
-                    t += Char((a << 12) | (b << 8) | (c << 4) | d);
-                } else
-                    continue; // invalid char, just skip it
+                        t += '"';
+                    else if (c == '\\')
+                        t += '\\';
+                    else if (c == 'u' || c == 'U') {
+                        Byte a = CharInt(f.getChar());
+                        Byte b = CharInt(f.getChar());
+                        Byte c = CharInt(f.getChar());
+                        Byte d = CharInt(f.getChar());
+                        t += Char((a << 12) | (b << 8) | (c << 4) | d);
+                    } else
+                        continue; // invalid char, just skip it
             } else if (Safe(c) && c != '\n')
                 t += c;
             else //   valid char, '\n' here is NOT allowed
                 if (!Skip(c))
-                return c; // invalid char (return it)
+                    return c; // invalid char (return it)
         }
         c = f.getChar(); // read next char after the string, so we're at the same situation as with the "simple name" case
     } else               // simple name
@@ -565,7 +565,7 @@ static Char LoadTextJSON(FileText &f, Str &t, Char c) {
                 t += c;
             else // valid name char
                 if (!Skip(c))
-                break;
+                    break;
         }
     }
     return c;
@@ -581,7 +581,7 @@ static Char LoadYAMLName(FileText &f, Str &t, Char c) {
             t += c;
         else // valid name char
             if (!Skip(c))
-            break;
+                break;
     }
     return c;
 }
@@ -608,17 +608,17 @@ static Char LoadYAMLValue(FileText &f, Str &t, Char c) {
                     t += '\t';
                 else // just in case
                     if (c == '"')
-                    t += '"';
-                else if (c == '\\')
-                    t += '\\';
-                else if (c == 'u' || c == 'U') {
-                    Byte a = CharInt(f.getChar());
-                    Byte b = CharInt(f.getChar());
-                    Byte c = CharInt(f.getChar());
-                    Byte d = CharInt(f.getChar());
-                    t += Char((a << 12) | (b << 8) | (c << 4) | d);
-                } else
-                    continue; // invalid char, just skip it
+                        t += '"';
+                    else if (c == '\\')
+                        t += '\\';
+                    else if (c == 'u' || c == 'U') {
+                        Byte a = CharInt(f.getChar());
+                        Byte b = CharInt(f.getChar());
+                        Byte c = CharInt(f.getChar());
+                        Byte d = CharInt(f.getChar());
+                        t += Char((a << 12) | (b << 8) | (c << 4) | d);
+                    } else
+                        continue; // invalid char, just skip it
             } else if (c == '\n') {
                 t.space();
                 for (;;) {
@@ -630,7 +630,7 @@ static Char LoadYAMLValue(FileText &f, Str &t, Char c) {
                 t += c;
             else //   valid char
                 if (!Skip(c))
-                return c; // invalid char (return it)
+                    return c; // invalid char (return it)
         }
         c = f.getChar();  // read next char after the string, so we're at the same situation as with the "simple name" case
     } else if (c == '\'') // string
@@ -665,17 +665,17 @@ static Char LoadYAMLValue(FileText &f, Str &t, Char c) {
                      }else continue; // invalid char, just skip it
                   }else*/
                 if (c == '\n') {
-                t.space();
-                for (;;) {
-                    c = f.getChar();
-                    if (c != ' ' && !Skip(c))
-                        goto process2;
-                }
-            } else if (Safe(c))
-                t += c;
-            else //   valid char
-                if (!Skip(c))
-                return c; // invalid char (return it)
+                    t.space();
+                    for (;;) {
+                        c = f.getChar();
+                        if (c != ' ' && !Skip(c))
+                            goto process2;
+                    }
+                } else if (Safe(c))
+                    t += c;
+                else //   valid char
+                    if (!Skip(c))
+                        return c; // invalid char (return it)
         }
         c = f.getChar(); // read next char after the string, so we're at the same situation as with the "simple name" case
     } else               // simple name
@@ -687,7 +687,7 @@ static Char LoadYAMLValue(FileText &f, Str &t, Char c) {
                 t += c;
             else // valid name char
                 if (!Skip(c))
-                break;
+                    break;
         }
     }
     return c;
@@ -874,50 +874,50 @@ Bool TextNode::save(FileText &f, Bool just_values) C {
             SaveText(f, value);
         else                       // just 'value' is present (save this only when there are no nodes, because they have the priority)
             if (EmptyNames(nodes)) // store just the values
-        {
-            has_children = HasChildren(nodes);
-            if (has_children)
-                f.endLine().startLine().depth++;
-            else if (just_values)
-                f.endLine().startLine();
+            {
+                has_children = HasChildren(nodes);
+                if (has_children)
+                    f.endLine().startLine().depth++;
+                else if (just_values)
+                    f.endLine().startLine();
 
-        nameless_sub_values:
-            f.putChar('[');
-            Bool after_elm = false;
-            FREPA(nodes) {
-                C TextNode &node = nodes[i];
-                if (node.nodes.elms()) // this node has children
-                {
-                    after_elm = false;
-                } else {
-                    if (after_elm)
-                        f.putChar(' ');
-                    else {
-                        if (has_children)
-                            f.endLine().startLine();
-                        after_elm = true;
+            nameless_sub_values:
+                f.putChar('[');
+                Bool after_elm = false;
+                FREPA(nodes) {
+                    C TextNode &node = nodes[i];
+                    if (node.nodes.elms()) // this node has children
+                    {
+                        after_elm = false;
+                    } else {
+                        if (after_elm)
+                            f.putChar(' ');
+                        else {
+                            if (has_children)
+                                f.endLine().startLine();
+                            after_elm = true;
+                        }
                     }
+                    if (!node.save(f, true))
+                        return false;
                 }
-                if (!node.save(f, true))
+                if (has_children) {
+                    f.endLine();
+                    f.depth--;
+                    f.startLine();
+                }
+                f.putChar(']');
+            } else {
+                f.endLine().startLine();
+            nameless_sub:
+                f.putChar('{').endLine();
+                f.depth++;
+                FREPA(nodes)
+                if (!nodes[i].save(f, false))
                     return false;
-            }
-            if (has_children) {
-                f.endLine();
                 f.depth--;
-                f.startLine();
+                f.startLine().putChar('}');
             }
-            f.putChar(']');
-        } else {
-            f.endLine().startLine();
-        nameless_sub:
-            f.putChar('{').endLine();
-            f.depth++;
-            FREPA(nodes)
-            if (!nodes[i].save(f, false))
-                return false;
-            f.depth--;
-            f.startLine().putChar('}');
-        }
     } else if (just_values)
         SaveText(f, S); // we're storing values, so we need to store something
 
@@ -1165,25 +1165,25 @@ Char TextNode::loadYAML(FileText &f, Bool just_values, Char c, const Int node_sp
                     c = f.getChar();
                 } else // comment
                     if (Skip(c)) {
-                    c = f.getChar();
-                } else if (YAMLNameStart(c)) {
-                    if (cur_spaces > node_spaces) {
-                        c = nodes.New().loadYAML(f, false, c, cur_spaces, cur_spaces);
-                    } else
-                        return c;
-                } else if (c == '-') {
-                    if (cur_spaces + 2 > node_spaces && !just_values) // "!just_values" means that we're not going to add another list element to existing nameless element, instead we need to return to parent, and create another nameless element
-                    {
-                        cur_spaces += 2;
                         c = f.getChar();
-                        if (c == ' ')
-                            c = nodes.New().loadYAML(f, true, c, cur_spaces - 2, cur_spaces);
-                        else
-                            return '\0';
+                    } else if (YAMLNameStart(c)) {
+                        if (cur_spaces > node_spaces) {
+                            c = nodes.New().loadYAML(f, false, c, cur_spaces, cur_spaces);
+                        } else
+                            return c;
+                    } else if (c == '-') {
+                        if (cur_spaces + 2 > node_spaces && !just_values) // "!just_values" means that we're not going to add another list element to existing nameless element, instead we need to return to parent, and create another nameless element
+                        {
+                            cur_spaces += 2;
+                            c = f.getChar();
+                            if (c == ' ')
+                                c = nodes.New().loadYAML(f, true, c, cur_spaces - 2, cur_spaces);
+                            else
+                                return '\0';
+                        } else
+                            return c;
                     } else
-                        return c;
-                } else
-                    break;
+                        break;
             }
         }
     }
@@ -1208,7 +1208,7 @@ Bool TextData::save(C Str &name, ENCODING encoding, INDENT indent, Cipher *ciphe
         f.indent = indent;
         if (save(f) && f.flush())
             return true; /*f.del(); FDelFile(name);*/
-    }                    // no need to delete incomplete text files, because they can be still readable, just partially
+    } // no need to delete incomplete text files, because they can be still readable, just partially
     return false;
 }
 Bool TextData::saveJSON(C Str &name, ENCODING encoding, INDENT indent, Cipher *cipher) C {
@@ -1217,7 +1217,7 @@ Bool TextData::saveJSON(C Str &name, ENCODING encoding, INDENT indent, Cipher *c
         f.indent = indent;
         if (saveJSON(f) && f.flush())
             return true; /*f.del(); FDelFile(name);*/
-    }                    // no need to delete incomplete text files, because they can be still readable, just partially
+    } // no need to delete incomplete text files, because they can be still readable, just partially
     return false;
 }
 Bool TextData::load(FileText &f) {
@@ -1264,17 +1264,17 @@ Bool TextData::loadYAML(FileText &f) {
             c = f.getChar();
         } else // comment
             if (c == '-') {
-            spaces = 0;
-            f.skipLine();
-            c = f.getChar();
-        } else if (Skip(c)) {
-            c = f.getChar();
-        } else if (YAMLNameStart(c))
-            c = nodes.New().loadYAML(f, false, c, spaces, spaces);
-        else if (!c)
-            return true;
-        else // don't check for 'f.ok' because methods stop on null char and not on 'f.end'
-            return false;
+                spaces = 0;
+                f.skipLine();
+                c = f.getChar();
+            } else if (Skip(c)) {
+                c = f.getChar();
+            } else if (YAMLNameStart(c))
+                c = nodes.New().loadYAML(f, false, c, spaces, spaces);
+            else if (!c)
+                return true;
+            else // don't check for 'f.ok' because methods stop on null char and not on 'f.end'
+                return false;
     }
 }
 Bool TextData::load(C Str &name, Cipher *cipher) {
@@ -1365,9 +1365,9 @@ static Str XmlParamString(C Str &str) {
         else
             // if(c=='\'')temp+="&apos;";else we always use " to save params, so we can skip encoding ' to reduce size
             if (c == '"')
-            temp += "&quot;";
-        else
-            temp += c;
+                temp += "&quot;";
+            else
+                temp += c;
     }
     return temp;
 }
@@ -1451,7 +1451,7 @@ Bool XmlData::save(C Str &name, Bool params_in_separate_lines, ENCODING encoding
     if (f.write(name, encoding)) {
         if (save(f, params_in_separate_lines) && f.flush())
             return true; /*f.del(); FDelFile(name);*/
-    }                    // no need to delete incomplete text files, because they can be still readable, just partially
+    } // no need to delete incomplete text files, because they can be still readable, just partially
     return false;
 }
 /******************************************************************************/
@@ -1503,18 +1503,18 @@ Bool XmlNode::load(FileText &f, Char first_char) {
             c = f.getChar();
         else                // skip white char
             if (XmlChar(c)) // param
-        {
-            XmlParam &param = params.New();
-            c = LoadXmlName(f, param.name, c); // load param name
-            for (; WhiteChar(c); c = f.getChar())
-                ; // skip white chars
-            if (c == '=') {
-                if (!LoadXmlValue(f, param.value))
-                    return false;
-                c = ' ';
-            } // param value
-        } else
-            break;
+            {
+                XmlParam &param = params.New();
+                c = LoadXmlName(f, param.name, c); // load param name
+                for (; WhiteChar(c); c = f.getChar())
+                    ; // skip white chars
+                if (c == '=') {
+                    if (!LoadXmlValue(f, param.value))
+                        return false;
+                    c = ' ';
+                } // param value
+            } else
+                break;
     }
 
     // node end
@@ -1926,7 +1926,7 @@ static Char LoadTextFileParams(FileText &f, Str &t, Char c, Bool param_name) {
                 t += c;
             else //   valid char, '\n' here is allowed
                 if (!Skip(c))
-                return ERROR; // invalid char
+                    return ERROR; // invalid char
         }
         c = f.getChar(); // read next char after the name, so we're at the same situation as with the "simple name" case
     }

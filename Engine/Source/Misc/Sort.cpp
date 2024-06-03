@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 #define ELM(i) data[i]
@@ -69,7 +69,7 @@ void Sort(Int *data, Int elms) { _Sort(data, elms); }
 void Sort(Flt *data, Int elms) { _Sort(data, elms); }
 void Sort(Dbl *data, Int elms) { _Sort(data, elms); }
 /******************************************************************************/
-#define ELM(i) (((Byte *)data) + (i)*elm_size)
+#define ELM(i) (((Byte *)data) + (i) * elm_size)
 #define COPY(dest, src) CopyFast(dest, src, elm_size)
 #define SWAP(a, b) SwapFast(ELM(a), ELM(b), elm_size)
 void _Sort(Ptr data, Int elms, Int elm_size, Int compare(CPtr a, CPtr b)) {

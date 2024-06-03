@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 Int MaterialPalette::getMaterialIndex0(C MaterialPtr &material) { return Max(0, getMaterialIndex(material)); }

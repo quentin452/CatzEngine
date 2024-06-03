@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 #define TEXTBOX_OFFSET 0.16f // set >=0.06 (at this value cursor is aligned with the TextBox rect left edge) this value is applied to the left and right of the text to add some margin
@@ -531,7 +531,7 @@ GuiObj *TextBox::test(C GuiPC &gpc, C Vec2 &pos, GuiObj *&mouse_wheel) {
             mouse_wheel = &slidebar[priority];
         else // check  priority slidebar first
             if (slidebar[!priority]._usable)
-            mouse_wheel = &slidebar[!priority]; // check !priority slidebar next
+                mouse_wheel = &slidebar[!priority]; // check !priority slidebar next
 
         GuiPC gpc_this(gpc, visible(), enabled());
         if (GuiObj *go = slidebar[0].test(gpc_this, pos, mouse_wheel))

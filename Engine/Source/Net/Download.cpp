@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************
 
@@ -27,13 +27,13 @@ static Bool AppendUrlPath(Str8 &text, C Str8 &path) {
             EncodeChar(text, c);
         else               // these are the only symbols that need to be replaced with %XX hex code
             if (c == '\\') // use Unix style paths
-        {
-            text += '/';
-        } else {
-            if (c == '?')
-                has_params = true;
-            text += c;
-        }
+            {
+                text += '/';
+            } else {
+                if (c == '?')
+                    has_params = true;
+                text += c;
+            }
     }
     return has_params;
 }
@@ -383,7 +383,7 @@ Bool Download::func() {
     } break;
 
     case DWNL_AUTH:
-    auth : {
+    auth: {
         switch (_socket.handshake()) {
         case SecureSocket::OK:
         ok:
@@ -407,7 +407,7 @@ Bool Download::func() {
     } break;
 
     case DWNL_SENDING:
-    sending : {
+    sending: {
         // send message
         Int left = _send.length() - _send_pos;
         if (left > 0) {
@@ -460,7 +460,7 @@ Bool Download::func() {
     } break;
 
     case DWNL_DOWNLOAD:
-    downloading : {
+    downloading: {
         if (_socket.wait(DOWNLOAD_WAIT_TIME)) {
             if (!hasAddrsHeader()) // download header
             {
@@ -625,15 +625,15 @@ Bool Download::func() {
                         }
                     } else             // unknown size
                         if (chunked()) // chunked
-                    {
-                        if (rcvd)
-                            parse(rest, rcvd);
-                    } else // remaining data as long as received
-                    {
-                        _memb.addNum(rcvd);
-                        REPAO(_memb) = rest[i];
-                        _done += rcvd;
-                    }
+                        {
+                            if (rcvd)
+                                parse(rest, rcvd);
+                        } else // remaining data as long as received
+                        {
+                            _memb.addNum(rcvd);
+                            REPAO(_memb) = rest[i];
+                            _done += rcvd;
+                        }
                 }
             } else {
                 if (_size >= 0) // known size
@@ -1094,9 +1094,7 @@ Download &Download::create(C Str &url, C CMemPtr<HTTPParam> &params, MemPtr<HTTP
             xhr.setRequestHeader("Content-length", post_params.length);
             xhr.setRequestHeader("Connection", "close");
             xhr.send(post_params);
-        }
-    },
-           request(), _url_full(), bytes(), prefix(), _js_download, OnProgress, OnDone, OnError);
+        } }, request(), _url_full(), bytes(), prefix(), _js_download, OnProgress, OnDone, OnError);
 #endif
     return T;
 }

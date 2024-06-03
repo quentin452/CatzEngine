@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************
 
@@ -122,11 +122,11 @@ struct ControllerGroundCallback : PhysHitCallback {
         return phys_hit.frac < ground_frac; // just check which one is closer
     }
     INLINE Bool walkable(C PhysHit &phys_hit, UInt group_mask) C {
-        return (group_mask & Physics.ctrl_ground_group_force)     // always stand on this group
-               || ((group_mask & Physics.ctrl_ground_group_allow) //        stand only when angle is correct
-#if PHYSX                                                         // PhysX may not report all faces of a mesh when sweeping (but it was noticed that it has preference to vertical faces, so ignore 'face_nrm' in case it points to some tiny faces with horizontal 'plane.normal')
+        return (group_mask & Physics.ctrl_ground_group_force)              // always stand on this group
+               || ((group_mask & Physics.ctrl_ground_group_allow)          //        stand only when angle is correct
+#if PHYSX                                                                  // PhysX may not report all faces of a mesh when sweeping (but it was noticed that it has preference to vertical faces, so ignore 'face_nrm' in case it points to some tiny faces with horizontal 'plane.normal')
                    && phys_hit.plane.normal.y >= Physics.ctrl_ground_slope // if angle is ok
-#else // Bullet reports all faces so we can use 'face_nrm'
+#else                                                                      // Bullet reports all faces so we can use 'face_nrm'
                    && phys_hit.face_nrm.y >= Physics.ctrl_ground_slope // if angle is ok
 #endif
                   );
@@ -150,18 +150,18 @@ struct ControllerGroundCallback : PhysHitCallback {
                     && (!do_slide || phys_hit.frac < slide_frac)                                            // if closer than previous detection
                     && Dist2(phys_hit.plane.pos.xz(), center_xz) <= slide_radius2                           // if within controller radius
                     && !ctrl.actor.ignored(phys_hit))                                                       // if not ignored
-            {
-                do_slide = true;
-                slide_normal = phys_hit.plane.normal;
-                if (group_mask & Physics.ctrl_slide_group_horizontal) {
-                    slide_normal.y = 0;
-                    slide_normal.normalize();
-                } // slide only horizontally against desired groups
-                slide_frac = phys_hit.frac;
+                {
+                    do_slide = true;
+                    slide_normal = phys_hit.plane.normal;
+                    if (group_mask & Physics.ctrl_slide_group_horizontal) {
+                        slide_normal.y = 0;
+                        slide_normal.normalize();
+                    } // slide only horizontally against desired groups
+                    slide_frac = phys_hit.frac;
 #if DEBUG
-                slide_pos = phys_hit.plane.pos;
+                    slide_pos = phys_hit.plane.pos;
 #endif
-            }
+                }
         }
         return true;
     }

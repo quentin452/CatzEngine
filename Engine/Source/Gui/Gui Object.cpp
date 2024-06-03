@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 // GUI PARENT CHILD
@@ -873,7 +873,7 @@ GuiObj *GuiObj::test(C GuiPC &gpc, C Vec2 &pos, GuiObj *&mouse_wheel) {
     return (/*gpc.visible &&*/ visible() && Cuts(pos, (rect() + gpc.offset) & gpc.clip) /*&& is()*/) ? this : null; // no need to check for 'is' because we already check for 'visible' and deleted objects can't be visible
 }
 /******************************************************************************/
-#define NEAREST_AREA_MIN 0.333f // fraction of original area that must be visible to detect
+#define NEAREST_AREA_MIN 0.333f                // fraction of original area that must be visible to detect
 static Bool Exclude(Rect &rect, C Rect &cover) // adjust 'rect' to don't have any parts belonging to 'cover' !! assumes that rectangles intersect !!
 {
     Rect part[4];  // we can generate up to 4 rectangles
@@ -1081,7 +1081,7 @@ Bool GuiObjChildren::find(C GuiObj &child_a, C GuiObj &child_b, Int &index_a, In
 void GuiObjChildren::del() {
 #if 1 // disconnect children (this should be used instead of deleting children, as we may still use them)
     REPAO(children).go->_parent = null;
-#else // delete children
+#else     // delete children
     for (GuiObj *last = null; children.elms();) {
         GuiObj *go = children.last().go; // can't do 'pop' because calling 'del' assumes that object is still in this container, and 'GuiObjChildren.remove' can find it
         if (go != last)                  // deleting object for the first time
@@ -1096,7 +1096,7 @@ void GuiObjChildren::del() {
                 s += S + "(" + go->parent()->typeName() + ") ";
             s += "failed.\nDid you override 'GuiObj.del' method and didn't call 'super.del' ?";
             Exit(s);
-#else // silently disconnect in release
+#else     // silently disconnect in release
             go->_parent = null;
             children.removeLast();
 #endif

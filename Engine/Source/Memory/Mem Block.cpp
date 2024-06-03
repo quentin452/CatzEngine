@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 void _Memb::_reset(Int elm_size, Int block_elms, void (*_new)(Ptr elm), void (*_del)(Ptr elm)) {
@@ -86,7 +86,7 @@ void _Memb::setNumZero(Int num) {
             ZeroFast(elm, elmSize());
             if (_new)
                 _new(elm);
-        }                    // create as the last step
+        } // create as the last step
     } else if (num < elms()) // remove elements
     {
         if (_del)
@@ -188,7 +188,7 @@ void _Memb::moveElm(Int elm, Int new_index) {
             {
                 for (Int i = elm; i < new_index; i++)
                     CopyFast(T[i], T[i + 1], elmSize());
-            }    //                                                                                        N E        N E
+            } //                                                                                        N E        N E
             else // element is on the right, and we're moving it to the left, move the data to the right "012X3" -> "0X123"
             {
                 for (Int i = elm; i > new_index; i--)

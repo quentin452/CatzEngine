@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 
 #if SUPPORT_AVIF
 #include "../../../../ThirdPartyLibs/begin.h"

@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 #pragma pack(push, 1) // 'Unaligned' are not needed because members are already aligned to their native types in this case

@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 EditorServer EditServer;
 /******************************************************************************/
@@ -156,7 +156,7 @@ check_again:
             // ELMS
             case Edit::EI_GET_ELMS: {
                 Mems<Edit::Elm> mems;
-                //Memc  <Edit.Elm> memc;
+                // Memc  <Edit.Elm> memc;
                 MemPtr<Edit::Elm> elms;
                 if (Proj.valid()) {
                     const bool include_removed = true;
@@ -749,7 +749,7 @@ check_again:
                                         if (!have_area) {
                                             have_area = true;
                                             area_xy = obj_area;
-                                        }                        // setup area of the first object
+                                        } // setup area of the first object
                                         if (obj_area == area_xy) // object matches target area
                                         {
                                             if (Elm *obj_elm = Proj.findElm(src.id, ELM_OBJ)) // if it's a valid ELM_OBJ

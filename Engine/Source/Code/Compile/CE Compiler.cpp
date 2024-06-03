@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 namespace EE {
 /******************************************************************************
 
@@ -256,7 +256,7 @@ void Compiler::expand(Memc<Command> &src, Memc<Command> &dest, Int label_break, 
                 d._for.cond_range = cmd._for.cond_range;
                 d.label_index = label_false;
                 d.scope_label = label_end;
-            }                                                                                    // 0
+            } // 0
             expand(cmd.cmds, dest, label_break, label_continue, label_return, label_true_scope); // 1
             {
                 Command &d = dest.New();
@@ -323,7 +323,7 @@ void Compiler::expand(Memc<Command> &src, Memc<Command> &dest, Int label_break, 
                 d._for.cond_range = cmd._for.cond_range;
                 d.label_index = label_break;
                 d.scope_label = label_break;
-            }                                                                                    // 2 (add step only if 'cond_range' is specified) (this should point to 'label_break' and not 'step_scope' because there is no destroying of block scoped variables in conditional goto)
+            } // 2 (add step only if 'cond_range' is specified) (this should point to 'label_break' and not 'step_scope' because there is no destroying of block scoped variables in conditional goto)
             expand(cmd.cmds, dest, label_break, label_continue, label_return, label_cmds_scope); // 3
             {
                 Command &d = dest.New();
@@ -382,7 +382,7 @@ void Compiler::expand(Memc<Command> &src, Memc<Command> &dest, Int label_break, 
                 d._for.cond_range = cmd._for.cond_range;
                 d.label_index = label_break;
                 d.scope_label = label_break;
-            }                                                                                    // 1
+            } // 1
             expand(cmd.cmds, dest, label_break, label_continue, label_return, label_cmds_scope); // 2
             {
                 Command &d = dest.New();
@@ -419,7 +419,7 @@ void Compiler::expand(Memc<Command> &src, Memc<Command> &dest, Int label_break, 
                 Command &d = dest.New();
                 d.type = CMD_LABEL;
                 d.label_index = label_loop;
-            }                                                                                    // 0
+            } // 0
             expand(cmd.cmds, dest, label_break, label_continue, label_return, label_cmds_scope); // 1
             {
                 Command &d = dest.New();
@@ -1052,7 +1052,7 @@ void Compiler::compile(Memc<Command> &cmds, Mems<Byte> &code, Symbol &func, Symb
             break;
 
         case CMD_GOTO:
-        write_goto : {
+        write_goto: {
             if (!InRange(cmd.label_index, labels))
                 msgs.New().error("Unknown label for 'goto' command", source, cmd.startTokenIndex());
             else if (!FollowedByLabel(cmds, i, cmd.label_index)) // check if we're not using goto to jump to command after us

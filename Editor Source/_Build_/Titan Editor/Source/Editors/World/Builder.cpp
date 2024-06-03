@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 /******************************************************************************
 
@@ -400,7 +400,7 @@ void AreaBuild::process(BuilderClass &builder) {
                         CacheLock cl(PhysBodies);
                         REPA(*obj.phys)
                         meshes.New().create(obj.phys->parts[i]);
-                    }                                                  // use lock because PhysBody can be changed on a different thread
+                    } // use lock because PhysBody can be changed on a different thread
                     for (; meshes_elms < meshes.elms(); meshes_elms++) // after unlock, process added meshes
                     {
                         MeshBase &mesh = meshes[meshes_elms].transform(obj.matrix);
@@ -428,7 +428,7 @@ void AreaBuild::process(BuilderClass &builder) {
             MeshBase &water = meshes.New().create(waters[i].mesh(), VTX_POS | TRI_IND | QUAD_IND);
             SetPathType(water, PM_WATER);
         }
-        /* TODO: 
+        /* TODO:
          // ocean
          if(Water.draw) // add ocean surface if enabled
          {
@@ -598,7 +598,7 @@ bool BuilderClass::ioFunc() {
             AreaBuild &area = areas.lockedData(i);
             if ((area.build & ~AREA_REBUILD_PATH) || (area.load & AREA_MAKE_PATH_SRC))
                 areas_build.add(&area);
-        }                                                                                                         // build all except paths
+        } // build all except paths
         BuilderThreads.process1(areas_build, Process, T, background ? Max(1, Cpu.threads() - 1) : Cpu.threads()); // leave one thread empty for main thread
 
         // build paths
@@ -609,7 +609,7 @@ bool BuilderClass::ioFunc() {
             AreaBuild &area = areas.lockedData(i);
             if (area.build & AREA_REBUILD_PATH)
                 areas_build.add(&area);
-        }                                                                                                             // select only paths
+        } // select only paths
         BuilderThreads.process1(areas_build, ProcessPath, T, background ? Max(1, Cpu.threads() - 1) : Cpu.threads()); // leave one thread empty for main thread
 
         // finish

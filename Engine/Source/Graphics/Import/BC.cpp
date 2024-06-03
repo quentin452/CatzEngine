@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 
 #include "../../../../ThirdPartyLibs/begin.h"
 
@@ -1468,7 +1468,7 @@ struct BCContext {
             if (perceptual) {
                 Vec4 min, max;
                 MinMax(rgba, 4 * 4, min, max);
-#if 1 // this gave better results
+#if 1                                                                 // this gave better results
                 Vec weight = BCWeights + max.xyz + max.xyz - min.xyz; // max + delta = max + (max-min)
 #else
                 Vec weight = LinearToSRGB(ColorLumWeight2);

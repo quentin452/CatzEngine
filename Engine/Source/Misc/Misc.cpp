@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 #if MAC
@@ -752,9 +752,7 @@ UID &UID::randomize() {
             var rnd = new Uint32Array(4);
             (window.crypto || window.msCrypto).getRandomValues(rnd);
             for (var i = 0; i < 4; i++)
-                setValue($0 + i * 4, rnd[i], 'i32');
-        },
-               i);
+                setValue($0 + i * 4, rnd[i], 'i32'); }, i);
         return T;
     }
 #endif
@@ -1042,11 +1040,11 @@ void IDGenerator::Return(UInt id) // return ID so it can be re-used later
             _created--;
         else                                      // if this is the one that was created most recently
             if (_returned.elms() == _created - 1) // if returned all that were created
-        {                                         // reset counter
-            _created = 0;
-            _returned.clear();
-        } else
-            _returned.add(id); // add to the list of returned ID's
+            {                                     // reset counter
+                _created = 0;
+                _returned.clear();
+            } else
+                _returned.add(id); // add to the list of returned ID's
     }
 }
 /******************************************************************************/
@@ -1487,7 +1485,7 @@ UInt CeilPow2(UInt x) {
     if (x > p2)
         p2 <<= 1;
     return p2;
-#else // slowest
+#else   // slowest
     UInt p2 = 1;
     for (; p2 < x;)
         p2 <<= 1;
@@ -1581,8 +1579,7 @@ Bool ClipSet(C Str &text) {
                 event.on();
             });
             App.wait(event);
-        }
-        catch (...) {
+        } catch (...) {
         }
     }
     return ok;
@@ -1672,8 +1669,7 @@ Str ClipGet() {
         try // can crash if app not focused
         {
             content = Windows::ApplicationModel::DataTransfer::Clipboard::GetContent();
-        }
-        catch (...) {
+        } catch (...) {
         }
     } else {
         try // can crash if app not yet initialized
@@ -1682,8 +1678,7 @@ Str ClipGet() {
                                                                                                                        try // can crash if app not focused
                                                                                                                        {
                                                                                                                            content = Windows::ApplicationModel::DataTransfer::Clipboard::GetContent();
-                                                                                                                       }
-                                                                                                                       catch (...) {
+                                                                                                                       } catch (...) {
                                                                                                                        }
                                                                                                                    }));
             SyncEvent event;
@@ -1691,8 +1686,7 @@ Str ClipGet() {
                 event.on();
             });
             App.wait(event);
-        }
-        catch (...) {
+        } catch (...) {
         }
     }
     if (content && content->Contains(Windows::ApplicationModel::DataTransfer::StandardDataFormats::Text)) {
@@ -3215,7 +3209,7 @@ Str SystemPath(SYSTEM_PATH type) {
         Str path = GetKnownFolderPath(FOLDERID_SavedGames);
         if (path.is())
             return path; // if unknown then fallback to SP_DOCUMENTS
-    }                    // !! no break on purpose !!
+    } // !! no break on purpose !!
     case SP_DOCUMENTS:
         out = CSIDL_MYDOCUMENTS;
         break;
@@ -4049,7 +4043,7 @@ UID DeviceID(Bool per_user) {
                 goto found_pf;
         }
         goto no_pf;
-    found_pf : {
+    found_pf: {
         CGLContextObj context = null;
         CGLCreateContext(pf, null, &context);
         CGLDestroyPixelFormat(pf);
@@ -5127,8 +5121,8 @@ struct std__string {
             length = size() - offset;
         size_type c = wmemcmp(c_str() + offset, s, (length < length2) ? length : length2);
         return (c ? (int)c : (length < length2) ? -1
-                         : (length == length2) ? 0
-                                               : +1);
+                         : (length == length2)  ? 0
+                                                : +1);
     }
 
     void swap(std__string &s) { Swap(T, s); }
@@ -5313,8 +5307,8 @@ struct std__wstring {
             length = size() - offset;
         size_type c = wmemcmp(c_str() + offset, s, (length < length2) ? length : length2);
         return (c ? (int)c : (length < length2) ? -1
-                         : (length == length2) ? 0
-                                               : +1);
+                         : (length == length2)  ? 0
+                                                : +1);
     }
 
     void swap(std__wstring &s) { Swap(T, s); }
@@ -5468,10 +5462,10 @@ Bool ErrorMove(C Str &src, C Str &dest) { return Error(S + "Error moving\n\"" + 
    It's important to note, that Code Signing does not modify section offsets, sizes or data.
 
 /******************************************************************************/
-#if WINDOWS_OLD // create a Hash section for verification purposes
-#define EE_SECTION_NAME "Hash" // name will be clamped to 8 chars
+#if WINDOWS_OLD                   // create a Hash section for verification purposes
+#define EE_SECTION_NAME "Hash"    // name will be clamped to 8 chars
 #pragma data_seg(EE_SECTION_NAME) // this will create a custom 'ExeSection'
-ULong Hash = 0; // have to specify a value (=0), because otherwise the section will not be created, and can't do "static" because it will be removed
+ULong Hash = 0;                   // have to specify a value (=0), because otherwise the section will not be created, and can't do "static" because it will be removed
 #pragma data_seg()
 static void Set(ExeSection &section, C IMAGE_SECTION_HEADER &img_section, Bool x64) {
     ASSERT(SIZE(img_section.Name) == 8 && ELMS(img_section.Name) == 8 && SIZE(section.name) == 9);
@@ -5483,9 +5477,9 @@ static void Set(ExeSection &section, C IMAGE_SECTION_HEADER &img_section, Bool x
         section.type = ExeSection::CONST_PROCESS;
     else // most likely this changes because of virtual function table reallocation during EXE loading
         if (Equal(section.name, EE_SECTION_NAME, true))
-        section.type = ExeSection::HASH;
-    else // EE storage of hash
-        section.type = ExeSection::CONSTANT;
+            section.type = ExeSection::HASH;
+        else // EE storage of hash
+            section.type = ExeSection::CONSTANT;
 }
 #endif
 Bool ParseProcess(MemPtr<ExeSection> sections) {
@@ -5510,7 +5504,7 @@ Bool ParseProcess(MemPtr<ExeSection> sections) {
 }
 Bool ParseExe(File &f, MemPtr<ExeSection> sections) {
 #if WINDOWS_OLD
-#define IMAGE_DOS_SIGNATURE 0x5A4D // MZ
+#define IMAGE_DOS_SIGNATURE 0x5A4D    // MZ
 #define IMAGE_NT_SIGNATURE 0x00004550 // PE00
 
     ULong offset = f.pos();

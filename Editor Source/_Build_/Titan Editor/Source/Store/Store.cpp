@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 StoreClass AppStore;
 /******************************************************************************/
@@ -692,7 +692,7 @@ void StoreClass::DownloadFile::update(C GuiPC &gpc) {
             } else
                 text.set("Failed to save file");
             progress.set(1);
-            //flash();
+            // flash();
         }
     } break;
     case DWNL_DOWNLOAD: {
@@ -884,9 +884,9 @@ void StoreClass::Upload::transfer() {
             mode = 1;
         else // first
             if (src.left() <= EsenthelStoreFileChunkSize)
-            mode = 3;
-        else          // last
-            mode = 2; // middle
+                mode = 3;
+            else          // last
+                mode = 2; // middle
         params.New().set("item_file_mode", S + mode);
         src.send = Min(EsenthelStoreFileChunkSize, src.left());
     } else
@@ -1194,7 +1194,7 @@ void StoreClass::create() {
             ListColumn(MEMBER(Item, time_ago), 0.27f, "Sort by Date"),         // 2
             ListColumn(MEMBER(Item, name), 0.29f, "Sort by Name"),             // 3
             ListColumn(MEMBER(Item, price_text), 0.28f, "Sort by Price"),      // 4
-                                                                               //ListColumn(MEMBER(Item, likes), 0.28, "Sort by Likes"), // 5
+                                                                               // ListColumn(MEMBER(Item, likes), 0.28, "Sort by Likes"), // 5
         };
     lc[2].sort = &date_sort.set(MEMBER(Item, date_added));
     lc[4].sort = &price_sort.set(MEMBER(Item, price));
@@ -1986,7 +1986,7 @@ void StoreClass::update(C GuiPC &gpc) {
                     y -= 0.045f;
                     have_file_uploads = true;
                 }
-            }                                                                              // file upload
+            } // file upload
             if (down.state() == DWNL_ERROR && down.sent() && down.sent() == down.toSend()) // finished uploading, but didn't receive confirmation
             {
                 if (Item *item = findItem(upload.item_id))

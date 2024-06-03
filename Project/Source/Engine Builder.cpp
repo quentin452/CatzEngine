@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 using namespace Edit;
 /******************************************************************************/
 Str VSPath = ""; // leave empty for auto-detect or type full path like this: "C:/Program Files (x86)/Microsoft Visual Studio 14.0"

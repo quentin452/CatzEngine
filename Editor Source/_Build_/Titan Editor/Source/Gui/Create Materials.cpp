@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 CreateMaterials CreateMtrls;
 State CreateMaterialsState(UpdateCreateMaterials, DrawCreateMaterials, InitCreateMaterials, ShutCreateMaterials);
@@ -33,7 +33,7 @@ bool UpdateCreateMaterials() {
     UpdateProgress.set(CreateMtrls.data.elms() - WorkerThreads.queued(), CreateMtrls.data.elms());
     App.stateProgress(UpdateProgress());
     Time.wait(1000 / 30);
-    //Gui.update(); this may cause conflicts with 'Proj.elmChanged'
+    // Gui.update(); this may cause conflicts with 'Proj.elmChanged'
     Server.update(null, true);
     if (Ms.bp(MS_MAXIMIZE))
         App.window().toggle();

@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 AnimEditor AnimEdit;
 /******************************************************************************/
@@ -815,7 +815,7 @@ void AnimEditor::draw(Edit::Viewport4::View &view) {
         int size = 8;
         Plane(VecZero, Vec(0, 1, 0)).drawLocal(Color(255, 128), size, false, size * (3 * 2));
         D.lineSmooth(line_smooth);
-    }                                    // disable line smoothing because it can be very slow for lots of full-screen lines
+    } // disable line smoothing because it can be very slow for lots of full-screen lines
     if (draw_bones() || settings() == 0) // always draw axis for root when settings are visible
     {
         SetMatrix();
@@ -851,7 +851,7 @@ void AnimEditor::draw(Edit::Viewport4::View &view) {
                     col.a = 140;
                 bone.draw(col);
             }
-            //if(skel && InRange(sel_bone, skel.bones)) don't check this so we can draw just for root too
+            // if(skel && InRange(sel_bone, skel.bones)) don't check this so we can draw just for root too
             {
                 if (op() == OP_ORN || op() == OP_ORN2)
                     orn_target.draw(RED, 0.005f);
@@ -1398,7 +1398,7 @@ void AnimEditor::SkelBonePosCopy(AnimEditor &editor) { editor.skelBonePosCopy(fa
 void AnimEditor::SkelBonePosCopyR(AnimEditor &editor) { editor.skelBonePosCopy(true); }
 void AnimEditor::skelBonePosCopy(bool relative) {
     setAnimSkel();
-    //copied_bone_pos=anim_skel.boneRoot(sel_bone).pos;
+    // copied_bone_pos=anim_skel.boneRoot(sel_bone).pos;
     copied_bone_pos = transformedBone(sel_bone).pos;
     if (relative && sel_bone >= 0)
         copied_bone_pos /= (Matrix)transformedBone(-1); // set as relative to root
@@ -1412,7 +1412,7 @@ void AnimEditor::skelBonePosPaste(C Vec &mask) {
     if (skel && anim) {
         undos.set("bonePosPaste");
         setAnimSkel();
-        //Vec pos=anim_skel.boneRoot(sel_bone).pos;
+        // Vec pos=anim_skel.boneRoot(sel_bone).pos;
         Vec pos = transformedBone(sel_bone).pos;
         if (copied_bone_pos_relative && sel_bone >= 0)
             pos /= (Matrix)transformedBone(-1);
@@ -1648,11 +1648,11 @@ AnimEditor &AnimEditor::create() {
         settings_region += root_del_rot_z.create(Rect_LU(root_del_rot_y.rect().ru(), h, h), "Z").func(RootDelRotZ, T).subType(BUTTON_TYPE_TAB_RIGHT);
         root_del_rot_z.mode = BUTTON_TOGGLE;
         y -= l;
-        //settings_region+=root_del_scale .create(Rect_LU(x, y, w, h), "Del Scale"   ).func(RootDelScale, T); root_del_scale.mode=BUTTON_TOGGLE; y-=l;
+        // settings_region+=root_del_scale .create(Rect_LU(x, y, w, h), "Del Scale"   ).func(RootDelScale, T); root_del_scale.mode=BUTTON_TOGGLE; y-=l;
         settings_region += root_from_body.create(Rect_LU(x, y, w, h), "From Body").func(RootFromBody, T);
         root_from_body.mode = BUTTON_TOGGLE;
         y -= l;
-        //settings_region+=root_2_keys    .create(Rect_LU(x, y, w, h), "2 Keys Only" ).func(Root2Keys   , T); root_2_keys   .mode=BUTTON_TOGGLE; y-=l; root_2_keys.desc("Limit number of keyframes to 2 keys only: Start+End");
+        // settings_region+=root_2_keys    .create(Rect_LU(x, y, w, h), "2 Keys Only" ).func(Root2Keys   , T); root_2_keys   .mode=BUTTON_TOGGLE; y-=l; root_2_keys.desc("Limit number of keyframes to 2 keys only: Start+End");
         settings_region += root_smooth.create(Rect_LU(x, y, w, h), "Smooth").func(RootSmooth, T);
         root_smooth.desc("Set smooth root rotation and movement with constant velocities");
         settings_region += root_smooth_rot.create(Rect_LU(root_smooth.rect().ru() + Vec2(0.01f, 0), h * 2, h), "Rot").func(RootSmoothRot, T).subType(BUTTON_TYPE_TAB_LEFT);
@@ -1668,7 +1668,7 @@ AnimEditor &AnimEditor::create() {
         settings_region += root_set_rot.create(Rect_LU(x, y - 3 * ph, w, h), "Set Rotation").func(RootSetRot, T);
         root_set_rot.mode = BUTTON_TOGGLE;
         root_set_rot.desc("Override Animation's root rotation with a custom value");
-        //settings_region+=reload         .create(Rect_U (settings_region.clientWidth()/2, y-6*ph-0.01, 0.18, h+0.005), "Reload").func(Reload, T);
+        // settings_region+=reload         .create(Rect_U (settings_region.clientWidth()/2, y-6*ph-0.01, 0.18, h+0.005), "Reload").func(Reload, T);
         settings_region += reload.create(Rect_LD(x, y - 6 * ph, 0.18f, h + 0.005f), "Reload").func(Reload, T);
         root_props.New().create("X", MemberDesc(DATA_REAL).setFunc(RootMoveX, RootMoveX));
         root_props.New().create("Y", MemberDesc(DATA_REAL).setFunc(RootMoveY, RootMoveY));
@@ -1699,7 +1699,7 @@ AnimEditor &AnimEditor::create() {
 SkelBone AnimEditor::transformedBone(int i) C {
     SkelBone bone;
     if (skel && InRange(i, skel->bones))
-        bone = skel->bones[i]; //else bone is already set to identity in constructor
+        bone = skel->bones[i]; // else bone is already set to identity in constructor
     bone *= anim_skel.boneRoot(i).matrix();
     return bone;
 }
@@ -1879,14 +1879,14 @@ void AnimEditor::update(C GuiPC &gpc) {
                             undos.set("orn");
                         op_orn:
 
-                            //Orient bone_orn=GetAnimOrient(bone, &bone_parent); bone_orn.fix();
+                            // Orient bone_orn=GetAnimOrient(bone, &bone_parent); bone_orn.fix();
                             Orient bone_orn = asbon.orn;
                             if (!bone_orn.fix()) {
                                 if (sbon /*&& skel - no need to check because 'sbon' already guarantees 'skel'*/)
                                     bone_orn = GetAnimOrient(*sbon, skel->bones.addr(sbon->parent));
                                 else
                                     bone_orn.identity();
-                            }                                                                                                // 'asbon.orn' can be zero
+                            } // 'asbon.orn' can be zero
                             AnimKeys::Orn *orn = ((all && keys->orns.elms()) ? null : &GetOrn(*keys, animTime(), bone_orn)); // if there are no keys then create
                             if (rotate) {
                                 flt d = (Ms.d() * mul).sum();
@@ -2018,7 +2018,7 @@ void AnimEditor::update(C GuiPC &gpc) {
                                     desired_angle = TriABAngle(desired_length, a_length, b_length);
                                 flt delta = desired_angle - cur_angle;
                                 SCAST(Orient, bone_parent) *= Matrix3().setRotate(rotate_axis, delta);
-                                //SCAST(Orient, bone       )*=Matrix3().setRotate(rotate_axis, delta); child should be transformed too, but instead we're transforming child by 'delta' below
+                                // SCAST(Orient, bone       )*=Matrix3().setRotate(rotate_axis, delta); child should be transformed too, but instead we're transforming child by 'delta' below
 
                                 cur_angle = TriABAngle(a_length, b_length, cur_length);
                                 desired_angle = TriABAngle(a_length, b_length, desired_length);
@@ -2443,7 +2443,7 @@ void AnimEditor::freezeDelFrame(bool pos) {
         changed |= freezeDelFrameOrn(sel_bone, pos) | freezeDelFrameOrn(boneParent(sel_bone), pos);
     if (op() == OP_POS || op() < 0)
         changed |= freezeDelFramePos(sel_bone);
-    //if(op()==OP_SCALE || op()<0)changed|=freezeDelFrameScale(sel_bone);
+    // if(op()==OP_SCALE || op()<0)changed|=freezeDelFrameScale(sel_bone);
     if (changed) {
         setAnimSkel();
         setOrnTarget();
@@ -2459,7 +2459,7 @@ void AnimEditor::freezeDelFrames(bool pos) {
         changed |= freezeDelFramesOrn(sel_bone, pos) | freezeDelFrameOrn(boneParent(sel_bone), pos);
     if (op() == OP_POS || op() < 0)
         changed |= freezeDelFramesPos(sel_bone);
-    //if(op()==OP_SCALE || op()<0)changed|=freezeDelFramesScale(sel_bone);
+    // if(op()==OP_SCALE || op()<0)changed|=freezeDelFramesScale(sel_bone);
     if (changed) {
         setAnimSkel();
         setOrnTarget();
@@ -2484,9 +2484,9 @@ void AnimEditor::reverseFrames() {
             anim->reverse();
         else // reverse entire animation when no bone is selected (instead of just root)
             if (AnimKeys *keys = findKeys(sel_bone)) {
-            keys->reverse(anim->length());
-            anim->setRootMatrix();
-        }
+                keys->reverse(anim->length());
+                anim->setRootMatrix();
+            }
         setAnimSkel();
         setOrnTarget();
         setChanged();

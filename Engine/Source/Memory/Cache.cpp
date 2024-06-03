@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 ASSERT(OFFSET(Cache<Image>::Elm, data) == 0); // '_data_offset' is not used because it's assumed to be always 0
 static SyncLock DelayRemoveLock;

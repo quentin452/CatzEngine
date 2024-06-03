@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 /******************************************************************************
 
@@ -180,7 +180,7 @@ void RiverBase::draw(C Color &color, C Color &depth_color) C {
     if (depth_color.a) {
         Vec d(0, -depth, 0);
         VI.color(depth_color);
-        //REPA(vtxs )VI.line (vtxs[i].pos, vtxs[i].pos+d);
+        // REPA(vtxs )VI.line (vtxs[i].pos, vtxs[i].pos+d);
         REPA(edges)
         VI.quad(vtxs[edges[i].x].pos, vtxs[edges[i].x].pos + d, vtxs[edges[i].y].pos + d, vtxs[edges[i].y].pos);
         VI.end();

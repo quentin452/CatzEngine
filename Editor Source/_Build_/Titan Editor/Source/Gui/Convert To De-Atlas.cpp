@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 ConvertToDeAtlasClass ConvertToDeAtlas;
 /******************************************************************************/
@@ -162,7 +162,7 @@ void ConvertToDeAtlasClass::convertMeshes(Memc<IDReplace> &mtrl_replace, C Rect 
                 remove.add(mtrl_id);
             else // first check if we can remove            , no other existing    element uses this material
                 if (!used_mtrls_publish.binaryHas(mtrl_id))
-                unpublish.add(mtrl_id); // then  check if at least we can unpublish, no other publishable element uses this material
+                    unpublish.add(mtrl_id); // then  check if at least we can unpublish, no other publishable element uses this material
         }
         Proj.remove(remove, false);
         Proj.disablePublish(unpublish, false);

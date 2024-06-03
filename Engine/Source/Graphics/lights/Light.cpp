@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 #define TEST_LIGHT_RECT (DEBUG && 0)
 #define FLAT_SHADOW_MAP 1                 // TODO try implementing Cube Shadow Maps?
 #define LOCAL_SHADOW_MAP_FROM (1.0f / 64) // 0.015625m, 1.5 cm

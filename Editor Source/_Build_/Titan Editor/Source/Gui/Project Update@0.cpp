@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 ProjectUpdate ProjUpdate;
 State StateProjectUpdate(UpdateProjectUpdate, DrawProjectUpdate, InitProjectUpdate, ShutProjectUpdate);
@@ -35,7 +35,7 @@ bool UpdateProjectUpdate() {
     UpdateProgress.set(ProjUpdate.total() - WorkerThreads.queued(), ProjUpdate.total());
     App.stateProgress(UpdateProgress());
     Time.wait(1000 / 30);
-    //Gui.update(); this may cause conflicts with 'Proj.elmChanged'
+    // Gui.update(); this may cause conflicts with 'Proj.elmChanged'
     Server.update(null, true);
     if (Ms.bp(MS_MAXIMIZE))
         App.window().toggle();

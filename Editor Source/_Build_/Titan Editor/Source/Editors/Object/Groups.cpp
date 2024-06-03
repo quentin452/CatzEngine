@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 
 /******************************************************************************/
@@ -91,7 +91,7 @@ GroupRegion &GroupRegion::create() {
     flt iw = 0.05f * 0, w = groups_r.minClientWidth() - iw;
     ListColumn groups_lc[] =
         {
-            //ListColumn(MEMBER(Index, i), iw, null  ),
+            // ListColumn(MEMBER(Index, i), iw, null  ),
             ListColumn(IndexToGroupName, w, "Name"),
         };
     groups_r += groups_l.create(groups_lc, Elms(groups_lc)).elmHeight(0.037f).textSize(0, 1).columnHeight(0.05f);
@@ -103,7 +103,7 @@ GroupRegion &GroupRegion::create() {
     iw = 0.05f * 0, w = parts_r.minClientWidth() - iw;
     ListColumn parts_lc[] =
         {
-            //ListColumn(MEMBER(Index, i), iw    , null   ),
+            // ListColumn(MEMBER(Index, i), iw    , null   ),
             ListColumn(IndexToPartName, w * 0.35f, "Name"),
             ListColumn(IndexToPartGroup, w * 0.65f, "Group"),
         };
@@ -151,15 +151,15 @@ void GroupRegion::update(C GuiPC &gpc) {
                 Gui.drag(DragGroup, ptr(groups_l.cur));
             else                          // start list group elm drag
                 if (Gui.ms() == &parts_l) // if click on part list
-            {
-                int part = VisiblePartI(lod, parts_l.lit);
-                if (OpObj == OP_OBJ_SET_GROUP && getSetGroup() >= 0 && InRange(part, lod)) // if group assigning is enabled
                 {
-                    ObjEdit.mesh_undos.set("drawGroup");
-                    SetDrawGroup(ObjEdit.mesh, lod, part, getSetGroup(), group_enum); // assign group
-                    ObjEdit.setChangedMesh(true, false);
+                    int part = VisiblePartI(lod, parts_l.lit);
+                    if (OpObj == OP_OBJ_SET_GROUP && getSetGroup() >= 0 && InRange(part, lod)) // if group assigning is enabled
+                    {
+                        ObjEdit.mesh_undos.set("drawGroup");
+                        SetDrawGroup(ObjEdit.mesh, lod, part, getSetGroup(), group_enum); // assign group
+                        ObjEdit.setChangedMesh(true, false);
+                    }
                 }
-            }
         }
     }
 }

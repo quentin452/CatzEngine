@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 /******************************************************************************
 
@@ -412,7 +412,7 @@ bool ImportFunc(Thread &thread) // 'ObjType' must be initialized because loading
 
                     // #MaterialTextureLayout
                     edit.color_map_time.getUTC();
-                    edit.color_map = base0_path; //AddTransform(edit.color_map, "channel", "xyz"); don't set because we might need alpha
+                    edit.color_map = base0_path; // AddTransform(edit.color_map, "channel", "xyz"); don't set because we might need alpha
                     edit.alpha_map_time.getUTC();
                     edit.alpha_map.clear(); // just use from 'color_map'
                     edit.normal_map_time.getUTC();

@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 namespace Edit {
 /******************************************************************************/
@@ -751,7 +751,7 @@ void CodeEditor::Options::create(CodeEditor &ce) {
         y -= s;
         tab += save_during_write.create(Rect_C(clientWidth() / 2, y, w, h), "Auto Save During Writing");
         save_during_write.mode = BUTTON_TOGGLE;
-        tab += info_label2.create(Rect_R(clientWidth() / 2 + w / 2 + 0.35f, y, w / 2 , h), "DANGEROUS");
+        tab += info_label2.create(Rect_R(clientWidth() / 2 + w / 2 + 0.35f, y, w / 2, h), "DANGEROUS");
         info_label2.mode = BUTTON_LABEL;
         y -= s;
 #if WINDOWS // TODO SUPPORT MORE OS

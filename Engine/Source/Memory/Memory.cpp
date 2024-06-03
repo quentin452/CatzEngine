@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 
 #define MEM_SINGLE_MAX 0                             // measure highest size for a single allocation
 #define MEM_LEAK_FULL 0                              // record all allocations
@@ -474,7 +474,7 @@ void _ReallocZero(Ptr &data, ULong size_new, ULong size_old) {
 // ALIGNED
 /******************************************************************************/
 #if MEM_CUSTOM || (WINDOWS && !X64) // Win 32-bit has only 8-byte alignment (for it always use this version instead of the one below, because '_aligned_malloc' and '_aligned_free' are just wrappers for 'malloc' and 'free')
-typedef Byte AAOffs; // Byte is enough to store 0..16 offset
+typedef Byte AAOffs;                // Byte is enough to store 0..16 offset
 Ptr AllocAlign16(IntPtr size) {
     if (size > 0) {
         Int padd = 15 + SIZE(AAOffs); // 15 for alignment and AAOffs for offset to the original pointer
@@ -539,7 +539,7 @@ void FreeAlign16(Ptr &data) {
 #endif
 /******************************************************************************/
 #if MEM_CUSTOM || WINDOWS // on Windows always use this version instead of the one below, because '_aligned_malloc' and '_aligned_free' are just wrappers for 'malloc' and 'free'
-typedef U16 AAOffs2; // U16 is enough to store 0..32768 offset
+typedef U16 AAOffs2;      // U16 is enough to store 0..32768 offset
 Ptr AllocAlign(IntPtr size, Int align) {
     if (size > 0) {
         DYNAMIC_ASSERT(align >= 1 && align <= 32768, "Invalid alignment");
@@ -941,7 +941,7 @@ void _MoveElm(Ptr data, Int elms, UInt elm_size, Int elm, Int new_index) // move
             if (elm < new_index)                          // element is on the left, and we're moving it to the right, move the data to the left "0X123" -> "012X3"
             {
                 MoveFast(d + elm * elm_size, d + (elm + 1) * elm_size, (new_index - elm) * elm_size);
-            }    //                                                                                        N E        N E
+            } //                                                                                        N E        N E
             else // element is on the right, and we're moving it to the left, move the data to the right "012X3" -> "0X123"
             {
                 MoveFast(d + (new_index + 1) * elm_size, d + new_index * elm_size, (elm - new_index) * elm_size);

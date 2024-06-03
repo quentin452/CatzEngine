@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 namespace Edit {
 /******************************************************************************/
@@ -339,39 +339,39 @@ void Parse(Memc<CodeLine> &lines) {
                 cl.insert(i, 'u', TOKEN_CHAR16);
             else                                                                            // '' -> u''
                 if (type == TOKEN_TEXT16 && cl.type(i - 1) != TOKEN_TEXT16 && cl[i] == '"') // "" -> u""
-            {
-                // don't parse for "include" and "extern"
-                REPD(j, i)
-                if (ValidType(cl.type(j))) {
-                    if (cl.type(j) == TOKEN_KEYWORD && cl[j] == 'n' && cl[j - 1] == 'r' && cl[j - 2] == 'e' && cl[j - 3] == 't' && cl[j - 4] == 'x' && cl[j - 5] == 'e')
-                        goto skip_parse; // extern
-                    if (cl.type(j) == TOKEN_PREPROC && cl[j] == 'e' && cl[j - 1] == 'd' && cl[j - 2] == 'u' && cl[j - 3] == 'l' && cl[j - 4] == 'c' && cl[j - 5] == 'n' && cl[j - 6] == 'i')
-                        goto skip_parse; // include
-                    break;
-                }
-                cl.insert(i, 'u', TOKEN_TEXT16);
-            skip_parse:;
-            } else if (type == TOKEN_NUMBER) // 0.0f -> 0.0f, 0.0 -> 0.0f, 0.0d -> 0.0
-            {
-                for (; cl.type(i) == TOKEN_NUMBER; i++)
-                    if (cl[i] == '.') // if floating point
-                    {
-                        for (; cl.type(i + 1) == TOKEN_NUMBER; i++)
-                            ; // move 'i' to the last character of the number token
-                        if (cl[i] == 'f' || cl[i] == 'F') {
-                        } else // do nothing (0.0f -> 0.0f)
-                        {
-                            if (cl[i] == 'd' || cl[i] == 'D')
-                                cl.remove(i); // remove double suffix (0.0d -> 0.0 )
-                            else
-                                cl.insert(++i, 'f', TOKEN_NUMBER); // add    float  suffix (0.0  -> 0.0f)
-                        }
+                {
+                    // don't parse for "include" and "extern"
+                    REPD(j, i)
+                    if (ValidType(cl.type(j))) {
+                        if (cl.type(j) == TOKEN_KEYWORD && cl[j] == 'n' && cl[j - 1] == 'r' && cl[j - 2] == 'e' && cl[j - 3] == 't' && cl[j - 4] == 'x' && cl[j - 5] == 'e')
+                            goto skip_parse; // extern
+                        if (cl.type(j) == TOKEN_PREPROC && cl[j] == 'e' && cl[j - 1] == 'd' && cl[j - 2] == 'u' && cl[j - 3] == 'l' && cl[j - 4] == 'c' && cl[j - 5] == 'n' && cl[j - 6] == 'i')
+                            goto skip_parse; // include
                         break;
                     }
-            } else if (type == TOKEN_OPERATOR) {
-                if (cl[i] == '<' && cl[i + 1] == ':' && cl[i + 2] == ':')
-                    cl.insert(i + 1, ' ', TOKEN_NONE);
-            }
+                    cl.insert(i, 'u', TOKEN_TEXT16);
+                skip_parse:;
+                } else if (type == TOKEN_NUMBER) // 0.0f -> 0.0f, 0.0 -> 0.0f, 0.0d -> 0.0
+                {
+                    for (; cl.type(i) == TOKEN_NUMBER; i++)
+                        if (cl[i] == '.') // if floating point
+                        {
+                            for (; cl.type(i + 1) == TOKEN_NUMBER; i++)
+                                ; // move 'i' to the last character of the number token
+                            if (cl[i] == 'f' || cl[i] == 'F') {
+                            } else // do nothing (0.0f -> 0.0f)
+                            {
+                                if (cl[i] == 'd' || cl[i] == 'D')
+                                    cl.remove(i); // remove double suffix (0.0d -> 0.0 )
+                                else
+                                    cl.insert(++i, 'f', TOKEN_NUMBER); // add    float  suffix (0.0  -> 0.0f)
+                            }
+                            break;
+                        }
+                } else if (type == TOKEN_OPERATOR) {
+                    if (cl[i] == '<' && cl[i + 1] == ':' && cl[i + 2] == ':')
+                        cl.insert(i + 1, ' ', TOKEN_NONE);
+                }
         }
     }
 }

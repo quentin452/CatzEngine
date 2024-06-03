@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 /******************************************************************************
 
@@ -187,7 +187,7 @@ void ObjView::MeshChange::selOnly() {
     edit_skel.del();
     cur_skel_to_saved_skel.del();
     can_use_cur_skel_to_saved_skel = false;
-    //bone_renames.del(); bone_removals.del(); bone_restores.del(); these are added manually and not in 'create'
+    // bone_renames.del(); bone_removals.del(); bone_restores.del(); these are added manually and not in 'create'
     sel_only = true;
 }
 uint ObjView::MeshChange::memUsage() C { return data.memUsage() + skel.memUsage() + edit_skel.memUsage() + sel_vtx.memUsage() + sel_face.memUsage(); }
@@ -254,17 +254,17 @@ void ObjView::MeshChange::apply(ptr user) {
                 *ObjEdit.mesh_skel = skel;
                 ObjEdit.mesh_skel->transform(GetTransform(mesh_matrix, ObjEdit.mesh_matrix));
                 ObjEdit.setChangedSkel(true);
-                //if(ElmSkel *skel_data=ObjEdit.skel_elm.skelData())skel_data.undo(T.skel_data);
+                // if(ElmSkel *skel_data=ObjEdit.skel_elm.skelData())skel_data.undo(T.skel_data);
             }
 
             if (can_use_cur_skel_to_saved_skel)
                 ObjEdit.cur_skel_to_saved_skel = cur_skel_to_saved_skel;
             else // use if we can
                 if (ObjEdit.mesh_undos_undo)
-                apply(true);
-            else // if we can't use, then we need to manually perform changes
-                if (MeshChange *change = ObjEdit.mesh_undos.addr(ObjEdit.mesh_undos.index(this) - 1))
-                change->apply(false); // we have to redo the previous change, and not this one
+                    apply(true);
+                else // if we can't use, then we need to manually perform changes
+                    if (MeshChange *change = ObjEdit.mesh_undos.addr(ObjEdit.mesh_undos.index(this) - 1))
+                        change->apply(false); // we have to redo the previous change, and not this one
             ObjEdit.lod.toGui();
         }
         ObjEdit.undoVis();
@@ -429,63 +429,63 @@ void ObjView::render() {
             }
         } else // default
             if (!showChangeSkin()) {
-            SetVariation(visibleVariation());
-            if (group.groups_l.lit >= 0)
-                SetDrawMask(IndexToFlag(group.groups_l.lit));
-            MeshLod &lod = getDrawLod();
-            bool custom_matrix = customDrawMatrix();
-            Matrix matrix;
-            if (custom_matrix)
-                setMatrixAtDist(matrix, NewLod.draw_distance);
-            FREPA(lod) {
-                MeshPart &part = lod.parts[i];
-                if (partVisible(i, part)) {
-                    if (mode() == PHYS && phys_tabs() == PHYS_TOGGLE)
-                        if (FlagOn(part.part_flag, MSHP_NO_PHYS_BODY))
-                            continue;
-                    bool invalid = false;
-                    if (interval) {
-                        bool optional = (obj_elm && obj_elm->finalNoPublish()); // if the object itself is not published, then set reference as optional
-                        REP(4)
-                        if (Proj.invalidRef(part.multiMaterial(i).id(), optional)) {
-                            invalid = true;
-                            break;
+                SetVariation(visibleVariation());
+                if (group.groups_l.lit >= 0)
+                    SetDrawMask(IndexToFlag(group.groups_l.lit));
+                MeshLod &lod = getDrawLod();
+                bool custom_matrix = customDrawMatrix();
+                Matrix matrix;
+                if (custom_matrix)
+                    setMatrixAtDist(matrix, NewLod.draw_distance);
+                FREPA(lod) {
+                    MeshPart &part = lod.parts[i];
+                    if (partVisible(i, part)) {
+                        if (mode() == PHYS && phys_tabs() == PHYS_TOGGLE)
+                            if (FlagOn(part.part_flag, MSHP_NO_PHYS_BODY))
+                                continue;
+                        bool invalid = false;
+                        if (interval) {
+                            bool optional = (obj_elm && obj_elm->finalNoPublish()); // if the object itself is not published, then set reference as optional
+                            REP(4)
+                            if (Proj.invalidRef(part.multiMaterial(i).id(), optional)) {
+                                invalid = true;
+                                break;
+                            }
+                            REP(part.variations())
+                            if (Proj.invalidRef(part.variation(i).id(), optional)) {
+                                invalid = true;
+                                break;
+                            }
                         }
-                        REP(part.variations())
-                        if (Proj.invalidRef(part.variation(i).id(), optional)) {
-                            invalid = true;
-                            break;
-                        }
+                        bool lit = (allow_lit && i == lit_part), sel = partSel(i);
+                        // if(mode()==PHYS && phys_tabs()==PHYS_TOGGLE)SetHighlight(Color((FlagOn(part.part_flag, MSHP_NO_PHYS_BODY) && interval) ? 85 : 0, lit ? 85 : 0, lit ? 85 : 0, 0));else
+                        if (mode() == REMOVE)
+                            SetHighlight(Color((FlagOn(part.part_flag, MSHP_HIDDEN) && interval) ? 85 : 0, lit ? 85 : 0, lit ? 85 : 0, 0));
+                        else if (invalid)
+                            SetHighlight(Color(85, 0, 0, 0));
+                        else if (sel && lit)
+                            SetHighlight(Color(40, 0, 0, 0));
+                        else if (sel)
+                            SetHighlight(Color(40, 40, 0, 0));
+                        else if (lit)
+                            SetHighlight(Color(0, 85, 85, 0));
+
+                        if (!custom_matrix)
+                            matrix = transformMatrix(partOp(i));
+                        part.waitForStream();
+                        part.draw(matrix, (custom_matrix && mesh_matrix_prev_ptr) ? *mesh_matrix_prev_ptr : matrix);
+
+                        SetHighlight();
                     }
-                    bool lit = (allow_lit && i == lit_part), sel = partSel(i);
-                    //if(mode()==PHYS && phys_tabs()==PHYS_TOGGLE)SetHighlight(Color((FlagOn(part.part_flag, MSHP_NO_PHYS_BODY) && interval) ? 85 : 0, lit ? 85 : 0, lit ? 85 : 0, 0));else
-                    if (mode() == REMOVE)
-                        SetHighlight(Color((FlagOn(part.part_flag, MSHP_HIDDEN) && interval) ? 85 : 0, lit ? 85 : 0, lit ? 85 : 0, 0));
-                    else if (invalid)
-                        SetHighlight(Color(85, 0, 0, 0));
-                    else if (sel && lit)
-                        SetHighlight(Color(40, 0, 0, 0));
-                    else if (sel)
-                        SetHighlight(Color(40, 40, 0, 0));
-                    else if (lit)
-                        SetHighlight(Color(0, 85, 85, 0));
-
-                    if (!custom_matrix)
-                        matrix = transformMatrix(partOp(i));
-                    part.waitForStream();
-                    part.draw(matrix, (custom_matrix && mesh_matrix_prev_ptr) ? *mesh_matrix_prev_ptr : matrix);
-
-                    SetHighlight();
                 }
-            }
-            if (custom_matrix && mesh_matrix_prev_ptr)
-                *mesh_matrix_prev_ptr = matrix;
-            SetDrawMask();
-            SetVariation();
+                if (custom_matrix && mesh_matrix_prev_ptr)
+                    *mesh_matrix_prev_ptr = matrix;
+                SetDrawMask();
+                SetVariation();
 
-            if (background_alpha() >= 1)
-                REPAO(back_meshes).draw();
-        }
+                if (background_alpha() >= 1)
+                    REPAO(back_meshes).draw();
+            }
 
         // meshes in skeleton slots
         if (mode() == SLOTS && mesh_skel)
@@ -502,36 +502,36 @@ void ObjView::render() {
 
         } else // default
             if (!showChangeSkin()) {
-            if (mode() == PHYS && phys_tabs() == PHYS_TOGGLE) {
-                SetVariation(visibleVariation());
-                if (group.groups_l.lit >= 0)
-                    SetDrawMask(IndexToFlag(group.groups_l.lit));
-                MeshLod &lod = getDrawLod();
-                FREPA(lod) {
-                    MeshPart &part = lod.parts[i];
-                    if (partVisible(i, part)) {
-                        if (mode() == PHYS && phys_tabs() == PHYS_TOGGLE)
-                            if (!FlagOn(part.part_flag, MSHP_NO_PHYS_BODY))
-                                continue;
-                        bool lit = (allow_lit && i == lit_part), sel = partSel(i);
-                        if (sel && lit)
-                            SetHighlight(Color(40, 0, 0, 0));
-                        else if (sel)
-                            SetHighlight(Color(40, 40, 0, 0));
-                        else if (lit)
-                            SetHighlight(Color(0, 85, 85, 0));
+                if (mode() == PHYS && phys_tabs() == PHYS_TOGGLE) {
+                    SetVariation(visibleVariation());
+                    if (group.groups_l.lit >= 0)
+                        SetDrawMask(IndexToFlag(group.groups_l.lit));
+                    MeshLod &lod = getDrawLod();
+                    FREPA(lod) {
+                        MeshPart &part = lod.parts[i];
+                        if (partVisible(i, part)) {
+                            if (mode() == PHYS && phys_tabs() == PHYS_TOGGLE)
+                                if (!FlagOn(part.part_flag, MSHP_NO_PHYS_BODY))
+                                    continue;
+                            bool lit = (allow_lit && i == lit_part), sel = partSel(i);
+                            if (sel && lit)
+                                SetHighlight(Color(40, 0, 0, 0));
+                            else if (sel)
+                                SetHighlight(Color(40, 40, 0, 0));
+                            else if (lit)
+                                SetHighlight(Color(0, 85, 85, 0));
 
-                        SetMatrix(transformMatrix(partOp(i)));
-                        part.waitForStream();
-                        part.drawBlend(&Vec4(1, 1, 1, 0.333f));
+                            SetMatrix(transformMatrix(partOp(i)));
+                            part.waitForStream();
+                            part.drawBlend(&Vec4(1, 1, 1, 0.333f));
 
-                        SetHighlight();
+                            SetHighlight();
+                        }
                     }
+                    SetDrawMask();
+                    SetVariation();
                 }
-                SetDrawMask();
-                SetVariation();
             }
-        }
 
         if (showChangeSkin()) {
             SetMatrix(transformMatrix());
@@ -586,7 +586,7 @@ void ObjView::draw(Edit::Viewport4::View &view) {
     Renderer.wire = wire();
     MOTION_MODE motion = D.motionMode();
     if (lodEditDist()) {
-        //D.motionMode(MOTION_NONE);
+        // D.motionMode(MOTION_NONE);
         Renderer.allow_temporal = false;
     }
 
@@ -1325,7 +1325,7 @@ void ObjView::getSkel(GuiObj *go, C Vec2 &screen_pos, int *bone_i, int *slot_i) 
                 if (bone_shape) {
                     ScreenToPosDir(screen_pos, pos, dir);
                     move = dir * D.viewRange();
-                    //edge.set(pos, pos+move);
+                    // edge.set(pos, pos+move);
                 }
                 REPA(skel->bones) {
                     C SkelBone &bone = skel->bones[i];
@@ -1333,7 +1333,7 @@ void ObjView::getSkel(GuiObj *go, C Vec2 &screen_pos, int *bone_i, int *slot_i) 
                         Vec2 screen;
                         if (PosToScreen(bone.shape.pos, screen)) {
                             flt d = Dist(screen_pos, screen);
-                            //if((*bone_i<0 || d<dist) && Cuts(Shape(edge), bone.shape)){*bone_i=i; dist=d;}
+                            // if((*bone_i<0 || d<dist) && Cuts(Shape(edge), bone.shape)){*bone_i=i; dist=d;}
                             if ((*bone_i < 0 || d < dist) && SweepPointCapsule(pos, move, bone.shape)) {
                                 *bone_i = i;
                                 dist = d;
@@ -2015,7 +2015,7 @@ void ObjView::flushObj() {
         if (obj_data) {
             obj_data->newVer();
             obj_data->from(*param_edit.p);
-        }                                           // modify just before saving/sending in case we've received data from server after edit
+        } // modify just before saving/sending in case we've received data from server after edit
         Save(*param_edit.p, Proj.editPath(obj_id)); // save edit
         Save(obj, Proj.gamePath(obj_id));
         Proj.savedGame(*obj_elm);  // save game
@@ -2355,7 +2355,7 @@ void ObjView::camCenter(bool zoom) {
         v4.dist(dist);
 }
 void ObjView::reloadObj() {
-    //changed_obj=param_edit.changed=false; don't use for same reason as explained for 'changed_mesh'
+    // changed_obj=param_edit.changed=false; don't use for same reason as explained for 'changed_mesh'
     if (obj_elm)
         param_edit.p->load(Proj.editPath(obj_id));
     else
@@ -2374,7 +2374,7 @@ void ObjView::syncObj() {
 void ObjView::reloadMeshSkel() {
     mesh_undos.del();
     undoVis(); // for now disable undos because of the difficulty with mapping between old skeleton and new skeleton in order to adjust animations
-               //changed_mesh=changed_skel=false; this can't be cleared because for example 'changed_mesh' is set when changing body (skeleton) and after making that change, when using 'reload' on the object would trigger 'reloadMeshSkel' and body change would not be saved
+               // changed_mesh=changed_skel=false; this can't be cleared because for example 'changed_mesh' is set when changing body (skeleton) and after making that change, when using 'reload' on the object would trigger 'reloadMeshSkel' and body change would not be saved
     ElmObj *obj_data = (obj_elm ? obj_elm->objData() : null);
     mesh_elm = (obj_data ? Proj.findElm(obj_data->mesh_id) : null);
     ElmMesh *mesh_data = (mesh_elm ? mesh_elm->meshData() : null);
@@ -2435,7 +2435,7 @@ void ObjView::reloadMeshSkel() {
     meshVariationChanged();
 }
 void ObjView::reloadPhys() {
-    //changed_phys=false; don't use for same reason as explained for 'changed_mesh'
+    // changed_phys=false; don't use for same reason as explained for 'changed_mesh'
     ElmMesh *mesh_data = (mesh_elm ? mesh_elm->meshData() : null);
     phys_elm = (mesh_data ? Proj.findElm(mesh_data->phys_id) : null);
     if (phys_elm)
@@ -2840,7 +2840,7 @@ void ObjView::animate(C AnimSkel &anim_skel, bool transform_anims, C UID &ignore
         saved_edit_skel = edit_skel;
         saved_skel_matrix = mesh_matrix;
         cur_skel_to_saved_skel.create(saved_skel);
-        //REPAO(mesh_undos).can_use_cur_skel_to_saved_skel=false; no need to do this because mapping doesn't change
+        // REPAO(mesh_undos).can_use_cur_skel_to_saved_skel=false; no need to do this because mapping doesn't change
 
         setChangedMesh(true);
         setChangedSkel(true);
@@ -3014,7 +3014,7 @@ void ObjView::drawInfo(C GuiPC &gpc) {
                 Add(s, "Helper");
             if (flag & VTX_NRM)
                 Add(s, "Normal");
-            //if(flag&VTX_TAN     )Add(s, "Tangent" ); if(flag&VTX_BIN )Add(s, "Binormal"); ignore these as they're always set in the Editor
+            // if(flag&VTX_TAN     )Add(s, "Tangent" ); if(flag&VTX_BIN )Add(s, "Binormal"); ignore these as they're always set in the Editor
             if (flag & VTX_TEX0)
                 Add(s, "TexCoord");
             if (flag & VTX_TEX1)
@@ -3180,9 +3180,9 @@ void ObjView::updateMesh() {
             trans_axis = -1;
     } else // SCALE doesn't support per-axis setting
         if (transMesh())
-        MatrixAxis(v4, trans_mesh.drawMatrix(), trans_axis);
-    else
-        trans_axis = -1;
+            MatrixAxis(v4, trans_mesh.drawMatrix(), trans_axis);
+        else
+            trans_axis = -1;
 
     // transform object
     if (mode() == TRANSFORM)
@@ -3803,7 +3803,7 @@ void ObjView::updateSlots() {
                             REPA(slot_meshes)
                             if (slot_meshes[i].name == mesh_skel->slots[sel_slot].name)
                                 slot_meshes[i].scale *= ScaleFactor(MT.ad(i).sum());
-                            //setChangedSkel(); this doesn't change the skeleton but items put in slots
+                            // setChangedSkel(); this doesn't change the skeleton but items put in slots
                         } break;
                         }
                     }
@@ -3943,7 +3943,7 @@ void ObjView::skelSetSelMirror(bool set_other) {
                 SCAST(OrientP, *bone) = *other;
                 bone->length = other->length;
                 bone->width = other->width;
-                //bone.frac  =other.frac  ;
+                // bone.frac  =other.frac  ;
                 bone->offset = other->offset;
                 bone->shape = other->shape;
                 bone->mirrorX();
@@ -4019,7 +4019,7 @@ void ObjView::boneSetShape() {
                         if (C VtxBone *mtrx = base.vtx.matrix())
                             if (C VecB4 *blend = base.vtx.blend())
                                 REPA(base.vtx) {
-                                    //VtxBone m=mtrx[i]; VecB4 b=blend[i]; int weight=0; REPA(m)if(m.c[i]==bone_b)weight+=b.c[i]; if(weight>=128)
+                                    // VtxBone m=mtrx[i]; VecB4 b=blend[i]; int weight=0; REPA(m)if(m.c[i]==bone_b)weight+=b.c[i]; if(weight>=128)
                                     if (mtrx[i].x == bone_b) // if most significant bone is this one, check X because bones are always sorted by most significant first
                                     {
                                         Vec p = pos[i] * transform;
@@ -4038,10 +4038,10 @@ void ObjView::boneSetShape() {
                 bone->offset = center - bone->center();
                 bone->width = Max(0.01f, Avg(box.w(), box.h()) / 2 / bone->length);
             }
-            //mesh_skel.setBoneTypes(); // bone orientation may affect bone type indexes
+            // mesh_skel.setBoneTypes(); // bone orientation may affect bone type indexes
             setChangedSkel(true);
-            //mesh.skeleton(mesh_skel, true).skeleton(null);
-            //setChangedMesh(true, false);
+            // mesh.skeleton(mesh_skel, true).skeleton(null);
+            // setChangedMesh(true, false);
         }
     }
 }
@@ -4083,7 +4083,7 @@ void ObjView::skelDelLeafBones() {
             edit_skel.removeBone(mesh_skel->bones[i].name);
             if (mesh_skel->removeBone(i, remap)) {
                 changed = true;
-                //mesh.boneRemap(remap); not needed since we have to do full assignment anyway
+                // mesh.boneRemap(remap); not needed since we have to do full assignment anyway
                 MemtN<bool, 256> used_bones1;
                 REP(Min(remap.elms(), used_bones.elms()))
                 if (used_bones[i])

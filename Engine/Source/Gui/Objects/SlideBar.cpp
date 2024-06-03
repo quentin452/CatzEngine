@@ -4,7 +4,7 @@
       because the middle button would flicker when moved.
 
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 namespace EE {
 static GuiSkin GuiSkinTemp;
 #define CLIP_UNDER 1 // if adjust clipping so we don't draw underneath the SlideBar (looks better for semi-transparent SlideBars)

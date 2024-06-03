@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 static void DrawTris(Vec *pos, VecI *tri, Int tris, C Color &color, Bool fill) {

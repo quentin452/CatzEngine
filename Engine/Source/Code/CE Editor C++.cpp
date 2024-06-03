@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 static Int Compare(C Edit::CodeEditor::BuildFile &a, C Edit::CodeEditor::BuildFile &b) {
     return ComparePath(a.src_proj_path, b.src_proj_path);
@@ -934,7 +934,7 @@ Bool CodeEditor::generateCPPH(Memc<Symbol *> &sorted_classes, EXPORT_MODE export
 
         // stdafx.h
         ft.writeMem();
-        ft.putLine("#pragma once"); // on Apple this header gets included automatically because of project PCH settings, and because of manual "#include "stdafx.h"" needed on Windows, it would get included multiple times
+        ft.putLine("#pragma once"); // on Apple this header gets included automatically because of project PCH settings, and because of manual "#include "../../stdafx.h"" needed on Windows, it would get included multiple times
 
         // 3rd party headers (first)
         Memc<Str> win_headers = GetFiles(cei().appHeadersWindows()),

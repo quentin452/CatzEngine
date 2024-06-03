@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 static void DrawPlane(C Color &color, Flt cell_size, Int resolution, C VecD &center, C Matrix3 &matrix, Bool ball) {

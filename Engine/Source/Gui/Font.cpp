@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 
 #define USE_FREE_TYPE LINUX
 
@@ -366,7 +366,7 @@ Font &Font::replace(Char src, Char dest, Bool permanent) {
                 if (src_i != 0xFFFF) {
                     _chrs.remove(src_i, true);
                     setRemap();
-                }  // source exists
+                } // source exists
             } else // have a valid target
             {
                 if (src_i == 0xFFFF)
@@ -953,11 +953,11 @@ struct FreeTypeDrawContext {
 #else // this gives same result as Windows
                 if (!FT_Set_Char_Size(face, 0, font.size * 64, 0, 64))
 #endif
-            {
-                // ok
-                font.setBaseLine(DivRound(face->ascender * font.size, face->height));
-                return true;
-            }
+                {
+                    // ok
+                    font.setBaseLine(DivRound(face->ascender * font.size, face->height));
+                    return true;
+                }
         }
         return false;
     }

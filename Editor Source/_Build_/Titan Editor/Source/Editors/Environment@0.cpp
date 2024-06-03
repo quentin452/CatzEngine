@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 EnvEditor EnvEdit;
 /******************************************************************************/
@@ -333,7 +333,7 @@ void EnvEditor::create() {
     sky.autoData(&edit);
     sky.create("Sky", PropElmNameWidth);
 
-    //sun.add("Blend"          , MemberDesc(DATA_BOOL).setFunc(SunBlend , SunBlend )).desc("If use blending for image.\nIf true then image will be applied using alpha blending,\nif false then image will be added onto the screen.");
+    // sun.add("Blend"          , MemberDesc(DATA_BOOL).setFunc(SunBlend , SunBlend )).desc("If use blending for image.\nIf true then image will be applied using alpha blending,\nif false then image will be added onto the screen.");
     sun.add("Glow", MemberDesc(DATA_INT).setFunc(SunGlow, SunGlow)).range(0, 255);
     sun.add("Size", MemberDesc(DATA_REAL).setFunc(SunSize, SunSize)).range(0, 1);
     sun.add("Image", MemberDesc(DATA_STR).setFunc(SunImage, SunImage)).elmType(ELM_IMAGE);
@@ -397,7 +397,7 @@ void EnvEditor::flush() {
         if (ElmEnv *data = elm->envData()) {
             data->newVer();
             data->from(edit);
-        }                                // modify just before saving/sending in case we've received data from server after edit
+        } // modify just before saving/sending in case we've received data from server after edit
         Save(edit, Proj.editPath(*elm)); // edit
         Save(*game, Proj.gamePath(*elm));
         Proj.savedGame(*elm); // game

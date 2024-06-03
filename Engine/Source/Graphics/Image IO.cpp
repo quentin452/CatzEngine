@@ -55,7 +55,7 @@ Stream None
 
 Conclusion: Creating up-front full sized textures is slow no matter what, instead first create small images, then load full on loader thread, and replace on main thread.
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 #define IMAGE_NEED_VALID_PTR GPU_API(true, false) // DX requires that all mip data pointers are valid
@@ -1110,7 +1110,7 @@ void Loader::update() {
             }
         }
     }
-error : {
+error: {
     SyncLocker lock(StreamLoadCurLock);
     if (!StreamLoadCur)
         return;                                      // canceled

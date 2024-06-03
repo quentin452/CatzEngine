@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 /******************************************************************************
 
@@ -302,7 +302,7 @@ bool StartPublish(C Str &exe_name, Edit::EXE_TYPE exe_type, Edit::BUILD_MODE bui
                 return false;
         } else if (exe_type == Edit::EXE_UWP) {
             PublishDataAsPak = true; // always set to true because files inside exe can't be modified by the app, so there's no point in storing them separately
-            //if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
+            // if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
             {
                 PublishProjectDataPath = CodeEdit.UWPProjectPakPath();
                 if (!PublishProjectDataPath.is()) {
@@ -313,7 +313,7 @@ bool StartPublish(C Str &exe_name, Edit::EXE_TYPE exe_type, Edit::BUILD_MODE bui
             }
         } else if (exe_type == Edit::EXE_APK || exe_type == Edit::EXE_AAB) {
             PublishDataAsPak = true; // always set to true because files inside APK (assets) can't be modified by the app, so there's no point in storing them separately
-            //if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
+            // if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
             {
                 PublishProjectDataPath = CodeEdit.androidProjectPakPath();
                 if (!PublishProjectDataPath.is()) {
@@ -324,7 +324,7 @@ bool StartPublish(C Str &exe_name, Edit::EXE_TYPE exe_type, Edit::BUILD_MODE bui
             }
         } else if (exe_type == Edit::EXE_IOS) {
             PublishDataAsPak = true; // always set to true because files inside iOS APP can't be modified by the app, so there's no point in storing them separately
-            //if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
+            // if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
             {
                 PublishProjectDataPath = CodeEdit.iOSProjectPakPath();
                 if (!PublishProjectDataPath.is()) {
@@ -335,7 +335,7 @@ bool StartPublish(C Str &exe_name, Edit::EXE_TYPE exe_type, Edit::BUILD_MODE bui
             }
         } else if (exe_type == Edit::EXE_NS) {
             PublishDataAsPak = true; // always set to true because files inside iOS APP can't be modified by the app, so there's no point in storing them separately
-            //if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
+            // if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
             {
                 PublishProjectDataPath = CodeEdit.nintendoProjectPakPath();
                 if (!PublishProjectDataPath.is()) {
@@ -446,7 +446,7 @@ bool PublishFunc(Thread &thread) {
                 if (pfd_size >= max_size) {
                     PublishErrorMessage = S + "File too big:\n" + pfd->name;
                     return false;
-                }                                             // a single file cannot be bigger than asset pack
+                } // a single file cannot be bigger than asset pack
                 if (!pfd || split_size + pfd_size > max_size) // if reached the end, or adding this file would break the limit
                 {
                     if (split.elms()) // have any data
@@ -862,9 +862,9 @@ void AddPublishFiles(Memt<Elm *> &elms, MemPtr<PakFileData> files, Memc<ImageGen
                     change_type = ((!UWPBC7 && tex.channels >= 3) ? ((tex.channels == 4) ? IMAGE_BC3 : IMAGE_BC1) : -1);
                 else // here we only want to disable BC7
                     if (web)
-                    change_type = ((tex.channels <= 2) ? -1 : WebBC7          ? ((tex.channels == 4 || tex.quality > Edit::Material::MEDIUM) ? -1 : IMAGE_BC1) // texture could have alpha, however if we're not using it, then reduce to BC1 because it's only 4-bit per pixel
-                                                          : tex.channels == 4 ? IMAGE_BC3
-                                                                              : IMAGE_BC1); // if BC7 not supported for Web, then use BC3
+                        change_type = ((tex.channels <= 2) ? -1 : WebBC7          ? ((tex.channels == 4 || tex.quality > Edit::Material::MEDIUM) ? -1 : IMAGE_BC1) // texture could have alpha, however if we're not using it, then reduce to BC1 because it's only 4-bit per pixel
+                                                              : tex.channels == 4 ? IMAGE_BC3
+                                                                                  : IMAGE_BC1); // if BC7 not supported for Web, then use BC3
                 if (change_type >= 0 && tex.sRGB())
                     change_type = ImageTypeIncludeSRGB((IMAGE_TYPE)change_type); // set sRGB
             }

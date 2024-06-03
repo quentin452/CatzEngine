@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 
 #if APPLE
 #ifndef PAGE_SIZE
@@ -169,7 +169,7 @@ void _Memx::moveElm(Int elm, Int new_index) {
                 for (Int i = elm + 1; i <= new_index; i++) {
                     Int abs = _valid[i];
                     (*(UInt *)(_abs[abs]))--;
-                }  // elements now have smaller valid indexes
+                } // elements now have smaller valid indexes
             } else // moving from right to left
             {
                 for (Int i = elm - 1; i >= new_index; i--) {

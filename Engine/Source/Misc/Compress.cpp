@@ -17,7 +17,7 @@
       LZ4 and ZSTD require the previous content of dest buffer to be still accessible, so encryption needs to be performed at the end.
 
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 
 #define SUPPORT_LIZARD 0 // disable because LZ4 gives similar results
 #define SUPPORT_BROTLI 0 // disable because ZSTD is considered better
@@ -497,7 +497,7 @@ static Bool LZMA2Decompress(File &src, File &dest, Long compressed_size, Long de
 /******************************************************************************/
 #if SUPPORT_SNAPPY
 
-#define SNAPPY_BUF_SIZE 65536 // chunks to support streaming !! don't change in the future !!
+#define SNAPPY_BUF_SIZE 65536                        // chunks to support streaming !! don't change in the future !!
 #define SNAPPY_COMPRESSBOUND(x) (32 + (x) + (x) / 6) // taken from Snappy source code
 
 static UIntPtr SNAPPYSize(UIntPtr src_size) { return snappy_max_compressed_length(src_size); }

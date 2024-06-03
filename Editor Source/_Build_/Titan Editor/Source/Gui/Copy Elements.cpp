@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 CopyElements CopyElms;
 /******************************************************************************/
@@ -155,9 +155,9 @@ bool CopyElmsFunc(Thread &thread) {
                     // code base shouldn't be copied here
                 } else // regular file
                 {
-                    //Str scp=src.codePath(id), dcp=dest.codePath(id); this is performed above
+                    // Str scp=src.codePath(id), dcp=dest.codePath(id); this is performed above
                     if (pak.totalFiles()) {
-                        //if(C PakFile *pf=pak.find(scp)){if(FCopy(pak, *pf, dcp, FILE_OVERWRITE_ALWAYS, null, suffix))SavedCode(        dcp);else goto error;}else FDelFile(dcp);
+                        // if(C PakFile *pf=pak.find(scp)){if(FCopy(pak, *pf, dcp, FILE_OVERWRITE_ALWAYS, null, suffix))SavedCode(        dcp);else goto error;}else FDelFile(dcp);
                         if (C PakFile *pf = pak.find(sep)) {
                             if (FCopy(pak, *pf, dep, FILE_OVERWRITE_ALWAYS, null, suffix))
                                 SavedEdit(s->type, dep);
@@ -173,7 +173,7 @@ bool CopyElmsFunc(Thread &thread) {
                         } else
                             FDelFile(dgp);
                     } else {
-                        //if(!FExist(scp))FDelFile(dcp);else if(FCopy(scp, dcp, FILE_OVERWRITE_ALWAYS, null, null, suffix))SavedCode(        dcp);else goto error;
+                        // if(!FExist(scp))FDelFile(dcp);else if(FCopy(scp, dcp, FILE_OVERWRITE_ALWAYS, null, null, suffix))SavedCode(        dcp);else goto error;
                         if (!FExist(sep))
                             FDelFile(dep);
                         else if (FCopy(sep, dep, FILE_OVERWRITE_ALWAYS, null, null, suffix))
@@ -399,7 +399,7 @@ void CopyElements::ReplaceElms::check() {
                 CopyElms.elms_to_copy.remove(i, true);
             else // if source doesn't exist for some reason, or both projects have this element but it's of different type, then delete it and don't copy
                 if (src && dest)
-                data.add(CopyElms.elms_to_copy[i]); // both exist -> display to select whether it should be copied or not
+                    data.add(CopyElms.elms_to_copy[i]); // both exist -> display to select whether it should be copied or not
         }
 
         // merge hidden elements with their parent

@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 
 #define CC4_SND CC4('S', 'N', 'D', '\0')
 
@@ -30,7 +30,7 @@ typedef OpusDecoder *OD;
 } // namespace
 
 #define OPUS_MAX_FRAME_SAMPLES 2880
-#define OPUS_FRAME_HISTORY 32 // tests have shown we need to decode at least 32 packets earlier to get same results
+#define OPUS_FRAME_HISTORY 32     // tests have shown we need to decode at least 32 packets earlier to get same results
 #define OPUS_FRAME_HISTORY_FAST 4 // 4 frames was enough to produce satisfactory results
 
 static Int OpusMaxFrameSize(Int channels) {
@@ -51,7 +51,7 @@ static Int OpusMaxFrameSize(Int channels) {
 #include "../../../ThirdPartyLibs/MiniMP3/minimp3.h"
 #define MP3_FRAME_SAMPLES 1152 // MPEG-1 Layer 3
 #define MP3_FRAME_SAMPLES2 576 // MPEG-2 Layer 3
-#define MP3_SAMPLE_DELAY 529 // http://mp3decoders.mp3-tech.org/decoders_lame.html or 528 http://lame.sourceforge.net/tech-FAQ.txt
+#define MP3_SAMPLE_DELAY 529   // http://mp3decoders.mp3-tech.org/decoders_lame.html or 528 http://lame.sourceforge.net/tech-FAQ.txt
 #endif
 
 #if SUPPORT_AAC
@@ -1807,7 +1807,7 @@ Bool SoundStream::create(C Str &name) // !! warning: set T._codec as last thing 
         } break;
 
         default: {
-#if SUPPORT_AAC // MP4
+#if SUPPORT_AAC                    // MP4
             if (!(cc4 & 0xFFFFFF)) // first UInt is the chunk size in BigEndian format, and for 'ftyp' it usually should be very small, so check 3 highest bytes that they are zero (have to check lowest because it's BigEndian)
             {
                 _f.resetOK().pos(4);
@@ -2317,9 +2317,9 @@ Bool OpusEncoder::flush(Int &flushed_samples, MemPtr<Byte> compressed_data, MemP
         Int block = T.block();
         Zero((Byte *)_last_sample + _last_sample_size, block - _last_sample_size); // zero unwritten data
                                                                                    // have to add delay data
-#if 0 // don't add zeros because it causes sudden jumps and pop/clicks in the last audio data
+#if 0                                                                              // don't add zeros because it causes sudden jumps and pop/clicks in the last audio data
      _data.addNumZero(delay()*block); // as zero bytes
-#else // duplicate last encoded sample multiple times
+#else                                                                              // duplicate last encoded sample multiple times
         Int delay = T.delay();
         Byte *dest = &_data[_data.addNum(delay * block)];
         FREP(delay) {

@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 static Bool ValidAccessKey(C Str &access_key) {
@@ -103,22 +103,22 @@ void EsenthelStore::licenseTest(Int item_id, C Str &license_key, C Str &email, C
         _license_result = EMAIL_NOT_FOUND;
     else                                                                    // 'email' required if 'access_key' specified
         if (license_key.is() || email.is() || access_key.is() || device_id) // if we were actually requested to test anything
-    {
-        Memt<HTTPParam> params;
-        // Int time=DateTime().getUTC().seconds1970()/(60*5); // 5 mins
-        params.New().set("i", item_id); // item ID
-        if (license_key.is())
-            params.New().set("l", license_key); // license key
-        if (email.is())
-            params.New().set("e", email); // email
-        if (access_key.is())
-            params.New().set("k", access_key, HTTP_POST);
-        if (device_id)
-            params.New().set("c", DeviceIDText()); // computer/device ID
-        params.New().set("cmd", "test_license");   // command
-        _license_download.create("https://esenthel.com/test_license.php", params);
-        _license_result = CONNECTING;
-    }
+        {
+            Memt<HTTPParam> params;
+            // Int time=DateTime().getUTC().seconds1970()/(60*5); // 5 mins
+            params.New().set("i", item_id); // item ID
+            if (license_key.is())
+                params.New().set("l", license_key); // license key
+            if (email.is())
+                params.New().set("e", email); // email
+            if (access_key.is())
+                params.New().set("k", access_key, HTTP_POST);
+            if (device_id)
+                params.New().set("c", DeviceIDText()); // computer/device ID
+            params.New().set("cmd", "test_license");   // command
+            _license_download.create("https://esenthel.com/test_license.php", params);
+            _license_result = CONNECTING;
+        }
 }
 void EsenthelStore::updateLicense() {
     if (_license_result == CONNECTING)

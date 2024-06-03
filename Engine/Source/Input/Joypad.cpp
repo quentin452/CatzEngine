@@ -5,7 +5,7 @@
       -we want new joypads to be added to the end of the list
 
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 #define JOYPAD_THREAD (JP_GAMEPAD_INPUT || JP_X_INPUT || JP_DIRECT_INPUT)
@@ -100,7 +100,7 @@ struct GamepadChange {
             if (raw_game_controller) {
                 raw_game_controller->get_HardwareVendorId(&vendor_id);
                 raw_game_controller->get_HardwareProductId(&product_id);
-#if JP_DIRECT_INPUT // if we use DirectInput then have to remove all DirectInput joypads with same vendor/product ID as they will be processed using this API instead
+#if JP_DIRECT_INPUT           // if we use DirectInput then have to remove all DirectInput joypads with same vendor/product ID as they will be processed using this API instead
                 REPA(Joypads) // go from back because we remove
                 {
                     Joypad &jp = Joypads[i];
@@ -256,10 +256,10 @@ static void JoypadAdded(void *inContext, IOReturn inResult, void *inSender, IOHI
                 elms.New().setAxis(cookie, usage - 0x30, min, max);
             else // Left  XY (0x30, 0x31) are always for Left XY, process it like this because Samsung EI-GP20 reports these 2 times!
                 if (usage >= 0x32 && usage < 0x36)
-                elms.New().setAxis(cookie, axes++, min, max);
-            else // Right XY
-                if (usage == 0x39)
-                elms.New().setPad(cookie, lmax);
+                    elms.New().setAxis(cookie, axes++, min, max);
+                else // Right XY
+                    if (usage == 0x39)
+                        elms.New().setPad(cookie, lmax);
             break; // 0x39 is always DPad
         }
     }
@@ -366,7 +366,7 @@ static void RemovingJoypad(Memc<Input> &inputs, Int device) {
                 input.device--;
             else // adjust the index
                 if (input.device == device)
-                inputs.remove(i, true); // if this input is for joypad being deleted, then delete the input and keep order
+                    inputs.remove(i, true); // if this input is for joypad being deleted, then delete the input and keep order
         }
     }
 }
@@ -1348,9 +1348,9 @@ void ApplyDeadZone(Vec2 &v, Flt dead_zone) {
         v.zero();
     else // zero
         if (len >= 1)
-        v /= len;
-    else                                     // normalize
-        v *= LerpR(dead_zone, 1, len) / len; // scale from dead_zone..1 -> 0..1
+            v /= len;
+        else                                     // normalize
+            v *= LerpR(dead_zone, 1, len) / len; // scale from dead_zone..1 -> 0..1
 }
 /******************************************************************************/
 Bool JoypadSensors() { return CalculateJoypadSensors; }
@@ -1386,7 +1386,7 @@ static void RemapMove(Memc<Input> &inputs, Int elm, Int new_index) {
                 input.device++;
             else // 'elm' is moved left , so indexes between 'new_index' and 'elm' should move right
                 if (input.device > elm && input.device <= new_index)
-                input.device--; // 'elm' is moved right, so indexes between 'new_index' and 'elm' should move left
+                    input.device--; // 'elm' is moved right, so indexes between 'new_index' and 'elm' should move left
         }
     }
 }

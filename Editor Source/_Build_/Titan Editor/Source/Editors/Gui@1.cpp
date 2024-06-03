@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 GuiView GuiEdit;
 /******************************************************************************/
@@ -13,12 +13,12 @@ GUI_OBJ_TYPE GuiView::obj_new[] =
     {
         GO_BUTTON,   // Button
         GO_CHECKBOX, // CheckBox
-                     //GO_MENU    , // Menu
+                     // GO_MENU    , // Menu
         GO_COMBOBOX, // ComboBox
         GO_CUSTOM,   // Custom
         GO_IMAGE,    // Image
-                     //GO_LIST    , // List
-                     //GO_MENU_BAR, // MenuBar
+                     // GO_LIST    , // List
+                     // GO_MENU_BAR, // MenuBar
         GO_PROGRESS, // PogressBar
         GO_REGION,   // Region
         GO_SLIDEBAR, // SlideBar
@@ -801,7 +801,7 @@ void GuiView::createProps() {
     obj_edit[GO_WINDOW].add("Movable", MemberDesc(DATA_BOOL).setFunc(WindowMovable, WindowMovable));
     obj_edit[GO_WINDOW].add("Resizable", MemberDesc(DATA_BOOL).setFunc(WindowResizable, WindowResizable));
     obj_edit[GO_WINDOW].add("Bar Visible", MemberDesc(DATA_BOOL).setFunc(WindowBarVisible, WindowBarVisible));
-    //obj_edit[GO_WINDOW].add("Bar Height"   , MemberDesc(DATA_REAL).setFunc(WindowBarHeight , WindowBarHeight )).min(0).mouseEditSpeed(0.05);
+    // obj_edit[GO_WINDOW].add("Bar Height"   , MemberDesc(DATA_REAL).setFunc(WindowBarHeight , WindowBarHeight )).min(0).mouseEditSpeed(0.05);
     obj_edit[GO_WINDOW].add("Skin Override", MemberDesc(DATA_STR).setFunc(WindowSkin, WindowSkin)).elmType(ELM_GUI_SKIN).desc("Override Skin, if no skin is specified then default will be used");
 
     REPAO(obj_edit).create(GUI_OBJ_TYPE(i), panel.level());
@@ -1036,9 +1036,9 @@ void GuiView::update(C GuiPC &gpc) {
                 }
         } else // highlight by mouse
             if (GuiObj *obj = MainObject(Gui.msLit()))
-            if (objs.contains(obj))
-                if (!Ms.b(1) && !disable_selection) // don't highlight when editing or when cancelled selection
-                    lit.include(obj);
+                if (objs.contains(obj))
+                    if (!Ms.b(1) && !disable_selection) // don't highlight when editing or when cancelled selection
+                        lit.include(obj);
 
         // enable rectangle selection
         if (!selecting) {
@@ -1063,12 +1063,12 @@ void GuiView::update(C GuiPC &gpc) {
                 disable_selection = true;
             } else // cancel selection, 'disable_selection' so releasing later any button currently pressed will not force selection
                 if (Ms.br(0)) {
-                selecting = false;
-                disable_selection = true;
-                processSel();
-            } else if (!Ms.b(0)) {
-                selecting = false;
-            }
+                    selecting = false;
+                    disable_selection = true;
+                    processSel();
+                } else if (!Ms.b(0)) {
+                    selecting = false;
+                }
         }
         // select objs on tap
         if (!disable_selection && !selecting)
@@ -1437,7 +1437,7 @@ void GuiView::draw() {
                         GuiCustom2 obj;
                         drawPreview(obj, gpc, *parent);
                     } break;
-                        //case GO_DESKTOP : {Desktop2   obj;} break;
+                        // case GO_DESKTOP : {Desktop2   obj;} break;
                     case GO_IMAGE: {
                         GuiImage2 obj;
                         drawPreview(obj, gpc, *parent);

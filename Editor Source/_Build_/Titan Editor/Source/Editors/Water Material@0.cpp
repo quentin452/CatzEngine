@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 WaterMtrlRegion WaterMtrlEdit;
 /******************************************************************************/
@@ -354,7 +354,7 @@ void WaterMtrlRegion::resizeBase2(C VecI2 &size, bool relative) {
     time.getUTC();
     VecI2 size2 = size;
 
-    //if(relative || game && game->normalMap() && game->normalMap()->size()!=size2)edit.separateNormalMap(time); // separate if needed (normal can be from bump), and before reverting
+    // if(relative || game && game->normalMap() && game->normalMap()->size()!=size2)edit.separateNormalMap(time); // separate if needed (normal can be from bump), and before reverting
 
     if (relative && size.any()) // if we want to have relative size and not original, then first revert to original size
         if (Proj.forceImageSize(edit.bump_map, 0, relative, edit.bump_map_time, time)) {

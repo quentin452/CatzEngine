@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 ASSERT(DIFFUSE_LAMBERT == SDIFFUSE_LAMBERT && DIFFUSE_OREN_NAYAR == SDIFFUSE_OREN_NAYAR && DIFFUSE_BURLEY == SDIFFUSE_BURLEY && DIFFUSE_NUM == SDIFFUSE_NUM);
 namespace EE {
 /******************************************************************************

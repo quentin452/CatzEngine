@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 /******************************************************************************
 
    Decompression codes based on PowerVR SDK, Copyright (c) Imagination Technologies Limited
@@ -281,7 +281,7 @@ static void unpackModulations(const PVRTCWord &word, int offsetX, int offsetY, P
                     }
                     ModulationBits >>= 2;
                 } // end for x
-            }     // end for y
+            } // end for y
         } else {
             for (int y = 0; y < 4; y++) {
                 for (int x = 0; x < 4; x++) {
@@ -291,7 +291,7 @@ static void unpackModulations(const PVRTCWord &word, int offsetX, int offsetY, P
                         i32ModulationValues[y + offsetY][x + offsetX] -= 1;
                     ModulationBits >>= 2;
                 } // end for x
-            }     // end for y
+            } // end for y
         }
     }
 }
@@ -605,7 +605,7 @@ static int pvrtcDecompress(PVRTuint8 *pCompressedData,
             mapDecompressedData(pOutData, ui32Width, pPixels, indices, ui8Bpp);
 
         } // for each word
-    }     // for each row of words
+    } // for each row of words
 
     free(pPixels);
     // Return the data size

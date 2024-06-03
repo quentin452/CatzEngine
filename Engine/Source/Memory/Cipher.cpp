@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 
 // AES requires 16-byte alignment due to _mm_* operations
 
@@ -1856,7 +1856,7 @@ AES_ATTR Bool AES::create(CPtr key_data, Int key_size) {
             _rounds = 10;
             for (;;) {
                 temp = rk[3];
-                rk[4] = rk[0] ^ (Te2[(temp >> 16) & 0xff] & 0xff000000) ^ (Te3[(temp >> 8) & 0xff] & 0x00ff0000) ^ (Te0[(temp)&0xff] & 0x0000ff00) ^ (Te1[(temp >> 24)] & 0x000000ff) ^ rcon[i];
+                rk[4] = rk[0] ^ (Te2[(temp >> 16) & 0xff] & 0xff000000) ^ (Te3[(temp >> 8) & 0xff] & 0x00ff0000) ^ (Te0[(temp) & 0xff] & 0x0000ff00) ^ (Te1[(temp >> 24)] & 0x000000ff) ^ rcon[i];
                 rk[5] = rk[1] ^ rk[4];
                 rk[6] = rk[2] ^ rk[5];
                 rk[7] = rk[3] ^ rk[6];
@@ -1872,7 +1872,7 @@ AES_ATTR Bool AES::create(CPtr key_data, Int key_size) {
             rk[5] = GETU32(key + 20);
             for (;;) {
                 temp = rk[5];
-                rk[6] = rk[0] ^ (Te2[(temp >> 16) & 0xff] & 0xff000000) ^ (Te3[(temp >> 8) & 0xff] & 0x00ff0000) ^ (Te0[(temp)&0xff] & 0x0000ff00) ^ (Te1[(temp >> 24)] & 0x000000ff) ^ rcon[i];
+                rk[6] = rk[0] ^ (Te2[(temp >> 16) & 0xff] & 0xff000000) ^ (Te3[(temp >> 8) & 0xff] & 0x00ff0000) ^ (Te0[(temp) & 0xff] & 0x0000ff00) ^ (Te1[(temp >> 24)] & 0x000000ff) ^ rcon[i];
                 rk[7] = rk[1] ^ rk[6];
                 rk[8] = rk[2] ^ rk[7];
                 rk[9] = rk[3] ^ rk[8];
@@ -1892,14 +1892,14 @@ AES_ATTR Bool AES::create(CPtr key_data, Int key_size) {
             rk[7] = GETU32(key + 28);
             for (;;) {
                 temp = rk[7];
-                rk[8] = rk[0] ^ (Te2[(temp >> 16) & 0xff] & 0xff000000) ^ (Te3[(temp >> 8) & 0xff] & 0x00ff0000) ^ (Te0[(temp)&0xff] & 0x0000ff00) ^ (Te1[(temp >> 24)] & 0x000000ff) ^ rcon[i];
+                rk[8] = rk[0] ^ (Te2[(temp >> 16) & 0xff] & 0xff000000) ^ (Te3[(temp >> 8) & 0xff] & 0x00ff0000) ^ (Te0[(temp) & 0xff] & 0x0000ff00) ^ (Te1[(temp >> 24)] & 0x000000ff) ^ rcon[i];
                 rk[9] = rk[1] ^ rk[8];
                 rk[10] = rk[2] ^ rk[9];
                 rk[11] = rk[3] ^ rk[10];
                 if (++i == 7)
                     break;
                 temp = rk[11];
-                rk[12] = rk[4] ^ (Te2[(temp >> 24)] & 0xff000000) ^ (Te3[(temp >> 16) & 0xff] & 0x00ff0000) ^ (Te0[(temp >> 8) & 0xff] & 0x0000ff00) ^ (Te1[(temp)&0xff] & 0x000000ff);
+                rk[12] = rk[4] ^ (Te2[(temp >> 24)] & 0xff000000) ^ (Te3[(temp >> 16) & 0xff] & 0x00ff0000) ^ (Te0[(temp >> 8) & 0xff] & 0x0000ff00) ^ (Te1[(temp) & 0xff] & 0x000000ff);
                 rk[13] = rk[5] ^ rk[12];
                 rk[14] = rk[6] ^ rk[13];
                 rk[15] = rk[7] ^ rk[14];
@@ -1980,17 +1980,17 @@ AES_ATTR void AES::encrypt16(Ptr dest, CPtr src) C {
 #if AES_SMALL_CODE
     Int r = _rounds >> 1;
     for (;;) {
-        t0 = Te0[(s0 >> 24)] ^ Te1[(s1 >> 16) & 0xff] ^ Te2[(s2 >> 8) & 0xff] ^ Te3[(s3)&0xff] ^ rk[4];
-        t1 = Te0[(s1 >> 24)] ^ Te1[(s2 >> 16) & 0xff] ^ Te2[(s3 >> 8) & 0xff] ^ Te3[(s0)&0xff] ^ rk[5];
-        t2 = Te0[(s2 >> 24)] ^ Te1[(s3 >> 16) & 0xff] ^ Te2[(s0 >> 8) & 0xff] ^ Te3[(s1)&0xff] ^ rk[6];
-        t3 = Te0[(s3 >> 24)] ^ Te1[(s0 >> 16) & 0xff] ^ Te2[(s1 >> 8) & 0xff] ^ Te3[(s2)&0xff] ^ rk[7];
+        t0 = Te0[(s0 >> 24)] ^ Te1[(s1 >> 16) & 0xff] ^ Te2[(s2 >> 8) & 0xff] ^ Te3[(s3) & 0xff] ^ rk[4];
+        t1 = Te0[(s1 >> 24)] ^ Te1[(s2 >> 16) & 0xff] ^ Te2[(s3 >> 8) & 0xff] ^ Te3[(s0) & 0xff] ^ rk[5];
+        t2 = Te0[(s2 >> 24)] ^ Te1[(s3 >> 16) & 0xff] ^ Te2[(s0 >> 8) & 0xff] ^ Te3[(s1) & 0xff] ^ rk[6];
+        t3 = Te0[(s3 >> 24)] ^ Te1[(s0 >> 16) & 0xff] ^ Te2[(s1 >> 8) & 0xff] ^ Te3[(s2) & 0xff] ^ rk[7];
         rk += 8;
         if (--r <= 0)
             break;
-        s0 = Te0[(t0 >> 24)] ^ Te1[(t1 >> 16) & 0xff] ^ Te2[(t2 >> 8) & 0xff] ^ Te3[(t3)&0xff] ^ rk[0];
-        s1 = Te0[(t1 >> 24)] ^ Te1[(t2 >> 16) & 0xff] ^ Te2[(t3 >> 8) & 0xff] ^ Te3[(t0)&0xff] ^ rk[1];
-        s2 = Te0[(t2 >> 24)] ^ Te1[(t3 >> 16) & 0xff] ^ Te2[(t0 >> 8) & 0xff] ^ Te3[(t1)&0xff] ^ rk[2];
-        s3 = Te0[(t3 >> 24)] ^ Te1[(t0 >> 16) & 0xff] ^ Te2[(t1 >> 8) & 0xff] ^ Te3[(t2)&0xff] ^ rk[3];
+        s0 = Te0[(t0 >> 24)] ^ Te1[(t1 >> 16) & 0xff] ^ Te2[(t2 >> 8) & 0xff] ^ Te3[(t3) & 0xff] ^ rk[0];
+        s1 = Te0[(t1 >> 24)] ^ Te1[(t2 >> 16) & 0xff] ^ Te2[(t3 >> 8) & 0xff] ^ Te3[(t0) & 0xff] ^ rk[1];
+        s2 = Te0[(t2 >> 24)] ^ Te1[(t3 >> 16) & 0xff] ^ Te2[(t0 >> 8) & 0xff] ^ Te3[(t1) & 0xff] ^ rk[2];
+        s3 = Te0[(t3 >> 24)] ^ Te1[(t0 >> 16) & 0xff] ^ Te2[(t1 >> 8) & 0xff] ^ Te3[(t2) & 0xff] ^ rk[3];
     }
 #else
     // round 1
@@ -2065,13 +2065,13 @@ AES_ATTR void AES::encrypt16(Ptr dest, CPtr src) C {
     rk += _rounds << 2;
 #endif
 
-    s0 = (Te2[(t0 >> 24)] & 0xff000000) ^ (Te3[(t1 >> 16) & 0xff] & 0x00ff0000) ^ (Te0[(t2 >> 8) & 0xff] & 0x0000ff00) ^ (Te1[(t3)&0xff] & 0x000000ff) ^ rk[0];
+    s0 = (Te2[(t0 >> 24)] & 0xff000000) ^ (Te3[(t1 >> 16) & 0xff] & 0x00ff0000) ^ (Te0[(t2 >> 8) & 0xff] & 0x0000ff00) ^ (Te1[(t3) & 0xff] & 0x000000ff) ^ rk[0];
     PUTU32(out, s0);
-    s1 = (Te2[(t1 >> 24)] & 0xff000000) ^ (Te3[(t2 >> 16) & 0xff] & 0x00ff0000) ^ (Te0[(t3 >> 8) & 0xff] & 0x0000ff00) ^ (Te1[(t0)&0xff] & 0x000000ff) ^ rk[1];
+    s1 = (Te2[(t1 >> 24)] & 0xff000000) ^ (Te3[(t2 >> 16) & 0xff] & 0x00ff0000) ^ (Te0[(t3 >> 8) & 0xff] & 0x0000ff00) ^ (Te1[(t0) & 0xff] & 0x000000ff) ^ rk[1];
     PUTU32(out + 4, s1);
-    s2 = (Te2[(t2 >> 24)] & 0xff000000) ^ (Te3[(t3 >> 16) & 0xff] & 0x00ff0000) ^ (Te0[(t0 >> 8) & 0xff] & 0x0000ff00) ^ (Te1[(t1)&0xff] & 0x000000ff) ^ rk[2];
+    s2 = (Te2[(t2 >> 24)] & 0xff000000) ^ (Te3[(t3 >> 16) & 0xff] & 0x00ff0000) ^ (Te0[(t0 >> 8) & 0xff] & 0x0000ff00) ^ (Te1[(t1) & 0xff] & 0x000000ff) ^ rk[2];
     PUTU32(out + 8, s2);
-    s3 = (Te2[(t3 >> 24)] & 0xff000000) ^ (Te3[(t0 >> 16) & 0xff] & 0x00ff0000) ^ (Te0[(t1 >> 8) & 0xff] & 0x0000ff00) ^ (Te1[(t2)&0xff] & 0x000000ff) ^ rk[3];
+    s3 = (Te2[(t3 >> 24)] & 0xff000000) ^ (Te3[(t0 >> 16) & 0xff] & 0x00ff0000) ^ (Te0[(t1 >> 8) & 0xff] & 0x0000ff00) ^ (Te1[(t2) & 0xff] & 0x000000ff) ^ rk[3];
     PUTU32(out + 12, s3);
 }
 /******************************************************************************/
@@ -2095,17 +2095,17 @@ AES_ATTR void AES::decrypt16(Ptr dest, CPtr src) C {
 #if AES_SMALL_CODE
     Int r = _rounds >> 1;
     for (;;) {
-        t0 = Td0[(s0 >> 24)] ^ Td1[(s3 >> 16) & 0xff] ^ Td2[(s2 >> 8) & 0xff] ^ Td3[(s1)&0xff] ^ rk[4];
-        t1 = Td0[(s1 >> 24)] ^ Td1[(s0 >> 16) & 0xff] ^ Td2[(s3 >> 8) & 0xff] ^ Td3[(s2)&0xff] ^ rk[5];
-        t2 = Td0[(s2 >> 24)] ^ Td1[(s1 >> 16) & 0xff] ^ Td2[(s0 >> 8) & 0xff] ^ Td3[(s3)&0xff] ^ rk[6];
-        t3 = Td0[(s3 >> 24)] ^ Td1[(s2 >> 16) & 0xff] ^ Td2[(s1 >> 8) & 0xff] ^ Td3[(s0)&0xff] ^ rk[7];
+        t0 = Td0[(s0 >> 24)] ^ Td1[(s3 >> 16) & 0xff] ^ Td2[(s2 >> 8) & 0xff] ^ Td3[(s1) & 0xff] ^ rk[4];
+        t1 = Td0[(s1 >> 24)] ^ Td1[(s0 >> 16) & 0xff] ^ Td2[(s3 >> 8) & 0xff] ^ Td3[(s2) & 0xff] ^ rk[5];
+        t2 = Td0[(s2 >> 24)] ^ Td1[(s1 >> 16) & 0xff] ^ Td2[(s0 >> 8) & 0xff] ^ Td3[(s3) & 0xff] ^ rk[6];
+        t3 = Td0[(s3 >> 24)] ^ Td1[(s2 >> 16) & 0xff] ^ Td2[(s1 >> 8) & 0xff] ^ Td3[(s0) & 0xff] ^ rk[7];
         rk += 8;
         if (--r <= 0)
             break;
-        s0 = Td0[(t0 >> 24)] ^ Td1[(t3 >> 16) & 0xff] ^ Td2[(t2 >> 8) & 0xff] ^ Td3[(t1)&0xff] ^ rk[0];
-        s1 = Td0[(t1 >> 24)] ^ Td1[(t0 >> 16) & 0xff] ^ Td2[(t3 >> 8) & 0xff] ^ Td3[(t2)&0xff] ^ rk[1];
-        s2 = Td0[(t2 >> 24)] ^ Td1[(t1 >> 16) & 0xff] ^ Td2[(t0 >> 8) & 0xff] ^ Td3[(t3)&0xff] ^ rk[2];
-        s3 = Td0[(t3 >> 24)] ^ Td1[(t2 >> 16) & 0xff] ^ Td2[(t1 >> 8) & 0xff] ^ Td3[(t0)&0xff] ^ rk[3];
+        s0 = Td0[(t0 >> 24)] ^ Td1[(t3 >> 16) & 0xff] ^ Td2[(t2 >> 8) & 0xff] ^ Td3[(t1) & 0xff] ^ rk[0];
+        s1 = Td0[(t1 >> 24)] ^ Td1[(t0 >> 16) & 0xff] ^ Td2[(t3 >> 8) & 0xff] ^ Td3[(t2) & 0xff] ^ rk[1];
+        s2 = Td0[(t2 >> 24)] ^ Td1[(t1 >> 16) & 0xff] ^ Td2[(t0 >> 8) & 0xff] ^ Td3[(t3) & 0xff] ^ rk[2];
+        s3 = Td0[(t3 >> 24)] ^ Td1[(t2 >> 16) & 0xff] ^ Td2[(t1 >> 8) & 0xff] ^ Td3[(t0) & 0xff] ^ rk[3];
     }
 #else
     // round 1
@@ -2181,13 +2181,13 @@ AES_ATTR void AES::decrypt16(Ptr dest, CPtr src) C {
 #endif
 
     // apply last round and map cipher state to byte array block
-    s0 = ((U32)Td4[(t0 >> 24)] << 24) ^ ((U32)Td4[(t3 >> 16) & 0xff] << 16) ^ ((U32)Td4[(t2 >> 8) & 0xff] << 8) ^ ((U32)Td4[(t1)&0xff]) ^ rk[0];
+    s0 = ((U32)Td4[(t0 >> 24)] << 24) ^ ((U32)Td4[(t3 >> 16) & 0xff] << 16) ^ ((U32)Td4[(t2 >> 8) & 0xff] << 8) ^ ((U32)Td4[(t1) & 0xff]) ^ rk[0];
     PUTU32(out, s0);
-    s1 = ((U32)Td4[(t1 >> 24)] << 24) ^ ((U32)Td4[(t0 >> 16) & 0xff] << 16) ^ ((U32)Td4[(t3 >> 8) & 0xff] << 8) ^ ((U32)Td4[(t2)&0xff]) ^ rk[1];
+    s1 = ((U32)Td4[(t1 >> 24)] << 24) ^ ((U32)Td4[(t0 >> 16) & 0xff] << 16) ^ ((U32)Td4[(t3 >> 8) & 0xff] << 8) ^ ((U32)Td4[(t2) & 0xff]) ^ rk[1];
     PUTU32(out + 4, s1);
-    s2 = ((U32)Td4[(t2 >> 24)] << 24) ^ ((U32)Td4[(t1 >> 16) & 0xff] << 16) ^ ((U32)Td4[(t0 >> 8) & 0xff] << 8) ^ ((U32)Td4[(t3)&0xff]) ^ rk[2];
+    s2 = ((U32)Td4[(t2 >> 24)] << 24) ^ ((U32)Td4[(t1 >> 16) & 0xff] << 16) ^ ((U32)Td4[(t0 >> 8) & 0xff] << 8) ^ ((U32)Td4[(t3) & 0xff]) ^ rk[2];
     PUTU32(out + 8, s2);
-    s3 = ((U32)Td4[(t3 >> 24)] << 24) ^ ((U32)Td4[(t2 >> 16) & 0xff] << 16) ^ ((U32)Td4[(t1 >> 8) & 0xff] << 8) ^ ((U32)Td4[(t0)&0xff]) ^ rk[3];
+    s3 = ((U32)Td4[(t3 >> 24)] << 24) ^ ((U32)Td4[(t2 >> 16) & 0xff] << 16) ^ ((U32)Td4[(t1 >> 8) & 0xff] << 8) ^ ((U32)Td4[(t0) & 0xff]) ^ rk[3];
     PUTU32(out + 12, s3);
 }
 #undef SWAP

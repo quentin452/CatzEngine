@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 flt HmHeight(C Heightmap &hm, flt area_size, C VecI2 &area_xy, C Vec &pos, bool smooth) { return HmHeight(hm, area_size, area_xy, pos.xz(), smooth); }
 flt HmHeight(C Heightmap &hm, flt area_size, C VecI2 &area_xy, C Vec2 &xz, bool smooth) {

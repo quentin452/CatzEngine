@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../../stdafx.h"
 
 #if SUPPORT_PNG && !SWITCH
 #include "../../../../ThirdPartyLibs/begin.h"

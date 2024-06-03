@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************
 
    TODO: '_rws' could potentially by separated into '_rws_pak' and '_rws_downloaded', would it be better?
@@ -378,7 +378,7 @@ void InternetCache::delFile() {
         REPA(_import_images) {
             auto &ii = _import_images[i];
             ii.lockedRead();
-        }                // read all
+        } // read all
         resetPak(&lock); // 'resetPak', reset while still under lock, it will be unlocked inside
     }
     if (LOG)
@@ -1064,7 +1064,7 @@ inline void InternetCache::update() {
                     LogN(S + "IC.import   !FAIL! " + ii.asText());
                 resetPak();
                 break;
-            }                 // if failed to open file, then we have to reset, break because 'resetPak' will handle '_import_images'
+            } // if failed to open file, then we have to reset, break because 'resetPak' will handle '_import_images'
             if (ii.image_ptr) // not canceled
             {
                 if (LOG)
@@ -1287,9 +1287,9 @@ inline void InternetCache::update() {
                         missing.access_time = downloaded->access_time;
                     else // reuse from 'downloaded'
                         if (C PakFile *pf = _pak.find(link, true))
-                        missing.access_time = pakFile(*pf).access_time;
-                    else                                           // reuse from 'pak'
-                        missing.access_time = missing.verify_time; // set as new
+                            missing.access_time = pakFile(*pf).access_time;
+                        else                                           // reuse from 'pak'
+                            missing.access_time = missing.verify_time; // set as new
                 }
                 // codes below cannot be inside 'just_created' because expired (not verified) '_missing' can be created in 'changed'
                 ImagePtr img;

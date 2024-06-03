@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 ImporterClass Importer;
 /******************************************************************************/
@@ -173,7 +173,7 @@ Str ImporterClass::Import::nodeUID(int bone_i) C // unique string identifying bo
             if (child_index) {
                 uid += CharAlpha;
                 uid += child_index;
-            }           // node child index in parent (only children with same names are counted)
+            } // node child index in parent (only children with same names are counted)
             uid += '/'; // separator
             node_i = parent;
         }
@@ -189,7 +189,7 @@ Str ImporterClass::Import::nodeUID(int bone_i) C // unique string identifying bo
             if (child_index) {
                 uid += CharAlpha;
                 uid += child_index;
-            }           // node child index in parent (only children with same names are counted)
+            } // node child index in parent (only children with same names are counted)
             uid += '/'; // separator
             bone_i = parent;
         }
@@ -502,41 +502,41 @@ bool ImporterClass::Import::import() // !! this is called on a secondary thread 
             }
         } else                                                                                // anim inside mesh
             if (EE::Import(file, null, &skel, anims, null, null, &xskel, all_nodes_as_bones)) // skeleton is needed for anims
-            if (anims.elms() >= 1)                                                            // at least 1 anim
-            {
-                if (anims.elms() > 1)
-                    if (C TextParam *anim_name = files[0].findParam("name")) {
-                        REPA(anims)
-                        if (anims[i].name == anim_name->value) // if more than 1 then find the one with matching name
-                        {
-                            Swap(anims[0], anims[i]); // put to first place
-                            break;
+                if (anims.elms() >= 1)                                                        // at least 1 anim
+                {
+                    if (anims.elms() > 1)
+                        if (C TextParam *anim_name = files[0].findParam("name")) {
+                            REPA(anims)
+                            if (anims[i].name == anim_name->value) // if more than 1 then find the one with matching name
+                            {
+                                Swap(anims[0], anims[i]); // put to first place
+                                break;
+                            }
+                            anims.setNum(1); // remove all other
                         }
-                        anims.setNum(1); // remove all other
+                    XAnimation &anim = anims[0];
+                    anim.anim.linear(anim.fps >= LinearAnimFpsLimit);
+                    if (files.elms()) {
+                        FileParams &fps = files[0];
+                        if (anim.fps > 0) // clip !! do this before looping and speed !!
+                        {
+                            C TextParam *start_frame = fps.findParam("startFrame"),
+                                        *end_frame = fps.findParam("endFrame");
+                            if (start_frame || end_frame) // clip animation, currently importer will already offset keyframes by 'anim.start', so if we want custom ranges, we need to revert it back
+                                anim.anim.clip(start_frame ? start_frame->asFlt() / anim.fps - anim.start : 0,
+                                               end_frame ? end_frame->asFlt() / anim.fps - anim.start : anim.anim.length());
+                        }
+                        if (C TextParam *p = fps.findParam("loop")) // set looping !! do this after clipping so the clip isn't affected by looping !!
+                        {
+                            has_loop = true;
+                            anim.anim.loop(p->asBool());
+                            fps.params.removeData(p); // remove this parameter because we've already applied this change to the animation, so when user modifies manually the looping, and then selectes reload, then looping won't be changed
+                        }
                     }
-                XAnimation &anim = anims[0];
-                anim.anim.linear(anim.fps >= LinearAnimFpsLimit);
-                if (files.elms()) {
-                    FileParams &fps = files[0];
-                    if (anim.fps > 0) // clip !! do this before looping and speed !!
-                    {
-                        C TextParam *start_frame = fps.findParam("startFrame"),
-                                    *end_frame = fps.findParam("endFrame");
-                        if (start_frame || end_frame) // clip animation, currently importer will already offset keyframes by 'anim.start', so if we want custom ranges, we need to revert it back
-                            anim.anim.clip(start_frame ? start_frame->asFlt() / anim.fps - anim.start : 0,
-                                           end_frame ? end_frame->asFlt() / anim.fps - anim.start : anim.anim.length());
-                    }
-                    if (C TextParam *p = fps.findParam("loop")) // set looping !! do this after clipping so the clip isn't affected by looping !!
-                    {
-                        has_loop = true;
-                        anim.anim.loop(p->asBool());
-                        fps.params.removeData(p); // remove this parameter because we've already applied this change to the animation, so when user modifies manually the looping, and then selectes reload, then looping won't be changed
-                    }
+                    anim.anim.clip(0, anim.anim.length()); // remove any keyframes outside of anim range
+                    T.file = FileParams::Encode(files);    // 'files' could have changed, so adjust the name so the 'elm.srcFile' is set properly
+                    return true;
                 }
-                anim.anim.clip(0, anim.anim.length()); // remove any keyframes outside of anim range
-                T.file = FileParams::Encode(files);    // 'files' could have changed, so adjust the name so the 'elm.srcFile' is set properly
-                return true;
-            }
     } break;
 
     case ELM_IMAGE: {
@@ -627,34 +627,34 @@ bool ImporterClass::Import::import() // !! this is called on a secondary thread 
                     }
                 } else // JPG never has any alpha
                     if (ext == "jxl") {
-                    Image image;
-                    raw.pos(0);
-                    if (image.ImportJXL(raw)) {
-                        has_color = HasColor(image);
-                        has_alpha = HasAlpha(image);
+                        Image image;
+                        raw.pos(0);
+                        if (image.ImportJXL(raw)) {
+                            has_color = HasColor(image);
+                            has_alpha = HasAlpha(image);
+                        }
+                    } else if (ext == "png") {
+                        Image image;
+                        raw.pos(0);
+                        if (image.ImportPNG(raw)) {
+                            has_color = HasColor(image);
+                            has_alpha = HasAlpha(image);
+                        }
+                    } else if (ext == "webp") {
+                        Image image;
+                        raw.pos(0);
+                        if (image.ImportWEBP(raw)) {
+                            has_color = HasColor(image);
+                            has_alpha = HasAlpha(image);
+                        }
+                    } else if (ext == "avif") {
+                        Image image;
+                        raw.pos(0);
+                        if (image.ImportAVIF(raw)) {
+                            has_color = HasColor(image);
+                            has_alpha = HasAlpha(image);
+                        }
                     }
-                } else if (ext == "png") {
-                    Image image;
-                    raw.pos(0);
-                    if (image.ImportPNG(raw)) {
-                        has_color = HasColor(image);
-                        has_alpha = HasAlpha(image);
-                    }
-                } else if (ext == "webp") {
-                    Image image;
-                    raw.pos(0);
-                    if (image.ImportWEBP(raw)) {
-                        has_color = HasColor(image);
-                        has_alpha = HasAlpha(image);
-                    }
-                } else if (ext == "avif") {
-                    Image image;
-                    raw.pos(0);
-                    if (image.ImportAVIF(raw)) {
-                        has_color = HasColor(image);
-                        has_alpha = HasAlpha(image);
-                    }
-                }
                 return true;
             } else // import and export as WEBP
             {
@@ -690,22 +690,22 @@ bool ImporterClass::Import::import() // !! this is called on a secondary thread 
             }
         } else // mtrl inside mesh
             if (EE::Import(file, null, null, null, SCAST(Memc<XMaterial>, mtrls), null))
-            if (mtrls.elms() >= 1) // at least 1 mtrl
-            {
-                if (mtrls.elms() > 1)
-                    if (C TextParam *mtrl_name = files[0].findParam("name")) {
-                        REPA(mtrls)
-                        if (mtrls[i].name == mtrl_name->value) // if more than 1 then find the one with matching name
-                        {
-                            Swap(mtrls[0], mtrls[i]); // put to first place
-                            break;
+                if (mtrls.elms() >= 1) // at least 1 mtrl
+                {
+                    if (mtrls.elms() > 1)
+                        if (C TextParam *mtrl_name = files[0].findParam("name")) {
+                            REPA(mtrls)
+                            if (mtrls[i].name == mtrl_name->value) // if more than 1 then find the one with matching name
+                            {
+                                Swap(mtrls[0], mtrls[i]); // put to first place
+                                break;
+                            }
+                            mtrls.setNum(1); // remove all other
                         }
-                        mtrls.setNum(1); // remove all other
-                    }
-                Str path = GetPath(file);
-                FREPAO(mtrls).process(path);
-                return true;
-            }
+                    Str path = GetPath(file);
+                    FREPAO(mtrls).process(path);
+                    return true;
+                }
     } break;
 
     case ELM_FONT: {
@@ -1368,8 +1368,8 @@ void ImporterClass::processUpdate(Import &import) {
                                                         C SkelBone &src_bone = old_skel->bones[best_old_skel_bone_i];
                                                         SkelBone &dest_bone = new_skel.bones[new_skel_bone_i];
                                                         dest_bone.width = src_bone.width;
-                                                        //dest_bone.offset=src_bone.offset;
-                                                        //dest_bone.frac  =src_bone.frac  ;
+                                                        // dest_bone.offset=src_bone.offset;
+                                                        // dest_bone.frac  =src_bone.frac  ;
                                                         dest_bone.flag = src_bone.flag;
                                                     }
                                                 }
@@ -1426,7 +1426,7 @@ void ImporterClass::processUpdate(Import &import) {
                                                 m = 3;
                                             else // full path the same - perfect match
                                                 if (GetBase(mtrl_data->src_file) == GetBase(mtrl_src_file))
-                                                m = 2; // base name the same
+                                                    m = 2; // base name the same
                                         } else {
                                             if (EqualPath(mtrl_data->src_file, mtrl_src_file))
                                                 m = 1; // full path the same, but not inside the object, perhaps this material is used for something else, prefer materials inside the object
@@ -1550,7 +1550,7 @@ void ImporterClass::processCloth(Import &import) {
                     }
 }
 void ImporterClass::processAnim(Import &import) {
-    //if(import.skel.is()) don't check this because we can import also EE.Animation ('anim' file format) which doesn't contain a skeleton
+    // if(import.skel.is()) don't check this because we can import also EE.Animation ('anim' file format) which doesn't contain a skeleton
     if (import.anims.elms())
         if (Elm *obj_elm = Proj.findElm(import.elm_id, ELM_OBJ))
             if (ElmObj *obj_data = obj_elm->objData())
@@ -1681,18 +1681,18 @@ void ImporterClass::processAdd(Import &import) {
 
                 if (import.mesh.is())
                     Proj.getObjMeshElm(elm->id, false, false); // need to have mesh     element to insert mesh
-                                                               //if(import.skel.is())Proj.getObjSkelElm(elm.id, false, false); // need to have skeleton element to insert skeleton
+                                                               // if(import.skel.is())Proj.getObjSkelElm(elm.id, false, false); // need to have skeleton element to insert skeleton
 
                 // update
                 if (Elm *mesh_elm = Proj.findElm(obj_data->mesh_id))
                     if (ElmMesh *mesh_data = mesh_elm->meshData()) {
                         // update skeleton
-                        //Elm *skel_elm=null; // currently this is not done
+                        // Elm *skel_elm=null; // currently this is not done
 
                         Proj.elmChanging(*elm);
                         if (mesh_elm)
                             Proj.elmChanging(*mesh_elm);
-                        //if(skel_elm)Proj.elmChanging(*skel_elm);
+                        // if(skel_elm)Proj.elmChanging(*skel_elm);
 
                         // first setup materials
                         FileParams fp = import.file;
@@ -1715,7 +1715,7 @@ void ImporterClass::processAdd(Import &import) {
                                                 m = 3;
                                             else // full path the same - perfect match
                                                 if (GetBase(mtrl_data->src_file) == GetBase(mtrl_src_file))
-                                                m = 2; // base name the same
+                                                    m = 2; // base name the same
                                         } else {
                                             if (EqualPath(mtrl_data->src_file, mtrl_src_file))
                                                 m = 1; // full path the same, but not inside the object, perhaps this material is used for something else, prefer materials inside the object
@@ -1802,7 +1802,7 @@ void ImporterClass::processAdd(Import &import) {
                         Proj.elmChanged(*elm);
                         if (mesh_elm)
                             Proj.elmChanged(*mesh_elm);
-                        //if(skel_elm)Proj.elmChanged(*skel_elm);
+                        // if(skel_elm)Proj.elmChanged(*skel_elm);
 
                         // send to server
                         Server.setElmFull(obj_data->mesh_id); /*Server.setElmFull(mesh_data.skel_id);*/

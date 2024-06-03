@@ -1,6 +1,7 @@
 /******************************************************************************/
+#include "../../stdafx.h"
 #include "../Platforms/iOS/iOS.h"
-#include "stdafx.h"
+
 namespace EE {
 /******************************************************************************/
 #define KNOWN_IMAGE_TYPE_USAGE (DX11)
@@ -171,7 +172,7 @@ void ImageRT::discard() {
         clearHw(PURPLE);
     else if (D3DC1)
         D3DC1->DiscardView(_rtv ? &SCAST(ID3D11View, *_rtv) : &SCAST(ID3D11View, *_dsv)); // will not crash if parameter is null
-#elif GL && !MAC && !LINUX // Mac doesn't have GL 4.3 'glInvalidateFramebuffer', Linux GeForce drivers have bugs (TODO: check again in the future)
+#elif GL && !MAC && !LINUX                                                                // Mac doesn't have GL 4.3 'glInvalidateFramebuffer', Linux GeForce drivers have bugs (TODO: check again in the future)
     if (DEBUG_DISCARD) {
         if (Renderer._cur_ds == this && Renderer._cur_ds_id == _txtr)
             D.clearDS();
@@ -186,7 +187,7 @@ void ImageRT::discard() {
         else {
             _discard = true;
             return;
-        }                 // discard at next opportunity when we want to attach it to FBO
+        } // discard at next opportunity when we want to attach it to FBO
         _discard = false; // discarded
     } else
 #if WINDOWS
@@ -217,21 +218,21 @@ void ImageRT::discard() {
                 attachment = (hwTypeInfo().s ? GL_DEPTH_STENCIL_ATTACHMENT : GL_DEPTH_ATTACHMENT);
             else // check both '_cur_ds' and '_cur_ds_id' because '_cur_ds_id' will be 0 when Image is a RenderBuffer or temporarily unbound Texture (only Textures can be temporarily unbound), this will work OK for RenderBuffers because both '_cur_ds_id' and '_txtr' will be zero
                 if (Renderer._cur[0] == this)
-                attachment = GL_COLOR_ATTACHMENT0;
-            else // check '_cur' because '_txtr' can be 0 for RenderBuffers
-                if (Renderer._cur[1] == this)
-                attachment = GL_COLOR_ATTACHMENT1;
-            else // check '_cur' because '_txtr' can be 0 for RenderBuffers
-                if (Renderer._cur[2] == this)
-                attachment = GL_COLOR_ATTACHMENT2;
-            else // check '_cur' because '_txtr' can be 0 for RenderBuffers
-                if (Renderer._cur[3] == this)
-                attachment = GL_COLOR_ATTACHMENT3;
-            else // check '_cur' because '_txtr' can be 0 for RenderBuffers
-            {
-                _discard = true;
-                return;
-            } // discard at next opportunity when we want to attach it to FBO
+                    attachment = GL_COLOR_ATTACHMENT0;
+                else // check '_cur' because '_txtr' can be 0 for RenderBuffers
+                    if (Renderer._cur[1] == this)
+                        attachment = GL_COLOR_ATTACHMENT1;
+                    else // check '_cur' because '_txtr' can be 0 for RenderBuffers
+                        if (Renderer._cur[2] == this)
+                            attachment = GL_COLOR_ATTACHMENT2;
+                        else // check '_cur' because '_txtr' can be 0 for RenderBuffers
+                            if (Renderer._cur[3] == this)
+                                attachment = GL_COLOR_ATTACHMENT3;
+                            else // check '_cur' because '_txtr' can be 0 for RenderBuffers
+                            {
+                                _discard = true;
+                                return;
+                            } // discard at next opportunity when we want to attach it to FBO
             glInvalidateFramebuffer(GL_FRAMEBUFFER, 1, &attachment);
             _discard = false; // discarded
         }

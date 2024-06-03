@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 struct QueuedMsgBox // queue these commands for thread-safety, this is so that 'Gui.msgBox' does not require 'Gui.cs' lock, this is important in case for example the main thread is deleting a thread inside a 'Gui.update' callback "Gui.update -> thread.del()" while that thread is "if(thread.wantStop())Gui.msgBox(failed)" calling 'Gui.msgBox' would require 'Gui.cs' lock which is already locked on the main thread
@@ -385,7 +385,7 @@ GuiObj *GUI::objNearest(C Vec2 &pos, C Vec2 &dir, Vec2 &out_pos) C {
                             if (obj.recalc)
                                 if (!obj.recalcDo(gon))
                                     gon.nearest.remove(i);
-                        }           // recalc all
+                        } // recalc all
                         goto again; // find again
                     }
                     out_pos = nearest->rect.center();
@@ -737,29 +737,29 @@ void GUI::update() {
             dragCancel();
         else                                                                       // if mouse dragging and RMB pressed then cancel dragging
             if (_drag_touch_id ? (!touch || touch->rs()) : (!Ms.b(0) || Ms.br(0))) // finish dragging
-        {
-            if (dragging())
-                if (GuiObj *lit = (touch ? objAtPos(touch->pos()) : msLit())) {
-                    if (_drag_name.is() && App.drop) {
-                        Memc<Str> names;
-                        names.add(_drag_name);
-                        App.drop(names, lit, touch ? touch->pos() : Ms.pos());
-                    } // don't use 'Memt' here, because that would reduce the stack memory, and in this method all gui object updates are called, so it's best to give them as much as possible, and also this is called only on drag finish, so once in a long time
-                    if (_drag_finish)
-                        _drag_finish(_drag_user, lit, touch ? touch->pos() : Ms.pos());
-                    _drag_cancel = null; // clear cancel so we won't call it, because we've already called finish
+            {
+                if (dragging())
+                    if (GuiObj *lit = (touch ? objAtPos(touch->pos()) : msLit())) {
+                        if (_drag_name.is() && App.drop) {
+                            Memc<Str> names;
+                            names.add(_drag_name);
+                            App.drop(names, lit, touch ? touch->pos() : Ms.pos());
+                        } // don't use 'Memt' here, because that would reduce the stack memory, and in this method all gui object updates are called, so it's best to give them as much as possible, and also this is called only on drag finish, so once in a long time
+                        if (_drag_finish)
+                            _drag_finish(_drag_user, lit, touch ? touch->pos() : Ms.pos());
+                        _drag_cancel = null; // clear cancel so we won't call it, because we've already called finish
 
-                    if (!menu())                                              // if menu was not activated during custom function calls
-                        if (lit = (touch ? objAtPos(touch->pos()) : msLit())) // detect lit again because previous may got deleted during custom function calls
-                            lit->activate();                                  // activate object at which we've drag and dropped
+                        if (!menu())                                              // if menu was not activated during custom function calls
+                            if (lit = (touch ? objAtPos(touch->pos()) : msLit())) // detect lit again because previous may got deleted during custom function calls
+                                lit->activate();                                  // activate object at which we've drag and dropped
+                    }
+                dragCancel(); // clear drag related members
+            } else            // start dragging
+                if (!dragging() && (touch ? touch->dragging() : Ms.dragging())) {
+                    _dragging = true;
+                    if (_drag_start)
+                        _drag_start(_drag_user);
                 }
-            dragCancel(); // clear drag related members
-        } else            // start dragging
-            if (!dragging() && (touch ? touch->dragging() : Ms.dragging())) {
-            _dragging = true;
-            if (_drag_start)
-                _drag_start(_drag_user);
-        }
     }
 
     _update_time = Time.curTime() - t;

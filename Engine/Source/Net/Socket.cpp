@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************
 
    Warning/TODO/FIXME: Once every few months 'UpdateCertificates' should be called to update latest version of trusted certificates for SSL/TLS/HTTPS
@@ -21,7 +21,7 @@ static const Bool DualStackSocket = (OSVerNumber().x > 5); // not supported on W
 
 #define PREFER_IPV6 (!SWITCH) // prefer IPv6 addresses to avoid unnecessary 'convert' calls, unsupported on Nintendo Switch - https://developer.nintendo.com/html/online-docs/g1kr9vj6-en/Packages/SDK/NintendoSDK/Documents/Package/contents/Pages/Page_107338335.html
 
-#define IP4_ANY 0 // "0.0.0.0"   any address will be selected
+#define IP4_ANY 0               // "0.0.0.0"   any address will be selected
 #define IP4_LOCAL_HOST 16777343 // "127.0.0.1" localhost
 
 #ifndef INET6_ADDRSTRLEN
@@ -958,7 +958,7 @@ Bool Socket::bind(C SockAddr &addr) {
     if (::bind(_s, (C sockaddr *)&addr._data, addr.size()) != SOCKET_ERROR)
         return true;
     switch (PLATFORM(WSAGetLastError(), errno)) {
-#if !WINDOWS // leave these extra checks just in case
+#if !WINDOWS     // leave these extra checks just in case
     case EINVAL: // this error can happen on Android (Lollipop 5.0) and Linux (Ubuntu 14.10)
     case EPERM:  // this error can happen on iOS 9
 #endif
@@ -1006,7 +1006,7 @@ Int Socket::send(C SockAddr &addr, CPtr data, Int size) {
     Int sent = ::sendto(_s, (Char8 *)data, size, SEND_FLAGS, (C sockaddr *)&addr._data, addr.size());
     if (sent < 0)
         switch (PLATFORM(WSAGetLastError(), errno)) {
-#if !WINDOWS // leave these extra checks just in case
+#if !WINDOWS         // leave these extra checks just in case
         case EINVAL: // this error can happen on Android (Lollipop 5.0) and Linux (Ubuntu 14.10)
         case EPERM:  // this error can happen on iOS 9
 #endif

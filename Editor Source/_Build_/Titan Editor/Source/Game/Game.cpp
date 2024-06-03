@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 State StateGame(UpdateGame, DrawGame, InitGame, ShutGame);
 Str GameWorld;
@@ -30,7 +30,7 @@ void InitGameObjContainers() {
     ObjType.create("OBJ_TYPE", obj_types);
 
     // set game object containers
-    //Statics.del(); PointLights.del(); ConeLights.del(); ObjParticles.del(); Players.del(); don't delete those objects because Game.World obj containers may point to some of them, instead, just create new ones if needed
+    // Statics.del(); PointLights.del(); ConeLights.del(); ObjParticles.del(); Players.del(); don't delete those objects because Game.World obj containers may point to some of them, instead, just create new ones if needed
     int statics = 0, point_lights = 0, cone_lights = 0, particles = 0, players = 0;
     FREPA(ObjType) {
         EditObjectPtr obj_class = Proj.editPath(ObjType[i].id);

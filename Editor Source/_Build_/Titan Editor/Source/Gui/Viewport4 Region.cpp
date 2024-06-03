@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 
 /******************************************************************************/
@@ -170,7 +170,7 @@ void Viewport4Region::update(C GuiPC &gpc) {
         if ((Ms.pixelDelta().any() || Ms.wheel()) && contains(Gui.ms())) {
             GUI_OBJ_TYPE kb_type = (Gui.kb() ? Gui.kb()->type() : GO_NONE);
             if (kb_type != GO_TEXTLINE && kb_type != GO_TEXTBOX) // don't change if keyboard focus is on text edit
-                                                                 //if(Gui.window()!=&RenameElm && Gui.window()!=&ReplaceName && Gui.window()!=&RenameBone && Gui.window()!=&RenameSlot && Gui.window()!=&ObjEdit.mesh_variations.rename) not needed since textline/textbox checked above
+                                                                 // if(Gui.window()!=&RenameElm && Gui.window()!=&ReplaceName && Gui.window()!=&RenameBone && Gui.window()!=&RenameSlot && Gui.window()!=&ObjEdit.mesh_variations.rename) not needed since textline/textbox checked above
                 if (!contains(Gui.kb()) || kb_type != GO_VIEWPORT)
                     if (Edit::Viewport4::View *view = v4.focus())
                         view->viewport.kbSet();

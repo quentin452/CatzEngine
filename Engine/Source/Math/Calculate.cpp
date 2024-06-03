@@ -1,5 +1,5 @@
 /******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 namespace EE {
 /******************************************************************************/
 enum CALC_ELM_TYPE : Byte {
@@ -3298,7 +3298,7 @@ Bool Calculate(CalcValue &value, C Str &expression, Str *error, C CMemPtr<CalcVa
                         next = i->next();
                         elms.remove(i);
                         i = next;
-                    }               // ,y
+                    } // ,y
                     elms.remove(i); // )
                     NEXT(nnext);
                 }

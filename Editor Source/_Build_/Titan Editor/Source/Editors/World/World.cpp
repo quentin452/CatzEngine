@@ -1,5 +1,5 @@
 ﻿/******************************************************************************/
-#include "stdafx.h"
+#include "../../stdafx.h"
 /******************************************************************************/
 WorldView WorldEdit;
 /******************************************************************************/
@@ -932,7 +932,7 @@ void WorldView::flushSettings() {
             if (path_settings != temp) {
                 path_settings = temp;
                 Proj.rebuildWorldAreas(*elm);
-            }                            // rebuild paths if needed
+            } // rebuild paths if needed
             Server.setElmShort(elm->id); // send new settings to the server
         }
     changed_settings = false;
@@ -1356,7 +1356,7 @@ void WorldView::updateCursors() {
         if (!cur) {
             cur = &cur_touch.New();
             cur->_touch_id = touch.id();
-        }                                                                    // create new cursor and link it with the touch
+        } // create new cursor and link it with the touch
         cur->update(touch.pos(), touch.guiObj(), touch.on(), touch.db(), T); // set cursor according to the touch
     }
 }
@@ -1432,7 +1432,7 @@ void WorldView::updateHm() {
 
     if (mode() == HEIGHTMAP && hm_add_rem()) {
         editHm(Ms.b(1), cur);
-        //REPA(cur_touch)editHm(, cur_touch[i]);
+        // REPA(cur_touch)editHm(, cur_touch[i]);
     }
 
     REPA(MT)

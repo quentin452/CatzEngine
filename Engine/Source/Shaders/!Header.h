@@ -15,7 +15,6 @@
 
 /******************************************************************************/
 #include "!Header CPU.h"
-#include "../../../Editor/Bin/Engine/Math/Vector.h"
 #define LINEAR_GAMMA 1
 #define CONCAT(a, b) a##b
 #if DX_SHADER_COMPILER

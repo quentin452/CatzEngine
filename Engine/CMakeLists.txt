@@ -4,331 +4,336 @@ set(PROJECT_NAME Engine)
 # Source groups
 ################################################################################
 set(H
-    "H/Engine.h"
+    "../Editor/Bin/Engine/Engine.h"
 )
 source_group("H" FILES ${H})
 
 set(H__Animation
-    "H/Animation/Animation Keys.h"
-    "H/Animation/Animation.h"
-    "H/Animation/Motion.h"
-    "H/Animation/Skeleton.h"
+    "../Editor/Bin/Engine/Animation/Animation Keys.h"
+    "../Editor/Bin/Engine/Animation/Animation.h"
+    "../Editor/Bin/Engine/Animation/Motion.h"
+    "../Editor/Bin/Engine/Animation/Skeleton.h"
 )
 source_group("H\\Animation" FILES ${H__Animation})
 
 set(H__Code
-    "H/Code/CE Code Col Line.h"
-    "H/Code/CE Compiler.h"
-    "H/Code/CE Environment.h"
-    "H/Code/CE Expression.h"
-    "H/Code/CE Find.h"
-    "H/Code/CE Item.h"
-    "H/Code/CE Macro.h"
-    "H/Code/CE Parser.h"
-    "H/Code/CE Shared.h"
-    "H/Code/CE Source.h"
-    "H/Code/CE Symbol.h"
-    "H/Code/CE Token.h"
-    "H/Code/CE.h"
+    "../Editor/Bin/Engine/Code/CE Code Col Line.h"
+    "../Editor/Bin/Engine/Code/CE Compiler.h"
+    "../Editor/Bin/Engine/Code/CE Environment.h"
+    "../Editor/Bin/Engine/Code/CE Expression.h"
+    "../Editor/Bin/Engine/Code/CE Find.h"
+    "../Editor/Bin/Engine/Code/CE Item.h"
+    "../Editor/Bin/Engine/Code/CE Macro.h"
+    "../Editor/Bin/Engine/Code/CE Parser.h"
+    "../Editor/Bin/Engine/Code/CE Shared.h"
+    "../Editor/Bin/Engine/Code/CE Source.h"
+    "../Editor/Bin/Engine/Code/CE Symbol.h"
+    "../Editor/Bin/Engine/Code/CE Token.h"
+    "../Editor/Bin/Engine/Code/CE.h"
 )
 source_group("H\\Code" FILES ${H__Code})
 
 set(H__Edit
-    "H/Edit/Editor Interface.h"
-    "H/Edit/Save Changes.h"
-    "H/Edit/Undo.h"
-    "H/Edit/Version.h"
-    "H/Edit/Viewport4.h"
+    "../Editor/Bin/Engine/Edit/Editor Interface.h"
+    "../Editor/Bin/Engine/Edit/Save Changes.h"
+    "../Editor/Bin/Engine/Edit/Undo.h"
+    "../Editor/Bin/Engine/Edit/Version.h"
+    "../Editor/Bin/Engine/Edit/Viewport4.h"
 )
 source_group("H\\Edit" FILES ${H__Edit})
 
 set(H__File
-    "H/File/Chunk.h"
-    "H/File/File Text.h"
-    "H/File/File.h"
-    "H/File/IO.h"
-    "H/File/Pak.h"
-    "H/File/Xml.h"
+    "../Editor/Bin/Engine/File/Chunk.h"
+    "../Editor/Bin/Engine/File/File Text.h"
+    "../Editor/Bin/Engine/File/File.h"
+    "../Editor/Bin/Engine/File/IO.h"
+    "../Editor/Bin/Engine/File/Pak.h"
+    "../Editor/Bin/Engine/File/Xml.h"
 )
 source_group("H\\File" FILES ${H__File})
 
 set(H__Game
-    "H/Game/Area.h"
-    "H/Game/Mini Map.h"
-    "H/Game/Obj.h"
-    "H/Game/Waypoint.h"
-    "H/Game/World.h"
+    "../Editor/Bin/Engine/Game/Area.h"
+    "../Editor/Bin/Engine/Game/Mini Map.h"
+    "../Editor/Bin/Engine/Game/Obj.h"
+    "../Editor/Bin/Engine/Game/Waypoint.h"
+    "../Editor/Bin/Engine/Game/World.h"
 )
 source_group("H\\Game" FILES ${H__Game})
 
 set(H__Game__Objects
-    "H/Game/Objects/Animatable.h"
-    "H/Game/Objects/Character.h"
-    "H/Game/Objects/Destructible.h"
-    "H/Game/Objects/Door.h"
-    "H/Game/Objects/Item.h"
-    "H/Game/Objects/Kinematic.h"
-    "H/Game/Objects/Obj Decal.h"
-    "H/Game/Objects/Obj Light Cone.h"
-    "H/Game/Objects/Obj Light Point.h"
-    "H/Game/Objects/Obj Particles.h"
-    "H/Game/Objects/Static.h"
+    "../Editor/Bin/Engine/Game/Objects/Animatable.h"
+    "../Editor/Bin/Engine/Game/Objects/Character.h"
+    "../Editor/Bin/Engine/Game/Objects/Destructible.h"
+    "../Editor/Bin/Engine/Game/Objects/Door.h"
+    "../Editor/Bin/Engine/Game/Objects/Item.h"
+    "../Editor/Bin/Engine/Game/Objects/Kinematic.h"
+    "../Editor/Bin/Engine/Game/Objects/Obj Decal.h"
+    "../Editor/Bin/Engine/Game/Objects/Obj Light Cone.h"
+    "../Editor/Bin/Engine/Game/Objects/Obj Light Point.h"
+    "../Editor/Bin/Engine/Game/Objects/Obj Particles.h"
+    "../Editor/Bin/Engine/Game/Objects/Static.h"
 )
 source_group("H\\Game\\Objects" FILES ${H__Game__Objects})
 
 set(H__Graphics
-    "H/Graphics/Clouds.h"
-    "H/Graphics/Color.h"
-    "H/Graphics/Display Draw.h"
-    "H/Graphics/Display State.h"
-    "H/Graphics/Display.h"
-    "H/Graphics/Effects 2D.h"
-    "H/Graphics/Effects 3D.h"
-    "H/Graphics/Environment.h"
-    "H/Graphics/Fog.h"
-    "H/Graphics/Fur.h"
-    "H/Graphics/Image Atlas.h"
-    "H/Graphics/Image RT.h"
-    "H/Graphics/Image.h"
-    "H/Graphics/Light.h"
-    "H/Graphics/Material.h"
-    "H/Graphics/Particle.h"
-    "H/Graphics/Renderer Instancing.h"
-    "H/Graphics/Renderer.h"
-    "H/Graphics/Shader Compiler.h"
-    "H/Graphics/Shader Main.h"
-    "H/Graphics/Shader.h"
-    "H/Graphics/Sky.h"
-    "H/Graphics/Sun.h"
-    "H/Graphics/Vertex Index Buffer Ex.h"
-    "H/Graphics/Vertex Index Buffer.h"
-    "H/Graphics/Water.h"
+    "../Editor/Bin/Engine/Graphics/Clouds.h"
+    "../Editor/Bin/Engine/Graphics/Color.h"
+    "../Editor/Bin/Engine/Graphics/Display Draw.h"
+    "../Editor/Bin/Engine/Graphics/Display State.h"
+    "../Editor/Bin/Engine/Graphics/Display.h"
+    "../Editor/Bin/Engine/Graphics/Effects 2D.h"
+    "../Editor/Bin/Engine/Graphics/Effects 3D.h"
+    "../Editor/Bin/Engine/Graphics/Environment.h"
+    "../Editor/Bin/Engine/Graphics/Fog.h"
+    "../Editor/Bin/Engine/Graphics/Fur.h"
+    "../Editor/Bin/Engine/Graphics/Image Atlas.h"
+    "../Editor/Bin/Engine/Graphics/Image RT.h"
+    "../Editor/Bin/Engine/Graphics/Image.h"
+    "../Editor/Bin/Engine/Graphics/Light.h"
+    "../Editor/Bin/Engine/Graphics/Material.h"
+    "../Editor/Bin/Engine/Graphics/Particle.h"
+    "../Editor/Bin/Engine/Graphics/Renderer Instancing.h"
+    "../Editor/Bin/Engine/Graphics/Renderer.h"
+    "../Editor/Bin/Engine/Graphics/Shader Compiler.h"
+    "../Editor/Bin/Engine/Graphics/Shader Main.h"
+    "../Editor/Bin/Engine/Graphics/Shader.h"
+    "../Editor/Bin/Engine/Graphics/Sky.h"
+    "../Editor/Bin/Engine/Graphics/Sun.h"
+    "../Editor/Bin/Engine/Graphics/Vertex Index Buffer Ex.h"
+    "../Editor/Bin/Engine/Graphics/Vertex Index Buffer.h"
+    "../Editor/Bin/Engine/Graphics/Water.h"
 )
 source_group("H\\Graphics" FILES ${H__Graphics})
 
 set(H__Gui
-    "H/Gui/Font.h"
-    "H/Gui/Gui Object.h"
-    "H/Gui/Gui Objects.h"
-    "H/Gui/Gui Skin.h"
-    "H/Gui/Gui.h"
-    "H/Gui/Panel Image.h"
-    "H/Gui/Panel.h"
-    "H/Gui/Text Style.h"
+    "../Editor/Bin/Engine/Gui/Font.h"
+    "../Editor/Bin/Engine/Gui/Gui Object.h"
+    "../Editor/Bin/Engine/Gui/Gui Objects.h"
+    "../Editor/Bin/Engine/Gui/Gui Skin.h"
+    "../Editor/Bin/Engine/Gui/Gui.h"
+    "../Editor/Bin/Engine/Gui/Panel Image.h"
+    "../Editor/Bin/Engine/Gui/Panel.h"
+    "../Editor/Bin/Engine/Gui/Text Style.h"
 )
 source_group("H\\Gui" FILES ${H__Gui})
 
 set(H__Gui__Objects
-    "H/Gui/Objects/Button.h"
-    "H/Gui/Objects/CheckBox.h"
-    "H/Gui/Objects/Color Picker.h"
-    "H/Gui/Objects/ComboBox.h"
-    "H/Gui/Objects/Desktop.h"
-    "H/Gui/Objects/Gui Custom.h"
-    "H/Gui/Objects/Gui Image.h"
-    "H/Gui/Objects/List.h"
-    "H/Gui/Objects/Menu.h"
-    "H/Gui/Objects/MenuBar.h"
-    "H/Gui/Objects/Progress.h"
-    "H/Gui/Objects/Property.h"
-    "H/Gui/Objects/Region.h"
-    "H/Gui/Objects/SlideBar.h"
-    "H/Gui/Objects/Slider.h"
-    "H/Gui/Objects/Tabs.h"
-    "H/Gui/Objects/Text.h"
-    "H/Gui/Objects/TextBox.h"
-    "H/Gui/Objects/TextLine.h"
-    "H/Gui/Objects/Viewport.h"
-    "H/Gui/Objects/Window IO.h"
-    "H/Gui/Objects/Window.h"
+    "../Editor/Bin/Engine/Gui/Objects/Button.h"
+    "../Editor/Bin/Engine/Gui/Objects/CheckBox.h"
+    "../Editor/Bin/Engine/Gui/Objects/Color Picker.h"
+    "../Editor/Bin/Engine/Gui/Objects/ComboBox.h"
+    "../Editor/Bin/Engine/Gui/Objects/Desktop.h"
+    "../Editor/Bin/Engine/Gui/Objects/Gui Custom.h"
+    "../Editor/Bin/Engine/Gui/Objects/Gui Image.h"
+    "../Editor/Bin/Engine/Gui/Objects/List.h"
+    "../Editor/Bin/Engine/Gui/Objects/Menu.h"
+    "../Editor/Bin/Engine/Gui/Objects/MenuBar.h"
+    "../Editor/Bin/Engine/Gui/Objects/Progress.h"
+    "../Editor/Bin/Engine/Gui/Objects/Property.h"
+    "../Editor/Bin/Engine/Gui/Objects/Region.h"
+    "../Editor/Bin/Engine/Gui/Objects/SlideBar.h"
+    "../Editor/Bin/Engine/Gui/Objects/Slider.h"
+    "../Editor/Bin/Engine/Gui/Objects/Tabs.h"
+    "../Editor/Bin/Engine/Gui/Objects/Text.h"
+    "../Editor/Bin/Engine/Gui/Objects/TextBox.h"
+    "../Editor/Bin/Engine/Gui/Objects/TextLine.h"
+    "../Editor/Bin/Engine/Gui/Objects/Viewport.h"
+    "../Editor/Bin/Engine/Gui/Objects/Window IO.h"
+    "../Editor/Bin/Engine/Gui/Objects/Window.h"
 )
 source_group("H\\Gui\\Objects" FILES ${H__Gui__Objects})
 
 set(H__Input
-    "H/Input/Input Buttons.h"
-    "H/Input/Input.h"
-    "H/Input/Joypad.h"
-    "H/Input/Keyboard.h"
-    "H/Input/Mouse.h"
-    "H/Input/Touch.h"
+    "../Editor/Bin/Engine/Input/Input Buttons.h"
+    "../Editor/Bin/Engine/Input/Input.h"
+    "../Editor/Bin/Engine/Input/Joypad.h"
+    "../Editor/Bin/Engine/Input/Keyboard.h"
+    "../Editor/Bin/Engine/Input/Mouse.h"
+    "../Editor/Bin/Engine/Input/Touch.h"
 )
 source_group("H\\Input" FILES ${H__Input})
 
 set(H__Math
-    "H/Math/Calculate.h"
-    "H/Math/Camera.h"
-    "H/Math/Frustum.h"
-    "H/Math/Math.h"
-    "H/Math/Matrix.h"
-    "H/Math/Number.h"
-    "H/Math/Orientation.h"
-    "H/Math/Quaternion.h"
-    "H/Math/Random.h"
-    "H/Math/Shape.h"
-    "H/Math/Vector.h"
+    "../Editor/Bin/Engine/Math/Calculate.h"
+    "../Editor/Bin/Engine/Math/Camera.h"
+    "../Editor/Bin/Engine/Math/Frustum.h"
+    "../Editor/Bin/Engine/Math/Math.h"
+    "../Editor/Bin/Engine/Math/Matrix.h"
+    "../Editor/Bin/Engine/Math/Number.h"
+    "../Editor/Bin/Engine/Math/Orientation.h"
+    "../Editor/Bin/Engine/Math/Quaternion.h"
+    "../Editor/Bin/Engine/Math/Random.h"
+    "../Editor/Bin/Engine/Math/Shape.h"
+    "../Editor/Bin/Engine/Math/Vector.h"
 )
 source_group("H\\Math" FILES ${H__Math})
 
 set(H__Math__Shapes
-    "H/Math/Shapes/Ball.h"
-    "H/Math/Shapes/Box.h"
-    "H/Math/Shapes/Capsule.h"
-    "H/Math/Shapes/Circle.h"
-    "H/Math/Shapes/Cone.h"
-    "H/Math/Shapes/Edge.h"
-    "H/Math/Shapes/Plane.h"
-    "H/Math/Shapes/Polygon.h"
-    "H/Math/Shapes/Pyramid.h"
-    "H/Math/Shapes/Quad.h"
-    "H/Math/Shapes/Rectangle.h"
-    "H/Math/Shapes/Torus.h"
-    "H/Math/Shapes/Triangle.h"
-    "H/Math/Shapes/Tube.h"
+    "../Editor/Bin/Engine/Math/Shapes/Ball.h"
+    "../Editor/Bin/Engine/Math/Shapes/Box.h"
+    "../Editor/Bin/Engine/Math/Shapes/Capsule.h"
+    "../Editor/Bin/Engine/Math/Shapes/Circle.h"
+    "../Editor/Bin/Engine/Math/Shapes/Cone.h"
+    "../Editor/Bin/Engine/Math/Shapes/Edge.h"
+    "../Editor/Bin/Engine/Math/Shapes/Plane.h"
+    "../Editor/Bin/Engine/Math/Shapes/Polygon.h"
+    "../Editor/Bin/Engine/Math/Shapes/Pyramid.h"
+    "../Editor/Bin/Engine/Math/Shapes/Quad.h"
+    "../Editor/Bin/Engine/Math/Shapes/Rectangle.h"
+    "../Editor/Bin/Engine/Math/Shapes/Torus.h"
+    "../Editor/Bin/Engine/Math/Shapes/Triangle.h"
+    "../Editor/Bin/Engine/Math/Shapes/Tube.h"
 )
 source_group("H\\Math\\Shapes" FILES ${H__Math__Shapes})
 
 set(H__Memory
-    "H/Memory/Cache.h"
-    "H/Memory/Cipher.h"
-    "H/Memory/Counted Pointer.h"
-    "H/Memory/Fixed Array.h"
-    "H/Memory/Grid.h"
-    "H/Memory/Hash.h"
-    "H/Memory/Index.h"
-    "H/Memory/Map.h"
-    "H/Memory/Mem Block.h"
-    "H/Memory/Mem Continuous Thread Safe.h"
-    "H/Memory/Mem Continuous.h"
-    "H/Memory/Mem Extended.h"
-    "H/Memory/Mem List.h"
-    "H/Memory/Mem Pointer.h"
-    "H/Memory/Mem Simple.h"
-    "H/Memory/Mem Temporary.h"
-    "H/Memory/Mem Tree.h"
-    "H/Memory/Memory.h"
-    "H/Memory/Node.h"
+    "../Editor/Bin/Engine/Memory/Cache.h"
+    "../Editor/Bin/Engine/Memory/Cipher.h"
+    "../Editor/Bin/Engine/Memory/Counted Pointer.h"
+    "../Editor/Bin/Engine/Memory/Fixed Array.h"
+    "../Editor/Bin/Engine/Memory/Grid.h"
+    "../Editor/Bin/Engine/Memory/Hash.h"
+    "../Editor/Bin/Engine/Memory/Index.h"
+    "../Editor/Bin/Engine/Memory/Map.h"
+    "../Editor/Bin/Engine/Memory/Mem Block.h"
+    "../Editor/Bin/Engine/Memory/Mem Continuous Thread Safe.h"
+    "../Editor/Bin/Engine/Memory/Mem Continuous.h"
+    "../Editor/Bin/Engine/Memory/Mem Extended.h"
+    "../Editor/Bin/Engine/Memory/Mem List.h"
+    "../Editor/Bin/Engine/Memory/Mem Pointer.h"
+    "../Editor/Bin/Engine/Memory/Mem Simple.h"
+    "../Editor/Bin/Engine/Memory/Mem Temporary.h"
+    "../Editor/Bin/Engine/Memory/Mem Tree.h"
+    "../Editor/Bin/Engine/Memory/Memory.h"
+    "../Editor/Bin/Engine/Memory/Node.h"
 )
 source_group("H\\Memory" FILES ${H__Memory})
 
 set(H__Memory___
-    "H/Memory/_Cache.h"
-    "H/Memory/_Grid.h"
-    "H/Memory/_Map.h"
-    "H/Memory/_Memb.h"
-    "H/Memory/_Memc Thread Safe.h"
-    "H/Memory/_Memc.h"
-    "H/Memory/_Meml.h"
-    "H/Memory/_Memx.h"
+    "../Editor/Bin/Engine/Memory/_Cache.h"
+    "../Editor/Bin/Engine/Memory/_Grid.h"
+    "../Editor/Bin/Engine/Memory/_Map.h"
+    "../Editor/Bin/Engine/Memory/_Memb.h"
+    "../Editor/Bin/Engine/Memory/_Memc Thread Safe.h"
+    "../Editor/Bin/Engine/Memory/_Memc.h"
+    "../Editor/Bin/Engine/Memory/_Meml.h"
+    "../Editor/Bin/Engine/Memory/_Memx.h"
 )
 source_group("H\\Memory\\_" FILES ${H__Memory___})
 
 set(H__Mesh
-    "H/Mesh/Blocks.h"
-    "H/Mesh/Heightmap.h"
-    "H/Mesh/Material Palette.h"
-    "H/Mesh/Mesh Base.h"
-    "H/Mesh/Mesh Csg.h"
-    "H/Mesh/Mesh Cuts.h"
-    "H/Mesh/Mesh Group.h"
-    "H/Mesh/Mesh Import.h"
-    "H/Mesh/Mesh Lod.h"
-    "H/Mesh/Mesh Mesh.h"
-    "H/Mesh/Mesh Overlay.h"
-    "H/Mesh/Mesh Part.h"
-    "H/Mesh/Mesh Render.h"
-    "H/Mesh/Voxel.h"
+    "../Editor/Bin/Engine/Mesh/Blocks.h"
+    "../Editor/Bin/Engine/Mesh/Heightmap.h"
+    "../Editor/Bin/Engine/Mesh/Material Palette.h"
+    "../Editor/Bin/Engine/Mesh/Mesh Base.h"
+    "../Editor/Bin/Engine/Mesh/Mesh Csg.h"
+    "../Editor/Bin/Engine/Mesh/Mesh Cuts.h"
+    "../Editor/Bin/Engine/Mesh/Mesh Group.h"
+    "../Editor/Bin/Engine/Mesh/Mesh Import.h"
+    "../Editor/Bin/Engine/Mesh/Mesh Lod.h"
+    "../Editor/Bin/Engine/Mesh/Mesh Mesh.h"
+    "../Editor/Bin/Engine/Mesh/Mesh Overlay.h"
+    "../Editor/Bin/Engine/Mesh/Mesh Part.h"
+    "../Editor/Bin/Engine/Mesh/Mesh Render.h"
+    "../Editor/Bin/Engine/Mesh/Voxel.h"
 )
 source_group("H\\Mesh" FILES ${H__Mesh})
 
 set(H__Misc
-    "H/Misc/Application.h"
-    "H/Misc/Callback.h"
-    "H/Misc/Character.h"
-    "H/Misc/Compress.h"
-    "H/Misc/Cpu.h"
-    "H/Misc/Date Time.h"
-    "H/Misc/DLL.h"
-    "H/Misc/Enum.h"
-    "H/Misc/Member.h"
-    "H/Misc/Misc.h"
-    "H/Misc/MP4.h"
-    "H/Misc/Object.h"
-    "H/Misc/Param.h"
-    "H/Misc/Pathfind 2D.h"
-    "H/Misc/Pathfind.h"
-    "H/Misc/Printer.h"
-    "H/Misc/Reference.h"
-    "H/Misc/Sort.h"
-    "H/Misc/States.h"
-    "H/Misc/String Borrowed.h"
-    "H/Misc/String Functions.h"
-    "H/Misc/String.h"
-    "H/Misc/String8.h"
-    "H/Misc/Thread.h"
-    "H/Misc/Timer.h"
-    "H/Misc/Translation.h"
-    "H/Misc/UID.h"
-    "H/Misc/Video.h"
-    "H/Misc/Windows.h"
+    "../Editor/Bin/Engine/Misc/Application.h"
+    "../Editor/Bin/Engine/Misc/Callback.h"
+    "../Editor/Bin/Engine/Misc/Character.h"
+    "../Editor/Bin/Engine/Misc/Compress.h"
+    "../Editor/Bin/Engine/Misc/Cpu.h"
+    "../Editor/Bin/Engine/Misc/Date Time.h"
+    "../Editor/Bin/Engine/Misc/DLL.h"
+    "../Editor/Bin/Engine/Misc/Enum.h"
+    "../Editor/Bin/Engine/Misc/Member.h"
+    "../Editor/Bin/Engine/Misc/Misc.h"
+    "../Editor/Bin/Engine/Misc/MP4.h"
+    "../Editor/Bin/Engine/Misc/Object.h"
+    "../Editor/Bin/Engine/Misc/Param.h"
+    "../Editor/Bin/Engine/Misc/Pathfind 2D.h"
+    "../Editor/Bin/Engine/Misc/Pathfind.h"
+    "../Editor/Bin/Engine/Misc/Printer.h"
+    "../Editor/Bin/Engine/Misc/Reference.h"
+    "../Editor/Bin/Engine/Misc/Sort.h"
+    "../Editor/Bin/Engine/Misc/States.h"
+    "../Editor/Bin/Engine/Misc/String Borrowed.h"
+    "../Editor/Bin/Engine/Misc/String Functions.h"
+    "../Editor/Bin/Engine/Misc/String.h"
+    "../Editor/Bin/Engine/Misc/String8.h"
+    "../Editor/Bin/Engine/Misc/Thread.h"
+    "../Editor/Bin/Engine/Misc/Timer.h"
+    "../Editor/Bin/Engine/Misc/Translation.h"
+    "../Editor/Bin/Engine/Misc/UID.h"
+    "../Editor/Bin/Engine/Misc/Video.h"
+    "../Editor/Bin/Engine/Misc/Windows.h"
 )
 source_group("H\\Misc" FILES ${H__Misc})
 
 set(H__Net
-    "H/Net/Advertisement.h"
-    "H/Net/Connection.h"
-    "H/Net/Download.h"
-    "H/Net/Esenthel Store.h"
-    "H/Net/Facebook.h"
-    "H/Net/Ftp.h"
-    "H/Net/Game Analytics.h"
-    "H/Net/Internet Cache.h"
-    "H/Net/Interpolator.h"
-    "H/Net/Patcher.h"
-    "H/Net/Socket.h"
-    "H/Net/Sql.h"
-    "H/Net/Steam.h"
-    "H/Net/Store.h"
-    "H/Net/Xbox Live.h"
+    "../Editor/Bin/Engine/Net/Advertisement.h"
+    "../Editor/Bin/Engine/Net/Connection.h"
+    "../Editor/Bin/Engine/Net/Download.h"
+    "../Editor/Bin/Engine/Net/Esenthel Store.h"
+    "../Editor/Bin/Engine/Net/Facebook.h"
+    "../Editor/Bin/Engine/Net/Ftp.h"
+    "../Editor/Bin/Engine/Net/Game Analytics.h"
+    "../Editor/Bin/Engine/Net/Internet Cache.h"
+    "../Editor/Bin/Engine/Net/Interpolator.h"
+    "../Editor/Bin/Engine/Net/Patcher.h"
+    "../Editor/Bin/Engine/Net/Socket.h"
+    "../Editor/Bin/Engine/Net/Sql.h"
+    "../Editor/Bin/Engine/Net/Steam.h"
+    "../Editor/Bin/Engine/Net/Store.h"
+    "../Editor/Bin/Engine/Net/Xbox Live.h"
 )
 source_group("H\\Net" FILES ${H__Net})
 
 set(H__Physics
-    "H/Physics/Actor.h"
-    "H/Physics/Aggregate.h"
-    "H/Physics/Cloth.h"
-    "H/Physics/Controller.h"
-    "H/Physics/Destruct Mesh.h"
-    "H/Physics/Grab.h"
-    "H/Physics/Joint.h"
-    "H/Physics/Phys Body.h"
-    "H/Physics/Phys Material.h"
-    "H/Physics/Physics.h"
-    "H/Physics/Ragdoll.h"
-    "H/Physics/Vehicle.h"
+    "../Editor/Bin/Engine/Physics/Actor.h"
+    "../Editor/Bin/Engine/Physics/Aggregate.h"
+    "../Editor/Bin/Engine/Physics/Cloth.h"
+    "../Editor/Bin/Engine/Physics/Controller.h"
+    "../Editor/Bin/Engine/Physics/Destruct Mesh.h"
+    "../Editor/Bin/Engine/Physics/Grab.h"
+    "../Editor/Bin/Engine/Physics/Joint.h"
+    "../Editor/Bin/Engine/Physics/Phys Body.h"
+    "../Editor/Bin/Engine/Physics/Phys Material.h"
+    "../Editor/Bin/Engine/Physics/Physics.h"
+    "../Editor/Bin/Engine/Physics/Ragdoll.h"
+    "../Editor/Bin/Engine/Physics/Vehicle.h"
 )
 source_group("H\\Physics" FILES ${H__Physics})
 
-set(H__Platforms
-    "../NintendoSwitch/Switch.h"
-    "H/Platforms/Android.h"
+set(H__Platforms__Android
+    "../Editor/Bin/Engine/Platforms/Android.h"
 )
-source_group("H\\Platforms" FILES ${H__Platforms})
+source_group("H\\Platforms" FILES ${H__Platforms__Android})
+if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "5) Nintendo Switch")
+set(H__Platforms__Switch
+    "../NintendoSwitc../Editor/Bin/Engine/Switch.h"
+)
+endif()
+source_group("H\\Platforms" FILES ${H__Platforms__Switch})
 
 set(H__Sound
-    "H/Sound/Music.h"
-    "H/Sound/Sound Buffer.h"
-    "H/Sound/Sound Extra.h"
-    "H/Sound/Sound Stream.h"
-    "H/Sound/Sound.h"
+    "../Editor/Bin/Engine/Sound/Music.h"
+    "../Editor/Bin/Engine/Sound/Sound Buffer.h"
+    "../Editor/Bin/Engine/Sound/Sound Extra.h"
+    "../Editor/Bin/Engine/Sound/Sound Stream.h"
+    "../Editor/Bin/Engine/Sound/Sound.h"
 )
 source_group("H\\Sound" FILES ${H__Sound})
 
 set(H___
-    "H/_/defines.h"
-    "H/_/headers.h"
-    "H/_/inline.h"
-    "H/_/structs.h"
-    "H/_/types.h"
+    "../Editor/Bin/Engine/_/defines.h"
+    "../Editor/Bin/Engine/_/headers.h"
+    "../Editor/Bin/Engine/_/inline.h"
+    "../Editor/Bin/Engine/_/structs.h"
+    "../Editor/Bin/Engine/_/types.h"
     "stdafx.cpp"
     "stdafx.h"
 )
@@ -550,35 +555,35 @@ set(Source__Input
 source_group("Source\\Input" FILES ${Source__Input})
 
 set(Source__Math
-    "Source/Math/Calculate.cpp"
-    "Source/Math/Camera.cpp"
-    "Source/Math/Frustum.cpp"
-    "Source/Math/Math.cpp"
-    "Source/Math/Matrix.cpp"
-    "Source/Math/Number.cpp"
-    "Source/Math/Orientation.cpp"
-    "Source/Math/Quaternion.cpp"
-    "Source/Math/Random.cpp"
-    "Source/Math/Shape.cpp"
-    "Source/Math/Vector.cpp"
+    "../Engine/Source/Math/Calculate.cpp"
+    "../Engine/Source/Math/Camera.cpp"
+    "../Engine/Source/Math/Frustum.cpp"
+    "../Engine/Source/Math/Math.cpp"
+    "../Engine/Source/Math/Matrix.cpp"
+    "../Engine/Source/Math/Number.cpp"
+    "../Engine/Source/Math/Orientation.cpp"
+    "../Engine/Source/Math/Quaternion.cpp"
+    "../Engine/Source/Math/Random.cpp"
+    "../Engine/Source/Math/Shape.cpp"
+    "../Engine/Source/Math/Vector.cpp"
 )
 source_group("Source\\Math" FILES ${Source__Math})
 
 set(Source__Math__Shapes
-    "Source/Math/Shapes/Ball.cpp"
-    "Source/Math/Shapes/Box.cpp"
-    "Source/Math/Shapes/Capsule.cpp"
-    "Source/Math/Shapes/Circle.cpp"
-    "Source/Math/Shapes/Cone.cpp"
-    "Source/Math/Shapes/Edge.cpp"
-    "Source/Math/Shapes/Plane.cpp"
-    "Source/Math/Shapes/Polygon.cpp"
-    "Source/Math/Shapes/Pyramid.cpp"
-    "Source/Math/Shapes/Quad.cpp"
-    "Source/Math/Shapes/Rectangle.cpp"
-    "Source/Math/Shapes/Torus.cpp"
-    "Source/Math/Shapes/Triangle.cpp"
-    "Source/Math/Shapes/Tube.cpp"
+    "../Engine/Source/Math/Shapes/Ball.cpp"
+    "../Engine/Source/Math/Shapes/Box.cpp"
+    "../Engine/Source/Math/Shapes/Capsule.cpp"
+    "../Engine/Source/Math/Shapes/Circle.cpp"
+    "../Engine/Source/Math/Shapes/Cone.cpp"
+    "../Engine/Source/Math/Shapes/Edge.cpp"
+    "../Engine/Source/Math/Shapes/Plane.cpp"
+    "../Engine/Source/Math/Shapes/Polygon.cpp"
+    "../Engine/Source/Math/Shapes/Pyramid.cpp"
+    "../Engine/Source/Math/Shapes/Quad.cpp"
+    "../Engine/Source/Math/Shapes/Rectangle.cpp"
+    "../Engine/Source/Math/Shapes/Torus.cpp"
+    "../Engine/Source/Math/Shapes/Triangle.cpp"
+    "../Engine/Source/Math/Shapes/Tube.cpp"
 )
 source_group("Source\\Math\\Shapes" FILES ${Source__Math__Shapes})
 
@@ -600,53 +605,53 @@ set(Source__Memory
 source_group("Source\\Memory" FILES ${Source__Memory})
 
 set(Source__Mesh
-    "Source/Mesh/Blocks.cpp"
-    "Source/Mesh/Heightmap.cpp"
-    "Source/Mesh/Material Palette.cpp"
-    "Source/Mesh/Mesh Base.cpp"
-    "Source/Mesh/Mesh Cuts.cpp"
-    "Source/Mesh/Mesh Draw.cpp"
-    "Source/Mesh/Mesh Group.cpp"
-    "Source/Mesh/Mesh IO.cpp"
-    "Source/Mesh/Mesh Lod.cpp"
-    "Source/Mesh/Mesh Mesh.cpp"
-    "Source/Mesh/Mesh Optimize.cpp"
-    "Source/Mesh/Mesh Overlay.cpp"
-    "Source/Mesh/Mesh Part.cpp"
-    "Source/Mesh/Mesh Render.cpp"
-    "Source/Mesh/Mesh Simplify.cpp"
-    "Source/Mesh/Voxel.cpp"
+    "../Engine/Source/Mesh/Blocks.cpp"
+    "../Engine/Source/Mesh/Heightmap.cpp"
+    "../Engine/Source/Mesh/Material Palette.cpp"
+    "../Engine/Source/Mesh/Mesh Base.cpp"
+    "../Engine/Source/Mesh/Mesh Cuts.cpp"
+    "../Engine/Source/Mesh/Mesh Draw.cpp"
+    "../Engine/Source/Mesh/Mesh Group.cpp"
+    "../Engine/Source/Mesh/Mesh IO.cpp"
+    "../Engine/Source/Mesh/Mesh Lod.cpp"
+    "../Engine/Source/Mesh/Mesh Mesh.cpp"
+    "../Engine/Source/Mesh/Mesh Optimize.cpp"
+    "../Engine/Source/Mesh/Mesh Overlay.cpp"
+    "../Engine/Source/Mesh/Mesh Part.cpp"
+    "../Engine/Source/Mesh/Mesh Render.cpp"
+    "../Engine/Source/Mesh/Mesh Simplify.cpp"
+    "../Engine/Source/Mesh/Voxel.cpp"
 )
 source_group("Source\\Mesh" FILES ${Source__Mesh})
 
 set(Source__Mesh__Import
-    "Source/Mesh/Import/Export OBJ.cpp"
-    "Source/Mesh/Import/Import 3DS.cpp"
-    "Source/Mesh/Import/Import ASE.cpp"
-    "Source/Mesh/Import/Import B3D.cpp"
-    "Source/Mesh/Import/Import BVH.cpp"
-    "Source/Mesh/Import/Import DAE.cpp"
-    "Source/Mesh/Import/Import FBX.cpp"
-    "Source/Mesh/Import/Import MS3D.cpp"
-    "Source/Mesh/Import/Import OBJ.cpp"
-    "Source/Mesh/Import/Import PSK PSA.cpp"
-    "Source/Mesh/Import/Import XPS.cpp"
+    "../Engine/Source/Mesh/Import/Export OBJ.cpp"
+    "../Engine/Source/Mesh/Import/Import 3DS.cpp"
+    "../Engine/Source/Mesh/Import/Import ASE.cpp"
+    "../Engine/Source/Mesh/Import/Import B3D.cpp"
+    "../Engine/Source/Mesh/Import/Import BVH.cpp"
+    "../Engine/Source/Mesh/Import/Import DAE.cpp"
+    "../Engine/Source/Mesh/Import/Import FBX.cpp"
+    "../Engine/Source/Mesh/Import/Import MS3D.cpp"
+    "../Engine/Source/Mesh/Import/Import OBJ.cpp"
+    "../Engine/Source/Mesh/Import/Import PSK PSA.cpp"
+    "../Engine/Source/Mesh/Import/Import XPS.cpp"
 )
 source_group("Source\\Mesh\\Import" FILES ${Source__Mesh__Import})
 
 set(Source__Mesh__MeshBase
-    "Source/Mesh/MeshBase/Mshb Add Remove.cpp"
-    "Source/Mesh/MeshBase/Mshb Convert.cpp"
-    "Source/Mesh/MeshBase/Mshb Create.cpp"
-    "Source/Mesh/MeshBase/Mshb Csg 2D.cpp"
-    "Source/Mesh/MeshBase/Mshb Csg.cpp"
-    "Source/Mesh/MeshBase/Mshb Fix.cpp"
-    "Source/Mesh/MeshBase/Mshb Join Split.cpp"
-    "Source/Mesh/MeshBase/Mshb Link.cpp"
-    "Source/Mesh/MeshBase/Mshb Operations.cpp"
-    "Source/Mesh/MeshBase/Mshb Set.cpp"
-    "Source/Mesh/MeshBase/Mshb Texturize.cpp"
-    "Source/Mesh/MeshBase/Mshb Transform.cpp"
+    "../Engine/Source/Mesh/MeshBase/Mshb Add Remove.cpp"
+    "../Engine/Source/Mesh/MeshBase/Mshb Convert.cpp"
+    "../Engine/Source/Mesh/MeshBase/Mshb Create.cpp"
+    "../Engine/Source/Mesh/MeshBase/Mshb Csg 2D.cpp"
+    "../Engine/Source/Mesh/MeshBase/Mshb Csg.cpp"
+    "../Engine/Source/Mesh/MeshBase/Mshb Fix.cpp"
+    "../Engine/Source/Mesh/MeshBase/Mshb Join Split.cpp"
+    "../Engine/Source/Mesh/MeshBase/Mshb Link.cpp"
+    "../Engine/Source/Mesh/MeshBase/Mshb Operations.cpp"
+    "../Engine/Source/Mesh/MeshBase/Mshb Set.cpp"
+    "../Engine/Source/Mesh/MeshBase/Mshb Texturize.cpp"
+    "../Engine/Source/Mesh/MeshBase/Mshb Transform.cpp"
 )
 source_group("Source\\Mesh\\MeshBase" FILES ${Source__Mesh__MeshBase})
 
@@ -740,7 +745,7 @@ set(Source__Platforms__Mac
 source_group("Source\\Platforms\\Mac" FILES ${Source__Platforms__Mac})
 
 set(Source__Platforms__Switch
-#    "../NintendoSwitch/Switch.cpp"
+#    "../NintendoSwitc../Editor/Bin/Engine/Switch.cpp"
 )
 source_group("Source\\Platforms\\Switch" FILES ${Source__Platforms__Switch})
 
@@ -874,7 +879,8 @@ set(ALL_FILES
     ${H__Misc}
     ${H__Net}
     ${H__Physics}
-    ${H__Platforms}
+    ${H__Platforms__Android}
+    ${H__Platforms__Switch}
     ${H__Sound}
     ${H___}
     ${H_____OpenGL}
@@ -937,7 +943,7 @@ set(ROOT_NAMESPACE Engine)
 ################################################################################
 # Target name
 ################################################################################
-if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "1) 64 bit")
+if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
     set_target_properties(${PROJECT_NAME} PROPERTIES
         TARGET_NAME_DEBUGDX11            "${PROJECT_NAME}Debug64DX11"
         TARGET_NAME_DEBUGGL              "${PROJECT_NAME}Debug64GL"
@@ -995,7 +1001,7 @@ endif()
 ################################################################################
 # Output directory
 ################################################################################
-if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "1) 64 bit")
+if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
     set_target_properties(${PROJECT_NAME} PROPERTIES
         OUTPUT_DIRECTORY_DEBUGDX11            "${CMAKE_CURRENT_SOURCE_DIR}/"
         OUTPUT_DIRECTORY_DEBUGGL              "${CMAKE_CURRENT_SOURCE_DIR}/"
@@ -1050,7 +1056,7 @@ elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "6) Android")
         OUTPUT_DIRECTORY_RELEASEUNIVERSALDX11 "${CMAKE_CURRENT_SOURCE_DIR}/"
     )
 endif()
-if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "1) 64 bit")
+if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
     set_target_properties(${PROJECT_NAME} PROPERTIES
         INTERPROCEDURAL_OPTIMIZATION_DEBUGDX11            "FALSE"
         INTERPROCEDURAL_OPTIMIZATION_DEBUGGL              "FALSE"
@@ -1104,7 +1110,7 @@ endif()
 # MSVC runtime library
 ################################################################################
 get_property(MSVC_RUNTIME_LIBRARY_DEFAULT TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY)
-if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "1) 64 bit")
+if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
     string(CONCAT "MSVC_RUNTIME_LIBRARY_STR"
         $<$<CONFIG:DebugDX11>:
             MultiThreaded
@@ -1224,10 +1230,10 @@ set_target_properties(${PROJECT_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY ${MSVC_RUN
 ################################################################################
 # Include directories
 ################################################################################
-if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "1) 64 bit")
+if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
     target_include_directories(${PROJECT_NAME} PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}/.;"
-        "${CMAKE_CURRENT_SOURCE_DIR}/H/_;"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Editor/Bin/Engine/_;"
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs;"
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs/FreeType/lib/include;"
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs/DirectX;"
@@ -1257,7 +1263,7 @@ if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "1) 64 bit")
 elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "2) 32 bit")
     target_include_directories(${PROJECT_NAME} PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}/.;"
-        "${CMAKE_CURRENT_SOURCE_DIR}/H/_;"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Editor/Bin/Engine/_;"
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs;"
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs/FreeType/lib/include;"
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs/DirectX;"
@@ -1287,7 +1293,7 @@ elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "2) 32 bit")
 elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "3) ARM")
     target_include_directories(${PROJECT_NAME} PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}/.;"
-        "${CMAKE_CURRENT_SOURCE_DIR}/H/_;"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Editor/Bin/Engine/_;"
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs;"
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs/FreeType/lib/include;"
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs/DirectX;"
@@ -1317,7 +1323,7 @@ elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "3) ARM")
 elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "4) Web")
     target_include_directories(${PROJECT_NAME} PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}/.;"
-        "${CMAKE_CURRENT_SOURCE_DIR}/H/_;"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Editor/Bin/Engine/_;"
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs;"
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs/FreeType/lib/include;"
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs/DirectX;"
@@ -1335,7 +1341,7 @@ elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "4) Web")
 elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "5) Nintendo Switch")
     target_include_directories(${PROJECT_NAME} PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}/.;"
-        "${CMAKE_CURRENT_SOURCE_DIR}/H/_;"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Editor/Bin/Engine/_;"
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs;"
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs/FreeType/lib/include;"
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs/DirectX;"
@@ -1356,8 +1362,8 @@ elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "5) Nintendo Switch")
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs/PhysX/physx/source/foundation/include;"
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs/PhysX/physx/source/common/src;"
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs/PhysX/physx/source/geomutils/src;"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../NintendoSwitch/ThirdPartyLibs/PhysX/physx/source/foundation/include;"
-        "${CMAKE_CURRENT_SOURCE_DIR}/../NintendoSwitch/ThirdPartyLibs/PhysX/pxshared/include;"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../NintendoSwitc../Editor/Bin/Engine/ThirdPartyLibs/PhysX/physx/source/foundation/include;"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../NintendoSwitc../Editor/Bin/Engine/ThirdPartyLibs/PhysX/pxshared/include;"
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs/OpenEXR/lib/IlmBase/Imath;"
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs/OpenEXR/lib/IlmBase/Iex;"
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs/OpenEXR/lib/IlmBase/Half;"
@@ -1367,7 +1373,7 @@ elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "5) Nintendo Switch")
 elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "6) Android")
     target_include_directories(${PROJECT_NAME} PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}/.;"
-        "${CMAKE_CURRENT_SOURCE_DIR}/H/_;"
+        "${CMAKE_CURRENT_SOURCE_DIR}/../Editor/Bin/Engine/_;"
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs;"
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs/FreeType/lib/include;"
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs/DirectX;"
@@ -1400,7 +1406,7 @@ endif()
 ################################################################################
 # Compile definitions
 ################################################################################
-if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "1) 64 bit")
+if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
     target_compile_definitions(${PROJECT_NAME} PRIVATE
         "$<$<CONFIG:DebugDX11>:"
             "DEBUG=1;"
@@ -1556,7 +1562,7 @@ endif()
 # Compile and link options
 ################################################################################
 if(MSVC)
-    if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "1) 64 bit")
+    if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
         target_compile_options(${PROJECT_NAME} PRIVATE
             $<$<CONFIG:DebugDX11>:
                 /MP;
@@ -2050,7 +2056,7 @@ if(MSVC)
             ${DEFAULT_CXX_EXCEPTION_HANDLING}
         )
     endif()
-    if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "1) 64 bit")
+    if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
         target_link_options(${PROJECT_NAME} PRIVATE
             /NOLOGO
         )

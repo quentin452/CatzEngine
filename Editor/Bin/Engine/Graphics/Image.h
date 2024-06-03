@@ -739,7 +739,7 @@ struct Image // Image (Texture)
     void drawTile(C Rect &rect, Flt tex_scale = 1) C;
     void drawTile(C Color &color, C Color &color_add, C Rect &rect, Flt tex_scale = 1) C;
 
-    void Image::drawTileRotate(C Color &color, C Color &color_add, C Vec2 &center, C Vec2 &size, Flt tex_scale, Flt angle, C Vec2 *rotation_center_uv) C;
+    void drawTileRotate(C Color &color, C Color &color_add, C Vec2 &center, C Vec2 &size, Flt tex_scale, Flt angle, C Vec2 *rotation_center_uv) C;
 
     // draw image as rectangle's border
     void drawBorder(C Rect &rect, Flt border = 0.02f, Flt tex_scale = 1, Flt tex_offset = 0, Bool wrap_mode = false) C;

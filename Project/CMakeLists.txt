@@ -59,7 +59,7 @@ endif()
 ################################################################################
 # Output directory
 ################################################################################
-if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "1) 64 bit")
+if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
     set_target_properties(${PROJECT_NAME} PROPERTIES
         OUTPUT_DIRECTORY_DEBUGDX11            "${CMAKE_CURRENT_SOURCE_DIR}/"
         OUTPUT_DIRECTORY_DEBUGGL              "${CMAKE_CURRENT_SOURCE_DIR}/"
@@ -110,7 +110,7 @@ if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "4) Web")
         PDB_OUTPUT_DIRECTORY                      "${OUTPUT_DIRECTORY}"
     )
 endif()
-if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "1) 64 bit")
+if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
     set_target_properties(${PROJECT_NAME} PROPERTIES
         INTERPROCEDURAL_OPTIMIZATION_DEBUGDX11            "FALSE"
         INTERPROCEDURAL_OPTIMIZATION_DEBUGGL              "FALSE"
@@ -164,7 +164,7 @@ endif()
 # MSVC runtime library
 ################################################################################
 get_property(MSVC_RUNTIME_LIBRARY_DEFAULT TARGET ${PROJECT_NAME} PROPERTY MSVC_RUNTIME_LIBRARY)
-if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "1) 64 bit")
+if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
     string(CONCAT "MSVC_RUNTIME_LIBRARY_STR"
         $<$<CONFIG:DebugDX11>:
             MultiThreaded
@@ -284,7 +284,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES MSVC_RUNTIME_LIBRARY ${MSVC_RUN
 ################################################################################
 # Include directories
 ################################################################################
-if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "1) 64 bit")
+if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
     target_include_directories(${PROJECT_NAME} PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}/.;"
         "${CMAKE_CURRENT_SOURCE_DIR}/../ThirdPartyLibs;"
@@ -387,7 +387,7 @@ endif()
 ################################################################################
 # Compile definitions
 ################################################################################
-if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "1) 64 bit")
+if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
     target_compile_definitions(${PROJECT_NAME} PRIVATE
         "$<$<CONFIG:DebugDX11>:"
             "DEBUG=1;"
@@ -543,7 +543,7 @@ endif()
 # Compile and link options
 ################################################################################
 if(MSVC)
-    if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "1) 64 bit")
+    if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
         target_compile_options(${PROJECT_NAME} PRIVATE
             $<$<CONFIG:DebugDX11>:
                 /MP;
@@ -1000,7 +1000,7 @@ if(MSVC)
             /Zc:wchar_t
         )
     endif()
-    if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "1) 64 bit")
+    if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
         target_link_options(${PROJECT_NAME} PRIVATE
             $<$<CONFIG:DebugDX11>:
                 /DEBUG;
@@ -1273,7 +1273,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     Engine
 )
 
-if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "1) 64 bit")
+if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
     set(ADDITIONAL_LIBRARY_DEPENDENCIES
         "$<$<CONFIG:DebugDX11>:"
             "../Engine/EngineDebug64DX11;"
@@ -1800,7 +1800,7 @@ elseif("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "5) Nintendo Switch")
 endif()
 target_link_libraries(${PROJECT_NAME} PRIVATE "${ADDITIONAL_LIBRARY_DEPENDENCIES}")
 
-if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "1) 64 bit")
+if("${CMAKE_VS_PLATFORM_NAME}" STREQUAL "x64")
     target_link_directories(${PROJECT_NAME} PRIVATE
         "$<$<CONFIG:DebugUniversalDX11>:"
             "$ENV{VCInstallDir}/lib/store/amd64;"

@@ -2,6 +2,16 @@
 
 cmake_minimum_required(VERSION 3.11.0)
 
+# Définir la macro use_props
+macro(use_props target config file)
+    get_filename_component(PROP_DIR "${file}" PATH)
+    include_directories("${PROP_DIR}/include")
+    link_directories("${PROP_DIR}/lib")
+endmacro()
+
+# Compile using Parallel
+add_compile_options(/MP)
+
 set(NAME CatzEngineEditor)
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE_DX11 "${CMAKE_EXE_LINKER_FLAGS_RELEASE}")
 
@@ -138,10 +148,6 @@ if(SMAA_HLSL_4_1)
     add_definitions(-DSMAA_HLSL_4_1=1)
 endif()
 
-if(EE_PRIVATE)
-    #add_definitions(-DEE_PRIVATE=1)
-endif()
-
 if(DX11)
     add_definitions(-DDX11=1)
 endif()
@@ -229,8 +235,8 @@ add_custom_command(TARGET ${NAME} POST_BUILD
 ################################################################################
 # Sub-projects
 ################################################################################
-# add_subdirectory(Engine)
-# add_subdirectory(Project)
+add_subdirectory(Engine)
+add_subdirectory(Project)
 
 # Common compilation options
 

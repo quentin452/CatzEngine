@@ -115,9 +115,9 @@ void CodeEditor::saveSettings(TextNode &code) {
 
     TextNode &edit = code.nodes.New().setName("Edit");
     edit.nodes.New().set("AutocompleteOnEnterOnly", options.ac_on_enter());
-    #if WINDOWS // TODO SUPPORT MORE OS
+#if WINDOWS // TODO SUPPORT MORE OS
     edit.nodes.New().set("FormatWithClangOnSave", options.clang_format_during_save());
-    #endif
+#endif
     edit.nodes.New().set("AutoSaveDuringWriting", options.save_during_write());
     edit.nodes.New().set("SimpleMode", options.simple());
     edit.nodes.New().set("ImmediateScroll", options.imm_scroll());
@@ -298,6 +298,7 @@ Bool CodeEditor::load(C SourceLoc &loc, Bool quiet, Bool Const) {
 }
 /******************************************************************************/
 void CodeEditor::save(Source *source, C SourceLoc &loc) {
+    cur()->forcereload();
     if (source) {
         Bool header = source->header, used = source->used();
         if (Source *dest = findSource(loc)) { // find destination source
@@ -317,7 +318,6 @@ void CodeEditor::save(Source *source, C SourceLoc &loc) {
         if (CE.options.clang_format_during_save()) {
             if (used || header) {
                 validateActiveSources(header); // If the file is used or if it is a header, validate the active sources
-                cur()->forcereload();
             }
         } else {
             if ((different && used) || header) {

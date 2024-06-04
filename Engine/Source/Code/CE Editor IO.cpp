@@ -297,8 +297,10 @@ Bool CodeEditor::load(C SourceLoc &loc, Bool quiet, Bool Const) {
     return false;
 }
 /******************************************************************************/
-void CodeEditor::save(Source *source, C SourceLoc &loc) {
-    cur()->forcereload();
+void CodeEditor::save(Source *source, C SourceLoc &loc, Bool ClangFormating) {
+    if (ClangFormating) {
+        cur()->forcereload();
+    }
     if (source) {
         Bool header = source->header, used = source->used();
         if (Source *dest = findSource(loc)) { // find destination source
@@ -327,10 +329,10 @@ void CodeEditor::save(Source *source, C SourceLoc &loc) {
     }
 }
 /******************************************************************************/
-void CodeEditor::overwrite() {
+void CodeEditor::overwrite(Bool ClangFormating) {
     if (cur() && !cur()->Const) {
         if (cur()->loc.is())
-            save(cur(), cur()->loc);
+            save(cur(), cur()->loc, ClangFormating);
         else
             cur()->save();
     }

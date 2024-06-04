@@ -866,8 +866,8 @@ const_mem_addr struct CodeEditor {
     void loadSettings(C TextNode &code);
 
     Bool load(C SourceLoc &loc, Bool quiet = false, Bool Const = false);
-    void save(Source *source, C SourceLoc &loc);
-    void overwrite();
+    void save(Source *source, C SourceLoc &loc, Bool ClangFormating = false);
+    void overwrite(Bool ClangFormating = false);
     void save();
     void load();
 

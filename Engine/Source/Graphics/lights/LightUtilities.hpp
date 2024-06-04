@@ -17,21 +17,21 @@ INLINE void SetDepthAndShadow_CASE_LIGHT_POINT(Light &CurrentLight, Flt range, V
 
 INLINE void SetLightShadow(Light &CurrentLight, std::function<void(bool)> GetShdPointFunc) {
     if (!Renderer._ds->multiSample()) {
-        Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ);
+        Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders
         REPS(Renderer._eye, Renderer._eye_num)
         if (SetLightEye(true))
             GetShdPointFunc(false)->draw(&CurrentLight.rect);
-    } else {
+    } else { // we can ignore 'Renderer.hasStencilAttached' because we would have to apply for all samples of '_shd_ms' and '_shd_1s' which will happen anyway below
         Renderer.set(Renderer._shd_ms, Renderer._ds, true, NEED_DEPTH_READ);
         D.stencil(STENCIL_MSAA_TEST, STENCIL_REF_MSAA);
         REPS(Renderer._eye, Renderer._eye_num)
         if (SetLightEye(true))
-            GetShdPointFunc(true)->draw(&CurrentLight.rect);
+            GetShdPointFunc(true)->draw(&CurrentLight.rect); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders
         Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ);
         D.stencil(STENCIL_NONE);
         REPS(Renderer._eye, Renderer._eye_num)
         if (SetLightEye(true))
-            GetShdPointFunc(false)->draw(&CurrentLight.rect);
+            GetShdPointFunc(false)->draw(&CurrentLight.rect); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders, for all stencil samples because they are needed for smoothing
     }
 }
 INLINE void SetLightShadow_CASE_LIGHT_POINT(Light &CurrentLight, Flt range, Vec &pos, Bool front_face) {
@@ -117,23 +117,7 @@ INLINE void RenderLum_CASE_LIGHT_CONE(Bool front_face, MatrixM &light_matrix) {
         D.depth2DOn();
         Flt mp_z_z;
         ApplyViewSpaceBias(mp_z_z);
-        if (!Renderer._ds->multiSample()) {
-            Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ);
-            REPS(Renderer._eye, Renderer._eye_num)
-            if (SetLightEye(true))
-                GetShdCone(false)->draw(&CurrentLight.rect);
-        } else {
-            Renderer.set(Renderer._shd_ms, Renderer._ds, true, NEED_DEPTH_READ);
-            D.stencil(STENCIL_MSAA_TEST, STENCIL_REF_MSAA);
-            REPS(Renderer._eye, Renderer._eye_num)
-            if (SetLightEye(true))
-                GetShdCone(true)->draw(&CurrentLight.rect);
-            Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ);
-            D.stencil(STENCIL_NONE);
-            REPS(Renderer._eye, Renderer._eye_num)
-            if (SetLightEye(true))
-                GetShdCone(false)->draw(&CurrentLight.rect);
-        }
+        SetLightShadow(CurrentLight, GetShdCone);
         RestoreViewSpaceBias(mp_z_z);
         MapSoft(front_face ? FUNC_LESS : FUNC_GREATER, &light_matrix);
         ApplyVolumetric(CurrentLight.cone);
@@ -328,23 +312,7 @@ INLINE void DrawLum_CASE_LIGHT_LINEAR(Light &CurrentLight, UInt depth_func, Matr
         D.depth2DOn();
         Flt mp_z_z;
         ApplyViewSpaceBias(mp_z_z);
-        if (!Renderer._ds->multiSample()) {
-            Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders
-            REPS(Renderer._eye, Renderer._eye_num)
-            if (SetLightEye(true))
-                GetShdPoint(false)->draw(&CurrentLight.rect);
-        } else { // we can ignore 'Renderer.hasStencilAttached' because we would have to apply for all samples of '_shd_ms' and '_shd_1s' which will happen anyway below
-            Renderer.set(Renderer._shd_ms, Renderer._ds, true, NEED_DEPTH_READ);
-            D.stencil(STENCIL_MSAA_TEST, STENCIL_REF_MSAA);
-            REPS(Renderer._eye, Renderer._eye_num)
-            if (SetLightEye(true))
-                GetShdPoint(true)->draw(&CurrentLight.rect); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders
-            Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ);
-            D.stencil(STENCIL_NONE);
-            REPS(Renderer._eye, Renderer._eye_num)
-            if (SetLightEye(true))
-                GetShdPoint(false)->draw(&CurrentLight.rect); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders, for all stencil samples because they are needed for smoothing
-        }
+        SetLightShadow(CurrentLight, GetShdPoint);
         RestoreViewSpaceBias(mp_z_z);
         MapSoft(depth_func, &light_matrix);
         ApplyVolumetric(CurrentLight.linear);

@@ -1776,12 +1776,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
     }
     /******************************************************************************/
     Flt GetLightFade(CPtr src) {
-        if (D.maxLights() && src) {
-            if (Flt *fade = LightFades.find(src))
-                return *fade;
-            return 0;
-        }
-        return 1;
+        return (D.maxLights() && src) ? (LightFades.find(src) ? *LightFades.find(src) : 0) : 1;
     }
     /******************************************************************************/
     void ShutLight() {

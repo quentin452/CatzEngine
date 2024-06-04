@@ -626,13 +626,18 @@ Memc<Str> GetFiles(C Str &files) {
 /******************************************************************************/
 static void MenuNew() { CE.New(); }
 static void MenuOverwrite(Bool ClangFormating = false) {
-    if (ClangFormating && CE.options.clang_format_during_save()) {
-        CanAutoSave = false;
-        CE.formatfileswithclang();
+    if (ClangFormating) {
+        if (CE.options.clang_format_during_save()) {
+            CanAutoSave = false;
+            CE.formatfileswithclang();
+            CE.overwrite(true);
+            CanAutoSave = true;
+        }
+    } else {
+        CE.overwrite(false);
     }
-    CE.overwrite(false);
-    CanAutoSave = true;
 }
+
 static void MenuOverwriteWrapper() {
     MenuOverwrite(true);
 }

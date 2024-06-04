@@ -625,6 +625,7 @@ Memc<Str> GetFiles(C Str &files) {
 // MENU
 /******************************************************************************/
 static void MenuNew() { CE.New(); }
+Bool ReloadProperlyWhenUsingClang = false;
 static void MenuOverwrite(Bool ClangFormating = false) {
     if (ClangFormating) {
         if (CE.options.clang_format_during_save()) {
@@ -632,6 +633,7 @@ static void MenuOverwrite(Bool ClangFormating = false) {
             CE.formatfileswithclang();
             CE.overwrite(true);
             CanAutoSave = true;
+            ReloadProperlyWhenUsingClang = true;
         }
     } else {
         CE.overwrite(false);
@@ -1752,8 +1754,9 @@ std::unordered_map<KB_KEY, bool> key_blacklist_for_auto_save = {
 void CodeEditor::update(Bool active) {
     if (active) {
 
-        if (CE.options.clang_format_during_save() && CE.options.save_during_write() && Kb.b(KB_LCTRL) && Kb.b(KB_S)) {
+        if (ReloadProperlyWhenUsingClang == true) {
             CE.overwrite(true);
+            ReloadProperlyWhenUsingClang = false;
         }
         if (CanAutoSave && CE.options.save_during_write() && Kb.anyKeyWasPressed(Kb.KeyState::DOWN, key_blacklist_for_auto_save)) {
             CE.overwrite(false);

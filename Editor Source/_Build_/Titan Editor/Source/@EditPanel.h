@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿#pragma once
+/******************************************************************************/
 /******************************************************************************/
 class EditPanel : Panel {
     UID center_image, bar_image, border_image, top_image, bottom_image, left_right_image, top_corner_image, bottom_corner_image,

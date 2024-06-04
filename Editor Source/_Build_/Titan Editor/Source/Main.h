@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿#pragma once
+/******************************************************************************/
 extern bool Initialized;
 extern Str SettingsPath, RunAtExit;
 extern Environment DefaultEnvironment;

@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿#pragma once
+/******************************************************************************/
 extern State StatePublish;
 extern Memb<PakFileData> PublishFiles;
 extern Memc<ImageGenerate> PublishGenerate;

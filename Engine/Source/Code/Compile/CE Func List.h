@@ -1,4 +1,5 @@
-﻿static void $nop(PARAMS) { thread.func_code_pos += Call::Size(0); }
+﻿#pragma once
+static void $nop(PARAMS) { thread.func_code_pos += Call::Size(0); }
 static void $call$20func(PARAMS) {
     thread.func_code_pos += Call::Size(1);
     thread.call(*(CodeEnvironment::FuncBody *)call.param(0).getInstructP(), call.param(0).getInstructI2(), null, null);

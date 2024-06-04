@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿#pragma once
+/******************************************************************************/
 class WorldVer {
     static bool CreateRebuild(byte &area_rebuild_flag, C VecI2 &area_xy, ptr); // set empty   initially
     static bool CreateObjEmbed(RectI &obj_area, C UID &id, ptr);               // set invalid initially

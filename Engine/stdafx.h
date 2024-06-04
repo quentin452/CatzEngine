@@ -1,3 +1,4 @@
+#pragma once
 /******************************************************************************/
 #define EE_PRIVATE 2
 #include "../Editor/bin/Engine/Engine.h"

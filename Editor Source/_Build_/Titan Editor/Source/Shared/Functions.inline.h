@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿#pragma once
+/******************************************************************************/
 template <typename TYPE>
 bool Sync(TimeStamp &time, C TimeStamp &src_time, TYPE &data, C TYPE &src_data) {
     if (Sync(time, src_time)) {

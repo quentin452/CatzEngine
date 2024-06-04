@@ -1,3 +1,4 @@
+#pragma once
 /******************************************************************************
 
    This header is visible on both CPU and GPU

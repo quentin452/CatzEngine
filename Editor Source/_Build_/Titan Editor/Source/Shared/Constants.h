@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿#pragma once
+/******************************************************************************/
 extern const Str ClientServerString;
 extern const cchar8 *WorldVerSuffix,
     *ProjectsBuildPath,   // !! this will     get deleted in 'CleanAll' !!

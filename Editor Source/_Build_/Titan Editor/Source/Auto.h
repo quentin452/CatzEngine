@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿#pragma once
+/******************************************************************************/
 extern cchar *C ENGINE_DATA_PATH;
 extern cchar *C PROJECT_DATA_PATH;
 extern cchar *C PROJECT_NAME;

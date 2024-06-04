@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿#pragma once
+/******************************************************************************/
 /******************************************************************************/
 class DetectSimilarTextures : PropWin {
     static const bool Decompress; // performance was the same for both options, so keep 'Decompress' as false, to be able to process bigger sizes for better precision

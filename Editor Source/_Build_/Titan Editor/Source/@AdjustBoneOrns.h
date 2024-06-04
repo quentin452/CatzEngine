@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿#pragma once
+/******************************************************************************/
 /******************************************************************************
 
    Usage of 'rotateToDir' instead of setting 'dir' and calling 'fix' gives better precision for cases when we're rotating the bone by 90 deg.

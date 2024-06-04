@@ -1,3 +1,4 @@
+#pragma once
 /******************************************************************************/
 void DecompressBlockBC1(C Byte *b, Color (&block)[4][4]);
 void DecompressBlockBC2(C Byte *b, Color (&block)[4][4]);

@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿#pragma once
+/******************************************************************************/
 template <int i>
 void EnvEditor::CloudsColor(EditEnv &env, C Str &text) {
     env.clouds.layers[i].color_s = TextVec4(text);

@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿#pragma once
+/******************************************************************************/
 extern Progress UpdateProgress;
 extern Thread UpdateThread;
 extern Image WhiteImage;

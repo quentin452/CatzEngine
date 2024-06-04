@@ -1,1 +1,2 @@
+#pragma once
 #define SHADER_HASH 13298492056736650918ull

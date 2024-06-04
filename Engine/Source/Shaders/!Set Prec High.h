@@ -1,3 +1,4 @@
+#pragma once
 #undef Half
 #undef VecH2
 #undef VecH

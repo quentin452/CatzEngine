@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿#pragma once
+/******************************************************************************/
 extern cchar8 *FormatSuffixes[];
 extern int FormatSuffixElms;
 extern const Color LitSelColor, SelColor, LitColor, DefColor, InvalidColor;

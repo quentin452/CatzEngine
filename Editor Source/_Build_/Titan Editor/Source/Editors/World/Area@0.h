@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿#pragma once
+/******************************************************************************/
 /******************************************************************************/
 flt HmHeight(C Heightmap &hm, flt area_size, C VecI2 &area_xy, C Vec &pos, bool smooth = true);
 flt HmHeight(C Heightmap &hm, flt area_size, C VecI2 &area_xy, C Vec2 &xz, bool smooth = true);

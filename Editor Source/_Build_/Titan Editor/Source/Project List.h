@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿#pragma once
+/******************************************************************************/
 extern Str ProjectsPath;
 extern Str MainProjectPath;
 extern Str CurrentlyOpenedFilePath;

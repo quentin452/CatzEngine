@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿#pragma once
+/******************************************************************************/
 /******************************************************************************/
 class ElmObj : ElmObjClass {
     UID mesh_id, base_id; // 'base_id' should not be processed in following methods, but only during syncing (it can point to both ElmObj and ElmObjClass)

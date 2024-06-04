@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿#pragma once
+/******************************************************************************/
 void ProjectEx::hide() { visible(false); }
 bool ProjectEx::visible() C { return outer_region.visible(); }
 void ProjectEx::visible(bool on) { outer_region.visible(on); }

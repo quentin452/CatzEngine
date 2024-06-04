@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿#pragma once
+/******************************************************************************/
 /******************************************************************************/
 class Heightmap2 : Heightmap {
     //Heightmap server_hm; heightmap before any modifications on the client side (use this in the future for delta-based updating of heightmaps to the server)

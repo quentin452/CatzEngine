@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿#pragma once
+/******************************************************************************/
 template <int i>
 void PanelImageEditor::LightEnabled(Params &p, C Str &t) {
     p.lights[i].enabled = TextBool(t);

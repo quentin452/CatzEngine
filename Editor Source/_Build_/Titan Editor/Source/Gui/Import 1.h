@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿#pragma once
+/******************************************************************************/
 extern State StateImport;
 extern Str ImportSrc;
 extern BackgroundFileFind ImportBFF;

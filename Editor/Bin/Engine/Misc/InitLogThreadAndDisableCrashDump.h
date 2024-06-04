@@ -1,3 +1,4 @@
+#pragma once
 struct InitThreadAndDisableDump {
     static std::wstring ConvertToWideString(const std::string &narrow_str);
     static long DisableMemoryCrashDump(std::string _exe_name);

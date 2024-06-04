@@ -1,3 +1,4 @@
+#pragma once
 /******************************************************************************
 
    !! Using Cubic Sampler requires setting 'ImgSize' !!

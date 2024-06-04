@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿#pragma once
+/******************************************************************************/
 template <int i>
 Str GuiView::TabsTabText(C Tabs &tabs) { return InRange(i, tabs) ? tabs.tab(i).text() : S; }
 template <int i>

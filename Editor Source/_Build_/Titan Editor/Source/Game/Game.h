@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿#pragma once
+/******************************************************************************/
 extern State StateGame;
 extern Str GameWorld;
 extern bool DrawPhysics, DrawWorldPath;

@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿#pragma once
+/******************************************************************************/
 extern Edit::Viewport4::DPad DPad;
 extern Edit::Viewport4::DPadY DPadY;
 extern Edit::Viewport4::Zoom Zoom;

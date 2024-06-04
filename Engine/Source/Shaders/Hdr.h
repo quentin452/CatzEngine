@@ -1,3 +1,4 @@
+#pragma once
 /******************************************************************************
 // AMD LPM
 #define Quart _Quart // "ffx_a.h" has its own 'Quart'

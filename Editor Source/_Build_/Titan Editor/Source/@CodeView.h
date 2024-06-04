@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿#pragma once
+/******************************************************************************/
 class CodeView : Region, Edit::CodeEditorInterface {
     Memx<EEItem> items;
     Memc<EEItem *> items_sorted;

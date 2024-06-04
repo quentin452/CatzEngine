@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿#pragma once
+/******************************************************************************/
 extern bool MiniMapBuilding, MiniMapOk;
 extern int MiniMapAreasLeft;
 extern State StateMiniMap;

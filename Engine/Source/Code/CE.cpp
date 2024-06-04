@@ -83,6 +83,7 @@
 
 /******************************************************************************/
 #include "stdafx.h"
+Bool CanAutoSave = true;
 #if WINDOWS
 std::string clang_format_exe = "\\clang-format.exe";
 #endif
@@ -626,9 +627,10 @@ Memc<Str> GetFiles(C Str &files) {
 static void MenuNew() { CE.New(); }
 static void MenuOverwrite(Bool ClangFormating = false) {
     if (ClangFormating && CE.options.clang_format_during_save()) {
+        CanAutoSave = false;
         CE.formatfileswithclang();
     }
-    CE.overwrite(ClangFormating);
+    CanAutoSave = true;
 }
 static void MenuOverwriteWrapper() {
     MenuOverwrite(true);
@@ -894,8 +896,6 @@ Bool CodeEditor::formatfileswithclang() {
     std::string command_line = "\"" + std::string(CE.clang_format_path.toCString()) + clang_format_exe + "\" -style=\"{BasedOnStyle: llvm, IndentWidth: 4, ColumnLimit: 0}\" -i \"" + path + "\"";
     auto &executor = CmdExecutor::GetInstance();
     if (!executor.executeCommand(command_line, false)) {
-        LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::ERRORING, __FILE__, __LINE__, "Failed to execute command.");
-        Gui.msgBox("Error", "Failed to execute command.");
         return false;
     }
     return true;
@@ -1745,13 +1745,16 @@ std::unordered_map<KB_KEY, bool> key_blacklist_for_auto_save = {
     {KB_S, true}};
 void CodeEditor::update(Bool active) {
     if (active) {
-        // Auto Save Script if key is pressed
-        auto &executor = EE::Edit::CmdExecutor::GetInstance();
-        {
-            std::lock_guard<std::mutex> lock(executor.commandMutex);
-            if (executor.isCmdIdle() && CE.options.save_during_write() && Kb.anyKeyWasPressed(Kb.KeyState::DOWN, key_blacklist_for_auto_save)) {
-                CE.overwrite(false);
-            }
+
+        if (CE.options.clang_format_during_save() && CE.options.save_during_write() && Kb.b(KB_LCTRL) && Kb.b(KB_S)) {
+            // CE.formatfileswithclang();
+            // CE.overwrite(true);
+            CE.overwrite(true);
+        }
+        if (CanAutoSave && CE.options.save_during_write() && Kb.anyKeyWasPressed(Kb.KeyState::DOWN, key_blacklist_for_auto_save)) {
+            CE.overwrite(false);
+        }
+        if (cur()) {
         }
         if (Gui.kb() == &build_list)
             if (cur())

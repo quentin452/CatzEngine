@@ -118,7 +118,7 @@ Bool CmdExecutor::isCommandFinished() {
 Bool CmdExecutor::isCmdIdle() {
 #if WINDOWS
     // Check if the cmd process is not active
-    return isCommandFinished();
+    return !isCommandFinished();
 #else
     return true;
 #endif
@@ -148,7 +148,8 @@ void CmdExecutor::processCommands() {
                 LoggerThread::GetLoggerThread().logMessageAsync(
                     LogLevel::INFO, __FILE__, __LINE__, "Exit command received. Breaking the loop.");
                 break;
-            } // Write the command to the pipe
+            } 
+            // Write the command to the pipe
             DWORD written;
             std::string fullCommand = command + "\r\n";
             if (!WriteFile(childStdInWr, fullCommand.c_str(), static_cast<DWORD>(fullCommand.size()), &written, NULL)) {
@@ -197,7 +198,6 @@ void CmdExecutor::processCommands() {
                 }
             }
 
-            CE.overwrite(false);
             isCommandExecuting = false;
         } catch (...) {
             isCommandExecuting = false;

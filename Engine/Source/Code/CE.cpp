@@ -630,6 +630,7 @@ static void MenuOverwrite(Bool ClangFormating = false) {
         CanAutoSave = false;
         CE.formatfileswithclang();
     }
+    CE.overwrite(false);
     CanAutoSave = true;
 }
 static void MenuOverwriteWrapper() {

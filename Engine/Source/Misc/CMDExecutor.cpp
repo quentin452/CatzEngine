@@ -108,13 +108,8 @@ Bool CmdExecutor::executeCommand(C std::string &command, bool outputEnabled) {
 
 Bool CmdExecutor::isCommandFinished() {
 #if WINDOWS
-    DWORD exitCode;
-    if (!GetExitCodeProcess(pi.hProcess, &exitCode)) {
-        LoggerThread::GetLoggerThread().logMessageAsync(
-            LogLevel::ERRORING, __FILE__, __LINE__, "Error: Failed to get exit code of process.");
-        return false;
-    }
-    return exitCode != STILL_ACTIVE;
+    std::lock_guard<std::mutex> lock(isCommandExecutingMutex);
+    return isCommandExecuting;
 #else
     return true;
 #endif
@@ -123,7 +118,7 @@ Bool CmdExecutor::isCommandFinished() {
 Bool CmdExecutor::isCmdIdle() {
 #if WINDOWS
     // Check if the cmd process is not active
-    return !isCommandFinished();
+    return isCommandFinished();
 #else
     return true;
 #endif
@@ -202,6 +197,7 @@ void CmdExecutor::processCommands() {
                 }
             }
 
+            CE.overwrite(false);
             isCommandExecuting = false;
         } catch (...) {
             isCommandExecuting = false;

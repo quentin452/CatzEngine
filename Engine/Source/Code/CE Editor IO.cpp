@@ -298,9 +298,6 @@ Bool CodeEditor::load(C SourceLoc &loc, Bool quiet, Bool Const) {
 }
 /******************************************************************************/
 void CodeEditor::save(Source *source, C SourceLoc &loc, Bool ClangFormating) {
-    if (ClangFormating) {
-        cur()->forcereload();
-    }
     if (source) {
         Bool header = source->header, used = source->used();
         if (Source *dest = findSource(loc)) { // find destination source
@@ -315,9 +312,12 @@ void CodeEditor::save(Source *source, C SourceLoc &loc, Bool ClangFormating) {
             }
         }
         Bool different = (source->loc != loc);
+        if (ClangFormating && CE.options.clang_format_during_save()) {
+            cur()->forcereload();
+        }
         source->save(loc);
 
-        if (CE.options.clang_format_during_save()) {
+        if (ClangFormating && CE.options.clang_format_during_save()) {
             if (used || header) {
                 validateActiveSources(header); // If the file is used or if it is a header, validate the active sources
             }
@@ -329,7 +329,10 @@ void CodeEditor::save(Source *source, C SourceLoc &loc, Bool ClangFormating) {
     }
 }
 /******************************************************************************/
+std::mutex overwriteMutex;
+
 void CodeEditor::overwrite(Bool ClangFormating) {
+    std::lock_guard<std::mutex> lock(overwriteMutex);
     if (cur() && !cur()->Const) {
         if (cur()->loc.is())
             save(cur(), cur()->loc, ClangFormating);

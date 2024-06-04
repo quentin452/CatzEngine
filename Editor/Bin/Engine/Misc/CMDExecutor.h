@@ -24,6 +24,7 @@ class CmdExecutor {
     void operator=(CmdExecutor C &) = delete;
 
     std::mutex commandMutex;
+    std::mutex isCommandExecutingMutex;
 
   private:
     CmdExecutor();

@@ -1748,14 +1748,10 @@ void CodeEditor::update(Bool active) {
     if (active) {
 
         if (CE.options.clang_format_during_save() && CE.options.save_during_write() && Kb.b(KB_LCTRL) && Kb.b(KB_S)) {
-            // CE.formatfileswithclang();
-            // CE.overwrite(true);
             CE.overwrite(true);
         }
         if (CanAutoSave && CE.options.save_during_write() && Kb.anyKeyWasPressed(Kb.KeyState::DOWN, key_blacklist_for_auto_save)) {
             CE.overwrite(false);
-        }
-        if (cur()) {
         }
         if (Gui.kb() == &build_list)
             if (cur())

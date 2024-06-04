@@ -15,7 +15,7 @@ INLINE void SetDepthAndShadow_CASE_LIGHT_POINT(Light &CurrentLight, Flt range, V
     D.depthClip(front_face);
 }
 
-INLINE void SetLightShadow(Light &CurrentLight, std::function<void(bool)> GetShdPointFunc) {
+INLINE void SetLightShadow(Light &CurrentLight, std::function<Shader *(bool)> GetShdPointFunc) {
     if (!Renderer._ds->multiSample()) {
         Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders
         REPS(Renderer._eye, Renderer._eye_num)
@@ -40,7 +40,7 @@ INLINE void SetLightShadow_CASE_LIGHT_POINT(Light &CurrentLight, Flt range, Vec 
         D.depth2DOn();
         Flt mp_z_z;
         ApplyViewSpaceBias(mp_z_z);
-        SetLightShadow(CurrentLight, GetShdPoint);
+        SetLightShadow(CurrentLight, &GetShdPoint);
         RestoreViewSpaceBias(mp_z_z);
         MapSoft((front_face ? FUNC_LESS : FUNC_GREATER), &MatrixM(front_face ? range : -range, pos));
         ApplyVolumetric(CurrentLight.point);
@@ -117,7 +117,7 @@ INLINE void RenderLum_CASE_LIGHT_CONE(Bool front_face, MatrixM &light_matrix) {
         D.depth2DOn();
         Flt mp_z_z;
         ApplyViewSpaceBias(mp_z_z);
-        SetLightShadow(CurrentLight, GetShdCone);
+        SetLightShadow(CurrentLight, &GetShdCone);
         RestoreViewSpaceBias(mp_z_z);
         MapSoft(front_face ? FUNC_LESS : FUNC_GREATER, &light_matrix);
         ApplyVolumetric(CurrentLight.cone);
@@ -312,7 +312,7 @@ INLINE void DrawLum_CASE_LIGHT_LINEAR(Light &CurrentLight, UInt depth_func, Matr
         D.depth2DOn();
         Flt mp_z_z;
         ApplyViewSpaceBias(mp_z_z);
-        SetLightShadow(CurrentLight, GetShdPoint);
+        SetLightShadow(CurrentLight, &GetShdPoint);
         RestoreViewSpaceBias(mp_z_z);
         MapSoft(depth_func, &light_matrix);
         ApplyVolumetric(CurrentLight.linear);

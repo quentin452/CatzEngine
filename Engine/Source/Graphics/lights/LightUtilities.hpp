@@ -15,29 +15,32 @@ INLINE void SetDepthAndShadow_CASE_LIGHT_POINT(Light &CurrentLight, Flt range, V
     D.depthClip(front_face);
 }
 
+INLINE void SetLightShadow(Light &CurrentLight, std::function<void(bool)> GetShdPointFunc) {
+    if (!Renderer._ds->multiSample()) {
+        Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ);
+        REPS(Renderer._eye, Renderer._eye_num)
+        if (SetLightEye(true))
+            GetShdPointFunc(false)->draw(&CurrentLight.rect);
+    } else {
+        Renderer.set(Renderer._shd_ms, Renderer._ds, true, NEED_DEPTH_READ);
+        D.stencil(STENCIL_MSAA_TEST, STENCIL_REF_MSAA);
+        REPS(Renderer._eye, Renderer._eye_num)
+        if (SetLightEye(true))
+            GetShdPointFunc(true)->draw(&CurrentLight.rect);
+        Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ);
+        D.stencil(STENCIL_NONE);
+        REPS(Renderer._eye, Renderer._eye_num)
+        if (SetLightEye(true))
+            GetShdPointFunc(false)->draw(&CurrentLight.rect);
+    }
+}
 INLINE void SetLightShadow_CASE_LIGHT_POINT(Light &CurrentLight, Flt range, Vec &pos, Bool front_face) {
     if (CurrentLight.shadow) {
         Renderer.getShdRT();
         D.depth2DOn();
         Flt mp_z_z;
         ApplyViewSpaceBias(mp_z_z);
-        if (!Renderer._ds->multiSample()) {
-            Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ);
-            REPS(Renderer._eye, Renderer._eye_num)
-            if (SetLightEye(true))
-                GetShdPoint(false)->draw(&CurrentLight.rect);
-        } else {
-            Renderer.set(Renderer._shd_ms, Renderer._ds, true, NEED_DEPTH_READ);
-            D.stencil(STENCIL_MSAA_TEST, STENCIL_REF_MSAA);
-            REPS(Renderer._eye, Renderer._eye_num)
-            if (SetLightEye(true))
-                GetShdPoint(true)->draw(&CurrentLight.rect);
-            Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ);
-            D.stencil(STENCIL_NONE);
-            REPS(Renderer._eye, Renderer._eye_num)
-            if (SetLightEye(true))
-                GetShdPoint(false)->draw(&CurrentLight.rect);
-        }
+        SetLightShadow(CurrentLight, GetShdPoint);
         RestoreViewSpaceBias(mp_z_z);
         MapSoft((front_face ? FUNC_LESS : FUNC_GREATER), &MatrixM(front_face ? range : -range, pos));
         ApplyVolumetric(CurrentLight.point);

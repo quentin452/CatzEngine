@@ -734,6 +734,44 @@ void Draw()\n\
 ";
     CE.paste(&t);
 }
+#if WINDOWS
+static void TemplateEmptyApplicationWindows() {
+    if (CE.view_mode())
+        return;
+    Str t = R"(
+/******************************************************************************/
+std::string _exe_game = "YOURGAMENAME";
+void InitPre() {
+    auto newLoggerInstance = std::make_unique<LoggerThread>();
+    LoggerThread::SetLoggerThread(std::move(newLoggerInstance));
+    InitThreadAndDisableDump::Init_elevatePrivile_DisableMemoryCrashDump_For_Games(_exe_game);
+    InitThreadAndDisableDump::InitThreadedLoggerForCPP(_exe_game, _exe_game, _exe_game);
+    INIT();
+    App.flag = APP_MINIMIZABLE | APP_MAXIMIZABLE | APP_RESIZABLE;
+}
+bool Init() {
+    LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Init.");
+    return true;
+}
+void Shut() {
+    LoggerThread::GetLoggerThread().ExitLoggerThread();
+}
+/******************************************************************************/
+bool Update() {
+    if (Kb.bp(KB_ESC)) return false;
+    Gui.update();
+    return true;
+}
+/******************************************************************************/
+void Draw() {
+    D.clearCol();
+    Gui.draw();
+}
+/******************************************************************************/
+)";
+    CE.paste(&t);
+}
+#endif
 
 static void EditNextFile() { CE.nextFile(); }
 static void EditPrevFile() { CE.prevFile(); }
@@ -895,6 +933,9 @@ void CodeEditor::setMenu(Node<MenuElm> &menu) {
             {
                 Node<MenuElm> &t = (e += "Insert Template");
                 t.New().create("Empty Application", TemplateEmptyApplication);
+#if WINDOWS
+                t.New().create("Empty Application (Windows)", TemplateEmptyApplicationWindows);
+#endif
             }
             e++;
             e.New().create("Select All", EditSelectAll).kbsc(KbSc('a', KBSC_CTRL_CMD));

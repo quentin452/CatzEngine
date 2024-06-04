@@ -288,6 +288,26 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
             MeshRender *mesh;
             if (geom)
                 mesh = ((CurrentLight.type == LIGHT_CONE) ? &LightMeshCone : &LightMeshBall);
+
+            auto processRender = [&](Shader *shader, MeshRender *mesh) {
+                if (geom) {
+                    D.depth2DOn(depth_func);
+                    shader->startTex();
+                    mesh->set();
+                }
+                REPS(Renderer._eye, Renderer._eye_num)
+                if (CurrentLightOn[Renderer._eye]) {
+                    if (geom) {
+                        Renderer.setEyeViewportCam();
+                        SetFastMatrix(*light_matrix);
+                        shader->commit();
+                        mesh->draw();
+                    } else {
+                        shader->draw(&CurrentLightRect[Renderer._eye]);
+                    }
+                }
+            };
+
             if (D.shadowSoft() >= 5) // use 2 pass blur (BlurX, BlurY)
             {
                 // first pass has to be flat (!geom) and cover full screen, because second pass gathers nearby pixels
@@ -300,42 +320,14 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
                 Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ);
                 Sh.ImgX[0]->set(temp); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders
                 Shader *shader = Sh.ShdBlurY[geom][0];
-                if (geom) {
-                    D.depth2DOn(depth_func);
-                    shader->startTex();
-                    mesh->set();
-                }
-                REPS(Renderer._eye, Renderer._eye_num)
-                if (CurrentLightOn[Renderer._eye]) {
-                    if (geom) {
-                        Renderer.setEyeViewportCam();
-                        SetFastMatrix(*light_matrix);
-                        shader->commit();
-                        mesh->draw();
-                    } else
-                        shader->draw(&CurrentLightRect[Renderer._eye]);
-                }
+                processRender(shader, mesh);
             } else // use single pass
             {
                 ImageRTPtr src = Renderer._shd_1s;
                 Renderer._shd_1s.get(rt_desc);
                 Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders
                 Shader *shader = Sh.ShdBlur[geom][0][D.shadowSoft() - 1];
-                if (geom) {
-                    D.depth2DOn(depth_func);
-                    shader->startTex();
-                    mesh->set();
-                }
-                REPS(Renderer._eye, Renderer._eye_num)
-                if (CurrentLightOn[Renderer._eye]) {
-                    if (geom) {
-                        Renderer.setEyeViewportCam();
-                        SetFastMatrix(*light_matrix);
-                        shader->commit();
-                        mesh->draw();
-                    } else
-                        shader->draw(&CurrentLightRect[Renderer._eye]);
-                }
+                processRender(shader, mesh);
             }
             Sh.ImgX[0]->set(Renderer._shd_1s);
         }

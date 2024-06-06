@@ -1342,7 +1342,6 @@ void CodeEditor::create(GuiObj *parent, Bool menu_on_top) {
         b_close.image = "Gui/close.img";
         b_close.skin = &EmptyGuiSkin;
 
-        // TODO FIX MEMORY CRASH WHEN EXITING THE APP
         Node<MenuElm> view_what_elms;
         view_what_elms.New().create("Element Names", ViewElmNames).flag(MENU_TOGGLABLE).setOn(view_elm_names).desc("Display project element names on top of their ID in the codes\nKeyboard Shortcut: Alt+E");
         view_what_elms++;

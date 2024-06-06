@@ -313,7 +313,6 @@ void MiscRegion::create() {
 
     online_ts.reset().size = 0.036f;
     flt w = 0.55f, h = 0.06f;
-    // TODO FIX MEMORY CRASH WHEN EXITING THE APP
     Gui += super ::create(Rect_LU(0, 0, w, h)).skin(&DarkSkin, false).hide().disabled(true);
     kb_lit = false;
     T += hide_proj.create(Rect_LU(0, 0, 0.090f, 0.06f), "<<").func(HideProj, T).focusable(false).desc("Hide Project\nKeyboard Shortcut: Alt+1");

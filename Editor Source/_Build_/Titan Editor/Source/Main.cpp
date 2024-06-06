@@ -252,7 +252,6 @@ bool Init() {
         Theater.create();       // create before 'Mode' so it's below Code Editor ouput
         Proj.create();          // create before 'Mode'
 
-        // TODO FIX MEMORY CRASH WHEN EXITING THE APP
         Mode.create();      // create after 'MtrlEdit' // TODO INVESTIGATE WHY THIS CALL WHEN ENABLED REDUCE BY ALOT FPS
         Misc.create();      // create after 'MtrlEdit' so 'preview_big' doesn't overlap
                             // FINISH

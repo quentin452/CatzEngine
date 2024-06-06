@@ -891,7 +891,6 @@ void CodeView::createItems(Memx<EEItem> &dest, C Memx<Edit::Item> &src, EEItem *
 }
 void CodeView::create(GuiObj &parent) {
     parent += Region::create();
-    // TODO FIX MEMORY CRASH WHEN EXITING THE APP
     CodeEditorInterface::create(parent, CodeMenuOnTop);
     // FINISH
     EEItem &ee = items.New();

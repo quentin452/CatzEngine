@@ -805,7 +805,6 @@ void ModeTabs::create() {
     Gui += close.create().func(CloseActive, T).desc("Keyboard Shortcut: Alt+F3");
     close.image = "Gui/close.img";
     close.skin = &EmptyGuiSkin;
-    // TODO FIX MEMORY CRASH WHEN EXITING THE APP
     tab(MODE_OBJ) += ObjEdit.create();
     tab(MODE_ANIM) += AnimEdit.create();
     tab(MODE_WORLD) += WorldEdit.create();

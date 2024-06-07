@@ -75,45 +75,6 @@ struct KeyboardClass // Keyboard Input
     Bool anyShift() C { return ButtonOn(_button[KB_LSHIFT] | _button[KB_RSHIFT]); }
     Bool anyAlt() C { return ButtonOn(_button[KB_LALT] | _button[KB_RALT]); }
     Bool anyWin() C { return ButtonOn(_button[KB_LWIN] | _button[KB_RWIN]); }
-    enum KeyState { PRESSED,
-                    RELEASED,
-                    DOWN,
-                    FIRST_PRESS,
-                    DOUBLE_CLICKED };
-
-    Bool anyKeyWasPressed(KeyState state, C std::unordered_map<KB_KEY, bool> &blacklist) C {
-        // Iterate over the range of KB_KEY values and check if any button is in the specified state
-        for (int i = KB_NONE; i <= KB_ZOOM_OUT; ++i) {
-            // If the key is in the blacklist, skip it
-            if (blacklist.find((KB_KEY)i) != blacklist.end() && blacklist.at((KB_KEY)i))
-                continue;
-
-            switch (state) {
-            case DOUBLE_CLICKED:
-                if (Kb.bd((KB_KEY)i))
-                    return true;
-                break;
-            case PRESSED:
-                if (Kb.bp((KB_KEY)i))
-                    return true;
-                break;
-            case RELEASED:
-                if (Kb.br((KB_KEY)i))
-                    return true;
-                break;
-            case DOWN:
-                if (Kb.b((KB_KEY)i))
-                    return true;
-                break;
-            case FIRST_PRESS:
-                if (Kb.kf((KB_KEY)i))
-                    return true;
-                break;
-            }
-        }
-        return false;
-    }
-
 #endif
 
     Char keyChar(KB_KEY key) C;     // get key character, example: keyChar  (KB_SPACE) -> ' '    , keyChar  (KB_UP) -> '\0'

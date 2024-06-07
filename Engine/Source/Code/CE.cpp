@@ -1742,15 +1742,14 @@ static Str FindPath(C Str &registry, C Str &sub_path) {
     }
     return S;
 }
-std::unordered_map<KB_KEY, bool> key_blacklist_for_auto_save = {
-    {KB_LCTRL, true},
-    {KB_S, true}};
 void CodeEditor::update(Bool active) {
     if (active) {
+        // Format With Clang When Saving
         if (CE.options.clang_format_during_save() && CE.options.save_during_write() && Kb.b(KB_LCTRL) && Kb.br(KB_S)) {
             CE.overwrite(true);
         }
-        if (CE.options.save_during_write() && Kb.anyKeyWasPressed(Kb.KeyState::DOWN, key_blacklist_for_auto_save)) {
+        // Auto Save During Writing
+        if (cur() && CE.options.save_during_write() && cur()->modified()) {
             CE.overwrite(false);
         }
         if (Gui.kb() == &build_list)

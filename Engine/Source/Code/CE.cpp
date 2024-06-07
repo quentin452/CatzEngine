@@ -1745,7 +1745,7 @@ static Str FindPath(C Str &registry, C Str &sub_path) {
 void CodeEditor::update(Bool active) {
     if (active) {
         // Format With Clang When Saving
-        if (CE.options.clang_format_during_save() && CE.options.save_during_write() && Kb.b(KB_LCTRL) && Kb.br(KB_S)) {
+        if (cur() && CE.options.clang_format_during_save() && CE.options.save_during_write() && Kb.b(KB_LCTRL) && Kb.br(KB_S)) {
             CE.overwrite(true);
         }
         // Auto Save During Writing

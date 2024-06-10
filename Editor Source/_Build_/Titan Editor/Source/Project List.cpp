@@ -2,8 +2,8 @@
 #include "stdafx.h"
 /******************************************************************************/
 Projects Projs;
-Str ProjectsPath;    // must include tailSlash
-Str MainProjectPath; // must include tailSlash
+Str ProjectsPath;            // must include tailSlash
+Str MainProjectPath;         // must include tailSlash
 Str CurrentlyOpenedFilePath; // must include tailSlash
 State StateProjectList(UpdateProjectList, DrawProjectList, InitProjectList, ShutProjectList);
 /******************************************************************************/
@@ -23,6 +23,23 @@ Str project_finding_depth;
 Str str_recursivity_max_depth = "5";
 bool refresh_depth = false;
 /******************************************************************************/
+
+void UpdateOrCreateProjectNameTxt(const std::string &filePath, const std::string &projectName) {
+    std::ofstream outFile(filePath, std::ios::trunc);
+    if (!outFile) {
+        throw std::runtime_error("Failed to update " + filePath);
+    }
+    outFile << projectName;
+}
+
+void UpdateOrCreateProjectNameTxt(Project &proj) {
+    UpdateOrCreateProjectNameTxt((proj.path + "project_name.txt").toCString(), proj.name.toCString());
+}
+
+void UpdateOrCreateProjectNameTxt(Projects::Elm &proj) {
+    UpdateOrCreateProjectNameTxt((proj.path + "project_name.txt").toCString(), proj.name.toCString());
+}
+
 bool InitProjectList() {
     SetKbExclusive();
     Proj.close();
@@ -358,8 +375,6 @@ bool Projects::newProj(C Str &name) {
     proj.id.randomizeValid();
     proj.name = CleanFileName(name);
     proj.path = ProjectsPath + EncodeFileName(proj.id).tailSlash(true);
-    LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "proj.name: " + std::string(proj.name.toCString()));
-    LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "proj.path: " + std::string(proj.path.toCString()));
     if (!ProjectsPath.is())
         Gui.msgBox(S, "Path for Projects is invalid");
     else if (!ValidFileName(proj.name))
@@ -373,6 +388,7 @@ bool Projects::newProj(C Str &name) {
     else if (!proj.save(proj.path + "Data"))
         Gui.msgBox(S, "Error saving project data");
     else {
+        UpdateOrCreateProjectNameTxt(proj);
         refresh();
         selectProj(proj.id);
         return true;
@@ -425,8 +441,10 @@ bool Projects::renameProj(C UID &proj_id, Str name) {
             break;
 
         case LOAD_OK:
+            // UpdateOrCreateProjectNameTxt(proj);
         case LOAD_EMPTY:
             proj.name = name;
+            UpdateOrCreateProjectNameTxt(proj);
             proj.close();
             refresh();
             selectProj(proj_id);
@@ -466,6 +484,7 @@ bool Projects::open(Elm &proj, bool ignore_lock) {
             ProjectLock.create(proj.id);
         else {
             SetProjectState();
+            UpdateOrCreateProjectNameTxt(proj);
             return true;
         }
     }

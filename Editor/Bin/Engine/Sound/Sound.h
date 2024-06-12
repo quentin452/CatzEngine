@@ -304,7 +304,7 @@ void SoundPlay(const_mem_addr SoundCallback &call, Flt volume = 1, VOLUME_GROUP 
 void SoundPlay(C Str &name, C Vec &pos, Flt range = 1, Flt volume = 1, VOLUME_GROUP volume_group = VOLUME_FX, Flt speed = 1);                        // play 3D sound, 'name'=sound file name   , 'pos'=sound position in World, 'range'=sound range multiplier (0..Inf), 'volume'=sound volume (0..1), 'speed'=sound speed (0..3)
 void SoundPlay(C UID &id, C Vec &pos, Flt range = 1, Flt volume = 1, VOLUME_GROUP volume_group = VOLUME_FX, Flt speed = 1);                          // play 3D sound, 'id'  =sound file name ID, 'pos'=sound position in World, 'range'=sound range multiplier (0..Inf), 'volume'=sound volume (0..1), 'speed'=sound speed (0..3)
 void SoundPlay(const_mem_addr SoundCallback &call, C Vec &pos, Flt range = 1, Flt volume = 1, VOLUME_GROUP volume_group = VOLUME_FX, Flt speed = 1); // play 3D sound, 'call'=sound call back   , 'pos'=sound position in World, 'range'=sound range multiplier (0..Inf), 'volume'=sound volume (0..1), 'speed'=sound speed (0..3)
-
+void StopAllSound();
 Flt SoundMinVolume();
 void SoundMinVolume(Flt volume); // get/set minimum volume required to play a sound            , default=0.02, if volume of a sound is less than the specified value then it will be skipped for faster processing
 Int SoundMaxConcurrent();

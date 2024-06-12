@@ -534,7 +534,7 @@ void _Sound::setBufferData(Byte *buffer, Int size) // no extra care needed
                 clear = -raw_pos;
             else // if data position is before the available data then clear
                 if (raw_pos >= raw_size && !kill)
-                kill = buffers(); // if data position is after  the available data then kill
+                    kill = buffers(); // if data position is after  the available data then kill
         }
         if (kill)
             clear = size; // if killing then clear
@@ -743,8 +743,8 @@ Bool _Sound::update(Flt dt) // !! requires 'SoundAPILock' !!
             _fade_d = 0;
         } else               // don't check for >=1 in case '_fade_d' is <0 (want to fade out) however 'dt'=0
             if (_fade < 0) { /*_fade=0; _fade_d=0;*/
-            del();
-        } // !! requires 'SoundAPILock' !! don't clear members because we're deleting, check for <0 instead of <=0, in case we want to fade in from zero, '_fade_d' is >0 however 'dt'=0
+                del();
+            } // !! requires 'SoundAPILock' !! don't clear members because we're deleting, check for <0 instead of <=0, in case we want to fade in from zero, '_fade_d' is >0 however 'dt'=0
         AtomicOr(flag, SOUND_CHANGED_VOLUME);
     }
 
@@ -1406,37 +1406,20 @@ void ChangeSounds(UInt change) // try using global
         ChangeSoundsSeparate(change); // if not, then have to set separately for all sounds
 }
 /******************************************************************************/
-static void SoundPlay2D(C Str &name, SoundCallback *call, Flt volume, VOLUME_GROUP volume_group, Flt speed) // !! call 'call.del' if not passed down !!
-{
+static void SoundPlay(C Str &name, SoundCallback *call, C Vec *pos, Flt range, Flt volume, VOLUME_GROUP volume_group, Flt speed) {
     if (SoundAPI) // test for 'SoundAPI' because there's no point in creating dummy sounds if they won't be played
     {
         SyncLocker locker(SoundMemxLock);
         _Sound &sound = SoundMemx.New();
         FlagEnable(sound.flag, SOUND_NO_REF);
-        sound.init(name, call, false, volume_group);
+        sound.init(name, call, pos != nullptr, volume_group);
         call = null; // 'call' will be processed inside, don't modify it anymore
         sound.volume(volume);
         sound.speed(speed);
-        sound.play();
-    }
-    if (call) {
-        call->del();
-        call = null;
-    }
-}
-static void SoundPlay3D(C Str &name, SoundCallback *call, C Vec &pos, Flt range, Flt volume, VOLUME_GROUP volume_group, Flt speed) // !! call 'call.del' if not passed down !!
-{
-    if (SoundAPI) // test for 'SoundAPI' because there's no point in creating dummy sounds if they won't be played
-    {
-        SyncLocker locker(SoundMemxLock);
-        _Sound &sound = SoundMemx.New();
-        FlagEnable(sound.flag, SOUND_NO_REF);
-        sound.init(name, call, true, volume_group);
-        call = null; // 'call' will be processed inside, don't modify it anymore
-        sound.volume(volume);
-        sound.speed(speed);
-        sound.pos(pos);
-        sound.range(range);
+        if (pos != nullptr) {
+            sound.pos(*pos);
+            sound.range(range);
+        }
         sound.play();
     }
     if (call) {
@@ -1447,22 +1430,37 @@ static void SoundPlay3D(C Str &name, SoundCallback *call, C Vec &pos, Flt range,
 
 void SoundPlay(C Str &name, Flt volume, VOLUME_GROUP volume_group, Flt speed) {
     if (name.is())
-        SoundPlay2D(name, null, volume, volume_group, speed);
+        SoundPlay(name, null, nullptr, 0, volume, volume_group, speed);
 }
 void SoundPlay(C Str &name, C Vec &pos, Flt range, Flt volume, VOLUME_GROUP volume_group, Flt speed) {
     if (name.is())
-        SoundPlay3D(name, null, pos, range, volume, volume_group, speed);
+        SoundPlay(name, null, &pos, range, volume, volume_group, speed);
 }
 void SoundPlay(C UID &id, Flt volume, VOLUME_GROUP volume_group, Flt speed) {
     if (id.valid())
-        SoundPlay2D(_EncodeFileName(id), null, volume, volume_group, speed);
+        SoundPlay(_EncodeFileName(id), null, nullptr, 0, volume, volume_group, speed);
 }
 void SoundPlay(C UID &id, C Vec &pos, Flt range, Flt volume, VOLUME_GROUP volume_group, Flt speed) {
     if (id.valid())
-        SoundPlay3D(_EncodeFileName(id), null, pos, range, volume, volume_group, speed);
+        SoundPlay(_EncodeFileName(id), null, &pos, range, volume, volume_group, speed);
 }
-void SoundPlay(SoundCallback &call, Flt volume, VOLUME_GROUP volume_group, Flt speed) { SoundPlay2D(S, &call, volume, volume_group, speed); }
-void SoundPlay(SoundCallback &call, C Vec &pos, Flt range, Flt volume, VOLUME_GROUP volume_group, Flt speed) { SoundPlay3D(S, &call, pos, range, volume, volume_group, speed); }
+void SoundPlay(SoundCallback &call, Flt volume, VOLUME_GROUP volume_group, Flt speed) {
+    SoundPlay(S, &call, nullptr, 0, volume, volume_group, speed);
+}
+void SoundPlay(SoundCallback &call, C Vec &pos, Flt range, Flt volume, VOLUME_GROUP volume_group, Flt speed) {
+    SoundPlay(S, &call, &pos, range, volume, volume_group, speed);
+}
+void StopAllSound() {
+    if (SoundAPI) {
+        SyncLocker locker(SoundMemxLock);
+        for (int i = 0; i < SoundMemx.elms(); i++) {
+            _Sound &sound = SoundMemx[i];
+            if (sound.is()) {
+                sound.stop();
+            }
+        }
+    }
+}
 /******************************************************************************/
 } // namespace EE
 /******************************************************************************/

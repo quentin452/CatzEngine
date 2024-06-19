@@ -708,49 +708,18 @@ static void EditAutoCompleteElm() {
 static void TemplateEmptyApplication() {
     if (CE.view_mode())
         return;
-    Str t =
-        "/******************************************************************************/\n\
-void InitPre()\n\
-{\n\
-   INIT();\n\
-   App.flag=APP_MINIMIZABLE|APP_MAXIMIZABLE|APP_RESIZABLE;\n\
-}\n\
-bool Init()\n\
-{\n\
-   return true;\n\
-}\n\
-void Shut()\n\
-{\n\
-}\n\
-/******************************************************************************/\n\
-bool Update()\n\
-{\n\
-   if(Kb.bp(KB_ESC))return false;\n\
-   Gui.update();\n\
-   return true;\n\
-}\n\
-/******************************************************************************/\n\
-void Draw()\n\
-{\n\
-   D.clearCol();\n\
-   Gui.draw();\n\
-}\n\
-/******************************************************************************/\n\
-";
-    CE.paste(&t);
-}
-#if WINDOWS
-static void TemplateEmptyApplicationWindows() {
-    if (CE.view_mode())
-        return;
     Str t = R"(
 /******************************************************************************/
+#if WINDOWS
 std::string _exe_game = "YOURGAMENAME";
+#endif
 void InitPre() {
+#if WINDOWS
     auto newLoggerInstance = std::make_unique<LoggerThread>();
     LoggerThread::SetLoggerThread(std::move(newLoggerInstance));
     InitThreadAndDisableDump::Init_elevatePrivile_DisableMemoryCrashDump_For_Games(_exe_game);
     InitThreadAndDisableDump::InitThreadedLoggerForCPP(_exe_game, _exe_game, _exe_game);
+#endif
     INIT();
     App.flag = APP_MINIMIZABLE | APP_MAXIMIZABLE | APP_RESIZABLE;
 }
@@ -776,7 +745,6 @@ void Draw() {
 )";
     CE.paste(&t);
 }
-#endif
 
 static void EditNextFile() { CE.nextFile(); }
 static void EditPrevFile() { CE.prevFile(); }
@@ -936,9 +904,6 @@ void CodeEditor::setMenu(Node<MenuElm> &menu) {
             {
                 Node<MenuElm> &t = (e += "Insert Template");
                 t.New().create("Empty Application", TemplateEmptyApplication);
-#if WINDOWS
-                t.New().create("Empty Application (Windows)", TemplateEmptyApplicationWindows);
-#endif
             }
             e++;
             e.New().create("Select All", EditSelectAll).kbsc(KbSc('a', KBSC_CTRL_CMD));

@@ -35,7 +35,6 @@ struct Str // Text String (16-bit per character)
     operator CChar *() C { return _d.data(); }  // cast to CChar*
     CChar *operator()() C { return _d.data(); } // get  text data
     Char operator[](Int i) C;                   // get  i-th character, returns '\0' if 'i' is out of range
-    #ifdef _WIN32
     std::string toCString() {
         std::string buffer(_length, '\0');
         for (int i = 0; i < _length; ++i) {
@@ -43,7 +42,6 @@ struct Str // Text String (16-bit per character)
         }
         return buffer;
     }
-    #endif
     Bool is() C { return _length > 0; }                        // if  contains any data
     Int length() C { return _length; }                         // get current length
     Char first() C { return _length ? _d[0] : '\0'; }          // get first character present in the string, '\0' if empty

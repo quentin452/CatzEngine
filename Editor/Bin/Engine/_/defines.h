@@ -11,6 +11,8 @@
 #define null nullptr
 #define null_t std::nullptr_t
 #define super __super
+#define OR ||
+#define AND &&
 /******************************************************************************/
 // TEMPLATE MACROS
 /******************************************************************************/

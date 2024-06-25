@@ -33,6 +33,8 @@ TextLine &TextLine::del() {
     zero();
     return T;
 }
+
+
 void TextLine::createReset() {
     reset.create().func(Clear, T).focusable(false).hide()._parent = this;
     reset._sub_type = BUTTON_TYPE_TEXTLINE_CLEAR;

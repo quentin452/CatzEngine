@@ -33,6 +33,9 @@ const_mem_addr struct TextLine : GuiObj // Gui TextLine !! must be stored in con
     Int cursor() C { return _edit.cur; }
     TextLine &cursor(Int position, Bool margin = true); // get/set cursor position
     C Str &operator()() C { return _text; }
+    bool operator!=(const Str& str) const {
+    return _text != str;
+    }
     TextLine &set(C Str &text, SET_MODE mode = SET_DEFAULT); // get/set text
     TextLine &clear(SET_MODE mode = SET_DEFAULT);            // clear   text
     Flt offset() C { return _offset; }                       // get     horizontal offset currently used for displaying text

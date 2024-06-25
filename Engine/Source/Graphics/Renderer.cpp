@@ -16,12 +16,12 @@ namespace EE {
 // #RTOutput
 #define SVEL_CLEAR Vec4Zero
 #define VEL_CLEAR Vec4(0.5f, 0.5f, 0.5f, 0)
-#define SNRM_CLEAR Vec4(0, 0, -1, 0) // normally Z should be set to 0   to set 'VecZero' normals, however Z is set to -1 makes ambient occlusion more precise when it uses normals (because ambient occlusion will not work good on the VecZero normals) #NRM_CLEAR
+#define SNRM_CLEAR Vec4(0, 0, -1, 0)     // normally Z should be set to 0   to set 'VecZero' normals, however Z is set to -1 makes ambient occlusion more precise when it uses normals (because ambient occlusion will not work good on the VecZero normals) #NRM_CLEAR
 #define NRM_CLEAR Vec4(0.5f, 0.5f, 0, 0) // normally Z should be set to 0.5 to set 'VecZero' normals, however Z is set to  0 makes ambient occlusion more precise when it uses normals (because ambient occlusion will not work good on the VecZero normals) #NRM_CLEAR
-#define EXT_CLEAR Vec4(1, 0, 0, 0) // rough, reflect
-#define NRM_CLEAR_START 1 // 1 works faster on GeForce 650m GT, TODO: check on newer hardware
-#define EXT_CLEAR_START 0 // TODO: which is better?
-#define VEL_CLEAR_START 0 // this is not needed because "ClearDeferred" is used later, performance tests suggested it's better don't clear unless necessary, instead 'Image.discard' is used and improves performance (at least on Mobile), TODO: check on newer hardware
+#define EXT_CLEAR Vec4(1, 0, 0, 0)       // rough, reflect
+#define NRM_CLEAR_START 1                // 1 works faster on GeForce 650m GT, TODO: check on newer hardware
+#define EXT_CLEAR_START 0                // TODO: which is better?
+#define VEL_CLEAR_START 0                // this is not needed because "ClearDeferred" is used later, performance tests suggested it's better don't clear unless necessary, instead 'Image.discard' is used and improves performance (at least on Mobile), TODO: check on newer hardware
 // if there's no sky but we use an environment map, currently PBR formulas can generate specular/reflection even if smooth and reflectivity are zero, so for that case we also need to clear normals as it depends on eye_dir, view_nrm, smooth and reflectivity #SpecularReflectionFromZeroSmoothReflectivity
 static inline Bool NeedBackgroundNrm() { return (!Sky.isActual() && D.envMap()) || D.aoWant() && D.ambientNormal() || Renderer.stage == RS_NORMAL; }
 static inline Bool NeedBackgroundExt() { return (!Sky.isActual() && D.envMap()) || Renderer.stage == RS_SMOOTH || Renderer.stage == RS_REFLECT || Renderer.stage == RS_LIT_COLOR; }
@@ -38,8 +38,8 @@ static const Vec2 TemporalSuperResOffsets[] =
 /******************************************************************************/
 static const Vec2 TemporalAntiAliasOffsets[] =
     {
-#if 1 // 8 samples (good enough quality and smaller flickering)
-#if 1 // Halton (smaller flickering), REPAO(TemporalAntiAliasOffsets).set(Halton(i+1, 2)*2-1, Halton(i+1, 3)*2-1)
+#if 1                     // 8 samples (good enough quality and smaller flickering)
+#if 1                     // Halton (smaller flickering), REPAO(TemporalAntiAliasOffsets).set(Halton(i+1, 2)*2-1, Halton(i+1, 3)*2-1)
 #define TEMPORAL_MUL 1.1f // this makes AA more smooth
         {0.000f * TEMPORAL_MUL, -0.333333313f * TEMPORAL_MUL},
         {-0.500f * TEMPORAL_MUL, 0.333333373f * TEMPORAL_MUL},
@@ -349,15 +349,15 @@ void RendererClass::linearizeDepth(ImageRT &dest, ImageRT &depth) {
         Sh.Depth->set(_ds_1s);
     } else // 1s->1s, set and restore depth, if we're resizing then we also need to use the simple version, 'imgSize' needed for 'DownSamplePointUV'
         if (!dest.multiSample()) {
-        Sh.DepthMS->set(depth);
-        Sh.LinearizeDepth[1][FovPerspective(D.viewFovMode())]->draw();
-        Sh.DepthMS->set(_ds);
-    } else // ms->1s, set and restore depth
-    {
-        Sh.DepthMS->set(depth);
-        Sh.LinearizeDepth[2][FovPerspective(D.viewFovMode())]->draw();
-        Sh.DepthMS->set(_ds);
-    } // ms->ms, set and restore depth
+            Sh.DepthMS->set(depth);
+            Sh.LinearizeDepth[1][FovPerspective(D.viewFovMode())]->draw();
+            Sh.DepthMS->set(_ds);
+        } else // ms->1s, set and restore depth
+        {
+            Sh.DepthMS->set(depth);
+            Sh.LinearizeDepth[2][FovPerspective(D.viewFovMode())]->draw();
+            Sh.DepthMS->set(_ds);
+        } // ms->ms, set and restore depth
 }
 void RendererClass::setDepthForDebugDrawing() {
     if (_set_depth_needed) {
@@ -400,7 +400,7 @@ ImageRT *RendererClass::adaptEye(ImageRTC &src, ImageRT *dest) {
             break;
         s = next_size;
         num++;
-    }         // go from 1 up to 'max_size', increase *4 in each step
+    } // go from 1 up to 'max_size', increase *4 in each step
     FREP(num) // now go backward, from up to 'max_size' to 1 inclusive
     {
         ImageRTPtr next = cur;
@@ -1160,6 +1160,7 @@ Bool RendererClass::reflection() {
         D.clipPlane(_mirror_plane); // set clip plane after viewport and camera
         D.lodSetCurrentFactor();
 
+        // todo suspects here for https://github.com/quentin452/CatzEngine/issues/56 , suspect number one : prepare();
         // render !! adding new modes here will require setting there D.clipPlane !!
         prepare();
         opaque();
@@ -1167,8 +1168,7 @@ Bool RendererClass::reflection() {
         sky();
         blend();
         AstroDrawRays();
-
-        // cleanup
+        
         cleanup();
         Swap(_mirror_rt, _col); // 'cleanup' clears '_mirror_rt' so we need to set it after calling the function
 
@@ -1349,9 +1349,9 @@ void RendererClass::setDS() {
         _ds = &_main_ds;
     else // we should always pair '_main' with '_main_ds', even if it's not 'accessible'
         if (_col == _cur_main)
-        _ds = _cur_main_ds;
-    else                                                  // reuse '_cur_main_ds' if we're rendering to '_cur_main'
-        _ds.getDS(_col->w(), _col->h(), _col->samples()); // create a new one
+            _ds = _cur_main_ds;
+        else                                                  // reuse '_cur_main_ds' if we're rendering to '_cur_main'
+            _ds.getDS(_col->w(), _col->h(), _col->samples()); // create a new one
 }
 void RendererClass::temporalCheck() // needs to be called after RT and viewport were set
 {
@@ -1454,9 +1454,9 @@ start:
         _ds_1s = _ds;
     else // if the source is not multi-sampled then reuse it
         if (_ds->depthTexture())
-        _ds_1s.getDS(_ds->w(), _ds->h());
-    else                // create new only if we can resolve multi-sample onto 1-sample
-        _ds_1s.clear(); // there's no point in creating a 1-sampled depth buffer if we can't resolve from the multi-sampled
+            _ds_1s.getDS(_ds->w(), _ds->h());
+        else                // create new only if we can resolve multi-sample onto 1-sample
+            _ds_1s.clear(); // there's no point in creating a 1-sampled depth buffer if we can't resolve from the multi-sampled
     Sh.Depth->set(_ds_1s);
     Sh.DepthMS->set(_ds);
 
@@ -1573,7 +1573,7 @@ void RendererClass::setForwardCol() {
         if (_clear & 2) {
             D.clearDS();
             temporalCheck();
-        }           // 'temporalCheck' and 'D.clearDS' are paired to make sure 'temporalCheck' is called only once
+        } // 'temporalCheck' and 'D.clearDS' are paired to make sure 'temporalCheck' is called only once
         _clear = 0; // cleared
     }
 }
@@ -2046,102 +2046,102 @@ Bool RendererClass::waterPostLight() {
         Water.drawSurfaces();
     else                // if we don't want to use secondary RT's
         if (_water_col) // only if we've got some water
-    {
-        /* -we can always do soft, because '_use_secondary_rt' is enabled only if we can read from depth buffer
-               -we need to read from both depth buffers to perform softing, so in order to modify depth, we need to do this after in another operation
-               -when doing refraction, we need to have a copy of '_col' and apply to '_col' (this is better for multi-sampling because copy can be 1-sampled)
-                   or alternatively apply to a new RT using existing '_col' (however the new RT would have to be multi-sampled for MS case)
-               -when not doing refraction, we don't need any copy or separate RT, we can just apply to existing '_col' using alpha blending without reading from it, however doing this would prevent from applying glow, so don't do it
-               -we can't use stencil optimizations, because:
-                  -when applying to MS RT the DS is MS and does not have any information about water
-                  -otherwise we apply to another RT and we have to write all pixels
-            */
-        getWaterLumRT(); // get in case we still haven't initialized it
-        Bool refract = (Water.refract > EPS_MATERIAL_BUMP);
-
-        ImageRTPtr src = _col;
-        Bool depth_test;
-        if (depth_test = src->multiSample()) // multi-sampled textures can't be sampled smoothly as there will be artifacts, so resolve them, also in this case we render back to '_col' (which is not set to a new RT because we have a copy of it in 'src') but only to pixels with depth FUNC_LESS, this solves the problem of AA with water
-        {                                    // convert to 1 sample
-            ImageRTPtr temp(ImageRTDesc(src->w(), src->h(), GetImageRTType(src->type())));
-            src->copyMs(*temp, false, false, D.viewRect());
-            Swap(src, temp);
-            D.depthLock(true);   // we need depth testing
-            D.depthWrite(false); // disable depth writing because we can't read and write to same DS
-            if (FUNC_DEFAULT != FUNC_LESS)
-                D.depthFunc(FUNC_LESS); // process only pixels that are closer (which means water on top of existing opaque)
-        }
-        if (_col == src)
-            _col.get(ImageRTDesc(_col->w(), _col->h(), GetImageRTType(_col->type()), _col->samples())); // can't read and write to same RT, in multi-sampling we're writing back to '_col' as it's not changed
-
-        SetOneMatrix();                        // needed for refraction
-        set(_col, _ds, true, NEED_DEPTH_READ); // we need depth read because we always need to read depth buffer for softing, but still use '_ds' in case we apply to existing '_col'
-        D.alpha(ALPHA_NONE);
-
-        Water.set();
-        Water.setImages(src, _water_ds);
-        Sh.Img[0]->set(_water_nrm); // 'Img0' required by shader 'GetNormal', 'GetNormalMS' functions
-        Sh.Img[3]->set(_water_col);
-        Sh.Img[4]->set(_water_lum);
-        Sh.Img[5]->set(_water_spec);
-        Sh.ImgXY[0]->set(_water_refract);
-        Shader *shader = WS.Apply[depth_test][Water._shader_reflect_env][Water._shader_reflect_mirror][refract]; // we need to output depth only if we need it for depth testing
-        REPS(_eye, _eye_num) {
-            Water.setEyeViewportCam();
-            shader->draw();
-        }
-        if (depth_test) {
-            D.depthUnlock();
-            D.depthWrite(true);
-            if (FUNC_DEFAULT != FUNC_LESS)
-                D.depthFunc(FUNC_DEFAULT);
-        }
-        Water.endImages();
-
-        // now we have to modify the depth buffer
-        if ((!Water._swapped_ds || !swapDS1S(_water_ds)) && Sh.SetDepth) // if we haven't swapped before, or swap back failed, then we have to apply '_water_ds' on top of existing '_ds_1s', otherwise we just swap back '_water_ds' because it had the stencil values
         {
-            set(null, _ds_1s, true);
-            if (FUNC_DEFAULT != FUNC_LESS)
-                D.depthFunc(FUNC_LESS);
-            D.depthLock(true);
-            Sh.Depth->set(_water_ds);
-            Sh.SetDepth->draw();
-            Sh.Depth->set(_ds_1s); // FUNC_LESS to modify only those that are closer
-            if (FUNC_DEFAULT != FUNC_LESS)
-                D.depthFunc(FUNC_DEFAULT);
-            D.depthUnlock();
-        }
-        if (_ds != _ds_1s && Sh.SetDepth) // multi-sample
-        {
-            set(null, _ds, true);
-            if (FUNC_DEFAULT != FUNC_LESS)
-                D.depthFunc(FUNC_LESS);
-            D.depthLock(true);
-            Sh.Depth->set(_water_ds);
-            Sh.SetDepth->draw();
-            Sh.Depth->set(_ds_1s); // FUNC_LESS to modify only those that are closer
-            if (FUNC_DEFAULT != FUNC_LESS)
-                D.depthFunc(FUNC_DEFAULT);
-            D.depthUnlock();
-        }
+            /* -we can always do soft, because '_use_secondary_rt' is enabled only if we can read from depth buffer
+                   -we need to read from both depth buffers to perform softing, so in order to modify depth, we need to do this after in another operation
+                   -when doing refraction, we need to have a copy of '_col' and apply to '_col' (this is better for multi-sampling because copy can be 1-sampled)
+                       or alternatively apply to a new RT using existing '_col' (however the new RT would have to be multi-sampled for MS case)
+                   -when not doing refraction, we don't need any copy or separate RT, we can just apply to existing '_col' using alpha blending without reading from it, however doing this would prevent from applying glow, so don't do it
+                   -we can't use stencil optimizations, because:
+                      -when applying to MS RT the DS is MS and does not have any information about water
+                      -otherwise we apply to another RT and we have to write all pixels
+                */
+            getWaterLumRT(); // get in case we still haven't initialized it
+            Bool refract = (Water.refract > EPS_MATERIAL_BUMP);
 
-        if (stage)
-            switch (stage) {
-            case RS_WATER_COLOR:
-                if (show(_water_col, true))
-                    return true;
-                break;
-            case RS_WATER_NORMAL:
-                if (show(_water_nrm, false, D.signedNrmRT()))
-                    return true;
-                break;
-            case RS_WATER_LIGHT:
-                if (show(_water_lum, true))
-                    return true;
-                break;
+            ImageRTPtr src = _col;
+            Bool depth_test;
+            if (depth_test = src->multiSample()) // multi-sampled textures can't be sampled smoothly as there will be artifacts, so resolve them, also in this case we render back to '_col' (which is not set to a new RT because we have a copy of it in 'src') but only to pixels with depth FUNC_LESS, this solves the problem of AA with water
+            {                                    // convert to 1 sample
+                ImageRTPtr temp(ImageRTDesc(src->w(), src->h(), GetImageRTType(src->type())));
+                src->copyMs(*temp, false, false, D.viewRect());
+                Swap(src, temp);
+                D.depthLock(true);   // we need depth testing
+                D.depthWrite(false); // disable depth writing because we can't read and write to same DS
+                if (FUNC_DEFAULT != FUNC_LESS)
+                    D.depthFunc(FUNC_LESS); // process only pixels that are closer (which means water on top of existing opaque)
             }
-    }
+            if (_col == src)
+                _col.get(ImageRTDesc(_col->w(), _col->h(), GetImageRTType(_col->type()), _col->samples())); // can't read and write to same RT, in multi-sampling we're writing back to '_col' as it's not changed
+
+            SetOneMatrix();                        // needed for refraction
+            set(_col, _ds, true, NEED_DEPTH_READ); // we need depth read because we always need to read depth buffer for softing, but still use '_ds' in case we apply to existing '_col'
+            D.alpha(ALPHA_NONE);
+
+            Water.set();
+            Water.setImages(src, _water_ds);
+            Sh.Img[0]->set(_water_nrm); // 'Img0' required by shader 'GetNormal', 'GetNormalMS' functions
+            Sh.Img[3]->set(_water_col);
+            Sh.Img[4]->set(_water_lum);
+            Sh.Img[5]->set(_water_spec);
+            Sh.ImgXY[0]->set(_water_refract);
+            Shader *shader = WS.Apply[depth_test][Water._shader_reflect_env][Water._shader_reflect_mirror][refract]; // we need to output depth only if we need it for depth testing
+            REPS(_eye, _eye_num) {
+                Water.setEyeViewportCam();
+                shader->draw();
+            }
+            if (depth_test) {
+                D.depthUnlock();
+                D.depthWrite(true);
+                if (FUNC_DEFAULT != FUNC_LESS)
+                    D.depthFunc(FUNC_DEFAULT);
+            }
+            Water.endImages();
+
+            // now we have to modify the depth buffer
+            if ((!Water._swapped_ds || !swapDS1S(_water_ds)) && Sh.SetDepth) // if we haven't swapped before, or swap back failed, then we have to apply '_water_ds' on top of existing '_ds_1s', otherwise we just swap back '_water_ds' because it had the stencil values
+            {
+                set(null, _ds_1s, true);
+                if (FUNC_DEFAULT != FUNC_LESS)
+                    D.depthFunc(FUNC_LESS);
+                D.depthLock(true);
+                Sh.Depth->set(_water_ds);
+                Sh.SetDepth->draw();
+                Sh.Depth->set(_ds_1s); // FUNC_LESS to modify only those that are closer
+                if (FUNC_DEFAULT != FUNC_LESS)
+                    D.depthFunc(FUNC_DEFAULT);
+                D.depthUnlock();
+            }
+            if (_ds != _ds_1s && Sh.SetDepth) // multi-sample
+            {
+                set(null, _ds, true);
+                if (FUNC_DEFAULT != FUNC_LESS)
+                    D.depthFunc(FUNC_LESS);
+                D.depthLock(true);
+                Sh.Depth->set(_water_ds);
+                Sh.SetDepth->draw();
+                Sh.Depth->set(_ds_1s); // FUNC_LESS to modify only those that are closer
+                if (FUNC_DEFAULT != FUNC_LESS)
+                    D.depthFunc(FUNC_DEFAULT);
+                D.depthUnlock();
+            }
+
+            if (stage)
+                switch (stage) {
+                case RS_WATER_COLOR:
+                    if (show(_water_col, true))
+                        return true;
+                    break;
+                case RS_WATER_NORMAL:
+                    if (show(_water_nrm, false, D.signedNrmRT()))
+                        return true;
+                    break;
+                case RS_WATER_LIGHT:
+                    if (show(_water_lum, true))
+                        return true;
+                    break;
+                }
+        }
     _water_col.clear();
     _water_nrm.clear();
     _water_refract.clear();
@@ -2648,7 +2648,7 @@ void RendererClass::edgeSoften() // !! assumes that 'finalizeGlow' was called !!
             if (swap_srgb) {
                 gamma = false;
                 _col->swapSRV();
-            }                                                        // if we have a non-sRGB access, then just use it instead of doing the more expensive shader, later we have to restore it
+            } // if we have a non-sRGB access, then just use it instead of doing the more expensive shader, later we have to restore it
             D.stencil(STENCIL_EDGE_SOFT_SET, STENCIL_REF_EDGE_SOFT); // have to use 'ds' in write mode to be able to use stencil
             ImageRTPtr edge(rt_desc.type(IMAGERT_TWO));
             set(edge, ds, true);
@@ -2887,7 +2887,7 @@ void RendererClass::postProcess() {
                 gamma = false;
                 _col->swapSRV();
                 dest->swapRTV();
-            }               // do just one gamma instead of in/out, to avoid having to do expensive gamma conversion in the shader
+            } // do just one gamma instead of in/out, to avoid having to do expensive gamma conversion in the shader
             pixels = 3 + 1; // 3 for filtering + 1 for borders
             Sh.imgSize(*_col);
             Sh.loadCubicShaders();

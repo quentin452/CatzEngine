@@ -1160,15 +1160,17 @@ Bool RendererClass::reflection() {
         D.clipPlane(_mirror_plane); // set clip plane after viewport and camera
         D.lodSetCurrentFactor();
 
-        // todo suspects here for https://github.com/quentin452/CatzEngine/issues/56 , suspect number one : prepare();
+        /* DISABLED ALL OF THESE TO FIX https://github.com/quentin452/CatzEngine/issues/56 (caused by prepare())
         // render !! adding new modes here will require setting there D.clipPlane !!
-        prepare();
-        opaque();
-        light();
-        sky();
-        blend();
-        AstroDrawRays();
-        
+        //prepare();
+        //opaque();
+        //light();
+        //sky();
+        //blend();
+        //AstroDrawRays();
+        */
+
+        // cleanup
         cleanup();
         Swap(_mirror_rt, _col); // 'cleanup' clears '_mirror_rt' so we need to set it after calling the function
 

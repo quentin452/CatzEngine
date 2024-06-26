@@ -739,7 +739,9 @@ INLINE void processPointLightForward(Light &CurrentLight, ALPHA_MODE alpha) {
     }
 
     DrawLightPointForward_CASE_LIGHT_POINT(alpha, range);
-    DrawWaterLumPoint_CASE_LIGHT_POINT(range);
+    if (Renderer._water_nrm) {
+        DrawWaterLumPoint_CASE_LIGHT_POINT(range);
+    }
     D.set2D();
 }
 

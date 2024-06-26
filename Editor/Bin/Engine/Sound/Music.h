@@ -42,7 +42,7 @@ struct MusicManager {
     Bool shuffle = true;               // if select songs from Playlist in random order
     FADE_CURVE fade_curve = FADE_SQRT; // curve used for song crossfade
     Flt fade_in = 0.5f,                // fade in  time for starting  new songs
-        fade_out = 3,                  // fade out time for finishing old songs
+        fade_out = 0,                  // fade out time for finishing old songs
         time_reset = 10;               // minimum  time left needed to play a song again from its last position instead of playing it from the start, for example: if song "A" was playing, and user manually switched to song "B", the last position of "A" song is remembered before switching to "B" song, then if user switches back to "A" song, the engine first checks if last position of "A" song has at least 'time_reset' seconds before the end of the song, if yes then song "A" is played from its last remembered position, if not then it is played from the start of the song
 
     UID(*select_song)

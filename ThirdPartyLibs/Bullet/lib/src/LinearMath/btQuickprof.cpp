@@ -720,9 +720,6 @@ void btLeaveProfileZoneDefault()
   #define BT_HAVE_TLS 1
 #elif __linux__
   #define BT_HAVE_TLS 1
-#elif defined(__FreeBSD__) || defined(__NetBSD__)
-  // TODO: At the moment disabling purposely OpenBSD, albeit tls support exists but not fully functioning
-  #define BT_HAVE_TLS 1
 #endif
 
 // __thread is broken on Andorid clang until r12b. See

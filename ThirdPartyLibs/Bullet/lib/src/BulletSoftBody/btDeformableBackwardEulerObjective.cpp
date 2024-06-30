@@ -263,10 +263,7 @@ void btDeformableBackwardEulerObjective::applyExplicitForce(TVStack& force)
 		{
 			for (int j = 0; j < psb->m_nodes.size(); ++j)
 			{
-				if (psb->m_nodes[j].m_im > 0)
-				{
-					psb->m_nodes[j].m_effectiveMass_inv = psb->m_nodes[j].m_effectiveMass.inverse();
-				}
+				psb->m_nodes[j].m_effectiveMass_inv = psb->m_nodes[j].m_effectiveMass.inverse();
 			}
 		}
 	}

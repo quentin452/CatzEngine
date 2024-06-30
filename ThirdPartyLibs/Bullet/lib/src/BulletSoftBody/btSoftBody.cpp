@@ -1,6 +1,6 @@
 /*
 Bullet Continuous Collision Detection and Physics Library
-Copyright (c) 2003-2006 Erwin Coumans  https://bulletphysics.org
+Copyright (c) 2003-2006 Erwin Coumans  http://continuousphysics.com/Bullet/
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -229,11 +229,7 @@ void btSoftBody::initDefaults()
 	m_maxSpeedSquared = 0;
 	m_repulsionStiffness = 0.5;
 	m_gravityFactor = 1;
-	m_cacheBarycenter = false;
 	m_fdbvnt = 0;
-
-	// reduced flag
-	m_reducedModel = false;
 }
 
 //
@@ -753,7 +749,7 @@ void btSoftBody::addAeroForceToNode(const btVector3& windVelocity, int nodeIndex
 					fDrag = 0.5f * kDG * medium.m_density * rel_v2 * tri_area * n_dot_v * (-rel_v_nrm);
 
 					// Check angle of attack
-					// cos(10ยบ) = 0.98480
+					// cos(10บ) = 0.98480
 					if (0 < n_dot_v && n_dot_v < 0.98480f)
 						fLift = 0.5f * kLF * medium.m_density * rel_v_len * tri_area * btSqrt(1.0f - n_dot_v * n_dot_v) * (nrm.cross(rel_v_nrm).cross(rel_v_nrm));
 
@@ -839,7 +835,7 @@ void btSoftBody::addAeroForceToFace(const btVector3& windVelocity, int faceIndex
 				fDrag = 0.5f * kDG * medium.m_density * rel_v2 * tri_area * n_dot_v * (-rel_v_nrm);
 
 				// Check angle of attack
-				// cos(10ยบ) = 0.98480
+				// cos(10บ) = 0.98480
 				if (0 < n_dot_v && n_dot_v < 0.98480f)
 					fLift = 0.5f * kLF * medium.m_density * rel_v_len * tri_area * btSqrt(1.0f - n_dot_v * n_dot_v) * (nrm.cross(rel_v_nrm).cross(rel_v_nrm));
 
@@ -1484,21 +1480,6 @@ void btSoftBody::randomizeConstraints()
 		btSwap(m_faces[i], m_faces[NEXTRAND % ni]);
 	}
 #undef NEXTRAND
-}
-
-void btSoftBody::updateState(const btAlignedObjectArray<btVector3>& q, const btAlignedObjectArray<btVector3>& v)
-{
-	int node_count = m_nodes.size();
-	btAssert(node_count == q.size());
-	btAssert(node_count == v.size());
-	for (int i = 0; i < node_count; i++)
-	{
-		Node& n = m_nodes[i];
-		n.m_x = q[i];
-		n.m_q = q[i];
-		n.m_v = v[i];
-		n.m_vn = v[i];
-	}
 }
 
 //
@@ -2807,7 +2788,7 @@ bool btSoftBody::checkDeformableContact(const btCollisionObjectWrapper* colObjWr
 //
 // Compute barycentric coordinates (u, v, w) for
 // point p with respect to triangle (a, b, c)
-static void getBarycentric(const btVector3& p, const btVector3& a, const btVector3& b, const btVector3& c, btVector3& bary)
+static void getBarycentric(const btVector3& p, btVector3& a, btVector3& b, btVector3& c, btVector3& bary)
 {
 	btVector3 v0 = b - a, v1 = c - a, v2 = p - a;
 	btScalar d00 = v0.dot(v0);
@@ -2816,17 +2797,8 @@ static void getBarycentric(const btVector3& p, const btVector3& a, const btVecto
 	btScalar d20 = v2.dot(v0);
 	btScalar d21 = v2.dot(v1);
 	btScalar denom = d00 * d11 - d01 * d01;
-	// In the case of a degenerate triangle, pick a vertex.
-	if (btFabs(denom) < SIMD_EPSILON) 
-	{
-		bary.setY(btScalar(0.0));
-		bary.setZ(btScalar(0.0));
-	} 
-	else 
-	{
-		bary.setY((d11 * d20 - d01 * d21) / denom);
-		bary.setZ((d00 * d21 - d01 * d20) / denom);
-  	}
+	bary.setY((d11 * d20 - d01 * d21) / denom);
+	bary.setZ((d00 * d21 - d01 * d20) / denom);
 	bary.setX(btScalar(1) - bary.getY() - bary.getZ());
 }
 
@@ -2848,7 +2820,8 @@ bool btSoftBody::checkDeformableFaceContact(const btCollisionObjectWrapper* colO
 	btScalar dst;
 	btGjkEpaSolver2::sResults results;
 
-	//	#define USE_QUADRATURE 1
+//	#define USE_QUADRATURE 1
+//#define CACHE_PREV_COLLISION
 
 	// use collision quadrature point
 #ifdef USE_QUADRATURE
@@ -2899,31 +2872,30 @@ bool btSoftBody::checkDeformableFaceContact(const btCollisionObjectWrapper* colO
 	if (dst >= 0)
 		return false;
 
-	// Use consistent barycenter to recalculate distance.
-	if (this->m_cacheBarycenter)
+// Use consistent barycenter to recalculate distance.
+#ifdef CACHE_PREV_COLLISION
+	if (f.m_pcontact[3] != 0)
 	{
-		if (f.m_pcontact[3] != 0)
-		{
-			for (int i = 0; i < 3; ++i)
-				bary[i] = f.m_pcontact[i];
-			contact_point = BaryEval(f.m_n[0]->m_x, f.m_n[1]->m_x, f.m_n[2]->m_x, bary);
-			const btConvexShape* csh = static_cast<const btConvexShape*>(shp);
-			btGjkEpaSolver2::SignedDistance(contact_point, margin, csh, wtr, results);
-			cti.m_colObj = colObjWrap->getCollisionObject();
-			dst = results.distance;
-			cti.m_normal = results.normal;
-			cti.m_offset = dst;
+		for (int i = 0; i < 3; ++i)
+			bary[i] = f.m_pcontact[i];
+		contact_point = BaryEval(f.m_n[0]->m_x, f.m_n[1]->m_x, f.m_n[2]->m_x, bary);
+		const btConvexShape* csh = static_cast<const btConvexShape*>(shp);
+		btGjkEpaSolver2::SignedDistance(contact_point, margin, csh, wtr, results);
+		cti.m_colObj = colObjWrap->getCollisionObject();
+		dst = results.distance;
+		cti.m_normal = results.normal;
+		cti.m_offset = dst;
 
-			//point-convex CD
-			wtr = colObjWrap->getWorldTransform();
-			btTriangleShape triangle2(btVector3(0, 0, 0), f.m_n[1]->m_x - f.m_n[0]->m_x, f.m_n[2]->m_x - f.m_n[0]->m_x);
-			triangle_transform.setOrigin(f.m_n[0]->m_x);
-			btGjkEpaSolver2::SignedDistance(&triangle2, triangle_transform, csh, wtr, guess, results);
+		//point-convex CD
+		wtr = colObjWrap->getWorldTransform();
+		btTriangleShape triangle2(btVector3(0, 0, 0), f.m_n[1]->m_x - f.m_n[0]->m_x, f.m_n[2]->m_x - f.m_n[0]->m_x);
+		triangle_transform.setOrigin(f.m_n[0]->m_x);
+		btGjkEpaSolver2::SignedDistance(&triangle2, triangle_transform, csh, wtr, guess, results);
 
-			dst = results.distance - csh->getMargin() - margin;
-			return true;
-		}
+		dst = results.distance - csh->getMargin() - margin;
+		return true;
 	}
+#endif
 
 	// Use triangle-convex CD.
 	wtr = colObjWrap->getWorldTransform();
@@ -3473,11 +3445,6 @@ void btSoftBody::setGravityFactor(btScalar gravFactor)
 	m_gravityFactor = gravFactor;
 }
 
-void btSoftBody::setCacheBarycenter(bool cacheBarycenter)
-{
-	m_cacheBarycenter = cacheBarycenter;
-}
-
 void btSoftBody::initializeDmInverse()
 {
 	btScalar unit_simplex_measure = 1. / 6.;
@@ -3832,7 +3799,7 @@ void btSoftBody::interpolateRenderMesh()
 			const Node* p2 = m_renderNodesParents[i][2];
 			btVector3 normal = btCross(p1->m_x - p0->m_x, p2->m_x - p0->m_x);
 			btVector3 unit_normal = normal.normalized();
-			RenderNode& n = m_renderNodes[i];
+			Node& n = m_renderNodes[i];
 			n.m_x.setZero();
 			for (int j = 0; j < 3; ++j)
 			{
@@ -3845,7 +3812,7 @@ void btSoftBody::interpolateRenderMesh()
 	{
 		for (int i = 0; i < m_renderNodes.size(); ++i)
 		{
-			RenderNode& n = m_renderNodes[i];
+			Node& n = m_renderNodes[i];
 			n.m_x.setZero();
 			for (int j = 0; j < 4; ++j)
 			{
@@ -3906,7 +3873,7 @@ void btSoftBody::PSolve_RContacts(btSoftBody* psb, btScalar kst, btScalar ti)
 			btVector3 va(0, 0, 0);
 			btRigidBody* rigidCol = 0;
 			btMultiBodyLinkCollider* multibodyLinkCol = 0;
-			btScalar* deltaV = NULL;
+			btScalar* deltaV;
 
 			if (cti.m_colObj->getInternalType() == btCollisionObject::CO_RIGID_BODY)
 			{
@@ -4122,7 +4089,7 @@ void btSoftBody::defaultCollisionHandler(const btCollisionObjectWrapper* pcoWrap
 		case fCollision::SDF_RD:
 		{
 			btRigidBody* prb1 = (btRigidBody*)btRigidBody::upcast(pcoWrap->getCollisionObject());
-			if (this->isActive())
+			if (pcoWrap->getCollisionObject()->isActive() || this->isActive())
 			{
 				const btTransform wtr = pcoWrap->getWorldTransform();
 				const btScalar timemargin = 0;

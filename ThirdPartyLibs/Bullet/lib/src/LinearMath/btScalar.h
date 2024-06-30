@@ -25,7 +25,7 @@ subject to the following restrictions:
 #include <float.h>
 
 /* SVN $Revision$ on $Date$ from http://bullet.googlecode.com*/
-#define BT_BULLET_VERSION 326
+#define BT_BULLET_VERSION 289
 
 inline int btGetVersion()
 {
@@ -107,7 +107,7 @@ inline int btIsDoublePrecision()
  			#define btFsel(a,b,c) __fsel((a),(b),(c))
 		#else
 
-#if defined (_M_ARM) || defined (_M_ARM64)
+#if defined (_M_ARM)
             //Do not turn SSE on for ARM (may want to turn on BT_USE_NEON however)
 #elif (defined (_WIN32) && (_MSC_VER) && _MSC_VER >= 1400) && (!defined (BT_USE_DOUBLE_PRECISION))
 
@@ -279,12 +279,9 @@ inline int btIsDoublePrecision()
 
 				#define SIMD_FORCE_INLINE inline
 				///@todo: check out alignment methods for other platforms/compilers
-				///#define ATTRIBUTE_ALIGNED16(a) a __attribute__ ((aligned (16)))
-				///#define ATTRIBUTE_ALIGNED64(a) a __attribute__ ((aligned (64)))
-				///#define ATTRIBUTE_ALIGNED128(a) a __attribute__ ((aligned (128)))
-				#define ATTRIBUTE_ALIGNED16(a) a
-				#define ATTRIBUTE_ALIGNED64(a) a
-				#define ATTRIBUTE_ALIGNED128(a) a
+				#define ATTRIBUTE_ALIGNED16(a) a __attribute__ ((aligned (16)))
+				#define ATTRIBUTE_ALIGNED64(a) a __attribute__ ((aligned (64)))
+				#define ATTRIBUTE_ALIGNED128(a) a __attribute__ ((aligned (128)))
 				#ifndef assert
 				#include <assert.h>
 				#endif

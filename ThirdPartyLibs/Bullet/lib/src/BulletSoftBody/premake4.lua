@@ -10,6 +10,5 @@
     end
 	files {
 		"**.cpp",
-                "BulletReducedDeformableBody/**.cpp",
 		"**.h"
 	}

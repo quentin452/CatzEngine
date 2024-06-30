@@ -338,7 +338,7 @@ PhysicsClass &PhysicsClass::dominance(Int dominance_group_a, Int dominance_group
 static Flt joint_impulse_scale;
 #endif
 
-PhysicsClass &PhysicsClass::startSimulation(Flt dt) { // https://github.com/quentin452/CatzWorldUsingCatzEngine-Issues/issues/67
+PhysicsClass &PhysicsClass::startSimulation(Flt dt) {
     if (!_simulated && created()) {
         _simulated = true;
         _new_updated = false;

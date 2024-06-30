@@ -1,6 +1,6 @@
 /*
 Bullet Continuous Collision Detection and Physics Library
-Copyright (c) 2003-2006 Erwin Coumans  http://continuousphysics.com/Bullet/
+Copyright (c) 2003-2006 Erwin Coumans  https://bulletphysics.org
 
 This software is provided 'as-is', without any express or implied warranty.
 In no event will the authors be held liable for any damages arising from the use of this software.
@@ -18,6 +18,7 @@ subject to the following restrictions:
 #include <stdio.h>
 #include <string>
 #include <iostream>
+#include <iomanip> 
 #include <sstream>
 #include <string.h>
 #include <algorithm>
@@ -1296,6 +1297,7 @@ btSoftBody* btSoftBodyHelpers::CreateFromVtkFile(btSoftBodyWorldInfo& worldInfo,
 			position.setY(p);
 			ss >> p;
 			position.setZ(p);
+			//printf("v %f %f %f\n", position.getX(), position.getY(), position.getZ());
 			X[x_count++] = position;
 		}
 		else if (reading_tets)
@@ -1314,9 +1316,9 @@ btSoftBody* btSoftBodyHelpers::CreateFromVtkFile(btSoftBodyWorldInfo& worldInfo,
 			for (size_t i = 0; i < 4; i++)
 			{
 				ss >> tet[i];
-				printf("%d ", tet[i]);
+				//printf("%d ", tet[i]);
 			}
-			printf("\n");
+			//printf("\n");
 			indices[indices_count++] = tet;
 		}
 	}
@@ -1416,6 +1418,7 @@ void btSoftBodyHelpers::generateBoundaryFaces(btSoftBody* psb)
 	{
 		std::vector<int> f = it->second;
 		psb->appendFace(f[0], f[1], f[2]);
+		//printf("f %d %d %d\n", f[0] + 1, f[1] + 1, f[2] + 1);
 	}
 }
 
@@ -1481,6 +1484,37 @@ void btSoftBodyHelpers::writeObj(const char* filename, const btSoftBody* psb)
 			}
 			fs << "\n";
 		}
+	}
+	fs.close();
+}
+
+
+void btSoftBodyHelpers::writeState(const char* file, const btSoftBody* psb)
+{
+	std::ofstream fs;
+	fs.open(file);
+	btAssert(fs);
+	fs << std::scientific << std::setprecision(16);
+
+	// Only write out for trimesh, directly write out all the nodes and faces.xs
+	for (int i = 0; i < psb->m_nodes.size(); ++i)
+	{
+		fs << "q";
+		for (int d = 0; d < 3; d++)
+		{
+			fs << " " << psb->m_nodes[i].m_q[d];
+		}
+		fs << "\n";
+	}
+
+	for (int i = 0; i < psb->m_nodes.size(); ++i)
+	{
+		fs << "v";
+		for (int d = 0; d < 3; d++)
+		{
+			fs << " " << psb->m_nodes[i].m_v[d];
+		}
+		fs << "\n";
 	}
 	fs.close();
 }

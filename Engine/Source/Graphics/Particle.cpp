@@ -38,13 +38,13 @@ static Flt (*GetOpacityFunc(C Particles &particles))(Flt s) // function which re
 /******************************************************************************/
 Bool DrawParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha) {
     Renderer.wantDepthRead(); // !! call before 'SoftParticles' !!
-    Shader *shader;
+    //Shader *shader;
     Bool soft = SoftParticles();
     switch (Renderer()) {
     default:
         return false;
     case RM_BLEND:
-        shader = Sh.Particle[false][soft][0][motion_affects_alpha];
+        //shader = Sh.Particle[false][soft][0][motion_affects_alpha];// disabled to fix particle distorsion bugs
         ColorFunc = ColorAlpha;
         D.alpha(Renderer.fastCombine() ? ALPHA_BLEND : ALPHA_RENDER_BLEND_FACTOR);
         D.alphaFactor(Color(0, 0, 0, glow));
@@ -54,7 +54,7 @@ Bool DrawParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha) {
         break; // 'MaterialClear' must be called when changing 'D.alphaFactor'
     case RM_PALETTE:
     case RM_PALETTE1:
-        shader = Sh.Particle[true][soft][0][motion_affects_alpha];
+        //shader = Sh.Particle[true][soft][0][motion_affects_alpha];// disabled to fix particle distorsion bugs
         ColorFunc = ColorMul;
         D.alpha(ALPHA_ADD);
         break;
@@ -62,7 +62,7 @@ Bool DrawParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha) {
     SetOneMatrix();
     D.depthOnWrite(true, false);
     VI.image(&image);
-    VI.shader(shader);
+    //VI.shader(shader); // disabled to fix particle distorsion bugs
     VI.setType(VI_3D_BILB, VI_QUAD_IND);
 #if GL // needed for iOS PVRTC Pow2 #ParticleImgPart
     Sh.ImgSize->setConditional(image._part.xy);
@@ -87,13 +87,13 @@ void DrawParticleEnd() {
 /******************************************************************************/
 Bool DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha, Int x_frames, Int y_frames) {
     Renderer.wantDepthRead(); // !! call before 'SoftParticles' !!
-    Shader *shader;
+    //Shader *shader;
     Bool soft = SoftParticles();
     switch (Renderer()) {
     default:
         return false;
     case RM_BLEND:
-        shader = Sh.Particle[false][soft][1 + D.particlesSmoothAnim()][motion_affects_alpha];
+        //shader = Sh.Particle[false][soft][1 + D.particlesSmoothAnim()][motion_affects_alpha];// disabled to fix particle distorsion bugs
         ColorFunc = ColorAlpha;
         D.alpha(Renderer.fastCombine() ? ALPHA_BLEND : ALPHA_RENDER_BLEND_FACTOR);
         D.alphaFactor(Color(0, 0, 0, glow));
@@ -103,7 +103,7 @@ Bool DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_al
         break; // 'MaterialClear' must be called when changing 'D.alphaFactor'
     case RM_PALETTE:
     case RM_PALETTE1:
-        shader = Sh.Particle[true][soft][1 + D.particlesSmoothAnim()][motion_affects_alpha];
+        //shader = Sh.Particle[true][soft][1 + D.particlesSmoothAnim()][motion_affects_alpha];// disabled to fix particle distorsion bugs
         ColorFunc = ColorMul;
         D.alpha(ALPHA_ADD);
         break;
@@ -111,7 +111,7 @@ Bool DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_al
     SetOneMatrix();
     D.depthOnWrite(true, false);
     VI.image(&image);
-    VI.shader(shader);
+    //VI.shader(shader);// disabled to fix particle distorsion bugs
     VI.setType(VI_3D_BILB_ANIM, VI_QUAD_IND);
     Sh.ParticleFrames->set(VecI2(x_frames, y_frames));
 #if GL // needed for iOS PVRTC Pow2 #ParticleImgPart

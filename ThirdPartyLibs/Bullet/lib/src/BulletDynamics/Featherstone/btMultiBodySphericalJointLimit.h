@@ -15,13 +15,13 @@ subject to the following restrictions:
 
 ///This file was written by Erwin Coumans
 
-#ifndef BT_MULTIBODY_SPHERICAL_JOINT_MOTOR_H
-#define BT_MULTIBODY_SPHERICAL_JOINT_MOTOR_H
+#ifndef BT_MULTIBODY_SPHERICAL_JOINT_LIMIT_H
+#define BT_MULTIBODY_SPHERICAL_JOINT_LIMIT_H
 
 #include "btMultiBodyConstraint.h"
 struct btSolverInfo;
 
-class btMultiBodySphericalJointMotor : public btMultiBodyConstraint
+class btMultiBodySphericalJointLimit : public btMultiBodyConstraint
 {
 protected:
 	btVector3 m_desiredVelocity;
@@ -32,12 +32,20 @@ protected:
 	btScalar m_erp;
 	btScalar m_rhsClamp;  //maximum error
 	btVector3 m_maxAppliedImpulseMultiDof;
-	btVector3 m_damping;
+	btVector3 m_pivotA;
+	btVector3 m_pivotB;
+	btScalar m_swingxRange;
+	btScalar m_swingyRange;
+	btScalar m_twistRange;
 
 public:
-	btMultiBodySphericalJointMotor(btMultiBody* body, int link, btScalar maxMotorImpulse);
+	btMultiBodySphericalJointLimit(btMultiBody* body, int link, 
+		btScalar swingxRange,
+		btScalar swingyRange,
+		btScalar twistRange,
+		btScalar maxAppliedImpulse);
 	
-	virtual ~btMultiBodySphericalJointMotor();
+	virtual ~btMultiBodySphericalJointLimit();
 	virtual void finalizeMultiDof();
 
 	virtual int getIslandIdA() const;
@@ -99,20 +107,9 @@ public:
 		m_use_multi_dof_params = true;
 	}
 
-	btScalar getDamping(int i) const
-	{
-		return m_damping[i];
-	}
 
-	void setDamping(const btVector3& damping)
-	{
-		m_damping = damping;
-	}
+	virtual void debugDraw(class btIDebugDraw* drawer);
 
-	virtual void debugDraw(class btIDebugDraw* drawer)
-	{
-		//todo(erwincoumans)
-	}
 };
 
-#endif  //BT_MULTIBODY_SPHERICAL_JOINT_MOTOR_H
+#endif  //BT_MULTIBODY_SPHERICAL_JOINT_LIMIT_H

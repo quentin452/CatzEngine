@@ -120,7 +120,5 @@ public:
     virtual void solveExternalForces(btContactSolverInfo& solverInfo);
     virtual void solveInternalConstraints(btContactSolverInfo& solverInfo);
     void buildIslands();
-
-	virtual void saveKinematicState(btScalar timeStep);
 };
 #endif  //BT_MULTIBODY_DYNAMICS_WORLD_H

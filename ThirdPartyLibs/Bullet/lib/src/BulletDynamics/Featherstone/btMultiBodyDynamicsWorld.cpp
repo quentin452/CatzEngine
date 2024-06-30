@@ -137,14 +137,7 @@ void btMultiBodyDynamicsWorld::updateActivationState(btScalar timeStep)
 				btMultiBodyLinkCollider* col = body->getBaseCollider();
 				if (col && col->getActivationState() == ACTIVE_TAG)
 				{
-                    if (body->hasFixedBase())
-					{
-                        col->setActivationState(FIXED_BASE_MULTI_BODY);
-                    } else
-					{
-                        col->setActivationState(WANTS_DEACTIVATION);
-                    }
-					
+					col->setActivationState(WANTS_DEACTIVATION);
 					col->setDeactivationTime(0.f);
 				}
 				for (int b = 0; b < body->getNumLinks(); b++)
@@ -876,18 +869,6 @@ void btMultiBodyDynamicsWorld::serializeMultiBodies(btSerializer* serializer)
 		}
 	}
 }
-
-void btMultiBodyDynamicsWorld::saveKinematicState(btScalar timeStep)
-{
-	btDiscreteDynamicsWorld::saveKinematicState(timeStep);
-	for(int i = 0; i < m_multiBodies.size(); i++)
-	{
-		btMultiBody* body = m_multiBodies[i];
-		if(body->isBaseKinematic())
-			body->saveKinematicState(timeStep);
-	}
-}
-
 //
 //void btMultiBodyDynamicsWorld::setSplitIslands(bool split)
 //{

@@ -295,9 +295,6 @@ struct btMultibodyLink
             }
         }
     }
-
- 
-
 };
 
 #endif  //BT_MULTIBODY_LINK_H

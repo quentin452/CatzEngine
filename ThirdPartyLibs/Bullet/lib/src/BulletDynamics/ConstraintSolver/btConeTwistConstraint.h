@@ -241,8 +241,10 @@ public:
 		m_relaxationFactor = _relaxationFactor;
 	}
 
-	const btTransform& getAFrame() const { return m_rbAFrame; };
-	const btTransform& getBFrame() const { return m_rbBFrame; };
+	      btTransform& getAFrame()      { return m_rbAFrame; };
+	      btTransform& getBFrame()      { return m_rbBFrame; };
+	const btTransform& getAFrame()const { return m_rbAFrame; };
+	const btTransform& getBFrame()const { return m_rbBFrame; };
 
 	inline int getSolveTwistLimit()
 	{

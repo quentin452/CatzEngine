@@ -233,8 +233,12 @@ Bool Ragdoll::createTry(C AnimatedSkeleton &anim_skel, Flt scale, Flt density, B
 }
 /******************************************************************************/
 Ragdoll &Ragdoll::create(C AnimatedSkeleton &anim_skel, Flt scale, Flt density, Bool kinematic) {
-    if (!createTry(anim_skel, scale, density, kinematic))
-        Exit("Can't create Ragdoll");
+    if (!createTry(anim_skel, scale, density, kinematic)) {
+        LoggerThread::GetLoggerThread().logMessageAsync(
+            LogLevel::INFO, __FILE__, __LINE__,
+            "Cannot Create Skeleton");
+        return T;
+    }
     return T;
 }
 /******************************************************************************

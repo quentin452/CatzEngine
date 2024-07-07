@@ -48,7 +48,21 @@ struct MiniMap {
     Vec2 imageToArea(C Vec2 &image) C { return image * areasPerImage(); } // convert image            to area coordinates
 
     // world (meters) <-> image
-    Vec2 worldToImage(C Vec2 &pos) C { return pos / (areaSize() * areasPerImage()); }     // convert world 'pos' position to image
+    Vec2 worldToImage(C Vec2 &pos) C {
+        float areaSizeVal = areaSize();
+        float areasPerImageVal = areasPerImage();
+
+        if (areaSizeVal <= 0 || areasPerImageVal <= 0) {
+            LoggerThread::GetLoggerThread().logMessageAsync(
+                LogLevel::ERRORING, __FILE__, __LINE__,
+                {"Invalid values: areaSize=" + std::to_string(areaSizeVal) + ", areasPerImage=" + std::to_string(areasPerImageVal)});
+            return Vec2(std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity());
+        }
+
+        float scale = areaSizeVal * areasPerImageVal;
+        return pos / scale;
+    } // convert world 'pos' position to image
+
     Vec2 imageToWorld(C Vec2 &image) C { return image * (areaSize() * areasPerImage()); } // convert image                to world position
 
     // operations

@@ -8,7 +8,7 @@ State StateMiniMap(UpdateMiniMap, DrawMiniMap, InitMiniMap, ShutMiniMap);
 /******************************************************************************/
 bool InitMiniMap() {
     SetKbExclusive();
-    //Proj.pause(); we're not pausing so the 'MiniMapEdit' doesn't close and unload mini map element/data/game world
+    // Proj.pause(); we're not pausing so the 'MiniMapEdit' doesn't close and unload mini map element/data/game world
     Proj.pauseServer(); // instead just pause the server so no changes are made during mini map generation
     MiniMapEdit.init();
     UpdateProgress.create(Rect_C(0, -0.05f, 1, 0.045f));
@@ -19,7 +19,7 @@ bool InitMiniMap() {
 }
 void ShutMiniMap() {
     UpdateProgress.del();
-    //Proj.resume(); we're not resuming
+    // Proj.resume(); we're not resuming
     Proj.resumeServer(); // resume server
     App.stateNormal().flash();
     MiniMapEdit.reloadAreas();
@@ -64,7 +64,7 @@ bool UpdateMiniMap() {
     }
 
     App.stateProgress(UpdateProgress());
-    //Gui.update(); do not update gui as it's not hidden
+    // Gui.update(); do not update gui as it's not hidden
     Server.update(null, true);
     if (Ms.bp(MS_MAXIMIZE))
         App.window().toggle();
@@ -101,7 +101,7 @@ void DrawMiniMap() {
     gpc.offset.zero();
     UpdateProgress.draw(gpc);
     D.clip();
-    //Gui.draw(); do not draw gui as it's not hidden
+    // Gui.draw(); do not draw gui as it's not hidden
     Draw();
 }
 /******************************************************************************/
@@ -129,6 +129,8 @@ cchar8 *MiniMapEditor::AreasPerImage[] =
         "12",
         "16",
         "24",
+        "100",
+        "200",
 };
 /******************************************************************************/
 void MiniMapEditor::Change::create(ptr user) {

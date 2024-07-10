@@ -82,6 +82,7 @@ struct OptionsClass : ClosableWindow {
     static void OptionChanged(OptionsClass &options) { options.saveConfig(); }
 
     void create() {
+        loadConfig();
         Flt y = -0.05f, h = 0.06f;
         Gui += super::create(Rect_C(0, 0, 1.4f, 3 * h + 0.11f), "Options").hide();
         button[2].show();
@@ -96,7 +97,6 @@ struct OptionsClass : ClosableWindow {
         T += physics.create(Rect_L(0.38, y, 1.0, 0.05), Physics_t, Elms(Physics_t)).func(OptionChanged, T).set(PHYS_ENGINE_PHYSX, QUIET);
         y -= h;
         load();
-        loadConfig();
         saveConfig(); // always save
     }
     Bool any() C {

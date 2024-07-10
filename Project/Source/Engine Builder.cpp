@@ -79,29 +79,55 @@ struct OptionsClass : ClosableWindow {
     CheckBox aac;
     ComboBox physics;
 
-    static void OptionChanged(OptionsClass &options) { options.saveConfig(); }
+    Int physicsb = 0;
+    Bool aacb = false;
+
+    OptionsClass() {
+        std::ofstream optionsFile(EngineConfig2(), std::ios::app);
+        if (!optionsFile) {
+        } else {
+            optionsFile.close();
+        }
+    }
+
+    static void OptionChanged(OptionsClass &options) {
+        options.saveConfig();
+        options.saveOptionsToFile();
+    }
 
     void create() {
+        loadOptionsFromFile();
+        load();
         loadConfig();
+
         Flt y = -0.05f, h = 0.06f;
         Gui += super::create(Rect_C(0, 0, 1.4f, 3 * h + 0.11f), "Options").hide();
         button[2].show();
+
         T += t_vs_path.create(Vec2(0.19, y), "Visual Studio Path");
         T += vs_path.create(Rect_L(0.38, y, 1.0, 0.05));
+
         y -= h;
         // T+=t_ndk_path.create(Vec2(0.19, y),   "Android NDK Path"); T+=ndk_path.create(Rect_L(0.38, y, 1.0, 0.05)); y-=h;
+
         T += t_aac.create(Vec2(0.19, y), "Use Patented AAC");
+
         T += aac.create(Rect_L(0.38, y, 0.05, 0.05)).func(OptionChanged, T).desc("If support AAC decoding which is currently covered by patents.\nIf disabled then playback of AAC sounds will not be available.");
+        aac.set(aacb);
         y -= h;
+
         T += t_physics.create(Vec2(0.19, y), "Physics Engine");
-        T += physics.create(Rect_L(0.38, y, 1.0, 0.05), Physics_t, Elms(Physics_t)).func(OptionChanged, T).set(PHYS_ENGINE_PHYSX, QUIET);
+        T += physics.create(Rect_L(0.38, y, 1.0, 0.05), Physics_t, Elms(Physics_t)).func(OptionChanged, T);
+        physics.set(physicsb);
+
         y -= h;
-        load();
         saveConfig(); // always save
     }
+
     Bool any() C {
         return vs_path().is() || ndk_path().is();
     }
+
     void load() {
         TextData data;
         if (data.load(OptionsFileName)) {
@@ -109,8 +135,13 @@ struct OptionsClass : ClosableWindow {
                 vs_path.set(param->asText());
             if (TextParam *param = data.findNode("Android NDK Path"))
                 ndk_path.set(param->asText());
+            if (TextParam *param = data.findNode("Use Patented AAC"))
+                aac.set(param->asBool());
+            if (TextParam *param = data.findNode("Physics Engine"))
+                physics.set(param->asInt());
         }
     }
+
     void save() C {
         if (any()) {
             TextData data;
@@ -118,23 +149,70 @@ struct OptionsClass : ClosableWindow {
                 data.nodes.New().set("Visual Studio Path", vs_path());
             if (ndk_path().is())
                 data.nodes.New().set("Android NDK Path", ndk_path());
+            data.nodes.New().set("Use Patented AAC", aac());
+            data.nodes.New().set("Physics Engine", physics());
             data.save(OptionsFileName);
         } else {
             FDelFile(OptionsFileName);
         }
     }
+
     static Str EngineConfig() { return EnginePath + "Engine Config.h"; }
+    static Str EngineConfig2() { return EnginePath + "Engine Config.txt"; }
+
+    void loadOptionsFromFile() {
+        std::ifstream optionsFile(EngineConfig2());
+        if (!optionsFile.is_open()) {
+            return;
+        }
+
+        std::string line;
+        while (std::getline(optionsFile, line)) {
+            if (line.find("Use Patented AAC:") != std::string::npos) {
+                aacb = std::stoi(line.substr(line.find(":") + 1));
+            } else if (line.find("Physics Engine:") != std::string::npos) {
+                physicsb = std::stoi(line.substr(line.find(":") + 1));
+            }
+        }
+
+        optionsFile.close();
+    }
+
+    void saveOptionsToFile() C {
+        std::ofstream optionsFile(EngineConfig2());
+        if (!optionsFile.is_open()) {
+            return;
+        }
+
+        optionsFile << "Use Patented AAC: " << (aac() ? 1 : 0) << '\n';
+        optionsFile << "Physics Engine: " << physics() << '\n';
+
+        optionsFile.close();
+    }
+
     void loadConfig() {
         FileText f;
         if (f.read(EngineConfig())) {
             Str s;
             f.getAll(s);
-            aac.set(Contains(s, "SUPPORT_AAC 1"), QUIET);
-            physics.set(Contains(s, "PHYSX 1") ? PHYS_ENGINE_PHYSX : PHYS_ENGINE_BULLET, QUIET); // remember that PhysX can be enabled only for certain platforms, so check if there's at least one "PHYSX 1" occurrence
+            if (Contains(s, "PHYSX 1") || Contains(s, "PHYSX 0")) {
+                if (Contains(s, "PHYSX 1")) {
+                    physics.set(PHYS_ENGINE_PHYSX, QUIET);
+                } else {
+                    physics.set(PHYS_ENGINE_BULLET, QUIET);
+                }
+            } else {
+                activate(); // if no config available then show options
+            }
         } else {
-            activate(); // if no config available then show options
+            // Create the file if it doesn't exist
+            std::ofstream configFile(EngineConfig());
+            if (configFile.is_open()) {
+                configFile.close();
+            }
         }
     }
+
     void saveConfig() C {
         Str s = S + "// File automatically generated by \"" + App.name() + "\"\n";
         s += S + "#define SUPPORT_AAC " + aac() + '\n';
@@ -145,8 +223,10 @@ struct OptionsClass : ClosableWindow {
                  "#else\n"
                  "   #define PHYSX 0\n"
                  "#endif\n";
-        } else
+        } else {
             s += "#define PHYSX 0\n";
+        }
+
         FileText f;
         f.writeMem(ANSI).putText(s);
         Bool changed;
@@ -158,6 +238,7 @@ struct OptionsClass : ClosableWindow {
             FTimeUTC(EnginePath + "H/_/Engine Config.h", DateTime().getUTC()); // set modification time to the default config as well, to make sure to force rebuild (this is needed for VS and possibly others too)
     }
 } Options;
+
 /******************************************************************************/
 Str DevEnvPath(C Str &vs_path) {
     if (vs_path.is()) {

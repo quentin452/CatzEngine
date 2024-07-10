@@ -117,3 +117,5 @@ compile_commands.json
 Editor/Bin/Store.dat
 /Editor Data/Code/Android/.gradle
 find_largest_cORhFile.txt
+Engine/options_config.txt
+Engine/Engine Config.txt

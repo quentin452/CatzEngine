@@ -108,6 +108,37 @@ void ExportWindow::save(C Str &name) {
                             }
                         }
         } break;
+
+        case ELM_WORLD_MAP: {
+            if (ElmWorldMap *mini_map_data = elm->worldMapData())
+                if (WorldMapVer *ver = Proj.worldMapVerGet(elm_id))
+                    if (ver->images.elms())
+                        if (int image_size = ver->settings.image_size) {
+                            Game::WorldMap map;
+                            if (map.load(Proj.gamePath(elm_id))) {
+                                RectI images = ver->images.last();
+                                REPA(ver->images)
+                                images |= ver->images[i];
+                                Image image, temp;
+                                if (image.createSoft(image_size * (images.w() + 1), image_size * (images.h() + 1), 1, IMAGE_R8G8B8A8_SRGB)) {
+                                    image.clear();
+                                    for (int y = images.min.y; y <= images.max.y; y++)
+                                        for (int x = images.min.x; x <= images.max.x; x++) {
+                                            C Image &src = map(VecI2(x, y));
+                                            if (src.is() && src.copy(temp, image_size, image_size, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1)) {
+                                                int ox = (x - images.min.x) * image_size,
+                                                    oy = (images.max.y - y) * image_size;
+                                                REPD(y, temp.h())
+                                                REPD(x, temp.w())
+                                                image.pixel(x + ox, y + oy, temp.pixel(x, y));
+                                            }
+                                            map.clear();
+                                        }
+                                    ok = image.Export(name);
+                                }
+                            }
+                        }
+        } break;
         }
     }
     if (ok)
@@ -158,7 +189,12 @@ void ExportWindow::activate(C UID &elm_id) {
         } break;
 
         case ELM_PANEL_IMAGE:
+        
         case ELM_MINI_MAP:
+            supp_ext = "bmp|png|jpg|jxl|tga|tif|webp|avif|img";
+            break;
+
+        case ELM_WORLD_MAP:
             supp_ext = "bmp|png|jpg|jxl|tga|tif|webp|avif|img";
             break;
 

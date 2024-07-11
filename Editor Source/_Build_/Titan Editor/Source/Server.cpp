@@ -16,6 +16,7 @@ void ServerClass::clearProj() {
     texs.clear();
     world_vers.del();
     mini_map_vers.del();
+    world_map_vers.del();
     Synchronizer.clearSync();
 }
 void ServerClass::logout() { stopConnect(); }
@@ -196,6 +197,18 @@ void ServerClass::getMiniMapImages(C UID &mini_map_id, Memc<VecI2> &images) {
 void ServerClass::setMiniMapSettings(C UID &mini_map_id, C Game::MiniMap::Settings &settings, C TimeStamp &settings_time) {
     if (canWrite() && mini_map_id.valid())
         ClientSendSetMiniMapSettings(T, mini_map_id, settings, settings_time);
+}
+void ServerClass::getWorldMapVer(C UID &world_map_id) {
+    if (canRead() && world_map_id.valid() && !world_map_vers.find(world_map_id))
+        ClientSendGetWorldMapVer(T, world_map_id);
+}
+void ServerClass::getWorldMapImages(C UID &world_map_id, Memc<VecI2> &images) {
+    if (canRead() && world_map_id.valid())
+        ClientSendGetWorldMapImages(T, world_map_id, images);
+}
+void ServerClass::setWorldMapSettings(C UID &world_map_id, C Game::WorldMap::Settings &settings, C TimeStamp &settings_time) {
+    if (canWrite() && world_map_id.valid())
+        ClientSendSetWorldMapSettings(T, world_map_id, settings, settings_time);
 }
 void ServerClass::update(ProjectEx *proj, bool busy) {
     if (reconnect && Time.realTime() >= reconnect_time)
@@ -671,6 +684,19 @@ void ServerClass::update(ProjectEx *proj, bool busy) {
                 }
                 break;
 
+            case CS_GET_WORLD_MAP_VER:
+                if (proj) {
+                    UID world_map_id, proj_id;
+                    WorldMapVer world_map_ver;
+                    ClientRecvGetWorldMapVer(data, world_map_ver, world_map_id, proj_id);
+                    if (proj_id == proj->id)
+                        if (WorldMapVer *server_world_map_ver = world_map_vers.get(world_map_id)) {
+                            Swap(*server_world_map_ver, world_map_ver);
+                            Synchronizer.syncWorldMap(world_map_id);
+                        }
+                }
+                break;
+
             case CS_SET_MINI_MAP_SETTINGS:
                 if (proj) {
                     UID mini_map_id;
@@ -684,6 +710,19 @@ void ServerClass::update(ProjectEx *proj, bool busy) {
                 }
                 break;
 
+            case CS_SET_WORLD_MAP_SETTINGS:
+                if (proj) {
+                    UID world_map_id;
+                    Game::WorldMap::Settings settings;
+                    TimeStamp settings_time;
+                    UID proj_id;
+                    if (ClientRecvSetWorldMapSettings(data, world_map_id, settings, settings_time, proj_id))
+                        if (proj_id == proj->id)
+                            if (proj->syncWorldMapSettings(world_map_id, settings, settings_time))
+                                Preview.elmChanged(world_map_id);
+                }
+                break;
+
             case CS_SET_MINI_MAP_IMAGE:
                 if (proj) {
                     UID mini_map_id, proj_id;
@@ -694,6 +733,19 @@ void ServerClass::update(ProjectEx *proj, bool busy) {
                         if (proj_id == proj->id)
                             if (proj->syncMiniMapImage(mini_map_id, image_xy, image_time, image_data))
                                 Preview.elmChanged(mini_map_id);
+                }
+                break;
+
+            case CS_SET_WORLD_MAP_IMAGE:
+                if (proj) {
+                    UID world_map_id, proj_id;
+                    VecI2 image_xy;
+                    File image_data;
+                    TimeStamp image_time;
+                    if (ClientRecvSetWorldMapImage(data, world_map_id, image_xy, image_time, image_data.writeMem(), proj_id))
+                        if (proj_id == proj->id)
+                            if (proj->syncWorldMapImage(world_map_id, image_xy, image_time, image_data))
+                                Preview.elmChanged(world_map_id);
                 }
                 break;
 
@@ -756,6 +808,6 @@ void ServerClass::update(ProjectEx *proj, bool busy) {
     EditServer.update(busy);
 }
 ServerClass::~ServerClass() { stopConnect(); }
-ServerClass::ServerClass() : after_connect(false), version_sent(false), version_ok(false), logged_in(false), reconnect(false), allow_reconnect(false), proj_opened(false), send_proj_settings(false), access(UA_NO_ACCESS), action(NONE), conn_pass_key(0), sending(0), rcving(0), sent(0), rcvd(0), stats_sent(0), stats_rcvd(0), reconnect_time(0), stats_time(0), world_vers(Compare), mini_map_vers(Compare) {}
+ServerClass::ServerClass() : after_connect(false), version_sent(false), version_ok(false), logged_in(false), reconnect(false), allow_reconnect(false), proj_opened(false), send_proj_settings(false), access(UA_NO_ACCESS), action(NONE), conn_pass_key(0), sending(0), rcving(0), sent(0), rcvd(0), stats_sent(0), stats_rcvd(0), reconnect_time(0), stats_time(0), world_vers(Compare), mini_map_vers(Compare) ,world_map_vers(Compare) {}
 
 /******************************************************************************/

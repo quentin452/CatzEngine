@@ -1790,6 +1790,9 @@
     <ClCompile Include="Source\Game\World Object.cpp">
       <Filter>Source\Game</Filter>
     </ClCompile>
+    <ClCompile Include="Source\Game\World Map.cpp">
+      <Filter>Source\Game</Filter>
+    </ClCompile>
     <ClCompile Include="Source\Game\World Path 2D.cpp">
       <Filter>Source\Game</Filter>
     </ClCompile>

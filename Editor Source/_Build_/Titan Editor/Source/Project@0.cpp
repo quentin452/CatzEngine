@@ -510,6 +510,7 @@ void ProjectEx::NewApp(ProjectEx &proj) { proj.newElm(ELM_APP); }
 void ProjectEx::NewCode(ProjectEx &proj) { proj.newElm(ELM_CODE); }
 void ProjectEx::NewEnv(ProjectEx &proj) { proj.newElm(ELM_ENV); }
 void ProjectEx::NewMiniMap(ProjectEx &proj) { proj.newElm(ELM_MINI_MAP); }
+void ProjectEx::NewWorldMap(ProjectEx &proj) { proj.newElm(ELM_WORLD_MAP); }
 void ProjectEx::NewWorld(ProjectEx &proj) { ::NewWorld.display(); }
 void ProjectEx::ElmRename(ProjectEx &proj) {
     if (proj.menu_list_sel.elms() == 1)
@@ -869,6 +870,8 @@ C ImagePtr &ProjectEx::elmIcon(ELM_TYPE type) {
         return icon_panel;
     case ELM_GUI_SKIN:
         return icon_gui_skin;
+    case ELM_WORLD_MAP:
+        return icon_world_map;
     case ELM_GUI:
         return icon_gui;
     case ELM_IMAGE:
@@ -1068,6 +1071,7 @@ void ProjectEx::setNewElm(Node<MenuElm> &n, C Str &prefix) {
     n.New().create(prefix + ElmTypeName[ELM_ICON], NewIcon, T).desc(ElmTypeDesc[ELM_ICON]);
     n.New().create(prefix + ElmTypeName[ELM_ENV], NewEnv, T).desc(ElmTypeDesc[ELM_ENV]);
     n.New().create(prefix + ElmTypeName[ELM_WORLD], NewWorld, T).desc(ElmTypeDesc[ELM_WORLD]);
+    n.New().create(prefix + ElmTypeName[ELM_WORLD_MAP], NewWorldMap, T).desc(ElmTypeDesc[ELM_WORLD_MAP]);
     n.New().create(prefix + ElmTypeName[ELM_MINI_MAP], NewMiniMap, T).desc(ElmTypeDesc[ELM_MINI_MAP]);
     n.New().create(prefix + ElmTypeName[ELM_SOUND], NewSound, T).desc(ElmTypeDesc[ELM_SOUND]);
     n.New().create(prefix + ElmTypeName[ELM_VIDEO], NewVideo, T).desc(ElmTypeDesc[ELM_VIDEO]);
@@ -1162,6 +1166,7 @@ void ProjectEx::create() {
     icon_env = "Gui/Elm/environment.img";
     icon_world = "Gui/Elm/world.img";
     icon_mini_map = "Gui/Elm/mini_map.img";
+    icon_world_map = "Gui/Elm/mini_map.img";
     icon_enum = "Gui/Elm/enum.img";
     icon_image = "Gui/Elm/image.img";
     icon_image_atlas = "Gui/Elm/image_atlas.img";
@@ -1325,6 +1330,21 @@ Elm *ProjectEx::newElm(ELM_TYPE type, C UID &parent_id, C Str *name, bool refres
             }
             makeGameVer(elm);
             Server.setElmFull(elm.id);
+        } break;
+
+        case ELM_WORLD_MAP: {
+            if (WorldMapVer *ver = worldMapVerRequire(elm.id)) {
+                ver->changed = true;
+                ver->time++;
+                if (ElmWorldMap *data = elm.worldMapData()) {
+                    data->newData();
+                    data->copyTo(ver->settings);
+                }
+                createWorldMapPaths(elm.id);
+                ver->settings.save(gamePath(elm.id).tailSlash(true) + "Settings");
+                Server.setElmFull(elm.id);
+                Server.setWorldMapSettings(elm.id, ver->settings, ver->time);
+            }
         } break;
 
         case ELM_TEXT_STYLE: {
@@ -3888,6 +3908,7 @@ void ProjectEx::duplicate(Memc<UID> &ids, MemPtr<UID> duplicated, C Str &suffix)
             case ELM_WATER_MTRL:
             case ELM_PHYS_MTRL:
             case ELM_GUI_SKIN:
+            case ELM_WORLD_MAP:
             case ELM_GUI:
             case ELM_ICON:
             case ELM_ICON_SETTS:
@@ -4990,6 +5011,9 @@ void ProjectEx::elmToggle(Elm *elm) {
         case ELM_GUI_SKIN:
             GuiSkinEdit.toggle(elm);
             break;
+        case ELM_WORLD_MAP:
+            GuiSkinEdit.toggle(elm);
+            break;
         case ELM_GUI:
             GuiEdit.toggle(elm);
             break;
@@ -5078,6 +5102,9 @@ void ProjectEx::elmActivate(Elm *elm) {
             PanelEdit.activate(elm);
             break;
         case ELM_GUI_SKIN:
+            GuiSkinEdit.activate(elm);
+            break;
+        case ELM_WORLD_MAP:
             GuiSkinEdit.activate(elm);
             break;
         case ELM_GUI:
@@ -5241,6 +5268,7 @@ void ProjectEx::elmMenu(C Vec2 &pos, bool touch) {
             case ELM_ICON:
             case ELM_CODE:
             case ELM_MINI_MAP:
+            case ELM_WORLD_MAP:
             case ELM_SOUND:
             case ELM_VIDEO:
             case ELM_FILE:
@@ -5609,6 +5637,9 @@ void ProjectEx::elmChanged(Elm &elm) {
         break;
     case ELM_GUI_SKIN:
         GuiSkinEdit.elmChanged(elm.id);
+        break;
+    case ELM_WORLD_MAP:
+        MiniMapEdit.elmChanged(elm.id);
         break;
     case ELM_GUI:
         GuiEdit.elmChanged(elm.id);

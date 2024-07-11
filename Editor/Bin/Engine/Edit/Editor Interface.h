@@ -39,6 +39,7 @@ enum ELM_TYPE : Byte // Project Element Type
     ELM_ICON_SETTS,  // Icon Settings
     ELM_MINI_MAP,    // World Mini Map
     ELM_GUI_SKIN,    // Gui Skin
+    ELM_WORLD_MAP,    // World Mini Map
     ELM_NUM,         // Number of Element Types
 };
 /******************************************************************************/

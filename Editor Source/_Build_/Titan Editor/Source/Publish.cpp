@@ -302,7 +302,7 @@ bool StartPublish(C Str &exe_name, Edit::EXE_TYPE exe_type, Edit::BUILD_MODE bui
                 return false;
         } else if (exe_type == Edit::EXE_UWP) {
             PublishDataAsPak = true; // always set to true because files inside exe can't be modified by the app, so there's no point in storing them separately
-            //if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
+            // if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
             {
                 PublishProjectDataPath = CodeEdit.UWPProjectPakPath();
                 if (!PublishProjectDataPath.is()) {
@@ -313,7 +313,7 @@ bool StartPublish(C Str &exe_name, Edit::EXE_TYPE exe_type, Edit::BUILD_MODE bui
             }
         } else if (exe_type == Edit::EXE_APK || exe_type == Edit::EXE_AAB) {
             PublishDataAsPak = true; // always set to true because files inside APK (assets) can't be modified by the app, so there's no point in storing them separately
-            //if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
+            // if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
             {
                 PublishProjectDataPath = CodeEdit.androidProjectPakPath();
                 if (!PublishProjectDataPath.is()) {
@@ -324,7 +324,7 @@ bool StartPublish(C Str &exe_name, Edit::EXE_TYPE exe_type, Edit::BUILD_MODE bui
             }
         } else if (exe_type == Edit::EXE_IOS) {
             PublishDataAsPak = true; // always set to true because files inside iOS APP can't be modified by the app, so there's no point in storing them separately
-            //if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
+            // if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
             {
                 PublishProjectDataPath = CodeEdit.iOSProjectPakPath();
                 if (!PublishProjectDataPath.is()) {
@@ -335,7 +335,7 @@ bool StartPublish(C Str &exe_name, Edit::EXE_TYPE exe_type, Edit::BUILD_MODE bui
             }
         } else if (exe_type == Edit::EXE_NS) {
             PublishDataAsPak = true; // always set to true because files inside iOS APP can't be modified by the app, so there's no point in storing them separately
-            //if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
+            // if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
             {
                 PublishProjectDataPath = CodeEdit.nintendoProjectPakPath();
                 if (!PublishProjectDataPath.is()) {
@@ -446,7 +446,7 @@ bool PublishFunc(Thread &thread) {
                 if (pfd_size >= max_size) {
                     PublishErrorMessage = S + "File too big:\n" + pfd->name;
                     return false;
-                }                                             // a single file cannot be bigger than asset pack
+                } // a single file cannot be bigger than asset pack
                 if (!pfd || split_size + pfd_size > max_size) // if reached the end, or adding this file would break the limit
                 {
                     if (split.elms()) // have any data
@@ -575,6 +575,46 @@ void AddPublishFiles(Memt<Elm *> &elms, MemPtr<PakFileData> files, Memc<ImageGen
                 pfd.type = FSTD_DIR; // mini map folder
                 if (ElmMiniMap *data = elm->miniMapData())
                     if (MiniMapVer *ver = Proj.miniMapVerGet(elm->id)) {
+                        mini_map_path.tailSlash(true);
+                        mini_map_game_path_src = Proj.gamePath(elm->id).tailSlash(true);
+
+                        PakFileData &pfd = files.New(); // mini map settings
+                        pfd.name = mini_map_path + "Settings";
+                        pfd.data.set(mini_map_game_path_src + "Settings");
+
+                        IMAGE_TYPE dest_type = IMAGE_NONE;
+                        if (android || iOS) // convert for android/ios, desktop/uwp/web/switch already have IMAGE_BC1 chosen
+                        {
+                            dest_type = IMAGE_ETC2_RGB_SRGB; //(android ? IMAGE_ETC2_RGB_SRGB : IMAGE_PVRTC1_4_SRGB);
+                            mini_map_formats_path = Proj.formatPath(elm->id, FormatSuffix(dest_type));
+                            mini_map_formats_path.tailSlash(true);
+                            FCreateDirs(mini_map_formats_path);
+                        }
+
+                        FREPA(ver->images) // process in order to avoid re-sorting
+                        {
+                            PakFileData &pfd = files.New(); // mini map image
+                            pfd.name = mini_map_path + ver->images[i];
+                            pfd.data.set(mini_map_game_path_src + ver->images[i]);
+                            if (dest_type) // convert
+                            {
+                                Str src_name = pfd.data.name,
+                                    dest_name = mini_map_formats_path + ver->images[i];
+                                pfd.data.set(dest_name); // adjust pak file path
+                                FileInfo src_fi(src_name);
+                                if (CompareFile(src_fi.modify_time_utc, FileInfoSystem(dest_name).modify_time_utc))        // if different (compare just modify time, because sizes will always be different due to different formats)
+                                    convert.New().set(src_name, dest_name, src_fi.modify_time_utc, dest_type, true, true); // create new conversion
+                            }
+                        }
+                    }
+            } else if (elm->type == ELM_WORLD_MAP) // mini map
+            {
+                Str mini_map_path = EncodeFileName(elm->id), mini_map_game_path_src, mini_map_formats_path;
+                PakFileData &pfd = files.New();
+                pfd.name = mini_map_path;
+                pfd.type = FSTD_DIR; // mini map folder
+                if (ElmWorldMap *data = elm->worldMapData())
+                    if (WorldMapVer *ver = Proj.worldMapVerGet(elm->id)) {
                         mini_map_path.tailSlash(true);
                         mini_map_game_path_src = Proj.gamePath(elm->id).tailSlash(true);
 
@@ -862,9 +902,9 @@ void AddPublishFiles(Memt<Elm *> &elms, MemPtr<PakFileData> files, Memc<ImageGen
                     change_type = ((!UWPBC7 && tex.channels >= 3) ? ((tex.channels == 4) ? IMAGE_BC3 : IMAGE_BC1) : -1);
                 else // here we only want to disable BC7
                     if (web)
-                    change_type = ((tex.channels <= 2) ? -1 : WebBC7          ? ((tex.channels == 4 || tex.quality > Edit::Material::MEDIUM) ? -1 : IMAGE_BC1) // texture could have alpha, however if we're not using it, then reduce to BC1 because it's only 4-bit per pixel
-                                                          : tex.channels == 4 ? IMAGE_BC3
-                                                                              : IMAGE_BC1); // if BC7 not supported for Web, then use BC3
+                        change_type = ((tex.channels <= 2) ? -1 : WebBC7          ? ((tex.channels == 4 || tex.quality > Edit::Material::MEDIUM) ? -1 : IMAGE_BC1) // texture could have alpha, however if we're not using it, then reduce to BC1 because it's only 4-bit per pixel
+                                                              : tex.channels == 4 ? IMAGE_BC3
+                                                                                  : IMAGE_BC1); // if BC7 not supported for Web, then use BC3
                 if (change_type >= 0 && tex.sRGB())
                     change_type = ImageTypeIncludeSRGB((IMAGE_TYPE)change_type); // set sRGB
             }
@@ -1050,6 +1090,35 @@ void SetPublishFiles(Memb<PakFileData> &files, Memc<ImageGenerate> &generate, Me
                     pfd.type = FSTD_DIR; // mini map folder
                     if (ElmMiniMap *data = elm.miniMapData())
                         if (MiniMapVer *ver = Proj.miniMapVerGet(elm.id)) {
+                            mini_map_path.tailSlash(true);
+                            mini_map_game_path_src = Proj.gamePath(elm.id).tailSlash(true);
+
+                            PakFileData &pfd = files.New(); // mini map settings
+                            pfd.name = mini_map_path + "Settings";
+                            pfd.data.set(mini_map_game_path_src + "Settings");
+
+                            FREPA(ver->images) // process in order to avoid re-sorting
+                            {
+                                PakFileData &pfd = files.New(); // mini map image
+                                pfd.name = mini_map_path + ver->images[i];
+                                pfd.data.set(mini_map_game_path_src + ver->images[i]);
+                            }
+                        }
+                }
+            } else if (elm.type == ELM_WORLD_MAP) // mini-map
+            {
+                { // edit
+                    PakFileData &pfd = files.New();
+                    pfd.name = S + "Edit/" + EncodeFileName(elm.id);
+                    pfd.data.set(Proj.editPath(elm.id));
+                }
+                { // game
+                    Str mini_map_path = S + "Game/" + EncodeFileName(elm.id), mini_map_game_path_src;
+                    PakFileData &pfd = files.New();
+                    pfd.name = mini_map_path;
+                    pfd.type = FSTD_DIR; // mini map folder
+                    if (ElmWorldMap *data = elm.worldMapData())
+                        if (WorldMapVer *ver = Proj.worldMapVerGet(elm.id)) {
                             mini_map_path.tailSlash(true);
                             mini_map_game_path_src = Proj.gamePath(elm.id).tailSlash(true);
 

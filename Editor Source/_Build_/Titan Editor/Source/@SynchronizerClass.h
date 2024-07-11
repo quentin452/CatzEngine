@@ -70,12 +70,28 @@ class SynchronizerClass {
     };
     static bool Create(MiniMapSync &mini_map_sync, C UID &mini_map_id, ptr);
 
+    class WorldMapSync // class handling synchronization of a single world map (what elements still need to be sent)
+    {
+        WorldMapVer *server_ver, *local_ver;
+        Memc<VecI2> set_image;
+
+        bool empty() C;
+        int elms() C;
+
+        void getServerVer(C UID &world_map_id);
+
+      public:
+        WorldMapSync();
+    };
+    static bool Create(WorldMapSync &world_map_sync, C UID &world_map_id, ptr);
+
     bool compressing;
     Memc<ElmFile> set_elm_full_file, set_elm_long_file;
     Memc<UID> set_elm_full, set_elm_long, set_elm_short, set_tex;
     Memc<File> cmds;
     ThreadSafeMap<UID, WorldSync> world_sync, delayed_world_sync; // make thread-safe just in case
     ThreadSafeMap<UID, MiniMapSync> mini_map_sync;                // make thread-safe just in case
+    ThreadSafeMap<UID, WorldMapSync> world_map_sync;                // make thread-safe just in case
     Str game_path, edit_path, tex_path;
     Thread thread;
     SyncLock lock;
@@ -94,6 +110,7 @@ class SynchronizerClass {
     void setArea(C UID &world_id, C VecI2 &area_xy);
     void setObjs(C UID &world_id, Memc<UID> &obj_ids);
     void setMiniMapImage(C UID &mini_map_id, C VecI2 &image_xy);
+    void setWorldMapImage(C UID &world_map_id, C VecI2 &image_xy);
     void delayedSetArea(C UID &world_id, C VecI2 &area_xy);     // !! must be multi-threaded SAFE !!
     void delayedSetObj(C UID &world_id, C MemPtr<UID> &obj_id); // !! must be multi-threaded SAFE !!
     void erasing(C UID &elm_id);
@@ -107,6 +124,7 @@ class SynchronizerClass {
 
     void syncWorld(C UID &world_id);
     void syncMiniMap(C UID &mini_map_id);
+    void syncWorldMap(C UID &world_map_id);
     void update();
 
   public:

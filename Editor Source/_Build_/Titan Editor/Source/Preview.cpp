@@ -90,12 +90,15 @@ void PreviewClass::elmChanged(C UID &elm_id) {
         video_id.zero();
     if (elm_id == mini_map_id)
         mini_map_id.zero();
+    if (elm_id == world_map_id)
+        world_map_id.zero();
 }
 void PreviewClass::clearProj() {
     sound_id.zero();
     video_id.zero();
     video.del();
     mini_map_id.zero();
+    world_map_id.zero();
     objs_last_id.zero();
 }
 void PreviewClass::drawBack(C Rect &rect) {
@@ -309,6 +312,22 @@ void PreviewClass::draw(Elm &elm, C Rect &rect) {
             rect.draw(rect_color, false);
             Gui.skin = temp;
         }
+    } break;
+
+    case ELM_WORLD_MAP: {
+        if (world_map_id != elm.id) {
+            world_map_id = elm.id;
+            world_map.load(Proj.gamePath(elm));
+        }
+        drawBack(rect);
+        D.clip(Rect(rect).extend(-D.pixelToScreenSize()));
+        for (int y = -4; y < 4; y++)
+            for (int x = -4; x < 4; x++) {
+                Image &img = world_map(VecI2(x, y));
+                if (img.is())
+                    img.draw(Rect_LD(x, y, 1, 1) * 0.19f + rect.center());
+            }
+        D.clip();
     } break;
 
     case ELM_GUI: {
@@ -531,7 +550,7 @@ void PreviewClass::draw(C GuiPC &gpc) {
     if (MaterialRegion::Texture *tex = CAST(MaterialRegion::Texture, Gui.ms())) {
         D.clip();
         Vec2 size(D.w(), D.h());
-        size = size.avg(); //if(tex.type==MaterialRegion.TEX_RFL_ALL)size.x*=4.0/3;
+        size = size.avg(); // if(tex.type==MaterialRegion.TEX_RFL_ALL)size.x*=4.0/3;
         flt x = D.w();
         if (MtrlEdit.visible())
             MIN(x, MtrlEdit.rect().min.x);
@@ -575,6 +594,6 @@ void PreviewClass::draw(C GuiPC &gpc) {
             return;
         }
 }
-PreviewClass::PreviewClass() : skel(null), anim(null), sound_id(UIDZero), video_id(UIDZero), mini_map_id(UIDZero), mesh_variation(0), video_time(0), objs_last_id(UIDZero) {}
+PreviewClass::PreviewClass() : skel(null), anim(null), sound_id(UIDZero), video_id(UIDZero), mini_map_id(UIDZero),world_map_id(UIDZero), mesh_variation(0), video_time(0), objs_last_id(UIDZero) {}
 
 /******************************************************************************/

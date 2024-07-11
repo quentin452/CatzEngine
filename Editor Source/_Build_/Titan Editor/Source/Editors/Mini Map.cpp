@@ -495,6 +495,8 @@ void MiniMapEditor::setChanged(bool world, bool areas) {
 void MiniMapEditor::set(Elm *elm) {
     if (elm && elm->type != ELM_MINI_MAP)
         elm = null;
+    if (elm && elm->type != ELM_WORLD_MAP)
+        elm = null;
     if (T.elm != elm) {
         flush();
         undos.del();

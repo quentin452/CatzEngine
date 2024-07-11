@@ -1058,6 +1058,111 @@ bool ServerRecvSetMiniMapImage(File &f, UID &mini_map_id, VecI2 &image_xy, TimeS
     f >> mini_map_id >> image_xy >> image_time >> image_is;
     return f.copy(cmpr_image_data); // don't decompress image data on the server
 }
+
+
+
+
+
+/******************************************************************************/
+// CS_GET_WORLD_MAP_VER
+/******************************************************************************/
+void ClientSendGetWorldMapVer(Connection &conn, C UID &world_map_id) {
+    File f;
+    f.writeMem().putByte(CS_GET_WORLD_MAP_VER) << world_map_id;
+    f.pos(0);
+    conn.send(f, -1, false);
+}
+void ServerRecvGetWorldMapVer(File &f, UID &world_map_id) {
+    f >> world_map_id;
+}
+void ServerSendGetWorldMapVer(Connection &conn, WorldMapVer *mini_map_ver, C UID &world_map_id, C UID &proj_id) {
+    File f;
+    f.writeMem().putByte(CS_GET_WORLD_MAP_VER) << world_map_id << proj_id;
+    f.putBool(mini_map_ver != null);
+    if (mini_map_ver) {
+        File temp;
+        mini_map_ver->save(temp.writeMem(), true);
+        temp.pos(0);
+        Compress(temp, f, ServerNetworkCompression, ServerNetworkCompressionLevel);
+    }
+    f.pos(0);
+    conn.send(f, -1, false);
+}
+void ClientRecvGetWorldMapVer(File &f, WorldMapVer &mini_map_ver, UID &world_map_id, UID &proj_id) {
+    f >> world_map_id >> proj_id;
+    if (f.getBool()) {
+        File temp;
+        if (Decompress(f, temp, true)) {
+            temp.pos(0);
+            mini_map_ver.load(temp, true);
+        }
+    }
+}
+/******************************************************************************/
+// CS_GET_WORLD_MAP_IMAGES
+/******************************************************************************/
+void ClientSendGetWorldMapImages(Connection &conn, C UID &world_map_id, Memc<VecI2> &images) {
+    File f;
+    f.writeMem().putByte(CS_GET_WORLD_MAP_IMAGES) << world_map_id;
+    f.cmpUIntV(images.elms());
+    FREPA(images)
+    f.cmpIntV(images[i].x).cmpIntV(images[i].y);
+    f.pos(0);
+    conn.send(f, -1, false);
+}
+void ServerRecvGetWorldMapImages(File &f, UID &world_map_id, Memc<VecI2> &images) {
+    f >> world_map_id;
+    images.setNum(f.decUIntV());
+    FREPA(images)
+    f.decIntV(images[i].x).decIntV(images[i].y);
+}
+/******************************************************************************/
+// CS_SET_WORLD_MAP_SETTINGS
+/******************************************************************************/
+void ClientSendSetWorldMapSettings(Connection &conn, C UID &world_map_id, C Game::WorldMap::Settings &settings, C TimeStamp &settings_time) {
+    File f;
+    f.writeMem().putByte(CS_SET_WORLD_MAP_SETTINGS) << world_map_id << settings_time;
+    settings.save(f);
+    f.pos(0);
+    conn.send(f, -1, false);
+}
+bool ServerRecvSetWorldMapSettings(File &f, UID &world_map_id, Game::WorldMap::Settings &settings, TimeStamp &settings_time) {
+    f >> world_map_id >> settings_time;
+    return settings.load(f);
+}
+void ServerWriteSetWorldMapSettings(File &f, C UID &world_map_id, C Game::WorldMap::Settings &settings, C TimeStamp &settings_time, C UID &proj_id) {
+    f.putByte(CS_SET_WORLD_MAP_SETTINGS) << world_map_id << proj_id << settings_time;
+    settings.save(f);
+}
+bool ClientRecvSetWorldMapSettings(File &f, UID &world_map_id, Game::WorldMap::Settings &settings, TimeStamp &settings_time, UID &proj_id) {
+    f >> world_map_id >> proj_id >> settings_time;
+    return settings.load(f);
+}
+/******************************************************************************/
+// CS_SET_WORLD_MAP_IMAGE
+/******************************************************************************/
+void ServerSendSetWorldMapImage(Connection &conn, C UID &world_map_id, C VecI2 &image_xy, C TimeStamp &image_time, File &cmpr_image_data, C UID &proj_id) {
+    File f;
+    f.writeMem().putByte(CS_SET_WORLD_MAP_IMAGE) << world_map_id << proj_id << image_xy << image_time;
+    cmpr_image_data.copy(f);
+    f.pos(0);
+    conn.send(f, -1, false);
+}
+bool ClientRecvSetWorldMapImage(File &f, UID &world_map_id, VecI2 &image_xy, TimeStamp &image_time, File &image_data, UID &proj_id) {
+    f >> world_map_id >> proj_id >> image_xy >> image_time;
+    Decompress(f, image_data);
+    return true; // 'f' can be empty if it doesn't exist, so don't return error on decompress fail
+}
+void ClientWriteSetWorldMapImage(File &elm, File &data, C UID &world_map_id, C VecI2 &image_xy, C TimeStamp &image_time, File &image_data) {
+    elm.putByte(CS_SET_WORLD_MAP_IMAGE) << world_map_id << image_xy << image_time;
+    elm.putBool(image_data.is());
+    image_data.copy(data); // 'data' will be compressed
+}
+bool ServerRecvSetWorldMapImage(File &f, UID &world_map_id, VecI2 &image_xy, TimeStamp &image_time, bool &image_is, File &cmpr_image_data) {
+    f >> world_map_id >> image_xy >> image_time >> image_is;
+    return f.copy(cmpr_image_data); // don't decompress image data on the server
+}
+
 /******************************************************************************/
 // CS_GET_CODE_VER
 /******************************************************************************/

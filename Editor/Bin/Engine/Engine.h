@@ -581,6 +581,8 @@ namespace EE // Esenthel Engine namespace
 
 #include "Game/Mini Map.h"
 
+#include "Game/World Map.h"
+
 #include "Game/World.h"
 /******************************************************************************/
 // NET

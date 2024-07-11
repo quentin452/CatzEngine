@@ -755,6 +755,81 @@ void MiniMapVer::flush() {
             save(path);
     }
 }
+WorldMapVer::~WorldMapVer() { flush(); }
+WorldMapVer &WorldMapVer::setChanged() {
+    changed = true;
+    return T;
+}
+void WorldMapVer::operator=(C WorldMapVer &src) {
+    setChanged();
+    // don't set path, to avoid accidental resaving from a temporary variable
+    // don't set world_map_id
+    time = src.time;
+    settings = src.settings;
+    images = src.images;
+}
+bool WorldMapVer::save(File &f, bool network) C {
+    f.cmpUIntV(1);
+    f << time;
+    settings.save(f);
+    f.cmpUIntV(images.elms());
+    FREPA(images)
+    f.cmpIntV(images[i].x).cmpIntV(images[i].y);
+    return f.ok();
+}
+bool WorldMapVer::load(File &f, bool network) {
+    changed = false;
+    switch (f.decUIntV()) {
+    case 1: {
+        f >> time;
+        if (!settings.load(f))
+            break;
+        images.setNum(f.decUIntV());
+        FREPA(images)
+        f.decIntV(images[i].x).decIntV(images[i].y);
+        if (f.ok())
+            return true;
+    } break;
+
+    case 0: {
+        f >> time;
+        if (!settings.load(f))
+            break;
+        images.setNum(f.decUIntV());
+        FREPA(images) {
+            images[i].x = DecIntV(f);
+            images[i].y = DecIntV(f);
+        }
+        if (f.ok())
+            return true;
+    } break;
+    }
+    time.zero();
+    settings.del();
+    images.del();
+    return false;
+}
+bool WorldMapVer::save(C Str &name) C {
+    File f;
+    save(f.writeMem());
+    f.pos(0);
+    return SafeOverwrite(f, name);
+}
+bool WorldMapVer::load(C Str &name) {
+    T.path = name;
+    T.world_map_id = FileNameID(name);
+    File f;
+    if (f.read(name))
+        return load(f);
+    return false;
+}
+void WorldMapVer::flush() {
+    if (changed) {
+        changed = false;
+        if (path.is())
+            save(path);
+    }
+}
 ObjVer::ObjVer() : area_xy(0), matrix(MatrixIdentity), elm_obj_id(UIDZero), mesh_variation_id(0), flag(0) {}
 
 WaterVer::WaterVer() : areas(0, -1) {}
@@ -763,4 +838,5 @@ WorldVer::WorldVer() : changed(false), world_id(UIDZero), areas(Compare), rebuil
 
 MiniMapVer::MiniMapVer() : changed(false), mini_map_id(UIDZero) {}
 
+WorldMapVer::WorldMapVer() : changed(false), world_map_id(UIDZero) {}
 /******************************************************************************/

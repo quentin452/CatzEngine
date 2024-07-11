@@ -35,6 +35,7 @@ cchar8 *ElmTypeName[] = // !! these names are saved in Project TextData, do not 
         "Icon Settings",
         "Mini Map",
         "Gui Skin",
+        "World Map",
         "Any",
 };
 cchar8 *ElmTypeClass[] =
@@ -71,6 +72,7 @@ cchar8 *ElmTypeClass[] =
         "", // Icon Settings
         "Game.MiniMap",
         "GuiSkin, GuiSkinPtr, GuiSkins",
+        "Game.WorldMap",
 };
 cchar8 *ElmTypeDesc[] =
     {
@@ -106,6 +108,7 @@ cchar8 *ElmTypeDesc[] =
         "Icon Settings contains information required for creating 2D Icon elements from 3D Objects, such as icon resolution, camera placement, lighting, etc.\nOne Icon Settings element can be used for multiple Icons.",
         "Mini Map is a set of multiple Images of a World from the bird's eye view.",
         "Gui Skin is a set of images used to define a Graphical User Interface",
+        "World Map is like Mini Map , but for the whole map.",
 };
 
 ElmTypeNameNoSpace ElmTypeNameNoSpaceDummy; // !! this needs to exist so that constructor is called !!
@@ -116,7 +119,7 @@ bool ElmFileInShort(ELM_TYPE type) { return type == ELM_ENUM || type == ELM_FONT
 bool ElmEdit(ELM_TYPE type) { return type == ELM_MESH || type == ELM_MTRL || type == ELM_SKEL || type == ELM_OBJ || type == ELM_ENUM || type == ELM_FONT || type == ELM_PANEL_IMAGE || type == ELM_IMAGE || type == ELM_OBJ_CLASS || type == ELM_TEXT_STYLE || type == ELM_PANEL || type == ELM_GUI_SKIN || type == ELM_WATER_MTRL || type == ELM_PHYS_MTRL || type == ELM_ENV || type == ELM_ICON_SETTS; }                                                                                                                                                                                                   // if element file is stored in the "edit" folder
 bool ElmGame(ELM_TYPE type) { return type == ELM_ENUM || type == ELM_IMAGE || type == ELM_IMAGE_ATLAS || type == ELM_FONT || type == ELM_TEXT_STYLE || type == ELM_PANEL || type == ELM_GUI || type == ELM_MTRL || type == ELM_WATER_MTRL || type == ELM_PHYS_MTRL || type == ELM_OBJ_CLASS || type == ELM_OBJ || type == ELM_MESH || type == ELM_SKEL || type == ELM_PHYS || type == ELM_ANIM || type == ELM_PANEL_IMAGE || type == ELM_ICON || type == ELM_ENV || type == ELM_SOUND || type == ELM_VIDEO || type == ELM_FILE || type == ELM_GUI_SKIN; }                                                     // if element file is stored in the "game" folder
 bool ElmSendBoth(ELM_TYPE type) { return type == ELM_SKEL || type == ELM_FONT || type == ELM_PANEL_IMAGE; }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   // if both Edit and Game file data should be sent in client<->server synchronization
-bool ElmInFolder(ELM_TYPE type) { return type == ELM_WORLD || type == ELM_MINI_MAP; }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         // if element data is stored inside a folder
+bool ElmInFolder(ELM_TYPE type) { return type == ELM_WORLD || type == ELM_MINI_MAP || type == ELM_WORLD_MAP; }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                // if element data is stored inside a folder
 
 bool ElmManualSync(ELM_TYPE type) { return type == ELM_CODE || type == ELM_APP; }
 bool ElmPublish(ELM_TYPE type) { return type != ELM_NONE && type != ELM_FOLDER && type != ELM_LIB && type != ELM_APP && type != ELM_CODE && type != ELM_ICON_SETTS; } // if element should be included in publishing
@@ -4343,6 +4346,98 @@ void ElmMiniMap::load(C MemPtr<TextNode> &nodes) {
             env_time.text(n);
     }
 }
+bool ElmWorldMap::equal(C ElmWorldMap &src) C { return super::equal(src) && areas_per_image_time == src.areas_per_image_time && image_size_time == src.image_size_time && world_time == src.world_time && env_time == src.env_time; }
+bool ElmWorldMap::newer(C ElmWorldMap &src) C { return super::newer(src) || areas_per_image_time > src.areas_per_image_time || image_size_time > src.image_size_time || world_time > src.world_time || env_time > src.env_time; }
+bool ElmWorldMap::mayContain(C UID &id) C { return id == world_id || id == env_id; }
+void ElmWorldMap::newData() {
+    super::newData();
+    areas_per_image_time++;
+    image_size_time++;
+    world_time++;
+    env_time++;
+}
+uint ElmWorldMap::undo(C ElmWorldMap &src) {
+    uint changed = super::undo(src);
+
+    changed |= Undo(areas_per_image_time, src.areas_per_image_time, areas_per_image, src.areas_per_image) * CHANGE_AFFECT_FILE;
+    changed |= Undo(image_size_time, src.image_size_time, image_size, src.image_size) * CHANGE_AFFECT_FILE;
+    changed |= Undo(world_time, src.world_time, world_id, src.world_id) * CHANGE_AFFECT_FILE;
+    changed |= Undo(env_time, src.env_time, env_id, src.env_id) * CHANGE_AFFECT_FILE;
+
+    if (changed)
+        newVer();
+    return changed;
+}
+uint ElmWorldMap::sync(C ElmWorldMap &src) {
+    uint changed = super::sync(src);
+
+    changed |= Sync(areas_per_image_time, src.areas_per_image_time, areas_per_image, src.areas_per_image) * CHANGE_AFFECT_FILE;
+    changed |= Sync(image_size_time, src.image_size_time, image_size, src.image_size) * CHANGE_AFFECT_FILE;
+    changed |= Sync(world_time, src.world_time, world_id, src.world_id) * CHANGE_AFFECT_FILE;
+    changed |= Sync(env_time, src.env_time, env_id, src.env_id) * CHANGE_AFFECT_FILE;
+
+    if (equal(src))
+        ver = src.ver;
+    else if (changed)
+        newVer();
+    return changed;
+}
+void ElmWorldMap::copyTo(Game::WorldMap::Settings &settings) C {
+    settings.image_size = image_size;
+    settings.areas_per_image = areas_per_image;
+}
+bool ElmWorldMap::save(File &f) C {
+    super::save(f);
+    f.cmpUIntV(0);
+    f << areas_per_image << image_size << world_id << env_id << areas_per_image_time << image_size_time << world_time << env_time;
+    return f.ok();
+}
+bool ElmWorldMap::load(File &f) {
+    if (super::load(f))
+        switch (f.decUIntV()) {
+        case 0: {
+            f >> areas_per_image >> image_size >> world_id >> env_id >> areas_per_image_time >> image_size_time >> world_time >> env_time;
+            if (f.ok())
+                return true;
+        } break;
+        }
+    return false;
+}
+void ElmWorldMap::save(MemPtr<TextNode> nodes) C {
+    super::save(nodes);
+    nodes.New().set("AreasPerImage", areas_per_image);
+    nodes.New().set("ImageSize", image_size);
+    if (world_id.valid())
+        nodes.New().setFN("World", world_id);
+    if (env_id.valid())
+        nodes.New().setFN("Environment", env_id);
+    nodes.New().set("AreasPerImageTime", areas_per_image_time.text());
+    nodes.New().set("ImageSizeTime", image_size_time.text());
+    nodes.New().set("WorldTime", world_time.text());
+    nodes.New().set("EnvironmentTime", env_time.text());
+}
+void ElmWorldMap::load(C MemPtr<TextNode> &nodes) {
+    super::load(nodes);
+    REPA(nodes) {
+        C TextNode &n = nodes[i];
+        if (n.name == "AreasPerImage")
+            n.getValue(areas_per_image);
+        else if (n.name == "ImageSize")
+            n.getValue(image_size);
+        else if (n.name == "World")
+            n.getValue(world_id);
+        else if (n.name == "Environment")
+            n.getValue(env_id);
+        else if (n.name == "AreasPerImageTime")
+            areas_per_image_time.text(n);
+        else if (n.name == "ImageSizeTime")
+            image_size_time.text(n);
+        else if (n.name == "WorldTime")
+            world_time.text(n);
+        else if (n.name == "EnvironmentTime")
+            env_time.text(n);
+    }
+}
 Elm::~Elm() { Delete(data); }
 Elm &Elm::copyParams(C Elm &src, bool set_parent) // copy parameters from 'src', 'type' must be already specified, doesn't copy ID
 {
@@ -4403,6 +4498,9 @@ Elm &Elm::copyParams(C Elm &src, bool set_parent) // copy parameters from 'src',
                     break;
                 case ELM_MINI_MAP:
                     *miniMapData() = *src.miniMapData();
+                    break;
+                case ELM_WORLD_MAP:
+                    *worldMapData() = *src.worldMapData();
                     break;
                 case ELM_ENUM:
                     *enumData() = *src.enumData();
@@ -4669,7 +4767,7 @@ ElmWorld *Elm::worldData() {
 }
 C ElmWorld *Elm::worldData() C { return (type == ELM_WORLD) ? CAST(ElmWorld, data) : null; }
 ElmMiniMap *Elm::miniMapData() {
-    if (type == ELM_MINI_MAP) {
+    if (type == ELM_MINI_MAP OR type == ELM_WORLD_MAP) {
         if (!data)
             data = new ElmMiniMap;
         return CAST(ElmMiniMap, data);
@@ -4677,6 +4775,15 @@ ElmMiniMap *Elm::miniMapData() {
     return null;
 }
 C ElmMiniMap *Elm::miniMapData() C { return (type == ELM_MINI_MAP) ? CAST(ElmMiniMap, data) : null; }
+ElmWorldMap *Elm::worldMapData() {
+    if (type == ELM_MINI_MAP OR type == ELM_WORLD_MAP) {
+        if (!data)
+            data = new ElmWorldMap;
+        return CAST(ElmWorldMap, data);
+    }
+    return null;
+}
+C ElmWorldMap *Elm::worldMapData() C { return (type == ELM_WORLD_MAP) ? CAST(ElmWorldMap, data) : null; }
 ElmEnum *Elm::enumData() {
     if (type == ELM_ENUM) {
         if (!data)
@@ -4854,6 +4961,9 @@ ElmData *Elm::Data() {
         case ELM_MINI_MAP:
             data = new ElmMiniMap;
             break;
+        case ELM_WORLD_MAP:
+            data = new ElmWorldMap;
+            break;
         case ELM_ENUM:
             data = new ElmEnum;
             break;
@@ -4989,6 +5099,8 @@ bool Elm::newerData(C Elm &src) C // if 'this' has any data newer than 'src'
             return iconSettsData()->newer(*src.iconSettsData());
         case ELM_MINI_MAP:
             return miniMapData()->newer(*src.miniMapData());
+        case ELM_WORLD_MAP:
+            return worldMapData()->newer(*src.worldMapData());
         case ELM_GUI_SKIN:
             return guiSkinData()->newer(*src.guiSkinData());
         }
@@ -5051,6 +5163,8 @@ uint Elm::syncData(C Elm &src) {
             return iconSettsData()->sync(*src.iconSettsData());
         case ELM_MINI_MAP:
             return miniMapData()->sync(*src.miniMapData());
+        case ELM_WORLD_MAP:
+            return worldMapData()->sync(*src.worldMapData());
         case ELM_GUI_SKIN:
             return guiSkinData()->sync(*src.guiSkinData());
         }
@@ -5351,6 +5465,8 @@ ElmPanelImage::ElmPanelImage() : compressed(false) {}
 ElmApp::ElmApp() : build(1), save_size(-1), fb_app_id(0), xbl_title_id(0), nintendo_app_id(0), storage(Edit::STORAGE_INTERNAL), xbl_program(Edit::XBOX_LIVE_CREATORS), supported_orientations(DIRF_X | DIRF_Y), flag(PUBLISH_PROJ_DATA | PUBLISH_PHYSX_DLL | PUBLISH_DATA_AS_PAK), icon(UIDZero), notification_icon(UIDZero), image_portrait(UIDZero), image_landscape(UIDZero), gui_skin(UIDZero), ms_publisher_id(UIDZero), xbl_scid(UIDZero) {}
 
 ElmMiniMap::ElmMiniMap() : areas_per_image(4), image_size(256), world_id(UIDZero), env_id(UIDZero) {}
+
+ElmWorldMap::ElmWorldMap() : areas_per_image(4), image_size(256), world_id(UIDZero), env_id(UIDZero) {}
 
 Elm::Elm() : type(ELM_NONE), flag(0), file_size(-1), id(UID().randomizeValid()), parent_id(UIDZero), data(null) {}
 

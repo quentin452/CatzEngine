@@ -24,7 +24,7 @@ class Elm {
     UID id,           // id   of the element
         parent_id;    // id   of the parent
     Str name;         // name of the element
-    TimeStamp         //create_time, // time when the element was created
+    TimeStamp         // create_time, // time when the element was created
         name_time,    // time when the element was named or renamed
         parent_time,  // time when the element was attached to the parent
         removed_time, // time when the element was removed or restored
@@ -101,6 +101,8 @@ class Elm {
     C ElmWorld *worldData() C;
     ElmMiniMap *miniMapData();
     C ElmMiniMap *miniMapData() C;
+    ElmWorldMap *worldMapData();
+    C ElmWorldMap *worldMapData() C;
     ElmEnum *enumData();
     C ElmEnum *enumData() C;
     ElmImage *imageData();

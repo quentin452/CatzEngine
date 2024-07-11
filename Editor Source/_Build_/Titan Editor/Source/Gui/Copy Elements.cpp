@@ -133,6 +133,48 @@ bool CopyElmsFunc(Thread &thread) {
                     if (src_mini_map_ver)
                         if (MiniMapVer *dest_mini_map_ver = dest.miniMapVerRequire(id))
                             *dest_mini_map_ver = *src_mini_map_ver;
+                } else if (s->type == ELM_WORLD_MAP) // World Map
+                {
+                    MiniMapVer *src_mini_map_ver = null, mini_map_ver_temp;
+                    if (pak.totalFiles()) {
+                        if (C PakFile *pf = pak.find(sgp))
+                            if (!FCopy(pak, *pf, dgp + suffix)) {
+                                FDelDirs(dgp + suffix);
+                                goto error;
+                            } // copy to temp folder
+                        if (C PakFile *pf = pak.find(sep)) {
+                            if (FCopy(pak, *pf, dep, FILE_OVERWRITE_ALWAYS, null, suffix))
+                                SavedEdit(s->type, dep);
+                            else {
+                                FDelDirs(dgp + suffix);
+                                goto error;
+                            }
+                        } else
+                            FDelFile(dep);
+                        File f;
+                        if (f.read(src.miniMapVerPath(id), pak))
+                            if (mini_map_ver_temp.load(f))
+                                src_mini_map_ver = &mini_map_ver_temp;
+                    } else {
+                        if (FExist(sgp) && !FCopyDir(sgp, dgp + suffix)) {
+                            FDelDirs(dgp + suffix);
+                            goto error;
+                        } // copy to temp folder
+                        if (!FExist(sep))
+                            FDelFile(dep);
+                        else if (FCopy(sep, dep, FILE_OVERWRITE_ALWAYS, null, null, suffix))
+                            SavedEdit(s->type, dep);
+                        else {
+                            FDelDirs(dgp + suffix);
+                            goto error;
+                        }
+                        src_mini_map_ver = src.miniMapVerRequire(id);
+                    }
+                    FDelDirs(dgp);
+                    FRename(dgp + suffix, dgp); // replace target folder with temp
+                    if (src_mini_map_ver)
+                        if (MiniMapVer *dest_mini_map_ver = dest.miniMapVerRequire(id))
+                            *dest_mini_map_ver = *src_mini_map_ver;
                 } else if (s->type == ELM_CODE && CopyElms.src_ver >= 49) // Code (stored separately only since version 49)
                 {
                     Str scp = src.codePath(id), dcp = dest.codePath(id);
@@ -155,9 +197,9 @@ bool CopyElmsFunc(Thread &thread) {
                     // code base shouldn't be copied here
                 } else // regular file
                 {
-                    //Str scp=src.codePath(id), dcp=dest.codePath(id); this is performed above
+                    // Str scp=src.codePath(id), dcp=dest.codePath(id); this is performed above
                     if (pak.totalFiles()) {
-                        //if(C PakFile *pf=pak.find(scp)){if(FCopy(pak, *pf, dcp, FILE_OVERWRITE_ALWAYS, null, suffix))SavedCode(        dcp);else goto error;}else FDelFile(dcp);
+                        // if(C PakFile *pf=pak.find(scp)){if(FCopy(pak, *pf, dcp, FILE_OVERWRITE_ALWAYS, null, suffix))SavedCode(        dcp);else goto error;}else FDelFile(dcp);
                         if (C PakFile *pf = pak.find(sep)) {
                             if (FCopy(pak, *pf, dep, FILE_OVERWRITE_ALWAYS, null, suffix))
                                 SavedEdit(s->type, dep);
@@ -173,7 +215,7 @@ bool CopyElmsFunc(Thread &thread) {
                         } else
                             FDelFile(dgp);
                     } else {
-                        //if(!FExist(scp))FDelFile(dcp);else if(FCopy(scp, dcp, FILE_OVERWRITE_ALWAYS, null, null, suffix))SavedCode(        dcp);else goto error;
+                        // if(!FExist(scp))FDelFile(dcp);else if(FCopy(scp, dcp, FILE_OVERWRITE_ALWAYS, null, null, suffix))SavedCode(        dcp);else goto error;
                         if (!FExist(sep))
                             FDelFile(dep);
                         else if (FCopy(sep, dep, FILE_OVERWRITE_ALWAYS, null, null, suffix))
@@ -399,7 +441,7 @@ void CopyElements::ReplaceElms::check() {
                 CopyElms.elms_to_copy.remove(i, true);
             else // if source doesn't exist for some reason, or both projects have this element but it's of different type, then delete it and don't copy
                 if (src && dest)
-                data.add(CopyElms.elms_to_copy[i]); // both exist -> display to select whether it should be copied or not
+                    data.add(CopyElms.elms_to_copy[i]); // both exist -> display to select whether it should be copied or not
         }
 
         // merge hidden elements with their parent
@@ -662,6 +704,15 @@ void CopyElements::includeDep(C UID &elm_id) {
 
                 case ELM_MINI_MAP:
                     if (ElmMiniMap *data = elm->miniMapData()) {
+                        if (include_dependencies()) {
+                            includeDep(data->world_id);
+                            includeDep(data->env_id);
+                        }
+                    }
+                    break;
+
+                case ELM_WORLD_MAP:
+                    if (ElmWorldMap *data = elm->worldMapData()) {
                         if (include_dependencies()) {
                             includeDep(data->world_id);
                             includeDep(data->env_id);

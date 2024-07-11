@@ -136,7 +136,7 @@ class ProjectEx : ProjectHierarchy {
     EEItem *list_cur_item;
     Memc<UID> list_sel, menu_list_sel, drag_list_sel;
     Memc<EEItem *> list_sel_item, menu_list_sel_item;
-    ImagePtr icon_folder, icon_file, icon_obj, icon_class, icon_mesh, icon_mtrl, icon_water_mtrl, icon_phys_mtrl, icon_anim, icon_env, icon_world, icon_mini_map, icon_image, icon_image_atlas, icon_icon_setts, icon_icon, icon_enum, icon_font, icon_panel_image, icon_ts, icon_panel, icon_gui, icon_gui_skin, icon_sound, icon_video, icon_lib, icon_app, icon_code, icon_play, icon_stop, arrow_right, arrow_down, warning, exclamation, icon_light, icon_particles;
+    ImagePtr icon_folder, icon_file, icon_obj, icon_class, icon_mesh, icon_mtrl, icon_water_mtrl, icon_phys_mtrl, icon_anim, icon_env, icon_world, icon_mini_map,icon_world_map, icon_image, icon_image_atlas, icon_icon_setts, icon_icon, icon_enum, icon_font, icon_panel_image, icon_ts, icon_panel, icon_gui, icon_gui_skin, icon_sound, icon_video, icon_lib, icon_app, icon_code, icon_play, icon_stop, arrow_right, arrow_down, warning, exclamation, icon_light, icon_particles;
     MenuBar menu;
     Node<MenuElm> obj_class_node, param_type_node, font_node;
     Sound sound;
@@ -178,6 +178,7 @@ class ProjectEx : ProjectHierarchy {
     static void NewCode(ProjectEx &proj);
     static void NewEnv(ProjectEx &proj);
     static void NewMiniMap(ProjectEx &proj);
+    static void NewWorldMap(ProjectEx &proj);
     static void NewWorld(ProjectEx &proj);
 
     static void ElmRename(ProjectEx &proj);

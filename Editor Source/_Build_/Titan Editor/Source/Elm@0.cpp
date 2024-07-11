@@ -37,6 +37,7 @@ void InitElmOrder() {
     elms.add(ELM_CODE);
     elms.add(ELM_LIB);
     elms.add(ELM_APP);
+    elms.add(ELM_WORLD_MAP);
     FREP(ELM_NUM)
     elms.include(ELM_TYPE(i)); // include elements that were not listed above (just in case)
     ElmOrderArray.setNum(elms.elms());

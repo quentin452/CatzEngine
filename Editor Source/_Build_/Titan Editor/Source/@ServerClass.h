@@ -18,9 +18,10 @@ class ServerClass : Connection {
     long sent, rcvd, stats_sent, stats_rcvd;
     flt reconnect_time, stats_time;
     Memx<Project> projects;
-    Memc<UID> texs;                               // textures available on the server
-    ThreadSafeMap<UID, WorldVer> world_vers;      // element exists only if we have received data from server (even empty), make thread-safe just in case
-    ThreadSafeMap<UID, MiniMapVer> mini_map_vers; // element exists only if we have received data from server (even empty), make thread-safe just in case
+    Memc<UID> texs;                                 // textures available on the server
+    ThreadSafeMap<UID, WorldVer> world_vers;        // element exists only if we have received data from server (even empty), make thread-safe just in case
+    ThreadSafeMap<UID, MiniMapVer> mini_map_vers;   // element exists only if we have received data from server (even empty), make thread-safe just in case
+    ThreadSafeMap<UID, WorldMapVer> world_map_vers; // element exists only if we have received data from server (even empty), make thread-safe just in case
 
     // get
     bool loggedIn() C;
@@ -78,6 +79,11 @@ class ServerClass : Connection {
     void getMiniMapImages(C UID &mini_map_id, Memc<VecI2> &images);
 
     void setMiniMapSettings(C UID &mini_map_id, C Game::MiniMap::Settings &settings, C TimeStamp &settings_time);
+
+    void getWorldMapVer(C UID &world_map_id); // request if don't have yet
+    void getWorldMapImages(C UID &world_map_id, Memc<VecI2> &images);
+
+    void setWorldMapSettings(C UID &world_map_id, C Game::WorldMap::Settings &settings, C TimeStamp &settings_time);
 
     void update(ProjectEx *proj, bool busy);
 

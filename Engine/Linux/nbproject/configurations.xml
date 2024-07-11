@@ -356,6 +356,7 @@
         <itemPath>../Source/Game/Waypoint.cpp</itemPath>
         <itemPath>../Source/Game/World Draw.cpp</itemPath>
         <itemPath>../Source/Game/World Object.cpp</itemPath>
+      <itemPath>../Source/Game/World Map.cpp</itemPath>
         <itemPath>../Source/Game/World Path 2D.cpp</itemPath>
         <itemPath>../Source/Game/World Terrain.cpp</itemPath>
         <itemPath>../Source/Game/World.cpp</itemPath>
@@ -1403,6 +1404,8 @@
       <item path="../Source/Game/World Draw.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Game/World Object.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../Source/Game/World Map.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Game/World Path 2D.cpp" ex="false" tool="1" flavor2="0">
       </item>
@@ -2845,6 +2848,8 @@
       <item path="../Source/Game/World Draw.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Game/World Object.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="../Source/Game/World Map.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="../Source/Game/World Path 2D.cpp" ex="false" tool="1" flavor2="0">
       </item>

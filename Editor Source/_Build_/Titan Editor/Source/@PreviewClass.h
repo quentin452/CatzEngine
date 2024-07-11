@@ -20,7 +20,8 @@ class PreviewClass : Window // create as window so it will be above other window
     Video video;
     Str sound_info;
     Game::MiniMap mini_map;
-    UID sound_id, video_id, mini_map_id;
+    Game::WorldMap world_map;
+    UID sound_id, video_id,mini_map_id, world_map_id;
     int mesh_variation;
     flt video_time;
     GuiObjs objs;

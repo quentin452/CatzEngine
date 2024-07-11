@@ -40,15 +40,18 @@ Project::Project() : text_data(false), synchronize(true), cipher(CIPHER_NONE), m
     REPAO(compress_type) = COMPRESS_NONE;
     REPAO(tex_downsize) = 0;
     REPAO(mtrl_brush_id).zero();
-    world_vers.mode(CACHE_DUMMY);    // to allow creating new elements
-    mini_map_vers.mode(CACHE_DUMMY); // to allow creating new elements
+    world_vers.mode(CACHE_DUMMY);     // to allow creating new elements
+    mini_map_vers.mode(CACHE_DUMMY);  // to allow creating new elements
+    world_map_vers.mode(CACHE_DUMMY); // to allow creating new elements
 }
 Project &Project::del() {
     // delete this first in case it uses this project members
     world_vers.del();
     mini_map_vers.del();
+    world_map_vers.del();
     world_paths.del();
     mini_map_paths.del();
+    world_map_paths.del();
 
     elms.del();
     texs.del();
@@ -230,7 +233,7 @@ Str Project::elmFullName(C Elm *elm, int max_elms) C {
                 processed.removeLast();
                 name.reserve(length + 3) = "..\\";
                 break;
-            }                                 // if reached the allowed limit
+            } // if reached the allowed limit
             length += elm->name.length() + 1; // 1 extra for '\\'
         }
         elm = findElm(elm->parent_id);
@@ -281,6 +284,10 @@ Str Project::miniMapVerPath(C UID &mini_map_id) C { return editPath(mini_map_id)
 MiniMapVer *Project::miniMapVerFind(C UID &mini_map_id) { return mini_map_vers.find(miniMapVerPath(mini_map_id)); }
 MiniMapVer *Project::miniMapVerGet(C UID &mini_map_id) { return mini_map_vers.get(miniMapVerPath(mini_map_id)); }
 MiniMapVer *Project::miniMapVerRequire(C UID &mini_map_id) { return mini_map_vers(miniMapVerPath(mini_map_id)); }
+Str Project::worldMapVerPath(C UID &world_map_id) C { return editPath(world_map_id); }
+WorldMapVer *Project::worldMapVerFind(C UID &world_map_id) { return world_map_vers.find(worldMapVerPath(world_map_id)); }
+WorldMapVer *Project::worldMapVerGet(C UID &world_map_id) { return world_map_vers.get(worldMapVerPath(world_map_id)); }
+WorldMapVer *Project::worldMapVerRequire(C UID &world_map_id) { return world_map_vers(worldMapVerPath(world_map_id)); }
 UID Project::physToMesh(C Elm *phys) {
     if (phys)
         if (C ElmPhys *phys_data = phys->physData())
@@ -540,7 +547,7 @@ bool Project::idToValid(C UID &id) // if target is valid (not removed)
             WorldVer &world_ver = world_vers.lockedData(i);
             if (ObjVer *obj_ver = world_ver.obj.find(id))
                 return !obj_ver->removed();
-            //if(                  world_ver.waypoints.find(id))return ;
+            // if(                  world_ver.waypoints.find(id))return ;
         }
     }
     return true;
@@ -589,7 +596,7 @@ bool Project::invalidSrc(C Mems<FileParams> &files, Str *invalid) C // if specif
                     if (invalid)
                         *invalid = name;
                     return true;
-                }  // INVALID
+                } // INVALID
             } else // source file
             {
                 if (FileInfoSystem(name).type != FSTD_FILE
@@ -633,7 +640,7 @@ bool Project::invalidTexSrc(C Mems<FileParams> &files, Str *invalid) C // if spe
                     if (invalid)
                         *invalid = name;
                     return true;
-                }  // INVALID
+                } // INVALID
             } else // source file
             {
                 if (FileInfoSystem(name).type != FSTD_FILE
@@ -683,7 +690,7 @@ bool Project::invalidRefs(Elm &elm) // check if this element has invalid referen
 
     case ELM_MESH:
         if (ElmMesh *data = elm.meshData()) {
-            //if(Elm * obj_elm=findElm(data. obj_id))if(invalidRefs(* obj_elm))return true; here we don't do this because 'obj' is a parent and is visible
+            // if(Elm * obj_elm=findElm(data. obj_id))if(invalidRefs(* obj_elm))return true; here we don't do this because 'obj' is a parent and is visible
             if (Elm *skel_elm = findElm(data->skel_id))
                 if (invalidRefs(*skel_elm))
                     return true; // process skel because it's hidden
@@ -791,6 +798,11 @@ bool Project::invalidRefs(Elm &elm) // check if this element has invalid referen
             return invalidRef(data->world_id, true) || invalidRef(data->env_id, true);
         }
         break;
+    case ELM_WORLD_MAP:
+        if (ElmWorldMap *data = elm.worldMapData()) {
+            return invalidRef(data->world_id, true) || invalidRef(data->env_id, true);
+        }
+        break;
 
     case ELM_APP:
         if (ElmApp *data = elm.appData()) {
@@ -858,6 +870,10 @@ void Project::createWorldPaths(C UID &world_id) {
 void Project::createMiniMapPaths(C UID &mini_map_id) {
     if (mini_map_id.valid() && mini_map_paths.binaryInclude(mini_map_id)) // create paths only at first time
         FCreateDirs(gamePath(mini_map_id));
+}
+void Project::createWorldMapPaths(C UID &world_map_id) {
+    if (world_map_id.valid() && world_map_paths.binaryInclude(world_map_id)) // create paths only at first time
+        FCreateDirs(gamePath(world_map_id));
 }
 bool Project::loadImages(Image &image, TextParam *image_resize, C Str &src, bool srgb, bool clamp, C Color &background, C Image *color, C TextParam *color_resize, C Image *smooth, C TextParam *smooth_resize, C Image *bump, C TextParam *bump_resize) C {
     return LoadImages(this, image, image_resize, src, srgb, clamp, background, color, color_resize, smooth, smooth_resize, bump, bump_resize);
@@ -1032,6 +1048,8 @@ void Project::makeGameVer(Elm &elm, File *file) {
 
     case ELM_MINI_MAP:
         break; // not done here
+    case ELM_WORLD_MAP:
+        break; // not done here
     }
 }
 void Project::removeOrphanedElms() {
@@ -1102,6 +1120,13 @@ void Project::eraseElm(C UID &elm_id) {
             REPA(mini_map_vers)
             if (mini_map_vers.lockedData(i).mini_map_id == elm_id)
                 mini_map_vers.removeData(&mini_map_vers.lockedData(i));
+        }
+        if (elm->type == ELM_WORLD_MAP) // world maps need to have their 'WorldMapVer' removed from the cache
+        {
+            CacheLock cl(world_map_vers);
+            REPA(world_map_vers)
+            if (world_map_vers.lockedData(i).world_map_id == elm_id)
+                world_map_vers.removeData(&world_map_vers.lockedData(i));
         }
         // elms.removeData(elm, true); don't remove element here, in case some 'eraseElm' function uses 'hierarchy' or 'elms' containers (for example CodeEditor.removeSource uses findSource and SourceLoc.setID which uses sourceFullName which uses hierarchy and elms)
         if (elm->type == ELM_CODE) {
@@ -2028,7 +2053,7 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
                 else if (data_changed || file_changed)
                     mtrl_data.newVer();
                 elm_newer_src = mtrl.newer(src_mtrl);
-                //src_newer_elm=src_mtrl.newer(mtrl); no need to set because we already have everything
+                // src_newer_elm=src_mtrl.newer(mtrl); no need to set because we already have everything
             }
         } break;
 
@@ -2049,7 +2074,7 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
                 else if (data_changed || file_changed)
                     mtrl_data.newVer();
                 elm_newer_src = mtrl.newer(src_mtrl);
-                //src_newer_elm=src_mtrl.newer(mtrl); no need to set because we already have everything
+                // src_newer_elm=src_mtrl.newer(mtrl); no need to set because we already have everything
             }
         } break;
 
@@ -2070,7 +2095,7 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
                 else if (data_changed || file_changed)
                     mtrl_data.newVer();
                 elm_newer_src = mtrl.newer(src_mtrl);
-                //src_newer_elm=src_mtrl.newer(mtrl); no need to set because we already have everything
+                // src_newer_elm=src_mtrl.newer(mtrl); no need to set because we already have everything
             }
         } break;
 
@@ -2112,7 +2137,7 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
                 else if (data_changed || file_changed)
                     icon_data.newVer();
                 elm_newer_src = icon.newer(src_icon);
-                //src_newer_elm=src_icon.newer(icon); no need to set because we already have everything
+                // src_newer_elm=src_icon.newer(icon); no need to set because we already have everything
             }
         } break;
 
@@ -2200,7 +2225,7 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
                 else if (data_changed || file_changed)
                     ts_data.newVer();
                 elm_newer_src = ts.newer(src_ts);
-                //src_newer_elm=src_ts.newer(ts); no need to set because we already have everything
+                // src_newer_elm=src_ts.newer(ts); no need to set because we already have everything
             }
         } break;
 
@@ -2221,7 +2246,7 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
                 else if (data_changed || file_changed)
                     panel_data.newVer();
                 elm_newer_src = panel.newer(src_panel);
-                //src_newer_elm=src_panel.newer(panel); no need to set because we already have everything
+                // src_newer_elm=src_panel.newer(panel); no need to set because we already have everything
             }
         } break;
 
@@ -2242,7 +2267,7 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
                 else if (data_changed || file_changed)
                     gui_skin_data.newVer();
                 elm_newer_src = gui_skin.newer(src_gui_skin);
-                //src_newer_elm=src_gui_skin.newer(gui_skin); no need to set because we already have everything
+                // src_newer_elm=src_gui_skin.newer(gui_skin); no need to set because we already have everything
             }
         } break;
 
@@ -2263,7 +2288,7 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
                 else if (data_changed || file_changed)
                     env_data.newVer();
                 elm_newer_src = env.newer(src_env);
-                //src_newer_elm=src_env.newer(env); no need to set because we already have everything
+                // src_newer_elm=src_env.newer(env); no need to set because we already have everything
             }
         } break;
 
@@ -2359,6 +2384,8 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
 
         case ELM_MINI_MAP: {
         } break;
+        case ELM_WORLD_MAP: {
+        } break;
 
         case ELM_ENUM: {
             ElmEnum &enum_data = *elm.enumData(), &src_enum_data = *src.enumData();
@@ -2375,7 +2402,7 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
             else if (data_changed || file_changed)
                 enum_data.newVer();
             elm_newer_src = enums.newer(src_enums);
-            //src_newer_elm=src_enums.newer(enums); no need to set because we already have everything
+            // src_newer_elm=src_enums.newer(enums); no need to set because we already have everything
         } break;
 
         case ELM_OBJ: {
@@ -2397,7 +2424,7 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
             else if (data_changed || file_changed)
                 obj_data.newVer();
             elm_newer_src = params.newer(src_params);
-            //src_newer_elm=src_params.newer(params); no need to set because we already have everything
+            // src_newer_elm=src_params.newer(params); no need to set because we already have everything
         } break;
 
         case ELM_OBJ_CLASS: {
@@ -2419,7 +2446,7 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
             else if (data_changed || file_changed)
                 obj_data.newVer();
             elm_newer_src = params.newer(src_params);
-            //src_newer_elm=src_params.newer(params); no need to set because we already have everything
+            // src_newer_elm=src_params.newer(params); no need to set because we already have everything
         } break;
 
         case ELM_GUI: {
@@ -2450,8 +2477,8 @@ bool Project::syncElm(Elm &elm, Elm &src, File &src_data, File &src_extra, bool 
             }
         } break;
 
-            //case ELM_CODE: break; // this is synchronized manually elsewhere
-            //case ELM_APP : break; // this is synchronized manually elsewhere
+            // case ELM_CODE: break; // this is synchronized manually elsewhere
+            // case ELM_APP : break; // this is synchronized manually elsewhere
         }
     return data_changed || file_changed;
 }
@@ -2610,7 +2637,7 @@ bool Project::syncObj(C UID &world_id, C VecI2 &area_xy, Memc<ObjData> &objs, Ma
                         world_ver->rebuildPaths(obj.id, target_area->xy); // don't check for 'physPath' on server because loading 'Object' may fail (doesn't need to be performed on the server)
                 } else                                                    // present in some area
                     if (AreaSyncObj *cur_area = areas(obj_ver->area_xy))  // load that area
-                    REPA(cur_area->objs)
+                        REPA(cur_area->objs)
                 if (cur_area->objs[i].id == obj.id) // found that object
                 {
                     ObjData &cur_obj = cur_area->objs[i];
@@ -2770,6 +2797,21 @@ bool Project::syncMiniMapSettings(C UID &mini_map_id, C Game::MiniMap::Settings 
             }
     return false;
 }
+bool Project::syncWorldMapSettings(C UID &world_map_id, C Game::WorldMap::Settings &settings, C TimeStamp &settings_time) {
+    if (world_map_id.valid())
+        if (WorldMapVer *world_map_ver = worldMapVerRequire(world_map_id))
+            if (settings_time > world_map_ver->time) {
+                FDelInside(gamePath(world_map_id));
+                createWorldMapPaths(world_map_id);
+                world_map_ver->time = settings_time;
+                world_map_ver->settings = settings;
+                settings.save(gamePath(world_map_id).tailSlash(true) + "Settings");
+                world_map_ver->images.clear();
+                world_map_ver->changed = true;
+                return true;
+            }
+    return false;
+}
 bool Project::syncMiniMapImage(C UID &mini_map_id, C VecI2 &image_xy, C TimeStamp &image_time, File &image_data) {
     if (mini_map_id.valid())
         if (MiniMapVer *mini_map_ver = miniMapVerRequire(mini_map_id))
@@ -2786,6 +2828,27 @@ bool Project::syncMiniMapImage(C UID &mini_map_id, C VecI2 &image_xy, C TimeStam
                     FDelFile(image_name);
                     if (mini_map_ver->images.binaryExclude(image_xy))
                         mini_map_ver->changed = true;
+                }
+                return true;
+            }
+    return false;
+}
+bool Project::syncWorldMapImage(C UID &world_map_id, C VecI2 &image_xy, C TimeStamp &image_time, File &image_data) {
+    if (world_map_id.valid())
+        if (WorldMapVer *world_map_ver = worldMapVerRequire(world_map_id))
+            if (image_time == world_map_ver->time) {
+                Str image_name = gamePath(world_map_id).tailSlash(true) + image_xy;
+                if (image_data.is()) // if image data exists then save it
+                {
+                    image_data.pos(0);
+                    if (SafeOverwrite(image_data, image_name))
+                        if (world_map_ver->images.binaryInclude(image_xy))
+                            world_map_ver->changed = true;
+                } else // otherwise delete it
+                {
+                    FDelFile(image_name);
+                    if (world_map_ver->images.binaryExclude(image_xy))
+                        world_map_ver->changed = true;
                 }
                 return true;
             }
@@ -2836,6 +2899,11 @@ void Project::flush(SAVE_MODE save_mode) {
         CacheLock cl(mini_map_vers);
         REPA(mini_map_vers)
         mini_map_vers.lockedData(i).flush();
+    }
+    {
+        CacheLock cl(world_map_vers);
+        REPA(world_map_vers)
+        world_map_vers.lockedData(i).flush();
     }
 }
 bool Project::save(File &f, bool network, SAVE_DATA mode) C {
@@ -3316,7 +3384,7 @@ void Project::save(MemPtr<TextNode> nodes) C {
 LOAD_RESULT Project::load(C MemPtr<TextNode> &nodes, int &ver, Str &error) // !! this assumes that binary was already loaded and 'ver' already set !!
 {
     error.clear();
-    //del(); don't delete, instead let text values override existing members from binary, so we can keep settings not saved in text files, such as element IMPORTING/OPENED, and local user Project Settings (current heightmap material, etc.)
+    // del(); don't delete, instead let text values override existing members from binary, so we can keep settings not saved in text files, such as element IMPORTING/OPENED, and local user Project Settings (current heightmap material, etc.)
     FREPA(nodes) {
         C TextNode &node = nodes[i];
         if (node.name == "Version") {
@@ -3803,7 +3871,7 @@ void ProjectHierarchy::eraseRemoved(bool full) {
     erased |= eraseElms(remove, full);
     erased |= eraseTexs(full);
     erased |= eraseWorlds(full);
-    //if(full)eraseMiniMaps(full); TODO:
+    // if(full)eraseMiniMaps(full); TODO:
     if (erased)
         save(); // save immediately after erase, just in case
 }

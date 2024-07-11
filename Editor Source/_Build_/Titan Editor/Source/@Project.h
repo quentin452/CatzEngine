@@ -13,9 +13,10 @@ class Project {
     Str name, path, code_path, code_base_path, edit_path, game_path, temp_path, tex_path, temp_tex_path, temp_tex_dynamic_path;
     Memx<Elm> elms;
     Memc<UID> texs, texs_update_base1, texs_remove_srgb;
-    Memc<UID> world_paths, mini_map_paths;
+    Memc<UID> world_paths, mini_map_paths, world_map_paths;
     Cache<WorldVer> world_vers;
     Cache<MiniMapVer> mini_map_vers;
+    Cache<WorldMapVer> world_map_vers;
 
     Project();
 
@@ -91,6 +92,11 @@ class Project {
     MiniMapVer *miniMapVerFind(C UID &mini_map_id);
     MiniMapVer *miniMapVerGet(C UID &mini_map_id);
     MiniMapVer *miniMapVerRequire(C UID &mini_map_id);
+
+    Str worldMapVerPath(C UID &world_map_id) C;
+    WorldMapVer *worldMapVerFind(C UID &world_map_id);
+    WorldMapVer *worldMapVerGet(C UID &world_map_id);
+    WorldMapVer *worldMapVerRequire(C UID &world_map_id);
 
     UID physToMesh(C Elm *phys);
     UID animToSkel(C Elm *anim);
@@ -178,7 +184,7 @@ class Project {
     bool getWorldPaths(C UID &world_id, Str &world_edit_path, Str &world_game_path);
     void createWorldPaths(C UID &world_id);
     void createMiniMapPaths(C UID &mini_map_id);
-
+    void createWorldMapPaths(C UID &world_map_id);
     bool loadImages(Image &image, TextParam *image_resize, C Str &src, bool srgb = true, bool clamp = true, C Color &background = TRANSPARENT, C Image *color = null, C TextParam *color_resize = null, C Image *smooth = null, C TextParam *smooth_resize = null, C Image *bump = null, C TextParam *bump_resize = null) C;
 
     void savedGame(Elm &elm, C Str &name);
@@ -264,6 +270,9 @@ class Project {
 
     virtual bool syncMiniMapSettings(C UID &mini_map_id, C Game::MiniMap::Settings &settings, C TimeStamp &settings_time);
     virtual bool syncMiniMapImage(C UID &mini_map_id, C VecI2 &image_xy, C TimeStamp &image_time, File &image_data);
+
+    virtual bool syncWorldMapSettings(C UID &world_map_id, C Game::WorldMap::Settings &settings, C TimeStamp &settings_time);
+    virtual bool syncWorldMapImage(C UID &world_map_id, C VecI2 &image_xy, C TimeStamp &image_time, File &image_data);
 
     bool newerSettings(C Project &src) C;
     bool oldSettings(C TimeStamp &now = TimeStamp().getUTC()) C;

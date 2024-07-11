@@ -107,6 +107,7 @@ class ElmMaterial;
 class ElmMatrix;
 class ElmMesh;
 class ElmMiniMap;
+class ElmWorldMap;
 class ElmName;
 class ElmNode;
 class ElmObj;
@@ -167,6 +168,8 @@ class MeshParts;
 class MeshVariations;
 class MiniMapEditor;
 class MiniMapVer;
+class WorldMapEditor;
+class WorldMapVer;
 class MiscRegion;
 class ModeTabs;
 class MtrlBrushClass;
@@ -433,6 +436,11 @@ enum CLIENT_SERVER_COMMANDS
    CS_SET_MINI_MAP_SETTINGS,
    CS_SET_MINI_MAP_IMAGE,
 
+   CS_GET_WORLD_MAP_VER,
+   CS_GET_WORLD_MAP_IMAGES,
+   CS_SET_WORLD_MAP_SETTINGS,
+   CS_SET_WORLD_MAP_IMAGE,
+
    CS_GET_CODE_VER ,
    CS_SET_CODE_DATA,
    CS_CODE_SYNC_STATUS,
@@ -505,6 +513,7 @@ enum ELM_TYPE : byte // !! these enums are saved, also this must be in sync with
    ELM_APP        , // Code Application
    ELM_ICON_SETTS , // Icon Settings
    ELM_MINI_MAP   , // World Mini Map
+   ELM_WORLD_MAP   , // World World Map
    ELM_GUI_SKIN   ,
    ELM_NUM        , // number of element types
    ELM_ANY        =ELM_NUM,
@@ -797,6 +806,7 @@ ASSERT(OBJ_ACCESS_CUSTOM==0 && OBJ_ACCESS_TERRAIN==1 && OBJ_ACCESS_GRASS==2 && O
 #include "@MtrlBrushClass.h"
 #include "@ModeTabs.h"
 #include "@MiniMapVer.h"
+#include "@WorldMapVer.h"
 #include "@MeshVariations.h"
 #include "@MeshParts.h"
 #include "@LodView.h"
@@ -885,6 +895,7 @@ ASSERT(OBJ_ACCESS_CUSTOM==0 && OBJ_ACCESS_TERRAIN==1 && OBJ_ACCESS_GRASS==2 && O
 #include "@ElmObjClass.h"
 #include "@ElmObj.h"
 #include "@ElmMiniMap.h"
+#include "@ElmWorldMap.h"
 #include "@ElmMesh.h"
 #include "@ElmMaterial.h"
 #include "@ElmImageAtlas.h"
@@ -941,6 +952,7 @@ ASSERT(OBJ_ACCESS_CUSTOM==0 && OBJ_ACCESS_TERRAIN==1 && OBJ_ACCESS_GRASS==2 && O
 #include "@PanelImageEditor.h"
 #include "@GroupRegion.h"
 #include "@MiniMapEditor.h"
+#include "@WorldMapEditor.h"
 #include "@SoundEditor.h"
 #include "@GridPlaneLevel.h"
 #include "@MergeSimilarMaterials.h"
@@ -980,6 +992,7 @@ ASSERT(OBJ_ACCESS_CUSTOM==0 && OBJ_ACCESS_TERRAIN==1 && OBJ_ACCESS_GRASS==2 && O
 #include "Auto.h"
 #include "Editors/Code@0.h"
 #include "Editors/Mini Map.h"
+#include "Editors/World Map.h"
 #include "Editors/Object/Mesh.h"
 #include "Editors/World/Area@0.h"
 #include "Editors/World/Builder.h"

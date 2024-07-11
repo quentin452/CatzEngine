@@ -64,6 +64,17 @@ bool SynchronizerClass::Create(MiniMapSync &mini_map_sync, C UID &mini_map_id, p
     mini_map_sync.local_ver = Proj.miniMapVerRequire(mini_map_id);
     return mini_map_sync.server_ver || mini_map_sync.local_ver;
 }
+bool SynchronizerClass::WorldMapSync::empty() C { return !set_image.elms(); }
+int SynchronizerClass::WorldMapSync::elms() C { return set_image.elms(); }
+void SynchronizerClass::WorldMapSync::getServerVer(C UID &world_map_id) {
+    if (!server_ver)
+        server_ver = Server.world_map_vers.find(world_map_id);
+}
+bool SynchronizerClass::Create(WorldMapSync &world_map_sync, C UID &world_map_id, ptr) {
+    world_map_sync.getServerVer(world_map_id);
+    world_map_sync.local_ver = Proj.worldMapVerRequire(world_map_id);
+    return world_map_sync.server_ver || world_map_sync.local_ver;
+}
 SynchronizerClass::~SynchronizerClass() {
     clearSync();
     thread.del();
@@ -146,6 +157,8 @@ int SynchronizerClass::queuedElms() {
     n += world_sync.lockedData(i).elms();
     REPA(mini_map_sync)
     n += mini_map_sync.lockedData(i).elms();
+    REPA(world_map_sync)
+    n += world_map_sync.lockedData(i).elms();
     return n;
 }
 void SynchronizerClass::clearSync() {
@@ -163,6 +176,7 @@ void SynchronizerClass::clearSync() {
         delayed_world_sync.del();
         world_sync.del();
         mini_map_sync.del();
+        world_map_sync.del();
     }
 }
 bool SynchronizerClass::getCmds(Memc<File> &cmds) {
@@ -189,6 +203,11 @@ void SynchronizerClass::setMiniMapImage(C UID &mini_map_id, C VecI2 &image_xy) {
         if (MiniMapSync *mms = mini_map_sync.get(mini_map_id))
             mms->set_image.binaryInclude(image_xy);
 }
+void SynchronizerClass::setWorldMapImage(C UID &world_map_id, C VecI2 &image_xy) {
+    if (Server.canWrite() && world_map_id.valid())
+        if (WorldMapSync *mms = world_map_sync.get(world_map_id))
+            mms->set_image.binaryInclude(image_xy);
+}
 void SynchronizerClass::delayedSetArea(C UID &world_id, C VecI2 &area_xy) // !! must be multi-threaded SAFE !!
 {
     if (Server.canWrite() && world_id.valid()) {
@@ -211,6 +230,7 @@ void SynchronizerClass::erasing(C UID &elm_id) {
     delayed_world_sync.removeKey(elm_id);
     world_sync.removeKey(elm_id);
     mini_map_sync.removeKey(elm_id);
+    world_map_sync.removeKey(elm_id);
     set_elm_full.exclude(elm_id, true);
     set_elm_long.exclude(elm_id, true);
     set_elm_short.exclude(elm_id, true);
@@ -287,25 +307,25 @@ void SynchronizerClass::sync(Project &local, Project &server) {
                 get_names.add(l.id);
             else // get from server
                 if (l.name_time > s->name_time)
-                set_names.add(&l); // set to   server
+                    set_names.add(&l); // set to   server
 
             if (l.parent_time < s->parent_time)
                 l.setParent(s->parent_id, s->parent_time);
             else // get from server
                 if (l.parent_time > s->parent_time)
-                set_parents.add(&l); // set to   server
+                    set_parents.add(&l); // set to   server
 
             if (l.removed_time < s->removed_time)
                 l.setRemoved(s->removed(), s->removed_time);
             else // get from server
                 if (l.removed_time > s->removed_time)
-                set_removed.add(&l); // set to   server
+                    set_removed.add(&l); // set to   server
 
             if (l.publish_time < s->publish_time)
                 l.setPublish(s->publish(), s->publishMobile(), s->publish_time);
             else // get from server
                 if (l.publish_time > s->publish_time)
-                set_publish.add(&l); // set to   server
+                    set_publish.add(&l); // set to   server
 
             // data
             if (s->type == l.type) // just in case
@@ -381,6 +401,9 @@ void SynchronizerClass::sync(Project &local, Project &server) {
     FREPA(Proj.elms)
     if (Proj.elms[i].type == ELM_MINI_MAP)
         Server.getMiniMapVer(Proj.elms[i].id);
+    FREPA(Proj.elms)
+    if (Proj.elms[i].type == ELM_WORLD_MAP)
+        Server.getWorldMapVer(Proj.elms[i].id);
 }
 void SynchronizerClass::syncWorld(C UID &world_id) {
     if (world_id.valid())
@@ -516,30 +539,60 @@ void SynchronizerClass::syncMiniMap(C UID &mini_map_id) {
             Server.getMiniMapImages(mini_map_id, get_image);
         }
 }
+void SynchronizerClass::syncWorldMap(C UID &world_map_id) {
+    if (world_map_id.valid())
+        if (WorldMapSync *mms = world_map_sync.get(world_map_id)) {
+            // sync settings
+            if (mms->server_ver)
+                Proj.syncWorldMapSettings(world_map_id, mms->server_ver->settings, mms->server_ver->time); // try to replace from server
+            if (mms->local_ver)
+                if (!mms->server_ver || mms->local_ver->time > mms->server_ver->time)
+                    Server.setWorldMapSettings(world_map_id, mms->local_ver->settings, mms->local_ver->time); // send to server
+
+            // sync images
+            Memc<VecI2> get_image;
+
+            // check local to send
+            if (Server.canWrite() && mms->local_ver)                                   // only if can write
+                if (!mms->server_ver || mms->local_ver->time >= mms->server_ver->time) // send only if the time of the images is same/newer than on the server (check for same in case some images did not finish sending yet)
+                    FREPA(mms->local_ver->images)
+            if (!mms->server_ver || mms->local_ver->time > mms->server_ver->time || !mms->server_ver->images.binaryHas(mms->local_ver->images[i])) // if server ver doesn't exist, or is old, or is the same time but doesn't have the image yet
+                mms->set_image.binaryInclude(mms->local_ver->images[i]);                                                                           // mark to be sent
+
+            // check server to receive
+            if (mms->server_ver)
+                if (!mms->local_ver || mms->server_ver->time >= mms->local_ver->time) // receive only if the time of the images is same/newer than on the client (check for same in case some images did not finish sending yet)
+                    FREPA(mms->server_ver->images)
+            if (!mms->local_ver || mms->server_ver->time > mms->local_ver->time || !mms->local_ver->images.binaryHas(mms->server_ver->images[i])) // if local ver doesn't exist, or is old, or is the same time but doesn't have the image yet
+                get_image.binaryInclude(mms->server_ver->images[i]);                                                                              // mark to be received
+
+            Server.getWorldMapImages(world_map_id, get_image);
+        }
+}
 void SynchronizerClass::update() {
     // move 'delayed_world_sync' to 'world_sync'
     if (!delayed_world_sync.elms())
         last_delayed_time = Time.realTime();
     else                                                           // if there are no elements then set last time to current time so after adding an element it won't be sent right away
         if (Time.realTime() - last_delayed_time >= SendAreasDelay) // if enough time has passed
-    {
-        last_delayed_time = Time.realTime();
-        MapLock ml(delayed_world_sync);
-        FREPA(delayed_world_sync) {
-            UID world_id = delayed_world_sync.lockedKey(i);
-            if (WorldSync *ws = world_sync.get(world_id)) {
-                WorldSync &dws = delayed_world_sync.lockedData(i);
-                FREPA(dws.set_area)
-                ws->set_area.binaryInclude(dws.set_area[i]);
-                FREPA(dws.set_obj)
-                ws->set_obj.binaryInclude(dws.set_obj[i]);
+        {
+            last_delayed_time = Time.realTime();
+            MapLock ml(delayed_world_sync);
+            FREPA(delayed_world_sync) {
+                UID world_id = delayed_world_sync.lockedKey(i);
+                if (WorldSync *ws = world_sync.get(world_id)) {
+                    WorldSync &dws = delayed_world_sync.lockedData(i);
+                    FREPA(dws.set_area)
+                    ws->set_area.binaryInclude(dws.set_area[i]);
+                    FREPA(dws.set_obj)
+                    ws->set_obj.binaryInclude(dws.set_obj[i]);
+                }
             }
+            delayed_world_sync.del();
         }
-        delayed_world_sync.del();
-    }
 
     // if we have any elements to send
-    if (set_elm_full.elms() || set_elm_long.elms() || set_elm_short.elms() || world_sync.elms() || mini_map_sync.elms()) {
+    if (set_elm_full.elms() || set_elm_long.elms() || set_elm_short.elms() || world_sync.elms() || mini_map_sync.elms() || world_map_sync.elms()) {
         const uint time = Time.curTimeMs(), delay = 16; // 1000ms/60fps
 
         // set elm short
@@ -697,11 +750,38 @@ void SynchronizerClass::update() {
                 else
                     i++;
             }
+        // world map sync
+        if (elmFileSize() <= ServerSendBufSize)
+            for (int i = 0; i < world_map_sync.elms();) {
+                UID world_map_id = world_map_sync.lockedKey(i);
+                WorldMapSync &wms = world_map_sync.lockedData(i);
+                for (; wms.set_image.elms();) {
+                    VecI2 image_xy = wms.set_image.last();
+                    wms.set_image.removeLast();
+                    if (wms.local_ver) {
+                        File image_data;
+                        image_data.read(Proj.gamePath(world_map_id).tailSlash(true) + image_xy);
+                        ElmFile elm_file;
+                        elm_file.compress = true;
+                        ClientWriteSetWorldMapImage(elm_file.elm.writeMem(), elm_file.data.writeMem(), world_map_id, image_xy, wms.local_ver->time, image_data);
+                        {
+                            SyncLocker locker(lock);
+                            Swap(elm_file, set_elm_full_file.New());
+                        } // !! WARNING: here is 'set_elm_full_file', but we can use it !!
+                        if (Time.curTimeMs() - time >= delay || elmFileSize() > ServerSendBufSize)
+                            goto skip;
+                    }
+                }
+                if (wms.empty())
+                    world_map_sync.remove(i);
+                else
+                    i++;
+            }
 
     skip:;
     }
 }
-SynchronizerClass::SynchronizerClass() : compressing(false), world_sync(Compare, Create), delayed_world_sync(Compare, Create), mini_map_sync(Compare, Create), last_delayed_time(0) {}
+SynchronizerClass::SynchronizerClass() : compressing(false), world_sync(Compare, Create), delayed_world_sync(Compare, Create), mini_map_sync(Compare, Create), world_map_sync(Compare, Create), last_delayed_time(0) {}
 
 SynchronizerClass::ElmDepth::ElmDepth() : depth(0), elm(null) {}
 
@@ -711,4 +791,5 @@ SynchronizerClass::WorldSync::WorldSync() : server_ver(null), local_ver(null) {}
 
 SynchronizerClass::MiniMapSync::MiniMapSync() : server_ver(null), local_ver(null) {}
 
+SynchronizerClass::WorldMapSync::WorldMapSync() : server_ver(null), local_ver(null) {}
 /******************************************************************************/

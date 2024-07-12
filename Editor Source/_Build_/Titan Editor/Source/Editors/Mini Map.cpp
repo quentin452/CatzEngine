@@ -246,11 +246,11 @@ void MiniMapEditor::draw(bool final) {
         D.viewRect(final ? &NoTemp(RectI(0, 0, res_border, res_border)) : &RectI(viewport.centerI()).extend(res_border / 2)); // set viewport to cover image map resolution with borders
 
         // set camera
-        Cam.at = ((Vec2(image_pos) + 0.5f) * miniMapWidth()).x0y(); // set camera at center of current map image
+        Cam.at = ((Vec2(image_pos)) * miniMapWidth()).x0y(); // set camera at center of current map image
         Cam.yaw = 0;
         Cam.pitch = -PI_2;
         Cam.roll = 0;
-        Cam.dist = miniMapWidth() * 0.5f / Tan(D.viewFovX() / 2); // set distance to cover the selected areas
+        Cam.dist = miniMapWidth() / Tan(D.viewFovX() / 2); // set distance to cover the selected areas
         Cam.dist *= flt(res_border) / res;                        // adjust for borders
         Cam.setSpherical().set();
 

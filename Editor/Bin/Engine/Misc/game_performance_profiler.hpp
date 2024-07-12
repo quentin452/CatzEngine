@@ -1,5 +1,6 @@
 #pragma once
 // COPYRIGHT MIT : created by https://github.com/quentin452
+#define PERFORMANCE_MONITOR 0
 class GamePerformanceProfiler {
   private:
 #if PERFORMANCE_MONITOR

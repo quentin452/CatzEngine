@@ -119,8 +119,7 @@ bool ElmSendBoth(ELM_TYPE type) { return type == ELM_SKEL || type == ELM_FONT ||
 bool ElmInFolder(ELM_TYPE type) { return type == ELM_WORLD || type == ELM_MINI_MAP; }                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         // if element data is stored inside a folder
 
 bool ElmManualSync(ELM_TYPE type) { return type == ELM_CODE || type == ELM_APP; }
-bool ElmPublish(ELM_TYPE type) { return type != ELM_NONE && type != ELM_FOLDER && type != ELM_LIB && type != ELM_APP && type != ELM_CODE && type != ELM_ICON_SETTS; } // if element should be included in publishing
-bool ElmPropertiesViewer(ELM_TYPE type) { return type != ELM_NONE && type != ELM_FOLDER && type != ELM_LIB && type != ELM_APP && type != ELM_ICON_SETTS; } // if element should be properties viewed false
+bool ElmPublish(ELM_TYPE type) { return type != ELM_NONE && type != ELM_FOLDER && type != ELM_LIB && type != ELM_APP  && type != ELM_ICON_SETTS; } // if element should be included in publishing
 bool ElmPublishNoCompress(ELM_TYPE type) { return type == ELM_SOUND || type == ELM_VIDEO; }                                                                           // if element should have disabled compression when publishing data
 bool ElmCanAccessID(ELM_TYPE type) { return type != ELM_NONE; }                                                                                                       // allow ELM_CODE too if user wants to set/get code data, and ELM_APP if it will be used for activating app using Editor Interface
 

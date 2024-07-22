@@ -14,7 +14,6 @@ bool ElmInFolder(ELM_TYPE type);
 bool ElmManualSync(ELM_TYPE type);
 bool ElmPublish(ELM_TYPE type);
 bool ElmPublishNoCompress(ELM_TYPE type);
-bool ElmPropertiesViewer(ELM_TYPE type);
 bool ElmCanAccessID(ELM_TYPE type);
 bool ElmImageLike(ELM_TYPE type);
 bool ElmCompatible(ELM_TYPE src, ELM_TYPE dest);

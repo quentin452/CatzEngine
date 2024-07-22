@@ -171,5 +171,6 @@
   },
   "cmake.sourceDirectory": "C:/Users/iamacatfr2/Documents/GitHub/CatzEngine/ThirdPartyLibs/AOM/lib",
   "clang-format.style": "{BasedOnStyle: llvm, IndentWidth: 4, ColumnLimit: 0}",
-  "C_Cpp.errorSquiggles": "disabled"
+  "C_Cpp.errorSquiggles": "disabled",
+  "sonarlint.pathToCompileCommands": "${workspaceFolder}\\compile_commands.json"
 }

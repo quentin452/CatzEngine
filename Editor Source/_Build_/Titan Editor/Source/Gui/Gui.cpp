@@ -1338,7 +1338,7 @@ void ElmProperties::create() {
 void ElmProperties::activate(Elm &elm) {
     if (elm.type == ELM_APP)
         AppPropsEdit.set(&elm);
-    else if (!ElmPublish(elm.type))
+    else if (!ElmPropertiesViewer(elm.type))
         Gui.msgBox(S, "This type of element doesn't have any properties.");
     else {
         setTitle(S + "Element Properties - " + Proj.elmFullName(&elm)).activate();

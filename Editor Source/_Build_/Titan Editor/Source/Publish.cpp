@@ -105,6 +105,50 @@ bool CleanPublish(Memt<SrcDest> &files) {
     }
     return true;
 }
+// Fonction utilitaire pour copier un répertoire
+void CopyDirectory(C std::filesystem::path &srcDir, C std::filesystem::path &dstDir) {
+    LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Starting to copy directory from " + srcDir.string() + " to " + dstDir.string());
+
+    // Créer le répertoire destination s'il n'existe pas
+    if (!std::filesystem::exists(dstDir)) {
+        std::filesystem::create_directories(dstDir);
+    }
+
+    // Parcourir le répertoire source
+    for (C auto &entry : std::filesystem::directory_iterator(srcDir)) {
+        C auto &path = entry.path();
+        auto relativePath = std::filesystem::relative(path, srcDir);
+
+        if (entry.is_directory()) {
+            // Copier les sous-répertoires récursivement
+            LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Copying subdirectory " + path.string());
+            CopyDirectory(path, dstDir / relativePath);
+        } else if (entry.is_regular_file()) {
+            // Copier les fichiers sauf README.txt
+            if (path.filename() != "README.txt") {
+                LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Copying file " + path.string());
+                std::filesystem::copy(path, dstDir / relativePath, std::filesystem::copy_options::overwrite_existing);
+            }
+        }
+    }
+
+    LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Finished copying directory from " + srcDir.string() + " to " + dstDir.string());
+}
+std::string getMainProjectPath() {
+    std::string path = CurDir().tailSlash(true).toCString();
+    path += "Settings.txt";
+    std::ifstream settingsFile(path);
+    std::string line;
+    while (std::getline(settingsFile, line)) {
+        if (line.find("MainProjectPath=") != std::string::npos) {
+            std::string mainProjectPath = line.substr(line.find("=") + 1);
+            mainProjectPath = mainProjectPath.substr(1, mainProjectPath.length() - 2);
+            return mainProjectPath;
+        }
+    }
+    return "";
+}
+// Fonction StartPublish mise à jour
 bool StartPublish(C Str &exe_name, Edit::EXE_TYPE exe_type, Edit::BUILD_MODE build_mode, bool no_compile, C Str &custom_project_data_path, bool open_ide, bool project_package) {
     PublishRes.del();
 
@@ -144,6 +188,7 @@ bool StartPublish(C Str &exe_name, Edit::EXE_TYPE exe_type, Edit::BUILD_MODE bui
         Str bin_path = BinPath();
         Memt<SrcDest> files, dirs;
         Memc<Str> ignore;
+
         if (exe_type == Edit::EXE_EXE || exe_type == Edit::EXE_DLL) {
             PublishPath = ProjectsPath + ProjectsPublishPath + GetBase(CodeEdit.appPath(CodeEdit.appName())).tailSlash(true);
             PublishDataAsPak = CodeEdit.appPublishDataAsPak();
@@ -302,7 +347,7 @@ bool StartPublish(C Str &exe_name, Edit::EXE_TYPE exe_type, Edit::BUILD_MODE bui
                 return false;
         } else if (exe_type == Edit::EXE_UWP) {
             PublishDataAsPak = true; // always set to true because files inside exe can't be modified by the app, so there's no point in storing them separately
-            //if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
+            // if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
             {
                 PublishProjectDataPath = CodeEdit.UWPProjectPakPath();
                 if (!PublishProjectDataPath.is()) {
@@ -313,7 +358,7 @@ bool StartPublish(C Str &exe_name, Edit::EXE_TYPE exe_type, Edit::BUILD_MODE bui
             }
         } else if (exe_type == Edit::EXE_APK || exe_type == Edit::EXE_AAB) {
             PublishDataAsPak = true; // always set to true because files inside APK (assets) can't be modified by the app, so there's no point in storing them separately
-            //if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
+            // if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
             {
                 PublishProjectDataPath = CodeEdit.androidProjectPakPath();
                 if (!PublishProjectDataPath.is()) {
@@ -324,7 +369,7 @@ bool StartPublish(C Str &exe_name, Edit::EXE_TYPE exe_type, Edit::BUILD_MODE bui
             }
         } else if (exe_type == Edit::EXE_IOS) {
             PublishDataAsPak = true; // always set to true because files inside iOS APP can't be modified by the app, so there's no point in storing them separately
-            //if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
+            // if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
             {
                 PublishProjectDataPath = CodeEdit.iOSProjectPakPath();
                 if (!PublishProjectDataPath.is()) {
@@ -335,7 +380,7 @@ bool StartPublish(C Str &exe_name, Edit::EXE_TYPE exe_type, Edit::BUILD_MODE bui
             }
         } else if (exe_type == Edit::EXE_NS) {
             PublishDataAsPak = true; // always set to true because files inside iOS APP can't be modified by the app, so there's no point in storing them separately
-            //if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
+            // if(CodeEdit.appPublishProjData()) always setup 'PublishProjectDataPath' because even if we don't include Project data, we still include App data
             {
                 PublishProjectDataPath = CodeEdit.nintendoProjectPakPath();
                 if (!PublishProjectDataPath.is()) {
@@ -348,6 +393,22 @@ bool StartPublish(C Str &exe_name, Edit::EXE_TYPE exe_type, Edit::BUILD_MODE bui
             Gui.msgBox(S, "Invalid application type.");
             return false;
         }
+        // Copier les fichiers et répertoires depuis !copy_this_files_to_publish_folder
+        std::filesystem::path copy_this_path = std::filesystem::path(getMainProjectPath()) / "!copy_this_files_to_publish_folder";
+        LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Checking if path exists: " + copy_this_path.string());
+        if (std::filesystem::exists(copy_this_path)) {
+            LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Path exists. Starting to copy directory.");
+            try {
+                CopyDirectory(copy_this_path, std::filesystem::path(std::string(PublishPath.toCString())));
+            } catch (C std::exception &e) {
+                LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::ERRORING, __FILE__, __LINE__, "Error copying files: " + std::string(e.what()));
+                Gui.msgBox(S, S + "Error copying files: " + e.what());
+                return false;
+            }
+        } else {
+            LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::WARNING, __FILE__, __LINE__, "Path does not exist: " + copy_this_path.string());
+        }
+
         FILE_OVERWRITE_MODE overwrite = FILE_OVERWRITE_DIFFERENT; // FILE_OVERWRITE_DIFFERENT faster but less safe
         FREPA(files)
         if (!FCopy(files[i].src, files[i].dest, overwrite)) {
@@ -446,7 +507,7 @@ bool PublishFunc(Thread &thread) {
                 if (pfd_size >= max_size) {
                     PublishErrorMessage = S + "File too big:\n" + pfd->name;
                     return false;
-                }                                             // a single file cannot be bigger than asset pack
+                } // a single file cannot be bigger than asset pack
                 if (!pfd || split_size + pfd_size > max_size) // if reached the end, or adding this file would break the limit
                 {
                     if (split.elms()) // have any data
@@ -862,9 +923,9 @@ void AddPublishFiles(Memt<Elm *> &elms, MemPtr<PakFileData> files, Memc<ImageGen
                     change_type = ((!UWPBC7 && tex.channels >= 3) ? ((tex.channels == 4) ? IMAGE_BC3 : IMAGE_BC1) : -1);
                 else // here we only want to disable BC7
                     if (web)
-                    change_type = ((tex.channels <= 2) ? -1 : WebBC7          ? ((tex.channels == 4 || tex.quality > Edit::Material::MEDIUM) ? -1 : IMAGE_BC1) // texture could have alpha, however if we're not using it, then reduce to BC1 because it's only 4-bit per pixel
-                                                          : tex.channels == 4 ? IMAGE_BC3
-                                                                              : IMAGE_BC1); // if BC7 not supported for Web, then use BC3
+                        change_type = ((tex.channels <= 2) ? -1 : WebBC7          ? ((tex.channels == 4 || tex.quality > Edit::Material::MEDIUM) ? -1 : IMAGE_BC1) // texture could have alpha, however if we're not using it, then reduce to BC1 because it's only 4-bit per pixel
+                                                              : tex.channels == 4 ? IMAGE_BC3
+                                                                                  : IMAGE_BC1); // if BC7 not supported for Web, then use BC3
                 if (change_type >= 0 && tex.sRGB())
                     change_type = ImageTypeIncludeSRGB((IMAGE_TYPE)change_type); // set sRGB
             }

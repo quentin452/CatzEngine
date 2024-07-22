@@ -23,8 +23,31 @@ Str project_finding_depth;
 Str str_recursivity_max_depth = "5";
 bool refresh_depth = false;
 /******************************************************************************/
+void CreateDirectoryAndReadme(C std::string &dirPath, C std::string &readmeContent) {
+    // Créer le dossier s'il n'existe pas
+    std::filesystem::create_directories(dirPath);
 
-void UpdateOrCreateProjectNameTxt(const std::string &filePath, const std::string &projectName) {
+    // Créer le fichier README.txt
+    std::ofstream outFile(dirPath + "/README.txt", std::ios::trunc);
+    if (!outFile) {
+        throw std::runtime_error("Failed to create " + dirPath + "/README.txt");
+    }
+
+    // Écrire le contenu dans README.txt
+    outFile << readmeContent;
+}
+
+void CreateDirectoryAndReadme(Project &proj) {
+    std::string readmeContent = "ALL THESE FILES IN THIS FOLDER WILL BE COPY AND PASTED TO THE PUBLISH FOLDER OF YOUR GAME";
+    CreateDirectoryAndReadme(proj.path.toCString() + "!copy_this_files_to_publish_folder", readmeContent);
+}
+
+void CreateDirectoryAndReadme(Projects::Elm &proj) {
+    std::string readmeContent = "ALL THESE FILES IN THIS FOLDER WILL BE COPY AND PASTED TO THE PUBLISH FOLDER OF YOUR GAME";
+    CreateDirectoryAndReadme(proj.path.toCString() + "!copy_this_files_to_publish_folder", readmeContent);
+}
+
+void UpdateOrCreateProjectNameTxt(C std::string &filePath, C std::string &projectName) {
     std::ofstream outFile(filePath, std::ios::trunc);
     if (!outFile) {
         throw std::runtime_error("Failed to update " + filePath);
@@ -389,6 +412,7 @@ bool Projects::newProj(C Str &name) {
         Gui.msgBox(S, "Error saving project data");
     else {
         UpdateOrCreateProjectNameTxt(proj);
+        CreateDirectoryAndReadme(proj);
         refresh();
         selectProj(proj.id);
         return true;
@@ -442,9 +466,11 @@ bool Projects::renameProj(C UID &proj_id, Str name) {
 
         case LOAD_OK:
             // UpdateOrCreateProjectNameTxt(proj);
+            // CreateDirectoryAndReadme(proj);
         case LOAD_EMPTY:
             proj.name = name;
             UpdateOrCreateProjectNameTxt(proj);
+            CreateDirectoryAndReadme(proj);
             proj.close();
             refresh();
             selectProj(proj_id);
@@ -471,6 +497,7 @@ bool Projects::removeProj(C UID &proj_id) {
 bool Projects::open(Elm &proj, bool ignore_lock) {
     Str path = proj.path; // Use Complete Project Path
     MainProjectPath = path;
+    SaveSettings();
     if (!FCreateDirs(path))
         Gui.msgBox(S, S + "Can't write to \"" + GetPath(path) + "\"");
     else {
@@ -485,6 +512,7 @@ bool Projects::open(Elm &proj, bool ignore_lock) {
         else {
             SetProjectState();
             UpdateOrCreateProjectNameTxt(proj);
+            CreateDirectoryAndReadme(proj);
             return true;
         }
     }

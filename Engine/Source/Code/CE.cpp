@@ -818,7 +818,6 @@ static FILE_LIST_MODE AddEEHeader(C FileFind &ff, CodeEditor &ce) {
     return FILE_LIST_CONTINUE;
 }
 /******************************************************************************/
-#if WINDOWS // TODO SUPPORT MORE OS
 std::string getMainProjectPath() {
     std::string path = CurDir().tailSlash(true).toCString();
     path += "Settings.txt";
@@ -871,8 +870,6 @@ Bool CodeEditor::formatfileswithclang() {
     }
     return true;
 }
-
-#endif
 /******************************************************************************/
 void CodeEditor::setMenu(Node<MenuElm> &menu) {
     {

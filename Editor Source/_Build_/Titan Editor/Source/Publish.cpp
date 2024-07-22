@@ -115,19 +115,32 @@ void CopyDirectory(C std::filesystem::path &srcDir, C std::filesystem::path &dst
     }
 
     // Parcourir le répertoire source
-    for (C auto &entry : std::filesystem::directory_iterator(srcDir)) {
-        C auto &path = entry.path();
+    for (const auto &entry : std::filesystem::directory_iterator(srcDir)) {
+        const auto &path = entry.path();
         auto relativePath = std::filesystem::relative(path, srcDir);
+        auto dstPath = dstDir / relativePath;
 
         if (entry.is_directory()) {
             // Copier les sous-répertoires récursivement
             LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Copying subdirectory " + path.string());
-            CopyDirectory(path, dstDir / relativePath);
+            CopyDirectory(path, dstPath);
         } else if (entry.is_regular_file()) {
             // Copier les fichiers sauf README.txt
             if (path.filename() != "README.txt") {
-                LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Copying file " + path.string());
-                std::filesystem::copy(path, dstDir / relativePath, std::filesystem::copy_options::overwrite_existing);
+                // Vérifier si le fichier de destination existe
+                if (std::filesystem::exists(dstPath)) {
+                    // Comparer les timestamps des fichiers source et destination
+                    auto srcFileTime = std::filesystem::last_write_time(path);
+                    auto dstFileTime = std::filesystem::last_write_time(dstPath);
+
+                    if (srcFileTime > dstFileTime) {
+                        LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Copying newer file " + path.string());
+                        std::filesystem::copy(path, dstPath, std::filesystem::copy_options::overwrite_existing);
+                    }
+                } else {
+                    LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Copying new file " + path.string());
+                    std::filesystem::copy(path, dstPath, std::filesystem::copy_options::overwrite_existing);
+                }
             }
         }
     }

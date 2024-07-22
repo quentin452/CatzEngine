@@ -408,9 +408,7 @@ bool StartPublish(C Str &exe_name, Edit::EXE_TYPE exe_type, Edit::BUILD_MODE bui
         }
         // Copier les fichiers et répertoires depuis !copy_this_files_to_publish_folder
         std::filesystem::path copy_this_path = std::filesystem::path(getMainProjectPath()) / "!copy_this_files_to_publish_folder";
-        LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Checking if path exists: " + copy_this_path.string());
         if (std::filesystem::exists(copy_this_path)) {
-            LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Path exists. Starting to copy directory.");
             try {
                 CopyDirectory(copy_this_path, std::filesystem::path(std::string(PublishPath.toCString())));
             } catch (C std::exception &e) {
@@ -418,8 +416,6 @@ bool StartPublish(C Str &exe_name, Edit::EXE_TYPE exe_type, Edit::BUILD_MODE bui
                 Gui.msgBox(S, S + "Error copying files: " + e.what());
                 return false;
             }
-        } else {
-            LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::WARNING, __FILE__, __LINE__, "Path does not exist: " + copy_this_path.string());
         }
 
         FILE_OVERWRITE_MODE overwrite = FILE_OVERWRITE_DIFFERENT; // FILE_OVERWRITE_DIFFERENT faster but less safe

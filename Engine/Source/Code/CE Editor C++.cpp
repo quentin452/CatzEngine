@@ -3841,6 +3841,62 @@ void CodeEditor::killBuild() {
     stopBuild();
 }
 /******************************************************************************/
+// Fonction utilitaire pour copier un répertoire
+void CopyDirectoryForBuild(C std::filesystem::path &srcDir, C std::filesystem::path &dstDir) {
+    LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Starting to copy directory from " + srcDir.string() + " to " + dstDir.string());
+
+    // Créer le répertoire destination s'il n'existe pas
+    if (!std::filesystem::exists(dstDir)) {
+        std::filesystem::create_directories(dstDir);
+    }
+
+    // Parcourir le répertoire source
+    for (const auto &entry : std::filesystem::directory_iterator(srcDir)) {
+        const auto &path = entry.path();
+        auto relativePath = std::filesystem::relative(path, srcDir);
+        auto dstPath = dstDir / relativePath;
+
+        if (entry.is_directory()) {
+            // Copier les sous-répertoires récursivement
+            LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Copying subdirectory " + path.string());
+            CopyDirectoryForBuild(path, dstPath);
+        } else if (entry.is_regular_file()) {
+            // Copier les fichiers sauf README.txt
+            if (path.filename() != "README.txt") {
+                // Vérifier si le fichier de destination existe
+                if (std::filesystem::exists(dstPath)) {
+                    // Comparer les timestamps des fichiers source et destination
+                    auto srcFileTime = std::filesystem::last_write_time(path);
+                    auto dstFileTime = std::filesystem::last_write_time(dstPath);
+
+                    if (srcFileTime > dstFileTime) {
+                        LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Copying newer file " + path.string());
+                        std::filesystem::copy(path, dstPath, std::filesystem::copy_options::overwrite_existing);
+                    }
+                } else {
+                    LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Copying new file " + path.string());
+                    std::filesystem::copy(path, dstPath, std::filesystem::copy_options::overwrite_existing);
+                }
+            }
+        }
+    }
+
+    LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Finished copying directory from " + srcDir.string() + " to " + dstDir.string());
+}
+std::string getMainProjectPathForBuild() {
+    std::string path = CurDir().tailSlash(true).toCString();
+    path += "Settings.txt";
+    std::ifstream settingsFile(path);
+    std::string line;
+    while (std::getline(settingsFile, line)) {
+        if (line.find("MainProjectPath=") != std::string::npos) {
+            std::string mainProjectPath = line.substr(line.find("=") + 1);
+            mainProjectPath = mainProjectPath.substr(1, mainProjectPath.length() - 2);
+            return mainProjectPath;
+        }
+    }
+    return "";
+}
 void CodeEditor::build(BUILD_MODE mode) {
     if (mode == BUILD_DEBUG)
         switch (config_exe) // DEBUG
@@ -4013,6 +4069,18 @@ void CodeEditor::build(BUILD_MODE mode) {
             FDelFile(build_path+"Android/libs/arm64-v8a/libProject.so");
             FDelFile(build_path+"Android/libs/x86/libProject.so");
          }*/
+        // Copier les fichiers et répertoires depuis !copy_this_files_to_publish_folder
+        std::filesystem::path copy_this_path = std::filesystem::path(getMainProjectPathForBuild()) / "!copy_this_files_to_publish_folder";
+        LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "Checking if path exists: " + copy_this_path.string());
+        if (std::filesystem::exists(copy_this_path)) {
+            try {
+                CopyDirectoryForBuild(copy_this_path, std::filesystem::path(std::string(build_path.toCString())));
+            } catch (C std::exception &e) {
+                LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::ERRORING, __FILE__, __LINE__, "Error copying files: " + std::string(e.what()));
+                Gui.msgBox(S, S + "Error copying files: " + e.what());
+                return;
+            }
+        }
         buildClear();
         buildUpdate();
     }

@@ -1,8 +1,17 @@
-# COPYRIGHT MIT : created by https://github.com/quentin452
 import tkinter as tk
-from tkinter import scrolledtext, filedialog, messagebox
+from tkinter import scrolledtext, filedialog, messagebox, ttk
 from collections import Counter
 import os
+import asyncio
+import aiofiles
+import re
+async def read_file(file_path):
+    try:
+        async with aiofiles.open(file_path, mode='r', encoding='utf-8', errors='ignore') as f:
+            return await f.read() + "\n"
+    except Exception as e:
+        print(f"Erreur lors de la lecture du fichier {file_path}: {e}")
+        return ""
 
 def find_duplicate_lines(code):
     lines = [line for line in code.split('\n') if line.strip() != '']  # Ignore empty lines
@@ -13,7 +22,7 @@ def find_duplicate_lines(code):
     return duplicates
 
 def detect_duplicates():
-    code = code_text.get("1.0", tk.END)
+    code = code_text.get("1.0", tk.END).strip()
     line_duplicates = find_duplicate_lines(code)
     block_duplicates = find_duplicate_blocks(code)
 
@@ -48,29 +57,38 @@ def open_file():
     file_path = filedialog.askopenfilename(filetypes=[("C++ Files", "*.cpp *.h"), ("All Files", "*.*")])
     if file_path:
         try:
-            with open(file_path, 'r', encoding='utf-8') as file:
+            with open(file_path, 'r', encoding='utf-8', errors='ignore') as file:
                 code = file.read()
                 code_text.delete("1.0", tk.END)
                 code_text.insert(tk.END, code)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to read file: {e}")
 
-def open_folder():
+async def open_folder_async():
     folder_path = filedialog.askdirectory()
     if folder_path:
         code = ""
         try:
             # Traverse the folder and read all C++ files
+            file_paths = []
             for root_dir, _, files in os.walk(folder_path):
                 for file_name in files:
                     if file_name.endswith(('.cpp', '.h')):
-                        file_path = os.path.join(root_dir, file_name)
-                        with open(file_path, 'r', encoding='utf-8') as file:
-                            code += file.read() + "\n"  # Add newline to separate file contents
+                        file_paths.append(os.path.join(root_dir, file_name))
+            
+            progress_bar['maximum'] = len(file_paths)
+            for i, file_path in enumerate(file_paths):
+                file_code = await read_file(file_path)
+                code += file_code
+                progress_bar['value'] = i + 1
+                root.update_idletasks()
             code_text.delete("1.0", tk.END)
             code_text.insert(tk.END, code)
         except Exception as e:
             messagebox.showerror("Error", f"Failed to read files: {e}")
+
+def open_folder():
+    asyncio.run(open_folder_async())
 
 # Initialize the main window
 root = tk.Tk()
@@ -82,6 +100,9 @@ open_file_button.pack()
 
 open_folder_button = tk.Button(root, text="Open Folder", command=open_folder)
 open_folder_button.pack()
+
+progress_bar = ttk.Progressbar(root, length=200)
+progress_bar.pack()
 
 detect_button = tk.Button(root, text="Detect Duplicates", command=detect_duplicates)
 detect_button.pack()

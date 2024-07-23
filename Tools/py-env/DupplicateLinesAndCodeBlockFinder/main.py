@@ -5,6 +5,7 @@ import os
 import asyncio
 import aiofiles
 import re
+
 async def read_file(file_path):
     try:
         async with aiofiles.open(file_path, mode='r', encoding='utf-8', errors='ignore') as f:
@@ -13,6 +14,29 @@ async def read_file(file_path):
         print(f"Erreur lors de la lecture du fichier {file_path}: {e}")
         return ""
 
+def remove_comments_and_normalize(code):
+    # Remove line comments
+    code = re.sub(r'//.*', '', code)
+    # Remove block comments
+    code = re.sub(r'/\*.*?\*/', '', code, flags=re.DOTALL)
+    # Normalize multiple spaces to a single space
+    code = re.sub(r'[ \t]+', ' ', code)
+    # Remove leading and trailing spaces from each line
+    code = '\n'.join(line.strip() for line in code.split('\n'))
+    return code
+
+def remove_indentation(code):
+    lines = code.split('\n')
+    # Strip leading spaces from each line
+    return '\n'.join(line.lstrip() for line in lines)
+
+def clean_code():
+    code = code_text.get("1.0", tk.END).strip()
+    cleaned_code = remove_comments_and_normalize(code)
+    cleaned_code = remove_indentation(cleaned_code)
+    code_text.delete("1.0", tk.END)
+    code_text.insert(tk.END, cleaned_code)
+
 def find_duplicate_lines(code):
     lines = [line for line in code.split('\n') if line.strip() != '']  # Ignore empty lines
     line_counts = Counter(lines)
@@ -20,6 +44,13 @@ def find_duplicate_lines(code):
     # Sort by count in descending order
     duplicates = dict(sorted(duplicates.items(), key=lambda item: item[1], reverse=True))
     return duplicates
+
+def find_duplicate_blocks(code, block_size=4):
+    lines = code.split('\n')
+    blocks = ['\n'.join(lines[i:i+block_size]) for i in range(len(lines) - block_size + 1)]
+    block_counts = Counter(blocks)
+    duplicates = {block: count for block, count in block_counts.items() if count > 1}
+    return dict(sorted(duplicates.items(), key=lambda item: item[1], reverse=True))
 
 def detect_duplicates():
     code = code_text.get("1.0", tk.END).strip()
@@ -45,13 +76,6 @@ def detect_duplicates():
             result_text.insert(tk.END, f"{block}\n\n")
     else:
         result_text.insert(tk.END, "No duplicate blocks found.\n")
-
-def find_duplicate_blocks(code, block_size=4):
-    lines = code.split('\n')
-    blocks = ['\n'.join(lines[i:i+block_size]) for i in range(len(lines) - block_size + 1)]
-    block_counts = Counter(blocks)
-    duplicates = {block: count for block, count in block_counts.items() if count > 1}
-    return dict(sorted(duplicates.items(), key=lambda item: item[1], reverse=True))
 
 def open_file():
     file_path = filedialog.askopenfilename(filetypes=[("C++ Files", "*.cpp *.h"), ("All Files", "*.*")])
@@ -100,6 +124,9 @@ open_file_button.pack()
 
 open_folder_button = tk.Button(root, text="Open Folder", command=open_folder)
 open_folder_button.pack()
+
+clean_code_button = tk.Button(root, text="Clean Code", command=clean_code)
+clean_code_button.pack()
 
 progress_bar = ttk.Progressbar(root, length=200)
 progress_bar.pack()

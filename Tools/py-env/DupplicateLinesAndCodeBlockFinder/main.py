@@ -85,6 +85,7 @@ def open_file():
                 code = file.read()
                 code_text.delete("1.0", tk.END)
                 code_text.insert(tk.END, code)
+                clean_code()
         except Exception as e:
             messagebox.showerror("Error", f"Failed to read file: {e}")
 
@@ -108,6 +109,7 @@ async def open_folder_async():
                 root.update_idletasks()
             code_text.delete("1.0", tk.END)
             code_text.insert(tk.END, code)
+            clean_code()
         except Exception as e:
             messagebox.showerror("Error", f"Failed to read files: {e}")
 

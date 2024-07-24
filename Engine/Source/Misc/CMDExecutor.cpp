@@ -148,7 +148,7 @@ void CmdExecutor::processCommands() {
                 LoggerThread::GetLoggerThread().logMessageAsync(
                     LogLevel::INFO, __FILE__, __LINE__, "Exit command received. Breaking the loop.");
                 break;
-            } 
+            }
             // Write the command to the pipe
             DWORD written;
             std::string fullCommand = command + "\r\n";

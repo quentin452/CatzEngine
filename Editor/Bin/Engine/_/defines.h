@@ -10,6 +10,7 @@
 #define T (*this)
 #define null nullptr
 #define null_t std::nullptr_t
+#define SIZE_T_TO_INT static_cast<Int>
 #define super __super
 #define OR ||
 #define AND &&

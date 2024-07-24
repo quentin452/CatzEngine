@@ -47,6 +47,7 @@ void ObjLightCone::matrix(C Matrix &matrix) {
 // UPDATE
 /******************************************************************************/
 Bool ObjLightCone::update() {
+    arbitrary_name = "ObjLightCone Object";
     return true;
 }
 /******************************************************************************/

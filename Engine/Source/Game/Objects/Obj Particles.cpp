@@ -11,6 +11,7 @@ ObjParticles::ObjParticles() {
 // MANAGE
 /******************************************************************************/
 void ObjParticles::create(Object &obj) {
+    arbitrary_name = "ObjParticle Object";
     Particles *ps = null;
     if (Param *p = obj.findParam("particles")) // have Particles object specified
     {

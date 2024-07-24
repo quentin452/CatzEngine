@@ -23,6 +23,7 @@ void Item::setUnsavedParams() {
         actor.create(*base->phys(), 1, scale).obj(this);
 }
 void Item::create(Object &obj) {
+    arbitrary_name = "Item Object";
     scale = obj.scale();
     base = obj.firstStored();
     mesh_variation = obj.meshVariationIndex();

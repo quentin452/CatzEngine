@@ -16,6 +16,7 @@ ObjLightPoint::ObjLightPoint() {
 // MANAGE
 /******************************************************************************/
 void ObjLightPoint::create(Object &obj) {
+    arbitrary_name = "ObjLightPoint Object";
     range = obj.scale();
     position = obj.matrixFinal().pos;
     if (Param *param = obj.findParam("cast shadows"))

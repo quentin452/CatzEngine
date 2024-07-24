@@ -11,9 +11,10 @@ namespace Game {
 /******************************************************************************/
 struct Obj // Game Object interface inherited by all Game Object classes (Game.Static, Game.Kinematic, Game.Chr, Game.Item, ..)
 {
+    Bool _enable_vanilla_update = true;
+    Str arbitrary_name = "NO_NAME";
     // manage
     virtual void create(Object &obj) = NULL; // create from object
-
     // get / set
     Int type();                                // get object's OBJ_TYPE
     Bool isConst() C { return _const; }        // if  object is constant
@@ -77,7 +78,6 @@ struct Obj // Game Object interface inherited by all Game Object classes (Game.S
 
     friend struct WorldManager;
 #endif
-
 #if !EE_PRIVATE
   private:
 #endif

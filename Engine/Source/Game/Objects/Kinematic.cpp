@@ -66,6 +66,7 @@ void Kinematic::memoryAddressChanged() {
 // UPDATE
 /******************************************************************************/
 Bool Kinematic::update() {
+    arbitrary_name = "Kinematic Object";
     return true;
 }
 /******************************************************************************/

@@ -23,6 +23,7 @@ void Static::setUnsavedParams() {
             .group(AG_TERRAIN);
 }
 void Static::create(Object &obj) {
+    arbitrary_name = "Static Object";
     base = obj.firstStored();
     scale = obj.scale3();
     _matrix = obj.matrixFinal().normalize();

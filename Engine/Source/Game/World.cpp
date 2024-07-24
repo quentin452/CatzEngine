@@ -1045,10 +1045,10 @@ void UpdateObject(WorldManager &world, Obj &obj) {
             if (id != obj.id())
                 return; // after parent update, this object could have been removed, that's why check if its 'id' hasn't been changed
         }
-
-    if (!obj.update())
+    if (!obj.update()) {
         if (ObjMap<Obj> *obj_map = obj.worldObjMap())
             obj_map->removeObj(&obj);
+    }
 }
 void WorldManager::updateObjects() {
     Dbl time = Time.curTime();
@@ -1058,11 +1058,18 @@ void WorldManager::updateObjects() {
         if (objs.elms() > 0) { // Only process the area if it contains objects
             REPA(objs) {       // order is important in case of removing
                 Obj *o = objs[i];
-                if (o->_update_count != _update_count) {
-                    UpdateObject(T, *o);
-                }
-                if (i > objs.elms()) {
-                    i = objs.elms(); // in case if some 'Obj::update' would remove other objects and suddenly 'i' would be out of 'objs' container range
+                if (o->_enable_vanilla_update == false) {
+                    continue;
+                } else {
+                    if (o->_update_count != _update_count) {
+                        UpdateObject(T, *o);
+                    }
+                    if (i > objs.elms()) {
+                        i = objs.elms(); // in case if some 'Obj::update' would remove other objects and suddenly 'i' would be out of 'objs' container range
+                    }
+                   // LoggerThread::GetLoggerThread().logMessageAsync(
+                  //      LogLevel::INFO, __FILE__, __LINE__,
+                   //     "Update Method get called with obj name(arbitrary_name): " + o->arbitrary_name.toCString());
                 }
             }
         }

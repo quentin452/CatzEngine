@@ -30,6 +30,7 @@ void ObjDecal::matrix(C Matrix &matrix) { decal.matrix = matrix; }
 // UPDATE
 /******************************************************************************/
 Bool ObjDecal::update() {
+    arbitrary_name = "ObjDecal Object";
     return true;
 }
 /******************************************************************************/

@@ -22,6 +22,7 @@ Animatable::Animatable() {
 // MANAGE
 /******************************************************************************/
 void Animatable::create(Object &obj) {
+    arbitrary_name = "Animatable Object";
     base = obj.firstStored();
     mesh_variation = obj.meshVariationIndex();
     scale = obj.scale();

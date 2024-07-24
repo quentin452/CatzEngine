@@ -48,6 +48,7 @@ void Destructible::setUnsavedParams() {
     }
 }
 void Destructible::create(Object &obj) {
+    arbitrary_name = "Destructible Object";
     scale = obj.scale();
     base = obj.firstStored();
     mode = DEFAULT_MODE;

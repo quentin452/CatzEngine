@@ -42,6 +42,7 @@ void Chr::setUnsavedParams() {
         Exit("Attempting to create a character without Mesh");
 }
 void Chr::create(Object &obj) {
+    arbitrary_name = "Character";
     Matrix matrix = obj.matrixFinal();
     scale = obj.scale();
     base = obj.firstStored(); // copy pointer to object stored in project data

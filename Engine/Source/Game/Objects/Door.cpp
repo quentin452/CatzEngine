@@ -23,6 +23,7 @@ void Door::setUnsavedParams() {
         actor.create(*base->phys(), 1, scale).obj(this);
 }
 void Door::create(Object &obj) {
+    arbitrary_name = "Door Object";
     scale = obj.scale();
     base = obj.firstStored();
     mesh_variation = obj.meshVariationIndex();

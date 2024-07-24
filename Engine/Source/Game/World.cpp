@@ -1053,20 +1053,20 @@ void UpdateObject(WorldManager &world, Obj &obj) {
 void WorldManager::updateObjects() {
     Dbl time = Time.curTime();
 
-    FREPA(_area_active) // FREPA #2 (rep/frep)
-    {
+    FREPA(_area_active) { // FREPA #2 (rep/frep)
         Memc<Obj *> &objs = _area_active[i]->_objs;
-        REPA(objs) // order is important in case of removing
-        {
-            Obj *o = objs[i];
-            if (o->_update_count != _update_count)
-                UpdateObject(T, *o);
-
-            if (i > objs.elms())
-                i = objs.elms(); // in case if some 'Obj::update' would remove other objects and suddenly 'i' would be out of 'objs' container range
+        if (objs.elms() > 0) { // Only process the area if it contains objects
+            REPA(objs) {       // order is important in case of removing
+                Obj *o = objs[i];
+                if (o->_update_count != _update_count) {
+                    UpdateObject(T, *o);
+                }
+                if (i > objs.elms()) {
+                    i = objs.elms(); // in case if some 'Obj::update' would remove other objects and suddenly 'i' would be out of 'objs' container range
+                }
+            }
         }
     }
-
     _time_obj_update = Time.curTime() - time;
 }
 void WorldManager::update(C Vec2 &xz) {

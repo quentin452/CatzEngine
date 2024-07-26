@@ -325,48 +325,15 @@ struct StrLibrary // String Library, efficient solution for storing multiple str
 #endif
     NO_COPY_CONSTRUCTOR(StrLibrary);
 };
-/*inline bool containsSubstring(C Str &str, C Str &substr) {
-    return str.toCString().find(substr.toCString()) != std::string::npos;
-}
-inline bool containsSubstringOptimized(C Str &str, C Str &substr) {
-    int strLength = str.length();
-    int substrLength = substr.length();
-
-    for (int i = 0; i <= strLength - substrLength; i++) {
-        int j;
-        for (j = 0; j < substrLength; j++) {
-            if (str[i + j] != substr[j]) {
-                break;
-            }
-        }
-
-        if (j == substrLength) {
-            return true;
-        }
-    }
-
-    return false;
-}*/
 inline bool containsSubstring(C Str &str, C Str &substr) {
-    auto start = std::chrono::high_resolution_clock::now();
-
     bool result = str.toCString().find(substr.toCString()) != std::string::npos;
-
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::nano> elapsed = end - start;
-    LoggerThread::GetLoggerThread().logMessageAsync(
-        LogLevel::INFO, __FILE__, __LINE__, "containsSubstring elapsed time: " + std::to_string(elapsed.count()) + " ns");
-
     return result;
 }
 
 inline bool containsSubstringOptimized(C Str &str, C Str &substr) {
-    auto start = std::chrono::high_resolution_clock::now();
-
     int strLength = str.length();
     int substrLength = substr.length();
     bool found = false;
-
     for (int i = 0; i <= strLength - substrLength; i++) {
         int j;
         for (j = 0; j < substrLength; j++) {
@@ -374,18 +341,11 @@ inline bool containsSubstringOptimized(C Str &str, C Str &substr) {
                 break;
             }
         }
-
         if (j == substrLength) {
             found = true;
             break;
         }
     }
-
-    auto end = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double, std::nano> elapsed = end - start;
-    LoggerThread::GetLoggerThread().logMessageAsync(
-        LogLevel::INFO, __FILE__, __LINE__, "containsSubstringOptimized elapsed time: " + std::to_string(elapsed.count()) + " ns");
-
     return found;
 }
 /******************************************************************************/

@@ -1461,6 +1461,8 @@ void StopAllSound() {
         }
     }
 }
+std::map<int, bool> pausedSounds;
+
 void PauseAllSounds() {
     if (SoundAPI) {
         SyncLocker locker(SoundMemxLock);
@@ -1468,6 +1470,7 @@ void PauseAllSounds() {
             _Sound &sound = SoundMemx[i];
             if (sound.is() && sound.playing()) {
                 sound.pause();
+                pausedSounds[i] = true;
             }
         }
     }
@@ -1476,12 +1479,13 @@ void PauseAllSounds() {
 void ResumeAllSounds() {
     if (SoundAPI) {
         SyncLocker locker(SoundMemxLock);
-        for (int i = 0; i < SoundMemx.elms(); i++) {
-            _Sound &sound = SoundMemx[i];
+        for (C auto &kv : pausedSounds) {
+            _Sound &sound = SoundMemx[kv.first];
             if (sound.is() && !sound.playing()) {
                 sound.play();
             }
         }
+        pausedSounds.clear();
     }
 }
 /******************************************************************************/

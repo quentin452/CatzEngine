@@ -465,7 +465,6 @@ Bool Application::hidden() C {
 #endif
 }
 Application &Application::hide() {
-    PauseAllSounds();
 #if WINDOWS_OLD
     ShowWindow(window(), SW_HIDE);
 #elif MAC
@@ -481,7 +480,6 @@ Application &Application::hide() {
 }
 
 Application &Application::show(Bool activate) {
-    ResumeAllSounds();
 #if WINDOWS_OLD
     ShowWindow(window(), activate ? SW_SHOW : SW_SHOWNA);
 #elif MAC

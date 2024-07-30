@@ -259,8 +259,26 @@ Str Param::asText(Int precision) C {
         return value.v4.asText(precision);
     case PARAM_COLOR:
         return value.c.asText();
-    case PARAM_STR:
-        return value.s;
+    case PARAM_STR: {
+        Str out;
+        const Str &s = value.s;
+        for (Int i = 0; i < s.length();) {
+            if (s[i] == '\\' && i + 1 < s.length()) {
+                switch (s[i + 1]) {
+                case 'n':
+                    out += '\n';
+                    i += 2;
+                    break;
+                default:
+                    out += s[i++];
+                    break;
+                }
+            } else {
+                out += s[i++];
+            }
+        }
+        return out;
+    }
     case PARAM_ENUM:
         return value.s;
     case PARAM_ID:
@@ -268,7 +286,7 @@ Str Param::asText(Int precision) C {
     case PARAM_ID_ARRAY: {
         Str s;
         if (Int ids = arrayIDs()) {
-            s.reserve(ids * 32 + (ids - 1)); // 32=characters for one ID, (ids-1)=number of '\n' between ID's
+            s.reserve(ids * 32 + (ids - 1)); // 32=characters for one ID, (ids-1)=number of '\n' between IDs
             UID *id = (UID *)value.s();
             FREP(ids)
             s.line() += id[i].asHex(); // list in order
@@ -277,6 +295,7 @@ Str Param::asText(Int precision) C {
     }
     }
 }
+
 Int Param::asEnum() C {
     switch (type) {
     case PARAM_INT:

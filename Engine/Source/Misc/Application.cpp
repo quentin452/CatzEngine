@@ -654,9 +654,11 @@ void Application::activeOrBackFullChanged() {
                 if (activeOrBackFull()) {
                     SwapChain->SetFullscreenState(true, null);
                     SwapChain->ResizeTarget(&SwapChainDesc.BufferDesc);
+                    ResumeAllSounds();
                 } else {
                     window().minimize(true);
                     SwapChain->SetFullscreenState(false, null);
+                    PauseAllSounds();
                 }
             }
 #endif
@@ -673,16 +675,25 @@ void Application::activeOrBackFullChanged() {
             }
         }
 #elif MAC
-        if (!activeOrBackFull())
+        if (activeOrBackFull()) {
+            SetDisplayMode();
+            ResumeAllSounds();
+        } else {
             hide();
-        SetDisplayMode();
+            PauseAllSounds();
+        }
 #elif LINUX
-        if (!activeOrBackFull())
+        if (activeOrBackFull()) {
+            SetDisplayMode();
+            ResumeAllSounds();
+        } else {
             window().minimize();
-        SetDisplayMode();
+            PauseAllSounds();
+        }
 #endif
     }
 }
+
 void Application::setActive(Bool active) {
     if (T.active() != active) {
         Bool active_or_back_full = activeOrBackFull();

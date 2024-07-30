@@ -1462,10 +1462,6 @@ void StopAllSound() {
     }
 }
 void PauseAllSounds() {
-    LoggerThread::GetLoggerThread().logMessageAsync(
-        LogLevel::INFO, __FILE__, __LINE__,
-        "PauseAllSounds get called");
-
     if (SoundAPI) {
         SyncLocker locker(SoundMemxLock);
         for (int i = 0; i < SoundMemx.elms(); i++) {
@@ -1478,9 +1474,6 @@ void PauseAllSounds() {
 }
 
 void ResumeAllSounds() {
-    LoggerThread::GetLoggerThread().logMessageAsync(
-        LogLevel::INFO, __FILE__, __LINE__,
-        "ResumeAllSounds get called");
     if (SoundAPI) {
         SyncLocker locker(SoundMemxLock);
         for (int i = 0; i < SoundMemx.elms(); i++) {

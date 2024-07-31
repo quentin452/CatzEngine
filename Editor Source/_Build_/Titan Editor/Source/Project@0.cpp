@@ -5217,7 +5217,7 @@ void ProjectEx::elmMenu(C Vec2 &pos, bool touch) {
             n.New().create("Replace Name Part", ReplaceName, T);
         }
         if (remove)
-            n.New().create("Remove", Remove, T).kbsc(KbSc(KB_DEL));
+            n.New().create("Remove", Remove, T);
         if (restore)
             n.New().create("Restore", Restore, T);
         n.New().create("Reload", Reload, T).kbsc(KbSc(KB_R, KBSC_CTRL_CMD)).desc(reload_desc);

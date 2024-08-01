@@ -98,10 +98,8 @@ class GamePerformanceProfiler {
                 double maxTimeSec = std::get<3>(entry);
                 std::string logMessage = key + ": " + std::to_string(totalTimeSec) + " s (Total Time), " +
                                          std::to_string(avgTimeSec) + " s (Average Time For one call), " +
-                                         std::to_string(maxTimeSec) + " s (Max Time For one call)";
+                                         std::to_string(maxTimeSec) + " s (Max Time For one call)" + " With a Total Calls: " + std::to_string(callCounts.at(key));
                 LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, logMessage);
-                std::string callsMessage = "Calls: " + std::to_string(callCounts.at(key));
-                LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, callsMessage);
             }
         } catch (C std::exception &e) {
             LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::ERRORING, __FILE__, __LINE__, e.what());

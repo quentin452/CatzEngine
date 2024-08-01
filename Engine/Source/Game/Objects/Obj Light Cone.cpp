@@ -1,3 +1,4 @@
+// TODO ADD PROFILE_START AND PROFILE_STOP PROFILERS
 /******************************************************************************/
 #include "stdafx.h"
 namespace EE {
@@ -14,6 +15,7 @@ ObjLightCone::ObjLightCone() {
     position.zero();
     direction.set(0, 0, 1);
     color.set(1, 1, 1);
+    arbitrary_name = "ObjLightCone Object";
 }
 /******************************************************************************/
 // MANAGE
@@ -47,23 +49,26 @@ void ObjLightCone::matrix(C Matrix &matrix) {
 // UPDATE
 /******************************************************************************/
 Bool ObjLightCone::update() {
-    arbitrary_name = "ObjLightCone Object";
     return true;
 }
 /******************************************************************************/
 // DRAW
 /******************************************************************************/
 void ObjLightCone::drawPrepare(C Matrix &matrix) {
+    PROFILE_START("CatzEngine::ObjLightCone::drawPrepare(C Matrix &matrix)")
     LightCone lc(range, position * matrix, !(direction * matrix.orn()), color, volumetric);
     lc.pyramid.scale = angle;
     lc.falloff = falloff;
     lc.add(cast_shadows, this);
+    PROFILE_STOP("CatzEngine::ObjLightCone::drawPrepare(C Matrix &matrix)")
 }
 UInt ObjLightCone::drawPrepare() {
+    PROFILE_START("CatzEngine::ObjLightCone::drawPrepare()")
     LightCone lc(range, position, direction, color, volumetric);
     lc.pyramid.scale = angle;
     lc.falloff = falloff;
     lc.add(cast_shadows, this);
+    PROFILE_STOP("CatzEngine::ObjLightCone::drawPrepare()")
     return 0; // no additional render modes required
 }
 /******************************************************************************/

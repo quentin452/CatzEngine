@@ -1,3 +1,4 @@
+// TODO ADD PROFILE_START AND PROFILE_STOP PROFILERS
 /******************************************************************************/
 #include "stdafx.h"
 namespace EE {
@@ -18,6 +19,7 @@ void ObjDecal::create(Object &obj) {
     decal.matrix.scaleOrn(0.5f);
     Swap(decal.matrix.y, decal.matrix.z);
     decal.matrix.y.chs();
+    arbitrary_name = "ObjDecal Object";
 }
 /******************************************************************************/
 // GET / SET
@@ -30,7 +32,6 @@ void ObjDecal::matrix(C Matrix &matrix) { decal.matrix = matrix; }
 // UPDATE
 /******************************************************************************/
 Bool ObjDecal::update() {
-    arbitrary_name = "ObjDecal Object";
     return true;
 }
 /******************************************************************************/

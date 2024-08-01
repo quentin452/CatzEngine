@@ -44,16 +44,21 @@ void AreaPath2D::del() {
     zero();
 }
 void AreaPath2D::create(Int size) {
+    PROFILE_START("AreaPath2D::create(Int size)")
     _map.createSoft(size, size, 1, IMAGE_I8);
     _map.clear();
     group();
+    PROFILE_STOP("AreaPath2D::create(Int size)")
 }
 void AreaPath2D::createFromQuarter(AreaPath2D &src, Bool right, Bool forward, WorldSettings &settings) {
+    PROFILE_START("AreaPath2D::createFromQuarter(AreaPath2D &src, Bool right, Bool forward, WorldSettings &settings)")
     src._map.crop(_map, right ? src._map.w() / 2 : 0, forward ? src._map.h() / 2 : 0, src._map.w() / 2, src._map.h() / 2);
     _map.resize(settings.path2DRes(), settings.path2DRes(), FILTER_NONE);
     group();
+    PROFILE_STOP("AreaPath2D::createFromQuarter(AreaPath2D &src, Bool right, Bool forward, WorldSettings &settings)")
 }
 void AreaPath2D::createFromQuad(AreaPath2D *lb, AreaPath2D *rb, AreaPath2D *lf, AreaPath2D *rf, WorldSettings &settings) {
+    PROFILE_START("AreaPath2D::createFromQuad(AreaPath2D *lb, AreaPath2D *rb, AreaPath2D *lf, AreaPath2D *rf, WorldSettings &settings)")
     create(settings.path2DRes());
     REPD(y, _map.h())
     REPD(x, _map.w()) {
@@ -79,28 +84,36 @@ void AreaPath2D::createFromQuad(AreaPath2D *lb, AreaPath2D *rb, AreaPath2D *lf, 
         }
     }
     group();
+    PROFILE_STOP("AreaPath2D::createFromQuad(AreaPath2D *lb, AreaPath2D *rb, AreaPath2D *lf, AreaPath2D *rf, WorldSettings &settings)")
 }
 /******************************************************************************/
 Bool AreaPath2D::walkable(Int x, Int y) C {
     return (InRange(x, _map.w()) && InRange(y, _map.h())) ? _map.pixB(x, y) != 0xFF : false;
 }
 AreaPath2D &AreaPath2D::walkable(Int x, Int y, Bool walkable) {
+    PROFILE_START("AreaPath2D::walkable(Int x, Int y, Bool walkable)")
     if (InRange(x, _map.w()) && InRange(y, _map.h())) {
         _map.pixB(x, y) = (walkable ? 0xFE : 0xFF);
         _changed = true;
     }
+    PROFILE_STOP("AreaPath2D::walkable(Int x, Int y, Bool walkable)")
     return T;
 }
 /******************************************************************************/
 Bool AreaPath2D::fullyWalkable() {
+    PROFILE_START("AreaPath2D::fullyWalkable()")
     REPD(y, _map.h())
     REPD(x, _map.w())
-    if (!walkable(x, y))
+    if (!walkable(x, y)) {
+        PROFILE_STOP("AreaPath2D::fullyWalkable()")
         return false;
+    }
+    PROFILE_STOP("AreaPath2D::fullyWalkable()")
     return true;
 }
 /******************************************************************************/
 void AreaPath2D::group() {
+    PROFILE_START("AreaPath2D::group()")
     // set groups
     {
 #define BLOCKED 0xFFFF
@@ -285,11 +298,14 @@ void AreaPath2D::group() {
         }
     }
     _changed = false;
+    PROFILE_STOP("AreaPath2D::group()")
 }
 /******************************************************************************/
 void AreaPath2D::resize(Int size) {
+    PROFILE_START("AreaPath2D::resize(Int size)")
     _map.resize(size, size, FILTER_NONE);
     group();
+    PROFILE_STOP("AreaPath2D::resize(Int size)")
 }
 /******************************************************************************/
 Bool AreaPath2D::save(File &f) C {
@@ -582,6 +598,7 @@ Area::Area(C VecI2 &xy, Ptr grid_user) {
 }
 /******************************************************************************/
 Flt Area::hmHeight(C Vec2 &xz, Bool smooth) C {
+    PROFILE_START("Area::hmHeight(C Vec2 &xz, Bool smooth)")
     if (_data) {
         Image &height = _data->height;
         if (height.is()) {
@@ -590,14 +607,17 @@ Flt Area::hmHeight(C Vec2 &xz, Bool smooth) C {
             pixel.y -= T._xz.y;                    // local fraction
             pixel.x *= height.w() - 1;
             pixel.y *= height.h() - 1; // image space
+            PROFILE_STOP("Area::hmHeight(C Vec2 &xz, Bool smooth)")
             return smooth ? height.pixelFLinear(pixel.x, pixel.y, true)
                           : height.pixelF(RoundPos(pixel.x), RoundPos(pixel.y));
         }
     }
+    PROFILE_STOP("Area::hmHeight(C Vec2 &xz, Bool smooth)")
     return 0;
 }
 /******************************************************************************/
 C MaterialPtr &Area::hmMaterial(C Vec2 &xz) C {
+    PROFILE_START("Area::hmMaterial(C Vec2 &xz)")
     if (_data) {
         Image &map = _data->material_map;
         if (map.is()) {
@@ -608,10 +628,13 @@ C MaterialPtr &Area::hmMaterial(C Vec2 &xz) C {
             pixel.y *= map.h() - 1; // image space
 
             UInt index = map.pixel(RoundPos(pixel.x), RoundPos(pixel.y)); // material index
-            if (InRange(index, _data->materials))
+            if (InRange(index, _data->materials)) {
+                PROFILE_STOP("Area::hmMaterial(C Vec2 &xz)")
                 return _data->materials[index];
+            }
         }
     }
+    PROFILE_STOP("Area::hmMaterial(C Vec2 &xz)")
     return MaterialNull;
 }
 /******************************************************************************/

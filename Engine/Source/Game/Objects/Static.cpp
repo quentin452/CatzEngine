@@ -23,6 +23,7 @@ void Static::setUnsavedParams() {
             .group(AG_TERRAIN);
 }
 void Static::create(Object &obj) {
+    PROFILE_START("CatzEngine::Static::create(Object &obj)")
     arbitrary_name = "Static Object";
     base = obj.firstStored();
     scale = obj.scale3();
@@ -32,6 +33,7 @@ void Static::create(Object &obj) {
     mesh_variation = obj.meshVariationIndex();
 
     setUnsavedParams();
+    PROFILE_STOP("CatzEngine::Static::create(Object &obj)")
 }
 /******************************************************************************/
 // GET / SET
@@ -64,22 +66,26 @@ Bool Static::update() {
 // DRAW
 /******************************************************************************/
 UInt Static::drawPrepare() {
+    PROFILE_START("CatzEngine::Static::drawPrepare()")
     if (mesh)
         if (Frustum(*mesh, _matrix_scaled)) {
             SetVariation(mesh_variation);
             mesh->draw(_matrix_scaled);
             SetVariation();
         }
+    PROFILE_STOP("CatzEngine::Static::drawPrepare()")
     return 0; // no additional render modes required
 }
 /******************************************************************************/
 void Static::drawShadow() {
+    PROFILE_START("CatzEngine::Static::drawShadow()")
     if (mesh)
         if (Frustum(*mesh, _matrix_scaled)) {
             SetVariation(mesh_variation);
             mesh->drawShadow(_matrix_scaled);
             SetVariation();
         }
+    PROFILE_STOP("CatzEngine::Static::drawShadow()")
 }
 /******************************************************************************/
 // IO

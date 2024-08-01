@@ -5,14 +5,17 @@
 // STARTED UTILITIES METHODS FOR Light::draw()
 
 INLINE void SetDepthAndShadow_CASE_LIGHT_POINT(Light &CurrentLight, Flt range, Vec &pos, Bool front_face) {
+    PROFILE_START("SetDepthAndShadow_CASE_LIGHT_POINT(Light &CurrentLight, Flt range, Vec &pos, Bool front_face)")
     if (CurrentLight.shadow) {
         D.depthClip(true);
         ShadowMap(range, CurrentLight.point.pos);
     }
     D.depthClip(front_face);
+    PROFILE_STOP("SetDepthAndShadow_CASE_LIGHT_POINT(Light &CurrentLight, Flt range, Vec &pos, Bool front_face)")
 }
 
 INLINE void SetLightShadow(Light &CurrentLight, std::function<Shader *(bool)> GetShdPointFunc) {
+    PROFILE_START("SetLightShadow(Light &CurrentLight, std::function<Shader *(bool)> GetShdPointFunc)")
     if (!Renderer._ds->multiSample()) {
         Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders
         REPS(Renderer._eye, Renderer._eye_num)
@@ -30,8 +33,10 @@ INLINE void SetLightShadow(Light &CurrentLight, std::function<Shader *(bool)> Ge
         if (SetLightEye(true))
             GetShdPointFunc(false)->draw(&CurrentLight.rect); // use DS because it may be used for 'D.depth' optimization and 3D geometric shaders, for all stencil samples because they are needed for smoothing
     }
+    PROFILE_STOP("SetLightShadow(Light &CurrentLight, std::function<Shader *(bool)> GetShdPointFunc)")
 }
 INLINE void SetLightShadow_CASE_LIGHT_POINT(Light &CurrentLight, Flt range, Vec &pos, Bool front_face) {
+    PROFILE_START("SetLightShadow_CASE_LIGHT_POINT(Light &CurrentLight, Flt range, Vec &pos, Bool front_face)")
     if (CurrentLight.shadow) {
         Renderer.getShdRT();
         D.depth2DOn();
@@ -42,9 +47,11 @@ INLINE void SetLightShadow_CASE_LIGHT_POINT(Light &CurrentLight, Flt range, Vec 
         MapSoft((front_face ? FUNC_LESS : FUNC_GREATER), &MatrixM(front_face ? range : -range, pos));
         ApplyVolumetric(CurrentLight.point);
     }
+    PROFILE_STOP("SetLightShadow_CASE_LIGHT_POINT(Light &CurrentLight, Flt range, Vec &pos, Bool front_face)")
 }
 
 INLINE void DrawWaterLum_CASE_LIGHT_POINT(Light &CurrentLight, Flt range, Vec &pos, Bool front_face, UInt depth_func) {
+    PROFILE_START("DrawWaterLum_CASE_LIGHT_POINT(Light &CurrentLight, Flt range, Vec &pos, Bool front_face, UInt depth_func)")
     if (Renderer._water_nrm) {
         D.stencil(STENCIL_WATER_TEST, STENCIL_REF_WATER);
         Sh.Depth->set(Renderer._water_ds);
@@ -62,9 +69,11 @@ INLINE void DrawWaterLum_CASE_LIGHT_POINT(Light &CurrentLight, Flt range, Vec &p
         Sh.Depth->set(Renderer._ds_1s);
         D.stencil(STENCIL_NONE);
     }
+    PROFILE_STOP("DrawWaterLum_CASE_LIGHT_POINT(Light &CurrentLight, Flt range, Vec &pos, Bool front_face, UInt depth_func)")
 }
 
 INLINE void DrawLum_CASE_LIGHT_POINT(Light &CurrentLight, Flt range, Vec &pos, Bool front_face, UInt depth_func) {
+    PROFILE_START("DrawLum_CASE_LIGHT_POINT(Light &CurrentLight, Flt range, Vec &pos, Bool front_face, UInt depth_func)")
     Bool clear = SetLum();
     D.depth2DOn(depth_func);
     if (!Renderer._ds->multiSample()) {
@@ -80,14 +89,18 @@ INLINE void DrawLum_CASE_LIGHT_POINT(Light &CurrentLight, Flt range, Vec &pos, B
         DrawLightPoint(MatrixM(front_face ? range : -range, pos), 2, LightMode);
         D.stencil(STENCIL_NONE);
     }
+    PROFILE_STOP("DrawLum_CASE_LIGHT_POINT(Light &CurrentLight, Flt range, Vec &pos, Bool front_face, UInt depth_func)")
 }
 
 INLINE void ProcessShadowMapForCone_CASE_LIGHT_CONE() {
+    PROFILE_START("ProcessShadowMapForCone_CASE_LIGHT_CONE()")
     D.depthClip(true);
     ShadowMap(CurrentLight.cone);
+    PROFILE_STOP("ProcessShadowMapForCone_CASE_LIGHT_CONE()")
 }
 
 INLINE void RenderWaterLum_CASE_LIGHT_CONE(MatrixM &light_matrix) {
+    PROFILE_START("RenderWaterLum_CASE_LIGHT_CONE(MatrixM &light_matrix)")
     D.stencil(STENCIL_WATER_TEST, STENCIL_REF_WATER);
     Sh.Depth->set(Renderer._water_ds);
     if (CurrentLight.shadow) {
@@ -103,9 +116,11 @@ INLINE void RenderWaterLum_CASE_LIGHT_CONE(MatrixM &light_matrix) {
     DrawLightCone(light_matrix, 0, LIGHT_MODE_WATER);
     Sh.Depth->set(Renderer._ds_1s);
     D.stencil(STENCIL_NONE);
+    PROFILE_STOP("RenderWaterLum_CASE_LIGHT_CONE(MatrixM &light_matrix)")
 }
 
 INLINE void RenderLum_CASE_LIGHT_CONE(Bool front_face, MatrixM &light_matrix) {
+    PROFILE_START("RenderLum_CASE_LIGHT_CONE(Bool front_face, MatrixM &light_matrix)")
     if (CurrentLight.shadow) {
         Renderer.getShdRT();
         D.depth2DOn();
@@ -116,14 +131,18 @@ INLINE void RenderLum_CASE_LIGHT_CONE(Bool front_face, MatrixM &light_matrix) {
         MapSoft(front_face ? FUNC_LESS : FUNC_GREATER, &light_matrix);
         ApplyVolumetric(CurrentLight.cone);
     }
+    PROFILE_STOP("RenderLum_CASE_LIGHT_CONE(Bool front_face, MatrixM &light_matrix)")
 }
 
 INLINE void SetLightImage_CASE_LIGHT_CONE() {
+    PROFILE_START("SetLightImage_CASE_LIGHT_CONE()")
     Sh.LightMapScale->set(CurrentLight.image_scale);
     Sh.Img[2]->set(CurrentLight.image);
+    PROFILE_STOP("SetLightImage_CASE_LIGHT_CONE()")
 }
 
 INLINE Bool SetLum2_CASE_LIGHT_CONE(MatrixM &light_matrix) {
+    PROFILE_START("SetLum2_CASE_LIGHT_CONE(MatrixM &light_matrix)")
     Bool clear = true;
     D.depth2DOn(FUNC_LESS);
     if (!Renderer._ds->multiSample()) {
@@ -139,10 +158,12 @@ INLINE Bool SetLum2_CASE_LIGHT_CONE(MatrixM &light_matrix) {
         DrawLightCone(light_matrix, 2, LightMode);
         D.stencil(STENCIL_NONE);
     }
+    PROFILE_STOP("SetLum2_CASE_LIGHT_CONE(MatrixM &light_matrix)")
     return clear;
 }
 
 INLINE void RenderMultiSample_CASE_LIGHT_CONE(MatrixM &light_matrix, UInt depth_func) {
+    PROFILE_START("RenderMultiSample_CASE_LIGHT_CONE(MatrixM &light_matrix, UInt depth_func)")
     D.depth2DOn();
     if (!Renderer._ds->multiSample()) {
         DrawLightCone(light_matrix, 0, LightMode);
@@ -157,18 +178,22 @@ INLINE void RenderMultiSample_CASE_LIGHT_CONE(MatrixM &light_matrix, UInt depth_
         DrawLightCone(light_matrix, 2, LightMode);
         D.stencil(STENCIL_NONE);
     }
+    PROFILE_STOP("RenderMultiSample_CASE_LIGHT_CONE(MatrixM &light_matrix, UInt depth_func)")
 }
 
 INLINE void setupDepthAndShadows_CASE_LIGHT_DIR(Light &CurrentLight, int &shd_map_num, bool &cloud, UInt &depth_func) {
+    PROFILE_START("setupDepthAndShadows_CASE_LIGHT_DIR(Light &CurrentLight, int &shd_map_num, bool &cloud, UInt &depth_func)")
     D.depthClip(true);
     if (CurrentLight.shadow) {
         shd_map_num = D.shadowMapNumActual();
         cloud = ShadowMap(CurrentLight.dir);
     }
     depth_func = FUNC_FOREGROUND;
+    PROFILE_STOP("setupDepthAndShadows_CASE_LIGHT_DIR(Light &CurrentLight, int &shd_map_num, bool &cloud, UInt &depth_func)")
 }
 
 INLINE void setupWaterLum_CASE_LIGHT_DIR(int &shd_map_num, bool &cloud) {
+    PROFILE_START("setupWaterLum_CASE_LIGHT_DIR(int &shd_map_num, bool &cloud)")
     D.stencil(STENCIL_WATER_TEST, STENCIL_REF_WATER);
     Sh.Depth->set(Renderer._water_ds);
     if (CurrentLight.shadow) {
@@ -184,9 +209,11 @@ INLINE void setupWaterLum_CASE_LIGHT_DIR(int &shd_map_num, bool &cloud) {
     DrawLightDir(0, LIGHT_MODE_WATER);
     Sh.Depth->set(Renderer._ds_1s);
     D.stencil(STENCIL_NONE);
+    PROFILE_STOP("setupWaterLum_CASE_LIGHT_DIR(int &shd_map_num, bool &cloud)")
 }
 
 INLINE void setupLum_CASE_LIGHT_DIR(Light &CurrentLight, int shd_map_num, bool cloud) {
+    PROFILE_START("setupLum_CASE_LIGHT_DIR(Light &CurrentLight, int shd_map_num, bool cloud)")
     Renderer.getShdRT();
     Bool multi_sample = Renderer._ds->multiSample();
     D.depth2DOn();
@@ -205,14 +232,18 @@ INLINE void setupLum_CASE_LIGHT_DIR(Light &CurrentLight, int shd_map_num, bool c
         GetShdDir(shd_map_num, cloud, false)->draw(&CurrentLight.rect);
     }
     RestoreViewSpaceBias(mp_z_z);
+    PROFILE_STOP("setupLum_CASE_LIGHT_DIR(Light &CurrentLight, int shd_map_num, bool cloud)")
 }
 
 INLINE void setupVolumetric_CASE_LIGHT_DIR(Light &CurrentLight, int shd_map_num, UInt depth_func) {
+    PROFILE_START("setupVolumetric_CASE_LIGHT_DIR(Light &CurrentLight, int shd_map_num, UInt depth_func)")
     MapSoft(depth_func);
     ApplyVolumetric(CurrentLight.dir, shd_map_num, false);
+    PROFILE_STOP("setupVolumetric_CASE_LIGHT_DIR(Light &CurrentLight, int shd_map_num, UInt depth_func)")
 }
 
 INLINE void processLighting_CASE_LIGHT_DIR(Light &CurrentLight, int shd_map_num, bool cloud, UInt depth_func) {
+    PROFILE_START("processLighting_CASE_LIGHT_DIR(Light &CurrentLight, int shd_map_num, bool cloud, UInt depth_func)")
     Bool clear = SetLum();
     D.depth2DOn(depth_func);
     if (!Renderer._ds->multiSample()) {
@@ -228,9 +259,11 @@ INLINE void processLighting_CASE_LIGHT_DIR(Light &CurrentLight, int shd_map_num,
         DrawLightDir(2, LightMode);
         D.stencil(STENCIL_NONE);
     }
+    PROFILE_STOP("processLighting_CASE_LIGHT_DIR(Light &CurrentLight, int shd_map_num, bool cloud, UInt depth_func)")
 }
 
 INLINE void processDirectionalLight(Light &CurrentLight) {
+    PROFILE_START("processDirectionalLight(Light &CurrentLight)")
     int shd_map_num = 0;
     bool cloud = false;
     UInt depth_func = 0;
@@ -245,9 +278,11 @@ INLINE void processDirectionalLight(Light &CurrentLight) {
         setupVolumetric_CASE_LIGHT_DIR(CurrentLight, shd_map_num, depth_func);
     }
     processLighting_CASE_LIGHT_DIR(CurrentLight, shd_map_num, cloud, depth_func);
+    PROFILE_STOP("processDirectionalLight(Light &CurrentLight)")
 }
 
 INLINE void DrawWaterLum_CASE_LIGHT_LINEAR(Light &CurrentLight) {
+    PROFILE_START("DrawWaterLum_CASE_LIGHT_LINEAR(Light &CurrentLight)")
     Flt range = CurrentLight.linear.range,
         z_center = DistPointActiveCamPlaneZ(CurrentLight.linear.pos); // Z relative to camera position
     CurrentLightZRange.set(z_center - range, z_center + range);       // use for DX12 OMSetDepthBounds
@@ -278,9 +313,11 @@ INLINE void DrawWaterLum_CASE_LIGHT_LINEAR(Light &CurrentLight) {
         Sh.Depth->set(Renderer._ds_1s); // restore default depth
         D.stencil(STENCIL_NONE);
     }
+    PROFILE_STOP("DrawWaterLum_CASE_LIGHT_LINEAR(Light &CurrentLight)")
 }
 
 INLINE void DrawLum_CASE_LIGHT_LINEAR(Light &CurrentLight, UInt depth_func, MatrixM &light_matrix) {
+    PROFILE_START("DrawLum_CASE_LIGHT_LINEAR(Light &CurrentLight, UInt depth_func, MatrixM &light_matrix)")
     if (CurrentLight.shadow) {
         Renderer.getShdRT();
         D.depth2DOn();
@@ -309,16 +346,20 @@ INLINE void DrawLum_CASE_LIGHT_LINEAR(Light &CurrentLight, UInt depth_func, Matr
         DrawLightLinear(light_matrix, 2, LightMode);
         D.stencil(STENCIL_NONE);
     }
+    PROFILE_STOP("DrawLum_CASE_LIGHT_LINEAR(Light &CurrentLight, UInt depth_func, MatrixM &light_matrix)")
 }
 
 INLINE void process_CASE_LIGHT_LINEAR(Light &CurrentLight, UInt depth_func, MatrixM &light_matrix) {
+    PROFILE_START("process_CASE_LIGHT_LINEAR(Light &CurrentLight, UInt depth_func, MatrixM &light_matrix)")
     // water lum first, as noted above in the comments
     DrawWaterLum_CASE_LIGHT_LINEAR(CurrentLight);
     // lum
     DrawLum_CASE_LIGHT_LINEAR(CurrentLight, depth_func, light_matrix);
+    PROFILE_STOP("process_CASE_LIGHT_LINEAR(Light &CurrentLight, UInt depth_func, MatrixM &light_matrix)")
 }
 
 INLINE void processPointLight(Light &CurrentLight) {
+    PROFILE_START("processPointLight(Light &CurrentLight)")
     Flt range = CurrentLight.point.range();
     Vec pos = CurrentLight.point.pos;
     Flt z_center = DistPointActiveCamPlaneZ(pos);
@@ -330,9 +371,11 @@ INLINE void processPointLight(Light &CurrentLight) {
     DrawWaterLum_CASE_LIGHT_POINT(CurrentLight, range, pos, front_face, depth_func);
     SetLightShadow_CASE_LIGHT_POINT(CurrentLight, range, pos, front_face);
     DrawLum_CASE_LIGHT_POINT(CurrentLight, range, pos, front_face, depth_func);
+    PROFILE_STOP("processPointLight(Light &CurrentLight)")
 }
 
 INLINE void processLinearLight(Light &CurrentLight) {
+    PROFILE_START("processLinearLight(Light &CurrentLight)")
     Flt range = CurrentLight.linear.range;
     Flt z_center = DistPointActiveCamPlaneZ(CurrentLight.linear.pos);
     CurrentLightZRange.set(z_center - range, z_center + range);
@@ -342,9 +385,11 @@ INLINE void processLinearLight(Light &CurrentLight) {
     D.depthClip(front_face);
     SetMatrixCount();
     process_CASE_LIGHT_LINEAR(CurrentLight, depth_func, light_matrix);
+    PROFILE_STOP("processLinearLight(Light &CurrentLight)")
 }
 
 INLINE void processConeLight(Light &CurrentLight) {
+    PROFILE_START("processConeLight(Light &CurrentLight)")
     SetLightZRangeCone();
     if (CurrentLight.shadow)
         ProcessShadowMapForCone_CASE_LIGHT_CONE();
@@ -360,6 +405,7 @@ INLINE void processConeLight(Light &CurrentLight) {
         SetLightImage_CASE_LIGHT_CONE();
     Bool clear = SetLum2_CASE_LIGHT_CONE(light_matrix);
     RenderMultiSample_CASE_LIGHT_CONE(light_matrix, depth_func);
+    PROFILE_STOP("processConeLight(Light &CurrentLight)")
 }
 
 // FINISHED UTILITIES METHODS FOR Light::draw()
@@ -367,6 +413,7 @@ INLINE void processConeLight(Light &CurrentLight) {
 // STARTED UTILITIES METHODS FOR Light::drawForward(ALPHA_MODE alpha)
 
 INLINE void DrawLightDirForward_CASE_LIGHT_DIR(ALPHA_MODE alpha) {
+    PROFILE_START("DrawLightDirForward_CASE_LIGHT_DIR(ALPHA_MODE alpha)")
     Int shd_map_num;
     if (CurrentLight.shadow) {
         shd_map_num = D.shadowMapNumActual();
@@ -405,9 +452,11 @@ INLINE void DrawLightDirForward_CASE_LIGHT_DIR(ALPHA_MODE alpha) {
         D.stencil(STENCIL_NONE);
         Renderer.resolveDepth();
     }
+    PROFILE_STOP("DrawLightDirForward_CASE_LIGHT_DIR(ALPHA_MODE alpha)")
 }
 
 INLINE void DrawWaterLumDir_CASE_LIGHT_DIR() {
+    PROFILE_START("DrawWaterLumDir_CASE_LIGHT_DIR()")
     D.stencil(STENCIL_WATER_TEST, STENCIL_REF_WATER);
     Sh.Depth->set(Renderer._water_ds); // set water depth
     UInt depth_func = FUNC_FOREGROUND;
@@ -428,9 +477,11 @@ INLINE void DrawWaterLumDir_CASE_LIGHT_DIR() {
     Sh.Depth->set(Renderer._ds_1s); // restore default depth
     D.depth2DOff();
     D.stencil(STENCIL_NONE);
+    PROFILE_STOP("DrawWaterLumDir_CASE_LIGHT_DIR()")
 }
 
 INLINE void DrawLightPointForward_CASE_LIGHT_POINT(ALPHA_MODE alpha, Flt range) {
+    PROFILE_START("DrawLightPointForward_CASE_LIGHT_POINT(ALPHA_MODE alpha, Flt range)")
     Renderer.setForwardCol();
     D.alpha(alpha);
     D.set3D();
@@ -467,9 +518,11 @@ INLINE void DrawLightPointForward_CASE_LIGHT_POINT(ALPHA_MODE alpha, Flt range) 
         D.stencil(STENCIL_NONE);
         Renderer.resolveDepth();
     }
+    PROFILE_STOP("DrawLightPointForward_CASE_LIGHT_POINT(ALPHA_MODE alpha, Flt range)")
 }
 
 INLINE void DrawWaterLumPoint_CASE_LIGHT_POINT(Flt range) {
+    PROFILE_START("DrawWaterLumPoint_CASE_LIGHT_POINT(Flt range)")
     D.stencil(STENCIL_WATER_TEST, STENCIL_REF_WATER);
     Sh.Depth->set(Renderer._water_ds); // set water depth
     Bool front_face = LightFrontFaceBall(range, CurrentLight.point.pos);
@@ -493,9 +546,11 @@ INLINE void DrawWaterLumPoint_CASE_LIGHT_POINT(Flt range) {
     D.depth2DOff();
     D.depthClip(true);
     D.stencil(STENCIL_NONE);
+    PROFILE_STOP("DrawWaterLumPoint_CASE_LIGHT_POINT(Flt range)")
 }
 
 INLINE void process_FORWARD_CASE_LIGHT_LINEAR(ALPHA_MODE alpha) {
+    PROFILE_START("process_FORWARD_CASE_LIGHT_LINEAR(ALPHA_MODE alpha)")
     Flt range = CurrentLight.linear.range,
         z_center = DistPointActiveCamPlaneZ(CurrentLight.linear.pos); // Z relative to camera position
     CurrentLightZRange.set(z_center - range, z_center + range);       // use for DX12 OMSetDepthBounds
@@ -542,9 +597,11 @@ INLINE void process_FORWARD_CASE_LIGHT_LINEAR(ALPHA_MODE alpha) {
         D.stencil(STENCIL_NONE);
         Renderer.resolveDepth();
     }
+    PROFILE_STOP("process_FORWARD_CASE_LIGHT_LINEAR(ALPHA_MODE alpha)")
 }
 
 INLINE void CommonWaterLumSetup(Bool front_face, UInt depth_func, const MatrixM &light_matrix) {
+    PROFILE_START("CommonWaterLumSetup(Bool front_face, UInt depth_func, const MatrixM &light_matrix)")
     D.stencil(STENCIL_WATER_TEST, STENCIL_REF_WATER);
     Sh.Depth->set(Renderer._water_ds);
     D.depthClip(front_face);
@@ -568,26 +625,32 @@ INLINE void CommonWaterLumSetup(Bool front_face, UInt depth_func, const MatrixM 
     D.depth2DOff();
     D.depthClip(true);
     D.stencil(STENCIL_NONE);
+    PROFILE_STOP("CommonWaterLumSetup(Bool front_face, UInt depth_func, const MatrixM &light_matrix)")
 }
 
 INLINE void drawWaterLumLinear_CASE_LIGHT_LINEAR() {
+    PROFILE_START("drawWaterLumLinear_CASE_LIGHT_LINEAR()")
     Bool front_face = LightFrontFaceBall(CurrentLight.linear.range, CurrentLight.linear.pos);
     UInt depth_func = (front_face ? FUNC_LESS : FUNC_GREATER);
     MatrixM light_matrix(front_face ? CurrentLight.linear.range : -CurrentLight.linear.range, CurrentLight.linear.pos);
     CommonWaterLumSetup(front_face, depth_func, light_matrix);
     DrawLightLinear(light_matrix, 0, LIGHT_MODE_WATER);
+    PROFILE_STOP("drawWaterLumLinear_CASE_LIGHT_LINEAR()")
 }
 
 INLINE void RenderWaterLuminosity_CASE_LIGHT_CONE() {
+    PROFILE_START("RenderWaterLuminosity_CASE_LIGHT_CONE()")
     Bool front_face = LightFrontFace(CurrentLight.cone.pyramid);
     UInt depth_func = (front_face ? FUNC_LESS : FUNC_GREATER);
     MatrixM light_matrix;
     SetLightMatrixCone(light_matrix, front_face);
     CommonWaterLumSetup(front_face, depth_func, light_matrix);
     DrawLightCone(light_matrix, 0, LIGHT_MODE_WATER);
+    PROFILE_STOP("RenderWaterLuminosity_CASE_LIGHT_CONE()")
 }
 
 INLINE void process_FORWARD_CASE_LIGHT_CONE(ALPHA_MODE alpha) {
+    PROFILE_START("process_FORWARD_CASE_LIGHT_CONE(ALPHA_MODE alpha)")
     SetLightZRangeCone(); // Z relative to camera position
     if (CurrentLight.shadow) {
         ShadowMap(CurrentLight.cone);
@@ -607,7 +670,7 @@ INLINE void process_FORWARD_CASE_LIGHT_CONE(ALPHA_MODE alpha) {
         Frustum.from(CurrentLight.cone.pyramid);
         Renderer.mode(RM_PREPARE);
         Renderer._render();
-        if (ALWAYS_RESTORE_FRUSTUM) 
+        if (ALWAYS_RESTORE_FRUSTUM)
             Frustum = FrustumMain;
         D.clipAllow(true);
     }
@@ -615,10 +678,10 @@ INLINE void process_FORWARD_CASE_LIGHT_CONE(ALPHA_MODE alpha) {
     REPS(Renderer._eye, Renderer._eye_num) {
         Renderer.setEyeViewportCam();
         if (GetCurrentLightRect()) {
-            if (CurrentLight.shadow) 
+            if (CurrentLight.shadow)
                 SetShdMatrix();
             CurrentLight.cone.set(CurrentLight.shadow_opacity);
-            if (Renderer.secondaryPass()) 
+            if (Renderer.secondaryPass())
                 D.clip(CurrentLight.rect & Renderer._clip);
             DrawOpaqueInstances();
             Renderer._render();
@@ -633,15 +696,19 @@ INLINE void process_FORWARD_CASE_LIGHT_CONE(ALPHA_MODE alpha) {
     // water lum
     if (Renderer._water_nrm)
         RenderWaterLuminosity_CASE_LIGHT_CONE();
+    PROFILE_STOP("process_FORWARD_CASE_LIGHT_CONE(ALPHA_MODE alpha)")
 }
 
 INLINE void processDirectionalLightForward(Light &CurrentLight, ALPHA_MODE alpha) {
+    PROFILE_START("processDirectionalLightForward(Light &CurrentLight, ALPHA_MODE alpha)")
     DrawLightDirForward_CASE_LIGHT_DIR(alpha);
     if (Renderer._water_nrm)
         DrawWaterLumDir_CASE_LIGHT_DIR();
+    PROFILE_STOP("processDirectionalLightForward(Light &CurrentLight, ALPHA_MODE alpha)")
 }
 
 INLINE void processPointLightForward(Light &CurrentLight, ALPHA_MODE alpha) {
+    PROFILE_START("processPointLightForward(Light &CurrentLight, ALPHA_MODE alpha)")
     Flt range = CurrentLight.point.range();
     Flt z_center = DistPointActiveCamPlaneZ(CurrentLight.point.pos);
     CurrentLightZRange.set(z_center - range, z_center + range);
@@ -655,23 +722,30 @@ INLINE void processPointLightForward(Light &CurrentLight, ALPHA_MODE alpha) {
     if (Renderer._water_nrm)
         DrawWaterLumPoint_CASE_LIGHT_POINT(range);
     D.set2D();
+    PROFILE_STOP("processPointLightForward(Light &CurrentLight, ALPHA_MODE alpha)")
 }
 
 INLINE void processLinearLightForward(Light &CurrentLight, ALPHA_MODE alpha) {
+    PROFILE_START("processLinearLightForward(Light &CurrentLight, ALPHA_MODE alpha)")
     process_FORWARD_CASE_LIGHT_LINEAR(alpha);
     if (Renderer._water_nrm)
         drawWaterLumLinear_CASE_LIGHT_LINEAR();
+    PROFILE_STOP("processLinearLightForward(Light &CurrentLight, ALPHA_MODE alpha)")
 }
 
 INLINE void processConeLightForward(Light &CurrentLight, ALPHA_MODE alpha) {
+    PROFILE_START("processConeLightForward(Light &CurrentLight, ALPHA_MODE alpha)")
     process_FORWARD_CASE_LIGHT_CONE(alpha);
+    PROFILE_STOP("processConeLightForward(Light &CurrentLight, ALPHA_MODE alpha)")
 }
 // FINISHED UTILITIES METHODS FOR Light::drawForward(ALPHA_MODE alpha)
 
 // STARTED COMMON CODE
 INLINE void finalizeDrawing() {
+    PROFILE_START("finalizeDrawing()")
     D.depth2DOff();
     Renderer._shd_1s.clear();
     Renderer._shd_ms.clear();
+    PROFILE_STOP("finalizeDrawing()")
 }
 // FINISHED COMMON CODE

@@ -1,3 +1,4 @@
+﻿// TODO ADD PROFILE_START AND PROFILE_STOP PROFILERS
 /******************************************************************************/
 #include "stdafx.h"
 namespace EE {
@@ -73,22 +74,26 @@ Bool Kinematic::update() {
 // DRAW
 /******************************************************************************/
 UInt Kinematic::drawPrepare() {
+    PROFILE_START("CatzEngine::Kinematic::drawPrepare()")
     if (mesh)
         if (Frustum(*mesh, _matrix_scaled)) {
             SetVariation(mesh_variation);
             mesh->draw(_matrix_scaled);
             SetVariation();
         }
+    PROFILE_STOP("CatzEngine::Kinematic::drawPrepare()")
     return 0; // no additional render modes required
 }
 /******************************************************************************/
 void Kinematic::drawShadow() {
+    PROFILE_START("CatzEngine::Kinematic::drawShadow()")
     if (mesh)
         if (Frustum(*mesh, _matrix_scaled)) {
             SetVariation(mesh_variation);
             mesh->drawShadow(_matrix_scaled);
             SetVariation();
         }
+    PROFILE_STOP("CatzEngine::Kinematic::drawShadow()")
 }
 /******************************************************************************/
 // IO

@@ -11,6 +11,7 @@ ObjParticles::ObjParticles() {
 // MANAGE
 /******************************************************************************/
 void ObjParticles::create(Object &obj) {
+    PROFILE_START("CatzEngine::ObjParticles::create(Object &obj)")
     arbitrary_name = "ObjParticle Object";
     Particles *ps = null;
     if (Param *p = obj.findParam("particles")) // have Particles object specified
@@ -213,6 +214,7 @@ void ObjParticles::create(Object &obj) {
     particles.accel *= matrix.orn();
 
     particles.resetFull();
+    PROFILE_STOP("CatzEngine::ObjParticles::create(Object &obj)")
 }
 /******************************************************************************/
 // GET / SET
@@ -232,11 +234,25 @@ Bool ObjParticles::update() {
 // DRAW
 /******************************************************************************/
 UInt ObjParticles::drawPrepare() {
+    PROFILE_START("CatzEngine::ObjParticles::drawPrepare()")
     return IndexToFlag(particles.renderMode()); // particles require additional render mode
+    PROFILE_STOP("CatzEngine::ObjParticles::drawPrepare()")
 }
-void ObjParticles::drawBlend() { particles.draw(); }
-void ObjParticles::drawPalette() { particles.draw(); }
-void ObjParticles::drawPalette1() { particles.draw(); }
+void ObjParticles::drawBlend() {
+    PROFILE_START("CatzEngine::ObjParticles::drawBlend()")
+    particles.draw();
+    PROFILE_STOP("CatzEngine::ObjParticles::drawBlend()")
+}
+void ObjParticles::drawPalette() {
+    PROFILE_START("CatzEngine::ObjParticles::drawPalette()")
+    particles.draw();
+    PROFILE_STOP("CatzEngine::ObjParticles::drawPalette()")
+}
+void ObjParticles::drawPalette1() {
+    PROFILE_START("CatzEngine::ObjParticles::drawPalette1()")
+    particles.draw();
+    PROFILE_STOP("CatzEngine::ObjParticles::drawPalette1()")
+}
 /******************************************************************************/
 // IO
 /******************************************************************************/

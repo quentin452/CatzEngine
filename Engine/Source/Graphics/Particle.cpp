@@ -37,14 +37,16 @@ static Flt (*GetOpacityFunc(C Particles &particles))(Flt s) // function which re
 // MAIN
 /******************************************************************************/
 Bool DrawParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha) {
+    PROFILE_START("DrawParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha)")
     Renderer.wantDepthRead(); // !! call before 'SoftParticles' !!
-    //Shader *shader;
+    // Shader *shader;
     Bool soft = SoftParticles();
     switch (Renderer()) {
     default:
+        PROFILE_STOP("DrawParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha)")
         return false;
     case RM_BLEND:
-        //shader = Sh.Particle[false][soft][0][motion_affects_alpha];// disabled to fix particle distorsion bugs
+        // shader = Sh.Particle[false][soft][0][motion_affects_alpha];// disabled to fix particle distorsion bugs
         ColorFunc = ColorAlpha;
         D.alpha(Renderer.fastCombine() ? ALPHA_BLEND : ALPHA_RENDER_BLEND_FACTOR);
         D.alphaFactor(Color(0, 0, 0, glow));
@@ -54,7 +56,7 @@ Bool DrawParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha) {
         break; // 'MaterialClear' must be called when changing 'D.alphaFactor'
     case RM_PALETTE:
     case RM_PALETTE1:
-        //shader = Sh.Particle[true][soft][0][motion_affects_alpha];// disabled to fix particle distorsion bugs
+        // shader = Sh.Particle[true][soft][0][motion_affects_alpha];// disabled to fix particle distorsion bugs
         ColorFunc = ColorMul;
         D.alpha(ALPHA_ADD);
         break;
@@ -62,14 +64,16 @@ Bool DrawParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha) {
     SetOneMatrix();
     D.depthOnWrite(true, false);
     VI.image(&image);
-    //VI.shader(shader); // disabled to fix particle distorsion bugs
+    // VI.shader(shader); // disabled to fix particle distorsion bugs
     VI.setType(VI_3D_BILB, VI_QUAD_IND);
 #if GL // needed for iOS PVRTC Pow2 #ParticleImgPart
     Sh.ImgSize->setConditional(image._part.xy);
 #endif
+    PROFILE_STOP("SetLightShadow(Light &CurrentLight, std::function<Shader *(bool)> GetShdPointFunc)")
     return true;
 }
 void DrawParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel) {
+    PROFILE_START("DrawParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel)")
     if (Vtx3DBilb *v = (Vtx3DBilb *)VI.addVtx(4)) {
         v[0].pos = v[1].pos = v[2].pos = v[3].pos = pos;
         v[0].vel_angle = v[1].vel_angle = v[2].vel_angle = v[3].vel_angle.set(vel.x, vel.y, vel.z, GPU_HALF_SUPPORTED ? AngleFull(angle) : angle);
@@ -80,20 +84,23 @@ void DrawParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &
         SET_TEX(v[2].tex, TEX_ONE, TEX_ZERO);
         SET_TEX(v[3].tex, TEX_ZERO, TEX_ZERO);
     }
+    PROFILE_STOP("DrawParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel)")
 }
 void DrawParticleEnd() {
     VI.end();
 }
 /******************************************************************************/
 Bool DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha, Int x_frames, Int y_frames) {
+    PROFILE_START("DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha, Int x_frames, Int y_frames)")
     Renderer.wantDepthRead(); // !! call before 'SoftParticles' !!
-    //Shader *shader;
+    // Shader *shader;
     Bool soft = SoftParticles();
     switch (Renderer()) {
     default:
+        PROFILE_STOP("DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha, Int x_frames, Int y_frames)")
         return false;
     case RM_BLEND:
-        //shader = Sh.Particle[false][soft][1 + D.particlesSmoothAnim()][motion_affects_alpha];// disabled to fix particle distorsion bugs
+        // shader = Sh.Particle[false][soft][1 + D.particlesSmoothAnim()][motion_affects_alpha];// disabled to fix particle distorsion bugs
         ColorFunc = ColorAlpha;
         D.alpha(Renderer.fastCombine() ? ALPHA_BLEND : ALPHA_RENDER_BLEND_FACTOR);
         D.alphaFactor(Color(0, 0, 0, glow));
@@ -103,7 +110,7 @@ Bool DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_al
         break; // 'MaterialClear' must be called when changing 'D.alphaFactor'
     case RM_PALETTE:
     case RM_PALETTE1:
-        //shader = Sh.Particle[true][soft][1 + D.particlesSmoothAnim()][motion_affects_alpha];// disabled to fix particle distorsion bugs
+        // shader = Sh.Particle[true][soft][1 + D.particlesSmoothAnim()][motion_affects_alpha];// disabled to fix particle distorsion bugs
         ColorFunc = ColorMul;
         D.alpha(ALPHA_ADD);
         break;
@@ -111,15 +118,17 @@ Bool DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_al
     SetOneMatrix();
     D.depthOnWrite(true, false);
     VI.image(&image);
-    //VI.shader(shader);// disabled to fix particle distorsion bugs
+    // VI.shader(shader);// disabled to fix particle distorsion bugs
     VI.setType(VI_3D_BILB_ANIM, VI_QUAD_IND);
     Sh.ParticleFrames->set(VecI2(x_frames, y_frames));
 #if GL // needed for iOS PVRTC Pow2 #ParticleImgPart
     Sh.ImgSize->setConditional(image._part.xy);
 #endif
+    PROFILE_STOP("DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha, Int x_frames, Int y_frames)")
     return true;
 }
 void DrawAnimatedParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel, Flt frame) {
+    PROFILE_START("DrawAnimatedParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel, Flt frame)")
     if (Vtx3DBilbAnim *v = (Vtx3DBilbAnim *)VI.addVtx(4)) {
         v[0].pos = v[1].pos = v[2].pos = v[3].pos = pos;
         v[0].vel_angle = v[1].vel_angle = v[2].vel_angle = v[3].vel_angle.set(vel.x, vel.y, vel.z, GPU_HALF_SUPPORTED ? AngleFull(angle) : angle);
@@ -131,6 +140,7 @@ void DrawAnimatedParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle,
         SET_TEX(v[2].tex, TEX_ONE, TEX_ZERO);
         SET_TEX(v[3].tex, TEX_ZERO, TEX_ZERO);
     }
+    PROFILE_STOP("DrawAnimatedParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel, Flt frame)")
 }
 void DrawAnimatedParticleEnd() {
     VI.end();
@@ -144,6 +154,7 @@ struct AnimatedMaterialParticle {
     // Vec2 *part; can ignore because material based particles should have TexPow2 size in the image
 } AMP;
 Bool DrawAnimatedMaterialParticleBegin(C Material &material, Int x_frames, Int y_frames) {
+    PROFILE_START("DrawAnimatedMaterialParticleBegin(C Material &material, Int x_frames, Int y_frames)")
     if (Shader *shader = DefaultShaders(&material, VTX_POS | VTX_NRM_TAN_BIN | VTX_COLOR | VTX_TEX0, 0, false).get(Renderer())) {
         DisableSkinning();
         material.setAuto();
@@ -158,11 +169,14 @@ Bool DrawAnimatedMaterialParticleBegin(C Material &material, Int x_frames, Int y
         AMP.nrm = -ActiveCam.matrix.z;
         AMP.tan.set(ActiveCam.matrix.x, 1);
         // AMP.part=((material.base_0 && material.base_0->partial()) ? &material.base_0->_part.xy : null);
+        PROFILE_STOP("DrawAnimatedMaterialParticleBegin(C Material &material, Int x_frames, Int y_frames)")
         return true;
     }
+    PROFILE_STOP("DrawAnimatedMaterialParticleBegin(C Material &material, Int x_frames, Int y_frames)")
     return false;
 }
 void DrawAnimatedMaterialParticleAdd(C Color &color, Flt radius, Flt angle, C Vec &pos, Int frame) {
+    PROFILE_START("DrawAnimatedMaterialParticleAdd(C Color &color, Flt radius, Flt angle, C Vec &pos, Int frame)")
     if (Vtx3DStandard *v = (Vtx3DStandard *)VI.addVtx(4)) {
         Vec x, y;
         if (angle) {
@@ -193,6 +207,7 @@ void DrawAnimatedMaterialParticleAdd(C Color &color, Flt radius, Flt angle, C Ve
         v[0].color = v[1].color = v[2].color = v[3].color = color;
         // if(AMP.part)REP(4)v[i].tex*=*AMP.part;
     }
+    PROFILE_STOP("DrawAnimatedMaterialParticleAdd(C Color &color, Flt radius, Flt angle, C Vec &pos, Int frame)")
 }
 void DrawAnimatedMaterialParticleEnd() {
     VI.end();
@@ -207,6 +222,7 @@ Flt ParticleOpacity(Flt particle_life, Flt particle_life_max, Bool particles_smo
 // PARTICLES
 /******************************************************************************/
 void Particles::zero() {
+    PROFILE_START("Particles::zero()")
     reborn = true;
     smooth_fade = false;
     motion_affects_alpha = true;
@@ -254,6 +270,7 @@ void Particles::zero() {
 
     hard_depth_offset = 0;
     opacity_func = null;
+    PROFILE_STOP("Particles::zero()")
 }
 Particles &Particles::del() {
     p.del();
@@ -266,19 +283,20 @@ Particles &Particles::del() {
 }
 Particles::Particles() { zero(); }
 Particles &Particles::create(C ImagePtr &image, C Color &color, Int elms, Flt radius, Flt life) {
+    PROFILE_START("Particles::create(C ImagePtr &image, C Color &color, Int elms, Flt radius, Flt life)")
     del();
-
     p.setNum(elms);
     T.color = color;
     T.radius = radius;
     T.life = life;
     _src_type = PARTICLE_STATIC_SHAPE;
     T.image = image;
-
     setRenderMode();
+    PROFILE_STOP("Particles::create(C ImagePtr &image, C Color &color, Int elms, Flt radius, Flt life)")
     return T;
 }
 Particles &Particles::create(C Particles &src) {
+    PROFILE_START("Particles::create(C Particles &src)")
     if (this != &src) {
         del();
 
@@ -335,6 +353,7 @@ Particles &Particles::create(C Particles &src) {
         CopyN(Alloc(_src_help, src._src_elms), src._src_help, _src_elms = src._src_elms);
         p = src.p;
     }
+    PROFILE_STOP("Particles::create(C Particles &src)")
     return T;
 }
 /******************************************************************************/
@@ -367,6 +386,7 @@ Particles &Particles::source(C OrientP *dynamic_point) {
     return T;
 }
 Particles &Particles::source(C AnimatedSkeleton *dynamic_skeleton, Bool ragdoll_bones_only) {
+    PROFILE_START("Particles::source(C AnimatedSkeleton *dynamic_skeleton, Bool ragdoll_bones_only)")
     T._src_type = PARTICLE_DYNAMIC_SKELETON;
     T._src_ptr = dynamic_skeleton;
     T._src_mesh = null;
@@ -383,6 +403,7 @@ Particles &Particles::source(C AnimatedSkeleton *dynamic_skeleton, Bool ragdoll_
             if (skel->bones[i].flag & BONE_RAGDOLL)
                 _src_help[_src_elms++] = i;
         }
+    PROFILE_STOP("Particles::source(C AnimatedSkeleton *dynamic_skeleton, Bool ragdoll_bones_only)")
     return T;
 }
 Particles &Particles::source(C MeshPtr &dynamic_mesh) {
@@ -401,6 +422,7 @@ Particles &Particles::source(C MeshPtr &dynamic_mesh, C AnimatedSkeleton *dynami
 }
 /******************************************************************************/
 Flt Particles::opacity(Vec *pos) C {
+    PROFILE_START("Particles::opacity(Vec *pos)")
     Vec vec = 0;
     Flt opacity = 0;
     Flt (*func)(Flt s) = GetOpacityFunc(T);
@@ -418,6 +440,7 @@ Flt Particles::opacity(Vec *pos) C {
     }
     if (pos)
         *pos = vec;
+    PROFILE_STOP("Particles::opacity(Vec *pos)")
     return opacity;
 }
 /******************************************************************************/
@@ -436,6 +459,7 @@ Particles &Particles::paletteIndex(Byte palette_index) {
 }
 /******************************************************************************/
 void Particles::reset(Int i) {
+    PROFILE_START("Particles::reset(Int i)")
     if (InRange(i, p)) {
         Particle &p = T.p[i];
         if (reborn) {
@@ -498,6 +522,7 @@ void Particles::reset(Int i) {
             p.life = p.life_max = 0; // if it shouldn't reborn then set life already as dead
         }
     }
+    PROFILE_STOP("Particles::reset(Int i)")
 }
 Particles &Particles::reset() {
     REPA(p)
@@ -514,6 +539,7 @@ Particles &Particles::resetFull() {
 }
 /******************************************************************************/
 Bool Particles::update(Flt dt) {
+    PROFILE_START("Particles::update(Flt dt)")
     if (_src_type) {
         // life/death/fade
         if (emitter_life_max > 0) {
@@ -527,9 +553,9 @@ Bool Particles::update(Flt dt) {
                 _fade = emitter_life / fade_in;
             else // fade in
                 if (left < fade_out)
-                _fade = left / fade_out;
-            else           // fade out
-                _fade = 1; // middle
+                    _fade = left / fade_out;
+                else           // fade out
+                    _fade = 1; // middle
         } else {
             _fade = 1;
         }
@@ -612,12 +638,15 @@ Bool Particles::update(Flt dt) {
         }
 
         _matrix_prev = matrix;
+        PROFILE_STOP("Particles::update(Flt dt)")
         return true;
     }
+    PROFILE_STOP("Particles::update(Flt dt)")
     return false;
 }
 /******************************************************************************/
 void Particles::draw(Flt opacity) C {
+    PROFILE_START("Particles::draw(Flt opacity)")
     if (_src_type && image && Renderer() == renderMode()) {
         opacity *= _fade;
         if (opacity > 0) {
@@ -634,8 +663,10 @@ void Particles::draw(Flt opacity) C {
             if (Renderer() != _render_mode) // if particle is palette based, however we're rendering it in blend mode, then we need to palettize each single particle
             {
                 render_color_palette = &D._color_palette_soft[paletteIndex()];
-                if (render_color_palette->h() < 4)
+                if (render_color_palette->h() < 4) {
+                    PROFILE_STOP("Particles::draw(Flt opacity)")
                     return;
+                }
                 render_color_palette_w1 = render_color_palette->w() - 1;
             }
             if (palette_image)
@@ -729,6 +760,7 @@ void Particles::draw(Flt opacity) C {
                 DrawParticleEnd();
         }
     }
+    PROFILE_STOP("Particles::draw(Flt opacity)")
 }
 /******************************************************************************/
 Bool Particles::save(File &f, Bool include_particles, CChar *path) C {
@@ -830,6 +862,7 @@ RawParticles &RawParticles::create(C ImagePtr &image) {
 }
 /******************************************************************************/
 RawParticles &RawParticles::set(C Particle *particle, Int particles) {
+    PROFILE_START("RawParticles::set(C Particle *particle, Int particles)")
     MAX(particles, 0);
     if (particles > _max_particles) // re-create buffers
     {
@@ -892,9 +925,11 @@ RawParticles &RawParticles::set(C Particle *particle, Int particles) {
             v += 4;
         }
         _vb.unlock();
-    } else
+    } else {
+        PROFILE_STOP("RawParticles::set(C Particle *particle, Int particles)")
         return del();
-
+    }
+    PROFILE_STOP("RawParticles::set(C Particle *particle, Int particles)")
     return T;
 }
 /******************************************************************************/
@@ -914,6 +949,7 @@ RawParticles &RawParticles::paletteIndex(Byte index) {
 }
 /******************************************************************************/
 void RawParticles::draw() C {
+    PROFILE_START("RawParticles::draw()")
     if (image && _particles && Renderer() == renderMode()) {
         Renderer.wantDepthRead(); // !! call before 'SoftParticles' !!
         Shader *shader;
@@ -959,6 +995,7 @@ void RawParticles::draw() C {
         glDrawElements(GL_TRIANGLES, _particles * (2 * 3), ib.bit16() ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, null);
 #endif
     }
+    PROFILE_STOP("RawParticles::draw()")
 }
 /******************************************************************************/
 // MAIN

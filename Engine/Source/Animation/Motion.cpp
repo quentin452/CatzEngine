@@ -32,17 +32,23 @@ Bool Motion::eventBetween(Flt from, Flt to) C { return skel_anim ? EventBetween(
 Flt Motion::eventProgress(Flt from, Flt to) C { return skel_anim ? LerpR(from, to, time) : 0; }
 /******************************************************************************/
 void Motion::getRootTransform(RevMatrix &transform) C {
+    PROFILE_START("Motion::getRootTransform(RevMatrix &transform)")
     if (skel_anim)
         if (C Animation *anim = skel_anim->animation()) {
             anim->getRootTransform(transform, time_prev, time);
+            PROFILE_STOP("Motion::getRootTransform(RevMatrix &transform)")
             return;
         }
     transform.identity();
+    PROFILE_STOP("Motion::getRootTransform(RevMatrix &transform)")
 }
 /******************************************************************************/
 Bool Motion::updateAuto(Flt blend_in_speed, Flt blend_out_speed, Flt time_speed) {
-    if (!is())
+    PROFILE_START("Motion::updateAuto(Flt blend_in_speed, Flt blend_out_speed, Flt time_speed)")
+    if (!is()) {
+        PROFILE_STOP("Motion::updateAuto(Flt blend_in_speed, Flt blend_out_speed, Flt time_speed)")
         return false; // return false if the motion isn't valid and can be deleted
+    }
 
     if (time < skel_anim->length()) // if not finished
     {
@@ -65,15 +71,19 @@ Bool Motion::updateAuto(Flt blend_in_speed, Flt blend_out_speed, Flt time_speed)
         {
             blend = 0;
             skel_anim = null;
+            PROFILE_STOP("Motion::updateAuto(Flt blend_in_speed, Flt blend_out_speed, Flt time_speed)")
             return false;
         }
     }
+    PROFILE_STOP("Motion::updateAuto(Flt blend_in_speed, Flt blend_out_speed, Flt time_speed)")
     return true;
 }
 Bool Motion::updateIn(Flt blend_in_speed, Flt time_speed) {
-    if (!is())
+    PROFILE_START("Motion::updateIn(Flt blend_in_speed, Flt time_speed)")
+    if (!is()) {
+        PROFILE_STOP("Motion::updateIn(Flt blend_in_speed, Flt time_speed)")
         return false; // return false if the motion isn't valid and can be deleted
-
+    }
     blend += blend_in_speed * Time.d(); // blend in
     if (blend >= 1)                     // if fully blended
     {
@@ -82,15 +92,20 @@ Bool Motion::updateIn(Flt blend_in_speed, Flt time_speed) {
         time_delta = time_speed * Time.d();
         time += time_delta;
 
-        if (time >= skel_anim->length())
+        if (time >= skel_anim->length()) {
+            PROFILE_STOP("Motion::updateIn(Flt blend_in_speed, Flt time_speed)")
             return false; // if finished
+        }
     }
+    PROFILE_STOP("Motion::updateIn(Flt blend_in_speed, Flt time_speed)")
     return true;
 }
 Bool Motion::updateOut(Flt blend_out_speed) {
-    if (!is())
+    PROFILE_START("Motion::updateOut(Flt blend_out_speed)")
+    if (!is()) {
+        PROFILE_STOP("Motion::updateOut(Flt blend_out_speed)")
         return false; // return false if the motion isn't valid and can be deleted
-
+    }
     // prevent events at end of anim firing multiple times
     time_prev = time;
     time_delta = 0;
@@ -100,12 +115,15 @@ Bool Motion::updateOut(Flt blend_out_speed) {
     {
         blend = 0;
         skel_anim = null;
+        PROFILE_STOP("Motion::updateOut(Flt blend_out_speed)")
         return false;
     }
+    PROFILE_STOP("Motion::updateOut(Flt blend_out_speed)")
     return true;
 }
 /******************************************************************************/
 Bool Motion::save(File &f) C {
+    PROFILE_START("Motion::save(File &f)")
     if (!skel_anim)
         f.cmpUIntV(0);
     else // version #0 specifies totally empty motion (which doesn't require additional data, and uses only 1 byte of storage)
@@ -114,23 +132,29 @@ Bool Motion::save(File &f) C {
         f.putAsset(skel_anim->id());
         f.putMulti(blend, time, time_prev, time_delta);
     }
+    PROFILE_STOP("Motion::save(File &f)")
     return f.ok();
 }
 Bool Motion::load(File &f, C AnimatedSkeleton &anim_skel) {
+    PROFILE_START("Motion::load(File &f, C AnimatedSkeleton &anim_skel)")
     switch (f.decUIntV()) // version
     {
     case 0:
         clear();
+        PROFILE_STOP("Motion::load(File &f, C AnimatedSkeleton &anim_skel)")
         return f.ok();
 
     case 1: {
         skel_anim = anim_skel.findSkelAnim(f.getAssetID());
         f.getMulti(blend, time, time_prev, time_delta);
-        if (f.ok())
+        if (f.ok()) {
+            PROFILE_STOP("Motion::load(File &f, C AnimatedSkeleton &anim_skel)")
             return true;
+        }
     } break;
     }
     clear();
+    PROFILE_STOP("Motion::load(File &f, C AnimatedSkeleton &anim_skel)")
     return false;
 }
 /******************************************************************************/

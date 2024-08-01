@@ -1,3 +1,4 @@
+// TODO ADD PROFILE_START AND PROFILE_STOP PROFILERS
 /******************************************************************************
 
    Graphics API differences:
@@ -99,6 +100,7 @@ MeshRender MshrBox,
     MshrBall;
 /******************************************************************************/
 static void InitMshr() {
+    PROFILE_START("InitMshr()")
     MeshBase mshb;
 
     mshb.createFast(Box(1));
@@ -108,6 +110,7 @@ static void InitMshr() {
 
     mshb.create(Ball(1), MESH_NONE, 12);
     MshrBall.create(mshb);
+    PROFILE_STOP("InitMshr()")
 }
 static void ShutMshr() {
     MshrBox.del();
@@ -121,6 +124,7 @@ struct EASU {
     AU1 c0[4], c1[4], c2[4], c3[4];
 };
 static inline void SetEASU(C Image &src, C ImageRT &dest) {
+    PROFILE_START("SetEASU(C Image &src, C ImageRT &dest)")
     EASU easu;
     FsrEasuCon(easu.c0, easu.c1, easu.c2, easu.c3,
                src.w(), src.h(),     // Viewport size (top left aligned) in the input image which is to be scaled.
@@ -141,8 +145,10 @@ static inline void SetEASU(C Image &src, C ImageRT &dest) {
 #endif
 
     Sh.Easu->set(easu);
+    PROFILE_STOP("SetEASU(C Image &src, C ImageRT &dest)")
 }
 void SetEASU(C Image &src, C Vec2 &dest_size, C Vec2 &screen_lu) {
+    PROFILE_START("SetEASU(C Image &src, C Vec2 &dest_size, C Vec2 &screen_lu)")
     EASU easu;
     FsrEasuCon(easu.c0, easu.c1, easu.c2, easu.c3,
                src.w(), src.h(),          // Viewport size (top left aligned) in the input image which is to be scaled.
@@ -164,8 +170,10 @@ void SetEASU(C Image &src, C Vec2 &dest_size, C Vec2 &screen_lu) {
 #endif
 
     Sh.Easu->set(easu);
+    PROFILE_STOP("SetEASU(C Image &src, C Vec2 &dest_size, C Vec2 &screen_lu)")
 }
 DisplayClass &DisplayClass::sharpenIntensity(Flt intensity) {
+    PROFILE_START("DisplayClass::sharpenIntensity(Flt intensity)")
     SAT(intensity);
     if (_sharpen_intensity != intensity) {
         _sharpen_intensity = intensity;
@@ -175,6 +183,7 @@ DisplayClass &DisplayClass::sharpenIntensity(Flt intensity) {
         FsrRcasCon(rcas.c0, 1 - intensity);
         Sh.Rcas->set(rcas);
     }
+    PROFILE_STOP("DisplayClass::sharpenIntensity(Flt intensity)")
     return T;
 }
 #if GL
@@ -260,6 +269,7 @@ void RendererClass::del() {
     rtDel();
 }
 void RendererClass::create() {
+    PROFILE_START("RendererClass::create()")
     if (LogInit)
         LogN("RendererClass.create");
 
@@ -299,6 +309,7 @@ void RendererClass::create() {
 #if GL
     RcasMulAdd = GetShaderParam("RcasMulAdd");
 #endif
+    PROFILE_STOP("RendererClass::create()")
 }
 RendererClass &RendererClass::type(RENDER_TYPE type) {
     Clamp(type, RENDER_TYPE(0), RENDER_TYPE(RT_NUM - 1));
@@ -340,6 +351,7 @@ void RendererClass::requestMirror(C PlaneM &plane, Int priority, Bool shadows, I
 }
 /******************************************************************************/
 void RendererClass::linearizeDepth(ImageRT &dest, ImageRT &depth) {
+    PROFILE_START("RendererClass::linearizeDepth(ImageRT &dest, ImageRT &depth)")
     D.alpha(ALPHA_NONE);
     set(&dest, null, true);
     if (!depth.multiSample() || depth.size() != dest.size()) {
@@ -358,8 +370,10 @@ void RendererClass::linearizeDepth(ImageRT &dest, ImageRT &depth) {
             Sh.LinearizeDepth[2][FovPerspective(D.viewFovMode())]->draw();
             Sh.DepthMS->set(_ds);
         } // ms->ms, set and restore depth
+    PROFILE_STOP("RendererClass::linearizeDepth(ImageRT &dest, ImageRT &depth)")
 }
 void RendererClass::setDepthForDebugDrawing() {
+    PROFILE_START("RendererClass::setDepthForDebugDrawing()")
     if (_set_depth_needed) {
         _set_depth_needed = false;
         if (_ds_1s)
@@ -376,18 +390,23 @@ void RendererClass::setDepthForDebugDrawing() {
                 set(rt, _cur_ds, true);
             }
     }
+    PROFILE_STOP("RendererClass::setDepthForDebugDrawing()")
 }
 ImageRTPtr RendererClass::getBackBuffer() // this may get called during rendering and outside of it
 {
+    PROFILE_START("RendererClass::getBackBuffer()")
     if (Image *src = _cur[0]) {
         ImageRTPtr hlp(ImageRTDesc(src->w(), src->h(), GetImageRTType(src->type())));
         src->copyHw(*hlp, true);
+        PROFILE_STOP("RendererClass::getBackBuffer()")
         return hlp;
     }
+    PROFILE_STOP("RendererClass::getBackBuffer()")
     return null;
 }
 /******************************************************************************/
 ImageRT *RendererClass::adaptEye(ImageRTC &src, ImageRT *dest) {
+    PROFILE_START("RendererClass::adaptEye(ImageRTC &src, ImageRT *dest)")
     Hdr.load();
     D.alpha(ALPHA_NONE);
     ImageRTPtr cur = &src;
@@ -429,12 +448,15 @@ ImageRT *RendererClass::adaptEye(ImageRTC &src, ImageRT *dest) {
         Sh.ImgX[0]->set(mul);
         set(dest, null, true);
         Hdr.AdaptEye[D.dither() /*&& src.highPrecision()*/ && !dest->highPrecision()]->draw(src);
+        PROFILE_STOP("RendererClass::adaptEye(ImageRTC &src, ImageRT *dest)")
         return null;
     }
+    PROFILE_STOP("RendererClass::adaptEye(ImageRTC &src, ImageRT *dest)")
     return &mul;
 }
 /******************************************************************************/
 Bool RendererClass::dilateMotion(ImageRTPtr *dilated_full_motion, ImageRTPtr *dilated_blur_motion) {
+    PROFILE_START("RendererClass::dilateMotion(ImageRTPtr *dilated_full_motion, ImageRTPtr *dilated_blur_motion)")
     if (dilated_full_motion || dilated_blur_motion) {
         Mtn.load();
         D.alpha(ALPHA_NONE);
@@ -486,8 +508,10 @@ Bool RendererClass::dilateMotion(ImageRTPtr *dilated_full_motion, ImageRTPtr *di
             shader->draw(rect_ptr);                                     // convert after drawing border
         }
 
-        if (stage == RS_MOTION_CONVERTED && show(dilated_motion, false, true))
+        if (stage == RS_MOTION_CONVERTED && show(dilated_motion, false, true)) {
+            PROFILE_STOP("RendererClass::dilateMotion(ImageRTPtr *dilated_full_motion, ImageRTPtr *dilated_blur_motion)")
             return true;
+        }
 
         // Dilate
         if (DUAL_DILATE_MOTION || dilate_pixels > 0) // always have to dilate for DUAL_DILATE_MOTION in order to scale by 'MotionScale_2' and clamp max length
@@ -531,20 +555,26 @@ Bool RendererClass::dilateMotion(ImageRTPtr *dilated_full_motion, ImageRTPtr *di
         if (stage)
             switch (stage) {
             case RS_MOTION_DILATED_FULL:
-                if (dilated_full_motion && show(*dilated_full_motion, false, true))
+                if (dilated_full_motion && show(*dilated_full_motion, false, true)) {
+                    PROFILE_STOP("RendererClass::dilateMotion(ImageRTPtr *dilated_full_motion, ImageRTPtr *dilated_blur_motion)")
                     return true;
+                }
                 break;
             case RS_MOTION_DILATED_BLUR:
-                if (dilated_blur_motion && show(*dilated_blur_motion, false, true))
+                if (dilated_blur_motion && show(*dilated_blur_motion, false, true)) {
+                    PROFILE_STOP("RendererClass::dilateMotion(ImageRTPtr *dilated_full_motion, ImageRTPtr *dilated_blur_motion)")
                     return true;
+                }
                 break;
             }
     }
+    PROFILE_STOP("RendererClass::dilateMotion(ImageRTPtr *dilated_full_motion, ImageRTPtr *dilated_blur_motion)")
     return false;
 }
 /******************************************************************************/
 // !! Assumes that 'ImgClamp' was already set !!
 void RendererClass::motionBlur(ImageRT &src, ImageRT &dest, ImageRTPtr &bloom_glow, ImageRTPtr &dilated_motion, Bool alpha, Bool combine, ImageRT *exposure) {
+    PROFILE_START("RendererClass::motionBlur(ImageRT &src, ImageRT &dest, ImageRTPtr &bloom_glow, ImageRTPtr &dilated_motion, Bool alpha, Bool combine, ImageRT *exposure)")
 #if DEBUG && 0 // test UV CLAMP
     {
         set(&src, null, false);
@@ -563,6 +593,7 @@ void RendererClass::motionBlur(ImageRT &src, ImageRT &dest, ImageRTPtr &bloom_gl
     set(&dest, bloom_glow, null, null, null, true);
     D.alpha((combine && &dest == _final) ? ALPHA_MERGE : ALPHA_NONE);
     Mtn.getBlur(Round(dest.h() * (7.0f / 1080)), _has_glow ? exposure ? 2 : 1 : 0, (D.dither() && !dest.highPrecision()) ? src.highPrecision() ? 1 /*always: should be 2 but disabled because rarely used*/ : 1 /*only in blur*/ : 0, alpha)->draw(src); // here blurring may generate high precision values, use 7 samples on a 1080 resolution #MotionBlurSamples
+    PROFILE_STOP("RendererClass::motionBlur(ImageRT &src, ImageRT &dest, ImageRTPtr &bloom_glow, ImageRTPtr &dilated_motion, Bool alpha, Bool combine, ImageRT *exposure)")
 }
 /******************************************************************************/
 INLINE Shader *GetPrecomputedBloomDS(Bool view_full, Bool half_res) {
@@ -585,6 +616,7 @@ INLINE Shader *GetBloom(Bool contrast, Bool tone_map, Int alpha, Bool dither, Bo
 }
 // !! Assumes that 'ImgClamp' was already set !!
 void RendererClass::bloom(ImageRT &src, ImageRT &dest, ImageRTPtr &bloom_glow, Bool alpha, Bool combine, ImageRT *exposure) {
+    PROFILE_START("RendererClass::bloom(ImageRT &src, ImageRT &dest, ImageRTPtr &bloom_glow, Bool alpha, Bool combine, ImageRT *exposure)")
     // '_alpha' RT from 'processAlpha' can't be used/modified because Bloom works by ADDING blurred results on top of existing background, NOT BLENDING (which is used for applying renderer results onto existing background when combining), we could potentially use a secondary RT to store bloom and add it on top of render, however that uses more memory, slower, and problematic with Motion Blur and DoF
     const Bool half = true;
     const Int shift = (half ? 1 : 2);
@@ -651,6 +683,7 @@ void RendererClass::bloom(ImageRT &src, ImageRT &dest, ImageRTPtr &bloom_glow, B
              D.dither() /*&& (src.highPrecision() || rt0->highPrecision())*/ && !dest.highPrecision(), exposure != null)
         ->draw(src);    // merging 2 RT's ('src' and 'rt0') with some scaling factors will give high precision
     bloom_glow.clear(); // not needed anymore
+    PROFILE_STOP("RendererClass::bloom(ImageRT &src, ImageRT &dest, ImageRTPtr &bloom_glow, Bool alpha, Bool combine, ImageRT *exposure)")
 }
 /******************************************************************************/
 INLINE Shader *GetDofDS(Bool view_full, Bool realistic, Bool alpha, Bool half_res) {
@@ -667,7 +700,8 @@ INLINE Shader *GetDof(Bool dither, Bool realistic, Bool alpha) {
 }
 // !! Assumes that 'ImgClamp' was already set !!
 void RendererClass::dof(ImageRT &src, ImageRT &dest, Bool alpha, Bool combine) { // Depth of Field shader does not require stereoscopic processing because it just reads the depth buffer
-    const Int shift = 1;                                                         // half_res
+    PROFILE_START("RendererClass::dof(ImageRT &src, ImageRT &dest, Bool alpha, Bool combine)")
+    const Int shift = 1; // half_res
     const VecI2 fx = T.fx();
     ImageRTDesc rt_desc(fx.x >> shift, fx.y >> shift, src.highPrecision() ? IMAGERT_SRGBA_H : IMAGERT_SRGBA); // here Alpha is used to store amount of Blur, use high precision if source is to don't lose smooth gradients when having full blur (especially visible on sky), IMAGERT_SRGBA_H vs IMAGERT_SRGBA has no significant difference on GeForce 1050Ti
     ImageRTPtr rt0(rt_desc),
@@ -709,6 +743,7 @@ void RendererClass::dof(ImageRT &src, ImageRT &dest, Bool alpha, Bool combine) {
     Sh.Img[1]->set(rt0);
     Sh.ImgX[0]->set(blur_smooth[0]);
     GetDof(D.dither() /*&& (src.highPrecision() || rt0->highPrecision())*/ && !dest.highPrecision(), D.dofFocusMode(), alpha)->draw(src);
+    PROFILE_STOP("RendererClass::dof(ImageRT &src, ImageRT &dest, Bool alpha, Bool combine)")
 }
 /******************************************************************************
 void RendererClass::toneMap(ImageRT &src, ImageRT &dest, Bool alpha, Bool combine)
@@ -813,6 +848,7 @@ void RendererClass::cleanup1() {
     }
 }
 RendererClass &RendererClass::operator()(void (&render)()) {
+    PROFILE_START("RendererClass::operator()(void (&render)())")
     DEBUG_ASSERT(App.mainThread(), "Rendering can't be performed on a secondary thread"); // on GL VAOs are limited only to the main thread, so they can't be used at all on other threads. And on all GPU_APIs Cache/Map use SyncUnlocker which may unlock D._lock while still in Rendering, and at that time State Update/Draw may lock D._lock and perform operations on GPU Device and Renderer itself, or even just change some display settings, especially D.view*, or others. To solve this, SyncUnlocker would have to be not used (not sure if possible), or another SyncLock D._draw_lock introduced, and used in most places where D._lock is used (have to search for "D._lock" and "_lock" in "Display.cpp")
 #if DEBUG
     if (Kb.b(KB_NP0))
@@ -1091,6 +1127,7 @@ RendererClass &RendererClass::operator()(void (&render)()) {
         Exit("'LinkShaderParamChanges' was called without 'UnlinkShaderParamChanges'.");
     if (target)
         target->_ptr_num--; // decrease ptr count without discarding
+    PROFILE_STOP("RendererClass::operator()(void (&render)())")
     return T;
 }
 ImageRTPtr RendererClass::get(void (&render)()) {
@@ -1102,6 +1139,7 @@ ImageRTPtr RendererClass::get(void (&render)()) {
     return temp;
 }
 Bool RendererClass::reflection() {
+    PROFILE_START("RendererClass::reflection()")
     // render reflection
     if (_mirror_want) {
         // remember current settings and disable fancy effects
@@ -1204,9 +1242,12 @@ Bool RendererClass::reflection() {
         cam.set(); // camera, this will also reset 'Frustum'
         D.lodSetCurrentFactor();
 
-        if (stage == RS_REFLECTION && show(_mirror_rt, true))
+        if (stage == RS_REFLECTION && show(_mirror_rt, true)) {
+            PROFILE_STOP("RendererClass::reflection()")
             return true;
+        }
     }
+    PROFILE_STOP("RendererClass::reflection()")
     return false;
 }
 /******************************************************************************/
@@ -1269,6 +1310,7 @@ Bool RendererClass::lowDepthPrecision() C { return _main_ds.type() == IMAGE_D16;
 Bool RendererClass::ambientInLum() C { return D.aoAll() || !Renderer._ao; }        // only these cases allow putting ambient inside lum RT's #AmbientInLum
 /******************************************************************************/
 Bool RendererClass::show(C ImageRTPtr &image, Bool srgb, Bool sign, Int channel, Bool inverse) {
+    PROFILE_START("RendererClass::show(C ImageRTPtr &image, Bool srgb, Bool sign, Int channel, Bool inverse)")
     if (image) {
         if (image->hwTypeInfo().d) // depth
         {
@@ -1329,8 +1371,10 @@ Bool RendererClass::show(C ImageRTPtr &image, Bool srgb, Bool sign, Int channel,
             Sh.DrawG->draw(image);
         } else
             image->copyHw(*_final, false, D.viewRect());
+        PROFILE_STOP("RendererClass::show(C ImageRTPtr &image, Bool srgb, Bool sign, Int channel, Bool inverse)")
         return true;
     }
+    PROFILE_STOP("RendererClass::show(C ImageRTPtr &image, Bool srgb, Bool sign, Int channel, Bool inverse)")
     return false;
 }
 Bool RendererClass::swapDS1S(ImageRTPtr &ds_1s) {
@@ -1357,6 +1401,7 @@ void RendererClass::setDS() {
 }
 void RendererClass::temporalCheck() // needs to be called after RT and viewport were set
 {
+    PROFILE_START("RendererClass::temporalCheck()")
     if (hasTemporal()) {
         _temporal_use = true;
         Vec2 offset;
@@ -1397,8 +1442,10 @@ void RendererClass::temporalCheck() // needs to be called after RT and viewport 
         D._view_active.setShader();
     }
     SetProjMatrix(); // call after setting '_temporal_offset', always call because needed for MotionBlur and Temporal
+    PROFILE_STOP("RendererClass::temporalCheck()")
 }
 void RendererClass::prepare() {
+    PROFILE_START("RendererClass::prepare()")
     Byte samples = (mirror() ? 1 : D.samples()); // disable multi-sampling for reflection
     VecI2 rt_size;
 start:
@@ -1565,6 +1612,7 @@ start:
                                                              // don't set RT or clear here, because it's very likely we will draw shadows first, before drawing to '_col', this will avoid setting useless '_col' which is very important for Mobile platforms with tile-based deferred renderers, instead we will check this in 'setForwardCol'
     } break;
     }
+    PROFILE_STOP("RendererClass::prepare()")
 }
 void RendererClass::setForwardCol() {
     set(_col, _ds, true);
@@ -1593,6 +1641,7 @@ void RendererClass::aoApply() {
     }
 }
 void RendererClass::opaque() {
+    PROFILE_START("RendererClass::opaque()")
     switch (_cur_type) {
     case RT_DEFERRED: {
         D.stencil(STENCIL_ALWAYS_SET, 0);
@@ -1703,8 +1752,10 @@ void RendererClass::opaque() {
 #if DEPTH_FLUSH
     _modified_depth = true;
 #endif
+    PROFILE_STOP("RendererClass::opaque()")
 }
 void RendererClass::resolveDepth() {
+    PROFILE_START("RendererClass::resolveDepth()")
     // this resolves the entire '_ds' into '_ds_1s' (by choosing Min of depth samples), and sets 'STENCIL_REF_MSAA' if needed
     if (_ds->multiSample() && _ds->depthTexture()) {
         Bool swap_srgb = (LINEAR_GAMMA && _col->canSwapSRV());
@@ -1750,8 +1801,10 @@ void RendererClass::resolveDepth() {
         if (swap_srgb)
             _col->swapSRV(); // restore
     }
+    PROFILE_STOP("RendererClass::resolveDepth()")
 }
 void RendererClass::resolveDepth1() {
+    PROFILE_START("RendererClass::resolveDepth1()")
     if (_ds->multiSample() && _ds->depthTexture()) {
         // always resolve '_ds' into '_ds_1s'
         set(null, _ds_1s, true);
@@ -1763,8 +1816,10 @@ void RendererClass::resolveDepth1() {
             D.depthFunc(FUNC_DEFAULT);
         D.depthUnlock();
     }
+    PROFILE_STOP("RendererClass::resolveDepth1()")
 }
 void RendererClass::overlay() {
+    PROFILE_START("RendererClass::overlay()")
     D.stencilRef(STENCIL_REF_TERRAIN); // set in case draw codes will use stencil
 
     set(_col, D.bumpMode() > BUMP_FLAT ? _nrm() : null, _ext, null, _ds, true, WANT_DEPTH_READ); // #RTOutput
@@ -1785,6 +1840,7 @@ void RendererClass::overlay() {
 
     D.stencil(STENCIL_NONE); // disable any stencil that might have been enabled
     OverlayObjects.clear();
+    PROFILE_STOP("RendererClass::overlay()")
 }
 void RendererClass::waterPreLight() {
     Water._use_secondary_rt = (!Water.max1Light() && canReadDepth() && D._max_rt >= 2 // col+nrm #RTOutput
@@ -1799,6 +1855,7 @@ inline Shader *AmbientOcclusion::get(Int quality, Bool jitter, Bool normal) {
     return s;
 }
 void RendererClass::ao() {
+    PROFILE_START("RendererClass::ao()")
     D.alpha(ALPHA_NONE);
     Bool use_nrm = (D.ambientNormal() && _nrm);
     Shader *ao = AO.get(D.ambientMode() - 1, D.ambientJitter(), use_nrm);
@@ -1867,8 +1924,10 @@ void RendererClass::ao() {
         Sh.Depth->set(_ds_1s); // restore full resolution depth
     if (foreground)
         D.depth2DOff();
+    PROFILE_STOP("RendererClass::ao()")
 }
 void RendererClass::setAlphaFromDepth() {
+    PROFILE_START("RendererClass::setAlphaFromDepth()")
     D.alpha(ALPHA_NONE);
     _alpha.get(ImageRTDesc(_ds->w(), _ds->h(), IMAGERT_ONE, _ds->samples()));
     Bool sky = Sky.isActual();
@@ -1889,8 +1948,10 @@ void RendererClass::setAlphaFromDepth() {
         set(_alpha, null, true);
         GetSetAlphaFromDepth(sky)->draw();
     }
+    PROFILE_STOP("RendererClass::setAlphaFromDepth()")
 }
 void RendererClass::setAlphaFromDepthAndCol() {
+    PROFILE_START("RendererClass::setAlphaFromDepthAndCol()")
     D.alpha(ALPHA_NONE);
     _alpha.get(ImageRTDesc(_ds->w(), _ds->h(), IMAGERT_ONE, _ds->samples()));
     Sh.Img[0]->set(_col);
@@ -1912,6 +1973,7 @@ void RendererClass::setAlphaFromDepthAndCol() {
         set(_alpha, null, true);
         GetSetAlphaFromDepthAndCol(sky)->draw();
     }
+    PROFILE_STOP("RendererClass::setAlphaFromDepthAndCol()")
 }
 INLINE Shader *GetApplyLight(Int multi_sample, Int reflect_mode, Bool ao, Bool cel_shade, Bool night_shade, Bool glow) {
     Shader *&s = Sh.ApplyLight[multi_sample][reflect_mode][ao][cel_shade][night_shade][glow];
@@ -1920,6 +1982,7 @@ INLINE Shader *GetApplyLight(Int multi_sample, Int reflect_mode, Bool ao, Bool c
     return s;
 }
 void RendererClass::light() {
+    PROFILE_START("RendererClass::light()")
     if (processAlpha() && D.independentBlendAvailable())
         setAlphaFromDepth();      // setup alpha before applying lights instead of after, because after we end up with '_col' already bound, so doing this before will reduce RT changes
     if (_cur_type == RT_DEFERRED) // on other renderers light is applied when rendering opaque
@@ -2042,8 +2105,10 @@ void RendererClass::light() {
         _spec.clear();
         _spec_1s.clear();
     }
+    PROFILE_STOP("RendererClass::light()")
 }
 Bool RendererClass::waterPostLight() {
+    PROFILE_START("RendererClass::waterPostLight()")
     if (!Water._use_secondary_rt)
         Water.drawSurfaces();
     else                // if we don't want to use secondary RT's
@@ -2131,16 +2196,22 @@ Bool RendererClass::waterPostLight() {
             if (stage)
                 switch (stage) {
                 case RS_WATER_COLOR:
-                    if (show(_water_col, true))
+                    if (show(_water_col, true)) {
+                        PROFILE_STOP("RendererClass::waterPostLight()")
                         return true;
+                    }
                     break;
                 case RS_WATER_NORMAL:
-                    if (show(_water_nrm, false, D.signedNrmRT()))
+                    if (show(_water_nrm, false, D.signedNrmRT())) {
+                        PROFILE_STOP("RendererClass::waterPostLight()")
                         return true;
+                    }
                     break;
                 case RS_WATER_LIGHT:
-                    if (show(_water_lum, true))
+                    if (show(_water_lum, true)) {
+                        PROFILE_STOP("RendererClass::waterPostLight()")
                         return true;
+                    }
                     break;
                 }
         }
@@ -2151,9 +2222,11 @@ Bool RendererClass::waterPostLight() {
     _water_lum.clear();
     _water_spec.clear();
     _mirror_rt.clear();
+    PROFILE_STOP("RendererClass::waterPostLight()")
     return false;
 }
 void RendererClass::emissive() {
+    PROFILE_START("RendererClass::emissive()")
 #if SUPPORT_EMISSIVE
     set(_col, _ds, true);
     D.alpha(ALPHA_ADD);
@@ -2170,6 +2243,7 @@ void RendererClass::emissive() {
     D.set2D();
     D.depthOnWriteFunc(false, true, FUNC_DEFAULT);
 #endif
+    PROFILE_STOP("RendererClass::emissive()")
 }
 void RendererClass::sky() {
     Fog.Draw(false);
@@ -2180,6 +2254,7 @@ void RendererClass::sky() {
     Fog.Draw(true);
 }
 void RendererClass::waterUnder() {
+    PROFILE_START("RendererClass::waterUnder()")
     if (Water._under_mtrl && canReadDepth() && !fastCombine()) {
         WS.load();
         C WaterMtrl &under = *Water._under_mtrl;
@@ -2198,9 +2273,11 @@ void RendererClass::waterUnder() {
         REPS(_eye, _eye_num)
         WS.Under->draw(setEyeParams());
     }
+    PROFILE_STOP("RendererClass::waterUnder()")
 }
 void RendererClass::temporal(ImageRTPtr &dilated_motion) // !! assumes 'resolveMultiSample' was already called !!
 {
+    PROFILE_START("RendererClass::temporal(ImageRTPtr &dilated_motion)")
     /* Don't 'downSample' (Super-Sampling) because quality will suffer
 
        by default 1 previous frame of color RT is used that continously gets updated with new data, simplified:
@@ -2323,6 +2400,7 @@ void RendererClass::temporal(ImageRTPtr &dilated_motion) // !! assumes 'resolveM
         _alpha = (TEMPORAL_SEPARATE_ALPHA ? _ctx->new_alpha : _ctx->new_data); // !! Warning: for TEMPORAL_SEPARATE_ALPHA=0 '_alpha' may point to multi-channel "Alpha, Flicker", this assumes that '_alpha' will not be further modified, we can't do the same for '_col' because we may modify it !!
 
     temporalFinish();
+    PROFILE_STOP("RendererClass::temporal(ImageRTPtr &dilated_motion)")
 }
 void RendererClass::temporalFinish() {
     if (_temporal_use) // hasTemporal()
@@ -2333,6 +2411,7 @@ void RendererClass::temporalFinish() {
     }
 }
 void RendererClass::edgeDetect() {
+    PROFILE_START("RendererClass::edgeDetect()")
     if (D.edgeDetect() && !mirror() && canReadDepth()) {
         Sky.setFracMulAdd();
         switch (D.edgeDetect()) // here can't use 'D.depth2DOn' because we want to affect sky
@@ -2358,8 +2437,10 @@ void RendererClass::edgeDetect() {
         } break;
         }
     }
+    PROFILE_STOP("RendererClass::edgeDetect()")
 }
 void RendererClass::blend() {
+    PROFILE_START("RendererClass::blend()")
     Sky.setFracMulAdd();
 
     // set main light parameters for *BLEND_LIGHT* and 'Mesh.drawBlend'
@@ -2426,8 +2507,10 @@ light_set:
     D.stencil(STENCIL_NONE); // disable any stencil that might have been enabled
 
     _lum_1s.clear(); // '_lum_1s' will not be used after this point
+    PROFILE_STOP("RendererClass::blend()")
 }
 void RendererClass::palette(Int index) {
+    PROFILE_START("RendererClass::palette(Int index)")
     if (D.colorPaletteAllow())
         if (C ImagePtr &palette = D._color_palette[index]) {
             ImageRT &ds = (_ds_1s ? *_ds_1s : *_ds); // Warning: this will disable applying palette only on terrain using STENCIL_REF_TERRAIN for multisampling
@@ -2468,8 +2551,10 @@ void RendererClass::palette(Int index) {
         PaletteObjects.clear();
         PaletteAreas.clear();
     }
+    PROFILE_STOP("RendererClass::palette(Int index)")
 }
 void RendererClass::behind() {
+    PROFILE_START("RendererClass::behind()")
     if (canReadDepth()) {
         Sky.setFracMulAdd();
 
@@ -2487,9 +2572,11 @@ void RendererClass::behind() {
         D.depthOnWriteFunc(false, true, FUNC_DEFAULT);
     }
     BehindObjects.clear();
+    PROFILE_STOP("RendererClass::behind()")
 }
 static const IMAGERT_TYPE IMAGERT_OUTLINE = IMAGERT_SRGBA; // here Alpha is used for outline opacity
 void RendererClass::setOutline(C Color &color) {
+    PROFILE_START("RendererClass::setOutline(C Color &color)")
     highlight->setConditional(color);
     if (!_outline) // not initialized at all
     {
@@ -2507,8 +2594,10 @@ void RendererClass::setOutline(C Color &color) {
         _outline |= outline_eye; // enable
         setEyeViewportCam();     // set viewport if needed
     }
+    PROFILE_STOP("RendererClass::setOutline(C Color &color)")
 }
 void RendererClass::applyOutline() {
+    PROFILE_START("RendererClass::applyOutline()")
     if (_outline_rt) {
         highlight->set(Vec4Zero);                      // disable 'SetHighlight' which was called during mesh drawing 'setOutline'
         D.depthOnWriteFunc(false, true, FUNC_DEFAULT); // restore default
@@ -2554,6 +2643,7 @@ void RendererClass::applyOutline() {
         }
         _outline_rt.clear();
     }
+    PROFILE_STOP("RendererClass::applyOutline()")
 }
 void RendererClass::outline() {
     // start outline
@@ -2587,6 +2677,7 @@ void RendererClass::downSample() // !! assumes that 'finalizeGlow' was called !!
 }
 void RendererClass::edgeSoften() // !! assumes that 'finalizeGlow' was called !!
 {
+    PROFILE_START("RendererClass::edgeSoften()")
     if (hasEdgeSoften()) {
         resolveMultiSample();
         D.alpha(ALPHA_NONE);
@@ -2687,6 +2778,7 @@ void RendererClass::edgeSoften() // !! assumes that 'finalizeGlow' was called !!
         }
         Swap(dest, _col);
     }
+    PROFILE_STOP("RendererClass::edgeSoften()")
 }
 void RendererClass::volumetric() {
     if (_vol) {
@@ -2700,6 +2792,7 @@ void RendererClass::volumetric() {
 }
 static Bool ColConst() { return Renderer._col == Renderer._ctx->new_col; } // if '_col' points to 'new_col' then we can't modify it
 void RendererClass::postProcess() {
+    PROFILE_START("RendererClass::postProcess()")
     resolveMultiSample(); // we need to resolve the MS Image so it's 1-sample for effects
     if (ms_samples_color.a && D.multiSample()) {
         D.alpha(ALPHA_BLEND);
@@ -2730,11 +2823,14 @@ void RendererClass::postProcess() {
         _alpha.clear(); // make sure to clear if we don't use it
 
     ImageRTPtr dest, bloom_glow, dilated_full_motion, dilated_blur_motion;
-    if (dilateMotion(temporal ? &dilated_full_motion : null, motion ? &dilated_blur_motion : null))
+    if (dilateMotion(temporal ? &dilated_full_motion : null, motion ? &dilated_blur_motion : null)) {
+        PROFILE_STOP("RendererClass::postProcess()")
         return;
-    if (stage == RS_MOTION && show(_vel, false, D.signedVelRT()))
+    }
+    if (stage == RS_MOTION && show(_vel, false, D.signedVelRT())) {
+        PROFILE_STOP("RendererClass::postProcess()")
         return; // velocity could've been used for MotionBlur or Temporal, check it after 'dilateMotion' because it might generate it for MOTION_CAMERA
-
+    }
     if (temporal) {
         T.temporal(dilated_full_motion); // !! AFTER 'temporal' we must be checking for 'ColConst' !!
         dilated_full_motion.clear();     // no longer needed
@@ -3040,9 +3136,11 @@ void RendererClass::postProcess() {
             Sh.clear(Vec4(0, 0, 0, 1)); // force full alpha so back buffer effects can work ok
         }
     }
+    PROFILE_STOP("RendererClass::postProcess()")
 }
 /******************************************************************************/
 void SetFov(Vec2 &fov, FOV_MODE fov_mode, Flt aspect) {
+    PROFILE_START("SetFov(Vec2 &fov, FOV_MODE fov_mode, Flt aspect)")
     if (FovPerspective(fov_mode)) {
         switch (fov_mode) {
         case FOV_X:
@@ -3078,8 +3176,10 @@ void SetFov(Vec2 &fov, FOV_MODE fov_mode, Flt aspect) {
             break;
         }
     }
+    PROFILE_STOP("SetFov(Vec2 &fov, FOV_MODE fov_mode, Flt aspect)")
 }
 void RenderIcon(void (&render)(), C ViewSettings *view, ImageRTC &image, C VecI2 &image_size, Int super_sample) {
+    PROFILE_START("RenderIcon(void (&render)(), C ViewSettings *view, ImageRTC &image, C VecI2 &image_size, Int super_sample)")
     if (image_size.x > 0 && image_size.y > 0) {
         Int shift = ((super_sample <= 1) ? 0 : Log2Ceil(Unsigned(super_sample)));
         if (image.create(image_size, IMAGE_R8G8B8A8_SRGB)) {
@@ -3152,10 +3252,12 @@ void RenderIcon(void (&render)(), C ViewSettings *view, ImageRTC &image, C VecI2
 
             // D.viewForceSquarePixel(view_force_square);
             cur_view.set();
+            PROFILE_STOP("RenderIcon(void (&render)(), C ViewSettings *view, ImageRTC &image, C VecI2 &image_size, Int super_sample)")
             return;
         }
     }
     image.del();
+    PROFILE_STOP("RenderIcon(void (&render)(), C ViewSettings *view, ImageRTC &image, C VecI2 &image_size, Int super_sample)")
 }
 void RenderIcon(void (&render)(), C ViewSettings *view, Image &image, C VecI2 &image_size, Int super_sample) {
     ImageRTC temp;

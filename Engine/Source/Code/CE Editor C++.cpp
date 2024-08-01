@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿// TODO ADD PROFILE_START AND PROFILE_STOP PROFILERS
+/******************************************************************************/
 #include "stdafx.h"
 namespace EE {
 static Int Compare(C Edit::CodeEditor::BuildFile &a, C Edit::CodeEditor::BuildFile &b) {

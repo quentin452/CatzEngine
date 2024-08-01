@@ -16,6 +16,7 @@ ObjLightPoint::ObjLightPoint() {
 // MANAGE
 /******************************************************************************/
 void ObjLightPoint::create(Object &obj) {
+    PROFILE_START("CatzEngine::ObjLightPoint::create(Object &obj)")
     arbitrary_name = "ObjLightPoint Object";
     range = obj.scale();
     position = obj.matrixFinal().pos;
@@ -25,6 +26,7 @@ void ObjLightPoint::create(Object &obj) {
         volumetric = Max(param->asFlt(), 0.0f);
     if (Param *param = obj.findParam("color"))
         color = SRGBToLinear(param->asVec());
+    PROFILE_STOP("CatzEngine::ObjLightPoint::create(Object &obj)")
 }
 /******************************************************************************/
 // GET / SET
@@ -43,10 +45,14 @@ Bool ObjLightPoint::update() {
 // DRAW
 /******************************************************************************/
 void ObjLightPoint::drawPrepare(C Matrix &matrix) {
+    PROFILE_START("CatzEngine::ObjLightPoint::drawPrepare(C Matrix &matrix)")
     LightLinear(range, position * matrix, color, volumetric).add(cast_shadows, this);
+    PROFILE_STOP("CatzEngine::ObjLightPoint::drawPrepare(C Matrix &matrix)")
 }
 UInt ObjLightPoint::drawPrepare() {
+    PROFILE_START("CatzEngine::ObjLightPoint::drawPrepare()")
     LightLinear(range, position, color, volumetric).add(cast_shadows, this);
+    PROFILE_STOP("CatzEngine::ObjLightPoint::drawPrepare()")
     return 0; // no additional render modes required
 }
 /******************************************************************************/

@@ -96,15 +96,17 @@ void AnimParams::set(C Animation &animation, Flt time) { set(animation.loop(), a
 // ANIMATION KEYS
 /******************************************************************************/
 Bool AnimKeys::orn(Orient &orn, C AnimParams &params) C {
+    PROFILE_START("AnimKeys::orn(Orient &orn, C AnimParams &params)")
     switch (orns.elms()) {
     case 0:
-        if (SET_ON_FAIL)
+        if (SET_ON_FAIL) {
             orn.identity();
-        return false;
+            goto stop_and_return_false;
+        }
     case 1:
     first:
         orn = orns[0].orn;
-        return true;
+        goto stop_and_return_true;
     default: {
         Int l, r;
         for (l = 0, r = orns.elms(); l < r;) {
@@ -142,7 +144,7 @@ Bool AnimKeys::orn(Orient &orn, C AnimParams &params) C {
             } else {
             last:
                 orn = orns.last().orn;
-                return true;
+                goto stop_and_return_true;
             }
         } else {
             p = &orns[prev];
@@ -151,7 +153,7 @@ Bool AnimKeys::orn(Orient &orn, C AnimParams &params) C {
                 step = (params.time - p->time) / length;
             else {
                 orn = p->orn;
-                return true;
+                goto stop_and_return_true;
             }
         }
         if (params.linear) {
@@ -180,18 +182,30 @@ Bool AnimKeys::orn(Orient &orn, C AnimParams &params) C {
         }
         orn.fix();
     }
-        return true;
+        goto stop_and_return_true;
     }
+
+stop_and_return_true:
+    PROFILE_STOP("AnimKeys::orn(Orient &orn, C AnimParams &params)")
+    return true;
+
+stop_and_return_false:
+    PROFILE_STOP("AnimKeys::orn(Orient &orn, C AnimParams &params)")
+    return false;
 }
+
 Bool AnimKeys::pos(Vec &pos, C AnimParams &params) C {
+    PROFILE_START("AnimKeys::pos(Vec &pos, C AnimParams &params)")
     switch (poss.elms()) {
     case 0:
         if (SET_ON_FAIL)
             pos.zero();
+        PROFILE_STOP("AnimKeys::pos(Vec &pos, C AnimParams &params)")
         return false;
     case 1:
     first:
         pos = poss[0].pos;
+        PROFILE_STOP("AnimKeys::pos(Vec &pos, C AnimParams &params)")
         return true;
     default: {
         Int l, r;
@@ -230,6 +244,7 @@ Bool AnimKeys::pos(Vec &pos, C AnimParams &params) C {
             } else {
             last:
                 pos = poss.last().pos;
+                PROFILE_STOP("AnimKeys::pos(Vec &pos, C AnimParams &params)")
                 return true;
             }
         } else {
@@ -239,6 +254,7 @@ Bool AnimKeys::pos(Vec &pos, C AnimParams &params) C {
                 step = (params.time - p->time) / length;
             else {
                 pos = p->pos;
+                PROFILE_STOP("AnimKeys::pos(Vec &pos, C AnimParams &params)")
                 return true;
             }
         }
@@ -264,18 +280,23 @@ Bool AnimKeys::pos(Vec &pos, C AnimParams &params) C {
 #endif
         }
     }
+        PROFILE_STOP("AnimKeys::pos(Vec &pos, C AnimParams &params)")
         return true;
     }
+    PROFILE_STOP("AnimKeys::pos(Vec &pos, C AnimParams &params)")
 }
 Bool AnimKeys::scale(Vec &scale, C AnimParams &params) C {
+    PROFILE_START("AnimKeys::scale(Vec &scale, C AnimParams &params)")
     switch (scales.elms()) {
     case 0:
         if (SET_ON_FAIL)
             scale.zero();
+        PROFILE_STOP("AnimKeys::scale(Vec &scale, C AnimParams &params)")
         return false;
     case 1:
     first:
         scale = scales[0].scale;
+        PROFILE_STOP("AnimKeys::scale(Vec &scale, C AnimParams &params)")
         return true;
     default: {
         Int l, r;
@@ -314,6 +335,7 @@ Bool AnimKeys::scale(Vec &scale, C AnimParams &params) C {
             } else {
             last:
                 scale = scales.last().scale;
+                PROFILE_STOP("AnimKeys::scale(Vec &scale, C AnimParams &params)")
                 return true;
             }
         } else {
@@ -323,6 +345,7 @@ Bool AnimKeys::scale(Vec &scale, C AnimParams &params) C {
                 step = (params.time - p->time) / length;
             else {
                 scale = p->scale;
+                PROFILE_STOP("AnimKeys::scale(Vec &scale, C AnimParams &params)")
                 return true;
             }
         }
@@ -348,19 +371,24 @@ Bool AnimKeys::scale(Vec &scale, C AnimParams &params) C {
 #endif
         }
     }
+        PROFILE_STOP("AnimKeys::scale(Vec &scale, C AnimParams &params)")
         return true;
     }
+    PROFILE_STOP("AnimKeys::scale(Vec &scale, C AnimParams &params)")
 }
 #if HAS_ANIM_ROT
 Bool AnimKeys::rot(AxisRoll &rot, C AnimParams &params) C {
+    PROFILE_START("AnimKeys::rot(AxisRoll &rot, C AnimParams &params)")
     switch (rots.elms()) {
     case 0:
         if (SET_ON_FAIL)
             rot.zero();
+        PROFILE_STOP("AnimKeys::rot(AxisRoll &rot, C AnimParams &params)")
         return false;
     case 1:
     first:
         rot = rots[0].rot;
+        PROFILE_STOP("AnimKeys::rot(AxisRoll &rot, C AnimParams &params)")
         return true;
     default: {
         Int l, r;
@@ -399,6 +427,7 @@ Bool AnimKeys::rot(AxisRoll &rot, C AnimParams &params) C {
             } else {
             last:
                 rot = rots.last().rot;
+                PROFILE_STOP("AnimKeys::rot(AxisRoll &rot, C AnimParams &params)")
                 return true;
             }
         } else {
@@ -408,6 +437,7 @@ Bool AnimKeys::rot(AxisRoll &rot, C AnimParams &params) C {
                 step = (params.time - p->time) / length;
             else {
                 rot = p->rot;
+                PROFILE_STOP("AnimKeys::rot(AxisRoll &rot, C AnimParams &params)")
                 return true;
             }
         }
@@ -433,20 +463,25 @@ Bool AnimKeys::rot(AxisRoll &rot, C AnimParams &params) C {
 #endif
         }
     }
+        PROFILE_STOP("AnimKeys::rot(AxisRoll &rot, C AnimParams &params)")
         return true;
     }
+    PROFILE_STOP("AnimKeys::rot(AxisRoll &rot, C AnimParams &params)")
 }
 #endif
 #if HAS_ANIM_COLOR
 Bool AnimKeys::color(Vec4 &color, C AnimParams &params) C {
+    PROFILE_START("AnimKeys::color(Vec4 &color, C AnimParams &params)")
     switch (colors.elms()) {
     case 0:
         if (SET_ON_FAIL)
             color = 1;
+        PROFILE_STOP("AnimKeys::color(Vec4 &color, C AnimParams &params)")
         return false;
     case 1:
     first:
         color = colors[0].color;
+        PROFILE_STOP("AnimKeys::color(Vec4 &color, C AnimParams &params)")
         return true;
     default: {
         Int l, r;
@@ -485,6 +520,7 @@ Bool AnimKeys::color(Vec4 &color, C AnimParams &params) C {
             } else {
             last:
                 color = colors.last().color;
+                PROFILE_STOP("AnimKeys::color(Vec4 &color, C AnimParams &params)")
                 return true;
             }
         } else {
@@ -494,6 +530,7 @@ Bool AnimKeys::color(Vec4 &color, C AnimParams &params) C {
                 step = (params.time - p->time) / length;
             else {
                 color = p->color;
+                PROFILE_STOP("AnimKeys::color(Vec4 &color, C AnimParams &params)")
                 return true;
             }
         }
@@ -519,12 +556,15 @@ Bool AnimKeys::color(Vec4 &color, C AnimParams &params) C {
 #endif
         }
     }
+        PROFILE_STOP("AnimKeys::color(Vec4 &color, C AnimParams &params)")
         return true;
     }
+    PROFILE_STOP("AnimKeys::color(Vec4 &color, C AnimParams &params)")
 }
 #endif
 /******************************************************************************/
 void AnimKeys::matrixNoScale(Matrix &matrix, C AnimParams &params) C {
+    PROFILE_START("AnimKeys::matrixNoScale(Matrix &matrix, C AnimParams &params)")
     Orient orn;
     if (T.orn(orn, params))
         matrix.orn() = orn;
@@ -532,14 +572,18 @@ void AnimKeys::matrixNoScale(Matrix &matrix, C AnimParams &params) C {
         matrix.orn().identity(); // if empty then call 'identity' because it's faster than setting from 'Orient'
     if (!T.pos(matrix.pos, params) && !SET_ON_FAIL)
         matrix.pos.zero();
+    PROFILE_STOP("AnimKeys::matrixNoScale(Matrix &matrix, C AnimParams &params)")
 }
 void AnimKeys::matrix(Matrix &matrix, C AnimParams &params) C {
+    PROFILE_START("AnimKeys::matrix(Matrix &matrix, C AnimParams &params)")
     matrixNoScale(matrix, params);
     Vec scale;
     if (T.scales.elms() && T.scale(scale, params))
         matrix.scaleOrnL(ScaleFactor(scale)); // most likely there won't be any scale, so do a fast check without the function call
+    PROFILE_STOP("AnimKeys::matrix(Matrix &matrix, C AnimParams &params)")
 }
 void AnimKeys::matrix(Matrix3 &matrix, C AnimParams &params, C Matrix3 &default_orn) C {
+    PROFILE_START("AnimKeys::matrix(Matrix3 &matrix, C AnimParams &params, C Matrix3 &default_orn)")
     Orient orn;
     if (T.orn(orn, params))
         matrix = orn;
@@ -548,8 +592,10 @@ void AnimKeys::matrix(Matrix3 &matrix, C AnimParams &params, C Matrix3 &default_
     Vec scale;
     if (T.scales.elms() && T.scale(scale, params))
         matrix.scaleL(ScaleFactor(scale)); // most likely there won't be any scale, so do a fast check without the function call
+    PROFILE_STOP("AnimKeys::matrix(Matrix3 &matrix, C AnimParams &params, C Matrix3 &default_orn)")
 }
 void AnimKeys::matrix(Matrix &matrix, C AnimParams &params, C Matrix3 &default_orn) C {
+    PROFILE_START("AnimKeys::matrix(Matrix &matrix, C AnimParams &params, C Matrix3 &default_orn)")
     Orient orn;
     if (T.orn(orn, params))
         matrix.orn() = orn;
@@ -560,6 +606,7 @@ void AnimKeys::matrix(Matrix &matrix, C AnimParams &params, C Matrix3 &default_o
     Vec scale;
     if (T.scales.elms() && T.scale(scale, params))
         matrix.scaleOrnL(ScaleFactor(scale)); // most likely there won't be any scale, so do a fast check without the function call
+    PROFILE_STOP("AnimKeys::matrix(Matrix &matrix, C AnimParams &params, C Matrix3 &default_orn)")
 }
 /******************************************************************************/
 void AnimKeys::Orn::save(MemPtr<TextNode> nodes) C {
@@ -620,8 +667,10 @@ AnimKeys &AnimKeys::del() {
 }
 /******************************************************************************/
 Bool AnimKeys::timeRange(Flt &min, Flt &max) C {
+    PROFILE_START("AnimKeys::timeRange(Flt &min, Flt &max)")
     if (!is()) {
         min = max = 0;
+        PROFILE_STOP("AnimKeys::timeRange(Flt &min, Flt &max)")
         return false;
     }
     min = FLT_MAX;
@@ -655,9 +704,11 @@ Bool AnimKeys::timeRange(Flt &min, Flt &max) C {
         MAX(max, t);
     }
 #endif
+    PROFILE_STOP("AnimKeys::timeRange(Flt &min, Flt &max)")
     return true;
 }
 AnimKeys &AnimKeys::scale(Flt scale) {
+    PROFILE_STOP("AnimKeys::scale(Flt scale)")
     REPA(poss) {
         Pos &pos = T.poss[i];
         pos.pos *= scale;
@@ -665,9 +716,11 @@ AnimKeys &AnimKeys::scale(Flt scale) {
         pos.tan *= scale;
 #endif
     }
+    PROFILE_STOP("AnimKeys::scale(Flt scale)")
     return T;
 }
 AnimKeys &AnimKeys::mirrorX() {
+    PROFILE_START("AnimKeys::mirrorX()")
     REPA(orns) {
         Orn &orn = T.orns[i];
         orn.orn.mirrorX();
@@ -695,10 +748,12 @@ AnimKeys &AnimKeys::mirrorX() {
 #endif
     }
 #endif
+    PROFILE_STOP("AnimKeys::mirrorX()")
     return T;
 }
 AnimKeys &AnimKeys::transform(C Matrix3 &matrix) // assumes that 'matrix' is normalized
 {
+    PROFILE_START("AnimKeys::transform(C Matrix3 &matrix)")
     REPA(orns) {
         Orn &orn = T.orns[i];
         orn.orn.mul(matrix, true);
@@ -722,6 +777,7 @@ AnimKeys &AnimKeys::transform(C Matrix3 &matrix) // assumes that 'matrix' is nor
 #endif
     }
 #endif
+    PROFILE_STOP("AnimKeys::transform(C Matrix3 &matrix)")
     return T;
 }
 /******************************************************************************/
@@ -743,6 +799,7 @@ static Int CompareEps(C AnimKeys::Orn &k, C Flt &time) { return CompareEps(k.tim
 static Int CompareEps(C AnimKeys::Pos &k, C Flt &time) { return CompareEps(k.time, time); }
 
 AnimKeys &AnimKeys::sortFrames() {
+    PROFILE_START("AnimKeys::sortFrames()")
     orns.sort(Compare);
     poss.sort(Compare);
     scales.sort(Compare);
@@ -752,6 +809,7 @@ AnimKeys &AnimKeys::sortFrames() {
 #if HAS_ANIM_COLOR
     colors.sort(Compare);
 #endif
+    PROFILE_STOP("AnimKeys::sortFrames()")
     return T;
 }
 struct TimeScaleClip {
@@ -770,6 +828,7 @@ struct TimeScaleClip {
     }
 };
 AnimKeys &AnimKeys::scaleTime(Flt scale, Flt anim_length) {
+    PROFILE_START("AnimKeys::scaleTime(Flt scale, Flt anim_length)")
     TimeScaleClip tsc(scale, anim_length);
     REPA(orns)
     tsc.adjust(orns[i].time);
@@ -785,9 +844,11 @@ AnimKeys &AnimKeys::scaleTime(Flt scale, Flt anim_length) {
     REPA(colors)
     tsc.adjust(colors[i].time);
 #endif
+    PROFILE_STOP("AnimKeys::scaleTime(Flt scale, Flt anim_length)")
     return T;
 }
 AnimKeys &AnimKeys::offsetTime(Flt dt, Flt anim_length) {
+    PROFILE_START("AnimKeys::offsetTime(Flt dt, Flt anim_length)")
     REPAO(orns).time = Frac(orns[i].time + dt, anim_length);
     REPAO(poss).time = Frac(poss[i].time + dt, anim_length);
     REPAO(scales).time = Frac(scales[i].time + dt, anim_length);
@@ -797,9 +858,11 @@ AnimKeys &AnimKeys::offsetTime(Flt dt, Flt anim_length) {
 #if HAS_ANIM_COLOR
     REPAO(colors).time = Frac(colors[i].time + dt, anim_length);
 #endif
+    PROFILE_STOP("AnimKeys::offsetTime(Flt dt, Flt anim_length)")
     return sortFrames();
 }
 AnimKeys &AnimKeys::reverse(Flt anim_length) {
+    PROFILE_START("AnimKeys::reverse(Flt anim_length)")
     REPA(orns) {
         Orn &orn = orns[i];
         orn.time = anim_length - orn.time;
@@ -848,11 +911,12 @@ AnimKeys &AnimKeys::reverse(Flt anim_length) {
     }
     colors.reverseOrder();
 #endif
-
+    PROFILE_STOP("AnimKeys::reverse(Flt anim_length)")
     return T;
 }
 
 AnimKeys &AnimKeys::setTangents(Bool anim_loop, Flt anim_length) {
+    PROFILE_START("AnimKeys::setTangents(Bool anim_loop, Flt anim_length)")
 #if HAS_ANIM_TANGENT
     REPA(orns) {
         Int prev = i - 1,
@@ -980,6 +1044,7 @@ AnimKeys &AnimKeys::setTangents(Bool anim_loop, Flt anim_length) {
     }
 #endif
 #endif
+    PROFILE_STOP("AnimKeys::setTangents(Bool anim_loop, Flt anim_length)")
     return T;
 }
 /******************************************************************************/
@@ -1001,17 +1066,20 @@ static Int Index(Int i, Bool loop, Int elms) {
 }
 static Int Index(Int i, Bool loop, Int elms, Int ignore) // this assumes that "elms>=2" and "InRange(ignore, elms)"
 {
+    PROFILE_START("Int Index(Int i, Bool loop, Int elms, Int ignore)")
     if (i > ignore)
         i--;
     i = (loop ? Mod(i, elms - 1) : Mid(i, 0, elms - 2)); // add extra -1 to 'elms' because we need it for 'ignore'
     if (i >= ignore)
         i++;
+    PROFILE_STOP("Int Index(Int i, Bool loop, Int elms, Int ignore)")
     return i;
 }
 static Flt AfterTime(Flt time, Flt base, Flt length) {
     return (time >= base) ? time : time + length;
 }
 AnimKeys &AnimKeys::optimize(Bool anim_loop, Bool anim_linear, Flt anim_length, Flt angle_eps, Flt pos_eps, Flt scale_eps, C Orient *bone, C Orient *bone_parent) {
+    PROFILE_START("AnimKeys::optimize(Bool anim_loop, Bool anim_linear, Flt anim_length, Flt angle_eps, Flt pos_eps, Flt scale_eps, C Orient *bone, C Orient *bone_parent)")
     AnimParams anim_params(anim_loop, anim_linear, anim_length, 0);
     Memt<Int> optimized; // indexes to original elements
 
@@ -1568,7 +1636,7 @@ AnimKeys &AnimKeys::optimize(Bool anim_loop, Bool anim_linear, Flt anim_length, 
         }
     }
 #endif
-
+    PROFILE_STOP("AnimKeys::optimize(Bool anim_loop, Bool anim_linear, Flt anim_length, Flt angle_eps, Flt pos_eps, Flt scale_eps, C Orient *bone, C Orient *bone_parent)")
     return T;
 }
 /******************************************************************************/
@@ -1588,7 +1656,7 @@ struct TimeClip {
             t = 0;
         else // it's important to align to start
             if (t > length_eps)
-            t = length; //                        and end, because looped root motion is calculated at time=0 and time=length, so if times are slightly offsetted, we could get root motion start that is actually end
+                t = length; //                        and end, because looped root motion is calculated at time=0 and time=length, so if times are slightly offsetted, we could get root motion start that is actually end
         time = t;
     }
     T1(TYPE)
@@ -1624,6 +1692,7 @@ struct TimeClip {
     }
 };
 AnimKeys &AnimKeys::clip(Bool anim_loop, Bool anim_linear, Flt anim_length, Flt start_time, Flt end_time) {
+    PROFILE_START("AnimKeys::clip(Bool anim_loop, Bool anim_linear, Flt anim_length, Flt start_time, Flt end_time)")
     Bool reverse;
     if (reverse = (end_time < start_time))
         Swap(start_time, end_time);
@@ -1636,93 +1705,93 @@ AnimKeys &AnimKeys::clip(Bool anim_loop, Bool anim_linear, Flt anim_length, Flt 
         tc.adjust(orns[0].time);
     else                     // if there is only 1 frame, then keep it
         if (orns.elms() > 1) // otherwise check for before start and after end
-    {
-        tc.find(orns, before_start, after_end);
+        {
+            tc.find(orns, before_start, after_end);
 
-        // check for keyframes after end
-        if (after_end >= 0)                                                                      // there is a keyframe after end
-            if (!InRange(after_end - 1, orns) || orns[after_end - 1].time < end_time - TIME_EPS) // previous keyframe doesn't exist or isn't at the end
-            {                                                                                    // adjust 'after_end' keyframe so it's positioned at the end
-                Orn &next = orns[after_end];
-                params.time = end_time;
-                orn(next.orn, params);
-                next.time = end_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
-            }
+            // check for keyframes after end
+            if (after_end >= 0)                                                                      // there is a keyframe after end
+                if (!InRange(after_end - 1, orns) || orns[after_end - 1].time < end_time - TIME_EPS) // previous keyframe doesn't exist or isn't at the end
+                {                                                                                    // adjust 'after_end' keyframe so it's positioned at the end
+                    Orn &next = orns[after_end];
+                    params.time = end_time;
+                    orn(next.orn, params);
+                    next.time = end_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
+                }
 
-        // check for keyframes before start
-        if (before_start >= 0)                                                                           // there is a keyframe before start
-            if (!InRange(before_start + 1, orns) || orns[before_start + 1].time > start_time + TIME_EPS) // next keyframe doesn't exist or isn't at the start
-            {                                                                                            // adjust 'before_start' keyframe so it's positioned at the start
-                Orn &prev = orns[before_start];
-                params.time = start_time;
-                orn(prev.orn, params);
-                prev.time = start_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
-            }
+            // check for keyframes before start
+            if (before_start >= 0)                                                                           // there is a keyframe before start
+                if (!InRange(before_start + 1, orns) || orns[before_start + 1].time > start_time + TIME_EPS) // next keyframe doesn't exist or isn't at the start
+                {                                                                                            // adjust 'before_start' keyframe so it's positioned at the start
+                    Orn &prev = orns[before_start];
+                    params.time = start_time;
+                    orn(prev.orn, params);
+                    prev.time = start_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
+                }
 
-        tc.clip(orns); // remove keyframes out of range and adjust time
-    }
+            tc.clip(orns); // remove keyframes out of range and adjust time
+        }
 
     // positions
     if (poss.elms() == 1)
         tc.adjust(poss[0].time);
     else                     // if there is only 1 frame, then keep it
         if (poss.elms() > 1) // otherwise check for before start and after end
-    {
-        tc.find(poss, before_start, after_end);
+        {
+            tc.find(poss, before_start, after_end);
 
-        // check for keyframes after end
-        if (after_end >= 0)                                                                      // there is a keyframe after end
-            if (!InRange(after_end - 1, poss) || poss[after_end - 1].time < end_time - TIME_EPS) // previous keyframe doesn't exist or isn't at the end
-            {                                                                                    // adjust 'after_end' keyframe so it's positioned at the end
-                Pos &next = poss[after_end];
-                params.time = end_time;
-                pos(next.pos, params);
-                next.time = end_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
-            }
+            // check for keyframes after end
+            if (after_end >= 0)                                                                      // there is a keyframe after end
+                if (!InRange(after_end - 1, poss) || poss[after_end - 1].time < end_time - TIME_EPS) // previous keyframe doesn't exist or isn't at the end
+                {                                                                                    // adjust 'after_end' keyframe so it's positioned at the end
+                    Pos &next = poss[after_end];
+                    params.time = end_time;
+                    pos(next.pos, params);
+                    next.time = end_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
+                }
 
-        // check for keyframes before start
-        if (before_start >= 0)                                                                           // there is a keyframe before start
-            if (!InRange(before_start + 1, poss) || poss[before_start + 1].time > start_time + TIME_EPS) // next keyframe doesn't exist or isn't at the start
-            {                                                                                            // adjust 'before_start' keyframe so it's positioned at the start
-                Pos &prev = poss[before_start];
-                params.time = start_time;
-                pos(prev.pos, params);
-                prev.time = start_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
-            }
+            // check for keyframes before start
+            if (before_start >= 0)                                                                           // there is a keyframe before start
+                if (!InRange(before_start + 1, poss) || poss[before_start + 1].time > start_time + TIME_EPS) // next keyframe doesn't exist or isn't at the start
+                {                                                                                            // adjust 'before_start' keyframe so it's positioned at the start
+                    Pos &prev = poss[before_start];
+                    params.time = start_time;
+                    pos(prev.pos, params);
+                    prev.time = start_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
+                }
 
-        tc.clip(poss); // remove keyframes out of range and adjust time
-    }
+            tc.clip(poss); // remove keyframes out of range and adjust time
+        }
 
     // scales
     if (scales.elms() == 1)
         tc.adjust(scales[0].time);
     else                       // if there is only 1 frame, then keep it
         if (scales.elms() > 1) // otherwise check for before start and after end
-    {
-        tc.find(scales, before_start, after_end);
+        {
+            tc.find(scales, before_start, after_end);
 
-        // check for keyframes after end
-        if (after_end >= 0)                                                                          // there is a keyframe after end
-            if (!InRange(after_end - 1, scales) || scales[after_end - 1].time < end_time - TIME_EPS) // previous keyframe doesn't exist or isn't at the end
-            {                                                                                        // adjust 'after_end' keyframe so it's positioned at the end
-                Scale &next = scales[after_end];
-                params.time = end_time;
-                scale(next.scale, params);
-                next.time = end_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
-            }
+            // check for keyframes after end
+            if (after_end >= 0)                                                                          // there is a keyframe after end
+                if (!InRange(after_end - 1, scales) || scales[after_end - 1].time < end_time - TIME_EPS) // previous keyframe doesn't exist or isn't at the end
+                {                                                                                        // adjust 'after_end' keyframe so it's positioned at the end
+                    Scale &next = scales[after_end];
+                    params.time = end_time;
+                    scale(next.scale, params);
+                    next.time = end_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
+                }
 
-        // check for keyframes before start
-        if (before_start >= 0)                                                                               // there is a keyframe before start
-            if (!InRange(before_start + 1, scales) || scales[before_start + 1].time > start_time + TIME_EPS) // next keyframe doesn't exist or isn't at the start
-            {                                                                                                // adjust 'before_start' keyframe so it's positioned at the start
-                Scale &prev = scales[before_start];
-                params.time = start_time;
-                scale(prev.scale, params);
-                prev.time = start_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
-            }
+            // check for keyframes before start
+            if (before_start >= 0)                                                                               // there is a keyframe before start
+                if (!InRange(before_start + 1, scales) || scales[before_start + 1].time > start_time + TIME_EPS) // next keyframe doesn't exist or isn't at the start
+                {                                                                                                // adjust 'before_start' keyframe so it's positioned at the start
+                    Scale &prev = scales[before_start];
+                    params.time = start_time;
+                    scale(prev.scale, params);
+                    prev.time = start_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
+                }
 
-        tc.clip(scales); // remove keyframes out of range and adjust time
-    }
+            tc.clip(scales); // remove keyframes out of range and adjust time
+        }
 
 #if HAS_ANIM_ROT
     // rotations
@@ -1730,31 +1799,31 @@ AnimKeys &AnimKeys::clip(Bool anim_loop, Bool anim_linear, Flt anim_length, Flt 
         tc.adjust(rots[0].time);
     else                     // if there is only 1 frame, then keep it
         if (rots.elms() > 1) // otherwise check for before start and after end
-    {
-        tc.find(rots, before_start, after_end);
+        {
+            tc.find(rots, before_start, after_end);
 
-        // check for keyframes after end
-        if (after_end >= 0)                                                                      // there is a keyframe after end
-            if (!InRange(after_end - 1, rots) || rots[after_end - 1].time < end_time - TIME_EPS) // previous keyframe doesn't exist or isn't at the end
-            {                                                                                    // adjust 'after_end' keyframe so it's positioned at the end
-                Rot &next = rots[after_end];
-                params.time = end_time;
-                rot(next.rot, params);
-                next.time = end_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
-            }
+            // check for keyframes after end
+            if (after_end >= 0)                                                                      // there is a keyframe after end
+                if (!InRange(after_end - 1, rots) || rots[after_end - 1].time < end_time - TIME_EPS) // previous keyframe doesn't exist or isn't at the end
+                {                                                                                    // adjust 'after_end' keyframe so it's positioned at the end
+                    Rot &next = rots[after_end];
+                    params.time = end_time;
+                    rot(next.rot, params);
+                    next.time = end_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
+                }
 
-        // check for keyframes before start
-        if (before_start >= 0)                                                                           // there is a keyframe before start
-            if (!InRange(before_start + 1, rots) || rots[before_start + 1].time > start_time + TIME_EPS) // next keyframe doesn't exist or isn't at the start
-            {                                                                                            // adjust 'before_start' keyframe so it's positioned at the start
-                Rot &prev = rots[before_start];
-                params.time = start_time;
-                rot(prev.rot, params);
-                prev.time = start_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
-            }
+            // check for keyframes before start
+            if (before_start >= 0)                                                                           // there is a keyframe before start
+                if (!InRange(before_start + 1, rots) || rots[before_start + 1].time > start_time + TIME_EPS) // next keyframe doesn't exist or isn't at the start
+                {                                                                                            // adjust 'before_start' keyframe so it's positioned at the start
+                    Rot &prev = rots[before_start];
+                    params.time = start_time;
+                    rot(prev.rot, params);
+                    prev.time = start_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
+                }
 
-        tc.clip(rots); // remove keyframes out of range and adjust time
-    }
+            tc.clip(rots); // remove keyframes out of range and adjust time
+        }
 #endif
 
 #if HAS_ANIM_COLOR
@@ -1763,39 +1832,41 @@ AnimKeys &AnimKeys::clip(Bool anim_loop, Bool anim_linear, Flt anim_length, Flt 
         tc.adjust(colors[0].time);
     else                       // if there is only 1 frame, then keep it
         if (colors.elms() > 1) // otherwise check for before start and after end
-    {
-        tc.find(colors, before_start, after_end);
+        {
+            tc.find(colors, before_start, after_end);
 
-        // check for keyframes after end
-        if (after_end >= 0)                                                                          // there is a keyframe after end
-            if (!InRange(after_end - 1, colors) || colors[after_end - 1].time < end_time - TIME_EPS) // previous keyframe doesn't exist or isn't at the end
-            {                                                                                        // adjust 'after_end' keyframe so it's positioned at the end
-                Color &next = colors[after_end];
-                params.time = end_time;
-                color(next.color, params);
-                next.time = end_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
-            }
+            // check for keyframes after end
+            if (after_end >= 0)                                                                          // there is a keyframe after end
+                if (!InRange(after_end - 1, colors) || colors[after_end - 1].time < end_time - TIME_EPS) // previous keyframe doesn't exist or isn't at the end
+                {                                                                                        // adjust 'after_end' keyframe so it's positioned at the end
+                    Color &next = colors[after_end];
+                    params.time = end_time;
+                    color(next.color, params);
+                    next.time = end_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
+                }
 
-        // check for keyframes before start
-        if (before_start >= 0)                                                                               // there is a keyframe before start
-            if (!InRange(before_start + 1, colors) || colors[before_start + 1].time > start_time + TIME_EPS) // next keyframe doesn't exist or isn't at the start
-            {                                                                                                // adjust 'before_start' keyframe so it's positioned at the start
-                Color &prev = colors[before_start];
-                params.time = start_time;
-                color(prev.color, params);
-                prev.time = start_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
-            }
+            // check for keyframes before start
+            if (before_start >= 0)                                                                               // there is a keyframe before start
+                if (!InRange(before_start + 1, colors) || colors[before_start + 1].time > start_time + TIME_EPS) // next keyframe doesn't exist or isn't at the start
+                {                                                                                                // adjust 'before_start' keyframe so it's positioned at the start
+                    Color &prev = colors[before_start];
+                    params.time = start_time;
+                    color(prev.color, params);
+                    prev.time = start_time; // adjust keyframe 'time' after evaluation so the change doesn't affect it
+                }
 
-        tc.clip(colors); // remove keyframes out of range and adjust time
-    }
+            tc.clip(colors); // remove keyframes out of range and adjust time
+        }
 #endif
 
     if (reverse)
         T.reverse(tc.length);
+    PROFILE_STOP("AnimKeys::clip(Bool anim_loop, Bool anim_linear, Flt anim_length, Flt start_time, Flt end_time)")
     return setTangents(anim_loop, tc.length);
 }
 /******************************************************************************/
 void AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times) C { // process forward because keys are sorted
+    PROFILE_START("AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times)")
     if (orn_times) {
         if (orn_times.elms())
             FREPA(orns)
@@ -1823,8 +1894,10 @@ void AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos
             REPAO(scale_times) = scales[i].time;
         }
     }
+    PROFILE_STOP("AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times)")
 }
 void AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times, Flt start, Flt end) C {
+    PROFILE_START("AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times, Flt start, Flt end)")
     Int i; // process forward because keys are sorted
     if (orn_times) {
         orns.binarySearch(start, i, Compare);
@@ -1853,15 +1926,19 @@ void AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos
             scale_times.binaryInclude(time, CompareEps);
         }
     }
+    PROFILE_STOP("AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times, Flt start, Flt end)")
 }
 static void IncludeTimes(C CMemPtr<Flt, 16384> &src, MemPtr<Flt, 16384> dest) {
+    PROFILE_START("IncludeTimes(C CMemPtr<Flt, 16384> &src, MemPtr<Flt, 16384> dest)")
     FREPA(src)
     dest.binaryInclude(src[i], CompareEps); // process forward because 'src' is most likely sorted
+    PROFILE_STOP("IncludeTimes(C CMemPtr<Flt, 16384> &src, MemPtr<Flt, 16384> dest)")
 }
 /******************************************************************************/
 #if HAS_ANIM_ROT
 AnimKeys &AnimKeys::convertRotToOrn(C Skeleton &skeleton, Int skel_bone_index, Bool anim_loop, Flt anim_length) // this method can ignore name differences because it's used only during importing while the names are the same
 {
+    PROFILE_START("AnimKeys::convertRotToOrn(C Skeleton &skeleton, Int skel_bone_index, Bool anim_loop, Flt anim_length)")
     if (rots.elms() && (skel_bone_index < 0 || InRange(skel_bone_index, skeleton.bones))) // <0 means keys of 'root' bone
     {
         if (skel_bone_index < 0) {
@@ -1909,10 +1986,12 @@ AnimKeys &AnimKeys::convertRotToOrn(C Skeleton &skeleton, Int skel_bone_index, B
         rots.clear();
         setTangents(anim_loop, anim_length);
     }
+    PROFILE_STOP("AnimKeys::convertRotToOrn(C Skeleton &skeleton, Int skel_bone_index, Bool anim_loop, Flt anim_length)")
     return T;
 }
 AnimKeys &AnimKeys::convertOrnToRot(C Skeleton &skeleton, Int skel_bone_index, Bool anim_loop, Flt anim_length) // this method can ignore name differences because it's used only during importing while the names are the same
 {
+    PROFILE_START("AnimKeys::convertOrnToRot(C Skeleton &skeleton, Int skel_bone_index, Bool anim_loop, Flt anim_length)")
     if (orns.elms() && (skel_bone_index < 0 || InRange(skel_bone_index, skeleton.bones))) // <0 means keys of 'root' bone
     {
         if (skel_bone_index < 0) {
@@ -1952,11 +2031,13 @@ AnimKeys &AnimKeys::convertOrnToRot(C Skeleton &skeleton, Int skel_bone_index, B
         orns.clear();
         setTangents(anim_loop, anim_length);
     }
+    PROFILE_STOP("AnimKeys::convertOrnToRot(C Skeleton &skeleton, Int skel_bone_index, Bool anim_loop, Flt anim_length)")
     return T;
 }
 #endif
 /******************************************************************************/
 static void LoadOrnTan(File &f, Mems<AnimKeys::Orn> &orns) {
+    PROFILE_START("LoadOrnTan(File &f, Mems<AnimKeys::Orn> &orns)")
 #if HAS_ANIM_TANGENT
     f.getN(orns.data(), orns.elms());
 #else
@@ -1966,8 +2047,10 @@ static void LoadOrnTan(File &f, Mems<AnimKeys::Orn> &orns) {
         f.skip(SIZE(Orient));
     }
 #endif
+    PROFILE_STOP("LoadOrnTan(File &f, Mems<AnimKeys::Orn> &orns)")
 }
 static void LoadPosTan(File &f, Mems<AnimKeys::Pos> &poss) {
+    PROFILE_START("LoadPosTan(File &f, Mems<AnimKeys::Pos> &poss)")
 #if HAS_ANIM_TANGENT
     f.getN(poss.data(), poss.elms());
 #else
@@ -1977,8 +2060,10 @@ static void LoadPosTan(File &f, Mems<AnimKeys::Pos> &poss) {
         f.skip(SIZE(Vec));
     }
 #endif
+    PROFILE_STOP("LoadPosTan(File &f, Mems<AnimKeys::Pos> &poss)")
 }
 static void LoadScaleTan(File &f, Mems<AnimKeys::Scale> &scales) {
+    PROFILE_START("LoadScaleTan(File &f, Mems<AnimKeys::Scale> &scales)")
 #if HAS_ANIM_TANGENT
     f.getN(scales.data(), scales.elms());
 #else
@@ -1988,10 +2073,12 @@ static void LoadScaleTan(File &f, Mems<AnimKeys::Scale> &scales) {
         f.skip(SIZE(Vec));
     }
 #endif
+    PROFILE_STOP("LoadScaleTan(File &f, Mems<AnimKeys::Scale> &scales)")
 }
 
 #if HAS_ANIM_ROT
 static void LoadRotTan(File &f, Mems<AnimKeys::Rot> &rots) {
+    PROFILE_START("LoadRotTan(File &f, Mems<AnimKeys::Rot> &rots)")
 #if HAS_ANIM_TANGENT
     f.getN(rots.data(), rots.elms());
 #else
@@ -2001,6 +2088,7 @@ static void LoadRotTan(File &f, Mems<AnimKeys::Rot> &rots) {
         f.skip(SIZE(AxisRoll));
     }
 #endif
+    PROFILE_STOP("LoadRotTan(File &f, Mems<AnimKeys::Rot> &rots)")
 }
 #else
 static void LoadRotTan(File &f, Int rots) { f.skip((SIZE(Flt) + SIZE(AxisRoll) + SIZE(AxisRoll)) * rots); } // (time+rot+tan)*rots
@@ -2008,6 +2096,7 @@ static void LoadRotTan(File &f, Int rots) { f.skip((SIZE(Flt) + SIZE(AxisRoll) +
 
 #if HAS_ANIM_COLOR
 static void LoadColorTan(File &f, Mems<AnimKeys::Color> &colors) {
+    PROFILE_START("LoadColorTan(File &f, Mems<AnimKeys::Color> &colors)")
 #if HAS_ANIM_TANGENT
     f.getN(colors.data(), colors.elms());
 #else
@@ -2017,30 +2106,40 @@ static void LoadColorTan(File &f, Mems<AnimKeys::Color> &colors) {
         f.skip(SIZE(Vec4));
     }
 #endif
+    PROFILE_STOP("LoadColorTan(File &f, Mems<AnimKeys::Color> &colors)")
 }
 #else
 static void LoadColorTan(File &f, Int colors) { f.skip((SIZE(Flt) + SIZE(Vec4) + SIZE(Vec4)) * colors); } // (time+color+tan)*color
 #endif
 /******************************************************************************/
 Bool AnimKeys::saveData(File &f) C {
+    PROFILE_START("AnimKeys::saveData(File &f)")
     ASSERT(HAS_ANIM_TANGENT == 0);
     if (orns.saveRaw(f))
         if (poss.saveRaw(f))
-            if (scales.saveRaw(f))
+            if (scales.saveRaw(f)) {
+                PROFILE_STOP("AnimKeys::saveData(File &f)")
                 return f.ok();
+            }
+    PROFILE_STOP("AnimKeys::saveData(File &f)")
     return false;
 }
 Bool AnimKeys::loadData(File &f) {
+    PROFILE_START("AnimKeys::loadData(File &f)")
     ASSERT(HAS_ANIM_TANGENT == 0);
     if (orns.loadRaw(f))
         if (poss.loadRaw(f))
             if (scales.loadRaw(f))
-                if (f.ok())
+                if (f.ok()) {
+                    PROFILE_STOP("AnimKeys::loadData(File &f)")
                     return true;
+                }
     del();
+    PROFILE_STOP("AnimKeys::loadData(File &f)")
     return false;
 }
 void AnimKeys::loadData3(File &f) {
+    PROFILE_START("AnimKeys::loadData3(File &f)")
     orns.setNumDiscard(f.decUIntV());
     LoadOrnTan(f, orns);
 #if HAS_ANIM_ROT
@@ -2059,8 +2158,10 @@ void AnimKeys::loadData3(File &f) {
 #else
     LoadColorTan(f, f.decUIntV());
 #endif
+    PROFILE_STOP("AnimKeys::loadData3(File &f)")
 }
 void AnimKeys::loadData2(File &f) {
+    PROFILE_START("AnimKeys::loadData2(File &f)")
     orns.setNumDiscard(f.getUShort());
 #if HAS_ANIM_ROT
     rots.setNumDiscard(f.getUShort());
@@ -2080,8 +2181,10 @@ void AnimKeys::loadData2(File &f) {
     LoadPosTan(f, poss);
     LoadScaleTan(f, scales);
     LoadColorTan(f, colors);
+    PROFILE_STOP("AnimKeys::loadData2(File &f)")
 }
 void AnimKeys::loadData1(File &f) {
+    PROFILE_START("AnimKeys::loadData1(File &f)")
     orns.setNumDiscard(f.getUShort());
 #if HAS_ANIM_ROT
     rots.setNumDiscard(f.getUShort());
@@ -2103,8 +2206,10 @@ void AnimKeys::loadData1(File &f) {
         f.skip(SIZE(Flt));
 #endif
     }
+    PROFILE_STOP("AnimKeys::loadData1(File &f)")
 }
 void AnimKeys::loadData0(File &f) {
+    PROFILE_START("AnimKeys::loadData0(File &f)")
     orns.setNumDiscard(f.getUShort());
 #if HAS_ANIM_ROT
     rots.setNumDiscard(f.getUShort());
@@ -2116,8 +2221,10 @@ void AnimKeys::loadData0(File &f) {
     LoadOrnTan(f, orns);
     LoadRotTan(f, rots);
     LoadPosTan(f, poss);
+    PROFILE_STOP("AnimKeys::loadData0(File &f)")
 }
 void AnimKeys::save(MemPtr<TextNode> nodes) C {
+    PROFILE_START("AnimKeys::save(MemPtr<TextNode> nodes)")
     if (orns.elms()) {
         TextNode &node = nodes.New();
         node.name = "Orientations";
@@ -2147,13 +2254,16 @@ void AnimKeys::save(MemPtr<TextNode> nodes) C {
         FREPAO(colors).save(node.nodes.New().nodes);
     }
 #endif
+    PROFILE_STOP("AnimKeys::save(MemPtr<TextNode> nodes)")
 }
 /******************************************************************************/
 // ANIMATION BONE
 /******************************************************************************/
 void AnimBone::save(TextNode &node) C {
+    PROFILE_START("AnimBone::save(TextNode &node)")
     node.set(name);
     super::save(node.nodes);
+    PROFILE_STOP("AnimBone::save(TextNode &node)")
 }
 /******************************************************************************/
 // ANIMATION EVENT
@@ -2191,45 +2301,60 @@ Animation &Animation::del() {
 }
 /******************************************************************************/
 AnimEvent *Animation::findEvent(CChar8 *name) {
+    PROFILE_START("Animation::findEvent(CChar8 *name)")
     REPA(events) {
         AnimEvent &event = events[i];
-        if (Equal(event.name, name))
+        if (Equal(event.name, name)) {
+            PROFILE_STOP("Animation::findEvent(CChar8 *name)")
             return &event;
+        }
     }
+    PROFILE_STOP("Animation::findEvent(CChar8 *name)")
     return null;
 }
 Int Animation::eventCount(CChar8 *name) C {
+    PROFILE_START("Animation::eventCount(CChar8 *name)")
     Int num = 0;
     REPA(events)
     if (Equal(events[i].name, name))
         num++;
+    PROFILE_STOP("Animation::eventCount(CChar8 *name)")
     return num;
 }
 Bool Animation::eventAfter(CChar8 *name, Flt time) C // event.name==name && event.time<=time (time>=event.time)
 {
+    PROFILE_START("Animation::eventAfter(CChar8 *name, Flt time)")
     FREPA(events) // check all events from the start until 'time'
     {
         C AnimEvent &event = events[i];
         if (event.time > time)
             break;
-        if (Equal(event.name, name))
+        if (Equal(event.name, name)) {
+            PROFILE_STOP("Animation::eventAfter(CChar8 *name, Flt time)")
             return true;
+        }
     }
+    PROFILE_STOP("Animation::eventAfter(CChar8 *name, Flt time)")
     return false;
 }
 Bool Animation::eventBefore(CChar8 *name, Flt time) C // event.name==name && event.time>time (time<event.time)
 {
+    PROFILE_START("Animation::eventBefore(CChar8 *name, Flt time)")
     REPA(events) // check all events from the end until 'time'
     {
         C AnimEvent &event = events[i];
         if (event.time <= time)
             break;
-        if (Equal(event.name, name))
+        if (Equal(event.name, name)) {
+            PROFILE_STOP("Animation::eventBefore(CChar8 *name, Flt time)")
             return true;
+        }
     }
+    PROFILE_STOP("Animation::eventBefore(CChar8 *name, Flt time)")
     return false;
 }
 Bool Animation::eventOccurred(CChar8 *name, Flt start_time, Flt dt) C {
+    PROFILE_START("Animation::eventOccurred(CChar8 *name, Flt start_time, Flt dt)")
     if (loop()) {
         start_time = Frac(start_time, _length);
         Flt end_time = start_time + dt;
@@ -2239,8 +2364,10 @@ Bool Animation::eventOccurred(CChar8 *name, Flt start_time, Flt dt) C {
             C AnimEvent &event = events[i];
             if (event.time >= end_time)
                 goto end; // EventOccurred(event_time, start_time, dt) = (start_time<=event_time && end_time>event_time)
-            if (Equal(event.name, name))
+            if (Equal(event.name, name)) {
+                PROFILE_STOP("Animation::eventOccurred(CChar8 *name, Flt start_time, Flt dt)")
                 return true;
+            }
         }
         for (Int i = 0; i < start_event; i++) // check events before 'start_time' but treating them as if they're after animation
         {
@@ -2248,8 +2375,10 @@ Bool Animation::eventOccurred(CChar8 *name, Flt start_time, Flt dt) C {
             Flt event_time = event.time + _length;
             if (event_time >= end_time)
                 goto end; // EventOccurred(event_time, start_time, dt) = (start_time<=event_time && end_time>event_time)
-            if (Equal(event.name, name))
+            if (Equal(event.name, name)) {
+                PROFILE_STOP("Animation::eventOccurred(CChar8 *name, Flt start_time, Flt dt)")
                 return true;
+            }
         }
     } else {
         Flt end_time = start_time + dt;
@@ -2259,14 +2388,18 @@ Bool Animation::eventOccurred(CChar8 *name, Flt start_time, Flt dt) C {
             C AnimEvent &event = events[start_event];
             if (event.time >= end_time)
                 goto end; // EventOccurred(event_time, start_time, dt) = (start_time<=event_time && end_time>event_time)
-            if (Equal(event.name, name))
+            if (Equal(event.name, name)) {
+                PROFILE_STOP("Animation::eventOccurred(CChar8 *name, Flt start_time, Flt dt)")
                 return true;
+            }
         }
     }
 end:
+    PROFILE_STOP("Animation::eventOccurred(CChar8 *name, Flt start_time, Flt dt)")
     return false;
 }
 Int Animation::eventsOccurred(Int &first_event, Flt start_time, Flt dt) C {
+    PROFILE_START("Animation::eventsOccurred(Int &first_event, Flt start_time, Flt dt)")
     Int num = 0;
     if (loop()) {
         start_time = Frac(start_time, _length);
@@ -2301,10 +2434,12 @@ Int Animation::eventsOccurred(Int &first_event, Flt start_time, Flt dt) C {
         }
     }
 end:
+    PROFILE_STOP("Animation::eventsOccurred(Int &first_event, Flt start_time, Flt dt)")
     return num;
 }
 // FIXME: TODO: events are now sorted by 'time', functions below can be optimized to make use of that
 Bool Animation::eventBetween(CChar8 *from, CChar8 *to, Flt start_time, Flt dt) C {
+    PROFILE_START("Animation::eventBetween(CChar8 *from, CChar8 *to, Flt start_time, Flt dt)")
     C AnimEvent *event_from = null,
                 *event_to = null;
     REPA(events) {
@@ -2320,6 +2455,7 @@ Bool Animation::eventBetween(CChar8 *from, CChar8 *to, Flt start_time, Flt dt) C
                 goto found;
         }
     }
+    PROFILE_STOP("Animation::eventBetween(CChar8 *from, CChar8 *to, Flt start_time, Flt dt)")
     return false;
 found:
     Flt time_to = event_to->time;
@@ -2330,9 +2466,11 @@ found:
         if (time_to < event_from->time)
             time_to += _length; // make sure that 'time_to'    is after 'event_from->time'
     }
+    PROFILE_STOP("Animation::eventBetween(CChar8 *from, CChar8 *to, Flt start_time, Flt dt)")
     return EventBetween(event_from->time, time_to, start_time, dt);
 }
 Flt Animation::eventProgress(CChar8 *from, CChar8 *to, Flt time) C {
+    PROFILE_START("Animation::eventProgress(CChar8 *from, CChar8 *to, Flt time)")
     C AnimEvent *event_from = null,
                 *event_to = null;
     REPA(events) {
@@ -2348,6 +2486,7 @@ Flt Animation::eventProgress(CChar8 *from, CChar8 *to, Flt time) C {
                 goto found;
         }
     }
+    PROFILE_STOP("Animation::eventProgress(CChar8 *from, CChar8 *to, Flt time)")
     return 0;
 found:
     Flt time_to = event_to->time;
@@ -2356,34 +2495,44 @@ found:
         if (time_to < event_from->time)
             time_to += _length; // make sure that 'time_to' is after 'event_from->time'
     }
+    PROFILE_STOP("Animation::eventProgress(CChar8 *from, CChar8 *to, Flt time)")
     return LerpR(event_from->time, time_to, time);
 }
 /******************************************************************************/
 AnimBone *Animation::findBone(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub) { return bones.addr(findBoneI(name, type, type_index, type_sub)); }
 AnimBone &Animation::getBone(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub) {
-    if (AnimBone *bone = findBone(name, type, type_index, type_sub))
+    PROFILE_START("Animation::getBone(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub)")
+    if (AnimBone *bone = findBone(name, type, type_index, type_sub)) {
+        PROFILE_STOP("Animation::getBone(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub)")
         return *bone;
+    }
     AnimBone &bone = bones.New();
     bone.set(name, type, type_index, type_sub);
+    PROFILE_STOP("Animation::getBone(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub)")
     return bone;
 }
 /******************************************************************************/
 Animation &Animation::loop(Bool loop) {
+    PROFILE_START("Animation::loop(Bool loop)")
     if (T.loop() != loop) {
         _flag ^= ANIM_LOOP;
         setTangents().setRootMatrix();
     }
+    PROFILE_STOP("Animation::loop(Bool loop)")
     return T;
 }
 Animation &Animation::linear(Bool linear) {
+    PROFILE_START("Animation::linear(Bool linear)")
     if (T.linear() != linear) {
         FlagToggle(_flag, ANIM_LINEAR);
         setRootMatrix();
     }
+    PROFILE_STOP("Animation::linear(Bool linear)")
     return T;
 }
 /******************************************************************************/
 Animation &Animation::length(Flt length, Bool rescale_keyframes) {
+    PROFILE_START("Animation::length(Flt length, Bool rescale_keyframes)")
     if (length < 0) {
         reverse();
         CHS(length);
@@ -2400,24 +2549,32 @@ Animation &Animation::length(Flt length, Bool rescale_keyframes) {
             clip(0, length); // if making the length shorter, then clip and remove keyframes out of range
         T._length = length;
     }
+    PROFILE_STOP("Animation::length(Flt length, Bool rescale_keyframes)")
     return T;
 }
 /******************************************************************************/
 void Animation::setRootMatrix2() {
+    PROFILE_START("Animation::setRootMatrix2()")
     _root_start.inverse(_root_start_inv);
     _root_end.mul(_root_start_inv, _root_transform); // this is "GetTransform(_root_transform, _root_start, _root_end)"
+    PROFILE_STOP("Animation::setRootMatrix2()")
 }
 Animation &Animation::setRootMatrix() {
+    PROFILE_START("Animation::setRootMatrix()")
     getRootMatrixExactTime(_root_end, length());
     getRootMatrix(_root_start, 0);
     setRootMatrix2();
+    PROFILE_STOP("Animation::setRootMatrix()")
     return T;
 }
 void Animation::getRootMatrix(Matrix &matrix, Flt time) C {
+    PROFILE_START("Animation::getRootMatrix(Matrix &matrix, Flt time)")
     AnimParams params(T, time);
     keys.matrix(matrix, params);
+    PROFILE_STOP("Animation::getRootMatrix(Matrix &matrix, Flt time)")
 }
 void Animation::getRootMatrixCumulative(Matrix &matrix, Flt time) C {
+    PROFILE_START("Animation::getRootMatrixCumulative(Matrix &matrix, Flt time)")
     AnimParams params(T, time);
     keys.matrix(matrix, params);
     if (params.loop)
@@ -2425,20 +2582,24 @@ void Animation::getRootMatrixCumulative(Matrix &matrix, Flt time) C {
             Matrix root_round; // this is root matrix at the start of the round
 #if 0
       rootStart().mulTimes(rounds  , rootTransform(), root_round);
-#else // prefer this version, because most likely we're playing animations forward, and this way we save 1 matrix multiplication
+#else                                                                    // prefer this version, because most likely we're playing animations forward, and this way we save 1 matrix multiplication
             rootEnd().mulTimes(rounds - 1, rootTransform(), root_round); // use "rounds-1" because we start from 'rootEnd' which is end of the loop (1 round already)
 #endif
             RevMatrix rm;
             matrix.mul(_root_start_inv, rm); // this is "GetTransform(rm, rootStart(), matrix)", this is OK for negative times too, because even though we're transforming from 'rootStart' to 'matrix', we start with 'root_round' which already was moved before 'time' - at the start of that round.
             root_round.mul(rm, matrix);      // result = matrix at the start of a round, transformed by (transform from 'rootStart' to matrix at 'params.time')
         }
+    PROFILE_STOP("Animation::getRootMatrixCumulative(Matrix &matrix, Flt time)")
 }
 void Animation::getRootMatrixExactTime(Matrix &matrix, Flt time) C {
+    PROFILE_START("Animation::getRootMatrixExactTime(Matrix &matrix, Flt time)")
     AnimParams params(T, time);
     params.time = time; // re-apply time to remove possible fraction
     keys.matrix(matrix, params);
+    PROFILE_STOP("Animation::getRootMatrixExactTime(Matrix &matrix, Flt time)")
 }
 void Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_time) C {
+    PROFILE_START("Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_time)")
     AnimParams params;
     RevMatrix rm;
     Matrix m;
@@ -2499,6 +2660,7 @@ void Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_t
                     keys.matrixNoScale(m, params);
                     m.mul(_root_start_inv, rm); // this is "GetTransformNormalized(rm, rootStart(), m)"
                     transform *= rm;
+                    PROFILE_STOP("Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_time)")
                     return;
                 } else if (params.time < 0) // going back
                 {
@@ -2513,6 +2675,7 @@ void Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_t
                     keys.matrixNoScale(m, params);
                     GetTransformNormalized(rm, rootEnd(), m);
                     transform *= rm;
+                    PROFILE_STOP("Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_time)")
                     return;
                 }
             }
@@ -2538,6 +2701,7 @@ void Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_t
                 keys.matrix(m, params);
                 m.mul(_root_start_inv, rm); // this is "GetTransform(rm, rootStart(), m)"
                 transform *= rm;
+                PROFILE_STOP("Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_time)")
                 return;
             } else if (params.time < 0) // going back
             {
@@ -2552,6 +2716,7 @@ void Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_t
                 keys.matrix(m, params);
                 GetTransform(rm, rootEnd(), m);
                 transform *= rm;
+                PROFILE_STOP("Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_time)")
                 return;
             }
         }
@@ -2559,12 +2724,15 @@ void Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_t
         keys.matrix(end, params);
         GetTransform(transform, m, end);
     }
+    PROFILE_STOP("Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_time)")
 }
 /******************************************************************************/
 Animation &Animation::removeUnused() {
+    PROFILE_START("Animation::removeUnused()")
     REPA(bones)
     if (!bones[i].is())
         bones.remove(i);
+    PROFILE_STOP("Animation::removeUnused()")
     return T;
 }
 /******************************************************************************
@@ -2581,31 +2749,42 @@ Animation& Animation::removeClones()
 }
 /******************************************************************************/
 static Bool SameBone(C SkelBone *a, C SkelBone *b, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights = null, Int old_i = -1, Int new_i = -1) {
-    if (!a && !b)
+    PROFILE_START("SameBone(C SkelBone *a, C SkelBone *b, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights = null, Int old_i = -1, Int new_i = -1)")
+    if (!a && !b) {
+        PROFILE_STOP("SameBone(C SkelBone *a, C SkelBone *b, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights = null, Int old_i = -1, Int new_i = -1)")
         return true; // both are null
-    if (a && b)      // both are valid
+    }
+    if (a && b) // both are valid
     {
         if (new_to_old_weights) // if have weights
         {
             if (InRange(new_i, new_to_old_weights)) {
                 C Mems<IndexWeight> &weights = new_to_old_weights[new_i];
+                PROFILE_STOP("SameBone(C SkelBone *a, C SkelBone *b, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights = null, Int old_i = -1, Int new_i = -1)")
                 return weights.elms() == 1 && weights[0].index == old_i;
             }
         } else {
+            PROFILE_STOP("SameBone(C SkelBone *a, C SkelBone *b, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights = null, Int old_i = -1, Int new_i = -1)")
             return Equal(a->name, b->name); // check by name only
         }
     }
+    PROFILE_STOP("SameBone(C SkelBone *a, C SkelBone *b, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights = null, Int old_i = -1, Int new_i = -1)")
     return false;
 }
 static Bool SameSet(C SkelBone &a_child, C SkelBone &b_child, C SkelBone *a_parent, C SkelBone *b_parent, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights, Int old_parent_i, Int new_parent_i) // this assumes that 'a_child' and 'b_child' are the same "SameBone(a_child, b_child)", and checks if their parents are the same, and children positions relative to their parents are also the same
 {
-    if (SameBone(a_parent, b_parent, new_to_old_weights, old_parent_i, new_parent_i))
+    PROFILE_START("SameSet(C SkelBone &a_child, C SkelBone &b_child, C SkelBone *a_parent, C SkelBone *b_parent, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights, Int old_parent_i, Int new_parent_i)")
+    if (SameBone(a_parent, b_parent, new_to_old_weights, old_parent_i, new_parent_i)) {
+        PROFILE_STOP("SameSet(C SkelBone &a_child, C SkelBone &b_child, C SkelBone *a_parent, C SkelBone *b_parent, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights, Int old_parent_i, Int new_parent_i)")
         return a_parent ? Equal(a_child.pos - a_parent->pos, b_child.pos - b_parent->pos)
                         : Equal(a_child.pos, b_child.pos);
+    }
+    PROFILE_STOP("SameSet(C SkelBone &a_child, C SkelBone &b_child, C SkelBone *a_parent, C SkelBone *b_parent, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights, Int old_parent_i, Int new_parent_i)")
     return false;
 }
 Animation &Animation::adjustForSameSkeletonWithDifferentPose(C Skeleton &source, C Skeleton &target) // 'source' and 'target' are assumed to have the same names, this animation bones are also assumed to have the same names because this is typically called during importing
 {
+    PROFILE_START("Animation::adjustForSameSkeletonWithDifferentPose(C Skeleton &source, C Skeleton &target)")
     if (&source != &target) {
         // adjust per-bone orientations (needed because some skeletons may have bones rotated already in the skeleton, not only in keyframes)
         // this will only insert 1 orientation keyframe if skeleton bone orientations are different, it doesn't modify existing keyframes
@@ -2680,6 +2859,7 @@ Animation &Animation::adjustForSameSkeletonWithDifferentPose(C Skeleton &source,
         // setTangents  (); currently not needed since tangents   don't change  in this method
         // setRootMatrix(); currently not needed since root keys aren't changed in this method
     }
+    PROFILE_STOP("Animation::adjustForSameSkeletonWithDifferentPose(C Skeleton &source, C Skeleton &target)")
     return T;
 }
 struct BoneWeight : IndexWeight {
@@ -2687,18 +2867,25 @@ struct BoneWeight : IndexWeight {
     C AnimSkelBone *asbone;
 };
 static Vec BoneWeightPos(C MemtN<BoneWeight, 4> &weights) {
-    if (weights.elms() == 1)
+    PROFILE_START("BoneWeightPos(C MemtN<BoneWeight, 4> &weights)")
+    if (weights.elms() == 1) {
+        PROFILE_STOP("BoneWeightPos(C MemtN<BoneWeight, 4> &weights)")
         return weights[0].asbone->matrix().pos;
+    }
     Vec pos = 0;
     REPA(weights) {
         C BoneWeight &weight = weights[i];
         pos += weight.asbone->matrix().pos * weight.weight;
     }
+    PROFILE_STOP("BoneWeightPos(C MemtN<BoneWeight, 4> &weights)")
     return pos;
 }
 static Matrix3 BoneWeightOrn(C MemtN<BoneWeight, 4> &weights) {
-    if (weights.elms() == 1)
+    PROFILE_START("BoneWeightOrn(C MemtN<BoneWeight, 4> &weights)")
+    if (weights.elms() == 1) {
+        PROFILE_STOP("BoneWeightOrn(C MemtN<BoneWeight, 4> &weights)")
         return weights[0].asbone->matrix().orn();
+    }
     Vec scale = 0;
     Matrix3 matrix;
     matrix.zero();
@@ -2718,9 +2905,11 @@ static Matrix3 BoneWeightOrn(C MemtN<BoneWeight, 4> &weights) {
     matrix.x.setLength(scale.x);
     matrix.y.setLength(scale.y);
     matrix.z.setLength(scale.z);
+    PROFILE_STOP("BoneWeightOrn(C MemtN<BoneWeight, 4> &weights)")
     return matrix;
 }
 static void DelRot(Orient &orn, UInt flag) {
+    PROFILE_START("DelRot(Orient &orn, UInt flag)")
     if (flag & ROOT_DEL_ROTATION) {
         if (FlagAll(flag, ROOT_DEL_ROTATION))
             orn.identity();
@@ -2739,8 +2928,10 @@ static void DelRot(Orient &orn, UInt flag) {
                 orn.identity();
         }
     }
+    PROFILE_STOP("DelRot(Orient &orn, UInt flag)")
 }
 static void DelRot(Animation &anim, UInt flag) {
+    PROFILE_START("DelRot(Animation &anim, UInt flag)")
     if (FlagAll(flag, ROOT_DEL_ROTATION))
         anim.keys.orns.del();
     else {
@@ -2764,6 +2955,7 @@ static void DelRot(Animation &anim, UInt flag) {
         }
         anim.keys.setTangents(anim.loop(), anim.length());
     }
+    PROFILE_STOP("DelRot(Animation &anim, UInt flag)")
 }
 struct SphericalInterpolator {
     Bool linear;
@@ -2776,12 +2968,15 @@ struct SphericalInterpolator {
 
     Bool init(C Animation &anim, Flt eps = EPS) // 'eps' must be >=0 because codes below will fail if angle is <=0
     {
+        PROFILE_START("init(C Animation &anim, Flt eps = EPS)")
         C Matrix &start = anim.rootStart(), &end = anim.rootEnd();
         DEBUG_ASSERT(eps >= 0, "SphericalInterpolator eps");
         GetDelta(rot_axis, start, end);
         rot_angle = rot_axis.normalize();
-        if (rot_angle <= eps)
+        if (rot_angle <= eps) {
+            PROFILE_STOP("init(C Animation &anim, Flt eps = EPS)")
             return false; // if 'rot_angle' is close to zero, then there is no rotation and we can fall back to linear interpolation
+        }
 
         if (rot_angle >= PI - eps) // rotation by 180 deg, special case where 'rot_axis' direction may be imprecise
         {
@@ -2824,6 +3019,7 @@ struct SphericalInterpolator {
             circle_x = cross * circle_r;
             circle_y = rot_plane_delta * circle_r;
         }
+        PROFILE_STOP("init(C Animation &anim, Flt eps = EPS)")
         return true;
     }
     void set(Vec &pos, Flt frac) {
@@ -2838,6 +3034,7 @@ struct SphericalInterpolator {
     }
 };
 Animation &Animation::adjustForSameTransformWithDifferentSkeleton(C Skeleton &old_skel, C Skeleton &new_skel, Int old_skel_bone_as_root, C CMemPtr<Mems<IndexWeight>> &weights, UInt root_flags) {
+    PROFILE_START("Animation::adjustForSameTransformWithDifferentSkeleton(C Skeleton &old_skel, C Skeleton &new_skel, Int old_skel_bone_as_root, C CMemPtr<Mems<IndexWeight>> &weights, UInt root_flags)")
     /*
        'old_skel' and 'new_skel'     are assumed to have the same names when 'weights' are null (if 'weights' are not null, then their indexes are used as 'new_skel' -> 'old_skel' mapping, and names/types are ignored)
        'old_skel' and this Animation are assumed to have the same names when FIND_ANIM_BY_NAME_ONLY
@@ -3210,309 +3407,311 @@ Animation &Animation::adjustForSameTransformWithDifferentSkeleton(C Skeleton &ol
                 if (old_bones.elms() == 1                                                                             // bone maps to only 1 old bone
                     && SameSet(old_bone, new_bone, old_parent, new_parent, weights, old_bone.parent, new_bone.parent) // it has the same set of bones/parents
                     && (old_parent || root_not_changed))                                                              // and there are parents or (when there are no parents, which means that parent is root) we preserve root animations
-            {
-#if FIND_ANIM_BY_NAME_ONLY
-                if (C AnimBone *old_anim = findBone(old_bone.name))
-#else
-                if (C AnimBone *old_anim = findBone(old_bone.name, old_bone.type, old_bone.type_index, old_bone.type_sub))
-#endif
                 {
-                    OrientD new_bone_d = new_bone;
-                    MatrixD3 old_bone_m = old_bone, old_bone_m_inv, old_parent_m, new_parent_m_inv;
-                    old_bone.inverse(old_bone_m_inv); // in the simple version we HAVE TO ignore positions of bones and process only orientations, yes this was tested
-                    if (old_parent)
-                        old_parent_m = *old_parent;
-                    if (new_parent)
-                        new_parent->inverse(new_parent_m_inv);
-                    AnimBone &new_anim = anim_out.bones.New();
-                    new_anim = *old_anim;
-                    new_anim.id() = new_bone;
-
-                    REPA(new_anim.orns) // orientation
+#if FIND_ANIM_BY_NAME_ONLY
+                    if (C AnimBone *old_anim = findBone(old_bone.name))
+#else
+                    if (C AnimBone *old_anim = findBone(old_bone.name, old_bone.type, old_bone.type_index, old_bone.type_sub))
+#endif
                     {
-                        OrientD orn = new_anim.orns[i].orn;
+                        OrientD new_bone_d = new_bone;
+                        MatrixD3 old_bone_m = old_bone, old_bone_m_inv, old_parent_m, new_parent_m_inv;
+                        old_bone.inverse(old_bone_m_inv); // in the simple version we HAVE TO ignore positions of bones and process only orientations, yes this was tested
                         if (old_parent)
-                            orn.mul(old_parent_m, true); // convert to world space from old parent space
-                        MatrixD3 anim_transform;
+                            old_parent_m = *old_parent;
+                        if (new_parent)
+                            new_parent->inverse(new_parent_m_inv);
+                        AnimBone &new_anim = anim_out.bones.New();
+                        new_anim = *old_anim;
+                        new_anim.id() = new_bone;
+
+                        REPA(new_anim.orns) // orientation
+                        {
+                            OrientD orn = new_anim.orns[i].orn;
+                            if (old_parent)
+                                orn.mul(old_parent_m, true); // convert to world space from old parent space
+                            MatrixD3 anim_transform;
 #if 0
                   GetTransform(anim_transform, old_bone_m, MatrixD3(orn)); // transform which animates skel bone into animated bone
 #else
-                        anim_transform = old_bone_m_inv;
-                        anim_transform *= MatrixD3(orn); // transform which animates skel bone into animated bone
+                            anim_transform = old_bone_m_inv;
+                            anim_transform *= MatrixD3(orn); // transform which animates skel bone into animated bone
 #endif
-                        orn = new_bone_d;              // get new bone
-                        orn.mul(anim_transform, true); // apply animation transform
-                        if (new_parent)
-                            orn.mul(new_parent_m_inv, true); // convert to new parent space
-                        new_anim.orns[i].orn = orn;
-                    }
-                    // if(!new_anim.orns.elms()).. any code like that is not needed, because here we preserve transformations, so if source keyframe is not found, then it means transformation was identity
-
-                    // position
-                    // if(!new_anim.poss.elms()){AnimKeys::Pos &pos=new_anim.poss.New(); pos.pos.zero(); pos.time=0;} any code like that is not needed, because we operate only on rotating existing positions here in the simple version
-                    if (new_anim.poss.elms()) {
-                        Bool pos_transform = (old_parent || new_parent); // if transform pos
-                        MatrixD3 pos_matrix;
-                        if (old_parent && new_parent)
-                            old_parent_m.mul(new_parent_m_inv, pos_matrix);
-                        else // both present, pos_matrix=old_parent_m*new_parent_m_inv
-                            if (old_parent)
-                            pos_matrix = old_parent_m;
-                        else // only old_parent
+                            orn = new_bone_d;              // get new bone
+                            orn.mul(anim_transform, true); // apply animation transform
                             if (new_parent)
-                            pos_matrix = new_parent_m_inv; // only new_parent
-                        REPA(new_anim.poss)                // position
-                        {
-                            VecD pos = new_anim.poss[i].pos;
+                                orn.mul(new_parent_m_inv, true); // convert to new parent space
+                            new_anim.orns[i].orn = orn;
+                        }
+                        // if(!new_anim.orns.elms()).. any code like that is not needed, because here we preserve transformations, so if source keyframe is not found, then it means transformation was identity
+
+                        // position
+                        // if(!new_anim.poss.elms()){AnimKeys::Pos &pos=new_anim.poss.New(); pos.pos.zero(); pos.time=0;} any code like that is not needed, because we operate only on rotating existing positions here in the simple version
+                        if (new_anim.poss.elms()) {
+                            Bool pos_transform = (old_parent || new_parent); // if transform pos
+                            MatrixD3 pos_matrix;
+                            if (old_parent && new_parent)
+                                old_parent_m.mul(new_parent_m_inv, pos_matrix);
+                            else // both present, pos_matrix=old_parent_m*new_parent_m_inv
+                                if (old_parent)
+                                    pos_matrix = old_parent_m;
+                                else // only old_parent
+                                    if (new_parent)
+                                        pos_matrix = new_parent_m_inv; // only new_parent
+                            REPA(new_anim.poss)                        // position
+                            {
+                                VecD pos = new_anim.poss[i].pos;
 #if 0
                      if(old_parent)pos*=old_parent_m    ; // convert to world space from old parent space
                      if(new_parent)pos*=new_parent_m_inv; // convert to new parent space
 #else // optimized
-                            if (pos_transform)
-                                pos *= pos_matrix;
+                                if (pos_transform)
+                                    pos *= pos_matrix;
 #endif
-                            new_anim.poss[i].pos = pos;
+                                new_anim.poss[i].pos = pos;
+                            }
                         }
-                    }
 
-                    // scale
-                    if (new_anim.scales.elms()) {                             // Warning: Scale conversion is not perfect, because scales are possible only on each axis separately, so if new bone is not rotated by 90 deg, then artifacts may occur
-                        MatrixD3 new_bone_in_old_bone_space = new_bone_d;     // get the new bone
-                        new_bone_in_old_bone_space.divNormalized(old_bone_m); // put it into old bone space
-                        REPA(new_anim.scales) {
-                            VecD scale = new_anim.scales[i].scale;
-                            MatrixD3 scaled_new_bone = new_bone_in_old_bone_space;
-                            scaled_new_bone.scale(ScaleFactor(scale));                        // apply old bone scale (we're in old bone space, so scaling in XYZ scales along old bone cross perp and dir)
-                            new_anim.scales[i].scale = ScaleFactorR(scaled_new_bone.scale()); // calculate new bone scale which is simply each axis length
+                        // scale
+                        if (new_anim.scales.elms()) {                             // Warning: Scale conversion is not perfect, because scales are possible only on each axis separately, so if new bone is not rotated by 90 deg, then artifacts may occur
+                            MatrixD3 new_bone_in_old_bone_space = new_bone_d;     // get the new bone
+                            new_bone_in_old_bone_space.divNormalized(old_bone_m); // put it into old bone space
+                            REPA(new_anim.scales) {
+                                VecD scale = new_anim.scales[i].scale;
+                                MatrixD3 scaled_new_bone = new_bone_in_old_bone_space;
+                                scaled_new_bone.scale(ScaleFactor(scale));                        // apply old bone scale (we're in old bone space, so scaling in XYZ scales along old bone cross perp and dir)
+                                new_anim.scales[i].scale = ScaleFactorR(scaled_new_bone.scale()); // calculate new bone scale which is simply each axis length
+                            }
                         }
+                        new_anim.setTangents(loop(), length());
                     }
-                    new_anim.setTangents(loop(), length());
-                }
-            } else // complex/advanced
-            {
-                REPA(old_bones)
-                for (Int old_parent_i = old_bones[i].index;;) // iterate all old parents until one of them is an ancestor of new bone
+                } else // complex/advanced
                 {
-                    old_parent_i = old_skel.boneParent(old_parent_i);
-                    if (old_parent_i < 0) {
-                        keys.includeTimes(orn_times, pos_times, scale_times);
-                        break;
-                    }
-                    C SkelBone &old_parent = old_skel.bones[old_parent_i];
+                    REPA(old_bones)
+                    for (Int old_parent_i = old_bones[i].index;;) // iterate all old parents until one of them is an ancestor of new bone
+                    {
+                        old_parent_i = old_skel.boneParent(old_parent_i);
+                        if (old_parent_i < 0) {
+                            keys.includeTimes(orn_times, pos_times, scale_times);
+                            break;
+                        }
+                        C SkelBone &old_parent = old_skel.bones[old_parent_i];
 
 #if FIND_ANIM_BY_NAME_ONLY
-                    if (AnimBone *abon = findBone(old_parent.name))
+                        if (AnimBone *abon = findBone(old_parent.name))
 #else
-                    if (AnimBone *abon = findBone(old_parent.name, old_parent.type, old_parent.type_index, old_parent.type_sub))
+                        if (AnimBone *abon = findBone(old_parent.name, old_parent.type, old_parent.type_index, old_parent.type_sub))
 #endif
-                        abon->includeTimes(orn_times, pos_times, scale_times);
+                            abon->includeTimes(orn_times, pos_times, scale_times);
 
-                    if (!weights) {
-                        Int new_parent_i = new_skel.findBoneI(old_parent.name);
-                        if (new_parent_i >= 0 && new_skel.contains(new_parent_i, new_bone_i))
-                            break; // if the parent contains the bone in the new skeleton
-                    } else {
-                        Bool found = false;
-                        REPAD(new_parent_i, weights) // iterate all new bones to check which are connected to 'old_parent_i'
-                        {
-                            C Mems<IndexWeight> &weight = weights[new_parent_i];
-                            REPA(weight)
-                            if (weight[i].index == old_parent_i) // if this bone points to 'old_parent_i'
+                        if (!weights) {
+                            Int new_parent_i = new_skel.findBoneI(old_parent.name);
+                            if (new_parent_i >= 0 && new_skel.contains(new_parent_i, new_bone_i))
+                                break; // if the parent contains the bone in the new skeleton
+                        } else {
+                            Bool found = false;
+                            REPAD(new_parent_i, weights) // iterate all new bones to check which are connected to 'old_parent_i'
                             {
-                                if (!new_skel.contains(new_parent_i, new_bone_i))
-                                    goto new_parent_not_contains_bone; // if at least one parent doesn't contain the bone, then stop this loop and keep checking next parents
-                                found = true;                          // we've found bones connected with 'old_parent_i'
-                                break;
+                                C Mems<IndexWeight> &weight = weights[new_parent_i];
+                                REPA(weight)
+                                if (weight[i].index == old_parent_i) // if this bone points to 'old_parent_i'
+                                {
+                                    if (!new_skel.contains(new_parent_i, new_bone_i))
+                                        goto new_parent_not_contains_bone; // if at least one parent doesn't contain the bone, then stop this loop and keep checking next parents
+                                    found = true;                          // we've found bones connected with 'old_parent_i'
+                                    break;
+                                }
                             }
-                        }
-                        if (found)
-                            break; // found a parent and all parents contain 'new_bone_i', so we can stop now
-                    new_parent_not_contains_bone:;
-                    }
-                }
-                for (Int new_parent_i = new_bone_i;;) // iterate all new parents until one of them is an ancestor of old bone
-                {
-                    new_parent_i = new_skel.boneParent(new_parent_i);
-                    if (new_parent_i < 0) {
-                        anim_out.keys.includeTimes(orn_times, pos_times, scale_times);
-                        break;
-                    }
-                    C SkelBone &new_parent = new_skel.bones[new_parent_i];
-
-                    if (AnimBone *abon = anim_out.findBone(new_parent.name)) // here we're looking in 'anim_out' which already has names set according to 'new_skel'
-                        abon->includeTimes(orn_times, pos_times, scale_times);
-
-                    if (!weights) {
-                        Int old_parent_i = old_skel.findBoneI(new_parent.name);
-                        if (old_parent_i >= 0 && old_skel.contains(old_parent_i, old_bones[0].index))
-                            break; // if the parent contains the bone in the old skeleton
-                    } else if (InRange(new_parent_i, weights)) {
-                        C Mems<IndexWeight> &parent_weights = weights[new_parent_i];
-                        if (parent_weights.elms()) // if this bone has any links
-                        {
-                            REPA(parent_weights) {
-                                Int old_parent_i = parent_weights[i].index;
-                                REPA(old_bones)
-                                if (!old_skel.contains(old_parent_i, old_bones[i].index))
-                                    goto old_parent_not_contains_bone; // if at least one isn't contained, then stop this loop and keep checking next parents
-                            }
-                            break; // all 'old_bones' are contained in this parent, so we can stop now
-                        old_parent_not_contains_bone:;
+                            if (found)
+                                break; // found a parent and all parents contain 'new_bone_i', so we can stop now
+                        new_parent_not_contains_bone:;
                         }
                     }
-                }
+                    for (Int new_parent_i = new_bone_i;;) // iterate all new parents until one of them is an ancestor of old bone
+                    {
+                        new_parent_i = new_skel.boneParent(new_parent_i);
+                        if (new_parent_i < 0) {
+                            anim_out.keys.includeTimes(orn_times, pos_times, scale_times);
+                            break;
+                        }
+                        C SkelBone &new_parent = new_skel.bones[new_parent_i];
 
-                // step 1, normally this could be done after step 2, because this orientations/scales normally don't affect this positions, unless this bone was moved
-                REPA(old_bones) {
-                    C SkelBone &old_bone = *old_bones[i].bone;
+                        if (AnimBone *abon = anim_out.findBone(new_parent.name)) // here we're looking in 'anim_out' which already has names set according to 'new_skel'
+                            abon->includeTimes(orn_times, pos_times, scale_times);
+
+                        if (!weights) {
+                            Int old_parent_i = old_skel.findBoneI(new_parent.name);
+                            if (old_parent_i >= 0 && old_skel.contains(old_parent_i, old_bones[0].index))
+                                break; // if the parent contains the bone in the old skeleton
+                        } else if (InRange(new_parent_i, weights)) {
+                            C Mems<IndexWeight> &parent_weights = weights[new_parent_i];
+                            if (parent_weights.elms()) // if this bone has any links
+                            {
+                                REPA(parent_weights) {
+                                    Int old_parent_i = parent_weights[i].index;
+                                    REPA(old_bones)
+                                    if (!old_skel.contains(old_parent_i, old_bones[i].index))
+                                        goto old_parent_not_contains_bone; // if at least one isn't contained, then stop this loop and keep checking next parents
+                                }
+                                break; // all 'old_bones' are contained in this parent, so we can stop now
+                            old_parent_not_contains_bone:;
+                            }
+                        }
+                    }
+
+                    // step 1, normally this could be done after step 2, because this orientations/scales normally don't affect this positions, unless this bone was moved
+                    REPA(old_bones) {
+                        C SkelBone &old_bone = *old_bones[i].bone;
 #if FIND_ANIM_BY_NAME_ONLY
-                    if (AnimBone *old_anim = findBone(old_bone.name))
+                        if (AnimBone *old_anim = findBone(old_bone.name))
 #else
-                    if (AnimBone *old_anim = findBone(old_bone.name, old_bone.type, old_bone.type_index, old_bone.type_sub))
+                        if (AnimBone *old_anim = findBone(old_bone.name, old_bone.type, old_bone.type_index, old_bone.type_sub))
 #endif
-                        old_anim->includeTimes(orn_times, pos_times, scale_times);
+                            old_anim->includeTimes(orn_times, pos_times, scale_times);
+                    }
+                    // step 2
+                    IncludeTimes(orn_times, pos_times);   // parent orientations affect this position
+                    IncludeTimes(scale_times, pos_times); // parent scales       affect this position
+
+                    // step 3, make sure we have at least 1 keyframe to process (after including orn times in pos times, in case orn is empty, but pos has something, in which case we would always add a useless key at time 0 for pos since it already has another)
+                    if (!orn_times.elms())
+                        orn_times.add(0);
+                    if (!pos_times.elms())
+                        pos_times.add(0);
+
+                    if (orn_times.elms() || pos_times.elms() || scale_times.elms()) {
+                        C AnimSkelBone &new_abon = new_askel.bones[new_bone_i];
+                        SkelAnim new_skela(new_skel, anim_out); // this needs to be created here and not once at the start, because we're dynamically adding new AnimBones to 'anim_out'
+                        AnimBone *added = null, anim;
+                        anim.id() = new_bone;
+                        Bool root_has_orn_scale = (anim_out.keys.orns.elms() || anim_out.keys.scales.elms());
+
+                        if (orn_times.elms()) // orientation
+                        {
+                            MatrixD3 new_bone_m = new_bone, new_parent_m;
+                            if (new_parent)
+                                new_parent_m = *new_parent;
+                            anim.orns.setNumDiscard(orn_times.elms());
+                            REPA(anim.orns) {
+                                AnimKeys::Orn &orn = anim.orns[i];
+                                orn.time = orn_times[i];
+                                old_askel.clear().animateEx(old_skela, orn.time);
+                                if (old_bones.elms() == 1)
+                                    old_askel.updateMatrixParents(MatrixMIdentity, old_bones[0].index);
+                                else
+                                    old_askel.updateMatrix();
+                                new_askel.clear().animateEx(new_skela, orn.time);
+                                new_askel.updateMatrixParents(MatrixMIdentity, new_bone_i);
+
+                                MatrixD3 new_bone_transformed = new_bone_m;
+                                new_bone_transformed *= BoneWeightOrn(old_bones); // bone world orientation at the current time
+                                if (new_parent) {
+                                    MatrixD3 new_parent_transformed;
+                                    new_parent_m.mul(new_askel.bones[new_bone.parent].matrix(), new_parent_transformed); // parent bone world orientation at the current time, new_parent_transformed=new_parent_m*new_askel.bones[new_bone.parent].matrix()
+                                    new_bone_transformed *= new_parent_transformed.inverseNonOrthogonal();               // new_bone_transformed/=new_parent_transformed with non-orthogonal support (needed because of possible scale keyframes)
+                                } else if (root_has_orn_scale)
+                                    new_bone_transformed /= new_askel.root.matrix().orn();
+                                OrientD o = new_bone_transformed;
+                                o.fix();
+                                orn.orn = o;
+                            }
+                            orn_times.clear();
+                            // add orientations to the animation only after everything was setup
+                            anim.setTangents(loop(), length());
+                            if (added)
+                                Swap(anim.orns, added->orns);
+                            else {
+                                added = &anim_out.bones.New();
+                                Swap(anim, *added);
+                            }
+                            new_skela.create(new_skel, anim_out); // need to re-create because we have added orientations
+                        }
+
+                        if (scale_times.elms()) // scale
+                        {
+                            anim.scales.setNumDiscard(scale_times.elms());
+                            REPA(anim.scales) { // Warning: Scale conversion is not perfect, because scales are possible only on each axis separately, so if new bone is not rotated by 90 deg, then artifacts may occur
+                                AnimKeys::Scale &scale = anim.scales[i];
+                                scale.time = scale_times[i];
+                                old_askel.clear().animateEx(old_skela, scale.time);
+                                if (old_bones.elms() == 1)
+                                    old_askel.updateMatrixParents(MatrixMIdentity, old_bones[0].index);
+                                else
+                                    old_askel.updateMatrix();
+                                new_askel.clear().animateEx(new_skela, scale.time);
+                                new_askel.updateMatrixParents(MatrixMIdentity, new_bone_i);
+
+                                Matrix3 old_abon_matrix___orn = BoneWeightOrn(old_bones);
+                                Vec new_bone_cross = new_bone.cross(),
+                                    old_scale((new_bone_cross * old_abon_matrix___orn).length(), // desired scale (yes here should be 'new_bone' too, because we want to calculate the scale for new bone using old transformation matrix)
+                                              (new_bone.perp * old_abon_matrix___orn).length(),
+                                              (new_bone.dir * old_abon_matrix___orn).length()),
+                                    new_scale((new_bone_cross * new_abon.matrix().orn()).length(), // current scale
+                                              (new_bone.perp * new_abon.matrix().orn()).length(),
+                                              (new_bone.dir * new_abon.matrix().orn()).length()),
+                                    rel_scale = old_scale / new_scale; // relative scale that should be applied
+                                scale.scale = ScaleFactorR(rel_scale);
+                            }
+                            scale_times.clear();
+                            // add scales to the animation only after everything was setup
+                            anim.setTangents(loop(), length());
+                            if (added)
+                                Swap(anim.scales, added->scales);
+                            else {
+                                added = &anim_out.bones.New();
+                                Swap(anim, *added);
+                            }
+                            new_skela.create(new_skel, anim_out); // need to re-create because we have added scales
+                        }
+
+                        if (pos_times.elms()) // position
+                        {
+                            MatrixD3 new_parent_m;
+                            if (new_parent)
+                                new_parent_m = *new_parent;
+                            anim.poss.setNumDiscard(pos_times.elms());
+                            REPA(anim.poss) {
+                                AnimKeys::Pos &pos = anim.poss[i];
+                                pos.time = pos_times[i];
+                                old_askel.clear().animateEx(old_skela, pos.time);
+                                if (old_bones.elms() == 1)
+                                    old_askel.updateMatrixParents(MatrixMIdentity, old_bones[0].index);
+                                else
+                                    old_askel.updateMatrix();
+                                new_askel.clear().animateEx(new_skela, pos.time);
+                                new_askel.updateMatrixParents(MatrixMIdentity, new_bone_i);
+
+                                pos.pos = BoneWeightPos(old_bones) // desired mesh transform offset
+                                          - new_abon.matrix().pos; // current mesh transform offset
+                                if (new_parent) {
+                                    MatrixD3 new_parent_transformed;
+                                    new_parent_m.mul(new_askel.bones[new_bone.parent].matrix(), new_parent_transformed); // parent bone world orientation at the current time, new_parent_transformed=new_parent_m*new_askel.bones[new_bone.parent].matrix()
+                                    pos.pos *= new_parent_transformed.inverseNonOrthogonal();                            // pos.pos/=new_parent_transformed with non-orthogonal support (needed because of possible scale keyframes)
+                                } else if (root_has_orn_scale)
+                                    pos.pos /= new_askel.root.matrix().orn();
+                            }
+                            pos_times.clear();
+                            // add positions to the animation only after everything was setup
+                            anim.setTangents(loop(), length());
+                            if (added)
+                                Swap(anim.poss, added->poss);
+                            else {
+                                added = &anim_out.bones.New();
+                                Swap(anim, *added);
+                            }
+                            // new_skela.create(new_skel, anim_out); // need to re-create because we have added positions, won't be used for anything
+                        }
+                    }
                 }
-                // step 2
-                IncludeTimes(orn_times, pos_times);   // parent orientations affect this position
-                IncludeTimes(scale_times, pos_times); // parent scales       affect this position
-
-                // step 3, make sure we have at least 1 keyframe to process (after including orn times in pos times, in case orn is empty, but pos has something, in which case we would always add a useless key at time 0 for pos since it already has another)
-                if (!orn_times.elms())
-                    orn_times.add(0);
-                if (!pos_times.elms())
-                    pos_times.add(0);
-
-                if (orn_times.elms() || pos_times.elms() || scale_times.elms()) {
-                    C AnimSkelBone &new_abon = new_askel.bones[new_bone_i];
-                    SkelAnim new_skela(new_skel, anim_out); // this needs to be created here and not once at the start, because we're dynamically adding new AnimBones to 'anim_out'
-                    AnimBone *added = null, anim;
-                    anim.id() = new_bone;
-                    Bool root_has_orn_scale = (anim_out.keys.orns.elms() || anim_out.keys.scales.elms());
-
-                    if (orn_times.elms()) // orientation
-                    {
-                        MatrixD3 new_bone_m = new_bone, new_parent_m;
-                        if (new_parent)
-                            new_parent_m = *new_parent;
-                        anim.orns.setNumDiscard(orn_times.elms());
-                        REPA(anim.orns) {
-                            AnimKeys::Orn &orn = anim.orns[i];
-                            orn.time = orn_times[i];
-                            old_askel.clear().animateEx(old_skela, orn.time);
-                            if (old_bones.elms() == 1)
-                                old_askel.updateMatrixParents(MatrixMIdentity, old_bones[0].index);
-                            else
-                                old_askel.updateMatrix();
-                            new_askel.clear().animateEx(new_skela, orn.time);
-                            new_askel.updateMatrixParents(MatrixMIdentity, new_bone_i);
-
-                            MatrixD3 new_bone_transformed = new_bone_m;
-                            new_bone_transformed *= BoneWeightOrn(old_bones); // bone world orientation at the current time
-                            if (new_parent) {
-                                MatrixD3 new_parent_transformed;
-                                new_parent_m.mul(new_askel.bones[new_bone.parent].matrix(), new_parent_transformed); // parent bone world orientation at the current time, new_parent_transformed=new_parent_m*new_askel.bones[new_bone.parent].matrix()
-                                new_bone_transformed *= new_parent_transformed.inverseNonOrthogonal();               // new_bone_transformed/=new_parent_transformed with non-orthogonal support (needed because of possible scale keyframes)
-                            } else if (root_has_orn_scale)
-                                new_bone_transformed /= new_askel.root.matrix().orn();
-                            OrientD o = new_bone_transformed;
-                            o.fix();
-                            orn.orn = o;
-                        }
-                        orn_times.clear();
-                        // add orientations to the animation only after everything was setup
-                        anim.setTangents(loop(), length());
-                        if (added)
-                            Swap(anim.orns, added->orns);
-                        else {
-                            added = &anim_out.bones.New();
-                            Swap(anim, *added);
-                        }
-                        new_skela.create(new_skel, anim_out); // need to re-create because we have added orientations
-                    }
-
-                    if (scale_times.elms()) // scale
-                    {
-                        anim.scales.setNumDiscard(scale_times.elms());
-                        REPA(anim.scales) { // Warning: Scale conversion is not perfect, because scales are possible only on each axis separately, so if new bone is not rotated by 90 deg, then artifacts may occur
-                            AnimKeys::Scale &scale = anim.scales[i];
-                            scale.time = scale_times[i];
-                            old_askel.clear().animateEx(old_skela, scale.time);
-                            if (old_bones.elms() == 1)
-                                old_askel.updateMatrixParents(MatrixMIdentity, old_bones[0].index);
-                            else
-                                old_askel.updateMatrix();
-                            new_askel.clear().animateEx(new_skela, scale.time);
-                            new_askel.updateMatrixParents(MatrixMIdentity, new_bone_i);
-
-                            Matrix3 old_abon_matrix___orn = BoneWeightOrn(old_bones);
-                            Vec new_bone_cross = new_bone.cross(),
-                                old_scale((new_bone_cross * old_abon_matrix___orn).length(), // desired scale (yes here should be 'new_bone' too, because we want to calculate the scale for new bone using old transformation matrix)
-                                          (new_bone.perp * old_abon_matrix___orn).length(),
-                                          (new_bone.dir * old_abon_matrix___orn).length()),
-                                new_scale((new_bone_cross * new_abon.matrix().orn()).length(), // current scale
-                                          (new_bone.perp * new_abon.matrix().orn()).length(),
-                                          (new_bone.dir * new_abon.matrix().orn()).length()),
-                                rel_scale = old_scale / new_scale; // relative scale that should be applied
-                            scale.scale = ScaleFactorR(rel_scale);
-                        }
-                        scale_times.clear();
-                        // add scales to the animation only after everything was setup
-                        anim.setTangents(loop(), length());
-                        if (added)
-                            Swap(anim.scales, added->scales);
-                        else {
-                            added = &anim_out.bones.New();
-                            Swap(anim, *added);
-                        }
-                        new_skela.create(new_skel, anim_out); // need to re-create because we have added scales
-                    }
-
-                    if (pos_times.elms()) // position
-                    {
-                        MatrixD3 new_parent_m;
-                        if (new_parent)
-                            new_parent_m = *new_parent;
-                        anim.poss.setNumDiscard(pos_times.elms());
-                        REPA(anim.poss) {
-                            AnimKeys::Pos &pos = anim.poss[i];
-                            pos.time = pos_times[i];
-                            old_askel.clear().animateEx(old_skela, pos.time);
-                            if (old_bones.elms() == 1)
-                                old_askel.updateMatrixParents(MatrixMIdentity, old_bones[0].index);
-                            else
-                                old_askel.updateMatrix();
-                            new_askel.clear().animateEx(new_skela, pos.time);
-                            new_askel.updateMatrixParents(MatrixMIdentity, new_bone_i);
-
-                            pos.pos = BoneWeightPos(old_bones) // desired mesh transform offset
-                                      - new_abon.matrix().pos; // current mesh transform offset
-                            if (new_parent) {
-                                MatrixD3 new_parent_transformed;
-                                new_parent_m.mul(new_askel.bones[new_bone.parent].matrix(), new_parent_transformed); // parent bone world orientation at the current time, new_parent_transformed=new_parent_m*new_askel.bones[new_bone.parent].matrix()
-                                pos.pos *= new_parent_transformed.inverseNonOrthogonal();                            // pos.pos/=new_parent_transformed with non-orthogonal support (needed because of possible scale keyframes)
-                            } else if (root_has_orn_scale)
-                                pos.pos /= new_askel.root.matrix().orn();
-                        }
-                        pos_times.clear();
-                        // add positions to the animation only after everything was setup
-                        anim.setTangents(loop(), length());
-                        if (added)
-                            Swap(anim.poss, added->poss);
-                        else {
-                            added = &anim_out.bones.New();
-                            Swap(anim, *added);
-                        }
-                        // new_skela.create(new_skel, anim_out); // need to re-create because we have added positions, won't be used for anything
-                    }
-                }
-            }
             old_bones.clear();
         }
     }
+    PROFILE_STOP("Animation::adjustForSameTransformWithDifferentSkeleton(C Skeleton &old_skel, C Skeleton &new_skel, Int old_skel_bone_as_root, C CMemPtr<Mems<IndexWeight>> &weights, UInt root_flags)")
     Swap(anim_out, T);
     return T;
 }
 Animation &Animation::offsetRootBones(C Skeleton &skeleton, C Vec &move) {
+    PROFILE_START("Animation::offsetRootBones(C Skeleton &skeleton, C Vec &move)")
     if (move.any()) {
         AnimParams params(T, 0);
         Memt<Flt, 16384> times;
@@ -3584,10 +3783,12 @@ Animation &Animation::offsetRootBones(C Skeleton &skeleton, C Vec &move) {
             setRootMatrix();
         }
     }
+    PROFILE_STOP("Animation::offsetRootBones(C Skeleton &skeleton, C Vec &move)")
     return T;
 }
 /******************************************************************************/
 static void FreezePos(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_index, C Vec *delta) {
+    PROFILE_START("FreezePos(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_index, C Vec *delta)")
     Bool root = (skel_bone < 0);
     if (root || InRange(skel_bone, skel.bones)) {
         AnimBone *abon;
@@ -3602,8 +3803,10 @@ static void FreezePos(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_
             if (abon = anim.findBone(sbon.name, sbon.type, sbon.type_index, sbon.type_sub)) {
                 keys = abon;
                 default_orn = GetAnimOrient(sbon, skel.bones.addr(sbon.parent));
-            } else
+            } else {
+                PROFILE_STOP("FreezePos(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_index, C Vec *delta)")
                 return;
+            }
         }
         Bool all_keys = (key_index < 0);
         if (all_keys || InRange(key_index, keys->poss)) {
@@ -3704,8 +3907,10 @@ static void FreezePos(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_
             }
         }
     }
+    PROFILE_STOP("FreezePos(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_index, C Vec *delta)")
 }
 static void FreezeRot(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_index, C Matrix3 *matrix, Bool pos) {
+    PROFILE_START("FreezeRot(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_index, C Matrix3 *matrix, Bool pos)")
     Bool root = (skel_bone < 0);
     if (root || InRange(skel_bone, skel.bones)) {
         C SkelBone *sbon;
@@ -3722,8 +3927,10 @@ static void FreezeRot(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_
             if (abon = anim.findBone(sbon->name, sbon->type, sbon->type_index, sbon->type_sub)) {
                 keys = abon;
                 default_orn = GetAnimOrient(*sbon, skel.bones.addr(sbon->parent));
-            } else
+            } else {
+                PROFILE_STOP("FreezeRot(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_index, C Matrix3 *matrix, Bool pos)")
                 return;
+            }
         }
         Bool all_keys = (key_index < 0);
         if (all_keys || InRange(key_index, keys->orns)) {
@@ -3907,6 +4114,7 @@ static void FreezeRot(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_
             }
         }
     }
+    PROFILE_STOP("FreezeRot(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_index, C Matrix3 *matrix, Bool pos)")
 }
 void Animation::freezeDelPos(C Skeleton &skel, Int skel_bone, Int key_index) { FreezePos(T, skel, skel_bone, key_index, null); }
 void Animation::freezeMove(C Skeleton &skel, Int skel_bone, Int key_index, C Vec &delta) { FreezePos(T, skel, skel_bone, key_index, &delta); }
@@ -3914,6 +4122,7 @@ void Animation::freezeDelRot(C Skeleton &skel, Int skel_bone, Int key_index, Boo
 void Animation::freezeRotate(C Skeleton &skel, Int skel_bone, Int key_index, C Matrix3 &matrix, Bool pos) { FreezeRot(T, skel, skel_bone, key_index, &matrix, pos); }
 /******************************************************************************/
 Animation &Animation::setBoneTypeIndexesFromSkeleton(C Skeleton &skeleton) {
+    PROFILE_START("Animation::setBoneTypeIndexesFromSkeleton(C Skeleton &skeleton)")
     enum MODE {
         KEEP,
         CLEAR,
@@ -3935,9 +4144,11 @@ Animation &Animation::setBoneTypeIndexesFromSkeleton(C Skeleton &skeleton) {
                 break; // clear to BONE_UNKNOWN
             }
     }
+    PROFILE_STOP("Animation::setBoneTypeIndexesFromSkeleton(C Skeleton &skeleton)")
     return T;
 }
 Bool Animation::setBoneNameTypeIndexesFromSkeleton(C Skeleton &skeleton) {
+    PROFILE_START("Animation::setBoneNameTypeIndexesFromSkeleton(C Skeleton &skeleton)")
     Bool changed = false;
     REPA(bones) {
         AnimBone &bone = bones[i];
@@ -3952,10 +4163,12 @@ Bool Animation::setBoneNameTypeIndexesFromSkeleton(C Skeleton &skeleton) {
             changed = true;
         }
     }
+    PROFILE_STOP("Animation::setBoneNameTypeIndexesFromSkeleton(C Skeleton &skeleton)")
     return changed;
 }
 /******************************************************************************/
 Animation &Animation::reverse() {
+    PROFILE_START("Animation::reverse()")
     keys.reverse(length());
     REPAO(bones).reverse(length());
 
@@ -3965,31 +4178,41 @@ Animation &Animation::reverse() {
     }
     events.reverseOrder();
 
+    PROFILE_STOP("Animation::reverse()")
     return setRootMatrix();
 }
 Animation &Animation::sortEvents() {
+    PROFILE_START("Animation::sortEvents()")
     events.sort(Compare);
+    PROFILE_STOP("Animation::sortEvents()")
     return T;
 }
 Animation &Animation::sortFrames() {
+    PROFILE_START("Animation::sortFrames()")
     keys.sortFrames();
     REPAO(bones).sortFrames();
+    PROFILE_STOP("Animation::sortFrames()")
     return setRootMatrix();
 }
 Animation &Animation::setTangents() {
+    PROFILE_START("Animation::setTangents()")
     keys.setTangents(loop(), length());
     REPAO(bones).setTangents(loop(), length());
+    PROFILE_STOP("Animation::setTangents()")
     return T;
 }
 Animation &Animation::optimize(Flt angle_eps, Flt pos_eps, Flt scale_eps, Bool remove_unused_bones) {
+    PROFILE_START("Animation::optimize(Flt angle_eps, Flt pos_eps, Flt scale_eps, Bool remove_unused_bones)")
     keys.optimize(loop(), linear(), length(), angle_eps, pos_eps, scale_eps, &NoTemp(Orient(Vec(0, 0, 1), Vec(0, 1, 0)))); // we can remove default orientation for root
     REPAO(bones).optimize(loop(), linear(), length(), angle_eps, pos_eps, scale_eps);
     if (remove_unused_bones)
         removeUnused();
     setRootMatrix();
+    PROFILE_STOP("Animation::optimize(Flt angle_eps, Flt pos_eps, Flt scale_eps, Bool remove_unused_bones)")
     return T;
 }
 Animation &Animation::clip(Flt start_time, Flt end_time, Bool remove_unused_bones) {
+    PROFILE_START("Animation::clip(Flt start_time, Flt end_time, Bool remove_unused_bones)")
     // if(start_time!=0 || end_time!=length()) don't check this, because we may have keyframe data outside of this range that needs to be removed
     {
         keys.clip(loop(), linear(), length(), start_time, end_time);
@@ -4014,9 +4237,11 @@ Animation &Animation::clip(Flt start_time, Flt end_time, Bool remove_unused_bone
         }
         setRootMatrix();
     }
+    PROFILE_STOP("Animation::clip(Flt start_time, Flt end_time, Bool remove_unused_bones)")
     return T;
 }
 Bool Animation::timeRange(Flt &min, Flt &max) C {
+    PROFILE_START("Animation::timeRange(Flt &min, Flt &max)")
     min = FLT_MAX;
     max = -FLT_MAX;
     Flt s, e;
@@ -4034,22 +4259,30 @@ Bool Animation::timeRange(Flt &min, Flt &max) C {
         MIN(min, t);
         MAX(max, t);
     }
-    if (min <= max)
+    if (min <= max) {
+        PROFILE_STOP("Animation::timeRange(Flt &min, Flt &max)")
         return true;
+    }
     min = max = 0;
+    PROFILE_STOP("Animation::timeRange(Flt &min, Flt &max)")
     return false;
 }
 Animation &Animation::clipAuto() {
+    PROFILE_START("Animation::clipAuto()")
     Flt min, max;
     timeRange(min, max);
+    PROFILE_STOP("Animation::clipAuto()")
     return clip(min, max);
 }
 Animation &Animation::maximizeLength() {
+    PROFILE_START("Animation::maximizeLength()")
     Flt min, max;
     timeRange(min, max);
+    PROFILE_STOP("Animation::maximizeLength()")
     return length(Max(length(), max), false);
 }
 Animation &Animation::offsetTime(Flt dt) {
+    PROFILE_START("Animation::offsetTime(Flt dt)")
     if (Flt time = Frac(-dt, length())) {
         if (1) {
             AnimParams params(T, time);
@@ -4084,7 +4317,7 @@ Animation &Animation::offsetTime(Flt dt) {
                     orn.time = 0;
                     orn.orn = start.orn();
                     orn.orn.fix();
-                }                // add first key
+                } // add first key
                 FREPA(keys.orns) // add keys after 'time'
                 {
                     C AnimKeys::Orn &src = keys.orns[i];
@@ -4125,7 +4358,7 @@ Animation &Animation::offsetTime(Flt dt) {
                     AnimKeys::Pos &pos = poss.New();
                     pos.time = 0;
                     pos.pos = start.pos;
-                }                // add first key
+                } // add first key
                 FREPA(keys.poss) // add keys after 'time'
                 {
                     C AnimKeys::Pos &src = keys.poss[i];
@@ -4165,6 +4398,7 @@ Animation &Animation::offsetTime(Flt dt) {
         sortEvents();
         setRootMatrix();
     }
+    PROFILE_STOP("Animation::offsetTime(Flt dt)")
     return T;
 }
 /******************************************************************************/
@@ -4215,6 +4449,7 @@ struct TimeScaleRange {
     }
 };
 Animation &Animation::scaleTime(Flt start_time, Flt end_time, Flt scale) {
+    PROFILE_START("Animation::scaleTime(Flt start_time, Flt end_time, Flt scale)")
     if (scale != 1 && scale >= 0) {
         Clamp(start_time, 0, length());
         Clamp(end_time, 0, length());
@@ -4230,20 +4465,26 @@ Animation &Animation::scaleTime(Flt start_time, Flt end_time, Flt scale) {
             length(ts.new_length, false);
         }
     }
+    PROFILE_STOP("Animation::scaleTime(Flt start_time, Flt end_time, Flt scale)")
     return T;
 }
 /******************************************************************************/
 Animation &Animation::scale(Flt scale) {
+    PROFILE_START("Animation::scale(Flt scale)")
     keys.scale(scale);
     REPAO(bones).scale(scale);
+    PROFILE_STOP("Animation::scale(Flt scale)")
     return setRootMatrix();
 }
 Animation &Animation::mirrorX() {
+    PROFILE_START("Animation::mirrorX()")
     keys.mirrorX();
     REPAO(bones).mirrorX();
+    PROFILE_STOP("Animation::mirrorX()")
     return setRootMatrix();
 }
 Animation &Animation::transform(C Matrix &matrix, C Skeleton &source, Bool skel_const) {
+    PROFILE_START("Animation::transform(C Matrix &matrix, C Skeleton &source, Bool skel_const)")
     // root
     AnimParams anim_params(T, 0);
     // AnimKeys   old=keys;
@@ -4338,7 +4579,7 @@ Animation &Animation::transform(C Matrix &matrix, C Skeleton &source, Bool skel_
 #endif
 
             // position
-#if 1 // optimized
+#if 1                       // optimized
             if (skel_const) // as explained below, the more complex formula has to be done only for ANIM_TRANSFORM_SKEL_CONST, because for other cases, 'temp.pos' is zero
             {
                 Vec bone = source.bones[sbon_index].pos;
@@ -4398,6 +4639,7 @@ Animation &Animation::transform(C Matrix &matrix, C Skeleton &source, Bool skel_
         } else
             REPAO(abon.poss).pos *= scale; // for sub bones we can use only uniform scale
     }
+    PROFILE_STOP("Animation::transform(C Matrix &matrix, C Skeleton &source, Bool skel_const)")
     return setTangents().setRootMatrix();
 }
 Animation &Animation::rightToLeft(C Skeleton &source) // this method can ignore name differences because it's used only during importing while the names are the same
@@ -4405,12 +4647,15 @@ Animation &Animation::rightToLeft(C Skeleton &source) // this method can ignore 
     return transform(Matrix3().setRotateX(-PI_2), source, false).mirrorX(); // set 'skel_const'=false because this method is called only during import, in which cases the skeleton is always going to get transformed too
 }
 static Str BoneNeutralName(C Str &name) {
+    PROFILE_START("BoneNeutralName(C Str &name)")
     Str n = Replace(name, "right", CharAlpha);
     n = Replace(n, "left", CharAlpha);
     n.replace('r', CharBeta).replace('l', CharBeta).replace('R', CharBeta).replace('L', CharBeta);
+    PROFILE_STOP("BoneNeutralName(C Str &name)")
     return n;
 }
 Animation &Animation::mirror(C Skeleton &source) {
+    PROFILE_START("Animation::mirror(C Skeleton &source)")
     MemtN<Bool, 256> bone_remapped;
     bone_remapped.setNumZero(bones.elms());
     REPA(bones)
@@ -4433,27 +4678,33 @@ Animation &Animation::mirror(C Skeleton &source) {
         }
     finished:;
     }
+    PROFILE_STOP("Animation::mirror(C Skeleton &source)")
     return mirrorX();
 }
 /******************************************************************************/
 #if HAS_ANIM_ROT
 Animation &Animation::convertRotToOrn(C Skeleton &skeleton) // this method can ignore name differences because it's used only during importing while the names are the same
 {
+    PROFILE_START("Animation::convertRotToOrn(C Skeleton &skeleton)")
     SkelAnim skel_anim(skeleton, T);
     keys.convertRotToOrn(skeleton, -1, loop(), length());
     REPAO(bones).convertRotToOrn(skeleton, skel_anim.abonToSbon(i), loop(), length());
+    PROFILE_STOP("Animation::convertRotToOrn(C Skeleton &skeleton)")
     return T;
 }
 Animation &Animation::convertOrnToRot(C Skeleton &skeleton) // this method can ignore name differences because it's used only during importing while the names are the same
 {
+    PROFILE_START("Animation::convertOrnToRot(C Skeleton &skeleton)")
     SkelAnim skel_anim(skeleton, T);
     keys.convertOrnToRot(skeleton, -1, loop(), length());
     REPAO(bones).convertOrnToRot(skeleton, skel_anim.abonToSbon(i), loop(), length());
+    PROFILE_STOP("Animation::convertOrnToRot(C Skeleton &skeleton)")
     return T;
 }
 #endif
 /******************************************************************************/
 void Animation::includeTimesForBoneAndItsParents(C Skeleton &skel, Int skel_bone, MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times) C {
+    PROFILE_START("Animation::includeTimesForBoneAndItsParents(C Skeleton &skel, Int skel_bone, MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times)")
     if (InRange(skel_bone, skel.bones))
         for (;;) {
             C SkelBone &sbon = skel.bones[skel_bone];
@@ -4468,6 +4719,7 @@ void Animation::includeTimesForBoneAndItsParents(C Skeleton &skel, Int skel_bone
             skel_bone = sbon.parent;
         }
     keys.includeTimes(orn_times, pos_times, scale_times);
+    PROFILE_STOP("Animation::includeTimesForBoneAndItsParents(C Skeleton &skel, Int skel_bone, MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times)")
 }
 /******************************************************************************/
 Animation &Animation::copyParams(C Animation &src) {
@@ -4477,6 +4729,7 @@ Animation &Animation::copyParams(C Animation &src) {
 }
 /******************************************************************************/
 void Animation::freezeBone(C Skeleton &skel, Int skel_bone) {
+    PROFILE_START("Animation::freezeBone(C Skeleton &skel, Int skel_bone)")
     if (InRange(skel_bone, skel.bones)) {
         SkelAnim skel_anim(skel, T);
         AnimSkel anim_skel;
@@ -4529,6 +4782,7 @@ void Animation::freezeBone(C Skeleton &skel, Int skel_bone) {
             Swap(getBone(root.name, root.type, root.type_index, root.type_sub).poss, keys.poss); // swap only positions
         }
     }
+    PROFILE_STOP("Animation::freezeBone(C Skeleton &skel, Int skel_bone)")
 }
 /******************************************************************************/
 Bool Animation::save(File &f) C {

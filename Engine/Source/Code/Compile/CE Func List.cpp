@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿// TODO ADD PROFILE_START AND PROFILE_STOP PROFILERS
+/******************************************************************************/
 #include "stdafx.h"
 // #define SUPPORT_SCRIPTS
 namespace EE {

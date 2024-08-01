@@ -6,10 +6,13 @@ namespace Game {
 #define DEFAULT_MODE BREAKABLE // here you can specify the default mode for Destructible objects - STATIC or BREAKABLE
 /******************************************************************************/
 static void CreateJoint(Joint &joint, Actor &a, Actor *b) {
+    PROFILE_START("CreateJoint(Joint &joint, Actor &a, Actor *b)")
     Flt mass = (b ? (a.mass() + b->mass()) : a.mass());
     joint.create(a, b).breakable(mass * 3.1f, mass * 0.22f);
+    PROFILE_STOP("CreateJoint(Joint &joint, Actor &a, Actor *b)")
 }
 static void CreateJoint(Joint &joint, Destructible &a, Destructible *b) {
+    PROFILE_START("CreateJoint(Joint &joint, Destructible &a, Destructible *b)")
     if (a.actors.elms()) {
         if (b) // joint attaches actor with other actor
         {
@@ -20,6 +23,7 @@ static void CreateJoint(Joint &joint, Destructible &a, Destructible *b) {
             CreateJoint(joint, a.actors.first(), null);
         }
     }
+    PROFILE_STOP("CreateJoint(Joint &joint, Destructible &a, Destructible *b)")
 }
 /******************************************************************************/
 Destructible::~Destructible() {
@@ -35,6 +39,7 @@ Destructible::Destructible() {
 // MANAGE
 /******************************************************************************/
 void Destructible::setUnsavedParams() {
+    PROFILE_START("Destructible::setUnsavedParams()")
     if (base)
         if (C Param *destruct = base->findParam("destruct"))
             destruct_mesh = DestructMeshes.get(destruct->asID());
@@ -46,8 +51,10 @@ void Destructible::setUnsavedParams() {
         if (base)
             mesh = base->mesh();
     }
+    PROFILE_STOP("Destructible::setUnsavedParams()")
 }
 void Destructible::create(Object &obj) {
+    PROFILE_START("Destructible::create()")
     arbitrary_name = "Destructible Object";
     scale = obj.scale();
     base = obj.firstStored();
@@ -69,6 +76,7 @@ void Destructible::create(Object &obj) {
         Exit("Unrecognized Destructible Mode");
         break;
     }
+    PROFILE_STOP("Destructible::create()")
 }
 /******************************************************************************/
 // GET / SET
@@ -82,6 +90,7 @@ void Destructible::matrix(C Matrix &matrix) { REPAO(actors).matrix(matrix); }
 // OPERATIONS
 /******************************************************************************/
 void Destructible::setStatic(C Matrix &matrix, Byte actor_group) {
+    PROFILE_START("Destructible::setStatic(C Matrix &matrix, Byte actor_group)")
     mode = STATIC;
     piece_index = -1;
     joints.del();
@@ -91,8 +100,10 @@ void Destructible::setStatic(C Matrix &matrix, Byte actor_group) {
             .matrix(matrix)
             .obj(this)
             .group(actor_group);
+    PROFILE_STOP("Destructible::setStatic(C Matrix &matrix, Byte actor_group)")
 }
 void Destructible::setBreakable(C Matrix &matrix, Byte actor_group) {
+    PROFILE_START("Destructible::setBreakable(C Matrix &matrix, Byte actor_group)")
     mode = BREAKABLE;
     piece_index = -1;
     joints.del();
@@ -103,6 +114,7 @@ void Destructible::setBreakable(C Matrix &matrix, Byte actor_group) {
         actors.New().create(destruct_mesh->part(i).phys, 1, scale).matrix(matrix).obj(this).group(actor_group);
         REPAO(actors).sleep(true); // put to sleep, call this after all actors have been created, in case creating other actors will wake up the neighbors
     }
+    PROFILE_STOP("Destructible::setBreakable(C Matrix &matrix, Byte actor_group)")
 }
 struct ActorInfo {
     Vec vel, ang_vel;
@@ -117,6 +129,7 @@ struct ActorInfo {
     }
 };
 void Destructible::setPieces(Bool create_joints) {
+    PROFILE_START("Destructible::setPieces(Bool create_joints)")
     if ((mode == STATIC || mode == BREAKABLE) // not a piece
         && destruct_mesh                      // has information about destructible mesh
         && destruct_mesh->parts()             // destructible mesh has parts
@@ -190,19 +203,26 @@ void Destructible::setPieces(Bool create_joints) {
             destr->actors.first().matrix(ai.matrix).vel(ai.vel).angVel(ai.ang_vel).group(ai.group);
         }
     }
+    PROFILE_STOP("Destructible::setPieces(Bool create_joints)")
 }
 /******************************************************************************/
 void Destructible::toStatic() {
+    PROFILE_START("Destructible::toStatic()")
     if (mode == BREAKABLE)
         setStatic(matrix(), actors.elms() ? actors[0].group() : 0);
+    PROFILE_STOP("Destructible::toStatic()")
 }
 void Destructible::toBreakable() {
+    PROFILE_START("Destructible::toBreakable()")
     if (mode == STATIC)
         setBreakable(matrix(), actors.elms() ? actors[0].group() : 0);
+    PROFILE_STOP("Destructible::toBreakable()")
 }
 void Destructible::toPieces() {
+    PROFILE_START("Destructible::toPieces()")
     if (mode == STATIC || mode == BREAKABLE)
         setPieces(false);
+    PROFILE_STOP("Destructible::toPieces()")
 }
 /******************************************************************************/
 // CALLBACKS
@@ -225,6 +245,7 @@ void Destructible::linkReferences() {
 /******************************************************************************/
 #define EPS_ACTOR_ENERGY 0.0002f
 Bool Destructible::update() {
+    PROFILE_START("Destructible::update()")
     switch (mode) {
     case BREAKABLE: {
         REPA(actors)
@@ -236,9 +257,10 @@ Bool Destructible::update() {
     } break;
 
     case PIECE: {
-        if (!destruct_mesh || !InRange(piece_index, destruct_mesh->parts()))
+        if (!destruct_mesh || !InRange(piece_index, destruct_mesh->parts())) {
+            PROFILE_STOP("Destructible::update()")
             return false;
-
+        }
         // pieces can reach very high velocities due to collisions, so clamp the velocity to maximum of 100
         Vec vel = actors.first().vel();
         if (vel.length() > 100) {
@@ -247,12 +269,14 @@ Bool Destructible::update() {
         }
     } break;
     }
+    PROFILE_STOP("Destructible::update()")
     return true;
 }
 /******************************************************************************/
 // DRAW
 /******************************************************************************/
 UInt Destructible::drawPrepare() {
+    PROFILE_START("Destructible::drawPrepare()")
     if (mesh) {
         Matrix matrix = matrixScaled();
         if (Frustum(*mesh, matrix)) {
@@ -261,10 +285,12 @@ UInt Destructible::drawPrepare() {
             SetVariation();
         }
     }
+    PROFILE_STOP("Destructible::drawPrepare()")
     return 0; // no additional render modes required
 }
 /******************************************************************************/
 void Destructible::drawShadow() {
+    PROFILE_START("Destructible::drawShadow()")
     if (mesh) {
         Matrix matrix = matrixScaled();
         if (Frustum(*mesh, matrix)) {
@@ -273,18 +299,22 @@ void Destructible::drawShadow() {
             SetVariation();
         }
     }
+    PROFILE_STOP("Destructible::drawShadow()")
 }
 /******************************************************************************/
 // ENABLE / DISABLE
 /******************************************************************************/
 void Destructible::disable() {
+    PROFILE_START("Destructible::disable()")
     // freeze all actors
     if (mode != STATIC) // static actor doesn't need to be freezed
     {
         REPAO(actors).kinematic(true); // freeze
     }
+    PROFILE_STOP("Destructible::disable()")
 }
 void Destructible::enable() {
+    PROFILE_START("Destructible::enable()")
     // unfreeze all actors
     if (mode != STATIC) // static actor doesn't need to be unfreezed
     {
@@ -292,6 +322,7 @@ void Destructible::enable() {
         if (mode == BREAKABLE)
             REPAO(actors).sleep(false); // put to sleep
     }
+    PROFILE_STOP("Destructible::enable()")
 }
 /******************************************************************************/
 // IO

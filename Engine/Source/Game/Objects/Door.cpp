@@ -23,6 +23,7 @@ void Door::setUnsavedParams() {
         actor.create(*base->phys(), 1, scale).obj(this);
 }
 void Door::create(Object &obj) {
+    PROFILE_START("CatzEngine::Door::create(Object &obj)")
     arbitrary_name = "Door Object";
     scale = obj.scale();
     base = obj.firstStored();
@@ -41,6 +42,7 @@ void Door::create(Object &obj) {
         joint.createHinge(actor, null, _hinge_matrix.pos, _hinge_matrix.y, -PI_2, PI_2);
     }
     setObstacle();
+    PROFILE_STOP("CatzEngine::Door::create(Object &obj)")
 }
 /******************************************************************************/
 // GET / SET
@@ -57,6 +59,7 @@ void Door::memoryAddressChanged() {
 // UPDATE
 /******************************************************************************/
 Bool Door::update() {
+    PROFILE_START("CatzEngine::Door::update()")
     if (_state == STATE_UNKNOWN) {
         Flt angle = AngleNormalize(PI - AngleXZ(actor.pos(), _hinge_matrix)), // get angle of the actor position relative to the hinge position
             angle_delta = actor.angVel().y * Time.d();                        // current frame angle delta
@@ -95,12 +98,14 @@ Bool Door::update() {
         }
         T._angle = angle; // store new angle
     }
+    PROFILE_STOP("CatzEngine::Door::update()")
     return true;
 }
 /******************************************************************************/
 // DRAW
 /******************************************************************************/
 UInt Door::drawPrepare() {
+    PROFILE_START("CatzEngine::Door::drawPrepare()")
     if (mesh && actor.is()) {
         Matrix matrix = actor.matrix().scaleOrn(scale);
         if (Frustum(*mesh, matrix)) {
@@ -109,9 +114,11 @@ UInt Door::drawPrepare() {
             SetVariation();
         }
     }
+    PROFILE_STOP("CatzEngine::Door::drawPrepare()")
     return 0; // no additional render modes required
 }
 void Door::drawShadow() {
+    PROFILE_START("CatzEngine::Door::drawShadow()")
     if (mesh && actor.is()) {
         Matrix matrix = actor.matrix().scaleOrn(scale);
         if (Frustum(*mesh, matrix)) {
@@ -120,6 +127,7 @@ void Door::drawShadow() {
             SetVariation();
         }
     }
+    PROFILE_STOP("CatzEngine::Door::drawShadow()")
 }
 /******************************************************************************/
 // ENABLE / DISABLE

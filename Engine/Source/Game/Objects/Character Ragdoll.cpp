@@ -4,15 +4,18 @@ namespace EE {
 namespace Game {
 /******************************************************************************/
 void Chr::ragdollValidate() {
+    PROFILE_START("CatzEngine::Chr::ragdollValidate()")
     if (!ragdoll.is()) // if ragdoll hasn't yet been created
     {
         ragdoll.create(skel, scale) // create from 'AnimatedSkeleton'
             .obj(this)              // set Game.Chr object
             .ignore(ctrl.actor);    // ignore collisions with the character controller
     }
+    PROFILE_STOP("CatzEngine::Chr::ragdollValidate()")
 }
 /******************************************************************************/
 void Chr::ragdollEnable() {
+    PROFILE_START("CatzEngine::Chr::ragdollEnable()")
     if (ragdoll_mode != RAGDOLL_FULL) {
         ragdollValidate(); // make sure the ragdoll is created
 
@@ -23,18 +26,22 @@ void Chr::ragdollEnable() {
 
         ragdoll_mode = RAGDOLL_FULL;
     }
+    PROFILE_STOP("CatzEngine::Chr::ragdollEnable()")
 }
 /******************************************************************************/
 void Chr::ragdollDisable() {
+    PROFILE_START("CatzEngine::Chr::ragdollDisable()")
     if (ragdoll_mode == RAGDOLL_FULL) {
         ragdoll.active(false);
         ctrl.actor.active(true);
 
         ragdoll_mode = RAGDOLL_NONE;
     }
+    PROFILE_STOP("CatzEngine::Chr::ragdollDisable()")
 }
 /******************************************************************************/
 Bool Chr::ragdollBlend() {
+    PROFILE_START("CatzEngine::Chr::ragdollBlend()")
     if (ragdoll_mode != RAGDOLL_FULL) {
         ragdollValidate(); // make sure the ragdoll is created
 
@@ -44,9 +51,10 @@ Bool Chr::ragdollBlend() {
 
         ragdoll_time = 0;
         ragdoll_mode = RAGDOLL_PART;
-
+        PROFILE_STOP("CatzEngine::Chr::ragdollBlend()")
         return true; // ragdoll set successfully
     }
+    PROFILE_STOP("CatzEngine::Chr::ragdollBlend()")
     return false; // can't set ragdoll mode
 }
 /******************************************************************************/

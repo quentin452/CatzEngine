@@ -5,16 +5,19 @@ namespace Game {
 /******************************************************************************/
 void Chr::actionBreak() // break current action
 {
+    PROFILE_START("CatzEngine::Chr::actionBreak()")
     action = ACTION_NONE;
     path.clear();
 
     // clear input
     input.move.zero();
     input.turn.zero();
+    PROFILE_STOP("CatzEngine::Chr::actionBreak()")
 }
 /******************************************************************************/
 Bool Chr::actionMoveTo(C Vec &pos) // set 'move to' action
 {
+    PROFILE_START("CatzEngine::Chr::actionMoveTo(C Vec &pos)")
     // break any current action
     actionBreak();
 
@@ -24,19 +27,23 @@ Bool Chr::actionMoveTo(C Vec &pos) // set 'move to' action
     {
         path.reverseOrder();
         action = ACTION_MOVE_TO; // set new action
+        PROFILE_STOP("CatzEngine::Chr::actionMoveTo(C Vec &pos)")
         return true;
     }
+    PROFILE_STOP("CatzEngine::Chr::actionMoveTo(C Vec &pos)")
     return false;
 }
 /******************************************************************************/
 void Chr::actionMoveDir(C Vec &dir) // set 'move to direction' action
 {
+    PROFILE_START("CatzEngine::Chr::actionMoveDir(C Vec &dir)")
     // break any current action
     actionBreak();
 
     // set new action
     action = ACTION_MOVE_DIR;
     move_dir = dir.xz();
+    PROFILE_STOP("CatzEngine::Chr::actionMoveDir(C Vec &dir)")
 }
 /******************************************************************************/
 #define ANGLE_INC 10.0f
@@ -47,6 +54,7 @@ void Chr::actionMoveDir(C Vec &dir) // set 'move to direction' action
 // returns true  - when the character is near the target angle and can proceed moving forward
 // returns false - if it should stay still and rotate only
 static Bool InputToAngle(Chr &chr, Flt from, Flt to, Flt turn_speed, Flt desired_speed) {
+    PROFILE_START("InputToAngle(Chr &chr, Flt from, Flt to, Flt turn_speed, Flt desired_speed)")
     Flt d = AngleDelta(from, to),
         ad = Abs(d);
     if (ad < 0.001f)
@@ -71,6 +79,7 @@ static Bool InputToAngle(Chr &chr, Flt from, Flt to, Flt turn_speed, Flt desired
     if (turn_speed > EPS)
         limit /= Max(1, turn_speed / 3.5f);
 
+    PROFILE_STOP("InputToAngle(Chr &chr, Flt from, Flt to, Flt turn_speed, Flt desired_speed)")
     return ad < limit;
 }
 static Bool ChrToAngle(Chr &chr, C Vec2 &dir) { return InputToAngle(chr, chr.angle.x + PI_2, Angle(dir), chr.turn_speed, chr.desiredSpeed()); }
@@ -78,29 +87,38 @@ static Bool ChrToAngle(Chr &chr, C Vec &pos) { return ChrToAngle(chr, pos.xz() -
 /******************************************************************************/
 static void StopAngleInput(Chr &chr) // stop angle input
 {
+    PROFILE_START("StopAngleInput(Chr &chr)")
     Flt d = ANGLE_INC * Time.d();
     AdjustValDir(chr.input_turn.x, chr.input.turn.x = 0, d);
     AdjustValDir(chr.input_turn.y, chr.input.turn.y = 0, d);
+    PROFILE_STOP("StopAngleInput(Chr &chr)")
 }
 static void StopDirInput(Chr &chr) // stop direction movement input
 {
+    PROFILE_START("StopDirInput(Chr &chr)")
     Flt inc = DIR_INC * Time.d(),
         dec = DIR_DEC * Time.d();
     AdjustValDir(chr.input_move.x, chr.input.move.x = 0, inc, dec);
     AdjustValDir(chr.input_move.z, chr.input.move.z = 0, inc, dec);
     AdjustValDir(chr.input_move.y, chr.input.move.y = 0, inc, dec);
+    PROFILE_STOP("StopDirInput(Chr &chr)")
 }
 static void StopInput(Chr &chr) // stop angle and direction movement input
 {
+    PROFILE_START("StopInput(Chr &chr)")
     StopAngleInput(chr);
     StopDirInput(chr);
+    PROFILE_STOP("StopInput(Chr &chr)")
 }
 static void ActionBreak(Chr &chr) {
+    PROFILE_START("ActionBreak(Chr &chr)")
     chr.actionBreak();
     StopInput(chr);
+    PROFILE_STOP("ActionBreak(Chr &chr)")
 }
 /******************************************************************************/
 static void UpdateMoveDir(Chr &chr, Vec2 &dir) {
+    PROFILE_START("UpdateMoveDir(Chr &chr, Vec2 &dir)")
     chr.input.move.x = 0;
     chr.input.move.z = ChrToAngle(chr, dir); // if the character is facing the target angle then move forward
     chr.input.move.y = 0;
@@ -110,8 +128,10 @@ static void UpdateMoveDir(Chr &chr, Vec2 &dir) {
     AdjustValDir(chr.input_move.x, chr.input.move.x, inc, dec);
     AdjustValDir(chr.input_move.z, chr.input.move.z, inc, dec);
     AdjustValDir(chr.input_move.y, chr.input.move.y, inc, dec);
+    PROFILE_STOP("UpdateMoveDir(Chr &chr, Vec2 &dir)")
 }
 static void UpdateMoveTo(Chr &chr) {
+    PROFILE_START("UpdateMoveTo(Chr &chr)")
     Vec from = chr.ctrl.actor.pos(); // get current position
     Bool path_searched = false;
     for (;;) {
@@ -141,9 +161,11 @@ static void UpdateMoveTo(Chr &chr) {
             break;                   // return
         }
     }
+    PROFILE_STOP("UpdateMoveTo(Chr &chr)")
 }
 /******************************************************************************/
 void Chr::updateAction() {
+    PROFILE_START("CatzEngine::Chr::updateAction()")
     // update input according to actions
     switch (action) {
     case ACTION_MOVE_TO: // move to target
@@ -196,9 +218,11 @@ void Chr::updateAction() {
             dodge_availability = 0.5f;
         }
     }
+    PROFILE_STOP("CatzEngine::Chr::updateAction()")
 }
 /******************************************************************************/
 void Chr::updateController() {
+    PROFILE_START("CatzEngine::Chr::updateController()")
     // set movement velocity
     Vec velocity;
     if (dodging) // set according to dodging
@@ -239,6 +263,7 @@ void Chr::updateController() {
 
     // update character controller
     ctrl.update(velocity, ctrl.crouched() ? input.crouch : (anim.stand_crouch >= 1), input.jump);
+    PROFILE_STOP("CatzEngine::Chr::updateController()")
 }
 /******************************************************************************/
 } // namespace Game

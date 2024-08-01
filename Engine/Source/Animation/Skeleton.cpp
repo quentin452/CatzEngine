@@ -120,6 +120,7 @@ SkelBone::SkeletonBone() {
     shape.set(radius(), length, Vec(0, 0, 0.5f));
 }
 void SkelBone::draw(C Color &color) C {
+    PROFILE_START("SkelBone::draw(C Color &color)")
     Vec drf = pos + dir * length * BONE_FRAC,
         to = pos + dir * length;
     Vec p = perp;
@@ -145,8 +146,10 @@ void SkelBone::draw(C Color &color) C {
     VI.line(p4, p1);
     VI.line(pos, pos + p);
     VI.end();
+    PROFILE_STOP("SkelBone::draw(C Color &color)")
 }
 void SkelBone::save(TextNode &node, C Skeleton *owner) C {
+    PROFILE_START("SkelBone::save(TextNode &node, C Skeleton *owner)")
     node.set(name);
     super::save(node.nodes);
     node.nodes.New().set("Length", length);
@@ -154,6 +157,7 @@ void SkelBone::save(TextNode &node, C Skeleton *owner) C {
     node.nodes.New().set("Flag", flag);
     if (owner && InRange(parent, owner->bones))
         node.nodes.New().set("Parent", owner->bones[parent].name);
+    PROFILE_STOP("SkelBone::save(TextNode &node, C Skeleton *owner)")
 }
 /******************************************************************************/
 SkelBone &SkelBone::operator+=(C Vec &v) {
@@ -300,38 +304,51 @@ Skeleton &Skeleton::operator=(C Skeleton &src) {
 }
 /******************************************************************************/
 Skeleton &Skeleton::move(C Vec &move) {
+    PROFILE_START("Skeleton::move(C Vec &move)")
     REPAO(bones) += move;
     REPAO(slots) += move;
+    PROFILE_STOP("Skeleton::move(C Vec &move)")
     return T;
 }
 Skeleton &Skeleton::scale(Flt scale) {
+    PROFILE_START("Skeleton::scale(Flt scale)")
     REPAO(bones) *= scale;
     REPAO(slots) *= scale;
+    PROFILE_STOP("Skeleton::scale(Flt scale)")
     return T;
 }
 Skeleton &Skeleton::scale(C Vec &scale) {
+    PROFILE_START("Skeleton::scale(C Vec &scale)")
     REPAO(bones) *= scale;
     REPAO(slots) *= scale;
+    PROFILE_STOP("Skeleton::scale(C Vec &scale)")
     return T;
 }
 Skeleton &Skeleton::scaleMove(C Vec &scale, C Vec &move) {
+    PROFILE_START("Skeleton::scaleMove(C Vec &scale, C Vec &move) ")
     REPA(bones)
     (bones[i] *= scale) += move;
     REPA(slots)
     (slots[i] *= scale) += move;
+    PROFILE_STOP("Skeleton::scaleMove(C Vec &scale, C Vec &move) ")
     return T;
 }
 Skeleton &Skeleton::transform(C Matrix3 &matrix) {
+    PROFILE_START("Skeleton::transform(C Matrix3 &matrix)")
     REPAO(bones) *= matrix;
     REPAO(slots) *= matrix;
+    PROFILE_STOP("Skeleton::transform(C Matrix3 &matrix)")
     return T;
 }
 Skeleton &Skeleton::transform(C Matrix &matrix) {
+    PROFILE_START("Skeleton::transform(C Matrix &matrix)")
     REPAO(bones) *= matrix;
     REPAO(slots) *= matrix;
+    PROFILE_STOP("Skeleton::transform(C Matrix &matrix)")
     return T;
 }
 Skeleton &Skeleton::animate(C AnimatedSkeleton &skel) {
+    PROFILE_START("Skeleton::animate(C AnimatedSkeleton &skel)")
     if (bones.elms() == skel.bones.elms())
         REPAO(bones) *= skel.bones[i].matrix();
     if (slots.elms() == skel.slots.elms())
@@ -340,45 +357,61 @@ Skeleton &Skeleton::animate(C AnimatedSkeleton &skel) {
             slot = skel.slots[i];
             slot.fix(); // fix in case 'skel.slot' was scaled or not orthogonal
         }
+    PROFILE_STOP("Skeleton::animate(C AnimatedSkeleton &skel)")
     return T;
 }
 Skeleton &Skeleton::mirrorX() {
+    PROFILE_START("Skeleton::mirrorX()")
     REPAO(bones).mirrorX();
     REPAO(slots).mirrorX();
+    PROFILE_STOP("Skeleton::mirrorX()")
     return T;
 }
 Skeleton &Skeleton::mirrorY() {
+    PROFILE_START("Skeleton::mirrorY()")
     REPAO(bones).mirrorY();
     REPAO(slots).mirrorY();
+    PROFILE_STOP("Skeleton::mirrorY()")
     return T;
 }
 Skeleton &Skeleton::mirrorZ() {
+    PROFILE_START("Skeleton::mirrorZ()")
     REPAO(bones).mirrorZ();
     REPAO(slots).mirrorZ();
+    PROFILE_STOP("Skeleton::mirrorZ()")
     return T;
 }
 Skeleton &Skeleton::rightToLeft() {
+    PROFILE_START("Skeleton::rightToLeft()")
     REPAO(bones).rightToLeft();
     REPAO(slots).rightToLeft();
+    PROFILE_STOP("Skeleton::rightToLeft()")
     return T;
 }
 /******************************************************************************/
 SkelBone *Skeleton::findBone(BONE_TYPE type, Int type_index, Int type_sub) { return bones.addr(findBoneI(type, type_index, type_sub)); }
 Byte Skeleton::findBoneB(BONE_TYPE type, Int type_index, Int type_sub) C {
+    PROFILE_START("Skeleton::findBoneB(BONE_TYPE type, Int type_index, Int type_sub)")
     Int i = findBoneI(type, type_index, type_sub);
+    PROFILE_STOP("Skeleton::findBoneB(BONE_TYPE type, Int type_index, Int type_sub)")
     return InRange(i, 256) ? i : 255;
 }
 Int Skeleton::findBoneI(BONE_TYPE type, Int type_index, Int type_sub) C {
+    PROFILE_START("Skeleton::findBoneI(BONE_TYPE type, Int type_index, Int type_sub)")
     if (type)
         REPA(bones) {
             C SkelBone &bone = bones[i];
-            if (bone.type == type && bone.type_index == type_index && bone.type_sub == type_sub)
+            if (bone.type == type && bone.type_index == type_index && bone.type_sub == type_sub) {
+                PROFILE_STOP("Skeleton::findBoneI(BONE_TYPE type, Int type_index, Int type_sub)")
                 return i;
+            }
         }
+    PROFILE_STOP("Skeleton::findBoneI(BONE_TYPE type, Int type_index, Int type_sub)")
     return -1;
 }
 SkelBone *Skeleton::findBone(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub) { return bones.addr(findBoneI(name, type, type_index, type_sub)); }
 Int Skeleton::findBoneI(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub) C {
+    PROFILE_START("Skeleton::findBoneI(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub)")
     Int bone_index = -1, best_match = 0;
     REPA(bones) {
         C SkelBone &bone = bones[i];
@@ -394,9 +427,11 @@ Int Skeleton::findBoneI(CChar8 *name, BONE_TYPE type, Int type_index, Int type_s
                 break; // if found highest possible match then stop
         }
     }
+    PROFILE_STOP("Skeleton::findBoneI(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub)")
     return bone_index;
 }
 Int Animation::findBoneI(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub) C {
+    PROFILE_START("Animation::findBoneI(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub)")
     Int bone_index = -1, best_match = 0;
     REPA(bones) {
         C AnimBone &bone = bones[i];
@@ -412,9 +447,11 @@ Int Animation::findBoneI(CChar8 *name, BONE_TYPE type, Int type_index, Int type_
                 break; // if found highest possible match then stop
         }
     }
+    PROFILE_STOP("Animation::findBoneI(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub)")
     return bone_index;
 }
 Int BoneMap::find(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub) C {
+    PROFILE_START("BoneMap::find(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub)")
     Int bone_index = -1, best_match = 0;
     REP(_bones) {
         C Bone &bone = _bone[i];
@@ -430,47 +467,66 @@ Int BoneMap::find(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub) C 
                 break; // if found highest possible match then stop
         }
     }
+    PROFILE_STOP("BoneMap::find(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub)")
     return bone_index;
 }
 
 Int Skeleton::findBoneI(CChar8 *name) C {
+    PROFILE_START("Skeleton::findBoneI(CChar8 *name)")
     if (Is(name))
         REPA(bones)
-    if (Equal(bones[i].name, name))
+    if (Equal(bones[i].name, name)) {
+        PROFILE_STOP("Skeleton::findBoneI(CChar8 *name)")
         return i;
+    }
+    PROFILE_STOP("Skeleton::findBoneI(CChar8 *name)")
     return -1;
 }
 Int Skeleton::findSlotI(CChar8 *name) C {
+    PROFILE_START("Skeleton::findSlotI(CChar8 *name)")
     if (Is(name))
         REPA(slots)
-    if (Equal(slots[i].name, name))
+    if (Equal(slots[i].name, name)) {
+        PROFILE_STOP("Skeleton::findSlotI(CChar8 *name)")
         return i;
+    }
+    PROFILE_STOP("Skeleton::findSlotI(CChar8 *name)")
     return -1;
 }
 Byte Skeleton::findBoneB(CChar8 *name) C {
+    PROFILE_START("Skeleton::findBoneB(CChar8 *name)")
     Int i = findBoneI(name);
+    PROFILE_STOP("Skeleton::findBoneB(CChar8 *name)")
     return InRange(i, 256) ? i : 255;
 }
 Byte Skeleton::findSlotB(CChar8 *name) C {
+    PROFILE_START("Skeleton::findSlotB(CChar8 *name)")
     Int i = findSlotI(name);
+    PROFILE_STOP("Skeleton::findSlotB(CChar8 *name)")
     return InRange(i, 256) ? i : 255;
 }
 Int Skeleton::getBoneI(BONE_TYPE type, Int type_index, Int type_sub) C {
+    PROFILE_START("Skeleton::getBoneI(BONE_TYPE type, Int type_index, Int type_sub)")
     Int i = findBoneI(type, type_index, type_sub);
     if (i < 0)
         Exit(S + "Bone " + BoneName(type) + ':' + type_index + ':' + type_sub + " not found in skeleton" + SkelName(this) + '.');
+    PROFILE_STOP("Skeleton::getBoneI(BONE_TYPE type, Int type_index, Int type_sub)")
     return i;
 }
 Int Skeleton::getBoneI(CChar8 *name) C {
+    PROFILE_START("Skeleton::getBoneI(CChar8 *name)")
     Int i = findBoneI(name);
     if (i < 0)
         Exit(S + "Bone \"" + name + "\" not found in skeleton" + SkelName(this) + '.');
+    PROFILE_STOP("Skeleton::getBoneI(CChar8 *name)")
     return i;
 }
 Int Skeleton::getSlotI(CChar8 *name) C {
+    PROFILE_START("Skeleton::getSlotI(CChar8 *name)")
     Int i = findSlotI(name);
     if (i < 0)
         Exit(S + "Slot \"" + name + "\" not found in skeleton" + SkelName(this) + '.');
+    PROFILE_STOP("Skeleton::getSlotI(CChar8 *name)")
     return i;
 }
 SkelBone *Skeleton::findBone(CChar8 *name) { return bones.addr(findBoneI(name)); }
@@ -480,13 +536,16 @@ SkelBone &Skeleton::getBone(CChar8 *name) { return bones[getBoneI(name)]; }
 SkelSlot &Skeleton::getSlot(CChar8 *name) { return slots[getSlotI(name)]; }
 /******************************************************************************/
 Int Skeleton::parentlessBones() C {
+    PROFILE_START("Skeleton::parentlessBones()")
     Int i = 0;
     for (; i < bones.elms(); i++)
         if (bones[i].parent != BONE_NULL)
             break;
+    PROFILE_STOP("Skeleton::parentlessBones()")
     return i;
 }
 Bool Skeleton::contains(Int parent, Int child) C {
+    PROFILE_START("Skeleton::contains(Int parent, Int child)")
     if (parent < 0)
         parent = BONE_NULL;
     if (child < 0)
@@ -501,18 +560,22 @@ Bool Skeleton::contains(Int parent, Int child) C {
             break; // proceed only if the parent has a smaller index (this solves the issue of never ending loops with incorrect data)
         child = child_parent;
     }
+    PROFILE_STOP("Skeleton::contains(Int parent, Int child)")
     return false;
 }
 Flt Skeleton::volume() C {
+    PROFILE_START("Skeleton::volume()")
     Flt vol = 0;
     REPA(bones)
     vol += bones[i].volume();
+    PROFILE_STOP("Skeleton::volume()")
     return vol;
 }
 UInt Skeleton::memUsage() C {
     return bones.memUsage() + slots.memUsage();
 }
 Int Skeleton::boneRoot(Int bone) C {
+    PROFILE_START("Skeleton::boneRoot(Int bone)")
     if (InRange(bone, bones)) {
     again:
         Int parent = boneParent(bone);
@@ -520,53 +583,70 @@ Int Skeleton::boneRoot(Int bone) C {
             bone = parent;
             goto again;
         }
+        PROFILE_STOP("Skeleton::boneRoot(Int bone)")
         return bone;
     }
+    PROFILE_STOP("Skeleton::boneRoot(Int bone)")
     return -1;
 }
 Int Skeleton::boneParent(Int bone) C {
+    PROFILE_START("Skeleton::boneParent(Int bone)")
     if (InRange(bone, bones)) {
         Int parent = bones[bone].parent;
-        if (InRange(parent, bones) && parent < bone)
+        if (InRange(parent, bones) && parent < bone) {
+            PROFILE_STOP("Skeleton::boneParent(Int bone)")
             return parent; // parent index must always be smaller than of the bone
+        }
     }
+    PROFILE_STOP("Skeleton::boneParent(Int bone)")
     return -1;
 }
 Int Skeleton::boneParents(Int bone) C {
+    PROFILE_START("Skeleton::boneParents(Int bone)")
     Int parents = 0;
     for (;; parents++) {
         bone = boneParent(bone);
         if (bone < 0)
             break;
     }
+    PROFILE_STOP("Skeleton::boneParents(Int bone)")
     return parents;
 }
 Int Skeleton::boneLevel(Int bone) C { return boneParents(bone) + InRange(bone, bones); }
 Int Skeleton::findParent(Int bone, BONE_TYPE type) C {
+    PROFILE_START("Skeleton::findParent(Int bone, BONE_TYPE type)")
     for (;;) {
         bone = boneParent(bone);
         if (bone < 0)
             break;
-        if (bones[bone].type == type)
+        if (bones[bone].type == type) {
+            PROFILE_STOP("Skeleton::findParent(Int bone, BONE_TYPE type)")
             return bone;
+        }
     }
+    PROFILE_STOP("Skeleton::findParent(Int bone, BONE_TYPE type)")
     return -1;
 }
 Int Skeleton::findRagdollParent(Int bone_index) C {
+    PROFILE_START("Skeleton::findRagdollParent(Int bone_index)")
     for (; InRange(bone_index, bones);) {
         C SkelBone &bone = bones[bone_index];
-        if (bone.flag & BONE_RAGDOLL)
+        if (bone.flag & BONE_RAGDOLL) {
+            PROFILE_STOP("Skeleton::findRagdollParent(Int bone_index)")
             return bone_index;
+        }
         if (bone.parent >= bone_index)
             break; // proceed only if the parent has a smaller index (this solves the issue of never ending loops with incorrect data)
         bone_index = bone.parent;
     }
+    PROFILE_STOP("Skeleton::findRagdollParent(Int bone_index)")
     return -1;
 }
 struct BoneParents {
     BoneType bone, parents;
 };
 Int Skeleton::bonesSharedParent(MemPtrN<BoneType, 256> bones) C {
+    PROFILE_START("Skeleton::bonesSharedParent(MemPtrN<BoneType, 256> bones)")
     MemtN<BoneParents, 256> bone_parents;
     bone_parents.setNum(bones.elms());
     Int min_parents = -1;
@@ -601,9 +681,11 @@ Int Skeleton::bonesSharedParent(MemPtrN<BoneType, 256> bones) C {
             bone_parents[i].bone = T.bones[bone_parents[i].bone].parent;
         }
     }
+    PROFILE_STOP("Skeleton::bonesSharedParent(MemPtrN<BoneType, 256> bones)")
     return BONE_NULL;
 }
 Int Skeleton::hierarchyDistance(Int bone_a, Int bone_b) C {
+    PROFILE_START("Skeleton::hierarchyDistance(Int bone_a, Int bone_b)")
     Int a_level = boneLevel(bone_a),
         b_level = boneLevel(bone_b);
     if (!a_level)
@@ -631,10 +713,12 @@ Int Skeleton::hierarchyDistance(Int bone_a, Int bone_b) C {
         bone_a = bones[bone_a].parent;
         bone_b = bones[bone_b].parent;
     }
+    PROFILE_STOP("Skeleton::hierarchyDistance(Int bone_a, Int bone_b)")
     return dist;
 }
 /******************************************************************************/
 void Skeleton::getSkin(C Vec &pos, VecB4 &blend, VtxBone &matrix) C {
+    PROFILE_START("Skeleton::getSkin(C Vec &pos, VecB4 &blend, VtxBone &matrix)")
 #if 0
    Int find[2]={-1, -1};
    Flt dist[2]={ 0,  0};
@@ -715,10 +799,12 @@ void Skeleton::getSkin(C Vec &pos, VecB4 &blend, VtxBone &matrix) C {
     }
     SetSkin(skin, matrix, blend, this);
 #endif
+    PROFILE_STOP("Skeleton::getSkin(C Vec &pos, VecB4 &blend, VtxBone &matrix)")
 }
 /******************************************************************************/
 void Skeleton::boneRemap(C CMemPtrN<BoneType, 256> &old_to_new) // !! this does not modify 'children_offset' and 'children_num' !!
 {
+    PROFILE_START("Skeleton::boneRemap(C CMemPtrN<BoneType, 256> &old_to_new)")
 #if 1 // clear out of range
     REPA(bones) {
         BoneType &b = bones[i].parent;
@@ -747,8 +833,10 @@ void Skeleton::boneRemap(C CMemPtrN<BoneType, 256> &old_to_new) // !! this does 
         }
     }
 #endif
+    PROFILE_STOP("Skeleton::boneRemap(C CMemPtrN<BoneType, 256> &old_to_new)")
 }
 Bool Skeleton::removeBone(Int i, MemPtrN<BoneType, 256> old_to_new) {
+    PROFILE_START("Skeleton::removeBone(Int i, MemPtrN<BoneType, 256> old_to_new)")
     if (InRange(i, bones)) {
         SkelBone &bone = bones[i];
 
@@ -785,15 +873,20 @@ Bool Skeleton::removeBone(Int i, MemPtrN<BoneType, 256> old_to_new) {
                 old_to_new[i] = (InRange(otn, otn_sort) ? otn_sort[otn] : BONE_NULL);
             }
         }
+        PROFILE_STOP("Skeleton::removeBone(Int i, MemPtrN<BoneType, 256> old_to_new)")
         return true;
     }
     old_to_new.clear();
+    PROFILE_STOP("Skeleton::removeBone(Int i, MemPtrN<BoneType, 256> old_to_new)")
     return false;
 }
 Skeleton &Skeleton::add(C Skeleton &src, MemPtrN<BoneType, 256> old_to_new) // !! assumes that skeletons have different bone names !!
 {
-    if (&src == this)
+    PROFILE_START("Skeleton::add(C Skeleton &src, MemPtrN<BoneType, 256> old_to_new)")
+    if (&src == this) {
+        PROFILE_STOP("Skeleton::add(C Skeleton &src, MemPtrN<BoneType, 256> old_to_new)")
         return T;
+    }
     Int offset = bones.elms();
     FREPA(src.bones) // copy in the same order
     {
@@ -813,11 +906,15 @@ Skeleton &Skeleton::add(C Skeleton &src, MemPtrN<BoneType, 256> old_to_new) // !
         if (d.bone1 != BONE_NULL)
             d.bone1 += offset;
     }
+    PROFILE_STOP("Skeleton::add(C Skeleton &src, MemPtrN<BoneType, 256> old_to_new)")
     return sortBones(old_to_new).setBoneTypes();
 }
 Skeleton &Skeleton::addSlots(C Skeleton &src) {
-    if (&src == this)
+    PROFILE_START("Skeleton::addSlots(C Skeleton &src)")
+    if (&src == this) {
+        PROFILE_STOP("Skeleton::addSlots(C Skeleton &src)")
         return T;
+    }
     FREPA(src.slots) // copy in the same order
     {
         C SkelSlot &s = src.slots[i];
@@ -840,10 +937,12 @@ Skeleton &Skeleton::addSlots(C Skeleton &src) {
                 d.bone1 = i;
         }
     }
+    PROFILE_STOP("Skeleton::addSlots(C Skeleton &src)")
     return T;
 }
 /******************************************************************************/
 static void AddChildren(Skeleton &skeleton, MemtN<Int, 256> &order, BoneType parent) {
+    PROFILE_START("AddChildren(Skeleton &skeleton, MemtN<Int, 256> &order, BoneType parent)")
     Int start = order.elms(),                            // number of bones added at this point
         elms = Min(skeleton.bones.elms(), BONE_NULL);    // don't process bone with index BONE_NULL because this is assumed to be <null> and would trigger adding bones from the start (never ending loop)
     SkelBone *parent_bone = skeleton.bones.addr(parent); // get parent bone (if any) for further processing
@@ -859,8 +958,10 @@ static void AddChildren(Skeleton &skeleton, MemtN<Int, 256> &order, BoneType par
     Int end = order.elms();                     // number of bones added at this point !! keep it as a variable because calls to 'AddChildren' below will change the order.elms !!
     for (Int i = start; i < end; i++)           // process forward, to try preserving existing order
         AddChildren(skeleton, order, order[i]); // add children of bones that were added in above step
+    PROFILE_STOP("AddChildren(Skeleton &skeleton, MemtN<Int, 256> &order, BoneType parent)")
 }
 Skeleton &Skeleton::sortBones(MemPtrN<BoneType, 256> old_to_new) {
+    PROFILE_START("Skeleton::sortBones(MemPtrN<BoneType, 256> old_to_new)")
     REPA(bones) {
         SkelBone &bone = bones[i];
         bone.children_offset = bone.children_num = 0;
@@ -883,11 +984,12 @@ Skeleton &Skeleton::sortBones(MemPtrN<BoneType, 256> old_to_new) {
     boneRemap(otn);
     if (old_to_new)
         old_to_new = otn;
-
+    PROFILE_STOP("Skeleton::sortBones(MemPtrN<BoneType, 256> old_to_new)")
     return T;
 }
 Skeleton &Skeleton::setBoneLengths() {
-    const Flt min_bone_length = 0.005f;
+    PROFILE_START("Skeleton::setBoneLengths()")
+    C Flt min_bone_length = 0.005f;
 
     // maximize lengths of bones which have children
     FREPA(bones) // process in order because we're first clearing the bone lengths
@@ -927,6 +1029,7 @@ Skeleton &Skeleton::setBoneLengths() {
         if (bone.length <= min_length)
             bone.length = (InRange(bone.parent, bones) ? bones[bone.parent].length : avg_length);
     }
+    PROFILE_STOP("Skeleton::setBoneLengths()")
     return T;
 }
 /******************************************************************************/
@@ -935,6 +1038,7 @@ static inline Bool Upper(Char8 c) { return c >= 'A' && c <= 'Z'; }
 
 static Bool BoneName(C SkelBone &bone, CChar8 *name) // this works as 'Contains' with extra checking for previous/next characters
 {
+    PROFILE_START("BoneName(C SkelBone &bone, CChar8 *name)")
     if (Int length = Length(name))
         for (CChar8 *start = bone.name; start = TextPos(start, name);) {
             Bool all_upper = true;
@@ -942,7 +1046,7 @@ static Bool BoneName(C SkelBone &bone, CChar8 *name) // this works as 'Contains'
             if (!Upper(start[i])) {
                 all_upper = false;
                 break;
-            }                       // check if name is all uppercase character
+            } // check if name is all uppercase character
             if (start != bone.name) // check previous character (if there's any)
             {
                 if (all_upper && Upper(start[-1]))
@@ -958,7 +1062,7 @@ static Bool BoneName(C SkelBone &bone, CChar8 *name) // this works as 'Contains'
                 if (Lower(start[i])) {
                     lower = true;
                     break;
-                }          // check if there's at least one lowercase character
+                } // check if there's at least one lowercase character
                 if (lower) // check only if at least one lowercase, don't check if all uppercase
                     REP(length)
                 if (Upper(start[i])    // if this is an uppercase character
@@ -969,11 +1073,12 @@ static Bool BoneName(C SkelBone &bone, CChar8 *name) // this works as 'Contains'
                 goto next; // if next character is lowercase then fail
             if (all_upper && Upper(start[length]))
                 goto next; // bone name is all uppercase and next character is also uppercase then fail, to reject "HANDLE" as "Hand"
-
+            PROFILE_STOP("BoneName(C SkelBone &bone, CChar8 *name)")
             return true;
         next:
             start++;
         }
+    PROFILE_STOP("BoneName(C SkelBone &bone, CChar8 *name)")
     return false;
 }
 struct BoneTypeIndexSetter {
@@ -987,8 +1092,12 @@ struct BoneTypeIndexSetter {
         Flt order;
     };
     static Int CompareChild(C Bone &a, C Bone &b) {
-        if (Int c = Compare(a.side_bool, b.side_bool))
+        PROFILE_START("BoneTypeIndexSetter.CompareChild(C Bone &a, C Bone &b")
+        if (Int c = Compare(a.side_bool, b.side_bool)) {
+            PROFILE_START("BoneTypeIndexSetter.CompareChild(C Bone &a, C Bone &b")
             return c;
+        }
+        PROFILE_START("BoneTypeIndexSetter.CompareChild(C Bone &a, C Bone &b")
         return Compare(a.order, b.order);
     }
     static Int CompareGlobal(C Bone &a, C Bone &b) {
@@ -1010,6 +1119,7 @@ struct BoneTypeIndexSetter {
 
     void flood(BoneType parent_i, BoneType parent_start_i, BoneType depth, SByte side) // 'side'=-1 negative, 0=unknown, 1=positive
     {
+        PROFILE_START("flood(BoneType parent_i, BoneType parent_start_i, BoneType depth, SByte side)")
         SkelBone *parent = skel.bones.addr(parent_i);
         Matrix parent_matrix;
         Int bone_i, child_end;
@@ -1078,8 +1188,10 @@ struct BoneTypeIndexSetter {
             if (!child.start)
                 flood(child.bone_i, parent_start_i, depth + 1, child.side);
         }
+        PROFILE_STOP("flood(BoneType parent_i, BoneType parent_start_i, BoneType depth, SByte side)")
     }
     BoneTypeIndexSetter(Skeleton &skel) : skel(skel) {
+        PROFILE_START("BoneTypeIndexSetter(Skeleton &skel) : skel(skel)")
         flood(BONE_NULL, BONE_NULL, 0, 0);
         if (Int end = bone_start.elms()) {
             Int start = 0;
@@ -1114,9 +1226,11 @@ struct BoneTypeIndexSetter {
                     bone.type_index = 0;
             }
         }
+        PROFILE_STOP("BoneTypeIndexSetter(Skeleton &skel) : skel(skel)")
     }
 };
 Skeleton &Skeleton::setBoneTypes() {
+    PROFILE_START("Skeleton::setBoneTypes()")
     // STEP 1 - set 'type'
     REPA(bones) {
         SkelBone &bone = bones[i];
@@ -1128,76 +1242,76 @@ Skeleton &Skeleton::setBoneTypes() {
         else // "Wings" used by "Bat", check this at the start because there are many wings that have hand/finger, but we want the type to be Wing
 
             if (BoneName(bone, "Spine") || BoneName(bone, "Pelvis") || BoneName(bone, "Hips") || BoneName(bone, "Chest") || BoneName(bone, "Torso") || BoneName(bone, "Body") || BoneName(bone, "Ribs") || BoneName(bone, "RibCage") || BoneName(bone, "Rib Cage") || BoneName(bone, "Rib_Cage"))
-            type = BONE_SPINE;
-        else
+                type = BONE_SPINE;
+            else
 
-            if (BoneName(bone, "Shoulder") || BoneName(bone, "Clavicle") || BoneName(bone, "CollarBone"))
-            type = BONE_SHOULDER;
-        else if (BoneName(bone, "ForeArm") || BoneName(bone, "LowerArm") || BoneName(bone, "Elbow"))
-            type = BONE_LOWER_ARM;
-        else if (BoneName(bone, "Finger") || BoneName(bone, "Fingers"))
-            type = BONE_FINGER;
-        else // "Fingers" used by "Troll"
-            if (BoneName(bone, "Hand") || BoneName(bone, "Wrist") || BoneName(bone, "Palm") && !BoneName(bone, "LegPalm"))
-            type = BONE_HAND;
-        else
+                if (BoneName(bone, "Shoulder") || BoneName(bone, "Clavicle") || BoneName(bone, "CollarBone"))
+                type = BONE_SHOULDER;
+            else if (BoneName(bone, "ForeArm") || BoneName(bone, "LowerArm") || BoneName(bone, "Elbow"))
+                type = BONE_LOWER_ARM;
+            else if (BoneName(bone, "Finger") || BoneName(bone, "Fingers"))
+                type = BONE_FINGER;
+            else // "Fingers" used by "Troll"
+                if (BoneName(bone, "Hand") || BoneName(bone, "Wrist") || BoneName(bone, "Palm") && !BoneName(bone, "LegPalm"))
+                    type = BONE_HAND;
+                else
 
-            if (BoneName(bone, "Calf") || BoneName(bone, "Crus") || BoneName(bone, "Shin") || BoneName(bone, "LowerLeg") || BoneName(bone, "HorseLink") || BoneName(bone, "Knee"))
-            type = BONE_LOWER_LEG;
-        else if (BoneName(bone, "Toe") || BoneName(bone, "Toes") || Equal(bone.name, "FootL0") || Equal(bone.name, "FootR0"))
-            type = BONE_TOE;
-        else // "Toes" used by "Cyclop", "FootL0/FootR0" is from the EE recommended naming system
-            if (BoneName(bone, "Foot") || BoneName(bone, "Feet") || BoneName(bone, "Ankle") || BoneName(bone, "LegPalm"))
-            type = BONE_FOOT;
-        else // "LegPalm" used by "Wolf"
+                    if (BoneName(bone, "Calf") || BoneName(bone, "Crus") || BoneName(bone, "Shin") || BoneName(bone, "LowerLeg") || BoneName(bone, "HorseLink") || BoneName(bone, "Knee"))
+                    type = BONE_LOWER_LEG;
+                else if (BoneName(bone, "Toe") || BoneName(bone, "Toes") || Equal(bone.name, "FootL0") || Equal(bone.name, "FootR0"))
+                    type = BONE_TOE;
+                else // "Toes" used by "Cyclop", "FootL0/FootR0" is from the EE recommended naming system
+                    if (BoneName(bone, "Foot") || BoneName(bone, "Feet") || BoneName(bone, "Ankle") || BoneName(bone, "LegPalm"))
+                        type = BONE_FOOT;
+                    else // "LegPalm" used by "Wolf"
 
-            if (BoneName(bone, "Neck"))
-            type = BONE_NECK;
-        else if (BoneName(bone, "Jaw"))
-            type = BONE_JAW;
-        else if (BoneName(bone, "Tongue"))
-            type = BONE_TONGUE;
-        else if (BoneName(bone, "Nose") || BoneName(bone, "Snout"))
-            type = BONE_NOSE;
-        else
-            // if(BoneName(bone, "Mouth") || BoneName(bone, "Lips") || BoneName(bone, "Lip"))type=BONE_MOUTH;else
-            if (BoneName(bone, "EyeLid") || BoneName(bone, "EyeLids"))
-            type = BONE_EYELID;
-        else if (BoneName(bone, "EyeBrow") || BoneName(bone, "EyeBrows") || BoneName(bone, "Brows"))
-            type = BONE_EYEBROW;
-        else // "brows" used by BitGem animals
-            if (BoneName(bone, "Ear"))
-            type = BONE_EAR;
-        else if (BoneName(bone, "Hair"))
-            type = BONE_HAIR;
-        else
+                        if (BoneName(bone, "Neck"))
+                            type = BONE_NECK;
+                        else if (BoneName(bone, "Jaw"))
+                            type = BONE_JAW;
+                        else if (BoneName(bone, "Tongue"))
+                            type = BONE_TONGUE;
+                        else if (BoneName(bone, "Nose") || BoneName(bone, "Snout"))
+                            type = BONE_NOSE;
+                        else
+                            // if(BoneName(bone, "Mouth") || BoneName(bone, "Lips") || BoneName(bone, "Lip"))type=BONE_MOUTH;else
+                            if (BoneName(bone, "EyeLid") || BoneName(bone, "EyeLids"))
+                                type = BONE_EYELID;
+                            else if (BoneName(bone, "EyeBrow") || BoneName(bone, "EyeBrows") || BoneName(bone, "Brows"))
+                                type = BONE_EYEBROW;
+                            else // "brows" used by BitGem animals
+                                if (BoneName(bone, "Ear"))
+                                    type = BONE_EAR;
+                                else if (BoneName(bone, "Hair"))
+                                    type = BONE_HAIR;
+                                else
 
-            if (BoneName(bone, "Breast") || BoneName(bone, "Boob") || BoneName(bone, "Boobs"))
-            type = BONE_BREAST;
-        else if (BoneName(bone, "Butt") || BoneName(bone, "Buttock") || BoneName(bone, "Buttocks"))
-            type = BONE_BUTT;
-        else
+                                    if (BoneName(bone, "Breast") || BoneName(bone, "Boob") || BoneName(bone, "Boobs"))
+                                    type = BONE_BREAST;
+                                else if (BoneName(bone, "Butt") || BoneName(bone, "Buttock") || BoneName(bone, "Buttocks"))
+                                    type = BONE_BUTT;
+                                else
 
-            if (BoneName(bone, "Tail") && !BoneName(bone, "PonyTail") && !BoneName(bone, "Pony Tail") && !BoneName(bone, "Pony_Tail"))
-            type = BONE_TAIL;
-        else if (BoneName(bone, "Cape") || BoneName(bone, "Cloak"))
-            type = BONE_CAPE;
-        else
+                                    if (BoneName(bone, "Tail") && !BoneName(bone, "PonyTail") && !BoneName(bone, "Pony Tail") && !BoneName(bone, "Pony_Tail"))
+                                    type = BONE_TAIL;
+                                else if (BoneName(bone, "Cape") || BoneName(bone, "Cloak"))
+                                    type = BONE_CAPE;
+                                else
 
-            // not unique names
-            if (BoneName(bone, "Eye"))
-            type = BONE_EYE;
-        else if (BoneName(bone, "Head"))
-            type = BONE_HEAD;
-        else // this can be "HeadJaw"
-            if (BoneName(bone, "Arm") || BoneName(bone, "UpArm") || BoneName(bone, "UpperArm"))
-            type = BONE_UPPER_ARM;
-        else // this can be both BONE_UPPER_ARM and BONE_LOWER_ARM
-            if (BoneName(bone, "Thigh") || BoneName(bone, "Leg") || BoneName(bone, "UpLeg") || BoneName(bone, "UpperLeg") || BoneName(bone, "Hip"))
-            type = BONE_UPPER_LEG;
-        else // this can be both BONE_UPPER_LEG and BONE_LOWER_LEG
-        {
-        }
+                                    // not unique names
+                                    if (BoneName(bone, "Eye"))
+                                        type = BONE_EYE;
+                                    else if (BoneName(bone, "Head"))
+                                        type = BONE_HEAD;
+                                    else // this can be "HeadJaw"
+                                        if (BoneName(bone, "Arm") || BoneName(bone, "UpArm") || BoneName(bone, "UpperArm"))
+                                            type = BONE_UPPER_ARM;
+                                        else // this can be both BONE_UPPER_ARM and BONE_LOWER_ARM
+                                            if (BoneName(bone, "Thigh") || BoneName(bone, "Leg") || BoneName(bone, "UpLeg") || BoneName(bone, "UpperLeg") || BoneName(bone, "Hip"))
+                                                type = BONE_UPPER_LEG;
+                                            else // this can be both BONE_UPPER_LEG and BONE_LOWER_LEG
+                                            {
+                                            }
 
         bone.type = type;
     }
@@ -1290,7 +1404,7 @@ Skeleton &Skeleton::setBoneTypes() {
 
     // STEP 3 - set 'type_index'
     BoneTypeIndexSetter(T);
-
+    PROFILE_STOP("Skeleton::setBoneTypes()")
     return T;
 }
 static Bool ChildOK(C SkelBone &parent, C SkelBone &child) {
@@ -1300,6 +1414,7 @@ static Bool ChildOK(C SkelBone &parent, C SkelBone &child) {
     return y > x * x + 0.5; // +0.5 because we want to test points at least half way from parent start to end
 }
 static void NextChild(C Skeleton &skel, Int i, Vec &to) {
+    PROFILE_START("NextChild(C Skeleton &skel, Int i, Vec &to)")
     if (InRange(i, skel.bones)) {
         C SkelBone &bone = skel.bones[i];
         Int children_ok = 0, child_i = -1;
@@ -1321,6 +1436,7 @@ static void NextChild(C Skeleton &skel, Int i, Vec &to) {
             }
         }
     }
+    PROFILE_STOP("NextChild(C Skeleton &skel, Int i, Vec &to)")
 }
 static Flt ColRadius(C SkelBone &bone) {
     return Min(bone.radius(), bone.length * 0.5f);
@@ -1336,6 +1452,7 @@ static Bool AlwaysConnect(C SkelBone &bone) // always connect these bones, becau
     return false;
 }
 Skeleton &Skeleton::setBoneShapes() {
+    PROFILE_START("Skeleton::setBoneShapes()")
     REPA(bones) {
         SkelBone &bone = bones[i];
         Bool always_connect = AlwaysConnect(bone);
@@ -1387,9 +1504,11 @@ Skeleton &Skeleton::setBoneShapes() {
 
         bone.shape.set(radius, length, center, dir);
     }
+    PROFILE_STOP("Skeleton::setBoneShapes()")
     return T;
 }
 Bool Skeleton::setBoneParent(Int child, Int parent, MemPtrN<BoneType, 256> old_to_new) {
+    PROFILE_START("Skeleton::setBoneParent(Int child, Int parent, MemPtrN<BoneType, 256> old_to_new)")
     if (InRange(child, bones) && child != parent) // can't be a child of itself
     {
         if (!InRange(parent, bones))
@@ -1399,26 +1518,32 @@ Bool Skeleton::setBoneParent(Int child, Int parent, MemPtrN<BoneType, 256> old_t
         {
             bone_parent = parent;                 // set new parent
             sortBones(old_to_new).setBoneTypes(); // sort because we need to rebuild 'children_offset' and 'children_num', and in case child has an index smaller than parent
+            PROFILE_STOP("Skeleton::setBoneParent(Int child, Int parent, MemPtrN<BoneType, 256> old_to_new)")
             return true;
         }
     }
     old_to_new.clear();
+    PROFILE_STOP("Skeleton::setBoneParent(Int child, Int parent, MemPtrN<BoneType, 256> old_to_new)")
     return false;
 }
 /******************************************************************************/
 void Skeleton::recreateSkelAnims() {
+    PROFILE_START("Skeleton::recreateSkelAnims()")
     CacheLock lock(_skel_anims);
     REPA(_skel_anims) {
         SkelAnim &skel_anim = _skel_anims.lockedData(i);
         skel_anim.create(T, *skel_anim.animation());
     }
+    PROFILE_STOP("Skeleton::recreateSkelAnims()")
 }
 /******************************************************************************/
 void Skeleton::draw(C Color &bone_color, C Color &slot_color, Flt slot_size) C {
+    PROFILE_START("Skeleton::draw")
     if (bone_color.a)
         REPAO(bones).draw(bone_color);
     if (slot_color.a)
         REPAO(slots).draw(slot_color, slot_size);
+    PROFILE_STOP("Skeleton::draw")
 }
 /******************************************************************************/
 // IO
@@ -1705,6 +1830,7 @@ void BoneMap::operator=(C BoneMap &src) {
     }
 }
 void BoneMap::create(C Skeleton &skeleton) {
+    PROFILE_START("BoneMap::create")
     Int name_size = 0;
     REPA(skeleton.bones)
     name_size += Length(skeleton.bones[i].name) + 1; // calculate memory needed for names
@@ -1724,6 +1850,7 @@ void BoneMap::create(C Skeleton &skeleton) {
         bone_name += length_1;
         name_size += length_1;
     }
+    PROFILE_STOP("BoneMap::create")
 }
 
 Int BoneMap::nameSize() C { return _bones ? _bone[_bones - 1].name_offset + Length(name(_bones - 1)) + 1 : 0; }
@@ -1775,6 +1902,7 @@ Bool BoneMap::rename(C Str8 &src, C Str8 &dest)
 }*/
 
 void BoneMap::remap(C CMemPtrN<BoneType, 256> &old_to_new) {
+    PROFILE_START("BoneMap::remap(C CMemPtrN<BoneType, 256> &old_to_new)")
     if (_bones) // process only if this already has some bones, this is important so we don't set a new map from empty data
     {
         MemtN<Int, 256> new_to_old; // create a 'new_to_old' remap
@@ -1823,8 +1951,10 @@ void BoneMap::remap(C CMemPtrN<BoneType, 256> &old_to_new) {
         }
         Swap(temp, T);
     }
+    PROFILE_STOP("BoneMap::remap(C CMemPtrN<BoneType, 256> &old_to_new)")
 }
 void BoneMap::setRemap(C Skeleton &skeleton, MemPtrN<BoneType, 256> old_to_new, Bool by_name) C {
+    PROFILE_START("BoneMap::setRemap(C Skeleton &skeleton, MemPtrN<BoneType, 256> old_to_new, Bool by_name)")
     old_to_new.clear();
     FREP(_bones) // process in order
     {
@@ -1838,6 +1968,7 @@ void BoneMap::setRemap(C Skeleton &skeleton, MemPtrN<BoneType, 256> old_to_new, 
         }
         old_to_new.add(skel_bone);
     }
+    PROFILE_STOP("BoneMap::setRemap(C Skeleton &skeleton, MemPtrN<BoneType, 256> old_to_new, Bool by_name)")
 }
 
 Bool BoneMap::save(File &f) C {

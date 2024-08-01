@@ -1,4 +1,5 @@
-﻿/******************************************************************************/
+﻿// TODO ADD PROFILE_START AND PROFILE_STOP PROFILERS
+/******************************************************************************/
 #include "stdafx.h"
 namespace EE {
 #define TEXTDATA_NAMELESS_SUB 1 // if allow saving/loading {} without name if it's empty

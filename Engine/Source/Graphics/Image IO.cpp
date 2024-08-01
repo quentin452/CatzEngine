@@ -1,4 +1,5 @@
-﻿/******************************************************************************
+﻿// TODO ADD PROFILE_START AND PROFILE_STOP PROFILERS
+/******************************************************************************
 
    TODO: This could use some mem manager / ring buffer for streamed data to avoid frequent allocations
 

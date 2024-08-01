@@ -42,6 +42,7 @@ void Chr::setUnsavedParams() {
         Exit("Attempting to create a character without Mesh");
 }
 void Chr::create(Object &obj) {
+    PROFILE_START("CatzEngine::Chr::create()")
     arbitrary_name = "Character";
     Matrix matrix = obj.matrixFinal();
     scale = obj.scale();
@@ -74,6 +75,7 @@ void Chr::create(Object &obj) {
 
     //
     angle.x = Angle(matrix.z.xz()) - PI_2; // set initial horizontal angle
+    PROFILE_STOP("CatzEngine::Chr::create()")
 }
 /******************************************************************************/
 // GET / SET
@@ -105,6 +107,7 @@ void Chr::memoryAddressChanged() {
 // UPDATE
 /******************************************************************************/
 Bool Chr::update() {
+    PROFILE_START("CatzEngine::Chr::update()")
     skel.updateBegin(); // begin skeleton update
 
     if (ragdoll_mode == RAGDOLL_FULL) // the character has ragdoll fully enabled, which most likely means that the character is dead, so update only skeleton basing on the ragdoll pose
@@ -117,45 +120,53 @@ Bool Chr::update() {
     }
 
     skel.updateEnd(); // end skeleton update
-
+    PROFILE_STOP("CatzEngine::Chr::update()")
     return true;
 }
 /******************************************************************************/
 // DRAW
 /******************************************************************************/
 UInt Chr::drawPrepare() {
+    PROFILE_START("CatzEngine::Chr::drawPrepare()")
     if (mesh)
         if (Frustum(Ball().setAnimated(mesh->ext, skel))) {
             SetVariation(mesh_variation);
             mesh->draw(skel);
             SetVariation();
         }
+    PROFILE_STOP("CatzEngine::Chr::drawPrepare()")
     return 0; // no additional render modes required
 }
 void Chr::drawShadow() {
+    PROFILE_START("CatzEngine::Chr::drawShadow()")
     if (mesh)
         if (Frustum(Ball().setAnimated(mesh->ext, skel))) {
             SetVariation(mesh_variation);
             mesh->drawShadow(skel);
             SetVariation();
         }
+    PROFILE_STOP("CatzEngine::Chr::drawShadow()")
 }
 /******************************************************************************/
 // ENABLE / DISABLE
 /******************************************************************************/
 void Chr::disable() {
+    PROFILE_START("CatzEngine::Chr::disable()")
     super::disable();
 
     ctrl.actor.kinematic(true);
     if (ragdoll_mode)
         ragdoll.kinematic(true);
+    PROFILE_STOP("CatzEngine::Chr::disable()")
 }
 void Chr::enable() {
+    PROFILE_START("CatzEngine::Chr::enable()")
     super::enable();
 
     ctrl.actor.kinematic((ragdoll_mode == RAGDOLL_FULL) ? true : false); // if character is in full ragdoll mode, then controller should be set as kinematic
     if (ragdoll_mode)
         ragdoll.kinematic(false);
+    PROFILE_STOP("CatzEngine::Chr::enable()")
 }
 /******************************************************************************/
 // IO

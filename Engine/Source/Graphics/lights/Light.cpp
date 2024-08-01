@@ -108,6 +108,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
     }
     /******************************************************************************/
     static void ApplyViewSpaceBias(Flt & mp_z_z) {
+        PROFILE_START("ApplyViewSpaceBias(Flt & mp_z_z)")
         if (FovPerspective(D.viewFovMode())) // needed only for perspective because it can produce big errors
         {                                    // 'ProjMatrix' here is from main view
             mp_z_z = ProjMatrix.z.z;
@@ -120,16 +121,19 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
                     IncRealByBit(ProjMatrix.z.z);
             SetProjMatrix();
         }
+        PROFILE_STOP("ApplyViewSpaceBias(Flt & mp_z_z)")
     }
     static void RestoreViewSpaceBias(Flt mp_z_z) {
+        PROFILE_START("RestoreViewSpaceBias(Flt mp_z_z)")
         if (FovPerspective(D.viewFovMode())) {
             ProjMatrix.z.z = mp_z_z;
             SetProjMatrix();
         }
+        PROFILE_STOP("RestoreViewSpaceBias(Flt mp_z_z)")
     }
     /******************************************************************************/
     void RendererClass::getShdRT() { // always do 'get' to call 'discard', do "ImgX[0]->set" it will be used by drawing lights 'Light.draw, drawForward' (GetDrawLight*->draw) and 'MapSoft'
-        {
+        PROFILE_START("RendererClass::getShdRT()") {
             Renderer._shd_1s.get(ImageRTDesc(Renderer._ds_1s->w(), Renderer._ds_1s->h(), IMAGERT_ONE));
             Sh.ImgX[0]->set(Renderer._shd_1s);
         }
@@ -138,13 +142,17 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
             Sh.ImgXMS->set(Renderer._shd_ms);
         }
         D.alpha(ALPHA_NONE);
+        PROFILE_STOP("RendererClass::getShdRT()")
     }
     /******************************************************************************/
     static void ClearLumSeparate(C Vec4 & lum_color, C ImageRTPtr & lum, C ImageRTPtr & spec) { // clear from last to first to minimize RT changes, 'clearViewport' ignores depth usage for 'D.depth2D'
+        PROFILE_START("ClearLumSeparate(C Vec4 & lum_color, C ImageRTPtr & lum, C ImageRTPtr & spec)")
         spec->clearViewport(Vec4Zero);
         lum->clearViewport(lum_color);
+        PROFILE_STOP("ClearLumSeparate(C Vec4 & lum_color, C ImageRTPtr & lum, C ImageRTPtr & spec)")
     }
     static void ClearLumMerged(C Vec4 & lum_color) {
+        PROFILE_START("ClearLumMerged(C Vec4 & lum_color)")
         if (D._view_main.full) { // 'D.clearCol(Int i' ignores depth usage for 'D.depth2D'
             D.clearCol(0, lum_color);
             D.clearCol(1, Vec4Zero);
@@ -158,10 +166,12 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
             Sh.ClearLight->draw();
             // D.depth2DOff(); ignore this because 'D.depth' is set always when needed
         }
+        PROFILE_STOP("ClearLumMerged(C Vec4 & lum_color)")
     }
     /******************************************************************************/
     static inline Bool MergedClearLum() { return true; } // here always use "true" instead of "D.mergedClear()" to enable merged clear, because performance is the same and this workarounds Nvidia GeForce flickering bug - https://devtalk.nvidia.com/default/topic/1068770/directx-and-direct-compute/dx11-driver-bug-significant-flickering-on-geforce/
     static void GetLum() {
+        PROFILE_START("GetLum()")
         ImageRTDesc rt_desc(Renderer._col->w(), Renderer._col->h(), D.highPrecLumRT() ? IMAGERT_SRGB_H : IMAGERT_SRGB, Renderer._col->samples());
         Renderer._lum.get(rt_desc);
         Renderer._spec.get(rt_desc);
@@ -174,8 +184,10 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
             Renderer._spec_1s.get(rt_desc);
         else
             Renderer._spec_1s = Renderer._spec;
+        PROFILE_STOP("GetLum()")
     }
     static Bool SetLum() {
+        PROFILE_START("SetLum()")
         Vec4 lum_color;
         Bool merged_clear;
         Bool clear = !Renderer._lum;
@@ -196,9 +208,11 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         Sh.ImgMS[1]->set(Renderer._col);
         Sh.ImgXY[0]->set(Renderer._ext);
         Sh.ImgXYMS->set(Renderer._ext);
+        PROFILE_STOP("SetLum()")
         return clear;
     }
     static void SetLumMS(Bool clear) {
+        PROFILE_START("SetLumMS(Bool clear)")
         Vec4 lum_color;
         Bool merged_clear;
         if (clear) {
@@ -212,9 +226,11 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         if (clear && merged_clear)
             ClearLumMerged(lum_color);
         D.alpha(ALPHA_ADD);
+        PROFILE_STOP("SetLumMS(Bool clear)")
     }
     void RendererClass::getLumRT() // this is called after drawing all lights, in order to make sure we have some RT's (in case there are no lights), after this ambient meshes will be drawn
     {
+        PROFILE_START("RendererClass::getLumRT()")
         if (!_lum) {
             GetLum();
             Vec4 lum_color = (Renderer.ambientInLum() ? Vec4(D.ambientColorD(), 0) : Vec4Zero);
@@ -232,15 +248,19 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
                 ClearLumMerged(lum_color);
             }
         }
+        PROFILE_STOP("RendererClass::getLumRT()")
     }
     /******************************************************************************/
     static void GetWaterLum() {
+        PROFILE_START("GetWaterLum()")
         ImageRTDesc rt_desc(Renderer._water_ds->w(), Renderer._water_ds->h(), IMAGERT_SRGB);
         Renderer._water_lum.get(rt_desc);
         Renderer._water_spec.get(rt_desc);
         Water.set(); // set main water material to set default "smoothness, reflectivity" in case we don't use '_water_ext' #WaterExt
+        PROFILE_STOP("GetWaterLum()")
     }
     static void SetWaterLum() {
+        PROFILE_START("SetWaterLum()")
         Vec4 lum_color;
         Bool merged_clear;
         Bool clear = !Renderer._water_lum;
@@ -259,8 +279,10 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         Sh.ImgMS[0]->set(Renderer._water_nrm);
         // Sh.Img  [1]->set(Renderer._water_col); Sh.ImgMS[1]->set(Renderer._water_col); ignored for water and copied from water reflectivity #WaterExt
         // Sh.ImgXY[0]->set(Renderer._water_ext); Sh.ImgXYMS ->set(Renderer._water_ext); Water doesn't have EXT #WaterExt
+        PROFILE_STOP("SetWaterLum()")
     }
     void RendererClass::getWaterLumRT() {
+        PROFILE_START("getWaterLumRT()")
         if (!_water_lum) {
             GetWaterLum();
             Vec4 lum_color = Vec4(D.ambientColorD(), 0);
@@ -272,9 +294,11 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
                 ClearLumMerged(lum_color);
             }
         }
+        PROFILE_STOP("getWaterLumRT()")
     }
     /******************************************************************************/
     static void MapSoft(UInt depth_func = FUNC_FOREGROUND, C MatrixM *light_matrix = null) {
+        PROFILE_START("MapSoft(UInt depth_func = FUNC_FOREGROUND, C MatrixM *light_matrix = null)")
         if (D.shadowSoft()) // !! 'D.shadowSoft' values need to be in sync with 'D.ambientSoft' !!
         {
             ImageRTDesc rt_desc(Renderer._shd_1s->w(), Renderer._shd_1s->h(), IMAGERT_ONE);
@@ -331,15 +355,19 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
             }
             Sh.ImgX[0]->set(Renderer._shd_1s);
         }
+        PROFILE_STOP("MapSoft(UInt depth_func = FUNC_FOREGROUND, C MatrixM *light_matrix = null)")
     }
     static void RestoreShadowMapSettings() {
+        PROFILE_START("RestoreShadowMapSettings()")
         D._view_active.set3DFrom(D._view_main).setProjMatrix();
         SetCam(ActiveCam.matrix);
         if (ALWAYS_RESTORE_FRUSTUM)
             Frustum = FrustumMain;
+        PROFILE_STOP("RestoreShadowMapSettings()")
     }
     /******************************************************************************/
     LightCone::LightCone(Flt length, C VecD & pos, C Vec & dir, C Vec & color_l, Flt vol, Flt vol_max) {
+        PROFILE_START("LightCone::LightCone(Flt length, C VecD & pos, C Vec & dir, C Vec & color_l, Flt vol, Flt vol_max)")
         T.pyramid.scale = 1;
         T.pyramid.h = length;
         T.pyramid.setPosDir(pos, dir);
@@ -347,6 +375,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         T.falloff = 0.5f;
         T.vol = vol;
         T.vol_max = vol_max;
+        PROFILE_STOP("LightCone::LightCone(Flt length, C VecD & pos, C Vec & dir, C Vec & color_l, Flt vol, Flt vol_max)")
     }
     /******************************************************************************/
     Flt LightPoint::range() C {
@@ -358,27 +387,34 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
            Flt  albedo=1, srgb_col=LinearToSRGB(light_intensity*albedo)*255; */
     }
     /******************************************************************************/
-    void LightDir ::add(Bool shadow, CPtr light_src, Bool allow_main) {
+    void LightDir::add(Bool shadow, CPtr light_src, Bool allow_main) {
+        PROFILE_START("LightDir::add(Bool shadow, CPtr light_src, Bool allow_main)")
         DEBUG_ASSERT(Renderer() == RM_PREPARE, "'LightDir.add' called outside of RM_PREPARE");
         if (color_l.max() > EPS_COL8_LINEAR && Renderer.firstPass()) {
             Lights.New().set(T, shadow, light_src, allow_main);
         }
+        PROFILE_STOP("LightDir::add(Bool shadow, CPtr light_src, Bool allow_main)")
     }
-    void LightPoint ::add(Flt shadow_opacity, CPtr light_src) {
+    void LightPoint::add(Flt shadow_opacity, CPtr light_src) {
+        PROFILE_START("LightPoint::add(Flt shadow_opacity, CPtr light_src)")
         Rect rect;
         DEBUG_ASSERT(Renderer() == RM_PREPARE, "'LightPoint.add' called outside of RM_PREPARE");
         if (color_l.max() > EPS_COL8_LINEAR && power > EPS && toScreenRect(rect) && Renderer.firstPass()) {
             Lights.New().set(T, rect, shadow_opacity, light_src);
         }
+        PROFILE_STOP("LightPoint::add(Flt shadow_opacity, CPtr light_src)")
     }
     void LightLinear::add(Flt shadow_opacity, CPtr light_src) {
+        PROFILE_START("LightLinear::add(Flt shadow_opacity, CPtr light_src)")
         Rect rect;
         DEBUG_ASSERT(Renderer() == RM_PREPARE, "'LightLinear.add' called outside of RM_PREPARE");
         if (color_l.max() > EPS_COL8_LINEAR && range > EPS && toScreenRect(rect) && Renderer.firstPass()) {
             Lights.New().set(T, rect, shadow_opacity, light_src);
         }
+        PROFILE_STOP("LightLinear::add(Flt shadow_opacity, CPtr light_src)")
     }
-    void LightCone ::add(Flt shadow_opacity, CPtr light_src, Image * image, Flt image_scale) {
+    void LightCone::add(Flt shadow_opacity, CPtr light_src, Image * image, Flt image_scale) {
+        PROFILE_START("LightCone::add(Flt shadow_opacity, CPtr light_src, Image * image, Flt image_scale)")
         Rect rect;
         DEBUG_ASSERT(Renderer() == RM_PREPARE, "'LightCone.add' called outside of RM_PREPARE");
         if (color_l.max() > EPS_COL8_LINEAR && pyramid.h > EPS && toScreenRect(rect) && Renderer.firstPass()) {
@@ -387,6 +423,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
             l.image = image;
             l.image_scale = image_scale;
         }
+        PROFILE_STOP("LightCone::add(Flt shadow_opacity, CPtr light_src, Image * image, Flt image_scale)")
     }
 /******************************************************************************/
 #pragma pack(push, 4)
@@ -423,6 +460,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
     };
 #pragma pack(pop)
     void LightDir::set() {
+        PROFILE_START("LightDir::set()")
         GpuLightDir l;
         l.dir.fromDivNormalized(dir, CamMatrix.orn()).chs();
         l.color = LinearToDisplay(color_l);
@@ -431,8 +469,10 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         l.vol_exponent = vol_exponent;
         l.vol_steam = vol_steam;
         Sh.LightDir->set(l);
+        PROFILE_STOP("LightDir::set()")
     }
     void LightPoint::set(Flt shadow_opacity) {
+        PROFILE_START("LightPoint::set(Flt shadow_opacity)")
         GpuLightPoint l;
         l.power = power;
         l.lum_max = lum_max;
@@ -441,8 +481,10 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         l.pos.fromDivNormalized(pos, CamMatrix);
         l.color = LinearToDisplay(color_l);
         Sh.LightPoint->set(l);
+        PROFILE_STOP("LightPoint::set(Flt shadow_opacity)")
     }
     void LightLinear::set(Flt shadow_opacity) {
+        PROFILE_START("LightLinear::set(Flt shadow_opacity)")
         GpuLightLinear l;
         l.neg_inv_range = -1 / range;
         l.vol = vol * shadow_opacity;
@@ -450,8 +492,10 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         l.pos.fromDivNormalized(pos, CamMatrix);
         l.color = LinearToDisplay(color_l);
         Sh.LightLinear->set(l);
+        PROFILE_STOP("LightLinear::set(Flt shadow_opacity)")
     }
     void LightCone::set(Flt shadow_opacity) {
+        PROFILE_START("LightCone::set(Flt shadow_opacity)")
         GpuLightCone l;
         // angular intensity = Length(pos)*l.falloff.x+l.falloff.y             falloff=0 Y|\         falloff=1 Y|  |
         // falloff=0         ->            l.falloff.x=-1    l.falloff.y=1                | \                   |  |
@@ -469,6 +513,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         l.mtrx.divNormalized(CamMatrix.orn());
         l.pos.fromDivNormalized(pyramid.pos, CamMatrix);
         Sh.LightCone->set(l);
+        PROFILE_STOP("LightCone::set(Flt shadow_opacity)")
     }
     /******************************************************************************/
     enum SHADOW_MAP_FLAG {
@@ -483,6 +528,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
     static void DrawShadowMap(DIR_ENUM dir, C MatrixM & cam_matrix, UInt flag, Flt view_from, Flt view_range, C Vec2 & fov, FOV_MODE fov_mode, Int border, Flt bias, C MatrixFovFrac *frustum = null) {
 #if FLAT_SHADOW_MAP
         {
+            PROFILE_START("DrawShadowMap(DIR_ENUM dir, C MatrixM & cam_matrix, UInt flag, Flt view_from, Flt view_range, C Vec2 & fov, FOV_MODE fov_mode, Int border, Flt bias, C MatrixFovFrac *frustum = null)")
             // apply cam matrix bias
             MatrixM cam_matrix_biased = cam_matrix;
             if (CurrentLight.type == LIGHT_DIR)
@@ -512,8 +558,10 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
             else
                 Frustum.set(D._view_active.range, D._view_active.fov, cam_matrix);
             if (flag & SM_FRUSTUM)
-                if (!FrustumMain(Frustum))
-                    return;                               // check if shadow frustum is visible (lies in main camera view frustum)
+                if (!FrustumMain(Frustum)) {
+                    PROFILE_STOP("DrawShadowMap(DIR_ENUM dir, C MatrixM & cam_matrix, UInt flag, Flt view_from, Flt view_range, C Vec2 & fov, FOV_MODE fov_mode, Int border, Flt bias, C MatrixFovFrac *frustum = null)")
+                    return; // check if shadow frustum is visible (lies in main camera view frustum)
+                }
             D._view_active.setViewport().setProjMatrix(); // we set 'Frustum' above
 
             // set matrix converting from shadow map to main camera space (required for tesselation - adaptive tesselation factors)
@@ -550,8 +598,10 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         else
             Frustum.set(D._view_active.range, D._view_active.fov, cam_matrix);
         if (flag & SM_FRUSTUM)
-            if (!FrustumMain(Frustum))
+            if (!FrustumMain(Frustum)) {
+                PROFILE_STOP("DrawShadowMap(DIR_ENUM dir, C MatrixM & cam_matrix, UInt flag, Flt view_from, Flt view_range, C Vec2 & fov, FOV_MODE fov_mode, Int border, Flt bias, C MatrixFovFrac *frustum = null)")
                 return;
+            }
         Sh.clear(Vec4(D._view_active.range * 2));
         D.clearDepth();
 
@@ -570,9 +620,11 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         }
     }
 #endif
+        PROFILE_STOP("DrawShadowMap(DIR_ENUM dir, C MatrixM & cam_matrix, UInt flag, Flt view_from, Flt view_range, C Vec2 & fov, FOV_MODE fov_mode, Int border, Flt bias, C MatrixFovFrac *frustum = null)")
     }
     /******************************************************************************/
     static void StartVol() {
+        PROFILE_START("StartVol()")
         Bool clear = false;
         if (!Renderer._vol) {
             Renderer._vol.get(ImageRTDesc(Renderer.fxW() >> 2, Renderer.fxH() >> 2, IMAGERT_SRGB)); // doesn't use Alpha
@@ -591,55 +643,71 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
             Renderer.setEyeParams();
         }
         CurrentLight.set(); // call after setting the camera
+        PROFILE_STOP("StartVol()")
     }
     static void ApplyVolumetric(LightDir & light, Int shd_map_num, Bool cloud_vol) {
+        PROFILE_START("ApplyVolumetric(LightDir & light, Int shd_map_num, Bool cloud_vol)")
         if (Renderer.hasVolLight() && light.vol > EPS_COL8_NATIVE && shd_map_num > 0)
             REPS(Renderer._eye, Renderer._eye_num)
         if (CurrentLightOn[Renderer._eye]) {
             StartVol();
             VL.VolDir[shd_map_num - 1][cloud_vol]->draw(Renderer._vol, &CurrentLightRect[Renderer._eye]);
         }
+        PROFILE_STOP("ApplyVolumetric(LightDir & light, Int shd_map_num, Bool cloud_vol)")
     }
     static void ApplyVolumetric(LightPoint & light) {
+        PROFILE_START("ApplyVolumetric(LightPoint & light)")
         if (Renderer.hasVolLight() && light.vol > EPS_COL8_NATIVE)
             REPS(Renderer._eye, Renderer._eye_num)
         if (CurrentLightOn[Renderer._eye]) {
             StartVol();
             VL.VolPoint->draw(Renderer._vol, &CurrentLightRect[Renderer._eye]);
         }
+        PROFILE_STOP("ApplyVolumetric(LightPoint & light)")
     }
     static void ApplyVolumetric(LightLinear & light) {
+        PROFILE_START("ApplyVolumetric(LightLinear & light)")
         if (Renderer.hasVolLight() && light.vol > EPS_COL8_NATIVE)
             REPS(Renderer._eye, Renderer._eye_num)
         if (CurrentLightOn[Renderer._eye]) {
             StartVol();
             VL.VolLinear->draw(Renderer._vol, &CurrentLightRect[Renderer._eye]);
         }
+        PROFILE_STOP("ApplyVolumetric(LightLinear & light)")
     }
     static void ApplyVolumetric(LightCone & light) {
+        PROFILE_START("ApplyVolumetric(LightCone & light)")
         if (Renderer.hasVolLight() && light.vol > EPS_COL8_NATIVE)
             REPS(Renderer._eye, Renderer._eye_num)
         if (CurrentLightOn[Renderer._eye]) {
             StartVol();
             VL.VolCone->draw(Renderer._vol, &CurrentLightRect[Renderer._eye]);
         }
+        PROFILE_STOP("ApplyVolumetric(LightCone & light)")
     }
     /******************************************************************************/
     static Bool StereoCurrentLightRect() // this relies on current Viewport, Camera Matrix and 'Frustum' (!! Actually right now 'toScreenRect' are based on 'FrustumMain' so we don't have to restore 'Frustum' !!)
     {
-        if (!CurrentLight.toScreenRect(CurrentLight.rect))
+        PROFILE_START("StereoCurrentLightRect()")
+        if (!CurrentLight.toScreenRect(CurrentLight.rect)) {
+            PROFILE_STOP("StereoCurrentLightRect()")
             return false;
+        }
+        PROFILE_STOP("StereoCurrentLightRect()")
         return ToEyeRect(CurrentLight.rect);
     }
     static Bool GetCurrentLightRect() {
         return Renderer._stereo ? StereoCurrentLightRect() : true; // for non-stereo the rect is already valid (if light was not visible then it wouldn't be added to the light list)
     }
     static Bool SetLightEye(Bool shadow = false) {
+        PROFILE_START("SetLightEye(Bool shadow = false)")
         CurrentLightOn[Renderer._eye] = false;
         if (Renderer._stereo) {
             Renderer.setEyeViewportCam();
-            if (!StereoCurrentLightRect())
+            if (!StereoCurrentLightRect()) {
+                PROFILE_STOP("SetLightEye(Bool shadow = false)")
                 return false;
+            }
         }
         if (shadow) {
             SetShdMatrix();
@@ -648,6 +716,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         } else {
             CurrentLight.set();
         }
+        PROFILE_STOP("SetLightEye(Bool shadow = false)")
         return true;
     }
     /******************************************************************************/
@@ -678,6 +747,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
                                                           : PointOnPlaneStep(start.y - Renderer.lowest_visible_point, end.y - Renderer.lowest_visible_point);
     }
     static Bool ShadowMap(LightDir & light) {
+        PROFILE_START("ShadowMap(LightDir & light)")
         // init
         RENDER_MODE mode = Renderer();
         Renderer.mode(RM_SHADOW);
@@ -1031,11 +1101,12 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         Renderer.mode(mode);
         RestoreShadowMapSettings();
         D.clip(clip ? &clip_rect : null); // no need to reset 'D.clipAllow' because it will be reset in the nearest RT change
-
+        PROFILE_STOP("ShadowMap(LightDir & light)")
         return cloud_shd;
     }
     /******************************************************************************/
     static void ShadowMap(Flt range, VecD & pos) {
+        PROFILE_START("ShadowMap(Flt range, VecD & pos)")
         RENDER_MODE mode = Renderer();
         Renderer.mode(RM_SHADOW);
         D.alpha(ALPHA_NONE); // disable alpha
@@ -1181,9 +1252,11 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         // restore settings
         Renderer.mode(mode); // restore rendering mode to correctly restore viewport
         RestoreShadowMapSettings();
+        PROFILE_STOP("ShadowMap(Flt range, VecD & pos)")
     }
     /******************************************************************************/
     static void ShadowMap(LightCone & light) {
+        PROFILE_START("ShadowMap(LightCone & light)")
         RENDER_MODE mode = Renderer();
         Renderer.mode(RM_SHADOW);
         D.alpha(ALPHA_NONE); // disable alpha
@@ -1234,6 +1307,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         // restore settings
         Renderer.mode(mode); // restore rendering mode to correctly restore viewport
         RestoreShadowMapSettings();
+        PROFILE_STOP("ShadowMap(LightCone & light)")
     }
     /******************************************************************************/
     Flt Light::range() C {
@@ -1275,6 +1349,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         }
     }
     Flt Light::firstLightCost(Flt view_rect_area, Dbl frustum_volume) C {
+        PROFILE_START("Light::firstLightCost(Flt view_rect_area, Dbl frustum_volume)")
         /* Normally we draw lights clipped to their screen rect and its frustum volume
            however for the first light we have to draw entire view rect and entire frustum
            which means that some pixels     (based on 2D area  ) are processed unnecessarily (they're wasted)
@@ -1309,6 +1384,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
             waste_3d = Max(0, frustum_volume - light_vol) / frustum_volume;
             break;
         default:
+            PROFILE_STOP("Light::firstLightCost(Flt view_rect_area, Dbl frustum_volume)")
             return FLT_MAX;
         }
         Flt wasted_area = view_rect_area - (rect & D.viewRect()).area(), // wasted area = total area - needed area
@@ -1317,6 +1393,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         if (shadow)
             waste_2d -= view_rect_area * 2; // (*2 because there are 2 transfers) for tile-based GPU's prefer choosing lights with shadows first, to avoid the cost of transferring RT to AND from chip fast memory (example: drawing #1 non-shadow light, #2 shadow light = draw light #1, flush RT, draw shadows for #2, restore RT, draw light #2), (example: drawing #1 shadow light, #2 non-shadow light = draw shadows for #1, draw light #1, draw light #2)
 #endif
+        PROFILE_STOP("Light::firstLightCost(Flt view_rect_area, Dbl frustum_volume)")
         return waste_2d / view_rect_area * 16 + waste_3d; // since it's difficult to estimate 2D pixel vs 3D volume cost, they're just normalized to approximate 0..1 ranges and added together, with 2D having bigger weight
     }
     Bool Light::toScreenRect(Rect & rect) C {
@@ -1477,6 +1554,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
 #endif
     /******************************************************************************/
     static void DrawLightDir(Int multi_sample, Int light_mode) {
+        PROFILE_START("DrawLightDir(Int multi_sample, Int light_mode)")
         if (TEST_LIGHT_RECT) {
             D.depthUnlock();
             REPS(Renderer._eye, Renderer._eye_num)
@@ -1489,8 +1567,10 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         REPS(Renderer._eye, Renderer._eye_num)
         if (SetLightEye())
             shader->draw(&CurrentLight.rect);
+        PROFILE_STOP("DrawLightDir(Int multi_sample, Int light_mode)")
     }
     static void DrawLightPoint(C MatrixM & light_matrix, Int multi_sample, Int light_mode) {
+        PROFILE_START("DrawLightPoint(C MatrixM & light_matrix, Int multi_sample, Int light_mode)")
         if (TEST_LIGHT_RECT) {
             D.depthUnlock();
             REPS(Renderer._eye, Renderer._eye_num)
@@ -1515,8 +1595,10 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
     if (SetLightEye())
         shader->draw(&CurrentLight.rect);
 #endif
+        PROFILE_STOP("DrawLightPoint(C MatrixM & light_matrix, Int multi_sample, Int light_mode)")
     }
     static void DrawLightLinear(C MatrixM & light_matrix, Int multi_sample, Int light_mode) {
+        PROFILE_START("DrawLightLinear(C MatrixM & light_matrix, Int multi_sample, Int light_mode)")
         if (TEST_LIGHT_RECT) {
             D.depthUnlock();
             REPS(Renderer._eye, Renderer._eye_num)
@@ -1541,8 +1623,10 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
     if (SetLightEye())
         shader->draw(&CurrentLight.rect);
 #endif
+        PROFILE_STOP("DrawLightLinear(C MatrixM & light_matrix, Int multi_sample, Int light_mode)")
     }
     static void DrawLightCone(C MatrixM & light_matrix, Int multi_sample, Int light_mode) {
+        PROFILE_START("DrawLightCone(C MatrixM & light_matrix, Int multi_sample, Int light_mode)")
         if (TEST_LIGHT_RECT) {
             D.depthUnlock();
             REPS(Renderer._eye, Renderer._eye_num)
@@ -1557,6 +1641,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
             REPS(Renderer._eye, Renderer._eye_num)
             if (SetLightEye())
                 shader->draw(&CurrentLight.rect);
+            PROFILE_STOP("DrawLightCone(C MatrixM & light_matrix, Int multi_sample, Int light_mode)")
             return;
         }
 #endif
@@ -1570,18 +1655,22 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
             shader->commit();
             LightMeshCone.draw();
         }
+        PROFILE_STOP("DrawLightCone(C MatrixM & light_matrix, Int multi_sample, Int light_mode)")
     }
     /******************************************************************************/
     static Bool LightFrontFaceBall(Flt range, C VecD & light_pos) {
+        PROFILE_START("LightFrontFaceBall(Flt range, C VecD & light_pos)")
         Bool front_face = Renderer.indoor; // draw as front only for in-door scenes, which will allow to hide the light by occluders, in other cases, we will most likely have to process fewer pixels if not using front
         if (front_face) {
             Flt dist2 = Dist2(ActiveCam.matrix.pos, light_pos); // use 'ActiveCam' instead of 'CamMatrix' because it's not affected by eyes
             if (dist2 <= Sqr(range * LIGHT_MESH_BALL_RADIUS + FrustumMain.view_quad_max_dist + D.eyeDistance_2()))
                 front_face = false; // if camera intersects with light mesh, then we can't use front
         }
+        PROFILE_STOP("LightFrontFaceBall(Flt range, C VecD & light_pos)")
         return front_face;
     }
     static Bool LightFrontFace(C PyramidM & pyramid) {
+        PROFILE_START("LightFrontFace(C PyramidM & pyramid)")
         Bool front_face = Renderer.indoor; // draw as front only for in-door scenes, which will allow to hide the light by occluders, in other cases, we will most likely have to process fewer pixels if not using front
         if (front_face) {
             ConeM cone(0, LIGHT_MESH_CONE_RADIUS * pyramid.scale * pyramid.h, pyramid.h, pyramid.pos, pyramid.dir);
@@ -1589,17 +1678,21 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
             if (dist <= FrustumMain.view_quad_max_dist + D.eyeDistance_2())
                 front_face = false; // if camera intersects with light mesh, then we can't use front
         }
+        PROFILE_STOP("LightFrontFace(C PyramidM & pyramid)")
         return front_face;
     }
     static void SetLightMatrixCone(MatrixM & light_matrix, Bool front_face) {
+        PROFILE_START("SetLightMatrixCone(MatrixM & light_matrix, Bool front_face)")
         Flt s = CurrentLight.cone.pyramid.h * CurrentLight.cone.pyramid.scale;
         light_matrix.orn().setDir(CurrentLight.cone.pyramid.dir);
         light_matrix.x *= (front_face ? s : -s); // reverse faces
         light_matrix.y *= s;
         light_matrix.z *= CurrentLight.cone.pyramid.h;
         light_matrix.pos = CurrentLight.cone.pyramid.pos;
+        PROFILE_STOP("SetLightMatrixCone(MatrixM & light_matrix, Bool front_face)")
     }
     static void SetLightZRangeCone() {
+        PROFILE_START("SetLightZRangeCone()")
         VecD p[5];
         CurrentLight.cone.pyramid.toCorners(p);
         Dbl max = Dot(p[4], ActiveCam.matrix.z), min = max;
@@ -1611,6 +1704,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
                 max = d;
         }
         CurrentLightZRange.set(min - ActiveCamZ, max - ActiveCamZ); // Z relative to camera position
+        PROFILE_STOP("SetLightZRangeCone()")
     }
 #include "LightProcessor.hpp"
     LightProcessor processor;
@@ -1634,6 +1728,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         finalizeDrawing();
     }*/
     void Light::draw() {
+        PROFILE_START("Light::draw()")
         SetShadowOpacity(shadow_opacity);
         CurrentLight = T;
 
@@ -1656,9 +1751,11 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         }
 
         finalizeDrawing();
+        PROFILE_STOP("Light::draw()")
     }
 
     void Light::drawForward(ALPHA_MODE alpha) {
+        PROFILE_START("Light::drawForward(ALPHA_MODE alpha)")
         SetShadowOpacity(shadow_opacity);
         CurrentLight = T;
 
@@ -1681,6 +1778,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         }
 
         finalizeDrawing();
+        PROFILE_STOP("Light::drawForward(ALPHA_MODE alpha)")
     }
     static Bool CreateLightFade(Flt & fade, C CPtr & key, Ptr user) {
         fade = 0;
@@ -1691,6 +1789,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
     static Memc<Light> LightsTemp;
 
     void UpdateLights() {
+        PROFILE_START("UpdateLights()")
         // limit
         if (D.maxLights()) {
             // limit number of lights
@@ -1781,8 +1880,10 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
             if (main > 0)
                 Swap(Lights.first(), Lights[main]); // >0 already handles !=-1 (not found) and !=0 (no need to move)
         }
+        PROFILE_STOP("UpdateLights()")
     }
     void DrawLights() {
+        PROFILE_START("DrawLights()")
         if (Lights.elms()) {
             LightMode = ((Renderer._has & HAS_CLEAR_COAT) ? LIGHT_MODE_CLEAR_COAT : LIGHT_MODE_DEFAULT);
             REPAO(Lights).draw(); // apply in backward order to leave main shadow map in the end
@@ -1792,6 +1893,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
 
             D.depthClip(true); // restore default
         }
+        PROFILE_STOP("DrawLights()")
     }
     /******************************************************************************/
     Flt GetLightFade(CPtr src) {
@@ -1799,12 +1901,15 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
     }
     /******************************************************************************/
     void ShutLight() {
+        PROFILE_START("ShutLight()")
         Lights.del();
         LightImportance.del();
         LightMeshBall.del();
         LightMeshCone.del();
+        PROFILE_STOP("ShutLight()")
     }
     void InitLight() {
+        PROFILE_START("InitLight()")
         HsmMatrix.x.x = 0.5f / 2;
         HsmMatrix.y.y = -0.5f / 3;
         HsmMatrix.z.z = 1;
@@ -1846,6 +1951,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         }
         int z = 0;
 #endif
+        PROFILE_STOP("InitLight()")
     }
     /******************************************************************************/
 } // namespace EE

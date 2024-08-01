@@ -10,6 +10,7 @@ static void AreaDrawState(Cell<Game::Area> &cell, Ptr)
 }
 /******************************************************************************/
 inline void Area::drawObjAndTerrain() {
+    PROFILE_START("Area::drawObjAndTerrain()")
     // first process objects before terrain, so they will be first on the list (if possible), objects don't use EarlyZ, so terrain will always be displayed as first in the EarlyZ stage
     REPA(_objs) {
         Obj &obj = *_objs[i];
@@ -109,8 +110,10 @@ inline void Area::drawObjAndTerrain() {
             SetStencilValue();
         }
     }
+    PROFILE_STOP("Area::drawObjAndTerrain()")
 }
 inline void Area::drawTerrainShadow() {
+    PROFILE_START("Area::drawTerrainShadow()")
     if (_data) {
         Bool fully_inside;
 
@@ -156,12 +159,14 @@ inline void Area::drawTerrainShadow() {
         // custom
         data()->customDrawShadow();
     }
+    PROFILE_STOP("Area::drawTerrainShadow()")
 }
 inline void Area::drawObjShadow() {
     REPAO(_objs)->drawShadow();
 }
 /******************************************************************************/
 inline void Area::drawOverlay() {
+    PROFILE_START("Area::drawOverlay()")
     if (_data) {
         // mesh overlays
         Memc<MeshOverlay> &mesh_overlays = _data->mesh_overlays;
@@ -178,9 +183,11 @@ inline void Area::drawOverlay() {
         Memc<Decal> &decals = _data->decals;
         FREPAO(decals).drawStatic();
     }
+    PROFILE_STOP("Area::drawOverlay()")
 }
 /******************************************************************************/
 void WorldManager::draw() {
+    PROFILE_START("WorldManager::draw()")
     switch (Renderer()) {
     case RM_PREPARE: {
         // objects and terrain
@@ -261,8 +268,10 @@ void WorldManager::draw() {
         }
         break;
     }
+    PROFILE_STOP("WorldManager::draw()")
 }
 void WorldManager::drawDrawnAreas(C Color &color, C Color &color_shd) {
+    PROFILE_START("WorldManager::drawDrawnAreas(C Color &color, C Color &color_shd)")
     Flt scale = 0.003f;
     if (color.a) {
         VI.color(color);
@@ -279,6 +288,7 @@ void WorldManager::drawDrawnAreas(C Color &color, C Color &color_shd) {
     (ActiveCam.matrix.pos.xz() * scale).draw(WHITE);
     REP(Frustum.edges)
     D.line(WHITE, Frustum.point[Frustum.edge[i].x].xz() * scale, Frustum.point[Frustum.edge[i].y].xz() * scale);
+    PROFILE_STOP("WorldManager::drawDrawnAreas(C Color &color, C Color &color_shd)")
 }
 /******************************************************************************/
 } // namespace Game

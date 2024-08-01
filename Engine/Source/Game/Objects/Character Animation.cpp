@@ -1,3 +1,4 @@
+// TODO ADD PROFILE_START AND PROFILE_STOP PROFILERS
 /******************************************************************************/
 #include "stdafx.h"
 namespace EE {
@@ -10,6 +11,7 @@ static SkelAnim *GetAnim(AnimatedSkeleton &anim_skel, C ObjectPtr &obj, CChar8 *
     return null;
 }
 void Chr::SkelAnimCache::set(AnimatedSkeleton &anim_skel, C ObjectPtr &obj) {
+    PROFILE_START("CatzEngine::Chr::SkelAnimCache::set(AnimatedSkeleton &anim_skel, C ObjectPtr &obj)")
     // set default animations
     fist_l = GetAnim(anim_skel, obj, "anim fist left");
     fist_r = GetAnim(anim_skel, obj, "anim fist right");
@@ -54,6 +56,7 @@ void Chr::SkelAnimCache::set(AnimatedSkeleton &anim_skel, C ObjectPtr &obj) {
         body_u = anim_skel.findBoneI(BONE_SPINE, 0, (spines + 1) / 2); // chose spine bone in the middle
     } else
         body_u = -1;
+    PROFILE_STOP("CatzEngine::Chr::SkelAnimCache::set(AnimatedSkeleton &anim_skel, C ObjectPtr &obj)")
 }
 /******************************************************************************/
 Flt Chr::animateFaceBlend() // facial animation blending value, dependent on distance from camera, returns value 0..1 (0 disables facial animation)
@@ -97,6 +100,7 @@ static void AlignFeet(Chr &chr, Flt step) // align character feet by 'step'=0..1
 /******************************************************************************/
 void Chr::updateAnimationAnim() // update all 'Chr::anim' parameters
 {
+    PROFILE_START("CatzEngine::Chr::updateAnimationAnim()")
     Bool set = (anim.stop_move == 0.0f); // 'set' is a helper value for setting animation blending values (which are in range 0..1) immediately to 1
     Flt dt = Time.d() * anim.speed;      // animations time delta
 
@@ -192,6 +196,7 @@ void Chr::updateAnimationAnim() // update all 'Chr::anim' parameters
         anim.time = 0;
     else
         anim.time += dt;
+    PROFILE_STOP("CatzEngine::Chr::updateAnimationAnim()")
 }
 /******************************************************************************/
 static Flt AnimTime(Chr &chr) // get global animation time for the character according to current time and character's 'unique' value
@@ -199,6 +204,7 @@ static Flt AnimTime(Chr &chr) // get global animation time for the character acc
     return Time.time() + chr.anim.unique * 10;
 }
 void Chr::animate() {
+    PROFILE_START("CatzEngine::Chr::animate()")
     // animation blend values
     Flt b_stand = (1 - anim.stand_crouch) * (1 - anim.stop_move) * (1 - anim.b_turn_l) * (1 - anim.b_turn_r),
         b_crc_stop = (anim.stand_crouch) * (1 - anim.stop_move),
@@ -302,9 +308,11 @@ void Chr::animate() {
         .animate(sac.floating, time, anim.fly);
     if (dodging)
         skel.animate((dodging < 0) ? sac.dodge_l : sac.dodge_r, 1 - dodge_step, Sqrt(Sin(dodge_step * PI)));
+    PROFILE_STOP("CatzEngine::Chr::animate()")
 }
 /******************************************************************************/
 void Chr::updateAnimation() {
+    PROFILE_START("CatzEngine::Chr::updateAnimation()")
     updateAnimationAnim();
 
     // first animate using only basic animations (standing or crouching) to detect 'foot_offset' (it will be used to align the whole body matrix while crouching so that the foot will always be in constant position - "attached" to certain position on the ground)
@@ -440,6 +448,7 @@ void Chr::updateAnimation() {
             ragdoll.toSkelBlend(skel, blend * 0.45f);
         }
     }
+    PROFILE_STOP("CatzEngine::Chr::updateAnimation()")
 }
 /******************************************************************************/
 } // namespace Game

@@ -601,29 +601,25 @@ INLINE void process_FORWARD_CASE_LIGHT_CONE(ALPHA_MODE alpha) {
     D.depth(true);
     if (Renderer.firstPass()) {
         D.stencil(STENCIL_ALWAYS_SET, 0);
-        if (!ALWAYS_RESTORE_FRUSTUM) {
+        if (!ALWAYS_RESTORE_FRUSTUM)
             Frustum = FrustumMain;
-        }
     } else {
         Frustum.from(CurrentLight.cone.pyramid);
         Renderer.mode(RM_PREPARE);
         Renderer._render();
-        if (ALWAYS_RESTORE_FRUSTUM) {
+        if (ALWAYS_RESTORE_FRUSTUM) 
             Frustum = FrustumMain;
-        }
         D.clipAllow(true);
     }
     Renderer.mode(RM_OPAQUE);
     REPS(Renderer._eye, Renderer._eye_num) {
         Renderer.setEyeViewportCam();
         if (GetCurrentLightRect()) {
-            if (CurrentLight.shadow) {
+            if (CurrentLight.shadow) 
                 SetShdMatrix();
-            }
             CurrentLight.cone.set(CurrentLight.shadow_opacity);
-            if (Renderer.secondaryPass()) {
+            if (Renderer.secondaryPass()) 
                 D.clip(CurrentLight.rect & Renderer._clip);
-            }
             DrawOpaqueInstances();
             Renderer._render();
         }

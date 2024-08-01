@@ -69,7 +69,7 @@ Bool DrawParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha) {
 #if GL // needed for iOS PVRTC Pow2 #ParticleImgPart
     Sh.ImgSize->setConditional(image._part.xy);
 #endif
-    PROFILE_STOP("SetLightShadow(Light &CurrentLight, std::function<Shader *(bool)> GetShdPointFunc)")
+    PROFILE_STOP("DrawParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha)")
     return true;
 }
 void DrawParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel) {

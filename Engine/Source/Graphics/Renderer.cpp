@@ -879,22 +879,20 @@ RendererClass &RendererClass::operator()(void (&render)()) {
         stage = RS_WATER_LIGHT;
     else if (Kb.b(KB_NPADD))
         stage = RS_REFLECTION;
-    else if (Kb.br(KB_NP0) || Kb.br(KB_NP1) || Kb.br(KB_NP2) || Kb.br(KB_NP3) || Kb.br(KB_NP4) || Kb.br(KB_NP5) || Kb.br(KB_NP6) || Kb.br(KB_NP7) || Kb.br(KB_NP8) || Kb.br(KB_NP9) || Kb.br(KB_NPDIV) || Kb.br(KB_NPMUL) || Kb.br(KB_NPSUB) || Kb.br(KB_NPADD) || Kb.br(KB_NPDEL))
+    else if (Kb.br(KB_NP0) || Kb.br(KB_NP1) || Kb.br(KB_NP2) || Kb.br(KB_NP3) ||
+             Kb.br(KB_NP4) || Kb.br(KB_NP5) || Kb.br(KB_NP6) || Kb.br(KB_NP7) ||
+             Kb.br(KB_NP8) || Kb.br(KB_NP9) || Kb.br(KB_NPDIV) || Kb.br(KB_NPMUL) ||
+             Kb.br(KB_NPSUB) || Kb.br(KB_NPADD) || Kb.br(KB_NPDEL))
         stage = RS_DEFAULT;
 #endif
 
-    // prepare
     _render = render;
     _stereo = (VR.active() && D._view_main.full && !combine && !target && !_get_target && D._allow_stereo); // use stereo only for full viewport, if we're not combining (games may use combining to display 3D items/characters in Gui)
     _eye_num = _stereo + 1;                                                                                 // _stereo ? 2 : 1
     _mirror_want = false;
     _has = 0;
     _outline = 0;
-    if (target) {
-        target->_ptr_num++; // increase ptr count to make sure this won't be discarded in case user does not hold a pointer to the target. This will be decreased at the end of this function when rendering finished
-        _final = target;
-    } else
-        _final = (_stereo ? VR.getRender() : _cur_main);
+    _final = target ? (target->_ptr_num++, target) : (_stereo ? VR.getRender() : _cur_main); // target->_ptr_num++; increase ptr count to make sure this won't be discarded in case user does not hold a pointer to the target. This will be decreased at the end of this function when rendering finished
 
     _ctx = _ctxs(temporal_id);
     _ctx_sub = _ctx->subs(D._view_main.recti, _temporal_reset);
@@ -907,226 +905,185 @@ RendererClass &RendererClass::operator()(void (&render)()) {
     // set water
     Water.prepare();
 
-#define MEASURE(x)              \
-    if (_t_measure) {           \
-        D.finish();             \
-        Dbl c = Time.curTime(); \
-        x += c - t;             \
-        t = c;                  \
+    // Render steps
+    if (reflection())
+        goto finished;
+    prepare();
+    opaque();
+    overlay();
+
+    // Set background sky pixels
+    {
+        // set background sky pixels not drawn by foreground object meshes (everything at the end of depth buffer), this needs to be done before 'blend' because fur may set depth buffer without setting velocities, and before water surface
+        C Bool clear_nrm = (!NRM_CLEAR_START && _nrm && NeedBackgroundNrm()),
+               clear_ext = (!EXT_CLEAR_START && _ext && NeedBackgroundExt()),
+               clear_vel = (!VEL_CLEAR_START && _vel);
+
+        if (clear_nrm || clear_ext || clear_vel) {
+            if (clear_vel)
+                SetViewToViewPrev();
+            D.alpha(ALPHA_NONE);
+            D.depth2DOn(FUNC_BACKGROUND);                                                                          // this enables depth but disables 'D.depthWrite'
+            set(null, clear_nrm ? _nrm() : null, clear_ext ? _ext() : null, clear_vel ? _vel() : null, _ds, true); // use DS because we use it for 'D.depth2D' optimization #RTOutput
+            Sh.ClearDeferred->draw();
+            D.depth2DOff();
+        }
     }
 
-    // render
-    {
-        Dbl t;
-        Flt temp, water;
-        if (_t_measure) {
-            D.finish();
-            t = Time.curTime();
-            temp = water = 0;
-            _t_measures[0]++;
+    if (stage) {
+        switch (stage) {
+        case RS_COLOR:
+            if (_cur_type == RT_DEFERRED && show(_col, true))
+                goto finished;
+            break; // only on deferred renderer the color is unlit
+        case RS_NORMAL:
+            if (show(_nrm, false, D.signedNrmRT()))
+                goto finished;
+            break;
+        case RS_SMOOTH:
+            if (show(_ext, false, false, 0, true))
+                goto finished;
+            break; // #RTOutput inverse because it's roughness
+        case RS_REFLECT:
+            if (show(_ext, false, false, 1))
+                goto finished;
+            break; // #RTOutput
+        case RS_DEPTH:
+            if (show(_ds_1s, false))
+                goto finished;
+            break; // this may be affected by test blend
         }
+    }
 
-        if (reflection())
-            goto finished;
-        MEASURE(_t_reflection[1])
+    waterPreLight();
+    light();
 
-        prepare();
-        MEASURE(_t_prepare[1])
-        opaque();
-        MEASURE(_t_opaque[1])
-        overlay();
-        MEASURE(_t_overlay[1])
-
-        // set background sky pixels not drawn by foreground object meshes (everything at the end of depth buffer), this needs to be done before 'blend' because fur may set depth buffer without setting velocities, and before water surface
-        {
-            const Bool clear_nrm = (!NRM_CLEAR_START && _nrm && NeedBackgroundNrm()),
-                       clear_ext = (!EXT_CLEAR_START && _ext && NeedBackgroundExt()),
-                       clear_vel = (!VEL_CLEAR_START && _vel);
-            if (clear_nrm || clear_ext || clear_vel) {
-                if (clear_vel)
-                    SetViewToViewPrev();
+    if (stage) {
+        switch (stage) {
+        case RS_LIT_COLOR:
+            if (show(_col, true))
+                goto finished;
+            break;
+        case RS_LIGHT:
+            // if ambient hasn't been applied to '_lum_1s', apply it here
+            if (_lum_1s) {
+                if (!ambientInLum()) {
+                    set(_lum_1s, null, true);
+                    D.alpha(ALPHA_ADD);
+                    Sh.clear(Vec4(D.ambientColorD(), 0));
+                }
+                if (show(_lum_1s, true)) 
+                    goto finished;
+            }
+            break;
+        case RS_AO:
+            if (_ao) {
+                set(_final, null, true);
                 D.alpha(ALPHA_NONE);
-                D.depth2DOn(FUNC_BACKGROUND);                                                                          // this enables depth but disables 'D.depthWrite'
-                set(null, clear_nrm ? _nrm() : null, clear_ext ? _ext() : null, clear_vel ? _vel() : null, _ds, true); // use DS because we use it for 'D.depth2D' optimization #RTOutput
-                Sh.ClearDeferred->draw();
-                D.depth2DOff();
+                Sh.ImgX[0]->set(_ao);
+                (LINEAR_GAMMA ? Sh.DrawXG : Sh.DrawX)->draw();
+                goto finished;
             }
+            break;
+        case RS_LIGHT_AO:
+            if (_lum_1s && _ao) {
+                set(_lum_1s, null, true);
+                Sh.ImgX[0]->set(_ao);
+                D.alpha(D.aoAll() ? ALPHA_MUL : ALPHA_ADD);
+                if (D.aoAll()) {
+                    Sh.DrawX->draw();
+                } else {
+                    Sh.Color[0]->set(Vec4(D.ambientColorD(), 0));
+                    Sh.Color[1]->set(Vec4Zero);
+                    Sh.DrawXC[0][0]->draw();
+                }
+                if (show(_lum_1s, true))
+                    goto finished;
+            }
+            break;
         }
+    }
 
-        if (stage)
-            switch (stage) {
-            case RS_COLOR:
-                if (_cur_type == RT_DEFERRED && show(_col, true))
-                    goto finished;
-                break; // only on deferred renderer the color is unlit
-            case RS_NORMAL:
-                if (show(_nrm, false, D.signedNrmRT()))
-                    goto finished;
-                break;
-            case RS_SMOOTH:
-                if (show(_ext, false, false, 0, true))
-                    goto finished;
-                break; // #RTOutput inverse because it's roughness
-            case RS_REFLECT:
-                if (show(_ext, false, false, 1))
-                    goto finished;
-                break; // #RTOutput
-            case RS_DEPTH:
-                if (show(_ds_1s, false))
-                    goto finished;
-                break; // this may be affected by test blend materials later
-            }
-        waterPreLight();
-        MEASURE(water)
-        light();
-        MEASURE(_t_light[1])
-        if (stage)
-            switch (stage) {
-            case RS_LIT_COLOR:
-                if (show(_col, true))
-                    goto finished;
-                break;
+    if (waterPostLight())
+        goto finished;
 
-            case RS_LIGHT:
-                if (_lum_1s) {
-                    if (!ambientInLum()) // if ambient hasn't been applied to '_lum_1s', apply it here
-                    {
-                        set(_lum_1s, null, true);
-                        D.alpha(ALPHA_ADD);
-                        Sh.clear(Vec4(D.ambientColorD(), 0));
-                    }
-                    if (show(_lum_1s, true))
-                        goto finished;
-                }
-                break;
+    emissive();
 
-            case RS_AO:
-                if (_ao) {
-                    set(_final, null, true);
-                    D.alpha(ALPHA_NONE);
-                    Sh.ImgX[0]->set(_ao);
-                    (LINEAR_GAMMA ? Sh.DrawXG : Sh.DrawX)->draw();
-                    goto finished;
-                }
-                break;
-
-            case RS_LIGHT_AO:
-                if (_lum_1s) {
-                    if (_ao) {
-                        set(_lum_1s, null, true);
-                        Sh.ImgX[0]->set(_ao);
-                        if (D.aoAll()) {
-                            D.alpha(ALPHA_MUL);
-                            Sh.DrawX->draw();
-                        } else {
-                            D.alpha(ALPHA_ADD);
-                            Sh.Color[0]->set(Vec4(D.ambientColorD(), 0));
-                            Sh.Color[1]->set(Vec4Zero);
-                            Sh.DrawXC[0][0]->draw();
-                        }
-                    }
-                    if (show(_lum_1s, true))
-                        goto finished;
-                }
-                break;
-            }
-        if (waterPostLight())
-            goto finished;
-        MEASURE(_t_water[1])
-        if (_t_measure)
-            _t_water[1] += water;
-
-        emissive();
-        MEASURE(_t_emissive[1])
-        if (stage)
-            switch (stage) {
-            case RS_GLOW:
-                if (show(_col, false, false, 3))
-                    goto finished;
-                break; // #RTOutput
-            case RS_EMISSIVE:
-                if (_cur_type == RT_DEFERRED && show(_col, true))
-                    goto finished;
-                break; // only on deferred renderer
-            }
-        sky();
-        MEASURE(_t_sky[1])
-        waterUnder();
-        MEASURE(_t_water_under[1])
-        edgeDetect();
-        MEASURE(_t_edge_detect[1])
-        blend();
-        MEASURE(_t_blend[1])
-        if (hasDof()) {
-            resolveDepth1();
-            MEASURE(temp)
+    if (stage) {
+        switch (stage) {
+        case RS_GLOW:
+            if (show(_col, false, false, 3))
+                goto finished;
+            break; // #RTOutput
+        case RS_EMISSIVE:
+            if (_cur_type == RT_DEFERRED && show(_col, true))
+                goto finished;
+            break; // only on deferred renderer
         }
-        /*if(stage)switch(stage) check this earlier together with other stages, to avoid doing a single extra check here
+    }
+
+    sky();
+    waterUnder();
+    edgeDetect();
+    blend();
+
+    if (hasDof())
+        resolveDepth1();
+    /*if(stage)switch(stage) check this earlier together with other stages, to avoid doing a single extra check here
           {
              case RS_DEPTH: if(show(_ds_1s, false))goto finished; break;
           }*/
 
-        palette(0);
-        palette(1);
-        MEASURE(_t_palette[1])
-        behind();
-        MEASURE(_t_behind[1])
-        outline();
-        MEASURE(temp)
+    palette(0);
+    palette(1);
+    behind();
+    outline();
 
-        // 2D
-        finalizeGlow(); // !! assume that nothing below can trigger glow on the scene !!
-        applyOutline();
+    // 2D
+    finalizeGlow(); // !! assume that nothing below can trigger glow on the scene !!
+    applyOutline();
 
-        if (stage)
-            switch (stage) {
-            case RS_ALPHA:
-                if (show(_alpha, false))
-                    goto finished;
-                break;
-            }
+    if (stage == RS_ALPHA && show(_alpha, false))
+        goto finished;
 
-        if (!D.temporalSuperRes())
-            edgeSoften();
-        MEASURE(temp) // if have temporal super-res then 'edgeSoften' must be run after upscale
-        AstroDrawRays();
-        MEASURE(_t_rays[1])
-        volumetric();
-        MEASURE(_t_volumetric[1])
-        postProcess();
-        MEASURE(_t_post_process[1])
-    finished:;
-    }
+    if (!D.temporalSuperRes())
+        edgeSoften();
+    AstroDrawRays();
+    volumetric();
+    postProcess();
 
-    // cleanup
-    {
-        temporalFinish();
-        _ctx_sub->proj_matrix_prev = ProjMatrix; // set always because needed for MotionBlur and Temporal
-        _ctx_sub = &_ctx_sub_dummy;
-        _ctx = null;
-        _render = null; // this specifies that we're outside of Rendering
-        _final = null;
-        D.alpha(ALPHA_BLEND);
-        mode(RM_OPAQUE);
-        set(_cur_main, _cur_main_ds, true);
+finished:
 
-        Sky.setFracMulAdd(); // in case user draws billboards/particles outside of Renderer, call before 'cleanup' because this relies on depth buffer being available
-        cleanup();
+    // Cleanup
+    temporalFinish();
+    _ctx_sub->proj_matrix_prev = ProjMatrix; // set always because needed for MotionBlur and Temporal
+    _ctx_sub = &_ctx_sub_dummy;
+    _ctx = null;
+    _render = null; // this specifies that we're outside of Rendering
+    _final = nullptr;
+    D.alpha(ALPHA_BLEND);
+    mode(RM_OPAQUE);
+    set(_cur_main, _cur_main_ds, true);
 
-        if (VR.active()) {
-            D.setViewFovTan(); // !! call after clearing _render !!
-            if (_stereo) {
-                D.clearCol(); // normally after rendering has finished we expect to draw on top of the result, however for stereoscopic, we've rendered to a separate render target, that won't be used for 2D drawing now, instead we're now back to '_cur_main' which is not yet initialized, so we need to clear it here
-                // restore settings to centered (not one of the eyes)
-                D._view_main.setShader().setProjMatrix();         // viewport
-                SetCam(ActiveCam.matrix, ActiveCam._matrix_prev); // camera, 'Frustum' remains the same
-            }
+    Sky.setFracMulAdd(); // in case user draws billboards/particles outside of Renderer, call before 'cleanup' because this relies on depth buffer being available
+    cleanup();
+
+    if (VR.active()) {
+        D.setViewFovTan(); // !! call after clearing _render !!
+        if (_stereo) {
+            D.clearCol(); // normally after rendering has finished we expect to draw on top of the result, however for stereoscopic, we've rendered to a separate render target, that won't be used for 2D drawing now, instead we're now back to '_cur_main' which is not yet initialized, so we need to clear it here
+            // restore settings to centered (not one of the eyes)
+            D._view_main.setShader().setProjMatrix();         // viewport
+            SetCam(ActiveCam.matrix, ActiveCam._matrix_prev); // camera, 'Frustum' remains the same
         }
     }
+
     if (_shader_param_changes)
         Exit("'LinkShaderParamChanges' was called without 'UnlinkShaderParamChanges'.");
+
     if (target)
         target->_ptr_num--; // decrease ptr count without discarding
+
     PROFILE_STOP("RendererClass::operator()(void (&render)())")
     return T;
 }

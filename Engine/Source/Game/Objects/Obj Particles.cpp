@@ -227,7 +227,9 @@ void ObjParticles::matrix(C Matrix &matrix) { particles.matrix = matrix; }
 // UPDATE
 /******************************************************************************/
 Bool ObjParticles::update() {
+    PROFILE_START("CatzEngine::ObjParticles::update()")
     particles.update();
+    PROFILE_STOP("CatzEngine::ObjParticles::update()")
     return true;
 }
 /******************************************************************************/

@@ -1,9 +1,6 @@
-#ifndef LIGHT_UTILITIES_HPP
-#define LIGHT_UTILITIES_HPP
+#pragma once
 
 #include "stdafx.h"
-
-// TODO IMPROVE AGAIN MAINTAINABILITY
 
 // STARTED UTILITIES METHODS FOR Light::draw()
 
@@ -93,7 +90,6 @@ INLINE void ProcessShadowMapForCone_CASE_LIGHT_CONE() {
 INLINE void RenderWaterLum_CASE_LIGHT_CONE(MatrixM &light_matrix) {
     D.stencil(STENCIL_WATER_TEST, STENCIL_REF_WATER);
     Sh.Depth->set(Renderer._water_ds);
-
     if (CurrentLight.shadow) {
         Renderer.getShdRT();
         Renderer.set(Renderer._shd_1s, Renderer._water_ds, true, NEED_DEPTH_READ);
@@ -102,11 +98,9 @@ INLINE void RenderWaterLum_CASE_LIGHT_CONE(MatrixM &light_matrix) {
         if (SetLightEye(true))
             GetShdCone(false)->draw(&CurrentLight.rect);
     }
-
     SetWaterLum();
     D.depth2DOn(FUNC_LESS);
     DrawLightCone(light_matrix, 0, LIGHT_MODE_WATER);
-
     Sh.Depth->set(Renderer._ds_1s);
     D.stencil(STENCIL_NONE);
 }
@@ -167,19 +161,16 @@ INLINE void RenderMultiSample_CASE_LIGHT_CONE(MatrixM &light_matrix, UInt depth_
 
 INLINE void setupDepthAndShadows_CASE_LIGHT_DIR(Light &CurrentLight, int &shd_map_num, bool &cloud, UInt &depth_func) {
     D.depthClip(true);
-
     if (CurrentLight.shadow) {
         shd_map_num = D.shadowMapNumActual();
         cloud = ShadowMap(CurrentLight.dir);
     }
-
     depth_func = FUNC_FOREGROUND;
 }
 
 INLINE void setupWaterLum_CASE_LIGHT_DIR(int &shd_map_num, bool &cloud) {
     D.stencil(STENCIL_WATER_TEST, STENCIL_REF_WATER);
     Sh.Depth->set(Renderer._water_ds);
-
     if (CurrentLight.shadow) {
         Renderer.getShdRT();
         Renderer.set(Renderer._shd_1s, Renderer._water_ds, true, NEED_DEPTH_READ);
@@ -188,29 +179,23 @@ INLINE void setupWaterLum_CASE_LIGHT_DIR(int &shd_map_num, bool &cloud) {
         if (SetLightEye(true))
             GetShdDir(Mid(shd_map_num, 1, 6), cloud, false)->draw(&CurrentLight.rect);
     }
-
     SetWaterLum();
     D.depth2DOn();
     DrawLightDir(0, LIGHT_MODE_WATER);
-
     Sh.Depth->set(Renderer._ds_1s);
     D.stencil(STENCIL_NONE);
 }
 
 INLINE void setupLum_CASE_LIGHT_DIR(Light &CurrentLight, int shd_map_num, bool cloud) {
     Renderer.getShdRT();
-
     Bool multi_sample = Renderer._ds->multiSample();
     D.depth2DOn();
-
     Flt mp_z_z;
     ApplyViewSpaceBias(mp_z_z);
-
     Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ);
     REPS(Renderer._eye, Renderer._eye_num)
     if (SetLightEye(true))
         GetShdDir(shd_map_num, cloud, false)->draw(&CurrentLight.rect);
-
     if (multi_sample) {
         D.stencil(STENCIL_MSAA_TEST, STENCIL_REF_MSAA);
         Renderer.set(Renderer._shd_ms, Renderer._ds, true, NEED_DEPTH_READ);
@@ -219,7 +204,6 @@ INLINE void setupLum_CASE_LIGHT_DIR(Light &CurrentLight, int shd_map_num, bool c
         Renderer.set(Renderer._shd_1s, Renderer._ds_1s, true, NEED_DEPTH_READ);
         GetShdDir(shd_map_num, cloud, false)->draw(&CurrentLight.rect);
     }
-
     RestoreViewSpaceBias(mp_z_z);
 }
 
@@ -231,7 +215,6 @@ INLINE void setupVolumetric_CASE_LIGHT_DIR(Light &CurrentLight, int shd_map_num,
 INLINE void processLighting_CASE_LIGHT_DIR(Light &CurrentLight, int shd_map_num, bool cloud, UInt depth_func) {
     Bool clear = SetLum();
     D.depth2DOn(depth_func);
-
     if (!Renderer._ds->multiSample()) {
         DrawLightDir(0, LightMode);
     } else {
@@ -251,20 +234,16 @@ INLINE void processDirectionalLight(Light &CurrentLight) {
     int shd_map_num = 0;
     bool cloud = false;
     UInt depth_func = 0;
-
     setupDepthAndShadows_CASE_LIGHT_DIR(CurrentLight, shd_map_num, cloud, depth_func);
-
     // Water lum first
     if (Renderer._water_nrm) {
         setupWaterLum_CASE_LIGHT_DIR(shd_map_num, cloud);
     }
-
     // Lum
     if (CurrentLight.shadow) {
         setupLum_CASE_LIGHT_DIR(CurrentLight, shd_map_num, cloud);
         setupVolumetric_CASE_LIGHT_DIR(CurrentLight, shd_map_num, depth_func);
     }
-
     processLighting_CASE_LIGHT_DIR(CurrentLight, shd_map_num, cloud, depth_func);
 }
 
@@ -272,7 +251,6 @@ INLINE void DrawWaterLum_CASE_LIGHT_LINEAR(Light &CurrentLight) {
     Flt range = CurrentLight.linear.range,
         z_center = DistPointActiveCamPlaneZ(CurrentLight.linear.pos); // Z relative to camera position
     CurrentLightZRange.set(z_center - range, z_center + range);       // use for DX12 OMSetDepthBounds
-
     if (CurrentLight.shadow) {
         D.depthClip(true);
         ShadowMap(range, CurrentLight.linear.pos);
@@ -282,11 +260,9 @@ INLINE void DrawWaterLum_CASE_LIGHT_LINEAR(Light &CurrentLight) {
     MatrixM light_matrix(front_face ? range : -range, CurrentLight.linear.pos); // reverse faces
     D.depthClip(front_face);                                                    // Warning: not available on GL ES
     SetMatrixCount();                                                           // needed for drawing light mesh
-
     if (Renderer._water_nrm) {
         D.stencil(STENCIL_WATER_TEST, STENCIL_REF_WATER);
         Sh.Depth->set(Renderer._water_ds); // set water depth
-
         if (CurrentLight.shadow) {
             // no need for view space bias, because we're calculating shadow for water surfaces, which by themself don't cast shadows and are usually above shadow surfaces
             Renderer.getShdRT();
@@ -296,11 +272,9 @@ INLINE void DrawWaterLum_CASE_LIGHT_LINEAR(Light &CurrentLight) {
             if (SetLightEye(true))
                 GetShdPoint(false)->draw(&CurrentLight.rect);
         }
-
         SetWaterLum();
         D.depth2DOn(depth_func);
         DrawLightLinear(light_matrix, 0, LIGHT_MODE_WATER);
-
         Sh.Depth->set(Renderer._ds_1s); // restore default depth
         D.stencil(STENCIL_NONE);
     }
@@ -340,7 +314,6 @@ INLINE void DrawLum_CASE_LIGHT_LINEAR(Light &CurrentLight, UInt depth_func, Matr
 INLINE void process_CASE_LIGHT_LINEAR(Light &CurrentLight, UInt depth_func, MatrixM &light_matrix) {
     // water lum first, as noted above in the comments
     DrawWaterLum_CASE_LIGHT_LINEAR(CurrentLight);
-
     // lum
     DrawLum_CASE_LIGHT_LINEAR(CurrentLight, depth_func, light_matrix);
 }
@@ -350,13 +323,10 @@ INLINE void processPointLight(Light &CurrentLight) {
     Vec pos = CurrentLight.point.pos;
     Flt z_center = DistPointActiveCamPlaneZ(pos);
     CurrentLightZRange.set(z_center - range, z_center + range);
-
     Bool front_face = LightFrontFaceBall(range, pos);
     UInt depth_func = (front_face ? FUNC_LESS : FUNC_GREATER);
-
     SetDepthAndShadow_CASE_LIGHT_POINT(CurrentLight, range, pos, front_face);
     SetMatrixCount();
-
     DrawWaterLum_CASE_LIGHT_POINT(CurrentLight, range, pos, front_face, depth_func);
     SetLightShadow_CASE_LIGHT_POINT(CurrentLight, range, pos, front_face);
     DrawLum_CASE_LIGHT_POINT(CurrentLight, range, pos, front_face, depth_func);
@@ -366,41 +336,28 @@ INLINE void processLinearLight(Light &CurrentLight) {
     Flt range = CurrentLight.linear.range;
     Flt z_center = DistPointActiveCamPlaneZ(CurrentLight.linear.pos);
     CurrentLightZRange.set(z_center - range, z_center + range);
-
     Bool front_face = LightFrontFaceBall(range, CurrentLight.linear.pos);
     UInt depth_func = (front_face ? FUNC_LESS : FUNC_GREATER);
     MatrixM light_matrix(front_face ? range : -range, CurrentLight.linear.pos);
-
     D.depthClip(front_face);
     SetMatrixCount();
-
     process_CASE_LIGHT_LINEAR(CurrentLight, depth_func, light_matrix);
 }
 
 INLINE void processConeLight(Light &CurrentLight) {
     SetLightZRangeCone();
-
-    if (CurrentLight.shadow) {
+    if (CurrentLight.shadow)
         ProcessShadowMapForCone_CASE_LIGHT_CONE();
-    }
-
     Bool front_face = LightFrontFace(CurrentLight.cone.pyramid);
     UInt depth_func = (front_face ? FUNC_LESS : FUNC_GREATER);
     MatrixM light_matrix;
-
     SetLightMatrixCone(light_matrix, front_face);
     SetMatrixCount();
-
-    if (Renderer._water_nrm) {
+    if (Renderer._water_nrm)
         RenderWaterLum_CASE_LIGHT_CONE(light_matrix);
-    }
-
     RenderLum_CASE_LIGHT_CONE(front_face, light_matrix);
-
-    if (CurrentLight.image) {
+    if (CurrentLight.image)
         SetLightImage_CASE_LIGHT_CONE();
-    }
-
     Bool clear = SetLum2_CASE_LIGHT_CONE(light_matrix);
     RenderMultiSample_CASE_LIGHT_CONE(light_matrix, depth_func);
 }
@@ -418,7 +375,6 @@ INLINE void DrawLightDirForward_CASE_LIGHT_DIR(ALPHA_MODE alpha) {
     } else {
         Renderer._frst_light_offset = OFFSET(FRST, dir);
     }
-
     Renderer.setForwardCol();
     D.alpha(alpha);
     D.set3D();
@@ -445,7 +401,6 @@ INLINE void DrawLightDirForward_CASE_LIGHT_DIR(ALPHA_MODE alpha) {
     }
     ClearOpaqueInstances();
     D.set2D();
-
     if (Renderer.firstPass()) {
         D.stencil(STENCIL_NONE);
         Renderer.resolveDepth();
@@ -467,11 +422,9 @@ INLINE void DrawWaterLumDir_CASE_LIGHT_DIR() {
         if (SetLightEye(true))
             GetShdDir(Mid(shd_map_num, 1, 6), false, false)->draw(&CurrentLight.rect);
     }
-
     SetWaterLum();
     D.depth2DOn(depth_func);
     DrawLightDir(0, LIGHT_MODE_WATER);
-
     Sh.Depth->set(Renderer._ds_1s); // restore default depth
     D.depth2DOff();
     D.stencil(STENCIL_NONE);
@@ -482,9 +435,8 @@ INLINE void DrawLightPointForward_CASE_LIGHT_POINT(ALPHA_MODE alpha, Flt range) 
     D.alpha(alpha);
     D.set3D();
     D.depth(true);
-    if (!ALWAYS_RESTORE_FRUSTUM) {
+    if (!ALWAYS_RESTORE_FRUSTUM)
         Frustum = FrustumMain;
-    }
     if (Renderer.firstPass()) {
         D.stencil(STENCIL_ALWAYS_SET, 0);
         // need to use entire Frustum for first pass
@@ -511,7 +463,6 @@ INLINE void DrawLightPointForward_CASE_LIGHT_POINT(ALPHA_MODE alpha, Flt range) 
     }
     ClearOpaqueInstances();
     D.set2D();
-
     if (Renderer.firstPass()) {
         D.stencil(STENCIL_NONE);
         Renderer.resolveDepth();
@@ -526,7 +477,6 @@ INLINE void DrawWaterLumPoint_CASE_LIGHT_POINT(Flt range) {
     MatrixM light_matrix(front_face ? range : -range, CurrentLight.point.pos); // reverse faces
     D.depthClip(front_face);                                                   // Warning: not available on GL ES
     SetMatrixCount();                                                          // needed for drawing light mesh
-
     if (CurrentLight.shadow) {
         // no need for view space bias, because we're calculating shadow for water surfaces, which by themself don't cast shadows and are usually above shadow surfaces
         Renderer.getShdRT();
@@ -536,11 +486,9 @@ INLINE void DrawWaterLumPoint_CASE_LIGHT_POINT(Flt range) {
         if (SetLightEye(true))
             GetShdPoint(false)->draw(&CurrentLight.rect);
     }
-
     SetWaterLum();
     D.depth2DOn(depth_func);
     DrawLightPoint(light_matrix, 0, LIGHT_MODE_WATER);
-
     Sh.Depth->set(Renderer._ds_1s); // restore default depth
     D.depth2DOff();
     D.depthClip(true);
@@ -551,14 +499,12 @@ INLINE void process_FORWARD_CASE_LIGHT_LINEAR(ALPHA_MODE alpha) {
     Flt range = CurrentLight.linear.range,
         z_center = DistPointActiveCamPlaneZ(CurrentLight.linear.pos); // Z relative to camera position
     CurrentLightZRange.set(z_center - range, z_center + range);       // use for DX12 OMSetDepthBounds
-
     if (CurrentLight.shadow) {
         ShadowMap(range, CurrentLight.linear.pos);
         Renderer._frst_light_offset = OFFSET(FRST, linear_shd);
     } else {
         Renderer._frst_light_offset = OFFSET(FRST, linear);
     }
-
     Renderer.setForwardCol();
     D.alpha(alpha);
     D.set3D();
@@ -592,87 +538,67 @@ INLINE void process_FORWARD_CASE_LIGHT_LINEAR(ALPHA_MODE alpha) {
     }
     ClearOpaqueInstances();
     D.set2D();
-
     if (Renderer.firstPass()) {
         D.stencil(STENCIL_NONE);
         Renderer.resolveDepth();
     }
 }
 
-INLINE void drawWaterLumLinear_CASE_LIGHT_LINEAR() {
-    D.stencil(STENCIL_WATER_TEST, STENCIL_REF_WATER);
-    Sh.Depth->set(Renderer._water_ds); // set water depth
-    Bool front_face = LightFrontFaceBall(CurrentLight.linear.range, CurrentLight.linear.pos);
-    UInt depth_func = (front_face ? FUNC_LESS : FUNC_GREATER);
-    MatrixM light_matrix(front_face ? CurrentLight.linear.range : -CurrentLight.linear.range, CurrentLight.linear.pos); // reverse faces
-    D.depthClip(front_face);                                                                                            // Warning: not available on GL ES
-    SetMatrixCount();                                                                                                   // needed for drawing light mesh
-
-    if (CurrentLight.shadow) {
-        // no need for view space bias, because we're calculating shadow for water surfaces, which by themself don't cast shadows and are usually above shadow surfaces
-        Renderer.getShdRT();
-        Renderer.set(Renderer._shd_1s, Renderer._water_ds, true, NEED_DEPTH_READ); // use DS because it may be used for 'D.depth' optimization, 3D geometric shaders and stencil tests
-        D.depth2DOn();
-        REPS(Renderer._eye, Renderer._eye_num)
-        if (SetLightEye(true))
-            GetShdPoint(false)->draw(&CurrentLight.rect);
-    }
-
-    SetWaterLum();
-    D.depth2DOn(depth_func);
-    DrawLightLinear(light_matrix, 0, LIGHT_MODE_WATER);
-
-    Sh.Depth->set(Renderer._ds_1s); // restore default depth
-    D.depth2DOff();
-    D.depthClip(true);
-    D.stencil(STENCIL_NONE);
-}
-
-INLINE void RenderWaterLuminosity_CASE_LIGHT_CONE() {
+INLINE void CommonWaterLumSetup(Bool front_face, UInt depth_func, const MatrixM &light_matrix) {
     D.stencil(STENCIL_WATER_TEST, STENCIL_REF_WATER);
     Sh.Depth->set(Renderer._water_ds);
-    Bool front_face = LightFrontFace(CurrentLight.cone.pyramid);
-    UInt depth_func = (front_face ? FUNC_LESS : FUNC_GREATER);
-    MatrixM light_matrix;
-    SetLightMatrixCone(light_matrix, front_face);
     D.depthClip(front_face);
     SetMatrixCount();
-
     if (CurrentLight.shadow) {
         Renderer.getShdRT();
         Renderer.set(Renderer._shd_1s, Renderer._water_ds, true, NEED_DEPTH_READ);
         D.depth2DOn();
         REPS(Renderer._eye, Renderer._eye_num) {
             if (SetLightEye(true)) {
-                GetShdCone(false)->draw(&CurrentLight.rect);
+                if (CurrentLight.type == LIGHT_LINEAR)
+                    GetShdPoint(false)->draw(&CurrentLight.rect);
+                else
+                    GetShdCone(false)->draw(&CurrentLight.rect);
             }
         }
     }
-
     SetWaterLum();
     D.depth2DOn(depth_func);
-    DrawLightCone(light_matrix, 0, LIGHT_MODE_WATER);
     Sh.Depth->set(Renderer._ds_1s);
     D.depth2DOff();
     D.depthClip(true);
     D.stencil(STENCIL_NONE);
 }
 
+INLINE void drawWaterLumLinear_CASE_LIGHT_LINEAR() {
+    Bool front_face = LightFrontFaceBall(CurrentLight.linear.range, CurrentLight.linear.pos);
+    UInt depth_func = (front_face ? FUNC_LESS : FUNC_GREATER);
+    MatrixM light_matrix(front_face ? CurrentLight.linear.range : -CurrentLight.linear.range, CurrentLight.linear.pos);
+    CommonWaterLumSetup(front_face, depth_func, light_matrix);
+    DrawLightLinear(light_matrix, 0, LIGHT_MODE_WATER);
+}
+
+INLINE void RenderWaterLuminosity_CASE_LIGHT_CONE() {
+    Bool front_face = LightFrontFace(CurrentLight.cone.pyramid);
+    UInt depth_func = (front_face ? FUNC_LESS : FUNC_GREATER);
+    MatrixM light_matrix;
+    SetLightMatrixCone(light_matrix, front_face);
+    CommonWaterLumSetup(front_face, depth_func, light_matrix);
+    DrawLightCone(light_matrix, 0, LIGHT_MODE_WATER);
+}
+
 INLINE void process_FORWARD_CASE_LIGHT_CONE(ALPHA_MODE alpha) {
     SetLightZRangeCone(); // Z relative to camera position
-
     if (CurrentLight.shadow) {
         ShadowMap(CurrentLight.cone);
         Renderer._frst_light_offset = OFFSET(FRST, cone_shd);
     } else {
         Renderer._frst_light_offset = OFFSET(FRST, cone);
     }
-
     Renderer.setForwardCol();
     D.alpha(alpha);
     D.set3D();
     D.depth(true);
-
     if (Renderer.firstPass()) {
         D.stencil(STENCIL_ALWAYS_SET, 0);
         if (!ALWAYS_RESTORE_FRUSTUM) {
@@ -687,7 +613,6 @@ INLINE void process_FORWARD_CASE_LIGHT_CONE(ALPHA_MODE alpha) {
         }
         D.clipAllow(true);
     }
-
     Renderer.mode(RM_OPAQUE);
     REPS(Renderer._eye, Renderer._eye_num) {
         Renderer.setEyeViewportCam();
@@ -703,70 +628,54 @@ INLINE void process_FORWARD_CASE_LIGHT_CONE(ALPHA_MODE alpha) {
             Renderer._render();
         }
     }
-
     ClearOpaqueInstances();
     D.set2D();
-
     if (Renderer.firstPass()) {
         D.stencil(STENCIL_NONE);
         Renderer.resolveDepth();
     }
-
     // water lum
-    if (Renderer._water_nrm) {
+    if (Renderer._water_nrm)
         RenderWaterLuminosity_CASE_LIGHT_CONE();
-    }
 }
 
 INLINE void processDirectionalLightForward(Light &CurrentLight, ALPHA_MODE alpha) {
     DrawLightDirForward_CASE_LIGHT_DIR(alpha);
-
-    if (Renderer._water_nrm) {
+    if (Renderer._water_nrm)
         DrawWaterLumDir_CASE_LIGHT_DIR();
-    }
 }
 
 INLINE void processPointLightForward(Light &CurrentLight, ALPHA_MODE alpha) {
     Flt range = CurrentLight.point.range();
     Flt z_center = DistPointActiveCamPlaneZ(CurrentLight.point.pos);
     CurrentLightZRange.set(z_center - range, z_center + range);
-
     if (CurrentLight.shadow) {
         ShadowMap(range, CurrentLight.point.pos);
         Renderer._frst_light_offset = OFFSET(FRST, point_shd);
     } else {
         Renderer._frst_light_offset = OFFSET(FRST, point);
     }
-
     DrawLightPointForward_CASE_LIGHT_POINT(alpha, range);
-    if (Renderer._water_nrm) {
+    if (Renderer._water_nrm)
         DrawWaterLumPoint_CASE_LIGHT_POINT(range);
-    }
     D.set2D();
 }
 
 INLINE void processLinearLightForward(Light &CurrentLight, ALPHA_MODE alpha) {
     process_FORWARD_CASE_LIGHT_LINEAR(alpha);
-
-    if (Renderer._water_nrm) {
+    if (Renderer._water_nrm)
         drawWaterLumLinear_CASE_LIGHT_LINEAR();
-    }
 }
 
 INLINE void processConeLightForward(Light &CurrentLight, ALPHA_MODE alpha) {
     process_FORWARD_CASE_LIGHT_CONE(alpha);
 }
-
 // FINISHED UTILITIES METHODS FOR Light::drawForward(ALPHA_MODE alpha)
 
 // STARTED COMMON CODE
-
 INLINE void finalizeDrawing() {
     D.depth2DOff();
     Renderer._shd_1s.clear();
     Renderer._shd_ms.clear();
 }
-
 // FINISHED COMMON CODE
-
-#endif // LIGHT_UTILITIES_HPP

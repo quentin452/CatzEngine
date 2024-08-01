@@ -1612,8 +1612,27 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         }
         CurrentLightZRange.set(min - ActiveCamZ, max - ActiveCamZ); // Z relative to camera position
     }
-#include "LightUtilities.hpp"
+#include "LightProcessor.hpp"
+    LightProcessor processor;
+    /*void Light::draw() {
+        SetShadowOpacity(shadow_opacity);
+        CurrentLight = T;
 
+        std::vector<Light> lights = {CurrentLight};
+        processor.drawLights(std::move(lights));
+
+        finalizeDrawing();
+    }
+
+    void Light::drawForward(ALPHA_MODE alpha) {
+        SetShadowOpacity(shadow_opacity);
+        CurrentLight = T;
+
+        std::vector<Light> lights = {CurrentLight};
+        processor.drawLightsForward(std::move(lights), alpha);
+
+        finalizeDrawing();
+    }*/
     void Light::draw() {
         SetShadowOpacity(shadow_opacity);
         CurrentLight = T;

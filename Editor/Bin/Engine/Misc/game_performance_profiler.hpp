@@ -1,6 +1,13 @@
 #pragma once
 // COPYRIGHT MIT : created by https://github.com/quentin452
 class GamePerformanceProfiler {
+  public:
+    GamePerformanceProfiler() {
+#if PERFORMANCE_MONITOR
+        realTimeStart = std::chrono::steady_clock::now();
+#endif
+    }
+
   private:
 #if PERFORMANCE_MONITOR
     std::unordered_map<std::string, std::chrono::steady_clock::time_point> startTimes;
@@ -8,6 +15,7 @@ class GamePerformanceProfiler {
     std::unordered_map<std::string, int> callCounts;
     std::unordered_map<std::string, int64_t> maxTimes;
     std::mutex mtx;
+    std::chrono::steady_clock::time_point realTimeStart;
 #endif
   public:
 #if PERFORMANCE_MONITOR
@@ -83,12 +91,14 @@ class GamePerformanceProfiler {
             }
 
             std::sort(sortedData.begin(), sortedData.end(),
-                      [](C std::tuple<std::string, double, double, double, double> &a,
-                         C std::tuple<std::string, double, double, double, double> &b) {
+                      [](C auto &a, C auto &b) {
                           return std::get<1>(b) < std::get<1>(a);
                       });
 
-            std::string totalLogMessage = "Total Profiling Time: " + std::to_string(totalProfilingTimeSec) + " s";
+            auto now = std::chrono::steady_clock::now();
+            auto realTimeElapsed = std::chrono::duration_cast<std::chrono::seconds>(now - realTimeStart).count();
+
+            std::string totalLogMessage = "Total Profiling Time: " + std::to_string(totalProfilingTimeSec) + " s, Real Time Elapsed: " + std::to_string(realTimeElapsed) + " s";
             LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, totalLogMessage);
 
             for (C auto &entry : sortedData) {

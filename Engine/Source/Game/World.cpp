@@ -1117,23 +1117,31 @@ INLINE
 #endif
 void UpdateObject(WorldManager &world, Obj &obj) {
     PROFILE_START("UpdateObject(WorldManager &world, Obj &obj)")
-    obj._update_count = world._update_count;
-
-    if (Obj *parent = obj.reliesOn())
-        if (parent->_update_count != world._update_count && parent->_area && parent->_area->state() == AREA_ACTIVE) // testing 'area' also guarantees that the object is existing
-        {
-            UID id = obj.id();
-            UpdateObject(world, *parent);
-            if (id != obj.id()) {
-                PROFILE_STOP("UpdateObject(WorldManager &world, Obj &obj)")
-                return; // after parent update, this object could have been removed, that's why check if its 'id' hasn't been changed
+    std::stack<Obj *> stack;
+    stack.push(&obj);
+    while (!stack.empty()) {
+        Obj *current = stack.top();
+        stack.pop();
+        current->_update_count = world._update_count;
+        if (Obj *parent = current->reliesOn()) {
+            if (parent->_update_count != world._update_count &&
+                parent->_area && parent->_area->state() == AREA_ACTIVE) {
+                UID id = current->id();
+                stack.push(parent); // Empiler le parent pour une mise à jour ultérieure
+                if (id != current->id()) {
+                    // L'objet a été modifié ou supprimé pendant la mise à jour du parent
+                    PROFILE_STOP("UpdateObject(WorldManager &world, Obj &obj)");
+                    return;
+                }
             }
         }
-    if (!obj.update()) {
-        if (ObjMap<Obj> *obj_map = obj.worldObjMap())
-            obj_map->removeObj(&obj);
+        if (!current->update()) {
+            if (ObjMap<Obj> *obj_map = current->worldObjMap()) {
+                obj_map->removeObj(current);
+            }
+        }
     }
-    PROFILE_STOP("UpdateObject(WorldManager &world, Obj &obj)")
+    PROFILE_STOP("UpdateObject(WorldManager &world, Obj &obj)");
 }
 void WorldManager::updateObjects() {
     PROFILE_START("WorldManager::updateObjects()")

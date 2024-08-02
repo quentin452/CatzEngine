@@ -748,7 +748,7 @@ void Particles::draw(Flt opacity) C {
     if (palette_image)
         palette_image_w1 = palette_image->w() - 1;
 
-    ("Draw Loop");
+    bool animate = (image_x_frames > 1 || image_y_frames > 1) && (image_speed > 0);
     REPA(p) {
         Vec2 screen_pos;
         if (PosToScreen(T.p[i].pos, screen_pos)) { // Check if the particle is within the camera view

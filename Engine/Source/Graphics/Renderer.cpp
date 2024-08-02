@@ -2411,6 +2411,7 @@ void RendererClass::blend() {
     Sky.setFracMulAdd();
 
     // Set main light parameters for *BLEND_LIGHT* and 'Mesh.drawBlend'
+    PROFILE_START("RendererClass::blend()1")
     if (Lights.elms()) {
         Light &light = Lights.first();
         if (light.type == LIGHT_DIR) {
@@ -2421,8 +2422,10 @@ void RendererClass::blend() {
             _blst_light_offset = OFFSET(BLST, dir[0]);
         }
     }
+    PROFILE_STOP("RendererClass::blend()1")
 
     // Apply light for fur drawing, which samples the light buffer
+    PROFILE_START("RendererClass::blend()2")
     if (_has & HAS_FUR) {
         if (_ao) {
             set(_lum_1s, nullptr, true);
@@ -2439,7 +2442,9 @@ void RendererClass::blend() {
         PrepareFur();
     }
     _ao.clear(); // '_ao' will not be used after this point
+    PROFILE_STOP("RendererClass::blend()2")
 
+    PROFILE_START("RendererClass::blend()3")
     D.stencilRef(STENCIL_REF_TERRAIN); // Set in case draw codes will use stencil
 
     const Bool blend_affect_vel = true;
@@ -2467,6 +2472,7 @@ void RendererClass::blend() {
 
     _lum_1s.clear(); // '_lum_1s' will not be used after this point
 
+    PROFILE_STOP("RendererClass::blend()3")
     PROFILE_STOP("RendererClass::blend()")
 }
 void RendererClass::palette(Int index) {

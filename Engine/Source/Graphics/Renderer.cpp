@@ -2411,7 +2411,7 @@ void RendererClass::blend() {
     Sky.setFracMulAdd();
 
     // Set main light parameters for *BLEND_LIGHT* and 'Mesh.drawBlend'
-    if (Lights.elms() > 0) {
+    if (Lights.elms()) {
         Light &light = Lights.first();
         if (light.type == LIGHT_DIR) {
             light.dir.set();

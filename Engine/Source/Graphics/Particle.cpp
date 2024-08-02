@@ -669,12 +669,10 @@ void Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, f
     PROFILE_START("Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized)");
     if (p.life_max <= 0) {
         PROFILE_STOP("Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized)");
-        LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "p.lilife_maxfe <= 0");
         return;
     }
     if (p.life <= 0) {
         PROFILE_STOP("Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized)");
-        LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "p.life <= 0");
         return;
     }
     float life = p.life / p.life_max;

@@ -480,20 +480,20 @@ Particles &Particles::paletteIndex(Byte palette_index) {
 void Particles::reset(Int i) {
     PROFILE_START("Particles::reset(Int i)")
     if (InRange(i, p)) {
-        Particle &p = T.p[i];
+        Particle &particle = T.p[i];
         if (reborn) {
             switch (_src_type) {
             case PARTICLE_STATIC_SHAPE:
-                p.pos = (Random(shape, inside_shape) * matrix);
+                particle.pos = (Random(shape, inside_shape) * matrix);
                 break;
             case PARTICLE_DYNAMIC_SHAPE:
-                p.pos = ((_src_ptr) ? Random(((Shape *)_src_ptr)[0], inside_shape) : matrix.pos);
+                particle.pos = ((_src_ptr) ? Random(((Shape *)_src_ptr)[0], inside_shape) : matrix.pos);
                 break;
             case PARTICLE_DYNAMIC_SHAPES:
-                p.pos = ((_src_ptr && _src_elms) ? Random(((Shape *)_src_ptr)[Random(_src_elms)], inside_shape) : matrix.pos);
+                particle.pos = ((_src_ptr && _src_elms) ? Random(((Shape *)_src_ptr)[Random(_src_elms)], inside_shape) : matrix.pos);
                 break;
             case PARTICLE_DYNAMIC_ORIENTP:
-                p.pos = ((_src_ptr) ? ((OrientP *)_src_ptr)->pos : matrix.pos);
+                particle.pos = ((_src_ptr) ? ((OrientP *)_src_ptr)->pos : matrix.pos);
                 break;
 
             case PARTICLE_DYNAMIC_SKELETON: {
@@ -502,43 +502,44 @@ void Particles::reset(Int i) {
                         if (Int bones = anim_skel->minBones()) {
                             Int bone = ((_src_help && _src_elms) ? Min(bones, _src_help[Random(_src_elms)]) : Random(bones));
                             C SkelBone &skel_bone = skel->bones[bone];
-                            p.pos = skel_bone.pos + skel_bone.dir * Random.f(skel_bone.length);
-                            p.pos *= anim_skel->bones[bone]._matrix;
+                            particle.pos = skel_bone.pos + skel_bone.dir * Random.f(skel_bone.length);
+                            particle.pos *= anim_skel->bones[bone]._matrix;
                             break;
                         }
-                p.pos = matrix.pos;
+                particle.pos = matrix.pos;
             } break;
 
             case PARTICLE_DYNAMIC_MESH:
-                p.pos = (_src_mesh ? Random(*_src_mesh) * matrix : matrix.pos);
+                particle.pos = (_src_mesh ? Random(*_src_mesh) * matrix : matrix.pos);
                 break;
             case PARTICLE_DYNAMIC_MESH_SKELETON:
                 if (_src_mesh) {
                     if (_src_ptr)
-                        p.pos = Random(*_src_mesh, *(AnimatedSkeleton *)_src_ptr);
+                        particle.pos = Random(*_src_mesh, *(AnimatedSkeleton *)_src_ptr);
                     else
-                        p.pos = Random(*_src_mesh) * matrix;
+                        particle.pos = Random(*_src_mesh) * matrix;
                 } else
-                    p.pos = matrix.pos;
+                    particle.pos = matrix.pos;
                 break;
 
             default:
-                p.pos = matrix.pos;
+                particle.pos = matrix.pos;
                 break;
             }
-            p.palette_y = (palette_image ? Random(palette_image->h()) : 0);
-            p.image_index = Random(image_x_frames * image_y_frames);
-            p.vel = Random(Ball(vel_random)) + vel_constant;
-            p.ang_vel = Random.f(-ang_vel, ang_vel);
-            p.radius = T.radius * ScaleFactor(Random.f(-radius_random, radius_random));
+            particle.palette_y = (palette_image ? Random(palette_image->h()) : 0);
+            particle.image_index = Random(image_x_frames * image_y_frames);
+            particle.vel = Random(Ball(vel_random)) + vel_constant;
+            particle.ang_vel = Random.f(-ang_vel, ang_vel);
+            particle.radius = T.radius * ScaleFactor(Random.f(-radius_random, radius_random));
             Flt life = T.life * ScaleFactor(Random.f(-life_random, life_random));
-            if (p.life_max > EPS && life)
-                p.life = Frac(p.life - p.life_max, life); // if particle was created before, then set some initial life depending on what it has already
+            if (particle.life_max > EPS && life)
+                particle.life = Frac(particle.life - particle.life_max, life); // if particle was created before, then set some initial life depending on what it has already
             else
-                p.life = Random.f(life); // if we're creating particle for the first time, then set random initial life so it won't look like all particles created in the same time
-            p.life_max = life;
+                particle.life = Random.f(life); // if we're creating particle for the first time, then set random initial life so it won't look like all particles created in the same time
+            particle.life_max = life;
         } else {
-            p.life = p.life_max = 0; // if it shouldn't reborn then set life already as dead
+            particle.life = particle.life_max = 0; // if it shouldn't reborn then set life already as dead
+                                                   // p.remove(i);
         }
     }
     PROFILE_STOP("Particles::reset(Int i)")
@@ -666,8 +667,14 @@ Bool Particles::update(Flt dt) {
 /******************************************************************************/
 void Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized) C {
     PROFILE_START("Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized)");
-    if (p.life_max <= EPS) {
+    if (p.life_max <= 0) {
         PROFILE_STOP("Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized)");
+        LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "p.lilife_maxfe <= 0");
+        return;
+    }
+    if (p.life <= 0) {
+        PROFILE_STOP("Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized)");
+        LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, "p.life <= 0");
         return;
     }
     float life = p.life / p.life_max;
@@ -726,7 +733,7 @@ void Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, f
     PROFILE_STOP("Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized)");
 }
 
-void Particles::draw(Flt opacity) C {
+void Particles::draw(Flt opacity) {
     PROFILE_START("Particles::draw(Flt opacity)");
 
     // Initial checks and setup
@@ -761,15 +768,23 @@ void Particles::draw(Flt opacity) C {
         palette_image_w1 = palette_image->w() - 1;
 
     bool animate = (image_x_frames > 1 || image_y_frames > 1) && (image_speed > 0);
+
     REPA(p) {
-        Vec2 screen_pos;
-        if (PosToScreen(T.p[i].pos, screen_pos)) // Check if the particle is within the camera view
-            drawSingleParticle(T.p[i], animate, opacity, radius_scale, offset_time, offset_time2, offset, random, palette_image, palette_image_w1, render_color_palette, render_color_palette_w1, func, initialized);
+        if (T.p[i].life > 0) {
+            Vec2 screen_pos;
+            if (PosToScreen(T.p[i].pos, screen_pos)) {
+                drawSingleParticle(T.p[i], animate, opacity, radius_scale, offset_time, offset_time2, offset, random, palette_image, palette_image_w1, render_color_palette, render_color_palette_w1, func, initialized);
+            }
+        } else {
+            p.remove(i);
+        }
     }
+
     if (initialized)
         DrawParticleEnd();
     PROFILE_STOP("Particles::draw(Flt opacity)");
 }
+
 /******************************************************************************/
 Bool Particles::save(File &f, Bool include_particles, CChar *path) C {
     f.putUInt(CC4_PRTC);

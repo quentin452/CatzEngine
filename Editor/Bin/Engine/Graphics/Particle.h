@@ -123,7 +123,7 @@ struct Particles // Set of Particles
     Bool update(Flt dt = Time.d()); // update all particles, returns false if Particles Set has died "!alive()", true if it's still alive (or has infinite life), you can use this information to delete the particles if they're no longer needed, 'dt'=time delta used for updating the particles
 
     // draw
-    void draw(Flt opacity = 1) C; // draw, 'opacity'=custom opacity multiplier, this method should be called only in RM_PALETTE, RM_PALETTE1 and RM_BLEND rendering modes, doesn't use automatic Frustum culling
+    void draw(Flt opacity = 1); // draw, 'opacity'=custom opacity multiplier, this method should be called only in RM_PALETTE, RM_PALETTE1 and RM_BLEND rendering modes, doesn't use automatic Frustum culling
     void drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized) C;
 
     // io

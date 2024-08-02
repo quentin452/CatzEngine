@@ -390,27 +390,24 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
     void LightDir::add(Bool shadow, CPtr light_src, Bool allow_main) {
         PROFILE_START("LightDir::add(Bool shadow, CPtr light_src, Bool allow_main)")
         DEBUG_ASSERT(Renderer() == RM_PREPARE, "'LightDir.add' called outside of RM_PREPARE");
-        if (color_l.max() > EPS_COL8_LINEAR && Renderer.firstPass()) {
+        if (color_l.max() > EPS_COL8_LINEAR && Renderer.firstPass())
             Lights.New().set(T, shadow, light_src, allow_main);
-        }
         PROFILE_STOP("LightDir::add(Bool shadow, CPtr light_src, Bool allow_main)")
     }
     void LightPoint::add(Flt shadow_opacity, CPtr light_src) {
         PROFILE_START("LightPoint::add(Flt shadow_opacity, CPtr light_src)")
         Rect rect;
         DEBUG_ASSERT(Renderer() == RM_PREPARE, "'LightPoint.add' called outside of RM_PREPARE");
-        if (color_l.max() > EPS_COL8_LINEAR && power > EPS && toScreenRect(rect) && Renderer.firstPass()) {
+        if (color_l.max() > EPS_COL8_LINEAR && power > EPS && toScreenRect(rect) && Renderer.firstPass())
             Lights.New().set(T, rect, shadow_opacity, light_src);
-        }
         PROFILE_STOP("LightPoint::add(Flt shadow_opacity, CPtr light_src)")
     }
     void LightLinear::add(Flt shadow_opacity, CPtr light_src) {
         PROFILE_START("LightLinear::add(Flt shadow_opacity, CPtr light_src)")
         Rect rect;
         DEBUG_ASSERT(Renderer() == RM_PREPARE, "'LightLinear.add' called outside of RM_PREPARE");
-        if (color_l.max() > EPS_COL8_LINEAR && range > EPS && toScreenRect(rect) && Renderer.firstPass()) {
+        if (color_l.max() > EPS_COL8_LINEAR && range > EPS && toScreenRect(rect) && Renderer.firstPass())
             Lights.New().set(T, rect, shadow_opacity, light_src);
-        }
         PROFILE_STOP("LightLinear::add(Flt shadow_opacity, CPtr light_src)")
     }
     void LightCone::add(Flt shadow_opacity, CPtr light_src, Image * image, Flt image_scale) {

@@ -1,4 +1,3 @@
-// TODO ADD PROFILE_START AND PROFILE_STOP PROFILERS
 /******************************************************************************/
 #include "stdafx.h"
 /******************************************************************************
@@ -38,7 +37,9 @@ void SetEarlyZ(Bool on) { Renderer._mesh_early_z = on; }
 void SetBehindBias(Flt distance) { Sh.BehindBias->setConditional(distance); }
 /******************************************************************************/
 static Bool CreateHighlight(Memc<ShaderParamChange> &data, C Color &color, Ptr user) {
+    PROFILE_START("CatzEngine::CreateHighlight(Memc<ShaderParamChange> &data, C Color &color, Ptr user)")
     data.New().set(Renderer.highlight).set(color);
+    PROFILE_STOP("CatzEngine::CreateHighlight(Memc<ShaderParamChange> &data, C Color &color, Ptr user)")
     return true;
 }
 
@@ -46,12 +47,15 @@ static Map<Color, Memc<ShaderParamChange>> Highlights(Compare, CreateHighlight);
 static Memc<ShaderParamChange> *Highlight;
 
 void SetHighlight() {
+    PROFILE_START("CatzEngine::SetHighlight()")
     if (Highlight) {
         UnlinkShaderParamChanges(*Highlight);
         Highlight = null;
     }
+    PROFILE_STOP("CatzEngine::SetHighlight()")
 }
 void SetHighlight(C Color &color) {
+    PROFILE_START("CatzEngine::SetHighlight(C Color &color)")
     auto highlight = (color.any() ? Highlights(color) : null);
     if (Highlight != highlight) {
         if (Highlight)
@@ -59,21 +63,26 @@ void SetHighlight(C Color &color) {
         if (Highlight = highlight)
             LinkShaderParamChanges(*Highlight);
     }
+    PROFILE_STOP("CatzEngine::SetHighlight(C Color &color)")
 }
 /******************************************************************************
 // SHADER PARAM CHANGES
 /******************************************************************************/
 void LinkShaderParamChanges(const_mem_addr C Memc<ShaderParamChange> &changes) {
+    PROFILE_START("CatzEngine::LinkShaderParamChanges(const_mem_addr C Memc<ShaderParamChange> &changes)")
     if (!Renderer._shader_param_changes)
         Renderer._shader_param_changes = &changes;
     else
         Exit("Trying to 'LinkShaderParamChanges' while there are other changes that weren't unlinked.");
+    PROFILE_STOP("CatzEngine::LinkShaderParamChanges(const_mem_addr C Memc<ShaderParamChange> &changes)")
 }
 void UnlinkShaderParamChanges(const_mem_addr C Memc<ShaderParamChange> &changes) {
+    PROFILE_START("CatzEngine::UnlinkShaderParamChanges(const_mem_addr C Memc<ShaderParamChange> &changes)")
     if (Renderer._shader_param_changes == &changes)
         Renderer._shader_param_changes = null;
     else
         Exit("Trying to 'UnlinkShaderParamChanges' that weren't linked.");
+    PROFILE_STOP("CatzEngine::UnlinkShaderParamChanges(const_mem_addr C Memc<ShaderParamChange> &changes)")
 }
 struct ShaderParamRestore {
     ShaderParam *param;
@@ -90,6 +99,7 @@ static Memc<ShaderParamRestore> RestoreChanges;
 static C Memc<ShaderParamChange> *LastChanges;
 
 Bool SetShaderParamChanges(C Memc<ShaderParamChange> *changes) {
+    PROFILE_START("CatzEngine::SetShaderParamChanges(C Memc<ShaderParamChange> *changes)")
     if (LastChanges != changes) {
         // restore previous changes if any
         REPAO(RestoreChanges).restore(); // restore in backward order
@@ -112,12 +122,15 @@ Bool SetShaderParamChanges(C Memc<ShaderParamChange> *changes) {
                     }
                 }
             }
+        PROFILE_STOP("CatzEngine::SetShaderParamChanges(C Memc<ShaderParamChange> *changes)")
         return true;
     }
+    PROFILE_STOP("CatzEngine::SetShaderParamChanges(C Memc<ShaderParamChange> *changes)")
     return false;
 }
 /******************************************************************************/
 void ShaderMaterial::unlink() {
+    PROFILE_START("CatzEngine::ShaderMaterial::unlink()")
 #if SUPPORT_MATERIAL_CHANGE_IN_RENDERING
     if (..)
         material->unlink(); // need to detect if this is 'material' or 'umm', and we can't check smm->mesh->_umm because this could have already been changed with MeshPart.material call, or this could be ShaderMaterial for shadow which ignores umm
@@ -131,6 +144,7 @@ void ShaderMaterial::unlink() {
             umm->unlink();
     }
 #endif
+    PROFILE_STOP("CatzEngine::ShaderMaterial::unlink()")
 }
 /******************************************************************************/
 Memc<Material::MaterialShader> MaterialShaders;
@@ -200,6 +214,7 @@ Bool HasEarlyZInstances() {
     return (EarlyZInstances[0].elms() + EarlyZInstances[1].elms()) > 0;
 }
 void DrawEarlyZInstances() {
+    PROFILE_START("CatzEngine::DrawEarlyZInstances()")
     SetViewOffset();
     BeginPrecomputedViewMatrix();
     SetMatrixCount();
@@ -220,6 +235,7 @@ void DrawEarlyZInstances() {
         }
     }
     EndPrecomputedViewMatrix();
+    PROFILE_STOP("CatzEngine::DrawEarlyZInstances()")
 }
 void ClearEarlyZInstances() {
     EarlyZInstances[0].clear();
@@ -231,6 +247,7 @@ void ClearEarlyZInstances() {
 /******************************************************************************/
 static INLINE void DrawOpaqueInstances(Bool forward) // !! this function should be safe to call 2 times in a row for both eyes, so can't do any clearing/unlinking that would break things !!
 {
+    PROFILE_START("CatzEngine::DrawOpaqueInstances(Bool forward)")
     SetViewOffset();
     BeginPrecomputedViewMatrix();
 
@@ -484,6 +501,7 @@ static INLINE void DrawOpaqueInstances(Bool forward) // !! this function should 
     EndPrecomputedViewMatrix();
 
     FREPAO(OpaqueObjects)->drawOpaque();
+    PROFILE_STOP("CatzEngine::DrawOpaqueInstances(Bool forward)")
 }
 void ClearOpaqueInstances() {
     MaterialShaders.clear();
@@ -502,10 +520,12 @@ void ClearOpaqueInstances() {
     OpaqueObjects.clear();
 }
 void DrawOpaqueInstances() {
+    PROFILE_START("CatzEngine::DrawOpaqueInstances()")
     if (Renderer._cur_type != RT_FORWARD)
         DrawOpaqueInstances(false);
     else
         DrawOpaqueInstances(true);
+    PROFILE_STOP("CatzEngine::DrawOpaqueInstances()")
 }
 /******************************************************************************/
 // AMBIENT
@@ -552,6 +572,7 @@ void SortEmissiveInstances() {
 }
 void DrawEmissiveInstances() // !! this function should be safe to call 2 times in a row for both eyes, so can't do any clearing/unlinking that would break things !!
 {                            // TODO: add support for #EmissiveInstancing
+    PROFILE_START("CatzEngine::DrawEmissiveInstances()")
 #if SUPPORT_EMISSIVE
     SetViewOffset();
     BeginPrecomputedViewMatrix();
@@ -604,6 +625,7 @@ void DrawEmissiveInstances() // !! this function should be safe to call 2 times 
 #endif
 
     FREPAO(EmissiveObjects)->drawEmissive();
+    PROFILE_STOP("CatzEngine::DrawEmissiveInstances()")
 }
 void ClearEmissiveInstances() {
     EmissiveInstances.clear();
@@ -615,6 +637,7 @@ void ClearEmissiveInstances() {
 /******************************************************************************/
 static Int MaterialShadersNum, ShaderDrawsNum, ShaderMaterialsNum, ShaderMaterialMeshesNum, SkeletonShadersNum, SkeletonShaderMaterialsNum;
 void PrepareShadowInstances() {
+    PROFILE_START("CatzEngine::PrepareShadowInstances()")
     // remember current number of elements in these containers (they may already have data in Forward renderer)
     MaterialShadersNum = MaterialShaders.elms();
     ShaderDrawsNum = ShaderDraws.elms();
@@ -623,9 +646,11 @@ void PrepareShadowInstances() {
 
     SkeletonShadersNum = SkeletonShaders.elms();
     SkeletonShaderMaterialsNum = SkeletonShaderMaterials.elms();
+    PROFILE_STOP("CatzEngine::PrepareShadowInstances()")
 }
 void DrawShadowInstances() // this is called only 1 time and not for each eye
 {
+    PROFILE_START("CatzEngine::DrawShadowInstances()")
     // this doesn't require 'ViewOffset' and 'BeginPrecomputedViewMatrix' because shadows are drawn only 1 time, and not for each eye
 
     // opaque
@@ -772,6 +797,7 @@ void DrawShadowInstances() // this is called only 1 time and not for each eye
           ShadowClothInstances.clear();
        }
     }*/
+    PROFILE_STOP("CatzEngine::DrawShadowInstances()")
 }
 /******************************************************************************/
 // BLEND
@@ -797,6 +823,7 @@ void ClearBlendInstances() {
 }
 void DrawBlendInstances() // !! this function should be safe to call 2 times in a row for both eyes, so can't do any clearing/unlinking that would break things !!
 {
+    PROFILE_START("CatzEngine::DrawBlendInstances()")
     SetViewOffset();
     EyeCache ec;
     ALPHA_MODE alpha = (Renderer.fastCombine() ? ALPHA_BLEND : ALPHA_RENDER_BLEND_FACTOR);
@@ -1095,35 +1122,46 @@ void DrawBlendInstances() // !! this function should be safe to call 2 times in 
     ec.EndPrecomputedViewMatrix();
     D.depthWrite(true);
     D.stencil(STENCIL_NONE);
+    PROFILE_STOP("CatzEngine::DrawBlendInstances()")
 }
 /******************************************************************************/
 // PALETTE
 /******************************************************************************/
 void DrawPaletteObjects() {
+    PROFILE_START("CatzEngine::DrawPaletteObjects()")
     FREPAO(PaletteObjects)->drawPalette();
     FREPAO(PaletteAreas)->customDrawPalette();
+    PROFILE_STOP("CatzEngine::DrawPaletteObjects()")
 }
 void DrawPalette1Objects() {
+    PROFILE_START("CatzEngine::DrawPalette1Objects()")
     FREPAO(Palette1Objects)->drawPalette1();
     FREPAO(Palette1Areas)->customDrawPalette1();
+    PROFILE_STOP("CatzEngine::DrawPalette1Objects()")
 }
 /******************************************************************************/
 // OVERLAY
 /******************************************************************************/
 void DrawOverlayObjects() {
+    PROFILE_START("CatzEngine::DrawOverlayObjects()")
     FREPAO(OverlayObjects)->drawOverlay();
+    PROFILE_STOP("CatzEngine::DrawOverlayObjects()")
 }
 /******************************************************************************/
 // OUTLINE
 /******************************************************************************/
 void DrawOutlineObjects() {
+    PROFILE_START("CatzEngine::DrawOutlineObjects()")
     FREPAO(OutlineObjects)->drawOutline();
+    PROFILE_STOP("CatzEngine::DrawOutlineObjects()")
 }
 /******************************************************************************/
 // BEHIND
 /******************************************************************************/
 void DrawBehindObjects() {
+    PROFILE_START("CatzEngine::DrawBehindObjects()")
     FREPAO(BehindObjects)->drawBehind();
+    PROFILE_STOP("CatzEngine::DrawBehindObjects()")
 }
 /******************************************************************************/
 // MANAGE
@@ -1166,6 +1204,7 @@ void ShutInstances() {
     Highlights.del();
 }
 void InitInstances() {
+    PROFILE_START("CatzEngine::InitInstances()")
     // MaterialShaders                    .reserve(16); no need because this is used only in special cases where materials use more than 1 shader
     ShaderDraws.reserve(16);
     MultiMaterialShaderDraws.reserve(4);
@@ -1183,6 +1222,7 @@ void InitInstances() {
     SkeletonOpaqueInstances.reserve(16);
     SkeletonShadowInstances.reserve(16);
     BlendInstances.reserve(16);
+    PROFILE_STOP("CatzEngine::InitInstances()")
 }
 void ClearInstances() {
     // unlink default materials because shadow draws may reuse them

@@ -1,4 +1,3 @@
-// TODO ADD PROFILE_START AND PROFILE_STOP PROFILERS
 /******************************************************************************/
 #include "stdafx.h"
 namespace EE {
@@ -56,6 +55,7 @@ namespace EE {
 
 /******************************************************************************/
 void RendererClass::createShadowMap() {
+    PROFILE_START("CatzEngine::RendererClass::createShadowMap()")
     SyncLocker locker(D._lock);
 
     // shadow maps
@@ -78,6 +78,7 @@ void RendererClass::createShadowMap() {
 
     Sh.connectRT();
     D.shadowJitterSet();
+    PROFILE_STOP("CatzEngine::RendererClass::createShadowMap()")
 }
 void RendererClass::rtClear() {
     _h0.clear();
@@ -163,6 +164,7 @@ void RendererClass::rtDel() {
 }
 Bool RendererClass::rtCreateMain() // !! call only under lock !!
 {
+    PROFILE_START("CatzEngine::RendererClass::rtCreateMain()")
     ImageRT *old = _ptr_main, *old_ds = _ptr_main_ds,
             *cur_ds = Renderer._cur_ds, *cur[ELMS(Renderer._cur)];
     REPAO(cur) = Renderer._cur[i]; // remember these before creating/deleting RT's because when doing that, 'Renderer._cur', 'Renderer._cur_ds' might get cleared to null
@@ -205,25 +207,31 @@ Bool RendererClass::rtCreateMain() // !! call only under lock !!
             cur_ds = _ptr_main_ds;
         Renderer.set(cur[0], cur[1], cur[2], cur[3], cur_ds, true);
     }
+    PROFILE_STOP("CatzEngine::RendererClass::rtCreateMain()")
     return ok;
 error:
     ok = false;
+    PROFILE_STOP("CatzEngine::RendererClass::rtCreateMain()")
     goto clear;
 }
 Bool RendererClass::rtCreate() {
+    PROFILE_START("CatzEngine::RendererClass::rtCreate()")
     if (LogInit)
         LogN("RendererClass.rtCreate");
     SyncLocker locker(D._lock);
 
     rtDel();
     ResetImageTypeCreateResult();
-    if (!D.created())
+    if (!D.created()) {
+        PROFILE_STOP("CatzEngine::RendererClass::rtCreate()")
         return true; // don't bother with render targets for APP_ALLOW_NO_GPU/APP_ALLOW_NO_XDISPLAY
-
-    if (!mapMain())
+    }
+    if (!mapMain()) {
+        PROFILE_STOP("CatzEngine::RendererClass::rtCreate()")
         return false;
+    }
 
-        // main depth
+    // main depth
 #if DX11
     if (!_main_ds.create(_main.size(), IMAGE_D24S8, IMAGE_DS, _main.samples()))
         return false;
@@ -237,13 +245,15 @@ Bool RendererClass::rtCreate() {
                             if (!_main_ds.create(_main.size(), IMAGE_D24X8, IMAGE_GL_RB, _main.samples()))
                                 if (!_main_ds.create(_main.size(), IMAGE_D16, IMAGE_GL_RB, _main.samples()))
                                     return false;
-#else // other platforms have '_main_ds' linked with '_main' provided by the system
+#else     // other platforms have '_main_ds' linked with '_main' provided by the system
     _main_ds.forceInfo(_main.w(), _main.h(), 1, _main_ds.type() ? _main_ds.type() : IMAGE_D24S8, IMAGE_GL_RB, _main.samples()); // if we know the type then use it, otherwise assume the default IMAGE_D24S8
 #endif
 
     // secondary main
-    if (!rtCreateMain())
+    if (!rtCreateMain()) {
+        PROFILE_STOP("CatzEngine::RendererClass::rtCreate()")
         return false;
+    }
 
     createShadowMap();
 
@@ -255,10 +265,12 @@ Bool RendererClass::rtCreate() {
     setMain();
 
     Sh.connectRT();
+    PROFILE_STOP("CatzEngine::RendererClass::rtCreate()")
     return true;
 }
 /******************************************************************************/
 void RendererClass::update() {
+    PROFILE_START("CatzEngine::RendererClass::update()")
     if (_t_measure) {
         Dbl t = Time.curTime();
         if (t > _t_last_measure + 1) {
@@ -304,10 +316,12 @@ void RendererClass::update() {
             _t_measures[1] = 0;
         }
     }
+    PROFILE_STOP("CatzEngine::RendererClass::update()")
 }
 /******************************************************************************/
 void RendererClass::setMain() // !! requires 'D._lock' !! this is called after RT creation, and when VR GuiTexture is created/deleted/changed, and at the end of frame drawing for stereo mode (to advance to the next VR frame)
 {
+    PROFILE_START("CatzEngine::RendererClass::setMain()")
 #if DX12
    map needs to be called for all images, cache the values, and adjust '_main' in every frame, possibly setRT too
 #endif
@@ -323,6 +337,7 @@ void RendererClass::setMain() // !! requires 'D._lock' !! this is called after R
    _cur_main_ds = _ui_ds;
 
    set(_cur_main, _cur_main_ds, false);
+   PROFILE_STOP("CatzEngine::RendererClass::setMain()")
 }
 Bool RendererClass::mapMain() {
     return _main.map();
@@ -439,6 +454,7 @@ void RendererClass::needDepthRead() {
 #pragma message("!! Warning: Use this only for debugging !!")
 #endif
 void RendererClass::set(ImageRT *t0, ImageRT *t1, ImageRT *t2, ImageRT *t3, ImageRT *ds, Bool custom_viewport, DEPTH_READ_MODE depth_read_mode) {
+    PROFILE_START("CatzEngine::RendererClass::set(ImageRT *t0, ImageRT *t1, ImageRT *t2, ImageRT *t3, ImageRT *ds, Bool custom_viewport, DEPTH_READ_MODE depth_read_mode)")
     Bool changed = false;
 #if DX11
     ID3D11RenderTargetView *id0 = (t0 ? t0->_rtv : null),
@@ -724,9 +740,11 @@ void RendererClass::set(ImageRT *t0, ImageRT *t1, ImageRT *t2, ImageRT *t3, Imag
             D.validateCoords(); // viewport was changed, also for OpenGL (flip Y 2D coords when Rendering To Texture)
         }
     }
+    PROFILE_STOP("CatzEngine::RendererClass::set(ImageRT *t0, ImageRT *t1, ImageRT *t2, ImageRT *t3, ImageRT *ds, Bool custom_viewport, DEPTH_READ_MODE depth_read_mode)")
 }
 /******************************************************************************/
 void RendererClass::setMainViewportCam() {
+    PROFILE_START("CatzEngine::RendererClass::setMainViewportCam()")
     if (_stereo) {
         D._view_active.setRect(Renderer.screenToPixelI(D._view_rect)).setViewport().setShader();
         SetProjMatrix();
@@ -734,8 +752,10 @@ void RendererClass::setMainViewportCam() {
         D.validateCoords();
         D.setViewFovTan();
     }
+    PROFILE_STOP("CatzEngine::RendererClass::setMainViewportCam()")
 }
 void RendererClass::setEyeViewportCam() {
+    PROFILE_START("CatzEngine::RendererClass::setEyeViewportCam()")
     if (_stereo) {
         D._view_active.setRect(Renderer.screenToPixelI(D._view_eye_rect[_eye])).setViewport().setShader(&ProjMatrixEyeOffset[_eye]); // 'setShader' needed for 'PosToScreen' and 'fur'
         SetProjMatrix(ProjMatrixEyeOffset[_eye]);
@@ -743,13 +763,17 @@ void RendererClass::setEyeViewportCam() {
         D.validateCoords(_eye);
         D.setViewFovTan();
     }
+    PROFILE_STOP("CatzEngine::RendererClass::setEyeViewportCam()")
 }
 Rect *RendererClass::setEyeParams() {
+    PROFILE_START("CatzEngine::RendererClass::setEyeParams()")
     if (_stereo) {
         RectI recti = D._view_active.recti;
         D._view_active.setRect(Renderer.screenToPixelI(D._view_eye_rect[_eye])).setShader(&ProjMatrixEyeOffset[_eye]).setRect(recti); // set rect temporarily to set shader params and restore it afterwards
+        PROFILE_STOP("CatzEngine::RendererClass::setEyeParams()")
         return &D._view_eye_rect[_eye];
     }
+    PROFILE_STOP("CatzEngine::RendererClass::setEyeParams()")
     return &D._view_rect;
 }
 /******************************************************************************/
@@ -759,6 +783,7 @@ void RendererClass::finalizeGlow() {
 }
 /******************************************************************************/
 Bool RendererClass::capture(Image &image, Int w, Int h, Int type, Int mode, Int mip_maps, Bool alpha) {
+    PROFILE_START("CatzEngine::RendererClass::capture(Image &image, Int w, Int h, Int type, Int mode, Int mip_maps, Bool alpha)")
     if (image.capture(*_ptr_main)) {
         if (type <= 0)
             type = image.type();
@@ -812,25 +837,32 @@ Bool RendererClass::capture(Image &image, Int w, Int h, Int type, Int mode, Int 
                 }
                 image.unlock().updateMipMaps();
             }
+            PROFILE_STOP("CatzEngine::RendererClass::capture(Image &image, Int w, Int h, Int type, Int mode, Int mip_maps, Bool alpha)")
             return true;
         }
     }
     image.del();
+    PROFILE_STOP("CatzEngine::RendererClass::capture(Image &image, Int w, Int h, Int type, Int mode, Int mip_maps, Bool alpha)")
     return false;
 }
 Bool RendererClass::screenShot(C Str &name, Bool alpha) {
+    PROFILE_START("CatzEngine::RendererClass::screenShot(C Str &name, Bool alpha)")
     FCreateDirs(GetPath(name));
     Image temp;
     if (alpha) // with alpha
     {
-        if (capture(temp, -1, -1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1, true))
+        if (capture(temp, -1, -1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1, true)) {
+            PROFILE_STOP("CatzEngine::RendererClass::screenShot(C Str &name, Bool alpha)")
             return temp.Export(name);
+        }
     } else if (temp.capture(*_ptr_main)) // no alpha
     {
         if (temp.typeInfo().a)
             temp.copy(temp, -1, -1, -1, IMAGE_R8G8B8_SRGB, IMAGE_SOFT, 1); // if captured image has alpha channel then let's remove it
+        PROFILE_STOP("CatzEngine::RendererClass::screenShot(C Str &name, Bool alpha)")
         return temp.Export(name);
     }
+    PROFILE_STOP("CatzEngine::RendererClass::screenShot(C Str &name, Bool alpha)")
     return false;
 }
 Bool RendererClass::screenShots(C Str &name, C Str &ext, Bool alpha) {
@@ -839,10 +871,12 @@ Bool RendererClass::screenShots(C Str &name, C Str &ext, Bool alpha) {
 }
 /******************************************************************************/
 void RendererClass::timeMeasure(Bool on) {
+    PROFILE_START("CatzEngine::RendererClass::timeMeasure(Bool on)")
     if (_t_measure != on) {
         _t_measure = on;
         _t_last_measure = Time.curTime();
     }
+    PROFILE_STOP("CatzEngine::RendererClass::timeMeasure(Bool on)")
 }
 /******************************************************************************/
 } // namespace EE

@@ -645,97 +645,111 @@ Bool Particles::update(Flt dt) {
     return false;
 }
 /******************************************************************************/
-void Particles::draw(Flt opacity) C {
+void Particles::draw(Flt opacity) C{
     PROFILE_START("Particles::draw(Flt opacity)");
-    if (_src_type && image && Renderer() == renderMode()) {
-        opacity *= _fade;
-        if (opacity > 0) {
-            bool initialized = false;
-            bool offset = (offset_range > EPS);
-            float offset_time = Time.time() * offset_speed;
-            float offset_time2 = offset_time * 0.7f;
-            float radius_scale = radiusScale();
-            float (*func)(Flt s) = GetOpacityFunc(T);
-            Randomizer random(UIDZero);
-            Image *render_color_palette = nullptr;
-            int render_color_palette_w1 = 0, palette_image_w1 = 0;
 
-            if (Renderer() != _render_mode) {
-                render_color_palette = &D._color_palette_soft[paletteIndex()];
-                if (render_color_palette->h() < 4) {
-                    PROFILE_STOP("Particles::draw(Flt opacity)");
-                    return;
-                }
-                render_color_palette_w1 = render_color_palette->w() - 1;
-            }
-
-            if (palette_image)
-                palette_image_w1 = palette_image->w() - 1;
-
-            auto drawParticle = [&](C Particle &p, bool animate) {
-                if (p.life_max > EPS) {
-                    float life = p.life / p.life_max;
-                    float radius = p.radius * radius_scale;
-                    Vec pos = p.pos;
-
-                    if (offset)
-                        pos += random(Ball(offset_range), false) * Sin(random.f(PI2) + offset_time) + random(Ball(offset_range), false) * Sin(random.f(PI2) + offset_time2);
-
-                    Color color = T.color;
-
-                    if (palette_image) {
-                        int x = RoundPos(life * palette_image_w1);
-                        color = ColorMul(color, palette_image->color(x, p.palette_y));
-                    }
-
-                    if (render_color_palette) {
-                        int x = render_color_palette_w1 - RoundPos(life * render_color_palette_w1);
-                        VecI4 p_color = 0;
-
-                        REP(4) {
-                            if (Byte c = color.c[i]) {
-                                C VecB4 &col = render_color_palette->pixB4(x, i);
-                                p_color.x += col.x * c;
-                                p_color.y += col.y * c;
-                                p_color.z += col.z * c;
-                                p_color.w += c;
-                            }
-                        }
-
-                        if (!p_color.w) {
-                            PROFILE_STOP("Particles::draw(Flt opacity)");
-                            return;
-                        }
-                        color.r = p_color.x / p_color.w;
-                        color.g = p_color.y / p_color.w;
-                        color.b = p_color.z / p_color.w;
-                        color.a = 255;
-                    }
-
-                    if (!initialized) {
-                        initialized = true;
-                        if (animate)
-                            DrawAnimatedParticleBegin(*image, glow, motion_affects_alpha, image_x_frames, image_y_frames);
-                        else
-                            DrawParticleBegin(*image, glow, motion_affects_alpha);
-                    }
-
-                    if (animate)
-                        DrawAnimatedParticleAdd(color, opacity * func(life), radius, p.ang_vel * p.life, pos, p.vel, p.life * image_speed);
-                    else
-                        DrawParticleAdd(color, opacity * func(life), radius, p.ang_vel * p.life, pos, p.vel);
-                }
-            };
-
-            bool animate = (image_x_frames > 1 || image_y_frames > 1) && (image_speed > 0);
-            REPA(p) {
-                drawParticle(T.p[i], animate);
-            }
-
-            if (initialized)
-                DrawParticleEnd();
-        }
+    // Early exit if conditions are not met
+    if (!_src_type || !image || Renderer() != renderMode()) {
+        PROFILE_STOP("Particles::draw(Flt opacity)");
+        return;
     }
+
+    opacity *= _fade;
+    if (opacity <= 0) {
+        PROFILE_STOP("Particles::draw(Flt opacity)");
+        return;
+    }
+
+    bool initialized = false;
+    bool offset = (offset_range > EPS);
+    float offset_time = Time.time() * offset_speed;
+    float offset_time2 = offset_time * 0.7f;
+    float radius_scale = radiusScale();
+    float (*func)(Flt s) = GetOpacityFunc(T);
+    Randomizer random(UIDZero);
+    Image *render_color_palette = nullptr;
+    int render_color_palette_w1 = 0, palette_image_w1 = 0;
+
+    // Set up the color palette if necessary
+    if (Renderer() != _render_mode) {
+        render_color_palette = &D._color_palette_soft[paletteIndex()];
+        if (render_color_palette->h() < 4) {
+            PROFILE_STOP("Particles::draw(Flt opacity)");
+            return;
+        }
+        render_color_palette_w1 = render_color_palette->w() - 1;
+    }
+
+    if (palette_image)
+        palette_image_w1 = palette_image->w() - 1;
+
+    auto drawParticle = [&](const Particle &p, bool animate) {
+        if (p.life_max <= EPS)
+            return;
+
+        float life = p.life / p.life_max;
+        float radius = p.radius * radius_scale;
+        Vec pos = p.pos;
+
+        if (offset) {
+            Vec offsetVec = random(Ball(offset_range), false);
+            pos += offsetVec * Sin(random.f(PI2) + offset_time) +
+                   random(Ball(offset_range), false) * Sin(random.f(PI2) + offset_time2);
+        }
+
+        Color color = T.color;
+
+        if (palette_image) {
+            int x = RoundPos(life * palette_image_w1);
+            color = ColorMul(color, palette_image->color(x, p.palette_y));
+        }
+
+        if (render_color_palette) {
+            int x = render_color_palette_w1 - RoundPos(life * render_color_palette_w1);
+            VecI4 p_color = {0, 0, 0, 0};
+
+            REP(4) {
+                Byte c = color.c[i];
+                if (c) {
+                    const VecB4 &col = render_color_palette->pixB4(x, i);
+                    p_color.x += col.x * c;
+                    p_color.y += col.y * c;
+                    p_color.z += col.z * c;
+                    p_color.w += c;
+                }
+            }
+
+            if (!p_color.w)
+                return;
+
+            color.r = p_color.x / p_color.w;
+            color.g = p_color.y / p_color.w;
+            color.b = p_color.z / p_color.w;
+            color.a = 255;
+        }
+
+        if (!initialized) {
+            initialized = true;
+            if (animate)
+                DrawAnimatedParticleBegin(*image, glow, motion_affects_alpha, image_x_frames, image_y_frames);
+            else
+                DrawParticleBegin(*image, glow, motion_affects_alpha);
+        }
+
+        if (animate)
+            DrawAnimatedParticleAdd(color, opacity * func(life), radius, p.ang_vel * p.life, pos, p.vel, p.life * image_speed);
+        else
+            DrawParticleAdd(color, opacity * func(life), radius, p.ang_vel * p.life, pos, p.vel);
+    };
+
+    bool animate = (image_x_frames > 1 || image_y_frames > 1) && (image_speed > 0);
+    REPA(p) {
+        drawParticle(T.p[i], animate);
+    }
+
+    if (initialized)
+        DrawParticleEnd();
+
     PROFILE_STOP("Particles::draw(Flt opacity)");
 }
 

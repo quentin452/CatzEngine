@@ -1155,15 +1155,10 @@ void WorldManager::updateObjects() {
                 if (o->_enable_vanilla_update == false) {
                     continue;
                 } else {
-                    if (o->_update_count != _update_count) {
+                    if (o->_update_count != _update_count)
                         UpdateObject(T, *o);
-                    }
-                    if (i > objs.elms()) {
+                    if (i > objs.elms()) 
                         i = objs.elms(); // in case if some 'Obj::update' would remove other objects and suddenly 'i' would be out of 'objs' container range
-                    }
-                    // LoggerThread::GetLoggerThread().logMessageAsync(
-                    //      LogLevel::INFO, __FILE__, __LINE__,
-                    //     "Update Method get called with obj name(arbitrary_name): " + o->arbitrary_name.toCString());
                 }
             }
         }

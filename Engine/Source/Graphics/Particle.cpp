@@ -83,9 +83,8 @@ void DrawParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &
     SET_TEX(v[1].tex, TEX_ONE, TEX_ONE);
     SET_TEX(v[2].tex, TEX_ONE, TEX_ZERO);
     SET_TEX(v[3].tex, TEX_ZERO, TEX_ZERO);
-    if (Vtx3DBilb *vtx = (Vtx3DBilb *)VI.addVtx(4)) {
+    if (Vtx3DBilb *vtx = (Vtx3DBilb *)VI.addVtx(4))
         memcpy(vtx, v, sizeof(v));
-    }
     PROFILE_STOP("DrawParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel)")
 }
 
@@ -94,40 +93,52 @@ void DrawParticleEnd() {
 }
 /******************************************************************************/
 Bool DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha, Int x_frames, Int y_frames) {
-    PROFILE_START("DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha, Int x_frames, Int y_frames)")
-    Renderer.wantDepthRead(); // !! call before 'SoftParticles' !!
-    // Shader *shader;
-    Bool soft = SoftParticles();
+    PROFILE_START("DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha, Int x_frames, Int y_frames)");
+
+    // Setup initial rendering state
+    Renderer.wantDepthRead();    // Ensure depth read is enabled
+    Bool soft = SoftParticles(); // Determine if soft particles are used
+
+    // Variable to hold shader (if required in the future)
+    // Shader *shader = nullptr;
+
+    // Configure based on renderer type
     switch (Renderer()) {
-    default:
-        PROFILE_STOP("DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha, Int x_frames, Int y_frames)")
-        return false;
     case RM_BLEND:
-        // shader = Sh.Particle[false][soft][1 + D.particlesSmoothAnim()][motion_affects_alpha];// disabled to fix particle distorsion bugs
         ColorFunc = ColorAlpha;
         D.alpha(Renderer.fastCombine() ? ALPHA_BLEND : ALPHA_RENDER_BLEND_FACTOR);
         D.alphaFactor(Color(0, 0, 0, glow));
-        MaterialClear();
+        MaterialClear(); // Clear material properties if required
         if (glow)
             Renderer._has |= HAS_GLOW;
-        break; // 'MaterialClear' must be called when changing 'D.alphaFactor'
+        break;
+
     case RM_PALETTE:
     case RM_PALETTE1:
-        // shader = Sh.Particle[true][soft][1 + D.particlesSmoothAnim()][motion_affects_alpha];// disabled to fix particle distorsion bugs
         ColorFunc = ColorMul;
         D.alpha(ALPHA_ADD);
         break;
+
+    default:
+        PROFILE_STOP("DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha, Int x_frames, Int y_frames)");
+        return false; // Return early if renderer type is unsupported
     }
-    SetOneMatrix();
-    D.depthOnWrite(true, false);
-    VI.image(&image);
-    // VI.shader(shader);// disabled to fix particle distorsion bugs
+
+    // Set common states
+    SetOneMatrix();              // Setup the matrix for rendering
+    D.depthOnWrite(true, false); // Enable depth writing
+    VI.image(&image);            // Bind the image for rendering
+    // VI.shader(shader); // Shader setup disabled due to fixes
+
+    // Set vertex information
     VI.setType(VI_3D_BILB_ANIM, VI_QUAD_IND);
     Sh.ParticleFrames->set(VecI2(x_frames, y_frames));
-#if GL // needed for iOS PVRTC Pow2 #ParticleImgPart
-    Sh.ImgSize->setConditional(image._part.xy);
+
+#if GL
+    Sh.ImgSize->setConditional(image._part.xy); // Set image size conditionally for certain platforms
 #endif
-    PROFILE_STOP("DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha, Int x_frames, Int y_frames)")
+
+    PROFILE_STOP("DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha, Int x_frames, Int y_frames)");
     return true;
 }
 void DrawAnimatedParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel, Flt frame) {
@@ -654,8 +665,11 @@ Bool Particles::update(Flt dt) {
 }
 /******************************************************************************/
 void Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized) C {
-    if (p.life_max <= EPS)
+    PROFILE_START("Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized)");
+    if (p.life_max <= EPS) {
+        PROFILE_STOP("Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized)");
         return;
+    }
     float life = p.life / p.life_max;
     float radius = p.radius * radius_scale;
     Vec pos = p.pos;
@@ -687,9 +701,10 @@ void Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, f
             }
         }
 
-        if (!p_color.w)
+        if (!p_color.w) {
+            PROFILE_STOP("Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized)");
             return;
-
+        }
         color.r = p_color.x / p_color.w;
         color.g = p_color.y / p_color.w;
         color.b = p_color.z / p_color.w;
@@ -708,6 +723,7 @@ void Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, f
         DrawAnimatedParticleAdd(color, opacity * func(life), radius, p.ang_vel * p.life, pos, p.vel, p.life * image_speed);
     else
         DrawParticleAdd(color, opacity * func(life), radius, p.ang_vel * p.life, pos, p.vel);
+    PROFILE_STOP("Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized)");
 }
 
 void Particles::draw(Flt opacity) C {
@@ -725,12 +741,8 @@ void Particles::draw(Flt opacity) C {
         return;
     }
 
-    bool initialized = false;
-    bool offset = (offset_range > EPS);
-    float offset_time = Time.time() * offset_speed;
-    float offset_time2 = offset_time * 0.7f;
-    float radius_scale = radiusScale();
-    float (*func)(Flt s) = GetOpacityFunc(T);
+    bool initialized = false, offset = (offset_range > EPS);
+    float offset_time = Time.time() * offset_speed, offset_time2 = offset_time * 0.7f, radius_scale = radiusScale(), (*func)(Flt s) = GetOpacityFunc(T);
     Randomizer random(UIDZero);
     Image *render_color_palette = nullptr;
     int render_color_palette_w1 = 0, palette_image_w1 = 0;
@@ -751,15 +763,13 @@ void Particles::draw(Flt opacity) C {
     bool animate = (image_x_frames > 1 || image_y_frames > 1) && (image_speed > 0);
     REPA(p) {
         Vec2 screen_pos;
-        if (PosToScreen(T.p[i].pos, screen_pos)) { // Check if the particle is within the camera view
+        if (PosToScreen(T.p[i].pos, screen_pos)) // Check if the particle is within the camera view
             drawSingleParticle(T.p[i], animate, opacity, radius_scale, offset_time, offset_time2, offset, random, palette_image, palette_image_w1, render_color_palette, render_color_palette_w1, func, initialized);
-        }
     }
     if (initialized)
         DrawParticleEnd();
     PROFILE_STOP("Particles::draw(Flt opacity)");
 }
-
 /******************************************************************************/
 Bool Particles::save(File &f, Bool include_particles, CChar *path) C {
     f.putUInt(CC4_PRTC);

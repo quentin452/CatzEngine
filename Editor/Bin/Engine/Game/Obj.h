@@ -11,6 +11,7 @@ namespace Game {
 /******************************************************************************/
 struct Obj // Game Object interface inherited by all Game Object classes (Game.Static, Game.Kinematic, Game.Chr, Game.Item, ..)
 {
+    public:
     Bool _enable_vanilla_update = true;
     Str arbitrary_name = "NO_NAME";
     // manage

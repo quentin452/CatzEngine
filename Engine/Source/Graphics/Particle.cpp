@@ -667,11 +667,7 @@ Bool Particles::update(Flt dt) {
 /******************************************************************************/
 void Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized) C {
     PROFILE_START("Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized)");
-    if (p.life_max <= 0) {
-        PROFILE_STOP("Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized)");
-        return;
-    }
-    if (p.life <= 0) {
+    if (p.life_max <= 0 OR p.life <= 0) {
         PROFILE_STOP("Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized)");
         return;
     }

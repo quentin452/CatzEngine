@@ -9,30 +9,64 @@ static void AreaDrawState(Cell<Game::Area> &cell, Ptr)
    (cell.xy().vec2()*0.03).draw(cell().state ? ((cell().state==2) ? GREEN : RED) : BLACK);
 }
 /******************************************************************************/
+bool IsPointInFrustum(C Camera &cam, C Vec &point) {
+    Vec2 screen_pos;
+    return PosToScreen(point, cam.matrix, screen_pos);
+}
+
+void GetBoundingBoxCorners(C Matrix &matrix, Vec corners[8]) {
+    C Vec scale = matrix.scale() * 1.5;
+    C Vec pos = matrix.pos;
+    C Vec right = matrix.x * scale.x;
+    C Vec up = matrix.y * scale.y;
+    C Vec forward = matrix.z * scale.z;
+    corners[0] = pos + right + up + forward;
+    corners[1] = pos + right + up - forward;
+    corners[2] = pos + right - up + forward;
+    corners[3] = pos + right - up - forward;
+    corners[4] = pos - right + up + forward;
+    corners[5] = pos - right + up - forward;
+    corners[6] = pos - right - up + forward;
+    corners[7] = pos - right - up - forward;
+}
+
+bool IsObjectInFrustum(C Camera &cam, Obj &obj) {
+    Vec corners[8];
+    GetBoundingBoxCorners(obj.matrix(), corners);
+    for (int i = 0; i < 8; ++i) {
+        if (IsPointInFrustum(cam, corners[i]))
+            return true;
+    }
+    return false;
+}
+
 inline void Area::drawObjAndTerrain() {
     PROFILE_START("Area::drawObjAndTerrain()")
     // first process objects before terrain, so they will be first on the list (if possible), objects don't use EarlyZ, so terrain will always be displayed as first in the EarlyZ stage
     REPA(_objs) {
         Obj &obj = *_objs[i];
-        if (UInt modes = obj.drawPrepare())
-            if (Renderer.firstPass()) {
-                if (modes & IndexToFlag(RM_OVERLAY))
-                    OverlayObjects.add(&obj);
-                if (modes & IndexToFlag(RM_BLEND))
-                    BlendInstances.add(obj);
-                if (modes & IndexToFlag(RM_PALETTE))
-                    PaletteObjects.add(&obj);
-                if (modes & IndexToFlag(RM_PALETTE1))
-                    Palette1Objects.add(&obj);
-                if (modes & IndexToFlag(RM_OPAQUE))
-                    OpaqueObjects.add(&obj);
-                if (modes & IndexToFlag(RM_EMISSIVE))
-                    EmissiveObjects.add(&obj);
-                if (modes & IndexToFlag(RM_OUTLINE))
-                    OutlineObjects.add(&obj);
-                if (modes & IndexToFlag(RM_BEHIND))
-                    BehindObjects.add(&obj);
-            }
+        Vec2 screen_pos;
+        if (IsObjectInFrustum(ActiveCam, obj)) {
+            if (UInt modes = obj.drawPrepare())
+                if (Renderer.firstPass()) {
+                    if (modes & IndexToFlag(RM_OVERLAY))
+                        OverlayObjects.add(&obj);
+                    if (modes & IndexToFlag(RM_BLEND))
+                        BlendInstances.add(obj);
+                    if (modes & IndexToFlag(RM_PALETTE))
+                        PaletteObjects.add(&obj);
+                    if (modes & IndexToFlag(RM_PALETTE1))
+                        Palette1Objects.add(&obj);
+                    if (modes & IndexToFlag(RM_OPAQUE))
+                        OpaqueObjects.add(&obj);
+                    if (modes & IndexToFlag(RM_EMISSIVE))
+                        EmissiveObjects.add(&obj);
+                    if (modes & IndexToFlag(RM_OUTLINE))
+                        OutlineObjects.add(&obj);
+                    if (modes & IndexToFlag(RM_BEHIND))
+                        BehindObjects.add(&obj);
+                }
+        }
     }
 
     // data

@@ -939,11 +939,9 @@ void WorldManager::areaUpdateState() {
         rect.extend(_rangei + 1); // +1=INACTIVE
 
         // pause background thread
-        LOG("areaUpdateState lock");
         _lock.on();
 
         // make a quick test of which areas need to be loaded (used for 'updateProgress')
-        LOG("areaUpdateState TestState");
         _areas_to_load = 0;
         if (_mode == WORLD_FULL)
             _grid.func(TestState, T);
@@ -954,7 +952,6 @@ void WorldManager::areaUpdateState() {
         updateObjectAreas();
 
         // process data required for this moment instantly
-        LOG("areaUpdateState process data required for this moment instantly");
         File file_area; // use one file object to make use of the performance improvement for pak load
         if (_mode == WORLD_FULL)
             _grid.func(UpdateState, file_area);
@@ -983,7 +980,6 @@ void WorldManager::areaUpdateState() {
         rect.extend(1); // +1=CACHE
 
         // set areas to be loaded in the background thread
-        LOG("areaUpdateState set areas to be loaded in the background thread");
         _area_background.clear();
         if (use_background_loading && _thread.created() && _mode == WORLD_STREAM)
             _grid.funcCreate(rect, GetBackground, T);
@@ -991,7 +987,6 @@ void WorldManager::areaUpdateState() {
             _thread_event.on(); // activate the thread
 
         // enable background thread
-        LOG("areaUpdateState unlock");
         _lock.off();
 
 #if DEBUG
@@ -1001,9 +996,7 @@ void WorldManager::areaUpdateState() {
 #endif
 
         // set data after updating the areas
-        LOG("areaUpdateState areaSetLoadedRect");
         areaSetLoadedRect(); // set loaded areas lookup table
-        LOG("areaUpdateState pathBuild");
         path2DBuild(); // build paths after setting active areas
 
         // delete unused mini map images
@@ -1013,8 +1006,6 @@ void WorldManager::areaUpdateState() {
                         Floor(mini_map.areaToImage(Vec2(rect.max))));
             mini_map.clear(&leave);
         }
-
-        LOG("areaUpdateState end");
 #if DEBUG
         t = Time.curTime();
         _time_area_update_state_path = t - time_area_update_state_path;

@@ -997,7 +997,7 @@ void WorldManager::areaUpdateState() {
 
         // set data after updating the areas
         areaSetLoadedRect(); // set loaded areas lookup table
-        path2DBuild(); // build paths after setting active areas
+        path2DBuild();       // build paths after setting active areas
 
         // delete unused mini map images
         if (_mode == WORLD_STREAM) {
@@ -1110,8 +1110,6 @@ void WorldManager::updateObjects() {
     PROFILE_START("WorldManager::updateObjects()")
     Dbl time = Time.curTime();
 
-    std::stack<Obj *> stack;
-
     FREPA(_area_active) {
         Memc<Obj *> &objs = _area_active[i]->_objs;
         if (objs.elms() > 0) {
@@ -1121,26 +1119,16 @@ void WorldManager::updateObjects() {
                     continue;
                 } else {
                     if (o->_update_count != _update_count) {
-                        stack.push(o);
-                        while (!stack.empty()) {
-                            Obj *current = stack.top();
-                            stack.pop();
-                            current->_update_count = _update_count;
-                            if (Obj *parent = current->reliesOn()) {
-                                if (parent->_update_count != _update_count &&
-                                    parent->_area && parent->_area->state() == AREA_ACTIVE) {
-                                    UID id = current->id();
-                                    stack.push(parent);
-                                    if (id != current->id()) {
-                                        PROFILE_STOP("WorldManager::updateObjects()");
-                                        return;
-                                    }
-                                }
+                        o->_update_count = _update_count;
+                        if (Obj *parent = o->reliesOn()) {
+                            if (parent->_update_count != _update_count &&
+                                parent->_area && parent->_area->state() == AREA_ACTIVE) {
+                                parent->_update_count = _update_count;
                             }
-                            if (!current->update()) {
-                                if (ObjMap<Obj> *obj_map = current->worldObjMap()) {
-                                    obj_map->removeObj(current);
-                                }
+                        }
+                        if (!o->update()) {
+                            if (ObjMap<Obj> *obj_map = o->worldObjMap()) {
+                                obj_map->removeObj(o);
                             }
                         }
                     }

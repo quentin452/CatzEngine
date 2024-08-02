@@ -74,18 +74,21 @@ Bool DrawParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha) {
 }
 void DrawParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel) {
     PROFILE_START("DrawParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel)")
-    if (Vtx3DBilb *v = (Vtx3DBilb *)VI.addVtx(4)) {
-        v[0].pos = v[1].pos = v[2].pos = v[3].pos = pos;
-        v[0].vel_angle = v[1].vel_angle = v[2].vel_angle = v[3].vel_angle.set(vel.x, vel.y, vel.z, GPU_HALF_SUPPORTED ? AngleFull(angle) : angle);
-        v[0].color = v[1].color = v[2].color = v[3].color = ColorFunc(color, opacity);
-        v[0].size = v[1].size = v[2].size = v[3].size = radius;
-        SET_TEX(v[0].tex, TEX_ZERO, TEX_ONE);
-        SET_TEX(v[1].tex, TEX_ONE, TEX_ONE);
-        SET_TEX(v[2].tex, TEX_ONE, TEX_ZERO);
-        SET_TEX(v[3].tex, TEX_ZERO, TEX_ZERO);
+    static Vtx3DBilb v[4]; // Use static array to avoid dynamic allocation
+    v[0].pos = v[1].pos = v[2].pos = v[3].pos = pos;
+    v[0].vel_angle = v[1].vel_angle = v[2].vel_angle = v[3].vel_angle.set(vel.x, vel.y, vel.z, GPU_HALF_SUPPORTED ? AngleFull(angle) : angle);
+    v[0].color = v[1].color = v[2].color = v[3].color = ColorFunc(color, opacity);
+    v[0].size = v[1].size = v[2].size = v[3].size = radius;
+    SET_TEX(v[0].tex, TEX_ZERO, TEX_ONE);
+    SET_TEX(v[1].tex, TEX_ONE, TEX_ONE);
+    SET_TEX(v[2].tex, TEX_ONE, TEX_ZERO);
+    SET_TEX(v[3].tex, TEX_ZERO, TEX_ZERO);
+    if (Vtx3DBilb *vtx = (Vtx3DBilb *)VI.addVtx(4)) {
+        memcpy(vtx, v, sizeof(v));
     }
     PROFILE_STOP("DrawParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel)")
 }
+
 void DrawParticleEnd() {
     VI.end();
 }
@@ -129,19 +132,21 @@ Bool DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_al
 }
 void DrawAnimatedParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel, Flt frame) {
     PROFILE_START("DrawAnimatedParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel, Flt frame)")
-    if (Vtx3DBilbAnim *v = (Vtx3DBilbAnim *)VI.addVtx(4)) {
-        v[0].pos = v[1].pos = v[2].pos = v[3].pos = pos;
-        v[0].vel_angle = v[1].vel_angle = v[2].vel_angle = v[3].vel_angle.set(vel.x, vel.y, vel.z, GPU_HALF_SUPPORTED ? AngleFull(angle) : angle);
-        v[0].color = v[1].color = v[2].color = v[3].color = ColorFunc(color, opacity);
-        v[0].size = v[1].size = v[2].size = v[3].size = radius;
-        v[0].frame = v[1].frame = v[2].frame = v[3].frame = frame;
-        SET_TEX(v[0].tex, TEX_ZERO, TEX_ONE);
-        SET_TEX(v[1].tex, TEX_ONE, TEX_ONE);
-        SET_TEX(v[2].tex, TEX_ONE, TEX_ZERO);
-        SET_TEX(v[3].tex, TEX_ZERO, TEX_ZERO);
-    }
+    static Vtx3DBilbAnim v[4]; // Utilisation d'un tableau statique pour éviter l'allocation dynamique
+    v[0].pos = v[1].pos = v[2].pos = v[3].pos = pos;
+    v[0].vel_angle = v[1].vel_angle = v[2].vel_angle = v[3].vel_angle.set(vel.x, vel.y, vel.z, GPU_HALF_SUPPORTED ? AngleFull(angle) : angle);
+    v[0].color = v[1].color = v[2].color = v[3].color = ColorFunc(color, opacity);
+    v[0].size = v[1].size = v[2].size = v[3].size = radius;
+    v[0].frame = v[1].frame = v[2].frame = v[3].frame = frame;
+    SET_TEX(v[0].tex, TEX_ZERO, TEX_ONE);
+    SET_TEX(v[1].tex, TEX_ONE, TEX_ONE);
+    SET_TEX(v[2].tex, TEX_ONE, TEX_ZERO);
+    SET_TEX(v[3].tex, TEX_ZERO, TEX_ZERO);
+    if (Vtx3DBilbAnim *vtx = (Vtx3DBilbAnim *)VI.addVtx(4))
+        memcpy(vtx, v, sizeof(v));
     PROFILE_STOP("DrawAnimatedParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel, Flt frame)")
 }
+
 void DrawAnimatedParticleEnd() {
     VI.end();
 }
@@ -177,37 +182,39 @@ Bool DrawAnimatedMaterialParticleBegin(C Material &material, Int x_frames, Int y
 }
 void DrawAnimatedMaterialParticleAdd(C Color &color, Flt radius, Flt angle, C Vec &pos, Int frame) {
     PROFILE_START("DrawAnimatedMaterialParticleAdd(C Color &color, Flt radius, Flt angle, C Vec &pos, Int frame)")
-    if (Vtx3DStandard *v = (Vtx3DStandard *)VI.addVtx(4)) {
-        Vec x, y;
-        if (angle) {
-            Flt cos, sin;
-            CosSin(cos, sin, angle);
-            cos *= radius;
-            sin *= radius;
-            x = ActiveCam.matrix.y * sin + ActiveCam.matrix.x * cos;
-            y = ActiveCam.matrix.y * cos - ActiveCam.matrix.x * sin;
-        } else {
-            x = ActiveCam.matrix.x * radius;
-            y = ActiveCam.matrix.y * radius;
-        }
-        frame = Mod(frame, AMP.frames_all);
-        Int frame_x = frame % AMP.frames_x;
-        Int frame_y = frame / AMP.frames_x;
-        Vec2 uv(frame_x * AMP.frame_size.x, frame_y * AMP.frame_size.y), uv1 = uv + AMP.frame_size;
-        v[0].pos = pos - x + y;
-        v[1].pos = pos + x + y;
-        v[2].pos = pos + x - y;
-        v[3].pos = pos - x - y;
-        v[0].tex.set(uv.x, uv.y);
-        v[1].tex.set(uv1.x, uv.y);
-        v[2].tex.set(uv1.x, uv1.y);
-        v[3].tex.set(uv.x, uv1.y);
-        v[0].nrm = v[1].nrm = v[2].nrm = v[3].nrm = AMP.nrm;
-        v[0].tan = v[1].tan = v[2].tan = v[3].tan = AMP.tan;
-        v[0].color = v[1].color = v[2].color = v[3].color = color;
-        // if(AMP.part)REP(4)v[i].tex*=*AMP.part;
+    static Vtx3DStandard v[4]; // Utilisation d'un tableau statique pour éviter l'allocation dynamique
+    Vec x, y;
+    if (angle) {
+        Flt cos, sin;
+        CosSin(cos, sin, angle);
+        cos *= radius;
+        sin *= radius;
+        x = ActiveCam.matrix.y * sin + ActiveCam.matrix.x * cos;
+        y = ActiveCam.matrix.y * cos - ActiveCam.matrix.x * sin;
+    } else {
+        x = ActiveCam.matrix.x * radius;
+        y = ActiveCam.matrix.y * radius;
     }
-    PROFILE_STOP("DrawAnimatedMaterialParticleAdd(C Color &color, Flt radius, Flt angle, C Vec &pos, Int frame)")
+    frame = Mod(frame, AMP.frames_all);
+    Int frame_x = frame % AMP.frames_x;
+    Int frame_y = frame / AMP.frames_x;
+    Vec2 uv(frame_x * AMP.frame_size.x, frame_y * AMP.frame_size.y), uv1 = uv + AMP.frame_size;
+    v[0].pos = pos - x + y;
+    v[1].pos = pos + x + y;
+    v[2].pos = pos + x - y;
+    v[3].pos = pos - x - y;
+    v[0].tex.set(uv.x, uv.y);
+    v[1].tex.set(uv1.x, uv.y);
+    v[2].tex.set(uv1.x, uv1.y);
+    v[3].tex.set(uv.x, uv1.y);
+    v[0].nrm = v[1].nrm = v[2].nrm = v[3].nrm = AMP.nrm;
+    v[0].tan = v[1].tan = v[2].tan = v[3].tan = AMP.tan;
+    v[0].color = v[1].color = v[2].color = v[3].color = color;
+    // if(AMP.part)REP(4)v[i].tex*=*AMP.part;
+    if (Vtx3DStandard *vtx = (Vtx3DStandard *)VI.addVtx(4)) {
+        memcpy(vtx, v, sizeof(v));
+        PROFILE_STOP("DrawAnimatedMaterialParticleAdd(C Color &color, Flt radius, Flt angle, C Vec &pos, Int frame)")
+    }
 }
 void DrawAnimatedMaterialParticleEnd() {
     VI.end();
@@ -426,23 +433,24 @@ Flt Particles::opacity(Vec *pos) C {
     Vec vec = 0;
     Flt opacity = 0;
     Flt (*func)(Flt s) = GetOpacityFunc(T);
-    REPA(p) {
-        C Particle &p = T.p[i];
-        if (p.life_max > EPS) {
-            Flt o = func(p.life / p.life_max);
-            vec += o * p.pos;
+    int particleCount = p.elms();
+    for (int i = 0; i < particleCount; ++i) {
+        C Particle &particle = T.p[i];
+        if (particle.life_max > EPS) {
+            Flt o = func(particle.life / particle.life_max);
+            vec += o * particle.pos;
             opacity += o;
         }
     }
-    if (opacity) {
+    if (opacity > 0)
         vec /= opacity;
-        opacity /= p.elms();
-    }
+    opacity /= particleCount;
     if (pos)
         *pos = vec;
     PROFILE_STOP("Particles::opacity(Vec *pos)")
     return opacity;
 }
+
 /******************************************************************************/
 RENDER_MODE Particles::renderMode() C { return D.colorPaletteAllow() ? _render_mode : RM_BLEND; }
 Particles &Particles::setRenderMode() {
@@ -645,21 +653,85 @@ Bool Particles::update(Flt dt) {
     return false;
 }
 /******************************************************************************/
-void Particles::draw(Flt opacity) C{
+void Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized) C {
+    if (p.life_max <= EPS)
+        return;
+    float life = p.life / p.life_max;
+    float radius = p.radius * radius_scale;
+    Vec pos = p.pos;
+
+    if (offset) {
+        Vec offsetVec = random(Ball(offset_range), false);
+        pos += offsetVec * Sin(random.f(PI2) + offset_time) +
+               random(Ball(offset_range), false) * Sin(random.f(PI2) + offset_time2);
+    }
+
+    Color color = this->color;
+    if (palette_image) {
+        int x = RoundPos(life * palette_image_w1);
+        color = ColorMul(color, palette_image->color(x, p.palette_y));
+    }
+
+    if (render_color_palette) {
+        int x = render_color_palette_w1 - RoundPos(life * render_color_palette_w1);
+        VecI4 p_color = {0, 0, 0, 0};
+
+        REP(4) {
+            Byte c = color.c[i];
+            if (c) {
+                C VecB4 &col = render_color_palette->pixB4(x, i);
+                p_color.x += col.x * c;
+                p_color.y += col.y * c;
+                p_color.z += col.z * c;
+                p_color.w += c;
+            }
+        }
+
+        if (!p_color.w)
+            return;
+
+        color.r = p_color.x / p_color.w;
+        color.g = p_color.y / p_color.w;
+        color.b = p_color.z / p_color.w;
+        color.a = 255;
+    }
+
+    if (!initialized) {
+        initialized = true;
+        if (animate)
+            DrawAnimatedParticleBegin(*image, glow, motion_affects_alpha, image_x_frames, image_y_frames);
+        else
+            DrawParticleBegin(*image, glow, motion_affects_alpha);
+    }
+
+    if (animate)
+        DrawAnimatedParticleAdd(color, opacity * func(life), radius, p.ang_vel * p.life, pos, p.vel, p.life * image_speed);
+    else
+        DrawParticleAdd(color, opacity * func(life), radius, p.ang_vel * p.life, pos, p.vel);
+}
+
+void Particles::draw(Flt opacity) C {
     PROFILE_START("Particles::draw(Flt opacity)");
 
-    // Early exit if conditions are not met
+    // Initial checks and setup
+    PROFILE_START("Initial Checks");
     if (!_src_type || !image || Renderer() != renderMode()) {
+        PROFILE_STOP("Initial Checks");
         PROFILE_STOP("Particles::draw(Flt opacity)");
         return;
     }
+    PROFILE_STOP("Initial Checks");
 
+    PROFILE_START("Opacity Calculation");
     opacity *= _fade;
     if (opacity <= 0) {
+        PROFILE_STOP("Opacity Calculation");
         PROFILE_STOP("Particles::draw(Flt opacity)");
         return;
     }
+    PROFILE_STOP("Opacity Calculation");
 
+    PROFILE_START("Variable Initialization");
     bool initialized = false;
     bool offset = (offset_range > EPS);
     float offset_time = Time.time() * offset_speed;
@@ -669,11 +741,14 @@ void Particles::draw(Flt opacity) C{
     Randomizer random(UIDZero);
     Image *render_color_palette = nullptr;
     int render_color_palette_w1 = 0, palette_image_w1 = 0;
+    PROFILE_STOP("Variable Initialization");
 
     // Set up the color palette if necessary
+    PROFILE_START("Color Palette Setup");
     if (Renderer() != _render_mode) {
         render_color_palette = &D._color_palette_soft[paletteIndex()];
         if (render_color_palette->h() < 4) {
+            PROFILE_STOP("Color Palette Setup");
             PROFILE_STOP("Particles::draw(Flt opacity)");
             return;
         }
@@ -682,73 +757,22 @@ void Particles::draw(Flt opacity) C{
 
     if (palette_image)
         palette_image_w1 = palette_image->w() - 1;
+    PROFILE_STOP("Color Palette Setup");
 
-    auto drawParticle = [&](const Particle &p, bool animate) {
-        if (p.life_max <= EPS)
-            return;
-
-        float life = p.life / p.life_max;
-        float radius = p.radius * radius_scale;
-        Vec pos = p.pos;
-
-        if (offset) {
-            Vec offsetVec = random(Ball(offset_range), false);
-            pos += offsetVec * Sin(random.f(PI2) + offset_time) +
-                   random(Ball(offset_range), false) * Sin(random.f(PI2) + offset_time2);
-        }
-
-        Color color = T.color;
-
-        if (palette_image) {
-            int x = RoundPos(life * palette_image_w1);
-            color = ColorMul(color, palette_image->color(x, p.palette_y));
-        }
-
-        if (render_color_palette) {
-            int x = render_color_palette_w1 - RoundPos(life * render_color_palette_w1);
-            VecI4 p_color = {0, 0, 0, 0};
-
-            REP(4) {
-                Byte c = color.c[i];
-                if (c) {
-                    const VecB4 &col = render_color_palette->pixB4(x, i);
-                    p_color.x += col.x * c;
-                    p_color.y += col.y * c;
-                    p_color.z += col.z * c;
-                    p_color.w += c;
-                }
-            }
-
-            if (!p_color.w)
-                return;
-
-            color.r = p_color.x / p_color.w;
-            color.g = p_color.y / p_color.w;
-            color.b = p_color.z / p_color.w;
-            color.a = 255;
-        }
-
-        if (!initialized) {
-            initialized = true;
-            if (animate)
-                DrawAnimatedParticleBegin(*image, glow, motion_affects_alpha, image_x_frames, image_y_frames);
-            else
-                DrawParticleBegin(*image, glow, motion_affects_alpha);
-        }
-
-        if (animate)
-            DrawAnimatedParticleAdd(color, opacity * func(life), radius, p.ang_vel * p.life, pos, p.vel, p.life * image_speed);
-        else
-            DrawParticleAdd(color, opacity * func(life), radius, p.ang_vel * p.life, pos, p.vel);
-    };
-
+    PROFILE_START("Draw Loop");
     bool animate = (image_x_frames > 1 || image_y_frames > 1) && (image_speed > 0);
     REPA(p) {
-        drawParticle(T.p[i], animate);
+        Vec2 screen_pos;
+        if (PosToScreen(T.p[i].pos, screen_pos)) { // Check if the particle is within the camera view
+            drawSingleParticle(T.p[i], animate, opacity, radius_scale, offset_time, offset_time2, offset, random, palette_image, palette_image_w1, render_color_palette, render_color_palette_w1, func, initialized);
+        }
     }
+    PROFILE_STOP("Draw Loop");
 
+    PROFILE_START("Draw End");
     if (initialized)
         DrawParticleEnd();
+    PROFILE_STOP("Draw End");
 
     PROFILE_STOP("Particles::draw(Flt opacity)");
 }

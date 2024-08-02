@@ -714,24 +714,17 @@ void Particles::draw(Flt opacity) C {
     PROFILE_START("Particles::draw(Flt opacity)");
 
     // Initial checks and setup
-    PROFILE_START("Initial Checks");
     if (!_src_type || !image || Renderer() != renderMode()) {
-        PROFILE_STOP("Initial Checks");
         PROFILE_STOP("Particles::draw(Flt opacity)");
         return;
     }
-    PROFILE_STOP("Initial Checks");
 
-    PROFILE_START("Opacity Calculation");
     opacity *= _fade;
     if (opacity <= 0) {
-        PROFILE_STOP("Opacity Calculation");
         PROFILE_STOP("Particles::draw(Flt opacity)");
         return;
     }
-    PROFILE_STOP("Opacity Calculation");
 
-    PROFILE_START("Variable Initialization");
     bool initialized = false;
     bool offset = (offset_range > EPS);
     float offset_time = Time.time() * offset_speed;
@@ -741,14 +734,11 @@ void Particles::draw(Flt opacity) C {
     Randomizer random(UIDZero);
     Image *render_color_palette = nullptr;
     int render_color_palette_w1 = 0, palette_image_w1 = 0;
-    PROFILE_STOP("Variable Initialization");
 
     // Set up the color palette if necessary
-    PROFILE_START("Color Palette Setup");
     if (Renderer() != _render_mode) {
         render_color_palette = &D._color_palette_soft[paletteIndex()];
         if (render_color_palette->h() < 4) {
-            PROFILE_STOP("Color Palette Setup");
             PROFILE_STOP("Particles::draw(Flt opacity)");
             return;
         }
@@ -757,23 +747,16 @@ void Particles::draw(Flt opacity) C {
 
     if (palette_image)
         palette_image_w1 = palette_image->w() - 1;
-    PROFILE_STOP("Color Palette Setup");
 
-    PROFILE_START("Draw Loop");
-    bool animate = (image_x_frames > 1 || image_y_frames > 1) && (image_speed > 0);
+    ("Draw Loop");
     REPA(p) {
         Vec2 screen_pos;
         if (PosToScreen(T.p[i].pos, screen_pos)) { // Check if the particle is within the camera view
             drawSingleParticle(T.p[i], animate, opacity, radius_scale, offset_time, offset_time2, offset, random, palette_image, palette_image_w1, render_color_palette, render_color_palette_w1, func, initialized);
         }
     }
-    PROFILE_STOP("Draw Loop");
-
-    PROFILE_START("Draw End");
     if (initialized)
         DrawParticleEnd();
-    PROFILE_STOP("Draw End");
-
     PROFILE_STOP("Particles::draw(Flt opacity)");
 }
 

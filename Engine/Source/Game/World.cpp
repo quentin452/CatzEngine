@@ -1106,34 +1106,29 @@ void WorldManager::updateObjectAreas() {
 #if !__GNUC__ // fails to compile on GCC
 INLINE
 #endif
+
 void WorldManager::updateObjects() {
     PROFILE_START("WorldManager::updateObjects()")
     Dbl time = Time.curTime();
-
     FREPA(_area_active) {
         Memc<Obj *> &objs = _area_active[i]->_objs;
         if (objs.elms() > 0) {
             REPA(objs) {
                 Obj *o = objs[i];
-                if (o->_enable_vanilla_update == false) {
+                if (!o->_enable_vanilla_update)
                     continue;
-                } else {
-                    if (o->_update_count != _update_count) {
-                        o->_update_count = _update_count;
-                        if (Obj *parent = o->reliesOn()) {
-                            if (parent->_update_count != _update_count &&
-                                parent->_area && parent->_area->state() == AREA_ACTIVE) {
-                                parent->_update_count = _update_count;
-                            }
-                        }
-                        if (!o->update()) {
-                            if (ObjMap<Obj> *obj_map = o->worldObjMap()) {
-                                obj_map->removeObj(o);
-                            }
+                if (o->_update_count != _update_count) {
+                    o->_update_count = _update_count;
+                    if (Obj *parent = o->reliesOn()) {
+                        if (parent->_update_count != _update_count &&
+                            parent->_area && parent->_area->state() == AREA_ACTIVE) {
+                            parent->_update_count = _update_count;
                         }
                     }
-                    if (i > objs.elms())
-                        i = objs.elms();
+                    if (!o->update()) {
+                        if (ObjMap<Obj> *obj_map = o->worldObjMap())
+                            obj_map->removeObj(o);
+                    }
                 }
             }
         }

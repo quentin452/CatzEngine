@@ -1115,50 +1115,46 @@ void WorldManager::updateObjectAreas() {
 #if !__GNUC__ // fails to compile on GCC
 INLINE
 #endif
-void UpdateObject(WorldManager &world, Obj &obj) {
-    PROFILE_START("UpdateObject(WorldManager &world, Obj &obj)")
-    std::stack<Obj *> stack;
-    stack.push(&obj);
-    while (!stack.empty()) {
-        Obj *current = stack.top();
-        stack.pop();
-        current->_update_count = world._update_count;
-        if (Obj *parent = current->reliesOn()) {
-            if (parent->_update_count != world._update_count &&
-                parent->_area && parent->_area->state() == AREA_ACTIVE) {
-                UID id = current->id();
-                stack.push(parent); // Empiler le parent pour une mise à jour ultérieure
-                if (id != current->id()) {
-                    // L'objet a été modifié ou supprimé pendant la mise à jour du parent
-                    PROFILE_STOP("UpdateObject(WorldManager &world, Obj &obj)");
-                    return;
-                }
-            }
-        }
-        if (!current->update()) {
-            if (ObjMap<Obj> *obj_map = current->worldObjMap()) {
-                obj_map->removeObj(current);
-            }
-        }
-    }
-    PROFILE_STOP("UpdateObject(WorldManager &world, Obj &obj)");
-}
 void WorldManager::updateObjects() {
     PROFILE_START("WorldManager::updateObjects()")
     Dbl time = Time.curTime();
 
-    FREPA(_area_active) { // FREPA #2 (rep/frep)
+    std::stack<Obj *> stack;
+
+    FREPA(_area_active) {
         Memc<Obj *> &objs = _area_active[i]->_objs;
-        if (objs.elms() > 0) { // Only process the area if it contains objects
-            REPA(objs) {       // order is important in case of removing
+        if (objs.elms() > 0) {
+            REPA(objs) {
                 Obj *o = objs[i];
                 if (o->_enable_vanilla_update == false) {
                     continue;
                 } else {
-                    if (o->_update_count != _update_count)
-                        UpdateObject(T, *o);
-                    if (i > objs.elms()) 
-                        i = objs.elms(); // in case if some 'Obj::update' would remove other objects and suddenly 'i' would be out of 'objs' container range
+                    if (o->_update_count != _update_count) {
+                        stack.push(o);
+                        while (!stack.empty()) {
+                            Obj *current = stack.top();
+                            stack.pop();
+                            current->_update_count = _update_count;
+                            if (Obj *parent = current->reliesOn()) {
+                                if (parent->_update_count != _update_count &&
+                                    parent->_area && parent->_area->state() == AREA_ACTIVE) {
+                                    UID id = current->id();
+                                    stack.push(parent);
+                                    if (id != current->id()) {
+                                        PROFILE_STOP("WorldManager::updateObjects()");
+                                        return;
+                                    }
+                                }
+                            }
+                            if (!current->update()) {
+                                if (ObjMap<Obj> *obj_map = current->worldObjMap()) {
+                                    obj_map->removeObj(current);
+                                }
+                            }
+                        }
+                    }
+                    if (i > objs.elms())
+                        i = objs.elms();
                 }
             }
         }
@@ -1166,6 +1162,7 @@ void WorldManager::updateObjects() {
     _time_obj_update = Time.curTime() - time;
     PROFILE_STOP("WorldManager::updateObjects()")
 }
+
 void WorldManager::update(C Vec2 &xz) {
     PROFILE_START("WorldManager::update(C Vec2 &xz)")
     if (is()) {

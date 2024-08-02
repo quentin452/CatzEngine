@@ -885,6 +885,7 @@ RendererClass &RendererClass::operator()(void (&render)()) {
              Kb.br(KB_NPSUB) || Kb.br(KB_NPADD) || Kb.br(KB_NPDEL))
         stage = RS_DEFAULT;
 #endif
+    PROFILE_START("RendererClass::operator()(void (&render)())1")
 
     _render = render;
     _stereo = (VR.active() && D._view_main.full && !combine && !target && !_get_target && D._allow_stereo); // use stereo only for full viewport, if we're not combining (games may use combining to display 3D items/characters in Gui)
@@ -911,6 +912,8 @@ RendererClass &RendererClass::operator()(void (&render)()) {
     prepare();
     opaque();
     overlay();
+    PROFILE_STOP("RendererClass::operator()(void (&render)())1")
+    PROFILE_START("RendererClass::operator()(void (&render)())2")
 
     // Set background sky pixels
     {
@@ -957,6 +960,8 @@ RendererClass &RendererClass::operator()(void (&render)()) {
 
     waterPreLight();
     light();
+    PROFILE_STOP("RendererClass::operator()(void (&render)())2")
+    PROFILE_START("RendererClass::operator()(void (&render)())3")
 
     if (stage) {
         switch (stage) {
@@ -972,7 +977,7 @@ RendererClass &RendererClass::operator()(void (&render)()) {
                     D.alpha(ALPHA_ADD);
                     Sh.clear(Vec4(D.ambientColorD(), 0));
                 }
-                if (show(_lum_1s, true)) 
+                if (show(_lum_1s, true))
                     goto finished;
             }
             break;
@@ -1008,6 +1013,8 @@ RendererClass &RendererClass::operator()(void (&render)()) {
         goto finished;
 
     emissive();
+    PROFILE_STOP("RendererClass::operator()(void (&render)())3")
+    PROFILE_START("RendererClass::operator()(void (&render)())4")
 
     if (stage) {
         switch (stage) {
@@ -1026,6 +1033,8 @@ RendererClass &RendererClass::operator()(void (&render)()) {
     waterUnder();
     edgeDetect();
     blend();
+    PROFILE_STOP("RendererClass::operator()(void (&render)())4")
+    PROFILE_START("RendererClass::operator()(void (&render)())5")
 
     if (hasDof())
         resolveDepth1();
@@ -1051,9 +1060,9 @@ RendererClass &RendererClass::operator()(void (&render)()) {
     AstroDrawRays();
     volumetric();
     postProcess();
-
+    PROFILE_STOP("RendererClass::operator()(void (&render)())5")
 finished:
-
+    PROFILE_START("RendererClass::operator()(void (&render)())6")
     // Cleanup
     temporalFinish();
     _ctx_sub->proj_matrix_prev = ProjMatrix; // set always because needed for MotionBlur and Temporal
@@ -1084,6 +1093,7 @@ finished:
     if (target)
         target->_ptr_num--; // decrease ptr count without discarding
 
+    PROFILE_STOP("RendererClass::operator()(void (&render)())6")
     PROFILE_STOP("RendererClass::operator()(void (&render)())")
     return T;
 }
@@ -2400,32 +2410,27 @@ void RendererClass::blend() {
     PROFILE_START("RendererClass::blend()")
     Sky.setFracMulAdd();
 
-    // set main light parameters for *BLEND_LIGHT* and 'Mesh.drawBlend'
-    if (Lights.elms()) {
+    // Set main light parameters for *BLEND_LIGHT* and 'Mesh.drawBlend'
+    if (Lights.elms() > 0) {
         Light &light = Lights.first();
-        if (light.type == LIGHT_DIR) // use first as it has already been set in 'UpdateLights'
-        {
+        if (light.type == LIGHT_DIR) {
             light.dir.set();
             _blst_light_offset = OFFSET(BLST, dir[light.shadow ? D.shadowMapNumActual() : 0]);
-            goto light_set;
+        } else {
+            LightDir(Vec(0, -1, 0), VecZero).set(); // set dummy light
+            _blst_light_offset = OFFSET(BLST, dir[0]);
         }
     }
-    {
-        LightDir(Vec(0, -1, 0), VecZero).set(); // set dummy light
-        _blst_light_offset = OFFSET(BLST, dir[0]);
-    }
-light_set:
 
-    // apply light in case of drawing fur, which samples the light buffer
+    // Apply light for fur drawing, which samples the light buffer
     if (_has & HAS_FUR) {
         if (_ao) {
-            set(_lum_1s, null, true);
+            set(_lum_1s, nullptr, true);
             Sh.ImgX[0]->set(_ao);
+            D.alpha(D.aoAll() ? ALPHA_MUL : ALPHA_ADD);
             if (D.aoAll()) {
-                D.alpha(ALPHA_MUL);
                 Sh.DrawX->draw();
             } else {
-                D.alpha(ALPHA_ADD);
                 Sh.Color[0]->set(Vec4(D.ambientColorD(), 0));
                 Sh.Color[1]->set(Vec4Zero);
                 Sh.DrawXC[0][0]->draw();
@@ -2435,35 +2440,33 @@ light_set:
     }
     _ao.clear(); // '_ao' will not be used after this point
 
-    D.stencilRef(STENCIL_REF_TERRAIN); // set in case draw codes will use stencil
+    D.stencilRef(STENCIL_REF_TERRAIN); // Set in case draw codes will use stencil
 
     const Bool blend_affect_vel = true;
     ALPHA_MODE alpha = (Renderer.fastCombine() ? ALPHA_BLEND : ALPHA_RENDER_BLEND);
-    set(_col, _alpha, blend_affect_vel ? _vel() : null, null, _ds, true);
+    set(_col, _alpha, blend_affect_vel ? _vel() : nullptr, nullptr, _ds, true);
     setDSLookup(); // 'setDSLookup' after 'set' #RTOutput.Blend, needed for 'DrawBlendInstances'
     D.set3D();
     D.depthOnWriteFunc(true, false, FUNC_LESS_EQUAL);
-    mode(RM_BLEND); // use LESS_EQUAL for blend because we may want to draw blend graphics on top of existing pixels (for example world editor terrain highlight)
+    mode(RM_BLEND); // Use LESS_EQUAL for blend because we may want to draw blend graphics on top of existing pixels
+
     SortBlendInstances();
+
+    // Render the blended objects
     REPS(_eye, _eye_num) {
         setEyeViewportCam();
-#if 1
         D.alpha(alpha);
         _render();
-        DrawBlendInstances(); // first call '_render' to for example get 'getBackBuffer' and then draw objects in 'DrawBlendInstances'
-#else
         DrawBlendInstances();
-        D.alpha(alpha);
-        _render();
-#endif
     }
+
     ClearBlendInstances();
     D.set2D();
     D.depthOnWriteFunc(false, true, FUNC_DEFAULT);
-
-    D.stencil(STENCIL_NONE); // disable any stencil that might have been enabled
+    D.stencil(STENCIL_NONE); // Disable any stencil that might have been enabled
 
     _lum_1s.clear(); // '_lum_1s' will not be used after this point
+
     PROFILE_STOP("RendererClass::blend()")
 }
 void RendererClass::palette(Int index) {

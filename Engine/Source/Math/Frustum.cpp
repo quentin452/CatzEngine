@@ -618,7 +618,7 @@ Bool FrustumClass::operator()(C Extent &ext, C Matrix3 &matrix) C {
     pos -= T.matrix.pos; // #VecMulMatrix
 #endif
 
-        if (persp) {
+    if (persp) {
         Flt z = Dot(pos, T.matrix.z);
         if (z < 0 || z > range) {
             Flt bz = OBoxLength(dx, dy, dz, plane[DIR_FORWARD].normal);
@@ -653,8 +653,7 @@ Bool FrustumClass::operator()(C Extent &ext, C Matrix3 &matrix) C {
             if (extraBall() && Dist2(extra_ball.pos, ext, matrix) > extra_ball_r2)
                 return false;
         }
-    }
-    else {
+    } else {
         Flt x = Abs(Dot(pos, T.matrix.x)), bx = T.size.x;
         if (x > bx)
             if (x > bx + OBoxLength(dx, dy, dz, plane[DIR_RIGHT].normal))
@@ -682,7 +681,7 @@ Bool FrustumClass::operator()(C Extent &ext, C Matrix &matrix) C {
     pos -= T.matrix.pos; // #VecMulMatrix
 #endif
 
-        if (persp) {
+    if (persp) {
         Flt z = Dot(pos, T.matrix.z);
         if (z < 0 || z > range) {
             Flt bz = OBoxLength(dx, dy, dz, plane[DIR_FORWARD].normal);
@@ -717,8 +716,7 @@ Bool FrustumClass::operator()(C Extent &ext, C Matrix &matrix) C {
             if (extraBall() && Dist2(extra_ball.pos, ext, matrix) > extra_ball_r2)
                 return false;
         }
-    }
-    else {
+    } else {
         Flt x = Abs(Dot(pos, T.matrix.x)), bx = T.size.x;
         if (x > bx)
             if (x > bx + OBoxLength(dx, dy, dz, plane[DIR_RIGHT].normal))
@@ -908,7 +906,7 @@ Bool FrustumClass::operator()(C Extent &ext, C Matrix3 &matrix, Bool &fully_insi
     pos -= T.matrix.pos; // #VecMulMatrix
 #endif
 
-        if (persp) {
+    if (persp) {
         Flt z = Dot(pos, T.matrix.z);
         // if( z<0 || z>range)
         {
@@ -983,8 +981,7 @@ Bool FrustumClass::operator()(C Extent &ext, C Matrix3 &matrix, Bool &fully_insi
                                d.z+ext.ext.z )>extra_ball_r2)fully_inside=false; // check maximum distance, if fully inside
             }*/
         }
-    }
-    else {
+    } else {
         Flt x = Abs(Dot(pos, T.matrix.x)) - T.size.x, bx = OBoxLength(dx, dy, dz, plane[DIR_RIGHT].normal);
         if (x > -bx) {
             if (x > bx)
@@ -1020,7 +1017,7 @@ Bool FrustumClass::operator()(C Extent &ext, C Matrix &matrix, Bool &fully_insid
     pos -= T.matrix.pos; // #VecMulMatrix
 #endif
 
-        if (persp) {
+    if (persp) {
         Flt z = Dot(pos, T.matrix.z);
         // if( z<0 || z>range)
         {
@@ -1095,8 +1092,7 @@ Bool FrustumClass::operator()(C Extent &ext, C Matrix &matrix, Bool &fully_insid
                                d.z+ext.ext.z )>extra_ball_r2)fully_inside=false; // check maximum distance, if fully inside
             }*/
         }
-    }
-    else {
+    } else {
         Flt x = Abs(Dot(pos, T.matrix.x)) - T.size.x, bx = OBoxLength(dx, dy, dz, plane[DIR_RIGHT].normal);
         if (x > -bx) {
             if (x > bx)
@@ -1435,9 +1431,9 @@ void FrustumClass::getIntersectingAreas(MemPtr<VecI2> area_pos, Flt area_size, B
                 edge.x += dir.x;
             else // first travel on the x-edge until you can't
                 if (dir.y && rect.includesY(edge.y + dir.y))
-                edge.y += dir.y;
-            else
-                break; // then  travel on the y-edge until you can't, after that get out of the loop
+                    edge.y += dir.y;
+                else
+                    break; // then  travel on the y-edge until you can't, after that get out of the loop
         }
     } else {
         VecI2 pos;

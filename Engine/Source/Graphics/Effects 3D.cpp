@@ -1,4 +1,3 @@
-// TODO ADD PROFILE_START AND PROFILE_STOP PROFILERS
 /******************************************************************************/
 #include "stdafx.h"
 namespace EE {
@@ -34,6 +33,7 @@ struct LaserSegment {
     Matrix m;
 };
 void DrawLaser(C Color &color, C Color &middle_color, Flt middle_exponent, Flt radius, Bool sharp_ending, C CMemPtr<Vec> &points) {
+    PROFILE_START("CatzEngine::DrawLaser(C Color &color, C Color &middle_color, Flt middle_exponent, Flt radius, Bool sharp_ending, C CMemPtr<Vec> &points)")
     if (Renderer.firstPass() && points.elms() > 1) {
         Vec2 pnt[3] =
             {
@@ -255,9 +255,11 @@ void DrawLaser(C Color &color, C Color &middle_color, Flt middle_exponent, Flt r
         }
         VI.end();
     }
+    PROFILE_STOP("CatzEngine::DrawLaser(C Color &color, C Color &middle_color, Flt middle_exponent, Flt radius, Bool sharp_ending, C CMemPtr<Vec> &points)")
 }
 /******************************************************************************/
 ElectricityFx::ElectricityFx() {
+    PROFILE_START("CatzEngine::ElectricityFx::ElectricityFx()")
     color.set(64, 96, 176);
     middle_color = WHITE;
     middle_exponent = 5;
@@ -266,8 +268,10 @@ ElectricityFx::ElectricityFx() {
     frequency = 0.03f;
     random_step = 0.1f;
     random_radius = 0.1f;
+    PROFILE_STOP("CatzEngine::ElectricityFx::ElectricityFx()")
 }
 void ElectricityFx::update() {
+    PROFILE_START("CatzEngine::ElectricityFx::update()")
     time -= Time.d();
     if (time <= 0) {
         time += frequency;
@@ -294,9 +298,12 @@ void ElectricityFx::update() {
             randomized.New() = original.last();
         }
     }
+    PROFILE_STOP("CatzEngine::ElectricityFx::update()")
 }
 void ElectricityFx::draw() {
+    PROFILE_START("CatzEngine::ElectricityFx::draw()")
     DrawLaser(color, middle_color, middle_exponent, radius, false, randomized);
+    PROFILE_STOP("CatzEngine::ElectricityFx::draw()")
 }
 /******************************************************************************/
 } // namespace EE

@@ -23,45 +23,35 @@ class GamePerformanceProfiler {
 #endif
     void start(C std::string &name, C std::string &file, int line, C std::string &customName) {
 #if PERFORMANCE_MONITOR
-        std::lock_guard<std::mutex> lock(mtx);
-        try {
-            auto now = std::chrono::steady_clock::now();
-            std::string key = customName.empty() ? (name + ":" + file + ":" + std::to_string(line)) : customName;
-            startTimes[key] = now;
+        auto now = std::chrono::steady_clock::now();
+        std::string key = customName.empty() ? (name + ":" + file + ":" + std::to_string(line)) : customName;
 
-            if (callCounts.find(key) == callCounts.end()) {
-                callCounts[key] = 0;
-            }
+        {
+            std::lock_guard<std::mutex> lock(mtx);
+            startTimes[key] = now;
             callCounts[key]++;
-        } catch (C std::exception &e) {
-            LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::ERRORING, file.c_str(), line, e.what());
         }
 #endif
     }
 
     void stop(C std::string &name, C std::string &file, int line, C std::string &customName) {
 #if PERFORMANCE_MONITOR
-        std::lock_guard<std::mutex> lock(mtx);
-        try {
-            auto now = std::chrono::steady_clock::now();
-            std::string key = customName.empty() ? (name + ":" + file + ":" + std::to_string(line)) : customName;
+        auto now = std::chrono::steady_clock::now();
+        std::string key = customName.empty() ? (name + ":" + file + ":" + std::to_string(line)) : customName;
 
-            if (startTimes.find(key) != startTimes.end()) {
-                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(now - startTimes[key]).count(); // Convertir en microsecondes
+        {
+            std::lock_guard<std::mutex> lock(mtx);
+            auto it = startTimes.find(key);
+            if (it != startTimes.end()) {
+                auto duration = std::chrono::duration_cast<std::chrono::microseconds>(now - it->second).count();
                 profilingData[key] += duration;
-
-                if (maxTimes.find(key) == maxTimes.end() || duration > maxTimes[key]) {
-                    maxTimes[key] = duration;
-                }
-
-                startTimes.erase(key);
+                maxTimes[key] = std::max(maxTimes[key], duration);
+                startTimes.erase(it);
             } else {
                 LoggerThread::GetLoggerThread().logMessageAsync(
                     LogLevel::WARNING, file.c_str(), line,
                     "Warning: Profiling stopped for a method that was not started.");
             }
-        } catch (C std::exception &e) {
-            LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::ERRORING, file.c_str(), line, e.what());
         }
 #endif
     }

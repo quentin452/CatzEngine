@@ -834,6 +834,7 @@ void DrawBlendInstances() // !! this function should be safe to call 2 times in 
         BlendInstance *object = &BlendInstances[i];
         switch (object->type) {
         case BlendInstance::STATIC: {
+            PROFILE_START("CatzEngine::DrawBlendInstances()1")
             ec.BeginPrecomputedViewMatrix();
             DisableSkinning();
             // this doesn't use velocities
@@ -922,9 +923,10 @@ void DrawBlendInstances() // !! this function should be safe to call 2 times in 
             else
                 render.draw();
             SetShaderParamChanges(); // this must be called here before setting new shader params, because we may have some 'ShaderParamRestore' that we need to apply before any new shader params, for example if we don't call it here, and a new material is set, and we process 'SetShaderParamChanges' later, then it could restore the material values that are now old because new material was already set
+            PROFILE_STOP("CatzEngine::DrawBlendInstances()1")
         } break;
-
         case BlendInstance::STATIC_BLST: {
+            PROFILE_START("CatzEngine::DrawBlendInstances()2")
             ec.BeginPrecomputedViewMatrix();
             DisableSkinning();
             Shader &shader = object->stat.shader->asBlendShader();
@@ -1012,9 +1014,11 @@ void DrawBlendInstances() // !! this function should be safe to call 2 times in 
             else
                 render.draw();
             SetShaderParamChanges(); // this must be called here before setting new shader params, because we may have some 'ShaderParamRestore' that we need to apply before any new shader params, for example if we don't call it here, and a new material is set, and we process 'SetShaderParamChanges' later, then it could restore the material values that are now old because new material was already set
+            PROFILE_STOP("CatzEngine::DrawBlendInstances()2")
         } break;
 
         case BlendInstance::STATIC_FUR: {
+            PROFILE_START("CatzEngine::DrawBlendInstances()3")
             ec.BeginPrecomputedViewMatrix();
             DisableSkinning();
             Flt scale = object->stat.view_matrix.cur.x.length() / D._view_active.fov_tan.y;
@@ -1039,9 +1043,11 @@ void DrawBlendInstances() // !! this function should be safe to call 2 times in 
             shader.begin();
             DrawFur(render, shader, scale);
             SetShaderParamChanges(); // this must be called here before setting new shader params, because we may have some 'ShaderParamRestore' that we need to apply before any new shader params, for example if we don't call it here, and a new material is set, and we process 'SetShaderParamChanges' later, then it could restore the material values that are now old because new material was already set
+            PROFILE_STOP("CatzEngine::DrawBlendInstances()3")
         } break;
 
         case BlendInstance::SKELETON: {
+            PROFILE_START("CatzEngine::DrawBlendInstances()4")
             ec.EndPrecomputedViewMatrix();
             EnableSkinning();
             SkeletonBlendInstance &skel = object->skeleton;
@@ -1092,28 +1098,35 @@ void DrawBlendInstances() // !! this function should be safe to call 2 times in 
                     break;
                 skel_shader = &SkeletonBlendShaders[skel_shader->next_skeleton_shader];
             }
+            PROFILE_STOP("CatzEngine::DrawBlendInstances()4")
         } break;
 
         case BlendInstance::BLEND_OBJ:
+            PROFILE_START("CatzEngine::DrawBlendInstances()5")
             ec.EndPrecomputedViewMatrix();
             D.stencil(STENCIL_NONE);
             object->blend_obj->drawBlend();
             D.alpha(alpha);
             D.depth(true);
+            PROFILE_STOP("CatzEngine::DrawBlendInstances()5")
             break;
         case BlendInstance::GAME_OBJ:
+            PROFILE_START("CatzEngine::DrawBlendInstances()6")
             ec.EndPrecomputedViewMatrix();
             D.stencil(STENCIL_NONE);
             object->game_obj->drawBlend();
             D.alpha(alpha);
             D.depth(true);
+            PROFILE_STOP("CatzEngine::DrawBlendInstances()6")
             break;
         case BlendInstance::GAME_AREA:
+            PROFILE_START("CatzEngine::DrawBlendInstances()7")
             ec.EndPrecomputedViewMatrix();
             D.stencil(STENCIL_NONE);
             object->game_area->customDrawBlend();
             D.alpha(alpha);
             D.depth(true);
+            PROFILE_STOP("CatzEngine::DrawBlendInstances()7")
             break;
         }
     }

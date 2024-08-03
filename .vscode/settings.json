@@ -169,7 +169,7 @@
     "editor.defaultFormatter": "ms-python.black-formatter",
     "editor.formatOnSave": true
   },
-  "cmake.sourceDirectory": "C:/Users/iamacatfr2/Documents/GitHub/CatzEngine/ThirdPartyLibs/AOM/lib",
+  "cmake.sourceDirectory": "D:/github-intellidea/CatzEngine/ThirdPartyLibs/De265",
   "clang-format.style": "{BasedOnStyle: llvm, IndentWidth: 4, ColumnLimit: 0}",
   "C_Cpp.errorSquiggles": "disabled",
   "sonarlint.pathToCompileCommands": "${workspaceFolder}\\compile_commands.json"

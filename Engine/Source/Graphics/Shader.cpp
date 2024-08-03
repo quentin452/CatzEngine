@@ -21,7 +21,7 @@ namespace EE {
 
 #if DX11
 #define ALLOW_PARTIAL_BUFFERS 0 // using partial buffers (1) actually made things slower, 100fps(1) vs 102fps(0), so use default value (0), TODO: check on newer hardware
-#define BUFFER_DYNAMIC 0 // for ALLOW_PARTIAL_BUFFERS=0, using 1 made no difference in performance, so use 0 to reduce API calls. But for ALLOW_PARTIAL_BUFFERS=1 using 1 was slower. Probably it could improve performance if 'ShaderBuffer.data' was not allocated manually but obtained from D3D 'Map', however this would make things complicated, because 'data' always needs to be available for 'ShaderParam.set', we don't always change entire 'data', and 'Map'/'Unmap' most likely always return different 'data' memory address (allocates new memory underneath because of D3D11_MAP_WRITE_DISCARD), this would not work well with instanced rendering, which at the start we don't know how many matrixes (what CB) we need, so we can't map it at the start, because we still need to iterate all instances, count how many, during the process matrixes are already copied to 'data' memory.
+#define BUFFER_DYNAMIC 0        // for ALLOW_PARTIAL_BUFFERS=0, using 1 made no difference in performance, so use 0 to reduce API calls. But for ALLOW_PARTIAL_BUFFERS=1 using 1 was slower. Probably it could improve performance if 'ShaderBuffer.data' was not allocated manually but obtained from D3D 'Map', however this would make things complicated, because 'data' always needs to be available for 'ShaderParam.set', we don't always change entire 'data', and 'Map'/'Unmap' most likely always return different 'data' memory address (allocates new memory underneath because of D3D11_MAP_WRITE_DISCARD), this would not work well with instanced rendering, which at the start we don't know how many matrixes (what CB) we need, so we can't map it at the start, because we still need to iterate all instances, count how many, during the process matrixes are already copied to 'data' memory.
 #elif GL
 #define GL_BUFFER_SUB 0
 #define GL_BUFFER_SUB_RESET_PART 1
@@ -72,7 +72,7 @@ void (*glDispatchCompute)(GLuint num_groups_x, GLuint num_groups_y, GLuint num_g
 /******************************************************************************/
 // SHADER CACHE
 /******************************************************************************/
-#include "Shader Hash.h" // this is generated after compiling shaders
+#include "Shader Hash.h"                        // this is generated after compiling shaders
 #define COMPRESS_GL_SHADER_BINARY COMPRESS_ZSTD // in tests it was faster and had smaller size than LZ4
 #define COMPRESS_GL_SHADER_BINARY_LEVEL ((App.flag & APP_SHADER_CACHE_MAX_COMPRESS) ? CompressionLevels(COMPRESS_GL_SHADER_BINARY).y : CompressionDefault(COMPRESS_GL_SHADER_BINARY))
 static Bool ShaderCacheLoadHeader(File &f) {
@@ -195,7 +195,7 @@ DisplayClass &DisplayClass::shaderCache(C Str &path) {
     else                                      // before display created, just store path
     {                                         // after created
         ShaderCache.create(ShaderCache.path); // initialize from stored path
-#if SWITCH // on Nintendo Switch we might also have an already precompiled ShaderCache
+#if SWITCH                                    // on Nintendo Switch we might also have an already precompiled ShaderCache
         if (!(App.flag & APP_IGNORE_PRECOMPILED_SHADER_CACHE))
             PrecompiledShaderCache.create("rom:/ShaderCache.pak"); // specify full path in case user changed 'CurDir'
 #endif
@@ -672,6 +672,7 @@ void ShaderBuffer::create(Int size) // no locks needed because this is called on
     changed = true;
 }
 void ShaderBuffer::update() {
+    PROFILE_START("ShaderBuffer::update()")
 #if DX11
     if (BUFFER_DYNAMIC) {
         D3D11_MAPPED_SUBRESOURCE map;
@@ -681,16 +682,16 @@ void ShaderBuffer::update() {
         }
     } else
 #if ALLOW_PARTIAL_BUFFERS // check for partial updates only if we may operate on partial buffers, because otherwise we always set entire buffers (which are smaller and separated into parts) and we can avoid the overhead of setting up 'D3D11_BOX'
-        if (D3DC1) // use partial updates where available to reduce amount of memory
-    {
-        D3D11_BOX box;
-        box.front = box.top = box.left = 0;
-        box.right = Ceil16(buffer.size);
-        box.back = box.bottom = 1; // must be 16-byte aligned or DX will fail
-        D3DC1->UpdateSubresource1(buffer.buffer, 0, &box, data, 0, 0, D3D11_COPY_DISCARD);
-    } else
+        if (D3DC1)        // use partial updates where available to reduce amount of memory
+        {
+            D3D11_BOX box;
+            box.front = box.top = box.left = 0;
+            box.right = Ceil16(buffer.size);
+            box.back = box.bottom = 1; // must be 16-byte aligned or DX will fail
+            D3DC1->UpdateSubresource1(buffer.buffer, 0, &box, data, 0, 0, D3D11_COPY_DISCARD);
+        } else
 #endif
-        D3DC->UpdateSubresource(buffer.buffer, 0, null, data, 0, 0);
+            D3DC->UpdateSubresource(buffer.buffer, 0, null, data, 0, 0);
 #elif GL
     glBindBuffer(GL_UNIFORM_BUFFER, buffer.buffer);
     switch (GL_UBO_MODE) {
@@ -720,8 +721,10 @@ void ShaderBuffer::update() {
     }
 #endif
     changed = false;
+    PROFILE_STOP("ShaderBuffer::update()")
 }
 void ShaderBuffer::bind(Int index) {
+    PROFILE_START("ShaderBuffer::bind(Int index)")
 #if DX11
     BufVS(index, buffer.buffer);
     BufHS(index, buffer.buffer);
@@ -731,8 +734,10 @@ void ShaderBuffer::bind(Int index) {
 #elif GL
     glBindBufferBase(GL_UNIFORM_BUFFER, index, buffer.buffer);
 #endif
+    PROFILE_STOP("ShaderBuffer::bind(Int index)")
 }
 void ShaderBuffer::bindCheck(Int index) {
+    PROFILE_START("ShaderBuffer::bindCheck(Int index)")
 #if 1
     if (explicit_bind_slot == index)
         return;
@@ -748,6 +753,7 @@ void ShaderBuffer::bindCheck(Int index) {
     }
 #endif
     Exit(S + "ShaderBuffer was expected to be bound at slot " + index);
+    PROFILE_STOP("ShaderBuffer::bindCheck(Int index)")
 }
 #if DX11
 void ShaderBuffer::setPart(Int part) {
@@ -798,6 +804,7 @@ Int ShaderParam::gpuArrayStride() C {
 }
 void ShaderParam::initAsElement(ShaderParam &parent, Int index) // this is called after 'parent' was already loaded, so 'gpu_offset' are relative to parameter (not cbuffer)
 {
+    PROFILE_START("ShaderParam::initAsElement(ShaderParam &parent, Int index)")
     DEBUG_ASSERT(this != &parent, "Can't init from self");
     RANGE_ASSERT(index, parent._elements);
 
@@ -834,6 +841,7 @@ void ShaderParam::initAsElement(ShaderParam &parent, Int index) // this is calle
         REPA(_optimized_translation)
         MAX(_gpu_data_size, _optimized_translation[i].gpu_offset + _optimized_translation[i].elm_size);
     }
+    PROFILE_STOP("ShaderParam::initAsElement(ShaderParam &parent, Int index)")
 }
 /******************************************************************************/
 ASSERT(MIN_SHADER_PARAM_DATA_SIZE >= SIZE(Vec4)); // can write small types without checking for 'canFit', because all 'ShaderBuffer's for 'ShaderParam' data are allocated with MIN_SHADER_PARAM_DATA_SIZE=SIZE(Vec4) padding
@@ -1463,7 +1471,7 @@ UInt ShaderSubGL::create(UInt gl_type, Str *messages) {
             temp.pos(0);
             data = temp.mem();
             size = temp.size(); // decompress shader
-#else // uncompressed
+#else                  // uncompressed
             data = T.data();
             size = T.elms();
 #endif
@@ -1472,17 +1480,16 @@ UInt ShaderSubGL::create(UInt gl_type, Str *messages) {
                 Exit("Can't create GL SHADER"); // create into temp var first and set to this only after fully initialized
 
             CChar8 *srcs[] =
-            {
-                GLSLVersion(), // version must be first
+                {
+                    GLSLVersion(), // version must be first
 #if GL_ES
-                "#define noperspective\n"                 // 'noperspective'   not available on GL ES
-                "#define gl_ClipDistance ClipDistance\n", // 'gl_ClipDistance' not available on GL ES
+                    "#define noperspective\n"                 // 'noperspective'   not available on GL ES
+                    "#define gl_ClipDistance ClipDistance\n", // 'gl_ClipDistance' not available on GL ES
 #endif
 #if LINUX // FIXME - https://forums.intel.com/s/question/0D50P00004QfQyQSAV/graphics-driver-bug-linux-glsl-cant-handle-precisions
-                "#define mediump\n#define highp\n#define precision\n", // Linux drivers fail to process constants VS "mediump float v;" PS "precision mediump float; float v;"
+                    "#define mediump\n#define highp\n#define precision\n", // Linux drivers fail to process constants VS "mediump float v;" PS "precision mediump float; float v;"
 #endif
-                (CChar8 *)data
-            };
+                    (CChar8 *)data};
 
 #ifdef GL_SHADER_BINARY_FORMAT_SPIR_V_ARB
             if (D.SpirVAvailable()) {
@@ -1889,7 +1896,7 @@ void Shader11::begin() C {
     updateBuffers();
 }
 void ComputeShader11::begin() C {
-#if DX11 // on DX11 trying to bind image SRV's while they're bound as RT's will fail
+#if DX11                             // on DX11 trying to bind image SRV's while they're bound as RT's will fail
     Renderer.set(null, null, false); // clear RT's
 #endif
     SetCS(cs);
@@ -3226,6 +3233,7 @@ static Byte BoneNumToPart[256 + 1];
 #endif
 static ShaderBuffer *SBObjMatrix, *SBObjMatrixPrev, *SBFurVel;
 void SetMatrixCount(Int num) {
+    PROFILE_START("CatzEngine::SetMatrixCount(Int num)")
     if (Matrixes != num) {
         Matrixes = num;
         // !! Warning: for performance reasons this doesn't adjust 'ShaderParam.translation', so using 'ShaderParam.set*' based on translation will use full size, so make sure that method isn't called for 'ObjMatrix' and 'ObjMatrixPrev' !!
@@ -3259,7 +3267,7 @@ void SetMatrixCount(Int num) {
 #if 0
             SBObjMatrix    ->bind(SBI_OBJ_MATRIX     );
             SBObjMatrixPrev->bind(SBI_OBJ_MATRIX_PREV);
-#else // bind 2 at the same time \
+#else                                                              // bind 2 at the same time \
       // Warning: code below does not set the cached buffers as 'bind' does, as it's not needed, because those buffers have constant bind index
                 ASSERT(SBI_OBJ_MATRIX_PREV == SBI_OBJ_MATRIX + 1); // can do this only if they're next to each other
                 ID3D11Buffer *buf[] = {SBObjMatrix->buffer.buffer, SBObjMatrixPrev->buffer.buffer};
@@ -3277,6 +3285,7 @@ void SetMatrixCount(Int num) {
         SBObjMatrixPrev->buffer.size = SIZE(GpuMatrix) * Matrixes;
 #endif
     }
+    PROFILE_STOP("CatzEngine::SetMatrixCount(Int num)")
 }
 void SetFurVelCount(Int num) // !! unlike 'SetMatrixCount' this needs to be called before Shader start/begin, because it doesn't bind the new buffer !!
 {

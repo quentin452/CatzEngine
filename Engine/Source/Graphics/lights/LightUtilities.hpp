@@ -414,9 +414,8 @@ INLINE void processConeLight(Light &CurrentLight) {
 
 INLINE void DrawLightDirForward_CASE_LIGHT_DIR(ALPHA_MODE alpha) {
     PROFILE_START("DrawLightDirForward_CASE_LIGHT_DIR(ALPHA_MODE alpha)")
-    Int shd_map_num;
+    Int shd_map_num = CurrentLight.shadow ? D.shadowMapNumActual() : 0;
     if (CurrentLight.shadow) {
-        shd_map_num = D.shadowMapNumActual();
         ShadowMap(CurrentLight.dir);
         Renderer._frst_light_offset = OFFSET(FRST, dir_shd[Mid(shd_map_num, 1, 6) - 1]);
     } else {
@@ -438,7 +437,7 @@ INLINE void DrawLightDirForward_CASE_LIGHT_DIR(ALPHA_MODE alpha) {
     Renderer.mode(RM_OPAQUE);
     REPS(Renderer._eye, Renderer._eye_num) {
         Renderer.setEyeViewportCam();
-        if (CurrentLight.shadow)
+        if (CurrentLight.shadow) 
             SetShdMatrix();
         CurrentLight.dir.set();
         if (Renderer.secondaryPass())

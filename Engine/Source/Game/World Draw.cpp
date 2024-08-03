@@ -15,6 +15,7 @@ bool IsPointInFrustum(C Camera &cam, C Vec &point) {
 }
 
 void GetBoundingBoxCorners(C Matrix &matrix, Vec corners[8]) {
+    PROFILE_START("GetBoundingBoxCorners(C Matrix &matrix, Vec corners[8])")
     C Vec scale = matrix.scale() * 1.5;
     C Vec pos = matrix.pos;
     C Vec right = matrix.x * scale.x;
@@ -28,15 +29,20 @@ void GetBoundingBoxCorners(C Matrix &matrix, Vec corners[8]) {
     corners[5] = pos - right + up - forward;
     corners[6] = pos - right - up + forward;
     corners[7] = pos - right - up - forward;
+    PROFILE_STOP("GetBoundingBoxCorners(C Matrix &matrix, Vec corners[8])")
 }
 
 bool IsObjectInFrustum(C Camera &cam, Obj &obj) {
+    PROFILE_START("IsObjectInFrustum(C Camera &cam, Obj &obj)")
     Vec corners[8];
     GetBoundingBoxCorners(obj.matrix(), corners);
     for (int i = 0; i < 8; ++i) {
-        if (IsPointInFrustum(cam, corners[i]))
+        if (IsPointInFrustum(cam, corners[i])) {
+            PROFILE_STOP("IsObjectInFrustum(C Camera &cam, Obj &obj)")
             return true;
+        }
     }
+    PROFILE_STOP("IsObjectInFrustum(C Camera &cam, Obj &obj)")
     return false;
 }
 

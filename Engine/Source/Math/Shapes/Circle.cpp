@@ -3,6 +3,7 @@
 namespace EE {
 /******************************************************************************/
 void Circle::draw(C Color &color, Bool fill, Int resolution) C {
+    PROFILE_START("Circle::draw(C Color &color, Bool fill, Int resolution)")
     if (resolution < 0)
         resolution = 96;
     else if (resolution < 3)
@@ -21,8 +22,10 @@ void Circle::draw(C Color &color, Bool fill, Int resolution) C {
         prev = next;
     }
     VI.end();
+    PROFILE_STOP("Circle::draw(C Color &color, Bool fill, Int resolution)")
 }
 void CircleM::draw(C Color &color, Bool fill, Int resolution) C {
+    PROFILE_START("CircleM::draw(C Color &color, Bool fill, Int resolution)")
     Vec2 pos = T.pos;
 
     if (resolution < 0)
@@ -43,8 +46,10 @@ void CircleM::draw(C Color &color, Bool fill, Int resolution) C {
         prev = next;
     }
     VI.end();
+    PROFILE_STOP("CircleM::draw(C Color &color, Bool fill, Int resolution)")
 }
 void Circle::drawPie(C Color &color, Flt r_start, Flt angle_start, Flt angle_range, Bool fill, Int resolution) C {
+    PROFILE_START("Circle::drawPie(C Color &color, Flt r_start, Flt angle_start, Flt angle_range, Bool fill, Int resolution)")
     if (Abs(angle_range) >= PI2 && !fill) // draw inner and outer lines only
     {
         Circle(r_start, pos).draw(color, false, resolution); // draw inner lines
@@ -77,6 +82,7 @@ void Circle::drawPie(C Color &color, Flt r_start, Flt angle_start, Flt angle_ran
             VI.line(prev, prev2); // side line
         VI.end();
     }
+    PROFILE_STOP("Circle::drawPie(C Color &color, Flt r_start, Flt angle_start, Flt angle_range, Bool fill, Int resolution)")
 }
 /******************************************************************************/
 Flt Dist(C Vec2 &point, C Circle &circle) {

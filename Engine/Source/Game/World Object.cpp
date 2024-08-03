@@ -117,7 +117,7 @@ Obj *WorldManager::objCreateNear(Object &object, C Matrix &matrix, C UID *obj_id
                 }
     }
     PROFILE_STOP("WorldManager::objCreateNear(Object &object, C Matrix &matrix, C UID *obj_id)")
-    return null;
+    return nullptr;
 }
 Bool WorldManager::objCreate(Object &object, C Matrix &matrix, C UID *obj_id) {
     PROFILE_START("WorldManager::objCreate(Object &object, C Matrix &matrix, C UID *obj_id)")

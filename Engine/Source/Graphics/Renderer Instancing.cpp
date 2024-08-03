@@ -654,9 +654,11 @@ void DrawShadowInstances() // this is called only 1 time and not for each eye
     // this doesn't require 'ViewOffset' and 'BeginPrecomputedViewMatrix' because shadows are drawn only 1 time, and not for each eye
 
     // opaque
+    PROFILE_START("CatzEngine::DrawShadowInstances()Opaque Section")
     SetMatrixCount();
     DisableSkinning();
     for (Int i = ShaderDrawsNum; i < ShaderDraws.elms(); i++) {
+        PROFILE_START("CatzEngine::DrawShadowInstances()Shader Draw Loop")
         ShaderDraw &shader_draw = ShaderDraws[i];
         shader_draw.unlink();
         Shader &shader = shader_draw.shader->getShader(false);
@@ -665,6 +667,7 @@ void DrawShadowInstances() // this is called only 1 time and not for each eye
         Bool reuse_default_material = ReuseDefaultMaterialForNonSkinnedShadowShader(&shader);
 #endif
         for (ShaderMaterial *shader_material = &ShaderMaterials[shader_draw.first_shader_material];;) {
+            PROFILE_START("CatzEngine::DrawShadowInstances()Shader Material Loop")
             ShaderMaterialMesh *shader_material_mesh = &ShaderMaterialMeshes[shader_material->first_shader_material_mesh];
 #if SUPPORT_MATERIAL_CHANGE_IN_RENDERING
             C Material &material = *shader_material->material;
@@ -678,6 +681,7 @@ void DrawShadowInstances() // this is called only 1 time and not for each eye
             shader.commitTex();
 
             for (;;) {
+                PROFILE_START("CatzEngine::DrawShadowInstances()Mesh Loop")
                 C MeshPart &mesh = *shader_material_mesh->mesh;
                 C MeshRender &render = mesh.render.set();
                 C Bool instancing_mesh = !(render.flag() & VTX_SKIN); // can do instancing only if mesh doesn't have skinning (otherwise a skinned shader is set which does not use instancing)
@@ -688,12 +692,14 @@ void DrawShadowInstances() // this is called only 1 time and not for each eye
 #endif
 
                 for (ShadowShaderMaterialMeshInstance *instance = &ShadowShaderMaterialMeshInstances[shader_material_mesh->first_instance];;) {
+                    PROFILE_START("CatzEngine::DrawShadowInstances()Instance Loop")
                     ViewMatrix[0] = instance->view_matrix;
                     Sh.ViewMatrix->setChanged(); // this doesn't need 'ViewOffset'
                     SetShaderParamChanges(instance->shader_param_changes);
                     Int instances = 1;
                     if (instancing_mesh)
                         for (; instance->next_instance >= 0;) {
+                            PROFILE_START("CatzEngine::DrawShadowInstances()Instance Loop - Next Instance")
                             ShadowShaderMaterialMeshInstance &next = ShadowShaderMaterialMeshInstances[instance->next_instance];
                             if (next.shader_param_changes == instance->shader_param_changes) {
                                 instance = &next;
@@ -702,6 +708,7 @@ void DrawShadowInstances() // this is called only 1 time and not for each eye
                                     break;
                             } else
                                 break;
+                            PROFILE_STOP("CatzEngine::DrawShadowInstances()Instance Loop - Next Instance")
                         }
                     SetMatrixCount(instances);
                     shader.commit();
@@ -713,6 +720,7 @@ void DrawShadowInstances() // this is called only 1 time and not for each eye
                     if (instance->next_instance < 0)
                         break;
                     instance = &ShadowShaderMaterialMeshInstances[instance->next_instance];
+                    PROFILE_STOP("CatzEngine::DrawShadowInstances()Instance Loop")
                 }
 
                 if (shader_material_mesh->next_shader_material_mesh < 0)
@@ -721,31 +729,40 @@ void DrawShadowInstances() // this is called only 1 time and not for each eye
 #if !SUPPORT_MATERIAL_CHANGE_IN_RENDERING
                 variation = &shader_material_mesh->Variation();
 #endif
+                PROFILE_STOP("CatzEngine::DrawShadowInstances()Mesh Loop")
             }
 
             SetShaderParamChanges(); // this must be called here before setting new shader params, because we may have some 'ShaderParamRestore' that we need to apply before any new shader params, for example if we don't call it here, and a new material is set, and we process 'SetShaderParamChanges' later, then it could restore the material values that are now old because new material was already set
             if (shader_material->next_shader_material < 0)
                 break;
             shader_material = &ShaderMaterials[shader_material->next_shader_material];
+            PROFILE_STOP("CatzEngine::DrawShadowInstances()Shader Material Loop")
         }
+        PROFILE_STOP("CatzEngine::DrawShadowInstances()Shader Draw Loop")
     }
+    PROFILE_STOP("CatzEngine::DrawShadowInstances()Opaque Section")
 
     // skeleton
+    PROFILE_START("CatzEngine::DrawShadowInstances()Skeleton Section")
     EnableSkinning();
     FREPA(SkeletonShadowInstances) {
+        PROFILE_START("CatzEngine::DrawShadowInstances()Skeleton Instance Loop")
         SkeletonInstance &skel = SkeletonShadowInstances[i];
         skel.unlinkShadow();
         skel.anim_skel->setMatrix();
         for (SkeletonShader *skel_shader = &skel.skel_shader;;) {
+            PROFILE_START("CatzEngine::DrawShadowInstances()Skeleton Shader Loop")
             Shader &shader = skel_shader->shader->getShader(false);
             shader.start();
             for (SkeletonShaderMaterial *skel_shader_material = &skel_shader->material;;) {
+                PROFILE_START("CatzEngine::DrawShadowInstances()Skeleton Shader Material Loop")
                 C Material &material = *skel_shader_material->material;
                 material.setShadow();
                 D.cull(material.cull);
                 shader.commitTex();
                 Bool shader_params_changed = true;
                 for (SkeletonShaderMaterialMeshInstance *instance = &SkeletonShadowShaderMaterialMeshInstances[skel_shader_material->first_mesh_instance];;) {
+                    PROFILE_START("CatzEngine::DrawShadowInstances()Skeleton Instance Loop")
                     shader_params_changed |= SetShaderParamChanges(instance->shader_param_changes);
                     if (shader_params_changed) {
                         shader_params_changed = false;
@@ -755,17 +772,22 @@ void DrawShadowInstances() // this is called only 1 time and not for each eye
                     if (instance->next_instance < 0)
                         break;
                     instance = &SkeletonShadowShaderMaterialMeshInstances[instance->next_instance];
+                    PROFILE_STOP("CatzEngine::DrawShadowInstances()Skeleton Instance Loop")
                 }
                 SetShaderParamChanges(); // this must be called here before setting new shader params, because we may have some 'ShaderParamRestore' that we need to apply before any new shader params, for example if we don't call it here, and a new material is set, and we process 'SetShaderParamChanges' later, then it could restore the material values that are now old because new material was already set
                 if (skel_shader_material->next_skeleton_shader_material < 0)
                     break;
                 skel_shader_material = &SkeletonShaderMaterials[skel_shader_material->next_skeleton_shader_material];
+                PROFILE_STOP("CatzEngine::DrawShadowInstances()Skeleton Shader Material Loop")
             }
             if (skel_shader->next_skeleton_shader < 0)
                 break;
             skel_shader = &SkeletonShaders[skel_shader->next_skeleton_shader];
+            PROFILE_STOP("CatzEngine::DrawShadowInstances()Skeleton Shader Loop")
         }
+        PROFILE_STOP("CatzEngine::DrawShadowInstances()Skeleton Instance Loop")
     }
+    PROFILE_STOP("CatzEngine::DrawShadowInstances()Skeleton Section")
 
     // we can't just clear all containers, because in Forward renderer there's still data needed for opaque shaders which are processed after shadows, so restore to what we had before drawing shadows
     MaterialShaders.setNum(MaterialShadersNum);
@@ -799,6 +821,7 @@ void DrawShadowInstances() // this is called only 1 time and not for each eye
     }*/
     PROFILE_STOP("CatzEngine::DrawShadowInstances()")
 }
+
 /******************************************************************************/
 // BLEND
 /******************************************************************************/
@@ -855,7 +878,7 @@ void DrawBlendInstances() // !! this function should be safe to call 2 times in 
             Sh.ViewMatrix->setChanged();
             SetViewMatrixPrev(object->stat.view_matrix.prev);
             Sh.ViewMatrixPrev->setChanged();
-            const Bool instancing_mesh = !(render.flag() & VTX_SKIN); // can do instancing only if mesh doesn't have skinning (otherwise a skinned shader is set which does not use instancing)
+            C Bool instancing_mesh = !(render.flag() & VTX_SKIN); // can do instancing only if mesh doesn't have skinning (otherwise a skinned shader is set which does not use instancing)
             Int instances = 1;
             for (; i;) // if there's next one
             {

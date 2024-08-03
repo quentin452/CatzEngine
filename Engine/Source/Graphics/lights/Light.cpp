@@ -526,46 +526,59 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
 #if FLAT_SHADOW_MAP
         {
             PROFILE_START("DrawShadowMap(DIR_ENUM dir, C MatrixM & cam_matrix, UInt flag, Flt view_from, Flt view_range, C Vec2 & fov, FOV_MODE fov_mode, Int border, Flt bias, C MatrixFovFrac *frustum = null)")
-            // apply cam matrix bias
+            // Apply bias to the camera matrix
             MatrixM cam_matrix_biased = cam_matrix;
-            if (CurrentLight.type == LIGHT_DIR)
+            if (CurrentLight.type == LIGHT_DIR) {
                 cam_matrix_biased -= cam_matrix.z * bias;
+            }
 
-            // set viewport
+            // Set the viewport
+            Int shadowMapSize = D.shadowMapSizeActual();
             RectI viewport_rect;
             if (CurrentLight.type == LIGHT_CONE) {
-                viewport_rect.set(0, 0, D.shadowMapSizeActual() * 2, D.shadowMapSizeActual() * 2); // cone lights use 2x shadow map size
+                Int size = shadowMapSize * 2;
+                viewport_rect.set(0, 0, size, size);
             } else {
-                Int x = HsmX(dir),
-                    y = HsmY(dir);
-                viewport_rect.set(x * D.shadowMapSizeActual(), y * D.shadowMapSizeActual(), (x + 1) * D.shadowMapSizeActual(), (y + 1) * D.shadowMapSizeActual());
+                Int x = HsmX(dir);
+                Int y = HsmY(dir);
+                viewport_rect.set(x * shadowMapSize, y * shadowMapSize, (x + 1) * shadowMapSize, (y + 1) * shadowMapSize);
             }
-            if (frustum) // in 'D.shadowReduceFlicker', the needed area may not be the entire viewport rect, so use scissor
-                D.clipAllow(RectI(Floor(viewport_rect.lerpX(frustum->frac.min.x)),
-                                  Floor(viewport_rect.lerpY(frustum->frac.min.y)),
-                                  Ceil(viewport_rect.lerpX(frustum->frac.max.x)),
-                                  Ceil(viewport_rect.lerpY(frustum->frac.max.y))) &
-                            viewport_rect); // AND with original viewport in case frac is slightly <0 || >1 or after floor/ceil we get +-1 values
+
+            // Use scissor if frustum is defined and shadow flicker reduction is enabled
+            if (frustum) {
+                RectI frac_rect(
+                    Floor(viewport_rect.lerpX(frustum->frac.min.x)),
+                    Floor(viewport_rect.lerpY(frustum->frac.min.y)),
+                    Ceil(viewport_rect.lerpX(frustum->frac.max.x)),
+                    Ceil(viewport_rect.lerpY(frustum->frac.max.y)));
+                D.clipAllow(frac_rect & viewport_rect);
+            }
 
             viewport_rect.extend(-border);
             D._view_active.set(viewport_rect, view_from, view_range, fov, fov_mode);
             SetCam(cam_matrix_biased);
-            if (frustum)
-                Frustum.set(D._view_active.range, frustum->fov, frustum->matrix);
-            else
-                Frustum.set(D._view_active.range, D._view_active.fov, cam_matrix);
-            if (flag & SM_FRUSTUM)
-                if (!FrustumMain(Frustum)) {
-                    PROFILE_STOP("DrawShadowMap(DIR_ENUM dir, C MatrixM & cam_matrix, UInt flag, Flt view_from, Flt view_range, C Vec2 & fov, FOV_MODE fov_mode, Int border, Flt bias, C MatrixFovFrac *frustum = null)")
-                    return; // check if shadow frustum is visible (lies in main camera view frustum)
-                }
-            D._view_active.setViewport().setProjMatrix(); // we set 'Frustum' above
 
-            // set matrix converting from shadow map to main camera space (required for tesselation - adaptive tesselation factors)
+            // Set the frustum
+            if (frustum) {
+                Frustum.set(D._view_active.range, frustum->fov, frustum->matrix);
+            } else {
+                Frustum.set(D._view_active.range, D._view_active.fov, cam_matrix);
+            }
+
+            // Check if the shadow frustum is visible
+            if ((flag & SM_FRUSTUM) && !FrustumMain(Frustum)) {
+                PROFILE_STOP("DrawShadowMap(DIR_ENUM dir, C MatrixM & cam_matrix, UInt flag, Flt view_from, Flt view_range, C Vec2 & fov, FOV_MODE fov_mode, Int border, Flt bias, C MatrixFovFrac *frustum = null)")
+                return;
+            }
+
+            D._view_active.setViewport().setProjMatrix();
+
+            // Set the shadow to main camera space conversion matrix
             Matrix temp;
-            cam_matrix.divNormalized(ActiveCam.matrix, temp); // temp = cam_matrix/ActiveCam.matrix
+            cam_matrix.divNormalized(ActiveCam.matrix, temp); // temp = cam_matrix / ActiveCam.matrix
             Sh.ShdMatrix->set(temp);
 
+            // Configure depth bias and draw shadows
             D.depthBias(BIAS_SHADOW);
             D.depth(true);
             PrepareShadowInstances();
@@ -573,14 +586,15 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
             DrawShadowInstances();
             D.depthBias(BIAS_ZERO);
 
-            if ((flag & SM_CLOUDS) && Renderer._cld_map.is()) // clouds are only for directional lights
-            {
-                Int x = HsmX(dir),
-                    y = HsmY(dir);
+            // Draw cloud shadows for directional lights
+            if ((flag & SM_CLOUDS) && Renderer._cld_map.is()) {
+                Int cloudMapSize = D.cloudsMapSize();
+                Int x = HsmX(dir);
+                Int y = HsmY(dir);
                 ImageRT *rt = Renderer._cur[0], *rtz = Renderer._cur_ds;
-                Renderer.set(&Renderer._cld_map, null, false);
-                D._view_active.set(RectI(x * D.cloudsMapSize(), y * D.cloudsMapSize(), (x + 1) * D.cloudsMapSize(), (y + 1) * D.cloudsMapSize()), view_from, view_range, fov, fov_mode).setViewport().setProjMatrix(); // viewport
-                SetCam(cam_matrix);                                                                                                                                                                                    // camera only, frustum not needed for cloud shadows
+                Renderer.set(&Renderer._cld_map, nullptr, false);
+                D._view_active.set(RectI(x * cloudMapSize, y * cloudMapSize, (x + 1) * cloudMapSize, (y + 1) * cloudMapSize), view_from, view_range, fov, fov_mode).setViewport().setProjMatrix(); // viewport
+                SetCam(cam_matrix);                                                                                                                                                                // camera only, no need for frustum for cloud shadows
                 Clouds.shadowMap();
                 Renderer.set(rt, rtz, false);
             }
@@ -1703,7 +1717,7 @@ use ID3D12GraphicsCommandList1::OMSetDepthBounds to process only shadow / light 
         CurrentLightZRange.set(min - ActiveCamZ, max - ActiveCamZ); // Z relative to camera position
         PROFILE_STOP("SetLightZRangeCone()")
     }
-#include "LightProcessor.hpp"
+#include "unused/LightProcessor.hpp"
     LightProcessor processor;
     /*void Light::draw() {
         SetShadowOpacity(shadow_opacity);

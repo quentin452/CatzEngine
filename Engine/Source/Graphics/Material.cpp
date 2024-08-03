@@ -58,8 +58,8 @@ namespace EE {
 constexpr Byte TexSmooth(Byte tx) { return TEX_IS_ROUGH ? 255 - tx : tx; } // convert between texture and smoothness
 
 #define TEX_DEFAULT_SMOOTH 0 // 0..255
-#define TEX_DEFAULT_METAL 0 // 0..255
-#define TEX_DEFAULT_BUMP 0 // 0..255, normally this should be 128, but 0 will allow to use BC4/BC5 (for Mtrl.base_2 tex if there's no Glow) and always set Material.bump=0 when bump is not used #MaterialTextureLayout
+#define TEX_DEFAULT_METAL 0  // 0..255
+#define TEX_DEFAULT_BUMP 0   // 0..255, normally this should be 128, but 0 will allow to use BC4/BC5 (for Mtrl.base_2 tex if there's no Glow) and always set Material.bump=0 when bump is not used #MaterialTextureLayout
 /******************************************************************************/
 static Int Compare(C UniqueMultiMaterialKey &a, C UniqueMultiMaterialKey &b) {
     if (a.m[0] < b.m[0])
@@ -243,6 +243,7 @@ Flt XMaterial ::reflectMax() C {
 }
 /******************************************************************************/
 Material::Material() {
+    PROFILE_START("CatzEngine::Material::Material()")
     color_l.set(1, 1, 1, 1);
     emissive_l.set(0, 0, 0);
     emissive_glow = 0;
@@ -262,8 +263,10 @@ Material::Material() {
 
     clear();
     validate();
+    PROFILE_STOP("CatzEngine::Material::Material()")
 }
 Material::~Material() {
+    PROFILE_START("CatzEngine::Material::~Material()")
 #if !SYNC_LOCK_SAFE // if 'SyncLock' is not safe then crash may occur when trying to lock, to prevent that, check if we have any elements (this means cache was already initialized)
     if (UniqueMultiMaterialMap.elms())
 #endif
@@ -276,6 +279,7 @@ Material::~Material() {
         }
         UniqueMultiMaterialMap.unlock();
     }
+    PROFILE_STOP("CatzEngine::Material::~Material()")
 }
 /******************************************************************************/
 Bool Material::hasAlphaBlendNoLight() C {
@@ -368,6 +372,7 @@ Material &Material::reset() {
 }
 Material &Material::validate() // #MaterialTextureLayout
 {
+    PROFILE_START("CatzEngine::Material::validate()")
     if (this == MaterialLast)
         MaterialLast = null;
     REPA(MaterialLast4)
@@ -438,13 +443,17 @@ Material &Material::validate() // #MaterialTextureLayout
         }
         _multi.macro = (macro_map != null);
     }
+    PROFILE_STOP("CatzEngine::Material::validate()")
     return T;
 }
 static inline void WaitForStream(Bool &ok, C ImagePtr &image) {
+    PROFILE_START("CatzEngine::WaitForStream(Bool &ok, C ImagePtr &image)")
     if (image)
         ok &= image->waitForStream();
+    PROFILE_STOP("CatzEngine::WaitForStream(Bool &ok, C ImagePtr &image)")
 }
 Bool Material::waitForStream() C {
+    PROFILE_START("CatzEngine::WaitForStream()")
     Bool ok = true;
     WaitForStream(ok, base_0);
     WaitForStream(ok, base_1);
@@ -452,10 +461,12 @@ Bool Material::waitForStream() C {
     WaitForStream(ok, detail_map);
     WaitForStream(ok, macro_map);
     WaitForStream(ok, emissive_map);
+    PROFILE_STOP("CatzEngine::WaitForStream()")
     return ok;
 }
 /******************************************************************************/
 void Material::setOpaque() C {
+    PROFILE_START("CatzEngine::setOpaque()")
     if (MaterialLast != this) {
         MaterialLast = this;
         MaterialLast4[0] = null; // because they use the same shader images
@@ -472,8 +483,10 @@ void Material::setOpaque() C {
         Renderer.material_color_l->set(colorS());
 #endif
     }
+    PROFILE_STOP("CatzEngine::setOpaque()")
 }
 void Material::setEmissive() C {
+    PROFILE_START("CatzEngine::setEmissive()")
     if (MaterialLast != this) {
         MaterialLast = this;
         MaterialLast4[0] = null; // because they use the same shader images
@@ -487,8 +500,10 @@ void Material::setEmissive() C {
         Renderer.material_color_l->set(colorS());
 #endif
     }
+    PROFILE_STOP("CatzEngine::setEmissive()")
 }
 void Material::setBlend() C {
+    PROFILE_START("CatzEngine::setBlend()")
     if (MaterialLast != this) {
         MaterialLast = this;
         // MaterialLast4[0]=null; not needed since multi materials not rendered in blend mode
@@ -508,8 +523,10 @@ void Material::setBlend() C {
         Renderer.material_color_l->set(colorS());
 #endif
     }
+    PROFILE_STOP("CatzEngine::setBlend()")
 }
 void Material::setBlendForce() C {
+    PROFILE_START("CatzEngine::setBlendForce()")
     if (_alpha_factor.a // if has glow in material settings
         && base_2)      // and on texture channel (glow is in Base2 #MaterialTextureLayout)
     {                   // then it means we need to disable it for forced blend, which operates on alpha instead of glow
@@ -517,8 +534,10 @@ void Material::setBlendForce() C {
             MaterialLast = null;
         D.alphaFactor(TRANSPARENT);
     } else {
-        if (MaterialLast == this)
+        if (MaterialLast == this) {
+            PROFILE_STOP("CatzEngine::setBlendForce()")
             return;
+        }
         MaterialLast = this;
 
         D.alphaFactor(_alpha_factor);
@@ -536,8 +555,10 @@ void Material::setBlendForce() C {
 #if !LINEAR_GAMMA
     Renderer.material_color_l->set(colorS());
 #endif
+    PROFILE_STOP("CatzEngine::setBlendForce()")
 }
 void Material::setOutline() C {
+    PROFILE_START("CatzEngine::setOutline()")
     if (MaterialLast != this) {
         MaterialLast = this;
         // MaterialLast4[0]=null; not needed since multi materials not rendered in outline mode
@@ -545,8 +566,10 @@ void Material::setOutline() C {
         Sh.Col[0]->set(base_0());
         Renderer.material_color_l->set(colorD()); // only Material Color is used for alpha-testing
     }
+    PROFILE_STOP("CatzEngine::setOutline()")
 }
 void Material::setBehind() C {
+    PROFILE_START("CatzEngine::setBehind()")
     if (MaterialLast != this) {
         MaterialLast = this;
         // MaterialLast4[0]=null; not needed since multi materials not rendered in behind mode
@@ -554,8 +577,10 @@ void Material::setBehind() C {
         Sh.Col[0]->set(base_0());
         Renderer.material_color_l->set(colorD()); // only Material Color is used for alpha-testing
     }
+    PROFILE_STOP("CatzEngine::setBehind()")
 }
 void Material::setShadow() C {
+    PROFILE_START("CatzEngine::setShadow()")
     if (hasAlphaTest() && MaterialLast != this) // this shader needs params/textures only for alpha test (if used)
     {
         MaterialLast = this;
@@ -564,8 +589,10 @@ void Material::setShadow() C {
         Sh.Col[0]->set(base_0());
         Renderer.material_color_l->set(colorD()); // only Material Color is used for alpha-testing
     }
+    PROFILE_STOP("CatzEngine::setShadow()")
 }
 void Material::setMulti(Int i) C {
+    PROFILE_START("CatzEngine::Material::setMulti(Int i)")
     DEBUG_RANGE_ASSERT(i, Sh.MultiMaterial);
     if (MaterialLast4[i] != this) {
         MaterialLast4[i] = this;
@@ -581,8 +608,10 @@ void Material::setMulti(Int i) C {
         Sh.Mac[i]->set(macro_map());
         Sh.MultiMaterial[i]->set(_multi);
     }
+    PROFILE_STOP("CatzEngine::Material::setMulti(Int i)")
 }
 void Material::setAuto() C {
+    PROFILE_START("CatzEngine::Material::setAuto()")
     switch (Renderer()) {
     case RM_PREPARE:
     case RM_OPAQUE:
@@ -615,6 +644,7 @@ void Material::setAuto() C {
         setShadow();
         break;
     }
+    PROFILE_STOP("CatzEngine::Material::setAuto()")
 }
 /******************************************************************************/
 Bool Material::saveData(File &f, CChar *path) C {
@@ -1116,6 +1146,7 @@ TEX_FLAG CreateBaseTextures(Image &base_0, Image &base_1, Image &base_2, C Image
     TEX_FLAG texf = TEXF_NONE;
     Image dest_0, dest_1, dest_2;
     {
+        PROFILE_START("CatzEngine::CreateBaseTextures(Image &base_0, Image &base_1, Image &base_2, C ImageSource &color, C ImageSource &alpha, C ImageSource &bump, C ImageSource &normal, C ImageSource &smooth, C ImageSource &metal, C ImageSource &glow, Bool resize_to_pow2, Bool flip_normal_y, Bool smooth_is_rough)")
         Image color_temp;
         C Image *color_src = &color.image;
         if (color_src->compressed())
@@ -1188,23 +1219,23 @@ TEX_FLAG CreateBaseTextures(Image &base_0, Image &base_1, Image &base_2, C Image
             }
         } else                            // if there's no alpha map
             if (color.image.typeInfo().a) // but there is alpha channel in color map
-        {
-            Byte min_alpha = 255;
-            alpha_src = &alpha_temp.mustCreate(color_src->w(), color_src->h(), 1, IMAGE_A8, IMAGE_SOFT, 1);
-            if (color_src->lockRead()) {
-                REPD(y, color_src->h())
-                REPD(x, color_src->w()) {
-                    Byte a = color_src->color(x, y).a;
-                    alpha_temp.pixel(x, y, a);
-                    MIN(min_alpha, a);
+            {
+                Byte min_alpha = 255;
+                alpha_src = &alpha_temp.mustCreate(color_src->w(), color_src->h(), 1, IMAGE_A8, IMAGE_SOFT, 1);
+                if (color_src->lockRead()) {
+                    REPD(y, color_src->h())
+                    REPD(x, color_src->w()) {
+                        Byte a = color_src->color(x, y).a;
+                        alpha_temp.pixel(x, y, a);
+                        MIN(min_alpha, a);
+                    }
+                    color_src->unlock();
                 }
-                color_src->unlock();
+                if (min_alpha >= 254)
+                    alpha_temp.del(); // alpha channel in color map is fully white
+                else
+                    alpha_from_col = true;
             }
-            if (min_alpha >= 254)
-                alpha_temp.del(); // alpha channel in color map is fully white
-            else
-                alpha_from_col = true;
-        }
         FILTER_TYPE alpha_filter = Filter((alpha_from_col && alpha.filter < 0) ? color.filter : alpha.filter);
         VecI2 alpha_size;
         if (!alpha_src->is())
@@ -1275,8 +1306,8 @@ TEX_FLAG CreateBaseTextures(Image &base_0, Image &base_1, Image &base_2, C Image
             bump_to_normal = bump_src;
         else // if bump available and normal not, then create normal from bump
             if (normal_src->is() && (normal.image.typeChannels() == 1 || normal_src->monochromaticRG()))
-            bump_to_normal = normal_src; // if normal is provided as monochromatic, then treat it as bump and convert to normal
-        if (bump_to_normal)              // create normal from bump
+                bump_to_normal = normal_src; // if normal is provided as monochromatic, then treat it as bump and convert to normal
+        if (bump_to_normal)                  // create normal from bump
         {
             // it's best to resize bump instead of normal
             Int w = ((normal.size.x > 0) ? normal.size.x : (bump_to_normal == bump_src && bump.size.x > 0) ? bump.size.x
@@ -1395,9 +1426,11 @@ error:
     Swap(dest_0, base_0);
     Swap(dest_1, base_1);
     Swap(dest_2, base_2);
+    PROFILE_STOP("CatzEngine::CreateBaseTextures(Image &base_0, Image &base_1, Image &base_2, C ImageSource &color, C ImageSource &alpha, C ImageSource &bump, C ImageSource &normal, C ImageSource &smooth, C ImageSource &metal, C ImageSource &glow, Bool resize_to_pow2, Bool flip_normal_y, Bool smooth_is_rough)")
     return texf;
 }
 TEX_FLAG ExtractBase0Texture(Image &base_0, Image *color, Image *alpha) {
+    PROFILE_START("CatzEngine::ExtractBase0Texture(Image &base_0, Image *color, Image *alpha)")
     TEX_FLAG tex = TEXF_NONE;
     if (color)
         color->createSoft(base_0.w(), base_0.h(), 1, IMAGE_R8G8B8_SRGB);
@@ -1417,9 +1450,11 @@ TEX_FLAG ExtractBase0Texture(Image &base_0, Image *color, Image *alpha) {
                 tex |= TEXF_ALPHA;
         }
     }
+    PROFILE_STOP("CatzEngine::ExtractBase0Texture(Image &base_0, Image *color, Image *alpha)")
     return tex;
 }
 TEX_FLAG ExtractBase1Texture(Image &base_1, Image *normal) {
+    PROFILE_START("CatzEngine::ExtractBase1Texture(Image &base_1, Image *normal)")
     TEX_FLAG tex = TEXF_NONE;
     if (normal) {
         normal->createSoft(base_1.w(), base_1.h(), 1, IMAGE_R8G8B8);
@@ -1435,9 +1470,11 @@ TEX_FLAG ExtractBase1Texture(Image &base_1, Image *normal) {
             normal->colorF(x, y, n);
         }
     }
+    PROFILE_STOP("CatzEngine::ExtractBase1Texture(Image &base_1, Image *normal)")
     return tex;
 }
 TEX_FLAG ExtractBase2Texture(Image &base_2, Image *bump, Image *smooth, Image *metal, Image *glow) {
+    PROFILE_START("CatzEngine::ExtractBase2Texture(Image &base_2, Image *bump, Image *smooth, Image *metal, Image *glow)")
     TEX_FLAG tex = TEXF_NONE;
     if (smooth)
         smooth->createSoft(base_2.w(), base_2.h(), 1, IMAGE_L8);
@@ -1473,10 +1510,12 @@ TEX_FLAG ExtractBase2Texture(Image &base_2, Image *bump, Image *smooth, Image *m
                 tex |= TEXF_GLOW;
         }
     }
+    PROFILE_STOP("CatzEngine::ExtractBase2Texture(Image &base_2, Image *bump, Image *smooth, Image *metal, Image *glow)")
     return tex;
 }
 /******************************************************************************/
 TEX_FLAG CreateDetailTexture(Image &detail, C ImageSource &color, C ImageSource &bump, C ImageSource &normal, C ImageSource &smooth, Bool resize_to_pow2, Bool flip_normal_y, Bool smooth_is_rough) {
+    PROFILE_START("CatzEngine::CreateDetailTexture(Image &detail, C ImageSource &color, C ImageSource &bump, C ImageSource &normal, C ImageSource &smooth, Bool resize_to_pow2, Bool flip_normal_y, Bool smooth_is_rough)")
     TEX_FLAG texf = TEXF_NONE;
     Image dest;
     {
@@ -1531,8 +1570,8 @@ TEX_FLAG CreateDetailTexture(Image &detail, C ImageSource &color, C ImageSource 
             bump_to_normal = bump_src;
         else // if bump available and normal not, then create normal from bump
             if (normal_src->is() && (normal.image.typeChannels() == 1 || normal_src->monochromaticRG()))
-            bump_to_normal = normal_src; // if normal is provided as monochromatic, then treat it as bump and convert to normal
-        if (bump_to_normal)              // create normal from bump
+                bump_to_normal = normal_src; // if normal is provided as monochromatic, then treat it as bump and convert to normal
+        if (bump_to_normal)                  // create normal from bump
         {
             // it's best to resize bump instead of normal
             MAX(w, (normal.size.x > 0) ? normal.size.x : (bump_to_normal == bump_src && bump.size.x > 0) ? bump.size.x
@@ -1618,9 +1657,11 @@ TEX_FLAG CreateDetailTexture(Image &detail, C ImageSource &color, C ImageSource 
 
 error:
     Swap(dest, detail);
+    PROFILE_STOP("CatzEngine::CreateDetailTexture(Image &detail, C ImageSource &color, C ImageSource &bump, C ImageSource &normal, C ImageSource &smooth, Bool resize_to_pow2, Bool flip_normal_y, Bool smooth_is_rough)")
     return texf;
 }
 TEX_FLAG ExtractDetailTexture(C Image &detail, Image *color, Image *bump, Image *normal, Image *smooth) {
+    PROFILE_START("CatzEngine::ExtractDetailTexture(C Image &detail, Image *color, Image *bump, Image *normal, Image *smooth)")
     TEX_FLAG tex = TEXF_NONE;
     if (color)
         color->createSoft(detail.w(), detail.h(), 1, IMAGE_L8);
@@ -1652,10 +1693,12 @@ TEX_FLAG ExtractDetailTexture(C Image &detail, Image *color, Image *bump, Image 
                 tex |= TEXF_DET_NORMAL;
         }
     }
+    PROFILE_STOP("CatzEngine::ExtractDetailTexture(C Image &detail, Image *color, Image *bump, Image *normal, Image *smooth)")
     return tex;
 }
 /******************************************************************************/
 TEX_FLAG CreateWaterBaseTextures(Image &base_0, Image &base_1, Image &base_2, C ImageSource &color, C ImageSource &alpha, C ImageSource &bump, C ImageSource &normal, C ImageSource &smooth, C ImageSource &metal, C ImageSource &glow, Bool resize_to_pow2, Bool flip_normal_y, Bool smooth_is_rough) { // #MaterialTextureLayoutWater
+    PROFILE_START("CatzEngine::CreateWaterBaseTextures(Image &base_0, Image &base_1, Image &base_2, C ImageSource &color, C ImageSource &alpha, C ImageSource &bump, C ImageSource &normal, C ImageSource &smooth, C ImageSource &metal, C ImageSource &glow, Bool resize_to_pow2, Bool flip_normal_y, Bool smooth_is_rough)")
     TEX_FLAG texf = TEXF_NONE;
     Image dest_0, dest_1, dest_2;
     {
@@ -1729,8 +1772,8 @@ TEX_FLAG CreateWaterBaseTextures(Image &base_0, Image &base_1, Image &base_2, C 
             bump_to_normal = bump_src;
         else // if bump available and normal not, then create normal from bump
             if (normal_src->is() && (normal.image.typeChannels() == 1 || normal_src->monochromaticRG()))
-            bump_to_normal = normal_src; // if normal is provided as monochromatic, then treat it as bump and convert to normal
-        if (bump_to_normal)              // create normal from bump
+                bump_to_normal = normal_src; // if normal is provided as monochromatic, then treat it as bump and convert to normal
+        if (bump_to_normal)                  // create normal from bump
         {
             // it's best to resize bump instead of normal
             Int w = ((normal.size.x > 0) ? normal.size.x : (bump_to_normal == bump_src && bump.size.x > 0) ? bump.size.x
@@ -1809,9 +1852,11 @@ error:
     Swap(dest_0, base_0);
     Swap(dest_1, base_1);
     Swap(dest_2, base_2);
+    PROFILE_STOP("CatzEngine::CreateWaterBaseTextures(Image &base_0, Image &base_1, Image &base_2, C ImageSource &color, C ImageSource &alpha, C ImageSource &bump, C ImageSource &normal, C ImageSource &smooth, C ImageSource &metal, C ImageSource &glow, Bool resize_to_pow2, Bool flip_normal_y, Bool smooth_is_rough)")
     return texf;
 }
 TEX_FLAG ExtractWaterBase0Texture(C Image &base_0, Image *color) { // #MaterialTextureLayoutWater
+    PROFILE_START("CatzEngine::ExtractWaterBase0Texture(C Image &base_0, Image *color)")
     TEX_FLAG tex = TEXF_NONE;
     if (color) {
         color->createSoft(base_0.w(), base_0.h(), 1, IMAGE_R8G8B8_SRGB);
@@ -1823,9 +1868,11 @@ TEX_FLAG ExtractWaterBase0Texture(C Image &base_0, Image *color) { // #MaterialT
             color->color(x, y, c);
         }
     }
+    PROFILE_STOP("CatzEngine::ExtractWaterBase0Texture(C Image &base_0, Image *color)")
     return tex;
 }
 TEX_FLAG ExtractWaterBase1Texture(C Image &base_1, Image *normal) { // #MaterialTextureLayoutWater
+    PROFILE_START("CatzEngine::ExtractWaterBase1Texture(C Image &base_1, Image *normal)")
     TEX_FLAG tex = TEXF_NONE;
     if (normal) {
         normal->createSoft(base_1.w(), base_1.h(), 1, IMAGE_R8G8B8);
@@ -1841,9 +1888,11 @@ TEX_FLAG ExtractWaterBase1Texture(C Image &base_1, Image *normal) { // #Material
             normal->colorF(x, y, n);
         }
     }
+    PROFILE_STOP("CatzEngine::ExtractWaterBase1Texture(C Image &base_1, Image *normal)")
     return tex;
 }
 TEX_FLAG ExtractWaterBase2Texture(C Image &base_2, Image *bump) { // #MaterialTextureLayoutWater
+    PROFILE_START("CatzEngine::ExtractWaterBase2Texture(C Image &base_2, Image *bump)")
     TEX_FLAG tex = TEXF_NONE;
     if (bump) {
         bump->createSoft(base_2.w(), base_2.h(), 1, IMAGE_L8);
@@ -1855,10 +1904,12 @@ TEX_FLAG ExtractWaterBase2Texture(C Image &base_2, Image *bump) { // #MaterialTe
             bump->pixelF(x, y, c * 0.5 + 0.5);
         }
     }
+    PROFILE_STOP("CatzEngine::ExtractWaterBase2Texture(C Image &base_2, Image *bump)")
     return tex;
 }
 /******************************************************************************/
 Bool CreateBumpFromColor(Image &bump, C Image &color, Flt min_blur_range, Flt max_blur_range, Bool clamp) {
+    PROFILE_START("CatzEngine::CreateBumpFromColor(Image &bump, C Image &color, Flt min_blur_range, Flt max_blur_range, Bool clamp)")
     Image color_temp;
     C Image *color_src = &color;
     if (color_src->compressed())
@@ -1900,12 +1951,14 @@ Bool CreateBumpFromColor(Image &bump, C Image &color, Flt min_blur_range, Flt ma
                     power *= 0.5f;
                 }
                 bump.normalize();
+                PROFILE_STOP("CatzEngine::CreateBumpFromColor(Image &bump, C Image &color, Flt min_blur_range, Flt max_blur_range, Bool clamp)")
                 return true;
             }
         }
     }
 error:
     bump.del();
+    PROFILE_STOP("CatzEngine::CreateBumpFromColor(Image &bump, C Image &color, Flt min_blur_range, Flt max_blur_range, Bool clamp)")
     return false;
 }
 /******************************************************************************/
@@ -1918,7 +1971,7 @@ static inline Flt LightSpecular(C Vec &normal, C Vec &light_dir, C Vec &eye_dir,
 #endif
 }
 Bool MergeBaseTextures(Image &base_0, C Material &material, Int image_type, Int max_image_size, C Vec *light_dir, Flt light_power, Flt spec_mul, FILTER_TYPE filter) { // #MaterialTextureLayout
-
+    PROFILE_START("CatzEngine::MergeBaseTextures(Image &base_0, C Material &material, Int image_type, Int max_image_size, C Vec *light_dir, Flt light_power, Flt spec_mul, FILTER_TYPE filter)")
     // dimensions
     VecI2 size = 0;
     if (material.base_0)
@@ -1936,11 +1989,15 @@ Bool MergeBaseTextures(Image &base_0, C Material &material, Int image_type, Int 
     if (size.any()) // this implies we have at least one texture
     {
         if (material.base_0) {
-            if (!material.base_0->copy(color, size.x, size.y, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1, filter, IC_WRAP))
+            if (!material.base_0->copy(color, size.x, size.y, 1, IMAGE_R8G8B8A8_SRGB, IMAGE_SOFT, 1, filter, IC_WRAP)) {
+                PROFILE_STOP("CatzEngine::MergeBaseTextures(Image &base_0, C Material &material, Int image_type, Int max_image_size, C Vec *light_dir, Flt light_power, Flt spec_mul, FILTER_TYPE filter)")
                 return false; // create new color map, use IMAGE_R8G8B8A8_SRGB to always include Alpha
+            }
         } else {
-            if (!color.createSoft(size.x, size.y, 1, IMAGE_R8G8B8A8_SRGB))
+            if (!color.createSoft(size.x, size.y, 1, IMAGE_R8G8B8A8_SRGB)) {
+                PROFILE_STOP("CatzEngine::MergeBaseTextures(Image &base_0, C Material &material, Int image_type, Int max_image_size, C Vec *light_dir, Flt light_power, Flt spec_mul, FILTER_TYPE filter)")
                 return false;
+            }
             REPD(y, color.h())
             REPD(x, color.w())
             color.color(x, y, WHITE);
@@ -1957,14 +2014,16 @@ Bool MergeBaseTextures(Image &base_0, C Material &material, Int image_type, Int 
 
         Image normal; // 'base_1' resized to 'color' resolution
         if (has_normal)
-            if (!material.base_1->copy(normal, color.w(), color.h(), 1, ImageTypeUncompressed(material.base_1->type()), IMAGE_SOFT, 1, filter, IC_WRAP))
+            if (!material.base_1->copy(normal, color.w(), color.h(), 1, ImageTypeUncompressed(material.base_1->type()), IMAGE_SOFT, 1, filter, IC_WRAP)) {
+                PROFILE_STOP("CatzEngine::MergeBaseTextures(Image &base_0, C Material &material, Int image_type, Int max_image_size, C Vec *light_dir, Flt light_power, Flt spec_mul, FILTER_TYPE filter)")
                 return false;
-
+            }
         Image b2; // 'base_2' resized to 'color' resolution
         if (has_spec || has_glow)
-            if (!material.base_2->copy(b2, color.w(), color.h(), 1, ImageTypeUncompressed(material.base_2->type()), IMAGE_SOFT, 1, filter, IC_WRAP))
+            if (!material.base_2->copy(b2, color.w(), color.h(), 1, ImageTypeUncompressed(material.base_2->type()), IMAGE_SOFT, 1, filter, IC_WRAP)) {
+                PROFILE_STOP("CatzEngine::MergeBaseTextures(Image &base_0, C Material &material, Int image_type, Int max_image_size, C Vec *light_dir, Flt light_power, Flt spec_mul, FILTER_TYPE filter)")
                 return false;
-
+            }
         // setup glow (before baking normals)
         Image glow;
         if (has_glow && glow.createSoft(color.w(), color.h(), 1, IMAGE_F32_3)) // use Vec because we're storing glow with multiplier
@@ -2049,11 +2108,14 @@ Bool MergeBaseTextures(Image &base_0, C Material &material, Int image_type, Int 
         // final copy
         C ImagePtr &base = (material.base_0 ? material.base_0 : material.base_1 ? material.base_1
                                                                                 : material.base_2);
-        if (!color.copy(color, size.x, size.y, 1, image_type, base->mode(), (base->mipMaps() > 1) ? 0 : 1, filter, IC_WRAP))
+        if (!color.copy(color, size.x, size.y, 1, image_type, base->mode(), (base->mipMaps() > 1) ? 0 : 1, filter, IC_WRAP)) {
+            PROFILE_STOP("CatzEngine::MergeBaseTextures(Image &base_0, C Material &material, Int image_type, Int max_image_size, C Vec *light_dir, Flt light_power, Flt spec_mul, FILTER_TYPE filter)")
             return false;
+        }
     }
 
     Swap(base_0, color);
+    PROFILE_STOP("CatzEngine::MergeBaseTextures(Image &base_0, C Material &material, Int image_type, Int max_image_size, C Vec *light_dir, Flt light_power, Flt spec_mul, FILTER_TYPE filter)")
     return true;
 }
 /******************************************************************************/

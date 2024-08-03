@@ -7,7 +7,7 @@
 #define ENGINE_BUILD 73 // this is an integer value specifying build iteration of the Engine, this gets incremented with each new release
 #define ENGINE_NAME "Titan"
 #define ENGINE_DEVELOPER_NAME "Esenthel"
-#define PERFORMANCE_MONITOR 0 // defnie if performance profiler is enabled or not , 0 = disabled , 1 = enabled
+#define PERFORMANCE_MONITOR 1 // defnie if performance profiler is enabled or not , 0 = disabled , 1 = enabled
 /******************************************************************************
 
    Following defines are available, they are always set to 0 (disabled) or 1 (enabled)

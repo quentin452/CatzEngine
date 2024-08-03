@@ -973,7 +973,7 @@ void PathWorld::del() {
     if (_build.elms()) {
         SyncLocker lock(_lock);
         _build.del();
-    }            // cancel build requests
+    } // cancel build requests
     _event.on(); // wake up thread
     _thread.del();
 
@@ -1046,6 +1046,7 @@ _PathMesh *PathWorld::pathMesh(C VecI2 &area_xy) C {
 }
 /******************************************************************************/
 void PathWorld::update() {
+    PROFILE_START("PathWorld::update()")
     if (_changed.elms() || _built.elms()) {
         Bool wake_up = (_changed.elms() > 0);
         {
@@ -1110,6 +1111,7 @@ void PathWorld::update() {
         if (wake_up)
             _event.on(); // wake up thread
     }
+    PROFILE_STOP("PathWorld::update()")
 }
 /******************************************************************************/
 void PathWorld::changed(C Shape &shape) {

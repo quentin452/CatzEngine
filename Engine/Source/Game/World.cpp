@@ -154,13 +154,18 @@ static Bool WorldThread(Thread &thread) {
 }
 void WorldManager::threadFunc() {
     PROFILE_START("WorldManager::threadFunc()")
-    _thread_event.wait();        // load data only on demand
+    PROFILE_START("WorldManager::threadFunc()1")
+    _thread_event.wait(); // load data only on demand
+    PROFILE_STOP("WorldManager::threadFunc()1")
     if (_area_background.elms()) // if want some areas to be loaded
     {
+        PROFILE_START("WorldManager::threadFunc()2")
         // important: do not create new grid objects, but use already created in the main thread, and now access them using 'area_background' array (creating grid objects on secondary thread would require 'SyncLocker' for every operation on grid)
         File f; // declare the file outside the loop, to make use of performance optimization when using the same file loading files from 1 pak
         ThreadMayUseGPUData();
+        PROFILE_STOP("WorldManager::threadFunc()2")
     again:
+        PROFILE_START("WorldManager::threadFunc()3")
         SyncLocker locker(_lock);
         if (_area_background.elms()) {
             Area &area = *_area_background.pop();
@@ -169,6 +174,7 @@ void WorldManager::threadFunc() {
                 goto again;
         }
         ThreadFinishedUsingGPUData();
+        PROFILE_STOP("WorldManager::threadFunc()3")
     }
     PROFILE_STOP("WorldManager::threadFunc()")
 }

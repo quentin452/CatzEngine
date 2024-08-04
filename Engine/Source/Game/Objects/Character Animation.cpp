@@ -313,6 +313,7 @@ void Chr::animate() {
 /******************************************************************************/
 void Chr::updateAnimation() {
     PROFILE_START("CatzEngine::Chr::updateAnimation()")
+    PROFILE_START("CatzEngine::Chr::updateAnimation()1")
     updateAnimationAnim();
 
     // first animate using only basic animations (standing or crouching) to detect 'foot_offset' (it will be used to align the whole body matrix while crouching so that the foot will always be in constant position - "attached" to certain position on the ground)
@@ -336,7 +337,8 @@ void Chr::updateAnimation() {
 
     // set animations
     animate();
-
+    PROFILE_STOP("CatzEngine::Chr::updateAnimation()1")
+    PROFILE_START("CatzEngine::Chr::updateAnimation()2")
     // manually adjust body, neck and head bones (according to look angles, movement, ...)
     Int body_sign = ((sac.body >= 0) ? Sign(skel.skeleton()->bones[sac.body].perp.z) : 1);
     Flt body_pitch = angle.y * body_sign;
@@ -378,7 +380,8 @@ void Chr::updateAnimation() {
 #endif
         }
     }
-
+    PROFILE_STOP("CatzEngine::Chr::updateAnimation()2")
+    PROFILE_START("CatzEngine::Chr::updateAnimation()3")
     // main matrix
     Matrix m;
     {
@@ -423,7 +426,8 @@ void Chr::updateAnimation() {
         }
 #endif
     }
-
+    PROFILE_STOP("CatzEngine::Chr::updateAnimation()3")
+    PROFILE_START("CatzEngine::Chr::updateAnimation()4")
     // scale
     m.scaleOrn(scale);
 
@@ -448,6 +452,7 @@ void Chr::updateAnimation() {
             ragdoll.toSkelBlend(skel, blend * 0.45f);
         }
     }
+    PROFILE_STOP("CatzEngine::Chr::updateAnimation()4")
     PROFILE_STOP("CatzEngine::Chr::updateAnimation()")
 }
 /******************************************************************************/

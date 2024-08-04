@@ -2,6 +2,7 @@
 #include "stdafx.h"
 /******************************************************************************/
 void NewObjs(C Vec &pos) {
+    PROFILE_START("CatzEngine::NewObjs(C Vec &pos)")
     Vec center = 0;
     Memt<Obj *> selected;
     if (Selection.elms()) {
@@ -32,8 +33,10 @@ void NewObjs(C Vec &pos) {
         ObjList.setChanged();
         WorldEdit.objTransChanged();
     }
+    PROFILE_STOP("CatzEngine::NewObjs(C Vec &pos)")
 }
 Obj *NewObj(C Vec &pos, Elm &elm) {
+    PROFILE_START("CatzEngine::NewObj(C Vec &pos, Elm &elm)")
     if (elm.type == ELM_OBJ) {
         Obj &obj = WorldEdit.objs.New();
         obj.params.setBase(Proj.editPath(elm.id), Proj.edit_path);
@@ -44,23 +47,30 @@ Obj *NewObj(C Vec &pos, Elm &elm) {
         obj.setUndo(WorldUndo::NewObjType, true); // call set Undo at the end with 'as_new'
         ObjList.setChanged();
         WorldEdit.objTransChanged();
+        PROFILE_STOP("CatzEngine::NewObj(C Vec &pos, Elm &elm)")
         return &obj;
     }
+    PROFILE_STOP("CatzEngine::NewObj(C Vec &pos, Elm &elm)")
     return null;
 }
 void DeleteObj() {
+    PROFILE_START("CatzEngine::DeleteObj()")
     if (Selection.elms()) {
         REPAO(Selection).remove();
         WorldEdit.objTransChanged();
     }
+    PROFILE_STOP("CatzEngine::DeleteObj()")
 }
 void DeleteObj(Obj &obj) {
+    PROFILE_START("CatzEngine::DeleteObj(Obj &obj)")
     bool sel = obj.selected;
     obj.remove();
     if (sel)
         WorldEdit.objTransChanged();
+    PROFILE_STOP("CatzEngine::DeleteObj(Obj &obj)")
 }
 void ScaleOrgObj() {
+    PROFILE_START("CatzEngine::ScaleOrgObj()")
     if (Selection.elms()) {
         Map<UID, flt> scaled(Compare);
         REPA(Selection) {
@@ -80,18 +90,24 @@ void ScaleOrgObj() {
         if (scaled.elms())
             WorldEdit.objTransChanged();
     }
+    PROFILE_STOP("CatzEngine::ScaleOrgObj()")
 }
 void ObjAlignTer() {
+    PROFILE_START("CatzEngine::ObjAlignTer()")
     WorldEdit.obj_pos.apply();
     REPAO(Selection).alignTerrain(true);
     WorldEdit.objTransChanged();
+    PROFILE_STOP("CatzEngine::ObjAlignTer()")
 }
 void ObjAlignNrm() {
+    PROFILE_START("CatzEngine::ObjAlignNrm()")
     WorldEdit.obj_pos.apply();
     REPAO(Selection).alignNormal();
     WorldEdit.objTransChanged();
+    PROFILE_STOP("CatzEngine::ObjAlignNrm()")
 }
 void ObjAlignGrid() {
+    PROFILE_START("CatzEngine::ObjAlignGrid()")
     WorldEdit.obj_pos.apply();
     REPA(Selection) {
         Obj &obj = Selection[i];
@@ -103,22 +119,30 @@ void ObjAlignGrid() {
             obj.alignNormal();
     }
     WorldEdit.objTransChanged();
+    PROFILE_STOP("CatzEngine::ObjAlignGrid()")
 }
 
 void ObjRandomRot() {
+    PROFILE_START("CatzEngine::ObjRandomRot()")
     REPAO(Selection).randomRot();
     WorldEdit.objTransChanged();
+    PROFILE_STOP("CatzEngine::ObjRandomRot()")
 }
 void ObjRandomRot90() {
+    PROFILE_START("CatzEngine::ObjRandomRot90()")
     REPAO(Selection).randomRot90();
     WorldEdit.objTransChanged();
+    PROFILE_STOP("CatzEngine::ObjRandomRot90()")
 }
 void ObjResetRot() {
+    PROFILE_START("CatzEngine::ObjResetRot()")
     REPAO(Selection).resetRot();
     WorldEdit.objTransChanged();
+    PROFILE_STOP("CatzEngine::ObjResetRot()")
 }
 
 void ObjRotX() {
+    PROFILE_START("CatzEngine::ObjRotX()")
     Matrix3 m;
     m.setRotateX(PI_2);
     REPA(Selection) {
@@ -126,8 +150,10 @@ void ObjRotX() {
         obj.moveTo(obj.matrix.orn() * m);
     }
     WorldEdit.objTransChanged();
+    PROFILE_STOP("CatzEngine::ObjRotX()")
 }
 void ObjRotY() {
+    PROFILE_START("CatzEngine::ObjRotY()")
     Matrix3 m;
     m.setRotateY(PI_2);
     REPA(Selection) {
@@ -135,8 +161,10 @@ void ObjRotY() {
         obj.moveTo(obj.matrix.orn() * m);
     }
     WorldEdit.objTransChanged();
+    PROFILE_STOP("CatzEngine::ObjRotY()")
 }
 void ObjRotZ() {
+    PROFILE_START("CatzEngine::ObjRotZ()")
     Matrix3 m;
     m.setRotateZ(PI_2);
     REPA(Selection) {
@@ -144,10 +172,12 @@ void ObjRotZ() {
         obj.moveTo(obj.matrix.orn() * m);
     }
     WorldEdit.objTransChanged();
+    PROFILE_STOP("CatzEngine::ObjRotZ()")
 }
 
 void EditObj() { WorldEdit.param_edit.b_class.push(); }
 void CopyObjInstanceID() {
+    PROFILE_START("CatzEngine::CopyObjInstanceID()")
     Str s;
     FREPA(Selection) {
         s += Selection[i].id.asCString();
@@ -155,8 +185,10 @@ void CopyObjInstanceID() {
             s += ",\n";
     }
     ClipSet(s);
+    PROFILE_STOP("CatzEngine::CopyObjInstanceID()")
 }
 void OpenObjMaterial() {
+    PROFILE_START("CatzEngine::OpenObjMaterial()")
     Memt<MaterialPtr> mtrls;
     FREPA(Selection) {
         Obj &obj = Selection[i];
@@ -168,6 +200,7 @@ void OpenObjMaterial() {
         }
     }
     MtrlEdit.set(mtrls);
+    PROFILE_STOP("CatzEngine::OpenObjMaterial()")
 }
 /******************************************************************************/
 
@@ -181,28 +214,36 @@ Obj::~Obj() {
 }
 bool Obj::setInvalidRefs() { return invalid_refs = invalidRefs(); }
 bool Obj::invalidRefs() C {
+    PROFILE_START("CatzEngine::OpenObjMaterial()")
     if (!removed) {
-        if (Proj.invalidRef(params.base.id()) || Proj.invalidRef(params.type))
+        if (Proj.invalidRef(params.base.id()) || Proj.invalidRef(params.type)) {
+            PROFILE_STOP("CatzEngine::OpenObjMaterial()")
             return true;
+        }
         REPA(params) {
             C EditParam &param = params[i];
             if (!param.removed) {
                 if (param.type == PARAM_ENUM) {
-                    if (Proj.invalidRef(Enums.id(param.enum_type)))
+                    if (Proj.invalidRef(Enums.id(param.enum_type))) {
+                        PROFILE_STOP("CatzEngine::OpenObjMaterial()")
                         return true;
-                } else if (ParamTypeID(param.type)) {
-                    // currently these are ignored
+                    } else if (ParamTypeID(param.type)) {
+                        // currently these are ignored
+                    }
+                }
+            }
+            REPA(params.sub_objs) {
+                C EditObject::SubObj &sub_obj = params.sub_objs[i];
+                if (!sub_obj.removed) {
+                    if (Proj.invalidRef(sub_obj.elm_obj_id)) {
+                        PROFILE_STOP("CatzEngine::OpenObjMaterial()")
+                        return true;
+                    }
                 }
             }
         }
-        REPA(params.sub_objs) {
-            C EditObject::SubObj &sub_obj = params.sub_objs[i];
-            if (!sub_obj.removed) {
-                if (Proj.invalidRef(sub_obj.elm_obj_id))
-                    return true;
-            }
-        }
     }
+    PROFILE_STOP("CatzEngine::OpenObjMaterial()")
     return false;
 }
 cchar8 *Obj::variationName() C {
@@ -229,6 +270,7 @@ Vec Obj::center() {
     return pos;
 }
 bool Obj::getBox(Box &box) {
+    PROFILE_START("CatzEngine::Obj::getBox(Box &box)")
     bool have = false;
     if (mesh && mesh->is()) {
         if (!have) {
@@ -244,6 +286,7 @@ bool Obj::getBox(Box &box) {
         } else
             box |= phys->box;
     }
+    PROFILE_STOP("CatzEngine::Obj::getBox(Box &box)")
     return have;
 }
 bool Obj::onGround() {
@@ -483,9 +526,11 @@ void Obj::alignNormal(int axis, flt blend) {
     }
 }
 void Obj::update() {
+    PROFILE_START("CatzEngine::Obj::update()")
     matrix_prev = particles.matrix = drawMatrix();
     if (!particles.update())
         particles.resetFull();
+    PROFILE_STOP("CatzEngine::Obj::update()")
 }
 bool Obj::skipDraw() {
     if (params.access == OBJ_ACCESS_GRASS)                                  // if grass
@@ -495,8 +540,11 @@ bool Obj::skipDraw() {
     return false;
 }
 void Obj::draw() {
-    if (skipDraw())
+    PROFILE_START("CatzEngine::Obj::draw()")
+    if (skipDraw()) {
+        PROFILE_STOP("CatzEngine::Obj::draw()")
         return;
+    }
     Matrix m = drawMatrix();
     if (mesh && Frustum(*mesh, m)) {
         if (WorldEdit.mode() == WorldView::OBJECT) {
@@ -535,10 +583,15 @@ void Obj::draw() {
         }
     } break;
     }
+    PROFILE_STOP("CatzEngine::Obj::draw()")
 }
 void Obj::drawShadow() {
-    if (skipDraw())
+    PROFILE_START("CatzEngine::Obj::drawShadow()")
+
+    if (skipDraw()) {
+        PROFILE_STOP("CatzEngine::Obj::drawShadow()")
         return;
+    }
     if (mesh && CurrentLight.src != this) {
         Matrix m = drawMatrix();
         if (Frustum(*mesh, m)) {
@@ -547,11 +600,13 @@ void Obj::drawShadow() {
             SetVariation();
         }
     }
+    PROFILE_STOP("CatzEngine::Obj::drawShadow()")
 }
 void Obj::drawParticle() {
     particles.draw();
 }
 void Obj::drawSelected() {
+    PROFILE_START("CatzEngine::Obj::drawSelected()")
     Extent ext;
     if (mesh && mesh->is())
         ext = mesh->ext;
@@ -570,8 +625,10 @@ void Obj::drawSelected() {
             D.depthUnlock();
         }
     }
+    PROFILE_STOP("CatzEngine::Obj::drawSelected()")
 }
 void Obj::drawHelper(bool box, bool phys) {
+    PROFILE_START("CatzEngine::Obj::drawHelper(bool box, bool phys)")
     Extent ext;
     if (mesh && mesh->is())
         ext = mesh->ext;
@@ -587,6 +644,7 @@ void Obj::drawHelper(bool box, bool phys) {
         if (phys && T.phys)
             T.phys->draw(col_shape);
     }
+    PROFILE_STOP("CatzEngine::Obj::drawHelper(bool box, bool phys)")
 }
 void Obj::setDraw() {
     switch (edit_type) {
@@ -627,6 +685,7 @@ void Obj::setMeshVariation() {
     mesh_variation = (mesh_proper ? mesh_proper->variationFind(params.mesh_variation_id) : 0);
 }
 void Obj::setMeshPhys() {
+    PROFILE_START("CatzEngine::Obj::setMeshPhys()")
     if (removed) {
         edit_type = EDIT_OBJ_MESH;
         icon = null;
@@ -677,13 +736,13 @@ void Obj::setMeshPhys() {
         T.phys = phys;
         setMeshVariation();
     }
+    PROFILE_STOP("CatzEngine::Obj::setMeshPhys()")
 }
 bool Obj::save(File &f) { return super::save(f, Proj.edit_path); }
 bool Obj::load(File &f) // 'setMeshPhys' doesn't need to be called because it will be called in 'attach->removeChanged'
 {
-    if (super::load(f, Proj.edit_path)) {
+    if (super::load(f, Proj.edit_path)) 
         return true;
-    }
     return false;
 }
 Obj::Obj() : area(null), selected(false), highlighted(false), invalid_refs(false), visible(false), edit_type(EDIT_OBJ_MESH), mesh_variation(0), matrix_prev(0), light_col(1), light_angle(1), light_falloff(0.5f), light_cast_shadows(true) {}

@@ -1,4 +1,3 @@
-// TODO ADD PROFILE_START AND PROFILE_STOP PROFILERS
 /******************************************************************************/
 #include "stdafx.h"
 namespace EE {
@@ -106,16 +105,12 @@ void Chr::updateAnimationAnim() // update all 'Chr::anim' parameters
 
     // optimizations
     {
-        Bool disable;
-
-        // disable fingers animations
-        disable = (animateFingers() == 0);
+        Bool disable = (animateFingers() == 0);
         skel.disable(sac.toe_l, disable);
         skel.disable(sac.toe_r, disable);
         skel.disableChildren(sac.hand_l, disable);
         skel.disableChildren(sac.hand_r, disable);
 
-        // disable facial animations
         disable = (animateFaceBlend() <= 0);
         skel.disableChildren(sac.head, disable);
     }
@@ -125,19 +120,13 @@ void Chr::updateAnimationAnim() // update all 'Chr::anim' parameters
         AdjustValBool(anim.b_turn_l, input.turn.x > 0 && !ctrl.flying(), Time.d() * 15, Time.d() * 4);
         AdjustValBool(anim.b_turn_r, input.turn.x < 0 && !ctrl.flying(), Time.d() * 15, Time.d() * 4);
 
-        if (!anim.b_turn_l)
-            anim.t_turn_l = 0;
-        else
-            anim.t_turn_l += Abs(input_turn.x) * Time.d();
-        if (!anim.b_turn_r)
-            anim.t_turn_r = 0;
-        else
-            anim.t_turn_r += Abs(input_turn.x) * Time.d();
+        anim.t_turn_l = anim.b_turn_l ? anim.t_turn_l + Abs(input_turn.x) * Time.d() : 0;
+        anim.t_turn_r = anim.b_turn_r ? anim.t_turn_r + Abs(input_turn.x) * Time.d() : 0;
     }
 
     // walk <-> run
-    Bool running = false;
-    if (input.move.x || input.move.z || (input.move.y && ctrl.flying())) {
+    Bool running = input.move.x || input.move.z || (input.move.y && ctrl.flying());
+    if (running) {
         running = !(input.walk || input.crouch || ctrl.crouched());
         AdjustValBoolSet(anim.walk_run, running, set, Time.d() * 6);
     }
@@ -150,10 +139,12 @@ void Chr::updateAnimationAnim() // update all 'Chr::anim' parameters
     // strafe
     {
         AdjustValDir(anim.strafe_yaw, input.move.z * input.move.x * !ctrl.flying(), Time.d() * 6);
-        if (input.move.x)
+        if (input.move.x) {
             AdjustValBoolSet(anim.left_right, input.move.x == 1, set, Time.d() * 6);
-        if (input.move.x || input.move.z)
+        }
+        if (input.move.x || input.move.z) {
             AdjustValBoolSet(anim.straight_strafe, !input.move.z && input.move.x, set, Time.d() * 6);
+        }
     }
 
     // stand <-> crouch
@@ -192,12 +183,10 @@ void Chr::updateAnimationAnim() // update all 'Chr::anim' parameters
         }
     }
 
-    if (set)
-        anim.time = 0;
-    else
-        anim.time += dt;
+    anim.time = set ? 0 : anim.time + dt;
     PROFILE_STOP("CatzEngine::Chr::updateAnimationAnim()")
 }
+
 /******************************************************************************/
 static Flt AnimTime(Chr &chr) // get global animation time for the character according to current time and character's 'unique' value
 {

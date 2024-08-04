@@ -37,6 +37,7 @@ struct Particle // Single Particle
     Particle() { Zero(T); }
 };
 /******************************************************************************/
+class ParticleBatch; // Forward declaration
 struct Particles // Set of Particles
 {
     Mems<Particle> p; // particles
@@ -125,6 +126,7 @@ struct Particles // Set of Particles
     // draw
     void draw(Flt opacity = 1); // draw, 'opacity'=custom opacity multiplier, this method should be called only in RM_PALETTE, RM_PALETTE1 and RM_BLEND rendering modes, doesn't use automatic Frustum culling
     void drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized) C;
+    void drawParticleBatch(ParticleBatch &batch);
 
     // io
     Bool save(File &f, Bool include_particles, CChar *path = null) C; // save, does not include  saving dynamic sources, false on fail, 'include_particles'=if include each single particle data in saving (if not, then they will be set randomly when loading), 'path'=path at which resource is located (this is needed so that the sub-resources can be accessed with relative path)
@@ -149,6 +151,27 @@ struct Particles // Set of Particles
     Byte *_src_help;
     Matrix _matrix_prev;
     NO_COPY_CONSTRUCTOR(Particles);
+};
+class ParticleBatch {
+  public:
+    std::vector<Particle> particles;
+    ImagePtr image;
+    bool animate;
+    float opacity;
+    float radius_scale;
+    float offset_time;
+    float offset_time2;
+    bool offset;
+    Randomizer random;
+    Image *render_color_palette;
+    int render_color_palette_w1;
+    int palette_image_w1;
+    float (*func)(Flt);
+    bool initialized;
+
+    ParticleBatch()
+        : animate(false), opacity(1.0f), radius_scale(1.0f), offset_time(0.0f), offset_time2(0.0f), offset(false),
+          render_color_palette(nullptr), render_color_palette_w1(0), palette_image_w1(0), func(nullptr), initialized(false) {}
 };
 /******************************************************************************/
 struct RawParticles // buffered particles

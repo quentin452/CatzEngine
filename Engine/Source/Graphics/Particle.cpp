@@ -559,6 +559,7 @@ Particles &Particles::resetFull() {
 }
 /******************************************************************************/
 Bool Particles::update(Flt dt) {
+    return true;
     PROFILE_START("Particles::update(Flt dt)")
     if (_src_type) {
         // life/death/fade
@@ -742,7 +743,7 @@ void Particles::draw(Flt opacity) {
         return;
     }
 
-    bool initialized = false, offset = (offset_range > EPS);
+    bool offset = (offset_range > EPS);
     float offset_time = Time.time() * offset_speed, offset_time2 = offset_time * 0.7f, radius_scale = radiusScale(), (*func)(Flt s) = GetOpacityFunc(T);
     Randomizer random(UIDZero);
     Image *render_color_palette = nullptr;
@@ -763,20 +764,53 @@ void Particles::draw(Flt opacity) {
 
     bool animate = (image_x_frames > 1 || image_y_frames > 1) && (image_speed > 0);
 
+    // Create a batch for particles
+    ParticleBatch batch;
+    batch.image = image;
+    batch.animate = animate;
+    batch.opacity = opacity;
+    batch.radius_scale = radius_scale;
+    batch.offset_time = offset_time;
+    batch.offset_time2 = offset_time2;
+    batch.offset = offset;
+    batch.random = random;
+    batch.render_color_palette = render_color_palette;
+    batch.render_color_palette_w1 = render_color_palette_w1;
+    batch.palette_image_w1 = palette_image_w1;
+    batch.func = func;
+
+    // Add particles to the batch
     REPA(p) {
         if (T.p[i].life > 0) {
             Vec2 screen_pos;
-            if (PosToScreen(T.p[i].pos, screen_pos)) {
-                drawSingleParticle(T.p[i], animate, opacity, radius_scale, offset_time, offset_time2, offset, random, palette_image, palette_image_w1, render_color_palette, render_color_palette_w1, func, initialized);
-            }
-        } else {
-            p.remove(i);
+            if (PosToScreen(T.p[i].pos, screen_pos)) 
+                batch.particles.push_back(T.p[i]);
         }
     }
 
-    if (initialized)
-        DrawParticleEnd();
+    // Draw the batch
+    if (!batch.particles.empty()) {
+        drawParticleBatch(batch);
+    }
+
     PROFILE_STOP("Particles::draw(Flt opacity)");
+}
+
+void Particles::drawParticleBatch(ParticleBatch &batch) {
+    if (!batch.initialized) {
+        batch.initialized = true;
+        if (batch.animate)
+            DrawAnimatedParticleBegin(*batch.image, glow, motion_affects_alpha, image_x_frames, image_y_frames);
+        else
+            DrawParticleBegin(*batch.image, glow, motion_affects_alpha);
+    }
+
+    for (C auto &p : batch.particles) {
+        drawSingleParticle(p, batch.animate, batch.opacity, batch.radius_scale, batch.offset_time, batch.offset_time2, batch.offset, batch.random, palette_image, batch.palette_image_w1, batch.render_color_palette, batch.render_color_palette_w1, batch.func, batch.initialized);
+    }
+
+    if (batch.initialized)
+        DrawParticleEnd();
 }
 
 /******************************************************************************/

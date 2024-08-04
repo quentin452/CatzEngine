@@ -1611,6 +1611,7 @@ void RendererClass::opaque() {
     PROFILE_START("CatzEngine::RendererClass::opaque()")
     switch (_cur_type) {
     case RT_DEFERRED: {
+        PROFILE_START("CatzEngine::RendererClass::opaque()1")
         D.stencil(STENCIL_ALWAYS_SET, 0);
         D.set3D();
         D.depth(true);
@@ -1625,9 +1626,12 @@ void RendererClass::opaque() {
         D.set2D();
 
         resolveDepth();
+        PROFILE_STOP("CatzEngine::RendererClass::opaque()1")
     } break;
 
     case RT_FORWARD: {
+        PROFILE_START("CatzEngine::RendererClass::opaque()2")
+        PROFILE_START("CatzEngine::RendererClass::opaque()3")
         // find initial light
         Int first_light = -1;
         if (Lights.elms() && (D.aoAll() || !hasAO())) // if we do "AO && !aoAll" then first we need to draw without lights (ambient only)
@@ -1655,7 +1659,8 @@ void RendererClass::opaque() {
                 } // find light with smallest cost
             }
         }
-
+        PROFILE_STOP("CatzEngine::RendererClass::opaque()3")
+        PROFILE_START("CatzEngine::RendererClass::opaque()4")
         // draw main light
         ALPHA_MODE alpha = ALPHA_NONE; // #RTOutput
         if (first_light >= 0) {
@@ -1680,7 +1685,8 @@ void RendererClass::opaque() {
 
             resolveDepth();
         }
-
+        PROFILE_STOP("CatzEngine::RendererClass::opaque()4")
+        PROFILE_START("CatzEngine::RendererClass::opaque()5")
         // apply ambient occlusion
         if (!D.aoAll())
             aoApply();
@@ -1714,6 +1720,8 @@ void RendererClass::opaque() {
 
         Frustum = FrustumMain; // restore frustum after it being potentially changed when drawing shadow maps or setting frustum for visible objects for lights
                                // resolveDepth(); was already called for the main light
+        PROFILE_STOP("CatzEngine::RendererClass::opaque()5")
+        PROFILE_STOP("CatzEngine::RendererClass::opaque()2")
     } break;
     }
 #if DEPTH_FLUSH

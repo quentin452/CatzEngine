@@ -23,6 +23,7 @@ void FrustumClass::setExtraBall(C BallM &ball) {
 }
 /******************************************************************************/
 void FrustumClass::set(Flt range, C Vec2 &fov, C MatrixM &camera) {
+    PROFILE_START("CatzEngine::FrustumClass::set(Flt range, C Vec2 &fov, C MatrixM &camera)")
     T.range = range;
     T.matrix = camera;
 
@@ -186,6 +187,7 @@ void FrustumClass::set(Flt range, C Vec2 &fov, C MatrixM &camera) {
         points = 8;
         edges = 12;
     }
+    PROFILE_STOP("CatzEngine::FrustumClass::set(Flt range, C Vec2 &fov, C MatrixM &camera)")
 }
 void FrustumClass::set() {
     set(D._view_active.range, D._view_active.fov, CamMatrix);
@@ -193,6 +195,7 @@ void FrustumClass::set() {
 }
 /******************************************************************************/
 void FrustumClass::from(C BoxD &box) {
+    PROFILE_START("CatzEngine::FrustumClass::from(C BoxD &box)")
     // set planes
     plane[DIR_RIGHT].normal.set(1, 0, 0);
     plane[DIR_RIGHT].pos.set(box.max.x, 0, 0); // right
@@ -248,10 +251,12 @@ void FrustumClass::from(C BoxD &box) {
     }
     points = 8;
     edges = 12;
+    PROFILE_STOP("CatzEngine::FrustumClass::from(C BoxD &box)")
 }
 /******************************************************************************/
 void FrustumClass::from(C PyramidM &pyramid) // used for cone lights
 {
+    PROFILE_START("CatzEngine::FrustumClass::from(C PyramidM &pyramid)")
     // set planes
     Vec2 d(pyramid.scale, 1);
     d.normalize();
@@ -320,225 +325,129 @@ void FrustumClass::from(C PyramidM &pyramid) // used for cone lights
     }
     points = 5;
     edges = 8;
+    PROFILE_STOP("CatzEngine::FrustumClass::from(C PyramidM &pyramid)")
 }
 /******************************************************************************/
 Dbl FrustumClass::volume() C // !! Warning: this ignores 'extra' !!
 {
+    PROFILE_START("CatzEngine::FrustumClass::volume()")
     if (persp) {
+        PROFILE_STOP("CatzEngine::FrustumClass::volume()")
         return (fov_tan.x * fov_tan.y * (4.0f / 3)) * Cube(Dbl(range));
     } else {
+        PROFILE_STOP("CatzEngine::FrustumClass::volume()")
         return Dbl(size.x * 8) * size.y * size.z; // 2*2*2
     }
+    PROFILE_STOP("CatzEngine::FrustumClass::volume()")
 }
 /******************************************************************************/
+Bool FrustumClass::isInsideFrustum(C Vec &pos, Flt radius) C {
+    PROFILE_START("CatzEngine::FrustumClass::isInsideFrustum(C Vec &pos, Flt radius = 0)")
+    Bool inside = true;
+    if (persp) {
+        Flt z = Dot(pos, matrix.z);
+        if (z < -radius || z > range + radius) {
+            inside = false;
+        } else {
+            MAX(z, 0);
+            Flt x = Dot(pos, matrix.x), bx = fov_tan.x * z + radius * fov_cos_inv.x + eye_dist_2;
+            if (Abs(x) > bx) {
+                inside = false;
+            } else {
+                Flt y = Dot(pos, matrix.y), by = fov_tan.y * z + radius * fov_cos_inv.y;
+                if (Abs(y) > by) {
+                    inside = false;
+                } else if (extra) {
+                    if (extraPlane() && Dist(pos + matrix.pos, extra_plane) > radius)
+                        inside = false;
+                    else if (extraBall() && Dist2(pos + matrix.pos, extra_ball.pos) > extra_ball_r2 + radius * radius)
+                        inside = false;
+                }
+            }
+        }
+    } else {
+        Flt y = Dot(pos, matrix.y), by = size.y + radius;
+        if (Abs(y) > by) {
+            inside = false;
+        } else {
+            Flt x = Dot(pos, matrix.x), bx = size.x + radius;
+            if (Abs(x) > bx) {
+                inside = false;
+            } else {
+                Flt z = Dot(pos, matrix.z), bz = size.z + radius;
+                if (Abs(z) > bz)
+                    inside = false;
+            }
+        }
+    }
+    PROFILE_STOP("CatzEngine::FrustumClass::isInsideFrustum(C Vec &pos, Flt radius = 0)")
+    return inside;
+}
+
 Bool FrustumClass::operator()(C Vec &point) C {
-    Vec pos = point - matrix.pos; // no need for 'VecD'
-    if (persp) {
-        Flt z = Dot(pos, matrix.z);
-        if (z < 0 || z > range)
-            return false;
-        Flt x = Dot(pos, matrix.x), bx = fov_tan.x * z + eye_dist_2;
-        if (Abs(x) > bx)
-            return false;
-        Flt y = Dot(pos, matrix.y), by = fov_tan.y * z;
-        if (Abs(y) > by)
-            return false;
-
-        if (extra) {
-            if (extraPlane() && Dist(point, extra_plane) > 0)
-                return false;
-            if (extraBall() && Dist2(point, extra_ball.pos) > extra_ball_r2)
-                return false;
-        }
-    } else {
-        Flt y = Dot(pos, matrix.y), by = size.y;
-        if (Abs(y) > by)
-            return false;
-        Flt x = Dot(pos, matrix.x), bx = size.x;
-        if (Abs(x) > bx)
-            return false;
-        Flt z = Dot(pos, matrix.z), bz = size.z;
-        if (Abs(z) > bz)
-            return false;
-    }
-    return true;
+    return isInsideFrustum(point - matrix.pos);
 }
+
 Bool FrustumClass::operator()(C VecD &point) C {
-    Vec pos = point - matrix.pos; // no need for 'VecD'
-    if (persp) {
-        Flt z = Dot(pos, matrix.z);
-        if (z < 0 || z > range)
-            return false;
-        Flt x = Dot(pos, matrix.x), bx = fov_tan.x * z + eye_dist_2;
-        if (Abs(x) > bx)
-            return false;
-        Flt y = Dot(pos, matrix.y), by = fov_tan.y * z;
-        if (Abs(y) > by)
-            return false;
-
-        if (extra) {
-            if (extraPlane() && Dist(point, extra_plane) > 0)
-                return false;
-            if (extraBall() && Dist2(point, extra_ball.pos) > extra_ball_r2)
-                return false;
-        }
-    } else {
-        Flt y = Dot(pos, matrix.y), by = size.y;
-        if (Abs(y) > by)
-            return false;
-        Flt x = Dot(pos, matrix.x), bx = size.x;
-        if (Abs(x) > bx)
-            return false;
-        Flt z = Dot(pos, matrix.z), bz = size.z;
-        if (Abs(z) > bz)
-            return false;
-    }
-    return true;
+    return isInsideFrustum(point - matrix.pos);
 }
-/******************************************************************************/
+
 Bool FrustumClass::operator()(C Ball &ball) C {
-    Vec pos = ball.pos - matrix.pos; // no need for 'VecD'
-    if (persp) {
-        Flt z = Dot(pos, matrix.z);
-        if (z < -ball.r || z > range + ball.r)
-            return false;
-        MAX(z, 0);
-        Flt x = Dot(pos, matrix.x), bx = fov_tan.x * z + ball.r * fov_cos_inv.x + eye_dist_2;
-        if (Abs(x) > bx)
-            return false;
-        Flt y = Dot(pos, matrix.y), by = fov_tan.y * z + ball.r * fov_cos_inv.y;
-        if (Abs(y) > by)
-            return false;
-
-        if (extra) {
-            if (extraPlane() && Dist(ball, extra_plane) > 0)
-                return false;
-            if (extraBall() && !Cuts(ball, extra_ball))
-                return false;
-        }
-    } else {
-        Flt y = Dot(pos, matrix.y), by = size.y + ball.r;
-        if (Abs(y) > by)
-            return false;
-        Flt x = Dot(pos, matrix.x), bx = size.x + ball.r;
-        if (Abs(x) > bx)
-            return false;
-        Flt z = Dot(pos, matrix.z), bz = size.z + ball.r;
-        if (Abs(z) > bz)
-            return false;
-    }
-    return true;
+    return isInsideFrustum(ball.pos - matrix.pos, ball.r);
 }
+
 Bool FrustumClass::operator()(C BallM &ball) C {
-    Vec pos = ball.pos - matrix.pos; // no need for 'VecD'
+    return isInsideFrustum(ball.pos - matrix.pos, ball.r);
+}
+
+template <typename Z>
+Bool FrustumClass::isCapsuleInsideFrustum(C Z &capsule) C {
+    PROFILE_START("CatzEngine::FrustumClass::isCapsuleInsideFrustum(C T &capsule)")
+    Vec up = capsule.pos - matrix.pos, down = up;
+    Vec d = capsule.up * capsule.innerHeightHalf();
+    up += d;
+    down -= d;
+    Bool is = true;
     if (persp) {
-        Flt z = Dot(pos, matrix.z);
-        if (z < -ball.r || z > range + ball.r)
-            return false;
-        MAX(z, 0);
-        Flt x = Dot(pos, matrix.x), bx = fov_tan.x * z + ball.r * fov_cos_inv.x + eye_dist_2;
-        if (Abs(x) > bx)
-            return false;
-        Flt y = Dot(pos, matrix.y), by = fov_tan.y * z + ball.r * fov_cos_inv.y;
-        if (Abs(y) > by)
-            return false;
+        Flt zu = Dot(up, matrix.z), zd = Dot(down, matrix.z);
+        if ((zu < -capsule.r && zd < -capsule.r) || (zu > range + capsule.r && zd > range + capsule.r))
+            is = false;
+        MAX(zu, 0);
+        MAX(zd, 0);
+        Flt xu = Dot(up, matrix.x), xd = Dot(down, matrix.x), bx = capsule.r * fov_cos_inv.x + eye_dist_2;
+        if (Abs(xu) > bx + fov_tan.x * zu && Abs(xd) > bx + fov_tan.x * zd)
+            is = false;
+        Flt yu = Dot(up, matrix.y), yd = Dot(down, matrix.y), by = capsule.r * fov_cos_inv.y;
+        if (Abs(yu) > by + fov_tan.y * zu && Abs(yd) > by + fov_tan.y * zd)
+            is = false;
 
         if (extra) {
-            if (extraPlane() && Dist(ball, extra_plane) > 0)
-                return false;
-            if (extraBall() && !Cuts(ball, extra_ball))
-                return false;
+            if (extraPlane() && Dist(capsule, extra_plane) > 0)
+                is = false;
+            if (extraBall() && !Cuts(extra_ball, capsule))
+                is = false;
         }
     } else {
-        Flt y = Dot(pos, matrix.y), by = size.y + ball.r;
-        if (Abs(y) > by)
-            return false;
-        Flt x = Dot(pos, matrix.x), bx = size.x + ball.r;
-        if (Abs(x) > bx)
-            return false;
-        Flt z = Dot(pos, matrix.z), bz = size.z + ball.r;
-        if (Abs(z) > bz)
-            return false;
+        Flt yu = Dot(up, matrix.y), yd = Dot(down, matrix.y), by = size.y + capsule.r;
+        if (Abs(yu) > by && Abs(yd) > by)
+            is = false;
+        Flt xu = Dot(up, matrix.x), xd = Dot(down, matrix.x), bx = size.x + capsule.r;
+        if (Abs(xu) > bx && Abs(xd) > bx)
+            is = false;
+        Flt zu = Dot(up, matrix.z), zd = Dot(down, matrix.z), bz = size.z + capsule.r;
+        if (Abs(zu) > bz && Abs(zd) > bz)
+            is = false;
     }
-    return true;
+    PROFILE_STOP("CatzEngine::FrustumClass::isCapsuleInsideFrustum(C T &capsule)")
+    return is;
 }
+
 Bool FrustumClass::operator()(C Capsule &capsule) C {
-    // if(capsule.isBall())return T(Ball(capsule)); // TODO: this is slower but more precise
-    Vec up = capsule.pos - matrix.pos, // no need for 'VecD'
-        down = up,
-        d = capsule.up * capsule.innerHeightHalf();
-    up += d;
-    down -= d;
-    if (persp) {
-        Flt zu = Dot(up, matrix.z), zd = Dot(down, matrix.z);
-        if ((zu < -capsule.r && zd < -capsule.r) || (zu > range + capsule.r && zd > range + capsule.r))
-            return false;
-        MAX(zu, 0);
-        MAX(zd, 0);
-        Flt xu = Dot(up, matrix.x), xd = Dot(down, matrix.x), bx = capsule.r * fov_cos_inv.x + eye_dist_2;
-        if (Abs(xu) > bx + fov_tan.x * zu && Abs(xd) > bx + fov_tan.x * zd)
-            return false;
-        Flt yu = Dot(up, matrix.y), yd = Dot(down, matrix.y), by = capsule.r * fov_cos_inv.y;
-        if (Abs(yu) > by + fov_tan.y * zu && Abs(yd) > by + fov_tan.y * zd)
-            return false;
-
-        if (extra) {
-            if (extraPlane() && Dist(capsule, extra_plane) > 0)
-                return false;
-            if (extraBall() && !Cuts(extra_ball, capsule))
-                return false;
-        }
-    } else {
-        Flt yu = Dot(up, matrix.y), yd = Dot(down, matrix.y), by = size.y + capsule.r;
-        if (Abs(yu) > by && Abs(yd) > by)
-            return false;
-        Flt xu = Dot(up, matrix.x), xd = Dot(down, matrix.x), bx = size.x + capsule.r;
-        if (Abs(xu) > bx && Abs(xd) > bx)
-            return false;
-        Flt zu = Dot(up, matrix.z), zd = Dot(down, matrix.z), bz = size.z + capsule.r;
-        if (Abs(zu) > bz && Abs(zd) > bz)
-            return false;
-    }
-    return true;
+    return isCapsuleInsideFrustum(capsule);
 }
-Bool FrustumClass::operator()(C CapsuleM &capsule) C {
-    // if(capsule.isBall())return T(BallM(capsule)); // TODO: this is slower but more precise
-    Vec up = capsule.pos - matrix.pos, // no need for 'VecD'
-        down = up,
-        d = capsule.up * capsule.innerHeightHalf();
-    up += d;
-    down -= d;
-    if (persp) {
-        Flt zu = Dot(up, matrix.z), zd = Dot(down, matrix.z);
-        if ((zu < -capsule.r && zd < -capsule.r) || (zu > range + capsule.r && zd > range + capsule.r))
-            return false;
-        MAX(zu, 0);
-        MAX(zd, 0);
-        Flt xu = Dot(up, matrix.x), xd = Dot(down, matrix.x), bx = capsule.r * fov_cos_inv.x + eye_dist_2;
-        if (Abs(xu) > bx + fov_tan.x * zu && Abs(xd) > bx + fov_tan.x * zd)
-            return false;
-        Flt yu = Dot(up, matrix.y), yd = Dot(down, matrix.y), by = capsule.r * fov_cos_inv.y;
-        if (Abs(yu) > by + fov_tan.y * zu && Abs(yd) > by + fov_tan.y * zd)
-            return false;
 
-        if (extra) {
-            if (extraPlane() && Dist(capsule, extra_plane) > 0)
-                return false;
-            if (extraBall() && !Cuts(extra_ball, capsule))
-                return false;
-        }
-    } else {
-        Flt yu = Dot(up, matrix.y), yd = Dot(down, matrix.y), by = size.y + capsule.r;
-        if (Abs(yu) > by && Abs(yd) > by)
-            return false;
-        Flt xu = Dot(up, matrix.x), xd = Dot(down, matrix.x), bx = size.x + capsule.r;
-        if (Abs(xu) > bx && Abs(xd) > bx)
-            return false;
-        Flt zu = Dot(up, matrix.z), zd = Dot(down, matrix.z), bz = size.z + capsule.r;
-        if (Abs(zu) > bz && Abs(zd) > bz)
-            return false;
-    }
-    return true;
+Bool FrustumClass::operator()(C CapsuleM &capsule) C {
+    return isCapsuleInsideFrustum(capsule);
 }
 /******************************************************************************/
 INLINE Flt BoxLength(C Vec &size, C Vec &dir) // box length along direction
@@ -554,30 +463,32 @@ INLINE Flt OBoxLength(C Vec &x, C Vec &y, C Vec &z, C Vec &dir) // obox length a
     return Abs(Dot(x, dir)) + Abs(Dot(y, dir)) + Abs(Dot(z, dir));
 }
 Bool FrustumClass::operator()(C Extent &ext) C {
+    PROFILE_START("CatzEngine::FrustumClass::operator()(C Extent &ext)")
     Vec pos = ext.pos - matrix.pos; // no need for 'VecD'
+    bool is = true;
     if (persp) {
         Flt z = Dot(pos, matrix.z);
         if (z < 0 || z > range) {
             Flt bz = BoxLengthAbs(ext.ext, plane_n_abs[DIR_FORWARD]);
             if (z < -bz || z > range + bz)
-                return false; // fb
+                is = false; // fb
             MAX(z, 0);
         }
 
         Flt x = Dot(pos, matrix.x), bx = fov_tan.x * z + eye_dist_2;
         if (Abs(x) > bx) {
             if (x > bx + BoxLengthAbs(ext.ext, plane_n_abs[DIR_RIGHT]) * fov_cos_inv.x)
-                return false; // r
+                is = false; // r
             if (x < -bx - BoxLengthAbs(ext.ext, plane_n_abs[DIR_LEFT]) * fov_cos_inv.x)
-                return false; // l
+                is = false; // l
         }
 
         Flt y = Dot(pos, matrix.y), by = fov_tan.y * z;
         if (Abs(y) > by) {
             if (y > by + BoxLengthAbs(ext.ext, plane_n_abs[DIR_UP]) * fov_cos_inv.y)
-                return false; // u
+                is = false; // u
             if (y < -by - BoxLengthAbs(ext.ext, plane_n_abs[DIR_DOWN]) * fov_cos_inv.y)
-                return false; // d
+                is = false; // d
         }
 
         if (extra) {
@@ -585,28 +496,31 @@ Bool FrustumClass::operator()(C Extent &ext) C {
                 Flt e = Dist(pos + matrix.pos, extra_plane);
                 if (e > 0)
                     if (e > BoxLengthAbs(ext.ext, extra_plane_n_abs))
-                        return false; // do a fast "e>0" check first to avoid calculating 'BoxLengthAbs' when unnecessary
+                        is = false; // do a fast "e>0" check first to avoid calculating 'BoxLengthAbs' when unnecessary
             }
             if (extraBall() && Dist2(extra_ball.pos, ext) > extra_ball_r2)
-                return false;
+                is = false;
         }
     } else {
         Flt x = Abs(Dot(pos, matrix.x)), bx = T.size.x;
         if (x > bx)
             if (x > bx + BoxLengthAbs(ext.ext, plane_n_abs[DIR_RIGHT]))
-                return false; // rl
+                is = false; // rl
         Flt y = Abs(Dot(pos, matrix.y)), by = T.size.y;
         if (y > by)
             if (y > by + BoxLengthAbs(ext.ext, plane_n_abs[DIR_UP]))
-                return false; // ud
+                is = false; // ud
         Flt z = Abs(Dot(pos, matrix.z)), bz = T.size.z;
         if (z > bz)
             if (z > bz + BoxLengthAbs(ext.ext, plane_n_abs[DIR_FORWARD]))
-                return false; // fb
+                is = false; // fb
     }
-    return true;
+    PROFILE_STOP("CatzEngine::FrustumClass::operator()(C Extent &ext)")
+    return is;
 }
 Bool FrustumClass::operator()(C Extent &ext, C Matrix3 &matrix) C {
+    PROFILE_START("CatzEngine::FrustumClass::operator()(C Extent &ext, C Matrix3 &matrix)")
+    Bool is = true;
     Vec dx = ext.ext.x * matrix.x,
         dy = ext.ext.y * matrix.y,
         dz = ext.ext.z * matrix.z,
@@ -623,24 +537,24 @@ Bool FrustumClass::operator()(C Extent &ext, C Matrix3 &matrix) C {
         if (z < 0 || z > range) {
             Flt bz = OBoxLength(dx, dy, dz, plane[DIR_FORWARD].normal);
             if (z < -bz || z > range + bz)
-                return false; // fb
+                is = false; // fb
             MAX(z, 0);
         }
 
         Flt x = Dot(pos, T.matrix.x), bx = fov_tan.x * z + eye_dist_2;
         if (Abs(x) > bx) {
             if (x > bx + OBoxLength(dx, dy, dz, plane[DIR_RIGHT].normal) * fov_cos_inv.x)
-                return false; // r
+                is = false; // r
             if (x < -bx - OBoxLength(dx, dy, dz, plane[DIR_LEFT].normal) * fov_cos_inv.x)
-                return false; // l
+                is = false; // l
         }
 
         Flt y = Dot(pos, T.matrix.y), by = fov_tan.y * z;
         if (Abs(y) > by) {
             if (y > by + OBoxLength(dx, dy, dz, plane[DIR_UP].normal) * fov_cos_inv.y)
-                return false; // u
+                is = false; // u
             if (y < -by - OBoxLength(dx, dy, dz, plane[DIR_DOWN].normal) * fov_cos_inv.y)
-                return false; // d
+                is = false; // d
         }
 
         if (extra) {
@@ -648,28 +562,31 @@ Bool FrustumClass::operator()(C Extent &ext, C Matrix3 &matrix) C {
                 Flt e = Dist(pos + T.matrix.pos, extra_plane);
                 if (e > 0)
                     if (e > OBoxLength(dx, dy, dz, extra_plane.normal))
-                        return false; // do a fast "e>0" check first to avoid calculating 'OBoxLengthAbs' when unnecessary
+                        is = false; // do a fast "e>0" check first to avoid calculating 'OBoxLengthAbs' when unnecessary
             }
             if (extraBall() && Dist2(extra_ball.pos, ext, matrix) > extra_ball_r2)
-                return false;
+                is = false;
         }
     } else {
         Flt x = Abs(Dot(pos, T.matrix.x)), bx = T.size.x;
         if (x > bx)
             if (x > bx + OBoxLength(dx, dy, dz, plane[DIR_RIGHT].normal))
-                return false; // rl
+                is = false; // rl
         Flt y = Abs(Dot(pos, T.matrix.y)), by = T.size.y;
         if (y > by)
             if (y > by + OBoxLength(dx, dy, dz, plane[DIR_UP].normal))
-                return false; // ud
+                is = false; // ud
         Flt z = Abs(Dot(pos, T.matrix.z)), bz = T.size.z;
         if (z > bz)
             if (z > bz + OBoxLength(dx, dy, dz, plane[DIR_FORWARD].normal))
-                return false; // fb
+                is = false; // fb
     }
+    PROFILE_STOP("CatzEngine::FrustumClass::operator()(C Extent &ext, C Matrix3 &matrix)")
     return true;
 }
 Bool FrustumClass::operator()(C Extent &ext, C Matrix &matrix) C {
+    PROFILE_START("CatzEngine::FrustumClass::operator()(C Extent &ext, C Matrix &matrix)")
+    Bool is = true;
     Vec dx = ext.ext.x * matrix.x,
         dy = ext.ext.y * matrix.y,
         dz = ext.ext.z * matrix.z,
@@ -686,24 +603,24 @@ Bool FrustumClass::operator()(C Extent &ext, C Matrix &matrix) C {
         if (z < 0 || z > range) {
             Flt bz = OBoxLength(dx, dy, dz, plane[DIR_FORWARD].normal);
             if (z < -bz || z > range + bz)
-                return false; // fb
+                is = false; // fb
             MAX(z, 0);
         }
 
         Flt x = Dot(pos, T.matrix.x), bx = fov_tan.x * z + eye_dist_2;
         if (Abs(x) > bx) {
             if (x > bx + OBoxLength(dx, dy, dz, plane[DIR_RIGHT].normal) * fov_cos_inv.x)
-                return false; // r
+                is = false; // r
             if (x < -bx - OBoxLength(dx, dy, dz, plane[DIR_LEFT].normal) * fov_cos_inv.x)
-                return false; // l
+                is = false; // l
         }
 
         Flt y = Dot(pos, T.matrix.y), by = fov_tan.y * z;
         if (Abs(y) > by) {
             if (y > by + OBoxLength(dx, dy, dz, plane[DIR_UP].normal) * fov_cos_inv.y)
-                return false; // u
+                is = false; // u
             if (y < -by - OBoxLength(dx, dy, dz, plane[DIR_DOWN].normal) * fov_cos_inv.y)
-                return false; // d
+                is = false; // d
         }
 
         if (extra) {
@@ -711,28 +628,31 @@ Bool FrustumClass::operator()(C Extent &ext, C Matrix &matrix) C {
                 Flt e = Dist(pos + T.matrix.pos, extra_plane);
                 if (e > 0)
                     if (e > OBoxLength(dx, dy, dz, extra_plane.normal))
-                        return false; // do a fast "e>0" check first to avoid calculating 'OBoxLengthAbs' when unnecessary
+                        is = false; // do a fast "e>0" check first to avoid calculating 'OBoxLengthAbs' when unnecessary
             }
             if (extraBall() && Dist2(extra_ball.pos, ext, matrix) > extra_ball_r2)
-                return false;
+                is = false;
         }
     } else {
         Flt x = Abs(Dot(pos, T.matrix.x)), bx = T.size.x;
         if (x > bx)
             if (x > bx + OBoxLength(dx, dy, dz, plane[DIR_RIGHT].normal))
-                return false; // rl
+                is = false; // rl
         Flt y = Abs(Dot(pos, T.matrix.y)), by = T.size.y;
         if (y > by)
             if (y > by + OBoxLength(dx, dy, dz, plane[DIR_UP].normal))
-                return false; // ud
+                is = false; // ud
         Flt z = Abs(Dot(pos, T.matrix.z)), bz = T.size.z;
         if (z > bz)
             if (z > bz + OBoxLength(dx, dy, dz, plane[DIR_FORWARD].normal))
-                return false; // fb
+                is = false; // fb
     }
-    return true;
+    PROFILE_STOP("CatzEngine::FrustumClass::operator()(C Extent &ext, C Matrix &matrix)")
+    return is;
 }
 Bool FrustumClass::operator()(C Extent &ext, C MatrixM &matrix) C {
+    PROFILE_START("CatzEngine::FrustumClass::operator()(C Extent &ext, C MatrixM &matrix)")
+    Bool is = true;
     Vec dx = ext.ext.x * matrix.x,
         dy = ext.ext.y * matrix.y,
         dz = ext.ext.z * matrix.z,
@@ -743,24 +663,24 @@ Bool FrustumClass::operator()(C Extent &ext, C MatrixM &matrix) C {
         if (z < 0 || z > range) {
             Flt bz = OBoxLength(dx, dy, dz, plane[DIR_FORWARD].normal);
             if (z < -bz || z > range + bz)
-                return false; // fb
+                is = false; // fb
             MAX(z, 0);
         }
 
         Flt x = Dot(pos, T.matrix.x), bx = fov_tan.x * z + eye_dist_2;
         if (Abs(x) > bx) {
             if (x > bx + OBoxLength(dx, dy, dz, plane[DIR_RIGHT].normal) * fov_cos_inv.x)
-                return false; // r
+                is = false; // r
             if (x < -bx - OBoxLength(dx, dy, dz, plane[DIR_LEFT].normal) * fov_cos_inv.x)
-                return false; // l
+                is = false; // l
         }
 
         Flt y = Dot(pos, T.matrix.y), by = fov_tan.y * z;
         if (Abs(y) > by) {
             if (y > by + OBoxLength(dx, dy, dz, plane[DIR_UP].normal) * fov_cos_inv.y)
-                return false; // u
+                is = false; // u
             if (y < -by - OBoxLength(dx, dy, dz, plane[DIR_DOWN].normal) * fov_cos_inv.y)
-                return false; // d
+                is = false; // d
         }
 
         if (extra) {
@@ -768,30 +688,32 @@ Bool FrustumClass::operator()(C Extent &ext, C MatrixM &matrix) C {
                 Flt e = Dist(pos + T.matrix.pos, extra_plane);
                 if (e > 0)
                     if (e > OBoxLength(dx, dy, dz, extra_plane.normal))
-                        return false; // do a fast "e>0" check first to avoid calculating 'OBoxLengthAbs' when unnecessary
+                        is = false; // do a fast "e>0" check first to avoid calculating 'OBoxLengthAbs' when unnecessary
             }
             if (extraBall() && Dist2(extra_ball.pos, ext, matrix) > extra_ball_r2)
-                return false;
+                is = false;
         }
     } else {
         Flt x = Abs(Dot(pos, T.matrix.x)), bx = T.size.x;
         if (x > bx)
             if (x > bx + OBoxLength(dx, dy, dz, plane[DIR_RIGHT].normal))
-                return false; // rl
+                is = false; // rl
         Flt y = Abs(Dot(pos, T.matrix.y)), by = T.size.y;
         if (y > by)
             if (y > by + OBoxLength(dx, dy, dz, plane[DIR_UP].normal))
-                return false; // ud
+                is = false; // ud
         Flt z = Abs(Dot(pos, T.matrix.z)), bz = T.size.z;
         if (z > bz)
             if (z > bz + OBoxLength(dx, dy, dz, plane[DIR_FORWARD].normal))
-                return false; // fb
+                is = false; // fb
     }
-    return true;
+    PROFILE_STOP("CatzEngine::FrustumClass::operator()(C Extent &ext, C MatrixM &matrix)")
+    return is;
 }
 /******************************************************************************/
 Bool FrustumClass::operator()(C Extent &ext, Bool &fully_inside) C {
-    fully_inside = true;
+    PROFILE_START("CatzEngine::FrustumClass::operator()(C Extent &ext, Bool &fully_inside)")
+    Bool is = fully_inside = true;
 
     Vec pos = ext.pos - T.matrix.pos; // no need for 'VecD'
     if (persp) {
@@ -801,12 +723,12 @@ Bool FrustumClass::operator()(C Extent &ext, Bool &fully_inside) C {
             Flt bz = BoxLengthAbs(ext.ext, plane_n_abs[DIR_FORWARD]);
             if (z < bz) {
                 if (z < -bz)
-                    return false;
+                    is = false;
                 fully_inside = false;
             } // b
             if (z > range - bz) {
                 if (z > range + bz)
-                    return false;
+                    is = false;
                 fully_inside = false;
             } // f
             MAX(z, 0);
@@ -818,13 +740,13 @@ Bool FrustumClass::operator()(C Extent &ext, Bool &fully_inside) C {
             Flt bxr = BoxLengthAbs(ext.ext, plane_n_abs[DIR_RIGHT]) * fov_cos_inv.x;
             if (x > bx - bxr) {
                 if (x > bx + bxr)
-                    return false;
+                    is = false;
                 fully_inside = false;
             } // r
             Flt bxl = BoxLengthAbs(ext.ext, plane_n_abs[DIR_LEFT]) * fov_cos_inv.x;
             if (x < -bx + bxl) {
                 if (x < -bx - bxl)
-                    return false;
+                    is = false;
                 fully_inside = false;
             } // l
         }
@@ -835,13 +757,13 @@ Bool FrustumClass::operator()(C Extent &ext, Bool &fully_inside) C {
             Flt bxu = BoxLengthAbs(ext.ext, plane_n_abs[DIR_UP]) * fov_cos_inv.y;
             if (y > by - bxu) {
                 if (y > by + bxu)
-                    return false;
+                    is = false;
                 fully_inside = false;
             } // u
             Flt bxd = BoxLengthAbs(ext.ext, plane_n_abs[DIR_DOWN]) * fov_cos_inv.y;
             if (y < -by + bxd) {
                 if (y < -by - bxd)
-                    return false;
+                    is = false;
                 fully_inside = false;
             } // d
         }
@@ -851,7 +773,7 @@ Bool FrustumClass::operator()(C Extent &ext, Bool &fully_inside) C {
                 Flt e = Dist(pos + T.matrix.pos, extra_plane), be = BoxLengthAbs(ext.ext, extra_plane_n_abs);
                 if (e > -be) {
                     if (e > be)
-                        return false;
+                        is = false;
                     fully_inside = false;
                 }
             }
@@ -862,7 +784,7 @@ Bool FrustumClass::operator()(C Extent &ext, Bool &fully_inside) C {
                 if (Dist2(Max(0, d.x - ext.ext.x),
                           Max(0, d.y - ext.ext.y),
                           Max(0, d.z - ext.ext.z)) > extra_ball_r2)
-                    return false; // check minimum distance, if overlapping
+                    is = false; // check minimum distance, if overlapping
 
                 if (Dist2(d.x + ext.ext.x,
                           d.y + ext.ext.y,
@@ -874,25 +796,28 @@ Bool FrustumClass::operator()(C Extent &ext, Bool &fully_inside) C {
         Flt x = Abs(Dot(pos, T.matrix.x)) - T.size.x, bx = BoxLengthAbs(ext.ext, plane_n_abs[DIR_RIGHT]);
         if (x > -bx) {
             if (x > bx)
-                return false;
+                is = false;
             fully_inside = false;
         } // rl
         Flt y = Abs(Dot(pos, T.matrix.y)) - T.size.y, by = BoxLengthAbs(ext.ext, plane_n_abs[DIR_UP]);
         if (y > -by) {
             if (y > by)
-                return false;
+                is = false;
             fully_inside = false;
         } // ud
         Flt z = Abs(Dot(pos, T.matrix.z)) - T.size.z, bz = BoxLengthAbs(ext.ext, plane_n_abs[DIR_FORWARD]);
         if (z > -bz) {
             if (z > bz)
-                return false;
+                is = false;
             fully_inside = false;
         } // fb
     }
-    return true;
+    PROFILE_STOP("CatzEngine::FrustumClass::operator()(C Extent &ext, Bool &fully_inside)")
+    return is;
 }
 Bool FrustumClass::operator()(C Extent &ext, C Matrix3 &matrix, Bool &fully_inside) C {
+    PROFILE_START("CatzEngine::FrustumClass::operator()(C Extent &ext, C Matrix3 &matrix, Bool &fully_inside)")
+    bool is = true;
     fully_inside = true;
 
     Vec dx = ext.ext.x * matrix.x,
@@ -913,12 +838,12 @@ Bool FrustumClass::operator()(C Extent &ext, C Matrix3 &matrix, Bool &fully_insi
             Flt bz = OBoxLength(dx, dy, dz, plane[DIR_FORWARD].normal);
             if (z < bz) {
                 if (z < -bz)
-                    return false;
+                    is = false;
                 fully_inside = false;
             } // b
             if (z > range - bz) {
                 if (z > range + bz)
-                    return false;
+                    is = false;
                 fully_inside = false;
             } // f
             MAX(z, 0);
@@ -930,13 +855,13 @@ Bool FrustumClass::operator()(C Extent &ext, C Matrix3 &matrix, Bool &fully_insi
             Flt bxr = OBoxLength(dx, dy, dz, plane[DIR_RIGHT].normal) * fov_cos_inv.x;
             if (x > bx - bxr) {
                 if (x > bx + bxr)
-                    return false;
+                    is = false;
                 fully_inside = false;
             } // r
             Flt bxl = OBoxLength(dx, dy, dz, plane[DIR_LEFT].normal) * fov_cos_inv.x;
             if (x < -bx + bxl) {
                 if (x < -bx - bxl)
-                    return false;
+                    is = false;
                 fully_inside = false;
             } // l
         }
@@ -947,13 +872,13 @@ Bool FrustumClass::operator()(C Extent &ext, C Matrix3 &matrix, Bool &fully_insi
             Flt bxu = OBoxLength(dx, dy, dz, plane[DIR_UP].normal) * fov_cos_inv.y;
             if (y > by - bxu) {
                 if (y > by + bxu)
-                    return false;
+                    is = false;
                 fully_inside = false;
             } // u
             Flt bxd = OBoxLength(dx, dy, dz, plane[DIR_DOWN].normal) * fov_cos_inv.y;
             if (y < -by + bxd) {
                 if (y < -by - bxd)
-                    return false;
+                    is = false;
                 fully_inside = false;
             } // d
         }
@@ -963,7 +888,7 @@ Bool FrustumClass::operator()(C Extent &ext, C Matrix3 &matrix, Bool &fully_insi
                 Flt e = Dist(pos + T.matrix.pos, extra_plane), be = OBoxLength(dx, dy, dz, extra_plane.normal);
                 if (e > -be) {
                     if (e > be)
-                        return false;
+                        is = false;
                     fully_inside = false;
                 }
             }
@@ -985,25 +910,28 @@ Bool FrustumClass::operator()(C Extent &ext, C Matrix3 &matrix, Bool &fully_insi
         Flt x = Abs(Dot(pos, T.matrix.x)) - T.size.x, bx = OBoxLength(dx, dy, dz, plane[DIR_RIGHT].normal);
         if (x > -bx) {
             if (x > bx)
-                return false;
+                is = false;
             fully_inside = false;
         } // rl
         Flt y = Abs(Dot(pos, T.matrix.y)) - T.size.y, by = OBoxLength(dx, dy, dz, plane[DIR_UP].normal);
         if (y > -by) {
             if (y > by)
-                return false;
+                is = false;
             fully_inside = false;
         } // ud
         Flt z = Abs(Dot(pos, T.matrix.z)) - T.size.z, bz = OBoxLength(dx, dy, dz, plane[DIR_FORWARD].normal);
         if (z > -bz) {
             if (z > bz)
-                return false;
+                is = false;
             fully_inside = false;
         } // fb
     }
-    return true;
+    PROFILE_STOP("CatzEngine::FrustumClass::operator()(C Extent &ext, C Matrix3 &matrix, Bool &fully_inside)")
+    return is;
 }
 Bool FrustumClass::operator()(C Extent &ext, C Matrix &matrix, Bool &fully_inside) C {
+    PROFILE_START("CatzEngine::FrustumClass::operator()(C Extent &ext, C Matrix &matrix, Bool &fully_inside)")
+    bool is = true;
     fully_inside = true;
 
     Vec dx = ext.ext.x * matrix.x,
@@ -1024,12 +952,12 @@ Bool FrustumClass::operator()(C Extent &ext, C Matrix &matrix, Bool &fully_insid
             Flt bz = OBoxLength(dx, dy, dz, plane[DIR_FORWARD].normal);
             if (z < bz) {
                 if (z < -bz)
-                    return false;
+                    is = false;
                 fully_inside = false;
             } // b
             if (z > range - bz) {
                 if (z > range + bz)
-                    return false;
+                    is = false;
                 fully_inside = false;
             } // f
             MAX(z, 0);
@@ -1041,13 +969,13 @@ Bool FrustumClass::operator()(C Extent &ext, C Matrix &matrix, Bool &fully_insid
             Flt bxr = OBoxLength(dx, dy, dz, plane[DIR_RIGHT].normal) * fov_cos_inv.x;
             if (x > bx - bxr) {
                 if (x > bx + bxr)
-                    return false;
+                    is = false;
                 fully_inside = false;
             } // r
             Flt bxl = OBoxLength(dx, dy, dz, plane[DIR_LEFT].normal) * fov_cos_inv.x;
             if (x < -bx + bxl) {
                 if (x < -bx - bxl)
-                    return false;
+                    is = false;
                 fully_inside = false;
             } // l
         }
@@ -1058,13 +986,13 @@ Bool FrustumClass::operator()(C Extent &ext, C Matrix &matrix, Bool &fully_insid
             Flt bxu = OBoxLength(dx, dy, dz, plane[DIR_UP].normal) * fov_cos_inv.y;
             if (y > by - bxu) {
                 if (y > by + bxu)
-                    return false;
+                    is = false;
                 fully_inside = false;
             } // u
             Flt bxd = OBoxLength(dx, dy, dz, plane[DIR_DOWN].normal) * fov_cos_inv.y;
             if (y < -by + bxd) {
                 if (y < -by - bxd)
-                    return false;
+                    is = false;
                 fully_inside = false;
             } // d
         }
@@ -1074,7 +1002,7 @@ Bool FrustumClass::operator()(C Extent &ext, C Matrix &matrix, Bool &fully_insid
                 Flt e = Dist(pos + T.matrix.pos, extra_plane), be = OBoxLength(dx, dy, dz, extra_plane.normal);
                 if (e > -be) {
                     if (e > be)
-                        return false;
+                        is = false;
                     fully_inside = false;
                 }
             }
@@ -1096,25 +1024,28 @@ Bool FrustumClass::operator()(C Extent &ext, C Matrix &matrix, Bool &fully_insid
         Flt x = Abs(Dot(pos, T.matrix.x)) - T.size.x, bx = OBoxLength(dx, dy, dz, plane[DIR_RIGHT].normal);
         if (x > -bx) {
             if (x > bx)
-                return false;
+                is = false;
             fully_inside = false;
         } // rl
         Flt y = Abs(Dot(pos, T.matrix.y)) - T.size.y, by = OBoxLength(dx, dy, dz, plane[DIR_UP].normal);
         if (y > -by) {
             if (y > by)
-                return false;
+                is = false;
             fully_inside = false;
         } // ud
         Flt z = Abs(Dot(pos, T.matrix.z)) - T.size.z, bz = OBoxLength(dx, dy, dz, plane[DIR_FORWARD].normal);
         if (z > -bz) {
             if (z > bz)
-                return false;
+                is = false;
             fully_inside = false;
         } // fb
     }
-    return true;
+    PROFILE_STOP("CatzEngine::FrustumClass::operator()(C Extent &ext, C Matrix &matrix, Bool &fully_inside)")
+    return is;
 }
 Bool FrustumClass::operator()(C Extent &ext, C MatrixM &matrix, Bool &fully_inside) C {
+    PROFILE_START("CatzEngine::FrustumClass::operator()(C Extent &ext, C MatrixM &matrix, Bool &fully_inside)")
+    bool is = true;
     fully_inside = true;
 
     Vec dx = ext.ext.x * matrix.x,
@@ -1129,12 +1060,12 @@ Bool FrustumClass::operator()(C Extent &ext, C MatrixM &matrix, Bool &fully_insi
             Flt bz = OBoxLength(dx, dy, dz, plane[DIR_FORWARD].normal);
             if (z < bz) {
                 if (z < -bz)
-                    return false;
+                    is = false;
                 fully_inside = false;
             } // b
             if (z > range - bz) {
                 if (z > range + bz)
-                    return false;
+                    is = false;
                 fully_inside = false;
             } // f
             MAX(z, 0);
@@ -1146,13 +1077,13 @@ Bool FrustumClass::operator()(C Extent &ext, C MatrixM &matrix, Bool &fully_insi
             Flt bxr = OBoxLength(dx, dy, dz, plane[DIR_RIGHT].normal) * fov_cos_inv.x;
             if (x > bx - bxr) {
                 if (x > bx + bxr)
-                    return false;
+                    is = false;
                 fully_inside = false;
             } // r
             Flt bxl = OBoxLength(dx, dy, dz, plane[DIR_LEFT].normal) * fov_cos_inv.x;
             if (x < -bx + bxl) {
                 if (x < -bx - bxl)
-                    return false;
+                    is = false;
                 fully_inside = false;
             } // l
         }
@@ -1163,13 +1094,13 @@ Bool FrustumClass::operator()(C Extent &ext, C MatrixM &matrix, Bool &fully_insi
             Flt bxu = OBoxLength(dx, dy, dz, plane[DIR_UP].normal) * fov_cos_inv.y;
             if (y > by - bxu) {
                 if (y > by + bxu)
-                    return false;
+                    is = false;
                 fully_inside = false;
             } // u
             Flt bxd = OBoxLength(dx, dy, dz, plane[DIR_DOWN].normal) * fov_cos_inv.y;
             if (y < -by + bxd) {
                 if (y < -by - bxd)
-                    return false;
+                    is = false;
                 fully_inside = false;
             } // d
         }
@@ -1179,7 +1110,7 @@ Bool FrustumClass::operator()(C Extent &ext, C MatrixM &matrix, Bool &fully_insi
                 Flt e = Dist(pos + T.matrix.pos, extra_plane), be = OBoxLength(dx, dy, dz, extra_plane.normal);
                 if (e > -be) {
                     if (e > be)
-                        return false;
+                        is = false;
                     fully_inside = false;
                 }
             }
@@ -1201,23 +1132,24 @@ Bool FrustumClass::operator()(C Extent &ext, C MatrixM &matrix, Bool &fully_insi
         Flt x = Abs(Dot(pos, T.matrix.x)) - T.size.x, bx = OBoxLength(dx, dy, dz, plane[DIR_RIGHT].normal);
         if (x > -bx) {
             if (x > bx)
-                return false;
+                is = false;
             fully_inside = false;
         } // rl
         Flt y = Abs(Dot(pos, T.matrix.y)) - T.size.y, by = OBoxLength(dx, dy, dz, plane[DIR_UP].normal);
         if (y > -by) {
             if (y > by)
-                return false;
+                is = false;
             fully_inside = false;
         } // ud
         Flt z = Abs(Dot(pos, T.matrix.z)) - T.size.z, bz = OBoxLength(dx, dy, dz, plane[DIR_FORWARD].normal);
         if (z > -bz) {
             if (z > bz)
-                return false;
+                is = false;
             fully_inside = false;
         } // fb
     }
-    return true;
+    PROFILE_STOP("CatzEngine::FrustumClass::operator()(C Extent &ext, C MatrixM &matrix, Bool &fully_inside)")
+    return is;
 }
 /******************************************************************************/
 Bool FrustumClass::operator()(C Box &box) C { return T(Extent(box)); }
@@ -1250,6 +1182,7 @@ Bool FrustumClass::operator()(C Shape *shape, Int shapes) C {
 /******************************************************************************/
 Bool FrustumClass::operator()(C FrustumClass &frustum) C // assumes that one frustum is not entirely inside the other frustum (which means that there is contact between edge and faces)
 {
+    PROFILE_START("CatzEngine::FrustumClass::operator()(C FrustumClass &frustum)")
     // comparing edges with faces is more precise than comparing points only
     REPD(f, 2) {
         C FrustumClass &a = (f ? T : frustum),
@@ -1259,21 +1192,27 @@ Bool FrustumClass::operator()(C FrustumClass &frustum) C // assumes that one fru
             EdgeD ed(a.point[a.edge[e].x], a.point[a.edge[e].y]);
             REPA(b.plane)
             if (Cuts(ed, b.plane[i], &contact))
-                if (b(contact - b.plane[i].normal * EPSL))
+                if (b(contact - b.plane[i].normal * EPSL)) {
+                    PROFILE_STOP("CatzEngine::FrustumClass::operator()(C FrustumClass &frustum)")
                     return true; // use epsilon to make sure that we're under plane surface
+                }
         }
     }
+    PROFILE_STOP("CatzEngine::FrustumClass::operator()(C FrustumClass &frustum)")
     return false;
 }
 /******************************************************************************/
 static INLINE void ProcessPos(C VecI2 &pos, C RectI &rect, Memt<VecI2> &row_min_max_x) {
+    PROFILE_START("CatzEngine::ProcessPos(C VecI2 &pos, C RectI &rect, Memt<VecI2> &row_min_max_x)")
     if (rect.includesY(pos.y)) {
         VecI2 &min_max_x = row_min_max_x[pos.y - rect.min.y];
         MIN(min_max_x.x, pos.x);
         MAX(min_max_x.y, pos.x);
     }
+    PROFILE_STOP("CatzEngine::ProcessPos(C VecI2 &pos, C RectI &rect, Memt<VecI2> &row_min_max_x)")
 }
 void FrustumClass::getIntersectingAreas(MemPtr<VecI2> area_pos, Flt area_size, Bool distance_check, Bool sort_by_distance, Bool extend, C RectI *clamp) C {
+    PROFILE_START("CatzEngine::FrustumClass::getIntersectingAreas(MemPtr<VecI2> area_pos, Flt area_size, Bool distance_check, Bool sort_by_distance, Bool extend, C RectI *clamp)")
     area_pos.clear();
 
     Memt<VecD2> convex_points;
@@ -1345,8 +1284,10 @@ void FrustumClass::getIntersectingAreas(MemPtr<VecI2> area_pos, Flt area_size, B
         rect.max++;
     if (mask_do) {
         rect &= mask;
-        if (!rect.valid())
+        if (!rect.valid()) {
+            PROFILE_STOP("CatzEngine::FrustumClass::getIntersectingAreas(MemPtr<VecI2> area_pos, Flt area_size, Bool distance_check, Bool sort_by_distance, Bool extend, C RectI *clamp)")
             return;
+        }
     }
 
     // set min_x..max_x per row in 'row_min_max_x'
@@ -1385,7 +1326,7 @@ void FrustumClass::getIntersectingAreas(MemPtr<VecI2> area_pos, Flt area_size, B
             ProcessPos(walker.pos(), rect, row_min_max_x);
     }
 
-    const Bool fast = true; // if use ~2x faster 'Dist2PointSquare' instead of 'Dist2(Vec2 point, RectI rect)'
+    C Bool fast = true; // if use ~2x faster 'Dist2PointSquare' instead of 'Dist2(Vec2 point, RectI rect)'
 
     VecD2 distance_pos;
     Flt distance_range2;
@@ -1447,9 +1388,11 @@ void FrustumClass::getIntersectingAreas(MemPtr<VecI2> area_pos, Flt area_size, B
                         area_pos.add(pos); // add to array
         }
     }
+    PROFILE_STOP("CatzEngine::FrustumClass::getIntersectingAreas(MemPtr<VecI2> area_pos, Flt area_size, Bool distance_check, Bool sort_by_distance, Bool extend, C RectI *clamp)")
 }
 /******************************************************************************/
 void FrustumClass::getIntersectingSphereAreas(MemPtr<SphereArea> area_pos, C SphereConvertEx &sc, Bool distance_check, Bool sort_by_distance, Bool extend, Flt min_radius) C {
+    PROFILE_START("CatzEngine::FrustumClass::getIntersectingSphereAreas(MemPtr<SphereArea> area_pos, C SphereConvertEx &sc, Bool distance_check, Bool sort_by_distance, Bool extend, Flt min_radius)")
     // WARNING: ignores 'extraBall'
     area_pos.clear();
     distance_check &= persp; // can do range tests only in perspective mode (orthogonal mode is used for shadows, and there we need full range, and also in that mode 'matrix.pos' is in the center)
@@ -1730,6 +1673,7 @@ void FrustumClass::getIntersectingSphereAreas(MemPtr<SphereArea> area_pos, C Sph
         area_pos.setNum(area_pos_dist.elms());
         REPAO(area_pos) = area_pos_dist[i];
     }
+    PROFILE_STOP("CatzEngine::FrustumClass::getIntersectingSphereAreas(MemPtr<SphereArea> area_pos, C SphereConvertEx &sc, Bool distance_check, Bool sort_by_distance, Bool extend, Flt min_radius)")
 }
 /******************************************************************************/
 void FrustumClass::draw(C Color &col) C {

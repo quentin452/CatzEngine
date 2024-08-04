@@ -566,6 +566,7 @@ Bool MeshPart::sameMaterials(C MeshPart &part) C {
 // SET
 /******************************************************************************/
 MeshPart &MeshPart::remapMaterials(Byte new_index[4]) {
+    PROFILE_START("CatzEngine::MeshPart::remapMaterials(Byte new_index[4])")
     if (new_index[0] != 0 || new_index[1] != 1 || new_index[2] != 2 || new_index[3] != 3) {
         // materials
         MaterialPtr temp[4] = {multiMaterial(0), multiMaterial(1), multiMaterial(2), multiMaterial(3)};
@@ -601,6 +602,7 @@ MeshPart &MeshPart::remapMaterials(Byte new_index[4]) {
             }
         setUMM();
     }
+    PROFILE_STOP("CatzEngine::MeshPart::remapMaterials(Byte new_index[4])")
     return T;
 }
 MeshPart &MeshPart::setUMM() {
@@ -748,19 +750,19 @@ MeshPart &MeshPart::variation(Int variation, C MaterialPtr &material, Int lod_in
         T.material(material, lod_index);
     else // 0-th is stored in MeshPart
         if (InRange(--variation, _variations)) {
-        Variation &var = _variations[variation];
-        if (var.material != material) {
+            Variation &var = _variations[variation];
+            if (var.material != material) {
 #if SUPPORT_MATERIAL_CHANGE_IN_RENDERING
-            var.unlink();
+                var.unlink();
 #else
-            if (var.drawn())
-                Exit("Changing Mesh Material after it was already requested to be drawn with a different Material is not supported");
+                if (var.drawn())
+                    Exit("Changing Mesh Material after it was already requested to be drawn with a different Material is not supported");
 #endif
-            var.material = material;
-            if (lod_index >= 0)
-                setShader(lod_index, var); // set shader only if valid lod specified (negative can be used for special case when we don't want to set shaders yet, for example because they may require locking D._lock)
+                var.material = material;
+                if (lod_index >= 0)
+                    setShader(lod_index, var); // set shader only if valid lod specified (negative can be used for special case when we don't want to set shaders yet, for example because they may require locking D._lock)
+            }
         }
-    }
     return T;
 }
 C MaterialPtr &MeshPart::variationNull(Int variation) C {

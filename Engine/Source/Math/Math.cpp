@@ -619,10 +619,10 @@ void AdjustValTarget(Flt &value, Flt target, Flt dv) {
             value = target;
     } else // move towards 'target' by increasing 'value' by 'dv'
         if (value < target) {
-        value += dv;
-        if (value > target)
-            value = target;
-    } // move towards 'target' by decreasing 'value' by 'dv'
+            value += dv;
+            if (value > target)
+                value = target;
+        } // move towards 'target' by decreasing 'value' by 'dv'
 }
 void AdjustValTarget(Dbl &value, Dbl target, Dbl dv) {
     if (value > target) {
@@ -631,10 +631,10 @@ void AdjustValTarget(Dbl &value, Dbl target, Dbl dv) {
             value = target;
     } else // move towards 'target' by increasing 'value' by 'dv'
         if (value < target) {
-        value += dv;
-        if (value > target)
-            value = target;
-    } // move towards 'target' by decreasing 'value' by 'dv'
+            value += dv;
+            if (value > target)
+                value = target;
+        } // move towards 'target' by decreasing 'value' by 'dv'
 }
 void AdjustValTarget(Flt &value, Flt target, Flt inc, Flt dec) {
     if (value > target) {
@@ -643,10 +643,10 @@ void AdjustValTarget(Flt &value, Flt target, Flt inc, Flt dec) {
             value = target;
     } else // move towards 'target' by increasing 'value' by 'inc'
         if (value < target) {
-        value += inc;
-        if (value > target)
-            value = target;
-    } // move towards 'target' by decreasing 'value' by 'dec'
+            value += inc;
+            if (value > target)
+                value = target;
+        } // move towards 'target' by decreasing 'value' by 'dec'
 }
 void AdjustValTarget(Vec2 &value, C Vec2 &target, Flt dv) {
     AdjustValTarget(value.x, target.x, dv);
@@ -719,10 +719,9 @@ Flt SmoothSqr(Flt x) {
         return 0;
     if (x >= 1)
         return 1;
-    if (x <= 0.5f)
-        return 2 * Sqr(x);
-    return 1 - 2 * Sqr(1 - x); // 1-2*Sqr(1-x) -> 1-2*(1+x*x-2*x) -> 1 - 2 - 2*x*x + 4*x -> -2*x*x + 4*x - 1 (however this formula has more operations)
+    return (x <= 0.5f) ? 2 * Sqr(x) : 1 - 2 * Sqr(1 - x);
 }
+
 Flt SmoothCube(Flt x) {
     if (x <= 0)
         return 0;
@@ -730,6 +729,7 @@ Flt SmoothCube(Flt x) {
         return 1;
     return _SmoothCube(x);
 }
+
 Flt SmoothCubeInv(Flt y) {
     if (y <= 0)
         return 0;
@@ -737,18 +737,19 @@ Flt SmoothCubeInv(Flt y) {
         return 1;
     return 0.5f - Sin(AsinFast(1 - 2 * y) / 3); // use 'AsinFast' version because we've already checked 'y' range
 }
+
 Flt SmoothCube2(Flt x) {
     if (x <= 0)
         return 0;
     if (x >= 1)
         return 1;
-    if (x <= 0.5f)
-        return 4 * Cube(x);
-    return 1 - 4 * Cube(1 - x);
+    return (x <= 0.5f) ? 4 * Cube(x) : 1 - 4 * Cube(1 - x);
 }
+
 Flt _SmoothQuintic(Flt x) {
     return x * x * x * (x * (x * 6 - 15) + 10);
 }
+
 Flt SmoothSextic(Flt x) {
     if (x <= 0)
         return 0;
@@ -757,6 +758,7 @@ Flt SmoothSextic(Flt x) {
     x *= x;
     return (4.0f / 9) * x * x * x - (17.0f / 9) * x * x + (22.0f / 9) * x;
 }
+
 Flt SmoothSin(Flt x) {
     if (x <= 0)
         return 0;
@@ -764,24 +766,23 @@ Flt SmoothSin(Flt x) {
         return 1;
     return 0.5f - 0.5f * Cos(x * PI);
 }
+
 Flt SmoothPow(Flt x, Flt pow) {
     if (x <= 0)
         return 0;
     if (x >= 1)
         return 1;
-    if (x <= 0.5f)
-        return 0.5f * Pow(2 * x, pow);
-    return 1 - 0.5f * Pow(2 - 2 * x, pow);
+    return (x <= 0.5f) ? 0.5f * Pow(2 * x, pow) : 1 - 0.5f * Pow(2 - 2 * x, pow);
 }
+
 Flt SmoothPinch(Flt x, Flt pinch) {
     if (x <= 0)
         return 0;
     if (x >= 1)
         return 1;
-    if (x <= 0.5f)
-        return 0.5f * Pinch(2 * x, pinch);
-    return 1 - 0.5f * Pinch(2 - 2 * x, pinch);
+    return (x <= 0.5f) ? 0.5f * Pinch(2 * x, pinch) : 1 - 0.5f * Pinch(2 - 2 * x, pinch);
 }
+
 /******************************************************************************/
 // SIGMOID
 /******************************************************************************/
@@ -1021,10 +1022,10 @@ Half::operator Flt() C {
         xem += 0x38000000;
     else             // Inf/NaN
         if (xe == 0) // Zero/Denormal
-    {
-        xem += 0x800000;
-        ((Flt &)xem) -= 6.10351563e-05f; // (Flt&)(0x38800000) renormalize
-    }
+        {
+            xem += 0x800000;
+            ((Flt &)xem) -= 6.10351563e-05f; // (Flt&)(0x38800000) renormalize
+        }
     xs |= xem;
     return (Flt &)xs;
 }

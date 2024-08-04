@@ -3234,59 +3234,57 @@ static Byte BoneNumToPart[256 + 1];
 static ShaderBuffer *SBObjMatrix, *SBObjMatrixPrev, *SBFurVel;
 void SetMatrixCount(Int num) {
     PROFILE_START("CatzEngine::SetMatrixCount(Int num)")
-    if (Matrixes != num) {
-        Matrixes = num;
-        // !! Warning: for performance reasons this doesn't adjust 'ShaderParam.translation', so using 'ShaderParam.set*' based on translation will use full size, so make sure that method isn't called for 'ObjMatrix' and 'ObjMatrixPrev' !!
+    if (Matrixes == num) {
+        PROFILE_STOP("CatzEngine::SetMatrixCount(Int num)")
+        return;
+    }
+
+    Matrixes = num;
+    Int newSize = SIZE(GpuMatrix) * Matrixes;
+
 #if DX11
 #if ALLOW_PARTIAL_BUFFERS
-        if (D3DC1) {
-            SBObjMatrix->buffer.size = SIZE(GpuMatrix) * Matrixes;
-            SBObjMatrixPrev->buffer.size = SIZE(GpuMatrix) * Matrixes;
-            Int m16 = Ceil16(Matrixes * 3);
-            if (MatrixesPart != m16) {
-                MatrixesPart = m16;
-                // Warning: code below does not set the cached buffers as 'bind' does, as it's not needed, because those buffers have constant bind index
-                ASSERT(SBI_OBJ_MATRIX_PREV == SBI_OBJ_MATRIX + 1); // can do this only if they're next to each other
-                UInt first[] = {0, 0},                             // must be provided or DX will fail
-                    num[] = {Ceil16(Matrixes * 3), Ceil16(Matrixes * 3)};
-                ID3D11Buffer *buf[] = {SBObjMatrix->buffer.buffer, SBObjMatrixPrev->buffer.buffer};
-                D3DC1->VSSetConstantBuffers1(SBI_OBJ_MATRIX, 2, buf, first, num);
-                D3DC1->HSSetConstantBuffers1(SBI_OBJ_MATRIX, 2, buf, first, num);
-                D3DC1->DSSetConstantBuffers1(SBI_OBJ_MATRIX, 2, buf, first, num);
-                D3DC1->PSSetConstantBuffers1(SBI_OBJ_MATRIX, 2, buf, first, num);
-                D3DC1->CSSetConstantBuffers1(SBI_OBJ_MATRIX, 2, buf, first, num);
-            }
-        } else
-#endif
-        {
-            Int part = BoneNumToPart[num];
-            if (MatrixesPart != part) {
-                MatrixesPart = part;
-                SBObjMatrix->setPart(part);
-                SBObjMatrixPrev->setPart(part);
-#if 0
-            SBObjMatrix    ->bind(SBI_OBJ_MATRIX     );
-            SBObjMatrixPrev->bind(SBI_OBJ_MATRIX_PREV);
-#else                                                              // bind 2 at the same time \
-      // Warning: code below does not set the cached buffers as 'bind' does, as it's not needed, because those buffers have constant bind index
-                ASSERT(SBI_OBJ_MATRIX_PREV == SBI_OBJ_MATRIX + 1); // can do this only if they're next to each other
-                ID3D11Buffer *buf[] = {SBObjMatrix->buffer.buffer, SBObjMatrixPrev->buffer.buffer};
-                D3DC->VSSetConstantBuffers(SBI_OBJ_MATRIX, 2, buf);
-                D3DC->HSSetConstantBuffers(SBI_OBJ_MATRIX, 2, buf);
-                D3DC->DSSetConstantBuffers(SBI_OBJ_MATRIX, 2, buf);
-                D3DC->PSSetConstantBuffers(SBI_OBJ_MATRIX, 2, buf);
-                D3DC->CSSetConstantBuffers(SBI_OBJ_MATRIX, 2, buf);
-#endif
-            }
+    if (D3DC1) {
+        SBObjMatrix->buffer.size = newSize;
+        SBObjMatrixPrev->buffer.size = newSize;
+        Int m16 = Ceil16(Matrixes * 3);
+        if (MatrixesPart != m16) {
+            MatrixesPart = m16;
+            ASSERT(SBI_OBJ_MATRIX_PREV == SBI_OBJ_MATRIX + 1);
+            UInt first[] = {0, 0};
+            UInt num[] = {m16, m16};
+            ID3D11Buffer *buf[] = {SBObjMatrix->buffer.buffer, SBObjMatrixPrev->buffer.buffer};
+            D3DC1->VSSetConstantBuffers1(SBI_OBJ_MATRIX, 2, buf, first, num);
+            D3DC1->HSSetConstantBuffers1(SBI_OBJ_MATRIX, 2, buf, first, num);
+            D3DC1->DSSetConstantBuffers1(SBI_OBJ_MATRIX, 2, buf, first, num);
+            D3DC1->PSSetConstantBuffers1(SBI_OBJ_MATRIX, 2, buf, first, num);
+            D3DC1->CSSetConstantBuffers1(SBI_OBJ_MATRIX, 2, buf, first, num);
         }
-#elif GL
-        // will affect 'ShaderBuffer::update()'
-        SBObjMatrix->buffer.size = SIZE(GpuMatrix) * Matrixes;
-        SBObjMatrixPrev->buffer.size = SIZE(GpuMatrix) * Matrixes;
+    } else
 #endif
+    {
+        Int part = BoneNumToPart[num];
+        if (MatrixesPart != part) {
+            MatrixesPart = part;
+            SBObjMatrix->setPart(part);
+            SBObjMatrixPrev->setPart(part);
+            ASSERT(SBI_OBJ_MATRIX_PREV == SBI_OBJ_MATRIX + 1);
+            ID3D11Buffer *buf[] = {SBObjMatrix->buffer.buffer, SBObjMatrixPrev->buffer.buffer};
+            D3DC->VSSetConstantBuffers(SBI_OBJ_MATRIX, 2, buf);
+            D3DC->HSSetConstantBuffers(SBI_OBJ_MATRIX, 2, buf);
+            D3DC->DSSetConstantBuffers(SBI_OBJ_MATRIX, 2, buf);
+            D3DC->PSSetConstantBuffers(SBI_OBJ_MATRIX, 2, buf);
+            D3DC->CSSetConstantBuffers(SBI_OBJ_MATRIX, 2, buf);
+        }
     }
+#elif GL
+    SBObjMatrix->buffer.size = newSize;
+    SBObjMatrixPrev->buffer.size = newSize;
+#endif
+
     PROFILE_STOP("CatzEngine::SetMatrixCount(Int num)")
 }
+
 void SetFurVelCount(Int num) // !! unlike 'SetMatrixCount' this needs to be called before Shader start/begin, because it doesn't bind the new buffer !!
 {
     if (FurVels != num) {

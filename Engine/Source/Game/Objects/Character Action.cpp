@@ -241,10 +241,8 @@ void Chr::updateController() {
         Flt ax = angle.x + PI_2,
             ay = angle.y;
         Vec dir = input_move;
-        if (!ctrl.flying()) {
-            ay = 0;
-            dir.y = 0;
-        }
+        if (!ctrl.flying()) 
+            dir.y = ay = 0;
         Flt cx, sx, cy, sy;
         CosSin(cx, sx, ax);
         CosSin(cy, sy, ay);

@@ -14,6 +14,11 @@
 /******************************************************************************/
 struct FrustumClass // Frustum
 {
+    // auxiliary methods
+    Bool isInsideFrustum(C Vec &pos, Flt radius = 0) C;
+    template <typename Z>
+    Bool isCapsuleInsideFrustum(C Z &capsule) C;
+
     // if shape intersects with frustum
     Bool operator()(C Vec &point) C;
     Bool operator()(C VecD &point) C;

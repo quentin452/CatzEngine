@@ -742,7 +742,6 @@ void DrawShadowInstances() // this is called only 1 time and not for each eye
     }
     PROFILE_STOP("CatzEngine::DrawShadowInstances()Opaque Section")
 
-    // skeleton
     PROFILE_START("CatzEngine::DrawShadowInstances()Skeleton Section")
     EnableSkinning();
     FREPA(SkeletonShadowInstances) {
@@ -750,18 +749,21 @@ void DrawShadowInstances() // this is called only 1 time and not for each eye
         SkeletonInstance &skel = SkeletonShadowInstances[i];
         skel.unlinkShadow();
         skel.anim_skel->setMatrix();
-        for (SkeletonShader *skel_shader = &skel.skel_shader;;) {
+
+        for (SkeletonShader *skel_shader = &skel.skel_shader; skel_shader != nullptr; skel_shader = (skel_shader->next_skeleton_shader >= 0) ? &SkeletonShaders[skel_shader->next_skeleton_shader] : nullptr) {
             PROFILE_START("CatzEngine::DrawShadowInstances()Skeleton Shader Loop")
             Shader &shader = skel_shader->shader->getShader(false);
             shader.start();
-            for (SkeletonShaderMaterial *skel_shader_material = &skel_shader->material;;) {
+
+            for (SkeletonShaderMaterial *skel_shader_material = &skel_shader->material; skel_shader_material != nullptr; skel_shader_material = (skel_shader_material->next_skeleton_shader_material >= 0) ? &SkeletonShaderMaterials[skel_shader_material->next_skeleton_shader_material] : nullptr) {
                 PROFILE_START("CatzEngine::DrawShadowInstances()Skeleton Shader Material Loop")
                 C Material &material = *skel_shader_material->material;
                 material.setShadow();
                 D.cull(material.cull);
                 shader.commitTex();
                 Bool shader_params_changed = true;
-                for (SkeletonShaderMaterialMeshInstance *instance = &SkeletonShadowShaderMaterialMeshInstances[skel_shader_material->first_mesh_instance];;) {
+
+                for (SkeletonShaderMaterialMeshInstance *instance = &SkeletonShadowShaderMaterialMeshInstances[skel_shader_material->first_mesh_instance]; instance != nullptr; instance = (instance->next_instance >= 0) ? &SkeletonShadowShaderMaterialMeshInstances[instance->next_instance] : nullptr) {
                     PROFILE_START("CatzEngine::DrawShadowInstances()Skeleton Instance Loop")
                     shader_params_changed |= SetShaderParamChanges(instance->shader_param_changes);
                     if (shader_params_changed) {
@@ -769,20 +771,11 @@ void DrawShadowInstances() // this is called only 1 time and not for each eye
                         shader.commit();
                     }
                     instance->mesh->set().draw();
-                    if (instance->next_instance < 0)
-                        break;
-                    instance = &SkeletonShadowShaderMaterialMeshInstances[instance->next_instance];
                     PROFILE_STOP("CatzEngine::DrawShadowInstances()Skeleton Instance Loop")
                 }
-                SetShaderParamChanges(); // this must be called here before setting new shader params, because we may have some 'ShaderParamRestore' that we need to apply before any new shader params, for example if we don't call it here, and a new material is set, and we process 'SetShaderParamChanges' later, then it could restore the material values that are now old because new material was already set
-                if (skel_shader_material->next_skeleton_shader_material < 0)
-                    break;
-                skel_shader_material = &SkeletonShaderMaterials[skel_shader_material->next_skeleton_shader_material];
+                SetShaderParamChanges();
                 PROFILE_STOP("CatzEngine::DrawShadowInstances()Skeleton Shader Material Loop")
             }
-            if (skel_shader->next_skeleton_shader < 0)
-                break;
-            skel_shader = &SkeletonShaders[skel_shader->next_skeleton_shader];
             PROFILE_STOP("CatzEngine::DrawShadowInstances()Skeleton Shader Loop")
         }
         PROFILE_STOP("CatzEngine::DrawShadowInstances()Skeleton Instance Loop")
@@ -826,18 +819,14 @@ void DrawShadowInstances() // this is called only 1 time and not for each eye
 // BLEND
 /******************************************************************************/
 Int Compare(C BlendInstance &a, C BlendInstance &b) {
+    // Compare z values first
     if (Int z = Compare(a.z, b.z))
         return z;
-    // compare other values in case 'z' is the same (which means the same object draws many parts with the same matrix, which may cause flickering)
-    // compare by shader, material, mesh, because that's the order of rendering
-    if (Int c = ComparePtr(a.stat.shader, b.stat.shader))
-        return c;
-    if (Int c = ComparePtr(a.stat.material, b.stat.material))
-        return c;
-    if (Int c = ComparePtr(a.stat.mesh, b.stat.mesh))
-        return c;
-    return 0;
+
+    // Compare other values using std::tie for better readability and performance
+    return std::tie(a.stat.shader, a.stat.material, a.stat.mesh) < std::tie(b.stat.shader, b.stat.material, b.stat.mesh) ? -1 : 1;
 }
+
 void ClearBlendInstances() {
     BlendInstances.clear();
     SkeletonBlendShaders.clear();

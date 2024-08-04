@@ -5,7 +5,7 @@ class LightProcessor {
     std::mutex mutex;
 
     void processLight(Light &light) {
-        PROFILE_START("processLight(Light &light)")
+        PROFILE_START("CatzEngine::processLight(Light &light)")
         switch (light.type) {
         case LIGHT_DIR:
             processDirectionalLight(light);
@@ -20,11 +20,11 @@ class LightProcessor {
             processConeLight(light);
             break;
         }
-        PROFILE_STOP("processLight(Light &light)")
+        PROFILE_STOP("CatzEngine::processLight(Light &light)")
     }
 
     void processLightForward(Light &light, ALPHA_MODE alpha) {
-        PROFILE_START("processLightForward(Light &light, ALPHA_MODE alpha)")
+        PROFILE_START("CatzEngine::processLightForward(Light &light, ALPHA_MODE alpha)")
         switch (light.type) {
         case LIGHT_DIR:
             processDirectionalLightForward(light, alpha);
@@ -39,12 +39,12 @@ class LightProcessor {
             processConeLightForward(light, alpha);
             break;
         }
-        PROFILE_STOP("processLightForward(Light &light, ALPHA_MODE alpha)")
+        PROFILE_STOP("CatzEngine::processLightForward(Light &light, ALPHA_MODE alpha)")
     }
 
   public:
     void drawLights(std::vector<Light> lights) {
-        PROFILE_START("drawLights(std::vector<Light> lights)")
+        PROFILE_START("CatzEngine::drawLights(std::vector<Light> lights)")
         for (auto &light : lights) {
             threadPool.emplace_back(&LightProcessor::processLight, this, light);
         }
@@ -56,11 +56,11 @@ class LightProcessor {
             }
         }
         threadPool.clear();
-        PROFILE_STOP("drawLights(std::vector<Light> lights)")
+        PROFILE_STOP("CatzEngine::drawLights(std::vector<Light> lights)")
     }
 
     void drawLightsForward(std::vector<Light> lights, ALPHA_MODE alpha) {
-        PROFILE_START("drawLightsForward(std::vector<Light> lights, ALPHA_MODE alpha)")
+        PROFILE_START("CatzEngine::drawLightsForward(std::vector<Light> lights, ALPHA_MODE alpha)")
         for (auto &light : lights) {
             threadPool.emplace_back(&LightProcessor::processLightForward, this, light, alpha);
         }
@@ -72,7 +72,7 @@ class LightProcessor {
             }
         }
         threadPool.clear();
-        PROFILE_STOP("drawLightsForward(std::vector<Light> lights, ALPHA_MODE alpha)")
+        PROFILE_STOP("CatzEngine::drawLightsForward(std::vector<Light> lights, ALPHA_MODE alpha)")
     }
 };
 /*

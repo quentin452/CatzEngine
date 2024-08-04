@@ -1046,7 +1046,7 @@ _PathMesh *PathWorld::pathMesh(C VecI2 &area_xy) C {
 }
 /******************************************************************************/
 void PathWorld::update() {
-    PROFILE_START("PathWorld::update()")
+    PROFILE_START("CatzEngine::PathWorld::update()")
     if (_changed.elms() || _built.elms()) {
         Bool wake_up = (_changed.elms() > 0);
         {
@@ -1111,7 +1111,7 @@ void PathWorld::update() {
         if (wake_up)
             _event.on(); // wake up thread
     }
-    PROFILE_STOP("PathWorld::update()")
+    PROFILE_STOP("CatzEngine::PathWorld::update()")
 }
 /******************************************************************************/
 void PathWorld::changed(C Shape &shape) {

@@ -7,7 +7,7 @@ namespace EE {
 // ANIM SKEL BONE
 /******************************************************************************/
 void AnimatedSkeletonBone::clear() {
-    PROFILE_START("AnimatedSkeletonBone::clear()")
+    PROFILE_START("CatzEngine::AnimatedSkeletonBone::clear()")
     orn.zero();
     pos.zero();
     scale.zero();
@@ -18,10 +18,10 @@ void AnimatedSkeletonBone::clear() {
     color.set(1);
 #endif
     _force_matrix = _world_space_transform = false;
-    PROFILE_STOP("AnimatedSkeletonBone::clear()")
+    PROFILE_STOP("CatzEngine::AnimatedSkeletonBone::clear()")
 }
 void AnimatedSkeletonBone::keep01(Flt blend) {
-    PROFILE_START("AnimatedSkeletonBone::keep01()")
+    PROFILE_START("CatzEngine::AnimatedSkeletonBone::keep01()")
     orn *= blend;
     pos *= blend;
     scale *= blend;
@@ -34,17 +34,17 @@ void AnimatedSkeletonBone::keep01(Flt blend) {
 #endif
     if (_world_space_transform)
         _world_space_transform_matrix.keep01(blend);
-    PROFILE_STOP("AnimatedSkeletonBone::keep01()")
+    PROFILE_STOP("CatzEngine::AnimatedSkeletonBone::keep01()")
 }
 void AnimatedSkeletonBone::clear(Flt blend) {
-    PROFILE_START("AnimatedSkeletonBone::clear(Flt blend)")
+    PROFILE_START("CatzEngine::AnimatedSkeletonBone::clear(Flt blend)")
     if (blend > 0) {
         if (blend >= 1)
             clear();
         else
             keep01(1 - blend);
     }
-    PROFILE_STOP("AnimatedSkeletonBone::clear(Flt blend)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeletonBone::clear(Flt blend)")
 }
 /*
    Flt                     fur_stiffness, // determines the speed of                fur velocities changes,    0..1  , default= 0.0001
@@ -86,7 +86,7 @@ AnimatedSkeleton &AnimatedSkeleton::del() {
 }
 AnimatedSkeleton &AnimatedSkeleton::create(C Skeleton *skeleton, C MatrixM &initial_matrix) // !! 'initial_matrix' can be 'root._matrix' !!
 {
-    PROFILE_START("AnimatedSkeleton::create(C Skeleton *skeleton, C MatrixM &initial_matrix)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::create(C Skeleton *skeleton, C MatrixM &initial_matrix)")
     auto temp = initial_matrix; // copy in case 'initial_matrix' belongs to this (for example 'root._matrix' and may get destroyed), use 'auto' depending on matrix type
 
     if (T._skeleton = skeleton) {
@@ -118,11 +118,11 @@ AnimatedSkeleton &AnimatedSkeleton::create(C Skeleton *skeleton, C MatrixM &init
 #if WORLD_POS
     root._world_pos = temp.pos;
 #endif
-    PROFILE_STOP("AnimatedSkeleton::create(C Skeleton *skeleton, C MatrixM &initial_matrix)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::create(C Skeleton *skeleton, C MatrixM &initial_matrix)")
     return T;
 }
 AnimatedSkeleton &AnimatedSkeleton::create(AnimatedSkeleton &src) {
-    PROFILE_START("AnimatedSkeleton::create(AnimatedSkeleton &src)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::create(AnimatedSkeleton &src)")
     if (&src != this) {
         _skeleton = src._skeleton;
         bones = src.bones;
@@ -136,7 +136,7 @@ AnimatedSkeleton &AnimatedSkeleton::create(AnimatedSkeleton &src) {
         fur_vel_scale = src.fur_vel_scale;
 #endif
     }
-    PROFILE_STOP("AnimatedSkeleton::create(AnimatedSkeleton &src)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::create(AnimatedSkeleton &src)")
     return T;
 }
 /******************************************************************************/
@@ -155,49 +155,49 @@ OrientM *AnimatedSkeleton::findSlot(CChar8 *name) { return slots.addr(findSlotI(
 AnimSkelBone *AnimatedSkeleton::getBone(CChar8 *name) { return bones.addr(getBoneI(name)); }
 OrientM *AnimatedSkeleton::getSlot(CChar8 *name) { return slots.addr(getSlotI(name)); }
 Int AnimatedSkeleton::getBoneI(CChar8 *name) C {
-    PROFILE_START("AnimatedSkeleton::getBoneI(CChar8 *name)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::getBoneI(CChar8 *name)")
     Int i = findBoneI(name);
     if (i < 0)
         Exit(S + "Bone \"" + name + "\" not found in skeleton \"" + Skeletons.name(skeleton()) + "\".");
-    PROFILE_STOP("AnimatedSkeleton::getBoneI(CChar8 *name)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::getBoneI(CChar8 *name)")
     return i;
 }
 Int AnimatedSkeleton::getSlotI(CChar8 *name) C {
-    PROFILE_START("AnimatedSkeleton::getSlotI(CChar8 *name)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::getSlotI(CChar8 *name)")
     Int i = findSlotI(name);
     if (i < 0)
         Exit(S + "Slot \"" + name + "\" not found in skeleton \"" + Skeletons.name(skeleton()) + "\".");
-    PROFILE_STOP("AnimatedSkeleton::getSlotI(CChar8 *name)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::getSlotI(CChar8 *name)")
     return i;
 }
 SkelAnim *AnimatedSkeleton::getSkelAnim(C Str &name) C {
-    PROFILE_START("AnimatedSkeleton::getSkelAnim(C Str &name)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::getSkelAnim(C Str &name)")
     SkelAnim *skel_anim = findSkelAnim(name);
     if (!skel_anim && name.is())
         Exit(S + "SkelAnim \"" + name + "\" not found in skeleton \"" + Skeletons.name(skeleton()) + "\".");
-    PROFILE_STOP("AnimatedSkeleton::getSkelAnim(C Str &name)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::getSkelAnim(C Str &name)")
     return skel_anim;
 }
 SkelAnim *AnimatedSkeleton::getSkelAnim(C UID &id) C {
-    PROFILE_START("AnimatedSkeleton::getSkelAnim(C UID &id)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::getSkelAnim(C UID &id)")
     SkelAnim *skel_anim = findSkelAnim(id);
     if (!skel_anim && id.valid())
         Exit(S + "SkelAnim \"" + id.asCString() + "\" not found in skeleton \"" + Skeletons.name(skeleton()) + "\".");
-    PROFILE_STOP("AnimatedSkeleton::getSkelAnim(C UID &id)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::getSkelAnim(C UID &id)")
     return skel_anim;
 }
 /******************************************************************************/
 // SET
 /******************************************************************************/
 AnimatedSkeleton &AnimatedSkeleton::disable(Int i, Bool disable) {
-    PROFILE_START("AnimatedSkeleton::disable(Int i, Bool disable)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::disable(Int i, Bool disable)")
     if (InRange(i, bones))
         bones[i]._disabled = disable;
-    PROFILE_STOP("AnimatedSkeleton::disable(Int i, Bool disable)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::disable(Int i, Bool disable)")
     return T;
 }
 static void DisableChildren(AnimatedSkeleton &anim_skel, Int i, Bool disable) {
-    PROFILE_START("AnimatedSkeleton::DisableChildren(AnimatedSkeleton &anim_skel, Int i, Bool disable)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::DisableChildren(AnimatedSkeleton &anim_skel, Int i, Bool disable)")
     if (C SkelBone *bone = anim_skel.skeleton()->bones.addr(i))
         REP(bone->children_num) {
             Int child_i = bone->children_offset + i;
@@ -206,10 +206,10 @@ static void DisableChildren(AnimatedSkeleton &anim_skel, Int i, Bool disable) {
                 DisableChildren(anim_skel, child_i, disable);
             }
         }
-    PROFILE_STOP("AnimatedSkeleton::DisableChildren(AnimatedSkeleton &anim_skel, Int i, Bool disable)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::DisableChildren(AnimatedSkeleton &anim_skel, Int i, Bool disable)")
 }
 AnimatedSkeleton &AnimatedSkeleton::disableChildren(Int i, Bool disable) {
-    PROFILE_START("AnimatedSkeleton::disableChildren(Int i, Bool disable)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::disableChildren(Int i, Bool disable)")
     if (InRange(i, bones)) {
         Bool &disabled = bones[i]._disabled_children;
         if (disabled != disable) {
@@ -218,21 +218,21 @@ AnimatedSkeleton &AnimatedSkeleton::disableChildren(Int i, Bool disable) {
                 DisableChildren(T, i, disable); // test for 'skeleton' only once here and not everytime in 'DisableChildren'
         }
     }
-    PROFILE_STOP("AnimatedSkeleton::disableChildren(Int i, Bool disable)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::disableChildren(Int i, Bool disable)")
     return T;
 }
 /******************************************************************************/
 // ANIMATE
 /******************************************************************************/
 AnimatedSkeleton &AnimatedSkeleton::clear() {
-    PROFILE_START("AnimatedSkeleton::clear()")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::clear()")
     root.clear();
     REPAO(bones).clear();
-    PROFILE_STOP("AnimatedSkeleton::clear()")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::clear()")
     return T;
 }
 AnimatedSkeleton &AnimatedSkeleton::clear(Flt blend) {
-    PROFILE_START("AnimatedSkeleton::clear(Flt blend)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::clear(Flt blend)")
     if (blend > 0) {
         if (blend >= 1)
             clear();
@@ -242,7 +242,7 @@ AnimatedSkeleton &AnimatedSkeleton::clear(Flt blend) {
             REPAO(bones).keep01(blend1);
         }
     }
-    PROFILE_STOP("AnimatedSkeleton::clear(Flt blend)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::clear(Flt blend)")
     return T;
 }
 /******************************************************************************/
@@ -257,7 +257,7 @@ struct AnimParamsReplace : AnimParams {
     AnimParamsReplace(C Animation &animation, Flt time, Flt blend) : AnimParams(animation, time), blend(blend), blend1(Sat(1 - blend)) {} // 'blend1' needs to be clamped to 0..1 range because old keyframes are multiplied by this
 };
 static void Animate(AnimSkelBone &asbon, C AnimKeys &keys, C AnimParams &params) {
-    PROFILE_START("Animate(AnimSkelBone &asbon, C AnimKeys &keys, C AnimParams &params)")
+    PROFILE_START("CatzEngine::Animate(AnimSkelBone &asbon, C AnimKeys &keys, C AnimParams &params)")
     if (!asbon._disabled) {
         // orientation
         if (keys.orns.elms()) {
@@ -298,10 +298,10 @@ static void Animate(AnimSkelBone &asbon, C AnimKeys &keys, C AnimParams &params)
         }
 #endif
     }
-    PROFILE_STOP("Animate(AnimSkelBone &asbon, C AnimKeys &keys, C AnimParams &params)")
+    PROFILE_STOP("CatzEngine::Animate(AnimSkelBone &asbon, C AnimKeys &keys, C AnimParams &params)")
 }
 static void Animate(AnimSkelBone &asbon, C AnimKeys &keys, C AnimParamsBlend &params) {
-    PROFILE_START("Animate(AnimSkelBone &asbon, C AnimKeys &keys, C AnimParamsBlend &params)")
+    PROFILE_START("CatzEngine::Animate(AnimSkelBone &asbon, C AnimKeys &keys, C AnimParamsBlend &params)")
     if (!asbon._disabled) {
         // orientation
         if (keys.orns.elms()) {
@@ -343,10 +343,10 @@ static void Animate(AnimSkelBone &asbon, C AnimKeys &keys, C AnimParamsBlend &pa
         }
 #endif
     }
-    PROFILE_STOP("Animate(AnimSkelBone &asbon, C AnimKeys &keys, C AnimParamsBlend &params)")
+    PROFILE_STOP("CatzEngine::Animate(AnimSkelBone &asbon, C AnimKeys &keys, C AnimParamsBlend &params)")
 }
 static void Animate(AnimSkelBone &asbon, C AnimKeys &keys, C AnimParamsReplace &params) {
-    PROFILE_START("Animate(AnimSkelBone &asbon, C AnimKeys &keys, C AnimParamsReplace &params)")
+    PROFILE_START("CatzEngine::Animate(AnimSkelBone &asbon, C AnimKeys &keys, C AnimParamsReplace &params)")
     if (!asbon._disabled) {
         // orientation
         if (keys.orns.elms()) {
@@ -395,20 +395,20 @@ static void Animate(AnimSkelBone &asbon, C AnimKeys &keys, C AnimParamsReplace &
         }
 #endif
     }
-    PROFILE_STOP("Animate(AnimSkelBone &asbon, C AnimKeys &keys, C AnimParamsReplace &params)")
+    PROFILE_STOP("CatzEngine::Animate(AnimSkelBone &asbon, C AnimKeys &keys, C AnimParamsReplace &params)")
 }
 static void AnimRoot(AnimatedSkeleton &anim_skel, C Animation *animation, Flt time, Flt blend) {
-    PROFILE_START("AnimRoot(AnimatedSkeleton &anim_skel, C Animation *animation, Flt time, Flt blend)")
+    PROFILE_START("CatzEngine::AnimRoot(AnimatedSkeleton &anim_skel, C Animation *animation, Flt time, Flt blend)")
     // if(blend>EPS_ANIM_BLEND) // this is already checked in methods calling this function
     if (animation) {
         AnimParamsBlend params(*animation, time, blend);
         Animate(anim_skel.root, animation->keys, params); // animate root
     }
-    PROFILE_STOP("AnimRoot(AnimatedSkeleton &anim_skel, C Animation *animation, Flt time, Flt blend)")
+    PROFILE_STOP("CatzEngine::AnimRoot(AnimatedSkeleton &anim_skel, C Animation *animation, Flt time, Flt blend)")
 }
 /******************************************************************************/
 AnimatedSkeleton &AnimatedSkeleton::animate(C SkelAnim &skel_anim, Flt time, Flt blend) {
-    PROFILE_START("AnimatedSkeleton::animate(C SkelAnim &skel_anim, Flt time, Flt blend)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::animate(C SkelAnim &skel_anim, Flt time, Flt blend)")
     if (blend > EPS_ANIM_BLEND)
         if (C Animation *animation = skel_anim.animation()) {
             if (blend == 1) {
@@ -433,26 +433,26 @@ AnimatedSkeleton &AnimatedSkeleton::animate(C SkelAnim &skel_anim, Flt time, Flt
                 }
             }
         }
-    PROFILE_STOP("AnimatedSkeleton::animate(C SkelAnim &skel_anim, Flt time, Flt blend)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::animate(C SkelAnim &skel_anim, Flt time, Flt blend)")
     return T;
 }
 
 AnimatedSkeleton &AnimatedSkeleton::animateRoot(C Animation *anim, Flt time) {
-    PROFILE_START("AnimatedSkeleton::animateRoot(C Animation *anim, Flt time)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::animateRoot(C Animation *anim, Flt time)")
     if (anim)
         animateRoot(*anim, time);
-    PROFILE_STOP("AnimatedSkeleton::animateRoot(C Animation *anim, Flt time)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::animateRoot(C Animation *anim, Flt time)")
     return T;
 }
 AnimatedSkeleton &AnimatedSkeleton::animateRoot(C Animation &anim, Flt time) {
-    PROFILE_START("AnimatedSkeleton::animateRoot(C Animation &anim, Flt time)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::animateRoot(C Animation &anim, Flt time)")
     AnimParams params(anim, time);
     Animate(root, anim.keys, params); // animate root
-    PROFILE_STOP("AnimatedSkeleton::animateRoot(C Animation &anim, Flt time)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::animateRoot(C Animation &anim, Flt time)")
     return T;
 }
 AnimatedSkeleton &AnimatedSkeleton::animateEx(C SkelAnim &skel_anim, Flt time, Bool exact_time, Bool animate_root, Bool animate_bones) {
-    PROFILE_START("AnimatedSkeleton::animateEx(C SkelAnim &skel_anim, Flt time, Bool exact_time, Bool animate_root, Bool animate_bones)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::animateEx(C SkelAnim &skel_anim, Flt time, Bool exact_time, Bool animate_root, Bool animate_bones)")
     if (C Animation *animation = skel_anim.animation()) {
         AnimParams params(*animation, time);
         if (exact_time)
@@ -468,46 +468,46 @@ AnimatedSkeleton &AnimatedSkeleton::animateEx(C SkelAnim &skel_anim, Flt time, B
                     Animate(bones[sbon], animation->bones[i], params);
             }
     }
-    PROFILE_STOP("AnimatedSkeleton::animateEx(C SkelAnim &skel_anim, Flt time, Bool exact_time, Bool animate_root, Bool animate_bones)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::animateEx(C SkelAnim &skel_anim, Flt time, Bool exact_time, Bool animate_root, Bool animate_bones)")
     return T;
 }
 AnimatedSkeleton &AnimatedSkeleton::animate(C SkelAnim *skel_anim, Flt time, Flt blend) {
-    PROFILE_START("AnimatedSkeleton::animate(C SkelAnim *skel_anim, Flt time, Flt blend)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::animate(C SkelAnim *skel_anim, Flt time, Flt blend)")
     if (skel_anim)
         animate(*skel_anim, time, blend);
-    PROFILE_STOP("AnimatedSkeleton::animate(C SkelAnim *skel_anim, Flt time, Flt blend)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::animate(C SkelAnim *skel_anim, Flt time, Flt blend)")
     return T;
 }
 AnimatedSkeleton &AnimatedSkeleton::animate(C Motion &motion) {
-    PROFILE_START("AnimatedSkeleton::animate(C Motion &motion)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::animate(C Motion &motion)")
     if (motion.is())
         animate(*motion.skel_anim, motion.time, motion.animBlend());
-    PROFILE_STOP("AnimatedSkeleton::animate(C Motion &motion)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::animate(C Motion &motion)")
     return T;
 }
 AnimatedSkeleton &AnimatedSkeleton::animate(C Str &anim_name, Flt time, Flt blend) {
-    PROFILE_START("AnimatedSkeleton::animate(C Str &anim_name, Flt time, Flt blend)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::animate(C Str &anim_name, Flt time, Flt blend)")
     if (anim_name.is() && blend > EPS_ANIM_BLEND)
         if (skeleton())
             animate(*getSkelAnim(anim_name), time, blend);
         else
             AnimRoot(T, Animations(anim_name), time, blend);
-    PROFILE_STOP("AnimatedSkeleton::animate(C Str &anim_name, Flt time, Flt blend)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::animate(C Str &anim_name, Flt time, Flt blend)")
     return T;
 } // in these methods check 'blend' first to avoid unnecessary animation loads
 AnimatedSkeleton &AnimatedSkeleton::animate(C UID &anim_id, Flt time, Flt blend) {
-    PROFILE_START("AnimatedSkeleton::animate(C UID &anim_id, Flt time, Flt blend)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::animate(C UID &anim_id, Flt time, Flt blend)")
     if (anim_id.valid() && blend > EPS_ANIM_BLEND)
         if (skeleton())
             animate(*getSkelAnim(anim_id), time, blend);
         else
             AnimRoot(T, Animations(anim_id), time, blend);
-    PROFILE_STOP("AnimatedSkeleton::animate(C UID &anim_id, Flt time, Flt blend)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::animate(C UID &anim_id, Flt time, Flt blend)")
     return T;
 } // in these methods check 'blend' first to avoid unnecessary animation loads
 /******************************************************************************/
 AnimatedSkeleton &AnimatedSkeleton::animateReplace(C SkelAnim &skel_anim, Flt time, Flt blend) {
-    PROFILE_START("AnimatedSkeleton::animateReplace(C SkelAnim &skel_anim, Flt time, Flt blend)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::animateReplace(C SkelAnim &skel_anim, Flt time, Flt blend)")
     if (blend > EPS_ANIM_BLEND)
         if (C Animation *animation = skel_anim.animation()) {
             AnimParamsReplace params(*animation, time, blend);
@@ -520,26 +520,26 @@ AnimatedSkeleton &AnimatedSkeleton::animateReplace(C SkelAnim &skel_anim, Flt ti
                     Animate(bones[sbon], animation->bones[i], params);
             }
         }
-    PROFILE_STOP("AnimatedSkeleton::animateReplace(C SkelAnim &skel_anim, Flt time, Flt blend)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::animateReplace(C SkelAnim &skel_anim, Flt time, Flt blend)")
     return T;
 }
 AnimatedSkeleton &AnimatedSkeleton::animateReplace(C SkelAnim *skel_anim, Flt time, Flt blend) {
-    PROFILE_START("AnimatedSkeleton::animateReplace(C SkelAnim *skel_anim, Flt time, Flt blend)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::animateReplace(C SkelAnim *skel_anim, Flt time, Flt blend)")
     if (skel_anim)
         animateReplace(*skel_anim, time, blend);
-    PROFILE_STOP("AnimatedSkeleton::animateReplace(C SkelAnim *skel_anim, Flt time, Flt blend)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::animateReplace(C SkelAnim *skel_anim, Flt time, Flt blend)")
     return T;
 }
 AnimatedSkeleton &AnimatedSkeleton::animateReplace(C Motion &motion) {
-    PROFILE_START("AnimatedSkeleton::animateReplace(C Motion &motion)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::animateReplace(C Motion &motion)")
     if (motion.is())
         animateReplace(*motion.skel_anim, motion.time, motion.animBlend());
-    PROFILE_STOP("AnimatedSkeleton::animateReplace(C Motion &motion)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::animateReplace(C Motion &motion)")
     return T;
 }
 /******************************************************************************/
 static void UpdateRootBoneMatrix(AnimatedSkeleton &anim_skel, C MatrixM &body_matrix) {
-    PROFILE_START("UpdateRootBoneMatrix(AnimatedSkeleton &anim_skel, C MatrixM &body_matrix)")
+    PROFILE_START("CatzEngine::UpdateRootBoneMatrix(AnimatedSkeleton &anim_skel, C MatrixM &body_matrix)")
     AnimSkelBone &bone = anim_skel.root;
 
     if (bone._disabled) {
@@ -596,10 +596,10 @@ static void UpdateRootBoneMatrix(AnimatedSkeleton &anim_skel, C MatrixM &body_ma
         bone._matrix.pos = bone.pos;
         bone._matrix.mul(body_matrix);
     }
-    PROFILE_STOP("UpdateRootBoneMatrix(AnimatedSkeleton &anim_skel, C MatrixM &body_matrix)")
+    PROFILE_STOP("CatzEngine::UpdateRootBoneMatrix(AnimatedSkeleton &anim_skel, C MatrixM &body_matrix)")
 }
 static void UpdateBoneMatrix(AnimatedSkeleton &anim_skel, Int i) {
-    PROFILE_START("UpdateBoneMatrix(AnimatedSkeleton &anim_skel, Int i)")
+    PROFILE_START("CatzEngine::UpdateBoneMatrix(AnimatedSkeleton &anim_skel, Int i)")
     AnimSkelBone &bone = anim_skel.bones[i];
     if (bone._force_matrix)
         return; // it's important to don't do any adjustments (for example '_world_space_transform') for '_matrix' if '_force_matrix' is enabled, because this function can be called several times before skeleton finishes animating, which would adjust several times
@@ -719,10 +719,10 @@ matrix_set:
     // world space transformation
     if (bone._world_space_transform)
         bone._matrix.transformAtPos(sbon.pos * bone._matrix, bone._world_space_transform_matrix);
-    PROFILE_STOP("UpdateBoneMatrix(AnimatedSkeleton &anim_skel, Int i)")
+    PROFILE_STOP("CatzEngine::UpdateBoneMatrix(AnimatedSkeleton &anim_skel, Int i)")
 }
 static void UpdateSlot(AnimatedSkeleton &anim_skel, Int i) {
-    PROFILE_START("UpdateSlot(AnimatedSkeleton &anim_skel, Int i)")
+    PROFILE_START("CatzEngine::UpdateSlot(AnimatedSkeleton &anim_skel, Int i)")
     C SkelSlot &skel_slot = anim_skel.skeleton()->slots[i];
     OrientM &slot = anim_skel.slots[i];
     slot = skel_slot;
@@ -734,11 +734,11 @@ static void UpdateSlot(AnimatedSkeleton &anim_skel, Int i) {
         slot.fix();
         slot.pos *= 0.5;
     }
-    PROFILE_STOP("UpdateSlot(AnimatedSkeleton &anim_skel, Int i)")
+    PROFILE_STOP("CatzEngine::UpdateSlot(AnimatedSkeleton &anim_skel, Int i)")
 }
 /******************************************************************************/
 AnimatedSkeleton &AnimatedSkeleton::updateMatrix(C MatrixM &body_matrix) {
-    PROFILE_START("AnimatedSkeleton::updateMatrix(C MatrixM &body_matrix)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::updateMatrix(C MatrixM &body_matrix)")
     UpdateRootBoneMatrix(T, body_matrix);
     if (skeleton()) // test 'skeleton' once here, and not everytime in 'UpdateBoneMatrix' and 'UpdateSlot'
     {
@@ -748,38 +748,38 @@ AnimatedSkeleton &AnimatedSkeleton::updateMatrix(C MatrixM &body_matrix) {
         REP(minSlots())
         UpdateSlot(T, i); // order is not important, because slots are attached to bones (not slots)
     }
-    PROFILE_STOP("AnimatedSkeleton::updateMatrix(C MatrixM &body_matrix)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::updateMatrix(C MatrixM &body_matrix)")
     return T;
 }
 /******************************************************************************/
 static void UpdateBoneMatrixRecursiveUp(AnimatedSkeleton &anim_skel, Int i) {
-    PROFILE_START("UpdateBoneMatrixRecursiveUp(AnimatedSkeleton &anim_skel, Int i)")
+    PROFILE_START("CatzEngine::UpdateBoneMatrixRecursiveUp(AnimatedSkeleton &anim_skel, Int i)")
     BoneType parent = anim_skel.skeleton()->bones[i].parent;
     if (parent < i)
         UpdateBoneMatrixRecursiveUp(anim_skel, parent); // first update parents, "parent<i" means that parent is !=BONE_NULL, parent fits in minBones range and this prevents infinite loops (looped parent cycle)
     UpdateBoneMatrix(anim_skel, i);                     // now   update self
-    PROFILE_STOP("UpdateBoneMatrixRecursiveUp(AnimatedSkeleton &anim_skel, Int i)")
+    PROFILE_STOP("CatzEngine::UpdateBoneMatrixRecursiveUp(AnimatedSkeleton &anim_skel, Int i)")
 }
 AnimatedSkeleton &AnimatedSkeleton::updateMatrixParents(C MatrixM &body_matrix, Int bone) {
-    PROFILE_START("AnimatedSkeleton::updateMatrixParents(C MatrixM &body_matrix, Int bone)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::updateMatrixParents(C MatrixM &body_matrix, Int bone)")
     UpdateRootBoneMatrix(T, body_matrix); // first update root
     if (skeleton() && InRange(bone, minBones()))
         UpdateBoneMatrixRecursiveUp(T, bone); // now   update parents and self, test 'skeleton' once here, and not everytime in 'UpdateBoneMatrixRecursiveUp'
-    PROFILE_STOP("AnimatedSkeleton::updateMatrixParents(C MatrixM &body_matrix, Int bone)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::updateMatrixParents(C MatrixM &body_matrix, Int bone)")
     return T;
 }
 /******************************************************************************/
 static void UpdateBoneMatrixRecursiveDown(AnimatedSkeleton &anim_skel, Int i, Int min_bones) {
-    PROFILE_START("UpdateBoneMatrixRecursiveDown(AnimatedSkeleton &anim_skel, Int i, Int min_bones)")
+    PROFILE_START("CatzEngine::UpdateBoneMatrixRecursiveDown(AnimatedSkeleton &anim_skel, Int i, Int min_bones)")
     C SkelBone &bone = anim_skel.skeleton()->bones[i];
     UpdateBoneMatrix(anim_skel, i);                                                                      // first update self
     for (Int i = Min(bone.children_offset + bone.children_num, min_bones); --i >= bone.children_offset;) // now update children
         UpdateBoneMatrixRecursiveDown(anim_skel, i, min_bones);
-    PROFILE_STOP("UpdateBoneMatrixRecursiveDown(AnimatedSkeleton &anim_skel, Int i, Int min_bones)")
+    PROFILE_STOP("CatzEngine::UpdateBoneMatrixRecursiveDown(AnimatedSkeleton &anim_skel, Int i, Int min_bones)")
 }
 AnimatedSkeleton &AnimatedSkeleton::updateMatrixChildren(Int bone) // this updates 'bone' too
 {
-    PROFILE_START("AnimatedSkeleton::updateMatrixChildren(Int bone)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::updateMatrixChildren(Int bone)")
     if (skeleton()) // test 'skeleton' once here, and not everytime in 'UpdateBoneMatrixRecursiveDown' and 'UpdateSlot'
     {
         Int min_bones = minBones();
@@ -789,22 +789,22 @@ AnimatedSkeleton &AnimatedSkeleton::updateMatrixChildren(Int bone) // this updat
             UpdateSlot(T, i); // update slots once bones are ready (because slots are attached to bones)
         }
     }
-    PROFILE_STOP("AnimatedSkeleton::updateMatrixChildren(Int bone)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::updateMatrixChildren(Int bone)")
     return T;
 }
 /******************************************************************************/
 AnimatedSkeleton &AnimatedSkeleton::forceMatrix(Int bone, C MatrixM &matrix, Bool auto_update_matrixes) {
-    PROFILE_START("AnimatedSkeleton::forceMatrix(Int bone, C MatrixM &matrix, Bool auto_update_matrixes)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::forceMatrix(Int bone, C MatrixM &matrix, Bool auto_update_matrixes)")
     if (InRange(bone, bones)) {
         bones[bone].forceMatrix(matrix);
         if (auto_update_matrixes)
             updateMatrixChildren(bone); // this will update 'bone' too
     }
-    PROFILE_STOP("AnimatedSkeleton::forceMatrix(Int bone, C MatrixM &matrix, Bool auto_update_matrixes)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::forceMatrix(Int bone, C MatrixM &matrix, Bool auto_update_matrixes)")
     return T;
 }
 AnimatedSkeleton &AnimatedSkeleton::transformInWorldSpace(Int bone, C Matrix3 &matrix, Bool auto_update_matrixes) {
-    PROFILE_START("AnimatedSkeleton::transformInWorldSpace(Int bone, C Matrix3 &matrix, Bool auto_update_matrixes)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::transformInWorldSpace(Int bone, C Matrix3 &matrix, Bool auto_update_matrixes)")
     if (InRange(bone, bones)) {
         AnimSkelBone &b = bones[bone];
 
@@ -819,11 +819,11 @@ AnimatedSkeleton &AnimatedSkeleton::transformInWorldSpace(Int bone, C Matrix3 &m
         if (auto_update_matrixes)
             updateMatrixChildren(bone); // this will update 'bone' too
     }
-    PROFILE_STOP("AnimatedSkeleton::transformInWorldSpace(Int bone, C Matrix3 &matrix, Bool auto_update_matrixes)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::transformInWorldSpace(Int bone, C Matrix3 &matrix, Bool auto_update_matrixes)")
     return T;
 }
 AnimatedSkeleton &AnimatedSkeleton::transformInWorldSpace(Int bone, C Matrix &matrix, Bool auto_update_matrixes) {
-    PROFILE_START("AnimatedSkeleton::transformInWorldSpace(Int bone, C Matrix &matrix, Bool auto_update_matrixes)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::transformInWorldSpace(Int bone, C Matrix &matrix, Bool auto_update_matrixes)")
     if (InRange(bone, bones)) {
         AnimSkelBone &b = bones[bone];
 
@@ -838,11 +838,11 @@ AnimatedSkeleton &AnimatedSkeleton::transformInWorldSpace(Int bone, C Matrix &ma
         if (auto_update_matrixes)
             updateMatrixChildren(bone); // this will update 'bone' too
     }
-    PROFILE_STOP("AnimatedSkeleton::transformInWorldSpace(Int bone, C Matrix &matrix, Bool auto_update_matrixes)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::transformInWorldSpace(Int bone, C Matrix &matrix, Bool auto_update_matrixes)")
     return T;
 }
 AnimatedSkeleton &AnimatedSkeleton::transformInWorldSpace(Int bone, C MatrixM &matrix, Bool auto_update_matrixes) {
-    PROFILE_START("AnimatedSkeleton::transformInWorldSpace(Int bone, C MatrixM &matrix, Bool auto_update_matrixes)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::transformInWorldSpace(Int bone, C MatrixM &matrix, Bool auto_update_matrixes)")
     if (InRange(bone, bones)) {
         AnimSkelBone &b = bones[bone];
 
@@ -857,7 +857,7 @@ AnimatedSkeleton &AnimatedSkeleton::transformInWorldSpace(Int bone, C MatrixM &m
         if (auto_update_matrixes)
             updateMatrixChildren(bone); // this will update 'bone' too
     }
-    PROFILE_STOP("AnimatedSkeleton::transformInWorldSpace(Int bone, C MatrixM &matrix, Bool auto_update_matrixes)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::transformInWorldSpace(Int bone, C MatrixM &matrix, Bool auto_update_matrixes)")
     return T;
 }
 /******************************************************************************
@@ -883,7 +883,7 @@ AnimatedSkeleton& AnimatedSkeleton::vel(C Vec &vel, C Vec &ang_vel)
    return T;
 }*/
 AnimatedSkeleton &AnimatedSkeleton::updateBegin() {
-    PROFILE_START("AnimatedSkeleton::updateBegin()")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::updateBegin()")
     Bool physics_relative = false;
     if (physics_relative && !Physics.updated())
         return T;
@@ -893,7 +893,7 @@ AnimatedSkeleton &AnimatedSkeleton::updateBegin() {
         AnimSkelBone &bone = bones[i];
         bone._matrix_prev = bone._matrix;
     }
-    PROFILE_STOP("AnimatedSkeleton::updateBegin()")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::updateBegin()")
     return T;
 }
 void AnimatedSkeleton::updateEnd() {
@@ -967,56 +967,56 @@ void AnimatedSkeleton::updateEnd() {
 }
 /******************************************************************************/
 void AnimatedSkeleton::move(C VecD &d) {
-    PROFILE_START("AnimatedSkeleton::move(C VecD &d)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::move(C VecD &d)")
     root += d;
     REPAO(bones) += d;
     REPAO(slots) += d;
-    PROFILE_STOP("AnimatedSkeleton::move(C VecD &d)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::move(C VecD &d)")
 }
 void AnimatedSkeleton::offset(C VecD &d) {
-    PROFILE_START("AnimatedSkeleton::offset(C VecD &d)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::offset(C VecD &d)")
     root._matrix += d;
     REPAO(bones)._matrix += d;
     REPAO(slots) += d;
-    PROFILE_STOP("AnimatedSkeleton::offset(C VecD &d)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::offset(C VecD &d)")
 }
 /******************************************************************************/
 void AnimatedSkeleton::getMatrixes(MemPtrN<MatrixM, 256> matrixes) C {
-    PROFILE_START("AnimatedSkeleton::getMatrixes(MemPtrN<MatrixM, 256> matrixes)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::getMatrixes(MemPtrN<MatrixM, 256> matrixes)")
     matrixes.setNum(bones.elms() + 1);
     matrixes[0] = matrix();
     REPA(bones)
     matrixes[i + 1] = bones[i].matrix();
-    PROFILE_STOP("AnimatedSkeleton::getMatrixes(MemPtrN<MatrixM, 256> matrixes)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::getMatrixes(MemPtrN<MatrixM, 256> matrixes)")
 }
 /******************************************************************************/
 // DRAW
 /******************************************************************************/
 void AnimatedSkeleton::draw(C Color &bone_color, C Color &slot_color) C {
-    PROFILE_START("AnimatedSkeleton::draw(C Color &bone_color, C Color &slot_color)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::draw(C Color &bone_color, C Color &slot_color)")
     if (bone_color.a && skeleton())
         REP(minBones())
     (skeleton()->bones[i] * bones[i].matrix()).draw(bone_color);
     if (slot_color.a)
         REPAO(slots).draw(slot_color);
-    PROFILE_STOP("AnimatedSkeleton::draw(C Color &bone_color, C Color &slot_color)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::draw(C Color &bone_color, C Color &slot_color)")
 }
 /******************************************************************************/
 // IO
 /******************************************************************************/
 Bool AnimatedSkeleton::save(File &f) C // !! if changing file format, then keep backward compatibility with old save games !!
 {
-    PROFILE_START("AnimatedSkeleton::save(File &f)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::save(File &f)")
     f.putMulti(Byte(0), matrix()); // version
     f.putAsset(Skeletons.id(skeleton()));
 #if FUR
     f.putMulti(fur_stiffness, fur_gravity, fur_vel_scale);
 #endif
-    PROFILE_STOP("AnimatedSkeleton::save(File &f)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::save(File &f)")
     return f.ok();
 }
 Bool AnimatedSkeleton::load(File &f) {
-    PROFILE_START("AnimatedSkeleton::load(File &f)")
+    PROFILE_START("CatzEngine::AnimatedSkeleton::load(File &f)")
     switch (f.decUIntV()) // version
     {
     case 0: {
@@ -1026,13 +1026,13 @@ Bool AnimatedSkeleton::load(File &f) {
         f.getMulti(fur_stiffness, fur_gravity, fur_vel_scale);
 #endif
         if (f.ok()) {
-            PROFILE_STOP("AnimatedSkeleton::load(File &f)")
+            PROFILE_STOP("CatzEngine::AnimatedSkeleton::load(File &f)")
             return true;
         }
     } break;
     }
     del();
-    PROFILE_STOP("AnimatedSkeleton::load(File &f)")
+    PROFILE_STOP("CatzEngine::AnimatedSkeleton::load(File &f)")
     return false;
 }
 /******************************************************************************/

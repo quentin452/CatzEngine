@@ -672,7 +672,7 @@ void ShaderBuffer::create(Int size) // no locks needed because this is called on
     changed = true;
 }
 void ShaderBuffer::update() {
-    PROFILE_START("ShaderBuffer::update()")
+    PROFILE_START("CatzEngine::ShaderBuffer::update()")
 #if DX11
     if (BUFFER_DYNAMIC) {
         D3D11_MAPPED_SUBRESOURCE map;
@@ -721,10 +721,10 @@ void ShaderBuffer::update() {
     }
 #endif
     changed = false;
-    PROFILE_STOP("ShaderBuffer::update()")
+    PROFILE_STOP("CatzEngine::ShaderBuffer::update()")
 }
 void ShaderBuffer::bind(Int index) {
-    PROFILE_START("ShaderBuffer::bind(Int index)")
+    PROFILE_START("CatzEngine::ShaderBuffer::bind(Int index)")
 #if DX11
     BufVS(index, buffer.buffer);
     BufHS(index, buffer.buffer);
@@ -734,10 +734,10 @@ void ShaderBuffer::bind(Int index) {
 #elif GL
     glBindBufferBase(GL_UNIFORM_BUFFER, index, buffer.buffer);
 #endif
-    PROFILE_STOP("ShaderBuffer::bind(Int index)")
+    PROFILE_STOP("CatzEngine::ShaderBuffer::bind(Int index)")
 }
 void ShaderBuffer::bindCheck(Int index) {
-    PROFILE_START("ShaderBuffer::bindCheck(Int index)")
+    PROFILE_START("CatzEngine::ShaderBuffer::bindCheck(Int index)")
 #if 1
     if (explicit_bind_slot == index)
         return;
@@ -753,7 +753,7 @@ void ShaderBuffer::bindCheck(Int index) {
     }
 #endif
     Exit(S + "ShaderBuffer was expected to be bound at slot " + index);
-    PROFILE_STOP("ShaderBuffer::bindCheck(Int index)")
+    PROFILE_STOP("CatzEngine::ShaderBuffer::bindCheck(Int index)")
 }
 #if DX11
 void ShaderBuffer::setPart(Int part) {
@@ -804,7 +804,7 @@ Int ShaderParam::gpuArrayStride() C {
 }
 void ShaderParam::initAsElement(ShaderParam &parent, Int index) // this is called after 'parent' was already loaded, so 'gpu_offset' are relative to parameter (not cbuffer)
 {
-    PROFILE_START("ShaderParam::initAsElement(ShaderParam &parent, Int index)")
+    PROFILE_START("CatzEngine::ShaderParam::initAsElement(ShaderParam &parent, Int index)")
     DEBUG_ASSERT(this != &parent, "Can't init from self");
     RANGE_ASSERT(index, parent._elements);
 
@@ -841,7 +841,7 @@ void ShaderParam::initAsElement(ShaderParam &parent, Int index) // this is calle
         REPA(_optimized_translation)
         MAX(_gpu_data_size, _optimized_translation[i].gpu_offset + _optimized_translation[i].elm_size);
     }
-    PROFILE_STOP("ShaderParam::initAsElement(ShaderParam &parent, Int index)")
+    PROFILE_STOP("CatzEngine::ShaderParam::initAsElement(ShaderParam &parent, Int index)")
 }
 /******************************************************************************/
 ASSERT(MIN_SHADER_PARAM_DATA_SIZE >= SIZE(Vec4)); // can write small types without checking for 'canFit', because all 'ShaderBuffer's for 'ShaderParam' data are allocated with MIN_SHADER_PARAM_DATA_SIZE=SIZE(Vec4) padding

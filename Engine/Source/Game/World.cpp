@@ -22,21 +22,21 @@ WorldManager World;
 // WORLD SETTINGS
 /******************************************************************************/
 WorldSettings &WorldSettings::areaSize(Flt size) {
-    PROFILE_START("WorldSettings::areaSize(Flt size)")
+    PROFILE_START("CatzEngine::WorldSettings::areaSize(Flt size)")
     T._area_size = Max(size, EPS);
-    PROFILE_STOP("WorldSettings::areaSize(Flt size)")
+    PROFILE_STOP("CatzEngine::WorldSettings::areaSize(Flt size)")
     return T;
 }
 WorldSettings &WorldSettings::hmRes(Int res) {
-    PROFILE_START("WorldSettings::hmRes(Int res)")
+    PROFILE_START("CatzEngine::WorldSettings::hmRes(Int res)")
     T._hm_res = NearestPow2(Mid(res, 1, MAX_HM_RES)) + 1;
-    PROFILE_STOP("WorldSettings::hmRes(Int res)")
+    PROFILE_STOP("CatzEngine::WorldSettings::hmRes(Int res)")
     return T;
 }
 WorldSettings &WorldSettings::path2DRes(Int res) {
-    PROFILE_START("WorldSettings::path2DRes(Int res)")
+    PROFILE_START("CatzEngine::WorldSettings::path2DRes(Int res)")
     T._path2d_res = Mid(res, 1, MAX_PATH_RES);
-    PROFILE_STOP("WorldSettings::path2DRes(Int res)")
+    PROFILE_STOP("CatzEngine::WorldSettings::path2DRes(Int res)")
     return T;
 }
 
@@ -50,28 +50,28 @@ Str WorldSettings::asText() C {
     return S + "Area Size: " + areaSize() + '\n' + "Heightmap Resolution: " + (hmRes() - 1) + '\n' + "2D Path Resolution: " + path2DRes();
 }
 WorldSettings &WorldSettings::reset() {
-    PROFILE_START("WorldSettings::reset()")
+    PROFILE_START("CatzEngine::WorldSettings::reset()")
     environment = null;
     _area_size = 32;
     _hm_res = 65;
     _path2d_res = 32;
-    PROFILE_STOP("WorldSettings::reset()")
+    PROFILE_STOP("CatzEngine::WorldSettings::reset()")
     return T;
 }
 WorldSettings &WorldSettings::shr() {
-    PROFILE_START("WorldSettings::shr()")
+    PROFILE_START("CatzEngine::WorldSettings::shr()")
     areaSize(areaSize() / 2);
     hmRes((hmRes() - 1) / 2);
     path2DRes(path2DRes() / 2);
-    PROFILE_STOP("WorldSettings::shr()")
+    PROFILE_STOP("CatzEngine::WorldSettings::shr()")
     return T;
 }
 WorldSettings &WorldSettings::shl() {
-    PROFILE_START("WorldSettings::shl()")
+    PROFILE_START("CatzEngine::WorldSettings::shl()")
     areaSize(areaSize() * 2);
     hmRes((hmRes() - 1) * 2);
     path2DRes(path2DRes() * 2);
-    PROFILE_STOP("WorldSettings::shl()")
+    PROFILE_STOP("CatzEngine::WorldSettings::shl()")
     return T;
 }
 Bool WorldSettings::save(File &f, CChar *path) C {
@@ -120,7 +120,7 @@ Bool WorldSettings::load(C Str &name) {
 // RESOURCES
 /******************************************************************************/
 static void DelayRemoveInc() {
-    PROFILE_START("DelayRemoveInc")
+    PROFILE_START("CatzEngine::DelayRemoveInc")
     Environments.delayRemoveInc();
     Objects.delayRemoveInc();
     Meshes.delayRemoveInc();
@@ -129,10 +129,10 @@ static void DelayRemoveInc() {
     Materials.delayRemoveInc();
     ImageAtlases.delayRemoveInc();
     Images.delayRemoveInc();
-    PROFILE_STOP("DelayRemoveInc")
+    PROFILE_STOP("CatzEngine::DelayRemoveInc")
 }
 static void DelayRemoveDec() {
-    PROFILE_START("DelayRemoveDec")
+    PROFILE_START("CatzEngine::DelayRemoveDec")
     Environments.delayRemoveDec();
     Objects.delayRemoveDec();
     Meshes.delayRemoveDec();
@@ -141,31 +141,31 @@ static void DelayRemoveDec() {
     Materials.delayRemoveDec();
     ImageAtlases.delayRemoveDec();
     Images.delayRemoveDec();
-    PROFILE_STOP("DelayRemoveDec")
+    PROFILE_STOP("CatzEngine::DelayRemoveDec")
 }
 /******************************************************************************/
 // WORLD MANAGER
 /******************************************************************************/
 static Bool WorldThread(Thread &thread) {
-    PROFILE_START("WorldThread(Thread &thread)")
+    PROFILE_START("CatzEngine::WorldThread(Thread &thread)")
     ((WorldManager *)thread.user)->threadFunc();
-    PROFILE_STOP("WorldThread(Thread &thread)")
+    PROFILE_STOP("CatzEngine::WorldThread(Thread &thread)")
     return true;
 }
 void WorldManager::threadFunc() {
-    PROFILE_START("WorldManager::threadFunc()")
-    PROFILE_START("WorldManager::threadFunc()1")
+    PROFILE_START("CatzEngine::WorldManager::threadFunc()")
+    PROFILE_START("CatzEngine::WorldManager::threadFunc()1")
     _thread_event.wait(); // load data only on demand
-    PROFILE_STOP("WorldManager::threadFunc()1")
+    PROFILE_STOP("CatzEngine::WorldManager::threadFunc()1")
     if (_area_background.elms()) // if want some areas to be loaded
     {
-        PROFILE_START("WorldManager::threadFunc()2")
+        PROFILE_START("CatzEngine::WorldManager::threadFunc()2")
         // important: do not create new grid objects, but use already created in the main thread, and now access them using 'area_background' array (creating grid objects on secondary thread would require 'SyncLocker' for every operation on grid)
         File f; // declare the file outside the loop, to make use of performance optimization when using the same file loading files from 1 pak
         ThreadMayUseGPUData();
-        PROFILE_STOP("WorldManager::threadFunc()2")
+        PROFILE_STOP("CatzEngine::WorldManager::threadFunc()2")
     again:
-        PROFILE_START("WorldManager::threadFunc()3")
+        PROFILE_START("CatzEngine::WorldManager::threadFunc()3")
         SyncLocker locker(_lock);
         if (_area_background.elms()) {
             Area &area = *_area_background.pop();
@@ -174,22 +174,22 @@ void WorldManager::threadFunc() {
                 goto again;
         }
         ThreadFinishedUsingGPUData();
-        PROFILE_STOP("WorldManager::threadFunc()3")
+        PROFILE_STOP("CatzEngine::WorldManager::threadFunc()3")
     }
-    PROFILE_STOP("WorldManager::threadFunc()")
+    PROFILE_STOP("CatzEngine::WorldManager::threadFunc()")
 }
 /******************************************************************************/
 WorldManager &WorldManager::mode(WORLD_MODE mode) {
-    PROFILE_START("WorldManager::mode(WORLD_MODE mode)")
+    PROFILE_START("CatzEngine::WorldManager::mode(WORLD_MODE mode)")
     if (T.mode() != mode) {
         del();
         T._mode = mode;
     }
-    PROFILE_STOP("WorldManager::mode(WORLD_MODE mode)")
+    PROFILE_STOP("CatzEngine::WorldManager::mode(WORLD_MODE mode)")
     return T;
 }
 void WorldManager::setRanges() {
-    PROFILE_START("WorldManager::setRanges()")
+    PROFILE_START("CatzEngine::WorldManager::setRanges()")
     Int rangei_prev = T._rangei;
     T._rangei = Trunc(T._range / areaSize() + 2.2f);
     T._rangei2 = RoundPos(Sqr(T._rangei + 0.5f));                  // +  0.5
@@ -197,19 +197,19 @@ void WorldManager::setRanges() {
     T._rangei2_cache = RoundPos(Sqr(T._rangei + 1.5f + SQRT2));    // + ~2.9
     if (_mode == WORLD_STREAM && _updated && rangei_prev != T._rangei)
         areaUpdateState();
-    PROFILE_STOP("WorldManager::setRanges()")
+    PROFILE_STOP("CatzEngine::WorldManager::setRanges()")
 }
 WorldManager &WorldManager::activeRange(Flt range) {
-    PROFILE_START("WorldManager::activeRange(Flt range)")
+    PROFILE_START("CatzEngine::WorldManager::activeRange(Flt range)")
     if (T._range != range) {
         T._range = range;
         setRanges();
     }
-    PROFILE_STOP("WorldManager::activeRange(Flt range)")
+    PROFILE_STOP("CatzEngine::WorldManager::activeRange(Flt range)")
     return T;
 }
 void WorldManager::ObjContainer::set(ObjMap<Obj> *map, CPtr type) {
-    PROFILE_START("WorldManager::ObjContainer::set(ObjMap<Obj> *map, CPtr type)")
+    PROFILE_START("CatzEngine::WorldManager::ObjContainer::set(ObjMap<Obj> *map, CPtr type)")
     if (T.map != map) // if changing
     {
         if (T.map)
@@ -217,23 +217,23 @@ void WorldManager::ObjContainer::set(ObjMap<Obj> *map, CPtr type) {
         T.map = map;
     }
     T.type = type;
-    PROFILE_STOP("WorldManager::ObjContainer::set(ObjMap<Obj> *map, CPtr type)")
+    PROFILE_STOP("CatzEngine::WorldManager::ObjContainer::set(ObjMap<Obj> *map, CPtr type)")
 }
 
 WorldManager &WorldManager::_setObjType(ObjMap<Obj> *obj_map, Int obj_type, CPtr c_type) {
-    PROFILE_START("WorldManager::_setObjType(ObjMap<Obj> *obj_map, Int obj_type, CPtr c_type)")
+    PROFILE_START("CatzEngine::WorldManager::_setObjType(ObjMap<Obj> *obj_map, Int obj_type, CPtr c_type)")
     if (obj_type >= 0) {
         SyncLocker locker(_lock);
         if (obj_map || InRange(obj_type, _obj_container)) // want to set somethnig, or want to clear and index is in range
             _obj_container(obj_type).set(obj_map, c_type);
     }
-    PROFILE_STOP("WorldManager::_setObjType(ObjMap<Obj> *obj_map, Int obj_type, CPtr c_type)")
+    PROFILE_STOP("CatzEngine::WorldManager::_setObjType(ObjMap<Obj> *obj_map, Int obj_type, CPtr c_type)")
     return T;
 }
 /******************************************************************************/
 static void UnloadAreas(Cell<Area> &cell, WorldManager &world) { world.areaUnload(cell()); }
 WorldManager &WorldManager::del() {
-    PROFILE_START("WorldManager::del()")
+    PROFILE_START("CatzEngine::WorldManager::del()")
     if (is()) {
         SyncLocker locker(_lock);
 
@@ -273,14 +273,14 @@ WorldManager &WorldManager::del() {
 
         Time.skipUpdate();
     }
-    PROFILE_STOP("WorldManager::del()")
+    PROFILE_STOP("CatzEngine::WorldManager::del()")
     return T;
 }
 Bool WorldManager::NewTry(C Str &world_name) {
-    PROFILE_START("WorldManager::NewTry(C Str &world_name)")
+    PROFILE_START("CatzEngine::WorldManager::NewTry(C Str &world_name)")
     del();
     if (!world_name.is()) {
-        PROFILE_STOP("WorldManager::NewTry(C Str &world_name)")
+        PROFILE_STOP("CatzEngine::WorldManager::NewTry(C Str &world_name)")
         return true;
     }
 
@@ -313,48 +313,48 @@ Bool WorldManager::NewTry(C Str &world_name) {
         if (D.canUseGPUDataOnSecondaryThread()) // only if we can operate on GPU on secondary threads
             if (!_thread.created())
                 _thread.create(WorldThread, this, 0, false, "EE.Game.World");
-        PROFILE_STOP("WorldManager::NewTry(C Str &world_name)")
+        PROFILE_STOP("CatzEngine::WorldManager::NewTry(C Str &world_name)")
         return true;
     }
 error:
     del();
-    PROFILE_STOP("WorldManager::NewTry(C Str &world_name)")
+    PROFILE_STOP("CatzEngine::WorldManager::NewTry(C Str &world_name)")
     return false;
 }
 WorldManager &WorldManager::New(C Str &world_name) {
-    PROFILE_START("WorldManager::New(C Str &world_name)")
+    PROFILE_START("CatzEngine::WorldManager::New(C Str &world_name)")
     if (!NewTry(world_name))
         Exit(MLT(S + "Can't load world \"" + world_name + "\".",
                  PL, S + u"Nie można wczytać świata \"" + world_name + "\"."));
-    PROFILE_STOP("WorldManager::New(C Str &world_name)")
+    PROFILE_STOP("CatzEngine::WorldManager::New(C Str &world_name)")
     return T;
 }
 Bool WorldManager::NewTry(C UID &world_id) { return NewTry(world_id.valid() ? _EncodeFileName(world_id) : null); }
 WorldManager &WorldManager::New(C UID &world_id) { return New(world_id.valid() ? _EncodeFileName(world_id) : null); }
 
 void WorldManager::Create(C Str &world_name, C WorldSettings &settings) {
-    PROFILE_START("WorldManager::Create(C Str &world_name, C WorldSettings &settings)")
+    PROFILE_START("CatzEngine::WorldManager::Create(C Str &world_name, C WorldSettings &settings)")
     FCreateDirs(world_name + "/Area");
     settings.save(world_name + "/Settings");
-    PROFILE_STOP("WorldManager::Create(C Str &world_name, C WorldSettings &settings)")
+    PROFILE_STOP("CatzEngine::WorldManager::Create(C Str &world_name, C WorldSettings &settings)")
 }
 /******************************************************************************/
 // GET
 /******************************************************************************/
 Int WorldManager::objType(Obj &obj) {
-    PROFILE_START("WorldManager::objType(Obj &obj)")
+    PROFILE_START("CatzEngine::WorldManager::objType(Obj &obj)")
     CPtr obj_c_type = CType(obj);
     if (InRange(obj._type, _obj_container))
         if (obj_c_type == _obj_container[obj._type].type) {
-            PROFILE_STOP("WorldManager::objType(Obj &obj)")
+            PROFILE_STOP("CatzEngine::WorldManager::objType(Obj &obj)")
             return obj._type; // check if obj.type precisely matches the object container class
         }
     REPA(_obj_container)
     if (obj_c_type == _obj_container[i].type) {
-        PROFILE_STOP("WorldManager::objType(Obj &obj)")
+        PROFILE_STOP("CatzEngine::WorldManager::objType(Obj &obj)")
         return obj._type = i; // search all object containers for matching type
     }
-    PROFILE_STOP("WorldManager::objType(Obj &obj)")
+    PROFILE_STOP("CatzEngine::WorldManager::objType(Obj &obj)")
     return -1;
 }
 AREA_STATE WorldManager::rangeState(C VecI2 &xzi) {
@@ -404,14 +404,14 @@ C MaterialPtr &WorldManager::hmMaterial(C Vec2 &xz) {
 }
 static WaterMtrlPtr WaterMtrlGlobal = &Water;
 C WaterMtrlPtr &WorldManager::waterUnder(C Vec &pos, Flt *depth) {
-    PROFILE_START("WorldManager::waterUnder(C Vec &pos, Flt *depth)")
+    PROFILE_START("CatzEngine::WorldManager::waterUnder(C Vec &pos, Flt *depth)")
     // water plane
     if (Water.draw) {
         Flt d = Dist(pos, Water.plane);
         if (d <= 0) {
             if (depth)
                 *depth = d;
-            PROFILE_STOP("WorldManager::waterUnder(C Vec &pos, Flt *depth)")
+            PROFILE_STOP("CatzEngine::WorldManager::waterUnder(C Vec &pos, Flt *depth)")
             return WaterMtrlGlobal;
         }
     }
@@ -422,31 +422,31 @@ C WaterMtrlPtr &WorldManager::waterUnder(C Vec &pos, Flt *depth) {
             REPA(data->waters)
     if (data->waters[i].under(pos, depth))
         if (C WaterMtrlPtr &mtrl = data->waters[i].material()) {
-            PROFILE_STOP("WorldManager::waterUnder(C Vec &pos, Flt *depth)")
+            PROFILE_STOP("CatzEngine::WorldManager::waterUnder(C Vec &pos, Flt *depth)")
             return mtrl;
         } else {
-            PROFILE_STOP("WorldManager::waterUnder(C Vec &pos, Flt *depth)")
+            PROFILE_STOP("CatzEngine::WorldManager::waterUnder(C Vec &pos, Flt *depth)")
             return WaterMtrlGlobal; // WaterMesh material can return null in which case Water is used
         }
-    PROFILE_STOP("WorldManager::waterUnder(C Vec &pos, Flt *depth)")
+    PROFILE_STOP("CatzEngine::WorldManager::waterUnder(C Vec &pos, Flt *depth)")
     return WaterMtrlNull;
 }
 /******************************************************************************/
 // SET
 /******************************************************************************/
 void WorldManager::setShader() {
-    PROFILE_START("WorldManager::setShader()")
+    PROFILE_START("CatzEngine::WorldManager::setShader()")
     SyncLocker locker(_lock);
     REPAO(_area_active)->setShader();
     REPAO(_area_inactive)->setShader();
     REPAO(_area_cache)->setShader();
-    PROFILE_STOP("WorldManager::setShader()")
+    PROFILE_STOP("CatzEngine::WorldManager::setShader()")
 }
 /******************************************************************************/
 // LOAD / UNLOAD
 /******************************************************************************/
 void WorldManager::areaUnload(Area &area) {
-    PROFILE_START("WorldManager::areaUnload(Area &area)")
+    PROFILE_START("CatzEngine::WorldManager::areaUnload(Area &area)")
     if (area.state()) {
 #if DEBUG
         Dbl t = Time.curTime();
@@ -500,10 +500,10 @@ void WorldManager::areaUnload(Area &area) {
         _time_area_update_state_unload += Time.curTime() - t;
 #endif
     }
-    PROFILE_STOP("WorldManager::areaUnload(Area &area)")
+    PROFILE_STOP("CatzEngine::WorldManager::areaUnload(Area &area)")
 }
 void WorldManager::areaUnloadToCache(Area &area) {
-    PROFILE_START("WorldManager::areaUnloadToCache(Area &area)")
+    PROFILE_START("CatzEngine::WorldManager::areaUnloadToCache(Area &area)")
     if (area.loaded()) {
 #if DEBUG
         Dbl t = Time.curTime();
@@ -549,11 +549,11 @@ void WorldManager::areaUnloadToCache(Area &area) {
         _time_area_update_state_unload_cache += Time.curTime() - t;
 #endif
     }
-    PROFILE_STOP("WorldManager::areaUnloadToCache(Area &area)")
+    PROFILE_STOP("CatzEngine::WorldManager::areaUnloadToCache(Area &area)")
 }
 /******************************************************************************/
 void WorldManager::areaCache(Area &area, Bool inc_progress, File &file_area) {
-    PROFILE_START("WorldManager::areaCache(Area &area, Bool inc_progress, File &file_area)")
+    PROFILE_START("CatzEngine::WorldManager::areaCache(Area &area, Bool inc_progress, File &file_area)")
     if (area.state() == AREA_UNLOADED) {
         if (file_area.read(dataPath() + "Area/" + area.xz(), area_cipher)) {
             Area::Data *data;
@@ -566,11 +566,11 @@ void WorldManager::areaCache(Area &area, Bool inc_progress, File &file_area) {
         if (inc_progress && _areas_to_load)
             _update_progress = Sat(_update_progress + 1.0f / _areas_to_load);
     }
-    PROFILE_STOP("WorldManager::areaCache(Area &area, Bool inc_progress, File &file_area)")
+    PROFILE_STOP("CatzEngine::WorldManager::areaCache(Area &area, Bool inc_progress, File &file_area)")
 }
 /******************************************************************************/
 void WorldManager::areaLoad(Area &area, Bool active, File &file_area) {
-    PROFILE_START("WorldManager::areaLoad(Area &area, Bool active, File &file_area)")
+    PROFILE_START("CatzEngine::WorldManager::areaLoad(Area &area, Bool active, File &file_area)")
     if (area.state() == AREA_UNLOADED || area.state() == AREA_CACHE) {
 #if DEBUG
         Dbl t = Time.curTime();
@@ -672,13 +672,13 @@ void WorldManager::areaLoad(Area &area, Bool active, File &file_area) {
         _time_area_update_state_load += Time.curTime() - t;
 #endif
     }
-    PROFILE_STOP("WorldManager::areaLoad(Area &area, Bool active, File &file_area)")
+    PROFILE_STOP("CatzEngine::WorldManager::areaLoad(Area &area, Bool active, File &file_area)")
 }
 /******************************************************************************/
 // REFERENCES
 /******************************************************************************/
 void WorldManager::linkReferences() {
-    PROFILE_START("WorldManager::linkReferences()")
+    PROFILE_START("CatzEngine::WorldManager::linkReferences()")
     // world object link
     REPA(_area_active) {
         Memc<Obj *> &objs = _area_active[i]->_objs;
@@ -695,13 +695,13 @@ void WorldManager::linkReferences() {
 
     // clear
     _obj_newly_added.clear();
-    PROFILE_STOP("WorldManager::linkReferences()")
+    PROFILE_STOP("CatzEngine::WorldManager::linkReferences()")
 }
 /******************************************************************************/
 // UPDATE
 /******************************************************************************/
 void WorldManager::areaActivate(Area &area) {
-    PROFILE_START("WorldManager::areaActivate(Area &area)")
+    PROFILE_START("CatzEngine::WorldManager::areaActivate(Area &area)")
     if (area.state() == AREA_INACTIVE) {
 #if DEBUG
         Dbl t = Time.curTime();
@@ -721,10 +721,10 @@ void WorldManager::areaActivate(Area &area) {
         _time_area_update_state_activate += Time.curTime() - t;
 #endif
     }
-    PROFILE_STOP("WorldManager::areaActivate(Area &area)")
+    PROFILE_STOP("CatzEngine::WorldManager::areaActivate(Area &area)")
 }
 void WorldManager::areaDeactivate(Area &area) {
-    PROFILE_START("WorldManager::areaDeactivate(Area &area)")
+    PROFILE_START("CatzEngine::WorldManager::areaDeactivate(Area &area)")
     if (area.state() == AREA_ACTIVE) {
 #if DEBUG
         Dbl t = Time.curTime();
@@ -744,7 +744,7 @@ void WorldManager::areaDeactivate(Area &area) {
         _time_area_update_state_deactivate += Time.curTime() - t;
 #endif
     }
-    PROFILE_STOP("WorldManager::areaDeactivate(Area &area)")
+    PROFILE_STOP("CatzEngine::WorldManager::areaDeactivate(Area &area)")
 }
 /******************************************************************************/
 static Bool NeedLoad(AREA_STATE src, AREA_STATE dest) // warning: must be in sync with function below
@@ -784,7 +784,7 @@ static Bool NeedUnload(AREA_STATE src, AREA_STATE dest) // warning: must be in s
 }
 void WorldManager::areaUpdateState(Area &area, AREA_STATE state, File &file_area) // warning: must be in sync with function above
 {
-    PROFILE_START("WorldManager::areaUpdateState(Area &area, AREA_STATE state, File &file_area)")
+    PROFILE_START("CatzEngine::WorldManager::areaUpdateState(Area &area, AREA_STATE state, File &file_area)")
     if (!_update_break)
         switch (state) {
         case AREA_ACTIVE:
@@ -838,7 +838,7 @@ void WorldManager::areaUpdateState(Area &area, AREA_STATE state, File &file_area
             }
         } break;
         }
-    PROFILE_STOP("WorldManager::areaUpdateState(Area &area, AREA_STATE state, File &file_area)")
+    PROFILE_STOP("CatzEngine::WorldManager::areaUpdateState(Area &area, AREA_STATE state, File &file_area)")
 }
 void WorldManager::areaUpdateState(Area &area, File &file_area) {
     areaUpdateState(area, rangeState(area.xz()), file_area);
@@ -885,7 +885,7 @@ struct RectSetter {
     }
 };
 void WorldManager::areaSetLoadedRect() {
-    PROFILE_START("WorldManager::areaSetLoadedRect()")
+    PROFILE_START("CatzEngine::WorldManager::areaSetLoadedRect()")
     // set area active/loaded rect
     switch (_mode) {
     case WORLD_STREAM: {
@@ -910,10 +910,10 @@ void WorldManager::areaSetLoadedRect() {
     if (_area_loaded_rect.w() >= 16384 || _area_loaded_rect.h() >= 16384)
         Exit(S + "Loaded 'Game.Area' coverage exceeds allowed memory limits!\nLoaded Area coordinates:\n" + _area_loaded_rect.asText() + "\nWidth: " + _area_loaded_rect.w() + ", Height: " + _area_loaded_rect.h() + "\nTotal Areas: " + _area_loaded_rect.w() * _area_loaded_rect.h());
     _grid.fastAccess(&_area_loaded_rect);
-    PROFILE_STOP("WorldManager::areaSetLoadedRect()")
+    PROFILE_STOP("CatzEngine::WorldManager::areaSetLoadedRect()")
 }
 void WorldManager::areaSetVisibility(Memc<Area *> &area_draw, Bool sort) {
-    PROFILE_START("WorldManager::areaSetVisibility(Memc<Area *> &area_draw, Bool sort)")
+    PROFILE_START("CatzEngine::WorldManager::areaSetVisibility(Memc<Area *> &area_draw, Bool sort)")
     if (is()) // if world exists
     {
         Memt<VecI2> areas;
@@ -923,10 +923,10 @@ void WorldManager::areaSetVisibility(Memc<Area *> &area_draw, Bool sort) {
         if (Area *area = areaActive(areas[i]))
             area_draw.add(area); // add in same order
     }
-    PROFILE_STOP("WorldManager::areaSetVisibility(Memc<Area *> &area_draw, Bool sort)")
+    PROFILE_STOP("CatzEngine::WorldManager::areaSetVisibility(Memc<Area *> &area_draw, Bool sort)")
 }
 void WorldManager::areaUpdateState() {
-    PROFILE_START("WorldManager::areaUpdateState()")
+    PROFILE_START("CatzEngine::WorldManager::areaUpdateState()")
     if (_mode != WORLD_MANUAL) {
 #if DEBUG
         Dbl t = Time.curTime(),
@@ -1018,18 +1018,18 @@ void WorldManager::areaUpdateState() {
         _time_area_update_state = t - time_area_update_state;
 #endif
     }
-    PROFILE_STOP("WorldManager::areaUpdateState()")
+    PROFILE_STOP("CatzEngine::WorldManager::areaUpdateState()")
 }
 static void AreaUnloadRemaining(Cell<Area> &cell, WorldManager &world) {
-    PROFILE_START("AreaUnloadRemaining(Cell<Area> &cell, WorldManager &world)")
+    PROFILE_START("CatzEngine::AreaUnloadRemaining(Cell<Area> &cell, WorldManager &world)")
     if (cell()._temp)
         cell()._temp = false; // was     marked, so it was     processed manually, we can disable the mark flag now
     else
         world.areaUnload(cell()); // was not marked,    it was not processed manually, we need to unload the area
-    PROFILE_STOP("AreaUnloadRemaining(Cell<Area> &cell, WorldManager &world)")
+    PROFILE_STOP("CatzEngine::AreaUnloadRemaining(Cell<Area> &cell, WorldManager &world)")
 }
 void WorldManager::areaSetState(C CMemPtr<AreaState> &area_states, Bool unload_remaining) {
-    PROFILE_START("WorldManager::areaSetState(C CMemPtr<AreaState> &area_states, Bool unload_remaining)")
+    PROFILE_START("CatzEngine::WorldManager::areaSetState(C CMemPtr<AreaState> &area_states, Bool unload_remaining)")
     if (_mode == WORLD_MANUAL) {
         _update_progress = 0;
 
@@ -1091,13 +1091,13 @@ void WorldManager::areaSetState(C CMemPtr<AreaState> &area_states, Bool unload_r
         areaSetLoadedRect(); // set loaded areas lookup table
         path2DBuild();       // build paths after setting active areas
     }
-    PROFILE_STOP("WorldManager::areaSetState(C CMemPtr<AreaState> &area_states, Bool unload_remaining)")
+    PROFILE_STOP("CatzEngine::WorldManager::areaSetState(C CMemPtr<AreaState> &area_states, Bool unload_remaining)")
 }
 void WorldManager::updateBreak() {
     _update_break = true;
 }
 void WorldManager::updateObjectAreas() {
-    PROFILE_START("WorldManager::updateObjectAreas()")
+    PROFILE_START("CatzEngine::WorldManager::updateObjectAreas()")
     // update object area assignments (area which object is assigned to)
     REPA(_obj_container)
     if (ObjMap<Obj> *obj_map = _obj_container[i].map) // update areas of all objects (active and inactive, because objects can be accessed from both area states, and they can be repositioned manually)
@@ -1107,14 +1107,14 @@ void WorldManager::updateObjectAreas() {
             if (!obj.updateArea())
                 obj_map->removeObj(&obj);
         }
-    PROFILE_STOP("WorldManager::updateObjectAreas()")
+    PROFILE_STOP("CatzEngine::WorldManager::updateObjectAreas()")
 }
 #if !__GNUC__ // fails to compile on GCC
 INLINE
 #endif
 
 void WorldManager::updateObjects() {
-    PROFILE_START("WorldManager::updateObjects()")
+    PROFILE_START("CatzEngine::WorldManager::updateObjects()")
     Dbl time = Time.curTime();
     FREPA(_area_active) {
         Memc<Obj *> &objs = _area_active[i]->_objs;
@@ -1140,11 +1140,11 @@ void WorldManager::updateObjects() {
         }
     }
     _time_obj_update = Time.curTime() - time;
-    PROFILE_STOP("WorldManager::updateObjects()")
+    PROFILE_STOP("CatzEngine::WorldManager::updateObjects()")
 }
 
 void WorldManager::update(C Vec2 &xz) {
-    PROFILE_START("WorldManager::update(C Vec2 &xz)")
+    PROFILE_START("CatzEngine::WorldManager::update(C Vec2 &xz)")
     if (is()) {
         _update_break = false;
         _update_progress = 0;
@@ -1250,13 +1250,13 @@ void WorldManager::update(C Vec2 &xz) {
         // update path world
         _path.update(); // call this right away after updating objects, to make sure that we request rebuilds ASAP
     }
-    PROFILE_STOP("WorldManager::update(C Vec2 &xz)")
+    PROFILE_STOP("CatzEngine::WorldManager::update(C Vec2 &xz)")
 }
 /******************************************************************************/
 // IO
 /******************************************************************************/
 static void AreaSave(Cell<Area> &cell, File &f) {
-    PROFILE_START("AreaSave(Cell<Area> &cell, File &f)")
+    PROFILE_START("CatzEngine::AreaSave(Cell<Area> &cell, File &f)")
     if (cell().loaded())
         cell().saveObjs();     // first save loaded areas to temp
     cell().save(f, cell.xy()); // then  save the temp to file
@@ -1273,7 +1273,7 @@ Bool WorldManager::save(File &f) {
     f.putStr(name());               // world name
     _grid.func(AreaSave, f);        // area data
     f << VecI2(SIGN_BIT, SIGN_BIT); // end marker
-    PROFILE_STOP("AreaSave(Cell<Area> &cell, File &f)")
+    PROFILE_STOP("CatzEngine::AreaSave(Cell<Area> &cell, File &f)")
     return f.ok();
 }
 Bool WorldManager::save(C Str &save_name, Bool (*save)(File &f), Cipher *cipher) {

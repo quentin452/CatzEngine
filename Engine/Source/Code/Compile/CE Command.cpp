@@ -73,13 +73,13 @@ static void ListFunction(FileText &ft, Symbol &func, Memc<Command> &cmds)
 /******************************************************************************/
 static void ReadInstruction(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs, CMD_TYPE type) // read until ; encountered (eat the ';'), if { or } then don't set its parents set error and return
 {
-    PROFILE_START("ReadInstruction(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs, CMD_TYPE type)")
+    PROFILE_START("CatzEngine::ReadInstruction(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs, CMD_TYPE type)")
     Memc<Token *> &tokens = source.tokens;
     for (Int start = token_index; token_index < tokens.elms();) {
         Token &token = *tokens[token_index];
         if ((token.type == TOKEN_OPERATOR && (token == '{' || token == '}')) || (token.type == TOKEN_KEYWORD && (token == "if" || token == "for" || token == "while" || token == "do" || token == "return" || token == "break" || token == "continue" || token == "goto" || token == "else"))) {
             msgs.New().error(S + "Unexpected '" + token + "'", &token);
-            PROFILE_STOP("ReadInstruction(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs, CMD_TYPE type)")
+            PROFILE_STOP("CatzEngine::ReadInstruction(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs, CMD_TYPE type)")
             return;
         }
         token.parent = &set_parent;
@@ -92,15 +92,15 @@ static void ReadInstruction(Source &source, Int &token_index, Symbol &set_parent
                 cmd.type = type;
                 cmd.raw_range.set(start, end);
             }
-            PROFILE_STOP("ReadInstruction(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs, CMD_TYPE type)")
+            PROFILE_STOP("CatzEngine::ReadInstruction(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs, CMD_TYPE type)")
             return;
         }
     }
-    PROFILE_STOP("ReadInstruction(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs, CMD_TYPE type)")
+    PROFILE_STOP("CatzEngine::ReadInstruction(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs, CMD_TYPE type)")
 }
 /******************************************************************************/
 static Bool ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs) {
-    PROFILE_START("ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
+    PROFILE_START("CatzEngine::ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
     Memc<Token *> &tokens = source.tokens;
     if (InRange(token_index, tokens)) {
         Token &token = *tokens[token_index++];
@@ -184,7 +184,7 @@ static Bool ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Me
                         }
                     }
                 }
-                PROFILE_STOP("ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
+                PROFILE_STOP("CatzEngine::ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
                 return true;
             } else if (token == "for") // spaces will be: "for(space; space; space_step)space;", 'space_step' is a child of 'space'
             {
@@ -250,7 +250,7 @@ static Bool ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Me
                         }
                     }
                 }
-                PROFILE_STOP("ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
+                PROFILE_STOP("CatzEngine::ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
                 return true;
             } else if (token == "while") // spaces will be: "while(space)space;"
             {
@@ -307,7 +307,7 @@ static Bool ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Me
                         }
                     }
                 }
-                PROFILE_STOP("ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
+                PROFILE_STOP("CatzEngine::ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
                 return true;
             } else if (token == "do") // spaces will be: "do cmds_space; while(cond_space);", 'cond_space' is NOT a child of 'cmds_space'
             {
@@ -387,7 +387,7 @@ static Bool ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Me
                         }
                     }
                 }
-                PROFILE_STOP("ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
+                PROFILE_STOP("CatzEngine::ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
                 return true;
             } else if (token == "switch") // spaces will be: "switch(space)space;"
             {
@@ -444,27 +444,27 @@ static Bool ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Me
                         }
                     }
                 }
-                PROFILE_STOP("ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
+                PROFILE_STOP("CatzEngine::ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
                 return true;
             } else if (token == "return") {
                 ReadInstruction(source, token_index, set_parent, cmds, msgs, CMD_RETURN);
-                PROFILE_STOP("ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
+                PROFILE_STOP("CatzEngine::ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
                 return true;
             } else if (token == "break") {
                 ReadInstruction(source, token_index, set_parent, cmds, msgs, CMD_BREAK);
-                PROFILE_STOP("ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
+                PROFILE_STOP("CatzEngine::ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
                 return true;
             } else if (token == "continue") {
                 ReadInstruction(source, token_index, set_parent, cmds, msgs, CMD_CONTINUE);
-                PROFILE_STOP("ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
+                PROFILE_STOP("CatzEngine::ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
                 return true;
             } else if (token == "goto") {
                 ReadInstruction(source, token_index, set_parent, cmds, msgs, CMD_GOTO);
-                PROFILE_STOP("ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
+                PROFILE_STOP("CatzEngine::ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
                 return true;
             } else if (token == "else") {
                 msgs.New().error(S + "Unexpected 'else'", &token);
-                PROFILE_STOP("ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
+                PROFILE_STOP("CatzEngine::ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
                 return true;
             }
         } else if (token == '{') {
@@ -474,10 +474,10 @@ static Bool ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Me
             token.parent = source.createSpace(set_parent, token_index - 1); // set '{' parent to point to newly created sub space
             ReadCommands(source, token_index, *token.parent, cmd.cmds, msgs);
             cmd.raw_range.y = token_index - 2; // skip '}', at this moment 'token_index' is after '}', so -2 is used to go back to '}' and later before '}'
-            PROFILE_STOP("ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
+            PROFILE_STOP("CatzEngine::ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
             return true;
         } else if (token == '}') {
-            PROFILE_STOP("ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
+            PROFILE_STOP("CatzEngine::ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
             return false;                                                                                   // false to stop processing this level
         } else if (token.type == TOKEN_CODE && InRange(token_index, tokens) && *tokens[token_index] == ':') // X: label
         {
@@ -491,14 +491,14 @@ static Bool ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Me
             cmd.type = CMD_LABEL;
             cmd.raw_range.set(token_index - 1, token_index - 1); // label:
             tokens[token_index++]->parent = &set_parent;
-            PROFILE_STOP("ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
+            PROFILE_STOP("CatzEngine::ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
             return true;
         }
         ReadInstruction(source, --token_index, set_parent, cmds, msgs, CMD_INSTRUCT);
-        PROFILE_STOP("ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
+        PROFILE_STOP("CatzEngine::ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
         return true;
     }
-    PROFILE_STOP("ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
+    PROFILE_STOP("CatzEngine::ReadCommand(Source &source, Int &token_index, Symbol &set_parent, Memc<Command> &cmds, Memc<Message> &msgs)")
     return false;
 }
 /******************************************************************************/

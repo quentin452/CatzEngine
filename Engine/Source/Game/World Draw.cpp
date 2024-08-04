@@ -15,7 +15,7 @@ bool IsPointInFrustum(C Camera &cam, C Vec &point) {
 }
 
 void GetBoundingBoxCorners(C Matrix &matrix, Vec corners[8]) {
-    PROFILE_START("GetBoundingBoxCorners(C Matrix &matrix, Vec corners[8])")
+    PROFILE_START("CatzEngine::GetBoundingBoxCorners(C Matrix &matrix, Vec corners[8])")
     C Vec scale = matrix.scale() * 1.5;
     C Vec pos = matrix.pos;
     C Vec right = matrix.x * scale.x;
@@ -29,25 +29,25 @@ void GetBoundingBoxCorners(C Matrix &matrix, Vec corners[8]) {
     corners[5] = pos - right + up - forward;
     corners[6] = pos - right - up + forward;
     corners[7] = pos - right - up - forward;
-    PROFILE_STOP("GetBoundingBoxCorners(C Matrix &matrix, Vec corners[8])")
+    PROFILE_STOP("CatzEngine::GetBoundingBoxCorners(C Matrix &matrix, Vec corners[8])")
 }
 
 bool IsObjectInFrustum(C Camera &cam, Obj &obj) {
-    PROFILE_START("IsObjectInFrustum(C Camera &cam, Obj &obj)")
+    PROFILE_START("CatzEngine::IsObjectInFrustum(C Camera &cam, Obj &obj)")
     Vec corners[8];
     GetBoundingBoxCorners(obj.matrix(), corners);
     for (int i = 0; i < 8; ++i) {
         if (IsPointInFrustum(cam, corners[i])) {
-            PROFILE_STOP("IsObjectInFrustum(C Camera &cam, Obj &obj)")
+            PROFILE_STOP("CatzEngine::IsObjectInFrustum(C Camera &cam, Obj &obj)")
             return true;
         }
     }
-    PROFILE_STOP("IsObjectInFrustum(C Camera &cam, Obj &obj)")
+    PROFILE_STOP("CatzEngine::IsObjectInFrustum(C Camera &cam, Obj &obj)")
     return false;
 }
 
 inline void Area::drawObjAndTerrain() {
-    PROFILE_START("Area::drawObjAndTerrain()")
+    PROFILE_START("CatzEngine::Area::drawObjAndTerrain()")
     // first process objects before terrain, so they will be first on the list (if possible), objects don't use EarlyZ, so terrain will always be displayed as first in the EarlyZ stage
     REPA(_objs) {
         Obj &obj = *_objs[i];
@@ -150,10 +150,10 @@ inline void Area::drawObjAndTerrain() {
             SetStencilValue();
         }
     }
-    PROFILE_STOP("Area::drawObjAndTerrain()")
+    PROFILE_STOP("CatzEngine::Area::drawObjAndTerrain()")
 }
 inline void Area::drawTerrainShadow() {
-    PROFILE_START("Area::drawTerrainShadow()")
+    PROFILE_START("CatzEngine::Area::drawTerrainShadow()")
     if (_data) {
         Bool fully_inside;
 
@@ -199,14 +199,14 @@ inline void Area::drawTerrainShadow() {
         // custom
         data()->customDrawShadow();
     }
-    PROFILE_STOP("Area::drawTerrainShadow()")
+    PROFILE_STOP("CatzEngine::Area::drawTerrainShadow()")
 }
 inline void Area::drawObjShadow() {
     REPAO(_objs)->drawShadow();
 }
 /******************************************************************************/
 inline void Area::drawOverlay() {
-    PROFILE_START("Area::drawOverlay()")
+    PROFILE_START("CatzEngine::Area::drawOverlay()")
     if (_data) {
         // mesh overlays
         Memc<MeshOverlay> &mesh_overlays = _data->mesh_overlays;
@@ -223,11 +223,11 @@ inline void Area::drawOverlay() {
         Memc<Decal> &decals = _data->decals;
         FREPAO(decals).drawStatic();
     }
-    PROFILE_STOP("Area::drawOverlay()")
+    PROFILE_STOP("CatzEngine::Area::drawOverlay()")
 }
 /******************************************************************************/
 void WorldManager::draw() {
-    PROFILE_START("WorldManager::draw()")
+    PROFILE_START("CatzEngine::WorldManager::draw()")
     switch (Renderer()) {
     case RM_PREPARE: {
         // objects and terrain
@@ -308,10 +308,10 @@ void WorldManager::draw() {
         }
         break;
     }
-    PROFILE_STOP("WorldManager::draw()")
+    PROFILE_STOP("CatzEngine::WorldManager::draw()")
 }
 void WorldManager::drawDrawnAreas(C Color &color, C Color &color_shd) {
-    PROFILE_START("WorldManager::drawDrawnAreas(C Color &color, C Color &color_shd)")
+    PROFILE_START("CatzEngine::WorldManager::drawDrawnAreas(C Color &color, C Color &color_shd)")
     Flt scale = 0.003f;
     if (color.a) {
         VI.color(color);
@@ -328,7 +328,7 @@ void WorldManager::drawDrawnAreas(C Color &color, C Color &color_shd) {
     (ActiveCam.matrix.pos.xz() * scale).draw(WHITE);
     REP(Frustum.edges)
     D.line(WHITE, Frustum.point[Frustum.edge[i].x].xz() * scale, Frustum.point[Frustum.edge[i].y].xz() * scale);
-    PROFILE_STOP("WorldManager::drawDrawnAreas(C Color &color, C Color &color_shd)")
+    PROFILE_STOP("CatzEngine::WorldManager::drawDrawnAreas(C Color &color, C Color &color_shd)")
 }
 /******************************************************************************/
 } // namespace Game

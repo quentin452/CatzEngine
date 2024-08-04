@@ -47,10 +47,9 @@ struct RaycastCallback : btTriangleRaycastCallback {
     RaycastCallback(const btVector3 &from, const btVector3 &to, unsigned int flags, PhysHitBasic *phys_hit)
         : btTriangleRaycastCallback(from, to, flags), phys_hit(phys_hit), hit(false) {}
 };
-
 /******************************************************************************/
 Bool PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic *phys_hit, Bool two_sided) C {
-    PROFILE_START("PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic *phys_hit, Bool two_sided)")
+    PROFILE_START("CatzEngine::PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic *phys_hit, Bool two_sided)")
     if (type() == PHYS_SHAPE) {
         Vec p = pos, m = move;
         if (body_matrix) {
@@ -71,7 +70,7 @@ Bool PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic 
                 phys_hit->plane.pos = pos + frac * move;
                 phys_hit->plane.normal = phys_hit->face_nrm = normal;
             }
-            PROFILE_STOP("PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic *phys_hit, Bool two_sided)")
+            PROFILE_STOP("CatzEngine::PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic *phys_hit, Bool two_sided)")
             return true;
         }
     } else if (_pm) {
@@ -107,7 +106,7 @@ Bool PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic 
                     }
                     phys_hit->updateFace(geom.triangleMesh(), body_matrix ? &orn : null);
                 }
-                PROFILE_STOP("PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic *phys_hit, Bool two_sided)")
+                PROFILE_STOP("CatzEngine::PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic *phys_hit, Bool two_sided)")
                 return true;
             }
         } else
@@ -149,7 +148,7 @@ Bool PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic 
                     phys_hit->face_nrm = Bullet.vec(castResult.m_normal);
                     phys_hit->plane.set(Bullet.vec(castResult.m_hitPoint), phys_hit->face_nrm);
                 }
-                PROFILE_STOP("PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic *phys_hit, Bool two_sided)")
+                PROFILE_STOP("CatzEngine::PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic *phys_hit, Bool two_sided)")
                 return true;
             }
         } break;
@@ -168,13 +167,13 @@ Bool PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic 
                 phys_hit->dist = phys_hit->frac * move.length();
                 phys_hit->plane.set(pos + move * phys_hit->frac, phys_hit->face_nrm);
             }
-            PROFILE_STOP("PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic *phys_hit, Bool two_sided)")
+            PROFILE_STOP("CatzEngine::PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic *phys_hit, Bool two_sided)")
             return callback.hit;
         } break;
         }
 #endif
     }
-    PROFILE_STOP("PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic *phys_hit, Bool two_sided)")
+    PROFILE_STOP("CatzEngine::PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic *phys_hit, Bool two_sided)")
     return false;
 }
 /******************************************************************************/

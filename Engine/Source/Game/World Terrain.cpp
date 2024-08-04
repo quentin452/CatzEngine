@@ -10,7 +10,7 @@ struct Overlay {
     Matrix matrix;
 };
 static void AddOverlay(Cell<Area> &cell, Overlay &overlay) {
-    PROFILE_START("AddOverlay(Cell<Area> &cell, Overlay &overlay)")
+    PROFILE_START("CatzEngine::AddOverlay(Cell<Area> &cell, Overlay &overlay)")
     C Area &area = cell();
     if (area.loaded() && area._data) {
         C MeshGroup &mshg = area._data->mesh;
@@ -27,10 +27,10 @@ static void AddOverlay(Cell<Area> &cell, Overlay &overlay) {
             }
         }
     }
-    PROFILE_STOP("AddOverlay(Cell<Area> &cell, Overlay &overlay)")
+    PROFILE_STOP("CatzEngine::AddOverlay(Cell<Area> &cell, Overlay &overlay)")
 }
 WorldManager &WorldManager::terrainAddOverlay(C MaterialPtr &material, C Matrix &overlay_matrix, Flt time_to_fade_out) {
-    PROFILE_START("WorldManager::terrainAddOverlay(C MaterialPtr &material, C Matrix &overlay_matrix, Flt time_to_fade_out)")
+    PROFILE_START("CatzEngine::WorldManager::terrainAddOverlay(C MaterialPtr &material, C Matrix &overlay_matrix, Flt time_to_fade_out)")
     if (material) {
         Overlay overlay;
         overlay.time = time_to_fade_out;
@@ -40,12 +40,12 @@ WorldManager &WorldManager::terrainAddOverlay(C MaterialPtr &material, C Matrix 
 
         _grid.func(worldToArea(overlay.ext.rectXZ()), AddOverlay, overlay);
     }
-    PROFILE_STOP("WorldManager::terrainAddOverlay(C MaterialPtr &material, C Matrix &overlay_matrix, Flt time_to_fade_out)")
+    PROFILE_STOP("CatzEngine::WorldManager::terrainAddOverlay(C MaterialPtr &material, C Matrix &overlay_matrix, Flt time_to_fade_out)")
     return T;
 }
 /******************************************************************************/
 WorldManager &WorldManager::terrainAddDecal(C Vec4 &color, C MaterialPtr &material, C Matrix &decal_matrix, Flt time_to_fade_out) {
-    PROFILE_START("WorldManager::terrainAddDecal(C Vec4 &color, C MaterialPtr &material, C Matrix &decal_matrix, Flt time_to_fade_out)")
+    PROFILE_START("CatzEngine::WorldManager::terrainAddDecal(C Vec4 &color, C MaterialPtr &material, C Matrix &decal_matrix, Flt time_to_fade_out)")
     if (material) {
         Decal2 &decal = _decals.New();
         decal.time = time_to_fade_out;
@@ -54,7 +54,7 @@ WorldManager &WorldManager::terrainAddDecal(C Vec4 &color, C MaterialPtr &materi
         decal.matrix = decal_matrix;
         decal.material(material);
     }
-    PROFILE_STOP("WorldManager::terrainAddDecal(C Vec4 &color, C MaterialPtr &material, C Matrix &decal_matrix, Flt time_to_fade_out)")
+    PROFILE_STOP("CatzEngine::WorldManager::terrainAddDecal(C Vec4 &color, C MaterialPtr &material, C Matrix &decal_matrix, Flt time_to_fade_out)")
 
     return T;
 }

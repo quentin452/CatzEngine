@@ -45,7 +45,7 @@ static int ErrorHandler(::Display *d, XErrorEvent *e) {
 Application App;
 /******************************************************************************/
 Application::Application() {
-    PROFILE_START("Application::Application()")
+    PROFILE_START("CatzEngine::Application::Application()")
 #if 0 // there's only one 'Application' global 'App' and it doesn't need clearing members to zero
    flag=0;
        active_wait=0;
@@ -111,7 +111,7 @@ Application &Application::name(C Str &name) {
             XChangeProperty(XDisplay, window(), _NET_WM_NAME, UTF8_STRING, 8, PropModeReplace, (unsigned char *)utf8(), utf8.length());
     }
 #endif
-    PROFILE_STOP("Application::Application()")
+    PROFILE_STOP("CatzEngine::Application::Application()")
     return T;
 }
 /******************************************************************************/
@@ -292,7 +292,7 @@ Bool Application::maximized() C { return _maximized; }
 #endif
 
 UInt Application::parentProcessID() C {
-    PROFILE_START("Application::parentProcessID()")
+    PROFILE_START("CatzEngine::Application::parentProcessID()")
 #if WINDOWS_OLD
     if (!_parent_process_id) {
         HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -310,7 +310,7 @@ UInt Application::parentProcessID() C {
         }
     }
 #endif
-    PROFILE_STOP("Application::parentProcessID()")
+    PROFILE_STOP("CatzEngine::Application::parentProcessID()")
     return _parent_process_id;
 }
 
@@ -359,7 +359,7 @@ Application &Application::opacity(Flt opacity) {
     return T;
 }
 Application &Application::flash() {
-    PROFILE_START("Application::flash()")
+    PROFILE_START("CatzEngine::Application::flash()")
 #if WINDOWS_OLD
     FlashWindow(window(), true);
 #elif MAC
@@ -416,7 +416,7 @@ Application &Application::flash() {
 #endif
     }
 #endif
-    PROFILE_STOP("Application::flash()")
+    PROFILE_STOP("CatzEngine::Application::flash()")
     return T;
 }
 /******************************************************************************/
@@ -551,9 +551,9 @@ Application &Application::icon(C Image &icon) {
 /******************************************************************************/
 #if WINDOWS
 HMONITOR Application::hmonitor() C {
-    PROFILE_START("Application::hmonitor()")
+    PROFILE_START("CatzEngine::Application::hmonitor()")
 #if WINDOWS_OLD
-    PROFILE_STOP("Application::hmonitor()")
+    PROFILE_STOP("CatzEngine::Application::hmonitor()")
     return MonitorFromWindow(window(), MONITOR_DEFAULTTONULL);
 #else
     HMONITOR monitor = null;
@@ -567,10 +567,10 @@ HMONITOR Application::hmonitor() C {
             output->Release();
         }
     }
-    PROFILE_STOP("Application::hmonitor()")
+    PROFILE_STOP("CatzEngine::Application::hmonitor()")
     return monitor;
 #endif
-    PROFILE_STOP("Application::hmonitor()")
+    PROFILE_STOP("CatzEngine::Application::hmonitor()")
 }
 #endif
 /******************************************************************************/
@@ -592,11 +592,11 @@ static IOPMAssertionID AssertionID;
 #if !SWITCH
 static void SetStayAwake() { App.setStayAwake(); }
 void Application::setStayAwake() {
-    PROFILE_START("Application::setStayAwake()")
+    PROFILE_START("CatzEngine::Application::setStayAwake()")
 #if IOS // can be called only on the main thread
     if (!App.mainThread()) {
         App.includeFuncCall(SetStayAwake);
-        PROFILE_STOP("Application::setStayAwake()")
+        PROFILE_STOP("CatzEngine::Application::setStayAwake()")
         return;
     }
 #endif
@@ -645,21 +645,21 @@ void Application::setStayAwake() {
 #elif LINUX
     // TODO: add 'stayAwake' support for Linux
 #endif
-    PROFILE_STOP("Application::setStayAwake()")
+    PROFILE_STOP("CatzEngine::Application::setStayAwake()")
 }
 #endif
 Application &Application::stayAwake(AWAKE_MODE mode) {
-    PROFILE_START("Application::stayAwake(AWAKE_MODE mode)")
+    PROFILE_START("CatzEngine::Application::stayAwake(AWAKE_MODE mode)")
     if (_stay_awake != mode) {
         _stay_awake = mode;
         setStayAwake();
     }
-    PROFILE_STOP("Application::stayAwake(AWAKE_MODE mode)")
+    PROFILE_STOP("CatzEngine::Application::stayAwake(AWAKE_MODE mode)")
     return T;
 }
 /******************************************************************************/
 void Application::activeOrBackFullChanged() {
-    PROFILE_START("Application::activeOrBackFullChanged()")
+    PROFILE_START("CatzEngine::Application::activeOrBackFullChanged()")
     if (D.full()) // full screen
     {
 #if WINDOWS_OLD
@@ -708,11 +708,11 @@ void Application::activeOrBackFullChanged() {
         }
 #endif
     }
-    PROFILE_STOP("Application::activeOrBackFullChanged()")
+    PROFILE_STOP("CatzEngine::Application::activeOrBackFullChanged()")
 }
 
 void Application::setActive(Bool active) {
-    PROFILE_START("Application::setActive(Bool active)")
+    PROFILE_START("CatzEngine::Application::setActive(Bool active)")
     if (T.active() != active) {
         Bool active_or_back_full = activeOrBackFull();
         T._active = active;
@@ -744,7 +744,7 @@ void Application::setActive(Bool active) {
             [view setUpdate];
 #endif
     }
-    PROFILE_STOP("Application::setActive(Bool active)")
+    PROFILE_STOP("CatzEngine::Application::setActive(Bool active)")
 }
 Application &Application::backgroundFull(Bool on) {
     if (T._back_full != on) {
@@ -1055,7 +1055,7 @@ void Application::lowMemory() {
 }
 /******************************************************************************/
 void Application::windowAdjust(Bool set) {
-    PROFILE_START("Application::windowAdjust(Bool set)")
+    PROFILE_START("CatzEngine::Application::windowAdjust(Bool set)")
     RectI full, work;
     VecI2 max_normal_win_client_size, maximized_win_client_size;
     D.getMonitor(full, work, max_normal_win_client_size, maximized_win_client_size);
@@ -1199,7 +1199,7 @@ void Application::windowAdjust(Bool set) {
             window().size(D.resW(), D.resH(), true); // don't resize Window on Linux when changing mode due to 'set' (when window got resized due to OS/User input instead of calling 'D.mode', because there the window is already resized and calling this would cause window jumping)
     }
 #endif
-    PROFILE_STOP("Application::windowAdjust(Bool set)")
+    PROFILE_STOP("CatzEngine::Application::windowAdjust(Bool set)")
 }
 /******************************************************************************/
 static RectI GetDesktopArea() {
@@ -1563,7 +1563,7 @@ void Application::del() {
 }
 /******************************************************************************/
 void Application::update() {
-    PROFILE_START("Application::update()")
+    PROFILE_START("CatzEngine::Application::update()")
     Time.update();
     InputDevices.update();
     Renderer.update();
@@ -1572,7 +1572,7 @@ void Application::update() {
     if (!(UpdateState() && DrawState()))
         _close = true;
     InputDevices.clear();
-    PROFILE_STOP("Application::update()")
+    PROFILE_STOP("CatzEngine::Application::update()")
 }
 /******************************************************************************/
 Str MLT(C Str &english, LANG_TYPE l0, C Str &t0) {

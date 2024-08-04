@@ -98,7 +98,8 @@
     "variant": "cpp",
     "regex": "cpp",
     "csetjmp": "cpp",
-    "*.rh": "cpp"
+    "*.rh": "cpp",
+    "execution": "cpp"
   },
   "git.ignoreLimitWarning": true,
   "[cpp]": {

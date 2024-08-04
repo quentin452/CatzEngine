@@ -4,7 +4,7 @@ namespace EE {
 namespace Game {
 /******************************************************************************/
 static void SetBasePathNodes(Area &area) {
-    PROFILE_START("SetBasePathNodes(Area &area)")
+    PROFILE_START("CatzEngine::SetBasePathNodes(Area &area)")
     if (Area::Data *data = area.data()) {
         if (!data->path2D())
             data->_path_node_offset = -1;
@@ -28,7 +28,7 @@ static void SetBasePathNodes(Area &area) {
             }
         }
     }
-    PROFILE_STOP("SetBasePathNodes(Area &area)")
+    PROFILE_STOP("CatzEngine::SetBasePathNodes(Area &area)")
 }
 static VecI2 Offsets[] =
     {
@@ -50,25 +50,25 @@ struct SetNeighborsHelper {
     Area::Data *data, *neighbor_data, *data_array[3][3]; // [y][x] orientation
 
     void addNeighbor(Int group, Int neighbor_index, Int cost) {
-        PROFILE_START("SetNeighborsHelper.addNeighbor(Int group, Int neighbor_index, Int cost)")
+        PROFILE_START("CatzEngine::SetNeighborsHelper.addNeighbor(Int group, Int neighbor_index, Int cost)")
         // check if it's already written
         REP(neighbors[group]) // iterate through all neighbors of a node
         {
             if (neighbor[group][i].index == neighbor_index) // if i-th neighbor is 'neighbor_index'
             {
                 MIN(neighbor[group][i].cost, cost); // decrease the travel cost
-                PROFILE_STOP("SetNeighborsHelper.addNeighbor(Int group, Int neighbor_index, Int cost)")
+                PROFILE_STOP("CatzEngine::SetNeighborsHelper.addNeighbor(Int group, Int neighbor_index, Int cost)")
                 return; // neighbor already exists so return
             }
         }
 
         // add new neighbor
         neighbor[group][neighbors[group]++].set(neighbor_index, cost);
-        PROFILE_STOP("SetNeighborsHelper.addNeighbor(Int group, Int neighbor_index, Int cost)")
+        PROFILE_STOP("CatzEngine::SetNeighborsHelper.addNeighbor(Int group, Int neighbor_index, Int cost)")
     }
 
     void testLeft(Int y) {
-        PROFILE_START("SetNeighborsHelper.testLeft(Int y)")
+        PROFILE_START("CatzEngine::SetNeighborsHelper.testLeft(Int y)")
         Byte group = data->path2D()->_map.pixB(0, y);
         if (group != 0xFF) {
             Byte group_b = data->path2D()->_map.pixB(0, y - 1),
@@ -84,10 +84,10 @@ struct SetNeighborsHelper {
             if (neighbor_group_lf != 0xFF && (neighbor_group_l != 0xFF || group_f != 0xFF))
                 addNeighbor(group, neighbor_data->_path_node_offset + neighbor_group_lf, 7);
         }
-        PROFILE_STOP("SetNeighborsHelper.testLeft(Int y)")
+        PROFILE_STOP("CatzEngine::SetNeighborsHelper.testLeft(Int y)")
     }
     void testRight(Int y) {
-        PROFILE_START("SetNeighborsHelper.testRight(Int y)")
+        PROFILE_START("CatzEngine::SetNeighborsHelper.testRight(Int y)")
         Byte group = data->path2D()->_map.pixB(World.settings().path2DRes() - 1, y);
         if (group != 0xFF) {
             Byte group_b = data->path2D()->_map.pixB(World.settings().path2DRes() - 1, y - 1),
@@ -103,10 +103,10 @@ struct SetNeighborsHelper {
             if (neighbor_group_rf != 0xFF && (neighbor_group_r != 0xFF || group_f != 0xFF))
                 addNeighbor(group, neighbor_data->_path_node_offset + neighbor_group_rf, 7);
         }
-        PROFILE_STOP("SetNeighborsHelper.testRight(Int y)")
+        PROFILE_STOP("CatzEngine::SetNeighborsHelper.testRight(Int y)")
     }
     void testBack(Int x) {
-        PROFILE_START("SetNeighborsHelper.testBack(Int y)")
+        PROFILE_START("CatzEngine::SetNeighborsHelper.testBack(Int y)")
         Byte group = data->path2D()->_map.pixB(x, 0);
         if (group != 0xFF) {
             Byte group_l = data->path2D()->_map.pixB(x - 1, 0),
@@ -122,10 +122,10 @@ struct SetNeighborsHelper {
             if (neighbor_group_br != 0xFF && (neighbor_group_b != 0xFF || group_r != 0xFF))
                 addNeighbor(group, neighbor_data->_path_node_offset + neighbor_group_br, 7);
         }
-        PROFILE_STOP("SetNeighborsHelper.testBack(Int y)")
+        PROFILE_STOP("CatzEngine::SetNeighborsHelper.testBack(Int y)")
     }
     void testForward(Int x) {
-        PROFILE_START("SetNeighborsHelper.testForward(Int y)")
+        PROFILE_START("CatzEngine::SetNeighborsHelper.testForward(Int y)")
         Byte group = data->path2D()->_map.pixB(x, World.settings().path2DRes() - 1);
         if (group != 0xFF) {
             Byte group_l = data->path2D()->_map.pixB(x - 1, World.settings().path2DRes() - 1),
@@ -141,10 +141,10 @@ struct SetNeighborsHelper {
             if (neighbor_group_fr != 0xFF && (neighbor_group_f != 0xFF || group_r != 0xFF))
                 addNeighbor(group, neighbor_data->_path_node_offset + neighbor_group_fr, 7);
         }
-        PROFILE_STOP("SetNeighborsHelper.testForward(Int y)")
+        PROFILE_STOP("CatzEngine::SetNeighborsHelper.testForward(Int y)")
     }
     void testCorner(Int x, Int y) {
-        PROFILE_START("SetNeighborsHelper.testCorner(Int x, Int y)")
+        PROFILE_START("CatzEngine::SetNeighborsHelper.testCorner(Int x, Int y)")
         Byte group = data->path2D()->_map.pixB(x, y);
         if (group != 0xFF) {
             REPA(Offsets) {
@@ -184,14 +184,14 @@ struct SetNeighborsHelper {
                     }
             }
         }
-        PROFILE_STOP("SetNeighborsHelper.testCorner(Int x, Int y)")
+        PROFILE_STOP("CatzEngine::SetNeighborsHelper.testCorner(Int x, Int y)")
     }
 
     INLINE Area *getAreaActive(C VecI2 &xy) { return World.areaActive(xy); }
     INLINE Area *getArea(C VecI2 &xy) { return World._grid.get(xy).data(); }
 
     SetNeighborsHelper(Area &area) {
-        PROFILE_START("SetNeighborsHelper.SetNeighborsHelper(Area &area)")
+        PROFILE_START("CatzEngine::SetNeighborsHelper.SetNeighborsHelper(Area &area)")
         data = area.data();
         REP(data->path2D()->_groups)
         neighbors[i] = 0;
@@ -239,11 +239,11 @@ struct SetNeighborsHelper {
         data_array[1][2] = ((r && r->_state == AREA_ACTIVE && r->data() && r->data()->path2D()) ? r->data() : null);
         data_array[2][2] = ((rf && rf->_state == AREA_ACTIVE && rf->data() && rf->data()->path2D()) ? rf->data() : null);
 #endif
-        PROFILE_STOP("SetNeighborsHelper.SetNeighborsHelper(Area &area)")
+        PROFILE_STOP("CatzEngine::SetNeighborsHelper.SetNeighborsHelper(Area &area)")
     }
 };
 static void SetNeighbors(Area &area) {
-    PROFILE_START("SetNeighborsHelper.SetNeighbors(Area &area)")
+    PROFILE_START("CatzEngine::SetNeighborsHelper.SetNeighbors(Area &area)")
     if (Area::Data *data = area.data())
         if (data->path2D()) {
             AreaPath2D &path = *data->path2D();
@@ -285,19 +285,19 @@ static void SetNeighbors(Area &area) {
                 World._path_neighbor.New() = snh.neighbor[g][n];
             }
         }
-    PROFILE_STOP("SetNeighborsHelper.SetNeighbors(Area &area)")
+    PROFILE_STOP("CatzEngine::SetNeighborsHelper.SetNeighbors(Area &area)")
 }
 static Int PathNodeSiblings(Int i) {
-    PROFILE_START("SetNeighborsHelper.PathNodeSiblings(Int i)")
+    PROFILE_START("CatzEngine::SetNeighborsHelper.PathNodeSiblings(Int i)")
     for (Int cur = i, num = 0;; num++) {
         cur = World._path_node[cur].sibling;
         if (cur == i)
             return num;
     }
-    PROFILE_STOP("SetNeighborsHelper.PathNodeSiblings(Int i)")
+    PROFILE_STOP("CatzEngine::SetNeighborsHelper.PathNodeSiblings(Int i)")
 }
 void WorldManager::path2DBuild() {
-    PROFILE_START("WorldManager::path2DBuild()")
+    PROFILE_START("CatzEngine::WorldManager::path2DBuild()")
     // clear path nodes and neighbors
     _path_node.clear();
     _path_neighbor.clear();
@@ -437,7 +437,7 @@ void WorldManager::path2DBuild() {
             }
         }
     }
-    PROFILE_STOP("WorldManager::path2DBuild()")
+    PROFILE_STOP("CatzEngine::WorldManager::path2DBuild()")
 }
 /******************************************************************************/
 AreaPath2D *WorldManager::path2DGet(C VecI2 &xz) {
@@ -506,12 +506,12 @@ static void PrepareTempNodes(WorldManager &world, Memc<TempNode> &temp_node, Int
     }
 }
 Bool WorldManager::pathFindFast(Int node_from, Int node_to, Memc<UInt> &path) {
-    PROFILE_START("WorldManager::pathFindFast()")
+    PROFILE_START("CatzEngine::WorldManager::pathFindFast()")
     path.clear();
 
     if (InRange(node_from, _path_node) && InRange(node_to, _path_node)) {
         if (node_from == node_to) {
-            PROFILE_STOP("WorldManager::pathFindFast()")
+            PROFILE_STOP("CatzEngine::WorldManager::pathFindFast()")
             return true; // the same nodes
         }
 
@@ -620,7 +620,7 @@ Bool WorldManager::pathFindFast(Int node_from, Int node_to, Memc<UInt> &path) {
                                         break;
                                     }
                                     if (!active.elms()) {
-                                        PROFILE_STOP("WorldManager::pathFindFast()")
+                                        PROFILE_STOP("CatzEngine::WorldManager::pathFindFast()")
                                         return false; // shouldn't happen
                                     }
                                 }
@@ -695,7 +695,7 @@ Bool WorldManager::pathFindFast(Int node_from, Int node_to, Memc<UInt> &path) {
                                     break; // found last element on this level
                                 }
                                 if (!active.elms()) {
-                                    PROFILE_STOP("WorldManager::pathFindFast()")
+                                    PROFILE_STOP("CatzEngine::WorldManager::pathFindFast()")
                                     return false; // shouldn't happen
                                 }
                             }
@@ -710,7 +710,7 @@ Bool WorldManager::pathFindFast(Int node_from, Int node_to, Memc<UInt> &path) {
                         path.add(node_to); // add target node
                         REPA(nodes[cur])
                         path.add(nodes[cur][i]); // add in reversed order
-                        PROFILE_STOP("WorldManager::pathFindFast()")
+                        PROFILE_STOP("CatzEngine::WorldManager::pathFindFast()")
                         return true;
                     }
                     Swap(top, cur);
@@ -730,17 +730,17 @@ Bool WorldManager::pathFindFast(Int node_from, Int node_to, Memc<UInt> &path) {
             to_cur = to_parent;
         }
     }
-    PROFILE_STOP("WorldManager::pathFindFast()")
+    PROFILE_STOP("CatzEngine::WorldManager::pathFindFast()")
     return false;
 }
 /******************************************************************************/
 Bool WorldManager::pathFind(Int node_from, Int node_to, Memc<UInt> &path) {
-    PROFILE_START("WorldManager::pathFind()")
+    PROFILE_START("CatzEngine::WorldManager::pathFind()")
     path.clear();
 
     if (InRange(node_from, _path_node) && InRange(node_to, _path_node)) {
         if (node_from == node_to) {
-            PROFILE_STOP("WorldManager::pathFind()")
+            PROFILE_STOP("CatzEngine::WorldManager::pathFind()")
             return true; // the same nodes
         }
         // check if it's possible to find a path (they have mutual ancestors)
@@ -748,7 +748,7 @@ Bool WorldManager::pathFind(Int node_from, Int node_to, Memc<UInt> &path) {
             from_parent = _path_node[from_parent].parent;
             to_parent = _path_node[to_parent].parent;
             if (from_parent < 0 || to_parent < 0) {
-                PROFILE_STOP("WorldManager::pathFind()")
+                PROFILE_STOP("CatzEngine::WorldManager::pathFind()")
                 return false; // no parents
             }
             if (from_parent == to_parent)
@@ -828,21 +828,21 @@ Bool WorldManager::pathFind(Int node_from, Int node_to, Memc<UInt> &path) {
                     path.add(found->node_index);
                     found = src;
                 }
-                PROFILE_STOP("WorldManager::pathFind()")
+                PROFILE_STOP("CatzEngine::WorldManager::pathFind()")
                 return true;
             }
             if (!active.elms()) {
-                PROFILE_STOP("WorldManager::pathFind()")
+                PROFILE_STOP("CatzEngine::WorldManager::pathFind()")
                 return false;
             }
         }
     }
-    PROFILE_STOP("WorldManager::pathFind()")
+    PROFILE_STOP("CatzEngine::WorldManager::pathFind()")
     return false;
 }
 /******************************************************************************/
 void WorldManager::pathDrawArea(Area &area, Byte index, C Color &color) {
-    PROFILE_START("WorldManager::pathDrawArea(Area &area, Byte index, C Color &color)")
+    PROFILE_START("CatzEngine::WorldManager::pathDrawArea(Area &area, Byte index, C Color &color)")
     if (area.loaded() && area.data())
         if (AreaPath2D *path = area.data()->path2D()) {
             Image &height = area.data()->height;
@@ -862,10 +862,10 @@ void WorldManager::pathDrawArea(Area &area, Byte index, C Color &color) {
             }
             VI.end();
         }
-    PROFILE_STOP("WorldManager::pathDrawArea(Area &area, Byte index, C Color &color)")
+    PROFILE_STOP("CatzEngine::WorldManager::pathDrawArea(Area &area, Byte index, C Color &color)")
 }
 void WorldManager::pathDraw(Int node, C Color &color) {
-    PROFILE_START("WorldManager::pathDraw(Int node, C Color &color)")
+    PROFILE_START("CatzEngine::WorldManager::pathDraw(Int node, C Color &color)")
     if (InRange(node, _path_node)) {
         PathNode &pn = _path_node[node];
         switch (pn.type) {
@@ -885,22 +885,22 @@ void WorldManager::pathDraw(Int node, C Color &color) {
         } break;
         }
     }
-    PROFILE_STOP("WorldManager::pathDraw(Int node, C Color &color)")
+    PROFILE_STOP("CatzEngine::WorldManager::pathDraw(Int node, C Color &color)")
 }
 void WorldManager::pathDrawNghb(Int node, C Color &color) {
-    PROFILE_START("WorldManager::pathDrawNghb(Int node, C Color &color)")
+    PROFILE_START("CatzEngine::WorldManager::pathDrawNghb(Int node, C Color &color)")
     if (InRange(node, _path_node)) {
         PathNode &pn = _path_node[node];
         REP(pn.nghb_num)
         pathDraw(_path_neighbor[pn.nghb_ofs + i].index, color);
     }
-    PROFILE_STOP("WorldManager::pathDrawNghb(Int node, C Color &color)")
+    PROFILE_STOP("CatzEngine::WorldManager::pathDrawNghb(Int node, C Color &color)")
 }
 void WorldManager::pathDrawBlock(C Color &color) {
-    PROFILE_START("WorldManager::pathDrawNghb(C Color &color)")
+    PROFILE_START("CatzEngine::WorldManager::pathDrawNghb(C Color &color)")
     REPA(_area_active)
     pathDrawArea(*_area_active[i], 0xFF, color);
-    PROFILE_STOP("WorldManager::pathDrawNghb(C Color &color)")
+    PROFILE_STOP("CatzEngine::WorldManager::pathDrawNghb(C Color &color)")
 }
 /******************************************************************************/
 } // namespace Game

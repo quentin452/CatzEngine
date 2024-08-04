@@ -37,13 +37,13 @@ static Flt (*GetOpacityFunc(C Particles &particles))(Flt s) // function which re
 // MAIN
 /******************************************************************************/
 Bool DrawParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha) {
-    PROFILE_START("DrawParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha)")
+    PROFILE_START("CatzEngine::DrawParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha)")
     Renderer.wantDepthRead(); // !! call before 'SoftParticles' !!
     // Shader *shader;
     Bool soft = SoftParticles();
     switch (Renderer()) {
     default:
-        PROFILE_STOP("DrawParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha)")
+        PROFILE_STOP("CatzEngine::DrawParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha)")
         return false;
     case RM_BLEND:
         // shader = Sh.Particle[false][soft][0][motion_affects_alpha];// disabled to fix particle distorsion bugs
@@ -69,11 +69,11 @@ Bool DrawParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha) {
 #if GL // needed for iOS PVRTC Pow2 #ParticleImgPart
     Sh.ImgSize->setConditional(image._part.xy);
 #endif
-    PROFILE_STOP("DrawParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha)")
+    PROFILE_STOP("CatzEngine::DrawParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha)")
     return true;
 }
 void DrawParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel) {
-    PROFILE_START("DrawParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel)")
+    PROFILE_START("CatzEngine::DrawParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel)")
     static Vtx3DBilb v[4]; // Use static array to avoid dynamic allocation
     v[0].pos = v[1].pos = v[2].pos = v[3].pos = pos;
     v[0].vel_angle = v[1].vel_angle = v[2].vel_angle = v[3].vel_angle.set(vel.x, vel.y, vel.z, GPU_HALF_SUPPORTED ? AngleFull(angle) : angle);
@@ -85,7 +85,7 @@ void DrawParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &
     SET_TEX(v[3].tex, TEX_ZERO, TEX_ZERO);
     if (Vtx3DBilb *vtx = (Vtx3DBilb *)VI.addVtx(4))
         memcpy(vtx, v, sizeof(v));
-    PROFILE_STOP("DrawParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel)")
+    PROFILE_STOP("CatzEngine::DrawParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel)")
 }
 
 void DrawParticleEnd() {
@@ -93,7 +93,7 @@ void DrawParticleEnd() {
 }
 /******************************************************************************/
 Bool DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha, Int x_frames, Int y_frames) {
-    PROFILE_START("DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha, Int x_frames, Int y_frames)");
+    PROFILE_START("CatzEngine::DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha, Int x_frames, Int y_frames)");
 
     // Setup initial rendering state
     Renderer.wantDepthRead();    // Ensure depth read is enabled
@@ -120,7 +120,7 @@ Bool DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_al
         break;
 
     default:
-        PROFILE_STOP("DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha, Int x_frames, Int y_frames)");
+        PROFILE_STOP("CatzEngine::DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha, Int x_frames, Int y_frames)");
         return false; // Return early if renderer type is unsupported
     }
 
@@ -138,11 +138,11 @@ Bool DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_al
     Sh.ImgSize->setConditional(image._part.xy); // Set image size conditionally for certain platforms
 #endif
 
-    PROFILE_STOP("DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha, Int x_frames, Int y_frames)");
+    PROFILE_STOP("CatzEngine::DrawAnimatedParticleBegin(C Image &image, Byte glow, Bool motion_affects_alpha, Int x_frames, Int y_frames)");
     return true;
 }
 void DrawAnimatedParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel, Flt frame) {
-    PROFILE_START("DrawAnimatedParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel, Flt frame)")
+    PROFILE_START("CatzEngine::DrawAnimatedParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel, Flt frame)")
     static Vtx3DBilbAnim v[4]; // Utilisation d'un tableau statique pour éviter l'allocation dynamique
     v[0].pos = v[1].pos = v[2].pos = v[3].pos = pos;
     v[0].vel_angle = v[1].vel_angle = v[2].vel_angle = v[3].vel_angle.set(vel.x, vel.y, vel.z, GPU_HALF_SUPPORTED ? AngleFull(angle) : angle);
@@ -155,7 +155,7 @@ void DrawAnimatedParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle,
     SET_TEX(v[3].tex, TEX_ZERO, TEX_ZERO);
     if (Vtx3DBilbAnim *vtx = (Vtx3DBilbAnim *)VI.addVtx(4))
         memcpy(vtx, v, sizeof(v));
-    PROFILE_STOP("DrawAnimatedParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel, Flt frame)")
+    PROFILE_STOP("CatzEngine::DrawAnimatedParticleAdd(C Color &color, Flt opacity, Flt radius, Flt angle, C Vec &pos, C Vec &vel, Flt frame)")
 }
 
 void DrawAnimatedParticleEnd() {
@@ -170,7 +170,7 @@ struct AnimatedMaterialParticle {
     // Vec2 *part; can ignore because material based particles should have TexPow2 size in the image
 } AMP;
 Bool DrawAnimatedMaterialParticleBegin(C Material &material, Int x_frames, Int y_frames) {
-    PROFILE_START("DrawAnimatedMaterialParticleBegin(C Material &material, Int x_frames, Int y_frames)")
+    PROFILE_START("CatzEngine::DrawAnimatedMaterialParticleBegin(C Material &material, Int x_frames, Int y_frames)")
     if (Shader *shader = DefaultShaders(&material, VTX_POS | VTX_NRM_TAN_BIN | VTX_COLOR | VTX_TEX0, 0, false).get(Renderer())) {
         DisableSkinning();
         material.setAuto();
@@ -185,14 +185,14 @@ Bool DrawAnimatedMaterialParticleBegin(C Material &material, Int x_frames, Int y
         AMP.nrm = -ActiveCam.matrix.z;
         AMP.tan.set(ActiveCam.matrix.x, 1);
         // AMP.part=((material.base_0 && material.base_0->partial()) ? &material.base_0->_part.xy : null);
-        PROFILE_STOP("DrawAnimatedMaterialParticleBegin(C Material &material, Int x_frames, Int y_frames)")
+        PROFILE_STOP("CatzEngine::DrawAnimatedMaterialParticleBegin(C Material &material, Int x_frames, Int y_frames)")
         return true;
     }
-    PROFILE_STOP("DrawAnimatedMaterialParticleBegin(C Material &material, Int x_frames, Int y_frames)")
+    PROFILE_STOP("CatzEngine::DrawAnimatedMaterialParticleBegin(C Material &material, Int x_frames, Int y_frames)")
     return false;
 }
 void DrawAnimatedMaterialParticleAdd(C Color &color, Flt radius, Flt angle, C Vec &pos, Int frame) {
-    PROFILE_START("DrawAnimatedMaterialParticleAdd(C Color &color, Flt radius, Flt angle, C Vec &pos, Int frame)")
+    PROFILE_START("CatzEngine::DrawAnimatedMaterialParticleAdd(C Color &color, Flt radius, Flt angle, C Vec &pos, Int frame)")
     static Vtx3DStandard v[4]; // Utilisation d'un tableau statique pour éviter l'allocation dynamique
     Vec x, y;
     if (angle) {
@@ -224,7 +224,7 @@ void DrawAnimatedMaterialParticleAdd(C Color &color, Flt radius, Flt angle, C Ve
     // if(AMP.part)REP(4)v[i].tex*=*AMP.part;
     if (Vtx3DStandard *vtx = (Vtx3DStandard *)VI.addVtx(4)) {
         memcpy(vtx, v, sizeof(v));
-        PROFILE_STOP("DrawAnimatedMaterialParticleAdd(C Color &color, Flt radius, Flt angle, C Vec &pos, Int frame)")
+        PROFILE_STOP("CatzEngine::DrawAnimatedMaterialParticleAdd(C Color &color, Flt radius, Flt angle, C Vec &pos, Int frame)")
     }
 }
 void DrawAnimatedMaterialParticleEnd() {
@@ -240,7 +240,7 @@ Flt ParticleOpacity(Flt particle_life, Flt particle_life_max, Bool particles_smo
 // PARTICLES
 /******************************************************************************/
 void Particles::zero() {
-    PROFILE_START("Particles::zero()")
+    PROFILE_START("CatzEngine::Particles::zero()")
     reborn = true;
     smooth_fade = false;
     motion_affects_alpha = true;
@@ -288,7 +288,7 @@ void Particles::zero() {
 
     hard_depth_offset = 0;
     opacity_func = null;
-    PROFILE_STOP("Particles::zero()")
+    PROFILE_STOP("CatzEngine::Particles::zero()")
 }
 Particles &Particles::del() {
     p.del();
@@ -301,7 +301,7 @@ Particles &Particles::del() {
 }
 Particles::Particles() { zero(); }
 Particles &Particles::create(C ImagePtr &image, C Color &color, Int elms, Flt radius, Flt life) {
-    PROFILE_START("Particles::create(C ImagePtr &image, C Color &color, Int elms, Flt radius, Flt life)")
+    PROFILE_START("CatzEngine::Particles::create(C ImagePtr &image, C Color &color, Int elms, Flt radius, Flt life)")
     del();
     p.setNum(elms);
     T.color = color;
@@ -310,11 +310,11 @@ Particles &Particles::create(C ImagePtr &image, C Color &color, Int elms, Flt ra
     _src_type = PARTICLE_STATIC_SHAPE;
     T.image = image;
     setRenderMode();
-    PROFILE_STOP("Particles::create(C ImagePtr &image, C Color &color, Int elms, Flt radius, Flt life)")
+    PROFILE_STOP("CatzEngine::Particles::create(C ImagePtr &image, C Color &color, Int elms, Flt radius, Flt life)")
     return T;
 }
 Particles &Particles::create(C Particles &src) {
-    PROFILE_START("Particles::create(C Particles &src)")
+    PROFILE_START("CatzEngine::Particles::create(C Particles &src)")
     if (this != &src) {
         del();
 
@@ -371,7 +371,7 @@ Particles &Particles::create(C Particles &src) {
         CopyN(Alloc(_src_help, src._src_elms), src._src_help, _src_elms = src._src_elms);
         p = src.p;
     }
-    PROFILE_STOP("Particles::create(C Particles &src)")
+    PROFILE_STOP("CatzEngine::Particles::create(C Particles &src)")
     return T;
 }
 /******************************************************************************/
@@ -404,7 +404,7 @@ Particles &Particles::source(C OrientP *dynamic_point) {
     return T;
 }
 Particles &Particles::source(C AnimatedSkeleton *dynamic_skeleton, Bool ragdoll_bones_only) {
-    PROFILE_START("Particles::source(C AnimatedSkeleton *dynamic_skeleton, Bool ragdoll_bones_only)")
+    PROFILE_START("CatzEngine::Particles::source(C AnimatedSkeleton *dynamic_skeleton, Bool ragdoll_bones_only)")
     T._src_type = PARTICLE_DYNAMIC_SKELETON;
     T._src_ptr = dynamic_skeleton;
     T._src_mesh = null;
@@ -421,7 +421,7 @@ Particles &Particles::source(C AnimatedSkeleton *dynamic_skeleton, Bool ragdoll_
             if (skel->bones[i].flag & BONE_RAGDOLL)
                 _src_help[_src_elms++] = i;
         }
-    PROFILE_STOP("Particles::source(C AnimatedSkeleton *dynamic_skeleton, Bool ragdoll_bones_only)")
+    PROFILE_STOP("CatzEngine::Particles::source(C AnimatedSkeleton *dynamic_skeleton, Bool ragdoll_bones_only)")
     return T;
 }
 Particles &Particles::source(C MeshPtr &dynamic_mesh) {
@@ -440,7 +440,7 @@ Particles &Particles::source(C MeshPtr &dynamic_mesh, C AnimatedSkeleton *dynami
 }
 /******************************************************************************/
 Flt Particles::opacity(Vec *pos) C {
-    PROFILE_START("Particles::opacity(Vec *pos)")
+    PROFILE_START("CatzEngine::Particles::opacity(Vec *pos)")
     Vec vec = 0;
     Flt opacity = 0;
     Flt (*func)(Flt s) = GetOpacityFunc(T);
@@ -458,7 +458,7 @@ Flt Particles::opacity(Vec *pos) C {
     opacity /= particleCount;
     if (pos)
         *pos = vec;
-    PROFILE_STOP("Particles::opacity(Vec *pos)")
+    PROFILE_STOP("CatzEngine::Particles::opacity(Vec *pos)")
     return opacity;
 }
 
@@ -478,7 +478,7 @@ Particles &Particles::paletteIndex(Byte palette_index) {
 }
 /******************************************************************************/
 void Particles::reset(Int i) {
-    PROFILE_START("Particles::reset(Int i)")
+    PROFILE_START("CatzEngine::Particles::reset(Int i)")
     if (InRange(i, p)) {
         Particle &particle = T.p[i];
         if (reborn) {
@@ -542,7 +542,7 @@ void Particles::reset(Int i) {
                                                    // p.remove(i);
         }
     }
-    PROFILE_STOP("Particles::reset(Int i)")
+    PROFILE_STOP("CatzEngine::Particles::reset(Int i)")
 }
 Particles &Particles::reset() {
     REPA(p)
@@ -559,7 +559,7 @@ Particles &Particles::resetFull() {
 }
 /******************************************************************************/
 Bool Particles::update(Flt dt) {
-    PROFILE_START("Particles::update(Flt dt)")
+    PROFILE_START("CatzEngine::Particles::update(Flt dt)")
     if (_src_type) {
         // life/death/fade
         if (emitter_life_max > 0) {
@@ -658,17 +658,17 @@ Bool Particles::update(Flt dt) {
         }
 
         _matrix_prev = matrix;
-        PROFILE_STOP("Particles::update(Flt dt)")
+        PROFILE_STOP("CatzEngine::Particles::update(Flt dt)")
         return true;
     }
-    PROFILE_STOP("Particles::update(Flt dt)")
+    PROFILE_STOP("CatzEngine::Particles::update(Flt dt)")
     return false;
 }
 /******************************************************************************/
 void Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized) C {
-    PROFILE_START("Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized)");
+    PROFILE_START("CatzEngine::Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized)");
     if (p.life_max <= 0 OR p.life <= 0) {
-        PROFILE_STOP("Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized)");
+        PROFILE_STOP("CatzEngine::Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized)");
         return;
     }
     float life = p.life / p.life_max;
@@ -703,7 +703,7 @@ void Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, f
         }
 
         if (!p_color.w) {
-            PROFILE_STOP("Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized)");
+            PROFILE_STOP("CatzEngine::Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized)");
             return;
         }
         color.r = p_color.x / p_color.w;
@@ -724,21 +724,21 @@ void Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, f
         DrawAnimatedParticleAdd(color, opacity * func(life), radius, p.ang_vel * p.life, pos, p.vel, p.life * image_speed);
     else
         DrawParticleAdd(color, opacity * func(life), radius, p.ang_vel * p.life, pos, p.vel);
-    PROFILE_STOP("Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized)");
+    PROFILE_STOP("CatzEngine::Particles::drawSingleParticle(C Particle &p, bool animate, float opacity, float radius_scale, float offset_time, float offset_time2, bool offset, Randomizer &random, C ImagePtr &palette_image, int palette_image_w1, Image *render_color_palette, int render_color_palette_w1, float (*func)(Flt), bool &initialized)");
 }
 
 void Particles::draw(Flt opacity) {
-    PROFILE_START("Particles::draw(Flt opacity)");
+    PROFILE_START("CatzEngine::Particles::draw(Flt opacity)");
 
     // Initial checks and setup
     if (!_src_type || !image || Renderer() != renderMode()) {
-        PROFILE_STOP("Particles::draw(Flt opacity)");
+        PROFILE_STOP("CatzEngine::Particles::draw(Flt opacity)");
         return;
     }
 
     opacity *= _fade;
     if (opacity <= 0) {
-        PROFILE_STOP("Particles::draw(Flt opacity)");
+        PROFILE_STOP("CatzEngine::Particles::draw(Flt opacity)");
         return;
     }
 
@@ -752,7 +752,7 @@ void Particles::draw(Flt opacity) {
     if (Renderer() != _render_mode) {
         render_color_palette = &D._color_palette_soft[paletteIndex()];
         if (render_color_palette->h() < 4) {
-            PROFILE_STOP("Particles::draw(Flt opacity)");
+            PROFILE_STOP("CatzEngine::Particles::draw(Flt opacity)");
             return;
         }
         render_color_palette_w1 = render_color_palette->w() - 1;
@@ -782,7 +782,7 @@ void Particles::draw(Flt opacity) {
     REPA(p) {
         if (T.p[i].life > 0) {
             Vec2 screen_pos;
-            if (PosToScreen(T.p[i].pos, screen_pos)) 
+            if (PosToScreen(T.p[i].pos, screen_pos))
                 batch.particles.push_back(T.p[i]);
         }
     }
@@ -792,7 +792,7 @@ void Particles::draw(Flt opacity) {
         drawParticleBatch(batch);
     }
 
-    PROFILE_STOP("Particles::draw(Flt opacity)");
+    PROFILE_STOP("CatzEngine::Particles::draw(Flt opacity)");
 }
 
 void Particles::drawParticleBatch(ParticleBatch &batch) {
@@ -912,7 +912,7 @@ RawParticles &RawParticles::create(C ImagePtr &image) {
 }
 /******************************************************************************/
 RawParticles &RawParticles::set(C Particle *particle, Int particles) {
-    PROFILE_START("RawParticles::set(C Particle *particle, Int particles)")
+    PROFILE_START("CatzEngine::RawParticles::set(C Particle *particle, Int particles)")
     MAX(particles, 0);
     if (particles > _max_particles) // re-create buffers
     {
@@ -976,10 +976,10 @@ RawParticles &RawParticles::set(C Particle *particle, Int particles) {
         }
         _vb.unlock();
     } else {
-        PROFILE_STOP("RawParticles::set(C Particle *particle, Int particles)")
+        PROFILE_STOP("CatzEngine::RawParticles::set(C Particle *particle, Int particles)")
         return del();
     }
-    PROFILE_STOP("RawParticles::set(C Particle *particle, Int particles)")
+    PROFILE_STOP("CatzEngine::RawParticles::set(C Particle *particle, Int particles)")
     return T;
 }
 /******************************************************************************/
@@ -999,7 +999,7 @@ RawParticles &RawParticles::paletteIndex(Byte index) {
 }
 /******************************************************************************/
 void RawParticles::draw() C {
-    PROFILE_START("RawParticles::draw()")
+    PROFILE_START("CatzEngine::RawParticles::draw()")
     if (image && _particles && Renderer() == renderMode()) {
         Renderer.wantDepthRead(); // !! call before 'SoftParticles' !!
         Shader *shader;
@@ -1045,7 +1045,7 @@ void RawParticles::draw() C {
         glDrawElements(GL_TRIANGLES, _particles * (2 * 3), ib.bit16() ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT, null);
 #endif
     }
-    PROFILE_STOP("RawParticles::draw()")
+    PROFILE_STOP("CatzEngine::RawParticles::draw()")
 }
 /******************************************************************************/
 // MAIN

@@ -29,7 +29,7 @@ void Object::zero() {
 }
 Object::Object() { zero(); }
 Object &Object::create(C Object &src) {
-    PROFILE_START("Object::create(C Object &src)")
+    PROFILE_START("CatzEngine::Object::create(C Object &src)")
     if (this != &src) {
         del();
 
@@ -48,7 +48,7 @@ Object &Object::create(C Object &src) {
         FREPA(src.sub_objs)
         sub_objs.New().create(src.sub_objs[i]);
     }
-    PROFILE_STOP("Object::create(C Object &src)")
+    PROFILE_STOP("CatzEngine::Object::create(C Object &src)")
     return T;
 }
 /******************************************************************************/
@@ -67,7 +67,7 @@ void Object::align(Bool custom, ALIGN_TYPE x, ALIGN_TYPE y, ALIGN_TYPE z) {
 }
 /******************************************************************************/
 Matrix Object::matrixFinal() C {
-    PROFILE_START("Object::matrixFinal()")
+    PROFILE_START("CatzEngine::Object::matrixFinal()")
     Box box;
 
     // get box
@@ -151,13 +151,13 @@ Matrix Object::matrixFinal() C {
         break;
     }
     O.orn() = matrix.orn();
-    PROFILE_STOP("Object::matrixFinal()")
+    PROFILE_STOP("CatzEngine::Object::matrixFinal()")
     return O;
 }
 Vec Object::centerFinal() C {
-    PROFILE_START("Object::centerFinal()")
+    PROFILE_START("CatzEngine::Object::centerFinal()")
     if (_mesh && _mesh->is()) {
-        PROFILE_STOP("Object::centerFinal()")
+        PROFILE_STOP("CatzEngine::Object::centerFinal()")
         return _mesh->ext.pos * matrixFinal();
     }
 
@@ -187,37 +187,37 @@ Vec Object::centerFinal() C {
         O.z += s;
         break;
     }
-    PROFILE_STOP("Object::centerFinal()")
+    PROFILE_STOP("CatzEngine::Object::centerFinal()")
     return O;
 }
 /******************************************************************************/
 ObjectPtr Object::firstStored() {
-    PROFILE_START("Object::firstStored()")
+    PROFILE_START("CatzEngine::Object::firstStored()")
     Memt<Object *, 1024> processed;
     for (Object *cur = this; cur && processed.include(cur); cur = cur->base()())
         if (Objects.contains(cur)) {
-            PROFILE_STOP("Object::firstStored()")
+            PROFILE_STOP("CatzEngine::Object::firstStored()")
             return cur; // use 'processed' in case A is based on A
         }
-    PROFILE_STOP("Object::firstStored()")
+    PROFILE_STOP("CatzEngine::Object::firstStored()")
     return null;
 }
 Bool Object::hasBase(C UID &base_id) C {
-    PROFILE_START("Object::hasBase(C UID &base_id)")
+    PROFILE_START("CatzEngine::Object::hasBase(C UID &base_id)")
     if (base_id.valid()) {
         Memt<C Object *, 1024> processed;
         for (C Object *cur = this; cur && processed.include(cur); cur = cur->base()())
             if (Objects.id(cur) == base_id) {
-                PROFILE_STOP("Object::hasBase(C UID &base_id)")
+                PROFILE_STOP("CatzEngine::Object::hasBase(C UID &base_id)")
                 return true; // use 'processed' in case A is based on A
             }
     }
-    PROFILE_STOP("Object::hasBase(C UID &base_id)")
+    PROFILE_STOP("CatzEngine::Object::hasBase(C UID &base_id)")
     return false;
 }
 /******************************************************************************/
 Object &Object::updateBaseSelf() {
-    PROFILE_START("Object::updateBaseSelf()")
+    PROFILE_START("CatzEngine::Object::updateBaseSelf()")
     if (!(_flag & OBJ_OVR_TYPE))
         _type = (_base ? _base->_type : UIDZero);
     if (!(_flag & OBJ_OVR_MESH))
@@ -243,21 +243,21 @@ Object &Object::updateBaseSelf() {
             matrix.z.setLength(_base->matrix.z.length());
         }
     }
-    PROFILE_STOP("Object::updateBaseSelf()")
+    PROFILE_STOP("CatzEngine::Object::updateBaseSelf()")
     return T;
 }
 Object &Object::updateBase() {
-    PROFILE_START("Object::updateBase()")
+    PROFILE_START("CatzEngine::Object::updateBase()")
     updateBaseSelf();
     REPAO(sub_objs).updateBase();
-    PROFILE_STOP("Object::updateBase()")
+    PROFILE_STOP("CatzEngine::Object::updateBase()")
     return T;
 }
 void Object::base(C ObjectPtr &base) {
-    PROFILE_START("Object::base(C ObjectPtr &base)")
+    PROFILE_START("CatzEngine::Object::base(C ObjectPtr &base)")
     T._base = base;
     updateBaseSelf();
-    PROFILE_STOP("Object::base(C ObjectPtr &base)")
+    PROFILE_STOP("CatzEngine::Object::base(C ObjectPtr &base)")
 }
 /******************************************************************************/
 Flt Object::scale() C { return matrix.x.length(); }
@@ -345,7 +345,7 @@ Bool Object::customMeshVariationAny() C {
 }
 /******************************************************************************/
 Param *Object::findParam(CChar8 *name) {
-    PROFILE_START("Object::findParam(CChar8 *name)")
+    PROFILE_START("CatzEngine::Object::findParam(CChar8 *name)")
 #if 0 // un-sorted
    REPA(params)if(Equal(params[i].name, name))return &params[i];
 #else // sorted
@@ -353,7 +353,7 @@ Param *Object::findParam(CChar8 *name) {
         Int mid = UInt(l + r) / 2,
             compare = Compare(name, params[mid].name);
         if (!compare) {
-            PROFILE_STOP("Object::findParam(CChar8 *name)")
+            PROFILE_STOP("CatzEngine::Object::findParam(CChar8 *name)")
             return &params[mid];
         }
         if (compare < 0)
@@ -362,11 +362,11 @@ Param *Object::findParam(CChar8 *name) {
             l = mid + 1;
     }
 #endif
-    PROFILE_STOP("Object::findParam(CChar8 *name)")
+    PROFILE_STOP("CatzEngine::Object::findParam(CChar8 *name)")
     return _base ? _base->findParam(name) : null;
 }
 Param *Object::findParam(C Str &name) {
-    PROFILE_START("Object::findParam(Str *name)")
+    PROFILE_START("CatzEngine::Object::findParam(Str *name)")
 
 #if 0 // un-sorted
    REPA(params)if(Equal(params[i].name, name))return &params[i];
@@ -375,7 +375,7 @@ Param *Object::findParam(C Str &name) {
         Int mid = UInt(l + r) / 2,
             compare = Compare(name, params[mid].name);
         if (!compare) {
-            PROFILE_STOP("Object::findParam(Str *name)")
+            PROFILE_STOP("CatzEngine::Object::findParam(Str *name)")
             return &params[mid];
         }
         if (compare < 0)
@@ -384,15 +384,15 @@ Param *Object::findParam(C Str &name) {
             l = mid + 1;
     }
 #endif
-    PROFILE_STOP("Object::findParam(Str *name)")
+    PROFILE_STOP("CatzEngine::Object::findParam(Str *name)")
     return _base ? _base->findParam(name) : null;
 }
 Param &Object::getParam(C Str &name) {
-    PROFILE_START("Object::getParam(C Str &name)")
+    PROFILE_START("CatzEngine::Object::getParam(C Str &name)")
     Param *param = findParam(name);
     if (!param)
         Exit(S + "Parameter \"" + name + "\" not found in Object.");
-    PROFILE_STOP("Object::getParam(C Str &name)")
+    PROFILE_STOP("CatzEngine::Object::getParam(C Str &name)")
     return *param;
 }
 /******************************************************************************/

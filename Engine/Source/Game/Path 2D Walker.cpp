@@ -9,25 +9,25 @@ Path2DWalker &Path2DWalker::clear() {
 }
 /******************************************************************************/
 static void SetWalkable(AreaPath2D &path, Int ofs_x, Int ofs_y) {
-    PROFILE_START("SetWalkable(AreaPath2D &path, Int ofs_x, Int ofs_y)")
+    PROFILE_START("CatzEngine::SetWalkable(AreaPath2D &path, Int ofs_x, Int ofs_y)")
     REPD(y, path._map.h())
     REPD(x, path._map.w())
     World._path_find.pixelFlag(ofs_x + x, ofs_y + y, path.walkable(x, y) ? PFP_WALKABLE : 0);
-    PROFILE_STOP("SetWalkable(AreaPath2D &path, Int ofs_x, Int ofs_y)")
+    PROFILE_STOP("CatzEngine::SetWalkable(AreaPath2D &path, Int ofs_x, Int ofs_y)")
 }
 static void SetNonwalkable(Int ofs_x, Int ofs_y) {
-    PROFILE_START("SetNonwalkable(Int ofs_x, Int ofs_y)")
+    PROFILE_START("CatzEngine::SetNonwalkable(Int ofs_x, Int ofs_y)")
     REP(World.settings().path2DRes()) {
         World._path_find.pixelFlag(ofs_x + i, ofs_y, 0);
         World._path_find.pixelFlag(ofs_x + i, ofs_y + World.settings().path2DRes() - 1, 0);
         World._path_find.pixelFlag(ofs_x, ofs_y + i, 0);
         World._path_find.pixelFlag(ofs_x + World.settings().path2DRes() - 1, ofs_y + i, 0);
     }
-    PROFILE_STOP("SetNonwalkable(Int ofs_x, Int ofs_y)")
+    PROFILE_STOP("CatzEngine::SetNonwalkable(Int ofs_x, Int ofs_y)")
 }
 /******************************************************************************/
 static Bool PathWalkerFind(Int start_node, Int target_node, C VecI2 &start_xy, C VecI2 &target_xy, Memc<Vec2> &points) {
-    PROFILE_START("PathWalkerFind(Int start_node, Int target_node, C VecI2 &start_xy, C VecI2 &target_xy, Memc<Vec2> &points)")
+    PROFILE_START("CatzEngine::PathWalkerFind(Int start_node, Int target_node, C VecI2 &start_xy, C VecI2 &target_xy, Memc<Vec2> &points)")
     PathNode &start_pn = World._path_node[start_node],
              &target_pn = World._path_node[target_node];
 
@@ -35,7 +35,7 @@ static Bool PathWalkerFind(Int start_node, Int target_node, C VecI2 &start_xy, C
         if (Cell<Area> *start_g = World._grid.find(start_pn.area.xy))
             if (Cell<Area> *target_g = ((start_pn.area.xy == target_pn.area.xy) ? start_g : World._grid.find(target_pn.area.xy))) {
                 if (Abs(start_g->x() - target_g->x()) > 1 || Abs(start_g->y() - target_g->y()) > 1) {
-                    PROFILE_STOP("PathWalkerFind(Int start_node, Int target_node, C VecI2 &start_xy, C VecI2 &target_xy, Memc<Vec2> &points)")
+                    PROFILE_STOP("CatzEngine::PathWalkerFind(Int start_node, Int target_node, C VecI2 &start_xy, C VecI2 &target_xy, Memc<Vec2> &points)")
                     return false; // too far away
                 }
 
@@ -104,11 +104,11 @@ static Bool PathWalkerFind(Int start_node, Int target_node, C VecI2 &start_xy, C
                          add = Vec2(start_g->xy()) * World.areaSize() + Vec2(0.5f - start_ofs_x, 0.5f - start_ofs_y) * mul;
                     FREPA(path)
                     points.add(Vec2(path[i]) * mul + add);
-                    PROFILE_STOP("PathWalkerFind(Int start_node, Int target_node, C VecI2 &start_xy, C VecI2 &target_xy, Memc<Vec2> &points)")
+                    PROFILE_STOP("CatzEngine::PathWalkerFind(Int start_node, Int target_node, C VecI2 &start_xy, C VecI2 &target_xy, Memc<Vec2> &points)")
                     return true;
                 }
             }
-    PROFILE_STOP("PathWalkerFind(Int start_node, Int target_node, C VecI2 &start_xy, C VecI2 &target_xy, Memc<Vec2> &points)")
+    PROFILE_STOP("CatzEngine::PathWalkerFind(Int start_node, Int target_node, C VecI2 &start_xy, C VecI2 &target_xy, Memc<Vec2> &points)")
     return false;
 }
 /******************************************************************************/
@@ -117,7 +117,7 @@ static inline Bool PathWalkerFind(Int start_node, Int target_node, C VecI2 &star
 }
 /******************************************************************************/
 static Bool PathWalkerFindStraight(C Vec &start, C Vec &target, Memc<Vec2> &points, Flt allowed_range = World.areaSize()) {
-    PROFILE_START("PathWalkerFindStraight(C Vec &start, C Vec &target, Memc<Vec2> &points, Flt allowed_range = World.areaSize())")
+    PROFILE_START("CatzEngine::PathWalkerFindStraight(C Vec &start, C Vec &target, Memc<Vec2> &points, Flt allowed_range = World.areaSize())")
     if (Dist2(start.xz(), target.xz()) <= Sqr(allowed_range)) {
         AreaPath2D *path = null;
         VecI2 area_cur = SIGN_BIT,
@@ -131,35 +131,35 @@ static Bool PathWalkerFindStraight(C Vec &start, C Vec &target, Memc<Vec2> &poin
             if (area_new != area_cur) {
                 Area::Data *data = World._grid.get(area_cur = area_new).data()->_data;
                 if (!data) {
-                    PROFILE_STOP("PathWalkerFindStraight(C Vec &start, C Vec &target, Memc<Vec2> &points, Flt allowed_range = World.areaSize())")
+                    PROFILE_STOP("CatzEngine::PathWalkerFindStraight(C Vec &start, C Vec &target, Memc<Vec2> &points, Flt allowed_range = World.areaSize())")
                     return false;
                 }
                 path = data->path2D();
                 if (!path) {
-                    PROFILE_STOP("PathWalkerFindStraight(C Vec &start, C Vec &target, Memc<Vec2> &points, Flt allowed_range = World.areaSize())")
+                    PROFILE_STOP("CatzEngine::PathWalkerFindStraight(C Vec &start, C Vec &target, Memc<Vec2> &points, Flt allowed_range = World.areaSize())")
                     return false;
                 }
             }
             if (!path->walkable(Mod(path_pos.x, World.settings().path2DRes()), Mod(path_pos.y, World.settings().path2DRes()))) {
-                PROFILE_STOP("PathWalkerFindStraight(C Vec &start, C Vec &target, Memc<Vec2> &points, Flt allowed_range = World.areaSize())")
+                PROFILE_STOP("CatzEngine::PathWalkerFindStraight(C Vec &start, C Vec &target, Memc<Vec2> &points, Flt allowed_range = World.areaSize())")
                 return false;
             }
         }
         points.add(target.xz());
-        PROFILE_STOP("PathWalkerFindStraight(C Vec &start, C Vec &target, Memc<Vec2> &points, Flt allowed_range = World.areaSize())")
+        PROFILE_STOP("CatzEngine::PathWalkerFindStraight(C Vec &start, C Vec &target, Memc<Vec2> &points, Flt allowed_range = World.areaSize())")
         return true;
     }
-    PROFILE_STOP("PathWalkerFindStraight(C Vec &start, C Vec &target, Memc<Vec2> &points, Flt allowed_range = World.areaSize())")
+    PROFILE_STOP("CatzEngine::PathWalkerFindStraight(C Vec &start, C Vec &target, Memc<Vec2> &points, Flt allowed_range = World.areaSize())")
     return false;
 }
 /******************************************************************************/
 Bool Path2DWalker::find(C Vec &start, C Vec &target, C Vec *alternate_start) {
-    PROFILE_START("Path2DWalker::find(C Vec &start, C Vec &target, C Vec *alternate_start)")
+    PROFILE_START("CatzEngine::Path2DWalker::find(C Vec &start, C Vec &target, C Vec *alternate_start)")
     clear();
     T.target = target;
 
     if (Dist2(start.xz(), target.xz()) <= Sqr(0.1f)) {
-        PROFILE_STOP("Path2DWalker::find(C Vec &start, C Vec &target, C Vec *alternate_start)")
+        PROFILE_STOP("CatzEngine::Path2DWalker::find(C Vec &start, C Vec &target, C Vec *alternate_start)")
         return true; // we're already at the target
     }
     Int start_node, target_node;
@@ -172,11 +172,11 @@ Bool Path2DWalker::find(C Vec &start, C Vec &target, C Vec *alternate_start) {
         target_node = World.pathGetNode(target, target_xy);
         if (target_node >= 0) {
             if (PathWalkerFindStraight(start, target, points)) {
-                PROFILE_STOP("Path2DWalker::find(C Vec &start, C Vec &target, C Vec *alternate_start)")
+                PROFILE_STOP("CatzEngine::Path2DWalker::find(C Vec &start, C Vec &target, C Vec *alternate_start)")
                 return true; // try first going straight
             }
             if (start_node == target_node && start_xy == target_xy) {
-                PROFILE_STOP("Path2DWalker::find(C Vec &start, C Vec &target, C Vec *alternate_start)")
+                PROFILE_STOP("CatzEngine::Path2DWalker::find(C Vec &start, C Vec &target, C Vec *alternate_start)")
                 return true; // we're already at the target
             }
             Memc<UInt> node;
@@ -185,13 +185,13 @@ Bool Path2DWalker::find(C Vec &start, C Vec &target, C Vec *alternate_start) {
                 if ((node.elms() <= 1) // start and target are located in the same or adjacent nodes
                         ? PathWalkerFind(start_node, target_node, start_xy, target_xy, points)
                         : PathWalkerFind(start_node, node.last(), start_xy, points)) {
-                    PROFILE_STOP("Path2DWalker::find(C Vec &start, C Vec &target, C Vec *alternate_start)")
+                    PROFILE_STOP("CatzEngine::Path2DWalker::find(C Vec &start, C Vec &target, C Vec *alternate_start)")
                     return true;
                 }
             }
         }
     }
-    PROFILE_STOP("Path2DWalker::find(C Vec &start, C Vec &target, C Vec *alternate_start)")
+    PROFILE_STOP("CatzEngine::Path2DWalker::find(C Vec &start, C Vec &target, C Vec *alternate_start)")
     return false;
 }
 /******************************************************************************/

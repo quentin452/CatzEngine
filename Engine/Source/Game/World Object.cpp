@@ -4,7 +4,7 @@ namespace EE {
 namespace Game {
 /******************************************************************************/
 Bool WorldManager::areaInsertObject(Area &area, Obj &obj, AREA_STATE obj_state) {
-    PROFILE_START("WorldManager::areaInsertObject(Area &area, Obj &obj, AREA_STATE obj_state)")
+    PROFILE_START("CatzEngine::WorldManager::areaInsertObject(Area &area, Obj &obj, AREA_STATE obj_state)")
     // test the state of target area
     if (!area.loaded()) // if target area hasn't yet been loaded
     {
@@ -15,13 +15,13 @@ Bool WorldManager::areaInsertObject(Area &area, Obj &obj, AREA_STATE obj_state) 
             // don't delete object, deletion will be handled outside
             if (obj.canBeSaved())
                 area.saveObj(obj);
-            PROFILE_STOP("WorldManager::areaInsertObject(Area &area, Obj &obj, AREA_STATE obj_state)")
+            PROFILE_STOP("CatzEngine::WorldManager::areaInsertObject(Area &area, Obj &obj, AREA_STATE obj_state)")
             return false; // return false stating that the object should be deleted
         }
 
         case WORLD_FULL: {
             if (!obj.canBeSaved()) {
-                PROFILE_STOP("WorldManager::areaInsertObject(Area &area, Obj &obj, AREA_STATE obj_state)")
+                PROFILE_STOP("CatzEngine::WorldManager::areaInsertObject(Area &area, Obj &obj, AREA_STATE obj_state)")
                 return false; // WORLD_FULL does not imply any limits to the area dimensions, so just for safety, check if the object wants to be put in that area ('canBeSaved' can be used to skip objects moved too far away)
             }
             File f;
@@ -38,13 +38,13 @@ Bool WorldManager::areaInsertObject(Area &area, Obj &obj, AREA_STATE obj_state) 
         else
             obj.disable();
     }
-    PROFILE_STOP("WorldManager::areaInsertObject(Area &area, Obj &obj, AREA_STATE obj_state)")
+    PROFILE_STOP("CatzEngine::WorldManager::areaInsertObject(Area &area, Obj &obj, AREA_STATE obj_state)")
     return true;
 }
 
 /******************************************************************************/
 Bool WorldManager::loadObj(Area &area, Bool active, Area::Data::AreaObj &area_obj, Bool _const) {
-    PROFILE_START("WorldManager::loadObj(Area &area, Bool active, Area::Data::AreaObj &area_obj, Bool _const)")
+    PROFILE_START("CatzEngine::WorldManager::loadObj(Area &area, Bool active, Area::Data::AreaObj &area_obj, Bool _const)")
     Int obj_type = ObjType.find(area_obj.type()); // OBJ_TYPE
     if (ObjMap<Obj> *obj_map = objMap(obj_type))
         if (Obj *obj = obj_map->_map(area_obj.id)) {
@@ -57,14 +57,14 @@ Bool WorldManager::loadObj(Area &area, Bool active, Area::Data::AreaObj &area_ob
             else
                 obj->disable();
             _obj_newly_added.add(obj);
-            PROFILE_STOP("WorldManager::loadObj(Area &area, Bool active, Area::Data::AreaObj &area_obj, Bool _const)")
+            PROFILE_STOP("CatzEngine::WorldManager::loadObj(Area &area, Bool active, Area::Data::AreaObj &area_obj, Bool _const)")
             return true;
         }
-    PROFILE_STOP("WorldManager::loadObj(Area &area, Bool active, Area::Data::AreaObj &area_obj, Bool _const)")
+    PROFILE_STOP("CatzEngine::WorldManager::loadObj(Area &area, Bool active, Area::Data::AreaObj &area_obj, Bool _const)")
     return false;
 }
 Bool WorldManager::loadObj(Area &area, Bool active, Int obj_type, File &f) {
-    PROFILE_START("WorldManager::loadObj(Area &area, Bool active, Int obj_type, File &f)")
+    PROFILE_START("CatzEngine::WorldManager::loadObj(Area &area, Bool active, Int obj_type, File &f)")
     if (ObjMap<Obj> *obj_map = objMap(obj_type))
         if (Obj *obj = obj_map->_map(UIDZero)) // we don't know yet the ID of the object, because it's stored in 'obj_save_data', so create with 'UIDZero' and later replace it
         {
@@ -78,18 +78,18 @@ Bool WorldManager::loadObj(Area &area, Bool active, Int obj_type, File &f) {
                 else
                     obj->disable();
                 _obj_newly_added.add(obj);
-                PROFILE_STOP("WorldManager::loadObj(Area &area, Bool active, Int obj_type, File &f)")
+                PROFILE_STOP("CatzEngine::WorldManager::loadObj(Area &area, Bool active, Int obj_type, File &f)")
                 return true;
             } else {
                 obj_map->removeObj(obj);
             }
         }
-    PROFILE_STOP("WorldManager::loadObj(Area &area, Bool active, Int obj_type, File &f)")
+    PROFILE_STOP("CatzEngine::WorldManager::loadObj(Area &area, Bool active, Int obj_type, File &f)")
     return false;
 }
 /******************************************************************************/
 Obj *WorldManager::objCreateNear(Object &object, C Matrix &matrix, C UID *obj_id) {
-    PROFILE_START("WorldManager::objCreateNear(Object &object, C Matrix &matrix, C UID *obj_id)")
+    PROFILE_START("CatzEngine::WorldManager::objCreateNear(Object &object, C Matrix &matrix, C UID *obj_id)")
     Int obj_type = ObjType.find(object.type()); // OBJ_TYPE
     if (ObjMap<Obj> *obj_map = objMap(obj_type)) {
         UID oid;
@@ -112,15 +112,15 @@ Obj *WorldManager::objCreateNear(Object &object, C Matrix &matrix, C UID *obj_id
                         obj->enable();
                     else
                         obj->disable();
-                    PROFILE_STOP("WorldManager::objCreateNear(Object &object, C Matrix &matrix, C UID *obj_id)")
+                    PROFILE_STOP("CatzEngine::WorldManager::objCreateNear(Object &object, C Matrix &matrix, C UID *obj_id)")
                     return obj;
                 }
     }
-    PROFILE_STOP("WorldManager::objCreateNear(Object &object, C Matrix &matrix, C UID *obj_id)")
+    PROFILE_STOP("CatzEngine::WorldManager::objCreateNear(Object &object, C Matrix &matrix, C UID *obj_id)")
     return nullptr;
 }
 Bool WorldManager::objCreate(Object &object, C Matrix &matrix, C UID *obj_id) {
-    PROFILE_START("WorldManager::objCreate(Object &object, C Matrix &matrix, C UID *obj_id)")
+    PROFILE_START("CatzEngine::WorldManager::objCreate(Object &object, C Matrix &matrix, C UID *obj_id)")
     Int obj_type = ObjType.find(object.type()); // OBJ_TYPE
     if (ObjMap<Obj> *obj_map = objMap(obj_type)) {
         UID oid;
@@ -137,15 +137,15 @@ Bool WorldManager::objCreate(Object &object, C Matrix &matrix, C UID *obj_id) {
             obj->memoryAddressChanged();
             if (!obj->updateArea())
                 obj_map->removeObj(obj);
-            PROFILE_STOP("WorldManager::objCreate(Object &object, C Matrix &matrix, C UID *obj_id)")
+            PROFILE_STOP("CatzEngine::WorldManager::objCreate(Object &object, C Matrix &matrix, C UID *obj_id)")
             return true;
         }
     }
-    PROFILE_STOP("WorldManager::objCreate(Object &object, C Matrix &matrix, C UID *obj_id)")
+    PROFILE_STOP("CatzEngine::WorldManager::objCreate(Object &object, C Matrix &matrix, C UID *obj_id)")
     return false;
 }
 Bool WorldManager::objInject(Int obj_type, File &obj_save_data, C Vec *pos) {
-    PROFILE_START("WorldManager::objInject(Int obj_type, File &obj_save_data, C Vec *pos)")
+    PROFILE_START("CatzEngine::WorldManager::objInject(Int obj_type, File &obj_save_data, C Vec *pos)")
     if (ObjMap<Obj> *obj_map = objMap(obj_type))
         if (Obj *obj = obj_map->_map(UIDZero)) // we don't know yet the ID of the object, because it's stored in 'obj_save_data', so create with 'UIDZero' and later replace it
         {
@@ -159,19 +159,19 @@ Bool WorldManager::objInject(Int obj_type, File &obj_save_data, C Vec *pos) {
                     obj_map->removeObj(obj);
                 else
                     _obj_newly_added.add(obj);
-                PROFILE_STOP("WorldManager::objInject(Int obj_type, File &obj_save_data, C Vec *pos)")
+                PROFILE_STOP("CatzEngine::WorldManager::objInject(Int obj_type, File &obj_save_data, C Vec *pos)")
 
                 return true;
             }
             obj_map->removeObj(obj);
         }
-    PROFILE_STOP("WorldManager::objInject(Int obj_type, File &obj_save_data, C Vec *pos)")
+    PROFILE_STOP("CatzEngine::WorldManager::objInject(Int obj_type, File &obj_save_data, C Vec *pos)")
 
     return false;
 }
 /******************************************************************************/
 Obj *WorldManager::moveWorldObjToStorage(Obj &world_obj, Memx<Obj> &storage) {
-    PROFILE_START("WorldManager::moveWorldObjToStorage(Obj &world_obj, Memx<Obj> &storage)")
+    PROFILE_START("CatzEngine::WorldManager::moveWorldObjToStorage(Obj &world_obj, Memx<Obj> &storage)")
     if (world_obj._area)                                          // if object belongs to an area
         if (ObjMap<Obj> *world_storage = world_obj.worldObjMap()) // if item is stored in world container
             if (world_storage->elmSize() == storage.elmSize())    // if elements stored in containers are of the same sizes
@@ -185,17 +185,17 @@ Obj *WorldManager::moveWorldObjToStorage(Obj &world_obj, Memx<Obj> &storage) {
                     world_storage->removeObj(&world_obj);              // remove from world container
                     storage_obj.memoryAddressChanged();                // notify that memory address was changed
                     storage_obj.wasMovedFromWorldToStorage();          // callback
-                    PROFILE_STOP("WorldManager::moveWorldObjToStorage(Obj &world_obj, Memx<Obj> &storage)")
+                    PROFILE_STOP("CatzEngine::WorldManager::moveWorldObjToStorage(Obj &world_obj, Memx<Obj> &storage)")
                     return &storage_obj;
                 } else {
                     storage.removeData(&storage_obj);
                 }
             }
-    PROFILE_STOP("WorldManager::moveWorldObjToStorage(Obj &world_obj, Memx<Obj> &storage)")
+    PROFILE_STOP("CatzEngine::WorldManager::moveWorldObjToStorage(Obj &world_obj, Memx<Obj> &storage)")
     return null;
 }
 Bool WorldManager::moveStorageObjToWorld(Obj &storage_obj, Memx<Obj> &storage, C Matrix *obj_matrix) {
-    PROFILE_START("WorldManager::moveStorageObjToWorld(Obj &storage_obj, Memx<Obj> &storage, C Matrix *obj_matrix)")
+    PROFILE_START("CatzEngine::WorldManager::moveStorageObjToWorld(Obj &storage_obj, Memx<Obj> &storage, C Matrix *obj_matrix)")
     if (storage.contains(&storage_obj))                                     // if belongs to this storage
         if (ObjMap<Obj> *world_storage = objMap(objType(storage_obj)))      // if world has storage for this object
             if (world_storage->elmSize() == storage.elmSize())              // if elements stored in containers are of the same sizes
@@ -215,17 +215,17 @@ Bool WorldManager::moveStorageObjToWorld(Obj &storage_obj, Memx<Obj> &storage, C
                         {
                             world_storage->removeObj(world_obj); // remove from world container if object was added to unloaded area
                         }
-                        PROFILE_STOP("WorldManager::moveStorageObjToWorld(Obj &storage_obj, Memx<Obj> &storage, C Matrix *obj_matrix)")
+                        PROFILE_STOP("CatzEngine::WorldManager::moveStorageObjToWorld(Obj &storage_obj, Memx<Obj> &storage, C Matrix *obj_matrix)")
                         return true;
                     } else {
                         world_storage->removeObj(world_obj);
                     }
                 }
-    PROFILE_STOP("WorldManager::moveStorageObjToWorld(Obj &storage_obj, Memx<Obj> &storage, C Matrix *obj_matrix)")
+    PROFILE_STOP("CatzEngine::WorldManager::moveStorageObjToWorld(Obj &storage_obj, Memx<Obj> &storage, C Matrix *obj_matrix)")
     return false;
 }
 Obj *WorldManager::MoveStorageObjToStorage(Obj &storage_obj, Memx<Obj> &src_storage, Memx<Obj> &dest_storage) {
-    PROFILE_START("WorldManager::MoveStorageObjToStorage(Obj &storage_obj, Memx<Obj> &src_storage, Memx<Obj> &dest_storage)")
+    PROFILE_START("CatzEngine::WorldManager::MoveStorageObjToStorage(Obj &storage_obj, Memx<Obj> &src_storage, Memx<Obj> &dest_storage)")
     if (&src_storage == &dest_storage)
         return &storage_obj;                             // same containers
     if (src_storage.elmSize() == dest_storage.elmSize()) // if elements stored in containers are of the same sizes
@@ -237,13 +237,13 @@ Obj *WorldManager::MoveStorageObjToStorage(Obj &storage_obj, Memx<Obj> &src_stor
                 Swap(&storage_obj, &dest_obj, dest_storage.elmSize()); // swap object data
                 src_storage.removeData(&storage_obj);                  // remove from src storage
                 dest_obj.memoryAddressChanged();                       // notify that memory address was changed
-                PROFILE_STOP("WorldManager::MoveStorageObjToStorage(Obj &storage_obj, Memx<Obj> &src_storage, Memx<Obj> &dest_storage)")
+                PROFILE_STOP("CatzEngine::WorldManager::MoveStorageObjToStorage(Obj &storage_obj, Memx<Obj> &src_storage, Memx<Obj> &dest_storage)")
                 return &dest_obj;
             } else {
                 dest_storage.removeData(&dest_obj);
             }
         }
-    PROFILE_STOP("WorldManager::MoveStorageObjToStorage(Obj &storage_obj, Memx<Obj> &src_storage, Memx<Obj> &dest_storage)")
+    PROFILE_STOP("CatzEngine::WorldManager::MoveStorageObjToStorage(Obj &storage_obj, Memx<Obj> &src_storage, Memx<Obj> &dest_storage)")
     return null;
 }
 /******************************************************************************/
@@ -259,7 +259,7 @@ struct ObjGetBall {
     }
 };
 static void ObjGetAddBall(Cell<Area> &cell, ObjGetBall &oq) {
-    PROFILE_START("ObjGetAddBall(Cell<Area> &cell, ObjGetBall &oq)")
+    PROFILE_START("CatzEngine::ObjGetAddBall(Cell<Area> &cell, ObjGetBall &oq)")
     if (cell().loaded()) {
         Int type = oq.obj_type;
         Memc<Obj *> &objs = cell()._objs;
@@ -270,7 +270,7 @@ static void ObjGetAddBall(Cell<Area> &cell, ObjGetBall &oq) {
                     oq.objects.add(&o);
         }
     }
-    PROFILE_STOP("ObjGetAddBall(Cell<Area> &cell, ObjGetBall &oq)")
+    PROFILE_STOP("CatzEngine::ObjGetAddBall(Cell<Area> &cell, ObjGetBall &oq)")
 }
 struct ObjGetCapsule {
     Int obj_type;
@@ -286,7 +286,7 @@ struct ObjGetCapsule {
     }
 };
 static void ObjGetAddCapsule(Cell<Area> &cell, ObjGetCapsule &oq) {
-    PROFILE_START("ObjGetAddCapsule(Cell<Area> &cell, ObjGetCapsule &oq)")
+    PROFILE_START("CatzEngine::ObjGetAddCapsule(Cell<Area> &cell, ObjGetCapsule &oq)")
     if (cell().loaded()) {
         Int type = oq.obj_type;
         Memc<Obj *> &objs = cell()._objs;
@@ -297,7 +297,7 @@ static void ObjGetAddCapsule(Cell<Area> &cell, ObjGetCapsule &oq) {
                     oq.objects.add(&o);
         }
     }
-    PROFILE_STOP("ObjGetAddCapsule(Cell<Area> &cell, ObjGetCapsule &oq)")
+    PROFILE_STOP("CatzEngine::ObjGetAddCapsule(Cell<Area> &cell, ObjGetCapsule &oq)")
 }
 struct ObjGetBox {
     Int obj_type;
@@ -307,7 +307,7 @@ struct ObjGetBox {
     ObjGetBox(MemPtr<Obj *> &objects, C Box &box, Int obj_type) : obj_type(obj_type), box(box), objects(objects) {}
 };
 static void ObjGetAddBox(Cell<Area> &cell, ObjGetBox &oq) {
-    PROFILE_START("ObjGetAddBox(Cell<Area> &cell, ObjGetBox &oq)")
+    PROFILE_START("CatzEngine::ObjGetAddBox(Cell<Area> &cell, ObjGetBox &oq)")
     if (cell().loaded()) {
         Int type = oq.obj_type;
         Memc<Obj *> &objs = cell()._objs;
@@ -318,7 +318,7 @@ static void ObjGetAddBox(Cell<Area> &cell, ObjGetBox &oq) {
                     oq.objects.add(&o);
         }
     }
-    PROFILE_STOP("ObjGetAddBox(Cell<Area> &cell, ObjGetBox &oq)")
+    PROFILE_STOP("CatzEngine::ObjGetAddBox(Cell<Area> &cell, ObjGetBox &oq)")
 }
 struct ObjGetOBox {
     Int obj_type;
@@ -328,7 +328,7 @@ struct ObjGetOBox {
     ObjGetOBox(MemPtr<Obj *> &objects, C OBox &obox, Int obj_type) : obj_type(obj_type), obox(obox), objects(objects) {}
 };
 static void ObjGetAddOBox(Cell<Area> &cell, ObjGetOBox &oq) {
-    PROFILE_START("ObjGetAddOBox(Cell<Area> &cell, ObjGetOBox &oq)")
+    PROFILE_START("CatzEngine::ObjGetAddOBox(Cell<Area> &cell, ObjGetOBox &oq)")
     if (cell().loaded()) {
         Int type = oq.obj_type;
         Memc<Obj *> &objs = cell()._objs;
@@ -339,7 +339,7 @@ static void ObjGetAddOBox(Cell<Area> &cell, ObjGetOBox &oq) {
                     oq.objects.add(&o);
         }
     }
-    PROFILE_STOP("ObjGetAddOBox(Cell<Area> &cell, ObjGetOBox &oq)")
+    PROFILE_STOP("CatzEngine::ObjGetAddOBox(Cell<Area> &cell, ObjGetOBox &oq)")
 }
 WorldManager &WorldManager::objGetAdd(MemPtr<Obj *> objects, C Ball &ball, Int obj_type) {
     ObjGetBall oq(objects, ball, obj_type);
@@ -363,22 +363,22 @@ WorldManager &WorldManager::objGetAdd(MemPtr<Obj *> objects, C OBox &obox, Int o
 }
 /******************************************************************************/
 Obj *WorldManager::findObjById(C UID &obj_id, Int obj_type) {
-    PROFILE_START("WorldManager::findObjById(C UID &obj_id, Int obj_type)")
+    PROFILE_START("CatzEngine::WorldManager::findObjById(C UID &obj_id, Int obj_type)")
     if (obj_id.valid()) {
         if (obj_type < 0) // search in all containers
         {
             REPA(_obj_container)
             if (ObjMap<Obj> *obj_map = _obj_container[i].map)
                 if (Obj *obj = obj_map->find(obj_id)) {
-                    PROFILE_STOP("WorldManager::findObjById(C UID &obj_id, Int obj_type)")
+                    PROFILE_STOP("CatzEngine::WorldManager::findObjById(C UID &obj_id, Int obj_type)")
                     return obj;
                 }
         } else if (ObjMap<Obj> *obj_map = objMap(obj_type)) {
-            PROFILE_STOP("WorldManager::findObjById(C UID &obj_id, Int obj_type)")
+            PROFILE_STOP("CatzEngine::WorldManager::findObjById(C UID &obj_id, Int obj_type)")
             return obj_map->find(obj_id);
         }
     }
-    PROFILE_STOP("WorldManager::findObjById(C UID &obj_id, Int obj_type)")
+    PROFILE_STOP("CatzEngine::WorldManager::findObjById(C UID &obj_id, Int obj_type)")
     return null;
 }
 /******************************************************************************/

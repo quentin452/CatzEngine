@@ -100,7 +100,7 @@ void PathFind::step() {
     }
 }
 Bool PathFind::find(C VecI2 *start, C VecI2 *target, MemPtr<VecI2> path, Int max_steps, Bool diagonal, Bool reversed) {
-    PROFILE_START("PathFind::find(C VecI2 *start, C VecI2 *target, MemPtr<VecI2> path, Int max_steps, Bool diagonal, Bool reversed)")
+    PROFILE_START("CatzEngine::PathFind::find(C VecI2 *start, C VecI2 *target, MemPtr<VecI2> path, Int max_steps, Bool diagonal, Bool reversed)")
     const Int moves = (diagonal ? 8 : 4);
 
     // clear path
@@ -110,12 +110,12 @@ Bool PathFind::find(C VecI2 *start, C VecI2 *target, MemPtr<VecI2> path, Int max
     {
         // if already on target
         if (start && onTarget(*start, target)) {
-            PROFILE_STOP("PathFind::find(C VecI2 *start, C VecI2 *target, MemPtr<VecI2> path, Int max_steps, Bool diagonal, Bool reversed)")
+            PROFILE_STOP("CatzEngine::PathFind::find(C VecI2 *start, C VecI2 *target, MemPtr<VecI2> path, Int max_steps, Bool diagonal, Bool reversed)")
             return true; // if there's only one 'start' point then there's no need for setting 'path'
         }
         // no steps left
         if (!max_steps) {
-            PROFILE_STOP("PathFind::find(C VecI2 *start, C VecI2 *target, MemPtr<VecI2> path, Int max_steps, Bool diagonal, Bool reversed)")
+            PROFILE_STOP("CatzEngine::PathFind::find(C VecI2 *start, C VecI2 *target, MemPtr<VecI2> path, Int max_steps, Bool diagonal, Bool reversed)")
             return false;
         }
         step();
@@ -138,7 +138,7 @@ Bool PathFind::find(C VecI2 *start, C VecI2 *target, MemPtr<VecI2> path, Int max
                             if (path)
                                 path.add(pos);
                             {
-                                PROFILE_STOP("PathFind::find(C VecI2 *start, C VecI2 *target, MemPtr<VecI2> path, Int max_steps, Bool diagonal, Bool reversed)")
+                                PROFILE_STOP("CatzEngine::PathFind::find(C VecI2 *start, C VecI2 *target, MemPtr<VecI2> path, Int max_steps, Bool diagonal, Bool reversed)")
                                 return true;
                             }
                         } // if already on target, in case where there are multiple start points ('start' is null) then add 'path' so we can know which one is on target
@@ -223,21 +223,21 @@ Bool PathFind::find(C VecI2 *start, C VecI2 *target, MemPtr<VecI2> path, Int max
                 return true;
             }
             if (!_active.elms()) {
-                PROFILE_STOP("PathFind::find(C VecI2 *start, C VecI2 *target, MemPtr<VecI2> path, Int max_steps, Bool diagonal, Bool reversed)")
+                PROFILE_STOP("CatzEngine::PathFind::find(C VecI2 *start, C VecI2 *target, MemPtr<VecI2> path, Int max_steps, Bool diagonal, Bool reversed)")
                 return false; // no more paths left to follow
             }
             if (!--max_steps) {
-                PROFILE_STOP("PathFind::find(C VecI2 *start, C VecI2 *target, MemPtr<VecI2> path, Int max_steps, Bool diagonal, Bool reversed)")
+                PROFILE_STOP("CatzEngine::PathFind::find(C VecI2 *start, C VecI2 *target, MemPtr<VecI2> path, Int max_steps, Bool diagonal, Bool reversed)")
                 return false; // ran out of steps
             }
         }
     }
-    PROFILE_STOP("PathFind::find(C VecI2 *start, C VecI2 *target, MemPtr<VecI2> path, Int max_steps, Bool diagonal, Bool reversed)")
+    PROFILE_STOP("CatzEngine::PathFind::find(C VecI2 *start, C VecI2 *target, MemPtr<VecI2> path, Int max_steps, Bool diagonal, Bool reversed)")
     return false;
 }
 /******************************************************************************/
 void PathFind::getWalkableNeighbors(C VecI2 &pos, MemPtr<VecI2> pixels, Bool diagonal) {
-    PROFILE_START("PathFind::getWalkableNeighbors(C VecI2 &pos, MemPtr<VecI2> pixels, Bool diagonal)")
+    PROFILE_START("CatzEngine::PathFind::getWalkableNeighbors(C VecI2 &pos, MemPtr<VecI2> pixels, Bool diagonal)")
     pixels.clear();
     if (pixelWalkable(pos.x, pos.y)) {
         const Int moves = (diagonal ? 8 : 4);
@@ -258,7 +258,7 @@ void PathFind::getWalkableNeighbors(C VecI2 &pos, MemPtr<VecI2> pixels, Bool dia
             }
         }
     }
-    PROFILE_STOP("PathFind::getWalkableNeighbors(C VecI2 &pos, MemPtr<VecI2> pixels, Bool diagonal)")
+    PROFILE_STOP("CatzEngine::PathFind::getWalkableNeighbors(C VecI2 &pos, MemPtr<VecI2> pixels, Bool diagonal)")
 }
 /******************************************************************************/
 } // namespace EE

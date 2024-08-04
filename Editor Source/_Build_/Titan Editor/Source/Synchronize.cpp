@@ -28,23 +28,23 @@ int SynchronizerClass::CompareDepth(C ElmDepth &a, C ElmDepth &b) {
 }
 int SynchronizerClass::ElmFile::size() C { return elm.size() + data.size(); }
 void SynchronizerClass::ElmFile::process() {
-    PROFILE_START("SynchronizerClass::ElmFile::process()")
+    PROFILE_START("CatzEngine::SynchronizerClass::ElmFile::process()")
     if (compress) {
         data.pos(0);
         File temp;
         Compress(data, temp.writeMem(), compress_fast ? ServerNetworkCompression : ClientNetworkCompression, compress_fast ? ServerNetworkCompressionLevel : ClientNetworkCompressionLevel);
         Swap(data, temp);
     }
-    PROFILE_STOP("SynchronizerClass::ElmFile::process()")
+    PROFILE_STOP("CatzEngine::SynchronizerClass::ElmFile::process()")
 }
 void SynchronizerClass::ElmFile::store(File &f) {
-    PROFILE_START("SynchronizerClass::ElmFile::store(File &f)")
+    PROFILE_START("CatzEngine::SynchronizerClass::ElmFile::store(File &f)")
     process();
     elm.pos(0);
     elm.copy(f);
     data.pos(0);
     data.copy(f);
-    PROFILE_STOP("SynchronizerClass::ElmFile::store(File &f)")
+    PROFILE_STOP("CatzEngine::SynchronizerClass::ElmFile::store(File &f)")
 }
 bool SynchronizerClass::WorldSync::empty() C { return !set_area.elms() && !set_obj.elms(); }
 int SynchronizerClass::WorldSync::elms() C { return set_area.elms() + set_obj.elms(); }
@@ -74,7 +74,7 @@ SynchronizerClass::~SynchronizerClass() {
 }
 bool SynchronizerClass::CompressFunc(Thread &thread) { return Synchronizer.compressFunc(); }
 bool SynchronizerClass::compressFunc() {
-    PROFILE_START("SynchronizerClass::compressFunc()")
+    PROFILE_START("CatzEngine::SynchronizerClass::compressFunc()")
     if (set_elm_full_file.elms() && Server.smallBuf()) // full elements first
     {
         SyncLockerEx locker(lock);
@@ -134,32 +134,32 @@ bool SynchronizerClass::compressFunc() {
     } else {
         Time.wait(1);
     }
-    PROFILE_STOP("SynchronizerClass::compressFunc()")
+    PROFILE_STOP("CatzEngine::SynchronizerClass::compressFunc()")
     return true;
 }
 int SynchronizerClass::elmFileSize() {
-    PROFILE_START("SynchronizerClass::elmFileSize()")
+    PROFILE_START("CatzEngine::SynchronizerClass::elmFileSize()")
     int size = 0;
     SyncLocker locker(lock);
     REPA(set_elm_full_file)
     size += set_elm_full_file[i].size();
     REPA(set_elm_long_file)
     size += set_elm_long_file[i].size();
-    PROFILE_STOP("SynchronizerClass::elmFileSize()")
+    PROFILE_STOP("CatzEngine::SynchronizerClass::elmFileSize()")
     return size;
 }
 int SynchronizerClass::queuedElms() {
-    PROFILE_START("SynchronizerClass::queuedElms()")
+    PROFILE_START("CatzEngine::SynchronizerClass::queuedElms()")
     int n = set_elm_full_file.elms() + set_elm_long_file.elms() + set_elm_full.elms() + set_elm_long.elms() + set_elm_short.elms() + set_tex.elms() + cmds.elms() + compressing;
     REPA(world_sync)
     n += world_sync.lockedData(i).elms();
     REPA(mini_map_sync)
     n += mini_map_sync.lockedData(i).elms();
-    PROFILE_STOP("SynchronizerClass::queuedElms()")
+    PROFILE_STOP("CatzEngine::SynchronizerClass::queuedElms()")
     return n;
 }
 void SynchronizerClass::clearSync() {
-    PROFILE_START("SynchronizerClass::clearSync()")
+    PROFILE_START("CatzEngine::SynchronizerClass::clearSync()")
     thread.stop();
     if (lock.created()) // this can be called after destructor
     {
@@ -175,53 +175,53 @@ void SynchronizerClass::clearSync() {
         world_sync.del();
         mini_map_sync.del();
     }
-    PROFILE_STOP("SynchronizerClass::clearSync()")
+    PROFILE_STOP("CatzEngine::SynchronizerClass::clearSync()")
 }
 bool SynchronizerClass::getCmds(Memc<File> &cmds) {
-    PROFILE_START("SynchronizerClass::getCmds(Memc<File> &cmds)")
+    PROFILE_START("CatzEngine::SynchronizerClass::getCmds(Memc<File> &cmds)")
     cmds.clear();
     if (T.cmds.elms()) {
         SyncLocker locker(lock);
         Swap(cmds, T.cmds);
     }
-    PROFILE_STOP("SynchronizerClass::getCmds(Memc<File> &cmds)")
+    PROFILE_STOP("CatzEngine::SynchronizerClass::getCmds(Memc<File> &cmds)")
     return cmds.elms() > 0;
 }
 void SynchronizerClass::setArea(C UID &world_id, C VecI2 &area_xy) {
-    PROFILE_START("SynchronizerClass::setArea(C UID &world_id, C VecI2 &area_xy)")
+    PROFILE_START("CatzEngine::SynchronizerClass::setArea(C UID &world_id, C VecI2 &area_xy)")
     if (Server.canWrite() && world_id.valid())
         if (WorldSync *ws = world_sync.get(world_id))
             ws->set_area.binaryInclude(area_xy);
-    PROFILE_STOP("SynchronizerClass::setArea(C UID &world_id, C VecI2 &area_xy)")
+    PROFILE_STOP("CatzEngine::SynchronizerClass::setArea(C UID &world_id, C VecI2 &area_xy)")
 }
 void SynchronizerClass::setObjs(C UID &world_id, Memc<UID> &obj_ids) {
-    PROFILE_START("SynchronizerClass::setObjs(C UID &world_id, Memc<UID> &obj_ids)")
+    PROFILE_START("CatzEngine::SynchronizerClass::setObjs(C UID &world_id, Memc<UID> &obj_ids)")
     if (Server.canWrite() && world_id.valid() && obj_ids.elms())
         if (WorldSync *ws = world_sync.get(world_id))
             REPA(obj_ids)
     ws->set_obj.binaryInclude(obj_ids[i]);
-    PROFILE_STOP("SynchronizerClass::setObjs(C UID &world_id, Memc<UID> &obj_ids)")
+    PROFILE_STOP("CatzEngine::SynchronizerClass::setObjs(C UID &world_id, Memc<UID> &obj_ids)")
 }
 void SynchronizerClass::setMiniMapImage(C UID &mini_map_id, C VecI2 &image_xy) {
-    PROFILE_START("SynchronizerClass::setMiniMapImage(C UID &mini_map_id, C VecI2 &image_xy)")
+    PROFILE_START("CatzEngine::SynchronizerClass::setMiniMapImage(C UID &mini_map_id, C VecI2 &image_xy)")
     if (Server.canWrite() && mini_map_id.valid())
         if (MiniMapSync *mms = mini_map_sync.get(mini_map_id))
             mms->set_image.binaryInclude(image_xy);
-    PROFILE_STOP("SynchronizerClass::setMiniMapImage(C UID &mini_map_id, C VecI2 &image_xy)")
+    PROFILE_STOP("CatzEngine::SynchronizerClass::setMiniMapImage(C UID &mini_map_id, C VecI2 &image_xy)")
 }
 void SynchronizerClass::delayedSetArea(C UID &world_id, C VecI2 &area_xy) // !! must be multi-threaded SAFE !!
 {
-    PROFILE_START("SynchronizerClass::delayedSetArea(C UID &world_id, C VecI2 &area_xy)")
+    PROFILE_START("CatzEngine::SynchronizerClass::delayedSetArea(C UID &world_id, C VecI2 &area_xy)")
     if (Server.canWrite() && world_id.valid()) {
         MapLock ml(delayed_world_sync); // use lock because this may be called on multiple threads by 'Area.setServer'
         if (WorldSync *ws = delayed_world_sync.get(world_id))
             ws->set_area.binaryInclude(area_xy);
     }
-    PROFILE_STOP("SynchronizerClass::delayedSetArea(C UID &world_id, C VecI2 &area_xy)")
+    PROFILE_STOP("CatzEngine::SynchronizerClass::delayedSetArea(C UID &world_id, C VecI2 &area_xy)")
 }
 void SynchronizerClass::delayedSetObj(C UID &world_id, C MemPtr<UID> &obj_id) // !! must be multi-threaded SAFE !!
 {
-    PROFILE_START("SynchronizerClass::delayedSetObj(C UID &world_id, C MemPtr<UID> &obj_id)")
+    PROFILE_START("CatzEngine::SynchronizerClass::delayedSetObj(C UID &world_id, C MemPtr<UID> &obj_id)")
     if (Server.canWrite() && world_id.valid()) {
         MapLock ml(delayed_world_sync); // use lock because this may be called on multiple threads by 'Area.setChangedObj'
         if (WorldSync *ws = delayed_world_sync.get(world_id))
@@ -229,17 +229,17 @@ void SynchronizerClass::delayedSetObj(C UID &world_id, C MemPtr<UID> &obj_id) //
         if (obj_id[i].valid())
             ws->set_obj.binaryInclude(obj_id[i]);
     }
-    PROFILE_STOP("SynchronizerClass::delayedSetObj(C UID &world_id, C MemPtr<UID> &obj_id)")
+    PROFILE_STOP("CatzEngine::SynchronizerClass::delayedSetObj(C UID &world_id, C MemPtr<UID> &obj_id)")
 }
 void SynchronizerClass::erasing(C UID &elm_id) {
-    PROFILE_START("SynchronizerClass::erasing(C UID &elm_id)")
+    PROFILE_START("CatzEngine::SynchronizerClass::erasing(C UID &elm_id)")
     delayed_world_sync.removeKey(elm_id);
     world_sync.removeKey(elm_id);
     mini_map_sync.removeKey(elm_id);
     set_elm_full.exclude(elm_id, true);
     set_elm_long.exclude(elm_id, true);
     set_elm_short.exclude(elm_id, true);
-    PROFILE_STOP("SynchronizerClass::erasing(C UID &elm_id)")
+    PROFILE_STOP("CatzEngine::SynchronizerClass::erasing(C UID &elm_id)")
 }
 void SynchronizerClass::erasingTex(C UID &tex_id) {
     SyncLocker locker(lock);
@@ -269,7 +269,7 @@ void SynchronizerClass::setTex(C UID &tex_id) {
 }
 void SynchronizerClass::createLocal(Project &local, Memx<Elm> &server) // process recursively to create parents first
 {
-    PROFILE_START("SynchronizerClass::createLocal(Project &local, Memx<Elm> &server)")
+    PROFILE_START("CatzEngine::SynchronizerClass::createLocal(Project &local, Memx<Elm> &server)")
     FREPA(server) {
         Elm &s = server[i],
             &l = local.getElm(s.id);
@@ -287,10 +287,10 @@ void SynchronizerClass::createLocal(Project &local, Memx<Elm> &server) // proces
             l.opened(false); // keep new downloaded elements as closed
         }
     }
-    PROFILE_STOP("SynchronizerClass::createLocal(Project &local, Memx<Elm> &server)")
+    PROFILE_STOP("CatzEngine::SynchronizerClass::createLocal(Project &local, Memx<Elm> &server)")
 }
 void SynchronizerClass::sync(Project &local, Project &server) {
-    PROFILE_START("SynchronizerClass::sync(Project &local, Project &server)")
+    PROFILE_START("CatzEngine::SynchronizerClass::sync(Project &local, Project &server)")
     Proj.setListCurSel();
     {
         SyncLocker locker(lock);
@@ -403,11 +403,11 @@ void SynchronizerClass::sync(Project &local, Project &server) {
     FREPA(Proj.elms)
     if (Proj.elms[i].type == ELM_MINI_MAP)
         Server.getMiniMapVer(Proj.elms[i].id);
-    PROFILE_STOP("SynchronizerClass::sync(Project &local, Project &server)")
+    PROFILE_STOP("CatzEngine::SynchronizerClass::sync(Project &local, Project &server)")
 }
 
 void SynchronizerClass::syncWorld(C UID &world_id) {
-    PROFILE_START("SynchronizerClass::syncWorld(C UID &world_id)")
+    PROFILE_START("CatzEngine::SynchronizerClass::syncWorld(C UID &world_id)")
     if (world_id.valid())
         if (WorldSync *ws = world_sync.get(world_id)) {
             Memc<AreaSync> area_get;
@@ -510,10 +510,10 @@ void SynchronizerClass::syncWorld(C UID &world_id) {
             Server.getWorldLakes(world_id, lakes_get);
             Server.getWorldRivers(world_id, rivers_get);
         }
-    PROFILE_STOP("SynchronizerClass::syncWorld(C UID &world_id)")
+    PROFILE_STOP("CatzEngine::SynchronizerClass::syncWorld(C UID &world_id)")
 }
 void SynchronizerClass::syncMiniMap(C UID &mini_map_id) {
-    PROFILE_START("SynchronizerClass::syncMiniMap(C UID &mini_map_id)")
+    PROFILE_START("CatzEngine::SynchronizerClass::syncMiniMap(C UID &mini_map_id)")
     if (mini_map_id.valid())
         if (MiniMapSync *mms = mini_map_sync.get(mini_map_id)) {
             // sync settings
@@ -542,10 +542,10 @@ void SynchronizerClass::syncMiniMap(C UID &mini_map_id) {
 
             Server.getMiniMapImages(mini_map_id, get_image);
         }
-    PROFILE_STOP("SynchronizerClass::syncMiniMap(C UID &mini_map_id)")
+    PROFILE_STOP("CatzEngine::SynchronizerClass::syncMiniMap(C UID &mini_map_id)")
 }
 void SynchronizerClass::update() {
-    PROFILE_START("SynchronizerClass::update()")
+    PROFILE_START("CatzEngine::SynchronizerClass::update()")
     // move 'delayed_world_sync' to 'world_sync'
     if (!delayed_world_sync.elms())
         last_delayed_time = Time.realTime();
@@ -729,7 +729,7 @@ void SynchronizerClass::update() {
 
     skip:;
     }
-    PROFILE_STOP("SynchronizerClass::update()")
+    PROFILE_STOP("CatzEngine::SynchronizerClass::update()")
 }
 SynchronizerClass::SynchronizerClass() : compressing(false), world_sync(Compare, Create), delayed_world_sync(Compare, Create), mini_map_sync(Compare, Create), last_delayed_time(0) {}
 

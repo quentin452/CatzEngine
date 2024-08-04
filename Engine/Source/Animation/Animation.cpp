@@ -96,7 +96,7 @@ void AnimParams::set(C Animation &animation, Flt time) { set(animation.loop(), a
 // ANIMATION KEYS
 /******************************************************************************/
 Bool AnimKeys::orn(Orient &orn, C AnimParams &params) C {
-    PROFILE_START("AnimKeys::orn(Orient &orn, C AnimParams &params)")
+    PROFILE_START("CatzEngine::AnimKeys::orn(Orient &orn, C AnimParams &params)")
     switch (orns.elms()) {
     case 0:
         if (SET_ON_FAIL) {
@@ -186,26 +186,26 @@ Bool AnimKeys::orn(Orient &orn, C AnimParams &params) C {
     }
 
 stop_and_return_true:
-    PROFILE_STOP("AnimKeys::orn(Orient &orn, C AnimParams &params)")
+    PROFILE_STOP("CatzEngine::AnimKeys::orn(Orient &orn, C AnimParams &params)")
     return true;
 
 stop_and_return_false:
-    PROFILE_STOP("AnimKeys::orn(Orient &orn, C AnimParams &params)")
+    PROFILE_STOP("CatzEngine::AnimKeys::orn(Orient &orn, C AnimParams &params)")
     return false;
 }
 
 Bool AnimKeys::pos(Vec &pos, C AnimParams &params) C {
-    PROFILE_START("AnimKeys::pos(Vec &pos, C AnimParams &params)")
+    PROFILE_START("CatzEngine::AnimKeys::pos(Vec &pos, C AnimParams &params)")
     switch (poss.elms()) {
     case 0:
         if (SET_ON_FAIL)
             pos.zero();
-        PROFILE_STOP("AnimKeys::pos(Vec &pos, C AnimParams &params)")
+        PROFILE_STOP("CatzEngine::AnimKeys::pos(Vec &pos, C AnimParams &params)")
         return false;
     case 1:
     first:
         pos = poss[0].pos;
-        PROFILE_STOP("AnimKeys::pos(Vec &pos, C AnimParams &params)")
+        PROFILE_STOP("CatzEngine::AnimKeys::pos(Vec &pos, C AnimParams &params)")
         return true;
     default: {
         Int l, r;
@@ -244,7 +244,7 @@ Bool AnimKeys::pos(Vec &pos, C AnimParams &params) C {
             } else {
             last:
                 pos = poss.last().pos;
-                PROFILE_STOP("AnimKeys::pos(Vec &pos, C AnimParams &params)")
+                PROFILE_STOP("CatzEngine::AnimKeys::pos(Vec &pos, C AnimParams &params)")
                 return true;
             }
         } else {
@@ -254,7 +254,7 @@ Bool AnimKeys::pos(Vec &pos, C AnimParams &params) C {
                 step = (params.time - p->time) / length;
             else {
                 pos = p->pos;
-                PROFILE_STOP("AnimKeys::pos(Vec &pos, C AnimParams &params)")
+                PROFILE_STOP("CatzEngine::AnimKeys::pos(Vec &pos, C AnimParams &params)")
                 return true;
             }
         }
@@ -280,23 +280,23 @@ Bool AnimKeys::pos(Vec &pos, C AnimParams &params) C {
 #endif
         }
     }
-        PROFILE_STOP("AnimKeys::pos(Vec &pos, C AnimParams &params)")
+        PROFILE_STOP("CatzEngine::AnimKeys::pos(Vec &pos, C AnimParams &params)")
         return true;
     }
-    PROFILE_STOP("AnimKeys::pos(Vec &pos, C AnimParams &params)")
+    PROFILE_STOP("CatzEngine::AnimKeys::pos(Vec &pos, C AnimParams &params)")
 }
 Bool AnimKeys::scale(Vec &scale, C AnimParams &params) C {
-    PROFILE_START("AnimKeys::scale(Vec &scale, C AnimParams &params)")
+    PROFILE_START("CatzEngine::AnimKeys::scale(Vec &scale, C AnimParams &params)")
     switch (scales.elms()) {
     case 0:
         if (SET_ON_FAIL)
             scale.zero();
-        PROFILE_STOP("AnimKeys::scale(Vec &scale, C AnimParams &params)")
+        PROFILE_STOP("CatzEngine::AnimKeys::scale(Vec &scale, C AnimParams &params)")
         return false;
     case 1:
     first:
         scale = scales[0].scale;
-        PROFILE_STOP("AnimKeys::scale(Vec &scale, C AnimParams &params)")
+        PROFILE_STOP("CatzEngine::AnimKeys::scale(Vec &scale, C AnimParams &params)")
         return true;
     default: {
         Int l, r;
@@ -335,7 +335,7 @@ Bool AnimKeys::scale(Vec &scale, C AnimParams &params) C {
             } else {
             last:
                 scale = scales.last().scale;
-                PROFILE_STOP("AnimKeys::scale(Vec &scale, C AnimParams &params)")
+                PROFILE_STOP("CatzEngine::AnimKeys::scale(Vec &scale, C AnimParams &params)")
                 return true;
             }
         } else {
@@ -345,7 +345,7 @@ Bool AnimKeys::scale(Vec &scale, C AnimParams &params) C {
                 step = (params.time - p->time) / length;
             else {
                 scale = p->scale;
-                PROFILE_STOP("AnimKeys::scale(Vec &scale, C AnimParams &params)")
+                PROFILE_STOP("CatzEngine::AnimKeys::scale(Vec &scale, C AnimParams &params)")
                 return true;
             }
         }
@@ -371,24 +371,24 @@ Bool AnimKeys::scale(Vec &scale, C AnimParams &params) C {
 #endif
         }
     }
-        PROFILE_STOP("AnimKeys::scale(Vec &scale, C AnimParams &params)")
+        PROFILE_STOP("CatzEngine::AnimKeys::scale(Vec &scale, C AnimParams &params)")
         return true;
     }
-    PROFILE_STOP("AnimKeys::scale(Vec &scale, C AnimParams &params)")
+    PROFILE_STOP("CatzEngine::AnimKeys::scale(Vec &scale, C AnimParams &params)")
 }
 #if HAS_ANIM_ROT
 Bool AnimKeys::rot(AxisRoll &rot, C AnimParams &params) C {
-    PROFILE_START("AnimKeys::rot(AxisRoll &rot, C AnimParams &params)")
+    PROFILE_START("CatzEngine::AnimKeys::rot(AxisRoll &rot, C AnimParams &params)")
     switch (rots.elms()) {
     case 0:
         if (SET_ON_FAIL)
             rot.zero();
-        PROFILE_STOP("AnimKeys::rot(AxisRoll &rot, C AnimParams &params)")
+        PROFILE_STOP("CatzEngine::AnimKeys::rot(AxisRoll &rot, C AnimParams &params)")
         return false;
     case 1:
     first:
         rot = rots[0].rot;
-        PROFILE_STOP("AnimKeys::rot(AxisRoll &rot, C AnimParams &params)")
+        PROFILE_STOP("CatzEngine::AnimKeys::rot(AxisRoll &rot, C AnimParams &params)")
         return true;
     default: {
         Int l, r;
@@ -427,7 +427,7 @@ Bool AnimKeys::rot(AxisRoll &rot, C AnimParams &params) C {
             } else {
             last:
                 rot = rots.last().rot;
-                PROFILE_STOP("AnimKeys::rot(AxisRoll &rot, C AnimParams &params)")
+                PROFILE_STOP("CatzEngine::AnimKeys::rot(AxisRoll &rot, C AnimParams &params)")
                 return true;
             }
         } else {
@@ -437,7 +437,7 @@ Bool AnimKeys::rot(AxisRoll &rot, C AnimParams &params) C {
                 step = (params.time - p->time) / length;
             else {
                 rot = p->rot;
-                PROFILE_STOP("AnimKeys::rot(AxisRoll &rot, C AnimParams &params)")
+                PROFILE_STOP("CatzEngine::AnimKeys::rot(AxisRoll &rot, C AnimParams &params)")
                 return true;
             }
         }
@@ -463,25 +463,25 @@ Bool AnimKeys::rot(AxisRoll &rot, C AnimParams &params) C {
 #endif
         }
     }
-        PROFILE_STOP("AnimKeys::rot(AxisRoll &rot, C AnimParams &params)")
+        PROFILE_STOP("CatzEngine::AnimKeys::rot(AxisRoll &rot, C AnimParams &params)")
         return true;
     }
-    PROFILE_STOP("AnimKeys::rot(AxisRoll &rot, C AnimParams &params)")
+    PROFILE_STOP("CatzEngine::AnimKeys::rot(AxisRoll &rot, C AnimParams &params)")
 }
 #endif
 #if HAS_ANIM_COLOR
 Bool AnimKeys::color(Vec4 &color, C AnimParams &params) C {
-    PROFILE_START("AnimKeys::color(Vec4 &color, C AnimParams &params)")
+    PROFILE_START("CatzEngine::AnimKeys::color(Vec4 &color, C AnimParams &params)")
     switch (colors.elms()) {
     case 0:
         if (SET_ON_FAIL)
             color = 1;
-        PROFILE_STOP("AnimKeys::color(Vec4 &color, C AnimParams &params)")
+        PROFILE_STOP("CatzEngine::AnimKeys::color(Vec4 &color, C AnimParams &params)")
         return false;
     case 1:
     first:
         color = colors[0].color;
-        PROFILE_STOP("AnimKeys::color(Vec4 &color, C AnimParams &params)")
+        PROFILE_STOP("CatzEngine::AnimKeys::color(Vec4 &color, C AnimParams &params)")
         return true;
     default: {
         Int l, r;
@@ -520,7 +520,7 @@ Bool AnimKeys::color(Vec4 &color, C AnimParams &params) C {
             } else {
             last:
                 color = colors.last().color;
-                PROFILE_STOP("AnimKeys::color(Vec4 &color, C AnimParams &params)")
+                PROFILE_STOP("CatzEngine::AnimKeys::color(Vec4 &color, C AnimParams &params)")
                 return true;
             }
         } else {
@@ -530,7 +530,7 @@ Bool AnimKeys::color(Vec4 &color, C AnimParams &params) C {
                 step = (params.time - p->time) / length;
             else {
                 color = p->color;
-                PROFILE_STOP("AnimKeys::color(Vec4 &color, C AnimParams &params)")
+                PROFILE_STOP("CatzEngine::AnimKeys::color(Vec4 &color, C AnimParams &params)")
                 return true;
             }
         }
@@ -556,15 +556,15 @@ Bool AnimKeys::color(Vec4 &color, C AnimParams &params) C {
 #endif
         }
     }
-        PROFILE_STOP("AnimKeys::color(Vec4 &color, C AnimParams &params)")
+        PROFILE_STOP("CatzEngine::AnimKeys::color(Vec4 &color, C AnimParams &params)")
         return true;
     }
-    PROFILE_STOP("AnimKeys::color(Vec4 &color, C AnimParams &params)")
+    PROFILE_STOP("CatzEngine::AnimKeys::color(Vec4 &color, C AnimParams &params)")
 }
 #endif
 /******************************************************************************/
 void AnimKeys::matrixNoScale(Matrix &matrix, C AnimParams &params) C {
-    PROFILE_START("AnimKeys::matrixNoScale(Matrix &matrix, C AnimParams &params)")
+    PROFILE_START("CatzEngine::AnimKeys::matrixNoScale(Matrix &matrix, C AnimParams &params)")
     Orient orn;
     if (T.orn(orn, params))
         matrix.orn() = orn;
@@ -572,18 +572,18 @@ void AnimKeys::matrixNoScale(Matrix &matrix, C AnimParams &params) C {
         matrix.orn().identity(); // if empty then call 'identity' because it's faster than setting from 'Orient'
     if (!T.pos(matrix.pos, params) && !SET_ON_FAIL)
         matrix.pos.zero();
-    PROFILE_STOP("AnimKeys::matrixNoScale(Matrix &matrix, C AnimParams &params)")
+    PROFILE_STOP("CatzEngine::AnimKeys::matrixNoScale(Matrix &matrix, C AnimParams &params)")
 }
 void AnimKeys::matrix(Matrix &matrix, C AnimParams &params) C {
-    PROFILE_START("AnimKeys::matrix(Matrix &matrix, C AnimParams &params)")
+    PROFILE_START("CatzEngine::AnimKeys::matrix(Matrix &matrix, C AnimParams &params)")
     matrixNoScale(matrix, params);
     Vec scale;
     if (T.scales.elms() && T.scale(scale, params))
         matrix.scaleOrnL(ScaleFactor(scale)); // most likely there won't be any scale, so do a fast check without the function call
-    PROFILE_STOP("AnimKeys::matrix(Matrix &matrix, C AnimParams &params)")
+    PROFILE_STOP("CatzEngine::AnimKeys::matrix(Matrix &matrix, C AnimParams &params)")
 }
 void AnimKeys::matrix(Matrix3 &matrix, C AnimParams &params, C Matrix3 &default_orn) C {
-    PROFILE_START("AnimKeys::matrix(Matrix3 &matrix, C AnimParams &params, C Matrix3 &default_orn)")
+    PROFILE_START("CatzEngine::AnimKeys::matrix(Matrix3 &matrix, C AnimParams &params, C Matrix3 &default_orn)")
     Orient orn;
     if (T.orn(orn, params))
         matrix = orn;
@@ -592,10 +592,10 @@ void AnimKeys::matrix(Matrix3 &matrix, C AnimParams &params, C Matrix3 &default_
     Vec scale;
     if (T.scales.elms() && T.scale(scale, params))
         matrix.scaleL(ScaleFactor(scale)); // most likely there won't be any scale, so do a fast check without the function call
-    PROFILE_STOP("AnimKeys::matrix(Matrix3 &matrix, C AnimParams &params, C Matrix3 &default_orn)")
+    PROFILE_STOP("CatzEngine::AnimKeys::matrix(Matrix3 &matrix, C AnimParams &params, C Matrix3 &default_orn)")
 }
 void AnimKeys::matrix(Matrix &matrix, C AnimParams &params, C Matrix3 &default_orn) C {
-    PROFILE_START("AnimKeys::matrix(Matrix &matrix, C AnimParams &params, C Matrix3 &default_orn)")
+    PROFILE_START("CatzEngine::AnimKeys::matrix(Matrix &matrix, C AnimParams &params, C Matrix3 &default_orn)")
     Orient orn;
     if (T.orn(orn, params))
         matrix.orn() = orn;
@@ -606,7 +606,7 @@ void AnimKeys::matrix(Matrix &matrix, C AnimParams &params, C Matrix3 &default_o
     Vec scale;
     if (T.scales.elms() && T.scale(scale, params))
         matrix.scaleOrnL(ScaleFactor(scale)); // most likely there won't be any scale, so do a fast check without the function call
-    PROFILE_STOP("AnimKeys::matrix(Matrix &matrix, C AnimParams &params, C Matrix3 &default_orn)")
+    PROFILE_STOP("CatzEngine::AnimKeys::matrix(Matrix &matrix, C AnimParams &params, C Matrix3 &default_orn)")
 }
 /******************************************************************************/
 void AnimKeys::Orn::save(MemPtr<TextNode> nodes) C {
@@ -667,10 +667,10 @@ AnimKeys &AnimKeys::del() {
 }
 /******************************************************************************/
 Bool AnimKeys::timeRange(Flt &min, Flt &max) C {
-    PROFILE_START("AnimKeys::timeRange(Flt &min, Flt &max)")
+    PROFILE_START("CatzEngine::AnimKeys::timeRange(Flt &min, Flt &max)")
     if (!is()) {
         min = max = 0;
-        PROFILE_STOP("AnimKeys::timeRange(Flt &min, Flt &max)")
+        PROFILE_STOP("CatzEngine::AnimKeys::timeRange(Flt &min, Flt &max)")
         return false;
     }
     min = FLT_MAX;
@@ -704,11 +704,11 @@ Bool AnimKeys::timeRange(Flt &min, Flt &max) C {
         MAX(max, t);
     }
 #endif
-    PROFILE_STOP("AnimKeys::timeRange(Flt &min, Flt &max)")
+    PROFILE_STOP("CatzEngine::AnimKeys::timeRange(Flt &min, Flt &max)")
     return true;
 }
 AnimKeys &AnimKeys::scale(Flt scale) {
-    PROFILE_STOP("AnimKeys::scale(Flt scale)")
+    PROFILE_STOP("CatzEngine::AnimKeys::scale(Flt scale)")
     REPA(poss) {
         Pos &pos = T.poss[i];
         pos.pos *= scale;
@@ -716,11 +716,11 @@ AnimKeys &AnimKeys::scale(Flt scale) {
         pos.tan *= scale;
 #endif
     }
-    PROFILE_STOP("AnimKeys::scale(Flt scale)")
+    PROFILE_STOP("CatzEngine::AnimKeys::scale(Flt scale)")
     return T;
 }
 AnimKeys &AnimKeys::mirrorX() {
-    PROFILE_START("AnimKeys::mirrorX()")
+    PROFILE_START("CatzEngine::AnimKeys::mirrorX()")
     REPA(orns) {
         Orn &orn = T.orns[i];
         orn.orn.mirrorX();
@@ -748,12 +748,12 @@ AnimKeys &AnimKeys::mirrorX() {
 #endif
     }
 #endif
-    PROFILE_STOP("AnimKeys::mirrorX()")
+    PROFILE_STOP("CatzEngine::AnimKeys::mirrorX()")
     return T;
 }
 AnimKeys &AnimKeys::transform(C Matrix3 &matrix) // assumes that 'matrix' is normalized
 {
-    PROFILE_START("AnimKeys::transform(C Matrix3 &matrix)")
+    PROFILE_START("CatzEngine::AnimKeys::transform(C Matrix3 &matrix)")
     REPA(orns) {
         Orn &orn = T.orns[i];
         orn.orn.mul(matrix, true);
@@ -777,7 +777,7 @@ AnimKeys &AnimKeys::transform(C Matrix3 &matrix) // assumes that 'matrix' is nor
 #endif
     }
 #endif
-    PROFILE_STOP("AnimKeys::transform(C Matrix3 &matrix)")
+    PROFILE_STOP("CatzEngine::AnimKeys::transform(C Matrix3 &matrix)")
     return T;
 }
 /******************************************************************************/
@@ -799,7 +799,7 @@ static Int CompareEps(C AnimKeys::Orn &k, C Flt &time) { return CompareEps(k.tim
 static Int CompareEps(C AnimKeys::Pos &k, C Flt &time) { return CompareEps(k.time, time); }
 
 AnimKeys &AnimKeys::sortFrames() {
-    PROFILE_START("AnimKeys::sortFrames()")
+    PROFILE_START("CatzEngine::AnimKeys::sortFrames()")
     orns.sort(Compare);
     poss.sort(Compare);
     scales.sort(Compare);
@@ -809,7 +809,7 @@ AnimKeys &AnimKeys::sortFrames() {
 #if HAS_ANIM_COLOR
     colors.sort(Compare);
 #endif
-    PROFILE_STOP("AnimKeys::sortFrames()")
+    PROFILE_STOP("CatzEngine::AnimKeys::sortFrames()")
     return T;
 }
 struct TimeScaleClip {
@@ -828,7 +828,7 @@ struct TimeScaleClip {
     }
 };
 AnimKeys &AnimKeys::scaleTime(Flt scale, Flt anim_length) {
-    PROFILE_START("AnimKeys::scaleTime(Flt scale, Flt anim_length)")
+    PROFILE_START("CatzEngine::AnimKeys::scaleTime(Flt scale, Flt anim_length)")
     TimeScaleClip tsc(scale, anim_length);
     REPA(orns)
     tsc.adjust(orns[i].time);
@@ -844,11 +844,11 @@ AnimKeys &AnimKeys::scaleTime(Flt scale, Flt anim_length) {
     REPA(colors)
     tsc.adjust(colors[i].time);
 #endif
-    PROFILE_STOP("AnimKeys::scaleTime(Flt scale, Flt anim_length)")
+    PROFILE_STOP("CatzEngine::AnimKeys::scaleTime(Flt scale, Flt anim_length)")
     return T;
 }
 AnimKeys &AnimKeys::offsetTime(Flt dt, Flt anim_length) {
-    PROFILE_START("AnimKeys::offsetTime(Flt dt, Flt anim_length)")
+    PROFILE_START("CatzEngine::AnimKeys::offsetTime(Flt dt, Flt anim_length)")
     REPAO(orns).time = Frac(orns[i].time + dt, anim_length);
     REPAO(poss).time = Frac(poss[i].time + dt, anim_length);
     REPAO(scales).time = Frac(scales[i].time + dt, anim_length);
@@ -858,11 +858,11 @@ AnimKeys &AnimKeys::offsetTime(Flt dt, Flt anim_length) {
 #if HAS_ANIM_COLOR
     REPAO(colors).time = Frac(colors[i].time + dt, anim_length);
 #endif
-    PROFILE_STOP("AnimKeys::offsetTime(Flt dt, Flt anim_length)")
+    PROFILE_STOP("CatzEngine::AnimKeys::offsetTime(Flt dt, Flt anim_length)")
     return sortFrames();
 }
 AnimKeys &AnimKeys::reverse(Flt anim_length) {
-    PROFILE_START("AnimKeys::reverse(Flt anim_length)")
+    PROFILE_START("CatzEngine::AnimKeys::reverse(Flt anim_length)")
     REPA(orns) {
         Orn &orn = orns[i];
         orn.time = anim_length - orn.time;
@@ -911,12 +911,12 @@ AnimKeys &AnimKeys::reverse(Flt anim_length) {
     }
     colors.reverseOrder();
 #endif
-    PROFILE_STOP("AnimKeys::reverse(Flt anim_length)")
+    PROFILE_STOP("CatzEngine::AnimKeys::reverse(Flt anim_length)")
     return T;
 }
 
 AnimKeys &AnimKeys::setTangents(Bool anim_loop, Flt anim_length) {
-    PROFILE_START("AnimKeys::setTangents(Bool anim_loop, Flt anim_length)")
+    PROFILE_START("CatzEngine::AnimKeys::setTangents(Bool anim_loop, Flt anim_length)")
 #if HAS_ANIM_TANGENT
     REPA(orns) {
         Int prev = i - 1,
@@ -1044,7 +1044,7 @@ AnimKeys &AnimKeys::setTangents(Bool anim_loop, Flt anim_length) {
     }
 #endif
 #endif
-    PROFILE_STOP("AnimKeys::setTangents(Bool anim_loop, Flt anim_length)")
+    PROFILE_STOP("CatzEngine::AnimKeys::setTangents(Bool anim_loop, Flt anim_length)")
     return T;
 }
 /******************************************************************************/
@@ -1066,20 +1066,20 @@ static Int Index(Int i, Bool loop, Int elms) {
 }
 static Int Index(Int i, Bool loop, Int elms, Int ignore) // this assumes that "elms>=2" and "InRange(ignore, elms)"
 {
-    PROFILE_START("Int Index(Int i, Bool loop, Int elms, Int ignore)")
+    PROFILE_START("CatzEngine::Int Index(Int i, Bool loop, Int elms, Int ignore)")
     if (i > ignore)
         i--;
     i = (loop ? Mod(i, elms - 1) : Mid(i, 0, elms - 2)); // add extra -1 to 'elms' because we need it for 'ignore'
     if (i >= ignore)
         i++;
-    PROFILE_STOP("Int Index(Int i, Bool loop, Int elms, Int ignore)")
+    PROFILE_STOP("CatzEngine::Int Index(Int i, Bool loop, Int elms, Int ignore)")
     return i;
 }
 static Flt AfterTime(Flt time, Flt base, Flt length) {
     return (time >= base) ? time : time + length;
 }
 AnimKeys &AnimKeys::optimize(Bool anim_loop, Bool anim_linear, Flt anim_length, Flt angle_eps, Flt pos_eps, Flt scale_eps, C Orient *bone, C Orient *bone_parent) {
-    PROFILE_START("AnimKeys::optimize(Bool anim_loop, Bool anim_linear, Flt anim_length, Flt angle_eps, Flt pos_eps, Flt scale_eps, C Orient *bone, C Orient *bone_parent)")
+    PROFILE_START("CatzEngine::AnimKeys::optimize(Bool anim_loop, Bool anim_linear, Flt anim_length, Flt angle_eps, Flt pos_eps, Flt scale_eps, C Orient *bone, C Orient *bone_parent)")
     AnimParams anim_params(anim_loop, anim_linear, anim_length, 0);
     Memt<Int> optimized; // indexes to original elements
 
@@ -1636,7 +1636,7 @@ AnimKeys &AnimKeys::optimize(Bool anim_loop, Bool anim_linear, Flt anim_length, 
         }
     }
 #endif
-    PROFILE_STOP("AnimKeys::optimize(Bool anim_loop, Bool anim_linear, Flt anim_length, Flt angle_eps, Flt pos_eps, Flt scale_eps, C Orient *bone, C Orient *bone_parent)")
+    PROFILE_STOP("CatzEngine::AnimKeys::optimize(Bool anim_loop, Bool anim_linear, Flt anim_length, Flt angle_eps, Flt pos_eps, Flt scale_eps, C Orient *bone, C Orient *bone_parent)")
     return T;
 }
 /******************************************************************************/
@@ -1692,7 +1692,7 @@ struct TimeClip {
     }
 };
 AnimKeys &AnimKeys::clip(Bool anim_loop, Bool anim_linear, Flt anim_length, Flt start_time, Flt end_time) {
-    PROFILE_START("AnimKeys::clip(Bool anim_loop, Bool anim_linear, Flt anim_length, Flt start_time, Flt end_time)")
+    PROFILE_START("CatzEngine::AnimKeys::clip(Bool anim_loop, Bool anim_linear, Flt anim_length, Flt start_time, Flt end_time)")
     Bool reverse;
     if (reverse = (end_time < start_time))
         Swap(start_time, end_time);
@@ -1861,12 +1861,12 @@ AnimKeys &AnimKeys::clip(Bool anim_loop, Bool anim_linear, Flt anim_length, Flt 
 
     if (reverse)
         T.reverse(tc.length);
-    PROFILE_STOP("AnimKeys::clip(Bool anim_loop, Bool anim_linear, Flt anim_length, Flt start_time, Flt end_time)")
+    PROFILE_STOP("CatzEngine::AnimKeys::clip(Bool anim_loop, Bool anim_linear, Flt anim_length, Flt start_time, Flt end_time)")
     return setTangents(anim_loop, tc.length);
 }
 /******************************************************************************/
 void AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times) C { // process forward because keys are sorted
-    PROFILE_START("AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times)")
+    PROFILE_START("CatzEngine::AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times)")
     if (orn_times) {
         if (orn_times.elms())
             FREPA(orns)
@@ -1894,10 +1894,10 @@ void AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos
             REPAO(scale_times) = scales[i].time;
         }
     }
-    PROFILE_STOP("AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times)")
+    PROFILE_STOP("CatzEngine::AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times)")
 }
 void AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times, Flt start, Flt end) C {
-    PROFILE_START("AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times, Flt start, Flt end)")
+    PROFILE_START("CatzEngine::AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times, Flt start, Flt end)")
     Int i; // process forward because keys are sorted
     if (orn_times) {
         orns.binarySearch(start, i, Compare);
@@ -1926,19 +1926,19 @@ void AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos
             scale_times.binaryInclude(time, CompareEps);
         }
     }
-    PROFILE_STOP("AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times, Flt start, Flt end)")
+    PROFILE_STOP("CatzEngine::AnimKeys::includeTimes(MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times, Flt start, Flt end)")
 }
 static void IncludeTimes(C CMemPtr<Flt, 16384> &src, MemPtr<Flt, 16384> dest) {
-    PROFILE_START("IncludeTimes(C CMemPtr<Flt, 16384> &src, MemPtr<Flt, 16384> dest)")
+    PROFILE_START("CatzEngine::IncludeTimes(C CMemPtr<Flt, 16384> &src, MemPtr<Flt, 16384> dest)")
     FREPA(src)
     dest.binaryInclude(src[i], CompareEps); // process forward because 'src' is most likely sorted
-    PROFILE_STOP("IncludeTimes(C CMemPtr<Flt, 16384> &src, MemPtr<Flt, 16384> dest)")
+    PROFILE_STOP("CatzEngine::IncludeTimes(C CMemPtr<Flt, 16384> &src, MemPtr<Flt, 16384> dest)")
 }
 /******************************************************************************/
 #if HAS_ANIM_ROT
 AnimKeys &AnimKeys::convertRotToOrn(C Skeleton &skeleton, Int skel_bone_index, Bool anim_loop, Flt anim_length) // this method can ignore name differences because it's used only during importing while the names are the same
 {
-    PROFILE_START("AnimKeys::convertRotToOrn(C Skeleton &skeleton, Int skel_bone_index, Bool anim_loop, Flt anim_length)")
+    PROFILE_START("CatzEngine::AnimKeys::convertRotToOrn(C Skeleton &skeleton, Int skel_bone_index, Bool anim_loop, Flt anim_length)")
     if (rots.elms() && (skel_bone_index < 0 || InRange(skel_bone_index, skeleton.bones))) // <0 means keys of 'root' bone
     {
         if (skel_bone_index < 0) {
@@ -1986,12 +1986,12 @@ AnimKeys &AnimKeys::convertRotToOrn(C Skeleton &skeleton, Int skel_bone_index, B
         rots.clear();
         setTangents(anim_loop, anim_length);
     }
-    PROFILE_STOP("AnimKeys::convertRotToOrn(C Skeleton &skeleton, Int skel_bone_index, Bool anim_loop, Flt anim_length)")
+    PROFILE_STOP("CatzEngine::AnimKeys::convertRotToOrn(C Skeleton &skeleton, Int skel_bone_index, Bool anim_loop, Flt anim_length)")
     return T;
 }
 AnimKeys &AnimKeys::convertOrnToRot(C Skeleton &skeleton, Int skel_bone_index, Bool anim_loop, Flt anim_length) // this method can ignore name differences because it's used only during importing while the names are the same
 {
-    PROFILE_START("AnimKeys::convertOrnToRot(C Skeleton &skeleton, Int skel_bone_index, Bool anim_loop, Flt anim_length)")
+    PROFILE_START("CatzEngine::AnimKeys::convertOrnToRot(C Skeleton &skeleton, Int skel_bone_index, Bool anim_loop, Flt anim_length)")
     if (orns.elms() && (skel_bone_index < 0 || InRange(skel_bone_index, skeleton.bones))) // <0 means keys of 'root' bone
     {
         if (skel_bone_index < 0) {
@@ -2031,13 +2031,13 @@ AnimKeys &AnimKeys::convertOrnToRot(C Skeleton &skeleton, Int skel_bone_index, B
         orns.clear();
         setTangents(anim_loop, anim_length);
     }
-    PROFILE_STOP("AnimKeys::convertOrnToRot(C Skeleton &skeleton, Int skel_bone_index, Bool anim_loop, Flt anim_length)")
+    PROFILE_STOP("CatzEngine::AnimKeys::convertOrnToRot(C Skeleton &skeleton, Int skel_bone_index, Bool anim_loop, Flt anim_length)")
     return T;
 }
 #endif
 /******************************************************************************/
 static void LoadOrnTan(File &f, Mems<AnimKeys::Orn> &orns) {
-    PROFILE_START("LoadOrnTan(File &f, Mems<AnimKeys::Orn> &orns)")
+    PROFILE_START("CatzEngine::LoadOrnTan(File &f, Mems<AnimKeys::Orn> &orns)")
 #if HAS_ANIM_TANGENT
     f.getN(orns.data(), orns.elms());
 #else
@@ -2047,10 +2047,10 @@ static void LoadOrnTan(File &f, Mems<AnimKeys::Orn> &orns) {
         f.skip(SIZE(Orient));
     }
 #endif
-    PROFILE_STOP("LoadOrnTan(File &f, Mems<AnimKeys::Orn> &orns)")
+    PROFILE_STOP("CatzEngine::LoadOrnTan(File &f, Mems<AnimKeys::Orn> &orns)")
 }
 static void LoadPosTan(File &f, Mems<AnimKeys::Pos> &poss) {
-    PROFILE_START("LoadPosTan(File &f, Mems<AnimKeys::Pos> &poss)")
+    PROFILE_START("CatzEngine::LoadPosTan(File &f, Mems<AnimKeys::Pos> &poss)")
 #if HAS_ANIM_TANGENT
     f.getN(poss.data(), poss.elms());
 #else
@@ -2060,10 +2060,10 @@ static void LoadPosTan(File &f, Mems<AnimKeys::Pos> &poss) {
         f.skip(SIZE(Vec));
     }
 #endif
-    PROFILE_STOP("LoadPosTan(File &f, Mems<AnimKeys::Pos> &poss)")
+    PROFILE_STOP("CatzEngine::LoadPosTan(File &f, Mems<AnimKeys::Pos> &poss)")
 }
 static void LoadScaleTan(File &f, Mems<AnimKeys::Scale> &scales) {
-    PROFILE_START("LoadScaleTan(File &f, Mems<AnimKeys::Scale> &scales)")
+    PROFILE_START("CatzEngine::LoadScaleTan(File &f, Mems<AnimKeys::Scale> &scales)")
 #if HAS_ANIM_TANGENT
     f.getN(scales.data(), scales.elms());
 #else
@@ -2073,12 +2073,12 @@ static void LoadScaleTan(File &f, Mems<AnimKeys::Scale> &scales) {
         f.skip(SIZE(Vec));
     }
 #endif
-    PROFILE_STOP("LoadScaleTan(File &f, Mems<AnimKeys::Scale> &scales)")
+    PROFILE_STOP("CatzEngine::LoadScaleTan(File &f, Mems<AnimKeys::Scale> &scales)")
 }
 
 #if HAS_ANIM_ROT
 static void LoadRotTan(File &f, Mems<AnimKeys::Rot> &rots) {
-    PROFILE_START("LoadRotTan(File &f, Mems<AnimKeys::Rot> &rots)")
+    PROFILE_START("CatzEngine::LoadRotTan(File &f, Mems<AnimKeys::Rot> &rots)")
 #if HAS_ANIM_TANGENT
     f.getN(rots.data(), rots.elms());
 #else
@@ -2088,7 +2088,7 @@ static void LoadRotTan(File &f, Mems<AnimKeys::Rot> &rots) {
         f.skip(SIZE(AxisRoll));
     }
 #endif
-    PROFILE_STOP("LoadRotTan(File &f, Mems<AnimKeys::Rot> &rots)")
+    PROFILE_STOP("CatzEngine::LoadRotTan(File &f, Mems<AnimKeys::Rot> &rots)")
 }
 #else
 static void LoadRotTan(File &f, Int rots) { f.skip((SIZE(Flt) + SIZE(AxisRoll) + SIZE(AxisRoll)) * rots); } // (time+rot+tan)*rots
@@ -2096,7 +2096,7 @@ static void LoadRotTan(File &f, Int rots) { f.skip((SIZE(Flt) + SIZE(AxisRoll) +
 
 #if HAS_ANIM_COLOR
 static void LoadColorTan(File &f, Mems<AnimKeys::Color> &colors) {
-    PROFILE_START("LoadColorTan(File &f, Mems<AnimKeys::Color> &colors)")
+    PROFILE_START("CatzEngine::LoadColorTan(File &f, Mems<AnimKeys::Color> &colors)")
 #if HAS_ANIM_TANGENT
     f.getN(colors.data(), colors.elms());
 #else
@@ -2106,40 +2106,40 @@ static void LoadColorTan(File &f, Mems<AnimKeys::Color> &colors) {
         f.skip(SIZE(Vec4));
     }
 #endif
-    PROFILE_STOP("LoadColorTan(File &f, Mems<AnimKeys::Color> &colors)")
+    PROFILE_STOP("CatzEngine::LoadColorTan(File &f, Mems<AnimKeys::Color> &colors)")
 }
 #else
 static void LoadColorTan(File &f, Int colors) { f.skip((SIZE(Flt) + SIZE(Vec4) + SIZE(Vec4)) * colors); } // (time+color+tan)*color
 #endif
 /******************************************************************************/
 Bool AnimKeys::saveData(File &f) C {
-    PROFILE_START("AnimKeys::saveData(File &f)")
+    PROFILE_START("CatzEngine::AnimKeys::saveData(File &f)")
     ASSERT(HAS_ANIM_TANGENT == 0);
     if (orns.saveRaw(f))
         if (poss.saveRaw(f))
             if (scales.saveRaw(f)) {
-                PROFILE_STOP("AnimKeys::saveData(File &f)")
+                PROFILE_STOP("CatzEngine::AnimKeys::saveData(File &f)")
                 return f.ok();
             }
-    PROFILE_STOP("AnimKeys::saveData(File &f)")
+    PROFILE_STOP("CatzEngine::AnimKeys::saveData(File &f)")
     return false;
 }
 Bool AnimKeys::loadData(File &f) {
-    PROFILE_START("AnimKeys::loadData(File &f)")
+    PROFILE_START("CatzEngine::AnimKeys::loadData(File &f)")
     ASSERT(HAS_ANIM_TANGENT == 0);
     if (orns.loadRaw(f))
         if (poss.loadRaw(f))
             if (scales.loadRaw(f))
                 if (f.ok()) {
-                    PROFILE_STOP("AnimKeys::loadData(File &f)")
+                    PROFILE_STOP("CatzEngine::AnimKeys::loadData(File &f)")
                     return true;
                 }
     del();
-    PROFILE_STOP("AnimKeys::loadData(File &f)")
+    PROFILE_STOP("CatzEngine::AnimKeys::loadData(File &f)")
     return false;
 }
 void AnimKeys::loadData3(File &f) {
-    PROFILE_START("AnimKeys::loadData3(File &f)")
+    PROFILE_START("CatzEngine::AnimKeys::loadData3(File &f)")
     orns.setNumDiscard(f.decUIntV());
     LoadOrnTan(f, orns);
 #if HAS_ANIM_ROT
@@ -2158,10 +2158,10 @@ void AnimKeys::loadData3(File &f) {
 #else
     LoadColorTan(f, f.decUIntV());
 #endif
-    PROFILE_STOP("AnimKeys::loadData3(File &f)")
+    PROFILE_STOP("CatzEngine::AnimKeys::loadData3(File &f)")
 }
 void AnimKeys::loadData2(File &f) {
-    PROFILE_START("AnimKeys::loadData2(File &f)")
+    PROFILE_START("CatzEngine::AnimKeys::loadData2(File &f)")
     orns.setNumDiscard(f.getUShort());
 #if HAS_ANIM_ROT
     rots.setNumDiscard(f.getUShort());
@@ -2181,10 +2181,10 @@ void AnimKeys::loadData2(File &f) {
     LoadPosTan(f, poss);
     LoadScaleTan(f, scales);
     LoadColorTan(f, colors);
-    PROFILE_STOP("AnimKeys::loadData2(File &f)")
+    PROFILE_STOP("CatzEngine::AnimKeys::loadData2(File &f)")
 }
 void AnimKeys::loadData1(File &f) {
-    PROFILE_START("AnimKeys::loadData1(File &f)")
+    PROFILE_START("CatzEngine::AnimKeys::loadData1(File &f)")
     orns.setNumDiscard(f.getUShort());
 #if HAS_ANIM_ROT
     rots.setNumDiscard(f.getUShort());
@@ -2206,10 +2206,10 @@ void AnimKeys::loadData1(File &f) {
         f.skip(SIZE(Flt));
 #endif
     }
-    PROFILE_STOP("AnimKeys::loadData1(File &f)")
+    PROFILE_STOP("CatzEngine::AnimKeys::loadData1(File &f)")
 }
 void AnimKeys::loadData0(File &f) {
-    PROFILE_START("AnimKeys::loadData0(File &f)")
+    PROFILE_START("CatzEngine::AnimKeys::loadData0(File &f)")
     orns.setNumDiscard(f.getUShort());
 #if HAS_ANIM_ROT
     rots.setNumDiscard(f.getUShort());
@@ -2221,10 +2221,10 @@ void AnimKeys::loadData0(File &f) {
     LoadOrnTan(f, orns);
     LoadRotTan(f, rots);
     LoadPosTan(f, poss);
-    PROFILE_STOP("AnimKeys::loadData0(File &f)")
+    PROFILE_STOP("CatzEngine::AnimKeys::loadData0(File &f)")
 }
 void AnimKeys::save(MemPtr<TextNode> nodes) C {
-    PROFILE_START("AnimKeys::save(MemPtr<TextNode> nodes)")
+    PROFILE_START("CatzEngine::AnimKeys::save(MemPtr<TextNode> nodes)")
     if (orns.elms()) {
         TextNode &node = nodes.New();
         node.name = "Orientations";
@@ -2254,16 +2254,16 @@ void AnimKeys::save(MemPtr<TextNode> nodes) C {
         FREPAO(colors).save(node.nodes.New().nodes);
     }
 #endif
-    PROFILE_STOP("AnimKeys::save(MemPtr<TextNode> nodes)")
+    PROFILE_STOP("CatzEngine::AnimKeys::save(MemPtr<TextNode> nodes)")
 }
 /******************************************************************************/
 // ANIMATION BONE
 /******************************************************************************/
 void AnimBone::save(TextNode &node) C {
-    PROFILE_START("AnimBone::save(TextNode &node)")
+    PROFILE_START("CatzEngine::AnimBone::save(TextNode &node)")
     node.set(name);
     super::save(node.nodes);
-    PROFILE_STOP("AnimBone::save(TextNode &node)")
+    PROFILE_STOP("CatzEngine::AnimBone::save(TextNode &node)")
 }
 /******************************************************************************/
 // ANIMATION EVENT
@@ -2301,60 +2301,60 @@ Animation &Animation::del() {
 }
 /******************************************************************************/
 AnimEvent *Animation::findEvent(CChar8 *name) {
-    PROFILE_START("Animation::findEvent(CChar8 *name)")
+    PROFILE_START("CatzEngine::Animation::findEvent(CChar8 *name)")
     REPA(events) {
         AnimEvent &event = events[i];
         if (Equal(event.name, name)) {
-            PROFILE_STOP("Animation::findEvent(CChar8 *name)")
+            PROFILE_STOP("CatzEngine::Animation::findEvent(CChar8 *name)")
             return &event;
         }
     }
-    PROFILE_STOP("Animation::findEvent(CChar8 *name)")
+    PROFILE_STOP("CatzEngine::Animation::findEvent(CChar8 *name)")
     return null;
 }
 Int Animation::eventCount(CChar8 *name) C {
-    PROFILE_START("Animation::eventCount(CChar8 *name)")
+    PROFILE_START("CatzEngine::Animation::eventCount(CChar8 *name)")
     Int num = 0;
     REPA(events)
     if (Equal(events[i].name, name))
         num++;
-    PROFILE_STOP("Animation::eventCount(CChar8 *name)")
+    PROFILE_STOP("CatzEngine::Animation::eventCount(CChar8 *name)")
     return num;
 }
 Bool Animation::eventAfter(CChar8 *name, Flt time) C // event.name==name && event.time<=time (time>=event.time)
 {
-    PROFILE_START("Animation::eventAfter(CChar8 *name, Flt time)")
+    PROFILE_START("CatzEngine::Animation::eventAfter(CChar8 *name, Flt time)")
     FREPA(events) // check all events from the start until 'time'
     {
         C AnimEvent &event = events[i];
         if (event.time > time)
             break;
         if (Equal(event.name, name)) {
-            PROFILE_STOP("Animation::eventAfter(CChar8 *name, Flt time)")
+            PROFILE_STOP("CatzEngine::Animation::eventAfter(CChar8 *name, Flt time)")
             return true;
         }
     }
-    PROFILE_STOP("Animation::eventAfter(CChar8 *name, Flt time)")
+    PROFILE_STOP("CatzEngine::Animation::eventAfter(CChar8 *name, Flt time)")
     return false;
 }
 Bool Animation::eventBefore(CChar8 *name, Flt time) C // event.name==name && event.time>time (time<event.time)
 {
-    PROFILE_START("Animation::eventBefore(CChar8 *name, Flt time)")
+    PROFILE_START("CatzEngine::Animation::eventBefore(CChar8 *name, Flt time)")
     REPA(events) // check all events from the end until 'time'
     {
         C AnimEvent &event = events[i];
         if (event.time <= time)
             break;
         if (Equal(event.name, name)) {
-            PROFILE_STOP("Animation::eventBefore(CChar8 *name, Flt time)")
+            PROFILE_STOP("CatzEngine::Animation::eventBefore(CChar8 *name, Flt time)")
             return true;
         }
     }
-    PROFILE_STOP("Animation::eventBefore(CChar8 *name, Flt time)")
+    PROFILE_STOP("CatzEngine::Animation::eventBefore(CChar8 *name, Flt time)")
     return false;
 }
 Bool Animation::eventOccurred(CChar8 *name, Flt start_time, Flt dt) C {
-    PROFILE_START("Animation::eventOccurred(CChar8 *name, Flt start_time, Flt dt)")
+    PROFILE_START("CatzEngine::Animation::eventOccurred(CChar8 *name, Flt start_time, Flt dt)")
     if (loop()) {
         start_time = Frac(start_time, _length);
         Flt end_time = start_time + dt;
@@ -2365,7 +2365,7 @@ Bool Animation::eventOccurred(CChar8 *name, Flt start_time, Flt dt) C {
             if (event.time >= end_time)
                 goto end; // EventOccurred(event_time, start_time, dt) = (start_time<=event_time && end_time>event_time)
             if (Equal(event.name, name)) {
-                PROFILE_STOP("Animation::eventOccurred(CChar8 *name, Flt start_time, Flt dt)")
+                PROFILE_STOP("CatzEngine::Animation::eventOccurred(CChar8 *name, Flt start_time, Flt dt)")
                 return true;
             }
         }
@@ -2376,7 +2376,7 @@ Bool Animation::eventOccurred(CChar8 *name, Flt start_time, Flt dt) C {
             if (event_time >= end_time)
                 goto end; // EventOccurred(event_time, start_time, dt) = (start_time<=event_time && end_time>event_time)
             if (Equal(event.name, name)) {
-                PROFILE_STOP("Animation::eventOccurred(CChar8 *name, Flt start_time, Flt dt)")
+                PROFILE_STOP("CatzEngine::Animation::eventOccurred(CChar8 *name, Flt start_time, Flt dt)")
                 return true;
             }
         }
@@ -2389,17 +2389,17 @@ Bool Animation::eventOccurred(CChar8 *name, Flt start_time, Flt dt) C {
             if (event.time >= end_time)
                 goto end; // EventOccurred(event_time, start_time, dt) = (start_time<=event_time && end_time>event_time)
             if (Equal(event.name, name)) {
-                PROFILE_STOP("Animation::eventOccurred(CChar8 *name, Flt start_time, Flt dt)")
+                PROFILE_STOP("CatzEngine::Animation::eventOccurred(CChar8 *name, Flt start_time, Flt dt)")
                 return true;
             }
         }
     }
 end:
-    PROFILE_STOP("Animation::eventOccurred(CChar8 *name, Flt start_time, Flt dt)")
+    PROFILE_STOP("CatzEngine::Animation::eventOccurred(CChar8 *name, Flt start_time, Flt dt)")
     return false;
 }
 Int Animation::eventsOccurred(Int &first_event, Flt start_time, Flt dt) C {
-    PROFILE_START("Animation::eventsOccurred(Int &first_event, Flt start_time, Flt dt)")
+    PROFILE_START("CatzEngine::Animation::eventsOccurred(Int &first_event, Flt start_time, Flt dt)")
     Int num = 0;
     if (loop()) {
         start_time = Frac(start_time, _length);
@@ -2434,12 +2434,12 @@ Int Animation::eventsOccurred(Int &first_event, Flt start_time, Flt dt) C {
         }
     }
 end:
-    PROFILE_STOP("Animation::eventsOccurred(Int &first_event, Flt start_time, Flt dt)")
+    PROFILE_STOP("CatzEngine::Animation::eventsOccurred(Int &first_event, Flt start_time, Flt dt)")
     return num;
 }
 // FIXME: TODO: events are now sorted by 'time', functions below can be optimized to make use of that
 Bool Animation::eventBetween(CChar8 *from, CChar8 *to, Flt start_time, Flt dt) C {
-    PROFILE_START("Animation::eventBetween(CChar8 *from, CChar8 *to, Flt start_time, Flt dt)")
+    PROFILE_START("CatzEngine::Animation::eventBetween(CChar8 *from, CChar8 *to, Flt start_time, Flt dt)")
     C AnimEvent *event_from = null,
                 *event_to = null;
     REPA(events) {
@@ -2455,7 +2455,7 @@ Bool Animation::eventBetween(CChar8 *from, CChar8 *to, Flt start_time, Flt dt) C
                 goto found;
         }
     }
-    PROFILE_STOP("Animation::eventBetween(CChar8 *from, CChar8 *to, Flt start_time, Flt dt)")
+    PROFILE_STOP("CatzEngine::Animation::eventBetween(CChar8 *from, CChar8 *to, Flt start_time, Flt dt)")
     return false;
 found:
     Flt time_to = event_to->time;
@@ -2466,11 +2466,11 @@ found:
         if (time_to < event_from->time)
             time_to += _length; // make sure that 'time_to'    is after 'event_from->time'
     }
-    PROFILE_STOP("Animation::eventBetween(CChar8 *from, CChar8 *to, Flt start_time, Flt dt)")
+    PROFILE_STOP("CatzEngine::Animation::eventBetween(CChar8 *from, CChar8 *to, Flt start_time, Flt dt)")
     return EventBetween(event_from->time, time_to, start_time, dt);
 }
 Flt Animation::eventProgress(CChar8 *from, CChar8 *to, Flt time) C {
-    PROFILE_START("Animation::eventProgress(CChar8 *from, CChar8 *to, Flt time)")
+    PROFILE_START("CatzEngine::Animation::eventProgress(CChar8 *from, CChar8 *to, Flt time)")
     C AnimEvent *event_from = null,
                 *event_to = null;
     REPA(events) {
@@ -2486,7 +2486,7 @@ Flt Animation::eventProgress(CChar8 *from, CChar8 *to, Flt time) C {
                 goto found;
         }
     }
-    PROFILE_STOP("Animation::eventProgress(CChar8 *from, CChar8 *to, Flt time)")
+    PROFILE_STOP("CatzEngine::Animation::eventProgress(CChar8 *from, CChar8 *to, Flt time)")
     return 0;
 found:
     Flt time_to = event_to->time;
@@ -2495,44 +2495,44 @@ found:
         if (time_to < event_from->time)
             time_to += _length; // make sure that 'time_to' is after 'event_from->time'
     }
-    PROFILE_STOP("Animation::eventProgress(CChar8 *from, CChar8 *to, Flt time)")
+    PROFILE_STOP("CatzEngine::Animation::eventProgress(CChar8 *from, CChar8 *to, Flt time)")
     return LerpR(event_from->time, time_to, time);
 }
 /******************************************************************************/
 AnimBone *Animation::findBone(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub) { return bones.addr(findBoneI(name, type, type_index, type_sub)); }
 AnimBone &Animation::getBone(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub) {
-    PROFILE_START("Animation::getBone(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub)")
+    PROFILE_START("CatzEngine::Animation::getBone(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub)")
     if (AnimBone *bone = findBone(name, type, type_index, type_sub)) {
-        PROFILE_STOP("Animation::getBone(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub)")
+        PROFILE_STOP("CatzEngine::Animation::getBone(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub)")
         return *bone;
     }
     AnimBone &bone = bones.New();
     bone.set(name, type, type_index, type_sub);
-    PROFILE_STOP("Animation::getBone(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub)")
+    PROFILE_STOP("CatzEngine::Animation::getBone(CChar8 *name, BONE_TYPE type, Int type_index, Int type_sub)")
     return bone;
 }
 /******************************************************************************/
 Animation &Animation::loop(Bool loop) {
-    PROFILE_START("Animation::loop(Bool loop)")
+    PROFILE_START("CatzEngine::Animation::loop(Bool loop)")
     if (T.loop() != loop) {
         _flag ^= ANIM_LOOP;
         setTangents().setRootMatrix();
     }
-    PROFILE_STOP("Animation::loop(Bool loop)")
+    PROFILE_STOP("CatzEngine::Animation::loop(Bool loop)")
     return T;
 }
 Animation &Animation::linear(Bool linear) {
-    PROFILE_START("Animation::linear(Bool linear)")
+    PROFILE_START("CatzEngine::Animation::linear(Bool linear)")
     if (T.linear() != linear) {
         FlagToggle(_flag, ANIM_LINEAR);
         setRootMatrix();
     }
-    PROFILE_STOP("Animation::linear(Bool linear)")
+    PROFILE_STOP("CatzEngine::Animation::linear(Bool linear)")
     return T;
 }
 /******************************************************************************/
 Animation &Animation::length(Flt length, Bool rescale_keyframes) {
-    PROFILE_START("Animation::length(Flt length, Bool rescale_keyframes)")
+    PROFILE_START("CatzEngine::Animation::length(Flt length, Bool rescale_keyframes)")
     if (length < 0) {
         reverse();
         CHS(length);
@@ -2549,32 +2549,32 @@ Animation &Animation::length(Flt length, Bool rescale_keyframes) {
             clip(0, length); // if making the length shorter, then clip and remove keyframes out of range
         T._length = length;
     }
-    PROFILE_STOP("Animation::length(Flt length, Bool rescale_keyframes)")
+    PROFILE_STOP("CatzEngine::Animation::length(Flt length, Bool rescale_keyframes)")
     return T;
 }
 /******************************************************************************/
 void Animation::setRootMatrix2() {
-    PROFILE_START("Animation::setRootMatrix2()")
+    PROFILE_START("CatzEngine::Animation::setRootMatrix2()")
     _root_start.inverse(_root_start_inv);
     _root_end.mul(_root_start_inv, _root_transform); // this is "GetTransform(_root_transform, _root_start, _root_end)"
-    PROFILE_STOP("Animation::setRootMatrix2()")
+    PROFILE_STOP("CatzEngine::Animation::setRootMatrix2()")
 }
 Animation &Animation::setRootMatrix() {
-    PROFILE_START("Animation::setRootMatrix()")
+    PROFILE_START("CatzEngine::Animation::setRootMatrix()")
     getRootMatrixExactTime(_root_end, length());
     getRootMatrix(_root_start, 0);
     setRootMatrix2();
-    PROFILE_STOP("Animation::setRootMatrix()")
+    PROFILE_STOP("CatzEngine::Animation::setRootMatrix()")
     return T;
 }
 void Animation::getRootMatrix(Matrix &matrix, Flt time) C {
-    PROFILE_START("Animation::getRootMatrix(Matrix &matrix, Flt time)")
+    PROFILE_START("CatzEngine::Animation::getRootMatrix(Matrix &matrix, Flt time)")
     AnimParams params(T, time);
     keys.matrix(matrix, params);
-    PROFILE_STOP("Animation::getRootMatrix(Matrix &matrix, Flt time)")
+    PROFILE_STOP("CatzEngine::Animation::getRootMatrix(Matrix &matrix, Flt time)")
 }
 void Animation::getRootMatrixCumulative(Matrix &matrix, Flt time) C {
-    PROFILE_START("Animation::getRootMatrixCumulative(Matrix &matrix, Flt time)")
+    PROFILE_START("CatzEngine::Animation::getRootMatrixCumulative(Matrix &matrix, Flt time)")
     AnimParams params(T, time);
     keys.matrix(matrix, params);
     if (params.loop)
@@ -2589,17 +2589,17 @@ void Animation::getRootMatrixCumulative(Matrix &matrix, Flt time) C {
             matrix.mul(_root_start_inv, rm); // this is "GetTransform(rm, rootStart(), matrix)", this is OK for negative times too, because even though we're transforming from 'rootStart' to 'matrix', we start with 'root_round' which already was moved before 'time' - at the start of that round.
             root_round.mul(rm, matrix);      // result = matrix at the start of a round, transformed by (transform from 'rootStart' to matrix at 'params.time')
         }
-    PROFILE_STOP("Animation::getRootMatrixCumulative(Matrix &matrix, Flt time)")
+    PROFILE_STOP("CatzEngine::Animation::getRootMatrixCumulative(Matrix &matrix, Flt time)")
 }
 void Animation::getRootMatrixExactTime(Matrix &matrix, Flt time) C {
-    PROFILE_START("Animation::getRootMatrixExactTime(Matrix &matrix, Flt time)")
+    PROFILE_START("CatzEngine::Animation::getRootMatrixExactTime(Matrix &matrix, Flt time)")
     AnimParams params(T, time);
     params.time = time; // re-apply time to remove possible fraction
     keys.matrix(matrix, params);
-    PROFILE_STOP("Animation::getRootMatrixExactTime(Matrix &matrix, Flt time)")
+    PROFILE_STOP("CatzEngine::Animation::getRootMatrixExactTime(Matrix &matrix, Flt time)")
 }
 void Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_time) C {
-    PROFILE_START("Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_time)")
+    PROFILE_START("CatzEngine::Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_time)")
     AnimParams params;
     RevMatrix rm;
     Matrix m;
@@ -2660,7 +2660,7 @@ void Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_t
                     keys.matrixNoScale(m, params);
                     m.mul(_root_start_inv, rm); // this is "GetTransformNormalized(rm, rootStart(), m)"
                     transform *= rm;
-                    PROFILE_STOP("Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_time)")
+                    PROFILE_STOP("CatzEngine::Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_time)")
                     return;
                 } else if (params.time < 0) // going back
                 {
@@ -2675,7 +2675,7 @@ void Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_t
                     keys.matrixNoScale(m, params);
                     GetTransformNormalized(rm, rootEnd(), m);
                     transform *= rm;
-                    PROFILE_STOP("Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_time)")
+                    PROFILE_STOP("CatzEngine::Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_time)")
                     return;
                 }
             }
@@ -2701,7 +2701,7 @@ void Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_t
                 keys.matrix(m, params);
                 m.mul(_root_start_inv, rm); // this is "GetTransform(rm, rootStart(), m)"
                 transform *= rm;
-                PROFILE_STOP("Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_time)")
+                PROFILE_STOP("CatzEngine::Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_time)")
                 return;
             } else if (params.time < 0) // going back
             {
@@ -2716,7 +2716,7 @@ void Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_t
                 keys.matrix(m, params);
                 GetTransform(rm, rootEnd(), m);
                 transform *= rm;
-                PROFILE_STOP("Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_time)")
+                PROFILE_STOP("CatzEngine::Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_time)")
                 return;
             }
         }
@@ -2724,15 +2724,15 @@ void Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_t
         keys.matrix(end, params);
         GetTransform(transform, m, end);
     }
-    PROFILE_STOP("Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_time)")
+    PROFILE_STOP("CatzEngine::Animation::getRootTransform(RevMatrix &transform, Flt start_time, Flt end_time)")
 }
 /******************************************************************************/
 Animation &Animation::removeUnused() {
-    PROFILE_START("Animation::removeUnused()")
+    PROFILE_START("CatzEngine::Animation::removeUnused()")
     REPA(bones)
     if (!bones[i].is())
         bones.remove(i);
-    PROFILE_STOP("Animation::removeUnused()")
+    PROFILE_STOP("CatzEngine::Animation::removeUnused()")
     return T;
 }
 /******************************************************************************
@@ -2749,9 +2749,9 @@ Animation& Animation::removeClones()
 }
 /******************************************************************************/
 static Bool SameBone(C SkelBone *a, C SkelBone *b, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights = null, Int old_i = -1, Int new_i = -1) {
-    PROFILE_START("SameBone(C SkelBone *a, C SkelBone *b, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights = null, Int old_i = -1, Int new_i = -1)")
+    PROFILE_START("CatzEngine::SameBone(C SkelBone *a, C SkelBone *b, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights = null, Int old_i = -1, Int new_i = -1)")
     if (!a && !b) {
-        PROFILE_STOP("SameBone(C SkelBone *a, C SkelBone *b, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights = null, Int old_i = -1, Int new_i = -1)")
+        PROFILE_STOP("CatzEngine::SameBone(C SkelBone *a, C SkelBone *b, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights = null, Int old_i = -1, Int new_i = -1)")
         return true; // both are null
     }
     if (a && b) // both are valid
@@ -2760,31 +2760,31 @@ static Bool SameBone(C SkelBone *a, C SkelBone *b, C CMemPtr<Mems<IndexWeight>> 
         {
             if (InRange(new_i, new_to_old_weights)) {
                 C Mems<IndexWeight> &weights = new_to_old_weights[new_i];
-                PROFILE_STOP("SameBone(C SkelBone *a, C SkelBone *b, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights = null, Int old_i = -1, Int new_i = -1)")
+                PROFILE_STOP("CatzEngine::SameBone(C SkelBone *a, C SkelBone *b, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights = null, Int old_i = -1, Int new_i = -1)")
                 return weights.elms() == 1 && weights[0].index == old_i;
             }
         } else {
-            PROFILE_STOP("SameBone(C SkelBone *a, C SkelBone *b, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights = null, Int old_i = -1, Int new_i = -1)")
+            PROFILE_STOP("CatzEngine::SameBone(C SkelBone *a, C SkelBone *b, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights = null, Int old_i = -1, Int new_i = -1)")
             return Equal(a->name, b->name); // check by name only
         }
     }
-    PROFILE_STOP("SameBone(C SkelBone *a, C SkelBone *b, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights = null, Int old_i = -1, Int new_i = -1)")
+    PROFILE_STOP("CatzEngine::SameBone(C SkelBone *a, C SkelBone *b, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights = null, Int old_i = -1, Int new_i = -1)")
     return false;
 }
 static Bool SameSet(C SkelBone &a_child, C SkelBone &b_child, C SkelBone *a_parent, C SkelBone *b_parent, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights, Int old_parent_i, Int new_parent_i) // this assumes that 'a_child' and 'b_child' are the same "SameBone(a_child, b_child)", and checks if their parents are the same, and children positions relative to their parents are also the same
 {
-    PROFILE_START("SameSet(C SkelBone &a_child, C SkelBone &b_child, C SkelBone *a_parent, C SkelBone *b_parent, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights, Int old_parent_i, Int new_parent_i)")
+    PROFILE_START("CatzEngine::SameSet(C SkelBone &a_child, C SkelBone &b_child, C SkelBone *a_parent, C SkelBone *b_parent, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights, Int old_parent_i, Int new_parent_i)")
     if (SameBone(a_parent, b_parent, new_to_old_weights, old_parent_i, new_parent_i)) {
-        PROFILE_STOP("SameSet(C SkelBone &a_child, C SkelBone &b_child, C SkelBone *a_parent, C SkelBone *b_parent, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights, Int old_parent_i, Int new_parent_i)")
+        PROFILE_STOP("CatzEngine::SameSet(C SkelBone &a_child, C SkelBone &b_child, C SkelBone *a_parent, C SkelBone *b_parent, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights, Int old_parent_i, Int new_parent_i)")
         return a_parent ? Equal(a_child.pos - a_parent->pos, b_child.pos - b_parent->pos)
                         : Equal(a_child.pos, b_child.pos);
     }
-    PROFILE_STOP("SameSet(C SkelBone &a_child, C SkelBone &b_child, C SkelBone *a_parent, C SkelBone *b_parent, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights, Int old_parent_i, Int new_parent_i)")
+    PROFILE_STOP("CatzEngine::SameSet(C SkelBone &a_child, C SkelBone &b_child, C SkelBone *a_parent, C SkelBone *b_parent, C CMemPtr<Mems<IndexWeight>> &new_to_old_weights, Int old_parent_i, Int new_parent_i)")
     return false;
 }
 Animation &Animation::adjustForSameSkeletonWithDifferentPose(C Skeleton &source, C Skeleton &target) // 'source' and 'target' are assumed to have the same names, this animation bones are also assumed to have the same names because this is typically called during importing
 {
-    PROFILE_START("Animation::adjustForSameSkeletonWithDifferentPose(C Skeleton &source, C Skeleton &target)")
+    PROFILE_START("CatzEngine::Animation::adjustForSameSkeletonWithDifferentPose(C Skeleton &source, C Skeleton &target)")
     if (&source != &target) {
         // adjust per-bone orientations (needed because some skeletons may have bones rotated already in the skeleton, not only in keyframes)
         // this will only insert 1 orientation keyframe if skeleton bone orientations are different, it doesn't modify existing keyframes
@@ -2859,7 +2859,7 @@ Animation &Animation::adjustForSameSkeletonWithDifferentPose(C Skeleton &source,
         // setTangents  (); currently not needed since tangents   don't change  in this method
         // setRootMatrix(); currently not needed since root keys aren't changed in this method
     }
-    PROFILE_STOP("Animation::adjustForSameSkeletonWithDifferentPose(C Skeleton &source, C Skeleton &target)")
+    PROFILE_STOP("CatzEngine::Animation::adjustForSameSkeletonWithDifferentPose(C Skeleton &source, C Skeleton &target)")
     return T;
 }
 struct BoneWeight : IndexWeight {
@@ -2867,9 +2867,9 @@ struct BoneWeight : IndexWeight {
     C AnimSkelBone *asbone;
 };
 static Vec BoneWeightPos(C MemtN<BoneWeight, 4> &weights) {
-    PROFILE_START("BoneWeightPos(C MemtN<BoneWeight, 4> &weights)")
+    PROFILE_START("CatzEngine::BoneWeightPos(C MemtN<BoneWeight, 4> &weights)")
     if (weights.elms() == 1) {
-        PROFILE_STOP("BoneWeightPos(C MemtN<BoneWeight, 4> &weights)")
+        PROFILE_STOP("CatzEngine::BoneWeightPos(C MemtN<BoneWeight, 4> &weights)")
         return weights[0].asbone->matrix().pos;
     }
     Vec pos = 0;
@@ -2877,13 +2877,13 @@ static Vec BoneWeightPos(C MemtN<BoneWeight, 4> &weights) {
         C BoneWeight &weight = weights[i];
         pos += weight.asbone->matrix().pos * weight.weight;
     }
-    PROFILE_STOP("BoneWeightPos(C MemtN<BoneWeight, 4> &weights)")
+    PROFILE_STOP("CatzEngine::BoneWeightPos(C MemtN<BoneWeight, 4> &weights)")
     return pos;
 }
 static Matrix3 BoneWeightOrn(C MemtN<BoneWeight, 4> &weights) {
-    PROFILE_START("BoneWeightOrn(C MemtN<BoneWeight, 4> &weights)")
+    PROFILE_START("CatzEngine::BoneWeightOrn(C MemtN<BoneWeight, 4> &weights)")
     if (weights.elms() == 1) {
-        PROFILE_STOP("BoneWeightOrn(C MemtN<BoneWeight, 4> &weights)")
+        PROFILE_STOP("CatzEngine::BoneWeightOrn(C MemtN<BoneWeight, 4> &weights)")
         return weights[0].asbone->matrix().orn();
     }
     Vec scale = 0;
@@ -2905,11 +2905,11 @@ static Matrix3 BoneWeightOrn(C MemtN<BoneWeight, 4> &weights) {
     matrix.x.setLength(scale.x);
     matrix.y.setLength(scale.y);
     matrix.z.setLength(scale.z);
-    PROFILE_STOP("BoneWeightOrn(C MemtN<BoneWeight, 4> &weights)")
+    PROFILE_STOP("CatzEngine::BoneWeightOrn(C MemtN<BoneWeight, 4> &weights)")
     return matrix;
 }
 static void DelRot(Orient &orn, UInt flag) {
-    PROFILE_START("DelRot(Orient &orn, UInt flag)")
+    PROFILE_START("CatzEngine::DelRot(Orient &orn, UInt flag)")
     if (flag & ROOT_DEL_ROTATION) {
         if (FlagAll(flag, ROOT_DEL_ROTATION))
             orn.identity();
@@ -2928,10 +2928,10 @@ static void DelRot(Orient &orn, UInt flag) {
                 orn.identity();
         }
     }
-    PROFILE_STOP("DelRot(Orient &orn, UInt flag)")
+    PROFILE_STOP("CatzEngine::DelRot(Orient &orn, UInt flag)")
 }
 static void DelRot(Animation &anim, UInt flag) {
-    PROFILE_START("DelRot(Animation &anim, UInt flag)")
+    PROFILE_START("CatzEngine::DelRot(Animation &anim, UInt flag)")
     if (FlagAll(flag, ROOT_DEL_ROTATION))
         anim.keys.orns.del();
     else {
@@ -2955,7 +2955,7 @@ static void DelRot(Animation &anim, UInt flag) {
         }
         anim.keys.setTangents(anim.loop(), anim.length());
     }
-    PROFILE_STOP("DelRot(Animation &anim, UInt flag)")
+    PROFILE_STOP("CatzEngine::DelRot(Animation &anim, UInt flag)")
 }
 struct SphericalInterpolator {
     Bool linear;
@@ -2968,13 +2968,13 @@ struct SphericalInterpolator {
 
     Bool init(C Animation &anim, Flt eps = EPS) // 'eps' must be >=0 because codes below will fail if angle is <=0
     {
-        PROFILE_START("init(C Animation &anim, Flt eps = EPS)")
+        PROFILE_START("CatzEngine::init(C Animation &anim, Flt eps = EPS)")
         C Matrix &start = anim.rootStart(), &end = anim.rootEnd();
         DEBUG_ASSERT(eps >= 0, "SphericalInterpolator eps");
         GetDelta(rot_axis, start, end);
         rot_angle = rot_axis.normalize();
         if (rot_angle <= eps) {
-            PROFILE_STOP("init(C Animation &anim, Flt eps = EPS)")
+            PROFILE_STOP("CatzEngine::init(C Animation &anim, Flt eps = EPS)")
             return false; // if 'rot_angle' is close to zero, then there is no rotation and we can fall back to linear interpolation
         }
 
@@ -3019,7 +3019,7 @@ struct SphericalInterpolator {
             circle_x = cross * circle_r;
             circle_y = rot_plane_delta * circle_r;
         }
-        PROFILE_STOP("init(C Animation &anim, Flt eps = EPS)")
+        PROFILE_STOP("CatzEngine::init(C Animation &anim, Flt eps = EPS)")
         return true;
     }
     void set(Vec &pos, Flt frac) {
@@ -3034,7 +3034,7 @@ struct SphericalInterpolator {
     }
 };
 Animation &Animation::adjustForSameTransformWithDifferentSkeleton(C Skeleton &old_skel, C Skeleton &new_skel, Int old_skel_bone_as_root, C CMemPtr<Mems<IndexWeight>> &weights, UInt root_flags) {
-    PROFILE_START("Animation::adjustForSameTransformWithDifferentSkeleton(C Skeleton &old_skel, C Skeleton &new_skel, Int old_skel_bone_as_root, C CMemPtr<Mems<IndexWeight>> &weights, UInt root_flags)")
+    PROFILE_START("CatzEngine::Animation::adjustForSameTransformWithDifferentSkeleton(C Skeleton &old_skel, C Skeleton &new_skel, Int old_skel_bone_as_root, C CMemPtr<Mems<IndexWeight>> &weights, UInt root_flags)")
     /*
        'old_skel' and 'new_skel'     are assumed to have the same names when 'weights' are null (if 'weights' are not null, then their indexes are used as 'new_skel' -> 'old_skel' mapping, and names/types are ignored)
        'old_skel' and this Animation are assumed to have the same names when FIND_ANIM_BY_NAME_ONLY
@@ -3706,12 +3706,12 @@ Animation &Animation::adjustForSameTransformWithDifferentSkeleton(C Skeleton &ol
             old_bones.clear();
         }
     }
-    PROFILE_STOP("Animation::adjustForSameTransformWithDifferentSkeleton(C Skeleton &old_skel, C Skeleton &new_skel, Int old_skel_bone_as_root, C CMemPtr<Mems<IndexWeight>> &weights, UInt root_flags)")
+    PROFILE_STOP("CatzEngine::Animation::adjustForSameTransformWithDifferentSkeleton(C Skeleton &old_skel, C Skeleton &new_skel, Int old_skel_bone_as_root, C CMemPtr<Mems<IndexWeight>> &weights, UInt root_flags)")
     Swap(anim_out, T);
     return T;
 }
 Animation &Animation::offsetRootBones(C Skeleton &skeleton, C Vec &move) {
-    PROFILE_START("Animation::offsetRootBones(C Skeleton &skeleton, C Vec &move)")
+    PROFILE_START("CatzEngine::Animation::offsetRootBones(C Skeleton &skeleton, C Vec &move)")
     if (move.any()) {
         AnimParams params(T, 0);
         Memt<Flt, 16384> times;
@@ -3783,12 +3783,12 @@ Animation &Animation::offsetRootBones(C Skeleton &skeleton, C Vec &move) {
             setRootMatrix();
         }
     }
-    PROFILE_STOP("Animation::offsetRootBones(C Skeleton &skeleton, C Vec &move)")
+    PROFILE_STOP("CatzEngine::Animation::offsetRootBones(C Skeleton &skeleton, C Vec &move)")
     return T;
 }
 /******************************************************************************/
 static void FreezePos(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_index, C Vec *delta) {
-    PROFILE_START("FreezePos(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_index, C Vec *delta)")
+    PROFILE_START("CatzEngine::FreezePos(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_index, C Vec *delta)")
     Bool root = (skel_bone < 0);
     if (root || InRange(skel_bone, skel.bones)) {
         AnimBone *abon;
@@ -3804,7 +3804,7 @@ static void FreezePos(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_
                 keys = abon;
                 default_orn = GetAnimOrient(sbon, skel.bones.addr(sbon.parent));
             } else {
-                PROFILE_STOP("FreezePos(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_index, C Vec *delta)")
+                PROFILE_STOP("CatzEngine::FreezePos(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_index, C Vec *delta)")
                 return;
             }
         }
@@ -3907,10 +3907,10 @@ static void FreezePos(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_
             }
         }
     }
-    PROFILE_STOP("FreezePos(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_index, C Vec *delta)")
+    PROFILE_STOP("CatzEngine::FreezePos(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_index, C Vec *delta)")
 }
 static void FreezeRot(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_index, C Matrix3 *matrix, Bool pos) {
-    PROFILE_START("FreezeRot(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_index, C Matrix3 *matrix, Bool pos)")
+    PROFILE_START("CatzEngine::FreezeRot(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_index, C Matrix3 *matrix, Bool pos)")
     Bool root = (skel_bone < 0);
     if (root || InRange(skel_bone, skel.bones)) {
         C SkelBone *sbon;
@@ -3928,7 +3928,7 @@ static void FreezeRot(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_
                 keys = abon;
                 default_orn = GetAnimOrient(*sbon, skel.bones.addr(sbon->parent));
             } else {
-                PROFILE_STOP("FreezeRot(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_index, C Matrix3 *matrix, Bool pos)")
+                PROFILE_STOP("CatzEngine::FreezeRot(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_index, C Matrix3 *matrix, Bool pos)")
                 return;
             }
         }
@@ -4114,7 +4114,7 @@ static void FreezeRot(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_
             }
         }
     }
-    PROFILE_STOP("FreezeRot(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_index, C Matrix3 *matrix, Bool pos)")
+    PROFILE_STOP("CatzEngine::FreezeRot(Animation &anim, C Skeleton &skel, Int skel_bone, Int key_index, C Matrix3 *matrix, Bool pos)")
 }
 void Animation::freezeDelPos(C Skeleton &skel, Int skel_bone, Int key_index) { FreezePos(T, skel, skel_bone, key_index, null); }
 void Animation::freezeMove(C Skeleton &skel, Int skel_bone, Int key_index, C Vec &delta) { FreezePos(T, skel, skel_bone, key_index, &delta); }
@@ -4122,7 +4122,7 @@ void Animation::freezeDelRot(C Skeleton &skel, Int skel_bone, Int key_index, Boo
 void Animation::freezeRotate(C Skeleton &skel, Int skel_bone, Int key_index, C Matrix3 &matrix, Bool pos) { FreezeRot(T, skel, skel_bone, key_index, &matrix, pos); }
 /******************************************************************************/
 Animation &Animation::setBoneTypeIndexesFromSkeleton(C Skeleton &skeleton) {
-    PROFILE_START("Animation::setBoneTypeIndexesFromSkeleton(C Skeleton &skeleton)")
+    PROFILE_START("CatzEngine::Animation::setBoneTypeIndexesFromSkeleton(C Skeleton &skeleton)")
     enum MODE {
         KEEP,
         CLEAR,
@@ -4144,11 +4144,11 @@ Animation &Animation::setBoneTypeIndexesFromSkeleton(C Skeleton &skeleton) {
                 break; // clear to BONE_UNKNOWN
             }
     }
-    PROFILE_STOP("Animation::setBoneTypeIndexesFromSkeleton(C Skeleton &skeleton)")
+    PROFILE_STOP("CatzEngine::Animation::setBoneTypeIndexesFromSkeleton(C Skeleton &skeleton)")
     return T;
 }
 Bool Animation::setBoneNameTypeIndexesFromSkeleton(C Skeleton &skeleton) {
-    PROFILE_START("Animation::setBoneNameTypeIndexesFromSkeleton(C Skeleton &skeleton)")
+    PROFILE_START("CatzEngine::Animation::setBoneNameTypeIndexesFromSkeleton(C Skeleton &skeleton)")
     Bool changed = false;
     REPA(bones) {
         AnimBone &bone = bones[i];
@@ -4163,12 +4163,12 @@ Bool Animation::setBoneNameTypeIndexesFromSkeleton(C Skeleton &skeleton) {
             changed = true;
         }
     }
-    PROFILE_STOP("Animation::setBoneNameTypeIndexesFromSkeleton(C Skeleton &skeleton)")
+    PROFILE_STOP("CatzEngine::Animation::setBoneNameTypeIndexesFromSkeleton(C Skeleton &skeleton)")
     return changed;
 }
 /******************************************************************************/
 Animation &Animation::reverse() {
-    PROFILE_START("Animation::reverse()")
+    PROFILE_START("CatzEngine::Animation::reverse()")
     keys.reverse(length());
     REPAO(bones).reverse(length());
 
@@ -4178,41 +4178,41 @@ Animation &Animation::reverse() {
     }
     events.reverseOrder();
 
-    PROFILE_STOP("Animation::reverse()")
+    PROFILE_STOP("CatzEngine::Animation::reverse()")
     return setRootMatrix();
 }
 Animation &Animation::sortEvents() {
-    PROFILE_START("Animation::sortEvents()")
+    PROFILE_START("CatzEngine::Animation::sortEvents()")
     events.sort(Compare);
-    PROFILE_STOP("Animation::sortEvents()")
+    PROFILE_STOP("CatzEngine::Animation::sortEvents()")
     return T;
 }
 Animation &Animation::sortFrames() {
-    PROFILE_START("Animation::sortFrames()")
+    PROFILE_START("CatzEngine::Animation::sortFrames()")
     keys.sortFrames();
     REPAO(bones).sortFrames();
-    PROFILE_STOP("Animation::sortFrames()")
+    PROFILE_STOP("CatzEngine::Animation::sortFrames()")
     return setRootMatrix();
 }
 Animation &Animation::setTangents() {
-    PROFILE_START("Animation::setTangents()")
+    PROFILE_START("CatzEngine::Animation::setTangents()")
     keys.setTangents(loop(), length());
     REPAO(bones).setTangents(loop(), length());
-    PROFILE_STOP("Animation::setTangents()")
+    PROFILE_STOP("CatzEngine::Animation::setTangents()")
     return T;
 }
 Animation &Animation::optimize(Flt angle_eps, Flt pos_eps, Flt scale_eps, Bool remove_unused_bones) {
-    PROFILE_START("Animation::optimize(Flt angle_eps, Flt pos_eps, Flt scale_eps, Bool remove_unused_bones)")
+    PROFILE_START("CatzEngine::Animation::optimize(Flt angle_eps, Flt pos_eps, Flt scale_eps, Bool remove_unused_bones)")
     keys.optimize(loop(), linear(), length(), angle_eps, pos_eps, scale_eps, &NoTemp(Orient(Vec(0, 0, 1), Vec(0, 1, 0)))); // we can remove default orientation for root
     REPAO(bones).optimize(loop(), linear(), length(), angle_eps, pos_eps, scale_eps);
     if (remove_unused_bones)
         removeUnused();
     setRootMatrix();
-    PROFILE_STOP("Animation::optimize(Flt angle_eps, Flt pos_eps, Flt scale_eps, Bool remove_unused_bones)")
+    PROFILE_STOP("CatzEngine::Animation::optimize(Flt angle_eps, Flt pos_eps, Flt scale_eps, Bool remove_unused_bones)")
     return T;
 }
 Animation &Animation::clip(Flt start_time, Flt end_time, Bool remove_unused_bones) {
-    PROFILE_START("Animation::clip(Flt start_time, Flt end_time, Bool remove_unused_bones)")
+    PROFILE_START("CatzEngine::Animation::clip(Flt start_time, Flt end_time, Bool remove_unused_bones)")
     // if(start_time!=0 || end_time!=length()) don't check this, because we may have keyframe data outside of this range that needs to be removed
     {
         keys.clip(loop(), linear(), length(), start_time, end_time);
@@ -4237,11 +4237,11 @@ Animation &Animation::clip(Flt start_time, Flt end_time, Bool remove_unused_bone
         }
         setRootMatrix();
     }
-    PROFILE_STOP("Animation::clip(Flt start_time, Flt end_time, Bool remove_unused_bones)")
+    PROFILE_STOP("CatzEngine::Animation::clip(Flt start_time, Flt end_time, Bool remove_unused_bones)")
     return T;
 }
 Bool Animation::timeRange(Flt &min, Flt &max) C {
-    PROFILE_START("Animation::timeRange(Flt &min, Flt &max)")
+    PROFILE_START("CatzEngine::Animation::timeRange(Flt &min, Flt &max)")
     min = FLT_MAX;
     max = -FLT_MAX;
     Flt s, e;
@@ -4260,29 +4260,29 @@ Bool Animation::timeRange(Flt &min, Flt &max) C {
         MAX(max, t);
     }
     if (min <= max) {
-        PROFILE_STOP("Animation::timeRange(Flt &min, Flt &max)")
+        PROFILE_STOP("CatzEngine::Animation::timeRange(Flt &min, Flt &max)")
         return true;
     }
     min = max = 0;
-    PROFILE_STOP("Animation::timeRange(Flt &min, Flt &max)")
+    PROFILE_STOP("CatzEngine::Animation::timeRange(Flt &min, Flt &max)")
     return false;
 }
 Animation &Animation::clipAuto() {
-    PROFILE_START("Animation::clipAuto()")
+    PROFILE_START("CatzEngine::Animation::clipAuto()")
     Flt min, max;
     timeRange(min, max);
-    PROFILE_STOP("Animation::clipAuto()")
+    PROFILE_STOP("CatzEngine::Animation::clipAuto()")
     return clip(min, max);
 }
 Animation &Animation::maximizeLength() {
-    PROFILE_START("Animation::maximizeLength()")
+    PROFILE_START("CatzEngine::Animation::maximizeLength()")
     Flt min, max;
     timeRange(min, max);
-    PROFILE_STOP("Animation::maximizeLength()")
+    PROFILE_STOP("CatzEngine::Animation::maximizeLength()")
     return length(Max(length(), max), false);
 }
 Animation &Animation::offsetTime(Flt dt) {
-    PROFILE_START("Animation::offsetTime(Flt dt)")
+    PROFILE_START("CatzEngine::Animation::offsetTime(Flt dt)")
     if (Flt time = Frac(-dt, length())) {
         if (1) {
             AnimParams params(T, time);
@@ -4398,7 +4398,7 @@ Animation &Animation::offsetTime(Flt dt) {
         sortEvents();
         setRootMatrix();
     }
-    PROFILE_STOP("Animation::offsetTime(Flt dt)")
+    PROFILE_STOP("CatzEngine::Animation::offsetTime(Flt dt)")
     return T;
 }
 /******************************************************************************/
@@ -4449,7 +4449,7 @@ struct TimeScaleRange {
     }
 };
 Animation &Animation::scaleTime(Flt start_time, Flt end_time, Flt scale) {
-    PROFILE_START("Animation::scaleTime(Flt start_time, Flt end_time, Flt scale)")
+    PROFILE_START("CatzEngine::Animation::scaleTime(Flt start_time, Flt end_time, Flt scale)")
     if (scale != 1 && scale >= 0) {
         Clamp(start_time, 0, length());
         Clamp(end_time, 0, length());
@@ -4465,26 +4465,26 @@ Animation &Animation::scaleTime(Flt start_time, Flt end_time, Flt scale) {
             length(ts.new_length, false);
         }
     }
-    PROFILE_STOP("Animation::scaleTime(Flt start_time, Flt end_time, Flt scale)")
+    PROFILE_STOP("CatzEngine::Animation::scaleTime(Flt start_time, Flt end_time, Flt scale)")
     return T;
 }
 /******************************************************************************/
 Animation &Animation::scale(Flt scale) {
-    PROFILE_START("Animation::scale(Flt scale)")
+    PROFILE_START("CatzEngine::Animation::scale(Flt scale)")
     keys.scale(scale);
     REPAO(bones).scale(scale);
-    PROFILE_STOP("Animation::scale(Flt scale)")
+    PROFILE_STOP("CatzEngine::Animation::scale(Flt scale)")
     return setRootMatrix();
 }
 Animation &Animation::mirrorX() {
-    PROFILE_START("Animation::mirrorX()")
+    PROFILE_START("CatzEngine::Animation::mirrorX()")
     keys.mirrorX();
     REPAO(bones).mirrorX();
-    PROFILE_STOP("Animation::mirrorX()")
+    PROFILE_STOP("CatzEngine::Animation::mirrorX()")
     return setRootMatrix();
 }
 Animation &Animation::transform(C Matrix &matrix, C Skeleton &source, Bool skel_const) {
-    PROFILE_START("Animation::transform(C Matrix &matrix, C Skeleton &source, Bool skel_const)")
+    PROFILE_START("CatzEngine::Animation::transform(C Matrix &matrix, C Skeleton &source, Bool skel_const)")
     // root
     AnimParams anim_params(T, 0);
     // AnimKeys   old=keys;
@@ -4639,7 +4639,7 @@ Animation &Animation::transform(C Matrix &matrix, C Skeleton &source, Bool skel_
         } else
             REPAO(abon.poss).pos *= scale; // for sub bones we can use only uniform scale
     }
-    PROFILE_STOP("Animation::transform(C Matrix &matrix, C Skeleton &source, Bool skel_const)")
+    PROFILE_STOP("CatzEngine::Animation::transform(C Matrix &matrix, C Skeleton &source, Bool skel_const)")
     return setTangents().setRootMatrix();
 }
 Animation &Animation::rightToLeft(C Skeleton &source) // this method can ignore name differences because it's used only during importing while the names are the same
@@ -4647,15 +4647,15 @@ Animation &Animation::rightToLeft(C Skeleton &source) // this method can ignore 
     return transform(Matrix3().setRotateX(-PI_2), source, false).mirrorX(); // set 'skel_const'=false because this method is called only during import, in which cases the skeleton is always going to get transformed too
 }
 static Str BoneNeutralName(C Str &name) {
-    PROFILE_START("BoneNeutralName(C Str &name)")
+    PROFILE_START("CatzEngine::BoneNeutralName(C Str &name)")
     Str n = Replace(name, "right", CharAlpha);
     n = Replace(n, "left", CharAlpha);
     n.replace('r', CharBeta).replace('l', CharBeta).replace('R', CharBeta).replace('L', CharBeta);
-    PROFILE_STOP("BoneNeutralName(C Str &name)")
+    PROFILE_STOP("CatzEngine::BoneNeutralName(C Str &name)")
     return n;
 }
 Animation &Animation::mirror(C Skeleton &source) {
-    PROFILE_START("Animation::mirror(C Skeleton &source)")
+    PROFILE_START("CatzEngine::Animation::mirror(C Skeleton &source)")
     MemtN<Bool, 256> bone_remapped;
     bone_remapped.setNumZero(bones.elms());
     REPA(bones)
@@ -4678,33 +4678,33 @@ Animation &Animation::mirror(C Skeleton &source) {
         }
     finished:;
     }
-    PROFILE_STOP("Animation::mirror(C Skeleton &source)")
+    PROFILE_STOP("CatzEngine::Animation::mirror(C Skeleton &source)")
     return mirrorX();
 }
 /******************************************************************************/
 #if HAS_ANIM_ROT
 Animation &Animation::convertRotToOrn(C Skeleton &skeleton) // this method can ignore name differences because it's used only during importing while the names are the same
 {
-    PROFILE_START("Animation::convertRotToOrn(C Skeleton &skeleton)")
+    PROFILE_START("CatzEngine::Animation::convertRotToOrn(C Skeleton &skeleton)")
     SkelAnim skel_anim(skeleton, T);
     keys.convertRotToOrn(skeleton, -1, loop(), length());
     REPAO(bones).convertRotToOrn(skeleton, skel_anim.abonToSbon(i), loop(), length());
-    PROFILE_STOP("Animation::convertRotToOrn(C Skeleton &skeleton)")
+    PROFILE_STOP("CatzEngine::Animation::convertRotToOrn(C Skeleton &skeleton)")
     return T;
 }
 Animation &Animation::convertOrnToRot(C Skeleton &skeleton) // this method can ignore name differences because it's used only during importing while the names are the same
 {
-    PROFILE_START("Animation::convertOrnToRot(C Skeleton &skeleton)")
+    PROFILE_START("CatzEngine::Animation::convertOrnToRot(C Skeleton &skeleton)")
     SkelAnim skel_anim(skeleton, T);
     keys.convertOrnToRot(skeleton, -1, loop(), length());
     REPAO(bones).convertOrnToRot(skeleton, skel_anim.abonToSbon(i), loop(), length());
-    PROFILE_STOP("Animation::convertOrnToRot(C Skeleton &skeleton)")
+    PROFILE_STOP("CatzEngine::Animation::convertOrnToRot(C Skeleton &skeleton)")
     return T;
 }
 #endif
 /******************************************************************************/
 void Animation::includeTimesForBoneAndItsParents(C Skeleton &skel, Int skel_bone, MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times) C {
-    PROFILE_START("Animation::includeTimesForBoneAndItsParents(C Skeleton &skel, Int skel_bone, MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times)")
+    PROFILE_START("CatzEngine::Animation::includeTimesForBoneAndItsParents(C Skeleton &skel, Int skel_bone, MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times)")
     if (InRange(skel_bone, skel.bones))
         for (;;) {
             C SkelBone &sbon = skel.bones[skel_bone];
@@ -4719,7 +4719,7 @@ void Animation::includeTimesForBoneAndItsParents(C Skeleton &skel, Int skel_bone
             skel_bone = sbon.parent;
         }
     keys.includeTimes(orn_times, pos_times, scale_times);
-    PROFILE_STOP("Animation::includeTimesForBoneAndItsParents(C Skeleton &skel, Int skel_bone, MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times)")
+    PROFILE_STOP("CatzEngine::Animation::includeTimesForBoneAndItsParents(C Skeleton &skel, Int skel_bone, MemPtr<Flt, 16384> orn_times, MemPtr<Flt, 16384> pos_times, MemPtr<Flt, 16384> scale_times)")
 }
 /******************************************************************************/
 Animation &Animation::copyParams(C Animation &src) {
@@ -4729,7 +4729,7 @@ Animation &Animation::copyParams(C Animation &src) {
 }
 /******************************************************************************/
 void Animation::freezeBone(C Skeleton &skel, Int skel_bone) {
-    PROFILE_START("Animation::freezeBone(C Skeleton &skel, Int skel_bone)")
+    PROFILE_START("CatzEngine::Animation::freezeBone(C Skeleton &skel, Int skel_bone)")
     if (InRange(skel_bone, skel.bones)) {
         SkelAnim skel_anim(skel, T);
         AnimSkel anim_skel;
@@ -4782,7 +4782,7 @@ void Animation::freezeBone(C Skeleton &skel, Int skel_bone) {
             Swap(getBone(root.name, root.type, root.type_index, root.type_sub).poss, keys.poss); // swap only positions
         }
     }
-    PROFILE_STOP("Animation::freezeBone(C Skeleton &skel, Int skel_bone)")
+    PROFILE_STOP("CatzEngine::Animation::freezeBone(C Skeleton &skel, Int skel_bone)")
 }
 /******************************************************************************/
 Bool Animation::save(File &f) C {

@@ -8,16 +8,16 @@ namespace EE {
 CPU Cpu;
 /******************************************************************************/
 void CPU::set() {
-    PROFILE_START("CPU::set()")
+    PROFILE_START("CatzEngine::CPU::set()")
     // disable subnormals/denormals (multiplying denormals on Intel i7-3632QM 2.2 Ghz is 16x slower compared to normal values)
 #if !(WINDOWS && ARM) && !IOS && !ANDROID && !SWITCH && !WEB
     _MM_SET_DENORMALS_ZERO_MODE(_MM_DENORMALS_ZERO_ON);
 #endif
-    PROFILE_STOP("CPU::set()")
+    PROFILE_STOP("CatzEngine::CPU::set()")
 }
 #if MAC && !ARM
 static void __cpuid(int regs[4], int cpuid_leaf) {
-    PROFILE_START("__cpuid(int regs[4], int cpuid_leaf)")
+    PROFILE_START("CatzEngine::__cpuid(int regs[4], int cpuid_leaf)")
     int eax, ebx, ecx, edx;
     asm(
 #if !X64
@@ -44,19 +44,19 @@ static void __cpuid(int regs[4], int cpuid_leaf) {
     regs[1] = ebx;
     regs[2] = ecx;
     regs[3] = edx;
-    PROFILE_STOP("__cpuid(int regs[4], int cpuid_leaf)")
+    PROFILE_STOP("CatzEngine::__cpuid(int regs[4], int cpuid_leaf)")
 }
 #elif LINUX && !ARM
 #undef __cpuid
 static void __cpuid(int regs[4], int cpuid_leaf) {
-    PROFILE_START("__cpuid(int regs[4], int cpuid_leaf)")
+    PROFILE_START("CatzEngine::__cpuid(int regs[4], int cpuid_leaf)")
     __get_cpuid(cpuid_leaf, (unsigned int *)&regs[0], (unsigned int *)&regs[1], (unsigned int *)&regs[2], (unsigned int *)&regs[3]);
-    PROFILE_STOP("__cpuid(int regs[4], int cpuid_leaf)")
+    PROFILE_STOP("CatzEngine::__cpuid(int regs[4], int cpuid_leaf)")
 }
 #elif ANDROID
 static ULong GetBits(CChar8 *text) // sample: "0,1-3"
 {
-    PROFILE_START("GetBits(CChar8 *text)")
+    PROFILE_START("CatzEngine::GetBits(CChar8 *text)")
     ULong out = 0;
     CalcValue val;
     for (; text;) {
@@ -79,12 +79,12 @@ static ULong GetBits(CChar8 *text) // sample: "0,1-3"
         if (text && *text == ',')
             text++; // skip comma and proceed to next value
     }
-    PROFILE_STOP("GetBits(CChar8 *text)")
+    PROFILE_STOP("CatzEngine::GetBits(CChar8 *text)")
     return out;
 }
 #endif
 CPU::CPU() {
-    PROFILE_START("CPU::CPU()")
+    PROFILE_START("CatzEngine::CPU::CPU()")
     if (LogInit)
         LogN("CPU.create");
 #if WINDOWS
@@ -287,7 +287,7 @@ CPU::CPU() {
     if (!_cores)
         _cores = _threads;
     set();
-    PROFILE_STOP("CPU::CPU()")
+    PROFILE_STOP("CatzEngine::CPU::CPU()")
 }
 /******************************************************************************/
 } // namespace EE

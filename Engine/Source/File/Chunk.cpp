@@ -7,41 +7,41 @@ namespace EE {
 // WRITER
 /******************************************************************************/
 ChunkWriter::~ChunkWriter() {
-    PROFILE_START("ChunkWriter::~ChunkWriter()")
+    PROFILE_START("CatzEngine::ChunkWriter::~ChunkWriter()")
     endChunk(); // end current chunk if any, but not the list, in case we want to append to it later
     _f = null;
     _chunk_size_pos = 0;
-    PROFILE_STOP("ChunkWriter::~ChunkWriter()")
+    PROFILE_STOP("CatzEngine::ChunkWriter::~ChunkWriter()")
 }
 ChunkWriter::ChunkWriter() {
-    PROFILE_START("ChunkWriter::ChunkWriter()")
+    PROFILE_START("CatzEngine::ChunkWriter::ChunkWriter()")
     _f = null;
     _chunk_size_pos = 0;
-    PROFILE_STOP("ChunkWriter::ChunkWriter()")
+    PROFILE_STOP("CatzEngine::ChunkWriter::ChunkWriter()")
 }
 ChunkWriter::ChunkWriter(const_mem_addr File &f) : ChunkWriter() { beginChunkList(f); }
 /******************************************************************************/
 void ChunkWriter::appendChunkList(File &f) {
-    PROFILE_START("ChunkWriter::appendChunkList(File &f)")
+    PROFILE_START("CatzEngine::ChunkWriter::appendChunkList(File &f)")
     endChunk(); // end current chunk if any, but not the list, because we're appending it now (if it exists)
     _chunk_size_pos = 0;
     _f = &f;
     if (!f.pos())
         f.putUInt(CC4_CHUNK); // automatically add marker only when the file is at start
-    PROFILE_STOP("ChunkWriter::appendChunkList(File &f)")
+    PROFILE_STOP("CatzEngine::ChunkWriter::appendChunkList(File &f)")
 }
 /******************************************************************************/
 void ChunkWriter::beginChunkList(File &f) {
-    PROFILE_START("ChunkWriter::beginChunkList(File &f)")
+    PROFILE_START("CatzEngine::ChunkWriter::beginChunkList(File &f)")
     endChunkList(); // end current chunk list if any
     _chunk_size_pos = 0;
     _f = &f;
     f.putUInt(CC4_CHUNK); // add chunk marker
-    PROFILE_STOP("ChunkWriter::beginChunkList(File &f)")
+    PROFILE_STOP("CatzEngine::ChunkWriter::beginChunkList(File &f)")
 }
 /******************************************************************************/
 File *ChunkWriter::beginChunk(C Str &name, UInt version) {
-    PROFILE_START("ChunkWriter::beginChunk(C Str &name, UInt version)")
+    PROFILE_START("CatzEngine::ChunkWriter::beginChunk(C Str &name, UInt version)")
     if (_f) {
         endChunk();            // finish current chunk if any
         _f->cmpUIntV(3);       // internal chunk container version
@@ -50,12 +50,12 @@ File *ChunkWriter::beginChunk(C Str &name, UInt version) {
         _chunk_size_pos = _f->pos();
         _f->putUInt(0); // remember position of chunk size just before writing it, to update it later, keep as fixed UInt size because we don't know it yet
     }
-    PROFILE_STOP("ChunkWriter::beginChunk(C Str &name, UInt version)")
+    PROFILE_STOP("CatzEngine::ChunkWriter::beginChunk(C Str &name, UInt version)")
     return _f;
 }
 /******************************************************************************/
 void ChunkWriter::endChunk() {
-    PROFILE_START("ChunkWriter::endChunk()")
+    PROFILE_START("CatzEngine::ChunkWriter::endChunk()")
     if (_chunk_size_pos) // we can end a chunk only if we started one
     {
         // update size of last written chunk
@@ -65,17 +65,17 @@ void ChunkWriter::endChunk() {
         _f->pos(cur_pos);    // restore last position
         _chunk_size_pos = 0; // clear chunk size pos as it's now ended
     }
-    PROFILE_STOP("ChunkWriter::endChunk()")
+    PROFILE_STOP("CatzEngine::ChunkWriter::endChunk()")
 }
 /******************************************************************************/
 void ChunkWriter::endChunkList() {
-    PROFILE_START("ChunkWriter::endChunkList()")
+    PROFILE_START("CatzEngine::ChunkWriter::endChunkList()")
     if (_f) {
         endChunk();      // end current chunk if any
         _f->cmpUIntV(0); // end of list, normally this is the place for chunk container version, setting 0 means that there are no more chunks, this is also compatible with 0 always being returned at the end of file
         _f = null;
     }
-    PROFILE_STOP("ChunkWriter::endChunkList()")
+    PROFILE_STOP("CatzEngine::ChunkWriter::endChunkList()")
 }
 /******************************************************************************/
 // READER
@@ -92,14 +92,14 @@ ChunkReader::ChunkReader() { zero(); }
 ChunkReader::ChunkReader(const_mem_addr File &f) : ChunkReader() { read(f); }
 
 void ChunkReader::restore() {
-    PROFILE_START("ChunkWriter::restore()")
+    PROFILE_START("CatzEngine::ChunkWriter::restore()")
     if (_f)
         _f->unlimit(_full_size, _offset_delta); // restore original file values
-    PROFILE_STOP("ChunkWriter::restore()")
+    PROFILE_STOP("CatzEngine::ChunkWriter::restore()")
 }
 /******************************************************************************/
 Bool ChunkReader::read(File &f) {
-    PROFILE_START("ChunkWriter::read(File &f)")
+    PROFILE_START("CatzEngine::ChunkWriter::read(File &f)")
     restore();
     zero();
     _name.clear();
@@ -107,15 +107,15 @@ Bool ChunkReader::read(File &f) {
         T._f = &f;
         T._full_size = f.size();
         T._next_chunk_pos = f.pos();
-        PROFILE_STOP("ChunkWriter::read(File &f)")
+        PROFILE_STOP("CatzEngine::ChunkWriter::read(File &f)")
         return true;
     }
-    PROFILE_STOP("ChunkWriter::read(File &f)")
+    PROFILE_STOP("CatzEngine::ChunkWriter::read(File &f)")
     return false;
 }
 /******************************************************************************/
 File *ChunkReader::operator()() {
-    PROFILE_START("ChunkReader::operator()()")
+    PROFILE_START("CatzEngine::ChunkReader::operator()()")
     if (_f) {
         restore(); // restore so that we can read the chunk container
 
@@ -134,7 +134,7 @@ File *ChunkReader::operator()() {
                 if (_f->ok()) {
                     _next_chunk_pos = _f->pos() + chunk_size; // current position + chunk size
                     _f->limit(_full_size, _offset_delta, chunk_size);
-                    PROFILE_STOP("ChunkReader::operator()()")
+                    PROFILE_STOP("CatzEngine::ChunkReader::operator()()")
                     return _f;
                 }
             } break;
@@ -147,7 +147,7 @@ File *ChunkReader::operator()() {
                 if (_f->ok()) {
                     _next_chunk_pos = _f->pos() + chunk_size; // current position + chunk size
                     _f->limit(_full_size, _offset_delta, chunk_size);
-                    PROFILE_STOP("ChunkReader::operator()()")
+                    PROFILE_STOP("CatzEngine::ChunkReader::operator()()")
                     return _f;
                 }
             } break;
@@ -160,7 +160,7 @@ File *ChunkReader::operator()() {
                 if (_f->ok()) {
                     _next_chunk_pos = _f->pos() + chunk_size; // current position + chunk size
                     _f->limit(_full_size, _offset_delta, chunk_size);
-                    PROFILE_STOP("ChunkReader::operator()()")
+                    PROFILE_STOP("CatzEngine::ChunkReader::operator()()")
                     return _f;
                 }
             } break;
@@ -171,7 +171,7 @@ File *ChunkReader::operator()() {
     }
     _name.clear();
     _ver = 0;
-    PROFILE_STOP("ChunkReader::operator()()")
+    PROFILE_STOP("CatzEngine::ChunkReader::operator()()")
     return null;
 }
 /******************************************************************************/

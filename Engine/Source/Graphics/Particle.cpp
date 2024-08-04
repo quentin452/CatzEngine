@@ -559,7 +559,6 @@ Particles &Particles::resetFull() {
 }
 /******************************************************************************/
 Bool Particles::update(Flt dt) {
-    return true;
     PROFILE_START("Particles::update(Flt dt)")
     if (_src_type) {
         // life/death/fade

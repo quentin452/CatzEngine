@@ -371,6 +371,7 @@ MeshGroup &MeshGroup::weldVtx(MESH_FLAG flag, Flt pos_eps, Flt nrm_cos, Flt remo
     return T;
 }
 MeshGroup &MeshGroup::weldVtxValues(MESH_FLAG flag, Flt pos_eps, Flt nrm_cos, Flt remove_degenerate_faces_eps) {
+    PROFILE_START("MeshGroup::weldVtxValues(MESH_FLAG flag, Flt pos_eps, Flt nrm_cos, Flt remove_degenerate_faces_eps)")
     flag &= T.flag();                                                                                                // can weld only values that we have
     if (flag & (VTX_POS | VTX_NRM_TAN_BIN | VTX_HLP | VTX_TEX_ALL | VTX_COLOR | VTX_MATERIAL | VTX_SKIN | VTX_SIZE)) // if have anything to weld
     {
@@ -574,6 +575,7 @@ MeshGroup &MeshGroup::weldVtxValues(MESH_FLAG flag, Flt pos_eps, Flt nrm_cos, Fl
         if ((flag & VTX_POS) && remove_degenerate_faces_eps >= 0)
             removeDegenerateFaces(remove_degenerate_faces_eps);
     }
+    PROFILE_STOP("MeshGroup::weldVtxValues(MESH_FLAG flag, Flt pos_eps, Flt nrm_cos, Flt remove_degenerate_faces_eps)")
     return T;
 }
 MeshGroup &MeshGroup::freeOpenGLESData() {

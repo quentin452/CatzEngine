@@ -24,6 +24,7 @@ static INLINE void SetViewMatrix(MatrixPair &matrix, C MatrixM &cur, C MatrixM &
 static INLINE void SetSkinning() { Sh.VtxSkinning->setConditional(Matrixes > 1); }
 /******************************************************************************/
 void MeshBase::draw2D(C Color &vtx_color, C Color &edge_color, C Color &face_color, Flt vtx_r, Flt side_width) C {
+    PROFILE_START("MeshBase::draw2D(C Color &vtx_color, C Color &edge_color, C Color &face_color, Flt vtx_r, Flt side_width)")
     C Int *p;
 
     if (face_color.a && quad.ind()) {
@@ -77,6 +78,7 @@ void MeshBase::draw2D(C Color &vtx_color, C Color &edge_color, C Color &face_col
         VI.dot(vtx.pos(i).xy, vtx_r);
         VI.end();
     }
+    PROFILE_STOP("MeshBase::draw2D(C Color &vtx_color, C Color &edge_color, C Color &face_color, Flt vtx_r, Flt side_width)")
 }
 void MeshLod ::draw2D(C Color &vtx_color, C Color &edge_color, C Color &face_color, Flt vtx_r, Flt side_width) C {
     FREPA(T)
@@ -88,6 +90,7 @@ void MeshGroup::draw2D(C Color &vtx_color, C Color &edge_color, C Color &face_co
 }
 /******************************************************************************/
 void MeshBase::drawNormals2D(Flt length, C Color &edge_color, C Color &vtx_color) C {
+    PROFILE_START("MeshBase::drawNormals2D(Flt length, C Color &edge_color, C Color &vtx_color)")
     C Vec *pos = vtx.pos(),
           *nrm;
     if (vtx_color.a && (nrm = vtx.nrm())) {
@@ -106,8 +109,10 @@ void MeshBase::drawNormals2D(Flt length, C Color &edge_color, C Color &vtx_color
         }
         VI.end();
     }
+    PROFILE_STOP("MeshBase::drawNormals2D(Flt length, C Color &edge_color, C Color &vtx_color)")
 }
 void MeshBase::drawNormals(Flt length, C Color &face_color, C Color &vtx_color, C Color &tangent_color, C Color &binormal_color) C {
+    PROFILE_START("MeshBase::drawNormals(Flt length, C Color &face_color, C Color &vtx_color, C Color &tangent_color, C Color &binormal_color)")
     C Int *p;
     C Vec *pos = vtx.pos();
     Int p0, p1, p2, p3;
@@ -177,6 +182,7 @@ void MeshBase::drawNormals(Flt length, C Color &face_color, C Color &vtx_color, 
             VI.end();
         }
     }
+    PROFILE_STOP("MeshBase::drawNormals(Flt length, C Color &face_color, C Color &vtx_color, C Color &tangent_color, C Color &binormal_color)")
 }
 void MeshLod ::drawNormals2D(Flt length, C Color &edge_color, C Color &vtx_color) C {
     REPA(T)
@@ -318,6 +324,7 @@ void ProcessVtx(Vec &local_pos, C Vec &hlp, Flt size)
 void ProcessVtx(Vtx3DFull &vtx) {ProcessVtx(vtx.pos, vtx.hlp, vtx.size);}
 /******************************************************************************/
 void MeshBase::drawAuto(C Material *material) C {
+    PROFILE_START("MeshBase::drawAuto(C Material *material)")
     C Material &mtrl = GetMaterial(material);
     if (Shader *shader = DefaultShaders(&mtrl, flag() & ~VTX_MATERIAL, 0, false).get(Renderer())) {
         SetSkinning();
@@ -508,6 +515,7 @@ void MeshBase::drawAuto(C Material *material) C {
         VI.end();
         D.alpha(alpha);
     }
+    PROFILE_STOP("MeshBase::drawAuto(C Material *material)")
 }
 /******************************************************************************/
 void MeshRender::drawBoneHighlight(Int bone, Shader *shader) C {
@@ -530,6 +538,7 @@ void MeshRender::drawBoneHighlight(Int bone, Shader *shader) C {
 // INSTANCED DRAWING
 /******************************************************************************/
 static void NewInstance(Memc<ShaderDraw> &shader_draws, Int instance_index, ShaderBase &shader, Material::MaterialShader *cur, C MeshPart &mesh, C MeshPart::Variation &variation) {
+    PROFILE_START("NewInstance(Memc<ShaderDraw> &shader_draws, Int instance_index, ShaderBase &shader, Material::MaterialShader *cur, C MeshPart &mesh, C MeshPart::Variation &variation)")
     ShaderMaterial *shader_material;
 again:
     if (cur->shader != &shader) // check if we already have a match
@@ -588,6 +597,7 @@ shader_material_initialized:
     shader_material_mesh.variation_1 = Renderer._mesh_variation_1;
 #endif
 #endif
+    PROFILE_STOP("NewInstance(Memc<ShaderDraw> &shader_draws, Int instance_index, ShaderBase &shader, Material::MaterialShader *cur, C MeshPart &mesh, C MeshPart::Variation &variation)")
 }
 /******************************************************************************/
 INLINE void SkeletonInstance::set(C AnimatedSkeleton &anim_skel) {
@@ -1010,6 +1020,7 @@ void MeshPart::draw(C AnimatedSkeleton &anim_skel) C {
 }
 /******************************************************************************/
 void MeshPart::draw(C AnimatedSkeleton &anim_skel, C Material &material) C {
+    PROFILE_START("MeshPart::draw(C AnimatedSkeleton &anim_skel, C Material &material)")
     DEBUG_ASSERT(Renderer() == RM_PREPARE, "'MeshPart.draw' called outside of RM_PREPARE");
     if (_draw_mask & Renderer._mesh_draw_mask) {
         C Variation &variation = getVariation();
@@ -1051,9 +1062,11 @@ void MeshPart::draw(C AnimatedSkeleton &anim_skel, C Material &material) C {
         } break;
         }
     }
+    PROFILE_STOP("MeshPart::draw(C AnimatedSkeleton &anim_skel, C Material &material)")
 }
 /******************************************************************************/
 void MeshPart::drawShadow(C MatrixM &matrix) C {
+    PROFILE_START("MeshPart::drawShadow(C MatrixM &matrix)")
     DEBUG_ASSERT(Renderer() == RM_SHADOW, "'MeshPart.drawShadow' called outside of RM_SHADOW");
     if (_draw_mask & Renderer._mesh_draw_mask) {
         C Variation &variation = getVariation();
@@ -1067,9 +1080,11 @@ void MeshPart::drawShadow(C MatrixM &matrix) C {
             SetViewMatrix(ShadowShaderMaterialMeshInstances.New().set().view_matrix, matrix);
         }
     }
+    PROFILE_STOP("MeshPart::drawShadow(C MatrixM &matrix)")
 }
 /******************************************************************************/
 void MeshPart::drawShadow(C AnimatedSkeleton &anim_skel) C {
+    PROFILE_START("MeshPart::drawShadow(C AnimatedSkeleton &anim_skel)")
     DEBUG_ASSERT(Renderer() == RM_SHADOW, "'MeshPart.drawShadow' called outside of RM_SHADOW");
     if (_draw_mask & Renderer._mesh_draw_mask) {
         C Variation &variation = getVariation();
@@ -1079,8 +1094,10 @@ void MeshPart::drawShadow(C AnimatedSkeleton &anim_skel) C {
             SkeletonShadowShaderMaterialMeshInstances.New().set(T);
         }
     }
+    PROFILE_STOP("MeshPart::drawShadow(C AnimatedSkeleton &anim_skel)")
 }
 void MeshPart::drawShadow(C AnimatedSkeleton &anim_skel, C Material &material) C {
+    PROFILE_START("MeshPart::drawShadow(C AnimatedSkeleton &anim_skel, C Material &material)")
     DEBUG_ASSERT(Renderer() == RM_SHADOW, "'MeshPart.drawShadow' called outside of RM_SHADOW");
     if (_draw_mask & Renderer._mesh_draw_mask) {
         C Variation &variation = getVariation();
@@ -1090,9 +1107,11 @@ void MeshPart::drawShadow(C AnimatedSkeleton &anim_skel, C Material &material) C
             SkeletonShadowShaderMaterialMeshInstances.New().set(T);
         }
     }
+    PROFILE_START("MeshPart::drawShadow(C AnimatedSkeleton &anim_skel, C Material &material)")
 }
 /******************************************************************************/
 void MeshLod::draw() C {
+    PROFILE_START("MeshLod::draw()")
     DEBUG_ASSERT(Renderer() == RM_PREPARE, "'MeshLod.draw' called outside of RM_PREPARE");
     Matrix view_matrix;
     SetViewMatrix(view_matrix);
@@ -1180,9 +1199,11 @@ void MeshLod::draw() C {
         }
     } break;
     }
+    PROFILE_STOP("MeshLod::draw()")
 }
 /******************************************************************************/
 void MeshLod::draw(C MatrixM &matrix, C MatrixM &matrix_prev) C {
+    PROFILE_START("MeshLod::draw(C MatrixM &matrix, C MatrixM &matrix_prev)")
     DEBUG_ASSERT(Renderer() == RM_PREPARE, "'MeshLod.draw' called outside of RM_PREPARE");
     Matrix view_matrix;
     SetViewMatrix(view_matrix, matrix);
@@ -1270,9 +1291,11 @@ void MeshLod::draw(C MatrixM &matrix, C MatrixM &matrix_prev) C {
         }
     } break;
     }
+    PROFILE_STOP("MeshLod::draw(C MatrixM &matrix, C MatrixM &matrix_prev)")
 }
 /******************************************************************************/
 void MeshLod::draw(C AnimatedSkeleton &anim_skel) C {
+    PROFILE_START("MeshLod::draw(C AnimatedSkeleton &anim_skel)")
     DEBUG_ASSERT(Renderer() == RM_PREPARE, "'MeshLod.draw' called outside of RM_PREPARE");
     SkeletonInstance *opaque_skeleton = null;
     SkeletonBlendInstance *blend_skeleton = null;
@@ -1345,9 +1368,11 @@ void MeshLod::draw(C AnimatedSkeleton &anim_skel) C {
         }
     } break;
     }
+    PROFILE_STOP("MeshLod::draw(C AnimatedSkeleton &anim_skel)")
 }
 /******************************************************************************/
 void MeshLod::draw(C AnimatedSkeleton &anim_skel, C Material &material) C {
+    PROFILE_START("MeshLod::draw(C AnimatedSkeleton &anim_skel, C Material &material)")
     DEBUG_ASSERT(Renderer() == RM_PREPARE, "'MeshLod.draw' called outside of RM_PREPARE");
     SkeletonInstance *opaque_skeleton = null;
     SkeletonBlendInstance *blend_skeleton = null;
@@ -1420,6 +1445,7 @@ void MeshLod::draw(C AnimatedSkeleton &anim_skel, C Material &material) C {
         }
     } break;
     }
+    PROFILE_STOP("MeshLod::draw(C AnimatedSkeleton &anim_skel, C Material &material)")
 }
 /******************************************************************************/
 void MeshLod::drawShadow() C {
@@ -1558,6 +1584,7 @@ void Mesh::drawShadow(C AnimatedSkeleton &anim_skel, C Material &material) C { g
 // BLEND
 /******************************************************************************/
 void MeshPart::drawBlend(C Vec4 *color) C {
+    PROFILE_START("MeshPart::drawBlend(C Vec4 *color)")
     DEBUG_ASSERT(Renderer() == RM_BLEND || !Renderer._render, "'MeshPart.drawBlend' called outside of RM_BLEND");
     if (_draw_mask & Renderer._mesh_draw_mask) {
         C Variation &variation = getVariation();
@@ -1590,8 +1617,10 @@ void MeshPart::drawBlend(C Vec4 *color) C {
             D.stencil(STENCIL_NONE);
         }
     }
+    PROFILE_STOP("MeshPart::drawBlend(C Vec4 *color)")
 }
 void MeshPart::drawBlend(C Material &material, C Vec4 *color) C {
+    PROFILE_START("MeshPart::drawBlend(C Material &material, C Vec4 *color)")
     DEBUG_ASSERT(Renderer() == RM_BLEND || !Renderer._render, "'MeshPart.drawBlend' called outside of RM_BLEND");
     if (_draw_mask & Renderer._mesh_draw_mask) {
         C Variation &variation = getVariation();
@@ -1623,6 +1652,7 @@ void MeshPart::drawBlend(C Material &material, C Vec4 *color) C {
             D.stencil(STENCIL_NONE);
         }
     }
+    PROFILE_STOP("MeshPart::drawBlend(C Material &material, C Vec4 *color)")
 }
 void MeshLod::drawBlend(C Vec4 *color) C { FREPAO(parts).drawBlend(color); }
 void MeshLod::drawBlend(C Material &material, C Vec4 *color) C { FREPAO(parts).drawBlend(material, color); }

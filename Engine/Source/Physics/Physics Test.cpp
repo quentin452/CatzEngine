@@ -1,3 +1,4 @@
+// TODO ADD PROFILING POINTS
 /******************************************************************************/
 #include "stdafx.h"
 #if !PHYSX                            // Bullet
@@ -28,7 +29,28 @@ namespace EE {
    TODO: need to check for capsule.isBall() ?
 
 /******************************************************************************/
+/******************************************************************************/
+struct RaycastCallback : btTriangleRaycastCallback {
+    PhysHitBasic *phys_hit;
+    Bool hit;
+
+    virtual btScalar reportHit(const btVector3 &hitNormalLocal, btScalar hitFraction, int partId, int triangleIndex) override {
+        hit = true;
+        if (phys_hit) {
+            phys_hit->face = triangleIndex;
+            phys_hit->frac = hitFraction;
+            phys_hit->face_nrm = Bullet.vec(hitNormalLocal);
+        }
+        return hitFraction;
+    }
+
+    RaycastCallback(const btVector3 &from, const btVector3 &to, unsigned int flags, PhysHitBasic *phys_hit)
+        : btTriangleRaycastCallback(from, to, flags), phys_hit(phys_hit), hit(false) {}
+};
+
+/******************************************************************************/
 Bool PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic *phys_hit, Bool two_sided) C {
+    PROFILE_START("PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic *phys_hit, Bool two_sided)")
     if (type() == PHYS_SHAPE) {
         Vec p = pos, m = move;
         if (body_matrix) {
@@ -49,6 +71,7 @@ Bool PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic 
                 phys_hit->plane.pos = pos + frac * move;
                 phys_hit->plane.normal = phys_hit->face_nrm = normal;
             }
+            PROFILE_STOP("PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic *phys_hit, Bool two_sided)")
             return true;
         }
     } else if (_pm) {
@@ -84,6 +107,7 @@ Bool PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic 
                     }
                     phys_hit->updateFace(geom.triangleMesh(), body_matrix ? &orn : null);
                 }
+                PROFILE_STOP("PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic *phys_hit, Bool two_sided)")
                 return true;
             }
         } else
@@ -125,6 +149,7 @@ Bool PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic 
                     phys_hit->face_nrm = Bullet.vec(castResult.m_normal);
                     phys_hit->plane.set(Bullet.vec(castResult.m_hitPoint), phys_hit->face_nrm);
                 }
+                PROFILE_STOP("PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic *phys_hit, Bool two_sided)")
                 return true;
             }
         } break;
@@ -135,22 +160,7 @@ Bool PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic 
                 p.div(*body_matrix);
                 m.div(body_matrix->orn());
             }
-            struct Callback : btTriangleRaycastCallback {
-                PhysHitBasic *phys_hit;
-                Bool hit;
-
-                virtual btScalar reportHit(const btVector3 &hitNormalLocal, btScalar hitFraction, int partId, int triangleIndex) {
-                    hit = true;
-                    if (phys_hit) {
-                        phys_hit->face = triangleIndex;
-                        phys_hit->frac = hitFraction;
-                        phys_hit->face_nrm = Bullet.vec(hitNormalLocal);
-                    }
-                    return hitFraction;
-                }
-                Callback(const btVector3 &from, const btVector3 &to, unsigned int flags, PhysHitBasic *phys_hit) : btTriangleRaycastCallback(from, to, flags), phys_hit(phys_hit), hit(false) {}
-            };
-            Callback callback(Bullet.vec(p), Bullet.vec(p + m), btTriangleRaycastCallback::kF_KeepUnflippedNormal | (two_sided ? 0 : btTriangleRaycastCallback::kF_FilterBackfaces), phys_hit);
+            RaycastCallback callback(Bullet.vec(p), Bullet.vec(p + m), btTriangleRaycastCallback::kF_KeepUnflippedNormal | (two_sided ? 0 : btTriangleRaycastCallback::kF_FilterBackfaces), phys_hit);
             _pm->_mesh->performRaycast(&callback, callback.m_from, callback.m_to);
             if (callback.hit && phys_hit) {
                 if (body_matrix)
@@ -158,11 +168,13 @@ Bool PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic 
                 phys_hit->dist = phys_hit->frac * move.length();
                 phys_hit->plane.set(pos + move * phys_hit->frac, phys_hit->face_nrm);
             }
+            PROFILE_STOP("PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic *phys_hit, Bool two_sided)")
             return callback.hit;
         } break;
         }
 #endif
     }
+    PROFILE_STOP("PhysPart::ray(C Vec &pos, C Vec &move, C Matrix *body_matrix, PhysHitBasic *phys_hit, Bool two_sided)")
     return false;
 }
 /******************************************************************************/

@@ -16,6 +16,7 @@ class GamePerformanceProfiler {
     std::unordered_map<std::string, int64_t> maxTimes;
     std::mutex mtx;
     std::chrono::steady_clock::time_point realTimeStart;
+    std::vector<std::string> warningsIssued;
 #endif
   public:
 #if PERFORMANCE_MONITOR
@@ -48,15 +49,16 @@ class GamePerformanceProfiler {
                 maxTimes[key] = std::max(maxTimes[key], duration);
                 startTimes.erase(it);
             } else {
-                LoggerThread::GetLoggerThread().logMessageAsync(
-                    LogLevel::WARNING, file.c_str(), line,
-                    "Warning: Profiling stopped for a method that was not started.");
+                std::string warningMessage = "Warning: Profiling stopped for a method that was not started: " + key;
+                if (std::find(warningsIssued.begin(), warningsIssued.end(), warningMessage) == warningsIssued.end()) {
+                    warningsIssued.push_back(warningMessage);
+                }
             }
         }
 #endif
     }
 
-    void print() C {
+    void print()  {
 #if PERFORMANCE_MONITOR
         try {
             if (profilingData.empty()) {
@@ -101,6 +103,12 @@ class GamePerformanceProfiler {
                                          std::to_string(maxTimeSec) + " s (Max Time For one call)" + " With a Total Calls: " + std::to_string(callCounts.at(key));
                 LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::INFO, __FILE__, __LINE__, logMessage);
             }
+            for (C std::string &warningMessage : warningsIssued) {
+                LoggerThread::GetLoggerThread().logMessageAsync(
+                    LogLevel::WARNING, __FILE__, __LINE__,
+                    warningMessage);
+            }
+            warningsIssued.clear();
         } catch (C std::exception &e) {
             LoggerThread::GetLoggerThread().logMessageAsync(LogLevel::ERRORING, __FILE__, __LINE__, e.what());
         }

@@ -582,7 +582,7 @@ Bool FrustumClass::operator()(C Extent &ext, C Matrix3 &matrix) C {
                 is = false; // fb
     }
     PROFILE_STOP("CatzEngine::FrustumClass::operator()(C Extent &ext, C Matrix3 &matrix)")
-    return true;
+    return is;
 }
 Bool FrustumClass::operator()(C Extent &ext, C Matrix &matrix) C {
     PROFILE_START("CatzEngine::FrustumClass::operator()(C Extent &ext, C Matrix &matrix)")
